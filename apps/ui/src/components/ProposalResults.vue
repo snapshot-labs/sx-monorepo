@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  formatQuorum,
   quorumChoiceProgress,
   quorumLabel,
   quorumProgress
@@ -24,12 +25,6 @@ const props = withDefaults(
     width: 100
   }
 );
-
-const LABELS = {
-  0: 'For',
-  1: 'Against',
-  2: 'Abstain'
-};
 
 const displayAllChoices = ref(false);
 
@@ -103,7 +98,7 @@ const otherResultsSummary = computed(() => {
       </a>
       <div v-if="proposal.quorum" class="mt-3.5">
         {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
     </div>
   </div>
@@ -183,7 +178,7 @@ const otherResultsSummary = computed(() => {
       </button>
       <div v-if="proposal.quorum">
         {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
+        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
       <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
         <a
@@ -209,7 +204,7 @@ const otherResultsSummary = computed(() => {
         <div
           v-for="result in results"
           :key="result.choice"
-          :title="LABELS[result.choice - 1]"
+          :title="props.proposal.choices[result.choice - 1]"
           class="choice-bg float-left h-full"
           :style="{
             width: `${quorumChoiceProgress(props.proposal.quorum_type, result, totalProgress).toFixed(3)}%`

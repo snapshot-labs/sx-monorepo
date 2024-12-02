@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { quorumLabel, quorumProgress } from '@/helpers/quorum';
-import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
+import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
+import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -43,8 +43,7 @@ const space = computed(() =>
       >
         <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
       </AppLink>
-
-      <div class="min-w-0 my-1 items-center leading-6">
+      <div class="min-w-0 my-1 items-center leading-6 space-x-2">
         <AppLink
           v-if="showSpace"
           :to="{
@@ -53,11 +52,10 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0"
+          class="text-[21px] text-skin-text font-bold inline shrink-0"
         >
           {{ proposal.space.name }}
         </AppLink>
-
         <AppLink
           :to="{
             name: 'space-proposal-overview',
@@ -66,9 +64,10 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
+          class="space-x-2"
         >
           <h3
-            class="text-[21px] inline [overflow-wrap:anywhere] mr-2 min-w-0"
+            class="text-[21px] inline [overflow-wrap:anywhere] min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <ProposalLabels
@@ -76,6 +75,7 @@ const space = computed(() =>
             :labels="proposal.labels"
             :space="space"
             inline
+            with-link
           />
           <IH-check
             v-if="
@@ -110,7 +110,8 @@ const space = computed(() =>
         {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
       </template>
       <span v-if="proposal.quorum" class="lowercase">
-        · {{ _p(totalProgress) }} {{ quorumLabel(proposal.quorum_type) }}
+        · {{ formatQuorum(totalProgress) }}
+        {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
       <button

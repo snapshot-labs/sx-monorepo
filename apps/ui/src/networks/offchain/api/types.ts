@@ -71,8 +71,8 @@ export type ApiSpace = {
   followersCount: number;
   children: [ApiRelatedSpace];
   parent: ApiRelatedSpace | null;
-  // properties used for settings
   terms: string;
+  // properties used for settings
   private: boolean;
   domain: string | null;
   skin: string | null;
@@ -102,6 +102,7 @@ export type ApiProposal = {
     admins: string[];
     moderators: string[];
     symbol: string;
+    terms: string;
   };
   type: VoteType;
   title: string;
@@ -124,6 +125,7 @@ export type ApiProposal = {
   votes: number;
   privacy: Privacy;
   plugins: Record<string, any>;
+  flagged: boolean;
 };
 
 export type ApiVote = {

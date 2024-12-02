@@ -46,11 +46,15 @@ const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
 
 const editable = computed(() => {
-  // HACK: here we need to use snapshot instead of start because start is artifically
+  // HACK: here we need to use snapshot instead of start because start is artificially
   // shifted for Starknet's proposals with ERC20Votes strategies.
+  const pivotName = offchainNetworks.includes(props.proposal.network)
+    ? 'start'
+    : 'snapshot';
+
   return (
     compareAddresses(props.proposal.author.id, web3.value.account) &&
-    props.proposal.snapshot >
+    props.proposal[pivotName] >
       (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
@@ -123,6 +127,7 @@ async function handleEditClick() {
     discussion: props.proposal.discussion,
     type: props.proposal.type,
     choices: props.proposal.choices,
+    labels: props.proposal.labels,
     executions
   });
 
@@ -195,6 +200,11 @@ onBeforeUnmount(() => destroyAudio());
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
     <div>
+      <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
+        This proposal might contain scams, offensive material, or be malicious
+        in nature. Please proceed with caution.
+      </UiAlert>
+
       <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>

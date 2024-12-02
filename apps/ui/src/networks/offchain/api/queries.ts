@@ -116,6 +116,7 @@ const PROPOSAL_FRAGMENT = gql`
       admins
       moderators
       symbol
+      terms
     }
     type
     title
@@ -142,6 +143,7 @@ const PROPOSAL_FRAGMENT = gql`
     votes
     privacy
     plugins
+    flagged
   }
 `;
 
@@ -359,4 +361,13 @@ export const STRATEGY_QUERY = gql`
     }
   }
   ${STRATEGY_FRAGMENT}
+`;
+
+export const NETWORKS_USAGE_QUERY = gql`
+  query Networks {
+    networks {
+      id
+      spacesCount
+    }
+  }
 `;

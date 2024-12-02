@@ -66,7 +66,6 @@ CHAIN_IDS.set('sepolia', 11155111)
 CHAIN_IDS.set('optimism', 10)
 CHAIN_IDS.set('matic', 137)
 CHAIN_IDS.set('arbitrum-one', 42161)
-CHAIN_IDS.set('linea-testnet', 59140)
 
 export function handleProxyDeployed(event: ProxyDeployed): void {
   let network = dataSource.network()

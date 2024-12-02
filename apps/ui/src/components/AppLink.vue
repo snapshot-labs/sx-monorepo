@@ -1,9 +1,15 @@
 <script lang="ts" setup>
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
-const props = defineProps<RouterLinkProps>();
+const props = defineProps<
+  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw }
+>();
 
 const { isWhiteLabel } = useWhiteLabel();
+
+function isExternalLink(to: RouteLocationRaw | undefined): to is string {
+  return typeof to === 'string' && to.startsWith('http');
+}
 
 function normalize(to: RouteLocationRaw) {
   if (
@@ -32,7 +38,13 @@ function normalize(to: RouteLocationRaw) {
 </script>
 
 <template>
-  <router-link :to="normalize(props.to)">
+  <a v-if="isExternalLink(props.to)" :href="props.to" target="_blank">
+    <slot />
+  </a>
+  <router-link v-else-if="props.to" :to="normalize(props.to)">
     <slot />
   </router-link>
+  <div v-else>
+    <slot />
+  </div>
 </template>

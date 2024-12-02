@@ -28,3 +28,14 @@ export function quorumChoiceProgress(
 export function quorumLabel(quorumType: Proposal['quorum_type']): string {
   return `Quorum${quorumType === 'rejection' ? ' of reject' : ''}`;
 }
+
+export function formatQuorum(value: number) {
+  const formatter = new Intl.NumberFormat('en', {
+    notation: 'compact',
+    maximumSignificantDigits: 3,
+    roundingMode: 'trunc',
+    style: 'percent'
+  });
+
+  return formatter.format(value).toLowerCase();
+}

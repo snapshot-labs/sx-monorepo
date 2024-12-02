@@ -255,7 +255,7 @@ You agree to promptly notify the Foundation of any Claims and cooperate with the
 
 ## 15. Privacy notice and cookie declaration
 
-Please refer to our Privacy Notice to understand how we collect and use and disclose your personal data as well as our Cookie Declaration to understand how we use cookies and how you can change your consent to their use.
+Please refer to our Privacy Notice to understand how we collect and use and disclose your personal data.
 
 ## 16. Miscellaneous
 

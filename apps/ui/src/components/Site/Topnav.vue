@@ -25,7 +25,7 @@ const { toggleSkin, currentMode } = useUserSkin();
       <li><AppLink to="/#features">Features</AppLink></li>
       <li><AppLink to="/#ecosystem">Ecosystem</AppLink></li>
       <li>
-        <a href="https://docs.snapshot.org" target="_blank">
+        <a href="https://docs.snapshot.box" target="_blank">
           Developers
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </a>

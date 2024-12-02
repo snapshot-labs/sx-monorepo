@@ -137,11 +137,25 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
+  async function getDataByMessageHash(id: number, params: any, res: Response) {
+    try {
+      const { hash } = params;
+
+      const transaction = await db.getDataByMessageHash(hash);
+
+      return rpcSuccess(res, transaction, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
   return {
     send,
     execute,
     registerTransaction,
     registerProposal,
-    getAccount
+    getAccount,
+    getDataByMessageHash
   };
 };

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { Choice, Space } from '@/types';
@@ -17,8 +18,10 @@ const {
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
+const termsStore = useTermsStore();
 
 const modalOpenVote = ref(false);
+const modalOpenTerms = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
@@ -68,7 +71,18 @@ async function handleVoteClick(choice: Choice) {
   }
 
   selectedChoice.value = choice;
+
+  if (props.space.terms && !termsStore.areAccepted(props.space)) {
+    modalOpenTerms.value = true;
+    return;
+  }
+
   modalOpenVote.value = true;
+}
+
+function handleAcceptTerms() {
+  termsStore.accept(props.space);
+  handleVoteClick(selectedChoice.value!);
 }
 
 async function handleVoteSubmitted() {
@@ -270,7 +284,7 @@ watchEffect(() => {
                       votingPower?.status === 'success' &&
                       votingPower.totalVotingPower === BigInt(0)
                     "
-                    href="https://help.snapshot.box/en/articles/9566904-why-do-i-have-0-voting-power"
+                    :href="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
                     target="_blank"
                   >
                     <IH-question-mark-circle />
@@ -285,6 +299,7 @@ watchEffect(() => {
               >
                 <ProposalVoteBasic
                   v-if="proposal.type === 'basic'"
+                  :choices="proposal.choices"
                   @vote="handleVoteClick"
                 />
                 <ProposalVoteSingleChoice
@@ -336,7 +351,11 @@ watchEffect(() => {
               <IH-tag />
               Labels
             </h4>
-            <ProposalLabels :labels="proposal.labels" :space="space" />
+            <ProposalLabels
+              :labels="proposal.labels"
+              :space="space"
+              with-link
+            />
           </div>
           <div>
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
@@ -349,6 +368,13 @@ watchEffect(() => {
       </Affix>
     </template>
     <teleport to="#modal">
+      <ModalTerms
+        v-if="space.terms"
+        :open="modalOpenTerms"
+        :space="space"
+        @close="modalOpenTerms = false"
+        @accept="handleAcceptTerms"
+      />
       <ModalVote
         v-if="proposal"
         :choice="selectedChoice"

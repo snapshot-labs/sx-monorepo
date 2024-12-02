@@ -123,6 +123,7 @@ const PROPOSAL_FRAGMENT = gql`
       body
       discussion
       execution
+      choices
       labels
     }
     start

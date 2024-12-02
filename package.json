@@ -11,6 +11,7 @@
     "dev:full": "./scripts/dev-full.sh",
     "build": "turbo run build",
     "test": "turbo run test",
+    "test:integration": "turbo run test:integration",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "release": "yarn build && changeset publish"
@@ -20,7 +21,7 @@
     "turbo": "^1.12.3"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": ">=22.x"
   },
   "packageManager": "yarn@1.22.19",
   "workspaces": {

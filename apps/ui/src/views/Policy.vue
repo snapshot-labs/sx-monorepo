@@ -31,9 +31,6 @@ For further information on the purpose and scope of the data processing of Twitt
 ## Newsletters
 If you subscribe to our newsletter, we process the information provided by you (e.g. contact details) in order to provide you with our newsletter. You may cancel your subscription at any time by using the option to unsubscribe contained in the newsletter or by sending us an email to the address mentioned above.
 
-## Cookies
-We use cookies to operate and optimise our website (see also “Tracking Tools” below). These are text files that are stored on your computer and enable the analysis of the use of our website. You can configure your browser in such a way that no cookies are stored on your computer or a message always appears before a cookie is installed. For further information or to change your cookies settings, please check out our Cookie Consent Management Tool. Complete deactivation of cookies may result in our website not functioning or not functioning completely.
-
 ## Links to third-party offerings
 Our website may contain third-party offerings. Please note that when you use such link, your data such as IP address, personal browser settings etc., are transmitted to these third parties. We have no control over, do not review and cannot be responsible for these third-party websites or their content. Please be aware that the terms of this Privacy Notice do not apply to these third-party websites or their content, or any collection of your data after you click on links to such third-party websites. We encourage you to read the privacy policies of every website you visit. Any links to third-party websites or locations are for your convenience and do not signify our endorsement of such third parties or their products, content, or websites.
 

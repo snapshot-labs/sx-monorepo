@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { HELPDESK_URL } from '@/helpers/constants';
 import { repository, version } from '@/../package.json';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
@@ -50,7 +51,7 @@ const SOCIALS = [
           <div class="eyebrow">Resources</div>
           <div class="space-y-1">
             <div>
-              <a href="https://help.snapshot.box" target="_blank">
+              <a :href="HELPDESK_URL" target="_blank">
                 Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
             </div>
@@ -72,14 +73,8 @@ const SOCIALS = [
           <div class="eyebrow">Developers</div>
           <div class="space-y-1">
             <div>
-              <a href="https://docs.snapshot.org" target="_blank">
-                Snapshot docs
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
-            </div>
-            <div>
               <a href="https://docs.snapshot.box" target="_blank">
-                Snapshot X docs
+                Docs
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
             </div>
@@ -106,7 +101,7 @@ const SOCIALS = [
             <AppLink :to="{ name: 'site-policy' }">Privacy policy</AppLink>
           </div>
           <div>
-            <a class="intercom-launcher" target="_blank"> Contact us </a>
+            <a :href="HELPDESK_URL" target="_blank">Contact us</a>
           </div>
         </div>
       </div>
