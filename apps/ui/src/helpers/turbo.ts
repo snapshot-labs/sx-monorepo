@@ -27,6 +27,6 @@ export const MAX_STRATEGIES = {
 };
 
 export const TURBO_URL =
-  'https://docs.snapshot.org/user-guides/spaces/turbo-plan';
+  'https://docs.snapshot.box/user-guides/spaces/turbo-plan';
 export const VERIFIED_URL =
-  'https://docs.snapshot.org/user-guides/spaces/get-verified';
+  'https://docs.snapshot.box/user-guides/spaces/get-verified';
