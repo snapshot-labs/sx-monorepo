@@ -14,8 +14,6 @@ import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
-const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
-
 const TITLE_DEFINITION = {
   type: 'string',
   title: 'Title',
@@ -218,10 +216,8 @@ async function handleProposeClick() {
       const appName = (route.query.app as LocationQueryValue) || '';
       const currentTime = Math.floor(Date.now() / 1000);
       const start = currentTime + props.space.voting_delay;
-      const minEnd =
-        start + (props.space.min_voting_period || DEFAULT_VOTING_DELAY);
-      const maxEnd =
-        start + (props.space.max_voting_period || DEFAULT_VOTING_DELAY);
+      const minEnd = start + props.space.min_voting_period;
+      const maxEnd = start + props.space.max_voting_period;
 
       result = await propose(
         props.space,
