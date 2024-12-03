@@ -14,7 +14,7 @@ import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
-const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 7;
+const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -59,9 +59,18 @@ const termsStore = useTermsStore();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
+const modalOpenCalendar = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
+const modalCalendarEditProperty = ref('start');
+const proposalTime = reactive({
+  start: Math.floor(Date.now() / 1000) + props.space.voting_delay,
+  end:
+    Math.floor(Date.now() / 1000) +
+    props.space.voting_delay +
+    (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
+});
 
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
@@ -216,12 +225,6 @@ async function handleProposeClick() {
       );
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
-      const currentTime = Math.floor(Date.now() / 1000);
-      const start = currentTime + props.space.voting_delay;
-      const minEnd =
-        start + (props.space.min_voting_period || DEFAULT_VOTING_DELAY);
-      const maxEnd =
-        start + (props.space.max_voting_period || DEFAULT_VOTING_DELAY);
 
       result = await propose(
         props.space,
@@ -232,9 +235,9 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
-        start,
-        minEnd,
-        maxEnd,
+        proposalTime.start,
+        proposalTime.end,
+        proposalTime.end,
         executions
       );
     }
@@ -297,6 +300,16 @@ function handleTransactionAccept() {
 
 function handleFetchPropositionPower() {
   fetchPropositionPower(props.space);
+}
+
+function handleEditPropositionStartClick() {
+  modalCalendarEditProperty.value = 'start';
+  modalOpenCalendar.value = true;
+}
+
+function handleEditPropositionEndClick() {
+  modalCalendarEditProperty.value = 'end';
+  modalOpenCalendar.value = true;
 }
 
 watch(
@@ -570,7 +583,31 @@ watchEffect(() => {
           />
           <div>
             <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-            <ProposalTimeline :data="space" />
+            <ProposalTimeline
+              :data="{
+                ...space,
+                start: proposalTime.start,
+                min_end: proposalTime.end,
+                max_end: proposalTime.end
+              }"
+            >
+              <template #start-date-suffix>
+                <button
+                  class="text-skin-link"
+                  @click="handleEditPropositionStartClick"
+                >
+                  Edit
+                </button>
+              </template>
+              <template #end-date-suffix>
+                <button
+                  class="text-skin-link"
+                  @click="handleEditPropositionEndClick"
+                >
+                  Edit
+                </button>
+              </template>
+            </ProposalTimeline>
           </div>
         </div>
       </Affix>
@@ -596,6 +633,11 @@ watchEffect(() => {
         :initial-state="transaction._form"
         @add="handleTransactionAccept"
         @close="reset"
+      />
+      <ModalDateTime
+        v-model="proposalTime[modalCalendarEditProperty]"
+        :open="modalOpenCalendar"
+        @close="modalOpenCalendar = false"
       />
     </teleport>
   </div>
