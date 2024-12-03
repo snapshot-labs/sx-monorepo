@@ -1,14 +1,14 @@
 <script setup lang="ts">
 type Step = 'DATE' | 'TIME';
 
-const datetime = defineModel<number>({ required: true });
-
-defineProps<{
+const props = defineProps<{
   open: boolean;
+  timestamp: number;
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
+  (e: 'pick', timestamp: number): void;
 }>();
 
 const currentStep = ref<Step>('DATE');
@@ -20,6 +20,7 @@ function handleClose() {
 
 function handleSubmit() {
   handleClose();
+  emit('pick', props.timestamp + 1000);
 }
 </script>
 

@@ -63,13 +63,11 @@ const modalOpenCalendar = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
-const modalCalendarEditProperty = ref('start');
-const proposalTime = reactive({
-  start: Math.floor(Date.now() / 1000) + props.space.voting_delay,
-  end:
-    Math.floor(Date.now() / 1000) +
-    props.space.voting_delay +
-    (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
+const modalCalendarProperty = ref('start');
+const modalCalendarTimestamp = ref(0);
+const proposalTime = reactive<{ start: null | number; end: null | number }>({
+  start: null,
+  end: null
 });
 
 const draftId = computed(() => route.params.key as string);
@@ -184,6 +182,19 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
+const proposalStart = computed(
+  () =>
+    proposalTime.start ??
+    Math.floor(Date.now() / 1000) + props.space.voting_delay
+);
+
+const proposalEnd = computed(
+  () =>
+    proposalTime.end ??
+    proposalStart.value +
+      (props.space.min_voting_period ?? DEFAULT_VOTING_DELAY)
+);
+
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -235,9 +246,9 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
-        proposalTime.start,
-        proposalTime.end,
-        proposalTime.end,
+        proposalStart.value,
+        proposalEnd.value,
+        proposalEnd.value,
         executions
       );
     }
@@ -303,13 +314,19 @@ function handleFetchPropositionPower() {
 }
 
 function handleEditPropositionStartClick() {
-  modalCalendarEditProperty.value = 'start';
+  modalCalendarTimestamp.value = proposalTime.start ?? proposalStart.value;
+  modalCalendarProperty.value = 'start';
   modalOpenCalendar.value = true;
 }
 
 function handleEditPropositionEndClick() {
-  modalCalendarEditProperty.value = 'end';
+  modalCalendarTimestamp.value = proposalTime.end ?? proposalEnd.value;
+  modalCalendarProperty.value = 'end';
   modalOpenCalendar.value = true;
+}
+
+function handleCalendarPick(timestamp: number) {
+  proposalTime[modalCalendarProperty.value] = timestamp;
 }
 
 watch(
@@ -586,9 +603,9 @@ watchEffect(() => {
             <ProposalTimeline
               :data="{
                 ...space,
-                start: proposalTime.start,
-                min_end: proposalTime.end,
-                max_end: proposalTime.end
+                start: proposalStart,
+                min_end: proposalEnd,
+                max_end: proposalEnd
               }"
             >
               <template #start-date-suffix>
@@ -637,8 +654,9 @@ watchEffect(() => {
         @close="reset"
       />
       <ModalDateTime
-        v-model="proposalTime[modalCalendarEditProperty]"
+        :timestamp="modalCalendarTimestamp"
         :open="modalOpenCalendar"
+        @pick="handleCalendarPick"
         @close="modalOpenCalendar = false"
       />
     </teleport>
