@@ -14,7 +14,7 @@ import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
-const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 7;
+const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
 
 const TITLE_DEFINITION = {
   type: 'string',
