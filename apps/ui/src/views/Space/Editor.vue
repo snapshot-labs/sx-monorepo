@@ -593,6 +593,7 @@ watchEffect(() => {
             >
               <template #start-date-suffix>
                 <button
+                  v-if="!proposal.proposalId"
                   class="text-skin-link"
                   @click="handleEditPropositionStartClick"
                 >
@@ -601,6 +602,7 @@ watchEffect(() => {
               </template>
               <template #end-date-suffix>
                 <button
+                  v-if="!proposal.proposalId"
                   class="text-skin-link"
                   @click="handleEditPropositionEndClick"
                 >
