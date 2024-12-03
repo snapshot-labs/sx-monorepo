@@ -49,8 +49,11 @@ const {
   reset
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
-const { get: getPropositionPower, fetch: fetchPropositionPower } =
-  usePropositionPower();
+const {
+  get: getPropositionPower,
+  fetch: fetchPropositionPower,
+  reset: resetPropositionPower
+} = usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 
@@ -297,9 +300,13 @@ function handleFetchPropositionPower() {
 }
 
 watch(
-  () => web3.value.account,
-  toAccount => {
-    if (!toAccount) return;
+  [() => web3.value.account, () => web3.value.authLoading],
+  ([toAccount, toAuthLoading], [fromAccount]) => {
+    if (fromAccount && toAccount && fromAccount !== toAccount) {
+      resetPropositionPower();
+    }
+
+    if (toAuthLoading || !toAccount) return;
 
     handleFetchPropositionPower();
   },
