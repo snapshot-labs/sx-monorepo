@@ -117,6 +117,7 @@ watch(
   id,
   async userId => {
     loaded.value = false;
+    userMetadata.loaded = false;
 
     if (!isValidAddress(userId)) {
       loaded.value = true;
