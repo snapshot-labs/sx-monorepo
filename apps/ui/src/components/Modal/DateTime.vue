@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import dayjs from 'dayjs';
+
 type Step = 'DATE' | 'TIME';
 
 const props = defineProps<{
@@ -14,6 +16,7 @@ const emit = defineEmits<{
 
 const currentStep = ref<Step>('DATE');
 const date = ref(props.timestamp);
+const time = ref(dayjs.unix(props.timestamp).format('hh:mm'));
 
 function handleClose() {
   currentStep.value = 'DATE';
@@ -29,6 +32,15 @@ function handleDateUpdate(timestamp: number) {
   date.value = timestamp;
   currentStep.value = 'TIME';
 }
+
+watch(time, value => {
+  const [hours, minutes] = value.split(':');
+  date.value = dayjs
+    .unix(date.value)
+    .set('hour', +hours)
+    .set('minute', +minutes)
+    .unix();
+});
 </script>
 
 <template>
@@ -39,7 +51,13 @@ function handleDateUpdate(timestamp: number) {
     <div v-if="currentStep === 'DATE'" class="p-4">
       <UiCalendar :min="min" :selected="timestamp" @pick="handleDateUpdate" />
     </div>
-    <div v-else-if="currentStep === 'TIME'">TimePicker</div>
+    <div v-else-if="currentStep === 'TIME'" class="my-4">
+      <input
+        v-model="time"
+        type="time"
+        class="s-input mx-auto max-w-[140px] text-center text-lg"
+      />
+    </div>
     <template #footer>
       <div class="flex space-x-3">
         <UiButton class="w-full" @click="handleClose"> Cancel </UiButton>
