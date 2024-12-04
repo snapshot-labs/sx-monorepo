@@ -226,6 +226,10 @@ async function handleProposeClick() {
       );
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
+      const currentTime = Math.floor(Date.now() / 1000);
+      const start = currentTime + props.space.voting_delay;
+      const minEnd = start + props.space.min_voting_period;
+      const maxEnd = start + props.space.max_voting_period;
 
       result = await propose(
         props.space,
@@ -237,6 +241,9 @@ async function handleProposeClick() {
         proposal.value.privacy,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
+        start,
+        minEnd,
+        maxEnd,
         executions
       );
     }

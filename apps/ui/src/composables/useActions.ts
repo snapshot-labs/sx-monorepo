@@ -288,6 +288,9 @@ export function useActions() {
     privacy: Privacy,
     labels: string[],
     app: string,
+    start: number,
+    min_end: number,
+    max_end: number,
     executions: ExecutionInfo[] | null
   ) {
     if (!web3.value.account) {
@@ -312,6 +315,9 @@ export function useActions() {
         privacy,
         labels,
         app,
+        start,
+        min_end,
+        max_end,
         executions
       )
     );
