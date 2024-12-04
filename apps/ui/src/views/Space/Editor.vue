@@ -193,7 +193,7 @@ const proposalEnd = computed(
   () =>
     proposalTime.end ??
     proposalStart.value +
-      (props.space.min_voting_period ?? DEFAULT_VOTING_DELAY)
+      (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
 );
 
 async function handleProposeClick() {

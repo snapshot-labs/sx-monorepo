@@ -21,7 +21,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <IH-exclamation-circle class="inline-block" />
     <span>No delegations configured.</span>
   </div>
-  <template v-else>
+  <div v-else>
     <UiScrollerHorizontal
       v-if="space.delegations.length > 1"
       class="z-40 sticky top-[71px] lg:top-[72px]"
@@ -48,5 +48,5 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       :space="space"
       :delegation="delegateData"
     />
-  </template>
+  </div>
 </template>
