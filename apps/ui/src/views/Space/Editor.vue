@@ -65,6 +65,7 @@ const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 const modalCalendarProperty = ref('start');
 const modalCalendarTimestamp = ref(0);
+const modalCalendarMinTimestamp = ref(0);
 const proposalTime = reactive<{ start: null | number; end: null | number }>({
   start: null,
   end: null
@@ -315,12 +316,14 @@ function handleFetchPropositionPower() {
 
 function handleEditPropositionStartClick() {
   modalCalendarTimestamp.value = proposalTime.start ?? proposalStart.value;
+  modalCalendarMinTimestamp.value = Math.floor(Date.now() / 1000);
   modalCalendarProperty.value = 'start';
   modalOpenCalendar.value = true;
 }
 
 function handleEditPropositionEndClick() {
   modalCalendarTimestamp.value = proposalTime.end ?? proposalEnd.value;
+  modalCalendarMinTimestamp.value = proposalTime.start ?? proposalStart.value;
   modalCalendarProperty.value = 'end';
   modalOpenCalendar.value = true;
 }
@@ -654,6 +657,7 @@ watchEffect(() => {
         @close="reset"
       />
       <ModalDateTime
+        :min="modalCalendarMinTimestamp"
         :timestamp="modalCalendarTimestamp"
         :open="modalOpenCalendar"
         @pick="handleCalendarPick"

@@ -3,6 +3,7 @@ type Step = 'DATE' | 'TIME';
 
 const props = defineProps<{
   open: boolean;
+  min?: number;
   timestamp: number;
 }>();
 
@@ -12,6 +13,7 @@ const emit = defineEmits<{
 }>();
 
 const currentStep = ref<Step>('DATE');
+const date = ref(props.timestamp);
 
 function handleClose() {
   currentStep.value = 'DATE';
@@ -20,7 +22,12 @@ function handleClose() {
 
 function handleSubmit() {
   handleClose();
-  emit('pick', props.timestamp + 1000);
+  emit('pick', date.value);
+}
+
+function handleDateUpdate(timestamp: number) {
+  date.value = timestamp;
+  currentStep.value = 'TIME';
 }
 </script>
 
@@ -29,7 +36,9 @@ function handleSubmit() {
     <template #header>
       <h3 v-text="`Select ${currentStep === 'DATE' ? 'date' : 'time'}`" />
     </template>
-    <div v-if="currentStep === 'DATE'">Calendar</div>
+    <div v-if="currentStep === 'DATE'" class="p-4">
+      <UiCalendar :min="min" :selected="timestamp" @pick="handleDateUpdate" />
+    </div>
     <div v-else-if="currentStep === 'TIME'">TimePicker</div>
     <template #footer>
       <div class="flex space-x-3">
