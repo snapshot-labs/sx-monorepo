@@ -190,7 +190,7 @@ watch([sortBy, choiceFilter], () => {
           @end-reached="handleEndReached"
         >
           <template #loading>
-            <UiLoading class="px-4 py-3 block absolute" />
+            <UiLoading class="px-4 py-3 block" />
           </template>
           <div
             v-for="(vote, i) in votes"

@@ -56,45 +56,47 @@ watch(
 </script>
 
 <template>
-  <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
-    <div class="flex flex-row space-x-2">
-      <UiSelectDropdown
-        v-model="spacesStore.protocol"
-        title="Protocol"
-        gap="12"
-        placement="start"
-        :items="protocols"
-      />
+  <div>
+    <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
+      <div class="flex flex-row space-x-2">
+        <UiSelectDropdown
+          v-model="spacesStore.protocol"
+          title="Protocol"
+          gap="12"
+          placement="start"
+          :items="protocols"
+        />
+      </div>
+      <UiTooltip title="Create new space">
+        <UiButton
+          :to="
+            spacesStore.protocol === 'snapshot'
+              ? 'https://snapshot.org/#/setup'
+              : 'create'
+          "
+          class="!px-0 w-[46px]"
+        >
+          <IH-plus-sm />
+        </UiButton>
+      </UiTooltip>
     </div>
-    <UiTooltip title="Create new space">
-      <UiButton
-        :to="
-          spacesStore.protocol === 'snapshot'
-            ? 'https://snapshot.org/#/setup'
-            : 'create'
-        "
-        class="!px-0 w-[46px]"
-      >
-        <IH-plus-sm />
-      </UiButton>
-    </UiTooltip>
-  </div>
-  <UiLabel label="My spaces" sticky />
-  <UiLoading v-if="loading" class="block m-4" />
-  <UiContainer
-    v-else-if="spacesStore.explorePageSpaces.length"
-    class="!max-w-screen-md pt-5"
-  >
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-      <SpacesListItem
-        v-for="space in spacesStore.explorePageSpaces"
-        :key="space.id"
-        :space="space"
-      />
+    <UiLabel label="My spaces" sticky />
+    <UiLoading v-if="loading" class="block m-4" />
+    <UiContainer
+      v-else-if="spacesStore.explorePageSpaces.length"
+      class="!max-w-screen-md pt-5"
+    >
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+        <SpacesListItem
+          v-for="space in spacesStore.explorePageSpaces"
+          :key="space.id"
+          :space="space"
+        />
+      </div>
+    </UiContainer>
+    <div v-else class="px-4 py-3 flex items-center space-x-2">
+      <IH-exclamation-circle class="inline-block shrink-0" />
+      <span v-text="'There are no spaces here.'" />
     </div>
-  </UiContainer>
-  <div v-else class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block shrink-0" />
-    <span v-text="'There are no spaces here.'" />
   </div>
 </template>
