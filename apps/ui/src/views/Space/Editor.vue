@@ -14,6 +14,8 @@ import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
+const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
+
 const TITLE_DEFINITION = {
   type: 'string',
   title: 'Title',
@@ -173,6 +175,16 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
+const proposalStart = computed(
+  () => Math.floor(Date.now() / 1000) + props.space.voting_delay
+);
+
+const proposalMinEnd = computed(
+  () =>
+    proposalStart.value +
+    (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
+);
+
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -214,10 +226,6 @@ async function handleProposeClick() {
       );
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
-      const currentTime = Math.floor(Date.now() / 1000);
-      const start = currentTime + props.space.voting_delay;
-      const minEnd = start + props.space.min_voting_period;
-      const maxEnd = start + props.space.max_voting_period;
 
       result = await propose(
         props.space,
@@ -228,9 +236,9 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
-        start,
-        minEnd,
-        maxEnd,
+        proposalStart.value,
+        proposalMinEnd.value,
+        proposalMinEnd.value,
         executions
       );
     }
@@ -566,7 +574,14 @@ watchEffect(() => {
           />
           <div>
             <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-            <ProposalTimeline :data="space" />
+            <ProposalTimeline
+              :data="{
+                ...space,
+                start: proposalStart,
+                min_end: proposalMinEnd,
+                max_end: proposalMinEnd
+              }"
+            />
           </div>
         </div>
       </Affix>
