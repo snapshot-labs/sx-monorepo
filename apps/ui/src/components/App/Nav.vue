@@ -2,7 +2,7 @@
 import { FunctionalComponent } from 'vue';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -71,6 +71,10 @@ const canSeeSettings = computed(() => {
 
 const canSeeMembers = computed(() => {
   const data = space.value?.additionalRawData;
+
+  if (!networkId.value || !offchainNetworks.includes(networkId.value)) {
+    return false;
+  }
 
   return (
     controller.value ||
