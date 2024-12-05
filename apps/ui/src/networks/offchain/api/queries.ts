@@ -362,7 +362,7 @@ export const STRATEGY_QUERY = gql`
 `;
 
 export const STATEMENTS_AND_USERS_QUERY = gql`
-  query ($where: StatementsWhere, $userIds: [String!]) {
+  query ($statementsWhere: StatementsWhere, $userIds: [String!]) {
     statements(where: $where) {
       delegate
       space
