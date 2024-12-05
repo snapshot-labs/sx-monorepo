@@ -10,6 +10,7 @@ const proposalTime = defineModel<{ start: null | number; end: null | number }>({
 const props = defineProps<{
   space: Space;
   editable: boolean;
+  proposalCreated: number;
   proposalStart: number;
   proposalEnd: number;
 }>();
@@ -73,6 +74,7 @@ function formatVotingDuration(type: string) {
         isOffchainSpace
           ? {
               ...space,
+              created: proposalCreated,
               start: proposalStart,
               min_end: proposalEnd,
               max_end: proposalEnd

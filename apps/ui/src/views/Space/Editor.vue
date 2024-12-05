@@ -181,12 +181,16 @@ const proposalLimitReached = computed(
 const propositionPower = computed(() => getPropositionPower(props.space));
 
 const proposalStart = computed(
-  () => proposalTime.start ?? NOW + props.space.voting_delay
+  () =>
+    proposalTime.start ??
+    proposal.value?.start ??
+    NOW + props.space.voting_delay
 );
 
 const proposalEnd = computed(
   () =>
     proposalTime.end ??
+    proposal.value?.min_end ??
     proposalStart.value +
       (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
 );
@@ -582,6 +586,7 @@ watchEffect(() => {
           <EditorTimeline
             v-model="proposalTime"
             :space="space"
+            :proposal-created="proposal.created || NOW"
             :proposal-start="proposalStart"
             :proposal-end="proposalEnd"
             :editable="!proposal.proposalId"
