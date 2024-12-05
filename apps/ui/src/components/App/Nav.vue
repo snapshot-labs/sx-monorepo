@@ -47,7 +47,7 @@ const controller = computedAsync(async () => {
   if (!networkId.value || !space.value) return null;
 
   const network = getNetwork(networkId.value);
-  return await network.helpers.getSpaceController(space.value);
+  return network.helpers.getSpaceController(space.value);
 });
 
 const isController = computed(() => {
