@@ -53,7 +53,7 @@ const controller = computedAsync(async () => {
 const isController = computed(() => {
   const { account } = web3.value;
 
-  return compareAddresses(controller.value ?? '', account);
+  return controller.value && compareAddresses(controller.value, account);
 });
 
 const canSeeSettings = computed(() => {
