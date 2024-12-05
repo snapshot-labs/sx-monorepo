@@ -1,5 +1,11 @@
 # @snapshot-labs/sx
 
+## 0.1.6
+
+### Patch Changes
+
+- 7a85ef3: Remove extraneous logs
+
 ## 0.1.5
 
 ### Patch Changes

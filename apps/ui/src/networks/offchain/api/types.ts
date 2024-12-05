@@ -102,6 +102,7 @@ export type ApiProposal = {
     admins: string[];
     moderators: string[];
     symbol: string;
+    terms: string;
   };
   type: VoteType;
   title: string;
@@ -124,6 +125,7 @@ export type ApiProposal = {
   votes: number;
   privacy: Privacy;
   plugins: Record<string, any>;
+  flagged: boolean;
 };
 
 export type ApiVote = {

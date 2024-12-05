@@ -26,9 +26,12 @@ export type SpacesFilter = {
   id_in?: string[];
   searchQuery?: string;
   domain?: string;
+  category?: string;
+  network?: string;
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
+  labels?: string[];
 } & Record<string, any>;
 export type Connector =
   | 'argentx'
@@ -139,6 +142,9 @@ export type ReadOnlyNetworkActions = {
     choices: string[],
     labels: string[],
     app: string,
+    start: number,
+    min_end: number,
+    max_end: number,
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
@@ -325,6 +331,7 @@ export type NetworkApi = {
   ): Promise<{ statements: Statement[]; users: User[] }>;
   loadStrategies(): Promise<StrategyTemplate[]>;
   loadStrategy(address: string): Promise<StrategyTemplate | null>;
+  getNetworksUsage(): Promise<Record<ChainId, number | undefined>>;
 };
 
 export type NetworkConstants = {

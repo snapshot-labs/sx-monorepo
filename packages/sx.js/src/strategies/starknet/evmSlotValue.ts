@@ -132,7 +132,6 @@ export default function createEvmSlotValueStrategy(): Strategy {
       try {
         l1BlockNumber = await contract.cached_timestamps(timestamp);
       } catch (e) {
-        console.log('failed with', e);
         throw new VotingPowerDetailsError(
           'Timestamp is not cached',
           type,

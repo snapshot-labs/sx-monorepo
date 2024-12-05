@@ -229,6 +229,9 @@ export function createActions(
       choices: string[],
       labels: string[],
       app: string,
+      start: number,
+      min_end: number,
+      max_end: number,
       executions: ExecutionInfo[] | null
     ) => {
       const executionInfo = executions?.[0];

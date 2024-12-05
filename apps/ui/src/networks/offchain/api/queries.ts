@@ -116,6 +116,7 @@ const PROPOSAL_FRAGMENT = gql`
       admins
       moderators
       symbol
+      terms
     }
     type
     title
@@ -142,6 +143,7 @@ const PROPOSAL_FRAGMENT = gql`
     votes
     privacy
     plugins
+    flagged
   }
 `;
 
@@ -372,6 +374,15 @@ export const STATEMENTS_AND_USERS_QUERY = gql`
     users(where: { id_in: $userIds }) {
       id
       about
+    }
+  }
+`;
+
+export const NETWORKS_USAGE_QUERY = gql`
+  query Networks {
+    networks {
+      id
+      spacesCount
     }
   }
 `;

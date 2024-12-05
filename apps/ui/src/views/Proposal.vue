@@ -18,8 +18,10 @@ const {
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
+const termsStore = useTermsStore();
 
 const modalOpenVote = ref(false);
+const modalOpenTerms = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
@@ -56,6 +58,10 @@ const currentVote = computed(
     votes.value[`${proposal.value.network}:${proposal.value.id}`]
 );
 
+const withoutBottomPadding = computed(
+  () => 'space-proposal-votes' === String(route.name)
+);
+
 async function handleVoteClick(choice: Choice) {
   if (!web3.value.account) {
     modalAccountOpen.value = true;
@@ -63,7 +69,18 @@ async function handleVoteClick(choice: Choice) {
   }
 
   selectedChoice.value = choice;
+
+  if (props.space.terms && !termsStore.areAccepted(props.space)) {
+    modalOpenTerms.value = true;
+    return;
+  }
+
   modalOpenVote.value = true;
+}
+
+function handleAcceptTerms() {
+  termsStore.accept(props.space);
+  handleVoteClick(selectedChoice.value!);
 }
 
 async function handleVoteSubmitted() {
@@ -113,7 +130,12 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
+  <div
+    :class="[
+      'flex items-stretch md:flex-row flex-col w-full md:h-full',
+      { '!pb-0': withoutBottomPadding }
+    ]"
+  >
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 grow min-w-0">
@@ -190,7 +212,10 @@ watchEffect(() => {
       <Affix
         :class="[
           'shrink-0 md:w-[340px] border-l-0 md:border-l',
-          { 'hidden md:block': route.name === 'space-proposal-votes' }
+          {
+            'hidden md:block': route.name === 'space-proposal-votes',
+            '-mb-6': !withoutBottomPadding
+          }
         ]"
         :top="72"
         :bottom="64"
@@ -332,7 +357,11 @@ watchEffect(() => {
               <IH-tag />
               Labels
             </h4>
-            <ProposalLabels :labels="proposal.labels" :space="space" />
+            <ProposalLabels
+              :labels="proposal.labels"
+              :space="space"
+              with-link
+            />
           </div>
           <div>
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
@@ -345,6 +374,13 @@ watchEffect(() => {
       </Affix>
     </template>
     <teleport to="#modal">
+      <ModalTerms
+        v-if="space.terms"
+        :open="modalOpenTerms"
+        :space="space"
+        @close="modalOpenTerms = false"
+        @accept="handleAcceptTerms"
+      />
       <ModalVote
         v-if="proposal"
         :choice="selectedChoice"

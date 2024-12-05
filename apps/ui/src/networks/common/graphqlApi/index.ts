@@ -6,6 +6,7 @@ import {
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import {
   NetworkApi,
   NetworkConstants,
@@ -20,6 +21,7 @@ import {
   ProposalExecution,
   ProposalState,
   Space,
+  SpaceMetadataTreasury,
   Transaction,
   User,
   UserActivity,
@@ -89,6 +91,25 @@ function formatExecution(execution: string): Transaction[] {
   }
 }
 
+function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
+  const { name, network, chain_id, address } = JSON.parse(treasury);
+
+  if (network) {
+    // NOTE: Legacy format
+    return {
+      name,
+      address,
+      chainId: CHAIN_IDS[network]
+    };
+  }
+
+  return {
+    name,
+    address,
+    chainId: chain_id
+  };
+}
+
 function processStrategiesMetadata(
   parsedMetadata: ApiStrategyParsedMetadata[],
   strategiesIndicies?: number[]
@@ -135,15 +156,9 @@ function processExecutions(
     strategy => strategy.address === proposal.execution_strategy
   );
 
-  const treasuries = proposal.space.metadata.treasuries.map(treasury => {
-    const { name, network, address } = JSON.parse(treasury);
-
-    return {
-      name,
-      network,
-      address
-    };
-  });
+  const treasuries = proposal.space.metadata.treasuries.map(treasury =>
+    formatMetadataTreasury(treasury)
+  );
 
   const matchingTreasury = treasuries.find(treasury => {
     if (!match) return null;
@@ -151,7 +166,7 @@ function processExecutions(
     return (
       match.treasury &&
       compareAddresses(treasury.address, match.treasury) &&
-      match.treasury_chain === CHAIN_IDS[treasury.network]
+      match.treasury_chain === treasury.chainId
     );
   });
 
@@ -160,7 +175,8 @@ function processExecutions(
       strategyType: match?.type || '',
       safeAddress: match?.treasury || '',
       safeName: matchingTreasury?.name || 'Unnamed treasury',
-      networkId: matchingTreasury?.network || executionNetworkId,
+      chainId:
+        matchingTreasury?.chainId || getNetwork(executionNetworkId).chainId,
       transactions
     }
   ];
@@ -185,16 +201,9 @@ function formatSpace(
     terms: '',
     voting_power_symbol: space.metadata.voting_power_symbol,
     voting_types: constants.EDITOR_VOTING_TYPES,
-    treasuries: space.metadata.treasuries.map(treasury => {
-      const { name, network, address } = JSON.parse(treasury);
-
-      return {
-        name,
-        network,
-        address,
-        chainId: CHAIN_IDS[network]
-      };
-    }),
+    treasuries: space.metadata.treasuries.map(treasury =>
+      formatMetadataTreasury(treasury)
+    ),
     labels: space.metadata.labels.map(label => {
       const { id, name, description, color } = JSON.parse(label);
       return { id, name, description, color };
@@ -266,7 +275,8 @@ function formatProposal(
       strategies_parsed_metadata: processStrategiesMetadata(
         proposal.space.strategies_parsed_metadata,
         proposal.strategies_indices
-      )
+      ),
+      terms: ''
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',
@@ -286,7 +296,8 @@ function formatProposal(
     state: getProposalState(proposal, current),
     network: networkId,
     privacy: null,
-    quorum: +proposal.quorum
+    quorum: +proposal.quorum,
+    flagged: false
   };
 }
 
@@ -441,7 +452,10 @@ export function createApi(
       filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: Record<string, any> = clone(filters || {});
+      const _filters: ProposalsFilter = clone(filters || {});
+      const metadataFilters: Record<string, any> = {
+        title_contains_nocase: searchQuery
+      };
       const state = _filters.state;
 
       if (state === 'active') {
@@ -455,6 +469,12 @@ export function createApi(
 
       delete _filters.state;
 
+      if (_filters.labels?.length) {
+        metadataFilters.labels_contains = _filters.labels;
+      }
+
+      delete _filters.labels;
+
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
         variables: {
@@ -463,7 +483,7 @@ export function createApi(
           where: {
             space_in: spaceIds,
             cancelled: false,
-            metadata_: { title_contains_nocase: searchQuery },
+            metadata_: metadataFilters,
             ..._filters
           }
         }
@@ -531,6 +551,8 @@ export function createApi(
         _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
       }
       delete _filter.searchQuery;
+      delete _filter.category;
+      delete _filter.network;
 
       const { data } = await apollo.query({
         query: SPACES_QUERY,
@@ -678,6 +700,9 @@ export function createApi(
     },
     loadStrategy: async () => {
       return null;
+    },
+    getNetworksUsage: async () => {
+      return {};
     }
   };
 }

@@ -6,7 +6,7 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, Contact, NetworkID, Transaction } from '@/types';
+import { ChainId, Contact, Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -26,7 +26,6 @@ const props = defineProps<{
   open: boolean;
   address: string;
   network: ChainId;
-  networkId: NetworkID;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
@@ -257,7 +256,6 @@ watchEffect(async () => {
         :assets="allAssets"
         :address="address"
         :network="network"
-        :network-id="networkId"
         :loading="loading"
         :search-value="searchValue"
         @pick="
@@ -294,7 +292,7 @@ watchEffect(async () => {
           <div class="flex items-center">
             <UiStamp
               v-if="currentToken"
-              :id="`${networkId}:${currentToken.contractAddress}`"
+              :id="`eip155:${network}:${currentToken.contractAddress}`"
               type="token"
               class="mr-2"
               :size="20"

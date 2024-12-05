@@ -2445,10 +2445,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.6.0.tgz#3c7c9c46e678feefe7a2e5bb609d3dbd665ffb3f"
   integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
 
-"@snapshot-labs/checkpoint@^0.1.0-beta.42":
-  version "0.1.0-beta.42"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.42.tgz#5f50cdf7c15df1126a857b1f0efbc88caa1382e4"
-  integrity sha512-ZUoDrtAVWi4SgGHO4JIdphg28N+NpbP5oBSEfceIhMIakGmP1nR2+teQTV/rJCTut+x5zTKJkwyXbdxfkcmIYw==
+"@snapshot-labs/checkpoint@^0.1.0-beta.44":
+  version "0.1.0-beta.44"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.44.tgz#61bac9957fcaf1fcdbd819a99deba02bdc7705f8"
+  integrity sha512-SE4p0TLAwb28phlfKp02obBUm4wlAwpf+gxuv40t1ei3vuYGeBHeGhoOsvCIKaUDXqyUbicdwQ2BE2WDEU2HIQ==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/address" "^5.7.0"
@@ -2510,10 +2510,10 @@
     "@snapshot-labs/pineapple" "^0.2.0"
     cross-fetch "^3.1.5"
 
-"@snapshot-labs/lock@^0.2.8":
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.8.tgz#4eb81af37e57c6eac6135e7db3acfbb511e9ab1c"
-  integrity sha512-5Izr4uAIU1lf2CHa155SW4oqZhyndFQf7AQNpyazk0AtffgDmEa6T5KxU7ktRXL9SwuRyAlo7MJrnjxMDmqZWA==
+"@snapshot-labs/lock@^0.2.10":
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/lock/-/lock-0.2.10.tgz#82f86eaa04a7579fa15030ceba36aaa537e442fd"
+  integrity sha512-nSSlP6M/KVj+ZEX1OtyM1xsXOsY8e8dX5US9ZWIJGAaqrwPhvl0y/jm1p6gtIuVAcQGo4gCfiBrjLrP8qKA8PQ==
   dependencies:
     "@coinbase/wallet-sdk" "^4.0.4"
     "@portis/web3" "^4.0.6"
@@ -2543,10 +2543,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.18.tgz#fcbd86d4557821bff774d60e5c636ad47ed85d77"
   integrity sha512-v6tj7l19KJUWjBbsWpwxaYO2mlIDBFyAG0OMSPhUgrhltO7b6R4Ejxn2k4Qgi/NtlnOrj+3Gt3eQRry8Jfgjrg==
 
-"@snapshot-labs/snapshot.js@^0.12.28":
-  version "0.12.28"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.28.tgz#6f6644038c9df06daaea508b57d0b3d5d7a55cd9"
-  integrity sha512-F2rwwgkV1NtYeeOy1Tl1qemJvm7Ux/D8mM5k/+uD53ptWsX6//zlv9daajZjT+7h7pYqycKvNJJE1f7Rr0m4cQ==
+"@snapshot-labs/snapshot.js@^0.12.33":
+  version "0.12.33"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.33.tgz#3ce3166419931ef31f1070449318b98b9c482078"
+  integrity sha512-N5diNuGsglbcQ/t63EdnpUvl2bQO6TerpJE4bA+QHCEoqy/XQdqUjksosn/MWKt1gQfBjTYiN3aPGV4uj1mspA==
   dependencies:
     "@ensdomains/eth-ens-namehash" "^2.0.15"
     "@ethersproject/abi" "^5.6.4"
