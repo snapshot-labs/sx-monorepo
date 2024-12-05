@@ -36,7 +36,6 @@ function handleDateUpdate(timestamp: number) {
 
 function handleNextClick() {
   currentStep.value = 'TIME';
-  date.value ||= props.timestamp;
 
   handleTimeUpdate();
 
@@ -69,6 +68,15 @@ function validateForm() {
 }
 
 watch(time, () => handleTimeUpdate());
+
+watch(
+  () => props.open,
+  open => {
+    if (open) {
+      date.value = props.timestamp;
+    }
+  }
+);
 </script>
 
 <template>
