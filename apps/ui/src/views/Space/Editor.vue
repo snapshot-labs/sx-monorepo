@@ -9,7 +9,7 @@ import {
   TURBO_URL,
   VERIFIED_URL
 } from '@/helpers/turbo';
-import { _d, _n, omit } from '@/helpers/utils';
+import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -56,17 +56,12 @@ const {
 } = usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
-const { getDurationFromCurrent } = useMetaStore();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
-const modalOpenCalendar = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
-const modalCalendarProperty = ref('start');
-const modalCalendarTimestamp = ref(0);
-const modalCalendarMinTimestamp = ref(0);
 const proposalTime = reactive<{ start: null | number; end: null | number }>({
   start: null,
   end: null
@@ -316,27 +311,6 @@ function handleFetchPropositionPower() {
   fetchPropositionPower(props.space);
 }
 
-function handleEditPropositionStartClick() {
-  modalCalendarTimestamp.value = proposalTime.start ?? proposalStart.value;
-  modalCalendarMinTimestamp.value = Math.floor(Date.now() / 1000);
-  modalCalendarProperty.value = 'start';
-  modalOpenCalendar.value = true;
-}
-
-function handleEditPropositionEndClick() {
-  modalCalendarTimestamp.value = proposalTime.end ?? proposalEnd.value;
-  modalCalendarMinTimestamp.value =
-    (proposalTime.start ?? proposalStart.value) + 60;
-  modalCalendarProperty.value = 'end';
-  modalOpenCalendar.value = true;
-}
-
-function handlePropositionTimeUpdate(timestamp: number) {
-  proposalTime[modalCalendarProperty.value] = timestamp;
-
-  normalizeProposalTime();
-}
-
 function normalizeProposalTime() {
   const now = Math.floor(Date.now() / 1000);
 
@@ -357,15 +331,7 @@ function normalizeProposalTime() {
   }
 }
 
-function formatVotingDuration(type: string) {
-  const duration = getDurationFromCurrent(
-    props.space.network,
-    props.space[type]
-  );
-  const roundedDuration = Math.round(duration / 60) * 60;
-
-  return _d(roundedDuration);
-}
+watch(proposalTime, normalizeProposalTime);
 
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
@@ -636,72 +602,13 @@ watchEffect(() => {
             v-model="proposal.labels"
             :space="space"
           />
-          <div>
-            <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-            <ProposalTimeline
-              :data="
-                isOffchainSpace
-                  ? {
-                      ...space,
-                      start: proposalStart,
-                      min_end: proposalEnd,
-                      max_end: proposalEnd
-                    }
-                  : space
-              "
-            >
-              <template v-if="!proposal.proposalId" #start-date-suffix>
-                <button
-                  v-if="!space.voting_delay && isOffchainSpace"
-                  class="text-skin-link"
-                  @click="handleEditPropositionStartClick"
-                >
-                  Edit
-                </button>
-                <UiTooltip
-                  v-else-if="space.voting_delay"
-                  :title="`This space has enforced a ${formatVotingDuration('voting_delay')} voting delay`"
-                >
-                  <IH-exclamation-circle />
-                </UiTooltip>
-              </template>
-              <template v-if="!proposal.proposalId" #end-date-suffix>
-                <button
-                  v-if="!space.min_voting_period && isOffchainSpace"
-                  class="text-skin-link"
-                  @click="handleEditPropositionEndClick"
-                >
-                  Edit
-                </button>
-                <UiTooltip
-                  v-else-if="space.min_voting_period"
-                  :title="`This space has enforced a ${formatVotingDuration('min_voting_period')} voting period`"
-                >
-                  <IH-exclamation-circle />
-                </UiTooltip>
-              </template>
-              <template
-                v-if="!proposal.proposalId && space.min_voting_period"
-                #min_end-date-suffix
-              >
-                <UiTooltip
-                  :title="`This space has enforced a ${formatVotingDuration('min_voting_period')} minimum voting period`"
-                >
-                  <IH-exclamation-circle />
-                </UiTooltip>
-              </template>
-              <template
-                v-if="!proposal.proposalId && space.max_voting_period"
-                #max_end-date-suffix
-              >
-                <UiTooltip
-                  :title="`This space has enforced a ${formatVotingDuration('max_voting_period')} maximum voting period`"
-                >
-                  <IH-exclamation-circle />
-                </UiTooltip>
-              </template>
-            </ProposalTimeline>
-          </div>
+          <EditorTimeline
+            v-model="proposalTime"
+            :space="space"
+            :proposal-start="proposalStart"
+            :proposal-end="proposalEnd"
+            :editable="!proposal.proposalId"
+          />
         </div>
       </Affix>
     </div>
@@ -726,13 +633,6 @@ watchEffect(() => {
         :initial-state="transaction._form"
         @add="handleTransactionAccept"
         @close="reset"
-      />
-      <ModalDateTime
-        :min="modalCalendarMinTimestamp"
-        :timestamp="modalCalendarTimestamp"
-        :open="modalOpenCalendar"
-        @pick="handlePropositionTimeUpdate"
-        @close="modalOpenCalendar = false"
       />
     </teleport>
   </div>
