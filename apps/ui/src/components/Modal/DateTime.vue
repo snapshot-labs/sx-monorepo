@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import dayjs from 'dayjs';
+import { clone } from '@/helpers/utils';
 
 type Step = 'DATE' | 'TIME';
+
+const DEFAULT_TIME = '';
+const TIME_FORMAT = 'HH:mm';
 
 const props = defineProps<{
   open: boolean;
@@ -15,8 +19,8 @@ const emit = defineEmits<{
 }>();
 
 const currentStep = ref<Step>('DATE');
-const date = ref<number>(0);
-const time = ref<string>('');
+const date = ref<number>(props.timestamp);
+const time = ref<string>(clone(DEFAULT_TIME));
 const formError = ref<null | string>(null);
 
 function handleClose() {
@@ -30,21 +34,31 @@ function handleSubmit() {
 
 function handleDateUpdate(timestamp: number) {
   date.value = timestamp;
-  handleNextClick();
+  moveToNextStep();
 }
 
-function handleNextClick() {
+function moveToNextStep() {
   currentStep.value = 'TIME';
 
-  handleTimeUpdate();
+  const originalDate = dayjs.unix(props.timestamp);
+  const selectedDate = dayjs
+    .unix(date.value)
+    .set('hour', originalDate.get('hour'))
+    .set('minute', originalDate.get('minute'));
 
-  if (formError) {
-    time.value = dayjs(new Date()).format('HH:mm');
+  if (props.min) {
+    const minDate = dayjs.unix(props.min);
+
+    if (selectedDate.isBefore(minDate)) {
+      time.value = minDate.format(TIME_FORMAT);
+      return;
+    }
   }
+
+  time.value = selectedDate.format(TIME_FORMAT);
 }
 
 function handleTimeUpdate() {
-  time.value ||= dayjs.unix(props.timestamp).format('HH:mm');
   const [hours, minutes] = time.value.split(':');
 
   date.value = dayjs
@@ -52,21 +66,27 @@ function handleTimeUpdate() {
     .set('hour', +hours)
     .set('minute', +minutes)
     .unix();
-
-  validateForm();
 }
 
 function validateForm() {
-  const min = props.min ? dayjs.unix(props.min).startOf('minute') : null;
+  if (!props.min) return;
 
-  if (min && date.value < min.unix()) {
-    formError.value = `Time must be greater than ${min.format('HH:mm')}`;
-  } else {
-    formError.value = null;
+  const minDate = dayjs.unix(props.min).startOf('minute');
+
+  if (date.value < minDate.unix()) {
+    formError.value = `Time must be greater than ${minDate.format(TIME_FORMAT)}`;
+    return;
   }
+
+  formError.value = null;
 }
 
-watch(time, () => handleTimeUpdate());
+watch(time, () => {
+  if (currentStep.value !== 'TIME') return;
+
+  handleTimeUpdate();
+  validateForm();
+});
 
 watch(
   () => props.open,
@@ -74,6 +94,7 @@ watch(
     if (open) {
       currentStep.value = 'DATE';
       date.value = props.timestamp;
+      time.value = DEFAULT_TIME;
     }
   }
 );
@@ -84,23 +105,25 @@ watch(
     <template #header>
       <h3 v-text="`Select ${currentStep === 'DATE' ? 'date' : 'time'}`" />
     </template>
-    <div v-if="currentStep === 'DATE'" class="p-4">
+    <div :class="['!m-4 text-center', { 's-error': formError }]">
       <UiCalendar
+        v-if="currentStep === 'DATE'"
         :min="min"
-        :selected="date || timestamp"
+        :selected="date"
         @pick="handleDateUpdate"
       />
-    </div>
-    <div
-      v-else-if="currentStep === 'TIME'"
-      :class="['my-4 text-center', { 's-error': formError }]"
-    >
-      <input
-        v-model="time"
-        type="time"
-        class="s-input mx-auto max-w-[140px] text-center text-lg"
-      />
-      <span v-if="formError" class="s-input-error-message" v-text="formError" />
+      <template v-else>
+        <input
+          v-model="time"
+          type="time"
+          class="s-input mx-auto max-w-[140px] text-center text-lg"
+        />
+        <span
+          v-if="formError"
+          class="s-input-error-message"
+          v-text="formError"
+        />
+      </template>
     </div>
     <template #footer>
       <div class="flex space-x-3">
@@ -117,12 +140,12 @@ watch(
         <UiButton
           v-if="currentStep == 'DATE'"
           class="primary w-full"
-          @click="handleNextClick"
+          @click="moveToNextStep"
         >
           Next
         </UiButton>
         <UiButton
-          v-else-if="currentStep == 'TIME'"
+          v-else
           class="primary w-full"
           :disabled="!!formError"
           @click="handleSubmit"

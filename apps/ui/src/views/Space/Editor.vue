@@ -325,7 +325,8 @@ function handleEditPropositionStartClick() {
 
 function handleEditPropositionEndClick() {
   modalCalendarTimestamp.value = proposalTime.end ?? proposalEnd.value;
-  modalCalendarMinTimestamp.value = proposalTime.start ?? proposalStart.value;
+  modalCalendarMinTimestamp.value =
+    (proposalTime.start ?? proposalStart.value) + 60;
   modalCalendarProperty.value = 'end';
   modalOpenCalendar.value = true;
 }
