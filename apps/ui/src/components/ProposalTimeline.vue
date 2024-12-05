@@ -122,7 +122,7 @@ const states: ComputedRef<State[]> = computed(() => {
         class="mb-3 last:mb-0 h-[44px]"
       >
         <h4 v-text="LABELS[state.id]" />
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
           <div v-text="_t(state.value)" />
           <slot :name="`${state.id}-date-suffix`" />
         </div>

@@ -9,7 +9,7 @@ import {
   TURBO_URL,
   VERIFIED_URL
 } from '@/helpers/turbo';
-import { _n, omit } from '@/helpers/utils';
+import { _d, _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -56,6 +56,7 @@ const {
 } = usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
+const { getDurationFromCurrent } = useMetaStore();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -332,6 +333,16 @@ function handleCalendarPick(timestamp: number) {
   proposalTime[modalCalendarProperty.value] = timestamp;
 }
 
+function formatVotingDuration(type: string) {
+  const duration = getDurationFromCurrent(
+    props.space.network,
+    props.space[type]
+  );
+  const roundedDuration = Math.round(duration / 60) * 60;
+
+  return _d(roundedDuration);
+}
+
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
   ([toAccount, toAuthLoading], [fromAccount]) => {
@@ -604,30 +615,66 @@ watchEffect(() => {
           <div>
             <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
             <ProposalTimeline
-              :data="{
-                ...space,
-                start: proposalStart,
-                min_end: proposalEnd,
-                max_end: proposalEnd
-              }"
+              :data="
+                isOffchainSpace
+                  ? {
+                      ...space,
+                      start: proposalStart,
+                      min_end: proposalEnd,
+                      max_end: proposalEnd
+                    }
+                  : space
+              "
             >
-              <template #start-date-suffix>
+              <template v-if="!proposal.proposalId" #start-date-suffix>
                 <button
-                  v-if="!proposal.proposalId"
+                  v-if="!space.voting_delay && isOffchainSpace"
                   class="text-skin-link"
                   @click="handleEditPropositionStartClick"
                 >
                   Edit
                 </button>
+                <UiTooltip
+                  v-else-if="space.voting_delay"
+                  :title="`This space has enforced a ${formatVotingDuration('voting_delay')} voting delay`"
+                >
+                  <IH-exclamation-circle />
+                </UiTooltip>
               </template>
-              <template #end-date-suffix>
+              <template v-if="!proposal.proposalId" #end-date-suffix>
                 <button
-                  v-if="!proposal.proposalId"
+                  v-if="!space.min_voting_period && isOffchainSpace"
                   class="text-skin-link"
                   @click="handleEditPropositionEndClick"
                 >
                   Edit
                 </button>
+                <UiTooltip
+                  v-else-if="space.min_voting_period"
+                  :title="`This space has enforced a ${formatVotingDuration('min_voting_period')} voting period`"
+                >
+                  <IH-exclamation-circle />
+                </UiTooltip>
+              </template>
+              <template
+                v-if="!proposal.proposalId && space.min_voting_period"
+                #min_end-date-suffix
+              >
+                <UiTooltip
+                  :title="`This space has enforced a ${formatVotingDuration('min_voting_period')} minimum voting period`"
+                >
+                  <IH-exclamation-circle />
+                </UiTooltip>
+              </template>
+              <template
+                v-if="!proposal.proposalId && space.max_voting_period"
+                #max_end-date-suffix
+              >
+                <UiTooltip
+                  :title="`This space has enforced a ${formatVotingDuration('max_voting_period')} maximum voting period`"
+                >
+                  <IH-exclamation-circle />
+                </UiTooltip>
               </template>
             </ProposalTimeline>
           </div>
