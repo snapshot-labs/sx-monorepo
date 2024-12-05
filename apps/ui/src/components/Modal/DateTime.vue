@@ -59,8 +59,10 @@ function handleTimeUpdate() {
 }
 
 function validateForm() {
-  if (date.value < dayjs.unix(props.min).startOf('minute').unix()) {
-    formError.value = 'Date must be in the future';
+  const min = props.min ? dayjs.unix(props.min) : null;
+
+  if (min && date.value < min.unix()) {
+    formError.value = `Time must be greater than ${min.format('HH:mm')}`;
   } else {
     formError.value = null;
   }
