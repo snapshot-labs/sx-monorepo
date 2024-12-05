@@ -42,6 +42,15 @@ function handleEditPropositionEndClick() {
 }
 
 function handlePropositionTimeUpdate(timestamp: number) {
+  if (
+    modalCalendarProperty.value === 'start' &&
+    proposalTime.value.end &&
+    timestamp >= proposalTime.value.end
+  ) {
+    proposalTime.value.end =
+      timestamp + props.proposalEnd - props.proposalStart;
+  }
+
   proposalTime.value[modalCalendarProperty.value] = timestamp;
 }
 
