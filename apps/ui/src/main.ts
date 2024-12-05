@@ -16,7 +16,8 @@ const knownHosts = [
   'worldassociation.org',
   'safe.mainnet.frax.com',
   'horizen-eon.safe.onchainden.com',
-  'safe.fantom.network'
+  'safe.fantom.network',
+  'safe.apechain.com'
 ];
 const parentUrl =
   window.location != window.parent.location

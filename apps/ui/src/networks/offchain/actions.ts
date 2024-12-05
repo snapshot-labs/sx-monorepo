@@ -133,13 +133,13 @@ export function createActions(
       privacy: Privacy,
       labels: string[],
       app: string,
+      created: number,
       start: number,
       min_end: number,
       max_end: number,
       executions: ExecutionInfo[]
     ) {
       const provider = getProvider(space.snapshot_chain_id as number);
-
       const plugins = await getPlugins(executions);
       const data = {
         space: space.id,
@@ -155,7 +155,7 @@ export function createActions(
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
-        timestamp: Math.floor(Date.now() / 1000)
+        timestamp: created
       };
 
       return client.propose({ signer: web3.getSigner(), data });

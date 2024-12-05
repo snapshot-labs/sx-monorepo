@@ -241,6 +241,7 @@ async function handleProposeClick() {
         proposal.value.privacy,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
+        currentTime,
         start,
         minEnd,
         maxEnd,
