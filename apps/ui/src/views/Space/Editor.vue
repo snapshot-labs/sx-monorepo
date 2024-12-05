@@ -575,12 +575,17 @@ watchEffect(() => {
           <div>
             <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
             <ProposalTimeline
-              :data="{
-                ...space,
-                start: proposalStart,
-                min_end: proposalMinEnd,
-                max_end: proposalMinEnd
-              }"
+              :data="
+                isOffchainSpace
+                  ? {
+                      ...space,
+                      created: NOW,
+                      start: proposalStart,
+                      min_end: proposalMinEnd,
+                      max_end: proposalMinEnd
+                    }
+                  : space
+              "
             />
           </div>
         </div>
