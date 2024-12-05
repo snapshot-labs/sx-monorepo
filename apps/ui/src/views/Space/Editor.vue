@@ -230,7 +230,6 @@ async function handleProposeClick() {
       );
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
-      normalizeProposalTime();
 
       result = await propose(
         props.space,
@@ -308,28 +307,6 @@ function handleTransactionAccept() {
 function handleFetchPropositionPower() {
   fetchPropositionPower(props.space);
 }
-
-function normalizeProposalTime() {
-  const now = Math.floor(Date.now() / 1000);
-
-  if (proposalTime.start && proposalTime.start < now) {
-    proposalTime.start = now;
-  }
-
-  if (
-    proposalTime.start &&
-    proposalTime.end &&
-    proposalTime.end < proposalTime.start
-  ) {
-    proposalTime.end = proposalTime.start + 60;
-  }
-
-  if (proposalTime.end && proposalTime.end < now) {
-    proposalTime.end = now + 60;
-  }
-}
-
-watch(proposalTime, normalizeProposalTime);
 
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
