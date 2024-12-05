@@ -20,7 +20,6 @@ const time = ref<string>('');
 const formError = ref<null | string>(null);
 
 function handleClose() {
-  currentStep.value = 'DATE';
   emit('close');
 }
 
@@ -73,6 +72,7 @@ watch(
   () => props.open,
   open => {
     if (open) {
+      currentStep.value = 'DATE';
       date.value = props.timestamp;
     }
   }
