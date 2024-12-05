@@ -180,7 +180,9 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
-const proposalStart = computed(() => NOW + props.space.voting_delay);
+const proposalStart = computed(
+  () => proposalTime.start ?? NOW + props.space.voting_delay
+);
 
 const proposalEnd = computed(
   () =>
