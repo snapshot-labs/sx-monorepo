@@ -131,6 +131,7 @@ export function createActions(
       choices: string[],
       labels: string[],
       app: string,
+      created: number,
       start: number,
       min_end: number,
       max_end: number,
@@ -138,13 +139,6 @@ export function createActions(
     ) {
       const provider = getProvider(space.snapshot_chain_id as number);
       const plugins = await getPlugins(executions);
-      const currentTime = Math.floor(Date.now() / 1000);
-      const normalizedStart = space.voting_delay
-        ? currentTime + space.voting_delay
-        : start;
-      const normalizedEnd = space.min_voting_period
-        ? normalizedStart + space.min_voting_period
-        : min_end;
 
       const data = {
         space: space.id,
@@ -154,12 +148,12 @@ export function createActions(
         discussion,
         choices,
         labels,
-        start: normalizedStart,
-        end: normalizedEnd,
+        start,
+        end: min_end,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
-        timestamp: currentTime
+        timestamp: created
       };
 
       return client.propose({ signer: web3.getSigner(), data });
