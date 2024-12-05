@@ -128,7 +128,7 @@ export function useEditor() {
       discussion: '',
       type,
       choices,
-      privacy: '',
+      privacy: 'none',
       labels: [],
       executions: Object.create(null),
       updatedAt: Date.now(),

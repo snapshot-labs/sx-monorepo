@@ -148,7 +148,7 @@ export function createActions(
         type,
         discussion,
         choices,
-        privacy,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
         start,
         end: min_end,

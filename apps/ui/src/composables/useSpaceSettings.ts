@@ -161,7 +161,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       | 'weighted'
       | 'basic'
   );
-  const privacy = ref<'' | 'shutter' | 'any'>('');
+  const privacy = ref('none' as 'none' | 'shutter' | 'any');
   const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
   const snapshotChainId: Ref<number> = ref(1);
@@ -418,9 +418,9 @@ export function useSpaceSettings(space: Ref<Space>) {
   }
 
   function getInitialVotingProperties(space: Space) {
-    const validPrivacyTypes = ['', 'shutter', 'any'];
+    const validPrivacyTypes = ['shutter', 'any'];
     const spaceVoteType = space.additionalRawData?.voting.type;
-    const privacyValue = space.additionalRawData?.voting.privacy || '';
+    const privacyValue = space.additionalRawData?.voting.privacy || 'none';
 
     return {
       quorumType: space.additionalRawData?.voting.quorumType ?? 'default',
@@ -429,7 +429,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         !spaceVoteType || spaceVoteType === 'custom' ? 'any' : spaceVoteType,
       privacy: validPrivacyTypes.includes(privacyValue as string)
         ? privacyValue
-        : '',
+        : 'none',
       ignoreAbstainVotes: space.additionalRawData?.voting.hideAbstain ?? false
     } as const;
   }
@@ -581,7 +581,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         type: voteType.value === 'any' ? '' : voteType.value,
         quorum: Number(quorum.value),
         quorumType: quorumType.value,
-        privacy: privacy.value,
+        privacy: privacy.value === 'none' ? '' : privacy.value,
         hideAbstain: ignoreAbstainVotes.value
       },
       validation:

@@ -96,10 +96,10 @@ export const VOTING_TYPES_INFO: Record<
 };
 
 export const PRIVACY_TYPES_INFO: Record<
-  '' | 'shutter' | 'any',
+  'none' | 'shutter' | 'any',
   { label: string; description?: string }
 > = {
-  '': {
+  none: {
     label: 'No privacy'
   },
   shutter: {

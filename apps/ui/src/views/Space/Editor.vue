@@ -68,7 +68,7 @@ const privacy = computed({
   },
   set(value) {
     if (proposal.value) {
-      proposal.value.privacy = value ? 'shutter' : '';
+      proposal.value.privacy = value ? 'shutter' : 'none';
     }
   }
 });
@@ -329,7 +329,7 @@ watch(
     if (id) return true;
 
     const newId = await createDraft(spaceKey.value, {
-      privacy: props.space.privacy === 'shutter' ? 'shutter' : ''
+      privacy: props.space.privacy === 'shutter' ? 'shutter' : 'none'
     });
 
     router.replace({

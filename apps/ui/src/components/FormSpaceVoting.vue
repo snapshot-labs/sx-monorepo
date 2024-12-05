@@ -28,7 +28,7 @@ const quorum = defineModel<string | number>('quorum', {
 const votingType = defineModel<VoteType | 'any'>('votingType', {
   required: true
 });
-const privacy = defineModel<'' | 'shutter' | 'any'>('privacy', {
+const privacy = defineModel<'none' | 'shutter' | 'any'>('privacy', {
   required: true
 });
 const voteValidation = defineModel<Validation>('voteValidation', {
