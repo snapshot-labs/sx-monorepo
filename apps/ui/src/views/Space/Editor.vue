@@ -15,6 +15,7 @@ import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
+const NOW = Math.floor(Date.now() / 1000);
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -175,9 +176,7 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
-const proposalStart = computed(
-  () => Math.floor(Date.now() / 1000) + props.space.voting_delay
-);
+const proposalStart = computed(() => NOW + props.space.voting_delay);
 
 const proposalMinEnd = computed(
   () =>
@@ -236,6 +235,7 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
+        NOW,
         proposalStart.value,
         proposalMinEnd.value,
         proposalMinEnd.value,
