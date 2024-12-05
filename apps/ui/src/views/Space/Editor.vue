@@ -238,6 +238,7 @@ async function handleProposeClick() {
       );
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
+      normalizeProposalTime();
 
       result = await propose(
         props.space,
@@ -329,8 +330,30 @@ function handleEditPropositionEndClick() {
   modalOpenCalendar.value = true;
 }
 
-function handleCalendarPick(timestamp: number) {
+function handlePropositionTimeUpdate(timestamp: number) {
   proposalTime[modalCalendarProperty.value] = timestamp;
+
+  normalizeProposalTime();
+}
+
+function normalizeProposalTime() {
+  const now = Math.floor(Date.now() / 1000);
+
+  if (proposalTime.start && proposalTime.start < now) {
+    proposalTime.start = now;
+  }
+
+  if (
+    proposalTime.start &&
+    proposalTime.end &&
+    proposalTime.end < proposalTime.start
+  ) {
+    proposalTime.end = proposalTime.start + 60;
+  }
+
+  if (proposalTime.end && proposalTime.end < now) {
+    proposalTime.end = now + 60;
+  }
 }
 
 function formatVotingDuration(type: string) {
@@ -707,7 +730,7 @@ watchEffect(() => {
         :min="modalCalendarMinTimestamp"
         :timestamp="modalCalendarTimestamp"
         :open="modalOpenCalendar"
-        @pick="handleCalendarPick"
+        @pick="handlePropositionTimeUpdate"
         @close="modalOpenCalendar = false"
       />
     </teleport>
