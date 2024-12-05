@@ -59,7 +59,7 @@ function handleTimeUpdate() {
 }
 
 function validateForm() {
-  const min = props.min ? dayjs.unix(props.min) : null;
+  const min = props.min ? dayjs.unix(props.min).startOf('minute') : null;
 
   if (min && date.value < min.unix()) {
     formError.value = `Time must be greater than ${min.format('HH:mm')}`;
