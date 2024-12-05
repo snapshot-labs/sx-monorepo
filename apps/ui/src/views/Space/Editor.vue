@@ -180,9 +180,7 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
-const proposalStart = computed(
-  () => proposalTime.start ?? NOW + props.space.voting_delay
-);
+const proposalStart = computed(() => NOW + props.space.voting_delay);
 
 const proposalEnd = computed(
   () =>
@@ -602,6 +600,7 @@ watchEffect(() => {
             v-model="proposal.labels"
             :space="space"
           />
+          <<<<<<< HEAD
           <EditorTimeline
             v-model="proposalTime"
             :space="space"
@@ -609,6 +608,24 @@ watchEffect(() => {
             :proposal-end="proposalEnd"
             :editable="!proposal.proposalId"
           />
+          =======
+          <div>
+            <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
+            <ProposalTimeline
+              :data="
+                isOffchainSpace
+                  ? {
+                      ...space,
+                      created: NOW,
+                      start: proposalStart,
+                      min_end: proposalMinEnd,
+                      max_end: proposalMinEnd
+                    }
+                  : space
+              "
+            />
+          </div>
+          >>>>>>> fix-allow-null-voting-period-for-offchain-spaces
         </div>
       </Affix>
     </div>
