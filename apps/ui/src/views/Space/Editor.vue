@@ -63,9 +63,12 @@ const modalOpenTerms = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
-const proposalTime = reactive<{ start: null | number; end: null | number }>({
-  start: null,
-  end: null
+const proposalTime = reactive<{
+  start: undefined | number;
+  end: undefined | number;
+}>({
+  start: undefined,
+  end: undefined
 });
 
 const draftId = computed(() => route.params.key as string);
@@ -313,6 +316,13 @@ function handleTransactionAccept() {
 function handleFetchPropositionPower() {
   fetchPropositionPower(props.space);
 }
+
+watch(proposalTime, () => {
+  if (!proposal.value) return;
+
+  proposal.value.start = proposalTime.start;
+  proposal.value.min_end = proposalTime.end;
+});
 
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
