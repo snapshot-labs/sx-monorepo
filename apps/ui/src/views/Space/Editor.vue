@@ -328,7 +328,9 @@ watch(
   async id => {
     if (id) return true;
 
-    const newId = await createDraft(spaceKey.value);
+    const newId = await createDraft(spaceKey.value, {
+      privacy: props.space.privacy === 'shutter' ? 'shutter' : ''
+    });
 
     router.replace({
       name: 'space-editor',
