@@ -185,7 +185,7 @@ export function createActions(
         type,
         discussion,
         choices,
-        privacy,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
         plugins: JSON.stringify(plugins)
       };
