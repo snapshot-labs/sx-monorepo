@@ -228,6 +228,7 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
+        currentTime,
         start,
         minEnd,
         maxEnd,
