@@ -10,14 +10,20 @@ const emit = defineEmits<{
   (e: 'pick', timestamp: number): void;
 }>();
 
-const today = dayjs(Date.now()).startOf('day');
+const timestamp = useTimestamp({ interval: 1000 });
 
-const selected = ref<dayjs.Dayjs | null>(
-  props.selected ? dayjs.unix(props.selected).startOf('day') : null
-);
+const selectedDate = props.selected
+  ? dayjs.unix(props.selected).startOf('day')
+  : null;
+const minimumDate = props.min ? dayjs.unix(props.min).startOf('day') : null;
+
 const currentView = ref<dayjs.Dayjs>(
-  dayjs.unix(props.selected || Math.floor(Date.now() / 1000)).startOf('month')
+  dayjs
+    .unix(props.selected || Math.floor(timestamp.value / 1000))
+    .startOf('month')
 );
+
+const today = computed(() => dayjs(timestamp.value).startOf('day'));
 
 const contents = computed(() => {
   const start = currentView.value.startOf('week');
@@ -36,15 +42,14 @@ const contents = computed(() => {
 function handleDateClick(date: dayjs.Dayjs) {
   if (!isSelectable(date)) return;
 
-  selected.value = date;
   emit('pick', date.unix());
 }
 
 function isSelectable(date: dayjs.Dayjs) {
   if (!date.isSame(currentView.value, 'month')) return false;
-  if (!props.min) return true;
+  if (!minimumDate) return true;
 
-  return date.valueOf() >= dayjs.unix(props.min).startOf('day').valueOf();
+  return !date.isBefore(minimumDate);
 }
 </script>
 
@@ -81,7 +86,7 @@ function isSelectable(date: dayjs.Dayjs) {
         :class="{
           '!cursor-default !bg-transparent': !date.isSame(currentView, 'month'),
           today: date.isSame(today),
-          selected: selected && selected.isSame(date),
+          selected: selectedDate && selectedDate.isSame(date),
           selectable: isSelectable(date)
         }"
         @click="handleDateClick(date)"
@@ -100,26 +105,26 @@ function isSelectable(date: dayjs.Dayjs) {
 
   .cell {
     @apply inline-block text-center size-[#{$size}] leading-[#{$size}];
-  }
 
-  .day {
-    @apply text-skin-border rounded-full cursor-default;
+    &.day {
+      @apply text-skin-border rounded-full cursor-default;
 
-    &.unselectable {
-      @apply cursor-not-allowed;
-    }
+      &.unselectable {
+        @apply cursor-not-allowed;
+      }
 
-    &.selectable {
-      @apply text-skin-link hover:bg-skin-link hover:text-skin-bg cursor-pointer;
-    }
+      &.selectable {
+        @apply text-skin-link hover:bg-skin-link hover:text-skin-bg cursor-pointer;
+      }
 
-    &.selected {
-      @apply bg-skin-link;
-      @apply text-skin-bg;
-    }
+      &.selected {
+        @apply bg-skin-link;
+        @apply text-skin-bg;
+      }
 
-    &.today {
-      @apply border border-skin-border;
+      &.today {
+        @apply border border-skin-border;
+      }
     }
   }
 }
