@@ -65,6 +65,7 @@ function updateDateWithTime() {
     .unix(date.value)
     .set('hour', +hours)
     .set('minute', +minutes)
+    .startOf('minute')
     .unix();
 }
 
