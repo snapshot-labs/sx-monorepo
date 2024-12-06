@@ -15,7 +15,6 @@ import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
-const NOW = Math.floor(Date.now() / 1000);
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -57,6 +56,7 @@ const {
 } = usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
+const timestamp = useTimestamp({ interval: 1000 });
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -176,7 +176,11 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
-const proposalStart = computed(() => NOW + props.space.voting_delay);
+const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
+
+const proposalStart = computed(
+  () => unixTimestamp.value + props.space.voting_delay
+);
 
 const proposalMinEnd = computed(
   () =>
@@ -235,7 +239,7 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
-        NOW,
+        unixTimestamp.value,
         proposalStart.value,
         proposalMinEnd.value,
         proposalMinEnd.value,
@@ -579,7 +583,7 @@ watchEffect(() => {
                 isOffchainSpace
                   ? {
                       ...space,
-                      created: NOW,
+                      created: unixTimestamp,
                       start: proposalStart,
                       min_end: proposalMinEnd,
                       max_end: proposalMinEnd
