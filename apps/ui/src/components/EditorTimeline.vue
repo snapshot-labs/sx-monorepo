@@ -130,7 +130,7 @@ function formatVotingDuration(type: string) {
     </ProposalTimeline>
     <ModalDateTime
       :min="modalCalendarMinTimestamp"
-      :timestamp="modalCalendarTimestamp"
+      :selected="modalCalendarTimestamp"
       :open="modalOpenCalendar"
       @pick="handlePropositionTimeUpdate"
       @close="modalOpenCalendar = false"
