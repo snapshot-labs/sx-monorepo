@@ -198,7 +198,7 @@ const proposalMinEnd = computed(
 );
 
 const proposalMaxEnd = computed(() => {
-  if (isOffchainSpace) return proposalMinEnd.value;
+  if (isOffchainSpace.value) return proposalMinEnd.value;
 
   return (
     proposal.value?.max_end ??
