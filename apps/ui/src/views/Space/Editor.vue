@@ -63,13 +63,10 @@ const modalOpenTerms = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
-const proposalTime = reactive<{
-  start: undefined | number;
-  end: undefined | number;
-}>({
-  start: undefined,
-  end: undefined
-});
+const customProposalTime = reactive<{
+  start?: number;
+  minEnd?: number;
+}>({});
 
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
@@ -185,14 +182,14 @@ const propositionPower = computed(() => getPropositionPower(props.space));
 
 const proposalStart = computed(
   () =>
-    proposalTime.start ??
+    customProposalTime.start ??
     proposal.value?.start ??
     NOW + props.space.voting_delay
 );
 
 const proposalMinEnd = computed(
   () =>
-    proposalTime.end ??
+    customProposalTime.minEnd ??
     proposal.value?.min_end ??
     proposalStart.value +
       (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
@@ -327,11 +324,11 @@ function handleFetchPropositionPower() {
   fetchPropositionPower(props.space);
 }
 
-watch(proposalTime, () => {
+watch(customProposalTime, () => {
   if (!proposal.value) return;
 
-  proposal.value.start = proposalTime.start;
-  proposal.value.min_end = proposalTime.end;
+  proposal.value.start = customProposalTime.start;
+  proposal.value.min_end = customProposalTime.minEnd;
 });
 
 watch(
@@ -604,12 +601,12 @@ watchEffect(() => {
             :space="space"
           />
           <EditorTimeline
-            v-model="proposalTime"
+            v-model="customProposalTime"
             :space="space"
-            :proposal-created="proposal.created || NOW"
-            :proposal-start="proposalStart"
-            :proposal-min-end="proposalMinEnd"
-            :proposal-max-end="proposalMaxEnd"
+            :created="proposal.created || NOW"
+            :start="proposalStart"
+            :min-end="proposalMinEnd"
+            :max-end="proposalMaxEnd"
             :editable="!proposal.proposalId"
           />
         </div>

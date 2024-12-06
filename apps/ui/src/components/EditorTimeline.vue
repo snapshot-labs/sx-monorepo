@@ -3,60 +3,70 @@ import { _d } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const proposalTime = defineModel<{ start?: number; end?: number }>({
+type DateTimeModalSettings = {
+  open: boolean;
+  editProperty: 'start' | 'minEnd';
+  min?: number;
+  selected: number;
+};
+
+const MIN_VOTING_PERIOD = 60;
+
+const customProposalTime = defineModel<{ start?: number; minEnd?: number }>({
   required: true
 });
 
 const props = defineProps<{
   space: Space;
   editable: boolean;
-  proposalCreated: number;
-  proposalStart: number;
-  proposalMinEnd: number;
-  proposalMaxEnd: number;
+  created: number;
+  start: number;
+  minEnd: number;
+  maxEnd: number;
 }>();
 
 const { getDurationFromCurrent } = useMetaStore();
 
-const modalOpenCalendar = ref(false);
-const modalCalendarProperty = ref('start');
-const modalCalendarTimestamp = ref(0);
-const modalCalendarMinTimestamp = ref(0);
+const dateTimeModalSettings = reactive<DateTimeModalSettings>({
+  open: false,
+  editProperty: 'start',
+  selected: 0
+});
 
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
 );
 
-function handleEditPropositionStartClick() {
-  modalCalendarTimestamp.value =
-    proposalTime.value.start ?? props.proposalStart;
-  modalCalendarMinTimestamp.value = Math.floor(Date.now() / 1000);
-  modalCalendarProperty.value = 'start';
-  modalOpenCalendar.value = true;
+const minDates = computed(() => {
+  return {
+    start: props.created,
+    minEnd: props.start + MIN_VOTING_PERIOD
+  };
+});
+
+function handleEditClick(type: 'start' | 'minEnd') {
+  dateTimeModalSettings.selected = props[type];
+  dateTimeModalSettings.min = minDates.value[type];
+  dateTimeModalSettings.editProperty = type;
+  dateTimeModalSettings.open = true;
 }
 
-function handleEditPropositionEndClick() {
-  modalCalendarTimestamp.value = proposalTime.value.end ?? props.proposalMinEnd;
-  modalCalendarMinTimestamp.value =
-    (proposalTime.value.start ?? props.proposalStart) + 60;
-  modalCalendarProperty.value = 'end';
-  modalOpenCalendar.value = true;
-}
-
-function handlePropositionTimeUpdate(timestamp: number) {
+function handleDatePick(timestamp: number) {
   if (
-    modalCalendarProperty.value === 'start' &&
-    proposalTime.value.end &&
-    timestamp >= proposalTime.value.end
+    dateTimeModalSettings.editProperty === 'start' &&
+    customProposalTime.value.minEnd &&
+    timestamp >= customProposalTime.value.minEnd
   ) {
-    proposalTime.value.end =
-      timestamp + props.proposalMinEnd - props.proposalStart;
+    const customVotingPeriod = props.minEnd - props.start;
+    customProposalTime.value.minEnd = timestamp + customVotingPeriod;
   }
 
-  proposalTime.value[modalCalendarProperty.value] = timestamp;
+  customProposalTime.value[dateTimeModalSettings.editProperty] = timestamp;
 }
 
-function formatVotingDuration(type: string) {
+function formatVotingDuration(
+  type: 'voting_delay' | 'min_voting_period' | 'max_voting_period'
+): string {
   const duration = getDurationFromCurrent(
     props.space.network,
     props.space[type]
@@ -75,43 +85,41 @@ function formatVotingDuration(type: string) {
         isOffchainSpace || !editable
           ? {
               ...space,
-              created: proposalCreated,
-              start: proposalStart,
-              min_end: proposalMinEnd,
-              max_end: proposalMaxEnd
+              created,
+              start,
+              min_end: minEnd,
+              max_end: maxEnd
             }
           : space
       "
     >
       <template v-if="editable" #start-date-suffix>
-        <button
-          v-if="!space.voting_delay && isOffchainSpace"
-          class="text-skin-link"
-          @click="handleEditPropositionStartClick"
-        >
-          Edit
-        </button>
         <UiTooltip
-          v-else-if="space.voting_delay"
+          v-if="space.voting_delay"
           :title="`This space has enforced a ${formatVotingDuration('voting_delay')} voting delay`"
         >
           <IH-exclamation-circle />
         </UiTooltip>
+        <button
+          v-else-if="isOffchainSpace"
+          class="text-skin-link"
+          @click="handleEditClick('start')"
+          v-text="'Edit'"
+        />
       </template>
       <template v-if="editable" #end-date-suffix>
-        <button
-          v-if="!space.min_voting_period && isOffchainSpace"
-          class="text-skin-link"
-          @click="handleEditPropositionEndClick"
-        >
-          Edit
-        </button>
         <UiTooltip
-          v-else-if="space.min_voting_period"
+          v-if="space.min_voting_period"
           :title="`This space has enforced a ${formatVotingDuration('min_voting_period')} voting period`"
         >
           <IH-exclamation-circle />
         </UiTooltip>
+        <button
+          v-else-if="isOffchainSpace"
+          class="text-skin-link"
+          @click="handleEditClick('minEnd')"
+          v-text="'Edit'"
+        />
       </template>
       <template v-if="editable && space.min_voting_period" #min_end-date-suffix>
         <UiTooltip
@@ -129,11 +137,11 @@ function formatVotingDuration(type: string) {
       </template>
     </ProposalTimeline>
     <ModalDateTime
-      :min="modalCalendarMinTimestamp"
-      :selected="modalCalendarTimestamp"
-      :open="modalOpenCalendar"
-      @pick="handlePropositionTimeUpdate"
-      @close="modalOpenCalendar = false"
+      :min="dateTimeModalSettings.min"
+      :selected="dateTimeModalSettings.selected"
+      :open="dateTimeModalSettings.open"
+      @pick="handleDatePick"
+      @close="dateTimeModalSettings.open = false"
     />
   </div>
 </template>
