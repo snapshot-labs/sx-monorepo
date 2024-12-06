@@ -3,7 +3,7 @@ import { _d } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-type DateTimeModalSettings = {
+type EditModalSettings = {
   open: boolean;
   editProperty: 'start' | 'minEnd';
   min?: number;
@@ -27,7 +27,7 @@ const props = defineProps<{
 
 const { getDurationFromCurrent } = useMetaStore();
 
-const dateTimeModalSettings = reactive<DateTimeModalSettings>({
+const editModalSettings = reactive<EditModalSettings>({
   open: false,
   editProperty: 'start',
   selected: 0
@@ -45,15 +45,15 @@ const minDates = computed(() => {
 });
 
 function handleEditClick(type: 'start' | 'minEnd') {
-  dateTimeModalSettings.selected = props[type];
-  dateTimeModalSettings.min = minDates.value[type];
-  dateTimeModalSettings.editProperty = type;
-  dateTimeModalSettings.open = true;
+  editModalSettings.selected = props[type];
+  editModalSettings.min = minDates.value[type];
+  editModalSettings.editProperty = type;
+  editModalSettings.open = true;
 }
 
 function handleDatePick(timestamp: number) {
   if (
-    dateTimeModalSettings.editProperty === 'start' &&
+    editModalSettings.editProperty === 'start' &&
     customProposalTime.value.minEnd &&
     timestamp >= customProposalTime.value.minEnd
   ) {
@@ -61,7 +61,7 @@ function handleDatePick(timestamp: number) {
     customProposalTime.value.minEnd = timestamp + customVotingPeriod;
   }
 
-  customProposalTime.value[dateTimeModalSettings.editProperty] = timestamp;
+  customProposalTime.value[editModalSettings.editProperty] = timestamp;
 }
 
 function formatVotingDuration(
@@ -137,11 +137,11 @@ function formatVotingDuration(
       </template>
     </ProposalTimeline>
     <ModalDateTime
-      :min="dateTimeModalSettings.min"
-      :selected="dateTimeModalSettings.selected"
-      :open="dateTimeModalSettings.open"
+      :min="editModalSettings.min"
+      :selected="editModalSettings.selected"
+      :open="editModalSettings.open"
       @pick="handleDatePick"
-      @close="dateTimeModalSettings.open = false"
+      @close="editModalSettings.open = false"
     />
   </div>
 </template>
