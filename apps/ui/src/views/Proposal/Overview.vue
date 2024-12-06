@@ -131,6 +131,7 @@ async function handleEditClick() {
     created: props.proposal.created,
     start: props.proposal.start,
     min_end: props.proposal.min_end,
+    max_end: props.proposal.max_end,
     executions
   });
 

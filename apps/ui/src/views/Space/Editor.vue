@@ -190,12 +190,19 @@ const proposalStart = computed(
     NOW + props.space.voting_delay
 );
 
-const proposalEnd = computed(
+const proposalMinEnd = computed(
   () =>
     proposalTime.end ??
     proposal.value?.min_end ??
     proposalStart.value +
       (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
+);
+
+const proposalMaxEnd = computed(
+  () =>
+    proposal.value?.max_end ??
+    proposalStart.value +
+      (props.space.max_voting_period || DEFAULT_VOTING_DELAY)
 );
 
 async function handleProposeClick() {
@@ -251,8 +258,8 @@ async function handleProposeClick() {
         appName.length <= 128 ? appName : '',
         NOW,
         proposalStart.value,
-        proposalEnd.value,
-        proposalEnd.value,
+        proposalMinEnd.value,
+        proposalMinEnd.value,
         executions
       );
     }
@@ -598,7 +605,8 @@ watchEffect(() => {
             :space="space"
             :proposal-created="proposal.created || NOW"
             :proposal-start="proposalStart"
-            :proposal-end="proposalEnd"
+            :proposal-min-end="proposalMinEnd"
+            :proposal-max-end="proposalMaxEnd"
             :editable="!proposal.proposalId"
           />
         </div>

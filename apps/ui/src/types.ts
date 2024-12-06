@@ -376,6 +376,7 @@ export type Draft = {
   created?: number;
   start?: number;
   min_end?: number;
+  max_end?: number;
 };
 
 export type Metadata = {

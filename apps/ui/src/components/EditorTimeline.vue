@@ -3,7 +3,7 @@ import { _d } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const proposalTime = defineModel<{ start: null | number; end: null | number }>({
+const proposalTime = defineModel<{ start?: number; end?: number }>({
   required: true
 });
 
@@ -12,7 +12,8 @@ const props = defineProps<{
   editable: boolean;
   proposalCreated: number;
   proposalStart: number;
-  proposalEnd: number;
+  proposalMinEnd: number;
+  proposalMaxEnd: number;
 }>();
 
 const { getDurationFromCurrent } = useMetaStore();
@@ -35,7 +36,7 @@ function handleEditPropositionStartClick() {
 }
 
 function handleEditPropositionEndClick() {
-  modalCalendarTimestamp.value = proposalTime.value.end ?? props.proposalEnd;
+  modalCalendarTimestamp.value = proposalTime.value.end ?? props.proposalMinEnd;
   modalCalendarMinTimestamp.value =
     (proposalTime.value.start ?? props.proposalStart) + 60;
   modalCalendarProperty.value = 'end';
@@ -49,7 +50,7 @@ function handlePropositionTimeUpdate(timestamp: number) {
     timestamp >= proposalTime.value.end
   ) {
     proposalTime.value.end =
-      timestamp + props.proposalEnd - props.proposalStart;
+      timestamp + props.proposalMinEnd - props.proposalStart;
   }
 
   proposalTime.value[modalCalendarProperty.value] = timestamp;
@@ -71,13 +72,13 @@ function formatVotingDuration(type: string) {
     <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
     <ProposalTimeline
       :data="
-        isOffchainSpace
+        isOffchainSpace || !editable
           ? {
               ...space,
               created: proposalCreated,
               start: proposalStart,
-              min_end: proposalEnd,
-              max_end: proposalEnd
+              min_end: proposalMinEnd,
+              max_end: proposalMaxEnd
             }
           : space
       "
