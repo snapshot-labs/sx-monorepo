@@ -182,6 +182,10 @@ const propositionPower = computed(() => getPropositionPower(props.space));
 
 const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
 
+const defaultVotingDelay = computed(() =>
+  isOffchainSpace ? DEFAULT_VOTING_DELAY : 0
+);
+
 const proposalStart = computed(
   () =>
     customProposalTime.start ??
@@ -194,7 +198,7 @@ const proposalMinEnd = computed(
     customProposalTime.minEnd ??
     proposal.value?.min_end ??
     proposalStart.value +
-      (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
+      (props.space.min_voting_period || defaultVotingDelay.value)
 );
 
 const proposalMaxEnd = computed(() => {
@@ -203,7 +207,7 @@ const proposalMaxEnd = computed(() => {
   return (
     proposal.value?.max_end ??
     proposalStart.value +
-      (props.space.max_voting_period || DEFAULT_VOTING_DELAY)
+      (props.space.max_voting_period || defaultVotingDelay.value)
   );
 });
 
