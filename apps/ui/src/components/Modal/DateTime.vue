@@ -50,7 +50,7 @@ function getBaseTime(ts: number): string {
   if (props.min) {
     const minDate = dayjs.unix(props.min);
 
-    if (selectedDate.isBefore(minDate)) {
+    if (selectedDate.isBefore(minDate, 'minute')) {
       return minDate.format(TIME_FORMAT);
     }
   }
