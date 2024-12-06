@@ -26,17 +26,9 @@ const LABELS = {
 
 const { getTsFromCurrent, getDurationFromCurrent } = useMetaStore();
 
-const now = ref(parseInt((Date.now() / 1000).toFixed()));
+const timestamp = useTimestamp({ interval: 1000, offset: 1000 });
 
-onMounted(() => {
-  const interval = setInterval(() => {
-    now.value = parseInt((Date.now() / 1000).toFixed());
-  }, 1000);
-
-  onUnmounted(() => {
-    clearInterval(interval);
-  });
-});
+const now = computed(() => Math.floor(timestamp.value / 1000));
 
 function formatTimelineValues(): ProposalTimelineValues {
   const data = props.data;
