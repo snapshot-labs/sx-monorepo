@@ -202,7 +202,7 @@ function formatSpace(
     children: space.children.map(formatRelatedSpace),
     parent: space.parent ? formatRelatedSpace(space.parent) : null,
     terms: space.terms,
-    privacy: space.voting.privacy,
+    privacy: space.voting.privacy || 'none',
     additionalRawData
   };
 }

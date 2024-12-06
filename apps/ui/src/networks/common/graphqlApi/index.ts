@@ -199,7 +199,7 @@ function formatSpace(
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     terms: '',
-    privacy: '',
+    privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
     voting_types: constants.EDITOR_VOTING_TYPES,
     treasuries: space.metadata.treasuries.map(treasury =>
@@ -296,7 +296,7 @@ function formatProposal(
       : proposal.min_end <= current,
     state: getProposalState(proposal, current),
     network: networkId,
-    privacy: '',
+    privacy: 'none',
     quorum: +proposal.quorum,
     flagged: false
   };

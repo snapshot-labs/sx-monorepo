@@ -420,7 +420,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   function getInitialVotingProperties(space: Space) {
     const validPrivacyTypes = ['shutter', 'any'];
     const spaceVoteType = space.additionalRawData?.voting.type;
-    const privacyValue = space.additionalRawData?.voting.privacy;
+    const privacyValue = space.additionalRawData?.voting.privacy || 'none';
 
     return {
       quorumType: space.additionalRawData?.voting.quorumType ?? 'default',
