@@ -198,12 +198,15 @@ const proposalMinEnd = computed(
       (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
 );
 
-const proposalMaxEnd = computed(
-  () =>
+const proposalMaxEnd = computed(() => {
+  if (isOffchainSpace) return proposalMinEnd.value;
+
+  return (
     proposal.value?.max_end ??
     proposalStart.value +
       (props.space.max_voting_period || DEFAULT_VOTING_DELAY)
-);
+  );
+});
 
 async function handleProposeClick() {
   if (!proposal.value) return;
