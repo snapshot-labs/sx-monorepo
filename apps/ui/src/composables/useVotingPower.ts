@@ -18,22 +18,28 @@ export function useVotingPower() {
     );
   }
 
-  function fetch(space: Space, proposal?: Proposal) {
+  function getSnapshot(
+    space: Space | Proposal['space'],
+    proposal?: Proposal
+  ): number | null {
+    return proposal
+      ? getProposalSnapshot(proposal)
+      : getLatestBlock((space as Space).network);
+  }
+
+  function fetch(space: Space | Proposal['space'], proposal?: Proposal) {
     if (!web3.value.account) return;
 
     votingPowersStore.fetch(
-      proposal || space,
+      proposal || (space as Space),
       web3.value.account,
-      proposal ? getProposalSnapshot(proposal) : getLatestBlock(space.network)
+      getSnapshot(space, proposal)
     );
   }
 
-  function get(space: Space, proposal?: Proposal) {
+  function get(space: Space | Proposal['space'], proposal?: Proposal) {
     return votingPowersStore.votingPowers.get(
-      getIndex(
-        proposal ? proposal.space : space,
-        proposal ? getProposalSnapshot(proposal) : getLatestBlock(space.network)
-      )
+      getIndex(proposal?.space || space, getSnapshot(space, proposal))
     );
   }
 
