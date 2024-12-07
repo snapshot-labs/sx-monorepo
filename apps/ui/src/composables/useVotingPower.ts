@@ -7,14 +7,14 @@ export function useVotingPower() {
   const { web3 } = useWeb3();
   const { getCurrent } = useMetaStore();
 
-  function latestBlock(network: NetworkID) {
+  function getLatestBlock(network: NetworkID): number | null {
     return supportsNullCurrent(network) ? null : getCurrent(network) || 0;
   }
 
-  function proposalSnapshot(proposal: Proposal) {
+  function getProposalSnapshot(proposal: Proposal): number | null {
     return (
       (proposal.state === 'pending' ? null : proposal.snapshot) ||
-      latestBlock(proposal.network)
+      getLatestBlock(proposal.network)
     );
   }
 
@@ -24,7 +24,7 @@ export function useVotingPower() {
     votingPowersStore.fetch(
       proposal || space,
       web3.value.account,
-      proposal ? proposalSnapshot(proposal) : latestBlock(space.network)
+      proposal ? getProposalSnapshot(proposal) : getLatestBlock(space.network)
     );
   }
 
@@ -32,7 +32,7 @@ export function useVotingPower() {
     return votingPowersStore.votingPowers.get(
       getIndex(
         proposal ? proposal.space : space,
-        proposal ? proposalSnapshot(proposal) : latestBlock(space.network)
+        proposal ? getProposalSnapshot(proposal) : getLatestBlock(space.network)
       )
     );
   }
