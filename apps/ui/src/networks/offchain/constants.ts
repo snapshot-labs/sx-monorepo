@@ -27,5 +27,3 @@ export const EDITOR_VOTING_TYPES: VoteType[] = [
   'weighted',
   'quadratic'
 ];
-
-export const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 7;
