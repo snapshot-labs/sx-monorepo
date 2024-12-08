@@ -1,5 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import { Privacy } from '@snapshot-labs/sx';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
@@ -140,6 +141,7 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     app: string,
     created: number,
@@ -159,6 +161,7 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed, ref, watchEffect } from 'vue';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
@@ -61,6 +62,16 @@ const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
+const privacy = computed({
+  get() {
+    return proposal.value?.privacy === 'shutter';
+  },
+  set(value) {
+    if (proposal.value) {
+      proposal.value.privacy = value ? 'shutter' : 'none';
+    }
+  }
+});
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -209,6 +220,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         executions
       );
@@ -226,6 +238,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
         currentTime,
@@ -315,7 +328,9 @@ watch(
   async id => {
     if (id) return true;
 
-    const newId = await createDraft(spaceKey.value);
+    const newId = await createDraft(spaceKey.value, {
+      privacy: props.space.privacy === 'shutter' ? 'shutter' : 'none'
+    });
 
     router.replace({
       name: 'space-editor',
@@ -560,6 +575,12 @@ watchEffect(() => {
               >.
             </template>
           </EditorChoices>
+          <UiSwitch
+            v-if="isOffchainSpace && space.privacy === 'any'"
+            v-model="privacy"
+            title="Shielded voting"
+            tooltip="Choices will be encrypted and only visible once the voting period is over."
+          />
           <EditorLabels
             v-if="space.labels?.length"
             v-model="proposal.labels"

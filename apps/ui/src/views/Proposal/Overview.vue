@@ -128,6 +128,7 @@ async function handleEditClick() {
     type: props.proposal.type,
     choices: props.proposal.choices,
     labels: props.proposal.labels,
+    privacy: props.proposal.privacy,
     executions
   });
 
