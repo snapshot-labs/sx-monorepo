@@ -180,7 +180,9 @@ onMounted(() => {
       <UiTooltip title="Create new space">
         <UiButton
           :to="
-            protocol === 'snapshot' ? 'https://snapshot.org/#/setup' : 'create'
+            protocol === 'snapshot'
+              ? 'https://v1.snapshot.box/#/setup'
+              : 'create'
           "
           class="!px-0 w-[46px]"
         >

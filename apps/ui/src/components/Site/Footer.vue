@@ -34,7 +34,7 @@ const SOCIALS = [
               <AppLink :to="{ name: 'my-explore' }"> Explore spaces </AppLink>
             </div>
             <div>
-              <a href="https://snapshot.org/#/setup?step=0" target="_blank">
+              <a href="https://v1.snapshot.box/#/setup" target="_blank">
                 Create a space
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>

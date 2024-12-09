@@ -13,8 +13,8 @@ const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
 const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
-  s: 'https://snapshot.org',
-  's-tn': 'https://testnet.snapshot.org'
+  s: 'https://v1.snapshot.box',
+  's-tn': 'https://testnet.v1.snapshot.box'
 };
 const CHAIN_IDS: Partial<Record<NetworkID, 1 | 11155111>> = {
   s: 1,
