@@ -136,12 +136,14 @@ function formatVotingDuration(
         </UiTooltip>
       </template>
     </ProposalTimeline>
-    <ModalDateTime
-      :min="editModalSettings.min"
-      :selected="editModalSettings.selected"
-      :open="editModalSettings.open"
-      @pick="handleDatePick"
-      @close="editModalSettings.open = false"
-    />
+    <teleport to="#modal">
+      <ModalDateTime
+        :min="editModalSettings.min"
+        :selected="editModalSettings.selected"
+        :open="editModalSettings.open"
+        @pick="handleDatePick"
+        @close="editModalSettings.open = false"
+      />
+    </teleport>
   </div>
 </template>
