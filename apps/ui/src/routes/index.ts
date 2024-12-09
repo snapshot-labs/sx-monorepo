@@ -55,6 +55,13 @@ router.beforeEach((to, _from, next) => {
     redirectPath = `/${metadataNetwork}:${domain}/delegates`;
   }
 
+  // Match and redirect "/strategy/*" or "/playground/*" to v1.snapshot.box
+  if (to.path.startsWith('/strategy/') || to.path.startsWith('/playground/')) {
+    const newPath = to.path.replace(/^\/(strategy|playground)/, '/#$1');
+    window.location.href = `https://v1.snapshot.box${newPath}`;
+    return;
+  }
+
   // Perform the redirection if a match is found
   if (redirectPath) {
     next({ path: redirectPath, replace: true });
