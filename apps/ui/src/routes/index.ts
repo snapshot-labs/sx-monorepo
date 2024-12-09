@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import SplashScreen from '@/components/Layout/SplashScreen.vue';
-import defaultRoutes from './default';
+import { metadataNetwork } from '@/networks';
+import defaultRoutes from '@/routes/default';
 
 const { resolved } = useWhiteLabel();
 
@@ -29,6 +30,36 @@ const router = createRouter({
       return { el: to.hash, behavior: 'smooth' };
     }
     return { top: 0 };
+  }
+});
+
+// Add a global navigation guard for URL redirection
+router.beforeEach((to, _from, next) => {
+  let redirectPath: string | null = null;
+
+  // Match and redirect paths like "/safe.eth/settings" to "/s:safe.eth/settings"
+  const domainMatch = to.path.match(/^\/([^:\/]+?\.[^:\/]+)(\/.*)?$/);
+  if (domainMatch) {
+    const domain = domainMatch[1];
+    const rest = domainMatch[2] || '';
+    redirectPath = `/${metadataNetwork}:${domain}`;
+    if (rest && !/^\/about$/.test(rest)) {
+      redirectPath += rest;
+    }
+  }
+
+  // Match and redirect paths like "/delegate/safe.eth" to "/s:safe.eth/delegates"
+  const delegateMatch = to.path.match(/^\/delegate\/([^:\/]+?\.[^:\/]+)$/);
+  if (delegateMatch) {
+    const domain = delegateMatch[1];
+    redirectPath = `/${metadataNetwork}:${domain}/delegates`;
+  }
+
+  // Perform the redirection if a match is found
+  if (redirectPath) {
+    next({ path: redirectPath, replace: true });
+  } else {
+    next();
   }
 });
 
