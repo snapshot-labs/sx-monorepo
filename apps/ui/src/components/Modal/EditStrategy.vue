@@ -166,7 +166,8 @@ watchEffect(() => {
           type: ['string', 'number'],
           title: 'Network',
           examples: ['Select network'],
-          networkId
+          networkId,
+          networksListKind: 'offchain'
         }"
       />
       <UiForm
