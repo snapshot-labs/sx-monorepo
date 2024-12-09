@@ -188,6 +188,12 @@ const proposalMinEnd = computed(
     (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
 );
 
+const proposalMaxEnd = computed(
+  () =>
+    proposalStart.value +
+    (props.space.max_voting_period || DEFAULT_VOTING_DELAY)
+);
+
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -242,7 +248,7 @@ async function handleProposeClick() {
         unixTimestamp.value,
         proposalStart.value,
         proposalMinEnd.value,
-        proposalMinEnd.value,
+        proposalMaxEnd.value,
         executions
       );
     }
@@ -586,7 +592,7 @@ watchEffect(() => {
                       created: unixTimestamp,
                       start: proposalStart,
                       min_end: proposalMinEnd,
-                      max_end: proposalMinEnd
+                      max_end: proposalMaxEnd
                     }
                   : space
               "
