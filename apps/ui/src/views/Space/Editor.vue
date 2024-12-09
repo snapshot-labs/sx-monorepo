@@ -14,6 +14,8 @@ import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
+const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
+
 const TITLE_DEFINITION = {
   type: 'string',
   title: 'Title',
@@ -54,6 +56,7 @@ const {
 } = usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
+const timestamp = useTimestamp({ interval: 1000 });
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -173,6 +176,24 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
+const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
+
+const proposalStart = computed(
+  () => unixTimestamp.value + props.space.voting_delay
+);
+
+const proposalMinEnd = computed(
+  () =>
+    proposalStart.value +
+    (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
+);
+
+const proposalMaxEnd = computed(
+  () =>
+    proposalStart.value +
+    (props.space.max_voting_period || DEFAULT_VOTING_DELAY)
+);
+
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -214,11 +235,10 @@ async function handleProposeClick() {
       );
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
-      const currentTime = Math.floor(Date.now() / 1000);
-      const start = currentTime + props.space.voting_delay;
-      const minEnd = start + props.space.min_voting_period;
-      const maxEnd = start + props.space.max_voting_period;
 
+      // Proposal start, min and end time are unix timestamp,
+      // and are not compatible with onchain EMV spaces (those use blocks instead of timestamps)
+      // (these args are ignored by onchain networks)
       result = await propose(
         props.space,
         proposal.value.title,
@@ -228,10 +248,10 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
-        currentTime,
-        start,
-        minEnd,
-        maxEnd,
+        unixTimestamp.value,
+        proposalStart.value,
+        proposalMinEnd.value,
+        proposalMaxEnd.value,
         executions
       );
     }
@@ -567,7 +587,19 @@ watchEffect(() => {
           />
           <div>
             <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-            <ProposalTimeline :data="space" />
+            <ProposalTimeline
+              :data="
+                isOffchainSpace
+                  ? {
+                      ...space,
+                      created: unixTimestamp,
+                      start: proposalStart,
+                      min_end: proposalMinEnd,
+                      max_end: proposalMaxEnd
+                    }
+                  : space
+              "
+            />
           </div>
         </div>
       </Affix>
