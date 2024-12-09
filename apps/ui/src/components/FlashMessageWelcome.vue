@@ -41,11 +41,18 @@ onMounted(async () => {
         support for onchain voting, proposal executions, and many more
         governance enhancements.
       </div>
-      <UiButton
-        class="w-full"
-        to="https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo"
-        >Learn more</UiButton
-      >
+      <div class="space-y-2">
+        <UiButton
+          class="w-full"
+          to="https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo"
+          >Learn more</UiButton
+        >
+        <UiButton
+          to="https://v1.snapshot.box"
+          class="!bg-transparent !border-skin-border w-full !text-skin-border"
+          >Go back to the old interface</UiButton
+        >
+      </div>
     </div>
   </div>
 </template>
