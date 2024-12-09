@@ -237,8 +237,8 @@ async function handleProposeClick() {
       const appName = (route.query.app as LocationQueryValue) || '';
 
       // Proposal start, min and end time are unix timestamp,
-      // are are not compatible with offchain spaces
-      // (these args are ignored by evm networks)
+      // and are not compatible with onchain EMV spaces (those use blocks instead of timestamps)
+      // (these args are ignored by onchain networks)
       result = await propose(
         props.space,
         proposal.value.title,
