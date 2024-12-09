@@ -38,6 +38,7 @@ import {
   Choice,
   DelegationType,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   SpaceMetadata,
@@ -208,6 +209,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       app: string,
       created: number,
@@ -315,6 +317,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       executions: ExecutionInfo[] | null
     ) {
