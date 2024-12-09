@@ -35,7 +35,7 @@ const STEPS = [
 <template>
   <div>
     <UiContainer class="!max-w-screen-lg">
-      <h1 class="font-display max-w-[680px] py-9 !text-[44px]">
+      <h1 class="font-display max-w-[680px] py-9 text-[36px] xs:text-[44px]">
         A fully integrated suite to manage DAO governance.
       </h1>
     </UiContainer>
