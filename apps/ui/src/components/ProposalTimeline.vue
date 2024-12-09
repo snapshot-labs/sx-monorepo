@@ -90,7 +90,7 @@ const states: ComputedRef<State[]> = computed(() => {
 // Use an offset to compare timestamps to avoid issues when comparing
 // timestamps that are not refreshed synchronously
 function isInThePast(timestamp: number): boolean {
-  return timestamp <= now.value + 100;
+  return timestamp <= now.value + 1;
 }
 </script>
 
