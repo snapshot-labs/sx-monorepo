@@ -12,7 +12,7 @@ import {
 } from '@/helpers/turbo';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -667,6 +667,7 @@ watchEffect(() => {
       />
       <ModalConfirmOnSafe
         :open="modalValidateOnSafeOpen"
+        :show-verifier-link="starknetNetworks.includes(props.space.network)"
         :messages="{
           title: 'Confirm proposal in Safe app',
           subtitle: 'Go back to Safe app to confirm your proposal'
