@@ -128,6 +128,10 @@ async function handleEditClick() {
     type: props.proposal.type,
     choices: props.proposal.choices,
     labels: props.proposal.labels,
+    created: props.proposal.created,
+    start: props.proposal.start,
+    min_end: props.proposal.min_end,
+    max_end: props.proposal.max_end,
     executions
   });
 
