@@ -11,7 +11,7 @@ const network = defineModel<string | number | null>({
 const props = defineProps<{
   definition: BaseDefinition<string | number | null> & {
     networkId: NetworkID;
-    networksListKind?: 'full' | 'builtin';
+    networksListKind?: 'full' | 'builtin' | 'offchain';
   };
 }>();
 
@@ -20,7 +20,8 @@ const { networks, getUsage } = useOffchainNetworksList(
 );
 
 const options = computed(() => {
-  if (props.definition.networksListKind === 'full') {
+  const networksListKind = props.definition.networksListKind;
+  if (networksListKind === 'full' || networksListKind === 'offchain') {
     const baseNetworks = networks.value
       .filter(network => {
         if (
@@ -42,6 +43,7 @@ const options = computed(() => {
           class: 'rounded-full'
         })
       }));
+    if (networksListKind === 'offchain') return baseNetworks;
 
     return [
       ...baseNetworks,
