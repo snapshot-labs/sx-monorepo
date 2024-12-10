@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getBoostsCount } from '@/helpers/boost';
 import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
@@ -26,6 +27,7 @@ const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
+const boostCount = ref(0);
 
 const id = computed(() => route.params.proposal as string);
 const proposal = computed(() => {
@@ -62,6 +64,10 @@ const currentVote = computed(
   () =>
     proposal.value &&
     votes.value[`${proposal.value.network}:${proposal.value.id}`]
+);
+
+const withoutBottomPadding = computed(
+  () => 'space-proposal-votes' === String(route.name)
 );
 
 async function handleVoteClick(choice: Choice) {
@@ -118,7 +124,18 @@ watch(
     await proposalsStore.fetchProposal(props.space.id, id, props.space.network);
 
     if (discussion.value) {
-      discourseTopic.value = await loadSingleTopic(discussion.value);
+      loadSingleTopic(discussion.value).then(result => {
+        discourseTopic.value = result;
+      });
+    }
+
+    if (props.space.additionalRawData?.boost?.enabled) {
+      const bribeEnabled =
+        props.space.additionalRawData.boost.bribeEnabled || false;
+      const proposalEnd = proposal.value?.max_end || 0;
+      getBoostsCount(id, bribeEnabled, proposalEnd).then(result => {
+        boostCount.value = result;
+      });
     }
   },
   { immediate: true }
@@ -132,7 +149,12 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
+  <div
+    :class="[
+      'flex items-stretch md:flex-row flex-col w-full md:h-full',
+      { '!pb-0': withoutBottomPadding }
+    ]"
+  >
     <UiLoading v-if="!proposal" class="ml-4 mt-3" />
     <template v-else>
       <div class="flex-1 grow min-w-0">
@@ -202,6 +224,15 @@ watchEffect(() => {
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
               </a>
             </template>
+            <template v-if="boostCount > 0">
+              <a
+                :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
+                class="flex items-center"
+                target="_blank"
+              >
+                <UiLink :count="boostCount" text="Boost" class="inline-block" />
+              </a>
+            </template>
           </div>
         </UiScrollerHorizontal>
         <router-view :proposal="proposal" />
@@ -209,7 +240,10 @@ watchEffect(() => {
       <Affix
         :class="[
           'shrink-0 md:w-[340px] border-l-0 md:border-l',
-          { 'hidden md:block': route.name === 'space-proposal-votes' }
+          {
+            'hidden md:block': route.name === 'space-proposal-votes',
+            '-mb-6': !withoutBottomPadding
+          }
         ]"
         :top="72"
         :bottom="64"

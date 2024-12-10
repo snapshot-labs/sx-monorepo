@@ -10,7 +10,7 @@
     >
       <div class="max-w-[560px]">
         <div class="eyebrow mb-3">Turn chaos to consensus</div>
-        <h1 class="mb-5 font-display !text-[56px]">
+        <h1 class="mb-5 font-display text-[40px] xs:text-[56px]">
           The governance stack for your organization
         </h1>
         <UiButton :to="{ name: 'my-home' }" class="primary">

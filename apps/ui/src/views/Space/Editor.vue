@@ -14,6 +14,8 @@ import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
+const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
+
 const TITLE_DEFINITION = {
   type: 'string',
   title: 'Title',
@@ -47,10 +49,14 @@ const {
   reset
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
-const { get: getPropositionPower, fetch: fetchPropositionPower } =
-  usePropositionPower();
+const {
+  get: getPropositionPower,
+  fetch: fetchPropositionPower,
+  reset: resetPropositionPower
+} = usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
+const timestamp = useTimestamp({ interval: 1000 });
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -170,6 +176,33 @@ const proposalLimitReached = computed(
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
+const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
+
+const defaultVotingDelay = computed(() =>
+  isOffchainSpace ? DEFAULT_VOTING_DELAY : 0
+);
+
+const proposalStart = computed(
+  () => proposal.value?.start ?? unixTimestamp.value + props.space.voting_delay
+);
+
+const proposalMinEnd = computed(
+  () =>
+    proposal.value?.min_end ??
+    proposalStart.value +
+      (props.space.min_voting_period || defaultVotingDelay.value)
+);
+
+const proposalMaxEnd = computed(() => {
+  if (isOffchainSpace.value) return proposalMinEnd.value;
+
+  return (
+    proposal.value?.max_end ??
+    proposalStart.value +
+      (props.space.max_voting_period || defaultVotingDelay.value)
+  );
+});
+
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -212,6 +245,9 @@ async function handleProposeClick() {
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
 
+      // Proposal start, min and end time are unix timestamp,
+      // and are not compatible with onchain EMV spaces (those use blocks instead of timestamps)
+      // (these args are ignored by onchain networks)
       result = await propose(
         props.space,
         proposal.value.title,
@@ -221,6 +257,10 @@ async function handleProposeClick() {
         choices,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
+        unixTimestamp.value,
+        proposalStart.value,
+        proposalMinEnd.value,
+        proposalMaxEnd.value,
         executions
       );
     }
@@ -286,9 +326,13 @@ function handleFetchPropositionPower() {
 }
 
 watch(
-  () => web3.value.account,
-  toAccount => {
-    if (!toAccount) return;
+  [() => web3.value.account, () => web3.value.authLoading],
+  ([toAccount, toAuthLoading], [fromAccount]) => {
+    if (fromAccount && toAccount && fromAccount !== toAccount) {
+      resetPropositionPower();
+    }
+
+    if (toAuthLoading || !toAccount) return;
 
     handleFetchPropositionPower();
   },
@@ -550,10 +594,15 @@ watchEffect(() => {
             v-model="proposal.labels"
             :space="space"
           />
-          <div>
-            <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-            <ProposalTimeline :data="space" />
-          </div>
+          <EditorTimeline
+            v-model="proposal"
+            :space="space"
+            :created="proposal.created || unixTimestamp"
+            :start="proposalStart"
+            :min_end="proposalMinEnd"
+            :max_end="proposalMaxEnd"
+            :editable="!proposal.proposalId"
+          />
         </div>
       </Affix>
     </div>

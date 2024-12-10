@@ -36,5 +36,5 @@ export function usePropositionPower() {
     }
   );
 
-  return { fetch, get };
+  return { fetch, get, reset };
 }

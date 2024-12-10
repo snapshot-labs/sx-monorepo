@@ -373,6 +373,10 @@ export type Draft = {
   labels: string[];
   executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
+  created?: number;
+  start?: number;
+  min_end?: number;
+  max_end?: number;
 };
 
 export type Metadata = {
