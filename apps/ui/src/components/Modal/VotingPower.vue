@@ -58,14 +58,10 @@ const loading = computed(
           />
           <div class="text-skin-link shrink-0">
             {{
-              _n(
-                Number(strategy.value) / 10 ** votingPower.decimals,
-                'compact',
-                {
-                  maximumFractionDigits: 2,
-                  formatDust: true
-                }
-              )
+              _n(Number(strategy.value) / 10 ** strategy.decimals, 'compact', {
+                maximumFractionDigits: 2,
+                formatDust: true
+              })
             }}
             {{ votingPower.symbol }}
           </div>

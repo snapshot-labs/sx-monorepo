@@ -38,19 +38,18 @@ const socials = computed(() => getSocialNetworksLink(user.value));
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const formattedVotingPower = computed(() => {
-  const votingPower = votingPowers.value.reduce((acc, b) => acc + b.value, 0n);
-  const decimals = Math.max(
-    ...votingPowers.value.map(votingPower => votingPower.decimals),
-    0
+  const votingPower = _vp(
+    votingPowers.value.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.decimals,
+      0
+    )
   );
 
-  const value = _vp(Number(votingPower) / 10 ** decimals);
-
   if (props.space.voting_power_symbol) {
-    return `${value} ${props.space.voting_power_symbol}`;
+    return `${votingPower} ${props.space.voting_power_symbol}`;
   }
 
-  return value;
+  return votingPower;
 });
 
 const navigation = computed(() => [
