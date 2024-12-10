@@ -85,7 +85,6 @@ const boostQuery = gql(`query Boosts($proposalIds: [String!]) {
 
 async function getBoosts(proposalIds: string[]) {
   async function query(chainId: string) {
-    console.log('querying chain', chainId);
     const client = new ApolloClient({
       uri: SUBGRAPH_URLS[chainId],
       cache: new InMemoryCache()
