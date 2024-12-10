@@ -4,6 +4,7 @@ import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
   evmArbitrum,
+  evmBase,
   evmMainnet,
   EvmNetworkConfig,
   evmOptimism,
@@ -49,6 +50,7 @@ import { EDITOR_APP_NAME } from '../common/constants';
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
   137: evmPolygon,
+  8453: evmBase,
   42161: evmArbitrum,
   1: evmMainnet,
   11155111: evmSepolia

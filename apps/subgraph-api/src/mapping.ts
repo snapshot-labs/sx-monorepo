@@ -65,6 +65,7 @@ CHAIN_IDS.set('mainnet', 1)
 CHAIN_IDS.set('sepolia', 11155111)
 CHAIN_IDS.set('optimism', 10)
 CHAIN_IDS.set('matic', 137)
+CHAIN_IDS.set('base', 8453)
 CHAIN_IDS.set('arbitrum-one', 42161)
 
 export function handleProxyDeployed(event: ProxyDeployed): void {

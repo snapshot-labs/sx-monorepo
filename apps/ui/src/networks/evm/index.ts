@@ -50,6 +50,14 @@ export const METADATA: Record<string, Metadata> = {
     avatar: 'ipfs://QmfF4kwhGL8QosUXvgq2KWCmavhKBvwD6kbhs7L4p5ZAWb',
     blockTime: 2
   },
+  base: {
+    name: 'Base',
+    chainId: 8453,
+    apiUrl:
+      'https://api.studio.thegraph.com/query/41343/sekhmet-sx-base/version/latest',
+    avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
+    blockTime: 2
+  },
   eth: {
     name: 'Ethereum',
     chainId: 1,
@@ -121,9 +129,14 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     chainId,
     baseChainId: chainId,
     currentChainId: currentChainId ?? chainId,
-    supportsSimulation: ['eth', 'sep', 'oeth', 'matic', 'arb1'].includes(
-      networkId
-    ),
+    supportsSimulation: [
+      'eth',
+      'sep',
+      'oeth',
+      'matic',
+      'base',
+      'arb1'
+    ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),
     api,
