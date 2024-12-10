@@ -21,7 +21,9 @@ const props = defineProps<{
   editable: boolean;
   created: number;
   start: number;
+  // eslint-disable-next-line vue/prop-name-casing
   min_end: number;
+  // eslint-disable-next-line vue/prop-name-casing
   max_end: number;
 }>();
 
