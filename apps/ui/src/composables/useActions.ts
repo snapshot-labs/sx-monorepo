@@ -258,7 +258,7 @@ export function useActions() {
       )
     );
 
-    addPendingVote(proposal.id);
+    if (txHash) addPendingVote(proposal.id);
 
     return txHash;
   }
