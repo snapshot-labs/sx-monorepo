@@ -149,10 +149,74 @@ onUnmounted(() => {
         </template>
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
-        <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
-        <IH-moon v-else class="inline-block" />
-      </UiButton>
+      <UiDropdown :z-index="999">
+        <template #button>
+          <slot name="button">
+            <UiButton class="!px-0 w-[46px]" v-bind="$attrs">
+              <IH-cog-6-tooth class="inline-block" />
+            </UiButton>
+          </slot>
+        </template>
+        <template #items>
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              href="https://snapshot.box"
+            >
+              <IH-bolt :width="16" />
+              Mainnet
+            </a>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              href="https://testnet.snapshot.box"
+            >
+              <IH-beaker :width="16" />
+              Testnet
+            </a>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              href="https://v1.snapshot.box"
+            >
+              <IH-bolt-slash :width="16" />
+              Old interface
+            </a>
+          </UiDropdownItem>
+          <hr class="h-[2px] bg-skin-text/20 mx-3" />
+          <UiDropdownItem v-slot="{ active }">
+            <button
+              type="button"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+              @click="toggleSkin"
+            >
+              <IH-light-bulb
+                v-if="currentMode === 'dark'"
+                class="inline-block"
+                :width="16"
+              />
+              <IH-moon v-else class="inline-block" :width="16" />
+              <span>
+                Switch to
+                {{ currentMode === 'dark' ? 'light' : 'dark' }} theme
+              </span>
+            </button>
+          </UiDropdownItem>
+          <hr class="h-[2px] bg-skin-text/20 mx-3" />
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              href="https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo"
+            >
+              <IH-sparkles :width="16" />
+              Discover our new interface
+            </a>
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
     </div>
   </UiTopnav>
   <teleport to="#modal">
