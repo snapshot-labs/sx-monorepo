@@ -254,8 +254,12 @@ watchEffect(async () => {
       }"
       @close="modalShareOpen = false"
     />
-    <ModalVoteConfirmOnSafe
+    <ModalConfirmOnSafe
       :open="modalValidateOnSafeOpen"
+      :messages="{
+        title: 'Confirm vote in Safe app',
+        subtitle: 'Go back to Safe app to confirm your vote'
+      }"
       @close="modalValidateOnSafeOpen = false"
     />
   </teleport>
