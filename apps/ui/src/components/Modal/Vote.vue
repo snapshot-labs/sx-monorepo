@@ -37,6 +37,7 @@ const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
 const modalTransactionOpen = ref(false);
 const modalShareOpen = ref(false);
+const modalValidateOnSafeOpen = ref(false);
 const txId = ref<string | null>(null);
 const selectedChoice = ref<Choice | null>(null);
 
@@ -103,9 +104,14 @@ async function voteFn() {
 }
 
 async function handleConfirmed(tx?: string | null) {
-  if (tx) txId.value = tx;
   modalTransactionOpen.value = false;
-  modalShareOpen.value = true;
+
+  if (tx) {
+    txId.value = tx;
+    modalShareOpen.value = true;
+  } else {
+    modalValidateOnSafeOpen.value = true;
+  }
 
   emit('voted');
   emit('close');
@@ -247,6 +253,10 @@ watchEffect(async () => {
         title: 'Vote success!'
       }"
       @close="modalShareOpen = false"
+    />
+    <ModalVoteConfirmOnSafe
+      :open="modalValidateOnSafeOpen"
+      @close="modalValidateOnSafeOpen = false"
     />
   </teleport>
 </template>
