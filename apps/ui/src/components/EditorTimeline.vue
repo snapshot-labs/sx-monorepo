@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { _d } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
-import { Space } from '@/types';
+import { Draft, Space } from '@/types';
 
 type EditModalSettings = {
   open: boolean;
-  editProperty: 'start' | 'minEnd';
+  editProperty: 'start' | 'min_end';
   min?: number;
   selected: number;
 };
 
 const MIN_VOTING_PERIOD = 60;
 
-const customProposalTime = defineModel<{ start?: number; minEnd?: number }>({
+const proposal = defineModel<Draft>({
   required: true
 });
 
@@ -21,8 +21,8 @@ const props = defineProps<{
   editable: boolean;
   created: number;
   start: number;
-  minEnd: number;
-  maxEnd: number;
+  min_end: number;
+  max_end: number;
 }>();
 
 const { getDurationFromCurrent } = useMetaStore();
@@ -40,11 +40,11 @@ const isOffchainSpace = computed(() =>
 const minDates = computed(() => {
   return {
     start: props.created,
-    minEnd: props.start + MIN_VOTING_PERIOD
+    min_end: props.start + MIN_VOTING_PERIOD
   };
 });
 
-function handleEditClick(type: 'start' | 'minEnd') {
+function handleEditClick(type: 'start' | 'min_end') {
   editModalSettings.selected = props[type];
   editModalSettings.min = minDates.value[type];
   editModalSettings.editProperty = type;
@@ -54,14 +54,14 @@ function handleEditClick(type: 'start' | 'minEnd') {
 function handleDatePick(timestamp: number) {
   if (
     editModalSettings.editProperty === 'start' &&
-    customProposalTime.value.minEnd &&
-    timestamp >= customProposalTime.value.minEnd
+    proposal.value.min_end &&
+    timestamp >= proposal.value.min_end
   ) {
-    const customVotingPeriod = props.minEnd - props.start;
-    customProposalTime.value.minEnd = timestamp + customVotingPeriod;
+    const customVotingPeriod = props.min_end - props.start;
+    proposal.value.min_end = timestamp + customVotingPeriod;
   }
 
-  customProposalTime.value[editModalSettings.editProperty] = timestamp;
+  proposal.value[editModalSettings.editProperty] = timestamp;
 }
 
 function formatVotingDuration(
@@ -87,8 +87,8 @@ function formatVotingDuration(
               ...space,
               created,
               start,
-              min_end: minEnd,
-              max_end: maxEnd
+              min_end,
+              max_end
             }
           : space
       "
@@ -117,7 +117,7 @@ function formatVotingDuration(
         <button
           v-else-if="isOffchainSpace"
           class="text-skin-link"
-          @click="handleEditClick('minEnd')"
+          @click="handleEditClick('min_end')"
           v-text="'Edit'"
         />
       </template>
