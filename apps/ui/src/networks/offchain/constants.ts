@@ -12,7 +12,12 @@ export const PROPOSAL_VALIDATIONS = {
 };
 export const STRATEGIES = {};
 export const EXECUTORS = {};
-export const CONNECTORS: Connector[] = ['injected', 'walletconnect'];
+export const CONNECTORS: Connector[] = [
+  'injected',
+  'walletconnect',
+  'walletlink',
+  'gnosis'
+];
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];
 export const EDITOR_VOTING_STRATEGIES = [];
