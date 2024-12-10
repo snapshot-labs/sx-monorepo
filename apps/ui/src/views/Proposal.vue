@@ -2,7 +2,7 @@
 import { getBoostsCount } from '@/helpers/boost';
 import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
-import { _n, getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
+import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { Choice, Space } from '@/types';
 
 const props = defineProps<{
