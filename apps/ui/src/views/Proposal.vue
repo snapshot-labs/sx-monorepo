@@ -221,6 +221,7 @@ watchEffect(() => {
               <a
                 :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
                 class="flex items-center"
+                target="_blank"
               >
                 <UiLink :count="boostCount" text="Boost" class="inline-block" />
               </a>
