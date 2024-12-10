@@ -30,6 +30,7 @@ import {
 } from '@/types';
 import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
+import { Privacy } from '../../types';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
   Connector,
@@ -129,6 +130,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       app: string,
       created: number,
@@ -139,7 +141,6 @@ export function createActions(
     ) {
       const provider = getProvider(space.snapshot_chain_id as number);
       const plugins = await getPlugins(executions);
-
       const data = {
         space: space.id,
         title,
@@ -147,6 +148,7 @@ export function createActions(
         type,
         discussion,
         choices,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
         start,
         end: min_end,
@@ -169,6 +171,7 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       executions: ExecutionInfo[]
     ) {
@@ -182,6 +185,7 @@ export function createActions(
         type,
         discussion,
         choices,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
         plugins: JSON.stringify(plugins)
       };

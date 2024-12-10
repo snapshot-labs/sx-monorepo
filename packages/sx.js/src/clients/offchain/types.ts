@@ -172,6 +172,7 @@ export type Propose = {
   body: string;
   discussion: string;
   choices: string[];
+  privacy: string;
   labels: string[];
   start: number;
   end: number;

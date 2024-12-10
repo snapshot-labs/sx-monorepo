@@ -96,7 +96,7 @@ export const VOTING_TYPES_INFO: Record<
 };
 
 export const PRIVACY_TYPES_INFO: Record<
-  'none' | 'shutter',
+  'none' | 'shutter' | 'any',
   { label: string; description?: string }
 > = {
   none: {
@@ -106,6 +106,10 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'Shielded voting',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
+  },
+  any: {
+    label: 'Any',
+    description: 'Author can choose between no privacy or shielded voting.'
   }
 };
 
