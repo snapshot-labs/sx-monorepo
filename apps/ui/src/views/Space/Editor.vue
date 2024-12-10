@@ -60,6 +60,7 @@ const timestamp = useTimestamp({ interval: 1000 });
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
+const modalValidateOnSafeOpen = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -203,6 +204,24 @@ const proposalMaxEnd = computed(() => {
   );
 });
 
+function navigateToProposal() {
+  if (!proposal.value) return;
+
+  if (
+    proposal.value.proposalId &&
+    offchainNetworks.includes(props.space.network)
+  ) {
+    router.push({
+      name: 'space-proposal-overview',
+      params: {
+        proposal: proposal.value.proposalId
+      }
+    });
+  } else {
+    router.push({ name: 'space-proposals' });
+  }
+}
+
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -267,19 +286,9 @@ async function handleProposeClick() {
     if (result) {
       proposalsStore.reset(props.space.id, props.space.network);
 
-      if (
-        proposal.value.proposalId &&
-        offchainNetworks.includes(props.space.network)
-      ) {
-        router.push({
-          name: 'space-proposal-overview',
-          params: {
-            proposal: proposal.value.proposalId
-          }
-        });
-      } else {
-        router.push({ name: 'space-proposals' });
-      }
+      navigateToProposal();
+    } else {
+      modalValidateOnSafeOpen.value = true;
     }
   } finally {
     sending.value = false;
@@ -289,6 +298,11 @@ async function handleProposeClick() {
 function handleAcceptTerms() {
   termsStore.accept(props.space);
   handleProposeClick();
+}
+
+function handleConfirmOnSafeClosed() {
+  modalValidateOnSafeOpen.value = false;
+  navigateToProposal();
 }
 
 function handleExecutionUpdated(
@@ -627,6 +641,14 @@ watchEffect(() => {
         :initial-state="transaction._form"
         @add="handleTransactionAccept"
         @close="reset"
+      />
+      <ModalConfirmOnSafe
+        :open="modalValidateOnSafeOpen"
+        :messages="{
+          title: 'Confirm proposal in Safe app',
+          subtitle: 'Go back to Safe app to confirm your proposal'
+        }"
+        @close="handleConfirmOnSafeClosed"
       />
     </teleport>
   </div>

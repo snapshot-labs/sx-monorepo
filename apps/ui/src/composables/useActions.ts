@@ -285,7 +285,7 @@ export function useActions() {
 
     const network = getNetwork(space.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
         auth.web3,
@@ -307,7 +307,7 @@ export function useActions() {
       )
     );
 
-    return true;
+    return txHash;
   }
 
   async function updateProposal(

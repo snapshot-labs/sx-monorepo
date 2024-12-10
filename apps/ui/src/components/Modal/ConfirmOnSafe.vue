@@ -1,20 +1,16 @@
 <script setup lang="ts">
 type Messages = {
-  title?: string;
+  title: string;
   subtitle?: string;
 };
 
 withDefaults(
   defineProps<{
     open: boolean;
-    messages?: Messages;
+    messages: Messages;
     showIcon?: boolean;
   }>(),
   {
-    messages: () => ({
-      title: 'Confirm vote in Safe app',
-      subtitle: 'Go back to Safe app to confirm your vote'
-    }),
     showIcon: true
   }
 );
@@ -49,7 +45,7 @@ const emit = defineEmits<{
         >
           hash-verifier <IH-arrow-sm-right class="inline-block -rotate-45" />
         </AppLink>
-        to validate vote data.
+        to validate the data.
       </div>
     </div>
   </UiModal>
