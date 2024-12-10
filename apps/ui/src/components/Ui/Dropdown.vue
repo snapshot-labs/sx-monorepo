@@ -7,11 +7,13 @@ withDefaults(
     disabled?: boolean;
     gap?: string;
     placement?: 'start' | 'end';
+    zIndex?: number;
   }>(),
   {
     disabled: false,
     gap: '8',
-    placement: 'end'
+    placement: 'end',
+    zIndex: 10
   }
 );
 </script>
@@ -21,8 +23,8 @@ withDefaults(
     <Float
       :placement="`bottom-${placement}`"
       :offset="Number(gap)"
+      :z-index="zIndex"
       portal
-      z-index="10"
     >
       <MenuButton :disabled="disabled" as="template" class="cursor-pointer">
         <slot name="button" />
@@ -38,7 +40,7 @@ withDefaults(
         <MenuItems
           class="rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
         >
-          <div class="max-h-[208px] overflow-y-auto">
+          <div class="max-h-[215px] overflow-y-auto">
             <slot name="items" />
           </div>
         </MenuItems>
