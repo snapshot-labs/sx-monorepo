@@ -219,6 +219,10 @@ input[type='number'] {
   appearance: textfield;
 }
 
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
 input:placeholder-shown {
   @apply text-ellipsis;
 }
