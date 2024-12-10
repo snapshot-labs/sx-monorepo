@@ -8,10 +8,12 @@ withDefaults(
   defineProps<{
     open: boolean;
     messages: Messages;
+    showVerifierLink?: boolean;
     showIcon?: boolean;
   }>(),
   {
-    showIcon: true
+    showIcon: true,
+    showVerifierLink: false
   }
 );
 
@@ -37,7 +39,7 @@ const emit = defineEmits<{
         <div v-if="messages.subtitle" v-text="messages.subtitle" />
       </div>
 
-      <div class="pt-2">
+      <div v-if="showVerifierLink" class="pt-2">
         You can use
         <AppLink
           to="https://github.com/snapshot-labs/hash-verifier"

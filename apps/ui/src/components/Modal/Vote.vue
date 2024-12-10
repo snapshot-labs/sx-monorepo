@@ -2,7 +2,7 @@
 import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { offchainNetworks } from '@/networks';
+import { offchainNetworks, starknetNetworks } from '@/networks';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -261,6 +261,7 @@ watchEffect(async () => {
     />
     <ModalConfirmOnSafe
       :open="modalValidateOnSafeOpen"
+      :show-verifier-link="starknetNetworks.includes(proposal.network)"
       :messages="{
         title: 'Confirm vote in Safe app',
         subtitle: 'Go back to Safe app to confirm your vote'
