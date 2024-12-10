@@ -139,6 +139,39 @@ async function handleEditClick() {
   });
 }
 
+async function handleDuplicateClick() {
+  if (!props.proposal) return;
+
+  const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
+
+  const executions = Object.fromEntries(
+    props.proposal.executions.map(execution => {
+      const address = offchainNetworks.includes(props.proposal.network)
+        ? execution.safeAddress
+        : props.proposal.execution_strategy;
+
+      return [address, execution.transactions];
+    })
+  );
+
+  const draftId = await createDraft(spaceId, {
+    title: props.proposal.title,
+    body: props.proposal.body,
+    discussion: props.proposal.discussion,
+    type: props.proposal.type,
+    choices: props.proposal.choices,
+    labels: props.proposal.labels,
+    executions
+  });
+
+  router.push({
+    name: 'space-editor',
+    params: {
+      key: draftId
+    }
+  });
+}
+
 async function handleCancelClick() {
   cancelling.value = true;
 
@@ -298,6 +331,17 @@ onBeforeUnmount(() => destroyAudio());
               </UiButton>
             </template>
             <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleDuplicateClick"
+                >
+                  <IH-document-duplicate :width="16" />
+                  Duplicate proposal
+                </button>
+              </UiDropdownItem>
               <UiDropdownItem v-if="editable" v-slot="{ active }">
                 <button
                   type="button"
