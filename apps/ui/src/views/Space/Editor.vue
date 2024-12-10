@@ -63,6 +63,10 @@ const modalOpenTerms = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
+const customProposalTime = reactive<{
+  start?: number;
+  minEnd?: number;
+}>({});
 
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
@@ -178,21 +182,34 @@ const propositionPower = computed(() => getPropositionPower(props.space));
 
 const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
 
+const defaultVotingDelay = computed(() =>
+  isOffchainSpace ? DEFAULT_VOTING_DELAY : 0
+);
+
 const proposalStart = computed(
-  () => unixTimestamp.value + props.space.voting_delay
+  () =>
+    customProposalTime.start ??
+    proposal.value?.start ??
+    unixTimestamp.value + props.space.voting_delay
 );
 
 const proposalMinEnd = computed(
   () =>
+    customProposalTime.minEnd ??
+    proposal.value?.min_end ??
     proposalStart.value +
-    (props.space.min_voting_period || DEFAULT_VOTING_DELAY)
+      (props.space.min_voting_period || defaultVotingDelay.value)
 );
 
-const proposalMaxEnd = computed(
-  () =>
+const proposalMaxEnd = computed(() => {
+  if (isOffchainSpace.value) return proposalMinEnd.value;
+
+  return (
+    proposal.value?.max_end ??
     proposalStart.value +
-    (props.space.max_voting_period || DEFAULT_VOTING_DELAY)
-);
+      (props.space.max_voting_period || defaultVotingDelay.value)
+  );
+});
 
 async function handleProposeClick() {
   if (!proposal.value) return;
@@ -315,6 +332,13 @@ function handleTransactionAccept() {
 function handleFetchPropositionPower() {
   fetchPropositionPower(props.space);
 }
+
+watch(customProposalTime, () => {
+  if (!proposal.value) return;
+
+  proposal.value.start = customProposalTime.start;
+  proposal.value.min_end = customProposalTime.minEnd;
+});
 
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
@@ -585,22 +609,15 @@ watchEffect(() => {
             v-model="proposal.labels"
             :space="space"
           />
-          <div>
-            <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-            <ProposalTimeline
-              :data="
-                isOffchainSpace
-                  ? {
-                      ...space,
-                      created: unixTimestamp,
-                      start: proposalStart,
-                      min_end: proposalMinEnd,
-                      max_end: proposalMaxEnd
-                    }
-                  : space
-              "
-            />
-          </div>
+          <EditorTimeline
+            v-model="customProposalTime"
+            :space="space"
+            :created="proposal.created || unixTimestamp"
+            :start="proposalStart"
+            :min-end="proposalMinEnd"
+            :max-end="proposalMaxEnd"
+            :editable="!proposal.proposalId"
+          />
         </div>
       </Affix>
     </div>
