@@ -149,7 +149,7 @@ onUnmounted(() => {
         </template>
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiDropdown :z-index="999">
+      <UiDropdown :z-index="999" :portal="false">
         <template #button>
           <slot name="button">
             <UiButton class="!px-0 w-[46px]" v-bind="$attrs">

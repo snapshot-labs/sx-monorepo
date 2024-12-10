@@ -8,12 +8,14 @@ withDefaults(
     gap?: string;
     placement?: 'start' | 'end';
     zIndex?: number;
+    portal: boolean;
   }>(),
   {
     disabled: false,
     gap: '8',
     placement: 'end',
-    zIndex: 10
+    zIndex: 10,
+    portal: true
   }
 );
 </script>
@@ -24,7 +26,7 @@ withDefaults(
       :placement="`bottom-${placement}`"
       :offset="Number(gap)"
       :z-index="zIndex"
-      portal
+      :portal="portal"
     >
       <MenuButton :disabled="disabled" as="template" class="cursor-pointer">
         <slot name="button" />
