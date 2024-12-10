@@ -118,18 +118,18 @@ watch(
     await proposalsStore.fetchProposal(props.space.id, id, props.space.network);
 
     if (discussion.value) {
-      try {
-        discourseTopic.value = await loadSingleTopic(discussion.value);
-      } catch (error) {
-        console.error(error);
-      }
+      loadSingleTopic(discussion.value).then(result => {
+        discourseTopic.value = result;
+      });
     }
-    
+
     if (props.space.additionalRawData?.boost?.enabled) {
       const bribeEnabled =
         props.space.additionalRawData.boost.bribeEnabled || false;
       const proposalEnd = proposal.value?.max_end || 0;
-      boostCount.value = await getBoostsCount(id, bribeEnabled, proposalEnd);
+      getBoostsCount(id, bribeEnabled, proposalEnd).then(result => {
+        boostCount.value = result;
+      });
     }
   },
   { immediate: true }
