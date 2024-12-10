@@ -54,7 +54,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Base',
     chainId: 8453,
     apiUrl:
-      'https://api.studio.thegraph.com/query/41343/sekhmet-sx-base/version/latest',
+      'https://api.studio.thegraph.com/query/23545/sx-base/version/latest',
     avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
     blockTime: 2
   },
