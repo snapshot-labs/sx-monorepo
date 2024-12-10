@@ -124,6 +124,7 @@ watch(
         console.error(error);
       }
     }
+    
     if (props.space.additionalRawData?.boost?.enabled) {
       const bribeEnabled =
         props.space.additionalRawData.boost.bribeEnabled || false;
