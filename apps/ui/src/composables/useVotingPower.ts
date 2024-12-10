@@ -1,4 +1,4 @@
-import { supportsNullCurrent } from '@/networks';
+import { offchainNetworks, supportsNullCurrent } from '@/networks';
 import { getIndex } from '@/stores/votingPowers';
 import { NetworkID, Proposal, Space } from '@/types';
 
@@ -13,8 +13,10 @@ export function useVotingPower() {
 
   function getProposalSnapshot(proposal: Proposal): number | null {
     return (
-      (proposal.state === 'pending' ? null : proposal.snapshot) ||
-      getLatestBlock(proposal.network)
+      (proposal.state === 'pending' &&
+      !offchainNetworks.includes(proposal.network)
+        ? null
+        : proposal.snapshot) || getLatestBlock(proposal.network)
     );
   }
 
