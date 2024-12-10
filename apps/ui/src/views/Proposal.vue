@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { getBoostsCount } from '@/helpers/boost';
 import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
-import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
+import { _n, getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { Choice, Space } from '@/types';
 
 const props = defineProps<{
@@ -26,6 +27,7 @@ const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
+const boostCount = ref(0);
 
 const id = computed(() => route.params.proposal as string);
 const proposal = computed(() => {
@@ -116,7 +118,17 @@ watch(
     await proposalsStore.fetchProposal(props.space.id, id, props.space.network);
 
     if (discussion.value) {
-      discourseTopic.value = await loadSingleTopic(discussion.value);
+      try {
+        discourseTopic.value = await loadSingleTopic(discussion.value);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    if (props.space.additionalRawData?.boost?.enabled) {
+      const bribeEnabled =
+        props.space.additionalRawData.boost.bribeEnabled || false;
+      const proposalEnd = proposal.value?.max_end || 0;
+      boostCount.value = await getBoostsCount(id, bribeEnabled, proposalEnd);
     }
   },
   { immediate: true }
@@ -203,6 +215,14 @@ watchEffect(() => {
               >
                 <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
+              </a>
+            </template>
+            <template v-if="boostCount > 0">
+              <a
+                :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
+                class="flex items-center"
+              >
+                <UiLink :count="boostCount" text="Boost" class="inline-block" />
               </a>
             </template>
           </div>
