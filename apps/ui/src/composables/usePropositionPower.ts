@@ -7,7 +7,7 @@ export function usePropositionPower() {
   const { web3 } = useWeb3();
   const { getCurrent } = useMetaStore();
 
-  function latestBlock(network: NetworkID) {
+  function getLatestBlock(network: NetworkID): number | null {
     return supportsNullCurrent(network) ? null : getCurrent(network) ?? 0;
   }
 
@@ -15,13 +15,13 @@ export function usePropositionPower() {
     votingPowersStore.fetch(
       space,
       web3.value.account,
-      latestBlock(space.network)
+      getLatestBlock(space.network)
     );
   }
 
   function get(space: Space) {
     return votingPowersStore.votingPowers.get(
-      getIndex(space, latestBlock(space.network))
+      getIndex(space, getLatestBlock(space.network))
     );
   }
 
