@@ -30,7 +30,17 @@ const displayAllChoices = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
+const placeholderResults = computed(() =>
+  props.proposal.choices.map((_, i) => ({
+    choice: i + 1,
+    progress: 0,
+    score: 0
+  }))
+);
+
 const results = computed(() => {
+  if (!props.proposal.scores.length) return placeholderResults.value;
+
   // TODO: sx-api returns number, sx-subgraph returns string
   const parsedTotal = parseFloat(
     props.proposal.scores_total as unknown as string
@@ -62,11 +72,11 @@ const visibleResults = computed(() => {
 });
 
 const otherResultsSummary = computed(() => {
-  const oetherResultsStartIndex = hasOneExtra.value
+  const otherResultsStartIndex = hasOneExtra.value
     ? DEFAULT_MAX_CHOICES + 1
     : DEFAULT_MAX_CHOICES;
 
-  return results.value.slice(oetherResultsStartIndex).reduce(
+  return results.value.slice(otherResultsStartIndex).reduce(
     (acc, result) => ({
       progress: acc.progress + result.progress,
       count: acc.count + 1
