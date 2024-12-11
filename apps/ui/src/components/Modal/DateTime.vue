@@ -106,25 +106,28 @@ watch(
     <template #header>
       <h3 v-text="current.title" />
     </template>
-    <div :class="['!m-4 text-center', { 's-error': formError }]">
+    <div :class="['s-box !m-4 text-center', { 's-error': formError }]">
       <UiCalendar
         v-if="isCurrent('date')"
         :min="min"
         :selected="date"
         @pick="handleDateUpdate"
       />
-      <template v-else-if="isCurrent('time')">
-        <input
-          v-model="time"
-          type="time"
-          class="s-input mx-auto max-w-[140px] text-center text-lg"
-        />
+      <div v-else-if="isCurrent('time')" class="s-base">
+        <div class="relative mx-auto max-w-[140px]">
+          <label class="s-label w-full">Time</label>
+          <input
+            v-model="time"
+            type="time"
+            class="s-input text-center text-lg"
+          />
+        </div>
         <span
           v-if="formError"
           class="s-input-error-message"
           v-text="formError"
         />
-      </template>
+      </div>
     </div>
     <template #footer>
       <div class="flex space-x-3">
