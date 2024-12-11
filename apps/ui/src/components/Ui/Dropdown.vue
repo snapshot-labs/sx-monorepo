@@ -8,7 +8,7 @@ withDefaults(
     gap?: string;
     placement?: 'start' | 'end';
     zIndex?: number;
-    portal: boolean;
+    portal?: boolean;
   }>(),
   {
     disabled: false,
