@@ -120,6 +120,7 @@ export type RelatedSpace = {
   about?: string;
   proposal_count: number;
   vote_count: number;
+  active_proposals: number | null;
   turbo: boolean;
   verified: boolean;
   snapshot_chain_id: number;
@@ -173,6 +174,7 @@ export type Space = {
   coingecko?: string;
   terms: string;
   voting_power_symbol: string;
+  active_proposals: number | null;
   controller: string;
   voting_delay: number;
   voting_types: VoteType[];

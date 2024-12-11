@@ -121,6 +121,7 @@ function formatSpace(
       cover: space.cover || '',
       proposal_count: space.proposalsCount,
       vote_count: space.votesCount,
+      active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
       snapshot_chain_id: parseInt(space.network)
@@ -170,6 +171,7 @@ function formatSpace(
     vote_count: space.votesCount,
     follower_count: space.followersCount,
     voting_power_symbol: space.symbol,
+    active_proposals: space.activeProposals,
     voting_delay: space.voting.delay ?? 0,
     voting_types: space.voting.type
       ? [space.voting.type]
