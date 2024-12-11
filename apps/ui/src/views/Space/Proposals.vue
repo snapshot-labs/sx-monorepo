@@ -8,7 +8,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const {
-  votingPower,
+  get: getVotingPower,
   fetch: fetchVotingPower,
   reset: resetVotingPower
 } = useVotingPower();
@@ -27,6 +27,8 @@ const selectIconBaseProps = {
 const proposalsRecord = computed(
   () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
 );
+
+const votingPower = computed(() => getVotingPower(props.space));
 
 const spaceLabels = computed(() => {
   if (!props.space.labels) return {};
