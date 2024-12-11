@@ -205,7 +205,7 @@ router.afterEach(() => {
       />
       <main class="flex-auto w-full flex">
         <div class="flex-auto w-0 mt-[72px]">
-          <router-view class="pb-6" />
+          <router-view class="h-full pb-6" />
         </div>
         <div
           v-if="hasPlaceHolderSidebar"
