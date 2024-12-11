@@ -57,10 +57,16 @@ export function useActions() {
     };
   }
 
-  function handleSafeEnvelope(envelope: any) {
+  function handleSafeEnvelope(
+    envelope: any,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     if (envelope !== null) return false;
 
-    uiStore.addNotification('success', 'Transaction set up.');
+    // TODO: this should determine differnet types
+    uiStore.openSafeModal(safeAppContext);
+
+    // uiStore.addNotification('success', 'Transaction set up.');
     return true;
   }
 
@@ -97,13 +103,18 @@ export function useActions() {
   async function wrapPromise(
     networkId: NetworkID,
     promise: Promise<any>,
-    opts: { transactionNetworkId?: NetworkID } = {}
+    opts: {
+      transactionNetworkId?: NetworkID;
+      safeAppContext?: 'vote' | 'propose' | 'transaction';
+    } = {}
   ): Promise<string | null> {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
 
-    if (handleSafeEnvelope(envelope)) return null;
+    if (handleSafeEnvelope(envelope, opts.safeAppContext ?? 'transaction')) {
+      return null;
+    }
     if (await handleCommitEnvelope(envelope, networkId)) return null;
 
     let hash;
@@ -256,7 +267,10 @@ export function useActions() {
         choice,
         reason,
         app
-      )
+      ),
+      {
+        safeAppContext: 'vote'
+      }
     );
 
     if (txHash) addPendingVote(proposal.id);
@@ -307,7 +321,10 @@ export function useActions() {
         min_end,
         max_end,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
     );
 
     return txHash;
@@ -348,7 +365,10 @@ export function useActions() {
         privacy,
         labels,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
     );
 
     return true;

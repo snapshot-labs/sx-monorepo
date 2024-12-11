@@ -2,7 +2,7 @@
 import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { offchainNetworks, starknetNetworks } from '@/networks';
+import { offchainNetworks } from '@/networks';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -37,7 +37,6 @@ const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
 const modalTransactionOpen = ref(false);
 const modalShareOpen = ref(false);
-const modalValidateOnSafeOpen = ref(false);
 const txId = ref<string | null>(null);
 const selectedChoice = ref<Choice | null>(null);
 
@@ -105,12 +104,9 @@ async function voteFn() {
 
 async function handleConfirmed(tx?: string | null) {
   modalTransactionOpen.value = false;
-
   if (tx) {
     txId.value = tx;
     modalShareOpen.value = true;
-  } else {
-    modalValidateOnSafeOpen.value = true;
   }
 
   emit('voted');
@@ -253,15 +249,6 @@ watchEffect(async () => {
         title: 'Vote success!'
       }"
       @close="modalShareOpen = false"
-    />
-    <ModalConfirmOnSafe
-      :open="modalValidateOnSafeOpen"
-      :show-verifier-link="starknetNetworks.includes(proposal.network)"
-      :messages="{
-        title: 'Confirm vote in Safe app',
-        subtitle: 'Go back to Safe app to confirm your vote'
-      }"
-      @close="modalValidateOnSafeOpen = false"
     />
   </teleport>
 </template>
