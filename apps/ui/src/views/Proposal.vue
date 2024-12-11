@@ -363,13 +363,7 @@ watchEffect(() => {
               </ProposalVote>
             </div>
           </div>
-          <div
-            v-if="
-              !proposal.cancelled &&
-              proposal.state !== 'pending' &&
-              proposal.vote_count
-            "
-          >
+          <div v-if="!proposal.cancelled">
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
               <IH-chart-square-bar />
               Results
