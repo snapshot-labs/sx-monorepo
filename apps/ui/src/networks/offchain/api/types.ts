@@ -13,6 +13,7 @@ export type ApiRelatedSpace = {
   avatar: string;
   cover: string | null;
   proposalsCount: number;
+  activeProposals: number;
   votesCount: number;
   turbo: boolean;
   verified: boolean;
@@ -34,6 +35,7 @@ export type ApiSpace = {
   github: string | null;
   coingecko: string | null;
   symbol: string;
+  activeProposals: number;
   treasuries: {
     name: string;
     network: string;
