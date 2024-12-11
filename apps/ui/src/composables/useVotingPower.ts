@@ -12,12 +12,13 @@ export function useVotingPower() {
   }
 
   function getProposalSnapshot(proposal: Proposal): number | null {
-    return (
-      (proposal.state === 'pending' &&
+    const snapshot =
+      proposal.state === 'pending' &&
       !offchainNetworks.includes(proposal.network)
         ? null
-        : proposal.snapshot) || getLatestBlock(proposal.network)
-    );
+        : proposal.snapshot;
+
+    return snapshot || getLatestBlock(proposal.network);
   }
 
   function getSnapshot(
