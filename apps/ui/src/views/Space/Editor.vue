@@ -11,7 +11,7 @@ import {
 } from '@/helpers/turbo';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -60,7 +60,6 @@ const timestamp = useTimestamp({ interval: 1000 });
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
-const modalValidateOnSafeOpen = ref(false);
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -204,24 +203,6 @@ const proposalMaxEnd = computed(() => {
   );
 });
 
-function navigateToProposal() {
-  if (!proposal.value) return;
-
-  if (
-    proposal.value.proposalId &&
-    offchainNetworks.includes(props.space.network)
-  ) {
-    router.push({
-      name: 'space-proposal-overview',
-      params: {
-        proposal: proposal.value.proposalId
-      }
-    });
-  } else {
-    router.push({ name: 'space-proposals' });
-  }
-}
-
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -285,10 +266,20 @@ async function handleProposeClick() {
     }
     if (result) {
       proposalsStore.reset(props.space.id, props.space.network);
+    }
 
-      navigateToProposal();
+    if (
+      proposal.value.proposalId &&
+      offchainNetworks.includes(props.space.network)
+    ) {
+      router.push({
+        name: 'space-proposal-overview',
+        params: {
+          proposal: proposal.value.proposalId
+        }
+      });
     } else {
-      modalValidateOnSafeOpen.value = true;
+      router.push({ name: 'space-proposals' });
     }
   } finally {
     sending.value = false;
@@ -298,11 +289,6 @@ async function handleProposeClick() {
 function handleAcceptTerms() {
   termsStore.accept(props.space);
   handleProposeClick();
-}
-
-function handleConfirmOnSafeClosed() {
-  modalValidateOnSafeOpen.value = false;
-  navigateToProposal();
 }
 
 function handleExecutionUpdated(
@@ -641,15 +627,6 @@ watchEffect(() => {
         :initial-state="transaction._form"
         @add="handleTransactionAccept"
         @close="reset"
-      />
-      <ModalConfirmOnSafe
-        :open="modalValidateOnSafeOpen"
-        :show-verifier-link="starknetNetworks.includes(props.space.network)"
-        :messages="{
-          title: 'Confirm proposal in Safe app',
-          subtitle: 'Go back to Safe app to confirm your proposal'
-        }"
-        @close="handleConfirmOnSafeClosed"
       />
     </teleport>
   </div>

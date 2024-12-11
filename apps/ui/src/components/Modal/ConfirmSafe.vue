@@ -1,13 +1,30 @@
 <script setup lang="ts">
+type Type = 'vote' | 'propose' | 'transaction';
+
 type Messages = {
   title: string;
-  subtitle?: string;
+  subtitle: string;
+};
+
+const MESSAGES: Record<Type, Messages> = {
+  vote: {
+    title: 'Confirm vote in Safe app',
+    subtitle: 'Go back to Safe app to confirm your vote'
+  },
+  propose: {
+    title: 'Confirm proposal in Safe app',
+    subtitle: 'Go back to Safe app to confirm your proposal'
+  },
+  transaction: {
+    title: 'Confirm transaction in Safe app',
+    subtitle: 'Go back to Safe app to confirm your transaction'
+  }
 };
 
 withDefaults(
   defineProps<{
     open: boolean;
-    messages: Messages;
+    type: Type;
     showVerifierLink?: boolean;
     showIcon?: boolean;
   }>(),
@@ -34,9 +51,9 @@ const emit = defineEmits<{
       <div class="flex flex-col space-y-1 leading-6">
         <h4
           class="font-semibold text-skin-heading text-lg"
-          v-text="messages.title"
+          v-text="MESSAGES[type].title"
         />
-        <div v-if="messages.subtitle" v-text="messages.subtitle" />
+        <div v-text="MESSAGES[type].subtitle" />
       </div>
 
       <div v-if="showVerifierLink" class="pt-2">
