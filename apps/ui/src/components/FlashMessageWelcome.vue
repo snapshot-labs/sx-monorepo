@@ -49,7 +49,7 @@ onMounted(async () => {
         >
         <div class="block text-sm">
           <span class="text-skin-bg/70">Or, go back to the </span>
-          <a to="https://v1.snapshot.box" target="_blank" class="text-skin-bg"
+          <a href="https://v1.snapshot.box" target="_blank" class="text-skin-bg"
             >previous interface</a
           >
         </div>
