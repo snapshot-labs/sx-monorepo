@@ -2,7 +2,7 @@
 import { FunctionalComponent } from 'vue';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -10,6 +10,7 @@ import IHCog from '~icons/heroicons-outline/cog';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
+import IHIdentification from '~icons/heroicons-outline/identification';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHStop from '~icons/heroicons-outline/stop';
@@ -42,15 +43,17 @@ const space = computed(() =>
     : null
 );
 
-const isController = computedAsync(async () => {
-  if (!networkId.value || !space.value) return false;
-
-  const { account } = web3.value;
+const controller = computedAsync(async () => {
+  if (!networkId.value || !space.value) return null;
 
   const network = getNetwork(networkId.value);
-  const controller = await network.helpers.getSpaceController(space.value);
+  return network.helpers.getSpaceController(space.value);
+});
 
-  return compareAddresses(controller, account);
+const isController = computed(() => {
+  const { account } = web3.value;
+
+  return controller.value && compareAddresses(controller.value, account);
 });
 
 const canSeeSettings = computed(() => {
@@ -63,6 +66,22 @@ const canSeeSettings = computed(() => {
 
     return admins.includes(web3.value.account.toLowerCase());
   }
+  return false;
+});
+
+const canSeeMembers = computed(() => {
+  const data = space.value?.additionalRawData;
+
+  if (!networkId.value || !offchainNetworks.includes(networkId.value)) {
+    return false;
+  }
+
+  return (
+    controller.value ||
+    (data?.admins?.length ?? 0) > 0 ||
+    (data?.moderators?.length ?? 0) > 0 ||
+    (data?.members?.length ?? 0) > 0
+  );
 });
 
 const navigationConfig = computed<
@@ -81,6 +100,14 @@ const navigationConfig = computed<
       name: 'Leaderboard',
       icon: IHUserGroup
     },
+    ...(canSeeMembers.value
+      ? {
+          members: {
+            name: 'Members',
+            icon: IHIdentification
+          }
+        }
+      : undefined),
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
           delegates: {
