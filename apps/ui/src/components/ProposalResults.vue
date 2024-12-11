@@ -10,7 +10,7 @@ import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
 
-const SHUTTER_URL = 'https://blog.shutter.network/shielded-voting';
+const SHUTTER_URL = 'https://www.shutter.network/shielded-voting';
 
 const props = withDefaults(
   defineProps<{
