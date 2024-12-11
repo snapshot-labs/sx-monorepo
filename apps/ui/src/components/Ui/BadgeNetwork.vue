@@ -57,7 +57,7 @@ const networkData = computed<NetworkData | null>(() => {
   <div class="relative">
     <slot />
     <img
-      v-if="networkData"
+      v-if="networkData && size !== 0"
       :src="getUrl(networkData.avatar) ?? undefined"
       :title="networkData.name"
       :style="{
