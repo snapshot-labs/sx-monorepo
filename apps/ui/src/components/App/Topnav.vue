@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getCacheHash, shorten } from '@/helpers/utils';
+import { metadataNetwork, offchainNetworks } from '@/networks';
+import { NetworkID } from '@/types';
 
 defineProps<{
   hasAppNav: boolean;
@@ -54,6 +56,70 @@ const searchConfig = computed(() => {
   }
 
   return null;
+});
+
+const oldInterfaceLink = computed(() => {
+  const networkSubDomains = {
+    s: 'v1.',
+    's-tn': 'testnet.v1.'
+  };
+  const [spaceNetwork, spaceId] = ((route.params.space as string) || '').split(
+    ':'
+  );
+  const subDomain =
+    networkSubDomains[spaceNetwork] || networkSubDomains[metadataNetwork];
+  let path = '';
+
+  switch (route.name) {
+    case 'my-home': {
+      path = 'timeline';
+      break;
+    }
+    case 'space-editor': {
+      path = `${spaceId}/create`;
+      break;
+    }
+    case 'space-leaderboard':
+    case 'space-discussions':
+    case 'space-discussions-topic':
+    case 'space-proposals':
+    case 'space-overview': {
+      path = `${spaceId}`;
+      break;
+    }
+    case 'space-proposal-discussion':
+    case 'space-proposal-votes':
+    case 'space-proposal-overview': {
+      path = `${spaceId}/proposal/${route.params.proposal}`;
+      break;
+    }
+    case 'space-settings': {
+      path = `${spaceId}/settings`;
+      break;
+    }
+    case 'space-treasury': {
+      path = `${spaceId}/treasury`;
+      break;
+    }
+    case 'space-delegates': {
+      path = `delegate/${spaceId}`;
+      break;
+    }
+    case 'space-user-statement':
+    case 'space-user-delegators':
+    case 'space-user-proposals':
+    case 'user': {
+      path = `profile/${route.params.user}`;
+      break;
+    }
+  }
+
+  // Redirect all onchain spaces to homepage
+  if (spaceNetwork && !offchainNetworks.includes(spaceNetwork as NetworkID)) {
+    path = '';
+  }
+
+  return `https://${subDomain}snapshot.box/#/${path}`;
 });
 
 async function handleLogin(connector) {
@@ -179,7 +245,8 @@ onUnmounted(() => {
           <UiDropdownItem v-slot="{ active }">
             <a
               :class="['flex gap-2 items-center', { 'opacity-80': active }]"
-              href="https://v1.snapshot.box"
+              :href="oldInterfaceLink"
+              target="_blank"
             >
               <IH-bolt-slash :width="16" />
               Old interface
