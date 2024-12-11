@@ -222,6 +222,7 @@ router.afterEach(() => {
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
     />
+    <FlashMessageWelcome />
   </div>
 </template>
 
