@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getCacheHash, shorten } from '@/helpers/utils';
+import { metadataNetwork, offchainNetworks } from '@/networks';
+import { NetworkID } from '@/types';
 
 defineProps<{
   hasAppNav: boolean;
@@ -54,6 +56,70 @@ const searchConfig = computed(() => {
   }
 
   return null;
+});
+
+const oldInterfaceLink = computed(() => {
+  const networkSubDomains = {
+    s: 'v1.',
+    's-tn': 'testnet.v1.'
+  };
+  const [spaceNetwork, spaceId] = ((route.params.space as string) || '').split(
+    ':'
+  );
+  const subDomain =
+    networkSubDomains[spaceNetwork] || networkSubDomains[metadataNetwork];
+  let path = '';
+
+  switch (route.name) {
+    case 'my-home': {
+      path = 'timeline';
+      break;
+    }
+    case 'space-editor': {
+      path = `${spaceId}/create`;
+      break;
+    }
+    case 'space-leaderboard':
+    case 'space-discussions':
+    case 'space-discussions-topic':
+    case 'space-proposals':
+    case 'space-overview': {
+      path = `${spaceId}`;
+      break;
+    }
+    case 'space-proposal-discussion':
+    case 'space-proposal-votes':
+    case 'space-proposal-overview': {
+      path = `${spaceId}/proposal/${route.params.proposal}`;
+      break;
+    }
+    case 'space-settings': {
+      path = `${spaceId}/settings`;
+      break;
+    }
+    case 'space-treasury': {
+      path = `${spaceId}/treasury`;
+      break;
+    }
+    case 'space-delegates': {
+      path = `delegate/${spaceId}`;
+      break;
+    }
+    case 'space-user-statement':
+    case 'space-user-delegators':
+    case 'space-user-proposals':
+    case 'user': {
+      path = `profile/${route.params.user}`;
+      break;
+    }
+  }
+
+  // Redirect all onchain spaces to homepage
+  if (spaceNetwork && !offchainNetworks.includes(spaceNetwork as NetworkID)) {
+    path = '';
+  }
+
+  return `https://${subDomain}snapshot.box/#/${path}`;
 });
 
 async function handleLogin(connector) {
@@ -149,10 +215,75 @@ onUnmounted(() => {
         </template>
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
-        <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
-        <IH-moon v-else class="inline-block" />
-      </UiButton>
+      <UiDropdown :z-index="999" :portal="false">
+        <template #button>
+          <slot name="button">
+            <UiButton class="!px-0 w-[46px]" v-bind="$attrs">
+              <IH-cog-6-tooth class="inline-block" />
+            </UiButton>
+          </slot>
+        </template>
+        <template #items>
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              href="https://snapshot.box"
+            >
+              <IH-bolt :width="16" />
+              Mainnet
+            </a>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              href="https://testnet.snapshot.box"
+            >
+              <IH-beaker :width="16" />
+              Testnet
+            </a>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              :href="oldInterfaceLink"
+              target="_blank"
+            >
+              <IH-bolt-slash :width="16" />
+              Old interface
+            </a>
+          </UiDropdownItem>
+          <hr class="h-[2px] bg-skin-text/20 mx-3" />
+          <UiDropdownItem v-slot="{ active }">
+            <button
+              type="button"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+              @click="toggleSkin"
+            >
+              <IH-light-bulb
+                v-if="currentMode === 'dark'"
+                class="inline-block"
+                :width="16"
+              />
+              <IH-moon v-else class="inline-block" :width="16" />
+              <span>
+                Switch to
+                {{ currentMode === 'dark' ? 'light' : 'dark' }} theme
+              </span>
+            </button>
+          </UiDropdownItem>
+          <hr class="h-[2px] bg-skin-text/20 mx-3" />
+          <UiDropdownItem v-slot="{ active }">
+            <a
+              :class="['flex gap-2 items-center', { 'opacity-80': active }]"
+              href="https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo"
+            >
+              <IH-sparkles :width="16" />
+              Discover our new interface
+            </a>
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
     </div>
   </UiTopnav>
   <teleport to="#modal">
