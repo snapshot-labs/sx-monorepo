@@ -14,6 +14,7 @@ const sliderEl = ref<HTMLElement | null>(null);
 const initialized = ref(false);
 const sliderOriginalPositionX = ref(0);
 const width = ref(lsGet(CACHE_KEYNAME) || props.default);
+const width = ref(lsGet(CACHE_KEYNAME, props.default));
 
 const { x, y } = useDraggable(sliderEl, {
   axis: 'x'
