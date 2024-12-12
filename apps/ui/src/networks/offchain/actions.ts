@@ -242,7 +242,14 @@ export function createActions(
 
       if (!strategy || !isAddress(voterAddress)) {
         return [
-          { address: name, value: 0n, decimals: 0, token: null, symbol: '' }
+          {
+            address: name,
+            value: 0n,
+            cumulativeDecimals: 0,
+            displayDecimals: 0,
+            token: null,
+            symbol: ''
+          }
         ];
       }
 
@@ -257,7 +264,8 @@ export function createActions(
         return [
           {
             address: strategiesNames[0],
-            decimals: 0,
+            cumulativeDecimals: 0,
+            displayDecimals: 0,
             symbol: '',
             token: '',
             chainId: snapshotInfo.chainId,
@@ -273,7 +281,8 @@ export function createActions(
         return {
           address: strategy.name,
           value,
-          decimals,
+          cumulativeDecimals: decimals,
+          displayDecimals: decimals,
           symbol: strategy.params.symbol,
           token: strategy.params.address,
           chainId: strategy.network ? parseInt(strategy.network) : undefined,
