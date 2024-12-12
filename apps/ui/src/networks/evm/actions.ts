@@ -622,6 +622,9 @@ export function createActions(
     ) => {
       await verifyNetwork(web3, chainId);
 
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
+
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
           execution_strategies: space.executors,
@@ -639,41 +642,46 @@ export function createActions(
         validationStrategy
       );
 
-      return client.updateSettings({
-        signer: getSigner(web3),
-        space: space.id,
-        settings: {
-          metadataUri: `ipfs://${pinned.cid}`,
-          authenticatorsToAdd: authenticatorsToAdd.map(
-            config => config.address
-          ),
-          authenticatorsToRemove: space.authenticators.filter(
-            (authenticator, index) => authenticatorsToRemove.includes(index)
-          ),
-          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)[0]
-              : '0x'
-          })),
-          votingStrategiesToRemove: votingStrategiesToRemove.map(
-            index => space.strategies_indices[index]
-          ),
-          votingStrategyMetadataUrisToAdd: metadataUris,
-          proposalValidationStrategy: {
-            addr: validationStrategy.address,
-            params: validationStrategy.generateParams
-              ? validationStrategy.generateParams(validationStrategy.params)[0]
-              : '0x'
-          },
-          proposalValidationStrategyMetadataUri,
-          votingDelay: votingDelay !== null ? votingDelay : undefined,
-          minVotingDuration:
-            minVotingDuration !== null ? minVotingDuration : undefined,
-          maxVotingDuration:
-            maxVotingDuration !== null ? maxVotingDuration : undefined
-        }
-      });
+      return client.updateSettings(
+        {
+          signer: getSigner(web3),
+          space: space.id,
+          settings: {
+            metadataUri: `ipfs://${pinned.cid}`,
+            authenticatorsToAdd: authenticatorsToAdd.map(
+              config => config.address
+            ),
+            authenticatorsToRemove: space.authenticators.filter(
+              (authenticator, index) => authenticatorsToRemove.includes(index)
+            ),
+            votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? config.generateParams(config.params)[0]
+                : '0x'
+            })),
+            votingStrategiesToRemove: votingStrategiesToRemove.map(
+              index => space.strategies_indices[index]
+            ),
+            votingStrategyMetadataUrisToAdd: metadataUris,
+            proposalValidationStrategy: {
+              addr: validationStrategy.address,
+              params: validationStrategy.generateParams
+                ? validationStrategy.generateParams(
+                    validationStrategy.params
+                  )[0]
+                : '0x'
+            },
+            proposalValidationStrategyMetadataUri,
+            votingDelay: votingDelay !== null ? votingDelay : undefined,
+            minVotingDuration:
+              minVotingDuration !== null ? minVotingDuration : undefined,
+            maxVotingDuration:
+              maxVotingDuration !== null ? maxVotingDuration : undefined
+          }
+        },
+        { noWait: isContract }
+      );
     },
     updateSettingsRaw: () => {
       throw new Error('Not implemented');
