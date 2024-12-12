@@ -40,7 +40,7 @@ const cb = computed(() => getCacheHash(user.value?.avatar));
 const formattedVotingPower = computed(() => {
   const votingPower = _vp(
     votingPowers.value.reduce(
-      (acc, b) => acc + Number(b.value) / 10 ** b.decimals,
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
       0
     )
   );

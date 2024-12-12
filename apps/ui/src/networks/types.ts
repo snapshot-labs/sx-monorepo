@@ -110,7 +110,14 @@ export type SnapshotInfo = {
 export type VotingPower = {
   address: string;
   value: bigint;
-  decimals: number;
+  /**
+   * Decimals used to interpret value in context of final (total) VP.
+   */
+  cumulativeDecimals: number;
+  /**
+   * Decimals used to display this strategy value.
+   */
+  displayDecimals: number;
   token: string | null;
   symbol: string;
   chainId?: number;

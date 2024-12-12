@@ -731,11 +731,22 @@ export function createActions(
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
+      const cumulativeDecimals = Math.max(
+        ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
+      );
+
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getStarknetStrategy(address, networkConfig);
           if (!strategy)
-            return { address, value: 0n, decimals: 0, token: null, symbol: '' };
+            return {
+              address,
+              value: 0n,
+              cumulativeDecimals: 0,
+              displayDecimals: 0,
+              token: null,
+              symbol: ''
+            };
 
           const strategyMetadata = await parseStrategyMetadata(
             strategiesMetadata[i].payload
@@ -756,7 +767,8 @@ export function createActions(
           return {
             address,
             value,
-            decimals: strategiesMetadata[i]?.decimals ?? 0,
+            cumulativeDecimals,
+            displayDecimals: strategiesMetadata[i]?.decimals ?? 0,
             symbol: strategiesMetadata[i]?.symbol ?? '',
             token: strategiesMetadata[i]?.token ?? null
           };

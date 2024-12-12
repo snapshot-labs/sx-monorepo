@@ -611,9 +611,11 @@ export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
   if (!votingPower) return;
 
   const { votingPowers, symbol } = votingPower;
-
   const value = _vp(
-    votingPowers.reduce((acc, b) => acc + Number(b.value) / 10 ** b.decimals, 0)
+    votingPowers.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+      0
+    )
   );
 
   return symbol ? `${value} ${symbol}` : value;

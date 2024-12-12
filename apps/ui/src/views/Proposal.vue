@@ -310,7 +310,7 @@ watchEffect(() => {
                   <a
                     v-if="
                       votingPower?.status === 'success' &&
-                      votingPower.totalVotingPower === BigInt(0)
+                      votingPower.votingPowers.some(v => v.value > 0n)
                     "
                     :href="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
                     target="_blank"
