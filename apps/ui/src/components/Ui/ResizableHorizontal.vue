@@ -13,11 +13,17 @@ const containerEl = ref<HTMLElement | null>(null);
 const sliderEl = ref<HTMLElement | null>(null);
 const initialized = ref(false);
 const sliderOriginalPositionX = ref(0);
-const width = ref(lsGet(CACHE_KEYNAME) || props.default);
+const dragging = ref(false);
 const width = ref(lsGet(CACHE_KEYNAME, props.default));
 
 const { x, y } = useDraggable(sliderEl, {
-  axis: 'x'
+  axis: 'x',
+  onStart: () => {
+    dragging.value = true;
+  },
+  onEnd: () => {
+    dragging.value = false;
+  }
 });
 
 const containerWidth = computed(() => {
@@ -52,7 +58,7 @@ onMounted(() => {
 
 <template>
   <div ref="containerEl" :style="{ width: `${containerWidth}px` }">
-    <div ref="sliderEl" class="slider" />
+    <div ref="sliderEl" :class="['slider', { dragging: dragging }]" />
     <slot />
   </div>
 </template>
@@ -66,7 +72,8 @@ onMounted(() => {
     content: '';
   }
 
-  &:hover {
+  &:hover,
+  &.dragging {
     @apply bg-skin-border cursor-col-resize;
   }
 }
