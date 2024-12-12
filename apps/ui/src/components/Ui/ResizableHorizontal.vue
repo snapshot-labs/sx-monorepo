@@ -28,7 +28,7 @@ const { x, y } = useDraggable(sliderEl, {
 
 const containerWidth = computed(() => {
   const offset = sliderOriginalPositionX.value - x.value;
-  const newWidth = width.value + offset;
+  const newWidth = Math.round(width.value + offset);
 
   if (props.max && newWidth > props.max) return props.max;
   if (props.min && newWidth < props.min) return props.min;
@@ -57,7 +57,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div ref="containerEl" :style="{ width: `${containerWidth}px` }">
+  <div
+    ref="containerEl"
+    class="max-md:!w-full"
+    :style="{ width: `${containerWidth}px` }"
+  >
     <div ref="sliderEl" :class="['slider', { dragging: dragging }]" />
     <slot />
   </div>
@@ -65,7 +69,7 @@ onMounted(() => {
 
 <style scoped>
 .slider {
-  @apply block fixed z-[99] w-[5px] h-full ml-[-2px];
+  @apply hidden md:block fixed z-[99] w-[5px] h-full ml-[-2px];
 
   &:before {
     @apply h-full border-l block ml-[2px];
