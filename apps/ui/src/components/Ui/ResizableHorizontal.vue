@@ -1,6 +1,10 @@
 <script lang="ts" setup>
+import { lsGet, lsSet } from '@/helpers/utils';
+
+const CACHE_KEYNAME = 'proposal.sidebarWidth';
+
 const props = defineProps<{
-  width: number;
+  default: number;
   max?: number;
   min?: number;
 }>();
@@ -9,25 +13,21 @@ const containerEl = ref<HTMLElement | null>(null);
 const sliderEl = ref<HTMLElement | null>(null);
 const initialized = ref(false);
 const sliderOriginalPositionX = ref(0);
+const width = ref(lsGet(CACHE_KEYNAME) || props.default);
 
 const { x, y } = useDraggable(sliderEl, {
   axis: 'x'
 });
 
 const containerWidth = computed(() => {
-  const width = getWidth(x.value);
+  const offset = sliderOriginalPositionX.value - x.value;
+  const newWidth = width.value + offset;
 
-  if (props.max && width > props.max) return props.max;
-  if (props.min && width < props.min) return props.min;
+  if (props.max && newWidth > props.max) return props.max;
+  if (props.min && newWidth < props.min) return props.min;
 
-  return width;
+  return Math.round(newWidth);
 });
-
-function getWidth(newSliderPositionX: number): number {
-  const offset = sliderOriginalPositionX.value - newSliderPositionX;
-
-  return props.width + offset;
-}
 
 function initResizer() {
   if (!sliderEl.value || !containerEl.value) return;
@@ -39,6 +39,10 @@ function initResizer() {
   y.value = position.y;
   initialized.value = true;
 }
+
+watch(containerWidth, w => {
+  lsSet(CACHE_KEYNAME, w);
+});
 
 onMounted(() => {
   initResizer();

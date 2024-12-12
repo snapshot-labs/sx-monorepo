@@ -238,7 +238,7 @@ watchEffect(() => {
         <router-view :proposal="proposal" />
       </div>
       <UiResizableHorizontal
-        :width="340"
+        :default="340"
         :max="400"
         :min="340"
         :class="[
