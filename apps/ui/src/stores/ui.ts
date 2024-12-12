@@ -6,6 +6,7 @@ import { NetworkID, NotificationType } from '@/types';
 type SafeModal = {
   id: string;
   type: 'vote' | 'propose' | 'transaction';
+  showVerifierLink: boolean;
 };
 
 type Notification = {
@@ -38,8 +39,8 @@ export const useUiStore = defineStore('ui', {
     async toggleSidebar() {
       this.sideMenuOpen = !this.sideMenuOpen;
     },
-    openSafeModal(type: SafeModal['type']) {
-      this.safeModal = { id: crypto.randomUUID(), type };
+    openSafeModal(data: Omit<SafeModal, 'id'>) {
+      this.safeModal = { id: crypto.randomUUID(), ...data };
     },
     addNotification(type: NotificationType, message: string, timeout = 5000) {
       const id = crypto.randomUUID();

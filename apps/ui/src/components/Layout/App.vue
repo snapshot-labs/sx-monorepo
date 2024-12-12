@@ -218,7 +218,7 @@ router.afterEach(() => {
       v-if="uiStore.safeModal !== null"
       :open="uiStore.safeModal !== null"
       :type="uiStore.safeModal.type"
-      :show-verifier-link="false"
+      :show-verifier-link="uiStore.safeModal.showVerifierLink"
       :messages="{
         title: 'Confirm proposal in Safe app',
         subtitle: 'Go back to Safe app to confirm your proposal'
