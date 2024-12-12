@@ -18,6 +18,7 @@ export type NetworkID =
   | 'matic'
   | 'arb1'
   | 'oeth'
+  | 'base'
   | 'sep'
   | 'sn'
   | 'sn-sep';
