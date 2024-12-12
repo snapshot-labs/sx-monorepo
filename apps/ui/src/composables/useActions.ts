@@ -63,14 +63,19 @@ export function useActions() {
   ) {
     if (envelope !== null) return false;
 
-    // TODO: this should determine differnet types
-    uiStore.openSafeModal(safeAppContext);
+    uiStore.openSafeModal({
+      type: safeAppContext,
+      showVerifierLink: false
+    });
 
-    // uiStore.addNotification('success', 'Transaction set up.');
     return true;
   }
 
-  async function handleCommitEnvelope(envelope: any, networkId: NetworkID) {
+  async function handleCommitEnvelope(
+    envelope: any,
+    networkId: NetworkID,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     // TODO: it should work with WalletConnect, should be done before L1 transaction is broadcasted
     const network = getNetwork(networkId);
 
@@ -89,10 +94,17 @@ export function useActions() {
         );
       }
 
-      uiStore.addNotification(
-        'success',
-        'Transaction set up. It will be processed once received on L2 network automatically.'
-      );
+      if (envelope.signatureData.commitTxId) {
+        uiStore.addNotification(
+          'success',
+          'Transaction set up. It will be processed once received on L2 network automatically.'
+        );
+      } else {
+        uiStore.openSafeModal({
+          type: safeAppContext,
+          showVerifierLink: true
+        });
+      }
 
       return true;
     }
@@ -115,7 +127,15 @@ export function useActions() {
     if (handleSafeEnvelope(envelope, opts.safeAppContext ?? 'transaction')) {
       return null;
     }
-    if (await handleCommitEnvelope(envelope, networkId)) return null;
+    if (
+      await handleCommitEnvelope(
+        envelope,
+        networkId,
+        opts.safeAppContext ?? 'transaction'
+      )
+    ) {
+      return null;
+    }
 
     let hash;
     // TODO: unify send/soc to both return txHash under same property
