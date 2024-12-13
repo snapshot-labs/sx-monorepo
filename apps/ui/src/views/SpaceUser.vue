@@ -25,6 +25,9 @@ const userActivity = ref<UserActivity>({
 const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const delegateModalOpen = ref(false);
+const delegateModalState = ref<{ delegatee: string } | null>(null);
+
 // const delegatesCount = ref(0);
 
 const network = computed(() => getNetwork(props.space.network));
@@ -120,6 +123,11 @@ async function loadUserActivity() {
 //     .reduce((a, b) => a + b, 0);
 // }
 
+function handleDelegateClick() {
+  delegateModalState.value = { delegatee: userId.value };
+  delegateModalOpen.value = true;
+}
+
 async function getVotingPower() {
   votingPowerStatus.value = 'loading';
   try {
@@ -179,6 +187,7 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
+        <UiButton @click="handleDelegateClick()"> Delegate </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
           <UiButton
             :to="{ name: 'user', params: { user: user.id } }"
@@ -251,5 +260,13 @@ watch(
       </div>
     </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
+    <teleport to="#modal">
+      <ModalDelegate
+        :open="delegateModalOpen"
+        :space="space"
+        :initial-state="delegateModalState"
+        @close="delegateModalOpen = false"
+      />
+    </teleport>
   </div>
 </template>
