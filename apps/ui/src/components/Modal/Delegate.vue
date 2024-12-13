@@ -65,7 +65,7 @@ const spaceDelegationsOptions = computed<
 
       return {
         id: i,
-        name: network.name,
+        name: d.name || '',
         icon: h('img', {
           src: getUrl(network.logo),
           alt: network.name,
