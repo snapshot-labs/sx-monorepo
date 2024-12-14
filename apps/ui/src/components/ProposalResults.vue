@@ -87,11 +87,27 @@ const otherResultsSummary = computed(() => {
     }
   );
 });
+
+const isFinalizing = computed(() => {
+  return (
+    !props.proposal.completed &&
+    ['passed', 'executed', 'rejected'].includes(props.proposal.state)
+  );
+});
 </script>
 
 <template>
+  <div v-if="isFinalizing" class="border rounded-lg px-3 py-2.5">
+    <div class="flex items-center gap-2 text-skin-link">
+      <IH-exclamation-circle class="shrink-0" />
+      Finalizing results
+    </div>
+    Please allow few minutes while final results are being calculated.
+  </div>
   <div
-    v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails"
+    v-else-if="
+      !!props.proposal.privacy && !props.proposal.completed && withDetails
+    "
   >
     <div class="mb-1">
       All votes are encrypted and will be decrypted only after the voting period
