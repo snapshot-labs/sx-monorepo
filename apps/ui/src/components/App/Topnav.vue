@@ -279,7 +279,7 @@ onUnmounted(() => {
               href="https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo"
             >
               <IH-sparkles :width="16" />
-              Discover our new interface
+              Learn more about the new interface
             </a>
           </UiDropdownItem>
         </template>
