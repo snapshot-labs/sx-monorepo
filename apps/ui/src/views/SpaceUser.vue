@@ -187,7 +187,12 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <UiButton @click="handleDelegateClick()"> Delegate </UiButton>
+        <UiButton
+          v-if="space.delegations.length"
+          @click="handleDelegateClick()"
+        >
+          Delegate
+        </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
           <UiButton
             :to="{ name: 'user', params: { user: user.id } }"
