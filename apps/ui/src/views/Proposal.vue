@@ -240,7 +240,6 @@ watchEffect(() => {
         :default="340"
         :max="400"
         :min="340"
-        resize-direction="LEFT"
         :class="[
           'shrink-0 md:h-full z-40 border-l-0 md:border-l',
           {

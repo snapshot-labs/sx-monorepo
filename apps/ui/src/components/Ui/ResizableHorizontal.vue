@@ -15,7 +15,8 @@ const sliderEl = ref<HTMLElement | null>(null);
 const initialized = ref(false);
 const dragging = ref(false);
 const width = ref(lsGet(`${props.id}.${CACHE_KEY_SUFFIX}`, props.default));
-const sliderOriginalPositionX = ref(0);
+const sliderOutOfBound = ref(false);
+const skipNextDragTick = ref(false);
 
 const { x, y } = useDraggable(sliderEl, {
   axis: 'x',
@@ -24,33 +25,48 @@ const { x, y } = useDraggable(sliderEl, {
   },
   onEnd: () => {
     dragging.value = false;
+    if (sliderOutOfBound) {
+      skipNextDragTick.value = true;
+    }
   }
 });
 
-const containerWidth = computed(() => {
-  const newWidth = Math.round(
-    width.value + sliderOriginalPositionX.value - x.value
-  );
+function getNewWidth(width: number, delta: number) {
+  const newWidth = Math.round(width - delta);
 
-  if (props.max && newWidth > props.max) return props.max;
-  if (props.min && newWidth < props.min) return props.min;
+  if (props.max && newWidth > props.max) {
+    sliderOutOfBound.value = true;
+    return props.max;
+  }
+  if (props.min && newWidth < props.min) {
+    sliderOutOfBound.value = true;
+    return props.min;
+  }
 
   return newWidth;
-});
+}
 
 function initResizer() {
   if (!sliderEl.value || !containerEl.value) return;
 
   const position = sliderEl.value.getBoundingClientRect();
-
-  sliderOriginalPositionX.value = position.x;
   x.value = position.x;
   y.value = position.y;
   initialized.value = true;
 }
 
-watch(containerWidth, w => {
-  lsSet(`${props.id}.${CACHE_KEY_SUFFIX}`, w);
+watch(x, (newX, oldX) => {
+  if (!initialized) return;
+
+  if (skipNextDragTick.value) {
+    skipNextDragTick.value = false;
+    sliderOutOfBound.value = false;
+    return;
+  }
+
+  width.value = getNewWidth(width.value, newX - oldX);
+
+  lsSet(`${props.id}.${CACHE_KEY_SUFFIX}`, width.value);
 });
 
 onMounted(() => {
@@ -62,7 +78,7 @@ onMounted(() => {
   <div
     ref="containerEl"
     class="relative max-md:!w-full"
-    :style="{ width: `${containerWidth}px` }"
+    :style="{ width: `${width}px` }"
   >
     <div
       ref="sliderEl"
