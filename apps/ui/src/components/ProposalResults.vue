@@ -91,7 +91,11 @@ const otherResultsSummary = computed(() => {
 
 <template>
   <div
-    v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails"
+    v-if="
+      !!props.proposal.privacy &&
+      props.proposal.state === 'active' &&
+      withDetails
+    "
   >
     <div class="mb-1">
       All votes are encrypted and will be decrypted only after the voting period
@@ -154,10 +158,16 @@ const otherResultsSummary = computed(() => {
           class="truncate grow"
           v-text="proposal.choices[result.choice - 1]"
         />
-        <div>
-          {{ _vp(result.score / 10 ** decimals) }}
-        </div>
-        <div v-text="_p(result.progress / 100)" />
+        <IH-lock-closed
+          v-if="!!proposal.privacy && !proposal.completed"
+          class="size-[16px] shrink-0"
+        />
+        <template v-else>
+          <div>
+            {{ _vp(result.score / 10 ** decimals) }}
+          </div>
+          <div v-text="_p(result.progress / 100)" />
+        </template>
       </div>
       <button
         v-if="!displayAllChoices && otherResultsSummary.count > 0"
