@@ -75,49 +75,53 @@ onMounted(loadMembersData);
 </script>
 
 <template>
-  <div v-if="!loaded" class="px-4 py-4 block">
-    <UiLoading class="block" />
-  </div>
-  <template v-for="role in roles" v-else :key="role.label">
-    <UiLabel v-if="role.data?.length" :label="role.label" />
-    <div class="text-left table-fixed w-full">
-      <div
-        v-for="(user, i) in role.data"
-        :key="`${role.label}-${i}`"
-        class="border-b flex space-x-1"
-      >
+  <div>
+    <div v-if="!loaded" class="px-4 py-4 block">
+      <UiLoading class="block" />
+    </div>
+    <template v-for="role in roles" v-else :key="role.label">
+      <UiLabel v-if="role.data?.length" :label="role.label" />
+      <div class="text-left table-fixed w-full">
         <div
-          class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] min-w-[220px] truncate"
+          v-for="(user, i) in role.data"
+          :key="`${role.label}-${i}`"
+          class="border-b flex space-x-1"
         >
-          <UiStamp :id="user" :size="32" />
-          <AppLink
-            :to="{
-              name: 'space-user-statement',
-              params: { space: `${space.network}:${space.id}`, user: user }
-            }"
-            class="overflow-hidden"
+          <div
+            class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] min-w-[220px] truncate"
           >
-            <h4
-              class="text-skin-link truncate"
-              v-text="names[user] || shorten(user)"
-            />
-            <div
-              class="text-[17px] text-skin-text truncate"
-              v-text="shorten(user)"
-            />
-          </AppLink>
-        </div>
-        <div
-          class="hidden sm:flex items-center grow text-[17px] px-4 overflow-hidden leading-[22px] text-skin-text"
-        >
-          <span
-            v-if="statements[user] || abouts[user]"
-            class="line-clamp-2 max-h-[44px]"
+            <UiStamp :id="user" :size="32" />
+            <AppLink
+              :to="{
+                name: 'space-user-statement',
+                params: { space: `${space.network}:${space.id}`, user: user }
+              }"
+              class="overflow-hidden"
+            >
+              <h4
+                class="text-skin-link truncate"
+                v-text="names[user] || shorten(user)"
+              />
+              <div
+                class="text-[17px] text-skin-text truncate"
+                v-text="shorten(user)"
+              />
+            </AppLink>
+          </div>
+          <div
+            class="hidden sm:flex items-center grow text-[17px] px-4 overflow-hidden leading-[22px] text-skin-text"
           >
-            {{ shorten(removeMarkdown(statements[user] || abouts[user]), 250) }}
-          </span>
+            <span
+              v-if="statements[user] || abouts[user]"
+              class="line-clamp-2 max-h-[44px]"
+            >
+              {{
+                shorten(removeMarkdown(statements[user] || abouts[user]), 250)
+              }}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  </template>
+    </template>
+  </div>
 </template>
