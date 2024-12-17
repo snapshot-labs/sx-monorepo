@@ -4,6 +4,7 @@ import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
   evmArbitrum,
+  evmBase,
   evmMainnet,
   EvmNetworkConfig,
   evmOptimism,
@@ -49,6 +50,7 @@ import { EDITOR_APP_NAME } from '../common/constants';
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
   137: evmPolygon,
+  8453: evmBase,
   42161: evmArbitrum,
   1: evmMainnet,
   11155111: evmSepolia
@@ -176,27 +178,6 @@ export function createActions(
       });
 
       return { txId: response.txId };
-    },
-    setMetadata: async (
-      web3: Web3Provider,
-      space: Space,
-      metadata: SpaceMetadata
-    ) => {
-      await verifyNetwork(web3, chainId);
-
-      const pinned = await helpers.pin(
-        createErc1155Metadata(metadata, {
-          execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types,
-          execution_destinations: space.executors_destinations
-        })
-      );
-
-      return client.setMetadataUri({
-        signer: web3.getSigner(),
-        space: space.id,
-        metadataUri: `ipfs://${pinned.cid}`
-      });
     },
     propose: async (
       web3: Web3Provider,
@@ -523,63 +504,6 @@ export function createActions(
         executionHash: proposal.execution_hash
       });
     },
-    setVotingDelay: async (
-      web3: Web3Provider,
-      space: Space,
-      votingDelay: number
-    ) => {
-      await verifyNetwork(web3, chainId);
-
-      const address = await web3.getSigner().getAddress();
-      const isContract = await getIsContract(address);
-
-      return client.setVotingDelay(
-        {
-          signer: web3.getSigner(),
-          space: space.id,
-          votingDelay
-        },
-        { noWait: isContract }
-      );
-    },
-    setMinVotingDuration: async (
-      web3: Web3Provider,
-      space: Space,
-      minVotingDuration: number
-    ) => {
-      await verifyNetwork(web3, chainId);
-
-      const address = await web3.getSigner().getAddress();
-      const isContract = await getIsContract(address);
-
-      return client.setMinVotingDuration(
-        {
-          signer: web3.getSigner(),
-          space: space.id,
-          minVotingDuration
-        },
-        { noWait: isContract }
-      );
-    },
-    setMaxVotingDuration: async (
-      web3: Web3Provider,
-      space: Space,
-      maxVotingDuration: number
-    ) => {
-      await verifyNetwork(web3, chainId);
-
-      const address = await web3.getSigner().getAddress();
-      const isContract = await getIsContract(address);
-
-      return client.setMaxVotingDuration(
-        {
-          signer: web3.getSigner(),
-          space: space.id,
-          maxVotingDuration
-        },
-        { noWait: isContract }
-      );
-    },
     transferOwnership: async (
       web3: Web3Provider,
       space: Space,
@@ -736,11 +660,22 @@ export function createActions(
       if (snapshotInfo.at === null)
         throw new Error('EVM requires block number to be defined');
 
+      const cumulativeDecimals = Math.max(
+        ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
+      );
+
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getEvmStrategy(address, networkConfig);
           if (!strategy)
-            return { address, value: 0n, decimals: 0, token: null, symbol: '' };
+            return {
+              address,
+              value: 0n,
+              displayDecimals: 0,
+              cumulativeDecimals: 0,
+              token: null,
+              symbol: ''
+            };
 
           const strategyMetadata = await parseStrategyMetadata(
             strategiesMetadata[i].payload
@@ -761,7 +696,8 @@ export function createActions(
           return {
             address,
             value,
-            decimals: strategiesMetadata[i]?.decimals ?? 0,
+            cumulativeDecimals,
+            displayDecimals: strategiesMetadata[i]?.decimals ?? 0,
             symbol: strategiesMetadata[i]?.symbol ?? '',
             token,
             swapLink: getSwapLink(strategy.type, address, chainId)

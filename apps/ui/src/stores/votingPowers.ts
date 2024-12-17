@@ -10,10 +10,8 @@ const LATEST_BLOCK_NAME = 'latest';
 type SpaceDetails = Proposal['space'];
 export type VotingPowerItem = {
   votingPowers: VotingPower[];
-  totalVotingPower: bigint;
   status: VotingPowerStatus;
   symbol: string;
-  decimals: number;
   error: utils.errors.VotingPowerDetailsError | null;
   canPropose: boolean;
   canVote: boolean;
@@ -63,8 +61,6 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
     let vpItem: VotingPowerItem = {
       status: 'loading',
       votingPowers: [],
-      totalVotingPower: 0n,
-      decimals: 18,
       symbol: space.voting_power_symbol,
       error: null,
       canPropose: false,
@@ -106,19 +102,20 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       vpItem = {
         ...vpItem,
         votingPowers: vp,
-        totalVotingPower: vp.reduce((acc, b) => acc + b.value, 0n),
-        status: 'success',
-        decimals: Math.max(...vp.map(votingPower => votingPower.decimals), 0)
+        status: 'success'
       };
 
       if (isSpace(item) && proposeVp) {
-        const totalProposeVp = proposeVp.reduce((acc, b) => acc + b.value, 0n);
+        const totalProposeVp = proposeVp.reduce(
+          (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+          0
+        );
 
         vpItem.canPropose =
           totalProposeVp >= BigInt(item.proposal_threshold) ||
           isSpaceMember(space as Space, account);
       } else {
-        vpItem.canVote = vpItem.totalVotingPower > 0n;
+        vpItem.canVote = vp.some(vp => vp.value > 0n);
       }
     } catch (e: unknown) {
       if (e instanceof utils.errors.VotingPowerDetailsError) {

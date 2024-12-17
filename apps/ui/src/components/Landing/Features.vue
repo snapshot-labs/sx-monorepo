@@ -72,7 +72,7 @@ const FEATURES = [
     <UiContainer class="!max-w-screen-lg">
       <div class="pb-6 max-w-[600px]">
         <div class="eyebrow mb-3">Features</div>
-        <h1 class="mb-4 font-display !text-[44px]">
+        <h1 class="mb-4 font-display text-[36px] xs:text-[44px]">
           Everything DAOs need to make better decisions together
         </h1>
       </div>

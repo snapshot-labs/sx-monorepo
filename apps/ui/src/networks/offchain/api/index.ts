@@ -57,7 +57,6 @@ import {
   ApiStrategy,
   ApiVote
 } from './types';
-import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
@@ -123,6 +122,7 @@ function formatSpace(
       cover: space.cover || '',
       proposal_count: space.proposalsCount,
       vote_count: space.votesCount,
+      active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
       snapshot_chain_id: parseInt(space.network)
@@ -172,12 +172,13 @@ function formatSpace(
     vote_count: space.votesCount,
     follower_count: space.followersCount,
     voting_power_symbol: space.symbol,
+    active_proposals: space.activeProposals,
     voting_delay: space.voting.delay ?? 0,
     voting_types: space.voting.type
       ? [space.voting.type]
       : constants.EDITOR_VOTING_TYPES,
-    min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
-    max_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
+    min_voting_period: space.voting.period ?? 0,
+    max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
     treasuries,
     labels: space.labels,

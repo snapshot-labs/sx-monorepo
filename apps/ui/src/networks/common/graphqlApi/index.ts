@@ -200,6 +200,7 @@ function formatSpace(
     discord: space.metadata.discord,
     terms: '',
     voting_power_symbol: space.metadata.voting_power_symbol,
+    active_proposals: null,
     voting_types: constants.EDITOR_VOTING_TYPES,
     treasuries: space.metadata.treasuries.map(treasury =>
       formatMetadataTreasury(treasury)

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getBoostsCount } from '@/helpers/boost';
 import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
@@ -11,7 +12,7 @@ const props = defineProps<{
 const route = useRoute();
 const proposalsStore = useProposalsStore();
 const {
-  votingPower,
+  get: getVotingPower,
   fetch: fetchVotingPower,
   reset: resetVotingPower
 } = useVotingPower();
@@ -26,6 +27,7 @@ const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
+const boostCount = ref(0);
 
 const id = computed(() => route.params.proposal as string);
 const proposal = computed(() => {
@@ -40,6 +42,12 @@ const discussion = computed(() => {
   if (!proposal.value) return null;
 
   return sanitizeUrl(proposal.value.discussion);
+});
+
+const votingPower = computed(() => {
+  if (!proposal.value) return;
+
+  return getVotingPower(props.space, proposal.value);
 });
 
 const votingPowerDecimals = computed(() => {
@@ -91,7 +99,7 @@ async function handleVoteSubmitted() {
 function handleFetchVotingPower() {
   if (!proposal.value) return;
 
-  fetchVotingPower(proposal.value);
+  fetchVotingPower(props.space, proposal.value);
 }
 
 watch(
@@ -116,7 +124,18 @@ watch(
     await proposalsStore.fetchProposal(props.space.id, id, props.space.network);
 
     if (discussion.value) {
-      discourseTopic.value = await loadSingleTopic(discussion.value);
+      loadSingleTopic(discussion.value).then(result => {
+        discourseTopic.value = result;
+      });
+    }
+
+    if (props.space.additionalRawData?.boost?.enabled) {
+      const bribeEnabled =
+        props.space.additionalRawData.boost.bribeEnabled || false;
+      const proposalEnd = proposal.value?.max_end || 0;
+      getBoostsCount(id, bribeEnabled, proposalEnd).then(result => {
+        boostCount.value = result;
+      });
     }
   },
   { immediate: true }
@@ -205,6 +224,15 @@ watchEffect(() => {
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
               </a>
             </template>
+            <template v-if="boostCount > 0">
+              <a
+                :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
+                class="flex items-center"
+                target="_blank"
+              >
+                <UiLink :count="boostCount" text="Boost" class="inline-block" />
+              </a>
+            </template>
           </div>
         </UiScrollerHorizontal>
         <router-view :proposal="proposal" />
@@ -288,7 +316,7 @@ watchEffect(() => {
                   <a
                     v-if="
                       votingPower?.status === 'success' &&
-                      votingPower.totalVotingPower === BigInt(0)
+                      votingPower.votingPowers.every(v => v.value === 0n)
                     "
                     :href="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
                     target="_blank"
@@ -335,13 +363,7 @@ watchEffect(() => {
               </ProposalVote>
             </div>
           </div>
-          <div
-            v-if="
-              !proposal.cancelled &&
-              proposal.state !== 'pending' &&
-              proposal.vote_count
-            "
-          >
+          <div v-if="!proposal.cancelled">
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
               <IH-chart-square-bar />
               Results

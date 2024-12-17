@@ -18,6 +18,7 @@ export type NetworkID =
   | 'matic'
   | 'arb1'
   | 'oeth'
+  | 'base'
   | 'sep'
   | 'sn'
   | 'sn-sep';
@@ -120,6 +121,7 @@ export type RelatedSpace = {
   about?: string;
   proposal_count: number;
   vote_count: number;
+  active_proposals: number | null;
   turbo: boolean;
   verified: boolean;
   snapshot_chain_id: number;
@@ -173,6 +175,7 @@ export type Space = {
   coingecko?: string;
   terms: string;
   voting_power_symbol: string;
+  active_proposals: number | null;
   controller: string;
   voting_delay: number;
   voting_types: VoteType[];
@@ -373,6 +376,10 @@ export type Draft = {
   labels: string[];
   executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
+  created?: number;
+  start?: number;
+  min_end?: number;
+  max_end?: number;
 };
 
 export type Metadata = {

@@ -10,6 +10,7 @@ const starknetNetwork = createStarknetNetwork('sn');
 const starknetSepoliaNetwork = createStarknetNetwork('sn-sep');
 const polygonNetwork = createEvmNetwork('matic');
 const arbitrumNetwork = createEvmNetwork('arb1');
+const baseNetwork = createEvmNetwork('base');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
 const sepoliaNetwork = createEvmNetwork('sep');
@@ -17,9 +18,27 @@ const sepoliaNetwork = createEvmNetwork('sep');
 export const enabledNetworks: NetworkID[] = import.meta.env
   .VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
-  : ['s', 's-tn', 'eth', 'matic', 'arb1', 'oeth', 'sep', 'sn', 'sn-sep'];
+  : [
+      's',
+      's-tn',
+      'eth',
+      'matic',
+      'arb1',
+      'base',
+      'oeth',
+      'sep',
+      'sn',
+      'sn-sep'
+    ];
 
-export const evmNetworks: NetworkID[] = ['eth', 'matic', 'arb1', 'oeth', 'sep'];
+export const evmNetworks: NetworkID[] = [
+  'eth',
+  'matic',
+  'arb1',
+  'base',
+  'oeth',
+  'sep'
+];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 // This network is used for aliases/follows/profiles/explore page.
@@ -34,6 +53,7 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 's-tn') return snapshotTestnetNetwork;
   if (id === 'matic') return polygonNetwork;
   if (id === 'arb1') return arbitrumNetwork;
+  if (id === 'base') return baseNetwork;
   if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
   if (id === 'sep') return sepoliaNetwork;
