@@ -368,7 +368,7 @@ export const STRATEGY_QUERY = gql`
 
 export const STATEMENTS_AND_USERS_QUERY = gql`
   query ($statementsWhere: StatementsWhere, $userIds: [String!]) {
-    statements(where: $where) {
+    statements(where: $statementsWhere) {
       delegate
       space
       network
