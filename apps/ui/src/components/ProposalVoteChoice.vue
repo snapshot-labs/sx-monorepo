@@ -2,7 +2,7 @@
 import { getChoiceText } from '@/helpers/utils';
 import { Proposal, Vote } from '@/types';
 
-const props = withDefaults(
+withDefaults(
   defineProps<{
     proposal: Proposal;
     vote: Vote;
@@ -12,26 +12,16 @@ const props = withDefaults(
     showReason: true
   }
 );
-
-const isClosed = computed(() => {
-  return ['passed', 'executed', 'rejected'].includes(props.proposal.state);
-});
 </script>
 
 <template>
-  <template v-if="!!proposal.privacy && !proposal.completed">
-    <div v-if="isClosed" class="flex flex-col items-start">
-      <div class="flex gap-1 items-center">
-        <div class="text-skin-heading leading-[22px]">Decrypting choice</div>
-        <IH-lock-closed class="size-[16px] shrink-0" />
-      </div>
-      <div class="text-[17px] text-skin-text">Please wait ...</div>
-    </div>
-    <div v-else class="flex gap-1 items-center">
-      <span class="text-skin-heading leading-[22px]">Encrypted choice</span>
-      <IH-lock-closed class="size-[16px] shrink-0" />
-    </div>
-  </template>
+  <div
+    v-if="!!proposal.privacy && !proposal.completed"
+    class="flex gap-1 items-center"
+  >
+    <span class="text-skin-heading leading-[22px]">Encrypted choice</span>
+    <IH-lock-closed class="size-[16px] shrink-0" />
+  </div>
   <div v-else class="flex flex-col max-w-full truncate items-start">
     <UiTooltip
       v-if="proposal.type !== 'basic'"
