@@ -8,6 +8,9 @@ export const HELPDESK_URL = 'https://help.snapshot.box';
 
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
+export const NEW_UI_ANNOUNCEMENT_URL =
+  'https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo';
+
 export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   // EVM
   eth: 1,
