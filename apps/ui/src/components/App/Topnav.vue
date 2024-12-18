@@ -2,7 +2,8 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { NEW_UI_ANNOUNCEMENT_URL } from '@/helpers/constants';
 import { getCacheHash, shorten } from '@/helpers/utils';
-import { metadataNetwork, offchainNetworks } from '@/networks';
+import { offchainNetworks } from '@/networks';
+import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { NetworkID } from '@/types';
 
 defineProps<{
@@ -60,15 +61,9 @@ const searchConfig = computed(() => {
 });
 
 const oldInterfaceLink = computed(() => {
-  const networkSubDomains = {
-    s: 'v1.',
-    's-tn': 'testnet.v1.'
-  };
   const [spaceNetwork, spaceId] = ((route.params.space as string) || '').split(
     ':'
   );
-  const subDomain =
-    networkSubDomains[spaceNetwork] || networkSubDomains[metadataNetwork];
   let path = '';
 
   switch (route.name) {
@@ -120,7 +115,7 @@ const oldInterfaceLink = computed(() => {
     path = '';
   }
 
-  return `https://${subDomain}snapshot.box/#/${path}`;
+  return `${SNAPSHOT_URLS[spaceNetwork]}/#/${path}`;
 });
 
 async function handleLogin(connector) {
