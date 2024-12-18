@@ -80,6 +80,13 @@ export type EIP712UpdateProposal = {
   from?: string;
 };
 
+export type EIP712FlagProposalMessage = {
+  space: string;
+  proposal: string;
+  from?: string;
+  timestamp?: number;
+};
+
 export type EIP712CancelProposalMessage = {
   space: string;
   proposal: string;
@@ -193,11 +200,18 @@ export type UpdateProposal = {
   plugins: string;
 };
 
+export type FlagProposal = {
+  from?: string;
+  space: string;
+  proposal: string;
+  timestamp?: number;
+};
+
 export type CancelProposal = {
   from?: string;
   space: string;
-  timestamp?: number;
   proposal: string;
+  timestamp?: number;
 };
 
 export type FollowSpace = {

@@ -401,6 +401,9 @@ export function createActions(
         data
       });
     },
+    flagProposal: () => {
+      throw new Error('Not implemented');
+    },
     cancelProposal: async (web3: any, proposal: Proposal) => {
       await verifyStarknetNetwork(web3, chainId);
 

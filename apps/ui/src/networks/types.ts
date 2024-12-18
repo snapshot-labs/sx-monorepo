@@ -169,6 +169,7 @@ export type ReadOnlyNetworkActions = {
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
+  flagProposal(web3: Web3Provider, proposal: Proposal);
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(
     web3: Web3Provider,
