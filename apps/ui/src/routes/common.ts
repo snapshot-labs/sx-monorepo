@@ -6,6 +6,7 @@ import SpaceDelegates from '@/views/Space/Delegates.vue';
 import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
+import SpaceMembers from '@/views/Space/Members.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearch from '@/views/Space/Search.vue';
@@ -70,6 +71,11 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
     path: 'leaderboard',
     name: 'space-leaderboard',
     component: SpaceLeaderboard
+  },
+  {
+    path: 'members',
+    name: 'space-members',
+    component: SpaceMembers
   },
   {
     path: 'profile/:user',
