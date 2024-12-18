@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { NEW_UI_ANNOUNCEMENT_URL } from '@/helpers/constants';
 import { getCacheHash, shorten } from '@/helpers/utils';
 import { metadataNetwork, offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
@@ -274,13 +275,13 @@ onUnmounted(() => {
           </UiDropdownItem>
           <hr class="h-[2px] bg-skin-text/20 mx-3" />
           <UiDropdownItem v-slot="{ active }">
-            <a
+            <AppLink
               :class="['flex gap-2 items-center', { 'opacity-80': active }]"
-              href="https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo"
+              :to="NEW_UI_ANNOUNCEMENT_URL"
             >
               <IH-sparkles :width="16" />
               Learn more about the new interface
-            </a>
+            </AppLink>
           </UiDropdownItem>
         </template>
       </UiDropdown>
