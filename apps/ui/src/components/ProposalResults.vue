@@ -110,24 +110,15 @@ const isFinalizing = computed(() => {
       props.proposal.state === 'active' &&
       withDetails
     "
+    class="space-y-1"
   >
-    <div class="mb-1">
+    <div>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
     </div>
-    <div>
-      <a
-        :href="SHUTTER_URL"
-        class="flex items-center text-skin-link"
-        target="_blank"
-      >
-        <IC-Shutter class="w-[80px]" />
-        <IH-arrow-sm-right class="-rotate-45" />
-      </a>
-      <div v-if="proposal.quorum" class="mt-3.5">
-        {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
-      </div>
+    <div v-if="proposal.quorum">
+      {{ quorumLabel(proposal.quorum_type) }}:
+      <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
     </div>
   </div>
   <template v-else>
@@ -214,16 +205,6 @@ const isFinalizing = computed(() => {
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
-      <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
-        <a
-          :href="SHUTTER_URL"
-          class="flex items-center text-skin-link"
-          target="_blank"
-        >
-          <IC-Shutter class="w-[80px]" />
-          <IH-arrow-sm-right class="-rotate-45" />
-        </a>
-      </div>
     </div>
     <div
       v-else-if="!props.proposal.privacy || props.proposal.completed"
@@ -255,4 +236,13 @@ const isFinalizing = computed(() => {
       </div>
     </div>
   </template>
+  <a
+    v-if="proposal.privacy == 'shutter' && withDetails"
+    :href="SHUTTER_URL"
+    class="flex items-center text-skin-link mt-2.5"
+    target="_blank"
+  >
+    <IC-Shutter class="w-[80px]" />
+    <IH-arrow-sm-right class="-rotate-45" />
+  </a>
 </template>
