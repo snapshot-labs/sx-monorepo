@@ -106,7 +106,9 @@ const isFinalizing = computed(() => {
   </div>
   <div
     v-else-if="
-      !!props.proposal.privacy && !props.proposal.completed && withDetails
+      !!props.proposal.privacy &&
+      props.proposal.state === 'active' &&
+      withDetails
     "
   >
     <div class="mb-1">
@@ -170,10 +172,16 @@ const isFinalizing = computed(() => {
           class="truncate grow"
           v-text="proposal.choices[result.choice - 1]"
         />
-        <div>
-          {{ _vp(result.score / 10 ** decimals) }}
-        </div>
-        <div v-text="_p(result.progress / 100)" />
+        <IH-lock-closed
+          v-if="!!proposal.privacy && !proposal.completed"
+          class="size-[16px] shrink-0"
+        />
+        <template v-else>
+          <div>
+            {{ _vp(result.score / 10 ** decimals) }}
+          </div>
+          <div v-text="_p(result.progress / 100)" />
+        </template>
       </div>
       <button
         v-if="!displayAllChoices && otherResultsSummary.count > 0"
