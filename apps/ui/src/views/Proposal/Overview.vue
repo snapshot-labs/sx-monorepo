@@ -9,6 +9,7 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
+import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
@@ -409,12 +410,36 @@ onBeforeUnmount(() => destroyAudio());
           <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
-      <div v-if="proposal.executions && proposal.executions.length > 0">
+      <div
+        v-if="
+          (proposal.executions && proposal.executions.length > 0) ||
+          proposal.execution_strategy_type === 'safeSnap'
+        "
+      >
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-play />
           <span>Execution</span>
         </h4>
         <div class="mb-4">
+          <UiAlert
+            v-if="proposal.execution_strategy_type === 'safeSnap'"
+            type="warning"
+          >
+            <div>
+              This proposal uses SafeSnap execution which is currently not
+              supported on the new interface. You can view execution details on
+              the
+              <a
+                :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
+                target="_blank"
+                class="inline-flex items-center font-bold"
+              >
+                previous interface
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </a>
+              .
+            </div>
+          </UiAlert>
           <ProposalExecutionsList
             :proposal="proposal"
             :executions="proposal.executions"
