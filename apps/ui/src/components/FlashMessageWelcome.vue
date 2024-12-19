@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { NEW_UI_ANNOUNCEMENT_URL } from '@/helpers/constants';
 import { lsGet, lsSet } from '@/helpers/utils';
 
 const KEY = 'showV2Welcome';
@@ -42,9 +43,7 @@ onMounted(async () => {
         governance enhancements.
       </div>
       <div class="space-y-2 text-center">
-        <UiButton
-          class="w-full"
-          to="https://snapshot.mirror.xyz/0qnfjmE0SFeUykArdi664oO4qFcZUoZTTOd8m7es_Eo"
+        <UiButton class="w-full" :to="NEW_UI_ANNOUNCEMENT_URL"
           >Learn more</UiButton
         >
         <div class="block text-sm">
