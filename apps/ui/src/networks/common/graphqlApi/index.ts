@@ -4,6 +4,7 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
@@ -57,6 +58,7 @@ type ApiOptions = {
 };
 
 function getProposalState(
+  networkId: NetworkID,
   proposal: ApiProposal,
   current: number
 ): ProposalState {
@@ -64,13 +66,16 @@ function getProposalState(
   // those values are actually strings
   // https://github.com/snapshot-labs/sx-monorepo/pull/529/files#r1691071502
   const quorum = BigInt(proposal.quorum);
-  const scoresTotal = BigInt(proposal.scores_total);
+  const currentQuorum = getProposalCurrentQuorum(networkId, {
+    scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
+    scores_total: proposal.scores_total
+  });
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);
 
   if (proposal.executed) return 'executed';
   if (proposal.max_end <= current) {
-    if (scoresTotal < quorum) return 'rejected';
+    if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
   if (proposal.start > current) return 'pending';
@@ -294,7 +299,7 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
-    state: getProposalState(proposal, current),
+    state: getProposalState(networkId, proposal, current),
     network: networkId,
     privacy: null,
     quorum: +proposal.quorum,
