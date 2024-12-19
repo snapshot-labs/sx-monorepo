@@ -87,33 +87,38 @@ const otherResultsSummary = computed(() => {
     }
   );
 });
+
+const isFinalizing = computed(() => {
+  return (
+    !props.proposal.completed &&
+    ['passed', 'executed', 'rejected'].includes(props.proposal.state)
+  );
+});
 </script>
 
 <template>
+  <div v-if="isFinalizing" class="border rounded-lg px-3 py-2.5">
+    <div class="flex items-center gap-2 text-skin-link">
+      <IH-exclamation-circle class="shrink-0" />
+      Finalizing results
+    </div>
+    Please allow few minutes while final results are being calculated.
+  </div>
   <div
-    v-if="
+    v-else-if="
       !!props.proposal.privacy &&
       props.proposal.state === 'active' &&
       withDetails
     "
+    class="space-y-1"
   >
-    <div class="mb-1">
+    <div>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
     </div>
-    <div>
-      <a
-        :href="SHUTTER_URL"
-        class="flex items-center text-skin-link"
-        target="_blank"
-      >
-        <IC-Shutter class="w-[80px]" />
-        <IH-arrow-sm-right class="-rotate-45" />
-      </a>
-      <div v-if="proposal.quorum" class="mt-3.5">
-        {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
-      </div>
+    <div v-if="proposal.quorum">
+      {{ quorumLabel(proposal.quorum_type) }}:
+      <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
     </div>
   </div>
   <template v-else>
@@ -200,16 +205,6 @@ const otherResultsSummary = computed(() => {
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
-      <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
-        <a
-          :href="SHUTTER_URL"
-          class="flex items-center text-skin-link"
-          target="_blank"
-        >
-          <IC-Shutter class="w-[80px]" />
-          <IH-arrow-sm-right class="-rotate-45" />
-        </a>
-      </div>
     </div>
     <div
       v-else-if="!props.proposal.privacy || props.proposal.completed"
@@ -241,4 +236,13 @@ const otherResultsSummary = computed(() => {
       </div>
     </div>
   </template>
+  <a
+    v-if="proposal.privacy == 'shutter' && withDetails"
+    :href="SHUTTER_URL"
+    class="flex items-center text-skin-link mt-2.5"
+    target="_blank"
+  >
+    <IC-Shutter class="w-[80px]" />
+    <IH-arrow-sm-right class="-rotate-45" />
+  </a>
 </template>
