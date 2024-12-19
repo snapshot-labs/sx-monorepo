@@ -368,6 +368,9 @@ export function createActions(
         { noWait: isContract }
       );
     },
+    flagProposal: () => {
+      throw new Error('Not implemented');
+    },
     cancelProposal: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
