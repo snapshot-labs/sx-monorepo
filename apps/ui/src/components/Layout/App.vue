@@ -214,6 +214,17 @@ router.afterEach(() => {
       </main>
     </div>
     <AppNotifications />
+    <ModalConfirmSafe
+      v-if="uiStore.safeModal !== null"
+      :open="uiStore.safeModal !== null"
+      :type="uiStore.safeModal.type"
+      :show-verifier-link="uiStore.safeModal.showVerifierLink"
+      :messages="{
+        title: 'Confirm proposal in Safe app',
+        subtitle: 'Go back to Safe app to confirm your proposal'
+      }"
+      @close="uiStore.safeModal = null"
+    />
     <ModalTransaction
       v-if="route.name !== 'space-editor' && transaction && network"
       :open="!!transaction"
