@@ -247,6 +247,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
     }
+  } else if (proposal.plugins.safeSnap) {
+    executions = [];
+    executionType = 'safeSnap';
   }
 
   if (proposal.plugins.readOnlyExecution) {
