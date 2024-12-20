@@ -19,7 +19,9 @@ const {
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
+const uiStore = useUiStore();
 const termsStore = useTermsStore();
+const { isDownloadingVotes, downloadVotes } = useReportDownload();
 
 const modalOpenVote = ref(false);
 const modalOpenTerms = ref(false);
@@ -84,6 +86,28 @@ async function handleVoteClick(choice: Choice) {
   }
 
   modalOpenVote.value = true;
+}
+
+async function handleDownloadVotes() {
+  if (!proposal.value) return;
+
+  try {
+    await downloadVotes(proposal.value.id);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      if (e.message === 'PENDING_GENERATION') {
+        return uiStore.addNotification(
+          'success',
+          'Your report is currently being generated. It may take a few minutes. Please check back shortly.'
+        );
+      }
+
+      uiStore.addNotification(
+        'error',
+        "We're having trouble connecting to the server responsible for downloads"
+      );
+    }
+  }
 }
 
 function handleAcceptTerms() {
@@ -373,6 +397,23 @@ watchEffect(() => {
               :proposal="proposal"
               :decimals="votingPowerDecimals"
             />
+            <button
+              v-if="
+                proposal.network === 's' &&
+                ['passed', 'rejected', 'executed'].includes(proposal.state)
+              "
+              class="mt-2.5 inline-flex items-center gap-2 hover:text-skin-link"
+              @click="handleDownloadVotes"
+            >
+              <template v-if="isDownloadingVotes">
+                <UiLoading :size="18" />
+                Downloading votes
+              </template>
+              <template v-else>
+                <IS-arrow-down-tray />
+                Download votes
+              </template>
+            </button>
           </div>
           <div v-if="space.labels?.length && proposal.labels?.length">
             <h4 class="mb-2.5 eyebrow flex items-center gap-2">
