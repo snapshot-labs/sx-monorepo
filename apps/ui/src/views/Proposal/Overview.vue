@@ -20,7 +20,7 @@ const uiStore = useUiStore();
 const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
-const { cancelProposal } = useActions();
+const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
 const {
   state: aiSummaryState,
@@ -42,8 +42,23 @@ const {
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
+const flagging = ref(false);
 const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
+
+const flaggable = computed(() => {
+  if (!offchainNetworks.includes(props.proposal.network)) return false;
+  if (props.proposal.flagged) return false;
+
+  const addresses = [
+    props.proposal.space.admins || [],
+    props.proposal.space.moderators || []
+  ].flat();
+
+  return addresses.some(address =>
+    compareAddresses(address, web3.value.account)
+  );
+});
 
 const editable = computed(() => {
   // HACK: here we need to use snapshot instead of start because start is artificially
@@ -174,6 +189,22 @@ async function handleDuplicateClick() {
       key: draftId
     }
   });
+}
+
+async function handleFlagClick() {
+  flagging.value = true;
+
+  try {
+    const result = await flagProposal(props.proposal);
+    if (result) {
+      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      router.push({
+        name: 'space-overview'
+      });
+    }
+  } finally {
+    flagging.value = false;
+  }
 }
 
 async function handleCancelClick() {
@@ -355,6 +386,21 @@ onBeforeUnmount(() => destroyAudio());
                 >
                   <IS-pencil :width="16" />
                   Edit proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="flaggable"
+                v-slot="{ active, disabled }"
+                :disabled="flagging"
+              >
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleFlagClick"
+                >
+                  <IH-flag :width="16" />
+                  Flag proposal
                 </button>
               </UiDropdownItem>
               <UiDropdownItem

@@ -188,6 +188,15 @@ export function createActions(
 
       return client.updateProposal({ signer: web3.getSigner(), data });
     },
+    flagProposal(web3: Web3Provider, proposal: Proposal) {
+      return client.flagProposal({
+        signer: web3.getSigner(),
+        data: {
+          proposal: proposal.proposal_id as string,
+          space: proposal.space.id
+        }
+      });
+    },
     cancelProposal(web3: Web3Provider, proposal: Proposal) {
       return client.cancel({
         signer: web3.getSigner(),
