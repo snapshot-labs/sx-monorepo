@@ -1,5 +1,11 @@
 # @snapshot-labs/sx
 
+## 0.1.7
+
+### Patch Changes
+
+- 5ebcc3c: add flagProposal method to offchain EthereumSig client
+
 ## 0.1.6
 
 ### Patch Changes
