@@ -102,7 +102,7 @@ function downloadExecution(execution: ProposalExecution) {
         proposal.executions &&
         proposal.executions.length > 0 &&
         proposal.scores.length > 0 &&
-        getProposalCurrentQuorum(proposal.network, proposal) >
+        getProposalCurrentQuorum(proposal.network, proposal) >=
           proposal.quorum &&
         toBigIntOrNumber(proposal.scores[0]) >
           toBigIntOrNumber(proposal.scores[1]) &&
