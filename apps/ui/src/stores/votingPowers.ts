@@ -58,12 +58,13 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
 
     const network = getNetwork(item.network);
 
+    const canPropose = isSpaceMember(space as Space, account);
     let vpItem: VotingPowerItem = {
       status: 'loading',
       votingPowers: [],
       symbol: space.voting_power_symbol,
       error: null,
-      canPropose: false,
+      canPropose,
       canVote: false
     };
 
@@ -87,7 +88,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
           account,
           opts
         ),
-        isSpace(item)
+        isSpace(item) && !vpItem.canPropose
           ? network.actions.getVotingPower(
               space.id,
               item.voting_power_validation_strategy_strategies,
@@ -111,9 +112,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
           0
         );
 
-        vpItem.canPropose =
-          totalProposeVp >= BigInt(item.proposal_threshold) ||
-          isSpaceMember(space as Space, account);
+        vpItem.canPropose ||= totalProposeVp >= BigInt(item.proposal_threshold);
       } else {
         vpItem.canVote = vp.some(vp => vp.value > 0n);
       }
