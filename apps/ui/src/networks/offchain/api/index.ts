@@ -788,7 +788,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: STATEMENTS_AND_USERS_QUERY,
         variables: {
-          where: {
+          statementsWhere: {
             delegate_in: userIds,
             network: networkId,
             space: spaceId
