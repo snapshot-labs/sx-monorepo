@@ -367,8 +367,12 @@ export const STRATEGY_QUERY = gql`
 `;
 
 export const STATEMENTS_AND_USERS_QUERY = gql`
-  query ($statementsWhere: StatementsWhere, $userIds: [String!]) {
-    statements(where: $statementsWhere) {
+  query (
+    $statementsFirst: Int!
+    $statementsWhere: StatementsWhere
+    $userIds: [String!]
+  ) {
+    statements(first: $statementsFirst, where: $statementsWhere) {
       delegate
       space
       network
