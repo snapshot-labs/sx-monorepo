@@ -321,6 +321,11 @@ export type NetworkApi = {
     spaceId: string,
     userIds: string[]
   ): Promise<Statement[]>;
+  loadStatementsAndUsers(
+    networkId: NetworkID,
+    spaceId: string,
+    userIds: string[]
+  ): Promise<{ statements: Statement[]; users: User[] }>;
   loadStrategies(): Promise<StrategyTemplate[]>;
   loadStrategy(address: string): Promise<StrategyTemplate | null>;
   getNetworksUsage(): Promise<Record<ChainId, number | undefined>>;
