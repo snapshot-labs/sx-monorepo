@@ -9,6 +9,7 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
+import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
@@ -20,7 +21,7 @@ const uiStore = useUiStore();
 const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
-const { cancelProposal } = useActions();
+const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
 const {
   state: aiSummaryState,
@@ -42,8 +43,23 @@ const {
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
+const flagging = ref(false);
 const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
+
+const flaggable = computed(() => {
+  if (!offchainNetworks.includes(props.proposal.network)) return false;
+  if (props.proposal.flagged) return false;
+
+  const addresses = [
+    props.proposal.space.admins || [],
+    props.proposal.space.moderators || []
+  ].flat();
+
+  return addresses.some(address =>
+    compareAddresses(address, web3.value.account)
+  );
+});
 
 const editable = computed(() => {
   // HACK: here we need to use snapshot instead of start because start is artificially
@@ -174,6 +190,22 @@ async function handleDuplicateClick() {
       key: draftId
     }
   });
+}
+
+async function handleFlagClick() {
+  flagging.value = true;
+
+  try {
+    const result = await flagProposal(props.proposal);
+    if (result) {
+      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      router.push({
+        name: 'space-overview'
+      });
+    }
+  } finally {
+    flagging.value = false;
+  }
 }
 
 async function handleCancelClick() {
@@ -358,6 +390,21 @@ onBeforeUnmount(() => destroyAudio());
                 </button>
               </UiDropdownItem>
               <UiDropdownItem
+                v-if="flaggable"
+                v-slot="{ active, disabled }"
+                :disabled="flagging"
+              >
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleFlagClick"
+                >
+                  <IH-flag :width="16" />
+                  Flag proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
                 v-if="cancellable"
                 v-slot="{ active, disabled }"
                 :disabled="cancelling"
@@ -409,12 +456,36 @@ onBeforeUnmount(() => destroyAudio());
           <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
-      <div v-if="proposal.executions && proposal.executions.length > 0">
+      <div
+        v-if="
+          (proposal.executions && proposal.executions.length > 0) ||
+          proposal.execution_strategy_type === 'safeSnap'
+        "
+      >
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-play />
           <span>Execution</span>
         </h4>
         <div class="mb-4">
+          <UiAlert
+            v-if="proposal.execution_strategy_type === 'safeSnap'"
+            type="warning"
+          >
+            <div>
+              This proposal uses SafeSnap execution which is currently not
+              supported on the new interface. You can view execution details on
+              the
+              <a
+                :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
+                target="_blank"
+                class="inline-flex items-center font-bold"
+              >
+                previous interface
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </a>
+              .
+            </div>
+          </UiAlert>
           <ProposalExecutionsList
             :proposal="proposal"
             :executions="proposal.executions"

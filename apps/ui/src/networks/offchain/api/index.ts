@@ -5,6 +5,7 @@ import {
 } from '@apollo/client/core';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap';
+import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone } from '@/helpers/utils';
 import {
@@ -71,9 +72,17 @@ const DELEGATION_STRATEGIES = [
 
 const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
 
-function getProposalState(proposal: ApiProposal): ProposalState {
+function getProposalState(
+  networkId: NetworkID,
+  proposal: ApiProposal
+): ProposalState {
   if (proposal.state === 'closed') {
-    if (proposal.scores_total < proposal.quorum) return 'rejected';
+    const currentQuorum = getProposalCurrentQuorum(networkId, {
+      scores: proposal.scores,
+      scores_total: proposal.scores_total
+    });
+
+    if (currentQuorum < proposal.quorum) return 'rejected';
     return proposal.type !== 'basic' || proposal.scores[0] > proposal.scores[1]
       ? 'passed'
       : 'rejected';
@@ -239,6 +248,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
     }
+  } else if (proposal.plugins.safeSnap) {
+    executions = [];
+    executionType = 'safeSnap';
   }
 
   if (proposal.plugins.readOnlyExecution) {
@@ -257,7 +269,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     ];
   }
 
-  const state = getProposalState(proposal);
+  const state = getProposalState(networkId, proposal);
 
   return {
     id: proposal.id,
@@ -289,7 +301,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     state,
     cancelled: false,
     vetoed: false,
-    completed: proposal.state === 'closed',
+    completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,
       name: proposal.space.name,

@@ -349,6 +349,25 @@ export function useActions() {
     return true;
   }
 
+  async function flagProposal(proposal: Proposal) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(proposal.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this action`);
+    }
+
+    await wrapPromise(
+      proposal.network,
+      network.actions.flagProposal(auth.web3, proposal)
+    );
+
+    return true;
+  }
+
   async function cancelProposal(proposal: Proposal) {
     if (!web3.value.account) {
       await forceLogin();
@@ -634,6 +653,7 @@ export function useActions() {
     vote: wrapWithErrors(vote),
     propose: wrapWithErrors(propose),
     updateProposal: wrapWithErrors(updateProposal),
+    flagProposal: wrapWithErrors(flagProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
     finalizeProposal: wrapWithErrors(finalizeProposal),
     executeTransactions: wrapWithErrors(executeTransactions),
