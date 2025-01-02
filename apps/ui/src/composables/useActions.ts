@@ -56,14 +56,25 @@ export function useActions() {
     };
   }
 
-  function handleSafeEnvelope(envelope: any) {
+  function handleSafeEnvelope(
+    envelope: any,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     if (envelope !== null) return false;
 
-    uiStore.addNotification('success', 'Transaction set up.');
+    uiStore.openSafeModal({
+      type: safeAppContext,
+      showVerifierLink: false
+    });
+
     return true;
   }
 
-  async function handleCommitEnvelope(envelope: any, networkId: NetworkID) {
+  async function handleCommitEnvelope(
+    envelope: any,
+    networkId: NetworkID,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     // TODO: it should work with WalletConnect, should be done before L1 transaction is broadcasted
     const network = getNetwork(networkId);
 
@@ -82,10 +93,17 @@ export function useActions() {
         );
       }
 
-      uiStore.addNotification(
-        'success',
-        'Transaction set up. It will be processed once received on L2 network automatically.'
-      );
+      if (envelope.signatureData.commitTxId) {
+        uiStore.addNotification(
+          'success',
+          'Transaction set up. It will be processed once received on L2 network automatically.'
+        );
+      } else {
+        uiStore.openSafeModal({
+          type: safeAppContext,
+          showVerifierLink: true
+        });
+      }
 
       return true;
     }
@@ -96,14 +114,27 @@ export function useActions() {
   async function wrapPromise(
     networkId: NetworkID,
     promise: Promise<any>,
-    opts: { transactionNetworkId?: NetworkID } = {}
+    opts: {
+      transactionNetworkId?: NetworkID;
+      safeAppContext?: 'vote' | 'propose' | 'transaction';
+    } = {}
   ): Promise<string | null> {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
 
-    if (handleSafeEnvelope(envelope)) return null;
-    if (await handleCommitEnvelope(envelope, networkId)) return null;
+    if (handleSafeEnvelope(envelope, opts.safeAppContext ?? 'transaction')) {
+      return null;
+    }
+    if (
+      await handleCommitEnvelope(
+        envelope,
+        networkId,
+        opts.safeAppContext ?? 'transaction'
+      )
+    ) {
+      return null;
+    }
 
     let hash;
     // TODO: unify send/soc to both return txHash under same property
@@ -255,10 +286,13 @@ export function useActions() {
         choice,
         reason,
         app
-      )
+      ),
+      {
+        safeAppContext: 'vote'
+      }
     );
 
-    addPendingVote(proposal.id);
+    if (txHash) addPendingVote(proposal.id);
 
     return txHash;
   }
@@ -285,7 +319,7 @@ export function useActions() {
 
     const network = getNetwork(space.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
         auth.web3,
@@ -304,10 +338,13 @@ export function useActions() {
         min_end,
         max_end,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
     );
 
-    return true;
+    return txHash;
   }
 
   async function updateProposal(
@@ -343,7 +380,10 @@ export function useActions() {
         choices,
         labels,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
     );
 
     return true;
