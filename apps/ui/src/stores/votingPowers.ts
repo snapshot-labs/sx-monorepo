@@ -15,6 +15,7 @@ export type VotingPowerItem = {
   error: utils.errors.VotingPowerDetailsError | null;
   canPropose: boolean;
   canVote: boolean;
+  account: string;
 };
 
 export function getIndex(space: SpaceDetails, block: number | null): string {
@@ -64,7 +65,8 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       symbol: space.voting_power_symbol,
       error: null,
       canPropose: false,
-      canVote: false
+      canVote: false,
+      account
     };
 
     if (existingVotingPower) {

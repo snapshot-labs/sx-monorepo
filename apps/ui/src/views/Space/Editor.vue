@@ -328,7 +328,10 @@ function handleFetchPropositionPower() {
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
   ([toAccount, toAuthLoading], [fromAccount]) => {
-    if (fromAccount && toAccount && fromAccount !== toAccount) {
+    if (
+      (fromAccount && toAccount && fromAccount !== toAccount) ||
+      propositionPower.value?.account !== toAccount
+    ) {
       resetPropositionPower();
     }
 
