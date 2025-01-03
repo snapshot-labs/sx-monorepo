@@ -6,11 +6,25 @@ import {
   quorumProgress
 } from '@/helpers/quorum';
 import { _n, _p, _vp } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
 
 const SHUTTER_URL = 'https://www.shutter.network/shielded-voting';
+
+async function refreshScores() {
+  try {
+    const network = getNetwork(props.proposal.network);
+    const hubUrl = network.api.apiUrl.replace('/graphql', '');
+    const response = await fetch(`${hubUrl}/api/scores/${props.proposal.id}`);
+    const result = await response.json();
+
+    if (result.result === true) {
+      window.location.reload();
+    }
+  } catch (e) {}
+}
 
 const props = withDefaults(
   defineProps<{
@@ -93,6 +107,12 @@ const isFinalizing = computed(() => {
     !props.proposal.completed &&
     ['passed', 'executed', 'rejected'].includes(props.proposal.state)
   );
+});
+
+onMounted(() => {
+  if (props.proposal.network === 's' && isFinalizing.value) {
+    refreshScores();
+  }
 });
 </script>
 
