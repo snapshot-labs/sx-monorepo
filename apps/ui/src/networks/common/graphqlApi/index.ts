@@ -710,9 +710,6 @@ export function createApi(
     },
     getNetworksUsage: async () => {
       return {};
-    },
-    refreshScores: async () => {
-      return;
     }
   };
 }
