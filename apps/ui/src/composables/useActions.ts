@@ -233,20 +233,6 @@ export function useActions() {
     return receipt;
   }
 
-  async function updateMetadata(space: Space, metadata: SpaceMetadata) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
-    }
-
-    await wrapPromise(
-      space.network,
-      network.actions.setMetadata(auth.web3, space, metadata)
-    );
-  }
-
   async function vote(
     proposal: Proposal,
     choice: Choice,
@@ -368,6 +354,25 @@ export function useActions() {
     return true;
   }
 
+  async function flagProposal(proposal: Proposal) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(proposal.network);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this action`);
+    }
+
+    await wrapPromise(
+      proposal.network,
+      network.actions.flagProposal(auth.web3, proposal)
+    );
+
+    return true;
+  }
+
   async function cancelProposal(proposal: Proposal) {
     if (!web3.value.account) {
       await forceLogin();
@@ -431,60 +436,6 @@ export function useActions() {
     await wrapPromise(
       proposal.network,
       network.actions.vetoProposal(auth.web3, proposal)
-    );
-  }
-
-  async function setVotingDelay(space: Space, votingDelay: number) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
-    }
-
-    await wrapPromise(
-      space.network,
-      network.actions.setVotingDelay(
-        auth.web3,
-        space,
-        getCurrentFromDuration(space.network, votingDelay)
-      )
-    );
-  }
-
-  async function setMinVotingDuration(space: Space, minVotingDuration: number) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
-    }
-
-    await wrapPromise(
-      space.network,
-      network.actions.setMinVotingDuration(
-        auth.web3,
-        space,
-        getCurrentFromDuration(space.network, minVotingDuration)
-      )
-    );
-  }
-
-  async function setMaxVotingDuration(space: Space, maxVotingDuration: number) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
-    }
-
-    await wrapPromise(
-      space.network,
-      network.actions.setMaxVotingDuration(
-        auth.web3,
-        space,
-        getCurrentFromDuration(space.network, maxVotingDuration)
-      )
     );
   }
 
@@ -704,18 +655,15 @@ export function useActions() {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
     createSpace: wrapWithErrors(createSpace),
-    updateMetadata: wrapWithErrors(updateMetadata),
     vote: wrapWithErrors(vote),
     propose: wrapWithErrors(propose),
     updateProposal: wrapWithErrors(updateProposal),
+    flagProposal: wrapWithErrors(flagProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
     finalizeProposal: wrapWithErrors(finalizeProposal),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
     vetoProposal: wrapWithErrors(vetoProposal),
-    setVotingDelay: wrapWithErrors(setVotingDelay),
-    setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
-    setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
     updateSettings: wrapWithErrors(updateSettings),
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),

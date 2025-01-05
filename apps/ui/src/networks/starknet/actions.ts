@@ -201,23 +201,6 @@ export function createActions(
         }
       });
     },
-    setMetadata: async (web3: any, space: Space, metadata: SpaceMetadata) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      const pinned = await helpers.pin(
-        createErc1155Metadata(metadata, {
-          execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types,
-          execution_destinations: space.executors_destinations
-        })
-      );
-
-      return client.setMetadataUri({
-        signer: web3.provider.account,
-        space: space.id,
-        metadataUri: `ipfs://${pinned.cid}`
-      });
-    },
     propose: async (
       web3: any,
       connectorType: Connector,
@@ -421,6 +404,9 @@ export function createActions(
         data
       });
     },
+    flagProposal: () => {
+      throw new Error('Not implemented');
+    },
     cancelProposal: async (web3: any, proposal: Proposal) => {
       await verifyStarknetNetwork(web3, chainId);
 
@@ -573,41 +559,6 @@ export function createActions(
       });
     },
     vetoProposal: () => null,
-    setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return client.setVotingDelay({
-        signer: web3.provider.account,
-        space: space.id,
-        votingDelay
-      });
-    },
-    setMinVotingDuration: async (
-      web3: any,
-      space: Space,
-      minVotingDuration: number
-    ) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return client.setMinVotingDuration({
-        signer: web3.provider.account,
-        space: space.id,
-        minVotingDuration
-      });
-    },
-    setMaxVotingDuration: async (
-      web3: any,
-      space: Space,
-      maxVotingDuration: number
-    ) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return client.setMaxVotingDuration({
-        signer: web3.provider.account,
-        space: space.id,
-        maxVotingDuration
-      });
-    },
     transferOwnership: async (web3: any, space: Space, owner: string) => {
       await verifyStarknetNetwork(web3, chainId);
 
@@ -734,11 +685,22 @@ export function createActions(
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
+      const cumulativeDecimals = Math.max(
+        ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
+      );
+
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getStarknetStrategy(address, networkConfig);
           if (!strategy)
-            return { address, value: 0n, decimals: 0, token: null, symbol: '' };
+            return {
+              address,
+              value: 0n,
+              cumulativeDecimals: 0,
+              displayDecimals: 0,
+              token: null,
+              symbol: ''
+            };
 
           const strategyMetadata = await parseStrategyMetadata(
             strategiesMetadata[i].payload
@@ -759,7 +721,8 @@ export function createActions(
           return {
             address,
             value,
-            decimals: strategiesMetadata[i]?.decimals ?? 0,
+            cumulativeDecimals,
+            displayDecimals: strategiesMetadata[i]?.decimals ?? 0,
             symbol: strategiesMetadata[i]?.symbol ?? '',
             token: strategiesMetadata[i]?.token ?? null
           };

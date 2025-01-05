@@ -13,6 +13,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   eth: 1,
   oeth: 10,
   matic: 137,
+  base: 8453,
   arb1: 42161,
   sep: 11155111,
   // Starknet
@@ -24,6 +25,7 @@ export const COINGECKO_ASSET_PLATFORMS = {
   1: 'ethereum',
   10: 'optimistic-ethereum',
   137: 'polygon-pos',
+  8453: 'base',
   42161: 'arbitrum-one'
 };
 
@@ -31,6 +33,7 @@ export const COINGECKO_BASE_ASSETS = {
   1: 'ethereum',
   10: 'ethereum',
   137: 'matic-network',
+  8453: 'ethereum',
   42161: 'ethereum'
 };
 

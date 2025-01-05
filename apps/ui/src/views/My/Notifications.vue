@@ -2,6 +2,8 @@
 import { _rt } from '@/helpers/utils';
 
 const notificationsStore = useNotificationsStore();
+const { modalAccountWithoutDismissOpen } = useModal();
+const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 
 watchEffect(async () => {
@@ -11,12 +13,24 @@ watchEffect(async () => {
 });
 
 watch(
-  () => notificationsStore.unreadNotificationsCount,
-  () => {
+  [
+    () => web3.value.account,
+    () => web3.value.authLoading,
+    () => notificationsStore.unreadNotificationsCount
+  ],
+  ([account, authLoading]) => {
+    if (!account && !authLoading) {
+      modalAccountWithoutDismissOpen.value = true;
+    }
+
     notificationsStore.refreshLastUnreadTs();
   },
   { immediate: true }
 );
+
+onUnmounted(() => {
+  modalAccountWithoutDismissOpen.value = false;
+});
 
 onUnmounted(() => notificationsStore.markAllAsRead());
 </script>

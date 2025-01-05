@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ProxyFactory
-    network: sepolia
+    network: base
     source:
       abi: ProxyFactory
       address: "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c"
-      startBlock: 4519171
+      startBlock: 23524251
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -30,11 +30,11 @@ dataSources:
       file: ./src/mapping.ts
   - kind: ethereum
     name: L1AvatarExecutionStrategyFactory
-    network: sepolia
+    network: base
     source:
       abi: L1AvatarExecutionStrategyFactory
-      address: "0x27981a29ec87f2fbf873a2dcb0325405648ffce1"
-      startBlock: 6078978
+      address: "0x0000000000021210000000000000000000000000"
+      startBlock: 23524251
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -51,7 +51,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: Space
-    network: sepolia
+    network: base
     source:
       abi: Space
     mapping:
@@ -103,7 +103,7 @@ templates:
       file: ./src/mapping.ts
   - kind: ethereum
     name: AxiomExecutionStrategy
-    network: sepolia
+    network: base
     source:
       abi: AxiomExecutionStrategy
     mapping:
@@ -121,7 +121,7 @@ templates:
       file: ./src/mapping.ts
   - kind: ethereum
     name: TimelockExecutionStrategy
-    network: sepolia
+    network: base
     source:
       abi: TimelockExecutionStrategy
     mapping:
@@ -151,7 +151,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: base
   - name: ProposalMetadata
     kind: file/ipfs
     mapping:
@@ -164,7 +164,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: base
   - name: VoteMetadata
     kind: file/ipfs
     mapping:
@@ -177,7 +177,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: base
   - name: StrategiesParsedMetadataData
     kind: file/ipfs
     mapping:
@@ -190,7 +190,7 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: base
   - name: VotingPowerValidationStrategyMetadata
     kind: file/ipfs
     mapping:
@@ -203,10 +203,10 @@ templates:
       abis:
         - name: Space
           file: ./abis/Space.json
-    network: sepolia
+    network: base
   - name: L1AvatarExecutionStrategy
     kind: ethereum
-    network: sepolia
+    network: base
     source:
       abi: L1AvatarExecutionStrategy
     mapping:

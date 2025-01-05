@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { buildBatchFile } from '@/helpers/safe/ build';
 import { getExecutionName } from '@/helpers/ui';
 import { shorten, toBigIntOrNumber } from '@/helpers/utils';
@@ -101,8 +102,8 @@ function downloadExecution(execution: ProposalExecution) {
         proposal.executions &&
         proposal.executions.length > 0 &&
         proposal.scores.length > 0 &&
-        toBigIntOrNumber(proposal.scores_total) >=
-          toBigIntOrNumber(proposal.quorum) &&
+        getProposalCurrentQuorum(proposal.network, proposal) >=
+          proposal.quorum &&
         toBigIntOrNumber(proposal.scores[0]) >
           toBigIntOrNumber(proposal.scores[1]) &&
         proposal.has_execution_window_opened

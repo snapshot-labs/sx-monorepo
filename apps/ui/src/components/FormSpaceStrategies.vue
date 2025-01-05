@@ -38,7 +38,8 @@ const strategiesLimit = computed(() => {
         tooltip:
           'The default network used for this space. Networks can also be specified in individual strategies',
         examples: ['Select network'],
-        networkId
+        networkId,
+        networksListKind: 'offchain'
       }"
     />
   </div>

@@ -201,8 +201,9 @@ watchEffect(() => {
     type="info"
     :learn-more-link="'https://docs.snapshot.box/spaces/add-custom-domain'"
   >
-    To setup a custom domain you additionally need to open a pull request on
-    GitHub after you have created the space.
+    To set up a custom domain, you must subscribe to the Turbo plan and create a
+    CNAME record pointing to "cname.snapshot.box" with your DNS provider or
+    registrar.
   </UiMessage>
   <div class="s-box mt-3">
     <UiInputString

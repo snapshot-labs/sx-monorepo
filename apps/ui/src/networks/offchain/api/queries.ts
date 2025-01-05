@@ -17,6 +17,7 @@ const SPACE_FRAGMENT = gql`
     github
     coingecko
     symbol
+    activeProposals
     treasuries {
       name
       network
@@ -68,6 +69,7 @@ const SPACE_FRAGMENT = gql`
       cover
       proposalsCount
       votesCount
+      activeProposals
       turbo
       verified
       network
@@ -79,6 +81,7 @@ const SPACE_FRAGMENT = gql`
       cover
       proposalsCount
       votesCount
+      activeProposals
       turbo
       verified
       network
@@ -132,6 +135,7 @@ const PROPOSAL_FRAGMENT = gql`
     labels
     scores
     scores_total
+    scores_state
     state
     strategies {
       name

@@ -197,7 +197,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   user: delegate.user
                 }
               }"
-              class="flex w-full space-x-3"
+              class="flex w-full space-x-3 truncate"
             >
               <div
                 class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"

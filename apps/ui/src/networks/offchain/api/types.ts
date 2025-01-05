@@ -13,6 +13,7 @@ export type ApiRelatedSpace = {
   avatar: string;
   cover: string | null;
   proposalsCount: number;
+  activeProposals: number;
   votesCount: number;
   turbo: boolean;
   verified: boolean;
@@ -34,6 +35,7 @@ export type ApiSpace = {
   github: string | null;
   coingecko: string | null;
   symbol: string;
+  activeProposals: number;
   treasuries: {
     name: string;
     network: string;
@@ -118,6 +120,7 @@ export type ApiProposal = {
   labels: string[];
   scores: number[];
   scores_total: number;
+  scores_state: 'invalid' | 'pending' | 'final';
   state: 'active' | 'pending' | 'closed';
   strategies: { network: string; params: Record<string, any>; name: string }[];
   created: number;

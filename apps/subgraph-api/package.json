@@ -16,7 +16,8 @@
     "deploy-studio-sepolia": "yarn deploy-studio --network sepolia sx-sepolia",
     "deploy-studio-optimism": "yarn deploy-studio --network optimism sx-optimism",
     "deploy-studio-polygon": "yarn deploy-studio --network matic sx-polygon",
-    "deploy-studio-arbitrum": "yarn deploy-studio --network arbitrum-one sx-arbitrum"
+    "deploy-studio-arbitrum": "yarn deploy-studio --network arbitrum-one sx-arbitrum",
+    "deploy-studio-base": "yarn deploy-studio --network base sx-base"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.72.1",

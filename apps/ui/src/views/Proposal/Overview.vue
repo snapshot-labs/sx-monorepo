@@ -9,6 +9,7 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
+import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
@@ -20,7 +21,7 @@ const uiStore = useUiStore();
 const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
-const { cancelProposal } = useActions();
+const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
 const {
   state: aiSummaryState,
@@ -42,8 +43,23 @@ const {
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
+const flagging = ref(false);
 const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
+
+const flaggable = computed(() => {
+  if (!offchainNetworks.includes(props.proposal.network)) return false;
+  if (props.proposal.flagged) return false;
+
+  const addresses = [
+    props.proposal.space.admins || [],
+    props.proposal.space.moderators || []
+  ].flat();
+
+  return addresses.some(address =>
+    compareAddresses(address, web3.value.account)
+  );
+});
 
 const editable = computed(() => {
   // HACK: here we need to use snapshot instead of start because start is artificially
@@ -129,6 +145,10 @@ async function handleEditClick() {
     choices: props.proposal.choices,
     labels: props.proposal.labels,
     privacy: props.proposal.privacy,
+    created: props.proposal.created,
+    start: props.proposal.start,
+    min_end: props.proposal.min_end,
+    max_end: props.proposal.max_end,
     executions
   });
 
@@ -138,6 +158,55 @@ async function handleEditClick() {
       key: draftId
     }
   });
+}
+
+async function handleDuplicateClick() {
+  if (!props.proposal) return;
+
+  const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
+
+  const executions = Object.fromEntries(
+    props.proposal.executions.map(execution => {
+      const address = offchainNetworks.includes(props.proposal.network)
+        ? execution.safeAddress
+        : props.proposal.execution_strategy;
+
+      return [address, execution.transactions];
+    })
+  );
+
+  const draftId = await createDraft(spaceId, {
+    title: props.proposal.title,
+    body: props.proposal.body,
+    discussion: props.proposal.discussion,
+    type: props.proposal.type,
+    choices: props.proposal.choices,
+    labels: props.proposal.labels,
+    executions
+  });
+
+  router.push({
+    name: 'space-editor',
+    params: {
+      key: draftId
+    }
+  });
+}
+
+async function handleFlagClick() {
+  flagging.value = true;
+
+  try {
+    const result = await flagProposal(props.proposal);
+    if (result) {
+      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      router.push({
+        name: 'space-overview'
+      });
+    }
+  } finally {
+    flagging.value = false;
+  }
 }
 
 async function handleCancelClick() {
@@ -299,6 +368,17 @@ onBeforeUnmount(() => destroyAudio());
               </UiButton>
             </template>
             <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleDuplicateClick"
+                >
+                  <IH-document-duplicate :width="16" />
+                  Duplicate proposal
+                </button>
+              </UiDropdownItem>
               <UiDropdownItem v-if="editable" v-slot="{ active }">
                 <button
                   type="button"
@@ -308,6 +388,21 @@ onBeforeUnmount(() => destroyAudio());
                 >
                   <IS-pencil :width="16" />
                   Edit proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="flaggable"
+                v-slot="{ active, disabled }"
+                :disabled="flagging"
+              >
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleFlagClick"
+                >
+                  <IH-flag :width="16" />
+                  Flag proposal
                 </button>
               </UiDropdownItem>
               <UiDropdownItem
@@ -362,12 +457,36 @@ onBeforeUnmount(() => destroyAudio());
           <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
-      <div v-if="proposal.executions && proposal.executions.length > 0">
+      <div
+        v-if="
+          (proposal.executions && proposal.executions.length > 0) ||
+          proposal.execution_strategy_type === 'safeSnap'
+        "
+      >
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-play />
           <span>Execution</span>
         </h4>
         <div class="mb-4">
+          <UiAlert
+            v-if="proposal.execution_strategy_type === 'safeSnap'"
+            type="warning"
+          >
+            <div>
+              This proposal uses SafeSnap execution which is currently not
+              supported on the new interface. You can view execution details on
+              the
+              <a
+                :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
+                target="_blank"
+                class="inline-flex items-center font-bold"
+              >
+                previous interface
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </a>
+              .
+            </div>
+          </UiAlert>
           <ProposalExecutionsList
             :proposal="proposal"
             :executions="proposal.executions"

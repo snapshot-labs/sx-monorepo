@@ -32,7 +32,12 @@ const followedSpacesStore = useFollowedSpacesStore();
           class="block"
         >
           <UiTooltip :title="element.name" placement="right">
-            <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />
+            <SpaceAvatar
+              show-active-proposals
+              :space="element"
+              :size="32"
+              class="!rounded-[4px]"
+            />
           </UiTooltip>
         </AppLink>
       </template>

@@ -1,14 +1,28 @@
-import { Proposal } from '@/types';
+import { offchainNetworks } from '@/networks';
+import { NetworkID, Proposal } from '@/types';
 
 const REJECTION_QUORUM_CHOICE_INDEX = 1;
 
-export function quorumProgress(proposal: Proposal): number {
-  const totalScore =
-    proposal.quorum_type === 'rejection'
-      ? proposal.scores[REJECTION_QUORUM_CHOICE_INDEX] ?? 0
-      : proposal.scores_total;
+export function getProposalCurrentQuorum(
+  networkId: NetworkID,
+  proposal: {
+    scores: number[];
+    scores_total: number;
+    quorum_type?: string;
+  }
+) {
+  if (offchainNetworks.includes(networkId)) {
+    return proposal.quorum_type === 'rejection'
+      ? Number(proposal.scores[REJECTION_QUORUM_CHOICE_INDEX] ?? 0)
+      : Number(proposal.scores_total);
+  }
 
-  return totalScore / proposal.quorum;
+  // Only For and Abstain votes are counted towards quorum progress in SX spaces.
+  return Number(proposal.scores[0]) + Number(proposal.scores[2]);
+}
+
+export function quorumProgress(proposal: Proposal): number {
+  return getProposalCurrentQuorum(proposal.network, proposal) / proposal.quorum;
 }
 
 export function quorumChoiceProgress(

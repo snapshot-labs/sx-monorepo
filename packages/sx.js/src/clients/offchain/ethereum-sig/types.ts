@@ -96,6 +96,15 @@ export const updateProposalTypes = {
   ]
 };
 
+export const flagProposalTypes = {
+  FlagProposal: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'proposal', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
+  ]
+};
+
 export const cancelProposalTypes = {
   CancelProposal: [
     { name: 'from', type: 'address' },
