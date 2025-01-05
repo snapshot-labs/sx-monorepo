@@ -14,6 +14,7 @@ import {
   Space,
   SpaceMetadata,
   SpaceMetadataLabel,
+  SpacePrivacy,
   StrategyParsedMetadata,
   Validation
 } from '@/types';
@@ -161,7 +162,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       | 'weighted'
       | 'basic'
   );
-  const privacy = ref('none' as 'none' | 'shutter' | 'any');
+  const privacy = ref('none' as SpacePrivacy);
   const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
   const snapshotChainId: Ref<number> = ref(1);

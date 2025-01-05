@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {

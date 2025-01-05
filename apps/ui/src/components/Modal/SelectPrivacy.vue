@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import { PRIVACY_TYPES_INFO } from '@/helpers/constants';
-
-type Privacy = 'none' | 'shutter' | 'any';
+import { SpacePrivacy } from '@/types';
 
 const votingTypes = ['any', 'shutter', 'none'] as const;
 
 defineProps<{
   open: boolean;
-  initialState?: Privacy;
+  initialState?: SpacePrivacy;
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', type: Privacy);
+  (e: 'save', type: SpacePrivacy);
   (e: 'close');
 }>();
 
-function handleSelect(type: Privacy) {
+function handleSelect(type: SpacePrivacy) {
   emit('save', type);
   emit('close');
 }

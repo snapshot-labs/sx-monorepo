@@ -1,6 +1,5 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { Privacy } from '@snapshot-labs/sx';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
@@ -9,6 +8,7 @@ import {
   DelegationType,
   Follow,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   SpaceMetadata,

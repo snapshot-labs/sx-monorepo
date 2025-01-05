@@ -19,6 +19,7 @@ import { getProvider } from '@/helpers/provider';
 import {
   Choice,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   Statement,
@@ -30,7 +31,6 @@ import {
 } from '@/types';
 import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
-import { Privacy } from '../../types';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
   Connector,

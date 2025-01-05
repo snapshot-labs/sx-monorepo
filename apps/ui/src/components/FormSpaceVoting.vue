@@ -7,7 +7,14 @@ import {
 import { _d } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { ChainId, Space, Validation, VoteType } from '@/types';
+import {
+  ChainId,
+  Privacy,
+  Space,
+  SpacePrivacy,
+  Validation,
+  VoteType
+} from '@/types';
 
 const votingDelay = defineModel<number | null>('votingDelay', {
   required: true
@@ -28,7 +35,7 @@ const quorum = defineModel<string | number>('quorum', {
 const votingType = defineModel<VoteType | 'any'>('votingType', {
   required: true
 });
-const privacy = defineModel<'none' | 'shutter' | 'any'>('privacy', {
+const privacy = defineModel<SpacePrivacy>('privacy', {
   required: true
 });
 const voteValidation = defineModel<Validation>('voteValidation', {
