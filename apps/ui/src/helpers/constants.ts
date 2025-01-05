@@ -112,7 +112,7 @@ export const PRIVACY_TYPES_INFO: Record<
   },
   any: {
     label: 'Any',
-    description: 'Author can choose between no privacy or shielded voting.'
+    description: 'Author can choose between no privacy and shielded voting.'
   }
 };
 
