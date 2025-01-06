@@ -59,6 +59,8 @@ function initResizer() {
 watch(x, (newX, oldX) => {
   if (!initialized.value || !dragging.value) return;
 
+  // useDraggable composable is not clamping x between min and max when given
+  // The following check will ignore the first x changes, when it's out of bound
   if (skipNextDragTick.value) {
     skipNextDragTick.value = false;
     sliderOutOfBound.value = false;
