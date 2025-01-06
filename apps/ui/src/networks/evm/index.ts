@@ -27,7 +27,7 @@ export const METADATA: Record<string, Metadata> = {
     ticker: 'MATIC',
     chainId: 137,
     apiUrl:
-      'https://api.studio.thegraph.com/query/23545/sx-polygon/version/latest',
+      'https://subgrapher.snapshot.org/subgraph/arbitrum/5DzKWssJUVKA1imXGyExrycUjdz7t5t7gzTsE9GQhBUn',
     avatar:
       'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am',
     blockTime: 2.15812
@@ -37,7 +37,7 @@ export const METADATA: Record<string, Metadata> = {
     chainId: 42161,
     currentChainId: 1,
     apiUrl:
-      'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
+      'https://subgrapher.snapshot.org/subgraph/arbitrum/4QovVxoK3TBLwZKPD1YPHHko5Zz87HvdjpEDBvitCWcH',
     avatar:
       'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -46,7 +46,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Optimism',
     chainId: 10,
     apiUrl:
-      'https://api.studio.thegraph.com/query/23545/sx-optimism/version/latest',
+      'https://subgrapher.snapshot.org/subgraph/arbitrum/4zXNNp5B34DUNACzonVsHivNJRUHnFBqhvBPYJVaNyks',
     avatar: 'ipfs://QmfF4kwhGL8QosUXvgq2KWCmavhKBvwD6kbhs7L4p5ZAWb',
     blockTime: 2
   },
@@ -54,14 +54,15 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Base',
     chainId: 8453,
     apiUrl:
-      'https://api.studio.thegraph.com/query/23545/sx-base/version/latest',
+      'https://subgrapher.snapshot.org/subgraph/arbitrum/BmcnmDYyCcN7NmQuWXyx3p1xLEiq3sYmvFct8uvBQfum',
     avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
     blockTime: 2
   },
   eth: {
     name: 'Ethereum',
     chainId: 1,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx/version/latest',
+    apiUrl:
+      'https://subgrapher.snapshot.org/subgraph/arbitrum/GerdwbJnTbEz45K7S3D2MLET6VFiY8VqwrqWZg52x2vx',
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -71,7 +72,7 @@ export const METADATA: Record<string, Metadata> = {
     chainId: 11155111,
     apiUrl:
       import.meta.env.VITE_EVM_SEPOLIA_API ??
-      'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest',
+      'https://subgrapher.snapshot.org/subgraph/arbitrum/3682UpSJVQ89v6BMSzxDSiQWZKa3Hbn6RKucpT8jZ5nT',
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816

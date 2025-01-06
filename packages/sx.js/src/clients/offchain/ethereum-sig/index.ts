@@ -11,6 +11,7 @@ import {
   deleteSpaceTypes,
   domain,
   encryptedVoteTypes,
+  flagProposalTypes,
   followSpaceTypes,
   proposeTypes,
   rankedChoiceVoteTypes,
@@ -29,6 +30,7 @@ import {
   DeleteSpace,
   EIP712CancelProposalMessage,
   EIP712DeleteSpaceMessage,
+  EIP712FlagProposalMessage,
   EIP712FollowSpaceMessage,
   EIP712Message,
   EIP712ProposeMessage,
@@ -40,6 +42,7 @@ import {
   EIP712UpdateUserMessage,
   EIP712VoteMessage,
   Envelope,
+  FlagProposal,
   FollowSpace,
   Propose,
   SetAlias,
@@ -82,6 +85,7 @@ export class EthereumSig {
       | EIP712VoteMessage
       | EIP712ProposeMessage
       | EIP712UpdateProposal
+      | EIP712FlagProposalMessage
       | EIP712CancelProposalMessage
       | EIP712FollowSpaceMessage
       | EIP712UnfollowSpaceMessage
@@ -116,6 +120,7 @@ export class EthereumSig {
       | Vote
       | Propose
       | UpdateProposal
+      | FlagProposal
       | CancelProposal
       | FollowSpace
       | UnfollowSpace
@@ -193,6 +198,21 @@ export class EthereumSig {
     data: UpdateProposal;
   }): Promise<Envelope<UpdateProposal>> {
     const signatureData = await this.sign(signer, data, updateProposalTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async flagProposal({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: FlagProposal;
+  }): Promise<Envelope<FlagProposal>> {
+    const signatureData = await this.sign(signer, data, flagProposalTypes);
 
     return {
       signatureData,

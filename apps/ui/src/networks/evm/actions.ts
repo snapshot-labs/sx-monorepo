@@ -368,6 +368,9 @@ export function createActions(
         { noWait: isContract }
       );
     },
+    flagProposal: () => {
+      throw new Error('Not implemented');
+    },
     cancelProposal: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
@@ -668,11 +671,22 @@ export function createActions(
       if (snapshotInfo.at === null)
         throw new Error('EVM requires block number to be defined');
 
+      const cumulativeDecimals = Math.max(
+        ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
+      );
+
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getEvmStrategy(address, networkConfig);
           if (!strategy)
-            return { address, value: 0n, decimals: 0, token: null, symbol: '' };
+            return {
+              address,
+              value: 0n,
+              displayDecimals: 0,
+              cumulativeDecimals: 0,
+              token: null,
+              symbol: ''
+            };
 
           const strategyMetadata = await parseStrategyMetadata(
             strategiesMetadata[i].payload
@@ -693,7 +707,8 @@ export function createActions(
           return {
             address,
             value,
-            decimals: strategiesMetadata[i]?.decimals ?? 0,
+            cumulativeDecimals,
+            displayDecimals: strategiesMetadata[i]?.decimals ?? 0,
             symbol: strategiesMetadata[i]?.symbol ?? '',
             token,
             swapLink: getSwapLink(strategy.type, address, chainId)

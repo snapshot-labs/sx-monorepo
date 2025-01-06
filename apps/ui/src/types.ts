@@ -139,8 +139,6 @@ export type OffchainAdditionalRawData = {
   | 'private'
   | 'domain'
   | 'skin'
-  | 'guidelines'
-  | 'template'
   | 'strategies'
   | 'categories'
   | 'admins'
@@ -210,6 +208,8 @@ export type Space = {
   created: number;
   children: RelatedSpace[];
   parent: RelatedSpace | null;
+  template: string | null;
+  guidelines: string | null;
   // only use this for settings, if it's actually used for other things
   // move it to main space type
   additionalRawData?: OffchainAdditionalRawData;

@@ -59,7 +59,7 @@ const loading = computed(
           <div class="text-skin-link shrink-0">
             {{
               _n(
-                Number(strategy.value) / 10 ** votingPower.decimals,
+                Number(strategy.value) / 10 ** strategy.cumulativeDecimals,
                 'compact',
                 {
                   maximumFractionDigits: 2,
@@ -109,7 +109,7 @@ const loading = computed(
           </div>
           <div v-else />
           <div>
-            {{ _n(Number(strategy.value) / 10 ** strategy.decimals) }}
+            {{ _n(Number(strategy.value) / 10 ** strategy.displayDecimals) }}
             {{ strategy.symbol || 'units' }}
           </div>
         </div>

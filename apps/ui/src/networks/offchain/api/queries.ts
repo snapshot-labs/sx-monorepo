@@ -135,6 +135,7 @@ const PROPOSAL_FRAGMENT = gql`
     labels
     scores
     scores_total
+    scores_state
     state
     strategies {
       name

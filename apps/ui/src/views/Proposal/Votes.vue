@@ -277,7 +277,11 @@ watch([sortBy, choiceFilter], () => {
                       :class="{ 'opacity-80': active }"
                     >
                       <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                      View on block explorer
+                      {{
+                        offchainNetworks.includes(proposal.network)
+                          ? 'Verify signature'
+                          : 'View on block explorer'
+                      }}
                     </a>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">

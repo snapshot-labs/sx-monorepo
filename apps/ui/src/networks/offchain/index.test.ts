@@ -34,7 +34,8 @@ describe('offchain network', () => {
           ).resolves.toEqual([
             {
               address: 'ticket',
-              decimals: 0,
+              cumulativeDecimals: 0,
+              displayDecimals: 0,
               symbol: '',
               token: null,
               value: 0n
@@ -88,7 +89,8 @@ describe('offchain network', () => {
       ).resolves.toEqual([
         {
           address: 'ticket',
-          decimals: 9,
+          cumulativeDecimals: 9,
+          displayDecimals: 9,
           symbol: 'SYM',
           token: 'TOKEN',
           value: result[0],
@@ -97,7 +99,8 @@ describe('offchain network', () => {
         },
         {
           address: 'math',
-          decimals: 18,
+          cumulativeDecimals: 18,
+          displayDecimals: 18,
           symbol: undefined,
           token: undefined,
           value: result[1],
@@ -106,7 +109,8 @@ describe('offchain network', () => {
         },
         {
           address: 'api',
-          decimals: 18,
+          cumulativeDecimals: 18,
+          displayDecimals: 18,
           symbol: undefined,
           token: undefined,
           value: result[2],
@@ -141,7 +145,8 @@ describe('offchain network', () => {
           ).resolves.toEqual([
             {
               address: 'basic',
-              decimals: 0,
+              cumulativeDecimals: 0,
+              displayDecimals: 0,
               symbol: '',
               token: null,
               value: 0n
@@ -167,7 +172,8 @@ describe('offchain network', () => {
             {
               address: 'only-members',
               value: 1n,
-              decimals: 0,
+              cumulativeDecimals: 0,
+              displayDecimals: 0,
               symbol: '',
               token: '',
               chainId: undefined
@@ -191,7 +197,8 @@ describe('offchain network', () => {
             {
               address: 'only-members',
               value: 0n,
-              decimals: 0,
+              cumulativeDecimals: 0,
+              displayDecimals: 0,
               symbol: '',
               token: '',
               chainId: undefined

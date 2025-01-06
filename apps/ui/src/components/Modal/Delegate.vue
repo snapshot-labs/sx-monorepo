@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { clone } from '@/helpers/utils';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { h, VNode } from 'vue';
+import { clone, getUrl } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { Space, SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
-  delegatee: ''
+  delegatee: '',
+  selectedIndex: 0
 };
 
 const props = defineProps<{
   open: boolean;
   space: Space;
-  delegation: SpaceMetadataDelegation;
+  delegation?: SpaceMetadataDelegation;
   initialState?: any;
 }>();
 
@@ -39,6 +43,7 @@ const { delegate } = useActions();
 
 const form: {
   delegatee: string;
+  selectedIndex: number;
 } = reactive(clone(DEFAULT_FORM_STATE));
 const formValidated = ref(false);
 const showPicker = ref(false);
@@ -46,11 +51,54 @@ const searchValue = ref('');
 const sending = ref(false);
 const formErrors = ref({} as Record<string, any>);
 
+const selectedDelegation = computed<SpaceMetadataDelegation>(() => {
+  return props.delegation || props.space.delegations[form.selectedIndex];
+});
+
+const spaceDelegationsOptions = computed<
+  { id: number; name: string; icon: VNode }[]
+>(() => {
+  return props.space.delegations
+    .filter(d => d.chainId)
+    .map((d, i) => {
+      const network = getNetworkDetails(d.chainId as string);
+
+      return {
+        id: i,
+        name: d.name || '',
+        icon: h('img', {
+          src: getUrl(network.logo),
+          alt: network.name,
+          class: 'rounded-full'
+        })
+      };
+    });
+});
+
+function getNetworkDetails(chainId: number | string) {
+  if (typeof chainId === 'number') {
+    return networks[chainId];
+  }
+
+  const starknetNetwork = Object.entries(STARKNET_NETWORK_METADATA).find(
+    ([, { chainId: starknetChainId }]) => starknetChainId === chainId
+  )?.[0];
+
+  if (!starknetNetwork) {
+    return { name: 'Unknown network', logo: '' };
+  }
+
+  return {
+    name: STARKNET_NETWORK_METADATA[starknetNetwork].name,
+    logo: STARKNET_NETWORK_METADATA[starknetNetwork].avatar
+  };
+}
+
 async function handleSubmit() {
   if (
-    !props.delegation.apiType ||
-    !props.delegation.contractAddress ||
-    !props.delegation.chainId
+    !selectedDelegation.value.apiType ||
+    !selectedDelegation.value.contractAddress ||
+    !selectedDelegation.value.chainId
   ) {
     return;
   }
@@ -60,10 +108,10 @@ async function handleSubmit() {
   try {
     await delegate(
       props.space,
-      props.delegation.apiType,
+      selectedDelegation.value.apiType,
       form.delegatee,
-      props.delegation.contractAddress,
-      props.delegation.chainId
+      selectedDelegation.value.contractAddress,
+      selectedDelegation.value.chainId
     );
     emit('close');
   } catch (e) {
@@ -78,8 +126,11 @@ watch(
   () => {
     if (props.initialState) {
       form.delegatee = props.initialState.delegatee;
+      form.selectedIndex =
+        props.initialState.selectedIndex || DEFAULT_FORM_STATE.selectedIndex;
     } else {
       form.delegatee = DEFAULT_FORM_STATE.delegatee;
+      form.selectedIndex = DEFAULT_FORM_STATE.selectedIndex;
     }
   }
 );
@@ -127,6 +178,17 @@ watchEffect(async () => {
       />
     </template>
     <div v-else class="s-box p-4">
+      <Combobox
+        v-if="!delegation && props.space.delegations.length > 1"
+        v-model="form.selectedIndex"
+        :definition="{
+          type: ['number'],
+          title: 'Delegation scheme',
+          examples: ['Select delegation scheme'],
+          enum: spaceDelegationsOptions.map(d => d.id),
+          options: spaceDelegationsOptions
+        }"
+      />
       <UiInputAddress
         v-model="form.delegatee"
         :definition="DELEGATEE_DEFINITION"

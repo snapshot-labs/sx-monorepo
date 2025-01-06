@@ -10,10 +10,8 @@ const LATEST_BLOCK_NAME = 'latest';
 type SpaceDetails = Proposal['space'];
 export type VotingPowerItem = {
   votingPowers: VotingPower[];
-  totalVotingPower: bigint;
   status: VotingPowerStatus;
   symbol: string;
-  decimals: number;
   error: utils.errors.VotingPowerDetailsError | null;
   canPropose: boolean;
   canVote: boolean;
@@ -26,16 +24,16 @@ export function getIndex(space: SpaceDetails, block: number | null): string {
   // we probably should separate it entirely (no more multipurpose VotingPowerItem)
   // as it it's causing bugs and it's hard to understand
 
-  const prefix = isSpace(space) ? 'space' : 'proposal';
+  const prefix = getIsSpace(space) ? 'space' : 'proposal';
 
   return `${prefix}:${space.id}:${block ?? LATEST_BLOCK_NAME}`;
 }
 
-function isSpace(item: SpaceDetails | Proposal): item is Space {
+function getIsSpace(item: SpaceDetails | Proposal): item is Space {
   return 'proposal_threshold' in item;
 }
 
-function isSpaceMember(space: Space, account: string): boolean {
+function getIsSpaceMember(space: Space, account: string): boolean {
   return [
     ...(space.additionalRawData?.admins || []),
     ...(space.additionalRawData?.moderators || []),
@@ -59,15 +57,15 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
     if (existingVotingPower && existingVotingPower.status === 'success') return;
 
     const network = getNetwork(item.network);
+    const isSpace = getIsSpace(item);
+    const isSpaceMember = getIsSpaceMember(space as Space, account);
 
     let vpItem: VotingPowerItem = {
       status: 'loading',
       votingPowers: [],
-      totalVotingPower: 0n,
-      decimals: 18,
       symbol: space.voting_power_symbol,
       error: null,
-      canPropose: false,
+      canPropose: isSpaceMember,
       canVote: false
     };
 
@@ -91,7 +89,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
           account,
           opts
         ),
-        isSpace(item)
+        isSpace && !isSpaceMember
           ? network.actions.getVotingPower(
               space.id,
               item.voting_power_validation_strategy_strategies,
@@ -106,19 +104,18 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       vpItem = {
         ...vpItem,
         votingPowers: vp,
-        totalVotingPower: vp.reduce((acc, b) => acc + b.value, 0n),
-        status: 'success',
-        decimals: Math.max(...vp.map(votingPower => votingPower.decimals), 0)
+        status: 'success'
       };
 
-      if (isSpace(item) && proposeVp) {
-        const totalProposeVp = proposeVp.reduce((acc, b) => acc + b.value, 0n);
+      if (isSpace && proposeVp) {
+        const totalProposeVp = proposeVp.reduce(
+          (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+          0
+        );
 
-        vpItem.canPropose =
-          totalProposeVp >= BigInt(item.proposal_threshold) ||
-          isSpaceMember(space as Space, account);
+        vpItem.canPropose = totalProposeVp >= BigInt(item.proposal_threshold);
       } else {
-        vpItem.canVote = vpItem.totalVotingPower > 0n;
+        vpItem.canVote = vp.some(vp => vp.value > 0n);
       }
     } catch (e: unknown) {
       if (e instanceof utils.errors.VotingPowerDetailsError) {

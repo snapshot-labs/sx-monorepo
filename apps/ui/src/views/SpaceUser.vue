@@ -25,6 +25,9 @@ const userActivity = ref<UserActivity>({
 const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const delegateModalOpen = ref(false);
+const delegateModalState = ref<{ delegatee: string } | null>(null);
+
 // const delegatesCount = ref(0);
 
 const network = computed(() => getNetwork(props.space.network));
@@ -38,19 +41,18 @@ const socials = computed(() => getSocialNetworksLink(user.value));
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const formattedVotingPower = computed(() => {
-  const votingPower = votingPowers.value.reduce((acc, b) => acc + b.value, 0n);
-  const decimals = Math.max(
-    ...votingPowers.value.map(votingPower => votingPower.decimals),
-    0
+  const votingPower = _vp(
+    votingPowers.value.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+      0
+    )
   );
 
-  const value = _vp(Number(votingPower) / 10 ** decimals);
-
   if (props.space.voting_power_symbol) {
-    return `${value} ${props.space.voting_power_symbol}`;
+    return `${votingPower} ${props.space.voting_power_symbol}`;
   }
 
-  return value;
+  return votingPower;
 });
 
 const navigation = computed(() => [
@@ -120,6 +122,11 @@ async function loadUserActivity() {
 //     .reduce((a, b) => a + b, 0);
 // }
 
+function handleDelegateClick() {
+  delegateModalState.value = { delegatee: userId.value };
+  delegateModalOpen.value = true;
+}
+
 async function getVotingPower() {
   votingPowerStatus.value = 'loading';
   try {
@@ -179,6 +186,12 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
+        <UiButton
+          v-if="space.delegations.length"
+          @click="handleDelegateClick()"
+        >
+          Delegate
+        </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
           <UiButton
             :to="{ name: 'user', params: { user: user.id } }"
@@ -251,5 +264,13 @@ watch(
       </div>
     </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
+    <teleport to="#modal">
+      <ModalDelegate
+        :open="delegateModalOpen"
+        :space="space"
+        :initial-state="delegateModalState"
+        @close="delegateModalOpen = false"
+      />
+    </teleport>
   </div>
 </template>

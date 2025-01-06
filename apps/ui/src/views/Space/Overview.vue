@@ -3,7 +3,7 @@ import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const PROPOSALS_LIMIT = 4;
+const PROPOSALS_LIMIT = 6;
 
 const props = defineProps<{ space: Space }>();
 

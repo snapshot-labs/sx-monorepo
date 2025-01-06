@@ -610,8 +610,13 @@ export function getSocialNetworksLink(data: any) {
 export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
   if (!votingPower) return;
 
-  const { totalVotingPower, decimals, symbol } = votingPower;
-  const value = _vp(Number(totalVotingPower) / 10 ** decimals);
+  const { votingPowers, symbol } = votingPower;
+  const value = _vp(
+    votingPowers.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+      0
+    )
+  );
 
   return symbol ? `${value} ${symbol}` : value;
 }

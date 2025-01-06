@@ -27,7 +27,8 @@ const processedProposals = Object.fromEntries(
 );
 
 const proposals = reactive<Drafts>(processedProposals as Drafts);
-const spaceVoteType = reactive(new Map<string, VoteType>());
+const spaceVoteType = new Map<string, VoteType>();
+const spaceTemplate = new Map<string, string>();
 
 function generateId() {
   return (Math.random() + 1).toString(36).substring(7);
@@ -38,6 +39,8 @@ function getSpaceId(draftId: string) {
 }
 
 export function useEditor() {
+  const spacesStore = useSpacesStore();
+
   const drafts = computed(() => {
     return Object.entries(removeEmpty(proposals))
       .map(([k, value]) => {
@@ -56,11 +59,13 @@ export function useEditor() {
 
   function removeEmpty(proposals: Drafts): Drafts {
     return Object.entries(proposals).reduce((acc, [id, proposal]) => {
-      const { executions, type, choices, labels, ...rest } = omit(proposal, [
-        'updatedAt'
-      ]);
+      const { executions, type, body, choices, labels, ...rest } = omit(
+        proposal,
+        ['updatedAt']
+      );
       const hasFormValues = Object.values(rest).some(val => !!val);
       const hasChangedVotingType = type !== spaceVoteType.get(getSpaceId(id));
+      const hasChangedBody = body !== spaceTemplate.get(getSpaceId(id));
       const hasFormChoices =
         type !== 'basic' && (choices || []).some(val => !!val);
 
@@ -69,6 +74,7 @@ export function useEditor() {
         labels.length === 0 &&
         !hasFormValues &&
         !hasChangedVotingType &&
+        !hasChangedBody &&
         !hasFormChoices
       ) {
         return acc;
@@ -85,8 +91,23 @@ export function useEditor() {
     }, {});
   }
 
+  async function getInitialProposalBody(spaceId: string) {
+    if (spaceTemplate.has(spaceId)) {
+      return spaceTemplate.get(spaceId) as string;
+    }
+
+    if (!spacesStore.spacesMap.has(spaceId)) {
+      await spacesStore.fetchSpaces([spaceId]);
+    }
+
+    const template = spacesStore.spacesMap.get(spaceId)?.template ?? '';
+
+    spaceTemplate.set(spaceId, template);
+
+    return template;
+  }
+
   async function setSpacesVoteType(spaceIds: string[]) {
-    const spacesStore = useSpacesStore();
     const newIds = spaceIds.filter(id => !spaceVoteType.has(id));
 
     if (!newIds.length) return;
@@ -122,9 +143,11 @@ export function useEditor() {
     const id = draftKey ?? generateId();
     const key = `${spaceId}:${id}`;
 
+    const body = await getInitialProposalBody(spaceId);
+
     proposals[key] = {
       title: '',
-      body: '',
+      body,
       discussion: '',
       type,
       choices,

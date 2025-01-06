@@ -120,6 +120,7 @@ export type ApiProposal = {
   labels: string[];
   scores: number[];
   scores_total: number;
+  scores_state: 'invalid' | 'pending' | 'final';
   state: 'active' | 'pending' | 'closed';
   strategies: { network: string; params: Record<string, any>; name: string }[];
   created: number;

@@ -38,11 +38,13 @@ const space = computed(() => {
     class="flex item-center space-x-2.5 truncate text-[24px]"
     v-bind="$attrs"
   >
-    <SpaceAvatar
-      :space="{ ...space, network: networkId as NetworkID }"
-      :size="36"
-      class="!rounded-[4px] shrink-0"
-    />
+    <div class="shrink-0">
+      <SpaceAvatar
+        :space="{ ...space, network: networkId as NetworkID }"
+        :size="36"
+        class="!rounded-[4px]"
+      />
+    </div>
     <span class="truncate" v-text="space.name" />
   </AppLink>
 </template>
