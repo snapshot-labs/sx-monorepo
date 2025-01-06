@@ -222,7 +222,7 @@ router.afterEach(() => {
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
     />
-    <FlashMessageWelcome />
+    <FlashMessageWelcome v-if="!whiteLabelSpace" />
   </div>
 </template>
 
