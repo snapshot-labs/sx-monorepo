@@ -34,15 +34,16 @@ const { x, y } = useDraggable(sliderEl, {
 function getNewWidth(width: number, delta: number) {
   const newWidth = Math.round(width - delta);
 
-  if (props.max && newWidth > props.max) {
+  if (props.max && newWidth >= props.max) {
     sliderOutOfBound.value = true;
     return props.max;
   }
-  if (props.min && newWidth < props.min) {
+  if (props.min && newWidth <= props.min) {
     sliderOutOfBound.value = true;
     return props.min;
   }
 
+  sliderOutOfBound.value = false;
   return newWidth;
 }
 
