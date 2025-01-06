@@ -702,8 +702,8 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     if (offchainNetworks.includes(space.value.network)) {
       proposalValidation.value = getInitialProposalValidation(space.value);
-      guidelines.value = space.value.additionalRawData?.guidelines ?? '';
-      template.value = space.value.additionalRawData?.template ?? '';
+      guidelines.value = space.value.guidelines ?? '';
+      template.value = space.value.template ?? '';
 
       const initialVotingProperties = getInitialVotingProperties(space.value);
       quorumType.value = initialVotingProperties.quorumType;
@@ -816,14 +816,12 @@ export function useSpaceSettings(space: Ref<Space>) {
         return;
       }
 
-      if (
-        guidelinesValue !== (space.value.additionalRawData?.guidelines ?? '')
-      ) {
+      if (guidelinesValue !== (space.value.guidelines ?? '')) {
         isModified.value = true;
         return;
       }
 
-      if (templateValue !== (space.value.additionalRawData?.template ?? '')) {
+      if (templateValue !== (space.value.template ?? '')) {
         isModified.value = true;
         return;
       }
