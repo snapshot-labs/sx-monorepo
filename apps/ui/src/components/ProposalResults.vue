@@ -6,7 +6,7 @@ import {
   quorumProgress
 } from '@/helpers/quorum';
 import { _n, _p, _vp } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -23,7 +23,9 @@ async function refreshScores() {
     if (result.result === true) {
       window.location.reload();
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Failed to refresh scores', e);
+  }
 }
 
 const props = withDefaults(
@@ -110,7 +112,7 @@ const isFinalizing = computed(() => {
 });
 
 onMounted(() => {
-  if (props.proposal.network === 's' && isFinalizing.value) {
+  if (offchainNetworks.includes(props.proposal.network) && isFinalizing.value) {
     refreshScores();
   }
 });
