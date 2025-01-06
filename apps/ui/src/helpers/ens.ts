@@ -111,8 +111,17 @@ export async function setEnsTextRecord(
 
   const ensHash = namehash(ensNormalize(ens));
 
+  const resolverAddress = await call(
+    getProvider(chainId),
+    ENS_CONTRACTS.registryAbi,
+    [ENS_CONTRACTS.registry, 'resolver', [ensHash]]
+  );
+
+  if (!resolvers.includes(resolverAddress))
+    throw new Error('Unsupported resolver');
+
   const contract = new Contract(
-    resolvers[0],
+    resolverAddress,
     ENS_CONTRACTS.resolverAbi,
     signer
   );

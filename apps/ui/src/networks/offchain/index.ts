@@ -12,7 +12,7 @@ const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
-const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
+export const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://v1.snapshot.box',
   's-tn': 'https://testnet.v1.snapshot.box'
 };
