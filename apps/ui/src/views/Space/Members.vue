@@ -69,6 +69,7 @@ async function loadMembersData() {
     loaded.value = true;
   }
 }
+
 watchEffect(() => setTitle(`Members - ${props.space.name}`));
 
 onMounted(loadMembersData);
