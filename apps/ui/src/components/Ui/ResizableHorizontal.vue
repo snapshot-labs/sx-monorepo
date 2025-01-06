@@ -56,7 +56,7 @@ function initResizer() {
 }
 
 watch(x, (newX, oldX) => {
-  if (!initialized) return;
+  if (!initialized.value || !dragging.value) return;
 
   if (skipNextDragTick.value) {
     skipNextDragTick.value = false;
