@@ -263,7 +263,7 @@ watchEffect(() => {
       <UiResizableHorizontal
         id="proposal-sidebar"
         :default="340"
-        :max="400"
+        :max="440"
         :min="340"
         :class="[
           'shrink-0 md:h-full z-40 border-l-0 md:border-l',
