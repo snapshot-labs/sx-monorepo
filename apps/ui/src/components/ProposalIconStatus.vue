@@ -5,6 +5,7 @@ const titles: Record<ProposalState, string> = {
   pending: 'Pending',
   active: 'Active',
   passed: 'Passed',
+  closed: 'Closed',
   rejected: 'Rejected',
   executed: 'Executed'
 };
@@ -35,6 +36,11 @@ const style = computed(() => ({
     />
     <IS-check-circle
       v-else-if="state === 'passed'"
+      class="text-skin-link"
+      :style="style"
+    />
+    <IH-minus-circle
+      v-else-if="state === 'closed'"
       class="text-skin-link"
       :style="style"
     />

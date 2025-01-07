@@ -82,9 +82,12 @@ function getProposalState(
     });
 
     if (currentQuorum < proposal.quorum) return 'rejected';
-    return proposal.type !== 'basic' || proposal.scores[0] > proposal.scores[1]
-      ? 'passed'
-      : 'rejected';
+
+    if (proposal.type !== 'basic') {
+      return 'closed';
+    }
+
+    return proposal.scores[0] > proposal.scores[1] ? 'passed' : 'rejected';
   }
 
   return proposal.state;
