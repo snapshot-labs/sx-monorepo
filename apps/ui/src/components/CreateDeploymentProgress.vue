@@ -44,6 +44,10 @@ const props = defineProps<{
   controller: string;
 }>();
 
+const emit = defineEmits<{
+  (e: 'back');
+}>();
+
 const { deployDependency, createSpace } = useActions();
 const { web3, login } = useWeb3();
 
@@ -248,14 +252,19 @@ onMounted(() => deploy());
         </div>
         <div>
           <h4 v-text="step.title" />
-          <button
-            v-if="failed && i === currentStep"
-            type="button"
-            class="text-skin-text"
-            @click="deploy(currentStep)"
-          >
-            Retry
-          </button>
+          <div v-if="failed && i === currentStep" class="flex gap-2">
+            <button
+              type="button"
+              class="text-skin-text"
+              @click="deploy(currentStep)"
+            >
+              Retry
+            </button>
+            <span>&middot;</span>
+            <button type="button" class="text-skin-text" @click="emit('back')">
+              Modify space details
+            </button>
+          </div>
           <a
             v-if="txIds[step.id]"
             class="inline-flex items-center"
