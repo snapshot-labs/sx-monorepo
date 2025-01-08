@@ -9,6 +9,7 @@ export type ProposalState =
   | 'active'
   | 'passed'
   | 'rejected'
+  | 'closed'
   | 'executed';
 
 export type NetworkID =

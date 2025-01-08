@@ -145,7 +145,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               key: 'closed',
               label: 'Closed',
               component: ProposalIconStatus,
-              componentProps: { ...selectIconBaseProps, state: 'passed' }
+              componentProps: { ...selectIconBaseProps, state: 'closed' }
             }
           ]"
         />
