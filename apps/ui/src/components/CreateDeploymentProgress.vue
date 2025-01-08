@@ -44,6 +44,10 @@ const props = defineProps<{
   controller: string;
 }>();
 
+const emit = defineEmits<{
+  (e: 'back');
+}>();
+
 const { deployDependency, createSpace } = useActions();
 const { web3, login } = useWeb3();
 
@@ -273,6 +277,13 @@ onMounted(() => deploy());
         </div>
       </div>
     </div>
+    <UiButton
+      v-if="!completed && steps[currentStep].id !== 'INDEXING_SPACE'"
+      class="mt-4"
+      @click="emit('back')"
+    >
+      Go back
+    </UiButton>
     <div v-if="completed" class="mt-4">
       You can now access your space
       <AppLink
