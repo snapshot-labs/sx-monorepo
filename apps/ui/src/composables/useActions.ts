@@ -9,6 +9,7 @@ import {
   Choice,
   DelegationType,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   SpaceMetadata,
@@ -270,6 +271,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     app: string,
     created: number,
@@ -297,6 +299,7 @@ export function useActions() {
         discussion,
         type,
         choices,
+        privacy,
         labels,
         app,
         created,
@@ -318,6 +321,7 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     executions: ExecutionInfo[] | null
   ) {
@@ -341,6 +345,7 @@ export function useActions() {
         discussion,
         type,
         choices,
+        privacy,
         labels,
         executions
       )

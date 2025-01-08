@@ -54,7 +54,7 @@ export type ApiSpace = {
     type: VoteType | '' | null;
     quorum: number | null;
     quorumType?: 'default' | 'rejection';
-    privacy: string;
+    privacy: '' | 'shutter' | 'any';
     hideAbstain: boolean;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];

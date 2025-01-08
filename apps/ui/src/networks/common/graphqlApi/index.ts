@@ -204,6 +204,7 @@ function formatSpace(
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     terms: '',
+    privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
     active_proposals: null,
     voting_types: constants.EDITOR_VOTING_TYPES,
@@ -303,7 +304,7 @@ function formatProposal(
       : proposal.min_end <= current,
     state,
     network: networkId,
-    privacy: null,
+    privacy: 'none',
     quorum: +proposal.quorum,
     flagged: false,
     completed: ['passed', 'executed', 'rejected'].includes(state)

@@ -65,6 +65,16 @@ const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
+const privacy = computed({
+  get() {
+    return proposal.value?.privacy === 'shutter';
+  },
+  set(value) {
+    if (proposal.value) {
+      proposal.value.privacy = value ? 'shutter' : 'none';
+    }
+  }
+});
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -245,6 +255,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         executions
       );
@@ -261,6 +272,7 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
         unixTimestamp.value,
@@ -601,6 +613,12 @@ watchEffect(() => {
               >.
             </template>
           </EditorChoices>
+          <UiSwitch
+            v-if="isOffchainSpace && space.privacy === 'any'"
+            v-model="privacy"
+            title="Shielded voting"
+            tooltip="Choices will be encrypted and only visible once the voting period is over."
+          />
           <EditorLabels
             v-if="space.labels?.length"
             v-model="proposal.labels"
