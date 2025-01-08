@@ -1,4 +1,10 @@
-import { ChainId, NetworkID, VoteType, VoteTypeInfo } from '@/types';
+import {
+  ChainId,
+  NetworkID,
+  SpacePrivacy,
+  VoteType,
+  VoteTypeInfo
+} from '@/types';
 
 export const APP_NAME = 'Snapshot';
 
@@ -99,7 +105,7 @@ export const VOTING_TYPES_INFO: Record<
 };
 
 export const PRIVACY_TYPES_INFO: Record<
-  'none' | 'shutter',
+  SpacePrivacy,
   { label: string; description?: string }
 > = {
   none: {
@@ -109,6 +115,10 @@ export const PRIVACY_TYPES_INFO: Record<
     label: 'Shielded voting',
     description:
       'Choices are encrypted and only visible once the voting period is over.'
+  },
+  any: {
+    label: 'Any',
+    description: 'Author can choose between no privacy and shielded voting.'
   }
 };
 

@@ -14,6 +14,7 @@ import {
   Space,
   SpaceMetadata,
   SpaceMetadataLabel,
+  SpacePrivacy,
   StrategyParsedMetadata,
   Validation
 } from '@/types';
@@ -161,7 +162,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       | 'weighted'
       | 'basic'
   );
-  const privacy = ref('none' as 'none' | 'shutter');
+  const privacy = ref('none' as SpacePrivacy);
   const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
   const snapshotChainId: Ref<number> = ref(1);
@@ -418,15 +419,18 @@ export function useSpaceSettings(space: Ref<Space>) {
   }
 
   function getInitialVotingProperties(space: Space) {
+    const validPrivacyTypes = ['shutter', 'any'];
     const spaceVoteType = space.additionalRawData?.voting.type;
-    const privacyValue = space.additionalRawData?.voting.privacy;
+    const privacyValue = space.privacy;
 
     return {
       quorumType: space.additionalRawData?.voting.quorumType ?? 'default',
       quorum: space.additionalRawData?.voting.quorum ?? 1,
       votingType:
         !spaceVoteType || spaceVoteType === 'custom' ? 'any' : spaceVoteType,
-      privacy: privacyValue === 'shutter' ? 'shutter' : 'none',
+      privacy: validPrivacyTypes.includes(privacyValue as string)
+        ? privacyValue
+        : 'none',
       ignoreAbstainVotes: space.additionalRawData?.voting.hideAbstain ?? false
     } as const;
   }

@@ -8,6 +8,7 @@ import {
   DelegationType,
   Follow,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   SpaceMetadata,
@@ -147,6 +148,7 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     app: string,
     created: number,
@@ -166,6 +168,7 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;

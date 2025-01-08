@@ -33,7 +33,8 @@ export type Choice =
   | number[]
   | Record<string, number>;
 
-export type Privacy = 'shutter' | null;
+export type Privacy = 'shutter' | 'none';
+export type SpacePrivacy = Privacy | 'any';
 
 export type VoteType =
   | 'basic'
@@ -172,6 +173,7 @@ export type Space = {
   discord: string;
   coingecko?: string;
   terms: string;
+  privacy: SpacePrivacy;
   voting_power_symbol: string;
   active_proposals: number | null;
   controller: string;
@@ -373,6 +375,7 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
+  privacy: Privacy;
   labels: string[];
   executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;

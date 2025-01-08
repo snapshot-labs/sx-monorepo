@@ -210,6 +210,7 @@ function formatSpace(
     children: space.children.map(formatRelatedSpace),
     parent: space.parent ? formatRelatedSpace(space.parent) : null,
     terms: space.terms,
+    privacy: space.voting.privacy || 'none',
     guidelines: space.guidelines,
     template: space.template,
     additionalRawData
