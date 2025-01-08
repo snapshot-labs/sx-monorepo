@@ -6,6 +6,7 @@ import {
   quorumProgress
 } from '@/helpers/quorum';
 import { _n, _p, _vp } from '@/helpers/utils';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -25,6 +26,8 @@ const props = withDefaults(
     width: 100
   }
 );
+
+const proposalsStore = useProposalsStore();
 
 const displayAllChoices = ref(false);
 
@@ -93,6 +96,32 @@ const isFinalizing = computed(() => {
     !props.proposal.completed &&
     ['passed', 'executed', 'rejected'].includes(props.proposal.state)
   );
+});
+
+async function refreshScores() {
+  try {
+    const network = getNetwork(props.proposal.network);
+    const hubUrl = network.api.apiUrl.replace('/graphql', '');
+    const response = await fetch(`${hubUrl}/api/scores/${props.proposal.id}`);
+    const result = await response.json();
+
+    if (result.result === true) {
+      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      await proposalsStore.fetchProposal(
+        props.proposal.space.id,
+        props.proposal.id,
+        props.proposal.network
+      );
+    }
+  } catch (e) {
+    console.warn('Failed to refresh scores', e);
+  }
+}
+
+onMounted(() => {
+  if (offchainNetworks.includes(props.proposal.network) && isFinalizing.value) {
+    refreshScores();
+  }
 });
 </script>
 

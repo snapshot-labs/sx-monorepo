@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { sanitizeUrl } from '@braintree/sanitize-url';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
@@ -108,6 +109,11 @@ const hasExecution = computed(() =>
 );
 const extraContacts = computed(() => {
   return props.space.treasuries as Contact[];
+});
+const guidelines = computed(() => {
+  if (!props.space.guidelines) return null;
+
+  return sanitizeUrl(props.space.guidelines);
 });
 
 const bodyDefinition = computed(() => ({
@@ -459,6 +465,12 @@ watchEffect(() => {
               >.</span
             >
           </UiAlert>
+          <div v-if="guidelines">
+            <h4 class="mb-2 eyebrow">Guidelines</h4>
+            <a :href="guidelines" target="_blank" class="block mb-4">
+              <UiLinkPreview :url="guidelines" :show-default="true" />
+            </a>
+          </div>
           <UiInputString
             :key="proposalKey || ''"
             v-model="proposal.title"

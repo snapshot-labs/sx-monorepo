@@ -86,7 +86,7 @@ function formatVotingDuration(
       :data="
         isOffchainSpace || !editable
           ? {
-              ...space,
+              network: space.network,
               created,
               start,
               min_end,

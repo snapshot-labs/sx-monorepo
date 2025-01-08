@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { _t } from '@/helpers/utils';
-import { Proposal, Space } from '@/types';
+import { NetworkID, Proposal, Space } from '@/types';
 
 type ProposalTimelineValues = {
   created?: number;
@@ -9,12 +9,18 @@ type ProposalTimelineValues = {
   max_end: number;
 };
 
+type ProposalTimelineInput = {
+  network: NetworkID;
+} & ProposalTimelineValues;
+
 type State = {
   id: keyof typeof LABELS;
   value: number;
 };
 
-const props = defineProps<{ data: Proposal | Space }>();
+const props = defineProps<{
+  data: Proposal | Space | ProposalTimelineInput;
+}>();
 
 const LABELS = {
   created: 'Created',
