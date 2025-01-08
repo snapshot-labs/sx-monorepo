@@ -156,6 +156,10 @@ a,
 
 input {
   @apply outline-none;
+
+  &[disabled] {
+    @apply cursor-not-allowed;
+  }
 }
 
 .choice-bg {
