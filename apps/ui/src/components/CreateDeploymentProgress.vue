@@ -280,7 +280,7 @@ onMounted(() => deploy());
     <UiButton v-if="!completed" class="mt-4" @click="emit('back')">
       Go back
     </UiButton>
-    <div v-if="completed" class="mt-4">
+    <div v-else class="mt-4">
       You can now access your space
       <AppLink
         :to="{
