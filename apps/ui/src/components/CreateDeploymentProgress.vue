@@ -252,19 +252,14 @@ onMounted(() => deploy());
         </div>
         <div>
           <h4 v-text="step.title" />
-          <div v-if="failed && i === currentStep" class="flex gap-2">
-            <button
-              type="button"
-              class="text-skin-text"
-              @click="deploy(currentStep)"
-            >
-              Retry
-            </button>
-            <span>&middot;</span>
-            <button type="button" class="text-skin-text" @click="emit('back')">
-              Modify space details
-            </button>
-          </div>
+          <button
+            v-if="failed && i === currentStep"
+            type="button"
+            class="text-skin-text"
+            @click="deploy(currentStep)"
+          >
+            Retry
+          </button>
           <a
             v-if="txIds[step.id]"
             class="inline-flex items-center"
@@ -282,6 +277,9 @@ onMounted(() => deploy());
         </div>
       </div>
     </div>
+    <UiButton v-if="!completed" class="mt-4" @click="emit('back')">
+      Go back
+    </UiButton>
     <div v-if="completed" class="mt-4">
       You can now access your space
       <AppLink
