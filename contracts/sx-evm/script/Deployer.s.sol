@@ -54,6 +54,9 @@ contract Deployer is Script {
 
     SingletonFactory internal singletonFactory = SingletonFactory(0xce0042B868300000d44A59004Da54A005ffdcf9f);
     address internal deployer;
+
+    // Legacy value from the original deployment
+    address internal address_salt = address(0x2dBCb4c373E99E27D1E357F42a40Ef114e9270c3);
     string internal deployments;
     string internal deploymentsPath;
 
@@ -66,7 +69,7 @@ contract Deployer is Script {
     uint256 internal saltNonce = 0;
 
     function run() public {
-        deployer = vm.envAddress("DEPLOYER_ADDRESS");
+        deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
 
         string memory network = vm.envString("NETWORK");
 
@@ -77,7 +80,6 @@ contract Deployer is Script {
         // ------- EXECUTION STRATEGIES -------
 
         (address avatarExecutionStrategy, ) = noRedeploy(
-            deployer,
             abi.encodePacked(
                 type(AvatarExecutionStrategy).creationCode,
                 abi.encode(address(0x1), address(0x1), new address[](0), 0)
@@ -88,7 +90,6 @@ contract Deployer is Script {
         deployments.serialize("AvatarExecutionStrategyImplementation", avatarExecutionStrategy);
 
         (address timelockExecutionStrategy, ) = noRedeploy(
-            deployer,
             abi.encodePacked(type(TimelockExecutionStrategy).creationCode),
             saltNonce
         );
@@ -96,7 +97,6 @@ contract Deployer is Script {
         deployments.serialize("TimelockExecutionStrategyImplementation", timelockExecutionStrategy);
 
         (address optimisticTimelockExecutionStrategy, ) = noRedeploy(
-            deployer,
             abi.encodePacked(type(OptimisticTimelockExecutionStrategy).creationCode),
             saltNonce
         );
@@ -104,7 +104,6 @@ contract Deployer is Script {
         deployments.serialize("OptimisticTimelockExecutionStrategyImplementation", optimisticTimelockExecutionStrategy);
 
         (address compTimelockCompatibleExecutionStrategy, ) = noRedeploy(
-            deployer,
             abi.encodePacked(
                 type(CompTimelockCompatibleExecutionStrategy).creationCode,
                 abi.encode(address(0x1), address(0x1), new address[](0), 0, 0)
@@ -118,7 +117,6 @@ contract Deployer is Script {
         );
 
         (address optimisticCompTimelockCompatibleExecutionStrategy, ) = noRedeploy(
-            deployer,
             abi.encodePacked(
                 type(OptimisticCompTimelockCompatibleExecutionStrategy).creationCode,
                 abi.encode(address(0x1), address(0x1), new address[](0), 0, 0)
@@ -133,14 +131,13 @@ contract Deployer is Script {
 
         // ------- AUTHENTICATORS -------
 
-        (address vanillaAuthenticator, ) = noRedeploy(deployer, type(VanillaAuthenticator).creationCode, saltNonce);
+        (address vanillaAuthenticator, ) = noRedeploy(type(VanillaAuthenticator).creationCode, saltNonce);
         deployments.serialize("VanillaAuthenticator", vanillaAuthenticator);
 
-        (address ethTxAuthenticator, ) = noRedeploy(deployer, type(EthTxAuthenticator).creationCode, saltNonce);
+        (address ethTxAuthenticator, ) = noRedeploy(type(EthTxAuthenticator).creationCode, saltNonce);
         deployments.serialize("EthTxAuthenticator", ethTxAuthenticator);
 
         (address ethSigAuthenticator, ) = noRedeploy(
-            deployer,
             abi.encodePacked(type(EthSigAuthenticator).creationCode, abi.encode(name, version)),
             saltNonce
         );
@@ -148,24 +145,19 @@ contract Deployer is Script {
 
         // ------- VOTING STRATEGIES -------
 
-        (address vanillaVotingStrategy, ) = noRedeploy(deployer, type(VanillaVotingStrategy).creationCode, saltNonce);
+        (address vanillaVotingStrategy, ) = noRedeploy(type(VanillaVotingStrategy).creationCode, saltNonce);
         deployments.serialize("VanillaVotingStrategy", vanillaVotingStrategy);
 
-        (address whitelistVotingStrategy, ) = noRedeploy(
-            deployer,
-            type(WhitelistVotingStrategy).creationCode,
-            saltNonce
-        );
+        (address whitelistVotingStrategy, ) = noRedeploy(type(WhitelistVotingStrategy).creationCode, saltNonce);
         deployments.serialize("WhitelistVotingStrategy", whitelistVotingStrategy);
 
-        (address compVotingStrategy, ) = noRedeploy(deployer, type(CompVotingStrategy).creationCode, saltNonce);
+        (address compVotingStrategy, ) = noRedeploy(type(CompVotingStrategy).creationCode, saltNonce);
         deployments.serialize("CompVotingStrategy", compVotingStrategy);
 
-        (address ozVotesVotingStrategy, ) = noRedeploy(deployer, type(OZVotesVotingStrategy).creationCode, saltNonce);
+        (address ozVotesVotingStrategy, ) = noRedeploy(type(OZVotesVotingStrategy).creationCode, saltNonce);
         deployments.serialize("OZVotesVotingStrategy", ozVotesVotingStrategy);
 
         (address merkleWhitelistVotingStrategy, ) = noRedeploy(
-            deployer,
             type(MerkleWhitelistVotingStrategy).creationCode,
             saltNonce
         );
@@ -174,21 +166,18 @@ contract Deployer is Script {
         // ------- PROPOSAL VALIDATION STRATEGIES -------
 
         (address vanillaProposalValidationStrategy, ) = noRedeploy(
-            deployer,
             type(VanillaProposalValidationStrategy).creationCode,
             saltNonce
         );
         deployments.serialize("VanillaProposalValidationStrategy", vanillaProposalValidationStrategy);
 
         (address propositionPowerProposalValidationStrategy, ) = noRedeploy(
-            deployer,
             type(PropositionPowerProposalValidationStrategy).creationCode,
             saltNonce
         );
         deployments.serialize("PropositionPowerProposalValidationStrategy", propositionPowerProposalValidationStrategy);
 
         (address activeProposalsLimiterProposalValidationStrategy, ) = noRedeploy(
-            deployer,
             type(ActiveProposalsLimiterProposalValidationStrategy).creationCode,
             saltNonce
         );
@@ -199,7 +188,6 @@ contract Deployer is Script {
         );
 
         (address propositionPowerAndActiveProposalsLimiterValidationStrategy, ) = noRedeploy(
-            deployer,
             type(PropositionPowerAndActiveProposalsLimiterValidationStrategy).creationCode,
             saltNonce
         );
@@ -211,12 +199,12 @@ contract Deployer is Script {
 
         // ------- PROXY FACTORY -------
 
-        (address proxyFactory, ) = noRedeploy(deployer, type(ProxyFactory).creationCode, saltNonce);
+        (address proxyFactory, ) = noRedeploy(type(ProxyFactory).creationCode, saltNonce);
         deployments.serialize("ProxyFactory", proxyFactory);
 
         // ------- SPACE -------
 
-        (address space, ) = noRedeploy(deployer, type(Space).creationCode, saltNonce);
+        (address space, ) = noRedeploy(type(Space).creationCode, saltNonce);
 
         // If the master space is not initialized, initialize it
         if (Space(space).owner() == address(0x0)) {
@@ -257,12 +245,8 @@ contract Deployer is Script {
     }
 
     // Deploys contract if it doesn't exist, otherwise returns the create2 address
-    function noRedeploy(
-        address _deployer,
-        bytes memory _initCode,
-        uint256 _saltNonce
-    ) internal returns (address, bool) {
-        bytes32 salt = keccak256(abi.encodePacked(_deployer, _saltNonce));
+    function noRedeploy(bytes memory _initCode, uint256 _saltNonce) internal returns (address, bool) {
+        bytes32 salt = keccak256(abi.encodePacked(address_salt, _saltNonce));
         address addy = computeCreate2Address(salt, keccak256(_initCode), address(singletonFactory));
         if (addy.code.length == 0) {
             address _addy = singletonFactory.deploy(_initCode, salt);

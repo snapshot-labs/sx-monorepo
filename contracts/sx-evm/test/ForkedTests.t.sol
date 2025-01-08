@@ -16,7 +16,7 @@ import { Choice, IndexedStrategy, Strategy, UpdateSettingsCalldata } from "../sr
 // Similar to "GasSnapshots.t.sol" except this uses a forked network
 // solhint-disable-next-line max-states-count
 contract ForkedTest is SpaceTest, SigUtils {
-    uint256 internal goerliFork;
+    uint256 internal sepoliaFork;
 
     CompVotingStrategy internal compVotingStrategy;
     CompToken internal compToken;
@@ -47,8 +47,8 @@ contract ForkedTest is SpaceTest, SigUtils {
     function setUp() public virtual override {
         super.setUp();
 
-        string memory GOERLI_RPC_URL = vm.envString("GOERLI_RPC_URL");
-        goerliFork = vm.createFork(GOERLI_RPC_URL);
+        string memory SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
+        sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
 
         (voter2, key2) = makeAddrAndKey("Voter 2 Key");
         (voter3, key3) = makeAddrAndKey("Voter 3 Key");
@@ -162,7 +162,7 @@ contract ForkedTest is SpaceTest, SigUtils {
     }
 
     function testFork_VoteAndProposeWithCompToken() public {
-        vm.selectFork(goerliFork);
+        vm.selectFork(sepoliaFork);
 
         vm.roll(block.number + 1);
 
