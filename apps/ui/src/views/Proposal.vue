@@ -392,6 +392,7 @@ watchEffect(() => {
             <button
               v-if="
                 proposal.network === 's' &&
+                proposal.completed &&
                 ['passed', 'rejected', 'executed'].includes(proposal.state)
               "
               class="mt-2.5 inline-flex items-center gap-2 hover:text-skin-link"

@@ -266,7 +266,7 @@ function formatProposal(
     proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
       ? baseNetworkId
       : networkId;
-
+  const state = getProposalState(networkId, proposal, current);
   return {
     ...proposal,
     space: {
@@ -299,11 +299,12 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
-    state: getProposalState(networkId, proposal, current),
+    state,
     network: networkId,
     privacy: null,
     quorum: +proposal.quorum,
-    flagged: false
+    flagged: false,
+    completed: ['passed', 'executed', 'rejected'].includes(state)
   };
 }
 
