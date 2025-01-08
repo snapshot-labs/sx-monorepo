@@ -26,7 +26,7 @@ contract ProxyFactory is IProxyFactory {
         return
             address(
                 uint160(
-                    uint(
+                    uint256(
                         keccak256(
                             abi.encodePacked(
                                 bytes1(0xff),

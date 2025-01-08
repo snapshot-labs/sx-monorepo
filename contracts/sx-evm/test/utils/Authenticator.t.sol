@@ -6,6 +6,7 @@ import { Test } from "forge-std/Test.sol";
 
 contract DemoTarget {
     uint256 public x;
+
     error TooBig();
 
     function foo(uint256 _x) public {

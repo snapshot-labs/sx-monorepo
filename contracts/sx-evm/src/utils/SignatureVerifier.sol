@@ -4,6 +4,7 @@ pragma solidity ^0.8.18;
 
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import { SignatureChecker } from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import { Choice, IndexedStrategy, Strategy } from "src/types.sol";
 import { SXHash } from "src/utils/SXHash.sol";
 import { TRUE, FALSE } from "../types.sol";
@@ -56,30 +57,28 @@ abstract contract SignatureVerifier is EIP712 {
         ) = abi.decode(data, (address, string, Strategy, bytes));
 
         if (usedSalts[author][salt] != FALSE) revert SaltAlreadyUsed();
-
-        address recoveredAddress = ECDSA.recover(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        PROPOSE_TYPEHASH,
-                        space,
-                        author,
-                        keccak256(bytes(metadataURI)),
-                        executionStrategy.hash(),
-                        keccak256(userProposalValidationParams),
-                        salt
-                    )
-                )
-            ),
-            v,
-            r,
-            s
-        );
-
-        if (recoveredAddress != author) revert InvalidSignature();
-
         // Mark salt as used to prevent replay attacks.
         usedSalts[author][salt] = TRUE;
+
+        bytes32 messageHash = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    PROPOSE_TYPEHASH,
+                    space,
+                    author,
+                    keccak256(bytes(metadataURI)),
+                    executionStrategy.hash(),
+                    keccak256(userProposalValidationParams),
+                    salt
+                )
+            )
+        );
+
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        bool valid = SignatureChecker.isValidSignatureNow(author, messageHash, signature);
+
+        if (!valid) revert InvalidSignature();
     }
 
     /// @dev Verifies an EIP712 signature for a vote call.
@@ -92,26 +91,25 @@ abstract contract SignatureVerifier is EIP712 {
             string memory voteMetadataURI
         ) = abi.decode(data, (address, uint256, Choice, IndexedStrategy[], string));
 
-        address recoveredAddress = ECDSA.recover(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        VOTE_TYPEHASH,
-                        space,
-                        voter,
-                        proposeId,
-                        choice,
-                        userVotingStrategies.hash(),
-                        keccak256(bytes(voteMetadataURI))
-                    )
+        bytes32 messageHash = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    VOTE_TYPEHASH,
+                    space,
+                    voter,
+                    proposeId,
+                    choice,
+                    userVotingStrategies.hash(),
+                    keccak256(bytes(voteMetadataURI))
                 )
-            ),
-            v,
-            r,
-            s
+            )
         );
 
-        if (recoveredAddress != voter) revert InvalidSignature();
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        bool valid = SignatureChecker.isValidSignatureNow(voter, messageHash, signature);
+
+        if (!valid) revert InvalidSignature();
     }
 
     /// @dev Verifies an EIP712 signature for an update proposal call.
@@ -130,29 +128,27 @@ abstract contract SignatureVerifier is EIP712 {
         );
 
         if (usedSalts[author][salt] != FALSE) revert SaltAlreadyUsed();
-
-        address recoveredAddress = ECDSA.recover(
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        UPDATE_PROPOSAL_TYPEHASH,
-                        space,
-                        author,
-                        proposalId,
-                        executionStrategy.hash(),
-                        keccak256(bytes(metadataURI)),
-                        salt
-                    )
-                )
-            ),
-            v,
-            r,
-            s
-        );
-
-        if (recoveredAddress != author) revert InvalidSignature();
-
         // Mark salt as used to prevent replay attacks.
         usedSalts[author][salt] = TRUE;
+
+        bytes32 messageHash = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    UPDATE_PROPOSAL_TYPEHASH,
+                    space,
+                    author,
+                    proposalId,
+                    executionStrategy.hash(),
+                    keccak256(bytes(metadataURI)),
+                    salt
+                )
+            )
+        );
+
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        bool valid = SignatureChecker.isValidSignatureNow(author, messageHash, signature);
+
+        if (!valid) revert InvalidSignature();
     }
 }

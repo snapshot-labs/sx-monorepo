@@ -32,6 +32,7 @@ abstract contract OptimisticTimelockExecutionStrategyTest is SpaceTest {
     error ProposalNotQueued();
     error DuplicateExecutionPayloadHash();
     error OnlyVetoGuardian();
+
     event OptimisticTimelockExecutionStrategySetUp(
         address owner,
         address vetoGuardian,

@@ -29,6 +29,7 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
     error ProposalNotQueued();
     error DuplicateExecutionPayloadHash();
     error OnlyVetoGuardian();
+
     event TimelockExecutionStrategySetUp(
         address owner,
         address vetoGuardian,

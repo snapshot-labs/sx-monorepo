@@ -15,10 +15,10 @@ interface ICompTimelock {
     /// @return The transaction hash.
     function queueTransaction(
         address target,
-        uint value,
+        uint256 value,
         string memory signature,
         bytes memory data,
-        uint eta
+        uint256 eta
     ) external returns (bytes32);
 
     /// @notice Execute a queued transaction.
@@ -30,10 +30,10 @@ interface ICompTimelock {
     /// @return The transaction return data.
     function executeTransaction(
         address target,
-        uint value,
+        uint256 value,
         string memory signature,
         bytes memory data,
-        uint eta
+        uint256 eta
     ) external payable returns (bytes memory);
 
     /// @notice Cancel a queued transaction.
@@ -44,21 +44,21 @@ interface ICompTimelock {
     /// @param eta The timestamp at which to execute the transaction, in seconds.
     function cancelTransaction(
         address target,
-        uint value,
+        uint256 value,
         string memory signature,
         bytes memory data,
-        uint eta
+        uint256 eta
     ) external;
 
-    function setDelay(uint delay) external;
+    function setDelay(uint256 delay) external;
 
-    function GRACE_PERIOD() external view returns (uint);
+    function GRACE_PERIOD() external view returns (uint256);
 
-    function MINIMUM_DELAY() external view returns (uint);
+    function MINIMUM_DELAY() external view returns (uint256);
 
-    function MAXIMUM_DELAY() external view returns (uint);
+    function MAXIMUM_DELAY() external view returns (uint256);
 
-    function delay() external view returns (uint);
+    function delay() external view returns (uint256);
 
     function queuedTransactions(bytes32 hash) external view returns (bool);
 }

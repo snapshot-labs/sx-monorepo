@@ -31,6 +31,7 @@ abstract contract CompTimelockExecutionStrategyTest is SpaceTest {
     error DuplicateMetaTransaction();
     error OnlyVetoGuardian();
     error InvalidTransaction();
+
     event CompTimelockCompatibleExecutionStrategySetUp(
         address owner,
         address vetoGuardian,

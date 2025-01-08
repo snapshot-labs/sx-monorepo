@@ -12,6 +12,7 @@ import { CompToken } from "./mocks/CompToken.sol";
 
 contract PropositionPowerProposalValidationTest is SpaceTest {
     error DuplicateFound(uint8 index);
+
     uint256 internal proposalThreshold = 100;
     CompToken internal compToken;
     IndexedStrategy[] internal userPropositionPowerStrategies;

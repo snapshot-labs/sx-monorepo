@@ -26,7 +26,7 @@ contract WhitelistVotingStrategy is IVotingStrategy {
     /// @param userParams Expected to contain a `uint256` corresponding to the voterIndex in the array provided by `params`.
     /// @return votingPower The voting power of the address if it exists in the whitelist, otherwise reverts.
     function getVotingPower(
-        uint32 /* blockNumber */,
+        uint32 _blockNumber,
         address voter,
         bytes calldata params,
         bytes calldata userParams

@@ -107,8 +107,9 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
             // We don't use the internal `_setMinVotingDuration` and `_setMaxVotingDuration` functions because
             // it would revert when `_minVotingDuration > maxVotingDuration` (when the new `_min` is
             // bigger than the current `max`).
-            if (input.minVotingDuration > input.maxVotingDuration)
+            if (input.minVotingDuration > input.maxVotingDuration) {
                 revert InvalidDuration(input.minVotingDuration, input.maxVotingDuration);
+            }
 
             minVotingDuration = input.minVotingDuration;
             emit MinVotingDurationUpdated(input.minVotingDuration);
@@ -156,8 +157,9 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         }
 
         if (input.votingStrategiesToAdd.length > 0) {
-            if (input.votingStrategiesToAdd.length != input.votingStrategyMetadataURIsToAdd.length)
+            if (input.votingStrategiesToAdd.length != input.votingStrategyMetadataURIsToAdd.length) {
                 revert ArrayLengthMismatch();
+            }
             _addVotingStrategies(input.votingStrategiesToAdd);
             emit VotingStrategiesAdded(input.votingStrategiesToAdd, input.votingStrategyMetadataURIsToAdd);
         }

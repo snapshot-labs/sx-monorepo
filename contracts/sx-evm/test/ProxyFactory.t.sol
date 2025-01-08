@@ -243,7 +243,7 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         return
             address(
                 uint160(
-                    uint(
+                    uint256(
                         keccak256(
                             abi.encodePacked(
                                 bytes1(0xff),
