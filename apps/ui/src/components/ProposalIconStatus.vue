@@ -39,7 +39,7 @@ const style = computed(() => ({
       class="text-skin-link"
       :style="style"
     />
-    <IH-minus-circle
+    <IS-minus-circle
       v-else-if="state === 'closed'"
       class="text-skin-link"
       :style="style"

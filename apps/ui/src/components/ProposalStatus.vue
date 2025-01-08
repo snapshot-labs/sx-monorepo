@@ -37,7 +37,7 @@ defineProps<{ state: ProposalState }>();
       v-else-if="state === 'passed'"
       class="text-skin-bg inline-block size-[17px] mb-[1px]"
     />
-    <IH-minus-circle
+    <IS-minus-circle
       v-else-if="state === 'closed'"
       class="text-skin-bg inline-block size-[17px] mb-[1px]"
     />
