@@ -253,7 +253,9 @@ function formatSpace(
       space.strategies_indices
     ),
     children: [],
-    parent: null
+    parent: null,
+    template: null,
+    guidelines: null
   };
 }
 

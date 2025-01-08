@@ -142,8 +142,6 @@ function formatSpace(
     private: space.private,
     domain: space.domain,
     skin: space.skin,
-    guidelines: space.guidelines,
-    template: space.template,
     strategies: space.strategies,
     categories: space.categories,
     admins: space.admins,
@@ -213,6 +211,8 @@ function formatSpace(
     parent: space.parent ? formatRelatedSpace(space.parent) : null,
     terms: space.terms,
     privacy: space.voting.privacy || 'none',
+    guidelines: space.guidelines,
+    template: space.template,
     additionalRawData
   };
 }
