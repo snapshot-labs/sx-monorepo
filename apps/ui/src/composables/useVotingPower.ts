@@ -46,16 +46,5 @@ export function useVotingPower() {
     );
   }
 
-  function reset() {
-    votingPowersStore.reset();
-  }
-
-  watch(
-    () => web3.value.account,
-    account => {
-      if (!account) reset();
-    }
-  );
-
-  return { get, fetch, reset };
+  return { get, fetch };
 }

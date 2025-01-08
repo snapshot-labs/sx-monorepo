@@ -15,7 +15,6 @@ export type VotingPowerItem = {
   error: utils.errors.VotingPowerDetailsError | null;
   canPropose: boolean;
   canVote: boolean;
-  account: string;
 };
 
 export function getIndex(space: SpaceDetails, block: number | null): string {
@@ -45,6 +44,8 @@ function isSpaceMember(space: Space, account: string): boolean {
 }
 
 export const useVotingPowersStore = defineStore('votingPowers', () => {
+  const { web3 } = useWeb3();
+
   const votingPowers = reactive<Map<string, VotingPowerItem>>(new Map());
 
   async function fetch(
@@ -65,8 +66,7 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
       symbol: space.voting_power_symbol,
       error: null,
       canPropose: false,
-      canVote: false,
-      account
+      canVote: false
     };
 
     if (existingVotingPower) {
@@ -134,6 +134,18 @@ export const useVotingPowersStore = defineStore('votingPowers', () => {
   function reset() {
     votingPowers.clear();
   }
+
+  watch(
+    () => web3.value.account,
+    (fromAccount, toAccount) => {
+      if (
+        !toAccount ||
+        (fromAccount && toAccount && fromAccount !== toAccount)
+      ) {
+        reset();
+      }
+    }
+  );
 
   return {
     votingPowers,

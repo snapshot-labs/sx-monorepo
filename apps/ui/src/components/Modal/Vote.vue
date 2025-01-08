@@ -26,11 +26,7 @@ const emit = defineEmits<{
 
 const { vote } = useActions();
 const { web3 } = useWeb3();
-const {
-  get: getVotingPower,
-  fetch: fetchVotingPower,
-  reset: resetVotingPower
-} = useVotingPower();
+const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const proposalsStore = useProposalsStore();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
@@ -138,7 +134,6 @@ watch(
 
     if (fromAccount && toAccount && fromAccount !== toAccount) {
       loading.value = true;
-      resetVotingPower();
       form.value.reason = '';
       await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
