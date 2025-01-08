@@ -2,7 +2,7 @@
 import { PRIVACY_TYPES_INFO } from '@/helpers/constants';
 import { SpacePrivacy } from '@/types';
 
-const votingTypes = ['any', 'shutter', 'none'] as const;
+const votingTypes: SpacePrivacy[] = ['any', 'shutter', 'none'];
 
 defineProps<{
   open: boolean;
