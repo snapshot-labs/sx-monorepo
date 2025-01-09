@@ -367,6 +367,25 @@ export const STRATEGY_QUERY = gql`
   ${STRATEGY_FRAGMENT}
 `;
 
+export const STATEMENTS_AND_USERS_QUERY = gql`
+  query (
+    $statementsFirst: Int!
+    $statementsWhere: StatementsWhere
+    $userIds: [String!]
+  ) {
+    statements(first: $statementsFirst, where: $statementsWhere) {
+      delegate
+      space
+      network
+      statement
+    }
+    users(where: { id_in: $userIds }) {
+      id
+      about
+    }
+  }
+`;
+
 export const NETWORKS_USAGE_QUERY = gql`
   query Networks {
     networks {
