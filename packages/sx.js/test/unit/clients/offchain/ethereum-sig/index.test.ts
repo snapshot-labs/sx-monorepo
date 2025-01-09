@@ -1,8 +1,8 @@
 import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { Privacy } from '../../../../../dist/types/index';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../../../src/offchainNetworks';
+import { Privacy } from '../../../../../src/types/index';
 
 describe('EthereumSig', () => {
   // Test address: 0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90
