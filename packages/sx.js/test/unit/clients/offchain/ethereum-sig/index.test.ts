@@ -1,5 +1,6 @@
 import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import { Privacy } from '../../../../../dist/types/index';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../../../src/offchainNetworks';
 
@@ -28,6 +29,7 @@ describe('EthereumSig', () => {
       proposal:
         '0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801',
       choice: 1,
+      privacy: 'none' as Privacy,
       metadataUri: '',
       type: 'basic',
       app: 'snapshot-v2'
