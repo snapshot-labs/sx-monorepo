@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getValidator } from '@/helpers/validation';
-import { NetworkID } from '@/types';
+import { NetworkID, Space } from '@/types';
 
 const CHILDREN_LIMIT = 16;
 
@@ -47,7 +47,7 @@ const isPrivate = defineModel<boolean>('isPrivate', { required: true });
 
 const props = defineProps<{
   networkId: NetworkID;
-  spaceId: string;
+  space: Space;
   isController: boolean;
 }>();
 
@@ -106,11 +106,11 @@ const formErrors = computed(() => {
     }
   );
 
-  if (parent.value === props.spaceId) {
+  if (parent.value === props.space.id) {
     errors.parent = 'Space cannot be a parent of itself';
   }
 
-  if (child.value === props.spaceId) {
+  if (child.value === props.space.id) {
     errors.child = 'Space cannot be a sub-space of itself';
   }
 
@@ -178,11 +178,11 @@ watchEffect(() => {
   </div>
   <div class="flex flex-wrap gap-2">
     <div
-      v-for="(space, i) in children"
-      :key="space"
+      v-for="(childSpace, i) in children"
+      :key="childSpace"
       class="flex items-center gap-2 rounded-lg border px-3 py-2 w-fit"
     >
-      <span>{{ space }}</span>
+      <span>{{ childSpace }}</span>
       <button type="button" @click="deleteChild(i)">
         <IH-x-mark class="w-[16px]" />
       </button>
@@ -210,6 +210,7 @@ watchEffect(() => {
       v-model="customDomain"
       :definition="CUSTOM_DOMAIN_DEFINITION"
       :error="formErrors.customDomain"
+      :disabled="!space.turbo && !space.additionalRawData?.domain"
     />
     <UiSwitch v-model="isPrivate" title="Hide space from homepage" />
   </div>
@@ -238,7 +239,7 @@ watchEffect(() => {
   <teleport to="#modal">
     <ModalDeleteSpace
       :open="isDeleteSpaceModalOpen"
-      :space-id="spaceId"
+      :space-id="space.id"
       @confirm="emit('deleteSpace')"
       @close="isDeleteSpaceModalOpen = false"
     />
