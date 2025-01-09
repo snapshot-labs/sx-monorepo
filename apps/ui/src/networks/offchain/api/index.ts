@@ -336,7 +336,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     tx: '',
     execution_tx: null,
     veto_tx: null,
-    privacy: proposal.privacy,
+    privacy: proposal.privacy || 'none',
     flagged: proposal.flagged
   };
 }
