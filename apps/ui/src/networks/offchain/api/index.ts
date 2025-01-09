@@ -145,6 +145,7 @@ function formatSpace(
     private: space.private,
     domain: space.domain,
     skin: space.skin,
+    skinSettings: space.skinSettings,
     strategies: space.strategies,
     categories: space.categories,
     admins: space.admins,

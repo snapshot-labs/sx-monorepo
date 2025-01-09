@@ -141,6 +141,7 @@ export type OffchainAdditionalRawData = {
   | 'private'
   | 'domain'
   | 'skin'
+  | 'skinSettings'
   | 'strategies'
   | 'categories'
   | 'admins'
@@ -391,6 +392,16 @@ export type Metadata = {
   body: string;
   discussion: string;
   execution: Transaction[];
+};
+
+export type SkinSettings = {
+  bg_color?: string;
+  link_color?: string;
+  text_color?: string;
+  content_color?: string;
+  border_color?: string;
+  heading_color?: string;
+  primary_color?: string;
 };
 
 export type Drafts = Record<string, Draft>;
