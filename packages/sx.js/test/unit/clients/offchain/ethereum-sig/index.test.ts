@@ -2,6 +2,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../../../src/offchainNetworks';
+import { Privacy } from '../../../../../src/types/index';
 
 describe('EthereumSig', () => {
   // Test address: 0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90
@@ -28,6 +29,7 @@ describe('EthereumSig', () => {
       proposal:
         '0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801',
       choice: 1,
+      privacy: 'none' as Privacy,
       metadataUri: '',
       type: 'basic',
       app: 'snapshot-v2'
