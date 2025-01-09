@@ -51,7 +51,7 @@ async function handleEndReached() {
 }
 
 const isEncrypted = computed(() => {
-  return props.proposal.privacy === 'shutter' && !props.proposal.completed;
+  return props.proposal.privacy !== 'none' && !props.proposal.completed;
 });
 
 watch([open, () => props.proposal.id], ([toOpen, toId], [, fromId]) => {
