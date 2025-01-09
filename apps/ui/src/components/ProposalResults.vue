@@ -135,7 +135,7 @@ onMounted(() => {
   </div>
   <div
     v-else-if="
-      !!props.proposal.privacy &&
+      props.proposal.privacy !== 'none' &&
       props.proposal.state === 'active' &&
       withDetails
     "
@@ -193,7 +193,7 @@ onMounted(() => {
           v-text="proposal.choices[result.choice - 1]"
         />
         <IH-lock-closed
-          v-if="!!proposal.privacy && !proposal.completed"
+          v-if="proposal.privacy !== 'none' && !proposal.completed"
           class="size-[16px] shrink-0"
         />
         <template v-else>
@@ -236,7 +236,7 @@ onMounted(() => {
       </div>
     </div>
     <div
-      v-else-if="!props.proposal.privacy || props.proposal.completed"
+      v-else-if="props.proposal.privacy === 'none' || props.proposal.completed"
       class="h-full flex items-center"
     >
       <div

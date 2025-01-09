@@ -1,7 +1,6 @@
 import {
   DelegationType,
   NetworkID,
-  Privacy,
   SpaceMetadataLabel,
   VoteType
 } from '@/types';
@@ -126,7 +125,7 @@ export type ApiProposal = {
   created: number;
   updated: number | null;
   votes: number;
-  privacy: Privacy;
+  privacy: 'shutter' | '';
   plugins: Record<string, any>;
   flagged: boolean;
 };

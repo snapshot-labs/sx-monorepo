@@ -202,7 +202,7 @@ watchEffect(async () => {
           v-text="formattedVotingPower"
         />
       </dl>
-      <div v-if="!proposal.privacy" class="s-box">
+      <div v-if="proposal.privacy === 'none'" class="s-box">
         <UiForm
           v-model="form"
           :error="formErrors"

@@ -14,7 +14,8 @@ const emit = defineEmits<{
 }>();
 
 const selectedChoices = ref<RankedChoice>(
-  (!props.proposal.privacy && (props.defaultChoice as RankedChoice)) ||
+  (props.proposal.privacy === 'none' &&
+    (props.defaultChoice as RankedChoice)) ||
     props.proposal.choices.map((_, i) => i + 1)
 );
 </script>
