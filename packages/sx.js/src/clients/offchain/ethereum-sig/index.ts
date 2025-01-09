@@ -277,7 +277,7 @@ export class EthereumSig {
       metadata: ''
     };
 
-    if (data.privacy) {
+    if (data.privacy !== 'none') {
       message.privacy = data.privacy;
       voteType = encryptedVoteTypes;
       message.choice = await encryptChoices(

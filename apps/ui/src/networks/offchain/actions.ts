@@ -227,7 +227,7 @@ export function createActions(
         authenticator: '',
         strategies: [],
         metadataUri: '',
-        privacy: proposal.privacy === 'none' ? '' : proposal.privacy,
+        privacy: proposal.privacy,
         reason,
         app: app || EDITOR_APP_NAME
       };
