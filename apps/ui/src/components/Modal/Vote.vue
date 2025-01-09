@@ -103,9 +103,11 @@ async function voteFn() {
 }
 
 async function handleConfirmed(tx?: string | null) {
-  if (tx) txId.value = tx;
   modalTransactionOpen.value = false;
-  modalShareOpen.value = true;
+  if (tx) {
+    txId.value = tx;
+    modalShareOpen.value = true;
+  }
 
   emit('voted');
   emit('close');
