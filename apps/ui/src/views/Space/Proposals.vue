@@ -7,11 +7,7 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const {
-  get: getVotingPower,
-  fetch: fetchVotingPower,
-  reset: resetVotingPower
-} = useVotingPower();
+const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { web3 } = useWeb3();
 const router = useRouter();
 const route = useRoute();
@@ -97,12 +93,8 @@ watch(
 
 watch(
   [props.space, () => web3.value.account, () => web3.value.authLoading],
-  ([toSpace, toAccount, toAuthLoading], [, fromAccount]) => {
-    if (fromAccount && toAccount && fromAccount !== toAccount) {
-      resetVotingPower();
-    }
-
-    if (toAuthLoading || !toSpace || !toAccount) return;
+  ([proposal, account, authLoading]) => {
+    if (authLoading || !proposal || !account) return;
 
     handleFetchVotingPower();
   },
