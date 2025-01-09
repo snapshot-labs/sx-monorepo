@@ -166,7 +166,7 @@ export type Vote = {
   choice: Choice;
   metadataUri: string;
   type: string;
-  privacy?: Privacy;
+  privacy: Privacy;
   timestamp?: number;
   reason?: string;
   app: string;
