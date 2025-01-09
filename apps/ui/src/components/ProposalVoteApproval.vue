@@ -13,7 +13,9 @@ const emit = defineEmits<{
 }>();
 
 const selectedChoices = ref<ApprovalChoice>(
-  (!props.proposal.privacy && (props.defaultChoice as ApprovalChoice)) || []
+  (props.proposal.privacy === 'none' &&
+    (props.defaultChoice as ApprovalChoice)) ||
+    []
 );
 
 function toggleSelectedChoice(choice: number) {

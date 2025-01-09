@@ -14,7 +14,9 @@ defineEmits<{
 }>();
 
 const selectedChoices = ref<WeightedChoice>(
-  (!props.proposal.privacy && (props.defaultChoice as WeightedChoice)) || {}
+  (props.proposal.privacy === 'none' &&
+    (props.defaultChoice as WeightedChoice)) ||
+    {}
 );
 
 function increaseChoice(index: number) {
