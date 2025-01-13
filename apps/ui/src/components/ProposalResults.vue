@@ -61,10 +61,6 @@ const results = computed(() => {
 
       const progress = parsedTotal !== 0 ? (score / parsedTotal) * 100 : 0;
 
-      if (hideAbstain.value && i === 2) {
-        return;
-      }
-
       return {
         choice: i + 1,
         progress,
