@@ -15,6 +15,7 @@ const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
+const { isWhiteLabel } = useWhiteLabel();
 
 const SEARCH_CONFIG = {
   space: {
@@ -149,7 +150,11 @@ onUnmounted(() => {
         </template>
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton class="!px-0 w-[46px]" @click="toggleSkin()">
+      <UiButton
+        v-if="!isWhiteLabel"
+        class="!px-0 w-[46px]"
+        @click="toggleSkin()"
+      >
         <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
