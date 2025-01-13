@@ -5,7 +5,8 @@ describe('getProposalCurrentQuorum', () => {
   it('should only use for and abstain votes for onchain spaces', () => {
     const currentQuorum = getProposalCurrentQuorum('eth', {
       scores: [11, 20, 100],
-      scores_total: 131
+      scores_total: 131,
+      type: 'basic'
     });
 
     expect(currentQuorum).toBe(111);
@@ -14,7 +15,8 @@ describe('getProposalCurrentQuorum', () => {
   it('should use total score for offchain spaces', () => {
     const currentQuorum = getProposalCurrentQuorum('s', {
       scores: [11, 20, 100],
-      scores_total: 131
+      scores_total: 131,
+      type: 'basic'
     });
 
     expect(currentQuorum).toBe(131);
@@ -24,7 +26,8 @@ describe('getProposalCurrentQuorum', () => {
     const currentQuorum = getProposalCurrentQuorum('s', {
       scores: [11, 20, 100],
       scores_total: 131,
-      quorum_type: 'rejection'
+      quorum_type: 'rejection',
+      type: 'basic'
     });
 
     expect(currentQuorum).toBe(20);

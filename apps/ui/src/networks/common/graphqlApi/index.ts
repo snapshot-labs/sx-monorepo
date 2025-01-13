@@ -26,7 +26,8 @@ import {
   Transaction,
   User,
   UserActivity,
-  Vote
+  Vote,
+  VoteType
 } from '@/types';
 import {
   PROPOSAL_QUERY as HIGHLIGHT_PROPOSAL_QUERY,
@@ -68,7 +69,9 @@ function getProposalState(
   const quorum = BigInt(proposal.quorum);
   const currentQuorum = getProposalCurrentQuorum(networkId, {
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    scores_total: proposal.scores_total
+    scores_total: proposal.scores_total,
+    type: 'basic' as VoteType,
+    hide_abstain: false
   });
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);

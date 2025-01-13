@@ -31,6 +31,8 @@ const proposalsStore = useProposalsStore();
 
 const displayAllChoices = ref(false);
 
+const hideAbstain = computed(() => props.proposal.hide_abstain ?? false);
+
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
 const placeholderResults = computed(() =>
@@ -45,13 +47,21 @@ const results = computed(() => {
   if (!props.proposal.scores.length) return placeholderResults.value;
 
   // TODO: sx-api returns number, sx-subgraph returns string
-  const parsedTotal = parseFloat(
+  let parsedTotal = parseFloat(
     props.proposal.scores_total as unknown as string
   );
+
+  if (hideAbstain.value && props.proposal.type === 'basic') {
+    parsedTotal = props.proposal.scores[0] + props.proposal.scores[1];
+  }
 
   return props.proposal.scores
     .map((score, i) => {
       const progress = parsedTotal !== 0 ? (score / parsedTotal) * 100 : 0;
+
+      if (hideAbstain.value && i === 2) {
+        return;
+      }
 
       return {
         choice: i + 1,
@@ -59,6 +69,7 @@ const results = computed(() => {
         score
       };
     })
+    .filter(r => !!r)
     .sort((a, b) => b.progress - a.progress);
 });
 
