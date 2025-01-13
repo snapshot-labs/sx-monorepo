@@ -99,6 +99,7 @@ const SPACE_FRAGMENT = gql`
       border_color
       heading_color
       primary_color
+      theme
     }
     guidelines
     template

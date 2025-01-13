@@ -402,6 +402,7 @@ export type SkinSettings = {
   border_color?: string;
   heading_color?: string;
   primary_color?: string;
+  theme?: string;
 };
 
 export type Drafts = Record<string, Draft>;
