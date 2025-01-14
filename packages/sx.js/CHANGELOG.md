@@ -1,5 +1,16 @@
 # @snapshot-labs/sx
 
+## 0.2.0
+
+### Minor Changes
+
+- 7bfd971: Add privacy option to proposal and update-proposal
+
+### Patch Changes
+
+- 5ebcc3c: add flagProposal method to offchain EthereumSig client
+- 5bcc748: encrypt only shutter votes
+
 ## 0.1.6
 
 ### Patch Changes
