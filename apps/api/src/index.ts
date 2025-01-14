@@ -9,10 +9,9 @@ import Checkpoint, {
   LogLevel,
   starknet
 } from '@snapshot-labs/checkpoint';
-import spaceAbi from './abis/space.json';
-import spaceFactoryAbi from './abis/spaceFactory.json';
-import config from './currentConfig';
-import * as writer from './writer';
+import { createConfig } from './config';
+import overrides from './overrides.json';
+import { createWriters } from './writer';
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
@@ -25,16 +24,21 @@ if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
 
-const indexer = new starknet.StarknetIndexer(writer);
-const checkpoint = new Checkpoint(config, indexer, schema, {
+const snConfig = createConfig('sn');
+const snSepConfig = createConfig('sn-sep');
+
+const snIndexer = new starknet.StarknetIndexer(createWriters(snConfig));
+const snSepIndexer = new starknet.StarknetIndexer(createWriters(snSepConfig));
+
+const checkpoint = new Checkpoint(schema, {
   logLevel: LogLevel.Info,
   resetOnConfigChange: true,
   prettifyLogs: process.env.NODE_ENV !== 'production',
-  abis: {
-    SpaceFactory: spaceFactoryAbi,
-    Space: spaceAbi
-  }
+  overridesConfig: overrides
 });
+
+checkpoint.addIndexer(snConfig.indexerName, snConfig, snIndexer);
+checkpoint.addIndexer(snSepConfig.indexerName, snSepConfig, snSepIndexer);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -65,7 +69,8 @@ async function run() {
     await sleep(PRODUCTION_INDEXER_DELAY);
   }
 
-  // await checkpoint.reset();
+  await checkpoint.resetMetadata();
+  await checkpoint.reset();
   checkpoint.start();
 }
 

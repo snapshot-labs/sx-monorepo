@@ -1,7 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract as EthContract } from '@ethersproject/contracts';
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { faker } from '@faker-js/faker';
 import { utils } from '@snapshot-labs/sx';
 import fetch from 'cross-fetch';
@@ -17,8 +17,8 @@ import {
 import EncodersAbi from './abis/encoders.json';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
 import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
+import { FullConfig } from './config';
 import { handleStrategiesParsedMetadata } from './ipfs';
-import { networkNodeUrl, networkProperties } from './overrrides';
 import {
   Space,
   StrategiesParsedMetadataItem,
@@ -29,14 +29,6 @@ type StrategyConfig = {
   address: BigNumberish;
   params: BigNumberish[];
 };
-
-export const ethProvider = new JsonRpcProvider(
-  process.env.L1_NETWORK_NODE_URL ??
-    `https://rpc.brovider.xyz/${networkProperties.baseChainId}`
-);
-const starkProvider = new RpcProvider({
-  nodeUrl: networkNodeUrl
-});
 
 const encodersAbi = new CallData(EncodersAbi);
 
@@ -145,10 +137,15 @@ export function getVoteValue(label: string) {
 
 export async function handleExecutionStrategy(
   address: string,
-  payload: string[]
+  payload: string[],
+  config: FullConfig
 ) {
   try {
     if (address === '0x0') return null;
+
+    const starkProvider = new RpcProvider({
+      nodeUrl: config.overrides.networkNodeUrl
+    });
 
     const executionContract = new Contract(
       ExecutionStrategyAbi,
@@ -169,6 +166,11 @@ export async function handleExecutionStrategy(
       if (!l1Destination)
         throw new Error('Invalid payload for EthRelayer execution strategy');
       destinationAddress = formatAddress('Ethereum', l1Destination);
+
+      const ethProvider = new StaticJsonRpcProvider(
+        config.overrides.l1NetworkNodeUrl,
+        config.overrides.baseChainId
+      );
 
       const SimpleQuorumExecutionStrategyContract = new EthContract(
         destinationAddress,
@@ -197,7 +199,8 @@ export async function updateProposaValidationStrategy(
   space: Space,
   validationStrategyAddress: string,
   validationStrategyParams: string[],
-  metadataUri: string[]
+  metadataUri: string[],
+  config: FullConfig
 ) {
   space.validation_strategy = validationStrategyAddress;
   space.validation_strategy_params = validationStrategyParams.join(',');
@@ -209,7 +212,7 @@ export async function updateProposaValidationStrategy(
   if (
     utils.encoding.hexPadLeft(validationStrategyAddress) ===
     utils.encoding.hexPadLeft(
-      networkProperties.propositionPowerValidationStrategyAddress
+      config.overrides.propositionPowerValidationStrategyAddress
     )
   ) {
     const parsed = encodersAbi.parse(
@@ -232,7 +235,8 @@ export async function updateProposaValidationStrategy(
     try {
       await handleVotingPowerValidationMetadata(
         space.id,
-        space.voting_power_validation_strategy_metadata
+        space.voting_power_validation_strategy_metadata,
+        config
       );
     } catch (e) {
       console.log('failed to handle voting power strategies metadata', e);
@@ -244,6 +248,7 @@ export async function handleStrategiesMetadata(
   spaceId: string,
   metadataUris: string[],
   startingIndex: number,
+  config: FullConfig,
   type:
     | typeof StrategiesParsedMetadataItem
     | typeof VotingPowerValidationStrategiesParsedMetadataItem = StrategiesParsedMetadataItem
@@ -255,17 +260,17 @@ export async function handleStrategiesMetadata(
     const index = startingIndex + i;
     const uniqueId = `${spaceId}/${index}/${dropIpfs(metadataUri)}`;
 
-    const exists = await type.loadEntity(uniqueId);
+    const exists = await type.loadEntity(uniqueId, config.indexerName);
     if (exists) continue;
 
-    const strategiesParsedMetadataItem = new type(uniqueId);
+    const strategiesParsedMetadataItem = new type(uniqueId, config.indexerName);
     strategiesParsedMetadataItem.space = spaceId;
     strategiesParsedMetadataItem.index = index;
 
     if (metadataUri.startsWith('ipfs://')) {
       strategiesParsedMetadataItem.data = dropIpfs(metadataUri);
 
-      await handleStrategiesParsedMetadata(metadataUri);
+      await handleStrategiesParsedMetadata(metadataUri, config);
     }
 
     await strategiesParsedMetadataItem.save();
@@ -274,7 +279,8 @@ export async function handleStrategiesMetadata(
 
 export async function handleVotingPowerValidationMetadata(
   spaceId: string,
-  metadataUri: string
+  metadataUri: string,
+  config: FullConfig
 ) {
   if (!metadataUri) return;
 
@@ -285,20 +291,24 @@ export async function handleVotingPowerValidationMetadata(
     spaceId,
     metadata.strategies_metadata,
     0,
+    config,
     VotingPowerValidationStrategiesParsedMetadataItem
   );
 }
 
-export async function registerProposal({
-  l1TokenAddress,
-  strategyAddress,
-  snapshotTimestamp
-}: {
-  l1TokenAddress: string;
-  strategyAddress: string;
-  snapshotTimestamp: number;
-}) {
-  const res = await fetch(networkProperties.manaRpcUrl, {
+export async function registerProposal(
+  {
+    l1TokenAddress,
+    strategyAddress,
+    snapshotTimestamp
+  }: {
+    l1TokenAddress: string;
+    strategyAddress: string;
+    snapshotTimestamp: number;
+  },
+  config: FullConfig
+) {
+  const res = await fetch(config.overrides.manaRpcUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
