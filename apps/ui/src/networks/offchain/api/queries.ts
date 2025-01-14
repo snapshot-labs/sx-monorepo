@@ -120,6 +120,9 @@ const PROPOSAL_FRAGMENT = gql`
       moderators
       symbol
       terms
+      voting {
+        hideAbstain
+      }
     }
     type
     title

@@ -78,7 +78,9 @@ function getProposalState(
   if (proposal.state === 'closed') {
     const currentQuorum = getProposalCurrentQuorum(networkId, {
       scores: proposal.scores,
-      scores_total: proposal.scores_total
+      scores_total: proposal.scores_total,
+      type: proposal.type,
+      hide_abstain: proposal.space.voting.hideAbstain
     });
 
     if (currentQuorum < proposal.quorum) return 'rejected';
@@ -296,6 +298,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     snapshot: proposal.snapshot,
     quorum: proposal.quorum,
     quorum_type: proposal.quorumType,
+    hide_abstain: proposal.space.voting.hideAbstain,
     choices: proposal.choices,
     labels: proposal.labels,
     scores: proposal.scores,
