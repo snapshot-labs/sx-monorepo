@@ -233,6 +233,27 @@ export function useActions() {
     return receipt;
   }
 
+  async function createSpaceRaw(
+    networkId: NetworkID,
+    id: string,
+    settings: string
+  ) {
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
+
+    const network = getNetwork(networkId);
+    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
+      throw new Error(`${web3.value.type} is not supported for this action`);
+    }
+
+    return wrapPromise(
+      networkId,
+      network.actions.createSpaceRaw(auth.web3, id, settings)
+    );
+  }
+
   async function vote(
     proposal: Proposal,
     choice: Choice,
@@ -655,6 +676,7 @@ export function useActions() {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
     createSpace: wrapWithErrors(createSpace),
+    createSpaceRaw: wrapWithErrors(createSpaceRaw),
     vote: wrapWithErrors(vote),
     propose: wrapWithErrors(propose),
     updateProposal: wrapWithErrors(updateProposal),
