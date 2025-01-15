@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 const props = withDefaults(
   defineProps<{
-    steps: ReadonlyArray<{ id: string; title: string }>;
-    validatePageFn: (pageId: string) => boolean | undefined;
+    steps: Record<string, { title: string; isValid: () => boolean }>;
     submitting?: boolean;
   }>(),
   {
@@ -12,56 +11,23 @@ const props = withDefaults(
 
 const emit = defineEmits(['submit']);
 
-const currentPage: Ref<string> = ref(props.steps[0].id);
-const pagesRefs = ref([] as HTMLElement[]);
-const pagesErrors: Ref<Record<string, Record<string, string>>> = ref(
-  props.steps.reduce(
-    (acc, page) => ({ ...acc, [page.id]: {} }),
-    {} as Record<string, Record<string, string>>
-  )
-);
+const stepper = useStepper(props.steps);
 
-const accessiblePages = computed(() => {
-  const invalidPageIndex = props.steps.findIndex(
-    page => !validateStep(page.id)
-  );
+const firstInvalidStepIndex = computed(() => {
+  const index = Object.values(props.steps).findIndex(step => !step.isValid());
 
-  return Object.fromEntries(
-    props.steps.map((page, i) => [
-      page.id,
-      invalidPageIndex === -1 ? true : i <= invalidPageIndex
-    ])
-  );
+  return index >= 0 ? index : stepper.stepNames.value.length;
 });
-const showCreate = computed(
-  () =>
-    props.steps.findIndex(page => page.id === currentPage.value) ===
-    props.steps.length - 1
-);
-const nextDisabled = computed(() => !validateStep(currentPage.value));
+
 const submitDisabled = computed(() =>
-  props.steps.some(page => !validateStep(page.id))
+  Object.values(props.steps).some(step => !step.isValid())
 );
 
-function validateStep(pageId: string) {
-  return (
-    props.validatePageFn(pageId) ??
-    Object.values(pagesErrors.value[pageId]).length === 0
-  );
-}
-
-function handleErrors(pageId: string, errors: any) {
-  pagesErrors.value[pageId] = errors;
-}
-
-function handleNextClick() {
-  const currentIndex = props.steps.findIndex(
-    page => page.id === currentPage.value
-  );
-  if (currentIndex === props.steps.length - 1) return;
-
-  currentPage.value = props.steps[currentIndex + 1].id;
-  pagesRefs.value[currentIndex + 1].scrollIntoView();
+function goToStep(stepName: string) {
+  stepper.goTo(stepName);
+  window.scrollTo({
+    top: 0
+  });
 }
 </script>
 
@@ -71,32 +37,30 @@ function handleNextClick() {
       class="flex fixed lg:sticky top-[72px] inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
     >
       <button
-        v-for="page in steps"
-        ref="pagesRefs"
-        :key="page.id"
+        v-for="(step, stepName, i) in steps"
+        :key="stepName"
         type="button"
-        :disabled="!accessiblePages[page.id]"
+        :disabled="i > firstInvalidStepIndex"
         class="px-3 py-1 block lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap"
         :class="{
-          'bg-skin-active-bg': page.id === currentPage,
-          'hover:bg-skin-hover-bg': page.id !== currentPage,
-          'text-skin-link': accessiblePages[page.id]
+          'bg-skin-active-bg': stepper.isCurrent(stepName),
+          'hover:bg-skin-hover-bg': !stepper.isCurrent(stepName),
+          'text-skin-link': i <= firstInvalidStepIndex
         }"
-        @click="currentPage = page.id"
+        @click="goToStep(stepName)"
       >
-        {{ page.title }}
+        {{ step.title }}
       </button>
     </div>
     <div class="flex-1">
       <div class="mt-8 lg:mt-0">
         <slot
           name="content"
-          :current-page="currentPage"
-          :handle-errors="handleErrors"
+          :current-step="stepper.stepNames.value[stepper.index.value]"
         />
       </div>
       <UiButton
-        v-if="showCreate"
+        v-if="stepper.isLast.value"
         class="w-full"
         :loading="submitting"
         :disabled="submitDisabled"
@@ -105,10 +69,10 @@ function handleNextClick() {
         <slot name="submit-text"> Submit </slot>
       </UiButton>
       <UiButton
-        v-else
+        v-else-if="stepper.next.value"
         class="w-full"
-        :disabled="nextDisabled"
-        @click="handleNextClick"
+        :disabled="!stepper.current.value.isValid()"
+        @click="goToStep(stepper.next.value)"
       >
         Next
       </UiButton>

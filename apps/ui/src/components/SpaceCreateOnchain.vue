@@ -4,40 +4,46 @@ import { enabledReadWriteNetworks, getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
-const PAGES = [
-  {
-    id: 'profile',
-    title: 'Profile'
+const STEPS = {
+  profile: {
+    title: 'Profile',
+    isValid: () => !stepsErrors.value['profile']
   },
-  {
-    id: 'network',
-    title: 'Network'
+  network: {
+    title: 'Network',
+    isValid: () => true
   },
-  {
-    id: 'strategies',
-    title: 'Strategies'
+  strategies: {
+    title: 'Strategies',
+    isValid: () => votingStrategies.value.length > 0
   },
-  {
-    id: 'validations',
-    title: 'Proposal validation'
+  validations: {
+    title: 'Proposal validation',
+    isValid: () => {
+      if (!validationStrategy.value) return false;
+
+      return validationStrategy.value.validate
+        ? validationStrategy.value.validate(validationStrategy.value.params)
+        : true;
+    }
   },
-  {
-    id: 'executions',
-    title: 'Executions'
+  executions: {
+    title: 'Executions',
+    isValid: () => true
   },
-  {
-    id: 'auths',
-    title: 'Auths'
+  auths: {
+    title: 'Auths',
+    isValid: () => authenticators.value.length > 0
   },
-  {
-    id: 'voting',
-    title: 'Voting'
+  voting: {
+    title: 'Voting',
+    isValid: () => !stepsErrors.value['voting']
   },
-  {
-    id: 'controller',
-    title: 'Controller'
+  controller: {
+    title: 'Controller',
+    isValid: () => !stepsErrors.value['controller']
   }
-] as const;
+} as const;
 
 const { predictSpaceAddress } = useActions();
 const { web3 } = useWeb3();
@@ -75,20 +81,13 @@ const controller = ref(web3.value.account);
 const confirming = ref(false);
 const salt: Ref<string | null> = ref(null);
 const predictedSpaceAddress: Ref<string | null> = ref(null);
+const stepsErrors = ref<Record<string, boolean>>({
+  profile: false,
+  voting: false,
+  controller: false
+});
 
 const selectedNetwork = computed(() => getNetwork(selectedNetworkId.value));
-
-function validatePage(page: string): boolean | undefined {
-  if (page === 'strategies') return votingStrategies.value.length > 0;
-  if (page === 'auths') return authenticators.value.length > 0;
-  if (page === 'validations') {
-    if (!validationStrategy.value) return false;
-
-    return validationStrategy.value.validate
-      ? validationStrategy.value.validate(validationStrategy.value.params)
-      : true;
-  }
-}
 
 async function handleSubmit() {
   salt.value = getSalt();
@@ -97,6 +96,10 @@ async function handleSubmit() {
     salt.value
   );
   confirming.value = true;
+}
+
+function handleErrors(stepName: string, errors: any) {
+  stepsErrors.value[stepName] = Object.values(errors).length > 0;
 }
 
 watch(
@@ -132,14 +135,9 @@ watch(selectedNetworkId, () => {
       :controller="controller"
       @back="confirming = false"
     />
-    <UiStepper
-      v-else
-      :steps="PAGES"
-      :validate-page-fn="validatePage"
-      @submit="handleSubmit"
-    >
-      <template #content="{ currentPage, handleErrors }">
-        <template v-if="currentPage === 'profile'">
+    <UiStepper v-else :steps="STEPS" @submit="handleSubmit">
+      <template #content="{ currentStep }">
+        <template v-if="currentStep === 'profile'">
           <h3 class="mb-4">Space profile</h3>
           <FormSpaceProfile
             :form="metadataForm"
@@ -158,11 +156,11 @@ watch(selectedNetworkId, () => {
           </div>
         </template>
         <FormNetwork
-          v-else-if="currentPage === 'network'"
+          v-else-if="currentStep === 'network'"
           v-model="selectedNetworkId"
         />
         <FormStrategies
-          v-else-if="currentPage === 'strategies'"
+          v-else-if="currentStep === 'strategies'"
           v-model="votingStrategies"
           :network-id="selectedNetworkId"
           :available-strategies="
@@ -172,7 +170,7 @@ watch(selectedNetworkId, () => {
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
         />
         <FormStrategies
-          v-else-if="currentPage === 'auths'"
+          v-else-if="currentStep === 'auths'"
           v-model="authenticators"
           unique
           :network-id="selectedNetworkId"
@@ -183,7 +181,7 @@ watch(selectedNetworkId, () => {
           description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
         />
         <FormValidation
-          v-else-if="currentPage === 'validations'"
+          v-else-if="currentStep === 'validations'"
           v-model="validationStrategy"
           :network-id="selectedNetworkId"
           :available-strategies="
@@ -197,7 +195,7 @@ watch(selectedNetworkId, () => {
           description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
         />
         <FormStrategies
-          v-else-if="currentPage === 'executions'"
+          v-else-if="currentStep === 'executions'"
           v-model="executionStrategies"
           :network-id="selectedNetworkId"
           :available-strategies="
@@ -208,13 +206,13 @@ watch(selectedNetworkId, () => {
           description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."
         />
         <FormVoting
-          v-else-if="currentPage === 'voting'"
+          v-else-if="currentStep === 'voting'"
           :form="settingsForm"
           :selected-network-id="selectedNetworkId"
           @errors="v => handleErrors('voting', v)"
         />
         <FormController
-          v-else-if="currentPage === 'controller'"
+          v-else-if="currentStep === 'controller'"
           v-model="controller"
           @errors="v => handleErrors('controller', v)"
         />
