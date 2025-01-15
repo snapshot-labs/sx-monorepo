@@ -2543,10 +2543,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.18.tgz#fcbd86d4557821bff774d60e5c636ad47ed85d77"
   integrity sha512-v6tj7l19KJUWjBbsWpwxaYO2mlIDBFyAG0OMSPhUgrhltO7b6R4Ejxn2k4Qgi/NtlnOrj+3Gt3eQRry8Jfgjrg==
 
-"@snapshot-labs/snapshot.js@^0.12.41":
-  version "0.12.41"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.41.tgz#3a0a2866a78f14368eb0648ef2e22a8e66422b26"
-  integrity sha512-Deikl21gUzeY/2TE8xTNsHbwTNcSqvxDnrzA1LcLwyqAzA6tigwNBlqaS5E35v7t5z7Iz62j+CPEFzxv1ta6cA==
+"@snapshot-labs/snapshot.js@^0.12.42":
+  version "0.12.42"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.12.42.tgz#5a1b63ed1ebe2391a7a4b21eac60c7ac54a27d5c"
+  integrity sha512-uIcY9UKIty1yafSSWctrabrBI0i3n/vKRy9SE+7nm6DTbULHSDs9R6aI4O+jJcTg++GSKYiMGvhW46Vz0K9Jjg==
   dependencies:
     "@ensdomains/eth-ens-namehash" "^2.0.15"
     "@ethersproject/abi" "^5.6.4"
@@ -2564,7 +2564,7 @@
     cross-fetch "^3.1.6"
     json-to-graphql-query "^2.2.4"
     lodash.set "^4.3.2"
-    starknet "^5.24.3"
+    starknet "^5.19.3"
 
 "@stablelib/aead@^1.0.1":
   version "1.0.1"
@@ -12118,7 +12118,7 @@ starknet@6.11.0:
     ts-mixer "^6.0.3"
     url-join "^4.0.1"
 
-starknet@^5.19.3, starknet@^5.24.3:
+starknet@^5.19.3:
   version "5.29.0"
   resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.29.0.tgz#26d8074340f26a2da4bc373169a1a5ed6dc9bedf"
   integrity sha512-eEcd6uiYIwGvl8MtHOsXGBhREqjJk84M/qUkvPLQ3n/JAMkbKBGnygDlh+HAsvXJsGlMQfwrcVlm6KpDoPha7w==
