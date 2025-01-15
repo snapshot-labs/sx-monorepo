@@ -2,8 +2,10 @@
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { APP_NAME } from '@/helpers/constants';
 import {
+  clone,
   getCacheHash,
   getStampUrl,
+  hexToRgb,
   whiteLabelAwareParams
 } from '@/helpers/utils';
 import { Transaction } from '@/types';
@@ -21,6 +23,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
+const { DEFAULT_SKIN, toggleSkin } = useUserSkin();
 const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
@@ -42,6 +45,7 @@ const {
   transaction,
   reset
 } = useWalletConnectTransaction();
+const { css } = useStyleTag('', { id: 'skin' });
 
 provide('web3', web3);
 
@@ -65,6 +69,25 @@ const hasPlaceHolderSidebar = computed(
 
 const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
+});
+
+const skinVariables = computed(() => {
+  if (!whiteLabelSpace.value?.additionalRawData?.skinSettings) return {};
+
+  const colors = clone(whiteLabelSpace.value?.additionalRawData?.skinSettings);
+
+  const result = Object.entries(colors).reduce((acc, [colorName, hex]) => {
+    if (!hex || !colorName.includes('_color')) return acc;
+
+    const rgb = hexToRgb(hex.slice(1));
+    acc[`--${colorName.replace('_color', '')}`] = `${rgb.r},${rgb.g},${rgb.b}`;
+    return acc;
+  }, {});
+
+  if (result['--content']) {
+    result['--content'] = `rgb(${result['--content']})`;
+  }
+  return result;
 });
 
 async function handleTransactionAccept() {
@@ -145,6 +168,15 @@ watch(
     setFavicon(faviconUrl);
 
     setAppName(whiteLabelSpace.value.name);
+
+    css.value = `:root { ${Object.entries(skinVariables.value)
+      .map(([key, val]) => `${key}:${val}`)
+      .join(';')};  }`;
+
+    toggleSkin(
+      whiteLabelSpace.value.additionalRawData?.skinSettings?.theme ||
+        DEFAULT_SKIN
+    );
   },
   { immediate: true }
 );

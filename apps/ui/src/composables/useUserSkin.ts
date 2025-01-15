@@ -1,17 +1,21 @@
 type Skin = 'dark' | 'light' | 'none';
 
+const DEFAULT_SKIN: Skin = 'light';
+
 export function useUserSkin() {
   const store = useStorage<Skin>('skin', 'none');
   const currentMode = computed(() =>
-    ['light', 'none'].includes(store.value) ? 'light' : 'dark'
+    [DEFAULT_SKIN, 'none'].includes(store.value) ? DEFAULT_SKIN : 'dark'
   );
 
-  function toggleSkin() {
-    store.value = ['light', 'none'].includes(store.value) ? 'dark' : 'light';
+  function toggleSkin(skin?: Skin) {
+    store.value =
+      skin ||
+      ([DEFAULT_SKIN, 'none'].includes(store.value) ? 'dark' : DEFAULT_SKIN);
   }
 
   watchEffect(() => {
-    if (currentMode.value === 'light') {
+    if (currentMode.value === DEFAULT_SKIN) {
       document.documentElement.classList.remove('dark');
     } else {
       document.documentElement.classList.add('dark');
@@ -19,6 +23,7 @@ export function useUserSkin() {
   });
 
   return {
+    DEFAULT_SKIN,
     currentMode,
     toggleSkin
   };
