@@ -151,7 +151,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const quorumType = ref(
     'default' as NonNullable<OffchainApiSpace['voting']['quorumType']>
   );
-  const quorum = ref(1 as string | number);
+  const quorum = ref(0 as string | number);
   const voteType = ref(
     'any' as
       | 'any'
@@ -425,7 +425,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     return {
       quorumType: space.additionalRawData?.voting.quorumType ?? 'default',
-      quorum: space.additionalRawData?.voting.quorum ?? 1,
+      quorum: space.additionalRawData?.voting.quorum ?? 0,
       votingType:
         !spaceVoteType || spaceVoteType === 'custom' ? 'any' : spaceVoteType,
       privacy: validPrivacyTypes.includes(privacyValue as string)
