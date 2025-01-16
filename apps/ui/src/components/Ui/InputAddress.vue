@@ -2,6 +2,7 @@
 import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
+import { BaseDefinition } from '@/types';
 
 const STARKNET_NETWORKS = Object.fromEntries(
   Object.values(STARKNET_NETWORK_METADATA).map(metadata => [
@@ -24,7 +25,7 @@ const props = withDefaults(
   defineProps<{
     showPicker?: boolean;
     path?: string;
-    definition?: {
+    definition?: BaseDefinition<string> & {
       chainId?: number | string;
     };
   }>(),
