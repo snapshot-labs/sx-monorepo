@@ -1,14 +1,32 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
-withDefaults(
+import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { getUrl } from '@/helpers/utils';
+import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
+
+const STARKNET_NETWORKS = Object.fromEntries(
+  Object.values(STARKNET_NETWORK_METADATA).map(metadata => [
+    metadata.chainId,
+    {
+      name: metadata.name,
+      logoUrl: getUrl(metadata.avatar)
+    }
+  ])
+);
+
+type NetworkDetails = {
+  name: string;
+  logoUrl: string | null;
+};
+
+defineOptions({ inheritAttrs: false });
+
+const props = withDefaults(
   defineProps<{
     showPicker?: boolean;
     path?: string;
+    definition?: {
+      chainId?: number | string;
+    };
   }>(),
   {
     showPicker: true
@@ -18,6 +36,24 @@ withDefaults(
 const emit = defineEmits<{
   (e: 'pick', path: string);
 }>();
+
+const networkDetails = computed<NetworkDetails | null>(() => {
+  const chainId = props.definition?.chainId;
+
+  if (!chainId) return null;
+
+  if (typeof chainId === 'string' && chainId in STARKNET_NETWORKS) {
+    return STARKNET_NETWORKS[chainId];
+  } else if (chainId in snapshotJsNetworks) {
+    const network = snapshotJsNetworks[chainId];
+    return {
+      name: network.name,
+      logoUrl: getUrl(network.logo)
+    };
+  }
+
+  return null;
+});
 </script>
 
 <template>
@@ -27,6 +63,23 @@ const emit = defineEmits<{
         <IH-identification />
       </button>
     </div>
-    <UiInputString v-bind="$attrs as any" class="!pr-7" />
+    <UiTooltip
+      v-if="networkDetails"
+      :title="networkDetails.name"
+      class="!absolute z-10 left-3 top-[29px]"
+    >
+      <img
+        :src="networkDetails.logoUrl ?? undefined"
+        class="size-3.5 rounded-full"
+      />
+    </UiTooltip>
+    <UiInputString
+      :definition="props.definition"
+      v-bind="$attrs as any"
+      class="!pr-7"
+      :class="{
+        '!pl-[42px]': !!networkDetails
+      }"
+    />
   </div>
 </template>

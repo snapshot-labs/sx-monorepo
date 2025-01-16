@@ -255,6 +255,7 @@ ajv.addFormat('network', {
 });
 ajv.addKeyword('networkId');
 ajv.addKeyword('networksListKind');
+ajv.addKeyword('chainId');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';
