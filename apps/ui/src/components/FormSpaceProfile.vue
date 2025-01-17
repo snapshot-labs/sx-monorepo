@@ -68,7 +68,7 @@ const votingPowerDefinition = computed(() => ({
   type: 'object',
   title: 'Voting power',
   additionalProperties: true,
-  required: [],
+  required: isOffchainNetwork.value ? ['votingPowerSymbol'] : [],
   properties: {
     votingPowerSymbol: {
       type: 'string',
