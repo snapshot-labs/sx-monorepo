@@ -74,8 +74,8 @@ const votingPowerDefinition = computed(() => ({
       type: 'string',
       title: 'Voting power symbol',
       examples: ['e.g. VP'],
-      maxLength: isOffchainNetwork ? 16 : MAX_SYMBOL_LENGTH,
-      minLength: isOffchainNetwork ? 1 : undefined
+      maxLength: isOffchainNetwork.value ? 16 : MAX_SYMBOL_LENGTH,
+      minLength: isOffchainNetwork.value ? 1 : undefined
     }
   }
 }));
