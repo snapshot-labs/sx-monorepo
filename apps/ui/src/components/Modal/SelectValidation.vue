@@ -27,14 +27,18 @@ const STRATEGIES_WITHOUT_PARAMS: ValidationDetails['key'][] = [
   'only-members'
 ];
 
-const props = defineProps<{
-  open: boolean;
-  networkId: NetworkID;
-  defaultChainId: ChainId;
-  space: Space;
-  type: 'voting' | 'proposal';
-  current?: Validation;
-}>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    networkId: NetworkID;
+    defaultChainId: ChainId;
+    space?: Space;
+    type: 'voting' | 'proposal';
+    current?: Validation;
+    skipMenu?: boolean;
+  }>(),
+  { skipMenu: false }
+);
 
 const emit = defineEmits<{
   (e: 'save', type: Validation);
@@ -227,14 +231,23 @@ function handleApply() {
 
 watch(
   () => props.open,
-  value => {
+  async value => {
     if (value) {
       selectedValidation.value = null;
-      fetchValidations();
+      await fetchValidations();
 
       if (props.current) {
         form.value = clone(props.current.params);
         rawParams.value = JSON.stringify(props.current.params, null, 2);
+
+        if (props.skipMenu) {
+          const selectedValidationDetail = filteredValidations.value.find(
+            v => v.key === props.current!.name
+          );
+          if (selectedValidationDetail) {
+            handleSelect(selectedValidationDetail);
+          }
+        }
       }
     }
   },

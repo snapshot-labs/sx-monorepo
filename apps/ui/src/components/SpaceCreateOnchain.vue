@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { clone, getSalt } from '@/helpers/utils';
 import { enabledReadWriteNetworks, getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
-const STEPS = {
+const STEPS: StepRecords = {
   profile: {
     title: 'Profile',
     isValid: () => !stepsErrors.value['profile']
@@ -120,104 +121,103 @@ watch(selectedNetworkId, () => {
 </script>
 
 <template>
-  <div>
-    <CreateDeploymentProgress
-      v-if="confirming && salt && predictedSpaceAddress && validationStrategy"
-      :network-id="selectedNetworkId"
-      :salt="salt"
-      :predicted-space-address="predictedSpaceAddress"
-      :metadata="metadataForm"
-      :settings="settingsForm"
-      :authenticators="authenticators"
-      :validation-strategy="validationStrategy"
-      :voting-strategies="votingStrategies"
-      :execution-strategies="executionStrategies"
-      :controller="controller"
-      @back="confirming = false"
-    />
-    <UiStepper v-else :steps="STEPS" @submit="handleSubmit">
-      <template #content="{ currentStep }">
-        <template v-if="currentStep === 'profile'">
-          <h3 class="mb-4">Space profile</h3>
-          <FormSpaceProfile
-            :form="metadataForm"
-            @errors="v => handleErrors('profile', v)"
+  <CreateDeploymentProgress
+    v-if="confirming && salt && predictedSpaceAddress && validationStrategy"
+    :network-id="selectedNetworkId"
+    :salt="salt"
+    :predicted-space-address="predictedSpaceAddress"
+    :metadata="metadataForm"
+    :settings="settingsForm"
+    :authenticators="authenticators"
+    :validation-strategy="validationStrategy"
+    :voting-strategies="votingStrategies"
+    :execution-strategies="executionStrategies"
+    :controller="controller"
+    @back="confirming = false"
+  />
+  <UiStepper v-else :steps="STEPS" @submit="handleSubmit">
+    <template #content="{ currentStep }">
+      <template v-if="currentStep === 'profile'">
+        <h3 class="mb-4">Space profile</h3>
+        <FormSpaceProfile
+          :form="metadataForm"
+          @errors="v => handleErrors('profile', v)"
+        />
+        <div class="s-box p-4 -mt-6">
+          <FormSpaceTreasuries
+            v-model="metadataForm.treasuries"
+            :network-id="selectedNetworkId"
           />
-          <div class="s-box p-4 -mt-6">
-            <FormSpaceTreasuries
-              v-model="metadataForm.treasuries"
-              :network-id="selectedNetworkId"
-            />
-            <FormSpaceDelegations
-              v-model="metadataForm.delegations"
-              :network-id="selectedNetworkId"
-              class="mt-2"
-            />
-          </div>
-        </template>
-        <FormNetwork
-          v-else-if="currentStep === 'network'"
-          v-model="selectedNetworkId"
-        />
-        <FormStrategies
-          v-else-if="currentStep === 'strategies'"
-          v-model="votingStrategies"
-          :network-id="selectedNetworkId"
-          :available-strategies="
-            selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
-          "
-          title="Voting strategies"
-          description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
-        />
-        <FormStrategies
-          v-else-if="currentStep === 'auths'"
-          v-model="authenticators"
-          unique
-          :network-id="selectedNetworkId"
-          :available-strategies="
-            selectedNetwork.constants.EDITOR_AUTHENTICATORS
-          "
-          title="Authenticators"
-          description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
-        />
-        <FormValidation
-          v-else-if="currentStep === 'validations'"
-          v-model="validationStrategy"
-          :network-id="selectedNetworkId"
-          :available-strategies="
-            selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS
-          "
-          :available-voting-strategies="
-            selectedNetwork.constants
-              .EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
-          "
-          title="Proposal validation"
-          description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
-        />
-        <FormStrategies
-          v-else-if="currentStep === 'executions'"
-          v-model="executionStrategies"
-          :network-id="selectedNetworkId"
-          :available-strategies="
-            selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES
-          "
-          :default-params="{ controller }"
-          title="Execution strategies"
-          description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."
-        />
-        <FormVoting
-          v-else-if="currentStep === 'voting'"
-          :form="settingsForm"
-          :selected-network-id="selectedNetworkId"
-          @errors="v => handleErrors('voting', v)"
-        />
-        <FormController
-          v-else-if="currentStep === 'controller'"
-          v-model="controller"
-          @errors="v => handleErrors('controller', v)"
-        />
+          <FormSpaceDelegations
+            v-model="metadataForm.delegations"
+            :network-id="selectedNetworkId"
+            class="mt-2"
+          />
+        </div>
       </template>
-      <template #submit-text> Create </template>
-    </UiStepper>
-  </div>
+      <FormNetwork
+        v-else-if="currentStep === 'network'"
+        v-model="selectedNetworkId"
+        title="Space network"
+      />
+      <FormStrategies
+        v-else-if="currentStep === 'strategies'"
+        v-model="votingStrategies"
+        :network-id="selectedNetworkId"
+        :available-strategies="
+          selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
+        "
+        title="Voting strategies"
+        description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+      />
+      <FormStrategies
+        v-else-if="currentStep === 'auths'"
+        v-model="authenticators"
+        unique
+        :network-id="selectedNetworkId"
+        :available-strategies="selectedNetwork.constants.EDITOR_AUTHENTICATORS"
+        title="Authenticators"
+        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+      />
+      <FormValidation
+        v-else-if="currentStep === 'validations'"
+        v-model="validationStrategy"
+        :network-id="selectedNetworkId"
+        :available-strategies="
+          selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS
+        "
+        :available-voting-strategies="
+          selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
+        "
+        title="Proposal validation"
+        description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
+      />
+      <FormStrategies
+        v-else-if="currentStep === 'executions'"
+        v-model="executionStrategies"
+        :network-id="selectedNetworkId"
+        :available-strategies="
+          selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES
+        "
+        :default-params="{ controller }"
+        title="Execution strategies"
+        description="Execution strategies are used to determine the status of a proposal and execute its payload if it's accepted."
+      />
+      <FormVoting
+        v-else-if="currentStep === 'voting'"
+        :form="settingsForm"
+        :selected-network-id="selectedNetworkId"
+        title="Voting settings"
+        @errors="v => handleErrors('voting', v)"
+      />
+      <FormController
+        v-else-if="currentStep === 'controller'"
+        v-model="controller"
+        title="Controller"
+        :chain-id="selectedNetwork.chainId"
+        @errors="v => handleErrors('controller', v)"
+      />
+    </template>
+    <template #submit-text> Create </template>
+  </UiStepper>
 </template>

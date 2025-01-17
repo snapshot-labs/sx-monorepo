@@ -1,7 +1,14 @@
 <script lang="ts" setup>
+export type StepRecords = Record<string, Step>;
+type Step = {
+  title: string;
+  isValid: () => boolean;
+  onBeforeNext?: () => boolean;
+};
+
 const props = withDefaults(
   defineProps<{
-    steps: Record<string, { title: string; isValid: () => boolean }>;
+    steps: StepRecords;
     submitting?: boolean;
   }>(),
   {
@@ -23,16 +30,28 @@ const submitDisabled = computed(() =>
   Object.values(props.steps).some(step => !step.isValid())
 );
 
+const currentStep = computed(() => {
+  return stepper.stepNames.value[stepper.index.value];
+});
+
 function goToStep(stepName: string) {
+  if (props.steps[currentStep.value]?.onBeforeNext?.() === false) return;
+
   stepper.goTo(stepName);
   window.scrollTo({
     top: 0
   });
 }
+
+watchEffect(() => {
+  if (firstInvalidStepIndex.value < stepper.index.value) {
+    stepper.goTo(stepper.stepNames.value[firstInvalidStepIndex.value]);
+  }
+});
 </script>
 
 <template>
-  <div class="pt-5 flex max-w-[50rem] mx-auto px-4">
+  <div class="flex">
     <div
       class="flex fixed lg:sticky top-[72px] inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
     >
@@ -48,20 +67,20 @@ function goToStep(stepName: string) {
           'text-skin-link': i <= firstInvalidStepIndex
         }"
         @click="goToStep(stepName)"
-      >
-        {{ step.title }}
-      </button>
+        v-text="step.title"
+      />
     </div>
     <div class="flex-1">
       <div class="mt-8 lg:mt-0">
         <slot
           name="content"
-          :current-step="stepper.stepNames.value[stepper.index.value]"
+          :current-step="currentStep"
+          :go-to-next="stepper.goToNext"
         />
       </div>
       <UiButton
         v-if="stepper.isLast.value"
-        class="w-full"
+        class="w-full primary"
         :loading="submitting"
         :disabled="submitDisabled"
         @click="emit('submit')"
@@ -70,7 +89,7 @@ function goToStep(stepName: string) {
       </UiButton>
       <UiButton
         v-else-if="stepper.next.value"
-        class="w-full"
+        class="w-full primary"
         :disabled="!stepper.current.value.isValid()"
         @click="goToStep(stepper.next.value)"
       >

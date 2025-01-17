@@ -1,0 +1,157 @@
+<script lang="ts" setup>
+import { getNetwork } from '@/networks';
+import { SNAPSHOT_URLS } from '@/networks/offchain';
+import { NetworkID } from '@/types';
+
+const spaceId = defineModel<string>();
+
+const emit = defineEmits<{
+  (e: 'select');
+}>();
+
+const props = defineProps<{
+  networkId: NetworkID;
+}>();
+
+const {
+  MAX_ENS_NAME_LENGTH,
+  isRefreshing,
+  isLoading,
+  hasError,
+  names,
+  load,
+  refresh
+} = useWalletEns(props.networkId);
+const { resume: resumeEnsMonitoring } = useIntervalFn(() => refresh, 5000, {
+  immediate: false
+});
+
+const validNames = computed(() => {
+  return Object.values(names.value || {}).filter(d => d.status === 'AVAILABLE');
+});
+
+const invalidNames = computed(() => {
+  return Object.values(names.value || {}).filter(d => d.status !== 'AVAILABLE');
+});
+
+const isTestnet = computed(() => {
+  return getNetwork(props.networkId).name.includes('testnet');
+});
+
+function handleSelect(value: string) {
+  spaceId.value = value;
+  emit('select');
+}
+</script>
+
+<template>
+  <UiAlert v-if="hasError" type="error">
+    <div>
+      An error happened while fetching the ENS names associated to your wallet.
+      Please try again
+    </div>
+    <UiButton
+      class="flex items-center justify-center gap-2"
+      :loading="isRefreshing"
+      @click="load"
+    >
+      <IH-refresh />
+      Retry
+    </UiButton>
+  </UiAlert>
+  <div v-else class="space-y-4">
+    <div class="space-y-2">
+      <div>
+        To create a space, you need an ENS name on
+        {{ isTestnet ? 'Sepolia testnet' : 'Ethereum mainnet' }}.
+      </div>
+      <UiMessage v-if="!isTestnet" type="info">
+        Still experimenting ?
+        <br />
+        You can also try
+        <AppLink to="https://testnet.snapshot.box/#/create">
+          testnet.snapshot.box
+        </AppLink>
+        - a Sepolia testnet playground dedicated to testing before creating your
+        space or proposals on Snapshot.
+      </UiMessage>
+    </div>
+    <div class="space-y-3">
+      <div class="flex justify-between items-center">
+        <h4 class="eyebrow">ENS names</h4>
+        <UiButton
+          v-if="names"
+          class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto"
+          :disabled="isLoading"
+          :loading="isRefreshing"
+          @click="refresh"
+        >
+          <IH-refresh class="h-[16px]" />
+          Refresh
+        </UiButton>
+      </div>
+      <UiLoading v-if="(isLoading && !isRefreshing) || !names" class="block" />
+      <div v-else-if="Object.keys(names).length" class="space-y-2">
+        <UiSelector
+          v-for="name in validNames"
+          :key="name.name"
+          :is-active="spaceId === name.name"
+          class="w-full"
+          @click="() => handleSelect(name.name)"
+        >
+          <div class="flex gap-2 items-center text-skin-link">
+            <IH-Globe-alt class="shrink-0" />
+            {{ name.name }}
+          </div>
+        </UiSelector>
+        <UiSelector
+          v-for="name in invalidNames"
+          :key="name.name"
+          :disabled="true"
+          class="w-full"
+        >
+          <div class="flex gap-2 items-top">
+            <IH-Exclamation class="mt-[5px] text-skin-danger shrink-0" />
+            <div class="flex flex-col">
+              <div class="text-skin-danger" v-text="name.name" />
+              <div v-if="name.status === 'USED'">
+                ENS name already attached to a
+                <AppLink
+                  :to="{
+                    name: 'space',
+                    params: { space: `${networkId}:${name.name}` }
+                  }"
+                  class="text-skin-link"
+                >
+                  space
+                </AppLink>
+              </div>
+              <div v-else-if="name.status === 'TOO_LONG'">
+                ENS name is too long. It must be less than
+                {{ MAX_ENS_NAME_LENGTH }} characters
+              </div>
+              <div v-else-if="name.status === 'DELETED'">
+                ENS name was used by a previously deleted space and can not be
+                reused to create a new space.
+                <AppLink
+                  to="https://docs.snapshot.box/faq/im-a-snapshot-user/space-settings#why-cant-i-create-a-new-space-with-my-previous-deleted-space-ens-name"
+                  class="text-skin-link"
+                >
+                  Learn more
+                  <IH-arrow-sm-right class="-rotate-45 inline" />
+                </AppLink>
+              </div>
+            </div>
+          </div>
+        </UiSelector>
+      </div>
+      <UiMessage v-else type="danger">
+        No ENS names found for the current wallet.
+      </UiMessage>
+    </div>
+    <div class="space-y-3">
+      <h4 class="eyebrow">Register new ENS name</h4>
+      <FormEnsRegistration @submit="resumeEnsMonitoring" />
+    </div>
+  </div>
+</template>
