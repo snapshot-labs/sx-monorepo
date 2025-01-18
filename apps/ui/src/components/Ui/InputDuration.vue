@@ -32,6 +32,7 @@ watch(
 <template>
   <div>
     <div
+      class="mb-1"
       :class="{ 'text-skin-danger': error && dirty }"
       v-text="definition.title"
     />
