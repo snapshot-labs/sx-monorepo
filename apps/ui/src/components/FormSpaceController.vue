@@ -3,7 +3,7 @@ import { shorten } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 
 defineProps<{
-  isController: boolean;
+  disabled: boolean;
   controller: string;
   network: Network;
 }>();
@@ -35,9 +35,9 @@ const changeControllerModalOpen = ref(false);
       </div>
       <button
         type="button"
-        :disabled="!isController"
+        :disabled="disabled"
         :class="{
-          'opacity-40 cursor-not-allowed text-skin-text': !isController
+          'opacity-40 cursor-not-allowed text-skin-text': disabled
         }"
         @click="changeControllerModalOpen = true"
       >

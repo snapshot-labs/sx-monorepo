@@ -463,7 +463,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         <FormSpaceController
           :controller="controller"
           :network="network"
-          :is-controller="isController"
+          :disabled="!isController || isOffchainNetwork"
           @save="handleControllerSave"
         />
       </UiContainerSettings>
