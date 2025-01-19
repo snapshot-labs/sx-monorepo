@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -52,7 +51,7 @@ const isAdvancedFormResolved = ref(false);
 const hasVotingErrors = ref(false);
 const hasProposalErrors = ref(false);
 const hasAdvancedErrors = ref(false);
-const changeControllerModalOpen = ref(false);
+
 const executeFn = ref(save);
 const saving = ref(false);
 
@@ -240,8 +239,6 @@ function handleSettingsSave() {
 }
 
 function handleControllerSave(value: string) {
-  changeControllerModalOpen.value = false;
-
   if (!isOwner.value) return;
   controller.value = value;
 
@@ -463,44 +460,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         title="Controller"
         description="The controller is the account able to change the space settings and cancel pending proposals."
       >
-        <div
-          class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
-        >
-          <div class="flex flex-col">
-            <a
-              :href="network.helpers.getExplorerUrl(controller, 'contract')"
-              target="_blank"
-              class="flex items-center text-skin-text leading-5"
-            >
-              <UiStamp
-                :id="controller"
-                type="avatar"
-                :size="18"
-                class="mr-2 !rounded"
-              />
-              {{ shorten(controller) }}
-              <IH-arrow-sm-right class="-rotate-45" />
-            </a>
-          </div>
-          <button
-            type="button"
-            :disabled="!isController"
-            :class="{
-              'opacity-40 cursor-not-allowed text-skin-text': !isController
-            }"
-            @click="changeControllerModalOpen = true"
-          >
-            <IH-pencil />
-          </button>
-        </div>
-        <teleport to="#modal">
-          <ModalChangeController
-            :open="changeControllerModalOpen"
-            :initial-state="{ controller }"
-            @close="changeControllerModalOpen = false"
-            @save="handleControllerSave"
-          />
-        </teleport>
+        <FormSpaceController
+          :controller="controller"
+          :network="network"
+          :is-controller="isController"
+          @save="handleControllerSave"
+        />
       </UiContainerSettings>
       <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
         <FormSpaceAdvanced
