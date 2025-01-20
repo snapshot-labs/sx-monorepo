@@ -138,6 +138,7 @@ export function createConstants(
         contractAddress: {
           type: 'string',
           format: 'address',
+          chainId: baseChainId,
           title: 'Contract address',
           examples: ['0x0000…']
         },
@@ -410,6 +411,7 @@ export function createConstants(
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Token address',
             examples: ['0x0000…']
           },
@@ -517,6 +519,7 @@ export function createConstants(
           l1Controller: {
             type: 'string',
             format: 'address',
+            chainId: baseChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -528,6 +531,7 @@ export function createConstants(
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: baseChainId,
             title: 'Avatar address',
             examples: ['0x0000…']
           }
