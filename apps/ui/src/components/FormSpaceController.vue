@@ -13,6 +13,11 @@ const emit = defineEmits<{
 }>();
 
 const changeControllerModalOpen = ref(false);
+
+function handleSave(value: string) {
+  changeControllerModalOpen.value = false;
+  emit('save', value);
+}
 </script>
 <template>
   <div>
@@ -51,7 +56,7 @@ const changeControllerModalOpen = ref(false);
         :open="changeControllerModalOpen"
         :initial-state="{ controller }"
         @close="changeControllerModalOpen = false"
-        @save="value => emit('save', value)"
+        @save="handleSave"
       />
     </teleport>
   </div>
