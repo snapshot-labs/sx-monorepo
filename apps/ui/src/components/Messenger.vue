@@ -6,7 +6,7 @@ import { HELPDESK_URL } from '@/helpers/constants';
   <a
     :href="HELPDESK_URL"
     target="_blank"
-    class="hidden md:block fixed bottom-4 right-4 rounded-full bg-skin-link text-skin-bg p-2"
+    class="hidden md:block fixed bottom-4 right-4 rounded-full bg-skin-link text-skin-bg p-2 z-40"
   >
     <IS-chat class="inline-block size-[32px]" />
   </a>
