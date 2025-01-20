@@ -1,23 +1,26 @@
 <script setup lang="ts">
 import { validateForm } from '@/helpers/validation';
+import { ChainId } from '@/types';
 
 const model = defineModel<string>({ required: true });
 
-defineProps<{
+const props = defineProps<{
   title: string;
   description?: string;
+  chainId: ChainId;
 }>();
 
 const emit = defineEmits<{
   (e: 'errors', value: any);
 }>();
 
-const definition = {
+const definition = computed(() => ({
   type: 'string',
   format: 'address',
+  chainId: props.chainId,
   title: 'Space controller',
   examples: ['0x0000…']
-};
+}));
 
 const formErrors = computed(() =>
   validateForm(
@@ -27,7 +30,7 @@ const formErrors = computed(() =>
       additionalProperties: false,
       required: ['controller'],
       properties: {
-        controller: definition
+        controller: definition.value
       }
     },
     {
@@ -42,7 +45,8 @@ watch(formErrors, value => emit('errors', value));
 <template>
   <UiContainerSettings :title="title" :description="description">
     <div class="s-box">
-      <UiInputString
+      <UiInputAddress
+        :show-picker="false"
         :model-value="model"
         :error="formErrors.controller"
         :definition="definition"

@@ -54,6 +54,7 @@ function handleSave(value: string) {
     <teleport to="#modal">
       <ModalChangeController
         :open="changeControllerModalOpen"
+        :chain-id="network.chainId"
         :initial-state="{ controller }"
         @close="changeControllerModalOpen = false"
         @save="handleSave"

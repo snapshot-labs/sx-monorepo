@@ -10,13 +10,6 @@ const DEFAULT_FORM_STATE = {
   amount: ''
 };
 
-const RECIPIENT_DEFINITION = {
-  type: 'string',
-  format: 'ens-or-address',
-  title: 'Recipient',
-  examples: ['Address or ENS']
-};
-
 const props = defineProps<{
   open: boolean;
   address: string;
@@ -25,16 +18,26 @@ const props = defineProps<{
   initialState?: any;
 }>();
 
-const formValidator = getValidator({
-  $async: true,
-  type: 'object',
-  title: 'TokenTransfer',
-  additionalProperties: false,
-  required: ['to'],
-  properties: {
-    to: RECIPIENT_DEFINITION
-  }
-});
+const recipientDefinition = computed(() => ({
+  type: 'string',
+  format: 'ens-or-address',
+  chainId: props.network,
+  title: 'Recipient',
+  examples: ['Address or ENS']
+}));
+
+const formValidator = computed(() =>
+  getValidator({
+    $async: true,
+    type: 'object',
+    title: 'TokenTransfer',
+    additionalProperties: false,
+    required: ['to'],
+    properties: {
+      to: recipientDefinition.value
+    }
+  })
+);
 
 const emit = defineEmits(['add', 'close']);
 
@@ -111,7 +114,7 @@ watch(
 watchEffect(async () => {
   formValidated.value = false;
 
-  formErrors.value = await formValidator.validateAsync({
+  formErrors.value = await formValidator.value.validateAsync({
     to: form.to
   });
   formValidated.value = true;
@@ -167,7 +170,7 @@ watchEffect(async () => {
     <div v-if="!showPicker" class="s-box p-4">
       <UiInputAddress
         v-model="form.to"
-        :definition="RECIPIENT_DEFINITION"
+        :definition="recipientDefinition"
         :error="formErrors.to"
         @pick="handlePickerClick('contact')"
       />

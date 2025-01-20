@@ -7,7 +7,7 @@ import { resolver } from '@/helpers/resolver';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { abiToDefinition, clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { Contact } from '@/types';
+import { ChainId, Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -19,7 +19,7 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
-  network: number | string;
+  network: ChainId;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
@@ -66,7 +66,7 @@ const definition = computed(() => {
     currentMethod.value.name &&
     currentMethod.value.inputs.length > 0
   ) {
-    return abiToDefinition(currentMethod.value);
+    return abiToDefinition(currentMethod.value, props.network);
   }
 
   return {};
@@ -79,7 +79,8 @@ const formValidator = computed(() =>
     properties: {
       to: {
         type: 'string',
-        format: 'ens-or-address'
+        format: 'ens-or-address',
+        chainId: props.network
       },
       abi: {
         type: 'string',
@@ -309,7 +310,8 @@ watchEffect(async () => {
           :definition="{
             type: 'string',
             title: 'Contract address',
-            examples: ['Address or ENS']
+            examples: ['Address or ENS'],
+            chainId: props.network
           }"
           @pick="handlePickerClick('to')"
         />

@@ -286,6 +286,7 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'controller'"
             v-model="controller"
             title="Controller"
+            :chain-id="selectedNetwork.chainId"
             @errors="v => handleErrors('controller', v)"
           />
         </div>

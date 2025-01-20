@@ -22,23 +22,6 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
-const DELEGATEE_DEFINITION = {
-  type: 'string',
-  format: 'ens-or-address',
-  title: 'Delegatee',
-  examples: ['Address or ENS']
-};
-
-const formValidator = getValidator({
-  $async: true,
-  type: 'object',
-  additionalProperties: false,
-  required: ['delegatee'],
-  properties: {
-    delegatee: DELEGATEE_DEFINITION
-  }
-});
-
 const { delegate } = useActions();
 
 const form: {
@@ -50,6 +33,26 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const sending = ref(false);
 const formErrors = ref({} as Record<string, any>);
+
+const delegateDefinition = computed(() => ({
+  type: 'string',
+  format: 'ens-or-address',
+  chainId: props.delegation?.chainId ?? undefined,
+  title: 'Delegatee',
+  examples: ['Address or ENS']
+}));
+
+const formValidator = computed(() =>
+  getValidator({
+    $async: true,
+    type: 'object',
+    additionalProperties: false,
+    required: ['delegatee'],
+    properties: {
+      delegatee: delegateDefinition.value
+    }
+  })
+);
 
 const selectedDelegation = computed<SpaceMetadataDelegation>(() => {
   return props.delegation || props.space.delegations[form.selectedIndex];
@@ -138,7 +141,7 @@ watch(
 watchEffect(async () => {
   formValidated.value = false;
 
-  formErrors.value = await formValidator.validateAsync(form);
+  formErrors.value = await formValidator.value.validateAsync(form);
   formValidated.value = true;
 });
 </script>
@@ -191,7 +194,7 @@ watchEffect(async () => {
       />
       <UiInputAddress
         v-model="form.delegatee"
-        :definition="DELEGATEE_DEFINITION"
+        :definition="delegateDefinition"
         :error="formErrors.delegatee"
         @pick="showPicker = true"
       />

@@ -343,6 +343,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Token address',
             examples: ['0x0000…']
           },
@@ -398,6 +399,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Token address',
             examples: ['0x0000…']
           },
@@ -455,6 +457,7 @@ export function createConstants(networkId: NetworkID) {
           controller: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -466,6 +469,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Safe address',
             examples: ['0x0000…']
           }
@@ -510,6 +514,7 @@ export function createConstants(networkId: NetworkID) {
           controller: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -521,6 +526,7 @@ export function createConstants(networkId: NetworkID) {
           vetoGuardian: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Veto guardian address',
             examples: ['0x0000…']
           },
@@ -573,6 +579,7 @@ export function createConstants(networkId: NetworkID) {
           controller: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -584,6 +591,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Contract address',
             examples: ['0x0000…']
           },
@@ -651,12 +659,14 @@ export function createConstants(networkId: NetworkID) {
           queryAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Query address',
             examples: ['0x0000…']
           },
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Contract address',
             examples: ['0x0000…']
           },

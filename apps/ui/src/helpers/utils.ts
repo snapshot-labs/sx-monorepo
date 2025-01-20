@@ -14,7 +14,7 @@ import {
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
 import { VotingPowerItem } from '@/stores/votingPowers';
-import { Choice, Proposal, SpaceMetadata } from '@/types';
+import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -258,7 +258,7 @@ export function _rt(number) {
   }
 }
 
-export function abiToDefinition(abi) {
+export function abiToDefinition(abi, chainId?: ChainId) {
   const definition = {
     $async: true,
     title: abi.name,
@@ -287,6 +287,9 @@ export function abiToDefinition(abi) {
     if (input.type === 'address') {
       definition.properties[input.name].format = 'ens-or-address';
       definition.properties[input.name].examples = ['0x0000…'];
+      if (chainId) {
+        definition.properties[input.name].chainId = chainId;
+      }
     }
     if (input.type.endsWith('[]')) {
       definition.properties[input.name].format = input.type;
