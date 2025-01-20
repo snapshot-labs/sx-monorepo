@@ -5,6 +5,8 @@ import { NetworkID } from '@/types';
 const props = defineProps<{
   form: any;
   selectedNetworkId: NetworkID;
+  title: string;
+  description?: string;
 }>();
 
 const emit = defineEmits<{
@@ -52,8 +54,13 @@ const formErrors = computed(() => {
 </script>
 
 <template>
-  <h3>Voting settings</h3>
-  <div class="s-box pt-4">
-    <UiForm :model-value="form" :error="formErrors" :definition="definition" />
-  </div>
+  <UiContainerSettings :title="title" :description="description">
+    <div class="s-box">
+      <UiForm
+        :model-value="form"
+        :error="formErrors"
+        :definition="definition"
+      />
+    </div>
+  </UiContainerSettings>
 </template>

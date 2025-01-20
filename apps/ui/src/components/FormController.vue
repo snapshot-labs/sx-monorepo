@@ -3,6 +3,11 @@ import { validateForm } from '@/helpers/validation';
 
 const model = defineModel<string>({ required: true });
 
+defineProps<{
+  title: string;
+  description?: string;
+}>();
+
 const emit = defineEmits<{
   (e: 'errors', value: any);
 }>();
@@ -35,13 +40,14 @@ watch(formErrors, value => emit('errors', value));
 </script>
 
 <template>
-  <h3>Controller</h3>
-  <div class="s-box pt-4">
-    <UiInputString
-      :model-value="model"
-      :error="formErrors.controller"
-      :definition="definition"
-      @update:model-value="v => (model = v)"
-    />
-  </div>
+  <UiContainerSettings :title="title" :description="description">
+    <div class="s-box">
+      <UiInputString
+        :model-value="model"
+        :error="formErrors.controller"
+        :definition="definition"
+        @update:model-value="v => (model = v)"
+      />
+    </div>
+  </UiContainerSettings>
 </template>
