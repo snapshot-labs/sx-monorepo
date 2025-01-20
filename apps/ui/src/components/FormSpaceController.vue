@@ -8,7 +8,9 @@ defineProps<{
   network: Network;
 }>();
 
-const emit = defineEmits<{ (e: 'save', value: string) }>();
+const emit = defineEmits<{
+  (e: 'save', value: string);
+}>();
 
 const changeControllerModalOpen = ref(false);
 </script>
