@@ -46,7 +46,7 @@ const STEPS: extendedStepRecords = {
     isValid: () => !web3.value.authLoading,
     contentTitle: 'Getting started',
     contentDescription: 'Create a snapshot space offchain.',
-    onBeforeNext: () => {
+    onBeforeQuit: () => {
       if (web3.value.account) return true;
 
       modalAccountOpen.value = true;
