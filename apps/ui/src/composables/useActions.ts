@@ -13,6 +13,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   SpaceSettings,
   Statement,
   User,
@@ -536,6 +537,18 @@ export function useActions() {
     );
   }
 
+  function getDelegationNetwork(chainId: ChainId) {
+    const isEvmNetwork = typeof chainId === 'number';
+    const actionNetwork = isEvmNetwork
+      ? 'eth'
+      : (Object.entries(METADATA).find(
+          ([, metadata]) => metadata.chainId === chainId
+        )?.[0] as NetworkID);
+    if (!actionNetwork) throw new Error('Failed to detect action network');
+
+    return actionNetwork;
+  }
+
   async function delegate(
     space: Space,
     delegationType: DelegationType,
@@ -545,14 +558,7 @@ export function useActions() {
   ) {
     if (!web3.value.account) return await forceLogin();
 
-    const isEvmNetwork = typeof chainId === 'number';
-    const actionNetwork = isEvmNetwork
-      ? 'eth'
-      : (Object.entries(METADATA).find(
-          ([, metadata]) => metadata.chainId === chainId
-        )?.[0] as NetworkID);
-    if (!actionNetwork) throw new Error('Failed to detect action network');
-
+    const actionNetwork = getDelegationNetwork(chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
     await wrapPromise(
@@ -567,6 +573,18 @@ export function useActions() {
         chainId
       )
     );
+  }
+
+  async function getDelegatee(
+    delegation: SpaceMetadataDelegation,
+    delegator: string
+  ) {
+    if (!delegation.chainId) throw new Error('Chain ID is missing');
+
+    const actionNetwork = getDelegationNetwork(delegation.chainId);
+    const network = getReadWriteNetwork(actionNetwork);
+
+    return network.actions.getDelegatee(auth.web3, delegation, delegator);
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {
@@ -669,6 +687,7 @@ export function useActions() {
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
     deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),
+    getDelegatee: wrapWithErrors(getDelegatee),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
     updateUser: wrapWithErrors(updateUser),

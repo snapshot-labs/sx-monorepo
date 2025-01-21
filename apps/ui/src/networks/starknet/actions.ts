@@ -49,6 +49,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
@@ -676,6 +677,22 @@ export function createActions(
       }
 
       return account.execute(calls);
+    },
+    getDelegatee: async (
+      web3: any,
+      delegation: SpaceMetadataDelegation,
+      delegator: string
+    ) => {
+      const { contractAddress } = delegation;
+      if (!contractAddress) return null;
+
+      const [delegatee] = await starkProvider.callContract({
+        contractAddress,
+        entrypoint: 'delegates',
+        calldata: CallData.compile({ delegator })
+      });
+
+      return delegatee !== '0x0' ? delegatee : null;
     },
     getVotingPower: async (
       spaceId: string,

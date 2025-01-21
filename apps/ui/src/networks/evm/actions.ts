@@ -1,3 +1,4 @@
+import { isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
@@ -44,6 +45,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
@@ -606,6 +608,25 @@ export function createActions(
       return votesContract[contractParams.functionName](
         ...contractParams.functionParams
       );
+    },
+    getDelegatee: async (
+      web3: any,
+      delegation: SpaceMetadataDelegation,
+      delegator: string
+    ) => {
+      const { contractAddress } = delegation;
+      if (!contractAddress) return null;
+      if (!isAddress(delegator)) return null;
+
+      const contract = new Contract(
+        contractAddress,
+        ['function delegates(address) view returns (address)'],
+        provider
+      );
+
+      const delegatee = await contract.delegates(delegator);
+
+      return delegatee !== '0x0' ? delegatee : null;
     },
     updateSettings: async (
       web3: Web3Provider,

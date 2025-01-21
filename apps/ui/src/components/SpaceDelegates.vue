@@ -3,6 +3,7 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getNames } from '@/helpers/stamp';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
@@ -14,6 +15,7 @@ const props = defineProps<{
 
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{ delegatee: string } | null>(null);
+const delegatee = ref<{ id: string; name: string | null } | null>(null);
 const sortBy = ref(
   'delegatedVotes-desc' as
     | 'delegatedVotes-desc'
@@ -28,6 +30,7 @@ const { getDelegates } = useDelegates(
   props.delegation.contractAddress as string,
   props.space
 );
+const { getDelegatee } = useActions();
 const { web3 } = useWeb3();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -65,6 +68,32 @@ const {
   }
 });
 
+async function handleFetchDelegatee() {
+  if (!props.delegation.apiType || !props.delegation.chainId) return;
+
+  if (props.delegation.apiType !== 'governor-subgraph') {
+    delegatee.value = null;
+    return;
+  }
+
+  if (!web3.value.account) {
+    delegatee.value = null;
+    return;
+  }
+
+  const delegateeAddress = await getDelegatee(
+    props.delegation,
+    web3.value.account
+  );
+
+  if (delegateeAddress) {
+    const names = await getNames([delegateeAddress]);
+    delegatee.value = { id: delegateeAddress, name: names[delegateeAddress] };
+  } else {
+    delegatee.value = null;
+  }
+}
+
 function getExplorerUrl(address: string, type: 'address' | 'token') {
   let url: string | null = null;
   if (props.delegation.chainId) {
@@ -94,6 +123,16 @@ function handleDelegateClick(delegatee?: string) {
   delegateModalState.value = delegatee ? { delegatee } : null;
   delegateModalOpen.value = true;
 }
+
+watch(
+  [props.space, () => web3.value.account, () => web3.value.authLoading],
+  ([, , authLoading]) => {
+    if (authLoading) return;
+
+    handleFetchDelegatee();
+  },
+  { immediate: true }
+);
 
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
@@ -143,6 +182,29 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </UiButton>
       </UiTooltip>
     </div>
+
+    <div v-if="delegatee">
+      <UiLabel label="Delegating to" />
+      <div class="flex justify-between items-center mx-4 py-3 border-b">
+        <UiStamp
+          :id="delegatee.id"
+          type="avatar"
+          :size="32"
+          class="rounded-md mr-3"
+        />
+        <div class="flex-1 leading-[22px]">
+          <h4
+            class="text-skin-link"
+            v-text="delegatee.name || shorten(delegatee.id)"
+          />
+          <div
+            class="text-skin-text text-[17px]"
+            v-text="shorten(delegatee.id)"
+          />
+        </div>
+      </div>
+    </div>
+
     <UiLabel label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
