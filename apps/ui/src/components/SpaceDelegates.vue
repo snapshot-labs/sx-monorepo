@@ -209,46 +209,69 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </UiTooltip>
     </div>
 
-    <div v-if="delegatee">
+    <div v-if="delegatee" class="mb-3">
       <UiLabel label="Delegating to" />
-      <AppLink
-        :to="{
-          name: 'space-user-statement',
-          params: {
-            space: spaceKey,
-            user: delegatee.id
-          }
-        }"
-        class="flex justify-between items-center mx-4 py-3 border-b"
-      >
-        <UiStamp
-          :id="delegatee.id"
-          type="avatar"
-          :size="32"
-          class="rounded-md mr-3"
-        />
-        <div class="flex-1 leading-[22px]">
-          <h4
-            class="text-skin-link"
-            v-text="delegatee.name || shorten(delegatee.id)"
-          />
-          <div
-            class="text-skin-text text-[17px]"
-            v-text="shorten(delegatee.id)"
-          />
+      <div class="w-full truncate px-4">
+        <div class="flex w-full space-x-3 truncate border-b py-3">
+          <AppLink
+            :to="{
+              name: 'space-user-statement',
+              params: {
+                space: spaceKey,
+                user: delegatee.id
+              }
+            }"
+            class="w-full flex justify-between items-center"
+          >
+            <UiStamp :id="delegatee.id" type="avatar" :size="32" class="mr-3" />
+            <div class="flex-1 leading-[22px]">
+              <h4
+                class="text-skin-link"
+                v-text="delegatee.name || shorten(delegatee.id)"
+              />
+              <div
+                class="text-skin-text text-[17px]"
+                v-text="shorten(delegatee.id)"
+              />
+            </div>
+            <div
+              class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
+            >
+              <h4 class="text-skin-link truncate">
+                {{
+                  _vp(
+                    Number(delegatee.balance) / Math.pow(10, delegatee.decimals)
+                  )
+                }}
+                {{ space.voting_power_symbol }}
+              </h4>
+              <div class="text-[17px]" v-text="_p(delegatee.share)" />
+            </div>
+          </AppLink>
+          <div class="flex items-center justify-center">
+            <UiDropdown>
+              <template #button>
+                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                  <IH-dots-horizontal class="text-skin-link" />
+                </UiButton>
+              </template>
+              <template #items>
+                <UiDropdownItem v-slot="{ active }">
+                  <button
+                    type="button"
+                    class="flex items-center gap-2"
+                    :class="{ 'opacity-80': active }"
+                    @click="handleDelegateClick(web3.account)"
+                  >
+                    <IH-user-remove />
+                    Undelegate
+                  </button>
+                </UiDropdownItem>
+              </template>
+            </UiDropdown>
+          </div>
         </div>
-        <div
-          class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
-        >
-          <h4 class="text-skin-link truncate">
-            {{
-              _vp(Number(delegatee.balance) / Math.pow(10, delegatee.decimals))
-            }}
-            {{ space.voting_power_symbol }}
-          </h4>
-          <div class="text-[17px]" v-text="_p(delegatee.share)" />
-        </div>
-      </AppLink>
+      </div>
     </div>
 
     <UiLabel label="Delegates" sticky />
