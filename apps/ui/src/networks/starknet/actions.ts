@@ -11,7 +11,8 @@ import {
   Call,
   CallData,
   RpcProvider,
-  constants as starknetConstants
+  constants as starknetConstants,
+  uint256
 } from 'starknet';
 import { executionCall, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
@@ -686,13 +687,33 @@ export function createActions(
       const { contractAddress } = delegation;
       if (!contractAddress) return null;
 
-      const [delegatee] = await starkProvider.callContract({
-        contractAddress,
-        entrypoint: 'delegates',
-        calldata: CallData.compile({ delegator })
-      });
+      const [[decimals], balance, [delegatee]] = await Promise.all([
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'decimals'
+        }),
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'balance_of',
+          calldata: CallData.compile({ delegator })
+        }),
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'delegates',
+          calldata: CallData.compile({ delegator })
+        })
+      ]);
 
-      return delegatee !== '0x0' ? delegatee : null;
+      return delegatee !== '0x0'
+        ? {
+            address: delegatee,
+            balance: uint256.uint256ToBN({
+              low: balance[0],
+              high: balance[1]
+            }),
+            decimals: parseInt(decimals, 16)
+          }
+        : null;
     },
     getVotingPower: async (
       spaceId: string,

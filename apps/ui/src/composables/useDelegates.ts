@@ -33,6 +33,9 @@ type DelegatesQueryFilter = {
   orderDirection: string;
   skip: number;
   first: number;
+  where?: {
+    user?: string;
+  };
 };
 
 const DELEGATES_QUERY = gql`

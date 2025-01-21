@@ -270,7 +270,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     web3: Web3Provider,
     delegation: SpaceMetadataDelegation,
     delegator: string
-  );
+  ): Promise<{ address: string; balance: bigint; decimals: number } | null>;
 };
 
 export type NetworkApi = {

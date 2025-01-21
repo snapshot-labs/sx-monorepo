@@ -16,6 +16,7 @@ import {
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, MANA_URL } from '@/helpers/mana';
+import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
@@ -618,15 +619,20 @@ export function createActions(
       if (!contractAddress) return null;
       if (!isAddress(delegator)) return null;
 
-      const contract = new Contract(
-        contractAddress,
-        ['function delegates(address) view returns (address)'],
-        provider
-      );
+      const multi = new Multicaller(chainId.toString(), provider, [
+        'function decimals() view returns (uint8)',
+        'function balanceOf(address account) view returns (uint256)',
+        'function delegates(address) view returns (address)'
+      ]);
+      multi.call('decimals', contractAddress, 'decimals');
+      multi.call('balanceOf', contractAddress, 'balanceOf', [delegator]);
+      multi.call('delegatee', contractAddress, 'delegates', [delegator]);
 
-      const delegatee = await contract.delegates(delegator);
+      const { decimals, balanceOf, delegatee } = await multi.execute();
 
-      return delegatee !== '0x0' ? delegatee : null;
+      return delegatee !== '0x0'
+        ? { address: delegatee, balance: balanceOf.toBigInt(), decimals }
+        : null;
     },
     updateSettings: async (
       web3: Web3Provider,

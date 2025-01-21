@@ -15,7 +15,13 @@ const props = defineProps<{
 
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{ delegatee: string } | null>(null);
-const delegatee = ref<{ id: string; name: string | null } | null>(null);
+const delegatee = ref<{
+  id: string;
+  balance: bigint;
+  decimals: number;
+  share: number;
+  name: string | null;
+} | null>(null);
 const sortBy = ref(
   'delegatedVotes-desc' as
     | 'delegatedVotes-desc'
@@ -81,14 +87,34 @@ async function handleFetchDelegatee() {
     return;
   }
 
-  const delegateeAddress = await getDelegatee(
+  const delegateeData = await getDelegatee(
     props.delegation,
     web3.value.account
   );
 
-  if (delegateeAddress) {
-    const names = await getNames([delegateeAddress]);
-    delegatee.value = { id: delegateeAddress, name: names[delegateeAddress] };
+  if (delegateeData) {
+    const [names, [apiDelegate]] = await Promise.all([
+      getNames([delegateeData.address]),
+      getDelegates({
+        first: 1,
+        skip: 0,
+        orderBy: 'delegatedVotes',
+        orderDirection: 'desc',
+        where: {
+          user: delegateeData.address
+        }
+      })
+    ]);
+
+    delegatee.value = {
+      id: delegateeData.address,
+      balance: delegateeData.balance,
+      decimals: delegateeData.decimals,
+      share: apiDelegate
+        ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
+        : 1,
+      name: names[delegateeData.address]
+    };
   } else {
     delegatee.value = null;
   }
@@ -185,7 +211,16 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
     <div v-if="delegatee">
       <UiLabel label="Delegating to" />
-      <div class="flex justify-between items-center mx-4 py-3 border-b">
+      <AppLink
+        :to="{
+          name: 'space-user-statement',
+          params: {
+            space: spaceKey,
+            user: delegatee.id
+          }
+        }"
+        class="flex justify-between items-center mx-4 py-3 border-b"
+      >
         <UiStamp
           :id="delegatee.id"
           type="avatar"
@@ -202,7 +237,18 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             v-text="shorten(delegatee.id)"
           />
         </div>
-      </div>
+        <div
+          class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
+        >
+          <h4 class="text-skin-link truncate">
+            {{
+              _vp(Number(delegatee.balance) / Math.pow(10, delegatee.decimals))
+            }}
+            {{ space.voting_power_symbol }}
+          </h4>
+          <div class="text-[17px]" v-text="_p(delegatee.share)" />
+        </div>
+      </AppLink>
     </div>
 
     <UiLabel label="Delegates" sticky />
