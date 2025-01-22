@@ -11,6 +11,7 @@ export function useSettings() {
 
     try {
       const result = await network.api.loadSettings();
+
       result.forEach(setting => {
         settings.value.set(setting.name, setting.value);
       });

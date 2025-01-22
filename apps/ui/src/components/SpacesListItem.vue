@@ -38,7 +38,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
     </div>
     <ButtonFollow
       :space="space"
-      class="absolute top-2.5 right-2.5 hidden group-hover:block"
+      class="!absolute top-2.5 right-2.5 hidden group-hover:block"
     />
     <div class="px-4">
       <div class="flex items-center">
