@@ -70,10 +70,10 @@ const navigation = computed(() => [
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
 ]);
 
-const hasInvalidDelegations = computed(() => {
+const hasOnlyInvalidDelegations = computed(() => {
   if (!props.space.delegations.length) return true;
 
-  return props.space.delegations.some(
+  return props.space.delegations.every(
     delegation =>
       !delegation.apiUrl || delegation.apiType === 'split-delegation'
   );
@@ -195,7 +195,10 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <UiButton v-if="!hasInvalidDelegations" @click="handleDelegateClick()">
+        <UiButton
+          v-if="!hasOnlyInvalidDelegations"
+          @click="handleDelegateClick()"
+        >
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
