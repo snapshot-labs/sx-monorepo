@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import { getAddress } from '@ethersproject/address';
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { getNames } from '@/helpers/stamp';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
+import { getNetwork, supportsNullCurrent } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
@@ -17,8 +19,7 @@ const delegateModalOpen = ref(false);
 const delegateModalState = ref<{ delegatee: string } | null>(null);
 const delegatee = ref<{
   id: string;
-  balance: bigint | null;
-  decimals: number;
+  balance: number | null;
   share: number;
   name: string | null;
 } | null>(null);
@@ -37,6 +38,7 @@ const { getDelegates, getDelegation } = useDelegates(
   props.space
 );
 const { getDelegatee } = useActions();
+const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -78,13 +80,42 @@ async function fetchDelegateRegistryDelegatee() {
   const delegation = await getDelegation(web3.value.account);
 
   if (delegation) {
-    const names = await getNames([delegation.delegatee]);
+    const [names, votingPowers, [apiDelegate]] = await Promise.all([
+      getNames([delegation.delegate]),
+      getNetwork(props.space.network).actions.getVotingPower(
+        props.space.id,
+        props.space.strategies,
+        props.space.strategies_params,
+        props.space.strategies_parsed_metadata,
+        web3.value.account,
+        {
+          at: supportsNullCurrent(props.space.network)
+            ? null
+            : getCurrent(props.space.network) || 0,
+          chainId: props.space.snapshot_chain_id
+        }
+      ),
+      getDelegates({
+        first: 1,
+        skip: 0,
+        orderBy: 'delegatedVotes',
+        orderDirection: 'desc',
+        where: {
+          // NOTE: this is delegate registry, needs to be checksummed
+          user: getAddress(delegation.delegate)
+        }
+      })
+    ]);
+
+    const balance = votingPowers.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+      0
+    );
 
     delegatee.value = {
       id: delegation.delegate,
-      balance: 0n,
-      decimals: 0,
-      share: 0,
+      balance,
+      share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
       name: names[delegation.delegate]
     };
   } else {
@@ -107,15 +138,15 @@ async function fetchGovernorSubgraphDelegatee() {
         orderBy: 'delegatedVotes',
         orderDirection: 'desc',
         where: {
-          user: delegateeData.address
+          // NOTE: This is subgraph, needs to be lowercase
+          user: delegateeData.address.toLocaleLowerCase()
         }
       })
     ]);
 
     delegatee.value = {
       id: delegateeData.address,
-      balance: delegateeData.balance,
-      decimals: delegateeData.decimals,
+      balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
       share: apiDelegate
         ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
         : 1,
@@ -260,11 +291,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link truncate">
-                {{
-                  _vp(
-                    Number(delegatee.balance) / Math.pow(10, delegatee.decimals)
-                  )
-                }}
+                {{ _vp(delegatee.balance) }}
                 {{ space.voting_power_symbol }}
               </h4>
               <div class="text-[17px]" v-text="_p(delegatee.share)" />

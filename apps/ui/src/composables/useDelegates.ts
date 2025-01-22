@@ -45,13 +45,18 @@ const DELEGATES_QUERY = gql`
     $orderBy: Delegate_orderBy!
     $orderDirection: OrderDirection!
     $governance: String!
+    $user: String
   ) {
     delegates(
       first: $first
       skip: $skip
       orderBy: $orderBy
       orderDirection: $orderDirection
-      where: { tokenHoldersRepresentedAmount_gte: 0, governance: $governance }
+      where: {
+        tokenHoldersRepresentedAmount_gte: 0
+        governance: $governance
+        user: $user
+      }
     ) {
       id
       user
@@ -155,9 +160,11 @@ export function useDelegates(
   async function getDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
+    const { user } = filter.where ?? {};
+
     const { data } = await apollo.query({
       query: DELEGATES_QUERY,
-      variables: { ...filter, governance: governance.toLowerCase() }
+      variables: { ...filter, governance: governance.toLowerCase(), user }
     });
 
     return formatDelegates(data);
