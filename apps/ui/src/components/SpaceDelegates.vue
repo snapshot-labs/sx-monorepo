@@ -113,9 +113,8 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       class="inline-flex items-center font-bold"
     >
       previous interface
-      <IH-arrow-sm-right class="inline-block -rotate-45" />
-    </a>
-    .
+      <IH-arrow-sm-right class="inline-block -rotate-45" /></a
+    >.
   </UiMessage>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
