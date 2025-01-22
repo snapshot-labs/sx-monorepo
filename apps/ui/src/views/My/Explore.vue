@@ -178,14 +178,7 @@ onMounted(() => {
         />
       </div>
       <UiTooltip title="Create new space">
-        <UiButton
-          :to="
-            protocol === 'snapshot'
-              ? 'https://v1.snapshot.box/#/setup'
-              : 'create'
-          "
-          class="!px-0 w-[46px]"
-        >
+        <UiButton :to="{ name: 'create' }" class="!px-0 w-[46px]">
           <IH-plus-sm />
         </UiButton>
       </UiTooltip>
