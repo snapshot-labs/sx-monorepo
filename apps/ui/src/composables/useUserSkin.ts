@@ -1,6 +1,6 @@
 export type Skin = 'dark' | 'light' | 'none';
 
-const DEFAULT_SKIN: Skin = 'light';
+const DEFAULT_SKIN = 'light';
 
 export function useUserSkin() {
   const store = useStorage<Skin>('skin', 'none');
