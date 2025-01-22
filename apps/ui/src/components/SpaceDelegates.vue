@@ -17,7 +17,7 @@ const delegateModalOpen = ref(false);
 const delegateModalState = ref<{ delegatee: string } | null>(null);
 const delegatee = ref<{
   id: string;
-  balance: bigint;
+  balance: bigint | null;
   decimals: number;
   share: number;
   name: string | null;
@@ -30,7 +30,7 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-asc'
 );
 const { setTitle } = useTitle();
-const { getDelegates } = useDelegates(
+const { getDelegates, getDelegation } = useDelegates(
   props.delegation.apiType as DelegationType,
   props.delegation.apiUrl as string,
   props.delegation.contractAddress as string,
@@ -74,19 +74,25 @@ const {
   }
 });
 
-async function handleFetchDelegatee() {
-  if (!props.delegation.apiType || !props.delegation.chainId) return;
+async function fetchDelegateRegistryDelegatee() {
+  const delegation = await getDelegation(web3.value.account);
 
-  if (props.delegation.apiType !== 'governor-subgraph') {
+  if (delegation) {
+    const names = await getNames([delegation.delegatee]);
+
+    delegatee.value = {
+      id: delegation.delegate,
+      balance: 0n,
+      decimals: 0,
+      share: 0,
+      name: names[delegation.delegate]
+    };
+  } else {
     delegatee.value = null;
-    return;
   }
+}
 
-  if (!web3.value.account) {
-    delegatee.value = null;
-    return;
-  }
-
+async function fetchGovernorSubgraphDelegatee() {
   const delegateeData = await getDelegatee(
     props.delegation,
     web3.value.account
@@ -117,6 +123,21 @@ async function handleFetchDelegatee() {
     };
   } else {
     delegatee.value = null;
+  }
+}
+
+async function handleFetchDelegatee() {
+  if (!props.delegation.apiType || !props.delegation.chainId) return;
+
+  if (!web3.value.account) {
+    delegatee.value = null;
+    return;
+  }
+
+  if (props.delegation.apiType === 'governor-subgraph') {
+    await fetchGovernorSubgraphDelegatee();
+  } else if (props.delegation.apiType === 'delegate-registry') {
+    await fetchDelegateRegistryDelegatee();
   }
 }
 
@@ -235,6 +256,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               />
             </div>
             <div
+              v-if="delegatee.balance"
               class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
             >
               <h4 class="text-skin-link truncate">

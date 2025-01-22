@@ -66,6 +66,18 @@ const DELEGATES_QUERY = gql`
   }
 `;
 
+const DELEGATIONS_QUERY = gql`
+  query ($space: String!, $delegator: String!) {
+    delegations(
+      first: $first
+      where: { space: $space, delegator: $delegator }
+    ) {
+      id
+      delegate
+    }
+  }
+`;
+
 const metadataNetwork = getNetwork(metadataNetworkId);
 
 function convertUrl(apiUrl: string) {
@@ -151,7 +163,26 @@ export function useDelegates(
     return formatDelegates(data);
   }
 
+  async function getDelegation(delegator: string) {
+    const client = new ApolloClient({
+      uri: 'https://api.studio.thegraph.com/query/23545/snapshot/version/latest',
+      cache: new InMemoryCache()
+    });
+
+    if (delegationType !== 'delegate-registry') {
+      throw new Error('getDelegation is only supported for delegate-registry');
+    }
+
+    const { data } = await client.query({
+      query: DELEGATIONS_QUERY,
+      variables: { space: space.id, delegator }
+    });
+
+    return data.delegations[0] ?? null;
+  }
+
   return {
-    getDelegates
+    getDelegates,
+    getDelegation
   };
 }
