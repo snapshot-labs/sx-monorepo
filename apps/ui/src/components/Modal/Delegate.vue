@@ -54,29 +54,43 @@ const formValidator = computed(() =>
   })
 );
 
-const selectedDelegation = computed<SpaceMetadataDelegation>(() => {
-  return props.delegation || props.space.delegations[form.selectedIndex];
+const isInvalidSelectedDelegation = computed(
+  () => !isValidDelegation(selectedDelegation.value)
+);
+
+const selectedDelegation = computed<SpaceMetadataDelegation | undefined>(() => {
+  return props.delegation || validDelegations.value[form.selectedIndex];
+});
+
+const validDelegations = computed(() => {
+  return props.space.delegations.filter(isValidDelegation);
 });
 
 const spaceDelegationsOptions = computed<
   { id: number; name: string; icon: VNode }[]
 >(() => {
-  return props.space.delegations
-    .filter(d => d.chainId)
-    .map((d, i) => {
-      const network = getNetworkDetails(d.chainId as string);
+  return validDelegations.value.map((d, i) => {
+    const network = getNetworkDetails(d.chainId as string);
 
-      return {
-        id: i,
-        name: d.name || '',
-        icon: h('img', {
-          src: getUrl(network.logo),
-          alt: network.name,
-          class: 'rounded-full'
-        })
-      };
-    });
+    return {
+      id: i,
+      name: d.name || '',
+      icon: h('img', {
+        src: getUrl(network.logo),
+        alt: network.name,
+        class: 'rounded-full'
+      })
+    };
+  });
 });
+
+function isValidDelegation(delegation?: SpaceMetadataDelegation): boolean {
+  return !!(
+    delegation?.chainId &&
+    delegation?.apiUrl &&
+    delegation?.apiType !== 'split-delegation'
+  );
+}
 
 function getNetworkDetails(chainId: number | string) {
   if (typeof chainId === 'number') {
@@ -98,6 +112,8 @@ function getNetworkDetails(chainId: number | string) {
 }
 
 async function handleSubmit() {
+  if (!selectedDelegation.value) return;
+
   if (
     !selectedDelegation.value.apiType ||
     !selectedDelegation.value.contractAddress ||
@@ -180,9 +196,16 @@ watchEffect(async () => {
         "
       />
     </template>
+    <UiMessage
+      v-else-if="isInvalidSelectedDelegation"
+      class="m-4"
+      type="danger"
+    >
+      Invalid delegation
+    </UiMessage>
     <div v-else class="s-box p-4">
       <Combobox
-        v-if="!delegation && props.space.delegations.length > 1"
+        v-if="!delegation && validDelegations.length > 1"
         v-model="form.selectedIndex"
         :definition="{
           type: ['number'],
@@ -201,6 +224,14 @@ watchEffect(async () => {
     </div>
     <template v-if="!showPicker" #footer>
       <UiButton
+        v-if="isInvalidSelectedDelegation"
+        class="w-full"
+        @click="emit('close')"
+      >
+        Close
+      </UiButton>
+      <UiButton
+        v-else
         class="w-full"
         :loading="sending"
         :disabled="Object.keys(formErrors).length > 0"
