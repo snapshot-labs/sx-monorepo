@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   _d,
+  _rt,
   _vp,
   createErc1155Metadata,
   formatAddress,
@@ -161,6 +162,39 @@ describe('utils', () => {
       expect(_d(86399)).toBe('23h 59m 59s');
       expect(_d(86400)).toBe('1d');
       expect(_d(86401)).toBe('1d 1s');
+    });
+  });
+
+  describe('_rt', () => {
+    const now = Date.now();
+    const timestamp = Math.floor(now / 1000);
+
+    beforeAll(() => {
+      vi.useFakeTimers();
+
+      vi.setSystemTime(now);
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    it('should format time in the past', () => {
+      expect(_rt(timestamp - 1)).toBe('just now');
+      expect(_rt(timestamp - 60)).toBe('1m ago');
+      expect(_rt(timestamp - 60 * 60)).toBe('1h ago');
+      expect(_rt(timestamp - 60 * 60 * 24)).toBe('1d ago');
+      expect(_rt(timestamp - 60 * 60 * 24 * 31 * 2)).toBe('2mo ago');
+      expect(_rt(timestamp - 60 * 60 * 24 * 365)).toBe('1y ago');
+    });
+
+    it('should format time in the future', () => {
+      expect(_rt(timestamp + 1)).toBe('in few seconds');
+      expect(_rt(timestamp + 60)).toBe('1m left');
+      expect(_rt(timestamp + 60 * 60)).toBe('1h left');
+      expect(_rt(timestamp + 60 * 60 * 24)).toBe('1d left');
+      expect(_rt(timestamp + 60 * 60 * 24 * 31 * 2)).toBe('2mo left');
+      expect(_rt(timestamp + 60 * 60 * 24 * 365)).toBe('1y left');
     });
   });
 
