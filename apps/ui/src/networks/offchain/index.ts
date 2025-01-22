@@ -63,7 +63,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             return network ? `${network.explorer.url}/tx/${id}` : '';
           }
 
-          return `https://signator.io/view?ipfs=${id}`;
+          return `https://signator.io/ipfs/${id}`;
         case 'strategy':
           return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
         case 'contract':
