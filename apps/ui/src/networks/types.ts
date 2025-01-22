@@ -10,6 +10,7 @@ import {
   NetworkID,
   Privacy,
   Proposal,
+  Setting,
   Space,
   SpaceMetadata,
   Statement,
@@ -327,6 +328,7 @@ export type NetworkApi = {
   loadStrategies(): Promise<StrategyTemplate[]>;
   loadStrategy(address: string): Promise<StrategyTemplate | null>;
   getNetworksUsage(): Promise<Record<ChainId, number | undefined>>;
+  loadSettings(): Promise<Setting[]>;
 };
 
 export type NetworkConstants = {
