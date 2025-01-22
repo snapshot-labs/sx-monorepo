@@ -50,11 +50,8 @@ const {
   reset
 } = useWalletConnectTransaction();
 const proposalsStore = useProposalsStore();
-const {
-  get: getPropositionPower,
-  fetch: fetchPropositionPower,
-  reset: resetPropositionPower
-} = usePropositionPower();
+const { get: getPropositionPower, fetch: fetchPropositionPower } =
+  usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
@@ -345,12 +342,8 @@ function handleFetchPropositionPower() {
 
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
-  ([toAccount, toAuthLoading], [fromAccount]) => {
-    if (fromAccount && toAccount && fromAccount !== toAccount) {
-      resetPropositionPower();
-    }
-
-    if (toAuthLoading || !toAccount) return;
+  ([account, authLoading]) => {
+    if (!account || authLoading) return;
 
     handleFetchPropositionPower();
   },
@@ -425,7 +418,7 @@ watchEffect(() => {
           !!web3.account &&
           (sending ||
             !propositionPower ||
-            propositionPower.status === 'loading')
+            propositionPower?.status === 'loading')
         "
         :disabled="!canSubmit"
         @click="handleProposeClick"

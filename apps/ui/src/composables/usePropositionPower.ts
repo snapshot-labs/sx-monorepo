@@ -25,16 +25,5 @@ export function usePropositionPower() {
     );
   }
 
-  function reset() {
-    votingPowersStore.reset();
-  }
-
-  watch(
-    () => web3.value.account,
-    account => {
-      if (!account) reset();
-    }
-  );
-
-  return { fetch, get, reset };
+  return { fetch, get };
 }

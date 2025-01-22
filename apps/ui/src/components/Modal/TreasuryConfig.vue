@@ -52,6 +52,7 @@ const definition = computed(() => {
               title: 'Treasury address',
               examples: ['0x0000…'],
               format: 'address',
+              chainId: form.value.chainId,
               minLength: 1
             }
           }

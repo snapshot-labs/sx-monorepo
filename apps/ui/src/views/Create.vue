@@ -206,26 +206,28 @@ watchEffect(() => setTitle('Create space'));
       <div class="flex-1">
         <div class="mt-8 lg:mt-0">
           <template v-if="currentPage === 'profile'">
-            <h3 class="mb-4">Space profile</h3>
-            <FormSpaceProfile
-              :form="metadataForm"
-              @errors="v => handleErrors('profile', v)"
-            />
-            <div class="s-box p-4 -mt-6">
-              <FormSpaceTreasuries
-                v-model="metadataForm.treasuries"
-                :network-id="selectedNetworkId"
+            <UiContainerSettings title="Space profile">
+              <FormSpaceProfile
+                :form="metadataForm"
+                @errors="v => handleErrors('profile', v)"
               />
-              <FormSpaceDelegations
-                v-model="metadataForm.delegations"
-                :network-id="selectedNetworkId"
-                class="mt-2"
-              />
-            </div>
+              <div class="s-box p-4 -mt-6">
+                <FormSpaceTreasuries
+                  v-model="metadataForm.treasuries"
+                  :network-id="selectedNetworkId"
+                />
+                <FormSpaceDelegations
+                  v-model="metadataForm.delegations"
+                  :network-id="selectedNetworkId"
+                  class="mt-2"
+                />
+              </div>
+            </UiContainerSettings>
           </template>
           <FormNetwork
             v-else-if="currentPage === 'network'"
             v-model="selectedNetworkId"
+            title="Space network"
           />
           <FormStrategies
             v-else-if="currentPage === 'strategies'"
@@ -277,11 +279,14 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'voting'"
             :form="settingsForm"
             :selected-network-id="selectedNetworkId"
+            title="Voting settings"
             @errors="v => handleErrors('voting', v)"
           />
           <FormController
             v-else-if="currentPage === 'controller'"
             v-model="controller"
+            title="Controller"
+            :chain-id="selectedNetwork.chainId"
             @errors="v => handleErrors('controller', v)"
           />
         </div>

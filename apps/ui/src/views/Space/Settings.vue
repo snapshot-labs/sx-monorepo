@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { shorten } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -52,26 +51,24 @@ const isAdvancedFormResolved = ref(false);
 const hasVotingErrors = ref(false);
 const hasProposalErrors = ref(false);
 const hasAdvancedErrors = ref(false);
-const changeControllerModalOpen = ref(false);
+
 const executeFn = ref(save);
 const saving = ref(false);
 
 type Tab = {
   id:
     | 'profile'
-    | 'delegations'
-    | 'treasuries'
-    | 'strategies'
-    | 'authenticators'
-    | 'proposal-validation'
-    | 'voting-strategies'
     | 'proposal'
+    | 'voting-strategies'
     | 'voting'
     | 'members'
-    | 'labels'
     | 'execution'
-    | 'controller'
-    | 'advanced';
+    | 'authenticators'
+    | 'treasuries'
+    | 'delegations'
+    | 'labels'
+    | 'advanced'
+    | 'controller';
   name: string;
   visible: boolean;
 };
@@ -89,39 +86,14 @@ const tabs = computed<Tab[]>(
         visible: true
       },
       {
-        id: 'delegations',
-        name: 'Delegations',
+        id: 'proposal',
+        name: 'Proposal',
         visible: true
-      },
-      {
-        id: 'treasuries',
-        name: 'Treasuries',
-        visible: true
-      },
-      {
-        id: 'authenticators',
-        name: 'Authenticators',
-        visible: !isOffchainNetwork.value
-      },
-      {
-        id: 'strategies',
-        name: 'Strategies',
-        visible: isOffchainNetwork.value
-      },
-      {
-        id: 'proposal-validation',
-        name: 'Proposal validation',
-        visible: !isOffchainNetwork.value
       },
       {
         id: 'voting-strategies',
         name: 'Voting strategies',
-        visible: !isOffchainNetwork.value
-      },
-      {
-        id: 'proposal',
-        name: 'Proposal',
-        visible: isOffchainNetwork.value
+        visible: true
       },
       {
         id: 'voting',
@@ -134,24 +106,39 @@ const tabs = computed<Tab[]>(
         visible: isOffchainNetwork.value
       },
       {
-        id: 'labels',
-        name: 'Labels',
-        visible: true
-      },
-      {
         id: 'execution',
         name: 'Execution',
         visible: !isOffchainNetwork.value
       },
       {
-        id: 'controller',
-        name: 'Controller',
+        id: 'authenticators',
+        name: 'Authenticators',
+        visible: !isOffchainNetwork.value
+      },
+      {
+        id: 'treasuries',
+        name: 'Treasuries',
+        visible: true
+      },
+      {
+        id: 'delegations',
+        name: 'Delegations',
+        visible: true
+      },
+      {
+        id: 'labels',
+        name: 'Labels',
         visible: true
       },
       {
         id: 'advanced',
         name: 'Advanced',
         visible: isOffchainNetwork.value
+      },
+      {
+        id: 'controller',
+        name: 'Controller',
+        visible: true
       }
     ] as const
 );
@@ -240,8 +227,6 @@ function handleSettingsSave() {
 }
 
 function handleControllerSave(value: string) {
-  changeControllerModalOpen.value = false;
-
   if (!isOwner.value) return;
   controller.value = value;
 
@@ -326,84 +311,57 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           @errors="v => (formErrors = v)"
         />
       </div>
-      <UiContainerSettings
-        v-if="activeTab === 'delegations'"
-        title="Delegations"
-        description="Delegations allow users to delegate their voting power to other users."
-      >
-        <FormSpaceDelegations
-          v-model="form.delegations"
+      <template v-if="activeTab === 'proposal'">
+        <UiContainerSettings
+          v-if="isOffchainNetwork"
+          title="Proposal"
+          description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
+        >
+          <FormSpaceProposal
+            v-model:proposal-validation="proposalValidation"
+            v-model:guidelines="guidelines"
+            v-model:template="template"
+            :network-id="space.network"
+            :snapshot-chain-id="snapshotChainId"
+            :space="space"
+            @update-validity="v => (hasProposalErrors = !v)"
+          />
+        </UiContainerSettings>
+        <FormValidation
+          v-else
+          v-model="validationStrategy"
           :network-id="space.network"
-          :limit="isOffchainNetwork ? 1 : undefined"
+          :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
+          :available-voting-strategies="
+            network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
+          "
+          title="Proposal"
+          description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
         />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-if="activeTab === 'treasuries'"
-        title="Treasuries"
-        description="Treasuries are used to manage the funds of the space."
-      >
-        <FormSpaceTreasuries
-          v-model="form.treasuries"
+      </template>
+      <template v-if="activeTab === 'voting-strategies'">
+        <UiContainerSettings
+          v-if="isOffchainNetwork"
+          title="Voting strategies"
+          description="Voting strategies are sets of conditions used to calculate user's voting power."
+        >
+          <FormSpaceStrategies
+            v-model:snapshot-chain-id="snapshotChainId"
+            v-model:strategies="strategies"
+            :network-id="space.network"
+            :is-ticket-valid="isTicketValid"
+            :space="space"
+          />
+        </UiContainerSettings>
+        <FormStrategies
+          v-else
+          v-model="votingStrategies"
           :network-id="space.network"
-          :limit="isOffchainNetwork ? 10 : undefined"
+          :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
+          title="Voting strategies"
+          description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
         />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="activeTab === 'strategies'"
-        title="Strategies"
-        description="Strategies are sets of conditions used to calculate user's voting power."
-      >
-        <FormSpaceStrategies
-          v-model:snapshot-chain-id="snapshotChainId"
-          v-model:strategies="strategies"
-          :network-id="space.network"
-          :is-ticket-valid="isTicketValid"
-          :space="space"
-        />
-      </UiContainerSettings>
-      <FormStrategies
-        v-if="activeTab === 'authenticators'"
-        v-model="authenticators"
-        unique
-        :network-id="space.network"
-        :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
-        title="Authenticators"
-        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
-      />
-      <FormValidation
-        v-else-if="activeTab === 'proposal-validation'"
-        v-model="validationStrategy"
-        :network-id="space.network"
-        :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
-        :available-voting-strategies="
-          network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
-        "
-        title="Proposal validation"
-        description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
-      />
-      <FormStrategies
-        v-else-if="activeTab === 'voting-strategies'"
-        v-model="votingStrategies"
-        :network-id="space.network"
-        :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
-        title="Voting strategies"
-        description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
-      />
-      <UiContainerSettings
-        v-else-if="activeTab === 'proposal'"
-        title="Proposal"
-        description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
-      >
-        <FormSpaceProposal
-          v-model:proposal-validation="proposalValidation"
-          v-model:guidelines="guidelines"
-          v-model:template="template"
-          :network-id="space.network"
-          :snapshot-chain-id="snapshotChainId"
-          :space="space"
-          @update-validity="v => (hasProposalErrors = !v)"
-        />
-      </UiContainerSettings>
+      </template>
       <UiContainerSettings
         v-else-if="activeTab === 'voting'"
         title="Voting"
@@ -437,13 +395,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </UiContainerSettings>
       <UiContainerSettings
-        v-else-if="activeTab === 'labels'"
-        title="Labels"
-        description="Labels are used to categorize proposals."
-      >
-        <FormSpaceLabels v-model="form.labels" />
-      </UiContainerSettings>
-      <UiContainerSettings
         v-else-if="activeTab === 'execution'"
         title="Execution(s)"
         description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
@@ -458,49 +409,43 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           />
         </div>
       </UiContainerSettings>
+      <FormStrategies
+        v-if="activeTab === 'authenticators'"
+        v-model="authenticators"
+        unique
+        :network-id="space.network"
+        :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
+        title="Authenticators"
+        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+      />
       <UiContainerSettings
-        v-else-if="activeTab === 'controller'"
-        title="Controller"
-        description="The controller is the account able to change the space settings and cancel pending proposals."
+        v-if="activeTab === 'treasuries'"
+        title="Treasuries"
+        description="Treasuries are used to manage the funds of the space."
       >
-        <div
-          class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
-        >
-          <div class="flex flex-col">
-            <a
-              :href="network.helpers.getExplorerUrl(controller, 'contract')"
-              target="_blank"
-              class="flex items-center text-skin-text leading-5"
-            >
-              <UiStamp
-                :id="controller"
-                type="avatar"
-                :size="18"
-                class="mr-2 !rounded"
-              />
-              {{ shorten(controller) }}
-              <IH-arrow-sm-right class="-rotate-45" />
-            </a>
-          </div>
-          <button
-            type="button"
-            :disabled="!isController"
-            :class="{
-              'opacity-40 cursor-not-allowed text-skin-text': !isController
-            }"
-            @click="changeControllerModalOpen = true"
-          >
-            <IH-pencil />
-          </button>
-        </div>
-        <teleport to="#modal">
-          <ModalChangeController
-            :open="changeControllerModalOpen"
-            :initial-state="{ controller }"
-            @close="changeControllerModalOpen = false"
-            @save="handleControllerSave"
-          />
-        </teleport>
+        <FormSpaceTreasuries
+          v-model="form.treasuries"
+          :network-id="space.network"
+          :limit="isOffchainNetwork ? 10 : undefined"
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'delegations'"
+        title="Delegations"
+        description="Delegations allow users to delegate their voting power to other users."
+      >
+        <FormSpaceDelegations
+          v-model="form.delegations"
+          :network-id="space.network"
+          :limit="isOffchainNetwork ? 1 : undefined"
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'labels'"
+        title="Labels"
+        description="Labels are used to categorize proposals."
+      >
+        <FormSpaceLabels v-model="form.labels" />
       </UiContainerSettings>
       <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
         <FormSpaceAdvanced
@@ -519,6 +464,26 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
               isAdvancedFormResolved = resolved;
             }
           "
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-if="activeTab === 'controller'"
+        title="Controller"
+        description="The controller is the account able to change the space settings and cancel pending proposals."
+      >
+        <UiMessage
+          v-if="isOffchainNetwork && isOwner"
+          type="danger"
+          class="mb-3"
+        >
+          The controller is the owner of the ENS name. To change the controller,
+          you need to change the owner of the ENS name.
+        </UiMessage>
+        <FormSpaceController
+          :controller="controller"
+          :network="network"
+          :disabled="!isController || isOffchainNetwork"
+          @save="handleControllerSave"
         />
       </UiContainerSettings>
       <UiToolbarBottom

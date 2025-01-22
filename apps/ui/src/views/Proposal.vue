@@ -11,11 +11,7 @@ const props = defineProps<{
 
 const route = useRoute();
 const proposalsStore = useProposalsStore();
-const {
-  get: getVotingPower,
-  fetch: fetchVotingPower,
-  reset: resetVotingPower
-} = useVotingPower();
+const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
@@ -128,12 +124,8 @@ function handleFetchVotingPower() {
 
 watch(
   [proposal, () => web3.value.account, () => web3.value.authLoading],
-  ([toProposal, toAccount, toAuthLoading], [, fromAccount]) => {
-    if (fromAccount && toAccount && fromAccount !== toAccount) {
-      resetVotingPower();
-    }
-
-    if (toAuthLoading || !toProposal || !toAccount) return;
+  ([proposal, account, authLoading]) => {
+    if (authLoading || !proposal || !account) return;
 
     handleFetchVotingPower();
   },
@@ -404,7 +396,9 @@ watchEffect(() => {
                 v-if="
                   proposal.network === 's' &&
                   proposal.completed &&
-                  ['passed', 'rejected', 'executed'].includes(proposal.state)
+                  ['passed', 'rejected', 'executed', 'closed'].includes(
+                    proposal.state
+                  )
                 "
                 class="mt-2.5 inline-flex items-center gap-2 hover:text-skin-link"
                 @click="handleDownloadVotes"

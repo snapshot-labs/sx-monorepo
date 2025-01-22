@@ -65,7 +65,8 @@ export const SPACES_DISCUSSIONS = {
   's:badgerdao.eth':
     'https://forum.badger.finance/c/badger-improvement-proposals-bip/5',
   'sn:0x07c251045154318a2376a3bb65be47d3c90df1740d8e35c9b9d943aa3f240e50':
-    'https://www.nostra.family/c/general/4'
+    'https://www.nostra.family/c/general/4',
+  's:odos.eth': 'https://forum.odos.xyz/c/governance/5'
 };
 
 export async function loadTopics(url: string): Promise<Topic[]> {

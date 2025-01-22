@@ -15,13 +15,6 @@ const DEFAULT_FORM_STATE = {
   value: ''
 };
 
-const RECIPIENT_DEFINITION = {
-  type: 'string',
-  format: 'ens-or-address',
-  title: 'Recipient',
-  examples: ['Address or ENS']
-};
-
 const props = defineProps<{
   open: boolean;
   address: string;
@@ -79,6 +72,14 @@ const currentToken = computed(() => {
   return token;
 });
 
+const recipientDefinition = computed(() => ({
+  type: 'string',
+  format: 'ens-or-address',
+  chainId: props.network,
+  title: 'Recipient',
+  examples: ['Address or ENS']
+}));
+
 const amountDefinition = computed(() => ({
   type: 'string',
   decimals: currentToken.value?.decimals ?? 0,
@@ -94,7 +95,7 @@ const formValidator = computed(() =>
     additionalProperties: false,
     required: ['to', 'amount'],
     properties: {
-      to: RECIPIENT_DEFINITION,
+      to: recipientDefinition.value,
       amount: amountDefinition.value
     }
   })
@@ -278,7 +279,7 @@ watchEffect(async () => {
     <div v-if="!showPicker" class="s-box p-4">
       <UiInputAddress
         v-model="form.to"
-        :definition="RECIPIENT_DEFINITION"
+        :definition="recipientDefinition"
         :error="formErrors.to"
         @pick="handlePickerClick('contact')"
       />
