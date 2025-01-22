@@ -1,4 +1,4 @@
-type Skin = 'dark' | 'light' | 'none';
+export type Skin = 'dark' | 'light' | 'none';
 
 const DEFAULT_SKIN: Skin = 'light';
 
@@ -8,10 +8,12 @@ export function useUserSkin() {
     [DEFAULT_SKIN, 'none'].includes(store.value) ? DEFAULT_SKIN : 'dark'
   );
 
-  function toggleSkin(skin?: Skin) {
-    store.value =
-      skin ||
-      ([DEFAULT_SKIN, 'none'].includes(store.value) ? 'dark' : DEFAULT_SKIN);
+  function toggleSkin() {
+    store.value = ['light', 'none'].includes(store.value) ? 'dark' : 'light';
+  }
+
+  function setSkin(skin: Skin) {
+    store.value = skin;
   }
 
   watchEffect(() => {
@@ -25,6 +27,7 @@ export function useUserSkin() {
   return {
     DEFAULT_SKIN,
     currentMode,
-    toggleSkin
+    toggleSkin,
+    setSkin
   };
 }

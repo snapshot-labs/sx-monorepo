@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
+import { Skin } from '@/composables/useUserSkin';
 import { APP_NAME } from '@/helpers/constants';
 import {
   clone,
@@ -23,7 +24,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
-const { DEFAULT_SKIN, toggleSkin } = useUserSkin();
+const { DEFAULT_SKIN, setSkin } = useUserSkin();
 const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
@@ -173,8 +174,8 @@ watch(
       .map(([key, val]) => `${key}:${val}`)
       .join(';')};  }`;
 
-    toggleSkin(
-      whiteLabelSpace.value.additionalRawData?.skinSettings?.theme ||
+    setSkin(
+      (whiteLabelSpace.value.additionalRawData?.skinSettings?.theme as Skin) ||
         DEFAULT_SKIN
     );
   },
