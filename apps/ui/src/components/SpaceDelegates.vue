@@ -8,7 +8,7 @@ import { getNames } from '@/helpers/stamp';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
-import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
+import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
   space: Space;
@@ -32,9 +32,7 @@ const sortBy = ref(
 );
 const { setTitle } = useTitle();
 const { getDelegates, getDelegation } = useDelegates(
-  props.delegation.apiType as DelegationType,
-  props.delegation.apiUrl as string,
-  props.delegation.contractAddress as string,
+  props.delegation as RequiredProperty<typeof props.delegation>,
   props.space
 );
 const { getDelegatee } = useActions();

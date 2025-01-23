@@ -6,7 +6,12 @@ import {
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
-import { DelegationType, Space, Statement } from '@/types';
+import {
+  RequiredProperty,
+  Space,
+  SpaceMetadataDelegation,
+  Statement
+} from '@/types';
 
 type ApiDelegate = {
   id: string;
@@ -36,6 +41,22 @@ type DelegatesQueryFilter = {
   where?: {
     user?: string;
   };
+};
+
+const DELEGATION_SUBGRAPHS = {
+  '1': 'https://subgrapher.snapshot.org/delegation/1',
+  '10': 'https://subgrapher.snapshot.org/delegation/10',
+  '56': 'https://subgrapher.snapshot.org/delegation/56',
+  '100': 'https://subgrapher.snapshot.org/delegation/100',
+  '137': 'https://subgrapher.snapshot.org/delegation/137',
+  '146': 'https://subgrapher.snapshot.org/delegation/146',
+  '250': 'https://subgrapher.snapshot.org/delegation/250',
+  '8453': 'https://subgrapher.snapshot.org/delegation/8453',
+  '42161': 'https://subgrapher.snapshot.org/delegation/42161',
+  '59144': 'https://subgrapher.snapshot.org/delegation/59144',
+  '81457': 'https://subgrapher.snapshot.org/delegation/81457',
+  '84532': 'https://subgrapher.snapshot.org/delegation/84532',
+  '11155111': 'https://subgrapher.snapshot.org/delegation/11155111'
 };
 
 const DELEGATES_QUERY = gql`
@@ -94,13 +115,11 @@ function convertUrl(apiUrl: string) {
 }
 
 export function useDelegates(
-  delegationType: DelegationType,
-  delegationApiUrl: string,
-  governance: string,
+  delegation: RequiredProperty<SpaceMetadataDelegation>,
   space: Space
 ) {
   const httpLink = createHttpLink({
-    uri: convertUrl(delegationApiUrl)
+    uri: convertUrl(delegation.apiUrl)
   });
 
   const apollo = new ApolloClient({
@@ -158,7 +177,7 @@ export function useDelegates(
   ): Promise<Delegate[]> {
     const where = {
       tokenHoldersRepresentedAmount_gte: 0,
-      governance: governance.toLowerCase(),
+      governance: delegation.contractAddress.toLowerCase(),
       ...filter.where
     };
 
@@ -171,14 +190,19 @@ export function useDelegates(
   }
 
   async function getDelegation(delegator: string) {
-    const client = new ApolloClient({
-      uri: 'https://api.studio.thegraph.com/query/23545/snapshot/version/latest',
-      cache: new InMemoryCache()
-    });
-
-    if (delegationType !== 'delegate-registry') {
+    if (delegation.apiType !== 'delegate-registry') {
       throw new Error('getDelegation is only supported for delegate-registry');
     }
+
+    const delegationSubgraph = DELEGATION_SUBGRAPHS[delegation.chainId];
+    if (!delegationSubgraph) {
+      throw new Error('Delegation subgraph not found');
+    }
+
+    const client = new ApolloClient({
+      uri: delegationSubgraph,
+      cache: new InMemoryCache()
+    });
 
     const { data } = await client.query({
       query: DELEGATIONS_QUERY,
