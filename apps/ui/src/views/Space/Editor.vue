@@ -2,14 +2,7 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import {
-  MAX_1D_PROPOSALS,
-  MAX_30D_PROPOSALS,
-  MAX_BODY_LENGTH,
-  MAX_CHOICES,
-  TURBO_URL,
-  VERIFIED_URL
-} from '@/helpers/turbo';
+import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
@@ -55,6 +48,7 @@ const { get: getPropositionPower, fetch: fetchPropositionPower } =
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
+const { settings } = useSettings();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -130,7 +124,7 @@ const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: MAX_BODY_LENGTH[props.space.turbo ? 'turbo' : 'default'],
+  maxLength: Number(settings.value.get(`space.${spaceType.value}.body_limit`)),
   examples: ['Propose something…']
 }));
 
@@ -138,7 +132,9 @@ const choicesDefinition = computed(() => ({
   type: 'array',
   title: 'Choices',
   minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
-  maxItems: MAX_CHOICES[props.space.turbo ? 'turbo' : 'default'],
+  maxItems: Number(
+    settings.value.get(`space.${spaceType.value}.choices_limit`)
+  ),
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
 }));
@@ -181,11 +177,20 @@ const spaceType = computed(() =>
   props.space.turbo ? 'turbo' : props.space.verified ? 'verified' : 'default'
 );
 
-const proposalLimitReached = computed(
-  () =>
-    (props.space.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
-    (props.space.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
-);
+const proposalLimitReached = computed(() => {
+  const type = (settings.value.get('space.ecosystem.list') || []).includes(
+    props.space.id
+  )
+    ? 'ecosystem'
+    : spaceType.value;
+
+  return (
+    (props.space.proposal_count_1d || 0) >=
+      Number(settings.value.get(`space.${type}.proposal_limit_per_day`)) ||
+    (props.space.proposal_count_30d || 0) >=
+      Number(settings.value.get(`space.${type}.proposal_limit_per_month`))
+  );
+});
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
@@ -466,16 +471,23 @@ watchEffect(() => {
             type="error"
             class="mb-4"
           >
-            <span
-              >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals
-              per day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
+            <span>
+              You can publish up to
+              {{
+                Number(settings.get(`space.verified.proposal_limit_per_day`))
+              }}
+              proposals per day and
+              {{
+                Number(settings.get(`space.verified.proposal_limit_per_month`))
+              }}
+              proposals per month.
               <a
                 :href="TURBO_URL"
                 target="_blank"
                 class="text-rose-500 dark:text-neutral-100 font-semibold"
                 >Increase limit</a
-              >.</span
-            >
+              >.
+            </span>
           </UiAlert>
           <div v-if="guidelines">
             <h4 class="mb-2 eyebrow">Guidelines</h4>

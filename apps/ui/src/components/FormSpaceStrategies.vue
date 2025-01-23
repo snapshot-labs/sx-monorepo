@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { MAX_STRATEGIES } from '@/helpers/turbo';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
@@ -16,6 +15,8 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const { settings } = useSettings();
+
 const strategiesLimit = computed(() => {
   const spaceType = props.space.turbo
     ? 'turbo'
@@ -23,7 +24,7 @@ const strategiesLimit = computed(() => {
       ? 'verified'
       : 'default';
 
-  return MAX_STRATEGIES[spaceType];
+  return Number(settings.value.get(`space.${spaceType}.strategies_limit`));
 });
 </script>
 

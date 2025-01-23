@@ -12,6 +12,12 @@ export const SIDEKICK_URL = 'https://sh5.co';
 
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
+export const TURBO_URL =
+  'https://docs.snapshot.box/user-guides/spaces/turbo-plan';
+
+export const VERIFIED_URL =
+  'https://docs.snapshot.box/user-guides/spaces/get-verified';
+
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
