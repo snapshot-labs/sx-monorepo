@@ -497,3 +497,8 @@ export type SelectItem<T> = {
   name?: string;
   icon?: VNode;
 };
+
+export type Setting = {
+  name: string;
+  value: string;
+};

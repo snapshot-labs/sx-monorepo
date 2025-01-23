@@ -14,6 +14,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   const actions = useActions();
   const { web3, authInitiated } = useWeb3();
   const { isWhiteLabel } = useWhiteLabel();
+  const { settings } = useSettings();
 
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
@@ -22,6 +23,10 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     `${pkg.name}.spaces-followed`,
     {} as Record<string, string[]>
   );
+
+  const maxFollowLimit = computed(() => {
+    return Number(settings.value.get('user.default.follow_limit'));
+  });
 
   const followedSpacesMap = computed(
     () =>
@@ -109,6 +114,12 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
             (spaceId: string) => spaceId !== id
           );
       } else {
+        if (followedSpaces.value.length >= maxFollowLimit.value) {
+          throw new Error(
+            `You can follow up to ${maxFollowLimit.value} spaces.`
+          );
+        }
+
         const result = await actions.followSpace(spaceNetwork, spaceId);
         if (!result) return;
 
@@ -152,6 +163,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   );
 
   return {
+    maxFollowLimit,
     followedSpaces,
     followedSpacesIds,
     followedSpaceIdsByNetwork,
