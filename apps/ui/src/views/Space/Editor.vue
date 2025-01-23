@@ -2,6 +2,7 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
+import { PROPOSALS_NETWORK_WHITELIST } from '@/helpers/constants';
 import {
   MAX_1D_PROPOSALS,
   MAX_30D_PROPOSALS,
@@ -55,6 +56,7 @@ const { get: getPropositionPower, fetch: fetchPropositionPower } =
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
+const { networks } = useOffchainNetworksList(props.space.network);
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -171,7 +173,11 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  if (Object.keys(formErrors.value).length > 0) return false;
+  if (
+    (unsupportedProposalNetworks.value.length && !proposal.value?.proposalId) ||
+    Object.keys(formErrors.value).length > 0
+  )
+    return false;
 
   return web3.value.account
     ? propositionPower.value?.canPropose
@@ -214,6 +220,24 @@ const proposalMaxEnd = computed(() => {
     proposalStart.value +
       (props.space.max_voting_period || defaultVotingDelay.value)
   );
+});
+
+const unsupportedProposalNetworks = computed(() => {
+  if (!props.space.snapshot_chain_id) return [];
+
+  const ids = new Set<number>([
+    props.space.snapshot_chain_id,
+    ...props.space.strategies_params.map(strategy => Number(strategy.network)),
+    ...props.space.strategies_params.flatMap(strategy =>
+      Array.isArray(strategy.params?.strategies)
+        ? strategy.params.strategies.map(param => Number(param.network))
+        : []
+    )
+  ]);
+
+  return Array.from(ids)
+    .filter(n => !PROPOSALS_NETWORK_WHITELIST.includes(n))
+    .map(chainId => networks.value.find(n => n.chainId === chainId));
 });
 
 async function handleProposeClick() {
@@ -433,50 +457,69 @@ watchEffect(() => {
     <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
       <div class="flex-1 grow min-w-0">
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
-          <MessageVotingPower
-            v-if="propositionPower"
-            class="mb-4"
-            :voting-power="propositionPower"
-            action="propose"
-            @fetch-voting-power="handleFetchPropositionPower"
-          />
           <UiAlert
-            v-if="
-              propositionPower &&
-              spaceType === 'default' &&
-              proposalLimitReached
-            "
+            v-if="unsupportedProposalNetworks[0] && !proposal?.proposalId"
             type="error"
             class="mb-4"
           >
-            <span
-              >Please verify your space to publish more proposals.
-              <a
-                :href="VERIFIED_URL"
-                target="_blank"
-                class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Verify space</a
-              >.</span
-            >
+            <div>
+              You cannot create proposals.
+              <br />
+              The space is configured with
+              <b>{{ unsupportedProposalNetworks[0].name }}</b>
+              , a non-premium network. Change to a premium network or upgrade
+              <b>{{ unsupportedProposalNetworks[0].name }}</b> to continue.
+            </div>
           </UiAlert>
-          <UiAlert
-            v-else-if="
-              propositionPower && spaceType !== 'turbo' && proposalLimitReached
-            "
-            type="error"
-            class="mb-4"
-          >
-            <span
-              >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals
-              per day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
-              <a
-                :href="TURBO_URL"
-                target="_blank"
-                class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Increase limit</a
-              >.</span
+          <template v-else>
+            <MessageVotingPower
+              v-if="propositionPower"
+              class="mb-4"
+              :voting-power="propositionPower"
+              action="propose"
+              @fetch-voting-power="handleFetchPropositionPower"
+            />
+            <UiAlert
+              v-if="
+                propositionPower &&
+                spaceType === 'default' &&
+                proposalLimitReached
+              "
+              type="error"
+              class="mb-4"
             >
-          </UiAlert>
+              <span
+                >Please verify your space to publish more proposals.
+                <a
+                  :href="VERIFIED_URL"
+                  target="_blank"
+                  class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >Verify space</a
+                >.</span
+              >
+            </UiAlert>
+            <UiAlert
+              v-else-if="
+                propositionPower &&
+                spaceType !== 'turbo' &&
+                proposalLimitReached
+              "
+              type="error"
+              class="mb-4"
+            >
+              <span
+                >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals
+                per day and {{ MAX_30D_PROPOSALS.verified }} proposals per
+                month.
+                <a
+                  :href="TURBO_URL"
+                  target="_blank"
+                  class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >Increase limit</a
+                >.</span
+              >
+            </UiAlert>
+          </template>
           <div v-if="guidelines">
             <h4 class="mb-2 eyebrow">Guidelines</h4>
             <a :href="guidelines" target="_blank" class="block mb-4">

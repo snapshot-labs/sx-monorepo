@@ -159,3 +159,9 @@ export const VALIDATION_TYPES_INFO: Record<
     description: 'Use EAS attest.sh to determine if user can create a proposal.'
   }
 };
+
+export const PROPOSALS_NETWORK_WHITELIST: ChainId[] = [
+  1, //Ethereum
+  42161, // Arbitrum
+  137 // Polygon
+];
