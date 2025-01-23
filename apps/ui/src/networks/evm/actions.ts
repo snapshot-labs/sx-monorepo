@@ -630,7 +630,7 @@ export function createActions(
 
       const { decimals, balanceOf, delegatee } = await multi.execute();
 
-      return delegatee !== '0x0'
+      return delegatee !== '0x0000000000000000000000000000000000000000'
         ? { address: delegatee, balance: balanceOf.toBigInt(), decimals }
         : null;
     },
