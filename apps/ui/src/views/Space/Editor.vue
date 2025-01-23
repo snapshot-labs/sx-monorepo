@@ -124,7 +124,9 @@ const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: Number(settings.value.get(`space.${spaceType.value}.body_limit`)),
+  maxLength: Number(
+    settings.value.get(`space.${spaceType.value}.body_limit`) || 0
+  ),
   examples: ['Propose something…']
 }));
 
@@ -133,7 +135,7 @@ const choicesDefinition = computed(() => ({
   title: 'Choices',
   minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
   maxItems: Number(
-    settings.value.get(`space.${spaceType.value}.choices_limit`)
+    settings.value.get(`space.${spaceType.value}.choices_limit`) || 0
   ),
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
@@ -186,9 +188,9 @@ const proposalLimitReached = computed(() => {
 
   return (
     (props.space.proposal_count_1d || 0) >=
-      Number(settings.value.get(`space.${type}.proposal_limit_per_day`)) ||
+      Number(settings.value.get(`space.${type}.proposal_limit_per_day`) || 0) ||
     (props.space.proposal_count_30d || 0) >=
-      Number(settings.value.get(`space.${type}.proposal_limit_per_month`))
+      Number(settings.value.get(`space.${type}.proposal_limit_per_month`) || 0)
   );
 });
 
@@ -474,11 +476,15 @@ watchEffect(() => {
             <span>
               You can publish up to
               {{
-                Number(settings.get(`space.verified.proposal_limit_per_day`))
+                Number(
+                  settings.get(`space.verified.proposal_limit_per_day`) || 0
+                )
               }}
               proposals per day and
               {{
-                Number(settings.get(`space.verified.proposal_limit_per_month`))
+                Number(
+                  settings.get(`space.verified.proposal_limit_per_month`) || 0
+                )
               }}
               proposals per month.
               <a

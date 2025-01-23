@@ -24,7 +24,7 @@ const strategiesLimit = computed(() => {
       ? 'verified'
       : 'default';
 
-  return Number(settings.value.get(`space.${spaceType}.strategies_limit`));
+  return Number(settings.value.get(`space.${spaceType}.strategies_limit`) || 0);
 });
 </script>
 
