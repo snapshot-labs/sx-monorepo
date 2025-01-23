@@ -23,7 +23,7 @@ import {
   Space,
   StrategiesParsedMetadataItem,
   VotingPowerValidationStrategiesParsedMetadataItem
-} from '../.checkpoint/models';
+} from '../../.checkpoint/models';
 
 type StrategyConfig = {
   address: BigNumberish;

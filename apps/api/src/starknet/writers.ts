@@ -24,7 +24,7 @@ import {
   Space,
   User,
   Vote
-} from '../.checkpoint/models';
+} from '../../.checkpoint/models';
 
 type Strategy = {
   address: string;

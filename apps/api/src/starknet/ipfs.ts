@@ -11,7 +11,7 @@ import {
   SpaceMetadataItem,
   StrategiesParsedMetadataDataItem,
   VoteMetadataItem
-} from '../.checkpoint/models';
+} from '../../.checkpoint/models';
 
 export async function handleSpaceMetadata(
   space: string,

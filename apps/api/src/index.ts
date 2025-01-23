@@ -6,12 +6,10 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { startStandaloneServer } from '@apollo/server/standalone';
 import Checkpoint, {
   createGetLoader,
-  LogLevel,
-  starknet
+  LogLevel
 } from '@snapshot-labs/checkpoint';
-import { createConfig } from './config';
 import overrides from './overrides.json';
-import { createWriters } from './writer';
+import { addStarknetIndexers } from './starknet';
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
@@ -24,12 +22,6 @@ if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
 
-const snConfig = createConfig('sn');
-const snSepConfig = createConfig('sn-sep');
-
-const snIndexer = new starknet.StarknetIndexer(createWriters(snConfig));
-const snSepIndexer = new starknet.StarknetIndexer(createWriters(snSepConfig));
-
 const checkpoint = new Checkpoint(schema, {
   logLevel: LogLevel.Info,
   resetOnConfigChange: true,
@@ -37,8 +29,7 @@ const checkpoint = new Checkpoint(schema, {
   overridesConfig: overrides
 });
 
-checkpoint.addIndexer(snConfig.indexerName, snConfig, snIndexer);
-checkpoint.addIndexer(snSepConfig.indexerName, snSepConfig, snSepIndexer);
+addStarknetIndexers(checkpoint);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
