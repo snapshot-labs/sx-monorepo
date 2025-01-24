@@ -6,7 +6,7 @@ import removeMarkdown from 'remove-markdown';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { getNames } from '@/helpers/stamp';
-import { _n, _p, _vp, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
@@ -25,6 +25,7 @@ const delegatee = ref<{
   balance: number | null;
   share: number;
   name: string | null;
+  canUndelegate: boolean;
 } | null>(null);
 const sortBy = ref(
   'delegatedVotes-desc' as
@@ -123,7 +124,8 @@ async function fetchDelegateRegistryDelegatee() {
       id: delegation.delegate,
       balance,
       share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
-      name: names[delegation.delegate]
+      name: names[delegation.delegate],
+      canUndelegate: true
     };
   } else {
     delegatee.value = null;
@@ -157,7 +159,11 @@ async function fetchGovernorSubgraphDelegatee() {
       share: apiDelegate
         ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
         : 1,
-      name: names[delegateeData.address]
+      name: names[delegateeData.address],
+      canUndelegate: !compareAddresses(
+        delegateeData.address,
+        web3.value.account
+      )
     };
   } else {
     delegatee.value = null;
@@ -322,7 +328,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               <div class="text-[17px]" v-text="_p(delegatee.share)" />
             </div>
           </AppLink>
-          <div class="flex items-center justify-center">
+          <div
+            v-if="delegatee.canUndelegate"
+            class="flex items-center justify-center"
+          >
             <UiDropdown>
               <template #button>
                 <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
