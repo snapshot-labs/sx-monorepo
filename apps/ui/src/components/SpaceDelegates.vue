@@ -3,6 +3,7 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress } from '@ethersproject/address';
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
+import { getDelegationNetwork } from '@/helpers/delegation';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { getNames } from '@/helpers/stamp';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
@@ -17,6 +18,8 @@ const props = defineProps<{
 
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{ delegatee: string } | null>(null);
+const isUndelegating = ref(false);
+const undelegateFn = ref(undelegate);
 const delegatee = ref<{
   id: string;
   balance: number | null;
@@ -38,9 +41,14 @@ const { getDelegates, getDelegation } = useDelegates(
 const { getDelegatee } = useActions();
 const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
-const { delegate } = useActions();
+const actions = useActions();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
+const delegationNetworkId = computed(() => {
+  if (!props.delegation.chainId) return null;
+
+  return getDelegationNetwork(props.delegation.chainId);
+});
 
 const {
   data,
@@ -201,15 +209,16 @@ function handleDelegateClick(delegatee?: string) {
   delegateModalOpen.value = true;
 }
 
-async function handleUndelegateClick() {
+async function undelegate() {
   if (
     !props.delegation.apiType ||
     !props.delegation.chainId ||
     !props.delegation.contractAddress
-  )
-    return;
+  ) {
+    return null;
+  }
 
-  delegate(
+  return actions.delegate(
     props.space,
     props.delegation.apiType,
     null,
@@ -326,7 +335,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     type="button"
                     class="flex items-center gap-2"
                     :class="{ 'opacity-80': active }"
-                    @click="handleUndelegateClick"
+                    @click="isUndelegating = true"
                   >
                     <IH-user-remove />
                     Undelegate
@@ -533,6 +542,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :delegation="delegation"
         :initial-state="delegateModalState"
         @close="delegateModalOpen = false"
+      />
+      <ModalTransactionProgress
+        v-if="delegationNetworkId"
+        :open="isUndelegating"
+        :network-id="delegationNetworkId"
+        :execute="undelegateFn"
+        @confirmed="handleFetchDelegatee"
+        @close="isUndelegating = false"
       />
     </teleport>
   </template>

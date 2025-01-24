@@ -1,8 +1,8 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { METADATA } from '@/networks/starknet';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   ChainId,
@@ -537,18 +537,6 @@ export function useActions() {
     );
   }
 
-  function getDelegationNetwork(chainId: ChainId) {
-    const isEvmNetwork = typeof chainId === 'number';
-    const actionNetwork = isEvmNetwork
-      ? 'eth'
-      : (Object.entries(METADATA).find(
-          ([, metadata]) => metadata.chainId === chainId
-        )?.[0] as NetworkID);
-    if (!actionNetwork) throw new Error('Failed to detect action network');
-
-    return actionNetwork;
-  }
-
   async function delegate(
     space: Space,
     delegationType: DelegationType,
@@ -556,12 +544,15 @@ export function useActions() {
     delegationContract: string,
     chainId: ChainId
   ) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
     const actionNetwork = getDelegationNetwork(chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
-    await wrapPromise(
+    return wrapPromise(
       actionNetwork,
       network.actions.delegate(
         auth.web3,
