@@ -8,6 +8,7 @@ import Checkpoint, {
   createGetLoader,
   LogLevel
 } from '@snapshot-labs/checkpoint';
+import { addEvmIndexers } from './evm';
 import overrides from './overrides.json';
 import { addStarknetIndexers } from './starknet';
 
@@ -30,6 +31,7 @@ const checkpoint = new Checkpoint(schema, {
 });
 
 addStarknetIndexers(checkpoint);
+addEvmIndexers(checkpoint);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 

@@ -1,11 +1,6 @@
 import { getAddress } from '@ethersproject/address';
-import { Contract as EthContract } from '@ethersproject/contracts';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
-import { validateAndParseAddress } from 'starknet';
-import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
 import { FullConfig } from './config';
 import {
-  ExecutionStrategy,
   ProposalMetadataItem,
   SpaceMetadataItem,
   StrategiesParsedMetadataDataItem,
@@ -83,83 +78,69 @@ export async function handleSpaceMetadata(
       spaceMetadataItem.voting_power_symbol =
         metadata.properties.voting_power_symbol;
     }
+
+    const executionStrategies: string[] =
+      metadata.properties.execution_strategies;
+    const executionStrategiesTypes: string[] =
+      metadata.properties.execution_strategies_types;
+    const executionDestinations = metadata.properties.execution_destinations;
+
     if (
-      metadata.properties.execution_strategies &&
-      metadata.properties.execution_strategies_types
+      executionStrategies &&
+      executionStrategiesTypes &&
+      executionDestinations
     ) {
-      // In Starknet execution strategies are not always deployed via proxy (e.g. EthRelayer).
-      // We have to intercept it there and create single use proxy for it.
-      const destinations: string[] = [];
-      const uniqueExecutors: string[] = [];
-      for (
-        let i = 0;
-        i < metadata.properties.execution_strategies.length;
-        i++
-      ) {
-        const id = crypto.randomUUID();
-        const destination =
-          (metadata.properties.execution_destinations?.[i] as string) ?? '';
-
-        destinations.push(destination);
-        uniqueExecutors.push(id);
-
-        let executionStrategy = await ExecutionStrategy.loadEntity(
-          id,
-          config.indexerName
-        );
-        if (!executionStrategy)
-          executionStrategy = new ExecutionStrategy(id, config.indexerName);
-
-        executionStrategy.type =
-          metadata.properties.execution_strategies_types[i];
-        executionStrategy.address = validateAndParseAddress(
-          metadata.properties.execution_strategies[i]
-        );
-        executionStrategy.quorum = '0';
-        executionStrategy.timelock_delay = 0n;
-
-        if (executionStrategy.type === 'EthRelayer') {
-          const l1Destination = getAddress(destination);
-
-          const ethProvider = new StaticJsonRpcProvider(
-            config.overrides.l1NetworkNodeUrl,
-            config.overrides.baseChainId
-          );
-
-          const l1AvatarExecutionStrategyContract = new EthContract(
-            l1Destination,
-            L1AvatarExectionStrategyAbi,
-            ethProvider
-          );
-
-          const quorum = (
-            await l1AvatarExecutionStrategyContract.quorum()
-          ).toBigInt();
-          const treasury = await l1AvatarExecutionStrategyContract.target();
-
-          executionStrategy.destination_address = l1Destination;
-          executionStrategy.quorum = quorum;
-          executionStrategy.treasury = treasury;
-          executionStrategy.treasury_chain = config.overrides.baseChainId;
-        }
-
-        await executionStrategy.save();
-      }
-
-      spaceMetadataItem.executors =
-        metadata.properties.execution_strategies.map((strategy: string) =>
-          validateAndParseAddress(strategy)
-        );
-      spaceMetadataItem.executors_strategies = uniqueExecutors;
-      spaceMetadataItem.executors_destinations = destinations;
-      spaceMetadataItem.executors_types =
-        metadata.properties.execution_strategies_types;
+      spaceMetadataItem.executors = executionStrategies.map(strategy =>
+        getAddress(strategy)
+      );
+      spaceMetadataItem.executors_types = executionStrategiesTypes;
+      spaceMetadataItem.executors_strategies = executionStrategies;
+      spaceMetadataItem.executors_destinations = executionDestinations;
     }
   }
 
   await spaceMetadataItem.save();
 }
 
+// TODO: unify?
+export async function handleStrategiesParsedMetadata(
+  metadataUri: string,
+  config: FullConfig
+) {
+  const exists = await StrategiesParsedMetadataDataItem.loadEntity(
+    dropIpfs(metadataUri),
+    config.indexerName
+  );
+  if (exists) return;
+
+  const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(
+    dropIpfs(metadataUri),
+    config.indexerName
+  );
+
+  const metadata: any = await getJSON(metadataUri);
+  if (metadata.name) strategiesParsedMetadataItem.name = metadata.name;
+  if (metadata.description)
+    strategiesParsedMetadataItem.description = metadata.description;
+
+  if (metadata.properties) {
+    if (metadata.properties.decimals) {
+      strategiesParsedMetadataItem.decimals = metadata.properties.decimals;
+    }
+    if (metadata.properties.symbol) {
+      strategiesParsedMetadataItem.symbol = metadata.properties.symbol;
+    }
+    if (metadata.properties.token)
+      strategiesParsedMetadataItem.token = metadata.properties.token;
+    if (metadata.properties.payload) {
+      strategiesParsedMetadataItem.payload = metadata.properties.payload;
+    }
+  }
+
+  await strategiesParsedMetadataItem.save();
+}
+
+// TODO: unify
 export async function handleProposalMetadata(
   metadataUri: string,
   config: FullConfig
@@ -201,6 +182,7 @@ export async function handleProposalMetadata(
   await proposalMetadataItem.save();
 }
 
+// TODO: unify
 export async function handleVoteMetadata(
   metadataUri: string,
   config: FullConfig
@@ -220,41 +202,4 @@ export async function handleVoteMetadata(
   voteMetadataItem.reason = metadata.reason ?? '';
 
   await voteMetadataItem.save();
-}
-
-export async function handleStrategiesParsedMetadata(
-  metadataUri: string,
-  config: FullConfig
-) {
-  const exists = await StrategiesParsedMetadataDataItem.loadEntity(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-  if (exists) return;
-
-  const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-
-  const metadata: any = await getJSON(metadataUri);
-  if (metadata.name) strategiesParsedMetadataItem.name = metadata.name;
-  if (metadata.description)
-    strategiesParsedMetadataItem.description = metadata.description;
-
-  if (metadata.properties) {
-    if (metadata.properties.decimals) {
-      strategiesParsedMetadataItem.decimals = metadata.properties.decimals;
-    }
-    if (metadata.properties.symbol) {
-      strategiesParsedMetadataItem.symbol = metadata.properties.symbol;
-    }
-    if (metadata.properties.token)
-      strategiesParsedMetadataItem.token = metadata.properties.token;
-    if (metadata.properties.payload) {
-      strategiesParsedMetadataItem.payload = metadata.properties.payload;
-    }
-  }
-
-  await strategiesParsedMetadataItem.save();
 }

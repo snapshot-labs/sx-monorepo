@@ -1,5 +1,5 @@
-import { starknet } from '@snapshot-labs/checkpoint';
-import { validateAndParseAddress } from 'starknet';
+import { getAddress } from '@ethersproject/address';
+import { evm } from '@snapshot-labs/checkpoint';
 import { FullConfig } from './config';
 import {
   handleProposalMetadata,
@@ -7,16 +7,12 @@ import {
   handleVoteMetadata
 } from './ipfs';
 import {
-  findVariant,
-  formatAddressVariant,
-  getVoteValue,
-  handleExecutionStrategy,
+  convertChoice,
   handleStrategiesMetadata,
-  longStringToText,
-  registerProposal,
   updateProposaValidationStrategy
 } from './utils';
 import {
+  ExecutionHash,
   Leaderboard,
   Proposal,
   Space,
@@ -25,13 +21,16 @@ import {
 } from '../../.checkpoint/models';
 import { dropIpfs, getCurrentTimestamp } from '../utils';
 
+const EMPTY_EXECUTION_HASH =
+  '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
+
 type Strategy = {
-  address: string;
-  params: string[];
+  addr: string;
+  params: string;
 };
 
 export function createWriters(config: FullConfig) {
-  const handleContractDeployed: starknet.Writer = async ({
+  const handleProxyDeployed: evm.Writer = async ({
     blockNumber,
     event,
     helpers: { executeTemplate }
@@ -40,76 +39,64 @@ export function createWriters(config: FullConfig) {
 
     if (!event) return;
 
-    const paddedClassHash = validateAndParseAddress(event.class_hash);
+    const proxyAddress = getAddress(event.args.proxy);
+    const implementationAddress = getAddress(event.args.implementation);
 
-    if (paddedClassHash === config.overrides.spaceClassHash) {
+    if (implementationAddress === getAddress(config.overrides.masterSpace)) {
       await executeTemplate('Space', {
-        contract: event.contract_address,
+        contract: proxyAddress,
         start: blockNumber
       });
     } else {
-      console.log('Unknown class hash', paddedClassHash);
+      console.log('Unknown implementation', implementationAddress);
     }
   };
 
-  const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
+  const handleSpaceCreated: evm.Writer = async ({ block, tx, event }) => {
     console.log('Handle space created');
 
-    if (!event || !tx.transaction_hash) return;
+    if (!event) return;
 
-    const strategies: string[] = event.voting_strategies.map(
-      (strategy: Strategy) => strategy.address
-    );
-    const strategiesParams = event.voting_strategies.map((strategy: Strategy) =>
-      strategy.params.join(',')
-    ); // different format than sx-evm
-    const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(
-      (array: string[]) => longStringToText(array)
-    );
+    const votingStrategies: Strategy[] = event.args.input.votingStrategies;
 
-    const id = validateAndParseAddress(event.space);
+    const id = getAddress(event.args.space);
 
     const space = new Space(id, config.indexerName);
-    space.verified = config.overrides.verifiedSpaces.includes(id);
+    space.verified = false;
     space.turbo = false;
     space.metadata = null;
-    space.controller = validateAndParseAddress(event.owner);
-    space.voting_delay = Number(BigInt(event.voting_delay).toString());
-    space.min_voting_period = Number(
-      BigInt(event.min_voting_duration).toString()
-    );
-    space.max_voting_period = Number(
-      BigInt(event.max_voting_duration).toString()
-    );
+    space.controller = getAddress(event.args.input.owner);
+    space.voting_delay = event.args.input.votingDelay;
+    space.min_voting_period = event.args.input.minVotingDuration;
+    space.max_voting_period = event.args.input.maxVotingDuration;
     space.proposal_threshold = '0';
-    space.strategies_indices = strategies.map((_, i) => i);
+    space.strategies_indices = votingStrategies.map((_, i) => i);
     // NOTE: deprecated
     space.strategies_indicies = space.strategies_indices;
-    space.strategies = strategies;
-    space.next_strategy_index = strategies.length;
-    space.strategies_params = strategiesParams;
-    space.strategies_metadata = strategiesMetadataUris;
-    space.authenticators = event.authenticators;
+    space.strategies = votingStrategies.map(s => getAddress(s.addr));
+    space.next_strategy_index = votingStrategies.length;
+    space.strategies_params = votingStrategies.map(s => s.params);
+    space.strategies_metadata = event.args.input.votingStrategyMetadataURIs;
+    space.authenticators = event.args.input.authenticators.map(
+      (address: string) => getAddress(address)
+    );
     space.proposal_count = 0;
     space.vote_count = 0;
     space.proposer_count = 0;
     space.voter_count = 0;
     space.created = block?.timestamp ?? getCurrentTimestamp();
-    space.tx = tx.transaction_hash;
+    space.tx = tx.hash;
 
     await updateProposaValidationStrategy(
       space,
-      event.proposal_validation_strategy.address,
-      event.proposal_validation_strategy.params,
-      event.proposal_validation_strategy_metadata_uri,
+      event.args.input.proposalValidationStrategy.addr,
+      event.args.input.proposalValidationStrategy.params,
+      event.args.input.proposalValidationStrategyMetadataURI,
       config
     );
 
     try {
-      const metadataUri = longStringToText(event.metadata_uri || []).replaceAll(
-        '\x00',
-        ''
-      );
+      const metadataUri = event.args.input.metadataURI;
       await handleSpaceMetadata(space.id, metadataUri, config);
 
       space.metadata = dropIpfs(metadataUri);
@@ -120,7 +107,7 @@ export function createWriters(config: FullConfig) {
     try {
       await handleStrategiesMetadata(
         space.id,
-        strategiesMetadataUris,
+        space.strategies_metadata,
         0,
         config
       );
@@ -131,21 +118,15 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handleMetadataUriUpdated: starknet.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleMetadataUriUpdated: evm.Writer = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     console.log('Handle space metadata uri updated');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     try {
-      const metadataUri = longStringToText(event.metadata_uri).replaceAll(
-        '\x00',
-        ''
-      );
+      const metadataUri = event.args.newMetadataURI;
       await handleSpaceMetadata(spaceId, metadataUri, config);
 
       const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -159,7 +140,7 @@ export function createWriters(config: FullConfig) {
     }
   };
 
-  const handleMinVotingDurationUpdated: starknet.Writer = async ({
+  const handleMinVotingDurationUpdated: evm.Writer = async ({
     rawEvent,
     event
   }) => {
@@ -167,19 +148,19 @@ export function createWriters(config: FullConfig) {
 
     console.log('Handle space min voting duration updated');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
     space.min_voting_period = Number(
-      BigInt(event.min_voting_duration).toString()
+      BigInt(event.args.newMinVotingDuration).toString()
     );
 
     await space.save();
   };
 
-  const handleMaxVotingDurationUpdated: starknet.Writer = async ({
+  const handleMaxVotingDurationUpdated: evm.Writer = async ({
     rawEvent,
     event
   }) => {
@@ -187,19 +168,34 @@ export function createWriters(config: FullConfig) {
 
     console.log('Handle space max voting duration updated');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
     space.max_voting_period = Number(
-      BigInt(event.max_voting_duration).toString()
+      BigInt(event.args.newMaxVotingDuration).toString()
     );
 
     await space.save();
   };
 
-  const handleOwnershipTransferred: starknet.Writer = async ({
+  const handleVotingDelayUpdated: evm.Writer = async ({ rawEvent, event }) => {
+    if (!event || !rawEvent) return;
+
+    console.log('Handle space voting delay updated');
+
+    const spaceId = getAddress(rawEvent.address);
+
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+    if (!space) return;
+
+    space.voting_delay = Number(BigInt(event.args.newVotingDelay).toString());
+
+    await space.save();
+  };
+
+  const handleOwnershipTransferred: evm.Writer = async ({
     rawEvent,
     event
   }) => {
@@ -207,55 +203,34 @@ export function createWriters(config: FullConfig) {
 
     console.log('Handle space ownership transferred');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.controller = validateAndParseAddress(event.new_owner);
+    space.controller = getAddress(event.args.newOwner);
 
     await space.save();
   };
 
-  const handleVotingDelayUpdated: starknet.Writer = async ({
-    rawEvent,
-    event
-  }) => {
-    if (!event || !rawEvent) return;
-
-    console.log('Handle space voting delay updated');
-
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
-
-    const space = await Space.loadEntity(spaceId, config.indexerName);
-    if (!space) return;
-
-    space.voting_delay = Number(BigInt(event.voting_delay).toString());
-
-    await space.save();
-  };
-
-  const handleAuthenticatorsAdded: starknet.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleAuthenticatorsAdded: evm.Writer = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     console.log('Handle space authenticators added');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
     space.authenticators = [
-      ...new Set([...space.authenticators, ...event.authenticators])
+      ...new Set([...space.authenticators, ...event.args.newAuthenticators])
     ];
 
     await space.save();
   };
 
-  const handleAuthenticatorsRemoved: starknet.Writer = async ({
+  const handleAuthenticatorsRemoved: evm.Writer = async ({
     rawEvent,
     event
   }) => {
@@ -263,19 +238,19 @@ export function createWriters(config: FullConfig) {
 
     console.log('Handle space authenticators removed');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
     space.authenticators = space.authenticators.filter(
-      authenticator => !event.authenticators.includes(authenticator)
+      authenticator => !event.args.authenticators.includes(authenticator)
     );
 
     await space.save();
   };
 
-  const handleVotingStrategiesAdded: starknet.Writer = async ({
+  const handleVotingStrategiesAdded: evm.Writer = async ({
     rawEvent,
     event
   }) => {
@@ -283,22 +258,20 @@ export function createWriters(config: FullConfig) {
 
     console.log('Handle space voting strategies added');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
     const initialNextStrategy = space.next_strategy_index;
 
-    const strategies: string[] = event.voting_strategies.map(
-      (strategy: Strategy) => strategy.address
+    const strategies: string[] = event.args.newVotingStrategies.map(
+      (strategy: Strategy) => strategy.addr
     );
-    const strategiesParams = event.voting_strategies.map((strategy: Strategy) =>
-      strategy.params.join(',')
+    const strategiesParams = event.args.newVotingStrategies.map(
+      (strategy: Strategy) => strategy.params
     );
-    const strategiesMetadataUris = event.voting_strategy_metadata_uris.map(
-      (array: string[]) => longStringToText(array)
-    );
+    const strategiesMetadataUris = event.args.newVotingStrategyMetadataURIs;
 
     space.strategies_indices = [
       ...space.strategies_indices,
@@ -328,7 +301,7 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handleVotingStrategiesRemoved: starknet.Writer = async ({
+  const handleVotingStrategiesRemoved: evm.Writer = async ({
     rawEvent,
     event
   }) => {
@@ -336,13 +309,13 @@ export function createWriters(config: FullConfig) {
 
     console.log('Handle space voting strategies removed');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    const indicesToRemove = event.voting_strategy_indices.map((index: string) =>
-      space.strategies_indices.indexOf(parseInt(index))
+    const indicesToRemove = event.args.votingStrategyIndices.map(
+      (index: string) => space.strategies_indices.indexOf(parseInt(index))
     );
 
     space.strategies_indices = space.strategies_indices.filter(
@@ -363,7 +336,7 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handleProposalValidationStrategyUpdated: starknet.Writer = async ({
+  const handleProposalValidationStrategyUpdated: evm.Writer = async ({
     rawEvent,
     event
   }) => {
@@ -371,54 +344,40 @@ export function createWriters(config: FullConfig) {
 
     console.log('Handle space proposal validation strategy updated');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
     await updateProposaValidationStrategy(
       space,
-      event.proposal_validation_strategy.address,
-      event.proposal_validation_strategy.params,
-      event.proposal_validation_strategy_metadata_uri,
+      event.args.newProposalValidationStrategy.addr,
+      event.args.newProposalValidationStrategy.params,
+      event.args.newProposalValidationStrategyMetadataURI,
       config
     );
 
     await space.save();
   };
 
-  const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) => {
-    if (!rawEvent || !event || !tx.transaction_hash) return;
+  const handleProposalCreated: evm.Writer = async ({
+    rawEvent,
+    event,
+    tx,
+    block
+  }) => {
+    if (!rawEvent || !event || !tx.hash) return;
 
     console.log('Handle propose');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
+    const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    const proposalId = parseInt(BigInt(event.proposal_id).toString());
-    const author = formatAddressVariant(findVariant(event.author));
-
-    const created =
-      BigInt(event.proposal.start_timestamp) - BigInt(space.voting_delay);
-
-    // for erc20votes strategies we have to add artificial delay to prevent voting within same block
-    // snapshot needs to remain the same as we need real timestamp to compute VP
-    let startTimestamp = BigInt(event.proposal.start_timestamp);
-    let minEnd = BigInt(event.proposal.min_end_timestamp);
-    if (
-      space.strategies.some(
-        strategy => strategy === config.overrides.erc20VotesStrategy
-      )
-    ) {
-      const minimumDelay = 10n * 60n;
-      startTimestamp =
-        startTimestamp > created + minimumDelay
-          ? startTimestamp
-          : created + minimumDelay;
-      minEnd = minEnd > startTimestamp ? minEnd : startTimestamp;
-    }
+    const proposalId = event.args.proposalId.toNumber();
+    const author = getAddress(event.args.author);
+    const created = block?.timestamp ?? getCurrentTimestamp();
 
     const proposal = new Proposal(
       `${spaceId}/${proposalId}`,
@@ -426,20 +385,16 @@ export function createWriters(config: FullConfig) {
     );
     proposal.proposal_id = proposalId;
     proposal.space = spaceId;
-    proposal.author = author.address;
+    proposal.author = author;
     proposal.metadata = null;
-    proposal.execution_hash = event.proposal.execution_payload_hash;
-    proposal.start = parseInt(startTimestamp.toString());
-    proposal.min_end = parseInt(minEnd.toString());
-    proposal.max_end = parseInt(
-      BigInt(event.proposal.max_end_timestamp).toString()
-    );
-    proposal.snapshot = parseInt(
-      BigInt(event.proposal.start_timestamp).toString()
-    );
+    proposal.execution_hash = event.args.proposal.executionPayloadHash;
+    proposal.start = event.args.proposal.startBlockNumber;
+    proposal.min_end = event.args.proposal.minEndBlockNumber;
+    proposal.max_end = event.args.proposal.maxEndBlockNumber;
+    proposal.snapshot = event.args.proposal.startBlockNumber;
     proposal.execution_time = 0;
-    proposal.execution_strategy = validateAndParseAddress(
-      event.proposal.execution_strategy
+    proposal.execution_strategy = getAddress(
+      event.args.proposal.executionStrategy
     );
     proposal.execution_strategy_type = 'none';
     proposal.type = 'basic';
@@ -453,31 +408,41 @@ export function createWriters(config: FullConfig) {
     proposal.strategies_indicies = proposal.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
-    proposal.created = parseInt(created.toString());
-    proposal.tx = tx.transaction_hash;
+    proposal.created = created;
+    proposal.tx = tx.hash;
     proposal.execution_tx = null;
     proposal.veto_tx = null;
     proposal.vote_count = 0;
-    proposal.execution_ready = true;
     proposal.executed = false;
     proposal.vetoed = false;
     proposal.completed = false;
     proposal.cancelled = false;
 
-    const executionStrategy = await handleExecutionStrategy(
-      event.proposal.execution_strategy,
-      event.payload,
-      config
-    );
-    if (executionStrategy) {
-      proposal.execution_strategy_type =
-        executionStrategy.executionStrategyType;
-      proposal.execution_destination = executionStrategy.destinationAddress;
-      proposal.quorum = executionStrategy.quorum;
+    // const executionStrategy = await handleExecutionStrategy(
+    //   event.proposal.execution_strategy,
+    //   event.payload,
+    //   config
+    // );
+    // if (executionStrategy) {
+    //   proposal.execution_strategy_type =
+    //     executionStrategy.executionStrategyType;
+    //   proposal.execution_destination = executionStrategy.destinationAddress;
+    //   proposal.quorum = executionStrategy.quorum;
+    // }
+
+    proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
+
+    if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
+      const executionHash = new ExecutionHash(
+        proposal.execution_hash,
+        config.indexerName
+      );
+      executionHash.proposal_id = `${spaceId}/${proposalId}`;
+      await executionHash.save();
     }
 
     try {
-      const metadataUri = longStringToText(event.metadata_uri);
+      const metadataUri = event.args.metadataUri;
       await handleProposalMetadata(metadataUri, config);
 
       proposal.metadata = dropIpfs(metadataUri);
@@ -485,31 +450,28 @@ export function createWriters(config: FullConfig) {
       console.log(JSON.stringify(e).slice(0, 256));
     }
 
-    const existingUser = await User.loadEntity(
-      author.address,
-      config.indexerName
-    );
+    const existingUser = await User.loadEntity(author, config.indexerName);
     if (existingUser) {
       existingUser.proposal_count += 1;
       await existingUser.save();
     } else {
-      const user = new User(author.address, config.indexerName);
-      user.address_type = author.type;
-      user.created = parseInt(created.toString());
+      const user = new User(author, config.indexerName);
+      user.address_type = 1;
+      user.created = created;
       await user.save();
     }
 
     let leaderboardItem = await Leaderboard.loadEntity(
-      `${spaceId}/${author.address}`,
+      `${spaceId}/${author}`,
       config.indexerName
     );
     if (!leaderboardItem) {
       leaderboardItem = new Leaderboard(
-        `${spaceId}/${author.address}`,
+        `${spaceId}/${author}`,
         config.indexerName
       );
       leaderboardItem.space = spaceId;
-      leaderboardItem.user = author.address;
+      leaderboardItem.user = author;
       leaderboardItem.vote_count = 0;
       leaderboardItem.proposal_count = 0;
     }
@@ -520,46 +482,16 @@ export function createWriters(config: FullConfig) {
     if (leaderboardItem.proposal_count === 1) space.proposer_count += 1;
     space.proposal_count += 1;
 
-    const herodotusStrategiesIndices = space.strategies
-      .map((strategy, i) => [strategy, i] as const)
-      .filter(([strategy]) =>
-        config.overrides.herodotusStrategies.includes(
-          validateAndParseAddress(strategy)
-        )
-      );
-
-    for (const herodotusStrategy of herodotusStrategiesIndices) {
-      const [strategy, i] = herodotusStrategy;
-      const params = space.strategies_params[i];
-      if (!params) continue;
-
-      const [l1TokenAddress] = params.split(',');
-      if (!l1TokenAddress) continue;
-
-      try {
-        await registerProposal(
-          {
-            l1TokenAddress,
-            strategyAddress: strategy,
-            snapshotTimestamp: proposal.snapshot
-          },
-          config
-        );
-      } catch (e) {
-        console.log('failed to register proposal');
-      }
-    }
-
     await Promise.all([proposal.save(), space.save()]);
   };
 
-  const handleCancel: starknet.Writer = async ({ rawEvent, event }) => {
+  const handleProposalCancelled: evm.Writer = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     console.log('Handle cancel');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
-    const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
 
     const [proposal, space] = await Promise.all([
       Proposal.loadEntity(proposalId, config.indexerName),
@@ -574,14 +506,18 @@ export function createWriters(config: FullConfig) {
     await Promise.all([proposal.save(), space.save()]);
   };
 
-  const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
+  const handleProposalUpdated: evm.Writer = async ({
+    block,
+    rawEvent,
+    event
+  }) => {
     if (!rawEvent || !event) return;
 
     console.log('Handle update');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
-    const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
-    const metadataUri = longStringToText(event.metadata_uri);
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
+    const metadataUri = event.args.newMetadataURI;
 
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
@@ -595,104 +531,119 @@ export function createWriters(config: FullConfig) {
       console.log('failed to update proposal metadata', e);
     }
 
-    const executionStrategy = await handleExecutionStrategy(
-      event.execution_strategy,
-      event.payload,
-      config
-    );
-    if (executionStrategy) {
-      proposal.execution_strategy_type =
-        executionStrategy.executionStrategyType;
-      proposal.quorum = executionStrategy.quorum;
+    // const executionStrategy = await handleExecutionStrategy(
+    //   event.execution_strategy,
+    //   event.payload,
+    //   config
+    // );
+    // if (executionStrategy) {
+    //   proposal.execution_strategy_type =
+    //     executionStrategy.executionStrategyType;
+    //   proposal.quorum = executionStrategy.quorum;
+    // }
+
+    proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
+
+    if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
+      const executionHash = new ExecutionHash(
+        proposal.execution_hash,
+        config.indexerName
+      );
+      executionHash.proposal_id = `${spaceId}/${proposalId}`;
+      await executionHash.save();
     }
 
     await proposal.save();
   };
 
-  const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) => {
-    if (!rawEvent || !event) return;
-
-    console.log('Handle execute');
-
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
-    const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
-
-    const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
-    if (!proposal) return;
-
-    proposal.executed = true;
-    proposal.completed = true;
-    proposal.execution_tx = tx.transaction_hash ?? null;
-
-    await proposal.save();
-  };
-
-  const handleVote: starknet.Writer = async ({
-    block,
+  const handleProposalExecuted: evm.Writer = async ({
     tx,
     rawEvent,
     event
   }) => {
     if (!rawEvent || !event) return;
 
+    console.log('Handle execute');
+
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
+
+    const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
+    if (!proposal) return;
+
+    proposal.executed = true;
+    proposal.completed = true;
+    proposal.execution_tx = tx.hash ?? null;
+
+    await proposal.save();
+  };
+
+  const handleVoteCast: evm.Writer = async ({ block, tx, rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+
     console.log('Handle vote');
 
-    const spaceId = validateAndParseAddress(rawEvent.from_address);
-    const proposalId = parseInt(event.proposal_id);
-    const choice = getVoteValue(findVariant(event.choice).key);
-    const vp = BigInt(event.voting_power);
+    const spaceId = getAddress(rawEvent.address);
+    const proposalId = parseInt(event.args.proposalId);
+    const choice = convertChoice(event.args.choice);
+    const vp = event.args.votingPower;
+
+    if (!choice) {
+      // Unknown choice value, ignoring vote
+      return;
+    }
 
     const created = block?.timestamp ?? getCurrentTimestamp();
-    const voter = formatAddressVariant(findVariant(event.voter));
+
+    const voter = getAddress(event.args.voter);
 
     const vote = new Vote(
-      `${spaceId}/${proposalId}/${voter.address}`,
+      `${spaceId}/${proposalId}/${voter}`,
       config.indexerName
     );
     vote.space = spaceId;
     vote.proposal = proposalId;
-    vote.voter = voter.address;
+    vote.voter = voter;
     vote.choice = choice;
     vote.vp = vp.toString();
     vote.created = created;
-    vote.tx = tx.transaction_hash;
+    vote.tx = tx.hash;
 
-    try {
-      const metadataUri = longStringToText(event.metadata_uri);
-      await handleVoteMetadata(metadataUri, config);
+    if (event.args.metadataUri) {
+      try {
+        const metadataUri = event.args.metadataUri;
+        await handleVoteMetadata(metadataUri, config);
 
-      vote.metadata = dropIpfs(metadataUri);
-    } catch (e) {
-      console.log(JSON.stringify(e).slice(0, 256));
+        vote.metadata = dropIpfs(metadataUri);
+      } catch (e) {
+        console.log(JSON.stringify(e).slice(0, 256));
+      }
     }
 
     await vote.save();
 
-    const existingUser = await User.loadEntity(
-      voter.address,
-      config.indexerName
-    );
+    const existingUser = await User.loadEntity(voter, config.indexerName);
     if (existingUser) {
       existingUser.vote_count += 1;
       await existingUser.save();
     } else {
-      const user = new User(voter.address, config.indexerName);
-      user.address_type = voter.type;
+      const user = new User(voter, config.indexerName);
+      user.address_type = 1;
       user.created = created;
       await user.save();
     }
 
     let leaderboardItem = await Leaderboard.loadEntity(
-      `${spaceId}/${voter.address}`,
+      `${spaceId}/${voter}`,
       config.indexerName
     );
     if (!leaderboardItem) {
       leaderboardItem = new Leaderboard(
-        `${spaceId}/${voter.address}`,
+        `${spaceId}/${voter}`,
         config.indexerName
       );
       leaderboardItem.space = spaceId;
-      leaderboardItem.user = voter.address;
+      leaderboardItem.user = voter;
       leaderboardItem.vote_count = 0;
       leaderboardItem.proposal_count = 0;
     }
@@ -725,22 +676,22 @@ export function createWriters(config: FullConfig) {
   };
 
   return {
-    handleContractDeployed,
+    handleProxyDeployed,
     handleSpaceCreated,
     handleMetadataUriUpdated,
     handleMinVotingDurationUpdated,
     handleMaxVotingDurationUpdated,
-    handleOwnershipTransferred,
     handleVotingDelayUpdated,
+    handleOwnershipTransferred,
     handleAuthenticatorsAdded,
     handleAuthenticatorsRemoved,
     handleVotingStrategiesAdded,
     handleVotingStrategiesRemoved,
     handleProposalValidationStrategyUpdated,
-    handlePropose,
-    handleCancel,
-    handleUpdate,
-    handleExecute,
-    handleVote
+    handleProposalCreated,
+    handleProposalCancelled,
+    handleProposalUpdated,
+    handleProposalExecuted,
+    handleVoteCast
   };
 }

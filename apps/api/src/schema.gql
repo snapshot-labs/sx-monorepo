@@ -98,6 +98,11 @@ type ExecutionStrategy {
   axiom_snapshot_slot: BigInt
 }
 
+type ExecutionHash {
+  id: String!
+  proposal_id: String!
+}
+
 type Proposal {
   id: String!
   proposal_id: Int!

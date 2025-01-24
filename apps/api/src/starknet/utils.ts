@@ -2,14 +2,12 @@ import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
-import { faker } from '@faker-js/faker';
 import { utils } from '@snapshot-labs/sx';
 import fetch from 'cross-fetch';
 import {
   BigNumberish,
   CallData,
   Contract,
-  hash,
   RpcProvider,
   shortString,
   validateAndParseAddress
@@ -24,6 +22,7 @@ import {
   StrategiesParsedMetadataItem,
   VotingPowerValidationStrategiesParsedMetadataItem
 } from '../../.checkpoint/models';
+import { dropIpfs, getJSON } from '../utils';
 
 type StrategyConfig = {
   address: BigNumberish;
@@ -31,10 +30,6 @@ type StrategyConfig = {
 };
 
 const encodersAbi = new CallData(EncodersAbi);
-
-export function getCurrentTimestamp() {
-  return Math.floor(Date.now() / 1000);
-}
 
 export function toAddress(bn: any) {
   try {
@@ -60,26 +55,6 @@ export function getUrl(uri: string, gateway = 'pineapple.fyi') {
   if (uriScheme === 'ipns')
     return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
   return uri;
-}
-
-export async function getJSON(uri: string) {
-  const url = getUrl(uri);
-  if (!url) throw new Error('Invalid URI');
-
-  return fetch(url).then(res => res.json());
-}
-
-export function getSpaceName(address: string) {
-  const seed = parseInt(
-    hash.getSelectorFromName(address).toString().slice(0, 12)
-  );
-  faker.seed(seed);
-  const noun = faker.word.noun(6);
-  return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
-}
-
-export function dropIpfs(metadataUri: string) {
-  return metadataUri.replace('ipfs://', '');
 }
 
 export function longStringToText(array: string[]): string {

@@ -3,9 +3,7 @@ import { starknetNetworks } from '@snapshot-labs/sx';
 import { validateAndParseAddress } from 'starknet';
 import spaceAbi from './abis/space.json';
 import spaceFactoryAbi from './abis/spaceFactory.json';
-
-const DEFAULT_INFURA_API_KEY =
-  process.env.INFURA_API_KEY || '46a5dd9727bf48d4a132672d3f376146';
+import { DEFAULT_INFURA_API_KEY } from '../config';
 
 const snNetworkNodeUrl =
   process.env.NETWORK_NODE_URL_SN ||
