@@ -67,7 +67,7 @@ router.beforeEach((to, _from, next) => {
   }
 
   // Perform the redirection if a match is found
-  if (redirectPath && redirectPath !== to.fullPath) {
+  if (redirectPath && redirectPath !== to.path) {
     next({ path: redirectPath, replace: true });
   } else {
     next();
