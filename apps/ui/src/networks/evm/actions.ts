@@ -15,6 +15,7 @@ import {
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, MANA_URL } from '@/helpers/mana';
+import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
@@ -80,12 +81,26 @@ export function createActions(
     return code !== '0x';
   };
 
+  /**
+   * Get signer from Web3 provider with ENS resolver on mainnet
+   * @param web3 Web3 provider
+   * @returns signer with ENS resolver on mainnet
+   */
+  const getSigner = (web3: Web3Provider) => {
+    const signer = web3.getSigner();
+    signer.provider.getResolver = (value: string) => {
+      return getProvider(1).getResolver(value);
+    };
+
+    return signer;
+  };
+
   return {
     async predictSpaceAddress(web3: Web3Provider, { salt }) {
       await verifyNetwork(web3, chainId);
 
       return client.predictSpaceAddress({
-        signer: web3.getSigner(),
+        signer: getSigner(web3),
         saltNonce: salt
       });
     },
@@ -113,7 +128,7 @@ export function createActions(
       );
     },
     async createSpace(
-      web3: any,
+      web3: Web3Provider,
       salt: string,
       params: {
         controller: string;
@@ -152,7 +167,7 @@ export function createActions(
       );
 
       const response = await client.deploySpace({
-        signer: web3.getSigner(),
+        signer: getSigner(web3),
         saltNonce: salt,
         params: {
           ...params,
@@ -268,16 +283,18 @@ export function createActions(
         metadataUri: `ipfs://${pinned.cid}`
       };
 
+      const signer = getSigner(web3);
+
       if (relayerType === 'evm') {
         return ethSigClient.propose({
-          signer: web3.getSigner(),
+          signer,
           data
         });
       }
 
       return client.propose(
         {
-          signer: web3.getSigner(),
+          signer,
           envelope: {
             data
           }
@@ -354,16 +371,18 @@ export function createActions(
         metadataUri: `ipfs://${pinned.cid}`
       };
 
+      const signer = getSigner(web3);
+
       if (relayerType === 'evm') {
         return ethSigClient.updateProposal({
-          signer: web3.getSigner(),
+          signer,
           data
         });
       }
 
       return client.updateProposal(
         {
-          signer: web3.getSigner(),
+          signer,
           envelope: {
             data
           }
@@ -377,12 +396,14 @@ export function createActions(
     cancelProposal: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
-      const address = await web3.getSigner().getAddress();
+      const signer = getSigner(web3);
+
+      const address = await signer.getAddress();
       const isContract = await getIsContract(address);
 
       return client.cancel(
         {
-          signer: web3.getSigner(),
+          signer,
           space: proposal.space.id,
           proposal: proposal.proposal_id as number
         },
@@ -440,20 +461,22 @@ export function createActions(
         chainId
       };
 
+      const signer = getSigner(web3);
+
       if (!isContract && proposal.execution_strategy_type === 'Axiom') {
-        return highlightVote({ signer: web3.getSigner(), data });
+        return highlightVote({ signer, data });
       }
 
       if (relayerType === 'evm') {
         return ethSigClient.vote({
-          signer: web3.getSigner(),
+          signer,
           data
         });
       }
 
       return client.vote(
         {
-          signer: web3.getSigner(),
+          signer,
           envelope: {
             data
           }
@@ -505,7 +528,7 @@ export function createActions(
       await verifyNetwork(web3, chainId);
 
       return client.vetoExecution({
-        signer: web3.getSigner(),
+        signer: getSigner(web3),
         executionStrategy: proposal.execution_strategy,
         executionHash: proposal.execution_hash
       });
@@ -517,12 +540,14 @@ export function createActions(
     ) => {
       await verifyNetwork(web3, chainId);
 
-      const address = await web3.getSigner().getAddress();
+      const signer = web3.getSigner();
+
+      const address = await signer.getAddress();
       const isContract = await getIsContract(address);
 
       return client.transferOwnership(
         {
-          signer: web3.getSigner(),
+          signer,
           space: space.id,
           owner
         },
@@ -570,10 +595,12 @@ export function createActions(
         throw new Error('Unsupported delegation type');
       }
 
+      const signer = getSigner(web3);
+
       const votesContract = new Contract(
         contractParams.address,
         contractParams.abi,
-        web3.getSigner()
+        signer
       );
 
       return votesContract[contractParams.functionName](
@@ -581,7 +608,7 @@ export function createActions(
       );
     },
     updateSettings: async (
-      web3: any,
+      web3: Web3Provider,
       space: Space,
       metadata: SpaceMetadata,
       authenticatorsToAdd: StrategyConfig[],
@@ -613,7 +640,7 @@ export function createActions(
       );
 
       return client.updateSettings({
-        signer: web3.getSigner(),
+        signer: getSigner(web3),
         space: space.id,
         settings: {
           metadataUri: `ipfs://${pinned.cid}`,
