@@ -53,7 +53,17 @@ export const SPACE_CATEGORIES = [
   { id: 'service', name: 'Service' },
   { id: 'media', name: 'Media' },
   { id: 'creator', name: 'Creator' },
-  { id: 'collector', name: 'Collector' }
+  { id: 'collector', name: 'Collector' },
+  { id: 'ai-agent', name: 'AI agent' },
+  { id: 'gaming', name: 'Gaming' },
+  { id: 'wallet', name: 'Wallet' },
+  { id: 'music', name: 'Music' },
+  { id: 'layer-2', name: 'Layer 2' },
+  { id: 'defai', name: 'DeFAI' },
+  { id: 'defi', name: 'DeFi' },
+  { id: 'rwa', name: 'RWA' },
+  { id: 'depin', name: 'DePIN' },
+  { id: 'meme', name: 'Meme' }
 ] as const;
 
 export const BASIC_CHOICES = ['For', 'Against', 'Abstain'];
