@@ -54,7 +54,7 @@ export const SPACE_CATEGORIES = [
   { id: 'media', name: 'Media' },
   { id: 'creator', name: 'Creator' },
   { id: 'collector', name: 'Collector' },
-  { id: 'ai-agent', name: 'AI Agent' },
+  { id: 'ai-agent', name: 'AI agent' },
   { id: 'gaming', name: 'Gaming' },
   { id: 'wallet', name: 'Wallet' },
   { id: 'music', name: 'Music' },
