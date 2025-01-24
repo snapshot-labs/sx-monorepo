@@ -552,7 +552,7 @@ export function useActions() {
   async function delegate(
     space: Space,
     delegationType: DelegationType,
-    delegatee: string,
+    delegatee: string | null,
     delegationContract: string,
     chainId: ChainId
   ) {

@@ -581,6 +581,8 @@ export function createActions(
       };
 
       if (delegationType === 'governor-subgraph') {
+        delegatee = delegatee ?? (await web3.getSigner().getAddress());
+
         contractParams = {
           address: delegationContract,
           functionName: 'delegate',
@@ -588,12 +590,21 @@ export function createActions(
           abi: ['function delegate(address delegatee)']
         };
       } else if (delegationType == 'delegate-registry') {
-        contractParams = {
-          address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
-          functionName: 'setDelegate',
-          functionParams: [formatBytes32String(space.id), delegatee],
-          abi: ['function setDelegate(bytes32 id, address delegate)']
-        };
+        if (delegatee) {
+          contractParams = {
+            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            functionName: 'setDelegate',
+            functionParams: [formatBytes32String(space.id), delegatee],
+            abi: ['function setDelegate(bytes32 id, address delegate)']
+          };
+        } else {
+          contractParams = {
+            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            functionName: 'clearDelegate',
+            functionParams: [formatBytes32String(space.id)],
+            abi: ['function clearDelegate(bytes32 id)']
+          };
+        }
       } else {
         throw new Error('Unsupported delegation type');
       }

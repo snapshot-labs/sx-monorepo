@@ -643,12 +643,14 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegationType: DelegationType,
-      delegatee: string,
+      delegatee: string | null,
       delegationContract: string
     ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       const { account }: { account: Account } = web3.provider;
+
+      delegatee = delegatee ?? account.address;
 
       let calls: AllowArray<Call> = {
         contractAddress: delegationContract,

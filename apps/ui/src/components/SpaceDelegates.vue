@@ -38,6 +38,7 @@ const { getDelegates, getDelegation } = useDelegates(
 const { getDelegatee } = useActions();
 const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
+const { delegate } = useActions();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 
@@ -200,6 +201,23 @@ function handleDelegateClick(delegatee?: string) {
   delegateModalOpen.value = true;
 }
 
+async function handleUndelegateClick() {
+  if (
+    !props.delegation.apiType ||
+    !props.delegation.chainId ||
+    !props.delegation.contractAddress
+  )
+    return;
+
+  delegate(
+    props.space,
+    props.delegation.apiType,
+    null,
+    props.delegation.contractAddress,
+    props.delegation.chainId
+  );
+}
+
 watch(
   [props.space, () => web3.value.account, () => web3.value.authLoading],
   ([, , authLoading]) => {
@@ -308,7 +326,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     type="button"
                     class="flex items-center gap-2"
                     :class="{ 'opacity-80': active }"
-                    @click="handleDelegateClick(web3.account)"
+                    @click="handleUndelegateClick"
                   >
                     <IH-user-remove />
                     Undelegate

@@ -262,7 +262,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     space: Space,
     networkId: NetworkID,
     delegationType: DelegationType,
-    delegatee: string,
+    delegatee: string | null,
     delegationContract: string,
     chainIdOverride?: ChainId
   );
