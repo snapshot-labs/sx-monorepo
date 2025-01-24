@@ -188,9 +188,9 @@ const proposalLimitReached = computed(() => {
 
   return (
     (props.space.proposal_count_1d || 0) >=
-      Number(settings.value.get(`space.${type}.proposal_limit_per_day`) || 0) ||
+      settings.value.get(`space.${type}.proposal_limit_per_day`) ||
     (props.space.proposal_count_30d || 0) >=
-      Number(settings.value.get(`space.${type}.proposal_limit_per_month`) || 0)
+      settings.value.get(`space.${type}.proposal_limit_per_month`)
   );
 });
 
@@ -475,17 +475,9 @@ watchEffect(() => {
           >
             <span>
               You can publish up to
-              {{
-                Number(
-                  settings.get(`space.verified.proposal_limit_per_day`) || 0
-                )
-              }}
+              {{ settings.get(`space.verified.proposal_limit_per_day`) }}
               proposals per day and
-              {{
-                Number(
-                  settings.get(`space.verified.proposal_limit_per_month`) || 0
-                )
-              }}
+              {{ settings.get(`space.verified.proposal_limit_per_month`) }}
               proposals per month.
               <a
                 :href="TURBO_URL"

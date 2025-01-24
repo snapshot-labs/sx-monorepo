@@ -25,7 +25,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   );
 
   const maxFollowLimit = computed(() => {
-    return Number(settings.value.get('user.default.follow_limit') || 0);
+    return settings.value.get('user.default.follow_limit');
   });
 
   const followedSpacesMap = computed(
