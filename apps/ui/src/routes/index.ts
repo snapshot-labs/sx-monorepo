@@ -4,7 +4,7 @@ import aliases from '@/helpers/aliases.json';
 import { metadataNetwork } from '@/networks';
 import defaultRoutes from '@/routes/default';
 
-const { resolved } = useWhiteLabel();
+const { resolved, isWhiteLabel } = useWhiteLabel();
 
 const splashScreenRoute = {
   path: '/:catchAll(.*)*',
@@ -36,6 +36,7 @@ const router = createRouter({
 
 // Add a global navigation guard for URL redirection
 router.beforeEach((to, _from, next) => {
+  if (isWhiteLabel.value) return next();
   let redirectPath: string | null = null;
 
   // Redirect paths like "/safe.eth/settings" to "/s:safe.eth/settings"
