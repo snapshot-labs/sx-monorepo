@@ -1,11 +1,11 @@
 import { getNetwork, offchainNetworks } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { Connector } from '@/networks/types';
 import { NetworkID, Proposal, Vote } from '@/types';
 
 const VOTES_LIMIT = 1000;
 
-const { web3 } = useWeb3();
+const { web3, connector } = useWeb3();
+
 const votes = ref<Record<Proposal['id'], Vote>>({});
 const pendingVotes = ref<Record<string, boolean>>({});
 
@@ -22,11 +22,11 @@ watch(
 export function useAccount() {
   async function loadVotes(networkId: NetworkID, spaceIds: string[]) {
     const account = web3.value.account;
-    if (!account) return;
+    if (!account || !connector.value) return;
 
     // On starknet account, we don't load votes for offchain networks (unsupported)
     if (
-      STARKNET_CONNECTORS.includes(web3.value.type as Connector) &&
+      STARKNET_CONNECTORS.includes(connector.value.type) &&
       offchainNetworks.includes(networkId)
     )
       return;

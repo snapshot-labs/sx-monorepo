@@ -35,12 +35,25 @@ export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
   labels?: string[];
 } & Record<string, any>;
-export type Connector =
+export type ConnectorType =
   | 'argentx'
   | 'injected'
   | 'walletconnect'
   | 'walletlink'
   | 'gnosis';
+export type Connector = {
+  id: string;
+  type: ConnectorType;
+  info: {
+    name: string;
+    icon: string;
+  };
+  options: any;
+  provider: any;
+  connect: () => void;
+  autoConnect: () => void;
+  disconnect: () => void;
+};
 export type GeneratedMetadata =
   | {
       name: string;
@@ -78,7 +91,7 @@ export type StrategyTemplate = {
     params: string,
     metadata: StrategyParsedMetadata | null
   ) => Promise<Record<string, any>>;
-  deployConnectors?: Connector[];
+  deployConnectors?: ConnectorType[];
   deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
@@ -141,7 +154,7 @@ export type ReadOnlyNetworkActions = {
   ): Promise<VotingPower[]>;
   propose(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     account: string,
     space: Space,
     title: string,
@@ -160,7 +173,7 @@ export type ReadOnlyNetworkActions = {
   ): Promise<any>;
   updateProposal(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     account: string,
     space: Space,
     proposalId: number | string,
@@ -177,7 +190,7 @@ export type ReadOnlyNetworkActions = {
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     account: string,
     proposal: Proposal,
     choice: Choice,
@@ -216,7 +229,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   ): Promise<string | null>;
   deployDependency(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     params: {
       controller: string;
       spaceAddress: string;
@@ -374,7 +387,7 @@ type BaseNetwork = {
   currentChainId: number;
   baseNetworkId?: NetworkID;
   supportsSimulation: boolean;
-  managerConnectors: Connector[];
+  managerConnectors: ConnectorType[];
   api: NetworkApi;
   constants: NetworkConstants;
   helpers: NetworkHelpers;

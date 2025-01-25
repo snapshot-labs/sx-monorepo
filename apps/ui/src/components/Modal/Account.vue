@@ -1,47 +1,21 @@
 <script setup lang="ts">
-import { getInjected } from '@snapshot-labs/lock/src/utils';
-import connectors, {
-  getConnectorIconUrl,
-  mapConnectorId
-} from '@/helpers/connectors';
 import { getCacheHash } from '@/helpers/utils';
-
-const win = window;
-
-const injected = getInjected();
-if (injected)
-  connectors['injected'] = {
-    ...connectors['injected'],
-    ...injected,
-    id: 'injected',
-    icon: connectors[mapConnectorId(injected.id)]?.icon ?? injected.icon
-  };
+import { Connector } from '@/networks/types';
 
 const props = defineProps<{
   open: boolean;
 }>();
+
 const emit = defineEmits<{
-  (e: 'login', connector: string): void;
+  (e: 'login', connector: Connector): void;
   (e: 'close'): void;
 }>();
 
 const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
 const usersStore = useUsersStore();
+
 const step: Ref<'connect' | null> = ref(null);
-
-const availableConnectors = computed(() => {
-  return Object.values(connectors).filter(connector => {
-    const hasNoType = !('type' in connector) || !connector.type;
-    const isActive =
-      'type' in connector &&
-      'root' in connector &&
-      connector.type === 'injected' &&
-      win[connector.root];
-
-    return hasNoType || isActive;
-  });
-});
 
 const user = computed(
   () =>
@@ -66,30 +40,15 @@ watch(open, () => (step.value = null));
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="isLoggedOut ? 'Log in' : 'Account'" />
     </template>
     <div class="m-4 flex flex-col gap-2">
-      <template v-if="isLoggedOut">
-        <button
-          v-for="connector in availableConnectors"
-          :key="connector.id"
-          type="button"
-          @click="$emit('login', connector.id)"
-        >
-          <UiButton class="w-full flex justify-center items-center gap-2">
-            <img
-              :src="getConnectorIconUrl(connector.icon)"
-              height="28"
-              width="28"
-              class="rounded-lg"
-              :alt="connector.name"
-            />
-            {{ connector.name }}
-          </UiButton>
-        </button>
-      </template>
+      <Connectors
+        v-if="isLoggedOut"
+        @click="(connector: Connector) => emit('login', connector)"
+      />
       <template v-else>
         <UiButton
           :to="{ name: 'user', params: { user: web3.account } }"

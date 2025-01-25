@@ -1,8 +1,6 @@
-import { LockPlugin } from '@snapshot-labs/lock/plugins/vue3';
 import { createPinia } from 'pinia';
 import VueTippy from 'vue-tippy';
 import App from '@/App.vue';
-import options from '@/helpers/auth';
 import router from '@/routes';
 import '@/style.scss';
 
@@ -35,7 +33,6 @@ if (window !== window.parent && !knownHosts.includes(parentHost)) {
 const pinia = createPinia();
 const app = createApp({ render: () => h(App) })
   .use(router)
-  .use(LockPlugin, options)
   .use(VueTippy, {
     defaultProps: {
       delay: [0, null],

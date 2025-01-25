@@ -27,7 +27,7 @@ import {
   parseStrategyMetadata
 } from '@/networks/common/helpers';
 import {
-  Connector,
+  ConnectorType,
   ExecutionInfo,
   NetworkActions,
   NetworkHelpers,
@@ -106,7 +106,7 @@ export function createActions(
     },
     async deployDependency(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       params: {
         controller: string;
         spaceAddress: string;
@@ -197,7 +197,7 @@ export function createActions(
     },
     propose: async (
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       title: string,
@@ -306,7 +306,7 @@ export function createActions(
     },
     async updateProposal(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       proposalId: number | string,
@@ -412,7 +412,7 @@ export function createActions(
     },
     vote: async (
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
       choice: Choice,
