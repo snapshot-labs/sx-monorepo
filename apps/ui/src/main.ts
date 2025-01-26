@@ -1,4 +1,5 @@
 import { LockPlugin } from '@snapshot-labs/lock/plugins/vue3';
+import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import VueTippy from 'vue-tippy';
 import App from '@/App.vue';
@@ -45,6 +46,7 @@ const app = createApp({ render: () => h(App) })
   });
 
 app.use(pinia);
+app.use(VueQueryPlugin);
 
 app.mount('#app');
 
