@@ -4,7 +4,7 @@ import Eip6963 from '@/helpers/eip6963';
 import { Connector, ConnectorType } from '@/networks/types';
 
 type ConnectorDetail = Partial<
-  Pick<Connector, 'id' | 'info' | 'options' | 'provider'> & { hidden?: boolean }
+  Pick<Connector, 'id' | 'info' | 'options' | 'provider'>
 >;
 
 const eip6963 = new Eip6963();
@@ -47,9 +47,7 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
     info: {
       name: 'Gnosis Safe',
       icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA0NpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDkuMS1jMDAyIDc5LmI3YzY0Y2NmOSwgMjAyNC8wNy8xNi0xMjozOTowNCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIDI2LjAgKDIwMjQxMDAyLm0uMjc5NSA2YWJkNWNmKSAgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NTY1NUU3N0Q3QkE3MTFFRkI1MzBDRTdGQTVGREUzNTkiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NTY1NUU3N0U3QkE3MTFFRkI1MzBDRTdGQTVGREUzNTkiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo1NjU1RTc3QjdCQTcxMUVGQjUzMENFN0ZBNUZERTM1OSIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo1NjU1RTc3QzdCQTcxMUVGQjUzMENFN0ZBNUZERTM1OSIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFj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'
-    },
-    // Connector can not be chosen, it's used transparently when inside a safe app
-    hidden: true
+    }
   },
   argentx: {
     info: {
@@ -71,7 +69,7 @@ export function useConnectors() {
   function getConnectors(
     connectorType: ConnectorType,
     connector: ConnectorDetail
-  ): ConnectorDetail[] {
+  ) {
     return connectorType === 'injected'
       ? injectedProviders.value.map(d => ({
           ...d,
@@ -84,8 +82,6 @@ export function useConnectors() {
     return (
       Object.entries(CONNECTOR_DETAILS) as [ConnectorType, ConnectorDetail][]
     ).flatMap(([type, detail]) => {
-      if (detail.hidden) return [];
-
       return getConnectors(type, detail).map(
         d =>
           new connectorsClass[type](

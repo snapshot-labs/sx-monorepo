@@ -12,11 +12,13 @@ const emit = defineEmits<{
 const { connectors } = useConnectors();
 
 const availableConnectors = computed(() => {
-  if (!props.supportedConnectors?.length) return connectors.value;
-
-  return connectors.value.filter(connector =>
-    props.supportedConnectors!.includes(connector.type)
-  );
+  return connectors.value.filter(connector => {
+    return !(
+      (props.supportedConnectors &&
+        !props.supportedConnectors.includes(connector.type)) ||
+      connector.type === 'gnosis'
+    );
+  });
 });
 </script>
 
