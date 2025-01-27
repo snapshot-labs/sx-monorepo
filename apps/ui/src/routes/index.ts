@@ -1,9 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import SplashScreen from '@/components/Layout/SplashScreen.vue';
+import aliases from '@/helpers/aliases.json';
 import { metadataNetwork } from '@/networks';
 import defaultRoutes from '@/routes/default';
 
-const { resolved } = useWhiteLabel();
+const { resolved, isWhiteLabel } = useWhiteLabel();
 
 const splashScreenRoute = {
   path: '/:catchAll(.*)*',
@@ -35,16 +36,20 @@ const router = createRouter({
 
 // Add a global navigation guard for URL redirection
 router.beforeEach((to, _from, next) => {
+  if (isWhiteLabel.value) return next();
   let redirectPath: string | null = null;
 
-  // Match and redirect paths like "/safe.eth/settings" to "/s:safe.eth/settings"
-  const domainMatch = to.path.match(/^\/([^:\/]+?\.[^:\/]+)(\/.*)?$/);
-  if (domainMatch) {
-    const domain = domainMatch[1];
-    const rest = domainMatch[2] || '';
-    redirectPath = `/${metadataNetwork}:${domain}`;
-    if (rest && !/^\/about$/.test(rest)) {
-      redirectPath += rest;
+  // Redirect paths like "/safe.eth/settings" to "/s:safe.eth/settings"
+  // Also handle aliases
+  if (to.matched[0]?.name === 'space') {
+    const [, space, ...rest] = to.path.split('/');
+    let spaceName = space.replace(`${metadataNetwork}:`, '');
+    spaceName = aliases[spaceName] || spaceName;
+    const restPath = rest.join('/');
+
+    redirectPath = `/${metadataNetwork}:${spaceName}`;
+    if (restPath) {
+      redirectPath += `/${restPath}`;
     }
   }
 
@@ -63,7 +68,7 @@ router.beforeEach((to, _from, next) => {
   }
 
   // Perform the redirection if a match is found
-  if (redirectPath) {
+  if (redirectPath && redirectPath !== to.path) {
     next({ path: redirectPath, replace: true });
   } else {
     next();
