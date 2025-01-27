@@ -463,11 +463,9 @@ watchEffect(() => {
             class="mb-4"
           >
             <div>
-              You cannot create proposals.
-              <br />
-              The space is configured with
-              <b>{{ unsupportedProposalNetworks[0].name }}</b>
-              , a non-premium network. Change to a premium network or upgrade
+              You cannot create proposals. The space is configured with
+              <b>{{ unsupportedProposalNetworks[0].name }}</b
+              >, a non-premium network. Change to a premium network or upgrade
               <b>{{ unsupportedProposalNetworks[0].name }}</b> to continue.
             </div>
           </UiAlert>
