@@ -35,16 +35,6 @@ type DelegatesQueryFilter = {
   first: number;
 };
 
-type SortOrder =
-  | 'delegatedVotes-desc'
-  | 'delegatedVotes-asc'
-  | 'tokenHoldersRepresentedAmount-desc'
-  | 'tokenHoldersRepresentedAmount-asc';
-
-const DEFAULT_ORDER = 'delegatedVotes-desc';
-
-const DELEGATES_LIMIT = 40;
-
 const DELEGATES_QUERY = gql`
   query (
     $first: Int!
@@ -93,14 +83,6 @@ export function useDelegates(
   governance: string,
   space: Space
 ) {
-  const delegates: Ref<Delegate[]> = ref([]);
-  const loading = ref(false);
-  const loadingMore = ref(false);
-  const loaded = ref(false);
-  const failed = ref(false);
-  const hasMore = ref(false);
-  const errorCode = ref<'initializing' | null>(null);
-
   const httpLink = createHttpLink({
     uri: convertUrl(delegationApiUrl)
   });
@@ -166,72 +148,7 @@ export function useDelegates(
     return formatDelegates(data);
   }
 
-  async function _fetch(overwrite: boolean, sortBy: SortOrder) {
-    const [orderBy, orderDirection] = sortBy.split('-');
-
-    const newDelegates = await getDelegates({
-      orderBy,
-      orderDirection,
-      skip: overwrite ? 0 : delegates.value.length,
-      first: DELEGATES_LIMIT
-    });
-
-    delegates.value = overwrite
-      ? newDelegates
-      : [...delegates.value, ...newDelegates];
-
-    hasMore.value = newDelegates.length === DELEGATES_LIMIT;
-  }
-
-  async function fetch(sortBy: SortOrder = DEFAULT_ORDER) {
-    if (loading.value || loaded.value) return;
-    loading.value = true;
-
-    try {
-      await _fetch(true, sortBy);
-
-      loaded.value = true;
-    } catch (e) {
-      failed.value = true;
-
-      if (e.message.includes('Row not found')) {
-        errorCode.value = 'initializing';
-      }
-    } finally {
-      loading.value = false;
-      loaded.value = true;
-    }
-  }
-
-  async function fetchMore(sortBy: SortOrder = DEFAULT_ORDER) {
-    if (loading.value || !loaded.value) return;
-    loadingMore.value = true;
-
-    await _fetch(false, sortBy);
-
-    loadingMore.value = false;
-  }
-
-  function reset() {
-    delegates.value = [];
-    loading.value = false;
-    loadingMore.value = false;
-    loaded.value = false;
-    failed.value = false;
-    hasMore.value = false;
-  }
-
   return {
-    loading,
-    loadingMore,
-    loaded,
-    failed,
-    errorCode,
-    hasMore,
-    delegates,
-    getDelegates,
-    fetch,
-    fetchMore,
-    reset
+    getDelegates
   };
 }
