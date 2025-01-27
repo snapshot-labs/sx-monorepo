@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import { useInfiniteQuery } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { _n, _p, _vp, shorten } from '@/helpers/utils';
+import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { DelegationType, Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
@@ -20,18 +22,7 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-asc'
 );
 const { setTitle } = useTitle();
-const {
-  loading,
-  loadingMore,
-  loaded,
-  failed,
-  errorCode,
-  hasMore,
-  delegates,
-  fetch,
-  fetchMore,
-  reset
-} = useDelegates(
+const { getDelegates } = useDelegates(
   props.delegation.apiType as DelegationType,
   props.delegation.apiUrl as string,
   props.delegation.contractAddress as string,
@@ -40,6 +31,39 @@ const {
 const { web3 } = useWeb3();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
+
+const {
+  data,
+  error,
+  fetchNextPage,
+  hasNextPage,
+  isPending,
+  isFetchingNextPage,
+  isError
+} = useInfiniteQuery({
+  initialPageParam: 0,
+  queryKey: ['delegates', props.delegation.contractAddress, sortBy],
+  queryFn: ({ pageParam }) => {
+    const [orderBy, orderDirection] = sortBy.value.split('-');
+
+    return getDelegates({
+      orderBy,
+      orderDirection,
+      first: 40,
+      skip: pageParam
+    });
+  },
+  getNextPageParam: (lastPage, pages) => {
+    if (lastPage.length < 40) return null;
+
+    return pages.length * 40;
+  },
+  retry: (failureCount, error) => {
+    if (error?.message.includes('Row not found')) return false;
+
+    return failureCount < 3;
+  }
+});
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
   let url: string | null = null;
@@ -66,39 +90,38 @@ function handleSortChange(
   }
 }
 
-async function handleEndReached() {
-  if (!hasMore.value) return;
-
-  await fetchMore(sortBy.value);
-}
-
 function handleDelegateClick(delegatee?: string) {
   delegateModalState.value = delegatee ? { delegatee } : null;
   delegateModalOpen.value = true;
 }
-
-onMounted(() => {
-  if (!props.delegation.apiUrl) return;
-
-  fetch(sortBy.value);
-});
-
-watch([sortBy], () => {
-  reset();
-  fetch(sortBy.value);
-});
 
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>
   <div
-    v-if="!delegation.apiUrl || delegation.apiType === 'split-delegation'"
+    v-if="!delegation.apiUrl"
     class="px-4 py-3 flex items-center text-skin-link space-x-2"
   >
     <IH-exclamation-circle class="shrink-0" />
     <span>Invalid delegation settings.</span>
   </div>
+  <UiMessage
+    v-if="delegation.apiType === 'split-delegation'"
+    :type="'info'"
+    class="m-4"
+  >
+    This space uses the split-delegation feature, which is currently not
+    supported on the new interface. You can view the delegates dashboard on the
+    <a
+      :href="`${SNAPSHOT_URLS[props.space.network]}/#/${props.space.id}/delegates`"
+      target="_blank"
+      class="inline-flex items-center font-bold"
+    >
+      previous interface
+      <IH-arrow-sm-right class="inline-block -rotate-45" /></a
+    >.
+  </UiMessage>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <UiButton
@@ -165,27 +188,27 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </button>
         <div class="w-[20px]" />
       </div>
-      <UiLoading v-if="loading" class="px-4 py-3 block" />
+      <UiLoading v-if="isPending" class="px-4 py-3 block" />
       <template v-else>
         <div
-          v-if="loaded && (delegates.length === 0 || failed)"
+          v-if="data?.pages.length === 0 || isError"
           class="px-4 py-3 flex items-center space-x-1"
         >
           <IH-exclamation-circle class="shrink-0" />
-          <span v-if="errorCode === 'initializing'">
+          <span v-if="error?.message.includes('Row not found')">
             Delegates are being computed, please come back later.
           </span>
-          <span v-else-if="failed">Failed to load delegates.</span>
-          <span v-else-if="delegates.length === 0">
-            There are no delegates.
-          </span>
+          <span v-else-if="isError">Failed to load delegates.</span>
+          <span v-else-if="data?.pages.length === 0">
+            There are no delegates.</span
+          >
         </div>
         <UiContainerInfiniteScroll
-          :loading-more="loadingMore"
-          @end-reached="handleEndReached"
+          :loading-more="isFetchingNextPage"
+          @end-reached="hasNextPage && fetchNextPage()"
         >
           <div
-            v-for="(delegate, i) in delegates"
+            v-for="(delegate, i) in data?.pages.flat()"
             :key="i"
             class="border-b flex space-x-3 px-4"
           >

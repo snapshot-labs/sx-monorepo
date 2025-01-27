@@ -25,6 +25,7 @@ import {
   ProposalExecution,
   ProposalState,
   RelatedSpace,
+  Setting,
   Space,
   SpaceMetadataDelegation,
   SpaceMetadataTreasury,
@@ -40,6 +41,7 @@ import {
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
+  SETTINGS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
   STATEMENTS_QUERY,
@@ -826,6 +828,15 @@ export function createApi(
           network.spacesCount
         ])
       );
+    },
+    loadSettings: async (): Promise<Setting[]> => {
+      const {
+        data: { options }
+      }: { data: { options: Setting[] } } = await apollo.query({
+        query: SETTINGS_QUERY
+      });
+
+      return options;
     }
   };
 }
