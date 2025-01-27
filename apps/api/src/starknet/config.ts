@@ -4,6 +4,17 @@ import { validateAndParseAddress } from 'starknet';
 import spaceAbi from './abis/space.json';
 import spaceFactoryAbi from './abis/spaceFactory.json';
 
+const DEFAULT_INFURA_API_KEY =
+  process.env.INFURA_API_KEY || '46a5dd9727bf48d4a132672d3f376146';
+
+const snNetworkNodeUrl =
+  process.env.NETWORK_NODE_URL_SN ||
+  `https://starknet-mainnet.infura.io/v3/${DEFAULT_INFURA_API_KEY}`;
+const snSepNetworkNodeUrl =
+  process.env.NETWORK_NODE_URL_SN_SEP ||
+  `https://starknet-sepolia.infura.io/v3/${DEFAULT_INFURA_API_KEY}`;
+const manaRpcUrl = process.env.VITE_MANA_URL || 'https://mana.box';
+
 export type FullConfig = {
   indexerName: 'sn' | 'sn-sep';
   overrides: ReturnType<typeof createOverrides>;
@@ -12,8 +23,7 @@ export type FullConfig = {
 const CONFIG = {
   sn: {
     indexerName: 'sn',
-    networkNodeUrl:
-      'https://starknet-mainnet.infura.io/v3/46a5dd9727bf48d4a132672d3f376146',
+    networkNodeUrl: snNetworkNodeUrl,
     l1NetworkNodeUrl: 'https://rpc.brovider.xyz/1',
     contract: starknetNetworks['sn'].Meta.spaceFactory,
     start: 445498,
@@ -26,8 +36,7 @@ const CONFIG = {
   },
   'sn-sep': {
     indexerName: 'sn-sep',
-    networkNodeUrl:
-      'https://starknet-sepolia.infura.io/v3/46a5dd9727bf48d4a132672d3f376146',
+    networkNodeUrl: snSepNetworkNodeUrl,
     l1NetworkNodeUrl: 'https://rpc.brovider.xyz/11155111',
     contract: starknetNetworks['sn-sep'].Meta.spaceFactory,
     start: 17960,
@@ -36,8 +45,6 @@ const CONFIG = {
     ]
   }
 };
-
-const manaRpcUrl = process.env.VITE_MANA_URL || 'https://mana.box';
 
 function createOverrides(networkId: keyof typeof CONFIG) {
   const config = starknetNetworks[networkId];
