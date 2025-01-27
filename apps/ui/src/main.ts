@@ -18,7 +18,8 @@ const knownHosts = [
   'safe.mainnet.frax.com',
   'horizen-eon.safe.onchainden.com',
   'safe.fantom.network',
-  'safe.apechain.com'
+  'safe.apechain.com',
+  'console.brahma.fi'
 ];
 const parentUrl =
   window.location != window.parent.location
