@@ -3,6 +3,12 @@ import { lsGet, lsSet } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { NetworkID, NotificationType } from '@/types';
 
+type SafeModal = {
+  id: string;
+  type: 'vote' | 'propose' | 'transaction';
+  showVerifierLink: boolean;
+};
+
 type Notification = {
   id: string;
   type: NotificationType;
@@ -25,12 +31,16 @@ function updateStorage(pendingTransactions: PendingTransaction[]) {
 export const useUiStore = defineStore('ui', {
   state: () => ({
     sideMenuOpen: false,
+    safeModal: null as SafeModal | null,
     notifications: [] as Notification[],
     pendingTransactions: [] as PendingTransaction[]
   }),
   actions: {
     async toggleSidebar() {
       this.sideMenuOpen = !this.sideMenuOpen;
+    },
+    openSafeModal(data: Omit<SafeModal, 'id'>) {
+      this.safeModal = { id: crypto.randomUUID(), ...data };
     },
     addNotification(type: NotificationType, message: string, timeout = 5000) {
       const id = crypto.randomUUID();

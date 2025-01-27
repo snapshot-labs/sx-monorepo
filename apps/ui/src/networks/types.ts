@@ -13,6 +13,7 @@ import {
   Setting,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   Statement,
   StrategyParsedMetadata,
   Transaction,
@@ -274,10 +275,15 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     space: Space,
     networkId: NetworkID,
     delegationType: DelegationType,
-    delegatee: string,
+    delegatee: string | null,
     delegationContract: string,
     chainIdOverride?: ChainId
   );
+  getDelegatee(
+    web3: Web3Provider,
+    delegation: SpaceMetadataDelegation,
+    delegator: string
+  ): Promise<{ address: string; balance: bigint; decimals: number } | null>;
 };
 
 export type NetworkApi = {

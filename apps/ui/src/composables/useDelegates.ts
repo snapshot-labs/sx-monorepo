@@ -6,7 +6,12 @@ import {
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
-import { DelegationType, Space, Statement } from '@/types';
+import {
+  RequiredProperty,
+  Space,
+  SpaceMetadataDelegation,
+  Statement
+} from '@/types';
 
 type ApiDelegate = {
   id: string;
@@ -33,17 +38,26 @@ type DelegatesQueryFilter = {
   orderDirection: string;
   skip: number;
   first: number;
+  where?: {
+    user?: string;
+  };
 };
 
-type SortOrder =
-  | 'delegatedVotes-desc'
-  | 'delegatedVotes-asc'
-  | 'tokenHoldersRepresentedAmount-desc'
-  | 'tokenHoldersRepresentedAmount-asc';
-
-const DEFAULT_ORDER = 'delegatedVotes-desc';
-
-const DELEGATES_LIMIT = 40;
+const DELEGATION_SUBGRAPHS = {
+  '1': 'https://subgrapher.snapshot.org/delegation/1',
+  '10': 'https://subgrapher.snapshot.org/delegation/10',
+  '56': 'https://subgrapher.snapshot.org/delegation/56',
+  '100': 'https://subgrapher.snapshot.org/delegation/100',
+  '137': 'https://subgrapher.snapshot.org/delegation/137',
+  '146': 'https://subgrapher.snapshot.org/delegation/146',
+  '250': 'https://subgrapher.snapshot.org/delegation/250',
+  '8453': 'https://subgrapher.snapshot.org/delegation/8453',
+  '42161': 'https://subgrapher.snapshot.org/delegation/42161',
+  '59144': 'https://subgrapher.snapshot.org/delegation/59144',
+  '81457': 'https://subgrapher.snapshot.org/delegation/81457',
+  '84532': 'https://subgrapher.snapshot.org/delegation/84532',
+  '11155111': 'https://subgrapher.snapshot.org/delegation/11155111'
+};
 
 const DELEGATES_QUERY = gql`
   query (
@@ -51,6 +65,7 @@ const DELEGATES_QUERY = gql`
     $skip: Int!
     $orderBy: Delegate_orderBy!
     $orderDirection: OrderDirection!
+    $where: Delegate_filter
     $governance: String!
   ) {
     delegates(
@@ -58,7 +73,7 @@ const DELEGATES_QUERY = gql`
       skip: $skip
       orderBy: $orderBy
       orderDirection: $orderDirection
-      where: { tokenHoldersRepresentedAmount_gte: 0, governance: $governance }
+      where: $where
     ) {
       id
       user
@@ -69,6 +84,18 @@ const DELEGATES_QUERY = gql`
     governance(id: $governance) {
       delegatedVotes
       totalDelegates
+    }
+  }
+`;
+
+const DELEGATIONS_QUERY = gql`
+  query ($space: String!, $delegator: String!) {
+    delegations(
+      first: $first
+      where: { space: $space, delegator: $delegator }
+    ) {
+      id
+      delegate
     }
   }
 `;
@@ -88,21 +115,11 @@ function convertUrl(apiUrl: string) {
 }
 
 export function useDelegates(
-  delegationType: DelegationType,
-  delegationApiUrl: string,
-  governance: string,
+  delegation: RequiredProperty<SpaceMetadataDelegation>,
   space: Space
 ) {
-  const delegates: Ref<Delegate[]> = ref([]);
-  const loading = ref(false);
-  const loadingMore = ref(false);
-  const loaded = ref(false);
-  const failed = ref(false);
-  const hasMore = ref(false);
-  const errorCode = ref<'initializing' | null>(null);
-
   const httpLink = createHttpLink({
-    uri: convertUrl(delegationApiUrl)
+    uri: convertUrl(delegation.apiUrl)
   });
 
   const apollo = new ApolloClient({
@@ -158,80 +175,45 @@ export function useDelegates(
   async function getDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
+    const where = {
+      tokenHoldersRepresentedAmount_gte: 0,
+      governance: delegation.contractAddress.toLowerCase(),
+      ...filter.where
+    };
+
     const { data } = await apollo.query({
       query: DELEGATES_QUERY,
-      variables: { ...filter, governance: governance.toLowerCase() }
+      variables: { ...filter, governance: where.governance, where }
     });
 
     return formatDelegates(data);
   }
 
-  async function _fetch(overwrite: boolean, sortBy: SortOrder) {
-    const [orderBy, orderDirection] = sortBy.split('-');
+  async function getDelegation(delegator: string) {
+    if (delegation.apiType !== 'delegate-registry') {
+      throw new Error('getDelegation is only supported for delegate-registry');
+    }
 
-    const newDelegates = await getDelegates({
-      orderBy,
-      orderDirection,
-      skip: overwrite ? 0 : delegates.value.length,
-      first: DELEGATES_LIMIT
+    const delegationSubgraph = DELEGATION_SUBGRAPHS[delegation.chainId];
+    if (!delegationSubgraph) {
+      throw new Error('Delegation subgraph not found');
+    }
+
+    const client = new ApolloClient({
+      uri: delegationSubgraph,
+      cache: new InMemoryCache()
     });
 
-    delegates.value = overwrite
-      ? newDelegates
-      : [...delegates.value, ...newDelegates];
+    const { data } = await client.query({
+      query: DELEGATIONS_QUERY,
+      variables: { space: space.id, delegator }
+    });
 
-    hasMore.value = newDelegates.length === DELEGATES_LIMIT;
-  }
-
-  async function fetch(sortBy: SortOrder = DEFAULT_ORDER) {
-    if (loading.value || loaded.value) return;
-    loading.value = true;
-
-    try {
-      await _fetch(true, sortBy);
-
-      loaded.value = true;
-    } catch (e) {
-      failed.value = true;
-
-      if (e.message.includes('Row not found')) {
-        errorCode.value = 'initializing';
-      }
-    } finally {
-      loading.value = false;
-      loaded.value = true;
-    }
-  }
-
-  async function fetchMore(sortBy: SortOrder = DEFAULT_ORDER) {
-    if (loading.value || !loaded.value) return;
-    loadingMore.value = true;
-
-    await _fetch(false, sortBy);
-
-    loadingMore.value = false;
-  }
-
-  function reset() {
-    delegates.value = [];
-    loading.value = false;
-    loadingMore.value = false;
-    loaded.value = false;
-    failed.value = false;
-    hasMore.value = false;
+    return data.delegations[0] ?? null;
   }
 
   return {
-    loading,
-    loadingMore,
-    loaded,
-    failed,
-    errorCode,
-    hasMore,
-    delegates,
     getDelegates,
-    fetch,
-    fetchMore,
-    reset
+    getDelegation
   };
 }

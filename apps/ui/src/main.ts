@@ -1,3 +1,4 @@
+import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import VueTippy from 'vue-tippy';
 import App from '@/App.vue';
@@ -15,7 +16,8 @@ const knownHosts = [
   'safe.mainnet.frax.com',
   'horizen-eon.safe.onchainden.com',
   'safe.fantom.network',
-  'safe.apechain.com'
+  'safe.apechain.com',
+  'console.brahma.fi'
 ];
 const parentUrl =
   window.location != window.parent.location
@@ -42,6 +44,7 @@ const app = createApp({ render: () => h(App) })
   });
 
 app.use(pinia);
+app.use(VueQueryPlugin);
 
 app.mount('#app');
 

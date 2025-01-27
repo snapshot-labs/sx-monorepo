@@ -11,7 +11,8 @@ import {
   Call,
   CallData,
   RpcProvider,
-  constants as starknetConstants
+  constants as starknetConstants,
+  uint256
 } from 'starknet';
 import { executionCall, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
@@ -49,6 +50,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
@@ -644,12 +646,14 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegationType: DelegationType,
-      delegatee: string,
+      delegatee: string | null,
       delegationContract: string
     ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       const { account }: { account: Account } = web3.provider;
+
+      delegatee = delegatee ?? '0x0';
 
       let calls: AllowArray<Call> = {
         contractAddress: delegationContract,
@@ -679,6 +683,42 @@ export function createActions(
       }
 
       return account.execute(calls);
+    },
+    getDelegatee: async (
+      web3: any,
+      delegation: SpaceMetadataDelegation,
+      delegator: string
+    ) => {
+      const { contractAddress } = delegation;
+      if (!contractAddress) return null;
+
+      const [[decimals], balance, [delegatee]] = await Promise.all([
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'decimals'
+        }),
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'balance_of',
+          calldata: CallData.compile({ delegator })
+        }),
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'delegates',
+          calldata: CallData.compile({ delegator })
+        })
+      ]);
+
+      return delegatee !== '0x0'
+        ? {
+            address: delegatee,
+            balance: uint256.uint256ToBN({
+              low: balance[0],
+              high: balance[1]
+            }),
+            decimals: parseInt(decimals, 16)
+          }
+        : null;
     },
     getVotingPower: async (
       spaceId: string,
