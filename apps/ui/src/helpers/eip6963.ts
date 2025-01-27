@@ -37,15 +37,18 @@ interface EIP1193Provider {
 }
 
 export default class Eip6963 extends EventEmitter {
-  providerDetails: EIP6963ProviderDetail[];
+  public providerDetails: Map<
+    EIP6963ProviderInfo['rdns'],
+    EIP6963ProviderDetail
+  >;
 
   constructor() {
     super();
-    this.providerDetails = [];
+    this.providerDetails = new Map();
   }
 
   private providerReceived(providerDetail: EIP6963ProviderDetail): void {
-    this.providerDetails.push(providerDetail);
+    this.providerDetails.set(providerDetail.info.rdns, providerDetail);
   }
 
   subscribe(): void {
@@ -58,7 +61,7 @@ export default class Eip6963 extends EventEmitter {
   }
 
   requestProviders(): void {
-    this.providerDetails = [];
+    this.providerDetails.clear();
     window.dispatchEvent(new EIP6963RequestProviderEvent());
   }
 }

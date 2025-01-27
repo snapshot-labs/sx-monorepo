@@ -71,9 +71,9 @@ export function useConnectors() {
     connector: ConnectorDetail
   ) {
     return connectorType === 'injected'
-      ? injectedProviders.value.map(d => ({
-          ...d,
-          id: d.info.rdns
+      ? Array.from(injectedProviders.value.entries()).map(([id, detail]) => ({
+          ...detail,
+          id
         }))
       : [connector];
   }
