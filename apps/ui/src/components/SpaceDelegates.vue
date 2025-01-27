@@ -86,7 +86,7 @@ const { data: delegatee } = useQuery({
   queryKey: [
     'delegatees',
     props.delegation.contractAddress,
-    web3.value.account
+    () => web3.value.account
   ],
   queryFn: () => getCurrentDelegatee(),
   enabled: !!web3.value.account && !web3.value.authLoading
@@ -170,7 +170,7 @@ async function fetchGovernorSubgraphDelegatee() {
 }
 
 async function getCurrentDelegatee() {
-  if (!props.delegation.apiType || !props.delegation.chainId) return;
+  if (!props.delegation.apiType || !props.delegation.chainId) return null;
 
   if (!web3.value.account) {
     return null;
