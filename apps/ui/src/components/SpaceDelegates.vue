@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress } from '@ethersproject/address';
-import { useInfiniteQuery } from '@tanstack/vue-query';
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient
+} from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
@@ -20,13 +24,6 @@ const delegateModalOpen = ref(false);
 const delegateModalState = ref<{ delegatee: string } | null>(null);
 const isUndelegating = ref(false);
 const undelegateFn = ref(undelegate);
-const delegatee = ref<{
-  id: string;
-  balance: number | null;
-  share: number;
-  name: string | null;
-  canUndelegate: boolean;
-} | null>(null);
 const sortBy = ref(
   'delegatedVotes-desc' as
     | 'delegatedVotes-desc'
@@ -43,6 +40,7 @@ const { getDelegatee } = useActions();
 const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const actions = useActions();
+const queryClient = useQueryClient();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 const delegationNetworkId = computed(() => {
@@ -84,52 +82,60 @@ const {
   }
 });
 
+const { data: delegatee } = useQuery({
+  queryKey: [
+    'delegatees',
+    props.delegation.contractAddress,
+    web3.value.account
+  ],
+  queryFn: () => getCurrentDelegatee(),
+  enabled: !!web3.value.account && !web3.value.authLoading
+});
+
 async function fetchDelegateRegistryDelegatee() {
   const delegation = await getDelegation(web3.value.account);
 
-  if (delegation) {
-    const [names, votingPowers, [apiDelegate]] = await Promise.all([
-      getNames([delegation.delegate]),
-      getNetwork(props.space.network).actions.getVotingPower(
-        props.space.id,
-        props.space.strategies,
-        props.space.strategies_params,
-        props.space.strategies_parsed_metadata,
-        web3.value.account,
-        {
-          at: supportsNullCurrent(props.space.network)
-            ? null
-            : getCurrent(props.space.network) || 0,
-          chainId: props.space.snapshot_chain_id
-        }
-      ),
-      getDelegates({
-        first: 1,
-        skip: 0,
-        orderBy: 'delegatedVotes',
-        orderDirection: 'desc',
-        where: {
-          // NOTE: this is delegate registry, needs to be checksummed
-          user: getAddress(delegation.delegate)
-        }
-      })
-    ]);
+  if (!delegation) return null;
 
-    const balance = votingPowers.reduce(
-      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
-      0
-    );
+  const [names, votingPowers, [apiDelegate]] = await Promise.all([
+    getNames([delegation.delegate]),
+    getNetwork(props.space.network).actions.getVotingPower(
+      props.space.id,
+      props.space.strategies,
+      props.space.strategies_params,
+      props.space.strategies_parsed_metadata,
+      web3.value.account,
+      {
+        at: supportsNullCurrent(props.space.network)
+          ? null
+          : getCurrent(props.space.network) || 0,
+        chainId: props.space.snapshot_chain_id
+      }
+    ),
+    getDelegates({
+      first: 1,
+      skip: 0,
+      orderBy: 'delegatedVotes',
+      orderDirection: 'desc',
+      where: {
+        // NOTE: this is delegate registry, needs to be checksummed
+        user: getAddress(delegation.delegate)
+      }
+    })
+  ]);
 
-    delegatee.value = {
-      id: delegation.delegate,
-      balance,
-      share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
-      name: names[delegation.delegate],
-      canUndelegate: true
-    };
-  } else {
-    delegatee.value = null;
-  }
+  const balance = votingPowers.reduce(
+    (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+    0
+  );
+
+  return {
+    id: delegation.delegate,
+    balance,
+    share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
+    name: names[delegation.delegate],
+    canUndelegate: true
+  };
 }
 
 async function fetchGovernorSubgraphDelegatee() {
@@ -138,50 +144,44 @@ async function fetchGovernorSubgraphDelegatee() {
     web3.value.account
   );
 
-  if (delegateeData) {
-    const [names, [apiDelegate]] = await Promise.all([
-      getNames([delegateeData.address]),
-      getDelegates({
-        first: 1,
-        skip: 0,
-        orderBy: 'delegatedVotes',
-        orderDirection: 'desc',
-        where: {
-          // NOTE: This is subgraph, needs to be lowercase
-          user: delegateeData.address.toLocaleLowerCase()
-        }
-      })
-    ]);
+  if (!delegateeData) return null;
 
-    delegatee.value = {
-      id: delegateeData.address,
-      balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
-      share: apiDelegate
-        ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
-        : 1,
-      name: names[delegateeData.address],
-      canUndelegate: !compareAddresses(
-        delegateeData.address,
-        web3.value.account
-      )
-    };
-  } else {
-    delegatee.value = null;
-  }
+  const [names, [apiDelegate]] = await Promise.all([
+    getNames([delegateeData.address]),
+    getDelegates({
+      first: 1,
+      skip: 0,
+      orderBy: 'delegatedVotes',
+      orderDirection: 'desc',
+      where: {
+        // NOTE: This is subgraph, needs to be lowercase
+        user: delegateeData.address.toLocaleLowerCase()
+      }
+    })
+  ]);
+
+  return {
+    id: delegateeData.address,
+    balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
+    share: apiDelegate
+      ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
+      : 1,
+    name: names[delegateeData.address],
+    canUndelegate: !compareAddresses(delegateeData.address, web3.value.account)
+  };
 }
 
-async function handleFetchDelegatee() {
+async function getCurrentDelegatee() {
   if (!props.delegation.apiType || !props.delegation.chainId) return;
 
   if (!web3.value.account) {
-    delegatee.value = null;
-    return;
+    return null;
   }
 
   if (props.delegation.apiType === 'governor-subgraph') {
-    await fetchGovernorSubgraphDelegatee();
+    return fetchGovernorSubgraphDelegatee();
   } else if (props.delegation.apiType === 'delegate-registry') {
-    await fetchDelegateRegistryDelegatee();
+    return fetchDelegateRegistryDelegatee();
   }
 }
 
@@ -233,15 +233,19 @@ async function undelegate() {
   );
 }
 
-watch(
-  [props.space, () => web3.value.account, () => web3.value.authLoading],
-  ([, , authLoading]) => {
-    if (authLoading) return;
+function handleUndelegateConfirmed() {
+  queryClient.invalidateQueries({
+    queryKey: ['delegates', props.delegation.contractAddress]
+  });
 
-    handleFetchDelegatee();
-  },
-  { immediate: true }
-);
+  queryClient.invalidateQueries({
+    queryKey: [
+      'delegatees',
+      props.delegation.contractAddress,
+      web3.value.account
+    ]
+  });
+}
 
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
@@ -557,7 +561,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :open="isUndelegating"
         :network-id="delegationNetworkId"
         :execute="undelegateFn"
-        @confirmed="handleFetchDelegatee"
+        @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"
       />
     </teleport>
