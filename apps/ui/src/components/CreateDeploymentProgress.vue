@@ -49,7 +49,7 @@ const emit = defineEmits<{
 }>();
 
 const { deployDependency, createSpace } = useActions();
-const { login, connector } = useWeb3();
+const { login, auth } = useWeb3();
 
 const currentStep = ref(0);
 const completed = ref(false);
@@ -134,7 +134,7 @@ async function deployStep(
       ? step.strategy.deployConnectors
       : network.value.managerConnectors;
 
-  if (!connector.value || !supportedConnectors.includes(connector.value.type)) {
+  if (!auth.value || !supportedConnectors.includes(auth.value.connector.type)) {
     const selectedConnector = await getConnector(supportedConnectors);
     if (!selectedConnector) throw new Error('No connector selected');
 

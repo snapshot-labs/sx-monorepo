@@ -83,9 +83,8 @@ export function useWeb3() {
       }
 
       await registerConnector(connector);
-
-      currentConnector.value = connector;
-      lsSet(LAST_USED_CONNECTOR_CACHE_KEY, connector.id);
+    } catch (e) {
+      reset();
     } finally {
       state.authLoading = false;
     }
@@ -115,6 +114,8 @@ export function useWeb3() {
     );
 
     provider.value = markRaw(web3);
+    currentConnector.value = connector;
+    lsSet(LAST_USED_CONNECTOR_CACHE_KEY, connector.id);
 
     try {
       attachConnectorEvents(connector);
@@ -210,8 +211,15 @@ export function useWeb3() {
     login,
     logout,
     autoLogin,
-    connector: currentConnector,
-    provider,
+    auth: computed(() =>
+      currentConnector.value
+        ? {
+            connector: currentConnector.value!,
+            provider: provider.value!,
+            account: state.account
+          }
+        : null
+    ),
     authInitiated,
     web3: computed(() => state),
     web3Account: computed(() => state.account)

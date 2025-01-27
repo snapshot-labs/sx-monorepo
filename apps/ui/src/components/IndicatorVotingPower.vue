@@ -13,7 +13,7 @@ defineEmits<{
   (e: 'fetchVotingPower');
 }>();
 
-const { web3, connector } = useWeb3();
+const { auth } = useWeb3();
 
 const modalOpen = ref(false);
 
@@ -40,9 +40,10 @@ function handleModalOpen() {
     <UiTooltip title="Your voting power" class="flex truncate">
       <UiButton
         v-if="
-          web3.account &&
-          connector &&
-          !(evmNetworks.includes(networkId) && connector.type === 'argentx')
+          auth &&
+          !(
+            evmNetworks.includes(networkId) && auth.connector.type === 'argentx'
+          )
         "
         :loading="loading"
         class="flex flex-row items-center justify-center gap-1 truncate"

@@ -18,7 +18,7 @@ const getSafeVersion = useMemoize(
 );
 
 export function useSafeWallet(network: NetworkID, chainId = 1) {
-  const { web3, connector } = useWeb3();
+  const { web3, auth } = useWeb3();
 
   const signedChainId = computed(() => web3.value.network.key);
 
@@ -34,7 +34,7 @@ export function useSafeWallet(network: NetworkID, chainId = 1) {
   }, false);
 
   const isSafeWallet = computed(
-    () => connector.value?.type === 'gnosis' || isSafeContract.value
+    () => auth.value?.connector.type === 'gnosis' || isSafeContract.value
   );
 
   const isInvalidNetwork = computed(() => {
