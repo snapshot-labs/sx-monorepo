@@ -1,8 +1,8 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { METADATA } from '@/networks/starknet';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   ChainId,
@@ -13,6 +13,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   SpaceSettings,
   Statement,
   User,
@@ -579,23 +580,19 @@ export function useActions() {
   async function delegate(
     space: Space,
     delegationType: DelegationType,
-    delegatee: string,
+    delegatee: string | null,
     delegationContract: string,
     chainId: ChainId
   ) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
-    const isEvmNetwork = typeof chainId === 'number';
-    const actionNetwork = isEvmNetwork
-      ? 'eth'
-      : (Object.entries(METADATA).find(
-          ([, metadata]) => metadata.chainId === chainId
-        )?.[0] as NetworkID);
-    if (!actionNetwork) throw new Error('Failed to detect action network');
-
+    const actionNetwork = getDelegationNetwork(chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
-    await wrapPromise(
+    return wrapPromise(
       actionNetwork,
       network.actions.delegate(
         auth.web3,
@@ -607,6 +604,18 @@ export function useActions() {
         chainId
       )
     );
+  }
+
+  async function getDelegatee(
+    delegation: SpaceMetadataDelegation,
+    delegator: string
+  ) {
+    if (!delegation.chainId) throw new Error('Chain ID is missing');
+
+    const actionNetwork = getDelegationNetwork(delegation.chainId);
+    const network = getReadWriteNetwork(actionNetwork);
+
+    return network.actions.getDelegatee(auth.web3, delegation, delegator);
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {
@@ -709,6 +718,7 @@ export function useActions() {
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
     deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),
+    getDelegatee: wrapWithErrors(getDelegatee),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
     updateUser: wrapWithErrors(updateUser),
