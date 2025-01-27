@@ -650,7 +650,7 @@ export function createActions(
 
       const { account }: { account: Account } = web3.provider;
 
-      delegatee = delegatee ?? account.address;
+      delegatee = delegatee ?? '0x0';
 
       let calls: AllowArray<Call> = {
         contractAddress: delegationContract,

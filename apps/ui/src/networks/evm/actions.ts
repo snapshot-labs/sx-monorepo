@@ -581,7 +581,7 @@ export function createActions(
       };
 
       if (delegationType === 'governor-subgraph') {
-        delegatee = delegatee ?? (await web3.getSigner().getAddress());
+        delegatee = delegatee ?? '0x0000000000000000000000000000000000000000';
 
         contractParams = {
           address: delegationContract,

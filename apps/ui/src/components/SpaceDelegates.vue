@@ -10,7 +10,7 @@ import removeMarkdown from 'remove-markdown';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { getNames } from '@/helpers/stamp';
-import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, shorten } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
@@ -133,8 +133,7 @@ async function fetchDelegateRegistryDelegatee() {
     id: delegation.delegate,
     balance,
     share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
-    name: names[delegation.delegate],
-    canUndelegate: true
+    name: names[delegation.delegate]
   };
 }
 
@@ -166,8 +165,7 @@ async function fetchGovernorSubgraphDelegatee() {
     share: apiDelegate
       ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
       : 1,
-    name: names[delegateeData.address],
-    canUndelegate: !compareAddresses(delegateeData.address, web3.value.account)
+    name: names[delegateeData.address]
   };
 }
 
@@ -332,10 +330,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               <div class="text-[17px]" v-text="_p(delegatee.share)" />
             </div>
           </AppLink>
-          <div
-            v-if="delegatee.canUndelegate"
-            class="flex items-center justify-center"
-          >
+          <div class="flex items-center justify-center">
             <UiDropdown>
               <template #button>
                 <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
