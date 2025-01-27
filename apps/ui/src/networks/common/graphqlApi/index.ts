@@ -711,7 +711,7 @@ export function createApi(
     loadStrategy: async () => {
       return null;
     },
-    getNetworksUsage: async () => {
+    getNetworks: async () => {
       return {};
     },
     loadSettings: async () => {

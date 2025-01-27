@@ -2,7 +2,6 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { PROPOSALS_NETWORK_WHITELIST } from '@/helpers/constants';
 import {
   MAX_1D_PROPOSALS,
   MAX_30D_PROPOSALS,
@@ -235,8 +234,12 @@ const unsupportedProposalNetworks = computed(() => {
     )
   ]);
 
+  const premiumsChainIds = networks.value
+    .filter(network => network.premium)
+    .map(network => network.chainId);
+
   return Array.from(ids)
-    .filter(n => !PROPOSALS_NETWORK_WHITELIST.includes(n))
+    .filter(n => !premiumsChainIds.includes(n))
     .map(chainId => networks.value.find(n => n.chainId === chainId));
 });
 
