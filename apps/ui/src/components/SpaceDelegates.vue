@@ -10,7 +10,7 @@ import removeMarkdown from 'remove-markdown';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { getGenericExplorerUrl } from '@/helpers/explorer';
 import { getNames } from '@/helpers/stamp';
-import { _n, _p, _vp, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
@@ -209,8 +209,17 @@ function handleSortChange(
   }
 }
 
-function handleDelegateClick(delegatee?: string) {
-  delegateModalState.value = delegatee ? { delegatee } : null;
+function handleDelegateToggle(newDelegatee?: string) {
+  if (
+    newDelegatee &&
+    delegatee.value &&
+    compareAddresses(newDelegatee, delegatee.value.id)
+  ) {
+    isUndelegating.value = true;
+    return;
+  }
+
+  delegateModalState.value = newDelegatee ? { delegatee: newDelegatee } : null;
   delegateModalOpen.value = true;
 }
 
@@ -289,7 +298,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </UiButton>
       <div class="flex-auto" />
       <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="handleDelegateClick()">
+        <UiButton class="!px-0 w-[46px]" @click="handleDelegateToggle()">
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
@@ -499,10 +508,21 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       type="button"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
-                      @click="handleDelegateClick(delegate.user)"
+                      @click="handleDelegateToggle(delegate.user)"
                     >
-                      <IH-user-add />
-                      Delegate
+                      <template
+                        v-if="
+                          delegatee &&
+                          compareAddresses(delegate.user, delegatee.id)
+                        "
+                      >
+                        <IH-user-remove />
+                        Undelegate
+                      </template>
+                      <template v-else>
+                        <IH-user-add />
+                        Delegate
+                      </template>
                     </button>
                   </UiDropdownItem>
                   <UiDropdownItem v-slot="{ active }">
