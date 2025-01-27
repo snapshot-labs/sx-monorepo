@@ -500,5 +500,5 @@ export type SelectItem<T> = {
 
 export type Setting = {
   name: string;
-  value: string;
+  value: string | string[];
 };

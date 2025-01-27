@@ -1,13 +1,13 @@
+import { clone } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
 
-const DEFAULT_SETTINGS = {
+const DEFAULT_LIMITS_SETTINGS: Record<string, number> = {
   'space.active_proposal_limit_per_author': 0,
   'space.default.body_limit': 0,
   'space.default.choices_limit': 0,
   'space.default.proposal_limit_per_day': 0,
   'space.default.proposal_limit_per_month': 0,
   'space.default.strategies_limit': 0,
-  'space.ecosystem.list': [],
   'space.ecosystem.proposal_limit_per_day': 0,
   'space.ecosystem.proposal_limit_per_month': 0,
   'space.flagged.proposal_limit_per_day': 0,
@@ -25,20 +25,21 @@ const DEFAULT_SETTINGS = {
   'user.default.follow_limit': 0
 };
 
-const settings = ref<Map<string, number | string[]>>(
-  new Map(Object.entries(DEFAULT_SETTINGS))
-);
+const DEFAULT_LISTS_SETTINGS: Record<string, string[]> = {
+  'space.ecosystem.list': []
+};
+
+const limits = ref({
+  ...clone(DEFAULT_LIMITS_SETTINGS)
+});
+
+const lists = ref({
+  ...clone(DEFAULT_LISTS_SETTINGS)
+});
+
 const initialized = ref(false);
 
 const network = getNetwork(metadataNetwork);
-
-function castValue(value: any, key: string): number | string[] {
-  if (key.includes('limit')) {
-    return Number(value);
-  }
-
-  return value;
-}
 
 export function useSettings() {
   async function load() {
@@ -47,13 +48,12 @@ export function useSettings() {
     try {
       const result = await network.api.loadSettings();
 
-      result.forEach(setting => {
-        if (!settings.value.has(setting.name)) return;
-
-        settings.value.set(
-          setting.name,
-          castValue(setting.value, setting.name)
-        );
+      result.forEach(({ name, value }) => {
+        if (DEFAULT_LISTS_SETTINGS[name].hasOwnProperty(name)) {
+          lists.value[name] = value as string[];
+        } else if (DEFAULT_LIMITS_SETTINGS[name].hasOwnProperty(name)) {
+          limits.value[name] = Number(value);
+        }
       });
 
       initialized.value = true;
@@ -66,5 +66,5 @@ export function useSettings() {
     load();
   });
 
-  return { settings };
+  return { limits, lists };
 }

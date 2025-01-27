@@ -48,7 +48,7 @@ const { get: getPropositionPower, fetch: fetchPropositionPower } =
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
-const { settings } = useSettings();
+const { limits, lists } = useSettings();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -124,9 +124,7 @@ const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: Number(
-    settings.value.get(`space.${spaceType.value}.body_limit`) || 0
-  ),
+  maxLength: limits.value[`space.${spaceType.value}.body_limit`],
   examples: ['Propose something…']
 }));
 
@@ -134,9 +132,7 @@ const choicesDefinition = computed(() => ({
   type: 'array',
   title: 'Choices',
   minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
-  maxItems: Number(
-    settings.value.get(`space.${spaceType.value}.choices_limit`) || 0
-  ),
+  maxItems: limits.value[`space.${spaceType.value}.choices_limit`],
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
 }));
@@ -180,17 +176,15 @@ const spaceType = computed(() =>
 );
 
 const proposalLimitReached = computed(() => {
-  const type = (settings.value.get('space.ecosystem.list') || []).includes(
-    props.space.id
-  )
+  const type = lists.value['space.ecosystem.list'].includes(props.space.id)
     ? 'ecosystem'
     : spaceType.value;
 
   return (
     (props.space.proposal_count_1d || 0) >=
-      settings.value.get(`space.${type}.proposal_limit_per_day`) ||
+      limits.value[`space.${type}.proposal_limit_per_day`] ||
     (props.space.proposal_count_30d || 0) >=
-      settings.value.get(`space.${type}.proposal_limit_per_month`)
+      limits.value[`space.${type}.proposal_limit_per_month`]
   );
 });
 
@@ -475,9 +469,9 @@ watchEffect(() => {
           >
             <span>
               You can publish up to
-              {{ settings.get(`space.verified.proposal_limit_per_day`) }}
+              {{ limits[`space.verified.proposal_limit_per_day`] }}
               proposals per day and
-              {{ settings.get(`space.verified.proposal_limit_per_month`) }}
+              {{ limits[`space.verified.proposal_limit_per_month`] }}
               proposals per month.
               <a
                 :href="TURBO_URL"

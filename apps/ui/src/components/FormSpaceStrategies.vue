@@ -15,7 +15,7 @@ const props = defineProps<{
   space: Space;
 }>();
 
-const { settings } = useSettings();
+const { limits } = useSettings();
 
 const strategiesLimit = computed(() => {
   const spaceType = props.space.turbo
@@ -24,7 +24,7 @@ const strategiesLimit = computed(() => {
       ? 'verified'
       : 'default';
 
-  return settings.value.get(`space.${spaceType}.strategies_limit`);
+  return limits.value[`space.${spaceType}.strategies_limit`];
 });
 </script>
 
