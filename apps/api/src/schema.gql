@@ -190,3 +190,11 @@ type Leaderboard {
   proposal_count: Int!
   vote_count: Int!
 }
+
+type StarknetL1Execution {
+  id: String!
+  space: String!
+  proposalId: Int!
+  created: Int!
+  tx: String!
+}

@@ -1,0 +1,7 @@
+[
+  "constructor(address _implementation)",
+  "function createContract(address _owner, address _target, address _starknetCore, uint256 _executionRelayer, uint256[] _starknetSpaces, uint256 _quorum, bytes32 salt)",
+  "function deployedContracts(uint256) view returns (address)",
+  "function implementation() view returns (address)",
+  "event ContractDeployed(address indexed contractAddress)"
+]

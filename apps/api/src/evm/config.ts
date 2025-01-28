@@ -1,6 +1,8 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
 import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
+import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy.json';
+import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory.json';
 import ProxyFactory from './abis/ProxyFactory.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
@@ -31,6 +33,34 @@ export type FullConfig = {
 export function createConfig(indexerName: NetworkID): FullConfig {
   const network = evmNetworks[indexerName];
 
+  const sources = [
+    {
+      contract: network.Meta.proxyFactory,
+      start: START_BLOCKS[indexerName],
+      abi: 'ProxyFactory',
+      events: [
+        {
+          name: 'ProxyDeployed(address,address)',
+          fn: 'handleProxyDeployed'
+        }
+      ]
+    }
+  ];
+
+  if (indexerName === 'sep') {
+    sources.push({
+      contract: '0x27981a29ec87f2fbf873a2dcb0325405648ffce1',
+      start: 6106288,
+      abi: 'L1AvatarExecutionStrategyFactory',
+      events: [
+        {
+          name: 'ContractDeployed(address)',
+          fn: 'handleL1AvatarExecutionContractDeployed'
+        }
+      ]
+    });
+  }
+
   return {
     indexerName,
     chainId: network.Meta.eip712ChainId,
@@ -44,19 +74,7 @@ export function createConfig(indexerName: NetworkID): FullConfig {
         network.ProposalValidations.VotingPower
     },
     network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
-    sources: [
-      {
-        contract: network.Meta.proxyFactory,
-        start: START_BLOCKS[indexerName],
-        abi: 'ProxyFactory',
-        events: [
-          {
-            name: 'ProxyDeployed(address,address)',
-            fn: 'handleProxyDeployed'
-          }
-        ]
-      }
-    ],
+    sources,
     templates: {
       Space: {
         abi: 'Space',
@@ -152,13 +170,24 @@ export function createConfig(indexerName: NetworkID): FullConfig {
             fn: 'handleAxiomWriteOffchainVotes'
           }
         ]
+      },
+      L1AvatarExecutionStrategy: {
+        abi: 'L1AvatarExecutionStrategy',
+        events: [
+          {
+            name: 'ProposalExecuted(uint256,uint256)',
+            fn: 'handleStarknetProposalExecuted'
+          }
+        ]
       }
     },
     abis: {
       ProxyFactory,
       Space,
       SimpleQuorumTimelockExecutionStrategy,
-      AxiomExecutionStrategy
+      AxiomExecutionStrategy,
+      L1AvatarExecutionStrategy,
+      L1AvatarExecutionStrategyFactory
     }
   };
 }
