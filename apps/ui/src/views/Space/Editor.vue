@@ -464,7 +464,7 @@ watchEffect(() => {
             class="mb-4"
           >
             <div>
-              You cannot create proposals. The space is configured with
+              You cannot create proposals. This space is configured with
               <b>{{ unsupportedProposalNetworks[0].name }}</b
               >, a non-premium network. Change to a
               <AppLink to="https://docs.snapshot.box/"
