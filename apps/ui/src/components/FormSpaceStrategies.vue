@@ -10,15 +10,11 @@ const strategies = defineModel<StrategyConfig[]>('strategies', {
   required: true
 });
 
-const props = withDefaults(
-  defineProps<{
-    networkId: NetworkID;
-    isTicketValid: boolean;
-    space: { turbo: boolean; verified: boolean };
-    withNetworkSelector?: boolean;
-  }>(),
-  { withNetworkSelector: true }
-);
+const props = defineProps<{
+  networkId: NetworkID;
+  isTicketValid: boolean;
+  space: { turbo: boolean; verified: boolean };
+}>();
 
 const strategiesLimit = computed(() => {
   const spaceType = props.space.turbo
@@ -34,7 +30,7 @@ const strategiesLimit = computed(() => {
 <template>
   <div>
     <h4 class="eyebrow mb-2 font-medium">Strategies</h4>
-    <div v-if="withNetworkSelector" class="s-box mb-4">
+    <div class="s-box mb-4">
       <UiSelectorNetwork
         v-model="snapshotChainId"
         :definition="{
