@@ -250,8 +250,7 @@ watch(
                 documentation
               </AppLink>
               or contact support on
-              <AppLink :to="'https://help.snapshot.box/en'">
-                Help Center </AppLink
+              <AppLink :to="'https://help.snapshot.box/en'"> Helpdesk </AppLink
               >.
             </div>
           </div>
