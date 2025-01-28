@@ -55,7 +55,9 @@ const { get: getPropositionPower, fetch: fetchPropositionPower } =
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
-const { networks } = useOffchainNetworksList(props.space.network);
+const { networks, premiumChainIds } = useOffchainNetworksList(
+  props.space.network
+);
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -234,12 +236,8 @@ const unsupportedProposalNetworks = computed(() => {
     )
   ]);
 
-  const premiumsChainIds = networks.value
-    .filter(network => network.premium)
-    .map(network => network.chainId);
-
   return Array.from(ids)
-    .filter(n => !premiumsChainIds.includes(n))
+    .filter(n => !premiumChainIds.value.has(n))
     .map(chainId => networks.value.find(n => n.chainId === chainId));
 });
 

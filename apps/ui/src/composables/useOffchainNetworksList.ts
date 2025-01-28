@@ -15,12 +15,6 @@ export function useOffchainNetworksList(
       ({ chainId }) => typeof chainId === 'number'
     );
 
-    rawNetworks.forEach(network => {
-      if (premiumChainIds.value.has(network.chainId)) {
-        network.premium = true;
-      }
-    });
-
     const usageValue = usage.value;
     if (!usageValue) return rawNetworks;
 
@@ -37,6 +31,8 @@ export function useOffchainNetworksList(
   });
 
   async function load() {
+    if (loaded.value) return;
+
     const network = getNetwork(networkId);
     const networks = await network.api.getNetworks();
 
