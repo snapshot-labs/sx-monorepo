@@ -70,6 +70,15 @@ const navigation = computed(() => [
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
 ]);
 
+const hasOnlyInvalidDelegations = computed(() => {
+  if (!props.space.delegations.length) return true;
+
+  return props.space.delegations.every(
+    delegation =>
+      !delegation.apiUrl || delegation.apiType === 'split-delegation'
+  );
+});
+
 async function loadUserActivity() {
   const spaceNetwork = getNetwork(props.space.network);
 
@@ -187,7 +196,7 @@ watch(
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
         <UiButton
-          v-if="space.delegations.length"
+          v-if="!hasOnlyInvalidDelegations"
           @click="handleDelegateClick()"
         >
           Delegate

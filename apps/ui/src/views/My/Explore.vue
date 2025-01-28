@@ -192,7 +192,11 @@ onMounted(() => {
           :loading-more="spacesStore.loadingMore"
           class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3"
           @end-reached="
-            spacesStore.fetchMore({ searchQuery: route.query.q as string })
+            spacesStore.fetchMore({
+              searchQuery: route.query.q as string,
+              category: category,
+              network: network
+            })
           "
         >
           <SpacesListItem

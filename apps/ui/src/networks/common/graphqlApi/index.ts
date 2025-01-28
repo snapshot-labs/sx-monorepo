@@ -713,6 +713,9 @@ export function createApi(
     },
     getNetworksUsage: async () => {
       return {};
+    },
+    loadSettings: async () => {
+      return [];
     }
   };
 }

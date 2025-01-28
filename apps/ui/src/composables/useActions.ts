@@ -1,8 +1,8 @@
 import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { METADATA } from '@/networks/starknet';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   ChainId,
@@ -13,6 +13,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   SpaceSettings,
   Statement,
   User,
@@ -57,14 +58,25 @@ export function useActions() {
     };
   }
 
-  function handleSafeEnvelope(envelope: any) {
+  function handleSafeEnvelope(
+    envelope: any,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     if (envelope !== null) return false;
 
-    uiStore.addNotification('success', 'Transaction set up.');
+    uiStore.openSafeModal({
+      type: safeAppContext,
+      showVerifierLink: false
+    });
+
     return true;
   }
 
-  async function handleCommitEnvelope(envelope: any, networkId: NetworkID) {
+  async function handleCommitEnvelope(
+    envelope: any,
+    networkId: NetworkID,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     // TODO: it should work with WalletConnect, should be done before L1 transaction is broadcasted
     const network = getNetwork(networkId);
 
@@ -83,10 +95,17 @@ export function useActions() {
         );
       }
 
-      uiStore.addNotification(
-        'success',
-        'Transaction set up. It will be processed once received on L2 network automatically.'
-      );
+      if (envelope.signatureData.commitTxId) {
+        uiStore.addNotification(
+          'success',
+          'Transaction set up. It will be processed once received on L2 network automatically.'
+        );
+      } else {
+        uiStore.openSafeModal({
+          type: safeAppContext,
+          showVerifierLink: true
+        });
+      }
 
       return true;
     }
@@ -97,14 +116,27 @@ export function useActions() {
   async function wrapPromise(
     networkId: NetworkID,
     promise: Promise<any>,
-    opts: { transactionNetworkId?: NetworkID } = {}
+    opts: {
+      transactionNetworkId?: NetworkID;
+      safeAppContext?: 'vote' | 'propose' | 'transaction';
+    } = {}
   ): Promise<string | null> {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
 
-    if (handleSafeEnvelope(envelope)) return null;
-    if (await handleCommitEnvelope(envelope, networkId)) return null;
+    if (handleSafeEnvelope(envelope, opts.safeAppContext ?? 'transaction')) {
+      return null;
+    }
+    if (
+      await handleCommitEnvelope(
+        envelope,
+        networkId,
+        opts.safeAppContext ?? 'transaction'
+      )
+    ) {
+      return null;
+    }
 
     let hash;
     // TODO: unify send/soc to both return txHash under same property
@@ -277,10 +309,13 @@ export function useActions() {
         choice,
         reason,
         app
-      )
+      ),
+      {
+        safeAppContext: 'vote'
+      }
     );
 
-    addPendingVote(proposal.id);
+    if (txHash) addPendingVote(proposal.id);
 
     return txHash;
   }
@@ -308,7 +343,7 @@ export function useActions() {
 
     const network = getNetwork(space.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
         auth.web3,
@@ -328,10 +363,13 @@ export function useActions() {
         min_end,
         max_end,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
     );
 
-    return true;
+    return txHash;
   }
 
   async function updateProposal(
@@ -369,7 +407,10 @@ export function useActions() {
         privacy,
         labels,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
     );
 
     return true;
@@ -560,23 +601,19 @@ export function useActions() {
   async function delegate(
     space: Space,
     delegationType: DelegationType,
-    delegatee: string,
+    delegatee: string | null,
     delegationContract: string,
     chainId: ChainId
   ) {
-    if (!web3.value.account) return await forceLogin();
+    if (!web3.value.account) {
+      await forceLogin();
+      return null;
+    }
 
-    const isEvmNetwork = typeof chainId === 'number';
-    const actionNetwork = isEvmNetwork
-      ? 'eth'
-      : (Object.entries(METADATA).find(
-          ([, metadata]) => metadata.chainId === chainId
-        )?.[0] as NetworkID);
-    if (!actionNetwork) throw new Error('Failed to detect action network');
-
+    const actionNetwork = getDelegationNetwork(chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
-    await wrapPromise(
+    return wrapPromise(
       actionNetwork,
       network.actions.delegate(
         auth.web3,
@@ -588,6 +625,18 @@ export function useActions() {
         chainId
       )
     );
+  }
+
+  async function getDelegatee(
+    delegation: SpaceMetadataDelegation,
+    delegator: string
+  ) {
+    if (!delegation.chainId) throw new Error('Chain ID is missing');
+
+    const actionNetwork = getDelegationNetwork(delegation.chainId);
+    const network = getReadWriteNetwork(actionNetwork);
+
+    return network.actions.getDelegatee(auth.web3, delegation, delegator);
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {
@@ -691,6 +740,7 @@ export function useActions() {
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
     deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),
+    getDelegatee: wrapWithErrors(getDelegatee),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
     updateUser: wrapWithErrors(updateUser),

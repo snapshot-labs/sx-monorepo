@@ -375,3 +375,12 @@ export const NETWORKS_USAGE_QUERY = gql`
     }
   }
 `;
+
+export const SETTINGS_QUERY = gql`
+  query Settings {
+    options {
+      name
+      value
+    }
+  }
+`;
