@@ -1,3 +1,4 @@
+import { isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
@@ -15,6 +16,8 @@ import {
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, MANA_URL } from '@/helpers/mana';
+import Multicaller from '@/helpers/multicaller';
+import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
@@ -43,6 +46,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
@@ -80,12 +84,26 @@ export function createActions(
     return code !== '0x';
   };
 
+  /**
+   * Get signer from Web3 provider with ENS resolver on mainnet
+   * @param web3 Web3 provider
+   * @returns signer with ENS resolver on mainnet
+   */
+  const getSigner = (web3: Web3Provider) => {
+    const signer = web3.getSigner();
+    signer.provider.getResolver = (value: string) => {
+      return getProvider(1).getResolver(value);
+    };
+
+    return signer;
+  };
+
   return {
     async predictSpaceAddress(web3: Web3Provider, { salt }) {
       await verifyNetwork(web3, chainId);
 
       return client.predictSpaceAddress({
-        signer: web3.getSigner(),
+        signer: getSigner(web3),
         saltNonce: salt
       });
     },
@@ -113,7 +131,7 @@ export function createActions(
       );
     },
     async createSpace(
-      web3: any,
+      web3: Web3Provider,
       salt: string,
       params: {
         controller: string;
@@ -152,7 +170,7 @@ export function createActions(
       );
 
       const response = await client.deploySpace({
-        signer: web3.getSigner(),
+        signer: getSigner(web3),
         saltNonce: salt,
         params: {
           ...params,
@@ -268,16 +286,18 @@ export function createActions(
         metadataUri: `ipfs://${pinned.cid}`
       };
 
+      const signer = getSigner(web3);
+
       if (relayerType === 'evm') {
         return ethSigClient.propose({
-          signer: web3.getSigner(),
+          signer,
           data
         });
       }
 
       return client.propose(
         {
-          signer: web3.getSigner(),
+          signer,
           envelope: {
             data
           }
@@ -354,16 +374,18 @@ export function createActions(
         metadataUri: `ipfs://${pinned.cid}`
       };
 
+      const signer = getSigner(web3);
+
       if (relayerType === 'evm') {
         return ethSigClient.updateProposal({
-          signer: web3.getSigner(),
+          signer,
           data
         });
       }
 
       return client.updateProposal(
         {
-          signer: web3.getSigner(),
+          signer,
           envelope: {
             data
           }
@@ -377,12 +399,14 @@ export function createActions(
     cancelProposal: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
-      const address = await web3.getSigner().getAddress();
+      const signer = getSigner(web3);
+
+      const address = await signer.getAddress();
       const isContract = await getIsContract(address);
 
       return client.cancel(
         {
-          signer: web3.getSigner(),
+          signer,
           space: proposal.space.id,
           proposal: proposal.proposal_id as number
         },
@@ -440,20 +464,22 @@ export function createActions(
         chainId
       };
 
+      const signer = getSigner(web3);
+
       if (!isContract && proposal.execution_strategy_type === 'Axiom') {
-        return highlightVote({ signer: web3.getSigner(), data });
+        return highlightVote({ signer, data });
       }
 
       if (relayerType === 'evm') {
         return ethSigClient.vote({
-          signer: web3.getSigner(),
+          signer,
           data
         });
       }
 
       return client.vote(
         {
-          signer: web3.getSigner(),
+          signer,
           envelope: {
             data
           }
@@ -505,7 +531,7 @@ export function createActions(
       await verifyNetwork(web3, chainId);
 
       return client.vetoExecution({
-        signer: web3.getSigner(),
+        signer: getSigner(web3),
         executionStrategy: proposal.execution_strategy,
         executionHash: proposal.execution_hash
       });
@@ -517,12 +543,14 @@ export function createActions(
     ) => {
       await verifyNetwork(web3, chainId);
 
-      const address = await web3.getSigner().getAddress();
+      const signer = web3.getSigner();
+
+      const address = await signer.getAddress();
       const isContract = await getIsContract(address);
 
       return client.transferOwnership(
         {
-          signer: web3.getSigner(),
+          signer,
           space: space.id,
           owner
         },
@@ -553,6 +581,8 @@ export function createActions(
       };
 
       if (delegationType === 'governor-subgraph') {
+        delegatee = delegatee ?? '0x0000000000000000000000000000000000000000';
+
         contractParams = {
           address: delegationContract,
           functionName: 'delegate',
@@ -560,28 +590,63 @@ export function createActions(
           abi: ['function delegate(address delegatee)']
         };
       } else if (delegationType == 'delegate-registry') {
-        contractParams = {
-          address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
-          functionName: 'setDelegate',
-          functionParams: [formatBytes32String(space.id), delegatee],
-          abi: ['function setDelegate(bytes32 id, address delegate)']
-        };
+        if (delegatee) {
+          contractParams = {
+            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            functionName: 'setDelegate',
+            functionParams: [formatBytes32String(space.id), delegatee],
+            abi: ['function setDelegate(bytes32 id, address delegate)']
+          };
+        } else {
+          contractParams = {
+            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            functionName: 'clearDelegate',
+            functionParams: [formatBytes32String(space.id)],
+            abi: ['function clearDelegate(bytes32 id)']
+          };
+        }
       } else {
         throw new Error('Unsupported delegation type');
       }
 
+      const signer = getSigner(web3);
+
       const votesContract = new Contract(
         contractParams.address,
         contractParams.abi,
-        web3.getSigner()
+        signer
       );
 
       return votesContract[contractParams.functionName](
         ...contractParams.functionParams
       );
     },
-    updateSettings: async (
+    getDelegatee: async (
       web3: any,
+      delegation: SpaceMetadataDelegation,
+      delegator: string
+    ) => {
+      const { contractAddress } = delegation;
+      if (!contractAddress) return null;
+      if (!isAddress(delegator)) return null;
+
+      const multi = new Multicaller(chainId.toString(), provider, [
+        'function decimals() view returns (uint8)',
+        'function balanceOf(address account) view returns (uint256)',
+        'function delegates(address) view returns (address)'
+      ]);
+      multi.call('decimals', contractAddress, 'decimals');
+      multi.call('balanceOf', contractAddress, 'balanceOf', [delegator]);
+      multi.call('delegatee', contractAddress, 'delegates', [delegator]);
+
+      const { decimals, balanceOf, delegatee } = await multi.execute();
+
+      return delegatee !== '0x0000000000000000000000000000000000000000'
+        ? { address: delegatee, balance: balanceOf.toBigInt(), decimals }
+        : null;
+    },
+    updateSettings: async (
+      web3: Web3Provider,
       space: Space,
       metadata: SpaceMetadata,
       authenticatorsToAdd: StrategyConfig[],
@@ -594,6 +659,9 @@ export function createActions(
       maxVotingDuration: number | null
     ) => {
       await verifyNetwork(web3, chainId);
+
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
@@ -612,41 +680,46 @@ export function createActions(
         validationStrategy
       );
 
-      return client.updateSettings({
-        signer: web3.getSigner(),
-        space: space.id,
-        settings: {
-          metadataUri: `ipfs://${pinned.cid}`,
-          authenticatorsToAdd: authenticatorsToAdd.map(
-            config => config.address
-          ),
-          authenticatorsToRemove: space.authenticators.filter(
-            (authenticator, index) => authenticatorsToRemove.includes(index)
-          ),
-          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)[0]
-              : '0x'
-          })),
-          votingStrategiesToRemove: votingStrategiesToRemove.map(
-            index => space.strategies_indices[index]
-          ),
-          votingStrategyMetadataUrisToAdd: metadataUris,
-          proposalValidationStrategy: {
-            addr: validationStrategy.address,
-            params: validationStrategy.generateParams
-              ? validationStrategy.generateParams(validationStrategy.params)[0]
-              : '0x'
-          },
-          proposalValidationStrategyMetadataUri,
-          votingDelay: votingDelay !== null ? votingDelay : undefined,
-          minVotingDuration:
-            minVotingDuration !== null ? minVotingDuration : undefined,
-          maxVotingDuration:
-            maxVotingDuration !== null ? maxVotingDuration : undefined
-        }
-      });
+      return client.updateSettings(
+        {
+          signer: getSigner(web3),
+          space: space.id,
+          settings: {
+            metadataUri: `ipfs://${pinned.cid}`,
+            authenticatorsToAdd: authenticatorsToAdd.map(
+              config => config.address
+            ),
+            authenticatorsToRemove: space.authenticators.filter(
+              (authenticator, index) => authenticatorsToRemove.includes(index)
+            ),
+            votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? config.generateParams(config.params)[0]
+                : '0x'
+            })),
+            votingStrategiesToRemove: votingStrategiesToRemove.map(
+              index => space.strategies_indices[index]
+            ),
+            votingStrategyMetadataUrisToAdd: metadataUris,
+            proposalValidationStrategy: {
+              addr: validationStrategy.address,
+              params: validationStrategy.generateParams
+                ? validationStrategy.generateParams(
+                    validationStrategy.params
+                  )[0]
+                : '0x'
+            },
+            proposalValidationStrategyMetadataUri,
+            votingDelay: votingDelay !== null ? votingDelay : undefined,
+            minVotingDuration:
+              minVotingDuration !== null ? minVotingDuration : undefined,
+            maxVotingDuration:
+              maxVotingDuration !== null ? maxVotingDuration : undefined
+          }
+        },
+        { noWait: isContract }
+      );
     },
     updateSettingsRaw: () => {
       throw new Error('Not implemented');
