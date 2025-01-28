@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { getNetwork } from '@/networks';
-import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { NetworkID } from '@/types';
 
 const spaceId = defineModel<string>();
