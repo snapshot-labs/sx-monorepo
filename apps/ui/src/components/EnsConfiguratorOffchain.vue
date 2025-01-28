@@ -80,7 +80,7 @@ function handleSelect(value: string) {
         <h4 class="eyebrow">ENS names</h4>
         <UiButton
           v-if="names"
-          class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto"
+          class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
           :disabled="isLoading"
           :loading="isRefreshing"
           @click="refresh"
