@@ -100,6 +100,11 @@ export function createWriters(config: FullConfig) {
 
         await executionStrategy.save();
 
+        await executeTemplate('SimpleQuorumTimelockExecutionStrategy', {
+          contract: proxyAddress,
+          start: blockNumber
+        });
+
         break;
       }
       case getAddress(config.overrides.masterSimpleQuorumAvatar): {
@@ -694,7 +699,8 @@ export function createWriters(config: FullConfig) {
   const handleProposalExecuted: evm.Writer = async ({
     tx,
     rawEvent,
-    event
+    event,
+    block
   }) => {
     if (!rawEvent || !event) return;
 
@@ -707,8 +713,27 @@ export function createWriters(config: FullConfig) {
     if (!proposal) return;
 
     proposal.executed = true;
-    proposal.completed = true;
-    proposal.execution_tx = tx.hash ?? null;
+
+    const executionStrategy = await ExecutionStrategy.loadEntity(
+      proposal.execution_strategy,
+      config.indexerName
+    );
+
+    const now = block?.timestamp ?? getCurrentTimestamp();
+
+    if (executionStrategy) {
+      switch (executionStrategy.type) {
+        case 'SimpleQuorumAvatar':
+        case 'Axiom':
+          proposal.completed = true;
+          proposal.execution_tx = tx.hash;
+          break;
+        case 'SimpleQuorumTimelock':
+          proposal.execution_time =
+            now + Number(executionStrategy.timelock_delay);
+          break;
+      }
+    }
 
     await proposal.save();
   };
@@ -810,8 +835,59 @@ export function createWriters(config: FullConfig) {
     }
   };
 
+  const handleTimelockProposalExecuted: evm.Writer = async ({
+    tx,
+    rawEvent,
+    event
+  }) => {
+    if (!rawEvent || !event) return;
+
+    const executionHash = await ExecutionHash.loadEntity(
+      event.args.executionPayloadHash,
+      config.indexerName
+    );
+    if (!executionHash) return;
+
+    const proposal = await Proposal.loadEntity(
+      executionHash.proposal_id,
+      config.indexerName
+    );
+    if (!proposal) return;
+
+    proposal.completed = true;
+    proposal.execution_tx = tx.hash;
+    await proposal.save();
+  };
+
+  const handleTimelockProposalVetoed: evm.Writer = async ({
+    tx,
+    rawEvent,
+    event
+  }) => {
+    if (!rawEvent || !event) return;
+
+    const executionHash = await ExecutionHash.loadEntity(
+      event.args.executionPayloadHash,
+      config.indexerName
+    );
+    if (!executionHash) return;
+
+    const proposal = await Proposal.loadEntity(
+      executionHash.proposal_id,
+      config.indexerName
+    );
+    if (!proposal) return;
+
+    proposal.completed = true;
+    proposal.vetoed = true;
+    proposal.veto_tx = tx.hash;
+    await proposal.save();
+  };
+
   return {
+    // ProxyFactory
     handleProxyDeployed,
+    // Space
     handleSpaceCreated,
     handleMetadataUriUpdated,
     handleMinVotingDurationUpdated,
@@ -827,6 +903,9 @@ export function createWriters(config: FullConfig) {
     handleProposalCancelled,
     handleProposalUpdated,
     handleProposalExecuted,
-    handleVoteCast
+    handleVoteCast,
+    // SimpleQuorumTimelockExecutionStrategy
+    handleTimelockProposalExecuted,
+    handleTimelockProposalVetoed
   };
 }

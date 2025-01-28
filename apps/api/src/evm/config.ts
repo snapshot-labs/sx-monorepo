@@ -1,7 +1,8 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
-import proxyFactoryAbi from './abis/ProxyFactory.json';
-import spaceAbi from './abis/Space.json';
+import ProxyFactory from './abis/ProxyFactory.json';
+import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
+import Space from './abis/Space.json';
 import { DEFAULT_INFURA_API_KEY } from '../config';
 
 export type FullConfig = {
@@ -118,11 +119,25 @@ export function createConfig(indexerName: 'sep'): FullConfig {
             fn: 'handleVoteCast'
           }
         ]
+      },
+      SimpleQuorumTimelockExecutionStrategy: {
+        abi: 'SimpleQuorumTimelockExecutionStrategy',
+        events: [
+          {
+            name: 'ProposalExecuted(bytes32)',
+            fn: 'handleTimelockProposalExecuted'
+          },
+          {
+            name: 'ProposalVetoed(bytes32)',
+            fn: 'handleTimelockProposalVetoed'
+          }
+        ]
       }
     },
     abis: {
-      ProxyFactory: proxyFactoryAbi,
-      Space: spaceAbi
+      ProxyFactory,
+      Space,
+      SimpleQuorumTimelockExecutionStrategy
     }
   };
 }
