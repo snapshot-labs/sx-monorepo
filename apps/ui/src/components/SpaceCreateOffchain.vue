@@ -4,7 +4,7 @@ import { CHAIN_IDS } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
-import { Member, NetworkID, SpacePrivacy, Validation } from '@/types';
+import { Member, NetworkID, Validation } from '@/types';
 
 const DEFAULT_SETTINGS_FORM = {
   id: '',
@@ -21,7 +21,6 @@ const DEFAULT_SETTINGS_FORM = {
   categories: [],
   votingDelay: 0,
   minVotingDuration: 0,
-  privacy: 'any' as SpacePrivacy,
   strategies: [] as StrategyConfig[],
   members: [] as Member[],
   proposalValidation: null as Validation | null
@@ -146,8 +145,7 @@ const formattedSpaceSettings = computed(() => {
     voting: {
       delay: settingsForm.value.votingDelay,
       period: settingsForm.value.minVotingDuration,
-      privacy:
-        settingsForm.value.privacy === 'none' ? '' : settingsForm.value.privacy
+      privacy: 'any'
     },
     filters: {
       onlyMembers:
