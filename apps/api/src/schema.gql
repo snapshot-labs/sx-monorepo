@@ -119,7 +119,7 @@ type Proposal {
   execution_strategy_type: String!
   execution_destination: String
   timelock_veto_guardian: String
-  timelock_delay: Int
+  timelock_delay: BigInt
   axiom_snapshot_address: String
   axiom_snapshot_slot: BigInt
   strategies_indices: [Int]!
