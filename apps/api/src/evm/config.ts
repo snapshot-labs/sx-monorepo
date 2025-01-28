@@ -37,7 +37,7 @@ export function createConfig(indexerName: 'sep'): FullConfig {
     sources: [
       {
         contract: network.Meta.proxyFactory,
-        start: 7554313,
+        start: 7588969,
         abi: 'ProxyFactory',
         events: [
           {

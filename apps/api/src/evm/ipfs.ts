@@ -1,12 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { FullConfig } from './config';
-import {
-  ProposalMetadataItem,
-  SpaceMetadataItem,
-  StrategiesParsedMetadataDataItem,
-  VoteMetadataItem
-} from '../../.checkpoint/models';
-import { dropIpfs, getJSON, getSpaceName } from '../utils';
+import { SpaceMetadataItem } from '../../.checkpoint/models';
+import { dropIpfs, getJSON, getSpaceName } from '../common/utils';
 
 export async function handleSpaceMetadata(
   space: string,
@@ -100,106 +95,4 @@ export async function handleSpaceMetadata(
   }
 
   await spaceMetadataItem.save();
-}
-
-// TODO: unify?
-export async function handleStrategiesParsedMetadata(
-  metadataUri: string,
-  config: FullConfig
-) {
-  const exists = await StrategiesParsedMetadataDataItem.loadEntity(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-  if (exists) return;
-
-  const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-
-  const metadata: any = await getJSON(metadataUri);
-  if (metadata.name) strategiesParsedMetadataItem.name = metadata.name;
-  if (metadata.description)
-    strategiesParsedMetadataItem.description = metadata.description;
-
-  if (metadata.properties) {
-    if (metadata.properties.decimals) {
-      strategiesParsedMetadataItem.decimals = metadata.properties.decimals;
-    }
-    if (metadata.properties.symbol) {
-      strategiesParsedMetadataItem.symbol = metadata.properties.symbol;
-    }
-    if (metadata.properties.token)
-      strategiesParsedMetadataItem.token = metadata.properties.token;
-    if (metadata.properties.payload) {
-      strategiesParsedMetadataItem.payload = metadata.properties.payload;
-    }
-  }
-
-  await strategiesParsedMetadataItem.save();
-}
-
-// TODO: unify
-export async function handleProposalMetadata(
-  metadataUri: string,
-  config: FullConfig
-) {
-  const exists = await ProposalMetadataItem.loadEntity(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-  if (exists) return;
-
-  const proposalMetadataItem = new ProposalMetadataItem(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-  proposalMetadataItem.choices = ['For', 'Against', 'Abstain'];
-  proposalMetadataItem.labels = [];
-
-  const metadata: any = await getJSON(metadataUri);
-  if (metadata.title) proposalMetadataItem.title = metadata.title;
-  if (metadata.body) proposalMetadataItem.body = metadata.body;
-  if (metadata.discussion)
-    proposalMetadataItem.discussion = metadata.discussion;
-  if (metadata.execution)
-    proposalMetadataItem.execution = JSON.stringify(metadata.execution);
-  if (
-    Array.isArray(metadata.labels) &&
-    metadata.labels.every((label: string) => typeof label === 'string')
-  ) {
-    proposalMetadataItem.labels = metadata.labels;
-  }
-  if (
-    Array.isArray(metadata.choices) &&
-    metadata.choices.length === 3 &&
-    metadata.choices.every((choice: string) => typeof choice === 'string')
-  ) {
-    proposalMetadataItem.choices = metadata.choices;
-  }
-
-  await proposalMetadataItem.save();
-}
-
-// TODO: unify
-export async function handleVoteMetadata(
-  metadataUri: string,
-  config: FullConfig
-) {
-  const exists = await VoteMetadataItem.loadEntity(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-  if (exists) return;
-
-  const voteMetadataItem = new VoteMetadataItem(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-
-  const metadata: any = await getJSON(metadataUri);
-  voteMetadataItem.reason = metadata.reason ?? '';
-
-  await voteMetadataItem.save();
 }

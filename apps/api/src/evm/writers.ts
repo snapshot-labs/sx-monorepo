@@ -7,16 +7,8 @@ import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
 import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import { FullConfig } from './config';
-import {
-  handleProposalMetadata,
-  handleSpaceMetadata,
-  handleVoteMetadata
-} from './ipfs';
-import {
-  convertChoice,
-  handleStrategiesMetadata,
-  updateProposaValidationStrategy
-} from './utils';
+import { handleSpaceMetadata } from './ipfs';
+import { convertChoice, updateProposaValidationStrategy } from './utils';
 import {
   ExecutionHash,
   ExecutionStrategy,
@@ -26,7 +18,12 @@ import {
   User,
   Vote
 } from '../../.checkpoint/models';
-import { dropIpfs, getCurrentTimestamp } from '../utils';
+import {
+  handleProposalMetadata,
+  handleStrategiesMetadata,
+  handleVoteMetadata
+} from '../common/ipfs';
+import { dropIpfs, getCurrentTimestamp } from '../common/utils';
 
 const EMPTY_EXECUTION_HASH =
   '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';

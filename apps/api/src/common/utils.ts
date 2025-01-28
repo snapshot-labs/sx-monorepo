@@ -1,7 +1,24 @@
 import { faker } from '@faker-js/faker';
 import fetch from 'cross-fetch';
 import { hash } from 'starknet';
-import { getUrl } from './starknet/utils';
+
+export function getUrl(uri: string, gateway = 'pineapple.fyi') {
+  const ipfsGateway = `https://${gateway}`;
+  if (!uri) return null;
+  if (
+    !uri.startsWith('ipfs://') &&
+    !uri.startsWith('ipns://') &&
+    !uri.startsWith('https://') &&
+    !uri.startsWith('http://')
+  )
+    return `${ipfsGateway}/ipfs/${uri}`;
+  const uriScheme = uri.split('://')[0];
+  if (uriScheme === 'ipfs')
+    return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
+  if (uriScheme === 'ipns')
+    return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  return uri;
+}
 
 export function getCurrentTimestamp() {
   return Math.floor(Date.now() / 1000);

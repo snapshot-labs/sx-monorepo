@@ -2,13 +2,8 @@ import { defaultAbiCoder } from '@ethersproject/abi';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { FullConfig } from './config';
-import { handleStrategiesParsedMetadata } from './ipfs';
-import {
-  Space,
-  StrategiesParsedMetadataItem,
-  VotingPowerValidationStrategiesParsedMetadataItem
-} from '../../.checkpoint/models';
-import { dropIpfs, getJSON } from '../utils';
+import { Space } from '../../.checkpoint/models';
+import { handleVotingPowerValidationMetadata } from '../common/ipfs';
 
 /**
  * Convert EVM onchain choice value to common format.
@@ -23,40 +18,6 @@ export function convertChoice(rawChoice: number): 1 | 2 | 3 | null {
   if (rawChoice === 2) return 3;
 
   return null;
-}
-
-// TODO: unify?
-export async function handleStrategiesMetadata(
-  spaceId: string,
-  metadataUris: string[],
-  startingIndex: number,
-  config: FullConfig,
-  type:
-    | typeof StrategiesParsedMetadataItem
-    | typeof VotingPowerValidationStrategiesParsedMetadataItem = StrategiesParsedMetadataItem
-) {
-  for (let i = 0; i < metadataUris.length; i++) {
-    const metadataUri = metadataUris[i];
-    if (!metadataUri) continue;
-
-    const index = startingIndex + i;
-    const uniqueId = `${spaceId}/${index}/${dropIpfs(metadataUri)}`;
-
-    const exists = await type.loadEntity(uniqueId, config.indexerName);
-    if (exists) continue;
-
-    const strategiesParsedMetadataItem = new type(uniqueId, config.indexerName);
-    strategiesParsedMetadataItem.space = spaceId;
-    strategiesParsedMetadataItem.index = index;
-
-    if (metadataUri.startsWith('ipfs://')) {
-      strategiesParsedMetadataItem.data = dropIpfs(metadataUri);
-
-      await handleStrategiesParsedMetadata(metadataUri, config);
-    }
-
-    await strategiesParsedMetadataItem.save();
-  }
 }
 
 export async function updateProposaValidationStrategy(
@@ -107,23 +68,4 @@ export async function updateProposaValidationStrategy(
       space.voting_power_validation_strategy_strategies_params = [];
     }
   }
-}
-
-export async function handleVotingPowerValidationMetadata(
-  spaceId: string,
-  metadataUri: string,
-  config: FullConfig
-) {
-  if (!metadataUri) return;
-
-  const metadata: any = await getJSON(metadataUri);
-  if (!metadata.strategies_metadata) return;
-
-  await handleStrategiesMetadata(
-    spaceId,
-    metadata.strategies_metadata,
-    0,
-    config,
-    VotingPowerValidationStrategiesParsedMetadataItem
-  );
 }
