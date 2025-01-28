@@ -1,5 +1,6 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
+import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
 import ProxyFactory from './abis/ProxyFactory.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
@@ -132,12 +133,22 @@ export function createConfig(indexerName: 'sep'): FullConfig {
             fn: 'handleTimelockProposalVetoed'
           }
         ]
+      },
+      AxiomExecutionStrategy: {
+        abi: 'AxiomExecutionStrategy',
+        events: [
+          {
+            name: 'WriteOffchainVotes(uint256,uint256,uint256,uint256,uint256)',
+            fn: 'handleAxiomWriteOffchainVotes'
+          }
+        ]
       }
     },
     abis: {
       ProxyFactory,
       Space,
-      SimpleQuorumTimelockExecutionStrategy
+      SimpleQuorumTimelockExecutionStrategy,
+      AxiomExecutionStrategy
     }
   };
 }

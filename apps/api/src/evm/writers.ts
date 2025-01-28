@@ -168,6 +168,11 @@ export function createWriters(config: FullConfig) {
 
         await executionStrategy.save();
 
+        await executeTemplate('AxiomExecutionStrategy', {
+          contract: proxyAddress,
+          start: blockNumber
+        });
+
         break;
       }
       default:
@@ -884,6 +889,37 @@ export function createWriters(config: FullConfig) {
     await proposal.save();
   };
 
+  const handleAxiomWriteOffchainVotes: evm.Writer = async ({
+    rawEvent,
+    blockNumber,
+    event
+  }) => {
+    if (!rawEvent || !event) return;
+
+    const contract = new Contract(
+      rawEvent.address,
+      AxiomExecutionStrategy,
+      provider
+    );
+
+    const overrides = {
+      blockTag: blockNumber
+    };
+
+    const space: string = await contract.space(overrides);
+    const spaceId = getAddress(space);
+
+    const proposal = await Proposal.loadEntity(
+      `${spaceId}/${event.args.proposalId}`,
+      config.indexerName
+    );
+    if (!proposal) return;
+
+    proposal.execution_ready = true;
+
+    proposal.save();
+  };
+
   return {
     // ProxyFactory
     handleProxyDeployed,
@@ -906,6 +942,8 @@ export function createWriters(config: FullConfig) {
     handleVoteCast,
     // SimpleQuorumTimelockExecutionStrategy
     handleTimelockProposalExecuted,
-    handleTimelockProposalVetoed
+    handleTimelockProposalVetoed,
+    // Axiom
+    handleAxiomWriteOffchainVotes
   };
 }
