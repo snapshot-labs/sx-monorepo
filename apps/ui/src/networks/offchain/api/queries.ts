@@ -372,6 +372,7 @@ export const NETWORKS_QUERY = gql`
     networks {
       id
       spacesCount
+      premium
     }
   }
 `;

@@ -826,7 +826,7 @@ export function createApi(
           Number(network.id),
           {
             spaces_count: network.spacesCount,
-            premium: true
+            premium: network.premium
           }
         ])
       );
