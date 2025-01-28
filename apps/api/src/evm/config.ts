@@ -4,10 +4,20 @@ import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
 import ProxyFactory from './abis/ProxyFactory.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
-import { DEFAULT_INFURA_API_KEY } from '../config';
+
+type NetworkID = 'eth' | 'sep' | 'oeth' | 'matic' | 'arb1' | 'base';
+
+const START_BLOCKS: Record<NetworkID, number> = {
+  eth: 18962278,
+  sep: 4519171,
+  oeth: 118359200,
+  matic: 50858232,
+  arb1: 157825417,
+  base: 23524251
+};
 
 export type FullConfig = {
-  indexerName: 'sep';
+  indexerName: NetworkID;
   chainId: number;
   overrides: {
     masterSpace: string;
@@ -18,7 +28,7 @@ export type FullConfig = {
   };
 } & CheckpointConfig;
 
-export function createConfig(indexerName: 'sep'): FullConfig {
+export function createConfig(indexerName: NetworkID): FullConfig {
   const network = evmNetworks[indexerName];
 
   return {
@@ -33,11 +43,11 @@ export function createConfig(indexerName: 'sep'): FullConfig {
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower
     },
-    network_node_url: `https://sepolia.infura.io/v3/${DEFAULT_INFURA_API_KEY}`,
+    network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
     sources: [
       {
         contract: network.Meta.proxyFactory,
-        start: 7588969,
+        start: START_BLOCKS[indexerName],
         abi: 'ProxyFactory',
         events: [
           {
