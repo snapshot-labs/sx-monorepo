@@ -6,6 +6,7 @@ const editStrategyModalStrategyId = ref<StrategyTemplate['address']>();
 </script>
 
 <script setup lang="ts">
+import { MAX_STRATEGIES } from '@/helpers/turbo';
 import { getNetwork } from '@/networks';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { ChainId, NetworkID } from '@/types';
@@ -107,7 +108,7 @@ onMounted(() => {
         v-model:model-value="strategies"
         :network-id="networkId"
         :default-chain-id="chainId"
-        :limit="8"
+        :limit="MAX_STRATEGIES.default"
       >
         <template #empty>
           <div class="space-y-3">
