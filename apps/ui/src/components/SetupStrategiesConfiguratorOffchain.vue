@@ -110,12 +110,9 @@ onMounted(() => {
         :limit="8"
       >
         <template #empty>
-          <UiMessage type="danger" class="mb-4">
-            At least one strategy is required.
-          </UiMessage>
-          <div class="text-center space-y-3">
+          <div class="space-y-3">
             <div>Setup your voting power weighted by an ERC token</div>
-            <div class="flex gap-2 justify-center">
+            <div class="flex gap-2">
               <UiButton
                 v-for="(standard, id) in TOKEN_STANDARD_STRATEGY_MAPPING"
                 :key="id"
