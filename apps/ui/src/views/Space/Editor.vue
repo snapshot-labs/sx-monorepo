@@ -467,7 +467,8 @@ watchEffect(() => {
               You cannot create proposals. This space is configured with
               <b>{{ unsupportedProposalNetworks[0].name }}</b
               >, a non-premium network. Change to a
-              <AppLink to="https://docs.snapshot.box/"
+              <AppLink
+                to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
                 >premium network
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
