@@ -307,7 +307,6 @@ watch(
             :selected-network-id="networkId"
             @errors="v => handleErrors('voting', v)"
           />
-          <VotingPrivacyConfigurator v-model="settingsForm.privacy" />
         </template>
         <FormSpaceMembers
           v-if="currentStep === 'members'"
