@@ -466,8 +466,13 @@ watchEffect(() => {
             <div>
               You cannot create proposals. The space is configured with
               <b>{{ unsupportedProposalNetworks[0].name }}</b
-              >, a non-premium network. Change to a premium network or upgrade
-              <b>{{ unsupportedProposalNetworks[0].name }}</b> to continue.
+              >, a non-premium network. Change to a
+              <AppLink to="https://docs.snapshot.box/"
+                >premium network
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </AppLink>
+              or upgrade <b>{{ unsupportedProposalNetworks[0].name }}</b> to
+              continue.
             </div>
           </UiAlert>
           <template v-else>
