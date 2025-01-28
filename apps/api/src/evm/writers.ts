@@ -1,5 +1,11 @@
 import { getAddress } from '@ethersproject/address';
+import { BigNumber } from '@ethersproject/bignumber';
+import { Contract } from '@ethersproject/contracts';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
+import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
+import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
+import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import { FullConfig } from './config';
 import {
   handleProposalMetadata,
@@ -13,6 +19,7 @@ import {
 } from './utils';
 import {
   ExecutionHash,
+  ExecutionStrategy,
   Leaderboard,
   Proposal,
   Space,
@@ -30,6 +37,11 @@ type Strategy = {
 };
 
 export function createWriters(config: FullConfig) {
+  const provider = new StaticJsonRpcProvider(
+    config.network_node_url,
+    config.chainId
+  );
+
   const handleProxyDeployed: evm.Writer = async ({
     blockNumber,
     event,
@@ -42,13 +54,119 @@ export function createWriters(config: FullConfig) {
     const proxyAddress = getAddress(event.args.proxy);
     const implementationAddress = getAddress(event.args.implementation);
 
-    if (implementationAddress === getAddress(config.overrides.masterSpace)) {
-      await executeTemplate('Space', {
-        contract: proxyAddress,
-        start: blockNumber
-      });
-    } else {
-      console.log('Unknown implementation', implementationAddress);
+    switch (implementationAddress) {
+      case getAddress(config.overrides.masterSpace): {
+        await executeTemplate('Space', {
+          contract: proxyAddress,
+          start: blockNumber
+        });
+        break;
+      }
+      case getAddress(config.overrides.masterSimpleQuorumTimelock): {
+        const contract = new Contract(
+          proxyAddress,
+          SimpleQuorumTimelockExecutionStrategy,
+          provider
+        );
+
+        const overrides = {
+          blockTag: blockNumber
+        };
+
+        const [type, quorum, timelockVetoGuardian, timelockDelay]: [
+          string,
+          BigNumber,
+          string,
+          BigNumber
+        ] = await Promise.all([
+          contract.getStrategyType(overrides),
+          contract.quorum(overrides),
+          contract.vetoGuardian(overrides),
+          contract.timelockDelay(overrides)
+        ]);
+
+        const executionStrategy = new ExecutionStrategy(
+          proxyAddress,
+          config.indexerName
+        );
+        executionStrategy.address = proxyAddress;
+        executionStrategy.type = type;
+        executionStrategy.quorum = quorum.toString();
+        executionStrategy.treasury_chain = config.chainId;
+        executionStrategy.treasury = proxyAddress;
+        executionStrategy.timelock_veto_guardian =
+          getAddress(timelockVetoGuardian);
+        executionStrategy.timelock_delay = timelockDelay.toBigInt();
+
+        await executionStrategy.save();
+
+        break;
+      }
+      case getAddress(config.overrides.masterSimpleQuorumAvatar): {
+        const contract = new Contract(
+          proxyAddress,
+          SimpleQuorumAvatarExecutionStrategy,
+          provider
+        );
+
+        const overrides = {
+          blockTag: blockNumber
+        };
+
+        const [type, quorum, target]: [string, BigNumber, string] =
+          await Promise.all([
+            contract.getStrategyType(overrides),
+            contract.quorum(overrides),
+            contract.target(overrides)
+          ]);
+
+        const executionStrategy = new ExecutionStrategy(
+          proxyAddress,
+          config.indexerName
+        );
+        executionStrategy.address = proxyAddress;
+        executionStrategy.type = type;
+        executionStrategy.quorum = quorum.toString();
+        executionStrategy.treasury_chain = config.chainId;
+        executionStrategy.treasury = getAddress(target);
+        executionStrategy.timelock_delay = 0n;
+
+        await executionStrategy.save();
+
+        break;
+      }
+      case config.overrides.masterAxiom
+        ? getAddress(config.overrides.masterAxiom)
+        : Symbol('never'): {
+        const contract = new Contract(
+          proxyAddress,
+          AxiomExecutionStrategy,
+          provider
+        );
+
+        const overrides = {
+          blockTag: blockNumber
+        };
+
+        const quorum: BigNumber = await contract.quorum(overrides);
+
+        const executionStrategy = new ExecutionStrategy(
+          proxyAddress,
+          config.indexerName
+        );
+        executionStrategy.address = proxyAddress;
+        executionStrategy.type = 'Axiom'; // override because contract returns AxiomExecutionStrategyMock
+        executionStrategy.quorum = quorum.toString();
+        executionStrategy.treasury_chain = config.chainId;
+        executionStrategy.treasury = proxyAddress;
+        executionStrategy.timelock_delay = 0n;
+
+        await executionStrategy.save();
+
+        break;
+      }
+      default:
+        console.log('Unknown implementation', implementationAddress);
     }
   };
 

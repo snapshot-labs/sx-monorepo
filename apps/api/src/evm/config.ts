@@ -6,8 +6,12 @@ import { DEFAULT_INFURA_API_KEY } from '../config';
 
 export type FullConfig = {
   indexerName: 'sep';
+  chainId: number;
   overrides: {
     masterSpace: string;
+    masterSimpleQuorumAvatar: string;
+    masterSimpleQuorumTimelock: string;
+    masterAxiom: string | null;
     propositionPowerValidationStrategyAddress: string;
   };
 } & CheckpointConfig;
@@ -17,8 +21,13 @@ export function createConfig(indexerName: 'sep'): FullConfig {
 
   return {
     indexerName,
+    chainId: network.Meta.eip712ChainId,
     overrides: {
       masterSpace: network.Meta.masterSpace,
+      masterSimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
+      masterSimpleQuorumTimelock:
+        network.ExecutionStrategies.SimpleQuorumTimelock,
+      masterAxiom: network.ExecutionStrategies.Axiom,
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower
     },
