@@ -15,7 +15,7 @@ const VALID_EXTENSIONS = [
 
 const DOMAIN_DEFINITION = {
   type: 'string',
-  pattern: `^[a-zA-Z0-9\-\.]+\.(${VALID_EXTENSIONS.join('|')})$`,
+  pattern: `^[a-zA-Z0-9\\-\\.]+\\.(${VALID_EXTENSIONS.join('|')})$`,
   title: 'ENS name',
   examples: ['dao-name.eth'],
   errorMessage: {
