@@ -175,7 +175,9 @@ const formErrors = computed(() => {
 });
 const canSubmit = computed(() => {
   if (
-    (unsupportedProposalNetworks.value.length && !proposal.value?.proposalId) ||
+    (!props.space.turbo &&
+      unsupportedProposalNetworks.value.length &&
+      !proposal.value?.proposalId) ||
     Object.keys(formErrors.value).length > 0
   )
     return false;
@@ -459,7 +461,11 @@ watchEffect(() => {
       <div class="flex-1 grow min-w-0">
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
-            v-if="unsupportedProposalNetworks[0] && !proposal?.proposalId"
+            v-if="
+              !space.turbo &&
+              unsupportedProposalNetworks[0] &&
+              !proposal?.proposalId
+            "
             type="error"
             class="mb-4"
           >
