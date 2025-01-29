@@ -36,21 +36,19 @@ const router = createRouter({
 
 // Add a global navigation guard for URL redirection
 router.beforeEach((to, _from, next) => {
-  if (isWhiteLabel.value) return next();
+  const [, space, ...rest] = to.path.split('/');
+  let spaceName = space.replace(`${metadataNetwork}:`, '');
+  // skip if network is not metadataNetwork or is whitelabel
+  if (spaceName.includes(':') || isWhiteLabel.value) return next();
+
   let redirectPath: string | null = null;
 
   // Redirect paths like "/safe.eth/settings" to "/s:safe.eth/settings"
-  // Also handle aliases
   if (to.matched[0]?.name === 'space') {
-    const [, space, ...rest] = to.path.split('/');
-    let spaceName = space.replace(`${metadataNetwork}:`, '');
+    // if space has alias, change url to it
     spaceName = aliases[spaceName] || spaceName;
-    const restPath = rest.join('/');
-
-    redirectPath = `/${metadataNetwork}:${spaceName}`;
-    if (restPath) {
-      redirectPath += `/${restPath}`;
-    }
+    const restPath = rest.length ? `/${rest.join('/')}` : '';
+    redirectPath = `/${metadataNetwork}:${spaceName}${restPath}`;
   }
 
   // Match and redirect paths like "/delegate/safe.eth" to "/s:safe.eth/delegates"
