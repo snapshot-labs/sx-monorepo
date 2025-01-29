@@ -1,6 +1,6 @@
 import Connector from './connector';
 
-export default class extends Connector {
+export default class Injected extends Connector {
   async connect() {
     try {
       await this.provider.request({ method: 'eth_requestAccounts' });

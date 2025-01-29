@@ -1,6 +1,6 @@
 import Connector from './connector';
 
-export default class extends Connector {
+export default class Gnosis extends Connector {
   async connect() {
     try {
       if (window?.parent === window) {

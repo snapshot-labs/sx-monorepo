@@ -1,7 +1,7 @@
 import Connector from './connector';
 const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
 
-export default class extends Connector {
+export default class Argentx extends Connector {
   async connect() {
     const { currentMode } = useUserSkin();
 

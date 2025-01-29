@@ -1,18 +1,21 @@
-import { Connector, ConnectorType } from '@/networks/types';
+import {
+  Connector as ConnectorInstance,
+  ConnectorType
+} from '@/networks/types';
 
-export default class {
+export default class Connector {
   public id: string;
   public type: ConnectorType;
-  public info: Connector['info'];
-  public options: Connector['options'];
-  public provider: Connector['provider'];
+  public info: ConnectorInstance['info'];
+  public options: ConnectorInstance['options'];
+  public provider: ConnectorInstance['provider'];
 
   constructor(
     id: string,
     type: ConnectorType,
-    info: Connector['info'],
-    options: Connector['options'],
-    provider: Connector['provider']
+    info: ConnectorInstance['info'],
+    options: ConnectorInstance['options'],
+    provider: ConnectorInstance['provider']
   ) {
     this.id = id;
     this.info = info;

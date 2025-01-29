@@ -1,6 +1,6 @@
 import Connector from './connector';
 
-export default class extends Connector {
+export default class Walletlink extends Connector {
   async connect() {
     try {
       let CoinbaseWalletSDK = await import('@coinbase/wallet-sdk'!);

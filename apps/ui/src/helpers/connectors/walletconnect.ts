@@ -1,6 +1,6 @@
 import Connector from './connector';
 
-export default class extends Connector {
+export default class Walletconnect extends Connector {
   async connect() {
     try {
       const imports = await import('@walletconnect/ethereum-provider'!);
