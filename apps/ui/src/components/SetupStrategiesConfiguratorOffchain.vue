@@ -1,6 +1,4 @@
 <script lang="ts">
-type TokenStandard = 'ERC-20' | 'ERC-721' | 'ERC-1155';
-
 const availableStrategies = ref<StrategyTemplate[]>([]);
 const editStrategyModalStrategyId = ref<StrategyTemplate['address']>();
 </script>
@@ -11,13 +9,11 @@ import { getNetwork } from '@/networks';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { ChainId, NetworkID } from '@/types';
 
-const TOKEN_STANDARD_STRATEGY_MAPPING: Record<
-  TokenStandard,
-  StrategyTemplate['address']
-> = {
-  'ERC-20': 'erc20-balance-of',
-  'ERC-721': 'erc721',
-  'ERC-1155': 'erc1155-balance-of'
+const POPULAR_STRATEGIES: Record<string, StrategyTemplate['address']> = {
+  'ERC-20 balance': 'erc20-balance-of',
+  'ERC-20 votes': 'erc20-votes',
+  'ERC-721 balance': 'erc721',
+  'ERC-1155 balance': 'erc1155-balance-of'
 } as const;
 
 const strategies = defineModel<StrategyConfig[]>({ required: true });
@@ -68,9 +64,8 @@ async function loadAvailableStrategies() {
   }
 }
 
-function handleSelectTokenStandard(tokenStandard: TokenStandard) {
-  editStrategyModalStrategyId.value =
-    TOKEN_STANDARD_STRATEGY_MAPPING[tokenStandard];
+function handlePopularStrategyClick(id: string) {
+  editStrategyModalStrategyId.value = POPULAR_STRATEGIES[id];
   isEditStrategyModalOpen.value = true;
 }
 
@@ -112,15 +107,15 @@ onMounted(() => {
       >
         <template #empty>
           <div class="space-y-3">
-            <div>Setup your voting power weighted by an ERC token</div>
-            <div class="flex gap-2">
-              <UiButton
-                v-for="(standard, id) in TOKEN_STANDARD_STRATEGY_MAPPING"
+            <div>Here are some of the most common voting strategies:</div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <div
+                v-for="(name, id) in POPULAR_STRATEGIES"
                 :key="id"
-                @click="handleSelectTokenStandard(id)"
-              >
-                {{ id }}
-              </UiButton>
+                class="border py-2 px-3 text-center rounded-lg"
+                @click="handlePopularStrategyClick(id)"
+                v-text="id"
+              />
             </div>
             <div>Or choose from our growing list of strategies</div>
           </div>
