@@ -65,7 +65,7 @@ function handleSelect(value: string) {
         {{ isTestnet ? 'Sepolia testnet' : 'Ethereum mainnet' }}.
       </div>
       <UiMessage v-if="!isTestnet" type="info">
-        Still experimenting ?
+        Still experimenting?
         <br />
         You can also try
         <AppLink to="https://testnet.snapshot.box/#/create">
