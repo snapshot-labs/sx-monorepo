@@ -240,7 +240,8 @@ const unsupportedProposalNetworks = computed(() => {
 
   return Array.from(ids)
     .filter(n => !premiumChainIds.value.has(n))
-    .map(chainId => networks.value.find(n => n.chainId === chainId));
+    .map(chainId => networks.value.find(n => n.chainId === chainId))
+    .filter(network => !!network);
 });
 
 async function handleProposeClick() {
@@ -463,7 +464,7 @@ watchEffect(() => {
           <UiAlert
             v-if="
               !space.turbo &&
-              unsupportedProposalNetworks[0] &&
+              unsupportedProposalNetworks.length &&
               !proposal?.proposalId
             "
             type="error"
@@ -471,15 +472,39 @@ watchEffect(() => {
           >
             <div>
               You cannot create proposals. This space is configured with
-              <b>{{ unsupportedProposalNetworks[0].name }}</b
-              >, a non-premium network. Change to a
+              non-premium networks (<template
+                v-for="(n, i) in unsupportedProposalNetworks"
+                :key="n.key"
+              >
+                <b>{{ n.name }}</b>
+                <template
+                  v-if="
+                    unsupportedProposalNetworks.length > 1 &&
+                    i < unsupportedProposalNetworks.length - 1
+                  "
+                  >,
+                </template> </template
+              >). Change to a
               <AppLink
                 to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
                 >premium network
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
-              or upgrade <b>{{ unsupportedProposalNetworks[0].name }}</b> to
-              continue.
+              or upgrade
+              <template
+                v-for="(n, i) in unsupportedProposalNetworks"
+                :key="n.key"
+              >
+                <b>{{ n.name }}</b>
+                <template
+                  v-if="
+                    unsupportedProposalNetworks.length > 1 &&
+                    i < unsupportedProposalNetworks.length - 1
+                  "
+                  >,
+                </template>
+              </template>
+              to continue.
             </div>
           </UiAlert>
           <template v-else>
