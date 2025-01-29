@@ -20,7 +20,7 @@ const { open } = toRefs(props);
     </template>
     <div class="m-4 space-y-2 flex flex-col">
       <Connectors
-        :connectors-type="supportedConnectors"
+        :supported-connectors="supportedConnectors"
         @click="(connector: Connector) => emit('pick', connector)"
       />
     </div>
