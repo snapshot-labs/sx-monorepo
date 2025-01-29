@@ -80,10 +80,12 @@ async function handleExecute() {
       step.value = 'confirming';
       await network.value.helpers.waitForTransaction(txId.value);
       await sleep(API_DELAY);
-    }
 
-    emit('confirmed', txId.value);
-    step.value = 'success';
+      step.value = 'success';
+      emit('confirmed', txId.value);
+    } else {
+      emit('close');
+    }
   } catch (e) {
     console.warn('Transaction failed', e);
 

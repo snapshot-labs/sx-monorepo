@@ -282,20 +282,20 @@ async function handleProposeClick() {
     }
     if (result) {
       proposalsStore.reset(props.space.id, props.space.network);
+    }
 
-      if (
-        proposal.value.proposalId &&
-        offchainNetworks.includes(props.space.network)
-      ) {
-        router.push({
-          name: 'space-proposal-overview',
-          params: {
-            proposal: proposal.value.proposalId
-          }
-        });
-      } else {
-        router.push({ name: 'space-proposals' });
-      }
+    if (
+      proposal.value.proposalId &&
+      offchainNetworks.includes(props.space.network)
+    ) {
+      router.push({
+        name: 'space-proposal-overview',
+        params: {
+          proposal: proposal.value.proposalId
+        }
+      });
+    } else {
+      router.push({ name: 'space-proposals' });
     }
   } finally {
     sending.value = false;

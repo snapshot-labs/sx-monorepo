@@ -1,3 +1,4 @@
+import { isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
@@ -15,6 +16,7 @@ import {
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, MANA_URL } from '@/helpers/mana';
+import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
@@ -44,6 +46,7 @@ import {
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
@@ -578,6 +581,8 @@ export function createActions(
       };
 
       if (delegationType === 'governor-subgraph') {
+        delegatee = delegatee ?? '0x0000000000000000000000000000000000000000';
+
         contractParams = {
           address: delegationContract,
           functionName: 'delegate',
@@ -585,12 +590,21 @@ export function createActions(
           abi: ['function delegate(address delegatee)']
         };
       } else if (delegationType == 'delegate-registry') {
-        contractParams = {
-          address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
-          functionName: 'setDelegate',
-          functionParams: [formatBytes32String(space.id), delegatee],
-          abi: ['function setDelegate(bytes32 id, address delegate)']
-        };
+        if (delegatee) {
+          contractParams = {
+            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            functionName: 'setDelegate',
+            functionParams: [formatBytes32String(space.id), delegatee],
+            abi: ['function setDelegate(bytes32 id, address delegate)']
+          };
+        } else {
+          contractParams = {
+            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            functionName: 'clearDelegate',
+            functionParams: [formatBytes32String(space.id)],
+            abi: ['function clearDelegate(bytes32 id)']
+          };
+        }
       } else {
         throw new Error('Unsupported delegation type');
       }
@@ -607,6 +621,30 @@ export function createActions(
         ...contractParams.functionParams
       );
     },
+    getDelegatee: async (
+      web3: any,
+      delegation: SpaceMetadataDelegation,
+      delegator: string
+    ) => {
+      const { contractAddress } = delegation;
+      if (!contractAddress) return null;
+      if (!isAddress(delegator)) return null;
+
+      const multi = new Multicaller(chainId.toString(), provider, [
+        'function decimals() view returns (uint8)',
+        'function balanceOf(address account) view returns (uint256)',
+        'function delegates(address) view returns (address)'
+      ]);
+      multi.call('decimals', contractAddress, 'decimals');
+      multi.call('balanceOf', contractAddress, 'balanceOf', [delegator]);
+      multi.call('delegatee', contractAddress, 'delegates', [delegator]);
+
+      const { decimals, balanceOf, delegatee } = await multi.execute();
+
+      return delegatee !== '0x0000000000000000000000000000000000000000'
+        ? { address: delegatee, balance: balanceOf.toBigInt(), decimals }
+        : null;
+    },
     updateSettings: async (
       web3: Web3Provider,
       space: Space,
@@ -621,6 +659,9 @@ export function createActions(
       maxVotingDuration: number | null
     ) => {
       await verifyNetwork(web3, chainId);
+
+      const address = await web3.getSigner().getAddress();
+      const isContract = await getIsContract(address);
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
@@ -639,41 +680,46 @@ export function createActions(
         validationStrategy
       );
 
-      return client.updateSettings({
-        signer: getSigner(web3),
-        space: space.id,
-        settings: {
-          metadataUri: `ipfs://${pinned.cid}`,
-          authenticatorsToAdd: authenticatorsToAdd.map(
-            config => config.address
-          ),
-          authenticatorsToRemove: space.authenticators.filter(
-            (authenticator, index) => authenticatorsToRemove.includes(index)
-          ),
-          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)[0]
-              : '0x'
-          })),
-          votingStrategiesToRemove: votingStrategiesToRemove.map(
-            index => space.strategies_indices[index]
-          ),
-          votingStrategyMetadataUrisToAdd: metadataUris,
-          proposalValidationStrategy: {
-            addr: validationStrategy.address,
-            params: validationStrategy.generateParams
-              ? validationStrategy.generateParams(validationStrategy.params)[0]
-              : '0x'
-          },
-          proposalValidationStrategyMetadataUri,
-          votingDelay: votingDelay !== null ? votingDelay : undefined,
-          minVotingDuration:
-            minVotingDuration !== null ? minVotingDuration : undefined,
-          maxVotingDuration:
-            maxVotingDuration !== null ? maxVotingDuration : undefined
-        }
-      });
+      return client.updateSettings(
+        {
+          signer: getSigner(web3),
+          space: space.id,
+          settings: {
+            metadataUri: `ipfs://${pinned.cid}`,
+            authenticatorsToAdd: authenticatorsToAdd.map(
+              config => config.address
+            ),
+            authenticatorsToRemove: space.authenticators.filter(
+              (authenticator, index) => authenticatorsToRemove.includes(index)
+            ),
+            votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? config.generateParams(config.params)[0]
+                : '0x'
+            })),
+            votingStrategiesToRemove: votingStrategiesToRemove.map(
+              index => space.strategies_indices[index]
+            ),
+            votingStrategyMetadataUrisToAdd: metadataUris,
+            proposalValidationStrategy: {
+              addr: validationStrategy.address,
+              params: validationStrategy.generateParams
+                ? validationStrategy.generateParams(
+                    validationStrategy.params
+                  )[0]
+                : '0x'
+            },
+            proposalValidationStrategyMetadataUri,
+            votingDelay: votingDelay !== null ? votingDelay : undefined,
+            minVotingDuration:
+              minVotingDuration !== null ? minVotingDuration : undefined,
+            maxVotingDuration:
+              maxVotingDuration !== null ? maxVotingDuration : undefined
+          }
+        },
+        { noWait: isContract }
+      );
     },
     updateSettingsRaw: () => {
       throw new Error('Not implemented');
