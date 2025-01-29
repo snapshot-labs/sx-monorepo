@@ -25,6 +25,7 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
     component: SpaceEditor
   },
   { path: '', name: 'space-overview', component: SpaceOverview },
+  { path: 'about', redirect: { name: 'space-overview' } },
   { path: 'proposals', name: 'space-proposals', component: SpaceProposals },
   {
     path: 'proposal/:proposal?',
