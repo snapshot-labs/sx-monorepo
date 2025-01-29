@@ -16,7 +16,9 @@ const props = withDefaults(
   }
 );
 
-const emit = defineEmits(['submit']);
+const emit = defineEmits<{
+  (e: 'submit');
+}>();
 
 const stepper = useStepper(props.steps);
 
