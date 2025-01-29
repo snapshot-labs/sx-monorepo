@@ -36,10 +36,12 @@ const router = createRouter({
 
 // Add a global navigation guard for URL redirection
 router.beforeEach((to, _from, next) => {
+  if (isWhiteLabel.value) return next();
+
   const [, space, ...rest] = to.path.split('/');
   let spaceName = space.replace(`${metadataNetwork}:`, '');
   // skip if network is not metadataNetwork or is whitelabel
-  if (spaceName.includes(':') || isWhiteLabel.value) return next();
+  if (spaceName.includes(':')) return next();
 
   let redirectPath: string | null = null;
 
