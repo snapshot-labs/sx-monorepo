@@ -7,7 +7,7 @@ import { FileSystemIconLoader } from 'unplugin-icons/loaders';
 import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 
 const ELECTRON = process.env.ELECTRON || false;
 
@@ -66,6 +66,14 @@ export default defineConfig({
       target
     }
   },
+  test: {
+    browser: {
+      enabled: true,
+      testerHtmlPath: './src/tester.html',
+      // at least one instance is required
+      instances: [{ browser: 'brave' }]
+    }
+  },
   build: {
     target,
     commonjsOptions: {
@@ -74,6 +82,7 @@ export default defineConfig({
     },
     rollupOptions: {
       plugins: [
+        // @ts-ignore
         inject({
           Buffer: ['buffer', 'Buffer']
         })
