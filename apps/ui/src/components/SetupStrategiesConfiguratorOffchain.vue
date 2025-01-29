@@ -11,7 +11,7 @@ import { ChainId, NetworkID } from '@/types';
 
 const POPULAR_STRATEGIES: Record<string, StrategyTemplate['address']> = {
   'ERC-20': 'erc20-balance-of',
-  'ERC-20 votes': 'erc20-votes',
+  'ERC-20 Votes': 'erc20-votes',
   'ERC-721': 'erc721',
   'ERC-1155': 'erc1155-balance-of'
 } as const;
