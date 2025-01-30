@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getCacheHash, shorten } from '@/helpers/utils';
+import { Connector } from '@/networks/types';
 
 defineProps<{
   hasAppNav: boolean;
@@ -9,7 +9,6 @@ defineProps<{
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
-const auth = getInstance();
 const uiStore = useUiStore();
 const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
@@ -57,7 +56,7 @@ const searchConfig = computed(() => {
   return null;
 });
 
-async function handleLogin(connector) {
+async function handleLogin(connector: Connector) {
   resetAccountModal();
   loading.value = true;
   await login(connector);
@@ -134,10 +133,7 @@ onUnmounted(() => {
         class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
         @click="modalAccountOpen = true"
       >
-        <span
-          v-if="auth.isAuthenticated.value"
-          class="sm:flex items-center space-x-2"
-        >
+        <span v-if="web3.account" class="sm:flex items-center space-x-2">
           <UiStamp :id="user.id" :size="18" :cb="cb" />
           <span
             class="hidden sm:block truncate max-w-[120px]"

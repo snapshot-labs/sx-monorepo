@@ -33,7 +33,7 @@ import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
-  Connector,
+  ConnectorType,
   ExecutionInfo,
   NetworkConstants,
   NetworkHelpers,
@@ -122,7 +122,7 @@ export function createActions(
   return {
     async propose(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       title: string,
@@ -162,7 +162,7 @@ export function createActions(
     },
     async updateProposal(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       proposalId: number | string,
@@ -212,7 +212,7 @@ export function createActions(
     },
     vote(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
       choice: Choice,

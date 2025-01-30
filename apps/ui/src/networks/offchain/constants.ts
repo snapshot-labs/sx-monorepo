@@ -1,5 +1,5 @@
 import { VoteType } from '@/types';
-import { Connector } from '../types';
+import { ConnectorType } from '../types';
 
 export const AUTHS = {};
 export const PROPOSAL_VALIDATIONS = {
@@ -12,7 +12,7 @@ export const PROPOSAL_VALIDATIONS = {
 };
 export const STRATEGIES = {};
 export const EXECUTORS = {};
-export const CONNECTORS: Connector[] = [
+export const CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
   'walletlink',
