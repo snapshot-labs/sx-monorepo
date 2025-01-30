@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import {
   formatQuorum,
   quorumChoiceProgress,
@@ -7,6 +8,7 @@ import {
 } from '@/helpers/quorum';
 import { _n, _p, _vp } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
@@ -27,7 +29,7 @@ const props = withDefaults(
   }
 );
 
-const proposalsStore = useProposalsStore();
+const queryClient = useQueryClient();
 
 const displayAllChoices = ref(false);
 
@@ -106,12 +108,12 @@ async function refreshScores() {
     const result = await response.json();
 
     if (result.result === true) {
-      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
-      await proposalsStore.fetchProposal(
-        props.proposal.space.id,
-        props.proposal.id,
-        props.proposal.network
-      );
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(
+          props.proposal.network,
+          props.proposal.space.id
+        )
+      });
     }
   } catch (e) {
     console.warn('Failed to refresh scores', e);

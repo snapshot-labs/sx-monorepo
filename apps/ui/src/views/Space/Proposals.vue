@@ -2,6 +2,7 @@
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
+import { useProposalsQuery } from '@/queries/proposals';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
@@ -11,7 +12,6 @@ const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { web3 } = useWeb3();
 const router = useRouter();
 const route = useRoute();
-const proposalsStore = useProposalsStore();
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
@@ -19,10 +19,6 @@ const labels = ref<string[]>([]);
 const selectIconBaseProps = {
   size: 16
 };
-
-const proposalsRecord = computed(
-  () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
-);
 
 const votingPower = computed(() => getVotingPower(props.space));
 
@@ -32,15 +28,21 @@ const spaceLabels = computed(() => {
   return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
 });
 
+const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
+  useProposalsQuery(props.space.network, props.space.id, {
+    state,
+    labels
+  });
+
 function handleClearLabelsFilter(close: () => void) {
   labels.value = [];
   close();
 }
 
 async function handleEndReached() {
-  if (!proposalsRecord.value?.hasMoreProposals) return;
+  if (!hasNextPage.value) return;
 
-  proposalsStore.fetchMore(props.space.id, props.space.network);
+  fetchNextPage();
 }
 
 function handleFetchVotingPower() {
@@ -61,12 +63,6 @@ watchThrottled(
       ? normalizedLabels
       : [normalizedLabels];
     labels.value = normalizedLabels.filter(id => spaceLabels.value[id]);
-
-    proposalsStore.reset(props.space.id, props.space.network);
-    proposalsStore.fetch(props.space.id, props.space.network, {
-      state: state.value,
-      labels: labels.value
-    });
   },
   { throttle: 1000, immediate: true }
 );
@@ -79,13 +75,24 @@ watch(
       toState !== fromState ||
       toLabels !== fromLabels
     ) {
-      const query: LocationQueryRaw = {
-        ...route.query,
-        state: toState === 'any' ? undefined : toState,
-        labels: !toLabels?.length ? undefined : toLabels
-      };
+      const query: LocationQueryRaw = { ...route.query };
 
-      router.push({ query });
+      if (toState === 'any') {
+        delete query.state;
+      } else {
+        query.state = toState;
+      }
+
+      if (toLabels.length) {
+        query.labels = toLabels;
+      } else {
+        delete query.labels;
+      }
+
+      if (JSON.stringify(query) !== JSON.stringify(route.query)) {
+        // NOTE: If we push the same query it will cause scroll position to be reset
+        router.push({ query });
+      }
     }
   },
   { immediate: true }
@@ -214,11 +221,9 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
     <ProposalsList
       title="Proposals"
       limit="off"
-      :loading="!proposalsRecord?.loaded"
-      :loading-more="proposalsRecord?.loadingMore"
-      :proposals="
-        proposalsStore.getSpaceProposals(props.space.id, props.space.network)
-      "
+      :loading="isPending"
+      :loading-more="isFetchingNextPage"
+      :proposals="data?.pages.flat() ?? []"
       @end-reached="handleEndReached"
     />
   </div>

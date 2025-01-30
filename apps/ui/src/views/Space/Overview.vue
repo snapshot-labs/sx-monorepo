@@ -1,30 +1,24 @@
 <script setup lang="ts">
 import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
+import {
+  PROPOSALS_SUMMARY_LIMIT,
+  useProposalsSummaryQuery
+} from '@/queries/proposals';
 import { Space } from '@/types';
-
-const PROPOSALS_LIMIT = 6;
 
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
-const proposalsStore = useProposalsStore();
-
-onMounted(() => {
-  proposalsStore.fetchSummary(
-    props.space.id,
-    props.space.network,
-    PROPOSALS_LIMIT
-  );
-});
 
 const isOffchainSpace = offchainNetworks.includes(props.space.network);
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
-const proposalsRecord = computed(
-  () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
+const { data, isPending } = useProposalsSummaryQuery(
+  props.space.network,
+  props.space.id
 );
 
 watchEffect(() => setTitle(props.space.name));
@@ -148,9 +142,9 @@ watchEffect(() => setTitle(props.space.name));
     <div>
       <ProposalsList
         title="Proposals"
-        :loading="!proposalsRecord?.summaryLoaded"
-        :limit="PROPOSALS_LIMIT - 1"
-        :proposals="proposalsRecord?.summaryProposals ?? []"
+        :loading="isPending"
+        :limit="PROPOSALS_SUMMARY_LIMIT - 1"
+        :proposals="data ?? []"
         :route="{
           name: 'space-proposals',
           linkTitle: 'See more'
