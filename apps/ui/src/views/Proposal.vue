@@ -3,6 +3,7 @@ import { getBoostsCount } from '@/helpers/boost';
 import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
+import { useProposalQuery } from '@/queries/proposals';
 import { Choice, Space } from '@/types';
 
 const props = defineProps<{
@@ -10,7 +11,6 @@ const props = defineProps<{
 }>();
 
 const route = useRoute();
-const proposalsStore = useProposalsStore();
 const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
@@ -28,13 +28,12 @@ const discourseTopic: Ref<Topic | null> = ref(null);
 const boostCount = ref(0);
 
 const id = computed(() => route.params.proposal as string);
-const proposal = computed(() => {
-  return proposalsStore.getProposal(
-    props.space.id,
-    id.value,
-    props.space.network
-  );
-});
+
+const { data: proposal, isPending } = useProposalQuery(
+  props.space.network,
+  props.space.id,
+  id
+);
 
 const discussion = computed(() => {
   if (!proposal.value) return null;
@@ -137,8 +136,6 @@ watch(
   async id => {
     modalOpenVote.value = false;
     editMode.value = false;
-    await proposalsStore.fetchProposal(props.space.id, id, props.space.network);
-
     if (discussion.value) {
       loadSingleTopic(discussion.value).then(result => {
         discourseTopic.value = result;
@@ -166,8 +163,8 @@ watchEffect(() => {
 
 <template>
   <div class="flex items-stretch md:flex-row flex-col w-full md:h-full !pb-0">
-    <UiLoading v-if="!proposal" class="ml-4 mt-3" />
-    <template v-else>
+    <UiLoading v-if="isPending" class="ml-4 mt-3" />
+    <template v-else-if="proposal">
       <div
         :class="['flex-1 grow min-w-0', { '!pb-0': withoutBottomPadding }]"
         v-bind="$attrs"
