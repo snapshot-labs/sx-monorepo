@@ -51,7 +51,7 @@ export function useWeb3() {
   const { connectors } = useConnectors();
 
   async function login(connector: Connector) {
-    connectUsing(connector, 'connect');
+    return connectUsing(connector, 'connect');
   }
 
   async function autoLogin(connectorId?: string) {
@@ -65,7 +65,7 @@ export function useWeb3() {
 
     if (!connector) return;
 
-    connectUsing(connector, 'autoConnect');
+    return connectUsing(connector, 'autoConnect');
   }
 
   async function connectUsing(
@@ -82,7 +82,7 @@ export function useWeb3() {
         throw new Error(`Unable to connect to provider ${connector.id}`);
       }
 
-      await registerConnector(connector);
+      return await registerConnector(connector);
     } catch (e) {
       reset();
     } finally {
