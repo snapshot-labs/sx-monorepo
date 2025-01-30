@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import {
@@ -13,6 +14,7 @@ import {
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -37,6 +39,7 @@ const props = defineProps<{
 }>();
 
 const { setTitle } = useTitle();
+const queryClient = useQueryClient();
 const { proposals, createDraft } = useEditor();
 const route = useRoute();
 const router = useRouter();
@@ -49,7 +52,6 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const proposalsStore = useProposalsStore();
 const { get: getPropositionPower, fetch: fetchPropositionPower } =
   usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
@@ -280,7 +282,9 @@ async function handleProposeClick() {
       );
     }
     if (result) {
-      proposalsStore.reset(props.space.id, props.space.network);
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(props.space.network, props.space.id)
+      });
     }
 
     if (

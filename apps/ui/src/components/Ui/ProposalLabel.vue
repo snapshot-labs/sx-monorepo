@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouteLocationNamedRaw } from 'vue-router';
+import { hexToRgb } from '@/helpers/utils';
 
 const props = defineProps<{
   label: string;
@@ -10,13 +11,6 @@ const props = defineProps<{
 const { currentMode } = useUserSkin();
 
 const colorProperties = computed(() => checkColorProximity(props.color));
-
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return { r, g, b };
-}
 
 function checkColorProximity(color: string): {
   backgroundColor?: string;

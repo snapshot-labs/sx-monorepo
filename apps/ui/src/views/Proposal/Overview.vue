@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import {
   _n,
   _rt,
@@ -10,15 +11,16 @@ import {
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
   proposal: Proposal;
 }>();
 
+const queryClient = useQueryClient();
 const router = useRouter();
 const uiStore = useUiStore();
-const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { flagProposal, cancelProposal } = useActions();
@@ -199,7 +201,12 @@ async function handleFlagClick() {
   try {
     const result = await flagProposal(props.proposal);
     if (result) {
-      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(
+          props.proposal.network,
+          props.proposal.space.id
+        )
+      });
       router.push({
         name: 'space-overview'
       });
@@ -215,7 +222,12 @@ async function handleCancelClick() {
   try {
     const result = await cancelProposal(props.proposal);
     if (result) {
-      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(
+          props.proposal.network,
+          props.proposal.space.id
+        )
+      });
       router.push({
         name: 'space-overview'
       });
