@@ -174,13 +174,15 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  if (
-    (!props.space.turbo &&
-      unsupportedProposalNetworks.value.length &&
-      !proposal.value?.proposalId) ||
-    Object.keys(formErrors.value).length > 0
-  )
+  const hasUnsupportedNetworks =
+    !props.space.turbo &&
+    !proposal.value?.proposalId &&
+    unsupportedProposalNetworks.value.length;
+  const hasFormErrors = Object.keys(formErrors.value).length > 0;
+
+  if (hasUnsupportedNetworks || hasFormErrors) {
     return false;
+  }
 
   return web3.value.account
     ? propositionPower.value?.canPropose
