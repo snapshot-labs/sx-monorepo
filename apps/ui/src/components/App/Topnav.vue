@@ -151,7 +151,7 @@ onUnmounted(() => {
         class="!px-0 w-[46px]"
         @click="toggleSkin()"
       >
-        <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
+        <IH-sun v-if="currentMode === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>
