@@ -30,7 +30,8 @@
     "@types/node": "^18.11.6",
     "cross-fetch": "^4.0.0",
     "dotenv": "^16.0.1",
-    "starknet": "6.11.0"
+    "starknet": "6.11.0",
+    "graphql": "^16.8.1"
   },
   "devDependencies": {
     "@snapshot-labs/eslint-config": "0.1.0-beta.18",
