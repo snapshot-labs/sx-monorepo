@@ -3,7 +3,7 @@
 
 # Snapshot X
 
-An EVM implementation of the Snapshot X Protocol. Refer to the [documentation](https://docs.snapshotx.xyz) for more
+An EVM implementation of the Snapshot X Protocol. Refer to the [documentation](https://docs.snapshot.box) for more
 information.
 
 ## Contracts Blueprint
