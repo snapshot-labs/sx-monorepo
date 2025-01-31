@@ -69,9 +69,9 @@ export function useSettings() {
       const result = await network.api.loadSettings();
 
       result.forEach(({ name, value }) => {
-        if (DEFAULT_LISTS_SETTINGS[name].hasOwnProperty(name)) {
+        if (DEFAULT_LISTS_SETTINGS.hasOwnProperty(name)) {
           lists.value[name] = value as string[];
-        } else if (DEFAULT_LIMITS_SETTINGS[name].hasOwnProperty(name)) {
+        } else if (DEFAULT_LIMITS_SETTINGS.hasOwnProperty(name)) {
           limits.value[name] = Number(value);
         }
       });
