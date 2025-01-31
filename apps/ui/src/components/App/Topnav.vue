@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getCacheHash, shorten } from '@/helpers/utils';
+import { Connector } from '@/networks/types';
 
 defineProps<{
   hasAppNav: boolean;
@@ -9,12 +9,12 @@ defineProps<{
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
-const auth = getInstance();
 const uiStore = useUiStore();
 const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
 const { login, web3 } = useWeb3();
 const { toggleSkin, currentMode } = useUserSkin();
+const { isWhiteLabel } = useWhiteLabel();
 
 const SEARCH_CONFIG = {
   space: {
@@ -56,7 +56,7 @@ const searchConfig = computed(() => {
   return null;
 });
 
-async function handleLogin(connector) {
+async function handleLogin(connector: Connector) {
   resetAccountModal();
   loading.value = true;
   await login(connector);
@@ -133,10 +133,7 @@ onUnmounted(() => {
         class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
         @click="modalAccountOpen = true"
       >
-        <span
-          v-if="auth.isAuthenticated.value"
-          class="sm:flex items-center space-x-2"
-        >
+        <span v-if="web3.account" class="sm:flex items-center space-x-2">
           <UiStamp :id="user.id" :size="18" :cb="cb" />
           <span
             class="hidden sm:block truncate max-w-[120px]"
@@ -149,8 +146,12 @@ onUnmounted(() => {
         </template>
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
-        <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
+      <UiButton
+        v-if="!isWhiteLabel"
+        class="!px-0 w-[46px]"
+        @click="toggleSkin()"
+      >
+        <IH-sun v-if="currentMode === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>

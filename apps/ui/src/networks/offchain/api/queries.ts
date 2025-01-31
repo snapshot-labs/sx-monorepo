@@ -91,6 +91,16 @@ const SPACE_FRAGMENT = gql`
     private
     domain
     skin
+    skinSettings {
+      bg_color
+      link_color
+      text_color
+      content_color
+      border_color
+      heading_color
+      primary_color
+      theme
+    }
     guidelines
     template
     categories

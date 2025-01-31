@@ -1,5 +1,4 @@
 import { Contract } from '@ethersproject/contracts';
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { computedAsync, useMemoize } from '@vueuse/core';
 import { getProvider } from '@/helpers/provider';
 import { offchainNetworks } from '@/networks';
@@ -19,9 +18,7 @@ const getSafeVersion = useMemoize(
 );
 
 export function useSafeWallet(network: NetworkID, chainId = 1) {
-  const { web3 } = useWeb3();
-  const auth = getInstance();
-  const connectorName = computed(() => auth.provider.value?.connectorName);
+  const { web3, auth } = useWeb3();
 
   const signedChainId = computed(() => web3.value.network.key);
 
@@ -37,7 +34,7 @@ export function useSafeWallet(network: NetworkID, chainId = 1) {
   }, false);
 
   const isSafeWallet = computed(
-    () => connectorName.value === 'gnosis' || isSafeContract.value
+    () => auth.value?.connector.type === 'gnosis' || isSafeContract.value
   );
 
   const isInvalidNetwork = computed(() => {

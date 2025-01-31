@@ -1,6 +1,7 @@
 import {
   DelegationType,
   NetworkID,
+  SkinSettings,
   SpaceMetadataLabel,
   VoteType
 } from '@/types';
@@ -77,6 +78,7 @@ export type ApiSpace = {
   private: boolean;
   domain: string | null;
   skin: string | null;
+  skinSettings: SkinSettings | null;
   template: string | null;
   guidelines: string | null;
   categories: string[];
