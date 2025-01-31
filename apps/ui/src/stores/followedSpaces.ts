@@ -14,7 +14,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   const actions = useActions();
   const { web3, authInitiated } = useWeb3();
   const { isWhiteLabel } = useWhiteLabel();
-  const { settings } = useSettings();
+  const { limits } = useSettings();
 
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
@@ -25,7 +25,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   );
 
   const maxFollowLimit = computed(() => {
-    return Number(settings.value.get('user.default.follow_limit'));
+    return limits.value['user.default.follow_limit'];
   });
 
   const followedSpacesMap = computed(
