@@ -44,6 +44,7 @@ import {
   SETTINGS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
+  STATEMENTS_AND_USERS_QUERY,
   STATEMENTS_QUERY,
   STRATEGIES_QUERY,
   STRATEGY_QUERY,
@@ -797,6 +798,29 @@ export function createApi(
       });
 
       return statements;
+    },
+    loadStatementsAndUsers: async (
+      networkId: NetworkID,
+      spaceId: string,
+      userIds: string[]
+    ): Promise<{ statements: Statement[]; users: User[] }> => {
+      const { data } = await apollo.query({
+        query: STATEMENTS_AND_USERS_QUERY,
+        variables: {
+          statementsFirst: 100,
+          statementsWhere: {
+            delegate_in: userIds,
+            network: networkId,
+            space: spaceId
+          },
+          userIds
+        }
+      });
+
+      return {
+        statements: data.statements,
+        users: data.users
+      };
     },
     loadStrategies: async () => {
       const { data } = await apollo.query({
