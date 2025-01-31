@@ -469,9 +469,9 @@ watchEffect(() => {
           >
             <span>
               You can publish up to
-              {{ limits[`space.verified.proposal_limit_per_day`] }}
+              {{ limits['space.verified.proposal_limit_per_day'] }}
               proposals per day and
-              {{ limits[`space.verified.proposal_limit_per_month`] }}
+              {{ limits['space.verified.proposal_limit_per_month'] }}
               proposals per month.
               <a
                 :href="TURBO_URL"

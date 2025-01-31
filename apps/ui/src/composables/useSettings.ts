@@ -54,13 +54,8 @@ const DEFAULT_LISTS_SETTINGS: Record<LISTS, string[]> = {
   'space.ecosystem.list': []
 };
 
-const limits = ref({
-  ...clone(DEFAULT_LIMITS_SETTINGS)
-});
-
-const lists = ref({
-  ...clone(DEFAULT_LISTS_SETTINGS)
-});
+const limits = ref(clone(DEFAULT_LIMITS_SETTINGS));
+const lists = ref(clone(DEFAULT_LISTS_SETTINGS));
 
 const initialized = ref(false);
 
