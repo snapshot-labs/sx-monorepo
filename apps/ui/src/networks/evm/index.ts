@@ -43,11 +43,12 @@ export const METADATA: Record<string, Metadata> = {
     blockTime: ETH_MAINNET_BLOCK_TIME
   },
   oeth: {
-    name: 'Optimism',
+    name: 'OP Mainnet',
     chainId: 10,
     apiUrl:
       'https://subgrapher.snapshot.org/subgraph/arbitrum/4zXNNp5B34DUNACzonVsHivNJRUHnFBqhvBPYJVaNyks',
-    avatar: 'ipfs://QmfF4kwhGL8QosUXvgq2KWCmavhKBvwD6kbhs7L4p5ZAWb',
+    avatar:
+      'ipfs://bafkreifu2remiqfpsb4hgisbwb3qxedrzpwsea7ik4el45znjcf56xf2ku',
     blockTime: 2
   },
   base: {
