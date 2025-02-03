@@ -3,7 +3,10 @@ import { EvmNetworkConfig } from './types';
 type AdditionalProperties = {
   authenticators?: Record<string, string>;
   strategies?: Record<string, string>;
-  executionStrategies?: Record<string, string>;
+  executionStrategies?: {
+    Axiom?: string;
+    Isokratia?: string;
+  };
 };
 
 function createStandardConfig(
