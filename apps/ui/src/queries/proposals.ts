@@ -35,6 +35,8 @@ export const PROPOSALS_KEYS = {
       'list',
       { ...filters, query }
     ] as const,
+  homeFeed: (spaceIds: MaybeRef<string[]>, filters: Filters) =>
+    [...PROPOSALS_KEYS.all, 'homeFeed', { spaceIds, ...filters }] as const,
   details: (networkId: NetworkID, spaceId: string) =>
     [...PROPOSALS_KEYS.space(networkId, spaceId), 'detail'] as const,
   detail: (
@@ -57,14 +59,13 @@ async function withAuthorNames(proposals: Proposal[]) {
 function setProposalsDetails(
   queryClient: QueryClient,
   networkId: NetworkID,
-  spaceId: string,
   proposals: Proposal[]
 ) {
   for (const proposal of proposals) {
     queryClient.setQueryData(
       PROPOSALS_KEYS.detail(
         networkId,
-        spaceId,
+        proposal.space.id,
         proposal.proposal_id.toString()
       ),
       proposal
@@ -73,7 +74,7 @@ function setProposalsDetails(
 }
 
 async function getProposals(
-  spaceId: string,
+  spaceIds: string[],
   networkId: NetworkID,
   { limit, skip }: { limit: number; skip: number },
   filters?: ProposalsFilter,
@@ -84,7 +85,7 @@ async function getProposals(
 
   return withAuthorNames(
     await getNetwork(networkId).api.loadProposals(
-      [spaceId],
+      spaceIds,
       {
         limit,
         skip
@@ -108,7 +109,7 @@ export function useProposalsQuery(
     queryKey: PROPOSALS_KEYS.spaceList(networkId, spaceId, filters, query),
     queryFn: async ({ pageParam = 0 }) => {
       const proposals = await getProposals(
-        spaceId,
+        [spaceId],
         networkId,
         {
           limit: PROPOSALS_LIMIT,
@@ -121,7 +122,7 @@ export function useProposalsQuery(
         unref(query)
       );
 
-      setProposalsDetails(queryClient, networkId, spaceId, proposals);
+      setProposalsDetails(queryClient, networkId, proposals);
 
       return proposals;
     },
@@ -130,6 +131,49 @@ export function useProposalsQuery(
 
       return pages.length * PROPOSALS_LIMIT;
     }
+  });
+}
+
+export function useHomeFeedQuery(networkId: NetworkID, filters: Filters) {
+  const queryClient = useQueryClient();
+  const { web3 } = useWeb3();
+  const followedSpacesStore = useFollowedSpacesStore();
+
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: PROPOSALS_KEYS.homeFeed(
+      toRef(followedSpacesStore, 'followedSpacesIds'),
+      filters
+    ),
+    queryFn: async ({ pageParam = 0 }) => {
+      const spaceIds = followedSpacesStore.followedSpacesIds.map(
+        compositeSpaceId => compositeSpaceId.split(':')[1]
+      );
+
+      const proposals = await getProposals(
+        spaceIds,
+        networkId,
+        {
+          limit: PROPOSALS_LIMIT,
+          skip: pageParam
+        },
+        {
+          state: unref(filters.state),
+          labels: unref(filters.labels)
+        }
+      );
+
+      setProposalsDetails(queryClient, networkId, proposals);
+
+      return proposals;
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < PROPOSALS_LIMIT) return null;
+
+      return pages.length * PROPOSALS_LIMIT;
+    },
+    enabled: () =>
+      !!(followedSpacesStore.followedSpacesLoaded && web3.value.account)
   });
 }
 
@@ -142,12 +186,12 @@ export function useProposalsSummaryQuery(
   return useQuery({
     queryKey: PROPOSALS_KEYS.spaceSummary(networkId, spaceId),
     queryFn: async () => {
-      const proposals = await getProposals(spaceId, networkId, {
+      const proposals = await getProposals([spaceId], networkId, {
         skip: 0,
         limit: PROPOSALS_SUMMARY_LIMIT
       });
 
-      setProposalsDetails(queryClient, networkId, spaceId, proposals);
+      setProposalsDetails(queryClient, networkId, proposals);
 
       return proposals;
     }
