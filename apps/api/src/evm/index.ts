@@ -1,6 +1,7 @@
 import Checkpoint, { evm } from '@snapshot-labs/checkpoint';
 import { createConfig } from './config';
 import { createWriters } from './writers';
+import { registerIndexer } from '../register';
 
 const ethConfig = createConfig('eth');
 const sepConfig = createConfig('sep');
@@ -17,10 +18,15 @@ const arb1Indexer = new evm.EvmIndexer(createWriters(arb1Config));
 const baseIndexer = new evm.EvmIndexer(createWriters(baseConfig));
 
 export function addEvmIndexers(checkpoint: Checkpoint) {
-  checkpoint.addIndexer(ethConfig.indexerName, ethConfig, ethIndexer);
-  checkpoint.addIndexer(sepConfig.indexerName, sepConfig, sepIndexer);
-  checkpoint.addIndexer(oethConfig.indexerName, oethConfig, oethIndexer);
-  checkpoint.addIndexer(maticConfig.indexerName, maticConfig, maticIndexer);
-  checkpoint.addIndexer(arb1Config.indexerName, arb1Config, arb1Indexer);
-  checkpoint.addIndexer(baseConfig.indexerName, baseConfig, baseIndexer);
+  registerIndexer(checkpoint, ethConfig.indexerName, ethConfig, ethIndexer);
+  registerIndexer(checkpoint, sepConfig.indexerName, sepConfig, sepIndexer);
+  registerIndexer(checkpoint, oethConfig.indexerName, oethConfig, oethIndexer);
+  registerIndexer(
+    checkpoint,
+    maticConfig.indexerName,
+    maticConfig,
+    maticIndexer
+  );
+  registerIndexer(checkpoint, arb1Config.indexerName, arb1Config, arb1Indexer);
+  registerIndexer(checkpoint, baseConfig.indexerName, baseConfig, baseIndexer);
 }
