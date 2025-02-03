@@ -2,14 +2,12 @@ import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
-import { faker } from '@faker-js/faker';
 import { utils } from '@snapshot-labs/sx';
 import fetch from 'cross-fetch';
 import {
   BigNumberish,
   CallData,
   Contract,
-  hash,
   RpcProvider,
   shortString,
   validateAndParseAddress
@@ -18,12 +16,8 @@ import EncodersAbi from './abis/encoders.json';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
 import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
 import { FullConfig } from './config';
-import { handleStrategiesParsedMetadata } from './ipfs';
-import {
-  Space,
-  StrategiesParsedMetadataItem,
-  VotingPowerValidationStrategiesParsedMetadataItem
-} from '../../.checkpoint/models';
+import { Space } from '../../.checkpoint/models';
+import { handleVotingPowerValidationMetadata } from '../common/ipfs';
 
 type StrategyConfig = {
   address: BigNumberish;
@@ -32,54 +26,12 @@ type StrategyConfig = {
 
 const encodersAbi = new CallData(EncodersAbi);
 
-export function getCurrentTimestamp() {
-  return Math.floor(Date.now() / 1000);
-}
-
 export function toAddress(bn: any) {
   try {
     return getAddress(BigNumber.from(bn).toHexString());
   } catch (e) {
     return bn;
   }
-}
-
-export function getUrl(uri: string, gateway = 'pineapple.fyi') {
-  const ipfsGateway = `https://${gateway}`;
-  if (!uri) return null;
-  if (
-    !uri.startsWith('ipfs://') &&
-    !uri.startsWith('ipns://') &&
-    !uri.startsWith('https://') &&
-    !uri.startsWith('http://')
-  )
-    return `${ipfsGateway}/ipfs/${uri}`;
-  const uriScheme = uri.split('://')[0];
-  if (uriScheme === 'ipfs')
-    return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
-  if (uriScheme === 'ipns')
-    return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
-  return uri;
-}
-
-export async function getJSON(uri: string) {
-  const url = getUrl(uri);
-  if (!url) throw new Error('Invalid URI');
-
-  return fetch(url).then(res => res.json());
-}
-
-export function getSpaceName(address: string) {
-  const seed = parseInt(
-    hash.getSelectorFromName(address).toString().slice(0, 12)
-  );
-  faker.seed(seed);
-  const noun = faker.word.noun(6);
-  return `${noun.charAt(0).toUpperCase()}${noun.slice(1)} DAO`;
-}
-
-export function dropIpfs(metadataUri: string) {
-  return metadataUri.replace('ipfs://', '');
 }
 
 export function longStringToText(array: string[]): string {
@@ -242,58 +194,6 @@ export async function updateProposaValidationStrategy(
       console.log('failed to handle voting power strategies metadata', e);
     }
   }
-}
-
-export async function handleStrategiesMetadata(
-  spaceId: string,
-  metadataUris: string[],
-  startingIndex: number,
-  config: FullConfig,
-  type:
-    | typeof StrategiesParsedMetadataItem
-    | typeof VotingPowerValidationStrategiesParsedMetadataItem = StrategiesParsedMetadataItem
-) {
-  for (let i = 0; i < metadataUris.length; i++) {
-    const metadataUri = metadataUris[i];
-    if (!metadataUri) continue;
-
-    const index = startingIndex + i;
-    const uniqueId = `${spaceId}/${index}/${dropIpfs(metadataUri)}`;
-
-    const exists = await type.loadEntity(uniqueId, config.indexerName);
-    if (exists) continue;
-
-    const strategiesParsedMetadataItem = new type(uniqueId, config.indexerName);
-    strategiesParsedMetadataItem.space = spaceId;
-    strategiesParsedMetadataItem.index = index;
-
-    if (metadataUri.startsWith('ipfs://')) {
-      strategiesParsedMetadataItem.data = dropIpfs(metadataUri);
-
-      await handleStrategiesParsedMetadata(metadataUri, config);
-    }
-
-    await strategiesParsedMetadataItem.save();
-  }
-}
-
-export async function handleVotingPowerValidationMetadata(
-  spaceId: string,
-  metadataUri: string,
-  config: FullConfig
-) {
-  if (!metadataUri) return;
-
-  const metadata: any = await getJSON(metadataUri);
-  if (!metadata.strategies_metadata) return;
-
-  await handleStrategiesMetadata(
-    spaceId,
-    metadata.strategies_metadata,
-    0,
-    config,
-    VotingPowerValidationStrategiesParsedMetadataItem
-  );
 }
 
 export async function registerProposal(

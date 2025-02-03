@@ -1,0 +1,8 @@
+[
+  "error FailedInitialization()",
+  "error InvalidImplementation()",
+  "error SaltAlreadyUsed()",
+  "event ProxyDeployed(address implementation, address proxy)",
+  "function deployProxy(address implementation, bytes initializer, uint256 saltNonce)",
+  "function predictProxyAddress(address implementation, bytes32 salt) view returns (address)"
+]

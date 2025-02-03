@@ -1,19 +1,12 @@
 import { starknet } from '@snapshot-labs/checkpoint';
 import { validateAndParseAddress } from 'starknet';
 import { FullConfig } from './config';
+import { handleSpaceMetadata } from './ipfs';
 import {
-  handleProposalMetadata,
-  handleSpaceMetadata,
-  handleVoteMetadata
-} from './ipfs';
-import {
-  dropIpfs,
   findVariant,
   formatAddressVariant,
-  getCurrentTimestamp,
   getVoteValue,
   handleExecutionStrategy,
-  handleStrategiesMetadata,
   longStringToText,
   registerProposal,
   updateProposaValidationStrategy
@@ -25,6 +18,12 @@ import {
   User,
   Vote
 } from '../../.checkpoint/models';
+import {
+  handleProposalMetadata,
+  handleStrategiesMetadata,
+  handleVoteMetadata
+} from '../common/ipfs';
+import { dropIpfs, getCurrentTimestamp } from '../common/utils';
 
 type Strategy = {
   address: string;
