@@ -8,6 +8,7 @@ import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -45,8 +46,6 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { get: getPropositionPower, fetch: fetchPropositionPower } =
-  usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
@@ -190,8 +189,6 @@ const proposalLimitReached = computed(() => {
   );
 });
 
-const propositionPower = computed(() => getPropositionPower(props.space));
-
 const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
 
 const defaultVotingDelay = computed(() =>
@@ -218,6 +215,14 @@ const proposalMaxEnd = computed(() => {
       (props.space.max_voting_period || defaultVotingDelay.value)
   );
 });
+
+const {
+  data: propositionPower,
+  isPending: isPropositionPowerPending,
+  isFetching: isPropositionPowerLoading,
+  isError: isPropositionPowerError,
+  refetch: fetchPropositionPower
+} = usePropositionPowerQuery(props.space);
 
 async function handleProposeClick() {
   if (!proposal.value) return;
@@ -341,16 +346,10 @@ function handleTransactionAccept() {
   reset();
 }
 
-function handleFetchPropositionPower() {
-  fetchPropositionPower(props.space);
-}
-
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
   ([account, authLoading]) => {
     if (!account || authLoading) return;
-
-    handleFetchPropositionPower();
   },
   { immediate: true }
 );
@@ -422,8 +421,8 @@ watchEffect(() => {
         :loading="
           !!web3.account &&
           (sending ||
-            !propositionPower ||
-            propositionPower?.status === 'loading')
+            (!propositionPower && !isPropositionPowerError) ||
+            isPropositionPowerLoading)
         "
         :disabled="!canSubmit"
         @click="handleProposeClick"
@@ -438,12 +437,12 @@ watchEffect(() => {
     <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
       <div class="flex-1 grow min-w-0">
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
-          <MessageVotingPower
-            v-if="propositionPower"
+          <MessagePropositionPower
+            v-if="!isPropositionPowerPending"
             class="mb-4"
-            :voting-power="propositionPower"
-            action="propose"
-            @fetch-voting-power="handleFetchPropositionPower"
+            :proposition-power="propositionPower"
+            :is-error="isPropositionPowerError"
+            @fetch="fetchPropositionPower"
           />
           <UiAlert
             v-if="
