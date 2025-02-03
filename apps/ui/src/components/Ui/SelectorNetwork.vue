@@ -15,9 +15,7 @@ const props = defineProps<{
   };
 }>();
 
-const { networks, getUsage } = useOffchainNetworksList(
-  props.definition.networkId
-);
+const { networks } = useOffchainNetworksList(props.definition.networkId);
 
 const options = computed(() => {
   const networksListKind = props.definition.networksListKind;
@@ -86,10 +84,6 @@ const options = computed(() => {
       };
     })
     .filter(network => !network.readOnly);
-});
-
-onMounted(() => {
-  getUsage();
 });
 </script>
 

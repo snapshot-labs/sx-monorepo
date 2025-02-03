@@ -3,20 +3,13 @@ import { getNetwork } from '@/networks';
 import { ChainId, NetworkID } from '@/types';
 
 const usage = ref<Record<ChainId, number | undefined> | null>(null);
+const premiumChainIds = ref<Set<ChainId>>(new Set());
 const loaded = ref(false);
 
 export function useOffchainNetworksList(
   networkId: NetworkID,
   hideUnused = false
 ) {
-  async function getUsage() {
-    if (loaded.value) return;
-
-    const network = getNetwork(networkId);
-
-    usage.value = await network.api.getNetworksUsage();
-  }
-
   const networks = computed(() => {
     const rawNetworks = Object.values(snapshotJsNetworks).filter(
       ({ chainId }) => typeof chainId === 'number'
@@ -37,8 +30,35 @@ export function useOffchainNetworksList(
     });
   });
 
+  async function load() {
+    if (loaded.value) return;
+
+    const network = getNetwork(networkId);
+    const networks = await network.api.getNetworks();
+
+    usage.value = Object.keys(networks).reduce(
+      (acc, chainId) => {
+        acc[chainId] = networks[chainId].spaces_count;
+        return acc;
+      },
+      {} as Record<ChainId, number>
+    );
+
+    Object.keys(networks).forEach(chainId => {
+      if (networks[chainId].premium) {
+        premiumChainIds.value.add(Number(chainId));
+      }
+    });
+
+    loaded.value = true;
+  }
+
+  onMounted(() => {
+    load();
+  });
+
   return {
-    getUsage,
-    networks
+    networks,
+    premiumChainIds
   };
 }
