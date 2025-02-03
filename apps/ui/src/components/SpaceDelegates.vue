@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { sanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress } from '@ethersproject/address';
 import {
   useInfiniteQuery,
@@ -7,8 +6,7 @@ import {
   useQueryClient
 } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
-import { getDelegationNetwork } from '@/helpers/delegation';
-import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNames } from '@/helpers/stamp';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
@@ -43,11 +41,6 @@ const actions = useActions();
 const queryClient = useQueryClient();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
-const delegationNetworkId = computed(() => {
-  if (!props.delegation.chainId) return null;
-
-  return getDelegationNetwork(props.delegation.chainId);
-});
 
 const {
   data,
@@ -185,16 +178,11 @@ async function getCurrentDelegatee() {
 }
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
-  let url: string | null = null;
   if (props.delegation.chainId) {
-    url = getGenericExplorerUrl(props.delegation.chainId, address, type);
+    return getGenericExplorerUrl(props.delegation.chainId, address, type);
   } else {
     return null;
   }
-
-  if (!url) return null;
-
-  return sanitizeUrl(url);
 }
 
 function handleSortChange(
@@ -572,9 +560,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         @close="delegateModalOpen = false"
       />
       <ModalTransactionProgress
-        v-if="delegationNetworkId"
+        v-if="delegation.chainId"
         :open="isUndelegating"
-        :network-id="delegationNetworkId"
+        :chain-id="delegation.chainId"
         :execute="undelegateFn"
         @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"
