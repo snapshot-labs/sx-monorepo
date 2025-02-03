@@ -497,21 +497,7 @@ watchEffect(() => {
                 >premium network
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
-              or upgrade
-              <template
-                v-for="(n, i) in unsupportedProposalNetworks"
-                :key="n.key"
-              >
-                <b>{{ n.name }}</b>
-                <template
-                  v-if="
-                    unsupportedProposalNetworks.length > 1 &&
-                    i < unsupportedProposalNetworks.length - 1
-                  "
-                  >,
-                </template>
-              </template>
-              to continue.
+              or upgrade networks to continue.
             </div>
           </UiAlert>
           <template v-else>
