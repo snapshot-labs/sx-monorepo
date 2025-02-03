@@ -118,7 +118,8 @@ export const starknetNetworks = {
         '0x699e53f4b40e19d96b8020386dbeeb156f40172d7bbb78b2a4204cf64ae75f',
       OZVotesStorageProof:
         '0x7ee3cf64f1072fe21570356eb57d4e9f78169ea9235ba610f60a8b33c36cc6e',
-      OZVotesTrace208StorageProof: ''
+      OZVotesTrace208StorageProof:
+        '0x50bceb018e677f281b30587406b8210a0d8fbf37e58299bb7c6ec0e8dd212a3'
     },
     ProposalValidations: {
       VotingPower:

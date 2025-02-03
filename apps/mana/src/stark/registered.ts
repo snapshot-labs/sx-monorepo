@@ -10,6 +10,7 @@ type Transaction = {
   id: number;
   network: string;
   type: 'Propose' | 'UpdateProposal' | 'Vote';
+  sender: string;
   hash: string;
   data: any;
 };
@@ -19,7 +20,8 @@ const failedCounter: Record<string, number | undefined> = {};
 async function processTransaction(transaction: Transaction) {
   const storageAddress = utils.encoding.getStorageVarAddress(
     '_commits',
-    transaction.hash
+    transaction.hash,
+    transaction.sender
   );
 
   const { provider, getAccount, client } = getClient(transaction.network);
@@ -31,7 +33,7 @@ async function processTransaction(transaction: Transaction) {
 
   const payload = {
     signatureData: {
-      address: value
+      address: transaction.sender
     },
     data: transaction.data
   };

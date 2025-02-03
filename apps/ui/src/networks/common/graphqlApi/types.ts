@@ -1,6 +1,7 @@
 export type ApiStrategyParsedMetadata = {
   index: number;
   data: {
+    id: string;
     name: string;
     description: string;
     decimals: number;
@@ -21,6 +22,8 @@ export type ApiExecutorStrategy = {
 
 export type ApiSpace = {
   id: string;
+  verified: boolean;
+  turbo: boolean;
   metadata: {
     name: string;
     avatar: string;
@@ -37,6 +40,7 @@ export type ApiSpace = {
     executors_destinations: string[];
     executors_strategies: ApiExecutorStrategy[];
     treasuries: string[];
+    labels: string[];
     delegations: string[];
   };
   controller: string;
@@ -49,7 +53,7 @@ export type ApiSpace = {
   voting_power_validation_strategy_strategies: string[];
   voting_power_validation_strategy_strategies_params: string[];
   voting_power_validation_strategies_parsed_metadata: ApiStrategyParsedMetadata[];
-  strategies_indicies: number[];
+  strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
   strategies_parsed_metadata: ApiStrategyParsedMetadata[];
@@ -64,10 +68,12 @@ export type ApiProposal = {
   proposal_id: number;
   metadata: {
     id: string;
-    title: string;
-    body: string;
-    discussion: string;
-    execution: string;
+    title: string | null;
+    body: string | null;
+    discussion: string | null;
+    execution: string | null;
+    choices: string[];
+    labels: string[];
   };
   space: {
     id: string;
@@ -77,6 +83,7 @@ export type ApiProposal = {
       avatar: string;
       voting_power_symbol: string;
       treasuries: string[];
+      labels: string[];
       executors: string[];
       executors_types: string[];
       executors_strategies: ApiExecutorStrategy[];
@@ -104,7 +111,7 @@ export type ApiProposal = {
   execution_strategy_type: string;
   execution_destination: string | null;
   timelock_veto_guardian: string | null;
-  strategies_indicies: number[];
+  strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
   created: number;

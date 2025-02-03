@@ -8,14 +8,17 @@ import {
   approvalVoteTypes,
   basicVoteTypes,
   cancelProposalTypes,
+  deleteSpaceTypes,
   domain,
   encryptedVoteTypes,
+  flagProposalTypes,
   followSpaceTypes,
   proposeTypes,
   rankedChoiceVoteTypes,
   singleChoiceVoteTypes,
   unfollowSpaceTypes,
   updateProposalTypes,
+  updateSpaceTypes,
   updateStatementTypes,
   updateUserTypes,
   weightedVoteTypes
@@ -24,22 +27,28 @@ import { offchainGoerli } from '../../../offchainNetworks';
 import { OffchainNetworkConfig, SignatureData } from '../../../types';
 import {
   CancelProposal,
+  DeleteSpace,
   EIP712CancelProposalMessage,
+  EIP712DeleteSpaceMessage,
+  EIP712FlagProposalMessage,
   EIP712FollowSpaceMessage,
   EIP712Message,
   EIP712ProposeMessage,
   EIP712SetAliasMessage,
   EIP712UnfollowSpaceMessage,
   EIP712UpdateProposal,
+  EIP712UpdateSpaceMessage,
   EIP712UpdateStatementMessage,
   EIP712UpdateUserMessage,
   EIP712VoteMessage,
   Envelope,
+  FlagProposal,
   FollowSpace,
   Propose,
   SetAlias,
   UnfollowSpace,
   UpdateProposal,
+  UpdateSpace,
   UpdateStatement,
   UpdateUser,
   Vote
@@ -76,12 +85,15 @@ export class EthereumSig {
       | EIP712VoteMessage
       | EIP712ProposeMessage
       | EIP712UpdateProposal
+      | EIP712FlagProposalMessage
       | EIP712CancelProposalMessage
       | EIP712FollowSpaceMessage
       | EIP712UnfollowSpaceMessage
       | EIP712SetAliasMessage
       | EIP712UpdateUserMessage
       | EIP712UpdateStatementMessage
+      | EIP712UpdateSpaceMessage
+      | EIP712DeleteSpaceMessage
   >(
     signer: Signer & TypedDataSigner,
     message: T,
@@ -108,6 +120,7 @@ export class EthereumSig {
       | Vote
       | Propose
       | UpdateProposal
+      | FlagProposal
       | CancelProposal
       | FollowSpace
       | UnfollowSpace
@@ -192,6 +205,21 @@ export class EthereumSig {
     };
   }
 
+  public async flagProposal({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: FlagProposal;
+  }): Promise<Envelope<FlagProposal>> {
+    const signatureData = await this.sign(signer, data, flagProposalTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
   public async cancel({
     signer,
     data
@@ -245,11 +273,11 @@ export class EthereumSig {
       proposal: data.proposal,
       choice,
       reason: data.reason || '',
-      app: '',
+      app: data.app,
       metadata: ''
     };
 
-    if (data.privacy) {
+    if (data.privacy !== 'none') {
       message.privacy = data.privacy;
       voteType = encryptedVoteTypes;
       message.choice = await encryptChoices(
@@ -336,6 +364,36 @@ export class EthereumSig {
     data: UpdateStatement;
   }) {
     const signatureData = await this.sign(signer, data, updateStatementTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async updateSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: UpdateSpace;
+  }) {
+    const signatureData = await this.sign(signer, data, updateSpaceTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async deleteSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: DeleteSpace;
+  }) {
+    const signatureData = await this.sign(signer, data, deleteSpaceTypes);
 
     return {
       signatureData,

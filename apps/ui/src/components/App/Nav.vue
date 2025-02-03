@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
+import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
+import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
@@ -24,11 +27,11 @@ type NavigationItem = {
 };
 
 const route = useRoute();
-const uiStore = useUiStore();
 const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
+const { isWhiteLabel } = useWhiteLabel();
 
-const { param } = useRouteParser('id');
+const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
 const { web3 } = useWeb3();
 
@@ -39,11 +42,29 @@ const space = computed(() =>
     : null
 );
 
-const isController = computed(() =>
-  space.value
-    ? compareAddresses(space.value.controller, web3.value.account)
-    : false
-);
+const isController = computedAsync(async () => {
+  if (!networkId.value || !space.value) return false;
+
+  const { account } = web3.value;
+
+  const network = getNetwork(networkId.value);
+  const controller = await network.helpers.getSpaceController(space.value);
+
+  return compareAddresses(controller, account);
+});
+
+const canSeeSettings = computed(() => {
+  if (isController.value) return true;
+
+  if (space.value?.additionalRawData?.type === 'offchain') {
+    const admins = space.value?.additionalRawData?.admins.map((admin: string) =>
+      admin.toLowerCase()
+    );
+
+    return admins.includes(web3.value.account.toLowerCase());
+  }
+});
+
 const navigationConfig = computed<
   Record<string, Record<string, NavigationItem>>
 >(() => ({
@@ -68,6 +89,17 @@ const navigationConfig = computed<
           }
         }
       : undefined),
+    ...(SPACES_DISCUSSIONS[`${networkId.value}:${address.value}`]
+      ? {
+          discussions: {
+            name: 'Discussions',
+            icon: IHAnnotation,
+            active: ['space-discussions', 'space-discussions-topic'].includes(
+              route.name as string
+            )
+          }
+        }
+      : undefined),
     ...(space.value?.treasuries?.length
       ? {
           treasury: {
@@ -76,7 +108,7 @@ const navigationConfig = computed<
           }
         }
       : undefined),
-    ...(isController.value
+    ...(canSeeSettings.value
       ? {
           settings: {
             name: 'Settings',
@@ -88,7 +120,8 @@ const navigationConfig = computed<
   settings: {
     spaces: {
       name: 'My spaces',
-      icon: IHStop
+      icon: IHStop,
+      hidden: isWhiteLabel.value
     },
     contacts: {
       name: 'Contacts',
@@ -119,12 +152,12 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
       my: {
         user: {
           name: 'Profile',
-          link: { name: 'user', params: { id: web3.value.account } },
+          link: { name: 'user', params: { user: web3.value.account } },
           icon: IHUser,
           hidden: !web3.value.account,
           active:
             (route.name as string) === 'user' &&
-            route.params.id === web3.value.account
+            route.params.user === web3.value.account
         },
         settings: {
           name: 'Settings',
@@ -161,30 +194,21 @@ const navigationItems = computed(() =>
 </script>
 
 <template>
-  <div
-    v-if="Object.keys(navigationItems).length"
-    class="lg:visible fixed w-[240px] border-r left-[72px] inset-y-0 z-10 bg-skin-bg"
-    :class="{
-      invisible: !uiStore.sidebarOpen
-    }"
-  >
-    <div class="h-[72px] border-b" />
-    <div class="py-4">
-      <router-link
-        v-for="(item, key) in navigationItems"
-        :key="key"
-        :to="item.link"
-        class="px-4 py-1.5 space-x-2 flex items-center"
-        :class="item.active ? 'text-skin-link' : 'text-skin-text'"
-      >
-        <component :is="item.icon" class="inline-block"></component>
-        <span class="grow" v-text="item.name" />
-        <span
-          v-if="item.count"
-          class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-          v-text="item.count"
-        />
-      </router-link>
-    </div>
+  <div class="border-r bg-skin-bg py-4">
+    <AppLink
+      v-for="(item, key) in navigationItems"
+      :key="key"
+      :to="item.link"
+      class="px-4 py-1.5 space-x-2 flex items-center"
+      :class="item.active ? 'text-skin-link' : 'text-skin-text'"
+    >
+      <component :is="item.icon" class="inline-block"></component>
+      <span class="grow" v-text="item.name" />
+      <span
+        v-if="item.count"
+        class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
+        v-text="item.count"
+      />
+    </AppLink>
   </div>
 </template>

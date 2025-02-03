@@ -1,25 +1,22 @@
 import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber';
-import {
-  MaxInt256,
-  MaxUint256,
-  MinInt256,
-  Zero
-} from '@ethersproject/constants';
 import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
+import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
+import { _n } from './utils';
 
 type Opts = { skipEmptyOptionalFields: boolean };
 
 const ajv = new Ajv({
   allErrors: true,
   // https://github.com/ajv-validator/ajv/issues/1417
-  strictTuples: false
+  strictTuples: false,
+  allowUnionTypes: true
 });
+ajvErrors(ajv);
 addFormats(ajv);
 
 export const addressValidator = (value: string) => {
@@ -30,40 +27,33 @@ export const addressValidator = (value: string) => {
   }
 };
 
-const bytesValidator = (value: string) =>
-  !!value.match(/^0x([0-9a-fA-F][0-9a-fA-F])+$/);
+export const ethAddressValidator = (value: string) => {
+  return isAddress(value);
+};
 
-const uint256Validator = (value: string) => {
-  if (!value.match(/^([0-9]|[1-9][0-9]+)$/)) return false;
+const validateType = (type: string, value: string) => {
+  if (!value) return false;
 
   try {
-    const number = BigNumber.from(value);
-    return number.gte(Zero) && number.lte(MaxUint256);
-  } catch {
+    const iface = new Interface([`function test(${type})`]);
+    iface.encodeFunctionData('test', [value]);
+    return true;
+  } catch (e) {
     return false;
   }
 };
 
-const int256Validator = (value: string) => {
-  if (!value.match(/^-?([0-9]|[1-9][0-9]+)$/)) return false;
-
-  try {
-    const number = BigNumber.from(value);
-    return number.gte(MinInt256) && number.lte(MaxInt256);
-  } catch {
-    return false;
-  }
-};
+const bytesValidator = (value: string) => validateType('bytes', value);
+const uint256Validator = (value: string) => validateType('uint256', value);
+const int256Validator = (value: string) => validateType('int256', value);
 
 const getArrayValidator =
   (valueValidator: (value: string) => boolean) => (value: string) => {
     if (!value) return false;
 
     try {
-      const parsed = JSON.parse(value);
-      if (!Array.isArray(parsed)) return false;
-
-      return parsed.every((value: string) => valueValidator(value));
+      const array = value.split(',').map(s => s.trim());
+      return array.every((value: string) => valueValidator(value));
     } catch {
       return false;
     }
@@ -71,6 +61,10 @@ const getArrayValidator =
 
 ajv.addFormat('address', {
   validate: addressValidator
+});
+
+ajv.addFormat('ethAddress', {
+  validate: ethAddressValidator
 });
 
 ajv.addFormat('uint256', {
@@ -85,8 +79,8 @@ ajv.addFormat('bytes', {
   validate: bytesValidator
 });
 
-ajv.addFormat('address[]', {
-  validate: getArrayValidator(addressValidator)
+ajv.addFormat('ethAddress[]', {
+  validate: getArrayValidator(ethAddressValidator)
 });
 
 ajv.addFormat('uint256[]', {
@@ -103,6 +97,13 @@ ajv.addFormat('bytes[]', {
 
 ajv.addFormat('long', {
   validate: () => true
+});
+
+ajv.addFormat('color', {
+  validate: (value: string) => {
+    if (!value) return false;
+    return !!value.match(/^#[0-9A-F]{6}$/);
+  }
 });
 
 ajv.addFormat('ens-or-address', {
@@ -184,6 +185,14 @@ ajv.addFormat('discord-handle', {
   }
 });
 
+ajv.addFormat('coingecko-handle', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-z0-9-]*$/);
+  }
+});
+
 ajv.addFormat('lens-handle', {
   validate: (value: string) => {
     if (!value) return false;
@@ -197,6 +206,14 @@ ajv.addFormat('farcaster-handle', {
     if (!value) return false;
 
     return !!value.match(/^[a-z0-9-]+$/);
+  }
+});
+
+ajv.addFormat('domain', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    return !!value.match(/^[a-zA-Z0-9\-\.]+$/);
   }
 });
 
@@ -230,6 +247,15 @@ ajv.addKeyword({
   }
 });
 ajv.addKeyword('options');
+ajv.addKeyword('tooltip');
+
+// UiSelectorNetwork
+ajv.addFormat('network', {
+  validate: () => true
+});
+ajv.addKeyword('networkId');
+ajv.addKeyword('networksListKind');
+ajv.addKeyword('chainId');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';
@@ -240,8 +266,14 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     switch (errorObject.params.format) {
       case 'uri':
         return 'Must be a valid URL.';
+      case 'domain':
+        return 'Must be a valid domain.';
       case 'address':
+      case 'ethAddress':
         return 'Must be a valid address.';
+      case 'address[]':
+      case 'ethAddress[]':
+        return 'Must be comma separated list of valid addresses.';
       case 'ens-or-address':
         return 'Must be a valid ENS domain or address.';
       case 'abi':
@@ -252,6 +284,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be a valid GitHub handle.';
       case 'discord-handle':
         return 'Must be a valid Discord handle or invite code.';
+      case 'coingecko-handle':
+        return 'Must be a valid CoinGecko handle.';
       case 'uint256':
         return 'Must be a positive integer.';
       case 'int256':
@@ -260,9 +294,26 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be a number.';
       case 'addresses-with-voting-power':
         return 'Must be a valid list of addresses with voting power.';
+      case 'color':
+        return 'Must be a valid hex color. ex: #EB4C5B';
       default:
         return 'Invalid format.';
     }
+  }
+
+  if (errorObject.keyword === 'maxLength') {
+    if (!errorObject.params) return 'Invalid format.';
+    return `Must not have more than ${_n(errorObject.params.limit)} characters.`;
+  }
+
+  if (errorObject.keyword === 'minimum') {
+    if (!errorObject.params) return 'Invalid format.';
+    return `Must be at least ${_n(errorObject.params.limit)}.`;
+  }
+
+  if (errorObject.keyword === 'maximum') {
+    if (!errorObject.params) return 'Invalid format.';
+    return `Must be at most ${_n(errorObject.params.limit)}.`;
   }
 
   return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
@@ -302,7 +353,9 @@ const getErrors = (errors: Partial<ErrorObject>[]) => {
     let current = output;
     for (let i = 0; i < path.length - 1; i++) {
       const subpath = path[i];
-      if (!current[subpath]) current[subpath] = {};
+      if (typeof current[subpath] !== 'object' || current[subpath] === null) {
+        current[subpath] = {};
+      }
       current = current[subpath];
     }
 

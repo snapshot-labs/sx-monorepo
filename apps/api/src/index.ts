@@ -6,13 +6,11 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { startStandaloneServer } from '@apollo/server/standalone';
 import Checkpoint, {
   createGetLoader,
-  LogLevel,
-  starknet
+  LogLevel
 } from '@snapshot-labs/checkpoint';
-import spaceAbi from './abis/space.json';
-import spaceFactoryAbi from './abis/spaceFactory.json';
-import config from './currentConfig';
-import * as writer from './writer';
+import { addEvmIndexers } from './evm';
+import overrides from './overrides.json';
+import { addStarknetIndexers } from './starknet';
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
@@ -25,16 +23,15 @@ if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
 
-const indexer = new starknet.StarknetIndexer(writer);
-const checkpoint = new Checkpoint(config, indexer, schema, {
+const checkpoint = new Checkpoint(schema, {
   logLevel: LogLevel.Info,
   resetOnConfigChange: true,
   prettifyLogs: process.env.NODE_ENV !== 'production',
-  abis: {
-    SpaceFactory: spaceFactoryAbi,
-    Space: spaceAbi
-  }
+  overridesConfig: overrides
 });
+
+addStarknetIndexers(checkpoint);
+addEvmIndexers(checkpoint);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -65,6 +62,7 @@ async function run() {
     await sleep(PRODUCTION_INDEXER_DELAY);
   }
 
+  await checkpoint.resetMetadata();
   await checkpoint.reset();
   checkpoint.start();
 }

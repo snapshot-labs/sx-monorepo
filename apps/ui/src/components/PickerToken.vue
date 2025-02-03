@@ -7,14 +7,14 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { _n, shorten } from '@/helpers/utils';
+import { ChainId } from '@/types';
 
 const props = defineProps<{
   searchValue: string;
   loading: boolean;
   assets: Token[];
   address: string;
-  network: number;
-  networkId: string;
+  network: ChainId;
 }>();
 
 const emit = defineEmits<{
@@ -61,6 +61,11 @@ function handlePick(token: Token) {
 
 async function fetchCustomToken(address) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
+
+  if (typeof props.network === 'string') {
+    console.log('network is not a number (starknet is not supported)');
+    return;
+  }
 
   customTokenLoading.value = true;
 
@@ -137,9 +142,9 @@ watch(
       @click="handlePick(asset)"
     >
       <div class="flex items-center min-w-0 pr-2">
-        <UiBadgeNetwork :id="networkId">
+        <UiBadgeNetwork :chain-id="network">
           <UiStamp
-            :id="`${networkId}:${asset.contractAddress}`"
+            :id="`eip155:${network}:${asset.contractAddress}`"
             type="token"
             :size="32"
           />

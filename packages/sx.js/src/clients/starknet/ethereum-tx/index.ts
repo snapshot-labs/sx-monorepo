@@ -1,7 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import { poseidonHashMany } from 'micro-starknet';
-import { CallData, constants, SequencerProvider, shortString } from 'starknet';
+import { CallData, shortString } from 'starknet';
 import StarknetCommitAbi from './abis/StarknetCommit.json';
 import {
   ClientConfig,
@@ -199,12 +199,10 @@ const UPDATE_PROPOSAL_SELECTOR =
   '0x1f93122f646d968b0ce8c1a4986533f8b4ed3f099122381a4f77478a480c2c3';
 
 export class EthereumTx {
-  // TODO: handle sequencerUrl in network config
-  config: ClientConfig & { sequencerUrl: string };
+  config: ClientConfig;
 
-  constructor(opts: ClientOpts & { sequencerUrl?: string }) {
+  constructor(opts: ClientOpts) {
     this.config = {
-      sequencerUrl: opts.sequencerUrl || constants.BaseUrl.SN_SEPOLIA,
       ...opts
     };
   }
@@ -213,11 +211,7 @@ export class EthereumTx {
     l2Address: string,
     payload: string[]
   ): Promise<{ overall_fee: number }> {
-    const sequencerProvider = new SequencerProvider({
-      baseUrl: this.config.sequencerUrl
-    });
-
-    const fees = await sequencerProvider.estimateMessageFee({
+    const fees = await this.config.starkProvider.estimateMessageFee({
       from_address: this.config.networkConfig.starknetCommit,
       to_address: l2Address,
       entry_point_selector: 'commit',
@@ -227,9 +221,8 @@ export class EthereumTx {
     return fees as any;
   }
 
-  async estimateProposeFee(signer: Signer, data: Propose) {
-    const address = await signer.getAddress();
-    const hash = await this.getProposeHash(signer, data);
+  async estimateProposeFee(address: string, data: Propose) {
+    const hash = await this.getProposeHash(address, data);
 
     return this.getMessageFee(data.authenticator, [
       address.toLocaleLowerCase(),
@@ -237,9 +230,8 @@ export class EthereumTx {
     ]);
   }
 
-  async estimateVoteFee(signer: Signer, data: Vote) {
-    const address = await signer.getAddress();
-    const hash = await this.getVoteHash(signer, data);
+  async estimateVoteFee(address: string, data: Vote) {
+    const hash = await this.getVoteHash(address, data);
 
     return this.getMessageFee(data.authenticator, [
       address.toLocaleLowerCase(),
@@ -247,9 +239,8 @@ export class EthereumTx {
     ]);
   }
 
-  async estimateUpdateProposalFee(signer: Signer, data: UpdateProposal) {
-    const address = await signer.getAddress();
-    const hash = await this.getUpdateProposalHash(signer, data);
+  async estimateUpdateProposalFee(address: string, data: UpdateProposal) {
+    const hash = await this.getUpdateProposalHash(address, data);
 
     return this.getMessageFee(data.authenticator, [
       address.toLocaleLowerCase(),
@@ -257,9 +248,7 @@ export class EthereumTx {
     ]);
   }
 
-  async getProposeHash(signer: Signer, data: Propose) {
-    const address = await signer.getAddress();
-
+  async getProposeHash(address: string, data: Propose) {
     const userStrategies = await getStrategiesWithParams(
       'propose',
       data.strategies,
@@ -286,11 +275,9 @@ export class EthereumTx {
     return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;
   }
 
-  async getVoteHash(signer: Signer, data: Vote) {
-    const address = await signer.getAddress();
-
+  async getVoteHash(address: string, data: Vote) {
     const userVotingStrategies = await getStrategiesWithParams(
-      'propose',
+      'vote',
       data.strategies,
       address,
       data,
@@ -311,9 +298,7 @@ export class EthereumTx {
     return `0x${poseidonHashMany(compiled.map(v => BigInt(v))).toString(16)}`;
   }
 
-  async getUpdateProposalHash(signer: Signer, data: UpdateProposal) {
-    const address = await signer.getAddress();
-
+  async getUpdateProposalHash(address: string, data: UpdateProposal) {
     const callData = new CallData(ENCODE_ABI);
     const compiled = callData.compile('update_proposal', [
       data.space,
@@ -341,11 +326,13 @@ export class EthereumTx {
       signer
     );
 
-    const hash = await this.getProposeHash(signer, data);
-    const { overall_fee } = await this.estimateProposeFee(signer, data);
+    const address = await signer.getAddress();
+    const hash = await this.getProposeHash(address, data);
+    const { overall_fee } = await this.estimateProposeFee(address, data);
 
     const promise = commitContract.commit(data.authenticator, hash, {
-      value: overall_fee
+      value: overall_fee,
+      gasLimit: opts.noWait ? 0 : undefined
     });
     const res = opts.noWait ? null : await promise;
 
@@ -371,11 +358,13 @@ export class EthereumTx {
       signer
     );
 
-    const hash = await this.getVoteHash(signer, data);
-    const { overall_fee } = await this.estimateVoteFee(signer, data);
+    const address = await signer.getAddress();
+    const hash = await this.getVoteHash(address, data);
+    const { overall_fee } = await this.estimateVoteFee(address, data);
 
     const promise = commitContract.commit(data.authenticator, hash, {
-      value: overall_fee
+      value: overall_fee,
+      gasLimit: opts.noWait ? 0 : undefined
     });
     const res = opts.noWait ? null : await promise;
 
@@ -401,11 +390,13 @@ export class EthereumTx {
       signer
     );
 
-    const hash = await this.getUpdateProposalHash(signer, data);
-    const { overall_fee } = await this.estimateUpdateProposalFee(signer, data);
+    const address = await signer.getAddress();
+    const hash = await this.getUpdateProposalHash(address, data);
+    const { overall_fee } = await this.estimateUpdateProposalFee(address, data);
 
     const promise = commitContract.commit(data.authenticator, hash, {
-      value: overall_fee
+      value: overall_fee,
+      gasLimit: opts.noWait ? 0 : undefined
     });
     const res = opts.noWait ? null : await promise;
 

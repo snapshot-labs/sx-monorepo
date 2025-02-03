@@ -2,6 +2,8 @@
 import { _rt } from '@/helpers/utils';
 
 const notificationsStore = useNotificationsStore();
+const { modalAccountWithoutDismissOpen } = useModal();
+const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 
 watchEffect(async () => {
@@ -11,12 +13,24 @@ watchEffect(async () => {
 });
 
 watch(
-  () => notificationsStore.unreadNotificationsCount,
-  () => {
+  [
+    () => web3.value.account,
+    () => web3.value.authLoading,
+    () => notificationsStore.unreadNotificationsCount
+  ],
+  ([account, authLoading]) => {
+    if (!account && !authLoading) {
+      modalAccountWithoutDismissOpen.value = true;
+    }
+
     notificationsStore.refreshLastUnreadTs();
   },
   { immediate: true }
 );
+
+onUnmounted(() => {
+  modalAccountWithoutDismissOpen.value = false;
+});
 
 onUnmounted(() => notificationsStore.markAllAsRead());
 </script>
@@ -35,35 +49,35 @@ onUnmounted(() => notificationsStore.markAllAsRead());
           :class="{ 'bg-skin-border/20': notification.unread }"
         >
           <div>
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-overview',
                 params: {
-                  id: `${notification.proposal.network}:${notification.proposal.space.id}`
+                  space: `${notification.proposal.network}:${notification.proposal.space.id}`
                 }
               }"
             >
               {{ notification.proposal.space.name }}
-            </router-link>
+            </AppLink>
             proposal has {{ notification.type }}
             {{ _rt(notification.timestamp) }}
-            <router-link
+            <AppLink
               :to="{
-                name: 'proposal-overview',
+                name: 'space-proposal-overview',
                 params: {
-                  id: notification.proposal.proposal_id,
+                  proposal: notification.proposal.proposal_id,
                   space: `${notification.proposal.network}:${notification.proposal.space.id}`
                 }
               }"
             >
               <h3
-                class="font-normal text-[21px]"
+                class="font-normal text-[21px] [overflow-wrap:anywhere]"
                 v-text="
                   notification.proposal.title ||
                   `#${notification.proposal.proposal_id}`
                 "
               />
-            </router-link>
+            </AppLink>
           </div>
         </div>
       </div>

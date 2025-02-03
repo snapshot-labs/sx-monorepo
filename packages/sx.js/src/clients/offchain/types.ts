@@ -56,6 +56,7 @@ export type EIP712ProposeMessage = {
   body: string;
   discussion: string;
   choices: string[];
+  labels: string[];
   start: number;
   end: number;
   snapshot: number;
@@ -73,9 +74,17 @@ export type EIP712UpdateProposal = {
   body: string;
   discussion: string;
   choices: string[];
+  labels: string[];
   plugins: string;
   timestamp?: number;
   from?: string;
+};
+
+export type EIP712FlagProposalMessage = {
+  space: string;
+  proposal: string;
+  from?: string;
+  timestamp?: number;
 };
 
 export type EIP712CancelProposalMessage = {
@@ -122,6 +131,19 @@ export type EIP712UpdateStatementMessage = {
   status: string;
 };
 
+export type EIP712UpdateSpaceMessage = {
+  from?: string;
+  timestamp?: number;
+  space: string;
+  settings: string;
+};
+
+export type EIP712DeleteSpaceMessage = {
+  from?: string;
+  space: string;
+  timestamp?: number;
+};
+
 export type EIP712Message = Required<
   | EIP712VoteMessage
   | EIP712ProposeMessage
@@ -131,6 +153,9 @@ export type EIP712Message = Required<
   | EIP712UnfollowSpaceMessage
   | EIP712SetAliasMessage
   | EIP712UpdateUserMessage
+  | EIP712UpdateStatementMessage
+  | EIP712UpdateSpaceMessage
+  | EIP712DeleteSpaceMessage
 >;
 
 export type Vote = {
@@ -141,9 +166,10 @@ export type Vote = {
   choice: Choice;
   metadataUri: string;
   type: string;
-  privacy?: Privacy;
+  privacy: Privacy;
   timestamp?: number;
   reason?: string;
+  app: string;
 };
 
 export type Propose = {
@@ -153,6 +179,8 @@ export type Propose = {
   body: string;
   discussion: string;
   choices: string[];
+  privacy: string;
+  labels: string[];
   start: number;
   end: number;
   snapshot: number;
@@ -169,14 +197,22 @@ export type UpdateProposal = {
   body: string;
   discussion: string;
   choices: string[];
+  labels: string[];
   plugins: string;
+};
+
+export type FlagProposal = {
+  from?: string;
+  space: string;
+  proposal: string;
+  timestamp?: number;
 };
 
 export type CancelProposal = {
   from?: string;
   space: string;
-  timestamp?: number;
   proposal: string;
+  timestamp?: number;
 };
 
 export type FollowSpace = {
@@ -213,4 +249,17 @@ export type UpdateStatement = {
   statement: string;
   discourse: string;
   status: string;
+};
+
+export type UpdateSpace = {
+  from?: string;
+  timestamp?: number;
+  space: string;
+  settings: string;
+};
+
+export type DeleteSpace = {
+  from?: string;
+  timestamp?: number;
+  space: string;
 };

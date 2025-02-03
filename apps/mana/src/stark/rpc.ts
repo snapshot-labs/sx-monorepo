@@ -31,8 +31,10 @@ export const createNetworkHandler = (chainId: string) => {
           console.log('Propose');
           receipt = await client.propose(account, params.envelope, { nonce });
         } else if (primaryType === 'UpdateProposal') {
-          console.log('Propose');
-          receipt = await client.propose(account, params.envelope, { nonce });
+          console.log('UpdateProposal');
+          receipt = await client.updateProposal(account, params.envelope, {
+            nonce
+          });
         } else if (primaryType === 'Vote') {
           console.log('Vote');
           receipt = await client.vote(account, params.envelope, { nonce });
@@ -84,11 +86,11 @@ export const createNetworkHandler = (chainId: string) => {
 
   async function registerTransaction(id: number, params: any, res: Response) {
     try {
-      const { type, hash, payload } = params;
+      const { type, sender, hash, payload } = params;
 
-      console.log('Registering transaction', type, hash, payload);
+      console.log('Registering transaction', type, sender, hash, payload);
 
-      await db.registerTransaction(chainId, type, hash, payload);
+      await db.registerTransaction(chainId, type, sender, hash, payload);
 
       return rpcSuccess(res, true, id);
     } catch (e) {
@@ -135,11 +137,25 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
+  async function getDataByMessageHash(id: number, params: any, res: Response) {
+    try {
+      const { hash } = params;
+
+      const transaction = await db.getDataByMessageHash(hash);
+
+      return rpcSuccess(res, transaction, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
   return {
     send,
     execute,
     registerTransaction,
     registerProposal,
-    getAccount
+    getAccount,
+    getDataByMessageHash
   };
 };

@@ -112,97 +112,106 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 </script>
 
 <template>
-  <UiLabel label="Leaderboard" sticky />
-  <div
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b w-full flex font-medium space-x-1"
-  >
-    <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
-    <button
-      type="button"
-      class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link space-x-1 truncate"
-      @click="handleSortChange('proposal_count')"
-    >
-      <span class="truncate">Proposals</span>
-      <IH-arrow-sm-down
-        v-if="sortBy === 'proposal_count-desc'"
-        class="shrink-0"
-      />
-      <IH-arrow-sm-up
-        v-else-if="sortBy === 'proposal_count-asc'"
-        class="shrink-0"
-      />
-    </button>
-    <button
-      type="button"
-      class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] space-x-1 truncate"
-      @click="handleSortChange('vote_count')"
-    >
-      <span class="truncate">Votes</span>
-      <IH-arrow-sm-down v-if="sortBy === 'vote_count-desc'" class="shrink-0" />
-      <IH-arrow-sm-up
-        v-else-if="sortBy === 'vote_count-asc'"
-        class="shrink-0"
-      />
-    </button>
-  </div>
-  <UiLoading v-if="!loaded" class="px-4 py-3 block" />
-  <template v-else>
+  <div>
+    <UiLabel label="Leaderboard" sticky />
     <div
-      v-if="failed || users.length === 0"
-      class="px-4 py-3 flex items-center space-x-2"
+      class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b w-full flex font-medium space-x-1"
     >
-      <IH-exclamation-circle class="inline-block" />
-      <span v-if="failed">Failed to load the leaderboard.</span>
-      <span v-else-if="users.length === 0">
-        This space does not have any activities yet.
-      </span>
+      <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
+      <button
+        type="button"
+        class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link space-x-1 truncate"
+        @click="handleSortChange('proposal_count')"
+      >
+        <span class="truncate">Proposals</span>
+        <IH-arrow-sm-down
+          v-if="sortBy === 'proposal_count-desc'"
+          class="shrink-0"
+        />
+        <IH-arrow-sm-up
+          v-else-if="sortBy === 'proposal_count-asc'"
+          class="shrink-0"
+        />
+      </button>
+      <button
+        type="button"
+        class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] space-x-1 truncate"
+        @click="handleSortChange('vote_count')"
+      >
+        <span class="truncate">Votes</span>
+        <IH-arrow-sm-down
+          v-if="sortBy === 'vote_count-desc'"
+          class="shrink-0"
+        />
+        <IH-arrow-sm-up
+          v-else-if="sortBy === 'vote_count-asc'"
+          class="shrink-0"
+        />
+      </button>
     </div>
-    <UiContainerInfiniteScroll
-      :loading-more="loadingMore"
-      @end-reached="handleEndReached"
-    >
-      <div v-for="(user, i) in users" :key="i" class="border-b flex space-x-1">
-        <div
-          class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
-        >
-          <UiStamp :id="user.id" :size="32" />
-          <router-link
-            :to="{
-              name: 'space-user-statement',
-              params: { id: `${space.network}:${space.id}`, user: user.id }
-            }"
-            class="overflow-hidden"
-          >
-            <h4
-              class="text-skin-link truncate"
-              v-text="user.name || shorten(user.id)"
-            />
-            <div
-              class="text-[17px] text-skin-text truncate"
-              v-text="shorten(user.id)"
-            />
-          </router-link>
-        </div>
-        <div
-          class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"
-        >
-          <h4 class="text-skin-link" v-text="_n(user.proposal_count)" />
-          <div class="text-[17px]">
-            {{ _p(user.proposal_count / space.proposal_count) }}
-          </div>
-        </div>
-        <div
-          class="flex flex-col items-end justify-center pr-4 leading-[22px] w-[30%] lg:w-[25%] truncate"
-        >
-          <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
-          <div class="text-[17px]">
-            {{ _p(user.vote_count / space.proposal_count) }}
-          </div>
-        </div>
+    <UiLoading v-if="!loaded" class="px-4 py-3 block" />
+    <template v-else>
+      <div
+        v-if="failed || users.length === 0"
+        class="px-4 py-3 flex items-center space-x-2"
+      >
+        <IH-exclamation-circle class="inline-block" />
+        <span v-if="failed">Failed to load the leaderboard.</span>
+        <span v-else-if="users.length === 0">
+          This space does not have any activities yet.
+        </span>
       </div>
-      <template #loading>
-        <UiLoading class="px-4 py-3 block" />
-      </template>
-    </UiContainerInfiniteScroll>
-  </template>
+      <UiContainerInfiniteScroll
+        :loading-more="loadingMore"
+        @end-reached="handleEndReached"
+      >
+        <div
+          v-for="(user, i) in users"
+          :key="i"
+          class="border-b flex space-x-1"
+        >
+          <div
+            class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
+          >
+            <UiStamp :id="user.id" :size="32" />
+            <AppLink
+              :to="{
+                name: 'space-user-statement',
+                params: { space: `${space.network}:${space.id}`, user: user.id }
+              }"
+              class="overflow-hidden"
+            >
+              <h4
+                class="text-skin-link truncate"
+                v-text="user.name || shorten(user.id)"
+              />
+              <div
+                class="text-[17px] text-skin-text truncate"
+                v-text="shorten(user.id)"
+              />
+            </AppLink>
+          </div>
+          <div
+            class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"
+          >
+            <h4 class="text-skin-link" v-text="_n(user.proposal_count)" />
+            <div class="text-[17px]">
+              {{ _p(user.proposal_count / space.proposal_count) }}
+            </div>
+          </div>
+          <div
+            class="flex flex-col items-end justify-center pr-4 leading-[22px] w-[30%] lg:w-[25%] truncate"
+          >
+            <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
+            <div class="text-[17px]">
+              {{ _p(user.vote_count / space.proposal_count) }}
+            </div>
+          </div>
+        </div>
+        <template #loading>
+          <UiLoading class="px-4 py-3 block" />
+        </template>
+      </UiContainerInfiniteScroll>
+    </template>
+  </div>
 </template>

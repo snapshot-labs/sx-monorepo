@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
+import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { offchainNetworks } from '@/networks';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -8,7 +12,7 @@ const REASON_DEFINITION = {
   type: 'string',
   format: 'long',
   examples: ['Share you reason (optional)'],
-  maxLength: 1000
+  maxLength: 5000
 };
 
 const props = defineProps<{
@@ -22,18 +26,21 @@ const emit = defineEmits<{
   (e: 'voted');
 }>();
 
+const queryClient = useQueryClient();
 const { vote } = useActions();
 const { web3 } = useWeb3();
-const {
-  votingPower,
-  fetch: fetchVotingPower,
-  reset: resetVotingPower
-} = useVotingPower();
+const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
+const { loadVotes, votes } = useAccount();
+const route = useRoute();
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
+const modalTransactionOpen = ref(false);
+const modalShareOpen = ref(false);
+const txId = ref<string | null>(null);
+const selectedChoice = ref<Choice | null>(null);
 
 const formValidator = getValidator({
   $async: true,
@@ -46,44 +53,104 @@ const formValidator = getValidator({
   }
 });
 
+const votingPower = computed(() =>
+  getVotingPower(props.proposal.space, props.proposal)
+);
+
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
-const canSubmit = computed(
+const offchainProposal = computed<boolean>(() =>
+  offchainNetworks.includes(props.proposal.network)
+);
+
+const canSubmit = computed<boolean>(
   () =>
     formValidated &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
-    votingPower.value?.canVote
+    !!votingPower.value?.canVote
 );
 
 async function handleSubmit() {
   loading.value = true;
+  selectedChoice.value = props.choice;
 
-  if (!props.choice) return;
-
-  try {
-    await vote(props.proposal, props.choice, form.value.reason);
-    emit('voted');
+  if (offchainProposal.value) {
+    try {
+      await voteFn();
+      handleConfirmed();
+    } finally {
+      loading.value = false;
+    }
+  } else {
     emit('close');
-  } finally {
     loading.value = false;
+    modalTransactionOpen.value = true;
+  }
+}
+
+async function voteFn() {
+  if (!selectedChoice.value) return null;
+
+  const appName = (route.query.app as LocationQueryValue) || '';
+
+  return vote(
+    props.proposal,
+    selectedChoice.value,
+    form.value.reason,
+    appName.length <= 128 ? appName : ''
+  );
+}
+
+async function handleConfirmed(tx?: string | null) {
+  modalTransactionOpen.value = false;
+  if (tx) {
+    txId.value = tx;
+    modalShareOpen.value = true;
+  }
+
+  emit('voted');
+  emit('close');
+
+  loading.value = false;
+
+  // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
+  if (offchainProposal.value) {
+    queryClient.invalidateQueries({
+      queryKey: PROPOSALS_KEYS.detail(
+        props.proposal.network,
+        props.proposal.space.id,
+        props.proposal.proposal_id.toString()
+      )
+    });
+    await loadVotes(props.proposal.network, [props.proposal.space.id]);
   }
 }
 
 function handleFetchVotingPower() {
-  fetchVotingPower(props.proposal);
+  fetchVotingPower(props.proposal.space, props.proposal);
 }
 
 watch(
   [() => props.open, () => web3.value.account],
-  ([open, toAccount], [, fromAccount]) => {
+  async ([open, toAccount], [, fromAccount]) => {
+    if (!open) return;
+
     if (fromAccount && toAccount && fromAccount !== toAccount) {
-      resetVotingPower();
+      loading.value = true;
+      form.value.reason = '';
+      await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
 
-    if (open) handleFetchVotingPower();
+    handleFetchVotingPower();
+
+    form.value.reason =
+      votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
+      '';
+
+    loading.value = false;
   },
   { immediate: true }
 );
@@ -136,7 +203,7 @@ watchEffect(async () => {
           v-text="formattedVotingPower"
         />
       </dl>
-      <div class="s-box">
+      <div v-if="proposal.privacy === 'none'" class="s-box">
         <UiForm
           v-model="form"
           :error="formErrors"
@@ -165,4 +232,27 @@ watchEffect(async () => {
       </div>
     </template>
   </UiModal>
+
+  <teleport to="#modal">
+    <ModalTransactionProgress
+      :open="modalTransactionOpen"
+      :network-id="proposal.network"
+      :messages="{
+        approveTitle: 'Confirm vote'
+      }"
+      :execute="voteFn"
+      @confirmed="handleConfirmed"
+      @close="modalTransactionOpen = false"
+    />
+    <ModalShare
+      :open="modalShareOpen"
+      :tx-id="txId"
+      :show-icon="true"
+      :shareable="{ proposal, choice: selectedChoice! }"
+      :messages="{
+        title: 'Vote success!'
+      }"
+      @close="modalShareOpen = false"
+    />
+  </teleport>
 </template>

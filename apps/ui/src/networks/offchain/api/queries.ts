@@ -8,6 +8,8 @@ const SPACE_FRAGMENT = gql`
     admins
     members
     name
+    avatar
+    cover
     network
     about
     website
@@ -15,21 +17,32 @@ const SPACE_FRAGMENT = gql`
     github
     coingecko
     symbol
+    activeProposals
     treasuries {
       name
       network
       address
     }
+    labels {
+      id
+      name
+      description
+      color
+    }
     delegationPortal {
       delegationType
       delegationContract
+      delegationNetwork
       delegationApi
     }
     voting {
       delay
       period
-      quorum
       type
+      quorum
+      quorumType
+      privacy
+      hideAbstain
     }
     strategies {
       name
@@ -45,8 +58,62 @@ const SPACE_FRAGMENT = gql`
       onlyMembers
     }
     proposalsCount
+    proposalsCount1d
+    proposalsCount30d
     votesCount
     followersCount
+    children {
+      id
+      name
+      avatar
+      cover
+      proposalsCount
+      votesCount
+      activeProposals
+      turbo
+      verified
+      network
+    }
+    parent {
+      id
+      name
+      avatar
+      cover
+      proposalsCount
+      votesCount
+      activeProposals
+      turbo
+      verified
+      network
+    }
+    # needed for settings
+    terms
+    private
+    domain
+    skin
+    skinSettings {
+      bg_color
+      link_color
+      text_color
+      content_color
+      border_color
+      heading_color
+      primary_color
+      theme
+    }
+    guidelines
+    template
+    categories
+    moderators
+    plugins
+    boost {
+      enabled
+      bribeEnabled
+    }
+    voteValidation {
+      name
+      params
+    }
   }
 `;
 
@@ -57,10 +124,12 @@ const PROPOSAL_FRAGMENT = gql`
     space {
       id
       name
+      avatar
       network
       admins
       moderators
       symbol
+      terms
     }
     type
     title
@@ -73,8 +142,10 @@ const PROPOSAL_FRAGMENT = gql`
     end
     snapshot
     choices
+    labels
     scores
     scores_total
+    scores_state
     state
     strategies {
       name
@@ -90,6 +161,7 @@ const PROPOSAL_FRAGMENT = gql`
     votes
     privacy
     plugins
+    flagged
   }
 `;
 
@@ -147,8 +219,12 @@ export const SPACE_QUERY = gql`
 `;
 
 export const USER_VOTES_QUERY = gql`
-  query ($spaceIds: [String], $voter: String) {
-    votes(where: { space_in: $spaceIds, voter: $voter }) {
+  query ($first: Int, $skip: Int, $spaceIds: [String], $voter: String) {
+    votes(
+      first: $first
+      skip: $skip
+      where: { space_in: $spaceIds, voter: $voter }
+    ) {
       id
       voter
       space {
@@ -220,14 +296,16 @@ export const ALIASES_QUERY = gql`
 `;
 
 export const STATEMENTS_QUERY = gql`
-  query Statements($delegate: String!, $space: String!) {
-    statements(where: { delegate: $delegate, space: $space }) {
+  query ($where: StatementsWhere) {
+    statements(where: $where) {
       about
       statement
       space
+      delegate
       network
       discourse
       status
+      source
     }
   }
 `;
@@ -244,6 +322,8 @@ export const USER_QUERY = gql`
       twitter
       lens
       farcaster
+      votesCount
+      created
     }
   }
 `;
@@ -267,6 +347,54 @@ export const LEADERBOARD_QUERY = gql`
       space
       proposalsCount
       votesCount
+    }
+  }
+`;
+
+const STRATEGY_FRAGMENT = gql`
+  fragment offchainStrategyFragment on StrategyItem {
+    id
+    author
+    about
+    version
+    spacesCount
+    examples
+    schema
+  }
+`;
+
+export const STRATEGIES_QUERY = gql`
+  query Strategies {
+    strategies {
+      ...offchainStrategyFragment
+    }
+  }
+  ${STRATEGY_FRAGMENT}
+`;
+
+export const STRATEGY_QUERY = gql`
+  query Strategy($id: String!) {
+    strategy(id: $id) {
+      ...offchainStrategyFragment
+    }
+  }
+  ${STRATEGY_FRAGMENT}
+`;
+
+export const NETWORKS_USAGE_QUERY = gql`
+  query Networks {
+    networks {
+      id
+      spacesCount
+    }
+  }
+`;
+
+export const SETTINGS_QUERY = gql`
+  query Settings {
+    options {
+      name
+      value
     }
   }
 `;

@@ -68,8 +68,10 @@ const metadataForm: SpaceMetadata = reactive(
     twitter: '',
     github: '',
     discord: '',
+    terms: '',
     votingPowerSymbol: '',
     treasuries: [],
+    labels: [],
     delegations: []
   })
 );
@@ -178,6 +180,7 @@ watchEffect(() => setTitle('Create space'));
       :voting-strategies="votingStrategies"
       :execution-strategies="executionStrategies"
       :controller="controller"
+      @back="confirming = false"
     />
     <div v-else class="pt-5 flex max-w-[50rem] mx-auto px-4">
       <div
@@ -202,22 +205,34 @@ watchEffect(() => setTitle('Create space'));
       </div>
       <div class="flex-1">
         <div class="mt-8 lg:mt-0">
-          <FormProfile
-            v-if="currentPage === 'profile'"
-            :form="metadataForm"
-            :treasuries-value="metadataForm.treasuries"
-            :delegations-value="metadataForm.delegations"
-            @treasuries="v => (metadataForm.treasuries = v)"
-            @delegations="v => (metadataForm.delegations = v)"
-            @errors="v => handleErrors('profile', v)"
-          />
+          <template v-if="currentPage === 'profile'">
+            <UiContainerSettings title="Space profile">
+              <FormSpaceProfile
+                :form="metadataForm"
+                @errors="v => handleErrors('profile', v)"
+              />
+              <div class="s-box p-4 -mt-6">
+                <FormSpaceTreasuries
+                  v-model="metadataForm.treasuries"
+                  :network-id="selectedNetworkId"
+                />
+                <FormSpaceDelegations
+                  v-model="metadataForm.delegations"
+                  :network-id="selectedNetworkId"
+                  class="mt-2"
+                />
+              </div>
+            </UiContainerSettings>
+          </template>
           <FormNetwork
             v-else-if="currentPage === 'network'"
             v-model="selectedNetworkId"
+            title="Space network"
           />
           <FormStrategies
             v-else-if="currentPage === 'strategies'"
             v-model="votingStrategies"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
             "
@@ -228,6 +243,7 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'auths'"
             v-model="authenticators"
             unique
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_AUTHENTICATORS
             "
@@ -237,6 +253,7 @@ watchEffect(() => setTitle('Create space'));
           <FormValidation
             v-else-if="currentPage === 'validations'"
             v-model="validationStrategy"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_PROPOSAL_VALIDATIONS
             "
@@ -250,6 +267,7 @@ watchEffect(() => setTitle('Create space'));
           <FormStrategies
             v-else-if="currentPage === 'executions'"
             v-model="executionStrategies"
+            :network-id="selectedNetworkId"
             :available-strategies="
               selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES
             "
@@ -261,11 +279,14 @@ watchEffect(() => setTitle('Create space'));
             v-else-if="currentPage === 'voting'"
             :form="settingsForm"
             :selected-network-id="selectedNetworkId"
+            title="Voting settings"
             @errors="v => handleErrors('voting', v)"
           />
           <FormController
             v-else-if="currentPage === 'controller'"
             v-model="controller"
+            title="Controller"
+            :chain-id="selectedNetwork.chainId"
             @errors="v => handleErrors('controller', v)"
           />
         </div>

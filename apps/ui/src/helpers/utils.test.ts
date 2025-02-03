@@ -1,7 +1,38 @@
-import { describe, expect, it } from 'vitest';
-import { _vp, createErc1155Metadata } from './utils';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import {
+  _d,
+  _rt,
+  _vp,
+  createErc1155Metadata,
+  formatAddress,
+  getStampUrl,
+  uniqBy
+} from './utils';
 
 describe('utils', () => {
+  describe('uniqBy', () => {
+    it('should return unique values by key', () => {
+      const arr = [
+        { id: 1, value: 'a' },
+        { id: 2, value: 'b' },
+        { id: 3, value: 'a' }
+      ];
+
+      const result = uniqBy(arr, 'value');
+      expect(result).toEqual([
+        { id: 1, value: 'a' },
+        { id: 2, value: 'b' }
+      ]);
+    });
+
+    it('should return unique values by predicate function', () => {
+      const arr = [2.1, 1.2, 2.3];
+
+      const result = uniqBy(arr, Math.floor);
+      expect(result).toEqual([2.1, 1.2]);
+    });
+  });
+
   describe('_vp', () => {
     it('should format dust', () => {
       expect(_vp(0.001)).toBe('~0');
@@ -38,8 +69,16 @@ describe('utils', () => {
         treasuries: [
           {
             name: 'treasury 1',
-            network: 'sep',
+            chainId: 11155111,
             address: '0x000000000000000000000000000000000000dead'
+          }
+        ],
+        labels: [
+          {
+            id: 'test',
+            name: 'Test',
+            description: 'Test description',
+            color: '#000000'
           }
         ],
         delegations: [
@@ -48,7 +87,7 @@ describe('utils', () => {
             apiType: 'governor-subgraph',
             apiUrl:
               'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            contractNetwork: 'sep',
+            chainId: 11155111,
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]
@@ -68,8 +107,16 @@ describe('utils', () => {
           treasuries: [
             {
               name: 'treasury 1',
-              network: 'sep',
+              chain_id: 11155111,
               address: '0x000000000000000000000000000000000000dead'
+            }
+          ],
+          labels: [
+            {
+              id: 'test',
+              name: 'Test',
+              description: 'Test description',
+              color: '#000000'
             }
           ],
           delegations: [
@@ -78,11 +125,147 @@ describe('utils', () => {
               api_type: 'governor-subgraph',
               api_url:
                 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-              contract: 'sep:0x000000000000000000000000000000000000dead'
+              contract: '0x000000000000000000000000000000000000dead',
+              chain_id: 11155111
             }
           ]
         }
       });
+    });
+  });
+
+  describe('_d', () => {
+    it('formats full duration correctly', () => {
+      expect(_d(90061)).toBe('1d 1h 1m 1s');
+    });
+
+    it('omits zero values', () => {
+      expect(_d(86400)).toBe('1d');
+      expect(_d(3600)).toBe('1h');
+      expect(_d(60)).toBe('1m');
+      expect(_d(1)).toBe('1s');
+    });
+
+    it('handles large values', () => {
+      expect(_d(3666661)).toBe('42d 10h 31m 1s');
+    });
+
+    it('handles very large values', () => {
+      expect(_d(60 * 60 * 24 * 1001)).toBe('1001d');
+    });
+
+    it('returns empty string for zero', () => {
+      expect(_d(0)).toBe('');
+    });
+
+    it('handles edge cases', () => {
+      expect(_d(86399)).toBe('23h 59m 59s');
+      expect(_d(86400)).toBe('1d');
+      expect(_d(86401)).toBe('1d 1s');
+    });
+  });
+
+  describe('_rt', () => {
+    const now = Date.now();
+    const timestamp = Math.floor(now / 1000);
+
+    beforeAll(() => {
+      vi.useFakeTimers();
+
+      vi.setSystemTime(now);
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    it('should format time in the past', () => {
+      expect(_rt(timestamp - 1)).toBe('just now');
+      expect(_rt(timestamp - 60)).toBe('1m ago');
+      expect(_rt(timestamp - 60 * 60)).toBe('1h ago');
+      expect(_rt(timestamp - 60 * 60 * 24)).toBe('1d ago');
+      expect(_rt(timestamp - 60 * 60 * 24 * 31 * 2)).toBe('2mo ago');
+      expect(_rt(timestamp - 60 * 60 * 24 * 365)).toBe('1y ago');
+    });
+
+    it('should format time in the future', () => {
+      expect(_rt(timestamp + 1)).toBe('in few seconds');
+      expect(_rt(timestamp + 60)).toBe('1m left');
+      expect(_rt(timestamp + 60 * 60)).toBe('1h left');
+      expect(_rt(timestamp + 60 * 60 * 24)).toBe('1d left');
+      expect(_rt(timestamp + 60 * 60 * 24 * 31 * 2)).toBe('2mo left');
+      expect(_rt(timestamp + 60 * 60 * 24 * 365)).toBe('1y left');
+    });
+  });
+
+  describe('formatAddress', () => {
+    it('returns a checksummed evm address', () => {
+      expect(formatAddress('0x556b14cbda79a36dc33fcd461a04a5bcb5dc2a70')).toBe(
+        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
+      );
+    });
+
+    it('returns a padded starknet address', () => {
+      expect(formatAddress('0x4c5dda09742520fdf5c2bbfa4aede8fb9fe6781')).toBe(
+        '0x00000000000000000000000004c5dda09742520fdf5c2bbfa4aede8fb9fe6781'
+      );
+    });
+
+    it('returns the input if it is not a valid address', () => {
+      expect(formatAddress('ens.eth')).toBe('ens.eth');
+      expect(formatAddress('')).toBe('');
+    });
+  });
+
+  describe('getStampUrl', () => {
+    it('returns a stamp url with a formatted ID', () => {
+      expect(
+        getStampUrl('avatar', '0x556b14cbda79a36dc33fcd461a04a5bcb5dc2a70', 32)
+      ).toBe(
+        'https://cdn.stamp.fyi/avatar/0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70?s=64'
+      );
+
+      expect(
+        getStampUrl('avatar', '0x4c5dda09742520fdf5c2bbfa4aede8fb9fe6781', 32)
+      ).toBe(
+        'https://cdn.stamp.fyi/avatar/0x00000000000000000000000004c5dda09742520fdf5c2bbfa4aede8fb9fe6781?s=64'
+      );
+
+      expect(getStampUrl('space', 'ens.eth', 32)).toBe(
+        'https://cdn.stamp.fyi/space/ens.eth?s=64'
+      );
+    });
+
+    it('returns a stamp with x2 size when given a single number', () => {
+      expect(
+        getStampUrl('space', '0x000000000000000000000000000000000000dead', 32)
+      ).toBe(
+        'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64'
+      );
+    });
+
+    it('returns a stamp url with the given width and height', () => {
+      expect(
+        getStampUrl('space', '0x000000000000000000000000000000000000dEaD', {
+          width: 1,
+          height: 2
+        })
+      ).toBe(
+        'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?w=1&h=2'
+      );
+    });
+
+    it('returns a stamp url with the given hash if available', () => {
+      expect(
+        getStampUrl(
+          'space',
+          '0x000000000000000000000000000000000000dead',
+          32,
+          '1234'
+        )
+      ).toBe(
+        'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64&cb=1234'
+      );
     });
   });
 });

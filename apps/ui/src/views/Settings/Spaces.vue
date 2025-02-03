@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { explorePageProtocols } from '../../networks';
-import { ExplorePageProtocol, ProtocolConfig } from '../../networks/types';
+import { explorePageProtocols } from '@/networks';
+import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 
 useTitle('My spaces');
 
@@ -38,11 +38,9 @@ watch(
   ([protocolQuery, controller]) => {
     loaded.value = false;
 
-    const _protocol = (
+    spacesStore.protocol = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
-
-    spacesStore.protocol = _protocol;
     if (controller) {
       spacesStore.fetch({ controller });
     } else {
@@ -58,33 +56,47 @@ watch(
 </script>
 
 <template>
-  <div class="flex justify-between">
-    <div class="flex flex-row p-4 space-x-2">
-      <UiSelectDropdown
-        v-model="spacesStore.protocol"
-        title="Protocol"
-        gap="12px"
-        placement="left"
-        :items="protocols"
-      />
+  <div>
+    <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
+      <div class="flex flex-row space-x-2">
+        <UiSelectDropdown
+          v-model="spacesStore.protocol"
+          title="Protocol"
+          gap="12"
+          placement="start"
+          :items="protocols"
+        />
+      </div>
+      <UiTooltip title="Create new space">
+        <UiButton
+          :to="
+            spacesStore.protocol === 'snapshot'
+              ? 'https://v1.snapshot.box/#/setup'
+              : 'create'
+          "
+          class="!px-0 w-[46px]"
+        >
+          <IH-plus-sm />
+        </UiButton>
+      </UiTooltip>
     </div>
-  </div>
-  <UiLabel label="My spaces" sticky />
-  <UiLoading v-if="loading" class="block m-4" />
-  <UiContainer
-    v-else-if="spacesStore.explorePageSpaces.length"
-    class="!max-w-screen-md pt-5"
-  >
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
-      <SpacesListItem
-        v-for="space in spacesStore.explorePageSpaces"
-        :key="space.id"
-        :space="space"
-      />
+    <UiLabel label="My spaces" sticky />
+    <UiLoading v-if="loading" class="block m-4" />
+    <UiContainer
+      v-else-if="spacesStore.explorePageSpaces.length"
+      class="!max-w-screen-md pt-5"
+    >
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+        <SpacesListItem
+          v-for="space in spacesStore.explorePageSpaces"
+          :key="space.id"
+          :space="space"
+        />
+      </div>
+    </UiContainer>
+    <div v-else class="px-4 py-3 flex items-center space-x-2">
+      <IH-exclamation-circle class="inline-block shrink-0" />
+      <span v-text="'There are no spaces here.'" />
     </div>
-  </UiContainer>
-  <div v-else class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block shrink-0" />
-    <span v-text="'There are no spaces here.'" />
   </div>
 </template>

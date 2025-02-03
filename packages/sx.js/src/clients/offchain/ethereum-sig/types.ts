@@ -69,10 +69,12 @@ export const proposeTypes = {
     { name: 'body', type: 'string' },
     { name: 'discussion', type: 'string' },
     { name: 'choices', type: 'string[]' },
+    { name: 'labels', type: 'string[]' },
     { name: 'start', type: 'uint64' },
     { name: 'end', type: 'uint64' },
     { name: 'snapshot', type: 'uint64' },
     { name: 'plugins', type: 'string' },
+    { name: 'privacy', type: 'string' },
     { name: 'app', type: 'string' }
   ]
 };
@@ -88,7 +90,18 @@ export const updateProposalTypes = {
     { name: 'body', type: 'string' },
     { name: 'discussion', type: 'string' },
     { name: 'choices', type: 'string[]' },
-    { name: 'plugins', type: 'string' }
+    { name: 'labels', type: 'string[]' },
+    { name: 'plugins', type: 'string' },
+    { name: 'privacy', type: 'string' }
+  ]
+};
+
+export const flagProposalTypes = {
+  FlagProposal: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'proposal', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
   ]
 };
 
@@ -145,5 +158,22 @@ export const updateStatementTypes = {
     { name: 'discourse', type: 'string' },
     { name: 'status', type: 'string' },
     { name: 'network', type: 'string' }
+  ]
+};
+
+export const updateSpaceTypes = {
+  Space: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' },
+    { name: 'settings', type: 'string' }
+  ]
+};
+
+export const deleteSpaceTypes = {
+  DeleteSpace: [
+    { name: 'from', type: 'address' },
+    { name: 'space', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
   ]
 };

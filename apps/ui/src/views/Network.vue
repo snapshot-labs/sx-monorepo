@@ -1,66 +1,6 @@
 <script setup lang="ts">
-import { getUrl } from '@/helpers/utils';
+useTitle('Network');
 
-const CUSTOMERS = [
-  {
-    name: 'Blast',
-    avatar:
-      'ipfs://bafkreicqhrimt2zyp2kvhmbpvffxlmxovkg5vw6zkissyzibcfy45kbvrm',
-    website: 'https://blast.io'
-  },
-  {
-    name: 'Starknet',
-    avatar:
-      'ipfs://bafkreib5g7a6ufzpo5ebeosetgzoy5geduwcgmch7vighsbasth3wty77q',
-    website: 'https://starknet.io'
-  },
-  {
-    name: 'Linea',
-    avatar:
-      'ipfs://bafkreihtyzolub3sejuwc32hpdpjnt7ksowaguni2yuho3kyihhcqrtqce',
-    website: 'https://linea.build'
-  },
-  {
-    name: 'Merlin',
-    avatar:
-      'ipfs://bafkreicew2qv3m756m7xs2nrjezinghps7rlessrqjqetvox74w4hov2xe',
-    website: 'https://merlinchain.io'
-  },
-  {
-    name: 'Immutable zkEVM',
-    avatar:
-      'ipfs://bafkreiepnhfv3hgexddjpyaeemxo3byhtxxit6t4zsponyczee6ddjqxwi',
-    website: 'https://www.immutable.com'
-  },
-  {
-    name: 'Cyber',
-    avatar:
-      'ipfs://bafkreifm2bbehoqpz4454o7gixnxfi6cgvqlxigqr3f6ipj7l2omtgfgnm',
-    website: 'https://cyber.co'
-  },
-  {
-    name: 'Sei',
-    avatar:
-      'ipfs://bafkreiammyt7uztbztqbcqv4bydnczsh2fqmnjf6jxj4xnskzzl6sjrigq',
-    website: 'https://www.sei.io'
-  },
-  {
-    name: 'Gravity',
-    avatar:
-      'ipfs://bafkreia7lrda6v2fc5dthazn3qdost4yd2qrn3r4ntrd6lgmc2gvtvvhoa',
-    website: 'https://gravity.xyz'
-  },
-  {
-    name: 'zkLink',
-    avatar: 'bafkreic6c3iems5235qapyhyrygha7akqrsfact2nok3y2uhljpzxrdu74',
-    website: 'https://zklink.io'
-  },
-  {
-    name: 'Fantom',
-    avatar: 'ipfs://QmVEgNeQDKnXygeGxfY9FywZpNGQu98ktZtRJ9bToYF6g7',
-    website: 'https://fantom.foundation'
-  }
-];
 const FAQ = [
   {
     question: 'What payment methods does Snapshot accept?',
@@ -75,31 +15,23 @@ const FAQ = [
     question: 'How to add a network that is not EVM compatible?',
     answer:
       'Adding a non-EVM network is possible under certain conditions. Please contact us for more details.'
-  },
-  {
-    question: 'Does the network plan include Snapshot X?',
-    answer:
-      'No, this network plan does not include Snapshot X, our onchain voting protocol. If you are interested in a Snapshot X integration, please reach out.'
   }
 ];
+
 const LINK = 'https://tally.so/r/31ApGb';
 
 const currentQuestion = ref();
 
-const { setTitle } = useTitle();
-
 function toggleQuestion(id) {
   currentQuestion.value = currentQuestion.value === id ? '' : id;
 }
-
-watchEffect(() => setTitle('Network'));
 </script>
 <template>
-  <div class="space-y-[80px] mb-8 blocks">
+  <div class="space-y-[80px] pt-12 mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
-        <h1 class="mb-6 mono max-w-[600px] mx-auto">
-          Unlock governance for your ecosystem.
+        <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[46px]">
+          Unlock governance for your ecosystem
         </h1>
         <a
           :href="LINK"
@@ -114,66 +46,114 @@ watchEffect(() => setTitle('Network'));
 
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Key features</div>
-      <h1 class="mb-3">What the network plan offers</h1>
-      <div class="text-[21px] mb-4 max-w-[500px] mx-auto">
+      <h2 class="font-display text-[36px] mb-3">
+        What the network plan offers
+      </h2>
+      <div class="text-[21px] mb-5 max-w-[500px] mx-auto">
         Our network plan is designed to provide the infrastructure and support
         needed for effective governance.
       </div>
       <div
-        class="text-skin-link text-lg space-y-1.5 px-5 py-4 border text-left rounded-lg max-w-[500px] mx-auto"
+        class="text-skin-link text-lg space-y-4 px-5 py-4 text-left border rounded-lg max-w-[500px] mx-auto"
       >
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Mainnet network support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Testnet network support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Custom domain registry support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Dedicated customer support
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Quick setup (~48 hours)
-        </h3>
-        <h3>
-          <IH-check class="inline-block text-skin-success mr-2" />
-          Co-marketing
-        </h3>
+        <div>
+          <h3 class="font-display mb-3">Basic plan</h3>
+          <div class="text-left">
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Mainnet network support
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Custom domain registry support
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Dedicated customer support
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Quick setup (~48 hours)
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Co-marketing
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="font-display mb-3">Premium plan</h3>
+          <div class="text-left">
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Snapshot X integration
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Support for Safe voting
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Support for delegate registry
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              Testnet network support
+            </div>
+          </div>
+        </div>
       </div>
     </UiContainer>
 
     <div class="text-center">
       <div class="eyebrow mb-4">Trusted by</div>
-      <div class="overflow-y-scroll no-scrollbar px-4">
-        <div class="w-fit mx-auto">
-          <div class="grid grid-flow-col auto-cols-max justify-center gap-4">
-            <a
-              v-for="(customer, i) in CUSTOMERS"
-              :key="i"
-              target="_blank"
-              :href="customer.website"
-            >
-              <img
-                :alt="customer.name"
-                :src="getUrl(customer.avatar) ?? undefined"
-                class="size-[54px] rounded-lg"
-              />
-            </a>
-          </div>
+      <UiCarousel>
+        <div class="customer">
+          <IC-blast />
         </div>
-      </div>
+        <div class="customer">
+          <IC-gravity />
+        </div>
+        <div class="customer">
+          <IC-linea />
+        </div>
+        <div class="customer">
+          <IC-optimism />
+        </div>
+        <div class="customer">
+          <IC-sei />
+        </div>
+        <div class="customer">
+          <IC-sonic />
+        </div>
+        <div class="customer">
+          <IC-immutable />
+        </div>
+        <div class="customer">
+          <IC-zklink />
+        </div>
+        <div class="customer">
+          <IC-manta />
+        </div>
+        <div class="customer">
+          <IC-bnb />
+        </div>
+        <div class="customer">
+          <IC-base />
+        </div>
+        <div class="customer">
+          <IC-snaxchain />
+        </div>
+        <div class="customer">
+          <IC-starkware />
+        </div>
+      </UiCarousel>
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">
       <div class="eyebrow mb-2">Get started</div>
-      <h1 class="mb-5">Start your integration</h1>
+      <h2 class="font-display text-[36px] mb-5">Get network support today</h2>
       <a
         :href="LINK"
         target="_blank"
@@ -191,25 +171,23 @@ watchEffect(() => setTitle('Network'));
           Is your network already live on Snapshot?
         </h3>
         <div class="text-md">
-          Starting July 1, 2024, all networks must subscribe to the network plan
-          to maintain support on Snapshot. To ensure continuous service and
-          avoid interruptions, please contact our team today.
+          All networks must subscribe to the network plan to maintain support on
+          Snapshot. To ensure continuous service and avoid interruptions, please
+          contact our team today.
         </div>
       </div>
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">
       <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
-      <h1 class="mb-3 text-center">Questions?</h1>
+      <h2 class="text-[36px] font-display mb-5 text-center">Questions?</h2>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
         <button
           type="button"
-          class="flex items-center"
+          class="flex items-center w-full text-left"
           @click="toggleQuestion(i)"
         >
-          <h3 class="py-3 flex-auto">
-            {{ question.question }}
-          </h3>
+          <h3 class="py-3 flex-auto h3" v-text="question.question" />
           <IH-minus-sm v-if="currentQuestion === i" class="text-skin-text" />
           <IH-plus-sm v-else class="text-skin-text" />
         </button>
@@ -220,3 +198,13 @@ watchEffect(() => setTitle('Network'));
     </UiContainer>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.customer {
+  @apply text-center w-[140px] h-[40px] mx-4 my-2 inline-block items-center justify-center;
+
+  svg {
+    @apply w-[140px] h-[40px] object-contain;
+  }
+}
+</style>

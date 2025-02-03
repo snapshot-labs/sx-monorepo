@@ -1,7 +1,7 @@
 import { Account, Call, stark } from 'starknet';
 import { NetworkConfig } from '../types';
 
-const FEE_OVERHEAD = 0.5;
+const FEE_OVERHEAD = 50;
 
 export async function estimateStarknetFee(
   account: Account,

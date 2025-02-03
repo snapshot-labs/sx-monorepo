@@ -1,16 +1,12 @@
-import { CHAIN_IDS } from '@/helpers/constants';
+import { SUPPORTED_CHAIN_IDS as ALCHEMY_SUPPORTED_CHAIN_IDS } from '@/helpers/alchemy';
+import { SUPPORTED_CHAIN_IDS as OPENSEA_SUPPORTED_CHAIN_IDS } from '@/helpers/opensea';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
-import {
-  RequiredProperty,
-  SelectedStrategy,
-  Space,
-  SpaceMetadataTreasury
-} from '@/types';
+import { SelectedStrategy, Space, SpaceMetadataTreasury } from '@/types';
 
 export type StrategyWithTreasury = SelectedStrategy & {
-  treasury: RequiredProperty<SpaceMetadataTreasury>;
+  treasury: SpaceMetadataTreasury;
 };
 
 type InputType = Space | null;
@@ -24,34 +20,34 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
     if (offchainNetworks.includes(space.network)) {
       oSnapSupportPerTreasury = await Promise.all(
         space.treasuries.map(async treasury => {
-          if (
-            !treasury.network ||
-            !treasury.address ||
-            !CHAIN_IDS[treasury.network]
-          ) {
+          if (!treasury.address || !treasury.chainId) {
             return false;
           }
 
-          return getIsOsnapEnabled(
-            CHAIN_IDS[treasury.network],
-            treasury.address
-          );
+          try {
+            return await getIsOsnapEnabled(
+              treasury.chainId as number,
+              treasury.address
+            );
+          } catch (e) {
+            return false;
+          }
         })
       );
     }
 
     return space.treasuries
       .map((treasury, i) => {
-        if (offchainNetworks.includes(space.network)) {
-          if (!oSnapSupportPerTreasury || !oSnapSupportPerTreasury[i]) {
-            return null;
-          }
-
+        if (
+          offchainNetworks.includes(space.network) &&
+          oSnapSupportPerTreasury &&
+          oSnapSupportPerTreasury[i]
+        ) {
           return {
             address: treasury.address,
             destinationAddress: null,
             type: 'oSnap',
-            treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+            treasury
           };
         }
 
@@ -60,26 +56,55 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
             strategy.treasury &&
             strategy.treasury_chain &&
             treasury.address &&
-            treasury.network &&
             compareAddresses(strategy.treasury, treasury.address) &&
-            CHAIN_IDS[treasury.network] === strategy.treasury_chain
+            treasury.chainId === strategy.treasury_chain
           );
         });
 
-        if (!strategy) return null;
+        if (!strategy) {
+          return {
+            address: treasury.address,
+            destinationAddress: '0x0',
+            type: 'ReadOnlyExecution',
+            treasury
+          };
+        }
 
         return {
           address: strategy.address,
           destinationAddress: strategy.destination_address,
           type: strategy.type,
-          treasury: treasury as RequiredProperty<SpaceMetadataTreasury>
+          treasury
         };
       })
-      .filter(
-        strategy =>
+      .filter(strategy => {
+        // Editor will only show strategies that are:
+        // - Supported by the Alchemy API
+        // - Supported by the OpenSea API
+        // in the future we can make it more granular
+        if (strategy.treasury.chainId) {
+          if (
+            !ALCHEMY_SUPPORTED_CHAIN_IDS.includes(
+              strategy.treasury.chainId as any
+            )
+          ) {
+            return false;
+          }
+
+          if (
+            !OPENSEA_SUPPORTED_CHAIN_IDS.includes(
+              strategy.treasury.chainId as any
+            )
+          ) {
+            return false;
+          }
+        }
+
+        return (
           strategy &&
           getNetwork(space.network).helpers.isExecutorSupported(strategy.type)
-      ) as StrategyWithTreasury[];
+        );
+      }) as StrategyWithTreasury[];
   }, null);
 
   return {

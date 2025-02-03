@@ -8,6 +8,7 @@ import {
   offchainMainnet,
   OffchainNetworkConfig
 } from '@snapshot-labs/sx';
+import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
 import {
   getModuleAddressForTreasury,
@@ -18,18 +19,21 @@ import { getProvider } from '@/helpers/provider';
 import {
   Choice,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   Statement,
   StrategyParsedMetadata,
+  Transaction,
   User,
   UserProfile,
   VoteType
 } from '@/types';
-import { EDITOR_APP_NAME, EDITOR_SNAPSHOT_OFFSET } from './constants';
+import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { getSdkChoice } from './helpers';
+import { EDITOR_APP_NAME } from '../common/constants';
 import {
-  Connector,
+  ConnectorType,
   ExecutionInfo,
   NetworkConstants,
   NetworkHelpers,
@@ -37,6 +41,17 @@ import {
   SnapshotInfo,
   VotingPower
 } from '../types';
+
+type ReadOnlyExecutionSafe = {
+  safeName: string;
+  safeAddress: string;
+  chainId: number;
+  transactions: Transaction[];
+};
+
+type ReadOnlyExecutionPlugin = {
+  safes: ReadOnlyExecutionSafe[];
+};
 
 const CONFIGS: Record<number, OffchainNetworkConfig> = {
   1: offchainMainnet,
@@ -46,7 +61,7 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
-  chainId: number
+  chainId: 1 | 11155111
 ): ReadOnlyNetworkActions {
   const networkConfig = CONFIGS[chainId];
 
@@ -55,30 +70,51 @@ export function createActions(
   });
 
   async function getPlugins(executions: ExecutionInfo[] | null) {
-    const plugins = {} as { oSnap?: OSnapPlugin };
+    const plugins = {} as {
+      oSnap?: OSnapPlugin;
+      readOnlyExecution?: ReadOnlyExecutionPlugin;
+    };
 
     if (!executions) return plugins;
 
-    const safes = [] as OSnapPlugin['safes'];
+    const oSnapSafes = [] as OSnapPlugin['safes'];
+    const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
     for (const info of executions) {
       if (!info.transactions.length) continue;
 
-      const treasuryAddress = info.strategyAddress;
-      const moduleAddress = await getModuleAddressForTreasury(
-        info.chainId,
-        treasuryAddress
-      );
+      if (info.strategyType === 'oSnap') {
+        const treasuryAddress = info.strategyAddress;
+        const moduleAddress = await getModuleAddressForTreasury(
+          info.chainId,
+          treasuryAddress
+        );
 
-      safes.push({
-        safeName: info.treasuryName,
-        safeAddress: treasuryAddress,
-        network: info.chainId.toString(),
-        transactions: info.transactions.map(tx => parseInternalTransaction(tx)),
-        moduleAddress
-      });
+        oSnapSafes.push({
+          safeName: info.treasuryName,
+          safeAddress: treasuryAddress,
+          network: info.chainId.toString(),
+          transactions: info.transactions.map(tx =>
+            parseInternalTransaction(tx)
+          ),
+          moduleAddress
+        });
+      } else if (info.strategyType === 'ReadOnlyExecution') {
+        readOnlyExecutionSafes.push({
+          safeName: info.treasuryName,
+          safeAddress: info.strategyAddress,
+          chainId: info.chainId,
+          transactions: info.transactions
+        });
+      }
     }
 
-    plugins.oSnap = { safes };
+    if (oSnapSafes.length > 0) {
+      plugins.oSnap = { safes: oSnapSafes };
+    }
+
+    if (readOnlyExecutionSafes.length > 0) {
+      plugins.readOnlyExecution = { safes: readOnlyExecutionSafes };
+    }
 
     return plugins;
   }
@@ -86,7 +122,7 @@ export function createActions(
   return {
     async propose(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       title: string,
@@ -94,14 +130,17 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
+      labels: string[],
+      app: string,
+      created: number,
+      start: number,
+      min_end: number,
+      max_end: number,
       executions: ExecutionInfo[]
     ) {
-      const currentTime = Math.floor(Date.now() / 1000);
-      const startTime = currentTime + space.voting_delay;
       const provider = getProvider(space.snapshot_chain_id as number);
-
       const plugins = await getPlugins(executions);
-
       const data = {
         space: space.id,
         title,
@@ -109,19 +148,21 @@ export function createActions(
         type,
         discussion,
         choices,
-        start: startTime,
-        end: startTime + space.min_voting_period,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
+        labels,
+        start,
+        end: min_end,
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: JSON.stringify(plugins),
-        app: EDITOR_APP_NAME,
-        timestamp: currentTime
+        app: app || EDITOR_APP_NAME,
+        timestamp: created
       };
 
       return client.propose({ signer: web3.getSigner(), data });
     },
     async updateProposal(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       proposalId: number | string,
@@ -130,6 +171,8 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
+      labels: string[],
       executions: ExecutionInfo[]
     ) {
       const plugins = await getPlugins(executions);
@@ -142,10 +185,21 @@ export function createActions(
         type,
         discussion,
         choices,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
+        labels,
         plugins: JSON.stringify(plugins)
       };
 
       return client.updateProposal({ signer: web3.getSigner(), data });
+    },
+    flagProposal(web3: Web3Provider, proposal: Proposal) {
+      return client.flagProposal({
+        signer: web3.getSigner(),
+        data: {
+          proposal: proposal.proposal_id as string,
+          space: proposal.space.id
+        }
+      });
     },
     cancelProposal(web3: Web3Provider, proposal: Proposal) {
       return client.cancel({
@@ -158,11 +212,12 @@ export function createActions(
     },
     vote(
       web3: Web3Provider,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
       choice: Choice,
-      reason: string
+      reason: string,
+      app: string
     ): Promise<any> {
       const data = {
         space: proposal.space.id,
@@ -173,7 +228,8 @@ export function createActions(
         strategies: [],
         metadataUri: '',
         privacy: proposal.privacy,
-        reason
+        reason,
+        app: app || EDITOR_APP_NAME
       };
 
       return client.vote({
@@ -199,7 +255,14 @@ export function createActions(
 
       if (!strategy || !isAddress(voterAddress)) {
         return [
-          { address: name, value: 0n, decimals: 0, token: null, symbol: '' }
+          {
+            address: name,
+            value: 0n,
+            cumulativeDecimals: 0,
+            displayDecimals: 0,
+            token: null,
+            symbol: ''
+          }
         ];
       }
 
@@ -214,7 +277,8 @@ export function createActions(
         return [
           {
             address: strategiesNames[0],
-            decimals: 0,
+            cumulativeDecimals: 0,
+            displayDecimals: 0,
             symbol: '',
             token: '',
             chainId: snapshotInfo.chainId,
@@ -230,7 +294,8 @@ export function createActions(
         return {
           address: strategy.name,
           value,
-          decimals,
+          cumulativeDecimals: decimals,
+          displayDecimals: decimals,
           symbol: strategy.params.symbol,
           token: strategy.params.address,
           chainId: strategy.network ? parseInt(strategy.network) : undefined,
@@ -295,6 +360,35 @@ export function createActions(
       return client.updateStatement({
         signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: { ...statement, ...(from ? { from } : {}) }
+      });
+    },
+    transferOwnership: async (
+      web3: Web3Provider,
+      space: Space,
+      owner: string
+    ) => {
+      return setEnsTextRecord(
+        web3.getSigner(),
+        space.id,
+        'snapshot',
+        owner,
+        chainId
+      );
+    },
+    updateSettingsRaw: (
+      web3: Web3Provider | Wallet,
+      space: Space,
+      settings: string
+    ) => {
+      return client.updateSpace({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { space: space.id, settings }
+      });
+    },
+    deleteSpace: (web3: Web3Provider | Wallet, space: Space) => {
+      return client.deleteSpace({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: { space: space.id }
       });
     }
   };

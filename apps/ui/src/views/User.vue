@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { getUserStats } from '@/helpers/efp';
 import {
   _n,
   _p,
   autoLinkText,
+  compareAddresses,
   getCacheHash,
   getSocialNetworksLink,
   shortenAddress
@@ -29,15 +31,35 @@ const loadingActivities = ref(false);
 const modalOpenEditUser = ref(false);
 const loaded = ref(false);
 
-const id = computed(() => route.params.id as string);
+const userMetadata = reactive({
+  loading: false,
+  loaded: false,
+  followers_count: 0,
+  following_count: 0
+});
+
+const id = computed(() => route.params.user as string);
 
 const user = computed(() => usersStore.getUser(id.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
-const shareMsg = computed(() => encodeURIComponent(window.location.href));
-
 const cb = computed(() => getCacheHash(user.value?.avatar));
+
+async function loadUserMetadata(userId: string) {
+  userMetadata.loading = true;
+
+  try {
+    const userStats = await getUserStats(userId);
+
+    userMetadata.followers_count = userStats.followers_count;
+    userMetadata.following_count = userStats.following_count;
+    userMetadata.loading = false;
+    userMetadata.loaded = true;
+  } catch (e) {
+    userMetadata.loading = false;
+  }
+}
 
 async function loadActivities(userId: string) {
   loadingActivities.value = true;
@@ -85,7 +107,7 @@ async function loadActivities(userId: string) {
           vote_percentage: totalVotes > 0 ? activity.vote_count / totalVotes : 0
         };
       })
-      .filter(Boolean) as typeof activities.value;
+      .filter(activity => activity !== undefined);
   } finally {
     loadingActivities.value = false;
   }
@@ -95,6 +117,7 @@ watch(
   id,
   async userId => {
     loaded.value = false;
+    userMetadata.loaded = false;
 
     if (!isValidAddress(userId)) {
       loaded.value = true;
@@ -103,6 +126,7 @@ watch(
 
     await usersStore.fetchUser(userId);
     loadActivities(userId);
+    loadUserMetadata(userId);
 
     loaded.value = true;
   },
@@ -129,8 +153,11 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
-        <UiTooltip v-if="web3.account === user.id" title="Edit profile">
+        <DropdownShare :shareable="user" type="user" class="!px-0 w-[46px]" />
+        <UiTooltip
+          v-if="compareAddresses(web3.account, user.id)"
+          title="Edit profile"
+        >
           <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
             <IH-cog class="inline-block" />
           </UiButton>
@@ -145,7 +172,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           :cb="cb"
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
-        <h1 v-text="user.name || shortenAddress(user.id)" />
+        <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 flex items-center space-x-2">
           <span class="text-skin-text" v-text="shortenAddress(user.id)" />
           <UiTooltip title="Copy address">
@@ -158,10 +185,22 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
               <IH-check v-else class="inline-block" />
             </button>
           </UiTooltip>
+          <span v-if="userMetadata.loaded">
+            ·
+            <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
+              {{ _n(userMetadata.following_count) }}
+              <span class="text-skin-text">following</span>
+            </a>
+            ·
+            <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
+              {{ _n(userMetadata.followers_count) }}
+              <span class="text-skin-text">followers</span>
+            </a>
+          </span>
         </div>
         <div
           v-if="user.about"
-          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
+          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(user.about)"
         />
         <div v-if="socials.length" class="space-x-2 flex">
@@ -181,8 +220,8 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
     <div class="border-b w-full">
       <div class="flex space-x-1 px-4 leading-8">
         <span class="w-[60%] lg:w-[50%] truncate">Space</span>
-        <span class="w-[20%] lg:w-[25%] text-end truncate">Proposals</span>
-        <span class="w-[20%] lg:w-[25%] text-end truncate">Votes</span>
+        <span class="w-[20%] lg:w-[25%] text-right truncate">Proposals</span>
+        <span class="w-[20%] lg:w-[25%] text-right truncate">Votes</span>
       </div>
     </div>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
@@ -193,14 +232,14 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       <IH-exclamation-circle class="inline-block" />
       <span>This user does not have any activities yet.</span>
     </div>
-    <router-link
+    <AppLink
       v-for="(activity, i) in activities"
       v-else
       :key="i"
       :to="{
         name: 'space-user-statement',
         params: {
-          id: activity.spaceId,
+          space: activity.spaceId,
           user: user.id
         }
       }"
@@ -214,10 +253,10 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           :size="32"
           class="!rounded-[4px]"
         />
-        <span class="truncate" v-text="activity.space.name" />
+        <span class="flex-auto w-0 truncate" v-text="activity.space.name" />
       </div>
       <div
-        class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
+        class="flex flex-col justify-center text-right w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
         <h4
           class="text-skin-link truncate"
@@ -229,7 +268,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         />
       </div>
       <div
-        class="flex flex-col justify-center items-end w-[20%] lg:w-[25%] leading-[22px] truncate"
+        class="flex flex-col justify-center text-right w-[20%] lg:w-[25%] leading-[22px] truncate"
       >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div
@@ -237,10 +276,10 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-text="_p(activity.vote_percentage)"
         />
       </div>
-    </router-link>
+    </AppLink>
     <teleport to="#modal">
       <ModalEditUser
-        v-if="web3.account === user.id"
+        v-if="compareAddresses(web3.account, user.id)"
         :open="modalOpenEditUser"
         :user="user"
         @close="modalOpenEditUser = false"

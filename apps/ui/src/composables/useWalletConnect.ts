@@ -5,6 +5,7 @@ import { Core } from '@walletconnect/core';
 import { ProposalTypes, SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 import { Web3Wallet } from '@walletconnect/web3wallet';
+import { APP_NAME } from '@/helpers/constants';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
 import { NetworkID, SelectedStrategy } from '@/types';
@@ -26,7 +27,7 @@ async function getConnector() {
       projectId: import.meta.env.VITE_WC_PROJECT_ID
     }),
     metadata: {
-      name: 'Snapshot',
+      name: APP_NAME,
       description: 'Where decisions get made',
       url: 'https://snapshot.box',
       icons: []

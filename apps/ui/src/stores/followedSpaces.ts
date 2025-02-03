@@ -13,6 +13,8 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   const spacesStore = useSpacesStore();
   const actions = useActions();
   const { web3, authInitiated } = useWeb3();
+  const { isWhiteLabel } = useWhiteLabel();
+  const { limits } = useSettings();
 
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
@@ -22,6 +24,10 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     {} as Record<string, string[]>
   );
 
+  const maxFollowLimit = computed(() => {
+    return limits.value['user.default.follow_limit'];
+  });
+
   const followedSpacesMap = computed(
     () =>
       new Map(
@@ -30,9 +36,9 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
             const space = spacesStore.spacesMap.get(spaceId);
             if (!space) return;
 
-            return [getCompositeSpaceId(space), space];
+            return [getCompositeSpaceId(space), space] as const;
           })
-          .filter(Boolean) as [string, Space][]
+          .filter(space => space !== undefined)
       )
   );
 
@@ -40,7 +46,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     get() {
       return (followedSpacesIdsByAccount.value[web3.value.account] || [])
         .map(id => followedSpacesMap.value.get(id))
-        .filter(Boolean) as Space[];
+        .filter(space => space !== undefined);
     },
     set(spaces: Space[]) {
       followedSpacesIdsByAccount.value[web3.value.account] =
@@ -108,6 +114,12 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
             (spaceId: string) => spaceId !== id
           );
       } else {
+        if (followedSpaces.value.length >= maxFollowLimit.value) {
+          throw new Error(
+            `You can follow up to ${maxFollowLimit.value} spaces.`
+          );
+        }
+
         const result = await actions.followSpace(spaceNetwork, spaceId);
         if (!result) return;
 
@@ -129,10 +141,11 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     [
       () => web3.value.account,
       () => web3.value.authLoading,
-      () => authInitiated.value
+      () => authInitiated.value,
+      () => isWhiteLabel.value
     ],
-    async ([web3, authLoading, authInitiated]) => {
-      if (!authInitiated || authLoading) return;
+    async ([web3, authLoading, authInitiated, isWhiteLabel]) => {
+      if (!authInitiated || authLoading || isWhiteLabel) return;
 
       followedSpacesLoaded.value = false;
 
@@ -150,6 +163,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   );
 
   return {
+    maxFollowLimit,
     followedSpaces,
     followedSpacesIds,
     followedSpaceIdsByNetwork,

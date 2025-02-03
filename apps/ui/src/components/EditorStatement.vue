@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { stripHtmlTags } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Statement } from '@/types';
 
@@ -22,6 +23,7 @@ const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
 
 const STATUS_DEFINITION = {
+  type: 'string',
   enum: ['ACTIVE', 'INACTIVE'],
   options: [
     { id: 'ACTIVE', name: 'Active' },
@@ -96,7 +98,7 @@ watchEffect(async () => {
       <UiMarkdown
         v-if="previewEnabled"
         class="px-3 py-2 mb-3 border rounded-lg min-h-[200px]"
-        :body="form.statement"
+        :body="stripHtmlTags(form.statement)"
       />
       <UiComposer
         v-else

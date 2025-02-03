@@ -2,6 +2,7 @@
 import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
+import { getExecutionName } from '@/helpers/ui';
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
@@ -37,9 +38,7 @@ const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
 
-const network = computed(() =>
-  props.space ? getNetwork(props.space.network) : null
-);
+const network = computed(() => getNetwork(props.space.network));
 
 function addTx(tx: TransactionType) {
   const newValue = [...model.value];
@@ -77,7 +76,13 @@ function editTx(index: number) {
 }
 
 async function handleSimulateClick() {
-  if (simulationState.value !== null || !treasury.value) return;
+  if (
+    simulationState.value !== null ||
+    !treasury.value ||
+    typeof treasury.value.network === 'string'
+  ) {
+    return;
+  }
 
   simulationState.value = 'SIMULATING';
 
@@ -108,45 +113,39 @@ watch(
     <div class="overflow-hidden border rounded-lg">
       <div
         v-if="treasury && network"
-        class="w-full flex justify-between px-4 py-3 text-start"
+        class="w-full flex justify-between items-center px-4 py-3"
       >
-        <div class="flex justify-between items-center">
-          <UiBadgeNetwork
-            :id="treasury.networkId"
-            class="mr-3"
+        <UiBadgeNetwork
+          :chain-id="treasury.network"
+          class="mr-3 shrink-0 size-fit"
+          :class="{
+            'opacity-40': disabled
+          }"
+        >
+          <UiStamp
+            :id="treasury.wallet"
+            type="avatar"
+            :size="32"
+            class="rounded-md"
+          />
+        </UiBadgeNetwork>
+        <div class="flex-1 leading-[22px] overflow-hidden">
+          <h4
+            class="text-skin-link truncate"
             :class="{
-              'opacity-40': disabled
+              'text-skin-border': disabled
             }"
-          >
-            <UiStamp
-              :id="treasury.wallet"
-              type="avatar"
-              :size="32"
-              class="rounded-md"
-            />
-          </UiBadgeNetwork>
-          <div class="flex-1 leading-[22px]">
-            <h4
-              class="text-skin-link"
-              :class="{
-                'text-skin-border': disabled
-              }"
-              v-text="treasury.name || shorten(treasury.wallet)"
-            />
-            <div
-              class="text-skin-text text-[17px]"
-              :class="{
-                'text-skin-border': disabled
-              }"
-              v-text="
-                strategy.type === 'oSnap'
-                  ? 'oSnap execution'
-                  : `${network.constants.EXECUTORS[strategy.type]} execution`
-              "
-            />
-          </div>
+            v-text="treasury.name || shorten(treasury.wallet)"
+          />
+          <div
+            class="text-skin-text text-[17px] truncate"
+            :class="{
+              'text-skin-border': disabled
+            }"
+            v-text="getExecutionName(props.space.network, strategy.type)"
+          />
         </div>
-        <div class="space-x-2">
+        <div class="space-x-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
               :disabled="!treasury || disabled"
@@ -176,7 +175,7 @@ watch(
           </UiTooltip>
         </div>
       </div>
-      <template v-if="model.length > 0">
+      <template v-if="model.length > 0 && treasury">
         <UiLabel label="Transactions" class="border-t" />
         <div>
           <Draggable
@@ -185,11 +184,11 @@ watch(
             :item-key="() => undefined"
           >
             <template #item="{ element: tx, index: i }">
-              <TransactionsListItem :tx="tx">
+              <TransactionsListItem :tx="tx" :chain-id="treasury.network">
                 <template #left>
                   <div
                     v-if="model.length > 1"
-                    class="handle mr-2 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+                    class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
                   </div>
@@ -248,11 +247,10 @@ watch(
 
     <teleport to="#modal">
       <ModalSendToken
-        v-if="treasury && treasury.networkId"
+        v-if="treasury"
         :open="modalOpen.sendToken"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="treasury.networkId"
         :extra-contacts="extraContacts"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
@@ -273,7 +271,6 @@ watch(
         :open="modalOpen.stakeToken"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="treasury.networkId"
         :initial-state="modalState.stakeToken"
         @close="modalOpen.stakeToken = false"
         @add="addTx"

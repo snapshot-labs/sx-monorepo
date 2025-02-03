@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
 
 const props = withDefaults(
@@ -20,36 +19,24 @@ const cb = computed(() => getCacheHash(props.space.cover));
 <template>
   <UiStamp
     v-if="space.cover"
-    :id="space.id"
+    :id="`${space.network}:${space.id}`"
     :width="width"
     :height="height"
     :cb="cb"
-    type="space-cover-sx"
+    type="space-cover"
     class="object-cover !rounded-none size-full"
   />
   <div
     v-else
-    class="space-fallback-cover"
+    class="bg-cover bg-center w-full h-full"
     :style="{
       'background-image': `url(${getStampUrl(
-        offchainNetworks.includes(space.network) ? 'space' : 'space-sx',
-        space.id,
+        'space',
+        `${space.network}:${space.id}`,
         50,
         getCacheHash(space.avatar)
-      )}`
+      )}`,
+      filter: `blur(${size === 'lg' ? '100' : '50'}px) contrast(0.9) saturate(1.3)`
     }"
-  ></div>
+  />
 </template>
-
-<style lang="scss" scoped>
-.space-fallback-cover {
-  @apply object-cover w-full h-full;
-
-  &::after {
-    @apply absolute h-full w-full pointer-events-none;
-
-    content: '';
-    backdrop-filter: blur(50px) contrast(0.9) saturate(1.3);
-  }
-}
-</style>

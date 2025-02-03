@@ -2,13 +2,11 @@
 withDefaults(
   defineProps<{
     inverse?: boolean;
-    width?: number;
-    height?: number;
+    size?: number;
   }>(),
   {
     inverse: false,
-    width: 20,
-    height: 20
+    size: 20
   }
 );
 </script>
@@ -17,8 +15,8 @@ withDefaults(
   <span class="loading" :class="{ inverse: !!inverse }">
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      :width="width"
-      :height="height"
+      :width="size"
+      :height="size"
       class="inline-block align-middle"
       viewBox="0 0 24 24"
     >
@@ -53,7 +51,7 @@ withDefaults(
   </span>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .loading {
   svg {
     animation: rotation 0.5s linear infinite;
@@ -87,21 +85,11 @@ withDefaults(
   }
 
   &.big svg {
-    width: 24px;
-    height: 24px;
+    @apply size-[24px];
   }
 
   &.overlay {
-    position: fixed;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    align-content: center;
-    top: 0;
-    bottom: 80px;
-    left: 0;
-    right: 0;
-    width: 100%;
+    @apply fixed flex items-center justify-center inset-0;
   }
 }
 </style>

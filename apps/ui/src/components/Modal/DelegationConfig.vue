@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { enabledNetworks, getNetwork } from '@/networks';
-import { SpaceMetadataDelegation } from '@/types';
+import { offchainNetworks } from '@/networks';
+import { NetworkID, SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
   apiType: null,
   apiUrl: null,
-  contractNetwork: null,
-  contractAddress: null
+  contractAddress: null,
+  chainId: null
 };
 
 const props = defineProps<{
   open: boolean;
+  networkId: NetworkID;
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{
@@ -25,18 +26,6 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataDelegation> = ref(clone(DEFAULT_FORM_STATE));
 
-const availableNetworks = enabledNetworks
-  .map(id => {
-    const { name, readOnly } = getNetwork(id);
-
-    return {
-      id,
-      name,
-      readOnly
-    };
-  })
-  .filter(network => !network.readOnly);
-
 const definition = computed(() => {
   return {
     type: 'object',
@@ -44,20 +33,25 @@ const definition = computed(() => {
     additionalProperties: true,
     required: ['name', 'apiType', 'apiUrl'],
     properties: {
-      name: {
-        type: 'string',
-        title: 'Name',
-        minLength: 1,
-        examples: ['Delegation API name']
-      },
+      ...(!offchainNetworks.includes(props.networkId)
+        ? {
+            name: {
+              type: 'string',
+              title: 'Name',
+              minLength: 1,
+              maxLength: 32,
+              examples: ['Delegation API name']
+            }
+          }
+        : {}),
       apiType: {
         type: ['string', 'null'],
         enum: [null, 'governor-subgraph'],
         options: [
           { id: null, name: 'No delegation API' },
-          { id: 'governor-subgraph', name: 'Governor subgraph' }
+          { id: 'governor-subgraph', name: 'ERC-20 Votes' }
         ],
-        title: 'Delegation API type',
+        title: 'Delegation type',
         nullable: true
       },
       ...(form.value.apiType !== null
@@ -70,23 +64,22 @@ const definition = computed(() => {
                 'https://api.thegraph.com/subgraphs/name/arr00/uniswap-governance-v2'
               ]
             },
-            contractNetwork: {
-              type: 'string',
-              enum: [null, ...availableNetworks.map(network => network.id)],
-              options: [
-                { id: null, name: 'No delegation contract' },
-                ...availableNetworks
-              ],
+            chainId: {
+              type: ['string', 'number', 'null'],
+              format: 'network',
+              networkId: props.networkId,
+              networksListKind: 'full',
               title: 'Delegation contract network',
               nullable: true
             },
-            ...(form.value.contractNetwork !== null
+            ...(form.value.chainId !== null
               ? {
                   contractAddress: {
                     type: 'string',
                     title: 'Delegation contract address',
                     examples: ['0x0000…'],
                     format: 'address',
+                    chainId: form.value.chainId,
                     minLength: 1
                   }
                 }
@@ -110,7 +103,12 @@ const formValid = computed(() => {
 });
 
 async function handleSubmit() {
-  emit('add', form.value);
+  const config = clone(form.value);
+  if (offchainNetworks.includes(props.networkId)) {
+    config.name = 'ERC-20 Votes';
+  }
+
+  emit('add', config);
   emit('close');
 }
 
@@ -166,6 +164,7 @@ watch(
         :model-value="form"
         :error="formErrors"
         :definition="definition"
+        @pick="showPicker = true"
       />
     </div>
     <template #footer>

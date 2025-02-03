@@ -1,137 +1,167 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { constants } from 'starknet';
-import networks from '@/helpers/networks.json';
-import { formatAddress } from '@/helpers/utils';
+import { formatAddress, lsGet, lsRemove, lsSet } from '@/helpers/utils';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector } from '@/networks/types';
+import { ChainId } from '@/types';
+
+type Web3providerWithSafe = Web3Provider & {
+  provider: Web3Provider['provider'] & {
+    safe?: {
+      safeAddress: string;
+      chainId: ChainId;
+    };
+  };
+};
+
+const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
 
 const STARKNET_NETWORKS = {
   [constants.StarknetChainId.SN_MAIN]: {
     key: constants.StarknetChainId.SN_MAIN,
     chainId: constants.StarknetChainId.SN_MAIN,
-    explorer: 'https://starkscan.co'
+    explorer: { url: 'https://starkscan.co' }
   },
   [constants.StarknetChainId.SN_SEPOLIA]: {
     key: constants.StarknetChainId.SN_SEPOLIA,
     chainId: constants.StarknetChainId.SN_SEPOLIA,
-    explorer: 'https://sepolia.starkscan.co'
+    explorer: { url: 'https://sepolia.starkscan.co' }
   }
 };
 
 Object.assign(networks, STARKNET_NETWORKS);
 
-let auth;
 const defaultNetwork: any =
   import.meta.env.VITE_DEFAULT_NETWORK || Object.keys(networks)[0];
 
 const state = reactive({
   account: '',
   name: '',
-  type: '',
-  walletconnect: '',
   network: networks[defaultNetwork],
   authLoading: false
 });
 const authInitiated = ref(false);
-const loadedProviders = ref(new Set<Connector>());
+const loadedProviders = ref(new Set<Connector['id']>());
+const currentConnector = ref<Connector | null>(null);
+const provider = ref<Web3providerWithSafe | null>(null);
 
 export function useWeb3() {
-  const { mixpanel } = useMixpanel();
+  const { connectors } = useConnectors();
 
-  async function login(connector: string | undefined | boolean = 'injected') {
+  async function login(connector: Connector) {
+    return connectUsing(connector, 'connect');
+  }
+
+  async function autoLogin(connectorId?: string) {
     authInitiated.value = true;
+
+    const id = connectorId ?? lsGet(LAST_USED_CONNECTOR_CACHE_KEY);
+
+    if (!id) return;
+
+    const connector = connectors.value.find(connector => connector.id === id);
 
     if (!connector) return;
 
+    return connectUsing(connector, 'autoConnect');
+  }
+
+  async function connectUsing(
+    connector: Connector,
+    connectFn: 'connect' | 'autoConnect'
+  ) {
+    authInitiated.value = true;
+    state.authLoading = true;
+
     try {
-      auth = getInstance();
-      state.authLoading = true;
-      await auth.login(connector);
-      if (auth.provider.value) {
-        mixpanel.track('Connect', { connector });
+      await connector[connectFn]();
 
-        auth.web3 = new Web3Provider(auth.provider.value, 'any');
-        await loadProvider();
+      if (!connector.provider) {
+        throw new Error(`Unable to connect to provider ${connector.id}`);
       }
 
-      // NOTE: Handle case where metamask stays locked after user ignored
-      // the unlock request on subsequent page loads
-      if (
-        state.type !== 'injected' ||
-        auth.provider?.value?._state?.isUnlocked
-      ) {
-        state.authLoading = false;
-      }
+      return await registerConnector(connector);
+    } catch (e) {
+      reset();
     } finally {
       state.authLoading = false;
     }
   }
 
-  function logout() {
-    auth = getInstance();
-    removeProviderEvents(auth.provider.value);
-    auth.logout();
-    state.account = '';
-    state.name = '';
-    state.type = '';
-    state.walletconnect = '';
+  function logout(connector: Connector | null = currentConnector.value) {
+    if (connector) {
+      removeConnectorEvents(connector);
+      connector.disconnect();
+    }
+
+    if (connector?.id === currentConnector.value?.id) reset();
   }
 
-  async function loadProvider() {
-    const connector = auth.provider.value?.connectorName;
+  function reset() {
+    lsRemove(LAST_USED_CONNECTOR_CACHE_KEY);
+    currentConnector.value = null;
+    provider.value = null;
+    state.account = '';
+    state.name = '';
+  }
+
+  async function registerConnector(connector: Connector) {
+    const web3: Web3providerWithSafe = new Web3Provider(
+      connector.provider,
+      'any'
+    );
+
+    provider.value = markRaw(web3);
+    currentConnector.value = connector;
+    lsSet(LAST_USED_CONNECTOR_CACHE_KEY, connector.id);
 
     try {
-      attachProviderEvents(auth.provider.value);
+      attachConnectorEvents(connector);
       let network, accounts;
       try {
-        if (connector === 'gnosis') {
-          const { chainId: safeChainId, safeAddress } = auth.web3.provider.safe;
+        if (connector.id === 'gnosis' && web3.provider.safe) {
+          const { chainId: safeChainId, safeAddress } = web3.provider.safe;
           network = { chainId: safeChainId };
           accounts = [safeAddress];
-        } else if (STARKNET_CONNECTORS.includes(connector)) {
+        } else if (STARKNET_CONNECTORS.includes(connector.type)) {
           network = {
             chainId:
-              auth.provider.value.provider.chainId ||
-              auth.provider.value.provider.provider.chainId
+              connector.provider.chainId ||
+              connector.provider.provider.chainId ||
+              connector.provider.provider.provider.chainId
           };
-          accounts = [auth.provider.value.selectedAddress];
+          accounts = [connector.provider.selectedAddress];
         } else {
           [network, accounts] = await Promise.all([
-            auth.web3.getNetwork(),
-            auth.web3.listAccounts()
+            web3.getNetwork(),
+            web3.listAccounts()
           ]);
         }
       } catch (e) {
         console.log(e);
       }
-      handleChainChanged(network.chainId);
       const acc = accounts.length > 0 ? accounts[0] : null;
 
       if (acc) {
+        handleChainChanged(network.chainId);
         const usersStore = useUsersStore();
         try {
-          await usersStore.fetchUser(acc);
+          await usersStore.fetchUser(formatAddress(acc));
         } catch (e) {
           console.warn('failed to fetch user', e);
         }
         state.account = formatAddress(acc);
         state.name = usersStore.getUser(acc)?.name || '';
       }
-
-      // NOTE: metamask doesn't return connectorName
-      state.type = connector ?? 'injected';
-      state.walletconnect = auth.provider.value?.wc?.peerMeta?.name || '';
     } catch (e) {
-      state.account = '';
-      state.name = '';
-      state.type = '';
+      reset();
       return Promise.reject(e);
     }
   }
 
-  function handleChainChanged(chainId) {
+  function handleChainChanged(chainId: ChainId) {
     if (!networks[chainId]) {
       networks[chainId] = {
         ...networks[defaultNetwork],
@@ -141,49 +171,55 @@ export function useWeb3() {
       };
     }
     state.network = networks[chainId];
-
-    const connector = auth.provider.value?.connectorName;
-    if (typeof connector === 'undefined') {
-      // NOTE: metamask doesn't return connectorName
-      state.type = 'injected';
-    }
   }
 
-  function attachProviderEvents(provider) {
-    const providerName: Connector = provider?.connectorName || 'injected';
+  function attachConnectorEvents(connector: Connector) {
+    if (loadedProviders.value.has(connector.id)) return;
 
-    if (loadedProviders.value.has(providerName)) return;
-    loadedProviders.value.add(providerName);
+    loadedProviders.value.add(connector.id);
 
-    if (!provider.on) return;
+    if (!connector.provider.on) return;
 
-    provider.on('accountsChanged', async accounts => {
-      if (!accounts.length) return;
+    connector.provider.on('accountsChanged', async accounts => {
+      if (!accounts?.length) {
+        logout(connector);
+        return;
+      }
 
       state.account = formatAddress(accounts[0]);
-      await login();
+      await login(connector);
     });
 
-    if (!STARKNET_CONNECTORS.includes(providerName)) {
-      provider.on('chainChanged', async chainId => {
+    if (!STARKNET_CONNECTORS.includes(connector.type)) {
+      connector.provider.on('chainChanged', async chainId => {
         handleChainChanged(parseInt(formatUnits(chainId, 0)));
       });
     }
 
-    // auth.provider.on('disconnect', async () => {});
+    // provider.on('disconnect', async () => {});
   }
 
-  function removeProviderEvents(provider) {
-    loadedProviders.value.delete(provider?.connectorName || 'injected');
+  function removeConnectorEvents(connector: Connector) {
+    loadedProviders.value.delete(connector.id);
 
     try {
-      provider.removeAllListeners();
+      connector.provider.removeAllListeners();
     } catch (e: any) {}
   }
 
   return {
     login,
     logout,
+    autoLogin,
+    auth: computed(() =>
+      currentConnector.value
+        ? {
+            connector: currentConnector.value!,
+            provider: provider.value!,
+            account: state.account
+          }
+        : null
+    ),
     authInitiated,
     web3: computed(() => state),
     web3Account: computed(() => state.account)

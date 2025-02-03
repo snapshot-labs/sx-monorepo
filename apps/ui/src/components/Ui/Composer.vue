@@ -86,7 +86,7 @@ watch(model, () => {
           class="p-1 size-[26px] leading-[18px] italic hover:text-skin-link rounded focus-visible:ring-1"
           @click="editor.italic"
         >
-          <span class="mono !text-[17px] !font-normal">I</span>
+          <span class="font-display !text-[17px] !font-normal">I</span>
         </button>
       </UiTooltip>
       <UiTooltip title="Add a link" class="size-[26px]">
@@ -111,16 +111,23 @@ watch(model, () => {
           />
           <UiLoading
             v-if="editor.uploading.value"
-            :width="14"
-            :height="14"
+            :size="14"
             class="inline-block"
           />
           <IS-photo v-else class="size-[18px]" />
         </label>
       </UiTooltip>
     </div>
-    <textarea ref="editorRef" v-model.trim="model" class="s-input h-[200px]" />
-    <div v-if="showError" class="s-input-error-message" v-text="error" />
+    <textarea
+      ref="editorRef"
+      v-model.trim="model"
+      :placeholder="definition?.examples ? definition.examples[0] : ''"
+      class="s-input h-[260px]"
+    />
+    <div v-if="showError" class="s-input-error-message leading-6 mt-2">
+      <span v-text="error" />
+      <slot name="error-suffix" />
+    </div>
   </div>
 </template>
 

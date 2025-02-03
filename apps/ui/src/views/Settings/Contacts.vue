@@ -65,16 +65,19 @@ function handleContactEdit(contact) {
         </button>
       </div>
     </div>
-    <div v-if="!contactsStore.contacts.length" class="px-4 py-3 text-skin-link">
-      <IH-exclamation-circle class="inline-block mr-2" />
+    <div
+      v-if="!contactsStore.contacts.length"
+      class="flex items-center px-4 py-3 text-skin-link gap-2"
+    >
+      <IH-exclamation-circle />
       <span v-text="'There are no contacts here.'" />
     </div>
+    <teleport to="#modal">
+      <ModalEditContact
+        :open="modalOpen.editContact"
+        :initial-state="modalState.editContact"
+        @close="modalOpen.editContact = false"
+      />
+    </teleport>
   </div>
-  <teleport to="#modal">
-    <ModalEditContact
-      :open="modalOpen.editContact"
-      :initial-state="modalState.editContact"
-      @close="modalOpen.editContact = false"
-    />
-  </teleport>
 </template>

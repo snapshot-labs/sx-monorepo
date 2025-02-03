@@ -51,7 +51,7 @@ export function getStarknetAccount(mnemonic: string, index: number) {
 }
 
 export const DEFAULT_INDEX = 1;
-export const SPACES_INDICIES = new Map([
+export const SPACES_INDICES = new Map([
   ['0x040e337fb53973b08343ce983369c1d9e6249ba011e929347288e4d8b590d048', 2],
   ['0x07c251045154318a2376a3bb65be47d3c90df1740d8e35c9b9d943aa3f240e50', 3], // Nostra
   ['0x0395989740c1d6ecc0cba880dd22e87cc209fdb6b8dc2794e9a399c4b2c34d94', 3] // Nostra (test)
@@ -65,7 +65,7 @@ export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
 
   return (spaceAddress: string) => {
     const normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
-    const index = SPACES_INDICIES.get(normalizedSpaceAddress) || DEFAULT_INDEX;
+    const index = SPACES_INDICES.get(normalizedSpaceAddress) || DEFAULT_INDEX;
 
     if (!accounts.has(index)) {
       const { address, privateKey } = getStarknetAccount(mnemonic, index);

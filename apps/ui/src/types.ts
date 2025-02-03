@@ -1,3 +1,6 @@
+import { VNode } from 'vue';
+import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
+
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
@@ -6,6 +9,7 @@ export type ProposalState =
   | 'active'
   | 'passed'
   | 'rejected'
+  | 'closed'
   | 'executed';
 
 export type NetworkID =
@@ -15,10 +19,12 @@ export type NetworkID =
   | 'matic'
   | 'arb1'
   | 'oeth'
+  | 'base'
   | 'sep'
-  | 'linea-testnet'
   | 'sn'
   | 'sn-sep';
+
+export type ChainId = number | string;
 
 export type Choice =
   | 'for'
@@ -28,7 +34,8 @@ export type Choice =
   | number[]
   | Record<string, number>;
 
-export type Privacy = 'shutter' | null;
+export type Privacy = 'shutter' | 'none';
+export type SpacePrivacy = Privacy | 'any';
 
 export type VoteType =
   | 'basic'
@@ -43,6 +50,12 @@ export type VoteTypeInfo = {
   description: string;
 };
 
+export type DelegationType =
+  | 'governor-subgraph'
+  // From v1
+  | 'delegate-registry'
+  | 'split-delegation';
+
 export type SelectedStrategy = {
   address: string;
   destinationAddress?: string | null;
@@ -50,18 +63,24 @@ export type SelectedStrategy = {
 };
 
 export type SpaceMetadataTreasury = {
-  name: string | null;
-  network: NetworkID | null;
-  address: string | null;
-  chainId?: number;
+  name: string;
+  address: string;
+  chainId: ChainId | null;
+};
+
+export type SpaceMetadataLabel = {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
 };
 
 export type SpaceMetadataDelegation = {
   name: string | null;
-  apiType: string | null;
+  apiType: DelegationType | null;
   apiUrl: string | null;
-  contractNetwork: NetworkID | null;
   contractAddress: string | null;
+  chainId: ChainId | null;
 };
 
 export type SpaceMetadata = {
@@ -75,6 +94,7 @@ export type SpaceMetadata = {
   discord: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
+  labels: SpaceMetadataLabel[];
   delegations: SpaceMetadataDelegation[];
 };
 
@@ -85,6 +105,7 @@ export type SpaceSettings = {
 };
 
 export type StrategyParsedMetadata = {
+  id: string;
   name: string;
   description: string;
   decimals: number;
@@ -92,6 +113,48 @@ export type StrategyParsedMetadata = {
   token: string | null;
   payload: string | null;
 };
+
+export type RelatedSpace = {
+  id: string;
+  name: string;
+  network: NetworkID;
+  avatar: string;
+  cover: string;
+  about?: string;
+  proposal_count: number;
+  vote_count: number;
+  active_proposals: number | null;
+  turbo: boolean;
+  verified: boolean;
+  snapshot_chain_id: number;
+};
+
+export type Validation = {
+  name: string;
+  params: Record<string, any>;
+};
+
+export type OffchainAdditionalRawData = {
+  type: 'offchain';
+} & Pick<
+  OffchainApiSpace,
+  | 'private'
+  | 'domain'
+  | 'skin'
+  | 'skinSettings'
+  | 'strategies'
+  | 'categories'
+  | 'admins'
+  | 'moderators'
+  | 'members'
+  | 'plugins'
+  | 'delegationPortal'
+  | 'filters'
+  | 'voting'
+  | 'validation'
+  | 'voteValidation'
+  | 'boost'
+>;
 
 export type Space = {
   id: string;
@@ -105,12 +168,16 @@ export type Space = {
   about?: string;
   external_url: string;
   treasuries: SpaceMetadataTreasury[];
+  labels?: SpaceMetadataLabel[];
   delegations: SpaceMetadataDelegation[];
   twitter: string;
   github: string;
   discord: string;
   coingecko?: string;
+  terms: string;
+  privacy: SpacePrivacy;
   voting_power_symbol: string;
+  active_proposals: number | null;
   controller: string;
   voting_delay: number;
   voting_types: VoteType[];
@@ -122,7 +189,7 @@ export type Space = {
   voting_power_validation_strategy_strategies: string[];
   voting_power_validation_strategy_strategies_params: string[];
   voting_power_validation_strategies_parsed_metadata: StrategyParsedMetadata[];
-  strategies_indicies: number[];
+  strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
   strategies_parsed_metadata: StrategyParsedMetadata[];
@@ -138,18 +205,26 @@ export type Space = {
     treasury_chain: number | null;
   }[];
   proposal_count: number;
+  proposal_count_1d?: number;
+  proposal_count_30d?: number;
   vote_count: number;
   follower_count?: number;
   created: number;
+  children: RelatedSpace[];
+  parent: RelatedSpace | null;
+  template: string | null;
+  guidelines: string | null;
+  // only use this for settings, if it's actually used for other things
+  // move it to main space type
+  additionalRawData?: OffchainAdditionalRawData;
 };
 
 export type ProposalExecution = {
   strategyType: string;
   safeName: string;
   safeAddress: string;
-  networkId: NetworkID;
   transactions: Transaction[];
-  chainId?: number;
+  chainId: ChainId;
 };
 
 export type Proposal = {
@@ -165,6 +240,7 @@ export type Proposal = {
     name: string;
     snapshot_chain_id?: number;
     avatar: string;
+    terms: string;
     controller: string;
     admins?: string[];
     moderators?: string[];
@@ -190,6 +266,7 @@ export type Proposal = {
   max_end: number;
   snapshot: number;
   choices: string[];
+  labels: string[];
   scores: number[];
   scores_total: number;
   execution_time: number;
@@ -197,7 +274,7 @@ export type Proposal = {
   execution_strategy_type: string;
   execution_destination: string | null;
   timelock_veto_guardian: string | null;
-  strategies_indicies: number[];
+  strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
   validation: string;
@@ -218,6 +295,7 @@ export type Proposal = {
   cancelled: boolean;
   state: ProposalState;
   privacy: Privacy;
+  flagged: boolean;
 };
 
 export type UserProfile = {
@@ -229,6 +307,7 @@ export type UserProfile = {
   twitter: string;
   lens: string;
   farcaster: string;
+  votesCount: number;
 };
 
 export type User = {
@@ -250,8 +329,10 @@ export type Statement = {
   network: NetworkID;
   about: string;
   statement: string;
+  delegate: string;
   discourse: string;
   status: 'ACTIVE' | 'INACTIVE';
+  source: string | null;
 };
 
 export type Follow = {
@@ -289,6 +370,11 @@ export type Vote = {
   tx: string;
 };
 
+export type Member = {
+  address: string;
+  role: 'admin' | 'moderator' | 'author';
+};
+
 export type Draft = {
   proposalId: number | string | null;
   title: string;
@@ -296,8 +382,14 @@ export type Draft = {
   discussion: string;
   type: VoteType;
   choices: string[];
+  privacy: Privacy;
+  labels: string[];
   executions: Record<string, Transaction[] | undefined>;
   updatedAt: number;
+  created?: number;
+  start?: number;
+  min_end?: number;
+  max_end?: number;
 };
 
 export type Metadata = {
@@ -305,6 +397,17 @@ export type Metadata = {
   body: string;
   discussion: string;
   execution: Transaction[];
+};
+
+export type SkinSettings = {
+  bg_color?: string;
+  link_color?: string;
+  text_color?: string;
+  content_color?: string;
+  border_color?: string;
+  heading_color?: string;
+  primary_color?: string;
+  theme?: string;
 };
 
 export type Drafts = Record<string, Draft>;
@@ -334,8 +437,10 @@ export type SendNftTransaction = BaseTransaction & {
   _type: 'sendNft';
   _form: {
     recipient: string;
+    sender: string;
     amount: string;
     nft: {
+      type: string;
       address: string;
       id: string;
       name: string;
@@ -381,4 +486,36 @@ export type Transaction =
 // Utils
 export type RequiredProperty<T> = {
   [P in keyof T]: Required<NonNullable<T[P]>>;
+};
+
+// UI
+export type BaseDefinition<T> = {
+  type: string | string[];
+  format?: string;
+  title: string;
+  description?: string;
+  default?: T;
+  examples?: string[];
+  tooltip?: string;
+};
+
+export type DefinitionWithOptions<T> = BaseDefinition<T> & {
+  enum: T[];
+  options: SelectItem<T>[];
+};
+
+export type DefinitionWithMultipleOptions<T> = BaseDefinition<T[]> & {
+  enum: T[];
+  options: SelectItem<T>[];
+};
+
+export type SelectItem<T> = {
+  id: T;
+  name?: string;
+  icon?: VNode;
+};
+
+export type Setting = {
+  name: string;
+  value: string | string[];
 };

@@ -111,9 +111,7 @@ export default function createEthSigAuthenticator(): Authenticator {
         s,
         v,
         space,
-        {
-          address: args.author
-        },
+        args.author,
         args.proposalId,
         {
           address: args.executionStrategy.address,

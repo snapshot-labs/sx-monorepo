@@ -5,25 +5,24 @@ const titles: Record<ProposalState, string> = {
   pending: 'Pending',
   active: 'Active',
   passed: 'Passed',
+  closed: 'Closed',
   rejected: 'Rejected',
   executed: 'Executed'
 };
 
 const props = withDefaults(
   defineProps<{
-    width?: number | string;
-    height?: number | string;
+    size?: number | string;
     state: ProposalState;
   }>(),
   {
-    width: 24,
-    height: 24
+    size: 24
   }
 );
 
 const style = computed(() => ({
-  width: `${props.width}px`,
-  height: `${props.height}px`
+  width: `${props.size}px`,
+  height: `${props.size}px`
 }));
 </script>
 
@@ -37,6 +36,11 @@ const style = computed(() => ({
     />
     <IS-check-circle
       v-else-if="state === 'passed'"
+      class="text-skin-link"
+      :style="style"
+    />
+    <IS-minus-circle
+      v-else-if="state === 'closed'"
       class="text-skin-link"
       :style="style"
     />

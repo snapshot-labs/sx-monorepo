@@ -1,6 +1,6 @@
-// URL: https://docs.google.com/spreadsheets/d/1R1qmDuKTp8WYiy-QWG0WQpu-pfoi-4TTUQKz1XdFZ1o
+// URL: https://docs.google.com/spreadsheets/d/1aUkvul0ja3ojK8N30MbG-BdXSbWFwRbGenvdo2dPWGU
 const APPS_SHEET_ID =
-  '2PACX-1vSyMqd0Ql198UtPMWO1RQmnzx-rfggEIT3Yieg8mOSf8tyNksUSLKXMpBkO1DLC8yoLqx0stynSk1Us';
+  '2PACX-1vSXPvTkgUnjTkBoCs-z1ionjuGFhO8kcGrXqUOw38BbS5Tf60wlgVYJCFk-El1_96xH1tHL6MNeW-6q';
 const APPS_SHEET_GID = '0';
 
 async function getSpreadsheet(id: string, gid: string = '0'): Promise<any[]> {
@@ -13,15 +13,44 @@ async function getSpreadsheet(id: string, gid: string = '0'): Promise<any[]> {
 }
 
 function csvToJson(csv: string): any[] {
-  const [header, ...lines] = csv
-    .split('\n')
-    .map(line =>
-      line
-        .split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/)
-        .map(field => field.trim().replace(/^"|"$/g, ''))
-    );
+  const lines: string[][] = [];
+  let currentLine: string[] = [];
+  let currentField = '';
+  let insideQuotes = false;
 
-  return lines
+  for (let i = 0; i < csv.length; i++) {
+    const char = csv[i];
+    const nextChar = csv[i + 1];
+
+    if (char === '"' && insideQuotes && nextChar === '"') {
+      // Handle escaped quotes
+      currentField += '"';
+      i++;
+    } else if (char === '"') {
+      // Toggle insideQuotes
+      insideQuotes = !insideQuotes;
+    } else if (char === ',' && !insideQuotes) {
+      // End of field
+      currentLine.push(currentField);
+      currentField = '';
+    } else if (char === '\n' && !insideQuotes) {
+      // End of line
+      currentLine.push(currentField);
+      lines.push(currentLine);
+      currentLine = [];
+      currentField = '';
+    } else {
+      // Regular character
+      currentField += char;
+    }
+  }
+
+  currentLine.push(currentField);
+  lines.push(currentLine);
+
+  const [header, ...data] = lines;
+
+  return data
     .filter(line => line.length > 1)
     .map(line =>
       Object.fromEntries(header.map((key, i) => [key, line[i] || '']))
@@ -47,7 +76,20 @@ export function useApps() {
   }
 
   function get(id: string) {
-    return apps.value.find(app => app.id === id) || {};
+    const app = apps.value.find(app => app.id === id);
+    if (!app) {
+      return {};
+    }
+
+    if (app.github && !app.github.startsWith('https://')) {
+      app.github = `https://github.com/${app.github}`;
+    }
+
+    if (app.x?.startsWith('@')) {
+      app.x = app.x.slice(1);
+    }
+
+    return app;
   }
 
   function search(q: string) {

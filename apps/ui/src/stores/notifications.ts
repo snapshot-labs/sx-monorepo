@@ -117,14 +117,26 @@ export const useNotificationsStore = defineStore('notifications', () => {
       () => followedSpacesStore.followedSpacesLoaded,
       () => followedSpacesStore.followedSpacesIds
     ],
-    async ([followedSpacesLoaded]) => {
+    async ([followedSpacesLoaded, followedSpacesIds]) => {
       if (!followedSpacesLoaded) return;
 
-      loading.value = true;
-      notifications.value = [];
-      await loadNotifications();
+      if (followedSpacesIds.length > 0) {
+        loading.value = true;
+        notifications.value = [];
+        await loadNotifications();
+        loading.value = false;
 
-      loading.value = false;
+        if (!refreshNotificationInterval) {
+          refreshNotificationInterval = window.setInterval(
+            loadNotifications,
+            REFRESH_INTERVAL * 1000
+          );
+        }
+      } else if (!followedSpacesIds.length && refreshNotificationInterval) {
+        clearInterval(refreshNotificationInterval);
+        refreshNotificationInterval = 0;
+        notifications.value = [];
+      }
     },
     { immediate: true }
   );
@@ -135,15 +147,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
       shownLastUnreadTs.value = account ? lastUnreadTs.value[account] ?? 0 : 0;
     }
   );
-
-  onMounted(() => {
-    refreshNotificationInterval = window.setInterval(
-      loadNotifications,
-      REFRESH_INTERVAL * 1000
-    );
-  });
-
-  onBeforeUnmount(() => clearInterval(refreshNotificationInterval));
 
   return {
     unreadNotificationsCount,

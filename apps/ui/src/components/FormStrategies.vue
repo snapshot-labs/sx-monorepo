@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
+import { NetworkID } from '@/types';
 
 const model = defineModel<StrategyConfig[]>({ required: true });
 
 withDefaults(
   defineProps<{
+    networkId: NetworkID;
     limit?: number;
     unique?: boolean;
     title: string;
@@ -20,17 +22,14 @@ withDefaults(
 </script>
 
 <template>
-  <div class="mb-4">
-    <h3 class="mb-2">{{ title }}</h3>
-    <span class="mb-3 inline-block">
-      {{ description }}
-    </span>
+  <UiContainerSettings :title="title" :description="description">
     <StrategiesConfigurator
       :model-value="model"
+      :network-id="networkId"
       :unique="unique"
       :available-strategies="availableStrategies"
       :default-params="defaultParams"
       @update:model-value="value => (model = value)"
     />
-  </div>
+  </UiContainerSettings>
 </template>

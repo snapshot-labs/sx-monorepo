@@ -1,306 +1,531 @@
 <script setup lang="ts">
-import { _d, compareAddresses, shorten } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const { setTitle } = useTitle();
-const { web3 } = useWeb3();
-const { getDurationFromCurrent, getCurrentFromDuration } = useMetaStore();
+const router = useRouter();
+const route = useRoute();
 const {
-  setVotingDelay,
-  setMinVotingDuration,
-  setMaxVotingDuration,
-  transferOwnership
-} = useActions();
+  loading,
+  isModified,
+  isController,
+  isOwner,
+  isAdmin,
+  canModifySettings,
+  form,
+  formErrors,
+  votingDelay,
+  minVotingPeriod,
+  maxVotingPeriod,
+  controller,
+  authenticators,
+  validationStrategy,
+  votingStrategies,
+  proposalValidation,
+  guidelines,
+  template,
+  quorumType,
+  quorum,
+  votingType,
+  privacy,
+  voteValidation,
+  ignoreAbstainVotes,
+  snapshotChainId,
+  strategies,
+  members,
+  parent,
+  children,
+  termsOfServices,
+  customDomain,
+  isPrivate,
+  save,
+  saveController,
+  deleteSpace,
+  reset
+} = useSpaceSettings(toRef(props, 'space'));
+const spacesStore = useSpacesStore();
+const { setTitle } = useTitle();
 
-const network = computed(() => getNetwork(props.space.network));
-const isController = computed(() =>
-  compareAddresses(props.space.controller, web3.value.account)
+const isAdvancedFormResolved = ref(false);
+const hasVotingErrors = ref(false);
+const hasProposalErrors = ref(false);
+const hasAdvancedErrors = ref(false);
+
+const executeFn = ref(save);
+const saving = ref(false);
+
+type Tab = {
+  id:
+    | 'profile'
+    | 'proposal'
+    | 'voting-strategies'
+    | 'voting'
+    | 'members'
+    | 'execution'
+    | 'authenticators'
+    | 'treasuries'
+    | 'delegations'
+    | 'labels'
+    | 'advanced'
+    | 'controller';
+  name: string;
+  visible: boolean;
+};
+
+const isOffchainNetwork = computed(() =>
+  offchainNetworks.includes(props.space.network)
 );
 
-const settingsLoading = ref({
-  votingDelay: false,
-  minVotingPeriod: false,
-  maxVotingPeriod: false,
-  controller: false
+const tabs = computed<Tab[]>(
+  () =>
+    [
+      {
+        id: 'profile',
+        name: 'Profile',
+        visible: true
+      },
+      {
+        id: 'proposal',
+        name: 'Proposal',
+        visible: true
+      },
+      {
+        id: 'voting-strategies',
+        name: 'Voting strategies',
+        visible: true
+      },
+      {
+        id: 'voting',
+        name: 'Voting',
+        visible: true
+      },
+      {
+        id: 'members',
+        name: 'Members',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'execution',
+        name: 'Execution',
+        visible: !isOffchainNetwork.value
+      },
+      {
+        id: 'authenticators',
+        name: 'Authenticators',
+        visible: !isOffchainNetwork.value
+      },
+      {
+        id: 'treasuries',
+        name: 'Treasuries',
+        visible: true
+      },
+      {
+        id: 'delegations',
+        name: 'Delegations',
+        visible: true
+      },
+      {
+        id: 'labels',
+        name: 'Labels',
+        visible: true
+      },
+      {
+        id: 'advanced',
+        name: 'Advanced',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'controller',
+        name: 'Controller',
+        visible: true
+      }
+    ] as const
+);
+const activeTab: Ref<Tab['id']> = computed(() => {
+  if (route.params.tab && isValidTab(route.params.tab)) {
+    return route.params.tab;
+  }
+
+  return 'profile';
+});
+const network = computed(() => getNetwork(props.space.network));
+
+const executionStrategies = computed(() => {
+  return props.space.executors.map((executor, i) => {
+    return {
+      id: executor,
+      address: executor,
+      name:
+        network.value.constants.EXECUTORS[executor] ||
+        network.value.constants.EXECUTORS[props.space.executors_types[i]] ||
+        props.space.executors_types[i],
+      params: {},
+      paramsDefinition: {}
+    };
+  });
 });
 
-function currentToMinutesOnly(value: number) {
-  const duration = getDurationFromCurrent(props.space.network, value);
-  return Math.round(duration / 60) * 60;
-}
+const isTicketValid = computed(() => {
+  return !(
+    strategies.value.some(s => s.address === 'ticket') &&
+    voteValidation.value.name === 'any'
+  );
+});
 
-function formatCurrentValue(value: number) {
-  return _d(currentToMinutesOnly(value));
-}
-
-async function handleSave(
-  field: 'votingDelay' | 'minVotingPeriod' | 'maxVotingPeriod' | 'controller',
-  value: string
-) {
-  const fieldActions = {
-    votingDelay: setVotingDelay,
-    minVotingPeriod: setMinVotingDuration,
-    maxVotingPeriod: setMaxVotingDuration,
-    controller: transferOwnership
-  };
-
-  if (!fieldActions[field]) return;
-
-  settingsLoading.value[field] = true;
-
-  try {
-    if (field === 'controller') {
-      await fieldActions[field](props.space, value);
-    } else {
-      await fieldActions[field](props.space, parseInt(value));
-    }
-  } finally {
-    settingsLoading.value[field] = false;
+const error = computed(() => {
+  if (Object.values(formErrors.value).length > 0) {
+    return 'Space profile is invalid';
   }
+
+  if (!isOffchainNetwork.value) {
+    if (!validationStrategy.value) {
+      return 'Proposal validation strategy is required';
+    }
+
+    if (!authenticators.value.length) {
+      return 'At least one authenticator is required';
+    }
+  } else {
+    if (!strategies.value.length) {
+      return 'At least one strategy is required';
+    }
+
+    if (!isTicketValid.value) {
+      return 'Strategies are invalid';
+    }
+
+    if (hasProposalErrors.value) {
+      return 'Proposal settings are invalid';
+    }
+
+    if (hasVotingErrors.value) {
+      return 'Voting settings are invalid';
+    }
+
+    if (hasAdvancedErrors.value && isAdvancedFormResolved.value) {
+      return 'Advanced settings are invalid';
+    }
+  }
+
+  return null;
+});
+
+function isValidTab(param: string | string[]): param is Tab['id'] {
+  if (Array.isArray(param)) return false;
+  return tabs.value.map(tab => tab.id).includes(param as any);
 }
 
-watchEffect(() => setTitle(`Settings - ${props.space.name}`));
+async function reloadSpaceAndReset() {
+  await spacesStore.fetchSpace(props.space.id, props.space.network);
+  await reset({ force: true });
+}
+
+function handleSettingsSave() {
+  saving.value = true;
+  executeFn.value = save;
+}
+
+function handleControllerSave(value: string) {
+  if (!isOwner.value) return;
+  controller.value = value;
+
+  saving.value = true;
+  executeFn.value = saveController;
+}
+
+function handleSpaceDelete() {
+  saving.value = true;
+  executeFn.value = async () => {
+    await deleteSpace();
+    router.push({ name: 'my-home' });
+
+    return null;
+  };
+}
+
+function handleTabFocus(event: FocusEvent) {
+  if (!event.target) return;
+
+  (event.target as HTMLElement).scrollIntoView({
+    block: 'end'
+  });
+}
+
+watch(
+  () => props.space.controller,
+  () => {
+    saving.value = false;
+  }
+);
+
+watchEffect(async () => {
+  loading.value = true;
+
+  await reset({ force: true });
+
+  loading.value = false;
+});
+
+watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <div class="space-y-3">
-    <div>
-      <UiLabel :label="'Voting'" sticky />
-      <div class="mx-4 pt-3">
-        <div class="mb-3">
-          <div class="s-label !mb-0">Voting delay</div>
-          <UiEditable
-            :editable="isController"
-            :initial-value="currentToMinutesOnly(space.voting_delay)"
-            :loading="settingsLoading.votingDelay"
-            :definition="{
-              type: 'integer',
-              format: 'duration'
-            }"
-            @save="value => handleSave('votingDelay', value.toString())"
-          >
-            <h4
-              class="text-skin-link text-md"
-              v-text="formatCurrentValue(space.voting_delay) || 'No delay'"
-            />
-          </UiEditable>
-        </div>
-        <div class="mb-3">
-          <div class="s-label !mb-0">Min. voting period</div>
-          <UiEditable
-            :editable="isController"
-            :initial-value="currentToMinutesOnly(space.min_voting_period)"
-            :loading="settingsLoading.minVotingPeriod"
-            :definition="{
-              type: 'integer',
-              format: 'duration'
-            }"
-            :custom-error-validation="
-              value =>
-                getCurrentFromDuration(space.network, Number(value)) >
-                space.max_voting_period
-                  ? 'Must be equal to or lower than max. voting period'
-                  : undefined
-            "
-            @save="value => handleSave('minVotingPeriod', value.toString())"
-          >
-            <h4
-              class="text-skin-link text-md"
-              v-text="formatCurrentValue(space.min_voting_period) || 'No min.'"
-            />
-          </UiEditable>
-        </div>
-        <div class="mb-3">
-          <div class="s-label !mb-0">Max. voting period</div>
-          <UiEditable
-            :editable="isController"
-            :initial-value="currentToMinutesOnly(space.max_voting_period)"
-            :loading="settingsLoading.maxVotingPeriod"
-            :definition="{
-              type: 'integer',
-              format: 'duration'
-            }"
-            :custom-error-validation="
-              value =>
-                getCurrentFromDuration(space.network, Number(value)) <
-                space.min_voting_period
-                  ? 'Must be equal to or higher than min. voting period'
-                  : undefined
-            "
-            @save="value => handleSave('maxVotingPeriod', value.toString())"
-          >
-            <h4
-              class="text-skin-link text-md"
-              v-text="formatCurrentValue(space.max_voting_period)"
-            />
-          </UiEditable>
-        </div>
-        <div v-if="space.proposal_threshold !== '0'" class="mb-3">
-          <div class="s-label !mb-0" v-text="'Proposal threshold'" />
-          <h4
-            class="text-skin-link text-md"
-            v-text="space.proposal_threshold"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div>
-      <UiLabel :label="'Controller'" sticky />
-      <div class="py-3 mx-4">
-        <UiEditable
-          :editable="isController"
-          :initial-value="space.controller"
-          :loading="settingsLoading.controller"
-          :definition="{
-            type: 'string',
-            format: 'address',
-            examples: ['0x0000…']
+  <div>
+    <UiScrollerHorizontal
+      class="sticky top-[72px] z-40"
+      with-buttons
+      gradient="xxl"
+    >
+      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+        <AppLink
+          v-for="tab in tabs.filter(tab => tab.visible)"
+          :key="tab.id"
+          :to="{
+            name: 'space-settings',
+            params: { space: route.params.space, tab: tab.id }
           }"
-          @save="value => handleSave('controller', value.toString())"
+          type="button"
+          class="scroll-mx-8"
+          @focus="handleTabFocus"
         >
-          <a
-            :href="network.helpers.getExplorerUrl(space.controller, 'contract')"
-            target="_blank"
-          >
-            <UiStamp
-              :id="space.controller"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
-            {{ shorten(space.controller) }}
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </a>
-        </UiEditable>
+          <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
+        </AppLink>
       </div>
+    </UiScrollerHorizontal>
+    <div v-if="loading" class="p-4">
+      <UiLoading />
     </div>
-
-    <div>
-      <UiLabel :label="'Auth(s)'" sticky />
-      <div
-        v-for="(auth, i) in space.authenticators"
-        :key="i"
-        class="mx-4 py-3 border-b"
-      >
-        <a
-          :href="network.helpers.getExplorerUrl(auth, 'contract')"
-          target="_blank"
-          class="flex"
+    <div
+      v-else
+      class="space-y-4 pb-[100px]"
+      :class="{
+        'mx-4 max-w-[592px]': activeTab !== 'profile'
+      }"
+    >
+      <div v-show="activeTab === 'profile'">
+        <FormSpaceProfile
+          :id="space.id"
+          :space="space"
+          :form="form"
+          @errors="v => (formErrors = v)"
+        />
+      </div>
+      <template v-if="activeTab === 'proposal'">
+        <UiContainerSettings
+          v-if="isOffchainNetwork"
+          title="Proposal"
+          description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
         >
-          <h4 class="flex-auto" v-text="network.constants.AUTHS[auth]" />
-          <div>
-            <UiStamp
-              :id="auth"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
-            {{ shorten(auth) }}
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <div>
-      <UiLabel :label="'Proposal validation'" sticky />
-      <div class="mx-4 py-3 border-b">
-        <a
-          :href="
-            network.helpers.getExplorerUrl(
-              space.validation_strategy,
-              'contract'
-            )
+          <FormSpaceProposal
+            v-model:proposal-validation="proposalValidation"
+            v-model:guidelines="guidelines"
+            v-model:template="template"
+            :network-id="space.network"
+            :snapshot-chain-id="snapshotChainId"
+            :space="space"
+            @update-validity="v => (hasProposalErrors = !v)"
+          />
+        </UiContainerSettings>
+        <FormValidation
+          v-else
+          v-model="validationStrategy"
+          :network-id="space.network"
+          :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
+          :available-voting-strategies="
+            network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
           "
-          target="_blank"
-          class="flex"
+          title="Proposal"
+          description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
+        />
+      </template>
+      <template v-if="activeTab === 'voting-strategies'">
+        <UiContainerSettings
+          v-if="isOffchainNetwork"
+          title="Voting strategies"
+          description="Voting strategies are sets of conditions used to calculate user's voting power."
         >
-          <h4
-            class="flex-auto"
-            v-text="
-              network.constants.PROPOSAL_VALIDATIONS[space.validation_strategy]
-            "
+          <FormSpaceStrategies
+            v-model:snapshot-chain-id="snapshotChainId"
+            v-model:strategies="strategies"
+            :network-id="space.network"
+            :is-ticket-valid="isTicketValid"
+            :space="space"
           />
-          <div>
-            <UiStamp
-              :id="space.validation_strategy"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
-            {{ shorten(space.validation_strategy) }}
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <div>
-      <UiLabel :label="'Strategie(s)'" sticky />
-      <div
-        v-for="(strategy, i) in space.strategies"
-        :key="i"
-        class="mx-4 py-3 border-b"
+        </UiContainerSettings>
+        <FormStrategies
+          v-else
+          v-model="votingStrategies"
+          :network-id="space.network"
+          :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
+          title="Voting strategies"
+          description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+        />
+      </template>
+      <UiContainerSettings
+        v-else-if="activeTab === 'voting'"
+        title="Voting"
+        description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
       >
-        <a
-          :href="network.helpers.getExplorerUrl(strategy, 'strategy')"
-          target="_blank"
-          class="flex"
-        >
-          <h4
-            class="flex-auto"
-            v-text="network.constants.STRATEGIES[strategy] || strategy"
-          />
-          <div>
-            <UiStamp
-              :id="strategy"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
-            {{ shorten(strategy) }}
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <div>
-      <UiLabel :label="'Execution(s)'" sticky />
-      <div
-        v-for="(executor, i) in space.executors"
-        :key="i"
-        class="mx-4 py-3 border-b"
+        <FormSpaceVoting
+          v-model:voting-delay="votingDelay"
+          v-model:min-voting-period="minVotingPeriod"
+          v-model:max-voting-period="maxVotingPeriod"
+          v-model:quorum-type="quorumType"
+          v-model:quorum="quorum"
+          v-model:voting-type="votingType"
+          v-model:privacy="privacy"
+          v-model:vote-validation="voteValidation"
+          v-model:ignore-abstain-votes="ignoreAbstainVotes"
+          :snapshot-chain-id="snapshotChainId"
+          :space="space"
+          @update-validity="v => (hasVotingErrors = !v)"
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'members'"
+        title="Members"
+        description="Members have different roles and permissions within the space."
       >
-        <a
-          :href="network.helpers.getExplorerUrl(executor, 'contract')"
-          target="_blank"
-          class="flex"
-        >
-          <h4
-            class="inline-block mr-3 flex-auto"
-            v-text="
-              network.constants.EXECUTORS[executor] ||
-              network.constants.EXECUTORS[space.executors_types[i]] ||
-              space.executors_types[i]
-            "
+        <FormSpaceMembers
+          v-model="members"
+          :network-id="space.network"
+          :is-controller="isController"
+          :is-admin="isAdmin"
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'execution'"
+        title="Execution(s)"
+        description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
+      >
+        <div class="space-y-3">
+          <FormStrategiesStrategyActive
+            v-for="strategy in executionStrategies"
+            :key="strategy.id"
+            read-only
+            :network-id="space.network"
+            :strategy="strategy"
           />
-          <div>
-            <UiStamp
-              :id="executor"
-              type="avatar"
-              :size="18"
-              class="mr-2 rounded-sm"
-            />
-            {{ shorten(executor) }}
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </div>
-        </a>
-      </div>
+        </div>
+      </UiContainerSettings>
+      <FormStrategies
+        v-if="activeTab === 'authenticators'"
+        v-model="authenticators"
+        unique
+        :network-id="space.network"
+        :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
+        title="Authenticators"
+        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+      />
+      <UiContainerSettings
+        v-if="activeTab === 'treasuries'"
+        title="Treasuries"
+        description="Treasuries are used to manage the funds of the space."
+      >
+        <FormSpaceTreasuries
+          v-model="form.treasuries"
+          :network-id="space.network"
+          :limit="isOffchainNetwork ? 10 : undefined"
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'delegations'"
+        title="Delegations"
+        description="Delegations allow users to delegate their voting power to other users."
+      >
+        <FormSpaceDelegations
+          v-model="form.delegations"
+          :network-id="space.network"
+          :limit="isOffchainNetwork ? 1 : undefined"
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-else-if="activeTab === 'labels'"
+        title="Labels"
+        description="Labels are used to categorize proposals."
+      >
+        <FormSpaceLabels v-model="form.labels" />
+      </UiContainerSettings>
+      <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
+        <FormSpaceAdvanced
+          v-model:parent="parent"
+          v-model:children="children"
+          v-model:terms-of-services="termsOfServices"
+          v-model:custom-domain="customDomain"
+          v-model:is-private="isPrivate"
+          :network-id="space.network"
+          :space="space"
+          :is-controller="isController"
+          @delete-space="handleSpaceDelete"
+          @update-validity="
+            (valid, resolved) => {
+              hasAdvancedErrors = !valid;
+              isAdvancedFormResolved = resolved;
+            }
+          "
+        />
+      </UiContainerSettings>
+      <UiContainerSettings
+        v-if="activeTab === 'controller'"
+        title="Controller"
+        description="The controller is the account able to change the space settings and cancel pending proposals."
+      >
+        <UiMessage
+          v-if="isOffchainNetwork && isOwner"
+          type="danger"
+          class="mb-3"
+        >
+          The controller is the owner of the ENS name. To change the controller,
+          you need to change the owner of the ENS name.
+        </UiMessage>
+        <FormSpaceController
+          :controller="controller"
+          :network="network"
+          :disabled="!isController || isOffchainNetwork"
+          @save="handleControllerSave"
+        />
+      </UiContainerSettings>
+      <UiToolbarBottom
+        v-if="
+          (isModified && isAdvancedFormResolved && canModifySettings) || error
+        "
+        class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+      >
+        <h4
+          class="leading-7 font-medium truncate mb-2 xs:mb-0"
+          :class="{ 'text-skin-danger': error }"
+        >
+          {{ error || 'You have unsaved changes' }}
+        </h4>
+        <div class="flex space-x-3">
+          <button type="reset" class="text-skin-heading" @click="reset()">
+            Reset
+          </button>
+          <UiButton
+            v-if="!error"
+            :loading="saving"
+            primary
+            @click="handleSettingsSave"
+          >
+            Save
+          </UiButton>
+        </div>
+      </UiToolbarBottom>
     </div>
+    <teleport to="#modal">
+      <ModalTransactionProgress
+        :open="saving"
+        :network-id="space.network"
+        :messages="{
+          approveTitle: 'Confirm your changes',
+          successTitle: 'Done!',
+          successSubtitle: 'Your changes were successfully saved'
+        }"
+        :execute="executeFn"
+        @confirmed="reloadSpaceAndReset"
+        @close="saving = false"
+      />
+    </teleport>
   </div>
 </template>

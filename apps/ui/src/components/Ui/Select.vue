@@ -1,15 +1,11 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
+<script setup lang="ts" generic="T extends string | number">
+import { DefinitionWithOptions } from '@/types';
 
-<script setup lang="ts">
-const model = defineModel<string>();
+const model = defineModel<T>({ required: true });
 
 const props = defineProps<{
   error?: string;
-  definition: any;
+  definition: DefinitionWithOptions<T>;
 }>();
 
 const dirty = ref(false);
@@ -22,7 +18,7 @@ const inputValue = computed({
 
     return model.value;
   },
-  set(newValue: string) {
+  set(newValue: T) {
     dirty.value = true;
     model.value = newValue;
   }
@@ -38,11 +34,11 @@ watch(model, () => {
     <select v-model="inputValue" class="s-input">
       <option disabled value="">Please select one</option>
       <option
-        v-for="option in definition.options || definition.enum"
-        :key="option.id === undefined ? option : option.id"
-        :value="option.id === undefined ? option : option.id"
+        v-for="option in definition.options"
+        :key="option.id"
+        :value="option.id"
       >
-        {{ option.name ?? option }}
+        {{ option.name ?? option.id }}
       </option>
     </select>
   </UiWrapperInput>

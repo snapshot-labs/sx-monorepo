@@ -25,6 +25,7 @@ export async function registerTransaction(
   chainId: number | string,
   params: {
     type: string;
+    sender: string;
     hash: string;
     payload: any;
   }

@@ -3,12 +3,17 @@ import { Wallet } from '@ethersproject/wallet';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
+  ChainId,
   Choice,
+  DelegationType,
   Follow,
   NetworkID,
+  Privacy,
   Proposal,
+  Setting,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   Statement,
   StrategyParsedMetadata,
   Transaction,
@@ -23,16 +28,33 @@ export type SpacesFilter = {
   controller?: string;
   id_in?: string[];
   searchQuery?: string;
+  domain?: string;
+  category?: string;
+  network?: string;
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
+  labels?: string[];
 } & Record<string, any>;
-export type Connector =
+export type ConnectorType =
   | 'argentx'
   | 'injected'
   | 'walletconnect'
   | 'walletlink'
   | 'gnosis';
+export type Connector = {
+  id: string;
+  type: ConnectorType;
+  info: {
+    name: string;
+    icon: string;
+  };
+  options: any;
+  provider: any;
+  connect: () => void;
+  autoConnect: () => void;
+  disconnect: () => void;
+};
 export type GeneratedMetadata =
   | {
       name: string;
@@ -52,8 +74,13 @@ export type StrategyTemplate = {
   address: string;
   name: string;
   about?: string;
+  author?: string;
+  version?: string;
+  spaceCount?: number;
+  link?: string;
   icon?: FunctionalComponent;
   type?: string;
+  defaultParams?: any;
   paramsDefinition: any;
   validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
@@ -65,7 +92,7 @@ export type StrategyTemplate = {
     params: string,
     metadata: StrategyParsedMetadata | null
   ) => Promise<Record<string, any>>;
-  deployConnectors?: Connector[];
+  deployConnectors?: ConnectorType[];
   deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
@@ -78,10 +105,12 @@ export type StrategyTemplate = {
 
 export type StrategyConfig = StrategyTemplate & {
   id: string;
+  chainId?: ChainId;
   params: Record<string, any>;
 };
 
 export type ExecutionInfo = {
+  strategyType: string;
   strategyAddress: string;
   destinationAddress: string;
   treasuryName: string;
@@ -97,7 +126,14 @@ export type SnapshotInfo = {
 export type VotingPower = {
   address: string;
   value: bigint;
-  decimals: number;
+  /**
+   * Decimals used to interpret value in context of final (total) VP.
+   */
+  cumulativeDecimals: number;
+  /**
+   * Decimals used to display this strategy value.
+   */
+  displayDecimals: number;
   token: string | null;
   symbol: string;
   chainId?: number;
@@ -119,7 +155,7 @@ export type ReadOnlyNetworkActions = {
   ): Promise<VotingPower[]>;
   propose(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     account: string,
     space: Space,
     title: string,
@@ -127,11 +163,18 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
+    labels: string[],
+    app: string,
+    created: number,
+    start: number,
+    min_end: number,
+    max_end: number,
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     account: string,
     space: Space,
     proposalId: number | string,
@@ -140,16 +183,20 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
+    labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
+  flagProposal(web3: Web3Provider, proposal: Proposal);
   cancelProposal(web3: Web3Provider, proposal: Proposal);
   vote(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     account: string,
     proposal: Proposal,
     choice: Choice,
-    reason: string
+    reason: string,
+    app: string
   ): Promise<any>;
   followSpace(
     web3: Web3Provider | Wallet,
@@ -170,6 +217,9 @@ export type ReadOnlyNetworkActions = {
     statement: Statement,
     from?: string
   );
+  transferOwnership(web3: Web3Provider, space: Space, owner: string);
+  updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
+  deleteSpace(web3: Web3Provider, space: Space);
   send(envelope: any): Promise<any>;
 };
 
@@ -180,6 +230,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   ): Promise<string | null>;
   deployDependency(
     web3: Web3Provider,
+    connectorType: ConnectorType,
     params: {
       controller: string;
       spaceAddress: string;
@@ -202,39 +253,37 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       metadata: SpaceMetadata;
     }
   );
-  setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
   vetoProposal(web3: Web3Provider, proposal: Proposal);
-  setVotingDelay(web3: Web3Provider, space: Space, votingDelay: number);
-  setMinVotingDuration(
+  updateSettings(
     web3: Web3Provider,
     space: Space,
-    minVotingDuration: number
-  );
-  setMaxVotingDuration(
-    web3: Web3Provider,
-    space: Space,
-    maxVotingDuration: number
-  );
-  transferOwnership(web3: Web3Provider, space: Space, owner: string);
-  updateStrategies(
-    web3: Web3Provider,
-    space: Space,
+    metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
     authenticatorsToRemove: number[],
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
-    validationStrategy: StrategyConfig
+    validationStrategy: StrategyConfig,
+    votingDelay: number | null,
+    minVotingDuration: number | null,
+    maxVotingDuration: number | null
   );
   delegate(
     web3: Web3Provider,
     space: Space,
     networkId: NetworkID,
-    delegatee: string,
-    delegationContract: string
+    delegationType: DelegationType,
+    delegatee: string | null,
+    delegationContract: string,
+    chainIdOverride?: ChainId
   );
+  getDelegatee(
+    web3: Web3Provider,
+    delegation: SpaceMetadataDelegation,
+    delegator: string
+  ): Promise<{ address: string; balance: bigint; decimals: number } | null>;
 };
 
 export type NetworkApi = {
@@ -247,7 +296,8 @@ export type NetworkApi = {
   ): Promise<Vote[]>;
   loadUserVotes(
     spaceIds: string[],
-    voter: string
+    voter: string,
+    paginationOpts: PaginationOpts
   ): Promise<{ [key: string]: Vote }>;
   loadProposals(
     spaceIds: string[],
@@ -289,6 +339,15 @@ export type NetworkApi = {
     spaceId: string,
     userId: string
   ): Promise<Statement | null>;
+  loadStatements(
+    networkId: NetworkID,
+    spaceId: string,
+    userIds: string[]
+  ): Promise<Statement[]>;
+  loadStrategies(): Promise<StrategyTemplate[]>;
+  loadStrategy(address: string): Promise<StrategyTemplate | null>;
+  getNetworksUsage(): Promise<Record<ChainId, number | undefined>>;
+  loadSettings(): Promise<Setting[]>;
 };
 
 export type NetworkConstants = {
@@ -314,6 +373,7 @@ export type NetworkHelpers = {
   isStrategySupported(strategy: string): boolean;
   isExecutorSupported(executor: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
+  getSpaceController(space: Space): Promise<string>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
@@ -333,7 +393,7 @@ type BaseNetwork = {
   currentChainId: number;
   baseNetworkId?: NetworkID;
   supportsSimulation: boolean;
-  managerConnectors: Connector[];
+  managerConnectors: ConnectorType[];
   api: NetworkApi;
   constants: NetworkConstants;
   helpers: NetworkHelpers;

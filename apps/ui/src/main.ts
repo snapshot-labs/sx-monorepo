@@ -1,12 +1,24 @@
-import { LockPlugin } from '@snapshot-labs/lock/plugins/vue3';
+import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import VueTippy from 'vue-tippy';
 import App from '@/App.vue';
-import options from '@/helpers/auth';
-import router from '@/router';
+import router from '@/routes';
 import '@/style.scss';
 
-const knownHosts = ['app.safe.global', 'pilot.gnosisguild.org'];
+const knownHosts = [
+  'app.safe.global',
+  'pilot.gnosisguild.org',
+  'metissafe.tech',
+  'multisig.mantle.xyz',
+  'wallet.ambire.com',
+  'multisig.moonbeam.network',
+  'worldassociation.org',
+  'safe.mainnet.frax.com',
+  'horizen-eon.safe.onchainden.com',
+  'safe.fantom.network',
+  'safe.apechain.com',
+  'console.brahma.fi'
+];
 const parentUrl =
   window.location != window.parent.location
     ? document.referrer ||
@@ -23,7 +35,6 @@ if (window !== window.parent && !knownHosts.includes(parentHost)) {
 const pinia = createPinia();
 const app = createApp({ render: () => h(App) })
   .use(router)
-  .use(LockPlugin, options)
   .use(VueTippy, {
     defaultProps: {
       delay: [0, null],
@@ -33,6 +44,7 @@ const app = createApp({ render: () => h(App) })
   });
 
 app.use(pinia);
+app.use(VueQueryPlugin);
 
 app.mount('#app');
 

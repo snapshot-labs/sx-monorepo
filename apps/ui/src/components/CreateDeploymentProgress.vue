@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
-import { Connector, StrategyConfig } from '@/networks/types';
+import { Connector, ConnectorType, StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
 
 type DeployingDependencyStep = {
@@ -44,15 +44,19 @@ const props = defineProps<{
   controller: string;
 }>();
 
+const emit = defineEmits<{
+  (e: 'back');
+}>();
+
 const { deployDependency, createSpace } = useActions();
-const { web3, login } = useWeb3();
+const { login, auth } = useWeb3();
 
 const currentStep = ref(0);
 const completed = ref(false);
 const failed = ref(false);
 const connectorModalOpen = ref(false);
-const connectorModalConnectors = ref([] as string[]);
-const connectorCallbackFn: Ref<((value: string | false) => void) | null> =
+const connectorModalConnectors = ref([] as ConnectorType[]);
+const connectorCallbackFn: Ref<((value: Connector | false) => void) | null> =
   ref(null);
 const txIds = ref({});
 const deployedExecutionStrategies = ref([] as StrategyConfig[]);
@@ -97,16 +101,16 @@ const uiSteps = computed(() => {
   >[];
 });
 
-function getConnector(supportedConnectors: string[]) {
+function getConnector(supportedConnectors: ConnectorType[]) {
   connectorModalOpen.value = true;
   connectorModalConnectors.value = supportedConnectors;
 
-  return new Promise<string | false>(resolve => {
+  return new Promise<Connector | false>(resolve => {
     connectorCallbackFn.value = resolve;
   });
 }
 
-function handleConnectorPick(connector: string) {
+function handleConnectorPick(connector: Connector) {
   connectorCallbackFn.value?.(connector);
   connectorModalOpen.value = false;
 }
@@ -130,11 +134,11 @@ async function deployStep(
       ? step.strategy.deployConnectors
       : network.value.managerConnectors;
 
-  if (!supportedConnectors.includes(web3.value.type as Connector)) {
-    const connector = await getConnector(supportedConnectors);
-    if (!connector) throw new Error('No connector selected');
+  if (!auth.value || !supportedConnectors.includes(auth.value.connector.type)) {
+    const selectedConnector = await getConnector(supportedConnectors);
+    if (!selectedConnector) throw new Error('No connector selected');
 
-    await login(connector);
+    await login(selectedConnector);
   }
 
   let result;
@@ -273,12 +277,19 @@ onMounted(() => deploy());
         </div>
       </div>
     </div>
+    <UiButton
+      v-if="!completed && steps[currentStep].id !== 'INDEXING_SPACE'"
+      class="mt-4"
+      @click="emit('back')"
+    >
+      Go back
+    </UiButton>
     <div v-if="completed" class="mt-4">
       You can now access your space
-      <router-link
+      <AppLink
         :to="{
           name: 'space-overview',
-          params: { id: `${networkId}:${predictedSpaceAddress}` }
+          params: { space: `${networkId}:${predictedSpaceAddress}` }
         }"
         text="here"
       />.

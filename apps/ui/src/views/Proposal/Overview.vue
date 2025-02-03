@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import {
   _n,
   _rt,
@@ -9,19 +10,20 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
+import { SNAPSHOT_URLS } from '@/networks/offchain';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
 
 const props = defineProps<{
   proposal: Proposal;
 }>();
 
+const queryClient = useQueryClient();
 const router = useRouter();
-const route = useRoute();
 const uiStore = useUiStore();
-const proposalsStore = useProposalsStore();
 const { getCurrent, getTsFromCurrent } = useMetaStore();
 const { web3 } = useWeb3();
-const { cancelProposal } = useActions();
+const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
 const {
   state: aiSummaryState,
@@ -43,20 +45,34 @@ const {
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
+const flagging = ref(false);
 const cancelling = ref(false);
 const aiSummaryOpen = ref(false);
 
-const currentUrl = `${window.location.origin}/#${route.path}`;
-const shareMsg = encodeURIComponent(
-  `${props.proposal.space.name}: ${props.proposal.title} ${currentUrl}`
-);
+const flaggable = computed(() => {
+  if (!offchainNetworks.includes(props.proposal.network)) return false;
+  if (props.proposal.flagged) return false;
+
+  const addresses = [
+    props.proposal.space.admins || [],
+    props.proposal.space.moderators || []
+  ].flat();
+
+  return addresses.some(address =>
+    compareAddresses(address, web3.value.account)
+  );
+});
 
 const editable = computed(() => {
-  // HACK: here we need to use snapshot instead of start because start is artifically
+  // HACK: here we need to use snapshot instead of start because start is artificially
   // shifted for Starknet's proposals with ERC20Votes strategies.
+  const pivotName = offchainNetworks.includes(props.proposal.network)
+    ? 'start'
+    : 'snapshot';
+
   return (
     compareAddresses(props.proposal.author.id, web3.value.account) &&
-    props.proposal.snapshot >
+    props.proposal[pivotName] >
       (getCurrent(props.proposal.network) || Number.POSITIVE_INFINITY)
   );
 });
@@ -129,16 +145,75 @@ async function handleEditClick() {
     discussion: props.proposal.discussion,
     type: props.proposal.type,
     choices: props.proposal.choices,
+    labels: props.proposal.labels,
+    privacy: props.proposal.privacy,
+    created: props.proposal.created,
+    start: props.proposal.start,
+    min_end: props.proposal.min_end,
+    max_end: props.proposal.max_end,
     executions
   });
 
   router.push({
-    name: 'editor',
+    name: 'space-editor',
     params: {
-      id: spaceId,
       key: draftId
     }
   });
+}
+
+async function handleDuplicateClick() {
+  if (!props.proposal) return;
+
+  const spaceId = `${props.proposal.network}:${props.proposal.space.id}`;
+
+  const executions = Object.fromEntries(
+    props.proposal.executions.map(execution => {
+      const address = offchainNetworks.includes(props.proposal.network)
+        ? execution.safeAddress
+        : props.proposal.execution_strategy;
+
+      return [address, execution.transactions];
+    })
+  );
+
+  const draftId = await createDraft(spaceId, {
+    title: props.proposal.title,
+    body: props.proposal.body,
+    discussion: props.proposal.discussion,
+    type: props.proposal.type,
+    choices: props.proposal.choices,
+    labels: props.proposal.labels,
+    executions
+  });
+
+  router.push({
+    name: 'space-editor',
+    params: {
+      key: draftId
+    }
+  });
+}
+
+async function handleFlagClick() {
+  flagging.value = true;
+
+  try {
+    const result = await flagProposal(props.proposal);
+    if (result) {
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(
+          props.proposal.network,
+          props.proposal.space.id
+        )
+      });
+      router.push({
+        name: 'space-overview'
+      });
+    }
+  } finally {
+    flagging.value = false;
+  }
 }
 
 async function handleCancelClick() {
@@ -147,12 +222,14 @@ async function handleCancelClick() {
   try {
     const result = await cancelProposal(props.proposal);
     if (result) {
-      proposalsStore.reset(props.proposal.space.id, props.proposal.network);
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(
+          props.proposal.network,
+          props.proposal.space.id
+        )
+      });
       router.push({
-        name: 'space-overview',
-        params: {
-          id: `${props.proposal.network}:${props.proposal.space.id}`
-        }
+        name: 'space-overview'
       });
     }
   } finally {
@@ -203,21 +280,25 @@ onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
-  <UiContainer class="pt-5 !max-w-[660px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
     <div>
-      <h1 class="mb-3 text-[36px] leading-10">
+      <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
+        This proposal might contain scams, offensive material, or be malicious
+        in nature. Please proceed with caution.
+      </UiAlert>
+
+      <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
-        <span class="text-skin-text">{{ getProposalId(proposal) }}</span>
       </h1>
 
-      <ProposalStatus :state="proposal.state" class="top-[7.5px]" />
+      <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
 
-      <div class="flex justify-between items-center mb-3">
-        <router-link
+      <div class="flex justify-between items-center mb-4">
+        <AppLink
           :to="{
             name: 'space-user-statement',
             params: {
-              id: `${proposal.network}:${proposal.space.id}`,
+              space: `${proposal.network}:${proposal.space.id}`,
               user: proposal.author.id
             }
           }"
@@ -228,19 +309,20 @@ onBeforeUnmount(() => destroyAudio());
             {{ proposal.author.name || shortenAddress(proposal.author.id) }}
             <span class="text-skin-text text-sm">
               In
-              <router-link
+              <AppLink
                 :to="{
                   name: 'space-overview',
-                  params: { id: `${proposal.network}:${proposal.space.id}` }
+                  params: { space: `${proposal.network}:${proposal.space.id}` }
                 }"
                 class="text-skin-text"
               >
                 {{ proposal.space.name }}
-              </router-link>
-              · {{ _rt(proposal.created) }}</span
-            >
+              </AppLink>
+              <span> · {{ _rt(proposal.created) }}</span>
+              <span> · {{ getProposalId(proposal) }}</span>
+            </span>
           </div>
-        </router-link>
+        </AppLink>
         <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
@@ -250,7 +332,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="'AI summary'"
           >
             <UiButton
-              class="!p-0 border-0 !h-auto"
+              class="!p-0 !border-0 !h-auto !w-[22px]"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
@@ -270,7 +352,7 @@ onBeforeUnmount(() => destroyAudio());
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
           >
             <UiButton
-              class="!p-0 border-0 !h-auto"
+              class="!p-0 !border-0 !h-auto !w-[22px]"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
@@ -282,22 +364,33 @@ onBeforeUnmount(() => destroyAudio());
               <IH-play v-else class="inline-block text-skin-text size-[22px]" />
             </UiButton>
           </UiTooltip>
-          <DropdownShare :message="shareMsg">
+          <DropdownShare :shareable="proposal" type="proposal">
             <template #button>
-              <UiButton class="!p-0 border-0 !h-auto">
+              <UiButton class="!p-0 !border-0 !h-auto">
                 <IH-share class="text-skin-text inline-block size-[22px]" />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
-              <UiButton class="!p-0 border-0 !h-auto">
+              <UiButton class="!p-0 !border-0 !h-auto">
                 <IH-dots-vertical
                   class="text-skin-text inline-block size-[22px]"
                 />
               </UiButton>
             </template>
             <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleDuplicateClick"
+                >
+                  <IH-document-duplicate :width="16" />
+                  Duplicate proposal
+                </button>
+              </UiDropdownItem>
               <UiDropdownItem v-if="editable" v-slot="{ active }">
                 <button
                   type="button"
@@ -307,6 +400,21 @@ onBeforeUnmount(() => destroyAudio());
                 >
                   <IS-pencil :width="16" />
                   Edit proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="flaggable"
+                v-slot="{ active, disabled }"
+                :disabled="flagging"
+              >
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
+                  @click="handleFlagClick"
+                >
+                  <IH-flag :width="16" />
+                  Flag proposal
                 </button>
               </UiDropdownItem>
               <UiDropdownItem
@@ -339,9 +447,10 @@ onBeforeUnmount(() => destroyAudio());
           </UiDropdown>
         </div>
       </div>
+
       <div v-if="aiSummaryOpen" class="mb-6">
-        <h4 class="mb-2 eyebrow flex items-center">
-          <IH-sparkles class="inline-block mr-2" />
+        <h4 class="mb-2 eyebrow flex items-center gap-2">
+          <IH-sparkles />
           <span>AI summary</span>
         </h4>
         <div class="text-md text-skin-link mb-2">{{ aiSummaryContent }}</div>
@@ -352,20 +461,44 @@ onBeforeUnmount(() => destroyAudio());
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
       <div v-if="discussion">
-        <h4 class="mb-3 eyebrow flex items-center">
-          <IH-chat-alt class="inline-block mr-2" />
+        <h4 class="mb-3 eyebrow flex items-center gap-2">
+          <IH-chat-alt />
           <span>Discussion</span>
         </h4>
         <a :href="discussion" target="_blank" class="block mb-5">
           <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
       </div>
-      <div v-if="proposal.executions && proposal.executions.length > 0">
-        <h4 class="mb-3 eyebrow flex items-center">
-          <IH-play class="inline-block mr-2" />
+      <div
+        v-if="
+          (proposal.executions && proposal.executions.length > 0) ||
+          proposal.execution_strategy_type === 'safeSnap'
+        "
+      >
+        <h4 class="mb-3 eyebrow flex items-center gap-2">
+          <IH-play />
           <span>Execution</span>
         </h4>
         <div class="mb-4">
+          <UiAlert
+            v-if="proposal.execution_strategy_type === 'safeSnap'"
+            type="warning"
+          >
+            <div>
+              This proposal uses SafeSnap execution which is currently not
+              supported on the new interface. You can view execution details on
+              the
+              <a
+                :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
+                target="_blank"
+                class="inline-flex items-center font-bold"
+              >
+                previous interface
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </a>
+              .
+            </div>
+          </UiAlert>
           <ProposalExecutionsList
             :proposal="proposal"
             :executions="proposal.executions"

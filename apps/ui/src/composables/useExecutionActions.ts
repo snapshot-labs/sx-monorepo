@@ -4,6 +4,7 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
+import { getGenericExplorerUrl } from '@/helpers/explorer';
 import {
   getModuleAddressForTreasury,
   getOgProposalGql,
@@ -35,18 +36,12 @@ export function useExecutionActions(
   const isL1ExecutionReady = ref(false);
 
   const fetchingDetails = ref(
-    STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
-      proposal.execution_strategy_type
-    ) &&
-      (proposal.execution_strategy_type === 'EthRelayer'
-        ? proposal.execution_tx
-        : true)
+    STRATEGIES_WITH_EXTERNAL_DETAILS.includes(execution.strategyType) &&
+      (execution.strategyType === 'EthRelayer' ? proposal.execution_tx : true)
   );
   const message: Ref<string | null> = ref(null);
   const executionTx = ref<string | null>(
-    proposal.execution_strategy_type !== 'EthRelayer'
-      ? proposal.execution_tx
-      : null
+    execution.strategyType !== 'EthRelayer' ? proposal.execution_tx : null
   );
   const executionNetwork = ref<Network>(getNetwork(proposal.network));
   const finalizeProposalSending = ref(false);
@@ -65,11 +60,11 @@ export function useExecutionActions(
   const network = computed(() => getNetwork(proposal.network));
   const hasFinalize = computed(
     () =>
-      STRATEGIES_WITH_FINALIZE.includes(proposal.execution_strategy_type) &&
+      STRATEGIES_WITH_FINALIZE.includes(execution.strategyType) &&
       !proposal.execution_ready
   );
   const hasExecuteQueued = computed(() => {
-    if (proposal.execution_strategy_type === 'EthRelayer') {
+    if (execution.strategyType === 'EthRelayer') {
       return proposal.state === 'executed' ? isL1ExecutionReady.value : false;
     }
 
@@ -80,7 +75,22 @@ export function useExecutionActions(
     return Math.max(proposal.execution_time * 1000 - currentTimestamp.value, 0);
   });
 
+  const executionTxUrl = computed(() => {
+    if (!executionTx.value) return null;
+
+    return getGenericExplorerUrl(
+      execution.chainId,
+      executionTx.value,
+      'transaction'
+    );
+  });
+
   async function fetchEthRelayerExecutionDetails() {
+    if (currentTimestamp.value < proposal.max_end * 1000) {
+      message.value =
+        'This execution strategy requires max end time to be reached.';
+    }
+
     if (!proposal.execution_tx) return;
 
     const tx = await network.value.helpers.getTransaction(
@@ -122,7 +132,7 @@ export function useExecutionActions(
 
   async function fetchOSnapExecutionDetails() {
     try {
-      if (!execution.chainId) {
+      if (!execution.chainId || typeof execution.chainId !== 'number') {
         throw new Error('Chain ID is required for oSnap execution');
       }
 
@@ -152,7 +162,6 @@ export function useExecutionActions(
           : 'Space is not configured for automatic execution.';
       } else if (data.executionTransactionHash) {
         try {
-          executionNetwork.value = getNetwork(execution.networkId);
           executionTx.value = data.executionTransactionHash;
         } catch (e) {
           message.value =
@@ -208,18 +217,14 @@ export function useExecutionActions(
   }
 
   onMounted(async () => {
-    if (
-      !STRATEGIES_WITH_EXTERNAL_DETAILS.includes(
-        proposal.execution_strategy_type
-      )
-    ) {
+    if (!STRATEGIES_WITH_EXTERNAL_DETAILS.includes(execution.strategyType)) {
       return;
     }
 
     try {
-      if (proposal.execution_strategy_type === 'EthRelayer') {
+      if (execution.strategyType === 'EthRelayer') {
         await fetchEthRelayerExecutionDetails();
-      } else if (proposal.execution_strategy_type === 'oSnap') {
+      } else if (execution.strategyType === 'oSnap') {
         await fetchOSnapExecutionDetails();
       } else {
         throw new Error('Unsupported strategy');
@@ -235,7 +240,7 @@ export function useExecutionActions(
     fetchingDetails,
     message,
     executionTx,
-    executionNetwork,
+    executionTxUrl,
     finalizeProposalSending,
     executeProposalSending,
     executeQueuedProposalSending,

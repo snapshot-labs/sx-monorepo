@@ -1,8 +1,8 @@
 import { BASIC_CHOICES } from '@/helpers/constants';
-import { lsGet, lsSet, omit } from '@/helpers/utils';
-import { Draft, Drafts, VoteType } from '@/types';
+import { clone, lsGet, lsSet, omit } from '@/helpers/utils';
+import { Draft, Drafts, Privacy, VoteType } from '@/types';
 
-const PREFERRED_VOTE_TYPE = 'single-choice';
+const PREFERRED_VOTE_TYPE = 'basic';
 
 const storedProposals = lsGet('proposals', {});
 const processedProposals = Object.fromEntries(
@@ -27,7 +27,9 @@ const processedProposals = Object.fromEntries(
 );
 
 const proposals = reactive<Drafts>(processedProposals as Drafts);
-const spaceVoteType = reactive(new Map<string, VoteType>());
+const spaceVoteType = new Map<string, VoteType>();
+const spacePrivacy = new Map<string, Privacy>();
+const spaceTemplate = new Map<string, string>();
 
 function generateId() {
   return (Math.random() + 1).toString(36).substring(7);
@@ -38,6 +40,8 @@ function getSpaceId(draftId: string) {
 }
 
 export function useEditor() {
+  const spacesStore = useSpacesStore();
+
   const drafts = computed(() => {
     return Object.entries(removeEmpty(proposals))
       .map(([k, value]) => {
@@ -56,18 +60,22 @@ export function useEditor() {
 
   function removeEmpty(proposals: Drafts): Drafts {
     return Object.entries(proposals).reduce((acc, [id, proposal]) => {
-      const { executions, type, choices, ...rest } = omit(proposal, [
-        'updatedAt'
-      ]);
+      const { executions, type, body, privacy, choices, labels, ...rest } =
+        omit(proposal, ['updatedAt']);
       const hasFormValues = Object.values(rest).some(val => !!val);
       const hasChangedVotingType = type !== spaceVoteType.get(getSpaceId(id));
+      const hasChangedPrivacy = privacy !== spacePrivacy.get(getSpaceId(id));
+      const hasChangedBody = body !== spaceTemplate.get(getSpaceId(id));
       const hasFormChoices =
         type !== 'basic' && (choices || []).some(val => !!val);
 
       if (
         Object.keys(executions).length === 0 &&
+        labels.length === 0 &&
         !hasFormValues &&
         !hasChangedVotingType &&
+        !hasChangedPrivacy &&
+        !hasChangedBody &&
         !hasFormChoices
       ) {
         return acc;
@@ -84,13 +92,31 @@ export function useEditor() {
     }, {});
   }
 
-  async function setSpacesVoteType(spaceIds: string[]) {
-    const spacesStore = useSpacesStore();
+  async function getInitialProposalBody(spaceId: string) {
+    if (spaceTemplate.has(spaceId)) {
+      return spaceTemplate.get(spaceId) as string;
+    }
+
+    if (!spacesStore.spacesMap.has(spaceId)) {
+      await spacesStore.fetchSpaces([spaceId]);
+    }
+
+    const template = spacesStore.spacesMap.get(spaceId)?.template ?? '';
+
+    spaceTemplate.set(spaceId, template);
+
+    return template;
+  }
+
+  async function setSpacesVoteTypeAndPrivacy(spaceIds: string[]) {
     const newIds = spaceIds.filter(id => !spaceVoteType.has(id));
 
-    if (!newIds) return;
+    if (!newIds.length) return;
 
-    await spacesStore.fetchSpaces(newIds);
+    const spacesToFetch = newIds.filter(id => !spacesStore.spacesMap.has(id));
+    if (spacesToFetch.length) {
+      await spacesStore.fetchSpaces(spacesToFetch);
+    }
 
     for (const id of newIds) {
       const space = spacesStore.spacesMap.get(id);
@@ -102,6 +128,7 @@ export function useEditor() {
         : space.voting_types[0];
 
       spaceVoteType.set(id, type);
+      spacePrivacy.set(id, space.privacy === 'any' ? 'none' : space.privacy);
     }
   }
 
@@ -110,20 +137,25 @@ export function useEditor() {
     payload?: Partial<Draft> & { proposalId?: number | string },
     draftKey?: string
   ) {
-    await setSpacesVoteType([spaceId]);
+    await setSpacesVoteTypeAndPrivacy([spaceId]);
 
     const type = payload?.type || spaceVoteType.get(spaceId)!;
-    const choices = type === 'basic' ? BASIC_CHOICES : Array(2).fill('');
+    const privacy: Privacy = payload?.privacy || spacePrivacy.get(spaceId)!;
+    const choices = type === 'basic' ? clone(BASIC_CHOICES) : Array(2).fill('');
 
     const id = draftKey ?? generateId();
     const key = `${spaceId}:${id}`;
 
+    const body = await getInitialProposalBody(spaceId);
+
     proposals[key] = {
       title: '',
-      body: '',
+      body,
       discussion: '',
       type,
       choices,
+      privacy,
+      labels: [],
       executions: Object.create(null),
       updatedAt: Date.now(),
       proposalId: null,
@@ -140,7 +172,7 @@ export function useEditor() {
   watch(proposals, async items => {
     const ids = Object.keys(items).map(getSpaceId);
 
-    await setSpacesVoteType(ids);
+    await setSpacesVoteTypeAndPrivacy(ids);
 
     lsSet('proposals', removeEmpty(proposals));
   });

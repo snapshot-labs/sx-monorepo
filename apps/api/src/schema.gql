@@ -5,6 +5,8 @@ scalar BigDecimalVP
 
 type Space {
   id: String!
+  verified: Boolean!
+  turbo: Boolean!
   metadata: SpaceMetadataItem
   controller: String!
   voting_delay: Int!
@@ -12,11 +14,14 @@ type Space {
   max_voting_period: Int!
   proposal_threshold: BigDecimalVP!
   next_strategy_index: Int!
+  strategies_indices: [Int]!
+  # Deprecated
   strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
   strategies_metadata: [String]!
-  strategies_parsed_metadata: [StrategiesParsedMetadataItem]! @derivedFrom(field: "space")
+  strategies_parsed_metadata: [StrategiesParsedMetadataItem]!
+    @derivedFrom(field: "space")
   authenticators: [String]!
   validation_strategy: String!
   validation_strategy_params: Text!
@@ -42,6 +47,7 @@ type SpaceMetadataItem {
   cover: String!
   external_url: String!
   treasuries: [String]!
+  labels: [String]!
   delegations: [String]!
   github: String!
   twitter: String!
@@ -92,6 +98,11 @@ type ExecutionStrategy {
   axiom_snapshot_slot: BigInt
 }
 
+type ExecutionHash {
+  id: String!
+  proposal_id: String!
+}
+
 type Proposal {
   id: String!
   proposal_id: Int!
@@ -108,12 +119,15 @@ type Proposal {
   execution_strategy_type: String!
   execution_destination: String
   timelock_veto_guardian: String
-  timelock_delay: Int
+  timelock_delay: BigInt
   axiom_snapshot_address: String
   axiom_snapshot_slot: BigInt
+  strategies_indices: [Int]!
+  # Deprecated
   strategies_indicies: [Int]!
   strategies: [String]!
   strategies_params: [String]!
+  type: String!
   scores_1: BigDecimalVP!
   scores_2: BigDecimalVP!
   scores_3: BigDecimalVP!
@@ -138,6 +152,8 @@ type ProposalMetadataItem {
   body: Text
   discussion: Text
   execution: Text
+  choices: [String]!
+  labels: [String]!
 }
 
 type Vote {
@@ -154,7 +170,7 @@ type Vote {
 
 type VoteMetadataItem {
   id: String!
-  reason: String!
+  reason: Text!
 }
 
 type User {
@@ -173,4 +189,12 @@ type Leaderboard {
   user: User!
   proposal_count: Int!
   vote_count: Int!
+}
+
+type StarknetL1Execution {
+  id: String!
+  space: String!
+  proposalId: Int!
+  created: Int!
+  tx: String!
 }

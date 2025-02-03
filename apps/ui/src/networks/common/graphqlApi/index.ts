@@ -3,9 +3,11 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import { CHAIN_IDS } from '@/helpers/constants';
+import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import {
   NetworkApi,
   NetworkConstants,
@@ -20,6 +22,7 @@ import {
   ProposalExecution,
   ProposalState,
   Space,
+  SpaceMetadataTreasury,
   Transaction,
   User,
   UserActivity,
@@ -55,6 +58,7 @@ type ApiOptions = {
 };
 
 function getProposalState(
+  networkId: NetworkID,
   proposal: ApiProposal,
   current: number
 ): ProposalState {
@@ -62,13 +66,16 @@ function getProposalState(
   // those values are actually strings
   // https://github.com/snapshot-labs/sx-monorepo/pull/529/files#r1691071502
   const quorum = BigInt(proposal.quorum);
-  const scoresTotal = BigInt(proposal.scores_total);
+  const currentQuorum = getProposalCurrentQuorum(networkId, {
+    scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
+    scores_total: proposal.scores_total
+  });
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);
 
   if (proposal.executed) return 'executed';
   if (proposal.max_end <= current) {
-    if (scoresTotal < quorum) return 'rejected';
+    if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
   if (proposal.start > current) return 'pending';
@@ -89,6 +96,25 @@ function formatExecution(execution: string): Transaction[] {
   }
 }
 
+function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
+  const { name, network, chain_id, address } = JSON.parse(treasury);
+
+  if (network) {
+    // NOTE: Legacy format
+    return {
+      name,
+      address,
+      chainId: CHAIN_IDS[network]
+    };
+  }
+
+  return {
+    name,
+    address,
+    chainId: chain_id
+  };
+}
+
 function processStrategiesMetadata(
   parsedMetadata: ApiStrategyParsedMetadata[],
   strategiesIndicies?: number[]
@@ -101,6 +127,7 @@ function processStrategiesMetadata(
     parsedMetadata.map(metadata => [
       metadata.index,
       {
+        id: metadata.data.id,
         name: metadata.data.name,
         description: metadata.data.description,
         decimals: metadata.data.decimals,
@@ -125,6 +152,8 @@ function processExecutions(
   // We should persist those values on proposal directly so it's stable.
   // Right now we can't really update subgraphs because of TheGraph issue.
 
+  if (!proposal.metadata.execution) return [];
+
   const transactions = formatExecution(proposal.metadata.execution);
   if (transactions.length === 0) return [];
 
@@ -132,15 +161,9 @@ function processExecutions(
     strategy => strategy.address === proposal.execution_strategy
   );
 
-  const treasuries = proposal.space.metadata.treasuries.map(treasury => {
-    const { name, network, address } = JSON.parse(treasury);
-
-    return {
-      name,
-      network,
-      address
-    };
-  });
+  const treasuries = proposal.space.metadata.treasuries.map(treasury =>
+    formatMetadataTreasury(treasury)
+  );
 
   const matchingTreasury = treasuries.find(treasury => {
     if (!match) return null;
@@ -148,7 +171,7 @@ function processExecutions(
     return (
       match.treasury &&
       compareAddresses(treasury.address, match.treasury) &&
-      match.treasury_chain === CHAIN_IDS[treasury.network]
+      match.treasury_chain === treasury.chainId
     );
   });
 
@@ -157,7 +180,8 @@ function processExecutions(
       strategyType: match?.type || '',
       safeAddress: match?.treasury || '',
       safeName: matchingTreasury?.name || 'Unnamed treasury',
-      networkId: matchingTreasury?.network || executionNetworkId,
+      chainId:
+        matchingTreasury?.chainId || getNetwork(executionNetworkId).chainId,
       transactions
     }
   ];
@@ -171,8 +195,6 @@ function formatSpace(
   return {
     ...space,
     network: networkId,
-    verified: false,
-    turbo: false,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
     cover: space.metadata.cover,
@@ -181,29 +203,41 @@ function formatSpace(
     github: space.metadata.github,
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
+    terms: '',
+    privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
+    active_proposals: null,
     voting_types: constants.EDITOR_VOTING_TYPES,
-    treasuries: space.metadata.treasuries.map(treasury => {
-      const { name, network, address } = JSON.parse(treasury);
-
-      return {
-        name,
-        network,
-        address,
-        chainId: CHAIN_IDS[network]
-      };
+    treasuries: space.metadata.treasuries.map(treasury =>
+      formatMetadataTreasury(treasury)
+    ),
+    labels: space.metadata.labels.map(label => {
+      const { id, name, description, color } = JSON.parse(label);
+      return { id, name, description, color };
     }),
     delegations: space.metadata.delegations.map(delegation => {
-      const { name, api_type, api_url, contract } = JSON.parse(delegation);
+      const { name, api_type, api_url, contract, chain_id } =
+        JSON.parse(delegation);
 
-      const [network, address] = contract.split(':');
+      if (contract.includes(':')) {
+        // NOTE: Legacy format
+        const [network, address] = contract.split(':');
+
+        return {
+          name: name,
+          apiType: api_type,
+          apiUrl: api_url,
+          contractAddress: address === 'null' ? null : address,
+          chainId: CHAIN_IDS[network]
+        };
+      }
 
       return {
         name: name,
         apiType: api_type,
         apiUrl: api_url,
-        contractNetwork: network === 'null' ? null : network,
-        contractAddress: address === 'null' ? null : address
+        contractAddress: contract,
+        chainId: chain_id
       };
     }),
     executors: space.metadata.executors,
@@ -216,8 +250,12 @@ function formatSpace(
       ),
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
-      space.strategies_indicies
-    )
+      space.strategies_indices
+    ),
+    children: [],
+    parent: null,
+    template: null,
+    guidelines: null
   };
 }
 
@@ -231,7 +269,7 @@ function formatProposal(
     proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
       ? baseNetworkId
       : networkId;
-
+  const state = getProposalState(networkId, proposal, current);
   return {
     ...proposal,
     space: {
@@ -245,16 +283,18 @@ function formatProposal(
       executors_types: proposal.space.metadata.executors_types,
       strategies_parsed_metadata: processStrategiesMetadata(
         proposal.space.strategies_parsed_metadata,
-        proposal.strategies_indicies
-      )
+        proposal.strategies_indices
+      ),
+      terms: ''
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',
-    choices: BASIC_CHOICES,
+    choices: proposal.metadata.choices,
+    labels: proposal.metadata.labels,
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    title: proposal.metadata.title,
-    body: proposal.metadata.body,
-    discussion: proposal.metadata.discussion,
+    title: proposal.metadata.title ?? '',
+    body: proposal.metadata.body ?? '',
+    discussion: proposal.metadata.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
@@ -262,12 +302,12 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
-    state: getProposalState(proposal, current),
+    state,
     network: networkId,
-    privacy: null,
+    privacy: 'none',
     quorum: +proposal.quorum,
-    validation: 'any',
-    validation_params: {}
+    flagged: false,
+    completed: ['passed', 'executed', 'rejected'].includes(state)
   };
 }
 
@@ -395,13 +435,16 @@ export function createApi(
     },
     loadUserVotes: async (
       spaceIds: string[],
-      voter: string
+      voter: string,
+      { limit, skip = 0 }: PaginationOpts
     ): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
         variables: {
           spaceIds,
-          voter
+          voter,
+          first: limit,
+          skip
         }
       });
 
@@ -419,7 +462,10 @@ export function createApi(
       filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: Record<string, any> = clone(filters || {});
+      const _filters: ProposalsFilter = clone(filters || {});
+      const metadataFilters: Record<string, any> = {
+        title_contains_nocase: searchQuery
+      };
       const state = _filters.state;
 
       if (state === 'active') {
@@ -433,6 +479,12 @@ export function createApi(
 
       delete _filters.state;
 
+      if (_filters.labels?.length) {
+        metadataFilters.labels_contains = _filters.labels;
+      }
+
+      delete _filters.labels;
+
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
         variables: {
@@ -441,7 +493,7 @@ export function createApi(
           where: {
             space_in: spaceIds,
             cancelled: false,
-            metadata_: { title_contains_nocase: searchQuery },
+            metadata_: metadataFilters,
             ..._filters
           }
         }
@@ -484,11 +536,13 @@ export function createApi(
           .catch(() => null)
       ]);
 
-      if (data.proposal.metadata === null) return null;
+      if (data.proposal?.metadata === null) return null;
       data.proposal = joinHighlightProposal(
         data.proposal,
         highlightResult?.data.sxproposal
       );
+
+      if (!data.proposal) return null;
 
       return formatProposal(
         data.proposal,
@@ -507,6 +561,8 @@ export function createApi(
         _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
       }
       delete _filter.searchQuery;
+      delete _filter.category;
+      delete _filter.network;
 
       const { data } = await apollo.query({
         query: SPACES_QUERY,
@@ -645,6 +701,21 @@ export function createApi(
     },
     loadStatement: async () => {
       return null;
+    },
+    loadStatements: async () => {
+      return [];
+    },
+    loadStrategies: async () => {
+      return [];
+    },
+    loadStrategy: async () => {
+      return null;
+    },
+    getNetworksUsage: async () => {
+      return {};
+    },
+    loadSettings: async () => {
+      return [];
     }
   };
 }

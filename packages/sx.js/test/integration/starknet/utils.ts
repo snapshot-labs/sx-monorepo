@@ -129,7 +129,7 @@ export async function setup({
   ethereumWallet: Wallet;
   ethUrl: string;
 }): Promise<TestConfig> {
-  await mint(starknetAccount.address, 1000000000000000000000);
+  await mint(starknetAccount.address, 100000000000000000);
 
   const masterSpaceResult = await starknetAccount.declareIfNot({
     contract: sxSpaceSierra as any,
@@ -287,7 +287,7 @@ export async function setup({
   const merkleTreeRoot = generateMerkleRoot(hashes);
 
   const networkConfig: NetworkConfig = {
-    eip712ChainId: '0x534e5f474f45524c49',
+    eip712ChainId: '0x534e5f5345504f4c4941',
     spaceFactory: factoryAddress,
     l1AvatarExecutionStrategyImplementation: masterl1AvatarExecutionStrategy,
     l1AvatarExecutionStrategyFactory,
@@ -531,7 +531,7 @@ export function increaseTime(timeIncrease: number) {
 
 export function loadL1MessagingContract(networkUrl: string, address: string) {
   return postDevnet('postman/load_l1_messaging_contract', {
-    networkUrl,
+    network_url: networkUrl,
     address
   });
 }

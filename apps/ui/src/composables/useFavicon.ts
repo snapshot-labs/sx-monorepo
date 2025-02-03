@@ -1,4 +1,4 @@
-const DEFAULT_FAVICON = '/favicon-temp.svg';
+const DEFAULT_FAVICON = '/favicon.svg';
 
 export function useFavicon(favicon?: string) {
   const setFavicon = (newFavicon: string | null) => {
@@ -8,10 +8,6 @@ export function useFavicon(favicon?: string) {
       .querySelectorAll<HTMLLinkElement>('link[rel="icon"]')
       .forEach(el => (el.href = newFavicon));
   };
-
-  onBeforeUnmount(() => {
-    setFavicon(DEFAULT_FAVICON);
-  });
 
   if (favicon) {
     setFavicon(favicon);

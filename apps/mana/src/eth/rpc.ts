@@ -1,7 +1,7 @@
 import {
   clients,
   evmArbitrum,
-  evmLineaGoerli,
+  evmBase,
   evmMainnet,
   EvmNetworkConfig,
   evmOptimism,
@@ -16,10 +16,10 @@ import { rpcError, rpcSuccess } from '../utils';
 export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [137, evmPolygon],
+  [8453, evmBase],
   [42161, evmArbitrum],
   [1, evmMainnet],
-  [11155111, evmSepolia],
-  [59140, evmLineaGoerli]
+  [11155111, evmSepolia]
 ]);
 
 export const createNetworkHandler = (chainId: number) => {

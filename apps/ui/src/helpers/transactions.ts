@@ -91,8 +91,10 @@ export async function createSendNftTransaction({
     _type: 'sendNft',
     _form: {
       recipient: form.to,
+      sender: address,
       amount: baseAmount.toString(),
       nft: {
+        type: nft.type,
         address: nft.contractAddress,
         id: nft.tokenId,
         name: nft.title,

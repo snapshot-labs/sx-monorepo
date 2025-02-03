@@ -3,6 +3,8 @@ import gql from 'graphql-tag';
 const SPACE_FRAGMENT = gql`
   fragment spaceFragment on Space {
     id
+    verified
+    turbo
     metadata {
       name
       avatar
@@ -14,6 +16,7 @@ const SPACE_FRAGMENT = gql`
       discord
       voting_power_symbol
       treasuries
+      labels
       delegations
       executors
       executors_types
@@ -39,6 +42,7 @@ const SPACE_FRAGMENT = gql`
     voting_power_validation_strategies_parsed_metadata {
       index
       data {
+        id
         name
         description
         decimals
@@ -47,12 +51,13 @@ const SPACE_FRAGMENT = gql`
         payload
       }
     }
-    strategies_indicies
+    strategies_indices
     strategies
     strategies_params
     strategies_parsed_metadata {
       index
       data {
+        id
         name
         description
         decimals
@@ -96,6 +101,7 @@ const PROPOSAL_FRAGMENT = gql`
       strategies_parsed_metadata {
         index
         data {
+          id
           name
           description
           decimals
@@ -117,6 +123,8 @@ const PROPOSAL_FRAGMENT = gql`
       body
       discussion
       execution
+      choices
+      labels
     }
     start
     min_end
@@ -131,7 +139,7 @@ const PROPOSAL_FRAGMENT = gql`
     execution_strategy_type
     execution_destination
     timelock_veto_guardian
-    strategies_indicies
+    strategies_indices
     strategies
     strategies_params
     created
@@ -207,8 +215,12 @@ export const VOTES_QUERY = gql`
 `;
 
 export const USER_VOTES_QUERY = gql`
-  query ($spaceIds: [String], $voter: String) {
-    votes(where: { space_in: $spaceIds, voter: $voter }) {
+  query ($first: Int, $skip: Int, $spaceIds: [String], $voter: String) {
+    votes(
+      first: $first
+      skip: $skip
+      where: { space_in: $spaceIds, voter: $voter }
+    ) {
       id
       voter {
         id

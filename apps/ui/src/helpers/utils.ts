@@ -8,10 +8,13 @@ import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import sha3 from 'js-sha3';
-import { validateAndParseAddress } from 'starknet';
-import networks from '@/helpers/networks.json';
+import {
+  constants as starknetConstants,
+  validateAndParseAddress
+} from 'starknet';
+import { RouteParamsRaw } from 'vue-router';
 import { VotingPowerItem } from '@/stores/votingPowers';
-import { Choice, Proposal, SpaceMetadata } from '@/types';
+import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -25,16 +28,16 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 const IPFS_GATEWAY: string =
   import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
-  59140: {
-    chainName: 'Linea Goerli test network',
-    nativeCurrency: {
-      name: 'LineaETH',
-      symbol: 'ETH',
-      decimals: 18
-    },
-    rpcUrls: ['https://rpc.goerli.linea.build'],
-    blockExplorerUrls: ['https://goerli.lineascan.build']
-  }
+  //   12345: {
+  //     chainName: 'My network name',
+  //     nativeCurrency: {
+  //       name: 'MyNetwork',
+  //       symbol: 'NTW',
+  //       decimals: 18
+  //     },
+  //     rpcUrls: ['https://...'],
+  //     blockExplorerUrls: ['https://...']
+  //   }
 };
 
 dayjs.extend(relativeTime);
@@ -58,8 +61,8 @@ dayjs.updateLocale('en', {
     hh: '%dh',
     d: '1d',
     dd: '%dd',
-    M: '1m',
-    MM: '%dm',
+    M: '1mo',
+    MM: '%dmo',
     y: '1y',
     yy: '%dy'
   }
@@ -114,17 +117,13 @@ export function shorten(
 }
 
 export function formatAddress(address: string) {
-  if (address.length === 42) return getAddress(address);
   try {
-    return validateAndParseAddress(address);
+    return address.length === 42
+      ? getAddress(address)
+      : validateAndParseAddress(address);
   } catch {
     return address;
   }
-}
-
-export function explorerUrl(network, str: string, type = 'address'): string {
-  if (network === 'starknet') type = 'contract';
-  return `${networks[network].explorer}/${type}/${str}`;
 }
 
 export function getProposalId(proposal: Proposal) {
@@ -211,12 +210,23 @@ export function lsRemove(key: string) {
   return localStorage.removeItem(`${pkg.name}.${key}`);
 }
 
-export function _d(s: number) {
-  const duration = dayjs.duration(s, 'seconds');
-  const daysLeft = Math.floor(duration.asDays());
+export function _d(s: number): string {
+  const SECONDS_TO_DAYS = 60 * 60 * 24;
+  const SECONDS_TO_HOURS = 60 * 60;
+  const SECONDS_TO_MINUTES = 60;
 
-  return duration
-    .format(`[${daysLeft}d] H[h] m[m] s[s]`)
+  const days = Math.floor(s / SECONDS_TO_DAYS);
+  const hours = Math.floor((s - days * SECONDS_TO_DAYS) / SECONDS_TO_HOURS);
+  const minutes = Math.floor(
+    (s - days * SECONDS_TO_DAYS - hours * SECONDS_TO_HOURS) / SECONDS_TO_MINUTES
+  );
+  const seconds =
+    s -
+    days * SECONDS_TO_DAYS -
+    hours * SECONDS_TO_HOURS -
+    minutes * SECONDS_TO_MINUTES;
+
+  return `${days}d ${hours}h ${minutes}m ${seconds}s`
     .replace(/\b0+[a-z]+\s*/gi, '')
     .trim();
 }
@@ -248,7 +258,7 @@ export function _rt(number) {
   }
 }
 
-export function abiToDefinition(abi) {
+export function abiToDefinition(abi, chainId?: ChainId) {
   const definition = {
     $async: true,
     title: abi.name,
@@ -270,9 +280,16 @@ export function abiToDefinition(abi) {
       definition.properties[input.name].format = 'int256';
       definition.properties[input.name].examples = ['0'];
     }
+    if (input.type === 'bytes') {
+      definition.properties[input.name].format = 'bytes';
+      definition.properties[input.name].examples = ['0x0000…'];
+    }
     if (input.type === 'address') {
       definition.properties[input.name].format = 'ens-or-address';
       definition.properties[input.name].examples = ['0x0000…'];
+      if (chainId) {
+        definition.properties[input.name].chainId = chainId;
+      }
     }
     if (input.type.endsWith('[]')) {
       definition.properties[input.name].format = input.type;
@@ -282,6 +299,10 @@ export function abiToDefinition(abi) {
     definition.properties[input.name].title = `${input.name} (${input.type})`;
   });
   return definition;
+}
+
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function memoize<T extends any[], U>(fn: (...args: T) => U) {
@@ -313,6 +334,25 @@ export function omit<T extends Record<string, unknown>, K extends keyof T>(
   >;
 }
 
+export function uniqBy<T>(arr: T[], predicate: keyof T | ((o: T) => any)): T[] {
+  const cb = typeof predicate === 'function' ? predicate : o => o[predicate];
+
+  const pickedObjects = arr
+    .filter(item => item)
+    .reduce((map, item) => {
+      const key = cb(item);
+
+      if (!key) {
+        return map;
+      }
+
+      return map.has(key) ? map : map.set(key, item);
+    }, new Map())
+    .values();
+
+  return [...pickedObjects];
+}
+
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
@@ -334,7 +374,8 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS) throw new Error(err.message);
+    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId])
+      throw new Error(err.message);
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',
@@ -356,6 +397,28 @@ export async function verifyNetwork(
       );
       (error as any).code = 4001;
       throw error;
+    }
+  }
+}
+
+export async function verifyStarknetNetwork(
+  web3: any,
+  chainId: starknetConstants.StarknetChainId
+) {
+  if (!web3.provider.request) return;
+  // Skip network switch for Argent Mobile,
+  // only SN_MAIN is supported (getting `unknown request` error inside in-built browser)
+  if (web3.provider.name === 'Argent Mobile') return;
+  try {
+    await web3.provider.request({
+      type: 'wallet_switchStarknetChain',
+      params: {
+        chainId
+      }
+    });
+  } catch (e) {
+    if (!e.message.toLowerCase().includes('not implemented')) {
+      throw new Error(e.message);
     }
   }
 }
@@ -384,14 +447,21 @@ export function createErc1155Metadata(
       discord: metadata.discord,
       treasuries: metadata.treasuries.map(treasury => ({
         name: treasury.name,
-        network: treasury.network,
+        chain_id: treasury.chainId,
         address: treasury.address
+      })),
+      labels: metadata.labels?.map(label => ({
+        id: label.id,
+        name: label.name,
+        description: label.description,
+        color: label.color
       })),
       delegations: metadata.delegations.map(delegation => ({
         name: delegation.name,
         api_type: delegation.apiType,
         api_url: delegation.apiUrl,
-        contract: `${delegation.contractNetwork}:${delegation.contractAddress}`
+        contract: delegation.contractAddress,
+        chain_id: delegation.chainId
       })),
       ...extraProperties
     }
@@ -417,13 +487,7 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type:
-    | 'avatar'
-    | 'user-cover'
-    | 'space'
-    | 'space-sx'
-    | 'space-cover-sx'
-    | 'token',
+  type: 'avatar' | 'user-cover' | 'space' | 'space-cover' | 'token',
   id: string,
   size: number | { width: number; height: number },
   hash?: string
@@ -437,11 +501,7 @@ export function getStampUrl(
 
   const cacheParam = hash ? `&cb=${hash}` : '';
 
-  const formattedId = ['avatar', 'space-sx', 'space-cover-sx'].includes(type)
-    ? formatAddress(id)
-    : id;
-
-  return `https://cdn.stamp.fyi/${type}/${formattedId}${sizeParam}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}`;
 }
 
 export async function imageUpload(file: File) {
@@ -462,8 +522,13 @@ export async function imageUpload(file: File) {
 }
 
 export function simplifyURL(fullURL: string): string {
-  const url = new URL(fullURL);
-  return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+  try {
+    const url = new URL(fullURL);
+    return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
+  } catch (error) {
+    console.log('Error simplifying URL', error);
+    return '';
+  }
 }
 
 export function getChoiceWeight(
@@ -478,13 +543,19 @@ export function getChoiceWeight(
 
 export function getChoiceText(availableChoices: string[], choice: Choice) {
   if (typeof choice === 'string') {
-    return ['for', 'against', 'abstain'].includes(choice)
-      ? choice.charAt(0).toUpperCase() + choice.slice(1)
+    const basicChoices = {
+      for: 0,
+      against: 1,
+      abstain: 2
+    };
+
+    return basicChoices[choice] !== undefined
+      ? availableChoices[basicChoices[choice]]
       : 'Invalid choice';
   }
 
   if (typeof choice === 'number') {
-    return availableChoices[choice - 1] || 'Invalid choice';
+    return availableChoices[choice - 1] ?? 'Invalid choice';
   }
 
   if (Array.isArray(choice)) {
@@ -542,8 +613,34 @@ export function getSocialNetworksLink(data: any) {
 export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
   if (!votingPower) return;
 
-  const { totalVotingPower, decimals, symbol } = votingPower;
-  const value = _vp(Number(totalVotingPower) / 10 ** decimals);
+  const { votingPowers, symbol } = votingPower;
+  const value = _vp(
+    votingPowers.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+      0
+    )
+  );
 
   return symbol ? `${value} ${symbol}` : value;
+}
+
+export function stripHtmlTags(text: string) {
+  const doc = new DOMParser().parseFromString(text, 'text/html');
+  return doc.body.textContent || '';
+}
+
+export function whiteLabelAwareParams(
+  isWhiteLabel: boolean,
+  params: RouteParamsRaw
+) {
+  if (isWhiteLabel) delete params.space;
+
+  return params;
+}
+
+export function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+  return { r, g, b };
 }

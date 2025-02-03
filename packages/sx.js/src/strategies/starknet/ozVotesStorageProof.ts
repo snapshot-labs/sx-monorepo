@@ -3,7 +3,7 @@
 import { Contract as EvmContract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
-import { CallData, Contract } from 'starknet';
+import { CallData, Contract, LibraryError } from 'starknet';
 import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
 import OzVotesToken from './abis/OzVotesToken.json';
 import { getNestedSlotKey, getSlotKey } from './utils';
@@ -211,16 +211,26 @@ export default function createOzVotesStorageProofStrategy({
       if (!checkpointMptProof || !exclusionMptProof)
         throw new Error('Invalid proofs');
 
-      return contract.get_voting_power(
-        timestamp,
-        getUserAddressEnum('ETHEREUM', voterAddress),
-        params,
-        CallData.compile({
-          checkpointIndex,
-          checkpointMptProof,
-          exclusionMptProof
-        })
-      );
+      try {
+        return await contract.get_voting_power(
+          timestamp,
+          getUserAddressEnum('ETHEREUM', voterAddress),
+          params,
+          CallData.compile({
+            checkpointIndex,
+            checkpointMptProof,
+            exclusionMptProof
+          })
+        );
+      } catch (e) {
+        if (e instanceof LibraryError) {
+          // can be removed after contracts include this
+          // https://github.com/snapshot-labs/sx-starknet/pull/624
+          if (e.message.includes('Slot is zero')) return 0n;
+        }
+
+        throw e;
+      }
     }
   };
 }

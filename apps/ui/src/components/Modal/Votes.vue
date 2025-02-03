@@ -51,7 +51,7 @@ async function handleEndReached() {
 }
 
 const isEncrypted = computed(() => {
-  return !!props.proposal.privacy && !props.proposal.completed;
+  return props.proposal.privacy !== 'none' && !props.proposal.completed;
 });
 
 watch([open, () => props.proposal.id], ([toOpen, toId], [, fromId]) => {
@@ -97,21 +97,21 @@ watch(
           >
             <div
               v-if="!isEncrypted"
-              class="absolute inset-y-0 right-0 z-[-1]"
+              class="absolute inset-y-0 right-0 h-[8px] z-[-1]"
               :style="{
                 width: `${((100 / proposal.scores_total) * vote.vp).toFixed(2)}%`
               }"
               :class="
                 proposal.type === 'basic'
-                  ? `choice-bg opacity-10 _${vote.choice}`
-                  : 'bg-skin-border opacity-40'
+                  ? `choice-bg opacity-20 _${vote.choice}`
+                  : 'bg-skin-border'
               "
             />
-            <router-link
+            <AppLink
               :to="{
                 name: 'space-user-statement',
                 params: {
-                  id: `${proposal.network}:${proposal.space.id}`,
+                  space: `${proposal.network}:${proposal.space.id}`,
                   user: vote.voter.id
                 }
               }"
@@ -122,7 +122,7 @@ watch(
               <span>{{
                 vote.voter.name || shortenAddress(vote.voter.id)
               }}</span>
-            </router-link>
+            </AppLink>
 
             <template v-if="isEncrypted">
               <div class="flex gap-1 items-center">

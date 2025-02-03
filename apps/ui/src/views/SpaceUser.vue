@@ -15,11 +15,8 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const usersStore = useUsersStore();
-const spacesStore = useSpacesStore();
-const { param } = useRouteParser('id');
-const { resolved, address, networkId } = useResolve(param);
-const { setTitle } = useTitle();
 const { getCurrent } = useMetaStore();
+const { isWhiteLabel } = useWhiteLabel();
 
 const userActivity = ref<UserActivity>({
   vote_count: 0,
@@ -28,6 +25,9 @@ const userActivity = ref<UserActivity>({
 const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const delegateModalOpen = ref(false);
+const delegateModalState = ref<{ delegatee: string } | null>(null);
+
 // const delegatesCount = ref(0);
 
 const network = computed(() => getNetwork(props.space.network));
@@ -38,32 +38,46 @@ const user = computed(() => usersStore.getUser(userId.value));
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
-const shareMsg = computed(() => encodeURIComponent(window.location.href));
-
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const formattedVotingPower = computed(() => {
-  const votingPower = votingPowers.value.reduce((acc, b) => acc + b.value, 0n);
-  const decimals = Math.max(
-    ...votingPowers.value.map(votingPower => votingPower.decimals),
-    0
+  const votingPower = _vp(
+    votingPowers.value.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+      0
+    )
   );
 
-  const value = _vp(Number(votingPower) / 10 ** decimals);
-
   if (props.space.voting_power_symbol) {
-    return `${value} ${props.space.voting_power_symbol}`;
+    return `${votingPower} ${props.space.voting_power_symbol}`;
   }
 
-  return value;
+  return votingPower;
 });
 
 const navigation = computed(() => [
-  { label: 'Statement', route: 'space-user-statement' }
+  { label: 'Statement', route: 'space-user-statement' },
+  {
+    label: 'Proposals',
+    route: 'space-user-proposals',
+    count: userActivity.value?.proposal_count
+  },
+  {
+    label: 'Votes',
+    route: 'space-user-votes',
+    count: userActivity.value?.vote_count
+  }
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
-  // { label: 'Proposals', route: 'space-user-proposals', count: userActivity.value?.proposal_count },
-  // { label: 'Latest votes', route: 'space-user-votes', count: userActivity.value?.vote_count }
 ]);
+
+const hasOnlyInvalidDelegations = computed(() => {
+  if (!props.space.delegations.length) return true;
+
+  return props.space.delegations.every(
+    delegation =>
+      !delegation.apiUrl || delegation.apiType === 'split-delegation'
+  );
+});
 
 async function loadUserActivity() {
   const spaceNetwork = getNetwork(props.space.network);
@@ -110,12 +124,17 @@ async function loadUserActivity() {
 //     )
 //   )
 //     .flat()
-//     .filter(Boolean);
+//     .filter(delegates => delegates !== undefined);
 
 //   delegatesCount.value = delegates
 //     .map(delegate => delegate.tokenHoldersRepresentedAmount || 0)
 //     .reduce((a, b) => a + b, 0);
 // }
+
+function handleDelegateClick() {
+  delegateModalState.value = { delegatee: userId.value };
+  delegateModalOpen.value = true;
+}
 
 async function getVotingPower() {
   votingPowerStatus.value = 'loading';
@@ -157,19 +176,6 @@ watch(
   },
   { immediate: true }
 );
-
-watch(
-  [resolved, networkId, address],
-  async ([resolved, networkId, address]) => {
-    if (!resolved || !networkId || !address) return;
-
-    spacesStore.networksMap[networkId].spaces[address];
-  }
-);
-
-watchEffect(() =>
-  setTitle(`${user.value?.name || userId.value} ${props.space.name}'s profile`)
-);
 </script>
 
 <template>
@@ -189,17 +195,25 @@ watchEffect(() =>
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <UiTooltip title="View profile">
-          <router-link
-            :to="{ name: 'user', params: { id: user.id } }"
-            tabindex="-1"
+        <UiButton
+          v-if="!hasOnlyInvalidDelegations"
+          @click="handleDelegateClick()"
+        >
+          Delegate
+        </UiButton>
+        <UiTooltip v-if="!isWhiteLabel" title="View profile">
+          <UiButton
+            :to="{ name: 'user', params: { user: user.id } }"
+            class="!px-0 w-[46px]"
           >
-            <UiButton class="!px-0 w-[46px]">
-              <IH-user-circle class="inline-block" />
-            </UiButton>
-          </router-link>
+            <IH-user-circle />
+          </UiButton>
         </UiTooltip>
-        <DropdownShare :message="shareMsg" class="!px-0 w-[46px]" />
+        <DropdownShare
+          :shareable="{ user, space }"
+          type="space-user"
+          class="!px-0 w-[46px]"
+        />
       </div>
     </div>
     <div class="px-4">
@@ -210,7 +224,7 @@ watchEffect(() =>
           :cb="cb"
           class="relative mb-2 border-4 border-skin-bg !bg-skin-border !rounded-full -left-1"
         />
-        <h1 v-text="user.name || shortenAddress(user.id)" />
+        <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 text-skin-text">
           <span class="text-skin-link" v-text="userActivity.proposal_count" />
           proposals ·
@@ -223,7 +237,7 @@ watchEffect(() =>
         </div>
         <div
           v-if="user.about"
-          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3"
+          class="max-w-[540px] text-skin-link text-md leading-[26px] mb-3 break-words"
           v-html="autoLinkText(user.about)"
         />
         <div v-if="socials.length" class="space-x-2 flex">
@@ -239,19 +253,33 @@ watchEffect(() =>
         </div>
       </div>
     </div>
-    <div
-      class="overflow-y-scroll no-scrollbar z-40 sticky top-[71px] lg:top-[72px]"
+    <UiScrollerHorizontal
+      class="z-40 sticky top-[71px] lg:top-[72px]"
+      with-buttons
+      gradient="xxl"
     >
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <router-link
+        <AppLink
           v-for="(item, i) in navigation"
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
         >
-          <UiLink :is-active="route.name === item.route" :text="item.label" />
-        </router-link>
+          <UiLink
+            :is-active="route.name === item.route"
+            :text="item.label"
+            :count="item.count"
+          />
+        </AppLink>
       </div>
-    </div>
+    </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
+    <teleport to="#modal">
+      <ModalDelegate
+        :open="delegateModalOpen"
+        :space="space"
+        :initial-state="delegateModalState"
+        @close="delegateModalOpen = false"
+      />
+    </teleport>
   </div>
 </template>

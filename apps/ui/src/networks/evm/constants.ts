@@ -2,7 +2,7 @@ import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
-import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinGraph } from '@/helpers/pin';
 import { getUrl, shorten } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
@@ -137,10 +137,12 @@ export function createConstants(networkId: NetworkID) {
         const abiCoder = new AbiCoder();
 
         return {
-          threshold: abiCoder.decode(
-            ['uint256', 'tuple(address addr, bytes params)[]'],
-            params
-          )[0]
+          threshold: abiCoder
+            .decode(
+              ['uint256', 'tuple(address addr, bytes params)[]'],
+              params
+            )[0]
+            .toString()
         };
       },
       paramsDefinition: {
@@ -152,6 +154,7 @@ export function createConstants(networkId: NetworkID) {
           threshold: {
             type: 'integer',
             title: 'Proposal threshold',
+            minimum: 1,
             examples: ['1']
           }
         }
@@ -165,6 +168,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'Vanilla',
       about:
         'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
+      link: `${HELPDESK_URL}/en/articles/9839150-vanilla-voting-strategy`,
       icon: IHBeaker,
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'Vanilla',
@@ -200,9 +204,11 @@ export function createConstants(networkId: NetworkID) {
     },
     {
       address: config.Strategies.Whitelist,
+      type: 'MerkleWhitelist',
       name: 'Whitelist',
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
+      link: `${HELPDESK_URL}/en/articles/9839118-whitelist-voting-strategy`,
       generateSummary: (params: Record<string, any>) => {
         const length =
           params.whitelist.trim().length === 0
@@ -303,6 +309,7 @@ export function createConstants(networkId: NetworkID) {
       name: 'ERC-20 Votes (EIP-5805)',
       about:
         'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
+      link: `${HELPDESK_URL}/en/articles/9839125-erc-20-votes-eip-5805-voting-strategy`,
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
@@ -336,6 +343,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Token address',
             examples: ['0x0000…']
           },
@@ -391,6 +399,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Token address',
             examples: ['0x0000…']
           },
@@ -418,7 +427,7 @@ export function createConstants(networkId: NetworkID) {
       type: 'SimpleQuorumAvatar',
       name: EXECUTORS.SimpleQuorumAvatar,
       about:
-        'An execution strategy that allows proposals to execute transactions from a specified target Avatar contract, the most popular one being a Safe.',
+        'An execution strategy that allows proposals to execute transactions from a specified target Safe contract.',
       icon: IHUserCircle,
       generateSummary: (params: Record<string, any>) =>
         `(${params.quorum}, ${shorten(params.contractAddress)})`,
@@ -448,6 +457,7 @@ export function createConstants(networkId: NetworkID) {
           controller: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -459,7 +469,8 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
-            title: 'Avatar address',
+            chainId: config.Meta.eip712ChainId,
+            title: 'Safe address',
             examples: ['0x0000…']
           }
         }
@@ -503,6 +514,7 @@ export function createConstants(networkId: NetworkID) {
           controller: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -514,6 +526,7 @@ export function createConstants(networkId: NetworkID) {
           vetoGuardian: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Veto guardian address',
             examples: ['0x0000…']
           },
@@ -566,6 +579,7 @@ export function createConstants(networkId: NetworkID) {
           controller: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -577,6 +591,7 @@ export function createConstants(networkId: NetworkID) {
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Contract address',
             examples: ['0x0000…']
           },
@@ -644,12 +659,14 @@ export function createConstants(networkId: NetworkID) {
           queryAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Query address',
             examples: ['0x0000…']
           },
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Contract address',
             examples: ['0x0000…']
           },
