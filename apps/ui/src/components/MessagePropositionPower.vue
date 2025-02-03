@@ -18,7 +18,7 @@ defineEmits<{
     v-bind="$attrs"
   >
     <UiAlert type="error">
-      There was an error fetching your voting power.
+      There was an error fetching your proposition power.
     </UiAlert>
     <UiButton
       type="button"
@@ -33,6 +33,6 @@ defineEmits<{
     type="error"
     v-bind="$attrs"
   >
-    You do not have enough voting power to create proposal in this space.
+    You do not have enough proposition power to create proposal in this space.
   </UiAlert>
 </template>
