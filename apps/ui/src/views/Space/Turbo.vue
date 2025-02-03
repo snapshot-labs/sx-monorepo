@@ -81,7 +81,7 @@ watchEffect(() => setTitle(`Plans - ${props.space.name}`));
 <template>
   <div class="space-y-4">
     <div class="bg-skin-border p-4 mb-4">
-      <h4 class="eyebrow text-skin-text mb-8" v-text="'Turbo'" />
+      <IC-turbo class="text-skin-link mb-6" />
       <h2>Pick the plan that works best for your organization</h2>
     </div>
     <div>
