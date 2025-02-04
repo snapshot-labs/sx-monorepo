@@ -59,6 +59,7 @@ export function useOffchainNetworksList(
 
   return {
     networks,
+    loaded,
     premiumChainIds
   };
 }
