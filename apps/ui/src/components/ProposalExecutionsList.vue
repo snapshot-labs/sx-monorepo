@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { buildBatchFile } from '@/helpers/safe/ build';
 import { getExecutionName } from '@/helpers/ui';

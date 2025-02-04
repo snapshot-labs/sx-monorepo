@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getNetwork } from '@/networks';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 
 defineProps<{
   open: boolean;
@@ -26,10 +26,11 @@ const uiStore = useUiStore();
           v-for="pendingTx in uiStore.pendingTransactions"
           :key="pendingTx.txId"
           :href="
-            getNetwork(pendingTx.networkId).helpers.getExplorerUrl(
+            getGenericExplorerUrl(
+              pendingTx.chainId,
               pendingTx.txId,
               'transaction'
-            )
+            ) ?? undefined
           "
           target="_blank"
           class="border rounded-lg px-3 py-2 flex items-center w-full mb-2 last:mb-0"
