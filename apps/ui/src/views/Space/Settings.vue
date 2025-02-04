@@ -131,8 +131,8 @@ const tabs = computed<Tab[]>(
         visible: true
       },
       {
-        id: 'white-label',
-        name: 'White label',
+        id: 'whitelabel',
+        name: 'Whitelabel',
         visible: isOffchainNetwork.value
       },
       {
@@ -453,10 +453,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         <FormSpaceLabels v-model="form.labels" />
       </UiContainerSettings>
       <UiContainerSettings
-        v-show="activeTab === 'white-label'"
-        title="White label"
+        v-show="activeTab === 'whitelabel'"
+        title="Whitelabel"
       >
-        <FormSpaceWhiteLabel
+        <FormSpaceWhitelabel
           v-model:custom-domain="customDomain"
           :space="space"
         />
