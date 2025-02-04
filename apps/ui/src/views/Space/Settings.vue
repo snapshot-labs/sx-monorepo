@@ -530,7 +530,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <teleport to="#modal">
       <ModalTransactionProgress
         :open="saving"
-        :network-id="space.network"
+        :chain-id="network.chainId"
         :messages="{
           approveTitle: 'Confirm your changes',
           successTitle: 'Done!',

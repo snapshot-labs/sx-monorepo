@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
-import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNames } from '@/helpers/stamp';
 import { _n, shorten } from '@/helpers/utils';
 import { ChainId, Transaction } from '@/types';
