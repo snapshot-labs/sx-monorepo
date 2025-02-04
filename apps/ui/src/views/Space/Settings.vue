@@ -67,6 +67,7 @@ type Tab = {
     | 'treasuries'
     | 'delegations'
     | 'labels'
+    | 'whitelabel'
     | 'advanced'
     | 'controller';
   name: string;
@@ -129,6 +130,11 @@ const tabs = computed<Tab[]>(
         id: 'labels',
         name: 'Labels',
         visible: true
+      },
+      {
+        id: 'whitelabel',
+        name: 'Whitelabel',
+        visible: isOffchainNetwork.value
       },
       {
         id: 'advanced',
@@ -447,12 +453,20 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       >
         <FormSpaceLabels v-model="form.labels" />
       </UiContainerSettings>
+      <UiContainerSettings
+        v-show="activeTab === 'whitelabel'"
+        title="Whitelabel"
+      >
+        <FormSpaceWhitelabel
+          v-model:custom-domain="customDomain"
+          :space="space"
+        />
+      </UiContainerSettings>
       <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
         <FormSpaceAdvanced
           v-model:parent="parent"
           v-model:children="children"
           v-model:terms-of-services="termsOfServices"
-          v-model:custom-domain="customDomain"
           v-model:is-private="isPrivate"
           :network-id="space.network"
           :space="space"

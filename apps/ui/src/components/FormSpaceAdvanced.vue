@@ -29,20 +29,11 @@ const TERMS_OF_SERVICES_DEFINITION = {
     'Users will be required to accept these terms once before they can create a proposal or cast a vote'
 };
 
-const CUSTOM_DOMAIN_DEFINITION = {
-  type: 'string',
-  format: 'domain',
-  title: 'Domain name',
-  maxLength: 64,
-  examples: ['vote.balancer.fi']
-};
-
 const parent = defineModel<string>('parent', { required: true });
 const children = defineModel<string[]>('children', { required: true });
 const termsOfServices = defineModel<string>('termsOfServices', {
   required: true
 });
-const customDomain = defineModel<string>('customDomain', { required: true });
 const isPrivate = defineModel<boolean>('isPrivate', { required: true });
 
 const props = defineProps<{
@@ -89,8 +80,7 @@ const formErrors = computed(() => {
     properties: {
       parent: PARENT_SPACE_DEFINITION,
       child: CHILD_DEFINITION,
-      termsOfServices: TERMS_OF_SERVICES_DEFINITION,
-      customDomain: CUSTOM_DOMAIN_DEFINITION
+      termsOfServices: TERMS_OF_SERVICES_DEFINITION
     }
   });
 
@@ -98,8 +88,7 @@ const formErrors = computed(() => {
     {
       parent: parent.value,
       child: child.value,
-      termsOfServices: termsOfServices.value,
-      customDomain: customDomain.value
+      termsOfServices: termsOfServices.value
     },
     {
       skipEmptyOptionalFields: true
@@ -196,22 +185,8 @@ watchEffect(() => {
       :error="formErrors.termsOfServices"
     />
   </div>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Custom domain</h4>
-  <UiMessage
-    type="info"
-    :learn-more-link="'https://docs.snapshot.box/spaces/add-custom-domain'"
-  >
-    To set up a custom domain, you must subscribe to the Turbo plan and create a
-    CNAME record pointing to "cname.snapshot.box" with your DNS provider or
-    registrar.
-  </UiMessage>
+  <h4 class="eyebrow mb-2 font-medium mt-4">Visibility</h4>
   <div class="s-box mt-3">
-    <UiInputString
-      v-model="customDomain"
-      :definition="CUSTOM_DOMAIN_DEFINITION"
-      :error="formErrors.customDomain"
-      :disabled="!space.turbo && !space.additionalRawData?.domain"
-    />
     <UiSwitch v-model="isPrivate" title="Hide space from homepage" />
   </div>
   <h4 class="eyebrow mb-2 font-medium mt-4">Danger zone</h4>
