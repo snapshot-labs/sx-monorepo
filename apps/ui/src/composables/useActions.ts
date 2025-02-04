@@ -116,7 +116,7 @@ export function useActions() {
     networkId: NetworkID,
     promise: Promise<any>,
     opts: {
-      transactionNetworkId?: NetworkID;
+      chainId?: ChainId;
       safeAppContext?: 'vote' | 'propose' | 'transaction';
     } = {}
   ): Promise<string | null> {
@@ -152,15 +152,12 @@ export function useActions() {
           'success',
           'Your vote is pending! waiting for other signers'
         );
-      hash && uiStore.addPendingTransaction(hash, networkId);
+      hash && uiStore.addPendingTransaction(hash, network.chainId);
     } else {
       hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
 
-      uiStore.addPendingTransaction(
-        hash,
-        opts.transactionNetworkId || networkId
-      );
+      uiStore.addPendingTransaction(hash, opts.chainId || network.chainId);
     }
 
     return hash;
@@ -482,7 +479,7 @@ export function useActions() {
       proposal.network,
       network.actions.executeQueuedProposal(auth.value.provider, proposal),
       {
-        transactionNetworkId: proposal.execution_network
+        chainId: getNetwork(proposal.execution_network).chainId
       }
     );
   }
@@ -631,7 +628,8 @@ export function useActions() {
         delegatee,
         delegationContract,
         chainId
-      )
+      ),
+      { chainId }
     );
   }
 

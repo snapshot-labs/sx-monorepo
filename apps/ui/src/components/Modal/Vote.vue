@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Choice, Proposal } from '@/types';
 
@@ -236,7 +236,7 @@ watchEffect(async () => {
   <teleport to="#modal">
     <ModalTransactionProgress
       :open="modalTransactionOpen"
-      :network-id="proposal.network"
+      :chain-id="getNetwork(props.proposal.network).chainId"
       :messages="{
         approveTitle: 'Confirm vote'
       }"

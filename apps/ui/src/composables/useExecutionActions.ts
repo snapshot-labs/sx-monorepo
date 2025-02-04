@@ -4,7 +4,7 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import gql from 'graphql-tag';
-import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import {
   getModuleAddressForTreasury,
   getOgProposalGql,
