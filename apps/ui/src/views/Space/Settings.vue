@@ -133,7 +133,7 @@ const tabs = computed<Tab[]>(
       {
         id: 'white-label',
         name: 'White label',
-        visible: true
+        visible: isOffchainNetwork.value
       },
       {
         id: 'advanced',
