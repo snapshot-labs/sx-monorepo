@@ -470,6 +470,7 @@ watchEffect(() => {
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
             v-if="
+              web3.account &&
               !space.turbo &&
               unsupportedProposalNetworks.length &&
               !proposal?.proposalId
