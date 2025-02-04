@@ -73,7 +73,7 @@ const DELEGATION_STRATEGIES = [
 
 const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
   s: 'https://delegate-registry-api.snapshot.box',
-  's-tn': 'https://delegate-registry-api-testnet-kn6g3.ondigitalocean.app/'
+  's-tn': 'https://testnet-delegate-registry-api.snapshot.box'
 };
 
 function getProposalState(
