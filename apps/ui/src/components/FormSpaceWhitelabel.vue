@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getValidator } from '@/helpers/validation';
+import { Space } from '@/types';
 
 const CUSTOM_DOMAIN_DEFINITION = {
   type: 'string',

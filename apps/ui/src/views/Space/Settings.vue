@@ -67,6 +67,7 @@ type Tab = {
     | 'treasuries'
     | 'delegations'
     | 'labels'
+    | 'whitelabel'
     | 'advanced'
     | 'controller';
   name: string;
