@@ -39,6 +39,7 @@ const {
   termsOfServices,
   customDomain,
   isPrivate,
+  skinSettings,
   save,
   saveController,
   deleteSpace,
@@ -456,9 +457,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       <UiContainerSettings
         v-show="activeTab === 'whitelabel'"
         title="Whitelabel"
+        description="Customize the appearance of your space to match your brand."
       >
         <FormSpaceWhitelabel
           v-model:custom-domain="customDomain"
+          v-model:skin-settings="skinSettings"
           :space="space"
         />
       </UiContainerSettings>
