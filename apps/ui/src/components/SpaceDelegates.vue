@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { sanitizeUrl } from '@braintree/sanitize-url';
 import { getAddress } from '@ethersproject/address';
 import {
   useInfiniteQuery,
@@ -7,8 +6,7 @@ import {
   useQueryClient
 } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
-import { getDelegationNetwork } from '@/helpers/delegation';
-import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNames } from '@/helpers/stamp';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
@@ -43,11 +41,6 @@ const actions = useActions();
 const queryClient = useQueryClient();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
-const delegationNetworkId = computed(() => {
-  if (!props.delegation.chainId) return null;
-
-  return getDelegationNetwork(props.delegation.chainId);
-});
 
 const {
   data,
@@ -185,16 +178,11 @@ async function getCurrentDelegatee() {
 }
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
-  let url: string | null = null;
   if (props.delegation.chainId) {
-    url = getGenericExplorerUrl(props.delegation.chainId, address, type);
+    return getGenericExplorerUrl(props.delegation.chainId, address, type);
   } else {
     return null;
   }
-
-  if (!url) return null;
-
-  return sanitizeUrl(url);
 }
 
 function handleSortChange(
@@ -380,7 +368,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </div>
         <button
           type="button"
-          class="hidden md:flex w-[120px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
+          class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span class="truncate">Delegators</span>
@@ -442,7 +430,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   user: delegate.user
                 }
               }"
-              class="flex w-full space-x-3 truncate"
+              class="flex w-full space-x-3"
             >
               <div
                 class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
@@ -460,7 +448,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 </div>
               </div>
               <div
-                class="hidden sm:flex items-center grow text-[17px] overflow-hidden leading-[22px] text-skin-heading"
+                class="hidden sm:flex items-center grow w-0 text-[17px] leading-[22px] text-skin-heading"
               >
                 <div
                   v-if="delegate.statement"
@@ -471,7 +459,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
               </div>
               <div
-                class="hidden md:flex shrink-0 w-[120px] flex-col items-end justify-center leading-[22px] truncate"
+                class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
               >
                 <h4
                   class="text-skin-link"
@@ -572,9 +560,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         @close="delegateModalOpen = false"
       />
       <ModalTransactionProgress
-        v-if="delegationNetworkId"
+        v-if="delegation.chainId"
         :open="isUndelegating"
-        :network-id="delegationNetworkId"
+        :chain-id="delegation.chainId"
         :execute="undelegateFn"
         @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"

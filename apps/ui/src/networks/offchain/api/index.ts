@@ -37,7 +37,7 @@ import {
 import {
   ALIASES_QUERY,
   LEADERBOARD_QUERY,
-  NETWORKS_USAGE_QUERY,
+  NETWORKS_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
@@ -147,6 +147,7 @@ function formatSpace(
     private: space.private,
     domain: space.domain,
     skin: space.skin,
+    skinSettings: space.skinSettings,
     strategies: space.strategies,
     categories: space.categories,
     admins: space.admins,
@@ -816,15 +817,18 @@ export function createApi(
 
       return formatStrategy(data.strategy as ApiStrategy);
     },
-    getNetworksUsage: async () => {
+    getNetworks: async () => {
       const { data } = await apollo.query({
-        query: NETWORKS_USAGE_QUERY
+        query: NETWORKS_QUERY
       });
 
       return Object.fromEntries(
         data.networks.map((network: any) => [
           Number(network.id),
-          network.spacesCount
+          {
+            spaces_count: network.spacesCount,
+            premium: network.premium
+          }
         ])
       );
     },

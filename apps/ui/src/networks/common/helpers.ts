@@ -4,7 +4,11 @@ import {
 } from '@snapshot-labs/sx';
 import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { getUrl } from '@/helpers/utils';
-import { Connector, NetworkHelpers, StrategyConfig } from '@/networks/types';
+import {
+  ConnectorType,
+  NetworkHelpers,
+  StrategyConfig
+} from '@/networks/types';
 import { Choice, Space } from '@/types';
 import { EVM_CONNECTORS, STARKNET_CONNECTORS } from './constants';
 
@@ -69,7 +73,7 @@ export function createStrategyPicker({
   lowPriorityAuthenticators = []
 }: {
   helpers: NetworkHelpers;
-  managerConnectors: Connector[];
+  managerConnectors: ConnectorType[];
   lowPriorityAuthenticators?: ('evm' | 'evm-tx' | 'starknet')[];
 }) {
   return function pick({
@@ -83,7 +87,7 @@ export function createStrategyPicker({
     strategies: string[];
     strategiesIndicies: number[];
     isContract: boolean;
-    connectorType: Connector;
+    connectorType: ConnectorType;
   }) {
     const authenticatorsInfo = [...authenticators]
       .filter(authenticator =>
@@ -124,7 +128,7 @@ export function createStrategyPicker({
       .map(authenticator => {
         const relayerType = helpers.getRelayerAuthenticatorType(authenticator);
 
-        let connectors: Connector[] = [];
+        let connectors: ConnectorType[] = [];
         if (relayerType && ['evm', 'evm-tx'].includes(relayerType))
           connectors = EVM_CONNECTORS;
         else if (relayerType === 'starknet') connectors = STARKNET_CONNECTORS;

@@ -1,18 +1,13 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import {
-  MAX_1D_PROPOSALS,
-  MAX_30D_PROPOSALS,
-  MAX_BODY_LENGTH,
-  MAX_CHOICES,
-  TURBO_URL,
-  VERIFIED_URL
-} from '@/helpers/turbo';
+import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -37,6 +32,7 @@ const props = defineProps<{
 }>();
 
 const { setTitle } = useTitle();
+const queryClient = useQueryClient();
 const { proposals, createDraft } = useEditor();
 const route = useRoute();
 const router = useRouter();
@@ -49,12 +45,15 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const proposalsStore = useProposalsStore();
 const { get: getPropositionPower, fetch: fetchPropositionPower } =
   usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
+const { networks, premiumChainIds } = useOffchainNetworksList(
+  props.space.network
+);
+const { limits, lists } = useSettings();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -130,7 +129,7 @@ const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: MAX_BODY_LENGTH[props.space.turbo ? 'turbo' : 'default'],
+  maxLength: limits.value[`space.${spaceType.value}.body_limit`],
   examples: ['Propose something…']
 }));
 
@@ -138,7 +137,7 @@ const choicesDefinition = computed(() => ({
   type: 'array',
   title: 'Choices',
   minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
-  maxItems: MAX_CHOICES[props.space.turbo ? 'turbo' : 'default'],
+  maxItems: limits.value[`space.${spaceType.value}.choices_limit`],
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
 }));
@@ -171,7 +170,15 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  if (Object.keys(formErrors.value).length > 0) return false;
+  const hasUnsupportedNetworks =
+    !props.space.turbo &&
+    !proposal.value?.proposalId &&
+    unsupportedProposalNetworks.value.length;
+  const hasFormErrors = Object.keys(formErrors.value).length > 0;
+
+  if (hasUnsupportedNetworks || hasFormErrors) {
+    return false;
+  }
 
   return web3.value.account
     ? propositionPower.value?.canPropose
@@ -181,11 +188,18 @@ const spaceType = computed(() =>
   props.space.turbo ? 'turbo' : props.space.verified ? 'verified' : 'default'
 );
 
-const proposalLimitReached = computed(
-  () =>
-    (props.space.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
-    (props.space.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
-);
+const proposalLimitReached = computed(() => {
+  const type = lists.value['space.ecosystem.list'].includes(props.space.id)
+    ? 'ecosystem'
+    : spaceType.value;
+
+  return (
+    (props.space.proposal_count_1d || 0) >=
+      limits.value[`space.${type}.proposal_limit_per_day`] ||
+    (props.space.proposal_count_30d || 0) >=
+      limits.value[`space.${type}.proposal_limit_per_month`]
+  );
+});
 
 const propositionPower = computed(() => getPropositionPower(props.space));
 
@@ -214,6 +228,25 @@ const proposalMaxEnd = computed(() => {
     proposalStart.value +
       (props.space.max_voting_period || defaultVotingDelay.value)
   );
+});
+
+const unsupportedProposalNetworks = computed(() => {
+  if (!props.space.snapshot_chain_id) return [];
+
+  const ids = new Set<number>([
+    props.space.snapshot_chain_id,
+    ...props.space.strategies_params.map(strategy => Number(strategy.network)),
+    ...props.space.strategies_params.flatMap(strategy =>
+      Array.isArray(strategy.params?.strategies)
+        ? strategy.params.strategies.map(param => Number(param.network))
+        : []
+    )
+  ]);
+
+  return Array.from(ids)
+    .filter(n => !premiumChainIds.value.has(n))
+    .map(chainId => networks.value.find(n => n.chainId === chainId))
+    .filter(network => !!network);
 });
 
 async function handleProposeClick() {
@@ -280,7 +313,9 @@ async function handleProposeClick() {
       );
     }
     if (result) {
-      proposalsStore.reset(props.space.id, props.space.network);
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(props.space.network, props.space.id)
+      });
     }
 
     if (
@@ -433,50 +468,89 @@ watchEffect(() => {
     <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
       <div class="flex-1 grow min-w-0">
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
-          <MessageVotingPower
-            v-if="propositionPower"
-            class="mb-4"
-            :voting-power="propositionPower"
-            action="propose"
-            @fetch-voting-power="handleFetchPropositionPower"
-          />
           <UiAlert
             v-if="
-              propositionPower &&
-              spaceType === 'default' &&
-              proposalLimitReached
+              !space.turbo &&
+              unsupportedProposalNetworks.length &&
+              !proposal?.proposalId
             "
             type="error"
             class="mb-4"
           >
-            <span
-              >Please verify your space to publish more proposals.
-              <a
-                :href="VERIFIED_URL"
-                target="_blank"
-                class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Verify space</a
-              >.</span
-            >
+            <div>
+              You cannot create proposals. This space is configured with
+              non-premium networks (<template
+                v-for="(n, i) in unsupportedProposalNetworks"
+                :key="n.key"
+              >
+                <b>{{ n.name }}</b>
+                <template
+                  v-if="
+                    unsupportedProposalNetworks.length > 1 &&
+                    i < unsupportedProposalNetworks.length - 1
+                  "
+                  >,
+                </template> </template
+              >). Change to a
+              <AppLink
+                to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+                >premium network
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </AppLink>
+              or upgrade networks to continue.
+            </div>
           </UiAlert>
-          <UiAlert
-            v-else-if="
-              propositionPower && spaceType !== 'turbo' && proposalLimitReached
-            "
-            type="error"
-            class="mb-4"
-          >
-            <span
-              >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals
-              per day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
-              <a
-                :href="TURBO_URL"
-                target="_blank"
-                class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Increase limit</a
-              >.</span
+          <template v-else>
+            <MessageVotingPower
+              v-if="propositionPower"
+              class="mb-4"
+              :voting-power="propositionPower"
+              action="propose"
+              @fetch-voting-power="handleFetchPropositionPower"
+            />
+            <UiAlert
+              v-if="
+                propositionPower &&
+                spaceType === 'default' &&
+                proposalLimitReached
+              "
+              type="error"
+              class="mb-4"
             >
-          </UiAlert>
+              <span
+                >Please verify your space to publish more proposals.
+                <a
+                  :href="VERIFIED_URL"
+                  target="_blank"
+                  class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >Verify space</a
+                >.</span
+              >
+            </UiAlert>
+            <UiAlert
+              v-else-if="
+                propositionPower &&
+                spaceType !== 'turbo' &&
+                proposalLimitReached
+              "
+              type="error"
+              class="mb-4"
+            >
+              <span>
+                You can publish up to
+                {{ limits['space.verified.proposal_limit_per_day'] }}
+                proposals per day and
+                {{ limits['space.verified.proposal_limit_per_month'] }}
+                proposals per month.
+                <a
+                  :href="TURBO_URL"
+                  target="_blank"
+                  class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >Increase limit</a
+                >.
+              </span>
+            </UiAlert>
+          </template>
           <div v-if="guidelines">
             <h4 class="mb-2 eyebrow">Guidelines</h4>
             <a :href="guidelines" target="_blank" class="block mb-4">

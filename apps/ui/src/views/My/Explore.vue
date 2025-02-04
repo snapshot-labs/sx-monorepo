@@ -35,7 +35,7 @@ const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 const network = ref<string>(DEFAULT_NETWORK);
 const category = ref<SpaceCategory>(DEFAULT_CATEGORY);
 
-const { networks: offchainNetworks, getUsage } = useOffchainNetworksList(
+const { networks: offchainNetworks } = useOffchainNetworksList(
   metadataNetwork,
   true
 );
@@ -137,10 +137,6 @@ watch(
 );
 
 watchEffect(() => setTitle('Explore'));
-
-onMounted(() => {
-  getUsage();
-});
 </script>
 
 <template>

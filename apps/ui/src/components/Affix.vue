@@ -103,7 +103,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="wrapperEl" class="relative">
+  <div ref="wrapperEl" class="relative h-full">
     <slot />
   </div>
 </template>

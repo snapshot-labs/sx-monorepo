@@ -1,6 +1,5 @@
-import { sanitizeUrl } from '@braintree/sanitize-url';
 import { SUPPORTED_CHAIN_IDS as TOKENS_SUPPORTED_CHAIN_IDS } from '@/helpers/alchemy';
-import { getGenericExplorerUrl } from '@/helpers/explorer';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { SUPPORTED_CHAIN_IDS as NFTS_SUPPORTED_CHAIN_IDS } from '@/helpers/opensea';
 import { SpaceMetadataTreasury } from '@/types';
 
@@ -24,14 +23,7 @@ export function useTreasury(treasuryData: SpaceMetadataTreasury) {
   function getExplorerUrl(address: string, type: 'address' | 'token') {
     if (!treasury.value) return null;
 
-    let url: string | null = null;
-    if (treasury.value.network) {
-      url = getGenericExplorerUrl(treasury.value.network, address, type);
-    }
-
-    if (!url) return null;
-
-    return sanitizeUrl(url);
+    return getGenericExplorerUrl(treasury.value.network, address, type);
   }
 
   return { treasury, getExplorerUrl };

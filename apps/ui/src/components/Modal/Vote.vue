@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -24,10 +26,10 @@ const emit = defineEmits<{
   (e: 'voted');
 }>();
 
+const queryClient = useQueryClient();
 const { vote } = useActions();
 const { web3 } = useWeb3();
 const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
-const proposalsStore = useProposalsStore();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
 
@@ -116,11 +118,13 @@ async function handleConfirmed(tx?: string | null) {
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
   if (offchainProposal.value) {
-    proposalsStore.fetchProposal(
-      props.proposal.space.id,
-      props.proposal.id,
-      props.proposal.network
-    );
+    queryClient.invalidateQueries({
+      queryKey: PROPOSALS_KEYS.detail(
+        props.proposal.network,
+        props.proposal.space.id,
+        props.proposal.proposal_id.toString()
+      )
+    });
     await loadVotes(props.proposal.network, [props.proposal.space.id]);
   }
 }
@@ -232,7 +236,7 @@ watchEffect(async () => {
   <teleport to="#modal">
     <ModalTransactionProgress
       :open="modalTransactionOpen"
-      :network-id="proposal.network"
+      :chain-id="getNetwork(props.proposal.network).chainId"
       :messages="{
         approveTitle: 'Confirm vote'
       }"

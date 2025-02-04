@@ -1,13 +1,17 @@
+import { enabledNetworks, evmNetworks } from '@/networks';
 import { METADATA } from '@/networks/starknet';
 import { ChainId, NetworkID } from '@/types';
 
 export function getDelegationNetwork(chainId: ChainId) {
-  // TODO: check if eth is actually what we want here, probably should be matching chainId is isEvmNetwork
-  // https://github.com/snapshot-labs/sx-monorepo/pull/946
+  // NOTE: any EVM network can be used for delegation on EVMs (it will switch chainId as needed).
+  // This will also support networks that are not supported natively.
+  const evmNetwork = enabledNetworks.find(networkId =>
+    evmNetworks.includes(networkId)
+  );
 
-  const isEvmNetwork = typeof chainId === 'number';
-  const actionNetwork = isEvmNetwork
-    ? 'eth'
+  const isEvm = typeof chainId === 'number';
+  const actionNetwork = isEvm
+    ? evmNetwork
     : (Object.entries(METADATA).find(
         ([, metadata]) => metadata.chainId === chainId
       )?.[0] as NetworkID);

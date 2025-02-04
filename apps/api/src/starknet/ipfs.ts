@@ -1,22 +1,31 @@
 import { getAddress } from '@ethersproject/address';
 import { Contract as EthContract } from '@ethersproject/contracts';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { validateAndParseAddress } from 'starknet';
 import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
-import { networkProperties } from './overrrides';
-import { dropIpfs, ethProvider, getJSON, getSpaceName } from './utils';
+import { FullConfig } from './config';
 import {
   ExecutionStrategy,
-  ProposalMetadataItem,
   SpaceMetadataItem,
-  StrategiesParsedMetadataDataItem,
-  VoteMetadataItem
-} from '../.checkpoint/models';
+  StrategiesParsedMetadataDataItem
+} from '../../.checkpoint/models';
+import { dropIpfs, getJSON, getSpaceName } from '../common/utils';
 
-export async function handleSpaceMetadata(space: string, metadataUri: string) {
-  const exists = await SpaceMetadataItem.loadEntity(dropIpfs(metadataUri));
+export async function handleSpaceMetadata(
+  space: string,
+  metadataUri: string,
+  config: FullConfig
+) {
+  const exists = await SpaceMetadataItem.loadEntity(
+    dropIpfs(metadataUri),
+    config.indexerName
+  );
   if (exists) return;
 
-  const spaceMetadataItem = new SpaceMetadataItem(dropIpfs(metadataUri));
+  const spaceMetadataItem = new SpaceMetadataItem(
+    dropIpfs(metadataUri),
+    config.indexerName
+  );
   spaceMetadataItem.name = getSpaceName(space);
   spaceMetadataItem.about = '';
   spaceMetadataItem.avatar = '';
@@ -92,8 +101,12 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
         destinations.push(destination);
         uniqueExecutors.push(id);
 
-        let executionStrategy = await ExecutionStrategy.loadEntity(id);
-        if (!executionStrategy) executionStrategy = new ExecutionStrategy(id);
+        let executionStrategy = await ExecutionStrategy.loadEntity(
+          id,
+          config.indexerName
+        );
+        if (!executionStrategy)
+          executionStrategy = new ExecutionStrategy(id, config.indexerName);
 
         executionStrategy.type =
           metadata.properties.execution_strategies_types[i];
@@ -105,6 +118,11 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
 
         if (executionStrategy.type === 'EthRelayer') {
           const l1Destination = getAddress(destination);
+
+          const ethProvider = new StaticJsonRpcProvider(
+            config.overrides.l1NetworkNodeUrl,
+            config.overrides.baseChainId
+          );
 
           const l1AvatarExecutionStrategyContract = new EthContract(
             l1Destination,
@@ -120,7 +138,7 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
           executionStrategy.destination_address = l1Destination;
           executionStrategy.quorum = quorum;
           executionStrategy.treasury = treasury;
-          executionStrategy.treasury_chain = networkProperties.baseChainId;
+          executionStrategy.treasury_chain = config.overrides.baseChainId;
         }
 
         await executionStrategy.save();
@@ -140,58 +158,19 @@ export async function handleSpaceMetadata(space: string, metadataUri: string) {
   await spaceMetadataItem.save();
 }
 
-export async function handleProposalMetadata(metadataUri: string) {
-  const exists = await ProposalMetadataItem.loadEntity(dropIpfs(metadataUri));
-  if (exists) return;
-
-  const proposalMetadataItem = new ProposalMetadataItem(dropIpfs(metadataUri));
-  proposalMetadataItem.choices = ['For', 'Against', 'Abstain'];
-  proposalMetadataItem.labels = [];
-
-  const metadata: any = await getJSON(metadataUri);
-  if (metadata.title) proposalMetadataItem.title = metadata.title;
-  if (metadata.body) proposalMetadataItem.body = metadata.body;
-  if (metadata.discussion)
-    proposalMetadataItem.discussion = metadata.discussion;
-  if (metadata.execution)
-    proposalMetadataItem.execution = JSON.stringify(metadata.execution);
-  if (
-    Array.isArray(metadata.labels) &&
-    metadata.labels.every((label: string) => typeof label === 'string')
-  ) {
-    proposalMetadataItem.labels = metadata.labels;
-  }
-  if (
-    Array.isArray(metadata.choices) &&
-    metadata.choices.length === 3 &&
-    metadata.choices.every((choice: string) => typeof choice === 'string')
-  ) {
-    proposalMetadataItem.choices = metadata.choices;
-  }
-
-  await proposalMetadataItem.save();
-}
-
-export async function handleVoteMetadata(metadataUri: string) {
-  const exists = await VoteMetadataItem.loadEntity(dropIpfs(metadataUri));
-  if (exists) return;
-
-  const voteMetadataItem = new VoteMetadataItem(dropIpfs(metadataUri));
-
-  const metadata: any = await getJSON(metadataUri);
-  voteMetadataItem.reason = metadata.reason ?? '';
-
-  await voteMetadataItem.save();
-}
-
-export async function handleStrategiesParsedMetadata(metadataUri: string) {
+export async function handleStrategiesParsedMetadata(
+  metadataUri: string,
+  config: FullConfig
+) {
   const exists = await StrategiesParsedMetadataDataItem.loadEntity(
-    dropIpfs(metadataUri)
+    dropIpfs(metadataUri),
+    config.indexerName
   );
   if (exists) return;
 
   const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(
-    dropIpfs(metadataUri)
+    dropIpfs(metadataUri),
+    config.indexerName
   );
 
   const metadata: any = await getJSON(metadataUri);

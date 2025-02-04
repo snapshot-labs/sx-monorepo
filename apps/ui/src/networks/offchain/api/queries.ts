@@ -91,6 +91,16 @@ const SPACE_FRAGMENT = gql`
     private
     domain
     skin
+    skinSettings {
+      bg_color
+      link_color
+      text_color
+      content_color
+      border_color
+      heading_color
+      primary_color
+      theme
+    }
     guidelines
     template
     categories
@@ -367,11 +377,12 @@ export const STRATEGY_QUERY = gql`
   ${STRATEGY_FRAGMENT}
 `;
 
-export const NETWORKS_USAGE_QUERY = gql`
+export const NETWORKS_QUERY = gql`
   query Networks {
     networks {
       id
       spacesCount
+      premium
     }
   }
 `;
