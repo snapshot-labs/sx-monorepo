@@ -106,6 +106,9 @@ export type ApiProposal = {
     moderators: string[];
     symbol: string;
     terms: string;
+    voting: {
+      hideAbstain: boolean;
+    };
   };
   type: VoteType;
   title: string;

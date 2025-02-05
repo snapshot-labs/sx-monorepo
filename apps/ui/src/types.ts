@@ -235,6 +235,7 @@ export type Proposal = {
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';
+  hide_abstain?: boolean;
   space: {
     id: string;
     name: string;
