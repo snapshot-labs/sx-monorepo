@@ -42,7 +42,7 @@ export type ConnectorType =
   | 'walletconnect'
   | 'walletlink'
   | 'gnosis'
-  | 'sequence-waas';
+  | 'sequence';
 export type Connector = {
   id: string;
   type: ConnectorType;

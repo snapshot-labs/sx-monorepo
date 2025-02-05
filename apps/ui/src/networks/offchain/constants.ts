@@ -17,7 +17,7 @@ export const CONNECTORS: ConnectorType[] = [
   'walletconnect',
   'walletlink',
   'gnosis',
-  'sequence-waas'
+  'sequence'
 ];
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];

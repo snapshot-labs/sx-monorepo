@@ -83,7 +83,7 @@ export function createActions(
     address: string,
     connectorType: ConnectorType
   ) => {
-    if (connectorType === 'sequence-waas') {
+    if (connectorType === 'sequence') {
       // NOTE: Sequence WaaS wallet is always a contract, this will save a request, but also
       // handles case where the wallet is not deployed yet (it will be deployed as part of signing flow).
       return true;
@@ -312,7 +312,7 @@ export function createActions(
           }
         },
         {
-          noWait: isContract && connectorType !== 'sequence-waas'
+          noWait: isContract && connectorType !== 'sequence'
         }
       );
     },
@@ -399,7 +399,7 @@ export function createActions(
             data
           }
         },
-        { noWait: isContract && connectorType !== 'sequence-waas' }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     flagProposal: () => {
@@ -423,7 +423,7 @@ export function createActions(
           space: proposal.space.id,
           proposal: proposal.proposal_id as number
         },
-        { noWait: isContract && connectorType !== 'sequence-waas' }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     vote: async (
@@ -497,7 +497,7 @@ export function createActions(
             data
           }
         },
-        { noWait: isContract && connectorType !== 'sequence-waas' }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
@@ -568,7 +568,7 @@ export function createActions(
           space: space.id,
           owner
         },
-        { noWait: isContract && connectorType !== 'sequence-waas' }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     delegate: async (
@@ -733,7 +733,7 @@ export function createActions(
               maxVotingDuration !== null ? maxVotingDuration : undefined
           }
         },
-        { noWait: isContract && connectorType !== 'sequence-waas' }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     updateSettingsRaw: () => {

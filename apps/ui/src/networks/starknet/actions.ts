@@ -98,7 +98,7 @@ export function createActions(
     address: string
   ) => {
     if (!EVM_CONNECTORS.includes(connectorType)) return false;
-    if (connectorType === 'sequence-waas') return true;
+    if (connectorType === 'sequence') return true;
 
     const code = await l1Provider.getCode(address);
     return code !== '0x';
@@ -311,7 +311,7 @@ export function createActions(
         });
       } else if (relayerType === 'evm-tx') {
         return ethTxClient.initializePropose(web3.getSigner(), data, {
-          noWait: isContract && connectorType !== 'sequence-waas'
+          noWait: isContract && connectorType !== 'sequence'
         });
       }
 
@@ -402,7 +402,7 @@ export function createActions(
         });
       } else if (relayerType === 'evm-tx') {
         return ethTxClient.initializeUpdateProposal(web3.getSigner(), data, {
-          noWait: isContract && connectorType !== 'sequence-waas'
+          noWait: isContract && connectorType !== 'sequence'
         });
       }
 

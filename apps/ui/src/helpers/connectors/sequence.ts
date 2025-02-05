@@ -2,7 +2,7 @@ import Connector from './connector';
 
 const projectAccessKey = 'AQAAAAAAAKD5WUrmbwO_EbPcAST_dV5PpDg';
 
-export default class SequenceWaaS extends Connector {
+export default class Sequence extends Connector {
   async getWallet() {
     const sequence = await import('0xsequence');
     return sequence.initWallet(projectAccessKey);
