@@ -4,7 +4,8 @@ export const EVM_CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
   'walletlink',
-  'gnosis'
+  'gnosis',
+  'sequence-waas'
 ];
 
 export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx'];
