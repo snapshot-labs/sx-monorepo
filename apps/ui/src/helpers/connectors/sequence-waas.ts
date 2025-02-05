@@ -1,6 +1,6 @@
 import Connector from './connector';
 
-const projectAccessKey = 'AQAAAAAAAJbd_5JOcE50AqglZCtvu51YlGI';
+const projectAccessKey = 'AQAAAAAAAKD5WUrmbwO_EbPcAST_dV5PpDg';
 
 export default class SequenceWaaS extends Connector {
   async getWallet() {
