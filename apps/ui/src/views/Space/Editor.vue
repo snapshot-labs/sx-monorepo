@@ -50,9 +50,11 @@ const { get: getPropositionPower, fetch: fetchPropositionPower } =
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
-const { networks, premiumChainIds } = useOffchainNetworksList(
-  props.space.network
-);
+const {
+  networks,
+  premiumChainIds,
+  loaded: networksLoaded
+} = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
 
 const modalOpen = ref(false);
@@ -231,7 +233,7 @@ const proposalMaxEnd = computed(() => {
 });
 
 const unsupportedProposalNetworks = computed(() => {
-  if (!props.space.snapshot_chain_id) return [];
+  if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
 
   const ids = new Set<number>([
     props.space.snapshot_chain_id,
