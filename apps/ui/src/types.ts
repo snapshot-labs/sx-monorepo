@@ -402,7 +402,7 @@ export type SkinSettings = {
   border_color: string | null;
   heading_color: string | null;
   primary_color: string | null;
-  theme: string | null;
+  theme: string;
   logo: string | null;
 };
 

@@ -147,7 +147,10 @@ function formatSpace(
     private: space.private,
     domain: space.domain,
     skin: space.skin,
-    skinSettings: space.skinSettings,
+    skinSettings: {
+      ...space.skinSettings,
+      theme: space.skinSettings?.theme || 'light'
+    },
     strategies: space.strategies,
     categories: space.categories,
     admins: space.admins,
