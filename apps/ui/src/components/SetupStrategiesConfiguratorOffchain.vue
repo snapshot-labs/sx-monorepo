@@ -4,7 +4,6 @@ const editStrategyModalStrategyId = ref<StrategyTemplate['address']>();
 </script>
 
 <script setup lang="ts">
-import { MAX_STRATEGIES } from '@/helpers/turbo';
 import { getNetwork } from '@/networks';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { ChainId, NetworkID } from '@/types';
@@ -23,6 +22,8 @@ const props = defineProps<{
   networkId: NetworkID;
   space: { turbo: boolean; verified: boolean };
 }>();
+
+const { limits } = useSettings();
 
 const chainId = ref<number>(props.snapshotChainId);
 const isLoading = ref(false);
@@ -103,7 +104,7 @@ onMounted(() => {
         v-model:model-value="strategies"
         :network-id="networkId"
         :default-chain-id="chainId"
-        :limit="MAX_STRATEGIES.default"
+        :limit="limits['space.default.strategies_limit']"
       >
         <template #empty>
           <div class="space-y-3">
