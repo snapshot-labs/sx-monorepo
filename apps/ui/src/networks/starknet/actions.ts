@@ -98,6 +98,7 @@ export function createActions(
     address: string
   ) => {
     if (!EVM_CONNECTORS.includes(connectorType)) return false;
+    if (connectorType === 'sequence-waas') return true;
 
     const code = await l1Provider.getCode(address);
     return code !== '0x';
@@ -310,7 +311,7 @@ export function createActions(
         });
       } else if (relayerType === 'evm-tx') {
         return ethTxClient.initializePropose(web3.getSigner(), data, {
-          noWait: isContract
+          noWait: isContract && connectorType !== 'sequence-waas'
         });
       }
 
@@ -401,7 +402,7 @@ export function createActions(
         });
       } else if (relayerType === 'evm-tx') {
         return ethTxClient.initializeUpdateProposal(web3.getSigner(), data, {
-          noWait: isContract
+          noWait: isContract && connectorType !== 'sequence-waas'
         });
       }
 
@@ -412,7 +413,11 @@ export function createActions(
     flagProposal: () => {
       throw new Error('Not implemented');
     },
-    cancelProposal: async (web3: any, proposal: Proposal) => {
+    cancelProposal: async (
+      web3: any,
+      connectorType: ConnectorType,
+      proposal: Proposal
+    ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       return client.cancelProposal({
@@ -564,7 +569,12 @@ export function createActions(
       });
     },
     vetoProposal: () => null,
-    transferOwnership: async (web3: any, space: Space, owner: string) => {
+    transferOwnership: async (
+      web3: any,
+      connectorType: ConnectorType,
+      space: Space,
+      owner: string
+    ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       return client.transferOwnership({
@@ -575,6 +585,7 @@ export function createActions(
     },
     updateSettings: async (
       web3: any,
+      connectorType: ConnectorType,
       space: Space,
       metadata: SpaceMetadata,
       authenticatorsToAdd: StrategyConfig[],

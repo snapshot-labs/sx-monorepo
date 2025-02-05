@@ -201,7 +201,11 @@ export function createActions(
         }
       });
     },
-    cancelProposal(web3: Web3Provider, proposal: Proposal) {
+    cancelProposal(
+      web3: Web3Provider,
+      connectorType: ConnectorType,
+      proposal: Proposal
+    ) {
       return client.cancel({
         signer: web3.getSigner(),
         data: {
@@ -364,6 +368,7 @@ export function createActions(
     },
     transferOwnership: async (
       web3: Web3Provider,
+      connectorType: ConnectorType,
       space: Space,
       owner: string
     ) => {

@@ -189,7 +189,11 @@ export type ReadOnlyNetworkActions = {
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   flagProposal(web3: Web3Provider, proposal: Proposal);
-  cancelProposal(web3: Web3Provider, proposal: Proposal);
+  cancelProposal(
+    web3: Web3Provider,
+    connectorType: ConnectorType,
+    proposal: Proposal
+  );
   vote(
     web3: Web3Provider,
     connectorType: ConnectorType,
@@ -218,7 +222,12 @@ export type ReadOnlyNetworkActions = {
     statement: Statement,
     from?: string
   );
-  transferOwnership(web3: Web3Provider, space: Space, owner: string);
+  transferOwnership(
+    web3: Web3Provider,
+    connectorType: ConnectorType,
+    space: Space,
+    owner: string
+  );
   updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
   deleteSpace(web3: Web3Provider, space: Space);
   send(envelope: any): Promise<any>;
@@ -260,6 +269,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   vetoProposal(web3: Web3Provider, proposal: Proposal);
   updateSettings(
     web3: Web3Provider,
+    connectorType: ConnectorType,
     space: Space,
     metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
