@@ -25,6 +25,7 @@
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
+    "0xsequence": "^2.2.10",
     "@apollo/client": "^3.9.5",
     "@braintree/sanitize-url": "^6.0.4",
     "@coinbase/wallet-sdk": "4.0.4",
@@ -69,6 +70,7 @@
     "buffer": "^6.0.3",
     "dayjs": "^1.11.10",
     "electron": "^26.2.3",
+    "ethers": "^6.13.5",
     "events": "^3.3.0",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
