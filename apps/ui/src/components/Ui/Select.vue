@@ -44,3 +44,9 @@ watch(model, () => {
     </select>
   </UiWrapperInput>
 </template>
+
+<style lang="scss" scoped>
+select:disabled {
+  @apply cursor-not-allowed opacity-100;
+}
+</style>

@@ -40,6 +40,7 @@ const definition = {
       type: 'string',
       format: 'color',
       title: 'Color',
+      minLength: 7,
       examples: ['#FF0000']
     }
   }

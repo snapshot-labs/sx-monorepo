@@ -13,6 +13,7 @@ const CUSTOM_DOMAIN_DEFINITION = {
 
 const COLOR_VALIDATION = {
   type: 'string',
+  format: 'color',
   examples: ['#FF0000']
 };
 
@@ -102,8 +103,13 @@ const disabled = computed(() => {
 </script>
 
 <template>
-  <UiMessage v-if="disabled" type="info" :learn-more-link="TURBO_URL">
-    Whitelabel features are available for Turbo subscribers.
+  <UiMessage
+    v-if="disabled"
+    type="info"
+    :learn-more-link="TURBO_URL"
+    class="mb-4"
+  >
+    Whitelabel features are only available for Turbo subscribers.
   </UiMessage>
   <div class="s-box space-y-4">
     <div>
@@ -124,7 +130,10 @@ const disabled = computed(() => {
       />
     </div>
     <div>
-      <h4 class="eyebrow mb-2 font-medium">Skin colors</h4>
+      <h4 class="eyebrow font-medium">Skin colors</h4>
+      <div class="mb-2">
+        Empty colors value will fallback to the base theme color.
+      </div>
       <UiForm
         v-model="skinSettings"
         :definition="SKIN_DEFINITION"

@@ -58,7 +58,7 @@ debouncedWatch(
 );
 
 onMounted(() => {
-  if (!model.value) {
+  if (!model.value && props.definition.minLength) {
     generateRandomColor();
   }
 });
@@ -109,7 +109,11 @@ function validateAndConvertColor(color: string): string {
         v-bind="$attrs"
         :placeholder="definition.examples && definition.examples[0]"
       />
-      <button class="absolute right-3 mt-[20px]" @click="generateRandomColor">
+      <button
+        v-if="definition.minLength"
+        class="absolute right-3 mt-[20px]"
+        @click="generateRandomColor"
+      >
         <IH-refresh class="text-skin-link" />
       </button>
     </div>
