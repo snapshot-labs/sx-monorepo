@@ -403,6 +403,7 @@ export type SkinSettings = {
   heading_color: string | null;
   primary_color: string | null;
   theme: string | null;
+  logo: string | null;
 };
 
 export type Drafts = Record<string, Draft>;

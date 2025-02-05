@@ -141,5 +141,22 @@ const disabled = computed(() => {
         :disabled="disabled"
       />
     </div>
+    <div>
+      <h4 class="eyebrow font-medium">Custom logo</h4>
+      <div class="mb-2">
+        You can replace your space name in the upper left corner by a custom
+        logo. Recommended size is 380x76 pixels.
+      </div>
+      <UiInputStampLogo
+        v-model="skinSettings.logo"
+        :width="380"
+        :height="76"
+        :definition="{
+          type: 'string',
+          format: 'stamp',
+          title: 'Logo'
+        }"
+      />
+    </div>
   </div>
 </template>
