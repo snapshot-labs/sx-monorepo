@@ -21,7 +21,16 @@ const SKIN_DEFINITION = {
   type: 'object',
   title: 'Skin settings',
   additionalProperties: false,
-  required: [],
+  required: [
+    'bg_color',
+    'text_color',
+    'link_color',
+    'content_color',
+    'border_color',
+    'heading_color',
+    'primary_color',
+    'theme'
+  ],
   properties: {
     bg_color: {
       ...COLOR_VALIDATION,

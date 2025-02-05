@@ -17,6 +17,8 @@ const { currentMode } = useUserSkin();
 
 const dirty = ref(false);
 
+const isRequired = computed(() => props.definition.minLength);
+
 const inputValue = computed({
   get() {
     if (!model.value && !dirty.value && props.definition.default) {
@@ -58,7 +60,7 @@ debouncedWatch(
 );
 
 onMounted(() => {
-  if (!model.value && props.definition.minLength) {
+  if (!model.value && isRequired.value) {
     generateRandomColor();
   }
 });
@@ -110,7 +112,7 @@ function validateAndConvertColor(color: string): string {
         :placeholder="definition.examples && definition.examples[0]"
       />
       <button
-        v-if="definition.minLength"
+        v-if="isRequired"
         class="absolute right-3 mt-[20px]"
         @click="generateRandomColor"
       >
