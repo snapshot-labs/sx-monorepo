@@ -175,3 +175,5 @@ export const VALIDATION_TYPES_INFO: Record<
     description: 'Use EAS attest.sh to determine if user can create a proposal.'
   }
 };
+
+export const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
