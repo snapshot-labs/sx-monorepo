@@ -278,19 +278,21 @@ export function useActions() {
     id: string,
     settings: string
   ) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return null;
     }
 
     const network = getNetwork(networkId);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
     }
 
     return wrapPromise(
       networkId,
-      network.actions.createSpaceRaw(auth.web3, id, settings)
+      network.actions.createSpaceRaw(auth.value.provider, id, settings)
     );
   }
 
