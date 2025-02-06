@@ -38,9 +38,8 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
     },
     options: {
       appName: APP_NAME,
-      darkMode: false,
-      chainId: 1,
-      ethJsonrpcUrl: 'https://cloudflare-eth.com'
+      appChainIds: [1],
+      appLogoUrl: 'https://snapshot.box/favicon.svg'
     }
   },
   gnosis: {
