@@ -2,6 +2,7 @@
 import { FunctionalComponent } from 'vue';
 import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
+import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -26,21 +27,25 @@ type NavigationItem = {
 };
 
 const route = useRoute();
-const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
+const { data: spaceData } = useSpaceQuery({
+  networkId: networkId,
+  spaceId: address
+});
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
-const spaceIdComposite = computed(() => `${networkId.value}:${address.value}`);
-const space = computed(() =>
-  currentRouteName.value === 'space' && resolved.value
-    ? spacesStore.spacesMap.get(spaceIdComposite.value) ?? null
-    : null
-);
+const space = computed(() => {
+  if (currentRouteName.value === 'space' && resolved.value) {
+    return spaceData.value ?? null;
+  }
+
+  return null;
+});
 
 const { isController } = useSpaceController(space);
 
