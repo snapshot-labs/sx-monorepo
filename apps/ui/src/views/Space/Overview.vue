@@ -125,6 +125,7 @@ watchEffect(() => setTitle(props.space.name));
         </div>
       </div>
     </div>
+    <OnboardingSpace :space="space" />
     <template v-if="!isWhiteLabel && space.children.length">
       <UiLabel :label="'Sub-spaces'" />
       <UiScrollerHorizontal gradient="md">
