@@ -92,12 +92,14 @@ export function useExploreSpacesQuery({
   protocol,
   network,
   category,
+  controller,
   searchQuery
 }: {
   protocol: MaybeRefOrGetter<ExplorePageProtocol>;
-  network: MaybeRefOrGetter<string>;
-  category: MaybeRefOrGetter<SpaceCategory>;
-  searchQuery: MaybeRefOrGetter<string | undefined>;
+  network?: MaybeRefOrGetter<string>;
+  category?: MaybeRefOrGetter<SpaceCategory>;
+  controller?: MaybeRefOrGetter<string>;
+  searchQuery?: MaybeRefOrGetter<string | undefined>;
 }) {
   const queryClient = useQueryClient();
   const protocolConfig = computed(
@@ -113,19 +115,18 @@ export function useExploreSpacesQuery({
         protocol,
         network,
         category,
+        controller,
         searchQuery
       }
     ],
     queryFn: async ({ pageParam }) => {
-      const results = await fetchSpaces(
-        toValue(protocol),
-        {
-          network: toValue(network),
-          category: toValue(category),
-          searchQuery: toValue(searchQuery)
-        },
-        pageParam
-      );
+      const filters: SpacesFilter = {};
+      if (network) filters.network = toValue(network);
+      if (category) filters.category = toValue(category);
+      if (searchQuery) filters.searchQuery = toValue(searchQuery);
+      if (controller) filters.controller = toValue(controller);
+
+      const results = await fetchSpaces(toValue(protocol), filters, pageParam);
 
       for (const space of results) {
         queryClient.setQueryData(
@@ -146,6 +147,7 @@ export function useExploreSpacesQuery({
       if (lastPage.length < protocolConfig.value.limit) return null;
 
       return pages.length * protocolConfig.value.limit;
-    }
+    },
+    enabled: () => (controller ? toValue(controller) !== '' : true)
   });
 }
