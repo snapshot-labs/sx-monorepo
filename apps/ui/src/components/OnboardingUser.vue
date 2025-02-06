@@ -50,22 +50,25 @@ onMounted(async () => {
     <UiLabel label="onboarding" sticky />
     <div v-if="tasks.profile" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <IS-flag class="text-skin-link mt-1 shrink-0" />
-      <div class="grow">
-        Setup your
-        <AppLink :to="{ name: 'user', params: { user: user.id } }">
-          profile
-        </AppLink>
-      </div>
+      <AppLink
+        :to="{ name: 'user', params: { user: user.id } }"
+        class="grow text-skin-link"
+      >
+        Setup your profile
+      </AppLink>
     </div>
 
-    <div v-if="tasks.following" class="border-b mx-4 py-[14px] flex gap-x-2.5">
-      <div><IS-flag class="text-skin-link mt-1" /></div>
-      <div class="grow">
-        Check the
-        <AppLink :to="{ name: 'my-explore' }"> explore </AppLink>
-        page and follow at least 3 spaces
+    <div
+      v-if="tasks.following"
+      class="border-b mx-4 py-[14px] flex gap-x-2.5 text-skin-link"
+    >
+      <IS-flag class="mt-1" />
+      <div>
+        <AppLink :to="{ name: 'my-explore' }" class="grow">
+          Follow at least 3 spaces</AppLink
+        >
         <div
-          class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-1"
+          class="inline-block bg-skin-border text-[13px] rounded-full px-1.5 ml-1"
         >
           {{ followedSpacesStore.followedSpacesIds.length }}/3
         </div>
