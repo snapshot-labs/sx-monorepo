@@ -1,4 +1,8 @@
-import { useInfiniteQuery } from '@tanstack/vue-query';
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient
+} from '@tanstack/vue-query';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
@@ -49,6 +53,29 @@ async function fetchSpaces(
   });
 }
 
+export function useSpaceQuery({
+  networkId,
+  spaceId
+}: {
+  networkId: Ref<NetworkID | null>;
+  spaceId: Ref<string | null>;
+}) {
+  const metaStore = useMetaStore();
+
+  return useQuery({
+    queryKey: ['spaces', 'detail', () => `${networkId.value}:${spaceId.value}`],
+    queryFn: async () => {
+      if (!networkId.value || !spaceId.value) return null;
+
+      await metaStore.fetchBlock(networkId.value);
+      const network = getNetwork(networkId.value);
+
+      return network.api.loadSpace(spaceId.value);
+    },
+    enabled: () => networkId.value !== null && spaceId.value !== null
+  });
+}
+
 export function useExploreSpacesQuery({
   protocol,
   network,
@@ -60,12 +87,14 @@ export function useExploreSpacesQuery({
   category: Ref<SpaceCategory>;
   searchQuery: Ref<string | undefined>;
 }) {
+  const queryClient = useQueryClient();
   const protocolConfig = computed(() => explorePageProtocols[protocol.value]);
 
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: [
-      'explore',
+      'spaces',
+      'list',
       {
         protocol,
         network,
@@ -73,8 +102,8 @@ export function useExploreSpacesQuery({
         searchQuery
       }
     ],
-    queryFn: ({ pageParam }) =>
-      fetchSpaces(
+    queryFn: async ({ pageParam }) => {
+      const results = await fetchSpaces(
         protocol.value,
         {
           network: network.value,
@@ -82,7 +111,17 @@ export function useExploreSpacesQuery({
           searchQuery: searchQuery.value
         },
         pageParam
-      ),
+      );
+
+      for (const space of results) {
+        queryClient.setQueryData(
+          ['spaces', 'detail', `${space.network}:${space.id}`],
+          space
+        );
+      }
+
+      return results;
+    },
     getNextPageParam: (lastPage, pages) => {
       if (protocol.value === 'snapshotx') {
         // SnapshotX has disabled pagination until unified API is implemented.
