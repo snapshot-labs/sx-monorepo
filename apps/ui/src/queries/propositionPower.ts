@@ -69,7 +69,7 @@ export function usePropositionPowerQuery(space: Space) {
   const block = getLatestBlock(space.network);
 
   return useQuery({
-    queryKey: [() => web3.value.account, space.id, block],
+    queryKey: ['propositionPower', () => web3.value.account, space.id, block],
     queryFn: async () => getPropositionPower(space, block),
     enabled: !!web3.value.account && !web3.value.authLoading
   });
