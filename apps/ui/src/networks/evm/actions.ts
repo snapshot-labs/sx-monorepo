@@ -79,7 +79,16 @@ export function createActions(
     manaUrl: MANA_URL
   });
 
-  const getIsContract = async (address: string) => {
+  const getIsContract = async (
+    address: string,
+    connectorType: ConnectorType
+  ) => {
+    if (connectorType === 'sequence') {
+      // NOTE: Sequence WaaS wallet is always a contract, this will save a request, but also
+      // handles case where the wallet is not deployed yet (it will be deployed as part of signing flow).
+      return true;
+    }
+
     const code = await provider.getCode(address);
     return code !== '0x';
   };
@@ -233,7 +242,7 @@ export function createActions(
       if (!pinned || !pinned.cid) return false;
       console.log('IPFS', pinned);
 
-      const isContract = await getIsContract(account);
+      const isContract = await getIsContract(account, connectorType);
 
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
@@ -303,7 +312,7 @@ export function createActions(
           }
         },
         {
-          noWait: isContract
+          noWait: isContract && connectorType !== 'sequence'
         }
       );
     },
@@ -337,7 +346,7 @@ export function createActions(
       if (!pinned || !pinned.cid) return false;
       console.log('IPFS', pinned);
 
-      const isContract = await getIsContract(account);
+      const isContract = await getIsContract(account, connectorType);
 
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
@@ -390,19 +399,23 @@ export function createActions(
             data
           }
         },
-        { noWait: isContract }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     flagProposal: () => {
       throw new Error('Not implemented');
     },
-    cancelProposal: async (web3: Web3Provider, proposal: Proposal) => {
+    cancelProposal: async (
+      web3: Web3Provider,
+      connectorType: ConnectorType,
+      proposal: Proposal
+    ) => {
       await verifyNetwork(web3, chainId);
 
       const signer = getSigner(web3);
 
       const address = await signer.getAddress();
-      const isContract = await getIsContract(address);
+      const isContract = await getIsContract(address, connectorType);
 
       return client.cancel(
         {
@@ -410,7 +423,7 @@ export function createActions(
           space: proposal.space.id,
           proposal: proposal.proposal_id as number
         },
-        { noWait: isContract }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     vote: async (
@@ -423,7 +436,7 @@ export function createActions(
     ) => {
       await verifyNetwork(web3, chainId);
 
-      const isContract = await getIsContract(account);
+      const isContract = await getIsContract(account, connectorType);
 
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
@@ -484,7 +497,7 @@ export function createActions(
             data
           }
         },
-        { noWait: isContract }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     finalizeProposal: async (web3: Web3Provider, proposal: Proposal) => {
@@ -538,6 +551,7 @@ export function createActions(
     },
     transferOwnership: async (
       web3: Web3Provider,
+      connectorType: ConnectorType,
       space: Space,
       owner: string
     ) => {
@@ -546,7 +560,7 @@ export function createActions(
       const signer = web3.getSigner();
 
       const address = await signer.getAddress();
-      const isContract = await getIsContract(address);
+      const isContract = await getIsContract(address, connectorType);
 
       return client.transferOwnership(
         {
@@ -554,7 +568,7 @@ export function createActions(
           space: space.id,
           owner
         },
-        { noWait: isContract }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     delegate: async (
@@ -647,6 +661,7 @@ export function createActions(
     },
     updateSettings: async (
       web3: Web3Provider,
+      connectorType: ConnectorType,
       space: Space,
       metadata: SpaceMetadata,
       authenticatorsToAdd: StrategyConfig[],
@@ -661,7 +676,7 @@ export function createActions(
       await verifyNetwork(web3, chainId);
 
       const address = await web3.getSigner().getAddress();
-      const isContract = await getIsContract(address);
+      const isContract = await getIsContract(address, connectorType);
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
@@ -718,7 +733,7 @@ export function createActions(
               maxVotingDuration !== null ? maxVotingDuration : undefined
           }
         },
-        { noWait: isContract }
+        { noWait: isContract && connectorType !== 'sequence' }
       );
     },
     updateSettingsRaw: () => {
