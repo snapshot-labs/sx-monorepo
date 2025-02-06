@@ -38,7 +38,11 @@ export default [
     children: spaceChildrenRoutes
   },
 
-  { path: '/create', name: 'create', component: Create },
+  {
+    path: '/create',
+    redirect: { name: 'create', params: { protocol: 'snapshotx' } }
+  },
+  { path: '/create/:protocol', name: 'create', component: Create },
   {
     path: '/settings',
     name: 'settings',

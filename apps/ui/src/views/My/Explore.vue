@@ -174,7 +174,15 @@ watchEffect(() => setTitle('Explore'));
         />
       </div>
       <UiTooltip title="Create new space">
-        <UiButton :to="{ name: 'create' }" class="!px-0 w-[46px]">
+        <UiButton
+          :to="{
+            name: 'create',
+            params: {
+              protocol
+            }
+          }"
+          class="!px-0 w-[46px]"
+        >
           <IH-plus-sm />
         </UiButton>
       </UiTooltip>
