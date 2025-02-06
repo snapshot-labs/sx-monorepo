@@ -232,7 +232,6 @@ const proposalMaxEnd = computed(() => {
 const {
   data: propositionPower,
   isPending: isPropositionPowerPending,
-  isFetching: isPropositionPowerLoading,
   isError: isPropositionPowerError,
   refetch: fetchPropositionPower
 } = usePropositionPowerQuery(props.space);
@@ -454,7 +453,7 @@ watchEffect(() => {
           !!web3.account &&
           (sending ||
             (!propositionPower && !isPropositionPowerError) ||
-            isPropositionPowerLoading)
+            isPropositionPowerPending)
         "
         :disabled="!canSubmit"
         @click="handleProposeClick"
