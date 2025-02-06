@@ -49,6 +49,11 @@ const {
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
+const {
+  networks,
+  premiumChainIds,
+  loaded: networksLoaded
+} = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
 
 const modalOpen = ref(false);
@@ -166,7 +171,15 @@ const formErrors = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  if (Object.keys(formErrors.value).length > 0) return false;
+  const hasUnsupportedNetworks =
+    !props.space.turbo &&
+    !proposal.value?.proposalId &&
+    unsupportedProposalNetworks.value.length;
+  const hasFormErrors = Object.keys(formErrors.value).length > 0;
+
+  if (hasUnsupportedNetworks || hasFormErrors) {
+    return false;
+  }
 
   return web3.value.account
     ? propositionPower.value?.canPropose
@@ -223,6 +236,25 @@ const {
   isError: isPropositionPowerError,
   refetch: fetchPropositionPower
 } = usePropositionPowerQuery(props.space);
+
+const unsupportedProposalNetworks = computed(() => {
+  if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
+
+  const ids = new Set<number>([
+    props.space.snapshot_chain_id,
+    ...props.space.strategies_params.map(strategy => Number(strategy.network)),
+    ...props.space.strategies_params.flatMap(strategy =>
+      Array.isArray(strategy.params?.strategies)
+        ? strategy.params.strategies.map(param => Number(param.network))
+        : []
+    )
+  ]);
+
+  return Array.from(ids)
+    .filter(n => !premiumChainIds.value.has(n))
+    .map(chainId => networks.value.find(n => n.chainId === chainId))
+    .filter(network => !!network);
+});
 
 async function handleProposeClick() {
   if (!proposal.value) return;
@@ -437,53 +469,89 @@ watchEffect(() => {
     <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
       <div class="flex-1 grow min-w-0">
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
-          <MessagePropositionPower
-            v-if="!isPropositionPowerPending"
-            class="mb-4"
-            :proposition-power="propositionPower"
-            :is-error="isPropositionPowerError"
-            @fetch="fetchPropositionPower"
-          />
           <UiAlert
             v-if="
-              propositionPower &&
-              spaceType === 'default' &&
-              proposalLimitReached
+              !space.turbo &&
+              unsupportedProposalNetworks.length &&
+              !proposal?.proposalId
             "
             type="error"
             class="mb-4"
           >
-            <span
-              >Please verify your space to publish more proposals.
-              <a
-                :href="VERIFIED_URL"
-                target="_blank"
-                class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Verify space</a
-              >.</span
+            <div>
+              You cannot create proposals. This space is configured with
+              non-premium networks (<template
+                v-for="(n, i) in unsupportedProposalNetworks"
+                :key="n.key"
+              >
+                <b>{{ n.name }}</b>
+                <template
+                  v-if="
+                    unsupportedProposalNetworks.length > 1 &&
+                    i < unsupportedProposalNetworks.length - 1
+                  "
+                  >,
+                </template> </template
+              >). Change to a
+              <AppLink
+                to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+                >premium network
+                <IH-arrow-sm-right class="inline-block -rotate-45" />
+              </AppLink>
+              or upgrade networks to continue.
+            </div>
+          </UiAlert>
+          <template v-else>
+            <MessagePropositionPower
+              v-if="!isPropositionPowerPending"
+              class="mb-4"
+              :proposition-power="propositionPower"
+              :is-error="isPropositionPowerError"
+              @fetch="fetchPropositionPower"
+            />
+            <UiAlert
+              v-if="
+                propositionPower &&
+                spaceType === 'default' &&
+                proposalLimitReached
+              "
+              type="error"
+              class="mb-4"
             >
-          </UiAlert>
-          <UiAlert
-            v-else-if="
-              propositionPower && spaceType !== 'turbo' && proposalLimitReached
-            "
-            type="error"
-            class="mb-4"
-          >
-            <span>
-              You can publish up to
-              {{ limits['space.verified.proposal_limit_per_day'] }}
-              proposals per day and
-              {{ limits['space.verified.proposal_limit_per_month'] }}
-              proposals per month.
-              <a
-                :href="TURBO_URL"
-                target="_blank"
-                class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Increase limit</a
-              >.
-            </span>
-          </UiAlert>
+              <span
+                >Please verify your space to publish more proposals.
+                <a
+                  :href="VERIFIED_URL"
+                  target="_blank"
+                  class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >Verify space</a
+                >.</span
+              >
+            </UiAlert>
+            <UiAlert
+              v-else-if="
+                propositionPower &&
+                spaceType !== 'turbo' &&
+                proposalLimitReached
+              "
+              type="error"
+              class="mb-4"
+            >
+              <span>
+                You can publish up to
+                {{ limits['space.verified.proposal_limit_per_day'] }}
+                proposals per day and
+                {{ limits['space.verified.proposal_limit_per_month'] }}
+                proposals per month.
+                <a
+                  :href="TURBO_URL"
+                  target="_blank"
+                  class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >Increase limit</a
+                >.
+              </span>
+            </UiAlert>
+          </template>
           <div v-if="guidelines">
             <h4 class="mb-2 eyebrow">Guidelines</h4>
             <a :href="guidelines" target="_blank" class="block mb-4">

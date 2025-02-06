@@ -116,7 +116,7 @@ export function useActions() {
     networkId: NetworkID,
     promise: Promise<any>,
     opts: {
-      transactionNetworkId?: NetworkID;
+      chainId?: ChainId;
       safeAppContext?: 'vote' | 'propose' | 'transaction';
     } = {}
   ): Promise<string | null> {
@@ -152,15 +152,12 @@ export function useActions() {
           'success',
           'Your vote is pending! waiting for other signers'
         );
-      hash && uiStore.addPendingTransaction(hash, networkId);
+      hash && uiStore.addPendingTransaction(hash, network.chainId);
     } else {
       hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
 
-      uiStore.addPendingTransaction(
-        hash,
-        opts.transactionNetworkId || networkId
-      );
+      uiStore.addPendingTransaction(hash, opts.chainId || network.chainId);
     }
 
     return hash;
@@ -442,7 +439,11 @@ export function useActions() {
 
     await wrapPromise(
       proposal.network,
-      network.actions.cancelProposal(auth.value.provider, proposal)
+      network.actions.cancelProposal(
+        auth.value.provider,
+        auth.value.connector.type,
+        proposal
+      )
     );
 
     return true;
@@ -482,7 +483,7 @@ export function useActions() {
       proposal.network,
       network.actions.executeQueuedProposal(auth.value.provider, proposal),
       {
-        transactionNetworkId: proposal.execution_network
+        chainId: getNetwork(proposal.execution_network).chainId
       }
     );
   }
@@ -516,7 +517,12 @@ export function useActions() {
 
     return wrapPromise(
       space.network,
-      network.actions.transferOwnership(auth.value.provider, space, owner)
+      network.actions.transferOwnership(
+        auth.value.provider,
+        auth.value.connector.type,
+        space,
+        owner
+      )
     );
   }
 
@@ -548,6 +554,7 @@ export function useActions() {
       space.network,
       network.actions.updateSettings(
         auth.value.provider,
+        auth.value.connector.type,
         space,
         metadata,
         authenticatorsToAdd,
@@ -631,7 +638,8 @@ export function useActions() {
         delegatee,
         delegationContract,
         chainId
-      )
+      ),
+      { chainId }
     );
   }
 

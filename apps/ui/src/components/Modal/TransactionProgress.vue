@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { getGenericExplorerUrl, waitForTransaction } from '@/helpers/generic';
 import { sleep } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
-import { NetworkID } from '@/types';
+import { ChainId } from '@/types';
 
 const API_DELAY = 10000;
 
@@ -19,7 +19,7 @@ type Messages = {
 const props = withDefaults(
   defineProps<{
     open: boolean;
-    networkId: NetworkID;
+    chainId: ChainId;
     messages?: Messages;
     execute: () => Promise<string | null>;
   }>(),
@@ -36,7 +36,6 @@ const emit = defineEmits<{
 const step: Ref<'approve' | 'confirming' | 'success' | 'fail'> = ref('approve');
 const txId: Ref<string | null> = ref(null);
 
-const network = computed(() => getNetwork(props.networkId));
 const text = computed(() => {
   if (step.value === 'approve') {
     return {
@@ -78,7 +77,7 @@ async function handleExecute() {
 
     if (txId.value) {
       step.value = 'confirming';
-      await network.value.helpers.waitForTransaction(txId.value);
+      await waitForTransaction(txId.value, props.chainId);
       await sleep(API_DELAY);
 
       step.value = 'success';
@@ -141,7 +140,7 @@ watch(
       <div v-if="step === 'approve'" v-text="'Proceed in your wallet'" />
       <a
         v-else-if="['confirming', 'success'].includes(step) && txId"
-        :href="network.helpers.getExplorerUrl(txId, 'transaction')"
+        :href="getGenericExplorerUrl(chainId, txId, 'transaction') ?? undefined"
         target="_blank"
       >
         View on explorer
