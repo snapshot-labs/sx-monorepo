@@ -38,6 +38,12 @@ const FEATURES = [
     custom: '∞'
   },
   {
+    name: 'Featured on explore page',
+    basic: false,
+    turbo: true,
+    custom: true
+  },
+  {
     name: 'Delegates dashboard',
     basic: false,
     turbo: true,
@@ -68,9 +74,15 @@ const FEATURES = [
     custom: true
   },
   {
-    name: 'Price',
+    name: 'Price (monthly)',
     basic: 'Free',
-    turbo: '2 ETH',
+    turbo: '600 USDC',
+    custom: 'Contact us'
+  },
+  {
+    name: 'Price (yearly)',
+    basic: 'Free',
+    turbo: '6,000 USDC',
     custom: 'Contact us'
   }
 ];
@@ -82,7 +94,7 @@ watchEffect(() => setTitle(`Plans - ${props.space.name}`));
   <div class="space-y-4">
     <div class="bg-skin-border p-4 mb-4">
       <IC-turbo class="text-skin-link mb-6" />
-      <h2>Pick the plan that works best for your organization</h2>
+      <h2>Supercharge your governance</h2>
     </div>
     <div>
       <div class="bg-skin-bg border-b flex w-full font-medium px-4">

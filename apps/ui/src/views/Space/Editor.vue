@@ -3,7 +3,7 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
+import { VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
@@ -477,11 +477,10 @@ watchEffect(() => {
               proposals per day and
               {{ limits['space.verified.proposal_limit_per_month'] }}
               proposals per month.
-              <a
-                :href="TURBO_URL"
-                target="_blank"
+              <router-link
+                :to="{ name: 'space-turbo' }"
                 class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Increase limit</a
+                >Increase limit</router-link
               >.
             </span>
           </UiAlert>
@@ -532,11 +531,10 @@ watchEffect(() => {
               "
               #error-suffix
             >
-              <a
-                :href="TURBO_URL"
-                target="_blank"
-                class="ml-1 text-skin-danger font-semibold"
-                >Increase limit</a
+              <router-link
+                :to="{ name: 'space-turbo' }"
+                class="text-rose-500 dark:text-neutral-100 font-semibold"
+                >Increase limit</router-link
               >.
             </template>
           </UiComposer>
@@ -601,16 +599,15 @@ watchEffect(() => {
             :definition="choicesDefinition"
             :error="
               proposal.choices.length > choicesDefinition.maxItems
-                ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
+                ? `Must not have more than ${_n(choicesDefinition.maxItems)} choices. `
                 : ''
             "
           >
             <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
-              <a
-                :href="TURBO_URL"
-                target="_blank"
-                class="ml-1 text-skin-danger font-semibold"
-                >Increase limit</a
+              <router-link
+                :to="{ name: 'space-turbo' }"
+                class="text-rose-500 dark:text-neutral-100 font-semibold"
+                >Increase limit</router-link
               >.
             </template>
           </EditorChoices>
