@@ -26,7 +26,7 @@ const hasPendingTasks = computed(() =>
 </script>
 
 <template>
-  <div v-if="hasPendingTasks">
+  <div v-if="canSeeOnboarding && hasPendingTasks">
     <UiLabel label="onboarding" sticky />
     <div v-if="tasks.followers" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <IS-flag class="text-skin-link mt-1 shrink-0" />
