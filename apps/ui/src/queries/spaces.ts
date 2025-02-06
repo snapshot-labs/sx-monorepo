@@ -4,11 +4,48 @@ import {
   useQueryClient
 } from '@tanstack/vue-query';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
-import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
+import {
+  enabledNetworks,
+  explorePageProtocols,
+  getNetwork,
+  offchainNetworks
+} from '@/networks';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
 import { NetworkID } from '@/types';
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
+
+// NOTE: this is used for followed spaces
+export async function getSpaces(filter?: SpacesFilter) {
+  const results = await Promise.all(
+    enabledNetworks.map(async id => {
+      const network = getNetwork(id);
+
+      const requestFilter = {
+        ...filter
+      };
+
+      if (requestFilter?.id_in) {
+        const filtered = requestFilter.id_in.filter(spaceId =>
+          spaceId.startsWith(`${id}:`)
+        );
+        if (filtered.length === 0) return [];
+
+        requestFilter.id_in = filtered.map(spaceId => spaceId.split(':')[1]);
+      }
+
+      return network.api.loadSpaces(
+        {
+          skip: 0,
+          limit: 1000
+        },
+        requestFilter
+      );
+    })
+  );
+
+  return results.flat();
+}
 
 async function fetchSpaces(
   protocol: ExplorePageProtocol,
