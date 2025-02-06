@@ -26,7 +26,7 @@ const hasPendingTasks = computed(() =>
 </script>
 
 <template>
-  <div v-if="canSeeOnboarding && hasPendingTasks">
+  <div v-if="hasPendingTasks">
     <UiLabel label="onboarding" sticky />
     <div v-if="tasks.followers" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <IS-flag class="text-skin-link mt-1 shrink-0" />
@@ -68,12 +68,9 @@ const hasPendingTasks = computed(() =>
     </div>
     <div v-if="tasks.verified" class="border-b mx-4 py-[14px] flex gap-x-2.5">
       <IS-flag class="text-skin-link mt-1" />
-      <div class="grow">
-        Get your space
-        <a :href="VERIFIED_URL" target="_blank" class="text-skin-text">
-          verified
-        </a>
-      </div>
+      <a :href="VERIFIED_URL" target="_blank" class="grow text-skin-text">
+        Get your space verified
+      </a>
     </div>
     <div class="mx-4 py-[10px] mb-4 flex gap-x-1.5 text-sm">
       <IH-eye class="text-skin-link mt-[3px]" /> Only you can see this
