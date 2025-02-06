@@ -13,7 +13,7 @@ const uiStore = useUiStore();
 const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
 const { login, web3 } = useWeb3();
-const { toggleSkin, currentMode } = useUserSkin();
+const { toggleTheme, currentTheme } = useTheme();
 const { isWhiteLabel } = useWhiteLabel();
 
 const SEARCH_CONFIG = {
@@ -149,9 +149,9 @@ onUnmounted(() => {
       <UiButton
         v-if="!isWhiteLabel"
         class="!px-0 w-[46px]"
-        @click="toggleSkin()"
+        @click="toggleTheme()"
       >
-        <IH-sun v-if="currentMode === 'dark'" class="inline-block" />
+        <IH-sun v-if="currentTheme === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
     </div>

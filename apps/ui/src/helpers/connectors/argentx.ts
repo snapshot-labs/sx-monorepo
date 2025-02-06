@@ -3,13 +3,13 @@ const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
 
 export default class Argentx extends Connector {
   async connect() {
-    const { currentMode } = useUserSkin();
+    const { currentTheme } = useTheme();
 
     const userOptions = {
       modalMode: localStorage.getItem('starknetLastConnectedWallet')
         ? 'neverAsk'
         : 'alwaysAsk',
-      modalTheme: currentMode.value
+      modalTheme: currentTheme.value
     };
 
     try {

@@ -17,6 +17,7 @@ import {
   SpaceMetadataLabel,
   SpacePrivacy,
   StrategyParsedMetadata,
+  Theme,
   Validation
 } from '@/types';
 

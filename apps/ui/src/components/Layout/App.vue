@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { Skin } from '@/composables/useUserSkin';
 import { APP_NAME } from '@/helpers/constants';
 import {
   clone,
@@ -9,7 +8,7 @@ import {
   hexToRgb,
   whiteLabelAwareParams
 } from '@/helpers/utils';
-import { Transaction } from '@/types';
+import { Theme, Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
 const LG_WIDTH = Number(
@@ -24,7 +23,7 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
-const { DEFAULT_SKIN, setSkin } = useUserSkin();
+const { DEFAULT_THEME, setTheme } = useTheme();
 const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
@@ -174,9 +173,9 @@ watch(
       .map(([key, val]) => `${key}:${val}`)
       .join(';')};  }`;
 
-    setSkin(
-      (whiteLabelSpace.value.additionalRawData?.skinSettings?.theme as Skin) ||
-        DEFAULT_SKIN
+    setTheme(
+      (whiteLabelSpace.value.additionalRawData?.skinSettings?.theme as Theme) ||
+        DEFAULT_THEME
     );
   },
   { immediate: true }

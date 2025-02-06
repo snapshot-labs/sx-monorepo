@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const model = defineModel<string>();
 
-const { currentMode } = useUserSkin();
+const { currentTheme } = useTheme();
 
 const dirty = ref(false);
 
@@ -37,7 +37,7 @@ const backgroundColor = computed(() => {
   const color = inputValue.value;
   return /^#[0-9A-F]{6}$/i.test(color)
     ? color
-    : currentMode.value === 'dark'
+    : currentTheme.value === 'dark'
       ? '#000000'
       : '#FFFFFF';
 });

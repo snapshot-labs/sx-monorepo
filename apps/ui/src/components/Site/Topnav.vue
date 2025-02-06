@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { toggleSkin, currentMode } = useUserSkin();
+const { toggleTheme, currentTheme } = useTheme();
 </script>
 
 <template>
@@ -38,8 +38,8 @@ const { toggleSkin, currentMode } = useUserSkin();
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">
-      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
-        <IH-sun v-if="currentMode === 'dark'" class="inline-block" />
+      <UiButton class="!px-0 w-[46px]" @click="toggleTheme">
+        <IH-sun v-if="currentTheme === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
       <UiButton :to="{ name: 'my-home' }" class="primary">
