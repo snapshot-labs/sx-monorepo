@@ -10,7 +10,6 @@ const canSeeOnboarding = computed(() => {
   return isController.value || isAdmin.value;
 });
 
-// space.value.additionalRawData?.type === 'offchain'
 const tasks = computed(() => ({
   followers:
     props.space.additionalRawData?.type === 'offchain' &&
