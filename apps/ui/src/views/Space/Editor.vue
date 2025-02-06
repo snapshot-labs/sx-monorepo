@@ -186,14 +186,23 @@ const canSubmit = computed(() => {
     ? propositionPower.value?.canPropose
     : !web3.value.authLoading;
 });
-const spaceType = computed(() =>
-  props.space.turbo ? 'turbo' : props.space.verified ? 'verified' : 'default'
-);
+const spaceType = computed(() => {
+  if (props.space.turbo) return 'turbo';
+  if (props.space.verified) return 'verified';
+  return 'default';
+});
+
+const spaceTypeForProposalLimit = computed(() => {
+  if (lists.value['space.ecosystem.list'].includes(props.space.id))
+    return 'ecosystem';
+  if (props.space.turbo) return 'turbo';
+  if (props.space.verified) return 'verified';
+  if (props.space.additionalRawData?.flagged) return 'flagged';
+  return 'default';
+});
 
 const proposalLimitReached = computed(() => {
-  const type = lists.value['space.ecosystem.list'].includes(props.space.id)
-    ? 'ecosystem'
-    : spaceType.value;
+  const type = spaceTypeForProposalLimit.value;
 
   return (
     (props.space.proposal_count_1d || 0) >=
@@ -513,7 +522,7 @@ watchEffect(() => {
             <UiAlert
               v-if="
                 propositionPower &&
-                spaceType === 'default' &&
+                ['default', 'flagged'].includes(spaceTypeForProposalLimit) &&
                 proposalLimitReached
               "
               type="error"
@@ -532,7 +541,7 @@ watchEffect(() => {
             <UiAlert
               v-else-if="
                 propositionPower &&
-                spaceType !== 'turbo' &&
+                spaceTypeForProposalLimit !== 'turbo' &&
                 proposalLimitReached
               "
               type="error"
