@@ -1,4 +1,8 @@
-import { useInfiniteQuery } from '@tanstack/vue-query';
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient
+} from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
@@ -54,6 +58,36 @@ async function fetchSpaces(
   });
 }
 
+export function useSpaceQuery({
+  networkId,
+  spaceId
+}: {
+  networkId: MaybeRefOrGetter<NetworkID | null>;
+  spaceId: MaybeRefOrGetter<string | null>;
+}) {
+  const metaStore = useMetaStore();
+
+  return useQuery({
+    queryKey: [
+      'spaces',
+      'detail',
+      () => `${toValue(networkId)}:${toValue(spaceId)}`
+    ],
+    queryFn: async () => {
+      const networkIdValue = toValue(networkId);
+      const spaceIdValue = toValue(spaceId);
+
+      if (!networkIdValue || !spaceIdValue) return null;
+
+      await metaStore.fetchBlock(networkIdValue);
+      const network = getNetwork(networkIdValue);
+
+      return network.api.loadSpace(spaceIdValue);
+    },
+    enabled: () => toValue(networkId) !== null && toValue(spaceId) !== null
+  });
+}
+
 export function useExploreSpacesQuery({
   protocol,
   network,
@@ -65,6 +99,7 @@ export function useExploreSpacesQuery({
   category: MaybeRefOrGetter<SpaceCategory>;
   searchQuery: MaybeRefOrGetter<string | undefined>;
 }) {
+  const queryClient = useQueryClient();
   const protocolConfig = computed(
     () => explorePageProtocols[toValue(protocol)]
   );
@@ -72,7 +107,8 @@ export function useExploreSpacesQuery({
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: [
-      'explore',
+      'spaces',
+      'list',
       {
         protocol,
         network,
@@ -80,8 +116,8 @@ export function useExploreSpacesQuery({
         searchQuery
       }
     ],
-    queryFn: ({ pageParam }) =>
-      fetchSpaces(
+    queryFn: async ({ pageParam }) => {
+      const results = await fetchSpaces(
         toValue(protocol),
         {
           network: toValue(network),
@@ -89,7 +125,17 @@ export function useExploreSpacesQuery({
           searchQuery: toValue(searchQuery)
         },
         pageParam
-      ),
+      );
+
+      for (const space of results) {
+        queryClient.setQueryData(
+          ['spaces', 'detail', `${space.network}:${space.id}`],
+          space
+        );
+      }
+
+      return results;
+    },
     getNextPageParam: (lastPage, pages) => {
       if (toValue(protocol) === 'snapshot-x') {
         // SnapshotX has disabled pagination until unified API is implemented.
