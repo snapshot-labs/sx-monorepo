@@ -180,8 +180,13 @@ const previewDomain = computed(
           <div class="browser-toolbar-address" v-text="previewDomain" />
         </div>
         <div class="browser-content-container">
-          <div class="browser-content">
+          <div class="browser-content flex items-center justify-center">
+            <IC-zap
+              v-if="disabled"
+              class="inline-block my-[18px] size-[256px] text-skin-border"
+            />
             <iframe
+              v-else
               src="window.location"
               inert="true"
               sandbox="allow-same-origin allow-scripts"
