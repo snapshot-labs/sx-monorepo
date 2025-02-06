@@ -63,7 +63,7 @@ onMounted(async () => {
       <div class="grow">
         Check the
         <AppLink :to="{ name: 'my-explore' }"> explore </AppLink>
-        page and follow at least 3 spaces.
+        page and follow at least 3 spaces
         <div
           class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-1"
         >
