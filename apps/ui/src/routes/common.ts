@@ -11,6 +11,7 @@ import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearch from '@/views/Space/Search.vue';
 import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceTreasury from '@/views/Space/Treasury.vue';
+import SpaceTurbo from '@/views/Space/Turbo.vue';
 import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
 import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
@@ -71,6 +72,11 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
     path: 'leaderboard',
     name: 'space-leaderboard',
     component: SpaceLeaderboard
+  },
+  {
+    path: 'turbo',
+    name: 'space-turbo',
+    component: SpaceTurbo
   },
   {
     path: 'profile/:user',
