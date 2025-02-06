@@ -105,10 +105,12 @@ const formErrors = computed(() => {
   );
   return errors;
 });
-
 const disabled = computed(() => {
   return !props.space.turbo && !props.space.additionalRawData?.domain;
 });
+const previewDomain = computed(
+  () => customDomain.value || window.location.host
+);
 </script>
 
 <template>
@@ -120,52 +122,118 @@ const disabled = computed(() => {
   >
     Whitelabel features are only available for Turbo subscribers.
   </UiMessage>
-  <div class="s-box space-y-4">
-    <div>
-      <h4 class="eyebrow mb-2 font-medium">Custom domain</h4>
-      <UiMessage
-        type="info"
-        class="mb-3"
-        :learn-more-link="'https://docs.snapshot.box/spaces/add-custom-domain'"
-      >
-        To set up a custom domain, you need to create a CNAME record pointing to
-        "cname.snapshot.box" with your DNS provider or registrar.
-      </UiMessage>
-      <UiInputString
-        v-model="customDomain"
-        :definition="CUSTOM_DOMAIN_DEFINITION"
-        :error="formErrors.customDomain"
-        :disabled="disabled"
-      />
-    </div>
-    <div>
-      <h4 class="eyebrow font-medium">Skin colors</h4>
-      <div class="mb-2">fallback to the base theme color.</div>
-      <UiForm
-        v-model="skinSettings"
-        :definition="SKIN_DEFINITION"
-        :error="formErrors.skinSettings"
-        :disabled="disabled"
-      />
-    </div>
-    <div>
-      <h4 class="eyebrow font-medium">Custom logo</h4>
-      <div class="mb-2">
-        You can replace your space name in the upper left corner by a custom
-        logo. Recommended size is 380x76 pixels.
+  <div class="flex flex-col md:flex-row gap-4">
+    <div class="s-box space-y-4 order-last md:order-first">
+      <div>
+        <h4 class="eyebrow mb-2 font-medium">Custom domain</h4>
+        <UiMessage
+          type="info"
+          class="mb-3"
+          :learn-more-link="'https://docs.snapshot.box/spaces/add-custom-domain'"
+        >
+          To set up a custom domain, you need to create a CNAME record pointing
+          to "cname.snapshot.box" with your DNS provider or registrar.
+        </UiMessage>
+        <UiInputString
+          v-model="customDomain"
+          :definition="CUSTOM_DOMAIN_DEFINITION"
+          :error="formErrors.customDomain"
+          :disabled="disabled"
+        />
       </div>
-      <UiInputStamp
-        v-model="skinSettings.logo"
-        :disabled="disabled"
-        :fallback="false"
-        :width="380"
-        :height="76"
-        :definition="{
-          type: 'string',
-          format: 'stamp',
-          title: 'Logo'
-        }"
-      />
+      <div>
+        <h4 class="eyebrow font-medium">Skin colors</h4>
+        <div class="mb-2">
+          Empty colors value will fallback to the base theme color.
+        </div>
+        <UiForm
+          v-model="skinSettings"
+          :definition="SKIN_DEFINITION"
+          :error="formErrors.skinSettings"
+          :disabled="disabled"
+        />
+      </div>
+      <div>
+        <h4 class="eyebrow font-medium">Custom logo</h4>
+        <div class="mb-2">
+          You can replace your space name in the upper left corner by a custom
+          logo. Recommended size is 380x76 pixels.
+        </div>
+        <UiInputStamp
+          v-model="skinSettings.logo"
+          :disabled="disabled"
+          :fallback="false"
+          :width="380"
+          :height="76"
+          :definition="{
+            type: 'string',
+            format: 'stamp',
+            title: 'Logo'
+          }"
+        />
+      </div>
+    </div>
+    <div class="shrink-0">
+      <h4 class="eyebrow mb-2 font-medium">Preview</h4>
+      <div class="browser">
+        <div class="browser-toolbar">
+          <div class="browser-toolbar-address" v-text="previewDomain" />
+        </div>
+        <div class="browser-content-container">
+          <div class="browser-content">
+            <iframe
+              src="window.location"
+              inert="true"
+              sandbox="allow-same-origin allow-scripts"
+            ></iframe>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+<style lang="scss" scoped>
+// Resolution of the iframe content
+$browser-content-width: 1280px;
+$browser-content-height: 720px;
+$browser-content-zoom: 0.35;
+
+.browser {
+  @apply border rounded-md;
+
+  width: calc($browser-content-width * $browser-content-zoom);
+
+  &-toolbar {
+    @apply bg-skin-border flex items-center px-2 py-1 relative;
+
+    &-address {
+      @apply bg-skin-bg truncate mx-auto px-2 w-1/2 text-[12px] text-center rounded-sm;
+    }
+
+    &:before {
+      @apply text-skin-bg top-[-2px] text-[64px] absolute leading-[0px] tracking-[-7px];
+      content: '. . .';
+    }
+  }
+
+  &-content {
+    transform: scale($browser-content-zoom);
+    transform-origin: left top;
+
+    &,
+    & iframe {
+      @apply border-0;
+
+      width: $browser-content-width;
+      height: $browser-content-height;
+    }
+
+    &-container {
+      @apply inline-block overflow-hidden relative;
+
+      width: calc($browser-content-width * $browser-content-zoom - 2px);
+      height: calc($browser-content-height * $browser-content-zoom - 2px);
+    }
+  }
+}
+</style>
