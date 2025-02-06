@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import SpaceCreateOffchain from '@/components/SpaceCreateOffchain.vue';
-import SpaceCreateOnchain from '@/components/SpaceCreateOnchain.vue';
+import SpaceCreateSnapshot from '@/components/SpaceCreateSnapshot.vue';
+import SpaceCreateSnapshotX from '@/components/SpaceCreateSnapshotX.vue';
 import { enabledNetworks, offchainNetworks } from '@/networks';
 import { ExplorePageProtocol } from '@/networks/types';
 
@@ -12,10 +12,10 @@ type ProtocolRecords = Record<ExplorePageProtocol, Protocol>;
 
 const PROTOCOLS: ProtocolRecords = {
   snapshotx: {
-    component: SpaceCreateOnchain
+    component: SpaceCreateSnapshotX
   },
   snapshot: {
-    component: SpaceCreateOffchain,
+    component: SpaceCreateSnapshot,
     networkId: enabledNetworks.find(id => offchainNetworks.includes(id))
   }
 } as const;
