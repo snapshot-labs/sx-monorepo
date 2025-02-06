@@ -1,6 +1,6 @@
-import gql from 'graphql-tag';
+import { gql } from '@/gql';
 
-const SPACE_FRAGMENT = gql`
+gql(`
   fragment spaceFragment on Space {
     id
     verified
@@ -71,9 +71,9 @@ const SPACE_FRAGMENT = gql`
     vote_count
     created
   }
-`;
+`);
 
-const PROPOSAL_FRAGMENT = gql`
+gql(`
   fragment proposalFragment on Proposal {
     id
     proposal_id
@@ -154,19 +154,18 @@ const PROPOSAL_FRAGMENT = gql`
     completed
     cancelled
   }
-`;
+`);
 
-export const PROPOSAL_QUERY = gql`
-  query ($id: String!) {
+export const PROPOSAL_QUERY = gql(`
+  query ProposalQuery($id: String!) {
     proposal(id: $id) {
       ...proposalFragment
     }
   }
-  ${PROPOSAL_FRAGMENT}
-`;
+`);
 
-export const PROPOSALS_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $where: Proposal_filter) {
+export const PROPOSALS_QUERY = gql(`
+  query ProposalsQuery($first: Int!, $skip: Int!, $where: Proposal_filter) {
     proposals(
       first: $first
       skip: $skip
@@ -177,11 +176,10 @@ export const PROPOSALS_QUERY = gql`
       ...proposalFragment
     }
   }
-  ${PROPOSAL_FRAGMENT}
-`;
+`);
 
-export const VOTES_QUERY = gql`
-  query (
+export const VOTES_QUERY = gql(`
+  query VotesQuery(
     $first: Int!
     $skip: Int!
     $orderBy: Vote_orderBy!
@@ -212,10 +210,15 @@ export const VOTES_QUERY = gql`
       tx
     }
   }
-`;
+`);
 
-export const USER_VOTES_QUERY = gql`
-  query ($first: Int, $skip: Int, $spaceIds: [String], $voter: String) {
+export const USER_VOTES_QUERY = gql(`
+  query UserVotesQuery(
+    $first: Int
+    $skip: Int
+    $spaceIds: [String]
+    $voter: String
+  ) {
     votes(
       first: $first
       skip: $skip
@@ -237,19 +240,18 @@ export const USER_VOTES_QUERY = gql`
       created
     }
   }
-`;
+`);
 
-export const SPACE_QUERY = gql`
-  query ($id: String!) {
+export const SPACE_QUERY = gql(`
+  query SpaceQuery($id: String!) {
     space(id: $id) {
       ...spaceFragment
     }
   }
-  ${SPACE_FRAGMENT}
-`;
+`);
 
-export const SPACES_QUERY = gql`
-  query ($first: Int!, $skip: Int!, $where: Space_filter) {
+export const SPACES_QUERY = gql(`
+  query SpacesQuery($first: Int!, $skip: Int!, $where: Space_filter) {
     spaces(
       first: $first
       skip: $skip
@@ -260,11 +262,10 @@ export const SPACES_QUERY = gql`
       ...spaceFragment
     }
   }
-  ${SPACE_FRAGMENT}
-`;
+`);
 
-export const USER_QUERY = gql`
-  query ($id: String!) {
+export const USER_QUERY = gql(`
+  query UserQuery($id: String!) {
     user(id: $id) {
       id
       proposal_count
@@ -272,10 +273,10 @@ export const USER_QUERY = gql`
       created
     }
   }
-`;
+`);
 
-export const LEADERBOARD_QUERY = gql`
-  query (
+export const LEADERBOARD_QUERY = gql(`
+  query LeaderboardQuery(
     $first: Int!
     $skip: Int!
     $orderBy: Leaderboard_orderBy
@@ -301,4 +302,4 @@ export const LEADERBOARD_QUERY = gql`
       vote_count
     }
   }
-`;
+`);

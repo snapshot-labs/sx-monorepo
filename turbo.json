@@ -22,8 +22,8 @@
       "dependsOn": ["codegen", "^build"]
     },
     "codegen": {
-      "outputs": [".checkpoint/**", "generated/**"],
-      "inputs": ["**/*.graphql", "**/*.gql"]
+      "outputs": [".checkpoint/**", "generated/**", "src/gql/**"],
+      "inputs": ["**/*.graphql", "**/*.gql", "codegen.ts"]
     }
   }
 }
