@@ -132,10 +132,15 @@ watch(
 );
 
 watch(
-  id,
-  async id => {
+  [id, proposal],
+  async ([id, proposal]) => {
     modalOpenVote.value = false;
     editMode.value = false;
+    discourseTopic.value = null;
+    boostCount.value = 0;
+
+    if (!proposal) return;
+
     if (discussion.value) {
       loadSingleTopic(discussion.value).then(result => {
         discourseTopic.value = result;
@@ -145,7 +150,7 @@ watch(
     if (props.space.additionalRawData?.boost?.enabled) {
       const bribeEnabled =
         props.space.additionalRawData.boost.bribeEnabled || false;
-      const proposalEnd = proposal.value?.max_end || 0;
+      const proposalEnd = proposal.max_end || 0;
       getBoostsCount(id, bribeEnabled, proposalEnd).then(result => {
         boostCount.value = result;
       });
