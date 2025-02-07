@@ -2,16 +2,15 @@
 import SpaceCreateSnapshot from '@/components/SpaceCreateSnapshot.vue';
 import SpaceCreateSnapshotX from '@/components/SpaceCreateSnapshotX.vue';
 import { enabledNetworks, offchainNetworks } from '@/networks';
-import { ExplorePageProtocol } from '@/networks/types';
 
 type Protocol = {
   component: Component;
   networkId?: string;
 };
-type ProtocolRecords = Record<ExplorePageProtocol, Protocol>;
+type ProtocolRecords = Record<string, Protocol>;
 
 const PROTOCOLS: ProtocolRecords = {
-  snapshotx: {
+  'snapshot-x': {
     component: SpaceCreateSnapshotX
   },
   snapshot: {

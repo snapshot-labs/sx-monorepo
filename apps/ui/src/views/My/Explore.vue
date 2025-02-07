@@ -178,7 +178,7 @@ watchEffect(() => setTitle('Explore'));
           :to="{
             name: 'create',
             params: {
-              protocol
+              protocol: protocol === 'snapshot' ? 'snapshot' : 'snapshot-x'
             }
           }"
           class="!px-0 w-[46px]"

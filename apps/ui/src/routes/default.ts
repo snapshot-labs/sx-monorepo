@@ -40,7 +40,7 @@ export default [
 
   {
     path: '/create',
-    redirect: { name: 'create', params: { protocol: 'snapshotx' } }
+    redirect: { name: 'create', params: { protocol: 'snapshot-x' } }
   },
   { path: '/create/:protocol', name: 'create', component: Create },
   {
