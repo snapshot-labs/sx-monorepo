@@ -1,7 +1,25 @@
 import { gql } from '@/gql';
 
 gql(`
-  fragment spaceFragment on Space {
+  fragment voteFields on Vote {
+    id
+    voter {
+      id
+    }
+    space {
+      id
+    }
+    metadata {
+      reason
+    }
+    proposal
+    choice
+    vp
+    created
+    tx
+  }
+
+  fragment spaceFields on Space {
     id
     verified
     turbo
@@ -71,10 +89,8 @@ gql(`
     vote_count
     created
   }
-`);
 
-gql(`
-  fragment proposalFragment on Proposal {
+  fragment proposalFields on Proposal {
     id
     proposal_id
     space {
@@ -157,15 +173,15 @@ gql(`
 `);
 
 export const PROPOSAL_QUERY = gql(`
-  query ProposalQuery($id: String!) {
+  query Proposal($id: String!) {
     proposal(id: $id) {
-      ...proposalFragment
+      ...proposalFields
     }
   }
 `);
 
 export const PROPOSALS_QUERY = gql(`
-  query ProposalsQuery($first: Int!, $skip: Int!, $where: Proposal_filter) {
+  query Proposals($first: Int!, $skip: Int!, $where: Proposal_filter) {
     proposals(
       first: $first
       skip: $skip
@@ -173,13 +189,13 @@ export const PROPOSALS_QUERY = gql(`
       orderBy: created
       orderDirection: desc
     ) {
-      ...proposalFragment
+      ...proposalFields
     }
   }
 `);
 
 export const VOTES_QUERY = gql(`
-  query VotesQuery(
+  query Votes(
     $first: Int!
     $skip: Int!
     $orderBy: Vote_orderBy!
@@ -193,27 +209,13 @@ export const VOTES_QUERY = gql(`
       orderBy: $orderBy
       orderDirection: $orderDirection
     ) {
-      id
-      voter {
-        id
-      }
-      space {
-        id
-      }
-      metadata {
-        reason
-      }
-      proposal
-      choice
-      vp
-      created
-      tx
+      ...voteFields
     }
   }
 `);
 
 export const USER_VOTES_QUERY = gql(`
-  query UserVotesQuery(
+  query UserVotes(
     $first: Int
     $skip: Int
     $spaceIds: [String]
@@ -224,34 +226,21 @@ export const USER_VOTES_QUERY = gql(`
       skip: $skip
       where: { space_in: $spaceIds, voter: $voter }
     ) {
-      id
-      voter {
-        id
-      }
-      space {
-        id
-      }
-      metadata {
-        reason
-      }
-      proposal
-      choice
-      vp
-      created
+      ...voteFields
     }
   }
 `);
 
 export const SPACE_QUERY = gql(`
-  query SpaceQuery($id: String!) {
+  query Space($id: String!) {
     space(id: $id) {
-      ...spaceFragment
+      ...spaceFields
     }
   }
 `);
 
 export const SPACES_QUERY = gql(`
-  query SpacesQuery($first: Int!, $skip: Int!, $where: Space_filter) {
+  query Spaces($first: Int!, $skip: Int!, $where: Space_filter) {
     spaces(
       first: $first
       skip: $skip
@@ -259,13 +248,13 @@ export const SPACES_QUERY = gql(`
       orderDirection: desc
       where: $where
     ) {
-      ...spaceFragment
+      ...spaceFields
     }
   }
 `);
 
 export const USER_QUERY = gql(`
-  query UserQuery($id: String!) {
+  query User($id: String!) {
     user(id: $id) {
       id
       proposal_count
@@ -276,7 +265,7 @@ export const USER_QUERY = gql(`
 `);
 
 export const LEADERBOARD_QUERY = gql(`
-  query LeaderboardQuery(
+  query Leaderboard(
     $first: Int!
     $skip: Int!
     $orderBy: Leaderboard_orderBy
