@@ -1,3 +1,5 @@
+// @vitest-environment happy-dom
+
 import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
