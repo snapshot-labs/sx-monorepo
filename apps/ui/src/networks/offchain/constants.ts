@@ -16,7 +16,8 @@ export const CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
   'walletlink',
-  'gnosis'
+  'gnosis',
+  'sequence'
 ];
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];

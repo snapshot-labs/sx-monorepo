@@ -2,6 +2,10 @@ import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { constants } from 'starknet';
+import {
+  LAST_USED_CONNECTOR_CACHE_KEY,
+  RECENT_CONNECTOR
+} from '@/helpers/constants';
 import { formatAddress, lsGet, lsRemove, lsSet } from '@/helpers/utils';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector } from '@/networks/types';
@@ -15,8 +19,6 @@ type Web3providerWithSafe = Web3Provider & {
     };
   };
 };
-
-const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
 
 const STARKNET_NETWORKS = {
   [constants.StarknetChainId.SN_MAIN]: {
@@ -116,6 +118,7 @@ export function useWeb3() {
     provider.value = markRaw(web3);
     currentConnector.value = connector;
     lsSet(LAST_USED_CONNECTOR_CACHE_KEY, connector.id);
+    lsSet(RECENT_CONNECTOR, connector.id);
 
     try {
       attachConnectorEvents(connector);

@@ -16,6 +16,7 @@ import {
   parseInternalTransaction
 } from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
+import { verifyNetwork } from '@/helpers/utils';
 import {
   Choice,
   NetworkID,
@@ -139,6 +140,10 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[]
     ) {
+      if (space.snapshot_chain_id) {
+        await verifyNetwork(web3, space.snapshot_chain_id);
+      }
+
       const provider = getProvider(space.snapshot_chain_id as number);
       const plugins = await getPlugins(executions);
       const data = {
@@ -175,6 +180,10 @@ export function createActions(
       labels: string[],
       executions: ExecutionInfo[]
     ) {
+      if (space.snapshot_chain_id) {
+        await verifyNetwork(web3, space.snapshot_chain_id);
+      }
+
       const plugins = await getPlugins(executions);
 
       const data = {
@@ -192,7 +201,11 @@ export function createActions(
 
       return client.updateProposal({ signer: web3.getSigner(), data });
     },
-    flagProposal(web3: Web3Provider, proposal: Proposal) {
+    async flagProposal(web3: Web3Provider, proposal: Proposal) {
+      if (proposal.space.snapshot_chain_id) {
+        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
+      }
+
       return client.flagProposal({
         signer: web3.getSigner(),
         data: {
@@ -201,7 +214,15 @@ export function createActions(
         }
       });
     },
-    cancelProposal(web3: Web3Provider, proposal: Proposal) {
+    async cancelProposal(
+      web3: Web3Provider,
+      connectorType: ConnectorType,
+      proposal: Proposal
+    ) {
+      if (proposal.space.snapshot_chain_id) {
+        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
+      }
+
       return client.cancel({
         signer: web3.getSigner(),
         data: {
@@ -210,7 +231,7 @@ export function createActions(
         }
       });
     },
-    vote(
+    async vote(
       web3: Web3Provider,
       connectorType: ConnectorType,
       account: string,
@@ -219,6 +240,10 @@ export function createActions(
       reason: string,
       app: string
     ): Promise<any> {
+      if (proposal.space.snapshot_chain_id) {
+        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
+      }
+
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,
@@ -364,9 +389,14 @@ export function createActions(
     },
     transferOwnership: async (
       web3: Web3Provider,
+      connectorType: ConnectorType,
       space: Space,
       owner: string
     ) => {
+      if (space.snapshot_chain_id) {
+        await verifyNetwork(web3, space.snapshot_chain_id);
+      }
+
       return setEnsTextRecord(
         web3.getSigner(),
         space.id,
@@ -375,19 +405,25 @@ export function createActions(
         chainId
       );
     },
-    updateSettingsRaw: (
-      web3: Web3Provider | Wallet,
+    updateSettingsRaw: async (
+      web3: Web3Provider,
       space: Space,
       settings: string
     ) => {
+      await verifyNetwork(web3, chainId);
+
       return client.updateSpace({
-        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        signer: web3.getSigner(),
         data: { space: space.id, settings }
       });
     },
-    deleteSpace: (web3: Web3Provider | Wallet, space: Space) => {
+    deleteSpace: async (web3: Web3Provider, space: Space) => {
+      if (space.snapshot_chain_id) {
+        await verifyNetwork(web3, space.snapshot_chain_id);
+      }
+
       return client.deleteSpace({
-        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        signer: web3.getSigner(),
         data: { space: space.id }
       });
     }

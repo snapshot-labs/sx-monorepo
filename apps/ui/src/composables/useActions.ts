@@ -439,7 +439,11 @@ export function useActions() {
 
     await wrapPromise(
       proposal.network,
-      network.actions.cancelProposal(auth.value.provider, proposal)
+      network.actions.cancelProposal(
+        auth.value.provider,
+        auth.value.connector.type,
+        proposal
+      )
     );
 
     return true;
@@ -513,7 +517,12 @@ export function useActions() {
 
     return wrapPromise(
       space.network,
-      network.actions.transferOwnership(auth.value.provider, space, owner)
+      network.actions.transferOwnership(
+        auth.value.provider,
+        auth.value.connector.type,
+        space,
+        owner
+      )
     );
   }
 
@@ -545,6 +554,7 @@ export function useActions() {
       space.network,
       network.actions.updateSettings(
         auth.value.provider,
+        auth.value.connector.type,
         space,
         metadata,
         authenticatorsToAdd,

@@ -16,7 +16,7 @@ export const TURBO_URL =
   'https://docs.snapshot.box/user-guides/spaces/turbo-plan';
 
 export const VERIFIED_URL =
-  'https://docs.snapshot.box/user-guides/spaces/get-verified';
+  'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
@@ -175,3 +175,7 @@ export const VALIDATION_TYPES_INFO: Record<
     description: 'Use EAS attest.sh to determine if user can create a proposal.'
   }
 };
+
+export const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
+
+export const RECENT_CONNECTOR = 'recent-connector';

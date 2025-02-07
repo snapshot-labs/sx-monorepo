@@ -71,7 +71,10 @@ const DELEGATION_STRATEGIES = [
   'erc20-balance-of-with-delegation'
 ];
 
-const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
+const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
+  s: 'https://delegate-registry-api.snapshot.box',
+  's-tn': 'https://testnet-delegate-registry-api.snapshot.box'
+};
 
 function getProposalState(
   networkId: NetworkID,
@@ -197,7 +200,7 @@ function formatSpace(
     proposal_threshold: '1',
     treasuries,
     labels: space.labels,
-    delegations: formatDelegations(space),
+    delegations: formatDelegations(space, networkId),
     // NOTE: ignored
     created: 0,
     authenticators: [DEFAULT_AUTHENTICATOR],
@@ -365,7 +368,10 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
+function formatDelegations(
+  space: ApiSpace,
+  networkId: NetworkID
+): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
   const spaceDelegationStrategy = space.strategies.find(strategy =>
@@ -394,13 +400,16 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
   if (spaceDelegationStrategy) {
     const chainId = parseInt(space.network, 10);
 
-    delegations.push({
-      name: 'Delegate registry',
-      apiType: 'delegate-registry',
-      apiUrl: DELEGATE_REGISTRY_URL,
-      contractAddress: space.id,
-      chainId
-    });
+    const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
+    if (apiUrl) {
+      delegations.push({
+        name: 'Delegate registry',
+        apiType: 'delegate-registry',
+        apiUrl,
+        contractAddress: space.id,
+        chainId
+      });
+    }
   }
 
   return delegations;
