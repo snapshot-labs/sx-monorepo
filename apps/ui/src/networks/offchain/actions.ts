@@ -240,7 +240,7 @@ export function createActions(
       reason: string,
       app: string
     ): Promise<any> {
-      if (proposal.space.snapshot_chain_id) {
+      if (proposal.space.snapshot_chain_id && connectorType === 'sequence') {
         await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
