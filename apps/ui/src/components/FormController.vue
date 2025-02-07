@@ -2,7 +2,7 @@
 import { validateForm } from '@/helpers/validation';
 import { ChainId } from '@/types';
 
-const model = defineModel<string>({ required: true });
+const model = defineModel<string>();
 
 const props = defineProps<{
   title: string;

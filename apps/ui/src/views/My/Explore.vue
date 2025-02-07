@@ -2,7 +2,6 @@
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { getUrl } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork, metadataNetwork } from '@/networks';
-import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 import { SelectItem } from '@/types';
 
@@ -176,11 +175,12 @@ watchEffect(() => setTitle('Explore'));
       </div>
       <UiTooltip title="Create new space">
         <UiButton
-          :to="
-            protocol === 'snapshot'
-              ? `${SNAPSHOT_URLS[metadataNetwork]}/#/setup`
-              : 'create'
-          "
+          :to="{
+            name: 'create',
+            params: {
+              protocol: protocol === 'snapshot' ? 'snapshot' : 'snapshot-x'
+            }
+          }"
           class="!px-0 w-[46px]"
         >
           <IH-plus-sm />

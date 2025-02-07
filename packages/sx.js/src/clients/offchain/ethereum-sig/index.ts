@@ -8,6 +8,7 @@ import {
   approvalVoteTypes,
   basicVoteTypes,
   cancelProposalTypes,
+  createSpaceTypes,
   deleteSpaceTypes,
   domain,
   encryptedVoteTypes,
@@ -27,6 +28,7 @@ import { offchainGoerli } from '../../../offchainNetworks';
 import { OffchainNetworkConfig, SignatureData } from '../../../types';
 import {
   CancelProposal,
+  CreateSpace,
   DeleteSpace,
   EIP712CancelProposalMessage,
   EIP712DeleteSpaceMessage,
@@ -364,6 +366,21 @@ export class EthereumSig {
     data: UpdateStatement;
   }) {
     const signatureData = await this.sign(signer, data, updateStatementTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async createSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: CreateSpace;
+  }) {
+    const signatureData = await this.sign(signer, data, createSpaceTypes);
 
     return {
       signatureData,
