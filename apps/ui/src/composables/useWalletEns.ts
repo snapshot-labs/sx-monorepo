@@ -1,5 +1,6 @@
 import { getENSNames } from '@/helpers/stamp';
 import { getNetwork } from '@/networks';
+import { getSpaces } from '@/queries/spaces';
 import { NetworkID } from '@/types';
 
 type ENSNameStatus = 'AVAILABLE' | 'USED' | 'TOO_LONG' | 'DELETED';
@@ -39,7 +40,6 @@ async function fetchDeletedSpaces(networkId: NetworkID, ids: string[]) {
 }
 
 export function useWalletEns(networkId: NetworkID) {
-  const { getSpaces } = useSpaces();
   const { web3, authInitiated } = useWeb3();
 
   const isLoading = ref(false);
