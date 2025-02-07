@@ -7,6 +7,7 @@ defineOptions({ inheritAttrs: false });
 const route = useRoute();
 const spacesStore = useSpacesStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { logo } = useSkin();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
 

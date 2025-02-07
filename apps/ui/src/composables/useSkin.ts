@@ -23,6 +23,8 @@ const decode = (str: string) =>
 const encodeSkin = (skin: SkinSettings) => encode(JSON.stringify(skin));
 const decodeSkin = (str: string) => JSON.parse(decode(str));
 
+const logo = ref<string | null>(null);
+
 export function useSkin() {
   const { css } = useStyleTag('', { id: 'skin' });
   const { setTheme } = useTheme();
@@ -55,6 +57,7 @@ export function useSkin() {
       .join(';')};  }`;
 
     setTheme(skinSettings.theme);
+    logo.value = skinSettings.logo;
   }
 
   watch(
@@ -72,5 +75,5 @@ export function useSkin() {
     { immediate: true }
   );
 
-  return { setSkin, encodeSkin };
+  return { logo, setSkin, encodeSkin };
 }
