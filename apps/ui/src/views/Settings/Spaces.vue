@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { explorePageProtocols } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
+import { useExploreSpacesQuery } from '@/queries/spaces';
 
 useTitle('My spaces');
 
@@ -12,42 +13,33 @@ const protocols = Object.values(explorePageProtocols).map(
 );
 const DEFAULT_PROTOCOL = 'snapshot';
 
-const spacesStore = useSpacesStore();
 const route = useRoute();
 const router = useRouter();
 const { web3 } = useWeb3();
 
 const loaded = ref(false);
+const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
+
+const { data, isPending } = useExploreSpacesQuery({
+  controller: toRef(web3.value, 'account'),
+  protocol
+});
 
 const loading = computed(
   () =>
-    !loaded ||
-    (web3.value.account && spacesStore.loading) ||
-    web3.value.authLoading
+    !loaded || (web3.value.account && isPending.value) || web3.value.authLoading
 );
 
-watch(
-  () => spacesStore.protocol,
-  value => {
-    router.push({ query: { ...route.query, p: value } });
-  }
-);
+watch(protocol, value => {
+  router.push({ query: { ...route.query, p: value } });
+});
 
 watch(
-  [() => route.query.p as string, () => web3.value.account],
-  ([protocolQuery, controller]) => {
-    loaded.value = false;
-
-    spacesStore.protocol = (
+  [() => route.query.p as string],
+  ([protocolQuery]) => {
+    protocol.value = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
-    if (controller) {
-      spacesStore.fetch({ controller });
-    } else {
-      spacesStore.explorePageSpaces = [];
-    }
-
-    loaded.value = true;
   },
   {
     immediate: true
@@ -60,7 +52,7 @@ watch(
     <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
       <div class="flex flex-row space-x-2">
         <UiSelectDropdown
-          v-model="spacesStore.protocol"
+          v-model="protocol"
           title="Protocol"
           gap="12"
           placement="start"
@@ -69,7 +61,12 @@ watch(
       </div>
       <UiTooltip title="Create new space">
         <UiButton
-          :to="{ name: 'create', params: { protocol: spacesStore.protocol } }"
+          :to="{
+            name: 'create',
+            params: {
+              protocol: protocol === 'snapshot' ? 'snapshot' : 'snapshot-x'
+            }
+          }"
           class="!px-0 w-[46px]"
         >
           <IH-plus-sm />
@@ -79,12 +76,12 @@ watch(
     <UiLabel label="My spaces" sticky />
     <UiLoading v-if="loading" class="block m-4" />
     <UiContainer
-      v-else-if="spacesStore.explorePageSpaces.length"
+      v-else-if="data?.pages.flat().length"
       class="!max-w-screen-md pt-5"
     >
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
         <SpacesListItem
-          v-for="space in spacesStore.explorePageSpaces"
+          v-for="space in data?.pages.flat()"
           :key="space.id"
           :space="space"
         />

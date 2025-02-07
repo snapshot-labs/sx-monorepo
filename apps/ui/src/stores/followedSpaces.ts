@@ -1,5 +1,7 @@
+import { useQueryClient } from '@tanstack/vue-query';
 import { defineStore } from 'pinia';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { getSpaces } from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
 import pkg from '../../package.json';
 
@@ -9,8 +11,9 @@ function getCompositeSpaceId(space: Space) {
   return `${space.network}:${space.id}`;
 }
 
+// TODO: refactor to use vue-query, right now it just kind of hijacks spaces query
 export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
-  const spacesStore = useSpacesStore();
+  const queryClient = useQueryClient();
   const actions = useActions();
   const { web3, authInitiated } = useWeb3();
   const { isWhiteLabel } = useWhiteLabel();
@@ -28,19 +31,24 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     return limits.value['user.default.follow_limit'];
   });
 
-  const followedSpacesMap = computed(
-    () =>
-      new Map(
-        followedSpacesIds.value
-          .map(spaceId => {
-            const space = spacesStore.spacesMap.get(spaceId);
-            if (!space) return;
+  const followedSpacesMap = computed(() => {
+    const ids = followedSpacesLoaded.value ? followedSpacesIds.value : [];
 
-            return [getCompositeSpaceId(space), space] as const;
-          })
-          .filter(space => space !== undefined)
-      )
-  );
+    return new Map(
+      ids
+        .map(spaceId => {
+          const space = queryClient.getQueryData<Space>([
+            'spaces',
+            'detail',
+            spaceId
+          ]);
+          if (!space) return;
+
+          return [getCompositeSpaceId(space), space] as const;
+        })
+        .filter(space => space !== undefined)
+    );
+  });
 
   const followedSpaces = computed({
     get() {
@@ -74,9 +82,20 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   async function fetchSpacesData(ids: string[]) {
     if (!ids.length) return;
 
-    await spacesStore.fetchSpaces(
-      ids.filter(id => !spacesStore.spacesMap.has(id))
+    const unavailableIds = ids.filter(
+      id => !queryClient.getQueryData(['spaces', 'detail', id])
     );
+
+    const spaces = await getSpaces({
+      id_in: unavailableIds
+    });
+
+    for (const space of spaces) {
+      queryClient.setQueryData(
+        ['spaces', 'detail', getCompositeSpaceId(space)],
+        space
+      );
+    }
   }
 
   async function loadFollowedSpaces() {

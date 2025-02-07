@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
-import { Proposal as ProposalType } from '@/types';
+import { Proposal as ProposalType, Space } from '@/types';
 
 const props = withDefaults(
   defineProps<{
@@ -17,16 +18,19 @@ const props = withDefaults(
   }
 );
 
+const queryClient = useQueryClient();
 const { getTsFromCurrent } = useMetaStore();
-const spacesStore = useSpacesStore();
 const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
-const space = computed(() =>
-  spacesStore.spacesMap.get(
-    `${props.proposal.network}:${props.proposal.space.id}`
-  )
+const space = computed(
+  () =>
+    queryClient.getQueryData<Space>([
+      'spaces',
+      'detail',
+      `${props.proposal.network}:${props.proposal.space.id}`
+    ]) ?? null
 );
 </script>
 <template>
