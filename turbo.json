@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "codegen"],
+      "dependsOn": ["^build", "codegen", "api#codegen"],
       "outputs": ["dist/**", "dist.cjs/**"]
     },
     "lint": {},
