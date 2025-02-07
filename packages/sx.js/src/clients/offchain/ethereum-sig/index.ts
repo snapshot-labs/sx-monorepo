@@ -6,11 +6,11 @@ import {
 import {
   aliasTypes,
   approvalVoteTypes,
+  domain as baseDomain,
   basicVoteTypes,
   cancelProposalTypes,
   createSpaceTypes,
   deleteSpaceTypes,
-  domain,
   encryptedVoteTypes,
   flagProposalTypes,
   followSpaceTypes,
@@ -107,6 +107,18 @@ export class EthereumSig {
       timestamp: parseInt((Date.now() / 1000).toFixed()),
       ...message
     };
+
+    const domain: typeof baseDomain & { chainId?: number } = baseDomain;
+    const isBrowser =
+      typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+    if (
+      isBrowser &&
+      ((window as any)?.ethereum?.isOKx || (window as any)?.ethereum?.isTrust)
+    ) {
+      domain.chainId = await signer.getChainId();
+    }
+
     const signature = await signer._signTypedData(domain, types, EIP712Message);
     return {
       address,
