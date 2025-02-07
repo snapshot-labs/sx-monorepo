@@ -11,7 +11,7 @@
     "story:dev": "histoire dev",
     "story:build": "histoire build",
     "codegen": "graphql-codegen",
-    "lint": "eslint \"./src/**/*.{ts,vue,json}\"",
+    "lint": "eslint \"./src/**/*.{ts,vue,json}\" --ignore-pattern \"**/gql/**\"",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
