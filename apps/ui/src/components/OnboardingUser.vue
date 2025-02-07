@@ -18,21 +18,34 @@ const user = computed(() => {
 });
 
 const tasks = computed(() => ({
-  profile: !user.value?.created,
-  following: followedSpacesStore.followedSpacesIds.length < 3,
-  votes: !user.value?.votesCount
+  profile: {
+    pending: !user.value?.created,
+    description: 'Setup your profile',
+    link: { name: 'user', params: { user: user.value?.id } }
+  },
+  following: {
+    pending: followedSpacesStore.followedSpacesIds.length < 3,
+    currentStep: followedSpacesStore.followedSpacesIds.length,
+    totalSteps: 3,
+    description: 'Follow at least 3 spaces',
+    link: { name: 'my-explore' }
+  },
+  votes: {
+    pending: !user.value?.votesCount,
+    description: 'Cast your first vote'
+  }
 }));
 
-const hasPendingTasks = computed(() =>
-  Object.values(tasks.value).includes(true)
+const pendingTasks = computed(() =>
+  Object.entries(tasks.value).filter(([, task]) => task.pending)
 );
 
 watch(
-  hasPendingTasks,
+  pendingTasks,
   value => {
     lsSet('showOnboarding', {
       ...lsGet('showOnboarding'),
-      [web3.value.account]: !value ? false : undefined
+      [web3.value.account]: !value.length ? false : undefined
     });
   },
   { immediate: true }
@@ -46,38 +59,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="user && hasPendingTasks">
+  <div v-if="user && pendingTasks.length">
     <UiLabel label="onboarding" sticky />
-    <div v-if="tasks.profile" class="border-b mx-4 py-[14px] flex gap-x-2.5">
-      <IS-flag class="text-skin-link mt-1 shrink-0" />
-      <AppLink
-        :to="{ name: 'user', params: { user: user.id } }"
-        class="grow text-skin-link"
-      >
-        Setup your profile
-      </AppLink>
-    </div>
-
-    <div
-      v-if="tasks.following"
-      class="border-b mx-4 py-[14px] flex gap-x-2.5 text-skin-link"
-    >
-      <IS-flag class="mt-1" />
-      <div>
-        <AppLink :to="{ name: 'my-explore' }" class="grow">
-          Follow at least 3 spaces</AppLink
-        >
-        <div
-          class="inline-block bg-skin-border text-[13px] rounded-full px-1.5 ml-1"
-        >
-          {{ followedSpacesStore.followedSpacesIds.length }}/3
-        </div>
-      </div>
-    </div>
-
-    <div v-if="tasks.votes" class="border-b mx-4 py-[14px] flex gap-x-2.5">
-      <div><IS-flag class="text-skin-link mt-1" /></div>
-      <div class="grow">Cast your first vote</div>
-    </div>
+    <OnboardingTask
+      v-for="[key, task] in pendingTasks"
+      :key="key"
+      :task="task"
+    />
   </div>
 </template>
