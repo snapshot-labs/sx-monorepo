@@ -90,3 +90,9 @@ async function handleFileChange(e: Event) {
     />
   </div>
 </template>
+
+<style lang="scss" scoped>
+button:disabled {
+  @apply cursor-not-allowed;
+}
+</style>

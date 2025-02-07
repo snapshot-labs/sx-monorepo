@@ -158,6 +158,7 @@ const disabled = computed(() => {
       </div>
       <UiInputStampLogo
         v-model="skinSettings.logo"
+        :disabled="disabled"
         :width="380"
         :height="76"
         :definition="{
