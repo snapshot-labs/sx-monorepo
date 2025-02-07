@@ -27,7 +27,7 @@ const logo = ref<string | null>(null);
 
 export function useSkin() {
   const { css } = useStyleTag('', { id: 'skin' });
-  const { setTheme } = useTheme();
+  const { previewTheme } = useTheme();
   const route = useRoute();
 
   function getCssVariables(skinSettings: SkinSettings) {
@@ -56,7 +56,7 @@ export function useSkin() {
       .map(([key, val]) => `${key}:${val}`)
       .join(';')};  }`;
 
-    setTheme(skinSettings.theme);
+    previewTheme(skinSettings.theme);
     logo.value = skinSettings.logo;
   }
 

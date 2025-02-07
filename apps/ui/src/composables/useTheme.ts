@@ -18,18 +18,27 @@ export function useTheme() {
     store.value = theme;
   }
 
-  watchEffect(() => {
-    if (currentTheme.value === DEFAULT_THEME) {
+  function previewTheme(theme: Theme) {
+    applyTheme(theme);
+  }
+
+  function applyTheme(theme: Theme) {
+    if (theme === DEFAULT_THEME) {
       document.documentElement.classList.remove('dark');
     } else {
       document.documentElement.classList.add('dark');
     }
+  }
+
+  watchEffect(() => {
+    applyTheme(currentTheme.value);
   });
 
   return {
     DEFAULT_THEME,
     currentTheme,
     toggleTheme,
-    setTheme
+    setTheme,
+    previewTheme
   };
 }
