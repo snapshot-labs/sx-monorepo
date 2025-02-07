@@ -82,6 +82,8 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const { encodeSkin } = useSkin();
+
 const formErrors = computed(() => {
   const validator = getValidator({
     type: 'object',
@@ -111,6 +113,9 @@ const disabled = computed(() => {
 const previewDomain = computed(
   () => customDomain.value || window.location.host
 );
+const previewUrl = computed(() => {
+  return `${window.location.host}/#/?skin-preview=${encodeSkin(skinSettings.value)}`;
+});
 </script>
 
 <template>
@@ -187,7 +192,7 @@ const previewDomain = computed(
             />
             <iframe
               v-else
-              src="window.location"
+              :src="previewUrl"
               inert="true"
               sandbox="allow-same-origin allow-scripts"
             ></iframe>

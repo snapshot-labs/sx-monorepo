@@ -6,9 +6,27 @@ function hexToCssRgb(hex: string) {
   return `${r},${g},${b}`;
 }
 
+const B64U_LOOKUP = {
+  '/': '_',
+  _: '/',
+  '+': '-',
+  '-': '+',
+  '=': '.',
+  '.': '='
+};
+
+const encode = (str: string) =>
+  btoa(str).replace(/(\+|\/|=)/g, m => B64U_LOOKUP[m]);
+const decode = (str: string) =>
+  atob(str.replace(/(-|_|\.)/g, m => B64U_LOOKUP[m]));
+
+const encodeSkin = (skin: SkinSettings) => encode(JSON.stringify(skin));
+const decodeSkin = (str: string) => JSON.parse(decode(str));
+
 export function useSkin() {
   const { css } = useStyleTag('', { id: 'skin' });
   const { setTheme } = useTheme();
+  const route = useRoute();
 
   function getCssVariables(skinSettings: SkinSettings) {
     const colorVariables = Object.entries(skinSettings).reduce(
@@ -30,12 +48,29 @@ export function useSkin() {
   function setSkin(skinSettings: SkinSettings) {
     if (!skinSettings) return;
 
-    css.value = `:root { ${Object.entries(getCssVariables(skinSettings))
+    const skinVariables = Object.entries(getCssVariables(skinSettings));
+
+    css.value = `:root { ${skinVariables
       .map(([key, val]) => `${key}:${val}`)
       .join(';')};  }`;
 
     setTheme(skinSettings.theme);
   }
 
-  return { setSkin };
+  watch(
+    () => route.query['skin-preview'],
+    previewQuery => {
+      if (!previewQuery) return;
+
+      try {
+        const skinSettings = decodeSkin(previewQuery as string);
+        setSkin(skinSettings);
+      } catch (e) {
+        console.error('Unable to decode skin preview', e);
+      }
+    },
+    { immediate: true }
+  );
+
+  return { setSkin, encodeSkin };
 }
