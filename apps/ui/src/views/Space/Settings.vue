@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -45,8 +44,7 @@ const {
   deleteSpace,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
-
-const queryClient = useQueryClient();
+const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
 const isAdvancedFormResolved = ref(false);
@@ -225,9 +223,7 @@ function isValidTab(param: string | string[]): param is Tab['id'] {
 }
 
 async function reloadSpaceAndReset() {
-  queryClient.invalidateQueries({
-    queryKey: ['spaces', 'detail', `${props.space.network}:${props.space.id}`]
-  });
+  await spacesStore.fetchSpace(props.space.id, props.space.network);
   await reset({ force: true });
 }
 

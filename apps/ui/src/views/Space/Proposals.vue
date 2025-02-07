@@ -68,10 +68,10 @@ watchThrottled(
 );
 
 watch(
-  [() => props.space.id, state, labels],
-  ([toSpaceId, toState, toLabels], [fromSpaceId, fromState, fromLabels]) => {
+  [props.space, state, labels],
+  ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
     if (
-      toSpaceId !== fromSpaceId ||
+      toSpace.id !== fromSpace?.id ||
       toState !== fromState ||
       toLabels !== fromLabels
     ) {
@@ -99,9 +99,9 @@ watch(
 );
 
 watch(
-  [() => props.space, () => web3.value.account, () => web3.value.authLoading],
-  ([space, account, authLoading]) => {
-    if (authLoading || !space || !account) return;
+  [props.space, () => web3.value.account, () => web3.value.authLoading],
+  ([proposal, account, authLoading]) => {
+    if (authLoading || !proposal || !account) return;
 
     handleFetchVotingPower();
   },

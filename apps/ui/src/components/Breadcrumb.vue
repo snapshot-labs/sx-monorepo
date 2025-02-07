@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { useQueryClient } from '@tanstack/vue-query';
-import { NetworkID, Space } from '@/types';
+import { NetworkID } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
 const route = useRoute();
-const queryClient = useQueryClient();
+const spacesStore = useSpacesStore();
 const { isWhiteLabel } = useWhiteLabel();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
@@ -26,13 +25,7 @@ const space = computed(() => {
     return null;
   }
 
-  return (
-    queryClient.getQueryData<Space>([
-      'spaces',
-      'detail',
-      `${networkId.value}:${spaceAddress.value}`
-    ]) ?? null
-  );
+  return spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`);
 });
 </script>
 

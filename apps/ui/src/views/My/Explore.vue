@@ -3,7 +3,6 @@ import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { getUrl } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork, metadataNetwork } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
-import { useExploreSpacesQuery } from '@/queries/spaces';
 import { SelectItem } from '@/types';
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
@@ -28,21 +27,13 @@ const categories = [
 ];
 
 const { setTitle } = useTitle();
+const spacesStore = useSpacesStore();
 const route = useRoute();
 const router = useRouter();
 
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 const network = ref<string>(DEFAULT_NETWORK);
 const category = ref<SpaceCategory>(DEFAULT_CATEGORY);
-const searchQuery = ref<string | undefined>(undefined);
-
-const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
-  useExploreSpacesQuery({
-    searchQuery,
-    protocol,
-    network,
-    category
-  });
 
 const { networks: offchainNetworks } = useOffchainNetworksList(
   metadataNetwork,
@@ -102,12 +93,6 @@ function isValidCategory(category: string): category is SpaceCategory {
   return category === 'all' || SPACE_CATEGORIES.some(c => c.id === category);
 }
 
-function handleEndReached() {
-  if (!hasNextPage.value) return;
-
-  fetchNextPage();
-}
-
 watch([protocol, category, network], ([p, c, n]) => {
   const props: { p?: string; c?: string; n?: string } = {
     ...route.query,
@@ -127,7 +112,7 @@ watch(
     () => route.query.c as string,
     () => route.query.n as string
   ],
-  ([searchQueryValue, protocolQuery, categoryQuery, networkQuery]) => {
+  ([searchQuery, protocolQuery, categoryQuery, networkQuery]) => {
     const _protocol = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
@@ -139,7 +124,12 @@ watch(
     category.value = isValidCategory(categoryQuery)
       ? categoryQuery
       : DEFAULT_CATEGORY;
-    searchQuery.value = searchQueryValue ? searchQueryValue : undefined;
+    spacesStore.protocol = _protocol;
+    spacesStore.fetch({
+      searchQuery,
+      category: category.value,
+      network: network.value
+    });
   },
   {
     immediate: true
@@ -199,16 +189,22 @@ watchEffect(() => setTitle('Explore'));
     </div>
     <div>
       <UiLabel label="Spaces" sticky />
-      <UiLoading v-if="isPending" class="block m-4" />
-      <div v-else-if="data">
+      <UiLoading v-if="spacesStore.loading" class="block m-4" />
+      <div v-else-if="spacesStore.loaded">
         <UiContainerInfiniteScroll
-          v-if="data.pages.flat().length"
-          :loading-more="isFetchingNextPage"
+          v-if="spacesStore.explorePageSpaces.length"
+          :loading-more="spacesStore.loadingMore"
           class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3"
-          @end-reached="handleEndReached"
+          @end-reached="
+            spacesStore.fetchMore({
+              searchQuery: route.query.q as string,
+              category: category,
+              network: network
+            })
+          "
         >
           <SpacesListItem
-            v-for="space in data.pages.flat()"
+            v-for="space in spacesStore.explorePageSpaces"
             :key="space.id"
             :space="space"
           />

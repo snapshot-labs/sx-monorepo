@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useQueryClient } from '@tanstack/vue-query';
 import { getUserStats } from '@/helpers/efp';
 import {
   _n,
@@ -12,12 +11,11 @@ import {
 } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { getSpaces } from '@/queries/spaces';
 import { Space, UserActivity } from '@/types';
 
-const queryClient = useQueryClient();
 const route = useRoute();
 const usersStore = useUsersStore();
+const spacesStore = useSpacesStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const { copy, copied } = useClipboard();
@@ -63,25 +61,6 @@ async function loadUserMetadata(userId: string) {
   }
 }
 
-async function fetchSpacesAndStore(ids: string[]) {
-  if (!ids.length) return;
-
-  const unavailableIds = ids.filter(
-    id => !queryClient.getQueryData(['spaces', 'detail', id])
-  );
-
-  const spaces = await getSpaces({
-    id_in: unavailableIds
-  });
-
-  for (const space of spaces) {
-    queryClient.setQueryData(
-      ['spaces', 'detail', `${space.network}:${space.id}`],
-      space
-    );
-  }
-}
-
 async function loadActivities(userId: string) {
   loadingActivities.value = true;
 
@@ -99,8 +78,10 @@ async function loadActivities(userId: string) {
           b.proposal_count - a.proposal_count || b.vote_count - a.vote_count
       );
 
-    await fetchSpacesAndStore(
-      aggregatedActivities.map(activity => activity.spaceId)
+    await spacesStore.fetchSpaces(
+      aggregatedActivities
+        .map(activity => activity.spaceId)
+        .filter(id => !spacesStore.spacesMap.has(id))
     );
 
     const totalProposals = aggregatedActivities.reduce(
@@ -114,11 +95,7 @@ async function loadActivities(userId: string) {
 
     activities.value = aggregatedActivities
       .map((activity: UserActivity) => {
-        const space = queryClient.getQueryData<Space>([
-          'spaces',
-          'detail',
-          activity.spaceId
-        ]);
+        const space = spacesStore.spacesMap.get(activity.spaceId);
 
         if (!space) return;
 
