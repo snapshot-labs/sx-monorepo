@@ -22,7 +22,11 @@
       "dependsOn": ["codegen", "^build"]
     },
     "codegen": {
-      "outputs": [".checkpoint/**", "generated/**", "src/gql/**"],
+      "outputs": [
+        ".checkpoint/**",
+        "generated/**",
+        "src/networks/common/graphqlApi/gql/**"
+      ],
       "inputs": ["**/*.graphql", "**/*.gql", "codegen.ts"]
     }
   }

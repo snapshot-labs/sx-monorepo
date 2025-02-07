@@ -26,4 +26,4 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-src/gql
+gql

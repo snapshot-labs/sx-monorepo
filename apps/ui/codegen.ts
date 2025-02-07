@@ -5,7 +5,7 @@ const config: CodegenConfig = {
   documents: ['src/networks/common/graphqlApi/queries.ts'],
   ignoreNoDocuments: true, // for better experience with the watcher
   generates: {
-    './src/gql/': {
+    './src/networks/common/graphqlApi/gql/': {
       preset: 'client',
       config: {
         enumsAsTypes: true,

@@ -1,9 +1,9 @@
+import { RequiredProperty } from '@/types';
 import {
   ProposalFieldsFragment,
   SpaceFieldsFragment,
   VoteFieldsFragment
-} from '@/gql/graphql';
-import { RequiredProperty } from '@/types';
+} from './gql/graphql';
 
 export type ApiVote = VoteFieldsFragment;
 export type ApiSpace = SpaceFieldsFragment;
