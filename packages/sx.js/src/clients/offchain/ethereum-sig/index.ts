@@ -109,9 +109,12 @@ export class EthereumSig {
     };
 
     const domain: typeof baseDomain & { chainId?: number } = baseDomain;
+    const isBrowser =
+      typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
     if (
-      (window as any)?.ethereum?.isOKx ||
-      (window as any)?.ethereum?.isTrust
+      isBrowser &&
+      ((window as any)?.ethereum?.isOKx || (window as any)?.ethereum?.isTrust)
     ) {
       domain.chainId = await signer.getChainId();
     }
