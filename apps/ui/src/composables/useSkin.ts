@@ -26,7 +26,7 @@ const decodeSkin = (str: string) => JSON.parse(decode(str));
 const logo = ref<string | null>(null);
 
 export function useSkin() {
-  const { css } = useStyleTag('', { id: 'skin' });
+  const { css } = useStyleTag('');
   const { previewTheme } = useTheme();
   const route = useRoute();
 
