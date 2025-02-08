@@ -38,7 +38,7 @@ const tasks = computed(() => ({
   verified: {
     pending: !props.space.verified,
     description: 'Get your space verified',
-    externalLink: VERIFIED_URL
+    link: VERIFIED_URL
   }
 }));
 

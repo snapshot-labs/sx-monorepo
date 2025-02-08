@@ -1,11 +1,12 @@
 <script setup lang="ts">
-interface Task {
+import { RouteLocationRaw } from 'vue-router';
+
+type Task = {
   description: string;
-  link?: { name: string; params?: Record<string, any> };
-  externalLink?: string;
+  link?: RouteLocationRaw;
   currentStep?: number;
   totalSteps?: number;
-}
+};
 
 defineProps<{ task: Task }>();
 </script>
@@ -15,9 +16,6 @@ defineProps<{ task: Task }>();
     <div>
       <template v-if="task.link">
         <AppLink :to="task.link">{{ task.description }}</AppLink>
-      </template>
-      <template v-else-if="task.externalLink">
-        <a :href="task.externalLink" target="_blank">{{ task.description }}</a>
       </template>
       <template v-else>
         {{ task.description }}
