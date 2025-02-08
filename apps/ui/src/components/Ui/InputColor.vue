@@ -8,6 +8,7 @@ export default {
 const props = defineProps<{
   loading?: boolean;
   error?: string;
+  required?: boolean;
   definition: any;
 }>();
 
@@ -94,6 +95,7 @@ function validateAndConvertColor(color: string): string {
     :loading="loading"
     :error="error"
     :dirty="dirty"
+    :required="required"
     :input-value-length="inputValue?.length"
   >
     <div class="flex">
