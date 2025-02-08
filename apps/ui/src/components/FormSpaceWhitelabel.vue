@@ -83,6 +83,7 @@ const props = defineProps<{
 }>();
 
 const { encodeSkin } = useSkin();
+const { isWhiteLabel } = useWhiteLabel();
 
 const formErrors = computed(() => {
   const validator = getValidator({
@@ -184,14 +185,16 @@ const previewUrl = computed(() => {
         <div class="browser-toolbar">
           <div class="browser-toolbar-address" v-text="previewDomain" />
         </div>
-        <div class="browser-content-container">
-          <div class="browser-content flex items-center justify-center">
-            <IC-zap
-              v-if="disabled"
-              class="inline-block my-[18px] size-[256px] text-skin-border"
-            />
+        <div class="browser-content-container flex items-center justify-center">
+          <IC-zap v-if="disabled" class="size-[126px] text-skin-border" />
+          <div v-else-if="!isWhiteLabel">
+            Preview only available on
+            <AppLink :to="`https://${customDomain}/#/settings/whitelabel`">{{
+              customDomain
+            }}</AppLink>
+          </div>
+          <div v-else class="browser-content">
             <iframe
-              v-else
               :src="previewUrl"
               inert="true"
               sandbox="allow-same-origin allow-scripts"
@@ -228,7 +231,6 @@ $browser-content-zoom: 0.35;
 
   &-content {
     transform: scale($browser-content-zoom);
-    transform-origin: left top;
 
     &,
     & iframe {
@@ -239,7 +241,7 @@ $browser-content-zoom: 0.35;
     }
 
     &-container {
-      @apply inline-block overflow-hidden relative;
+      @apply overflow-hidden relative;
 
       width: calc($browser-content-width * $browser-content-zoom - 2px);
       height: calc($browser-content-height * $browser-content-zoom - 2px);
