@@ -212,7 +212,7 @@ $browser-content-height: 720px;
 $browser-content-zoom: 0.35;
 
 .browser {
-  @apply border rounded-md;
+  @apply overflow-hidden border rounded-md;
 
   width: calc($browser-content-width * $browser-content-zoom);
 
