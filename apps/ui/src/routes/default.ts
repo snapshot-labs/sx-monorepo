@@ -41,7 +41,7 @@ export default [
 
   {
     path: '/create',
-    redirect: { name: 'create-snapshot-x' }
+    redirect: { name: 'space-create-snapshot-x' }
   },
   {
     path: '/create/snapshot-x',
