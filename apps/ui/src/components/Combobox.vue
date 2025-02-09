@@ -47,6 +47,12 @@ const inputValue = computed({
 });
 
 const content = computed(() => query.value || getDisplayValue(model.value));
+const icon = computed(() => {
+  const option = props.definition.options.find(
+    option => option.id === model.value
+  );
+  return option ? option.icon : null;
+});
 
 function handleFocus(event: FocusEvent, open: boolean) {
   if (!event.target || open) return;
@@ -97,20 +103,28 @@ watch(model, () => {
               sizer: inline
             }"
           >
-            <ComboboxInput
-              class="s-input !flex items-center justify-between !mb-0"
+            <div
+              class="s-input !flex items-center"
               :class="{
                 '!rounded-b-none': !gap && open,
-                'h-[42px] min-w-11': inline
+                'h-[42px]': inline
               }"
-              :size="'1'"
-              autocomplete="off"
-              :placeholder="definition.examples?.[0]"
-              :display-value="item => getDisplayValue(item as T)"
-              @keydown.enter="() => (query = '')"
-              @change="e => (query = e.target.value)"
-              @focus="event => handleFocus(event, open)"
-            />
+            >
+              <component :is="icon" class="size-[20px] mr-2" />
+              <ComboboxInput
+                class="bg-transparent"
+                :size="content.length"
+                :class="{
+                  'h-[42px] min-w-11': inline
+                }"
+                autocomplete="off"
+                :placeholder="definition.examples?.[0]"
+                :display-value="item => getDisplayValue(item as T)"
+                @keydown.enter="() => (query = '')"
+                @change="e => (query = e.target.value)"
+                @focus="event => handleFocus(event, open)"
+              />
+            </div>
           </ComboboxButton>
           <ComboboxButton v-if="!inline" class="absolute right-3 bottom-[14px]">
             <IH-chevron-up v-if="open" />
@@ -178,7 +192,7 @@ watch(model, () => {
     @apply col-start-1 row-start-1;
   }
 
-  &::after {
+  input::after {
     content: attr(data-value);
     @apply px-3 border-x col-start-1 row-start-1;
     visibility: hidden;
