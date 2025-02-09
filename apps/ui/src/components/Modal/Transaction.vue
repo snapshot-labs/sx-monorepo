@@ -307,6 +307,7 @@ watchEffect(async () => {
           v-model="form.to"
           :error="errors.to"
           :show-picker="!loading"
+          :required="true"
           :definition="{
             type: 'string',
             title: 'Contract address',
@@ -320,6 +321,7 @@ watchEffect(async () => {
         v-if="showAbiInput"
         v-model="abiStr"
         :error="errors.abi"
+        :required="true"
         :definition="{
           type: 'string',
           format: 'abi',
@@ -341,6 +343,7 @@ watchEffect(async () => {
           title: 'ETH amount',
           examples: ['Payable amount']
         }"
+        :required="true"
       />
       <div v-if="definition">
         <UiForm

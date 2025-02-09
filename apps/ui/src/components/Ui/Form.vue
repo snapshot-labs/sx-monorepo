@@ -99,5 +99,6 @@ const getComponent = (property: {
     :path="path ? `${path}.${i}` : i"
     :definition="property"
     :error="error?.[i]"
+    :required="definition.required?.includes(i)"
   />
 </template>

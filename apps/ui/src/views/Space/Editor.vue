@@ -562,6 +562,7 @@ watchEffect(() => {
             v-model="proposal.title"
             :definition="TITLE_DEFINITION"
             :error="formErrors.title"
+            :required="true"
           />
           <div class="flex space-x-3">
             <button type="button" @click="previewEnabled = false">

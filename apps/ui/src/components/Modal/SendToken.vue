@@ -280,11 +280,12 @@ watchEffect(async () => {
       <UiInputAddress
         v-model="form.to"
         :definition="recipientDefinition"
+        :required="true"
         :error="formErrors.to"
         @pick="handlePickerClick('contact')"
       />
       <div class="s-base">
-        <div class="s-label" v-text="'Token'" />
+        <div class="s-label" v-text="'Token *'" />
         <button
           type="button"
           class="s-input text-left h-[61px]"
@@ -310,6 +311,7 @@ watchEffect(async () => {
             :model-value="form.amount"
             :definition="amountDefinition"
             :error="formErrors.amount"
+            :required="true"
             @update:model-value="handleAmountUpdate"
           />
           <button

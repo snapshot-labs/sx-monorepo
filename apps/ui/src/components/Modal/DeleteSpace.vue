@@ -58,6 +58,7 @@ watch(
           title: `Enter ${spaceId} to continue`,
           minLength: 1
         }"
+        :required="true"
       />
       <UiCheckbox
         v-model="form.confirmed"
