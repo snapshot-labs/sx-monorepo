@@ -69,7 +69,7 @@ watch(
       </div>
       <UiTooltip title="Create new space">
         <UiButton
-          :to="{ name: 'create', params: { protocol: spacesStore.protocol } }"
+          :to="{ name: `space-create-${spacesStore.protocol}` }"
           class="!px-0 w-[46px]"
         >
           <IH-plus-sm />
