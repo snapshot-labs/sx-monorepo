@@ -81,7 +81,10 @@ watch(model, () => {
     :definition="inline ? omit(definition, ['title']) : definition"
     :error="error"
     :dirty="dirty"
-    class="relative mb-[14px] w-auto"
+    class="relative w-auto"
+    :class="{
+      'mb-[14px]': !inline
+    }"
   >
     <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>
       <Float
@@ -192,7 +195,7 @@ watch(model, () => {
     @apply col-start-1 row-start-1;
   }
 
-  input::after {
+  .s-input::after {
     content: attr(data-value);
     @apply px-3 border-x col-start-1 row-start-1;
     visibility: hidden;
