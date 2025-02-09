@@ -251,12 +251,14 @@ export type UpdateStatement = {
   status: string;
 };
 
-export type UpdateSpace = {
+export type CreateSpace = {
   from?: string;
   timestamp?: number;
   space: string;
   settings: string;
 };
+
+export type UpdateSpace = CreateSpace;
 
 export type DeleteSpace = {
   from?: string;

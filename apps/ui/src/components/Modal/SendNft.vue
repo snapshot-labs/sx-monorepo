@@ -172,10 +172,11 @@ watchEffect(async () => {
         v-model="form.to"
         :definition="recipientDefinition"
         :error="formErrors.to"
+        :required="true"
         @pick="handlePickerClick('contact')"
       />
       <div class="s-base">
-        <div class="s-label" v-text="'NFT'" />
+        <div class="s-label" v-text="'NFT *'" />
         <button
           type="button"
           class="s-input text-left h-[61px]"

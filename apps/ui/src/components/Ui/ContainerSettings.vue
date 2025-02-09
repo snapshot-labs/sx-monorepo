@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  title: string;
+  title?: string;
   description?: string;
 }>();
 </script>
@@ -8,6 +8,7 @@ defineProps<{
 <template>
   <div class="mb-4">
     <h3
+      v-if="title"
       class="text-md leading-6"
       :class="{
         'mb-4': !description

@@ -405,6 +405,16 @@ export function createActions(
         chainId
       );
     },
+    createSpaceRaw: async (
+      web3: Web3Provider,
+      id: string,
+      settings: string
+    ) => {
+      return client.createSpace({
+        signer: web3.getSigner(),
+        data: { space: id, settings }
+      });
+    },
     updateSettingsRaw: async (
       web3: Web3Provider,
       space: Space,

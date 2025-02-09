@@ -5,6 +5,7 @@ const model = defineModel<T>({ required: true });
 
 const props = defineProps<{
   error?: string;
+  required?: boolean;
   definition: DefinitionWithOptions<T>;
   disabled?: boolean;
 }>();
@@ -31,7 +32,12 @@ watch(model, () => {
 </script>
 
 <template>
-  <UiWrapperInput :definition="definition" :error="error" :dirty="dirty">
+  <UiWrapperInput
+    :definition="definition"
+    :error="error"
+    :dirty="dirty"
+    :required="required"
+  >
     <select v-model="inputValue" class="s-input" :disabled="disabled">
       <option disabled value="">Please select one</option>
       <option

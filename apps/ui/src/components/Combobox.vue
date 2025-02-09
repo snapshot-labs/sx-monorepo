@@ -19,6 +19,7 @@ const props = defineProps<{
   inline?: boolean;
   definition: DefinitionWithOptions<T | null>;
   gap?: number;
+  required?: boolean;
 }>();
 
 const dirty = ref(false);
@@ -75,6 +76,7 @@ watch(model, () => {
     :definition="inline ? omit(definition, ['title']) : definition"
     :error="error"
     :dirty="dirty"
+    :required="required"
     class="relative mb-[14px] w-auto"
   >
     <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>

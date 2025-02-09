@@ -273,6 +273,29 @@ export function useActions() {
     return receipt;
   }
 
+  async function createSpaceRaw(
+    networkId: NetworkID,
+    id: string,
+    settings: string
+  ) {
+    if (!auth.value) {
+      await forceLogin();
+      return null;
+    }
+
+    const network = getNetwork(networkId);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
+
+    return wrapPromise(
+      networkId,
+      network.actions.createSpaceRaw(auth.value.provider, id, settings)
+    );
+  }
+
   async function vote(
     proposal: Proposal,
     choice: Choice,
@@ -757,6 +780,7 @@ export function useActions() {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
     createSpace: wrapWithErrors(createSpace),
+    createSpaceRaw: wrapWithErrors(createSpaceRaw),
     vote: wrapWithErrors(vote),
     propose: wrapWithErrors(propose),
     updateProposal: wrapWithErrors(updateProposal),

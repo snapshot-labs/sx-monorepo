@@ -102,6 +102,7 @@ watchEffect(async () => {
         v-model="form.controller"
         :definition="controllerDefinition"
         :error="formErrors.delegatee"
+        :required="true"
         @pick="showPicker = true"
       />
     </div>

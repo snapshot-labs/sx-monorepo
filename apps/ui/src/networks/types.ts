@@ -229,6 +229,7 @@ export type ReadOnlyNetworkActions = {
     owner: string
   );
   updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
+  createSpaceRaw(web3: Web3Provider, id: string, settings: string);
   deleteSpace(web3: Web3Provider, space: Space);
   send(envelope: any): Promise<any>;
 };

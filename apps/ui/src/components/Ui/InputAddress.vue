@@ -28,6 +28,7 @@ const props = withDefaults(
     definition?: BaseDefinition<string> & {
       chainId?: number | string;
     };
+    required?: boolean;
   }>(),
   {
     showPicker: true
@@ -76,6 +77,7 @@ const networkDetails = computed<NetworkDetails | null>(() => {
     </UiTooltip>
     <UiInputString
       :definition="props.definition"
+      :required="required"
       v-bind="$attrs as any"
       class="!pr-7"
       :class="{

@@ -2,7 +2,7 @@
 import { validateForm } from '@/helpers/validation';
 import { ChainId } from '@/types';
 
-const model = defineModel<string>({ required: true });
+const model = defineModel<string>();
 
 const props = defineProps<{
   title: string;
@@ -50,6 +50,7 @@ watch(formErrors, value => emit('errors', value));
         :model-value="model"
         :error="formErrors.controller"
         :definition="definition"
+        :required="true"
         @update:model-value="v => (model = v)"
       />
     </div>
