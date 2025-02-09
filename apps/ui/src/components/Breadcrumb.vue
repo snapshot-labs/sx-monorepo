@@ -44,6 +44,7 @@ const space = computed(() => {
       type="space-logo"
       :width="190"
       :height="38"
+      class="rounded-none border-none"
     />
     <template v-else>
       <div class="shrink-0">
