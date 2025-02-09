@@ -88,7 +88,7 @@ const DEFAULT_SKIN_SETTINGS = {
   heading_color: null,
   primary_color: null,
   theme: 'light',
-  logo: null
+  logo: undefined
 };
 
 export function useSpaceSettings(space: Ref<Space>) {
