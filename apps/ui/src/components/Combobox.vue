@@ -107,7 +107,7 @@ watch(model, () => {
             }"
           >
             <div
-              class="s-input !flex items-center"
+              class="s-input !flex items-center !mb-0"
               :class="{
                 '!rounded-b-none': !gap && open,
                 'h-[42px]': inline
@@ -193,13 +193,6 @@ watch(model, () => {
 
   input {
     @apply col-start-1 row-start-1;
-  }
-
-  .s-input::after {
-    content: attr(data-value);
-    @apply px-3 border-x col-start-1 row-start-1;
-    visibility: hidden;
-    white-space: pre-wrap;
   }
 }
 </style>
