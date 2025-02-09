@@ -61,8 +61,8 @@ const STEPS: extendedStepRecords = {
   profile: {
     title: 'Profile',
     isValid: () => !stepsErrors.value['profile'],
-    contentTitle: 'Space profile',
-    contentDescription: 'Tell us more about your space.'
+    contentTitle: '',
+    contentDescription: ''
   },
   network: {
     title: 'Network',
