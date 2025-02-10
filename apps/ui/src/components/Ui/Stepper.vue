@@ -22,12 +22,6 @@ const emit = defineEmits<{
 
 const stepper = useStepper(props.steps);
 
-const firstInvalidStepIndex = computed(() => {
-  const index = Object.values(props.steps).findIndex(step => !step.isValid());
-
-  return index >= 0 ? index : stepper.stepNames.value.length;
-});
-
 const submitDisabled = computed(() =>
   Object.values(props.steps).some(step => !step.isValid())
 );
@@ -44,12 +38,6 @@ function goToStep(stepName: string) {
     top: 0
   });
 }
-
-watchEffect(() => {
-  if (firstInvalidStepIndex.value < stepper.index.value) {
-    stepper.goTo(stepper.stepNames.value[firstInvalidStepIndex.value]);
-  }
-});
 </script>
 
 <template>
@@ -58,19 +46,20 @@ watchEffect(() => {
       class="flex fixed lg:sticky top-[72px] inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
     >
       <button
-        v-for="(step, stepName, i) in steps"
+        v-for="(step, stepName) in steps"
         :key="stepName"
         type="button"
-        :disabled="i > firstInvalidStepIndex"
-        class="px-3 py-1 block lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap"
+        class="px-3 py-1 flex items-center gap-2 lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap"
         :class="{
           'bg-skin-active-bg': stepper.isCurrent(stepName),
-          'hover:bg-skin-hover-bg': !stepper.isCurrent(stepName),
-          'text-skin-link': i <= firstInvalidStepIndex
+          'hover:bg-skin-hover-bg': !stepper.isCurrent(stepName)
         }"
         @click="goToStep(stepName)"
-        v-text="step.title"
-      />
+      >
+        <IH-check-circle v-if="!step.isValid()" :class="'opacity-20'" />
+        <IS-check-circle v-if="step.isValid()" class="text-skin-success" />
+        {{ step.title }}
+      </button>
     </div>
     <div class="flex-1">
       <div class="mt-8 lg:mt-0">

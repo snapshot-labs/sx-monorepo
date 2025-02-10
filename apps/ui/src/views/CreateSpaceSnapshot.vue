@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS_FORM = {
 };
 
 const DEFAULT_STEP_ERRORS = {
-  profile: false,
+  profile: true,
   voting: false
 };
 
