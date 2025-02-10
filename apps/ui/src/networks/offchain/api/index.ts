@@ -88,12 +88,13 @@ function getProposalState(
     });
 
     if (
-      (proposal.quorumType === 'rejection' &&
-        currentQuorum > proposal.quorum) ||
-      (proposal.quorumType !== 'rejection' && currentQuorum < proposal.quorum)
+      proposal.quorumType === 'rejection'
+        ? currentQuorum > proposal.quorum
+        : currentQuorum < proposal.quorum
     ) {
       return 'rejected';
     }
+
     if (proposal.type !== 'basic') {
       return 'closed';
     }
