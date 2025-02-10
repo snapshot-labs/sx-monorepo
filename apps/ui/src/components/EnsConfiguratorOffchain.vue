@@ -22,6 +22,7 @@ const {
   refresh
 } = useWalletEns(props.networkId);
 const { web3 } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const validNames = computed(() => {
   return Object.values(names.value || {}).filter(d => d.status === 'AVAILABLE');
@@ -75,82 +76,93 @@ function handleSelect(value: string) {
         space or proposals on Snapshot.
       </UiMessage>
     </div>
-    <div class="space-y-3">
-      <div class="flex justify-between items-center">
-        <h4 class="eyebrow">ENS names</h4>
-        <UiButton
-          v-if="names"
-          class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
-          :disabled="isLoading"
-          :loading="isRefreshing"
-          @click="refresh"
-        >
-          <IH-refresh class="h-[16px]" />
-          Refresh
-        </UiButton>
-      </div>
-      <UiLoading v-if="(isLoading && !isRefreshing) || !names" class="block" />
-      <div v-else-if="Object.keys(names).length" class="space-y-2">
-        <UiSelector
-          v-for="name in validNames"
-          :key="name.name"
-          :is-active="spaceId === name.name"
-          class="w-full"
-          @click="() => handleSelect(name.name)"
-        >
-          <div class="flex gap-2 items-center text-skin-link">
-            <IH-Globe-alt class="shrink-0" />
-            {{ name.name }}
-          </div>
-        </UiSelector>
-        <UiSelector
-          v-for="name in invalidNames"
-          :key="name.name"
-          :disabled="true"
-          class="w-full"
-        >
-          <div class="flex gap-2 items-top">
-            <IH-Exclamation class="mt-[5px] text-skin-danger shrink-0" />
-            <div class="flex flex-col">
-              <div class="text-skin-danger" v-text="name.name" />
-              <div v-if="name.status === 'TOO_LONG'">
-                ENS name is too long. It must be less than
-                {{ MAX_ENS_NAME_LENGTH }} characters
-              </div>
-              <div v-else-if="name.status === 'DELETED'">
-                ENS name was used by a previously deleted space and can not be
-                reused to create a new space.
-                <AppLink
-                  to="https://docs.snapshot.box/faq/im-a-snapshot-user/space-settings#why-cant-i-create-a-new-space-with-my-previous-deleted-space-ens-name"
-                  class="text-skin-link"
-                >
-                  Learn more
-                  <IH-arrow-sm-right class="-rotate-45 inline" />
-                </AppLink>
+    <div v-if="web3.account" class="space-y-4">
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <h4 class="eyebrow">ENS names</h4>
+          <UiButton
+            v-if="names"
+            class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
+            :disabled="isLoading"
+            :loading="isRefreshing"
+            @click="refresh"
+          >
+            <IH-refresh class="h-[16px]" />
+            Refresh
+          </UiButton>
+        </div>
+        <UiLoading
+          v-if="(isLoading && !isRefreshing) || !names"
+          class="block"
+        />
+        <div v-else-if="Object.keys(names).length" class="space-y-2">
+          <UiSelector
+            v-for="name in validNames"
+            :key="name.name"
+            :is-active="spaceId === name.name"
+            class="w-full"
+            @click="() => handleSelect(name.name)"
+          >
+            <div class="flex gap-2 items-center text-skin-link">
+              <IH-Globe-alt class="shrink-0" />
+              {{ name.name }}
+            </div>
+          </UiSelector>
+          <UiSelector
+            v-for="name in invalidNames"
+            :key="name.name"
+            :disabled="true"
+            class="w-full"
+          >
+            <div class="flex gap-2 items-top">
+              <IH-Exclamation class="mt-[5px] text-skin-danger shrink-0" />
+              <div class="flex flex-col">
+                <div class="text-skin-danger" v-text="name.name" />
+                <div v-if="name.status === 'TOO_LONG'">
+                  ENS name is too long. It must be less than
+                  {{ MAX_ENS_NAME_LENGTH }} characters
+                </div>
+                <div v-else-if="name.status === 'DELETED'">
+                  ENS name was used by a previously deleted space and can not be
+                  reused to create a new space.
+                  <AppLink
+                    to="https://docs.snapshot.box/faq/im-a-snapshot-user/space-settings#why-cant-i-create-a-new-space-with-my-previous-deleted-space-ens-name"
+                    class="text-skin-link"
+                  >
+                    Learn more
+                    <IH-arrow-sm-right class="-rotate-45 inline" />
+                  </AppLink>
+                </div>
               </div>
             </div>
-          </div>
-        </UiSelector>
+          </UiSelector>
+        </div>
+        <UiMessage v-else type="danger">
+          No ENS names found for the current wallet.
+        </UiMessage>
+        <AppLink to="https://app.ens.domains" class="inline-block">
+          Register a new ENS name
+          <IH-arrow-sm-right class="-rotate-45 inline" />
+        </AppLink>
       </div>
-      <UiMessage v-else type="danger">
-        No ENS names found for the current wallet.
-      </UiMessage>
-      <AppLink to="https://app.ens.domains" class="inline-block">
-        Register a new ENS name <IH-arrow-sm-right class="-rotate-45 inline" />
-      </AppLink>
+      <div class="space-y-3">
+        <h4 class="eyebrow">Controller</h4>
+        <UiMessage type="info">
+          Your space controller will be set to the ENS name owner. Any changes
+          to the ENS name ownership will also change the controller.</UiMessage
+        >
+        <FormSpaceController
+          :controller="web3.account"
+          :network="getNetwork(networkId)"
+          :disabled="true"
+        />
+      </div>
     </div>
-
-    <div class="space-y-3">
-      <h4 class="eyebrow">Controller</h4>
-      <UiMessage type="info">
-        Your space controller will be set to the ENS name owner. Any changes to
-        the ENS name ownership will also change the controller.</UiMessage
-      >
-      <FormSpaceController
-        :controller="web3.account"
-        :network="getNetwork(networkId)"
-        :disabled="true"
-      />
-    </div>
+    <UiMessage v-else type="danger">
+      <button class="text-skin-link" @click="modalAccountOpen = true">
+        Connect your wallet
+      </button>
+      in order to see your ENS names
+    </UiMessage>
   </div>
 </template>
