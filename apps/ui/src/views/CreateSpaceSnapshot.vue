@@ -2,7 +2,7 @@
 import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
-import { getNetwork, metadataNetwork } from '@/networks';
+import { metadataNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { Member, NetworkID, Validation } from '@/types';
 
@@ -95,12 +95,6 @@ const STEPS: extendedStepRecords = {
     contentTitle: 'Members',
     contentDescription:
       'Assign different roles and permissions to your space members.'
-  },
-  controller: {
-    title: 'Controller',
-    isValid: () => true,
-    contentTitle: 'Controller',
-    contentDescription: "The controller is the space's owner."
   }
 } as const;
 
@@ -315,17 +309,6 @@ watch(
             :is-controller="true"
             :is-admin="true"
           />
-          <template v-if="currentStep === 'controller'">
-            <UiMessage type="danger" class="mb-3">
-              The controller is set to the ENS name owner. Any change of the ENS
-              name ownership will also change the controller.</UiMessage
-            >
-            <FormSpaceController
-              :controller="web3.account"
-              :network="getNetwork(networkId)"
-              :disabled="true"
-            />
-          </template>
         </UiContainerSettings>
       </template>
       <template #submit-text> Create space</template>
