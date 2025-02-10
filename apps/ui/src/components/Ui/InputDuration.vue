@@ -3,6 +3,7 @@ const model = defineModel<number>();
 
 defineProps<{
   error?: string;
+  required?: boolean;
   definition: any;
 }>();
 
@@ -32,9 +33,10 @@ watch(
 <template>
   <div>
     <div
+      v-if="definition.title"
       class="mb-1"
       :class="{ 'text-skin-danger': error && dirty }"
-      v-text="definition.title"
+      v-text="`${definition.title}${required ? ' *' : ''}`"
     />
     <div class="flex !mb-0" :class="{ 's-error': error && dirty }">
       <UiWrapperInput

@@ -19,6 +19,7 @@ const props = defineProps<{
   inline?: boolean;
   definition: DefinitionWithOptions<T | null>;
   gap?: number;
+  required?: boolean;
 }>();
 
 const dirty = ref(false);
@@ -81,6 +82,7 @@ watch(model, () => {
     :definition="inline ? omit(definition, ['title']) : definition"
     :error="error"
     :dirty="dirty"
+    :required="required"
     class="relative w-auto"
     :class="{
       'mb-[14px]': !inline
