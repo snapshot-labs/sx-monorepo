@@ -21,6 +21,7 @@ const {
   load,
   refresh
 } = useWalletEns(props.networkId);
+const { web3 } = useWeb3();
 const { resume: resumeEnsMonitoring } = useIntervalFn(() => refresh, 5000, {
   immediate: false
 });
@@ -151,6 +152,19 @@ function handleSelect(value: string) {
     <div class="space-y-3">
       <h4 class="eyebrow">Register new ENS name</h4>
       <FormEnsRegistration @submit="resumeEnsMonitoring" />
+    </div>
+
+    <div class="space-y-3">
+      <h4 class="eyebrow">Controller</h4>
+      <UiMessage type="info">
+        Your space controller will be set to the ENS name owner. Any changes to
+        the ENS name ownership will also change the controller.</UiMessage
+      >
+      <FormSpaceController
+        :controller="web3.account"
+        :network="getNetwork(networkId)"
+        :disabled="true"
+      />
     </div>
   </div>
 </template>
