@@ -27,7 +27,9 @@ const validNames = computed(() => {
 });
 
 const invalidNames = computed(() => {
-  return Object.values(names.value || {}).filter(d => d.status !== 'AVAILABLE');
+  return Object.values(names.value || {}).filter(
+    d => !['AVAILABLE', 'USED'].includes(d.status)
+  );
 });
 
 const isTestnet = computed(() => {
@@ -110,19 +112,7 @@ function handleSelect(value: string) {
             <IH-Exclamation class="mt-[5px] text-skin-danger shrink-0" />
             <div class="flex flex-col">
               <div class="text-skin-danger" v-text="name.name" />
-              <div v-if="name.status === 'USED'">
-                ENS name already attached to a
-                <AppLink
-                  :to="{
-                    name: 'space',
-                    params: { space: `${networkId}:${name.name}` }
-                  }"
-                  class="text-skin-link"
-                >
-                  space
-                </AppLink>
-              </div>
-              <div v-else-if="name.status === 'TOO_LONG'">
+              <div v-if="name.status === 'TOO_LONG'">
                 ENS name is too long. It must be less than
                 {{ MAX_ENS_NAME_LENGTH }} characters
               </div>
