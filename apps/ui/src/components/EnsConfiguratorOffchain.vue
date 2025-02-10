@@ -21,9 +21,6 @@ const {
   load,
   refresh
 } = useWalletEns(props.networkId);
-const { resume: resumeEnsMonitoring } = useIntervalFn(() => refresh, 5000, {
-  immediate: false
-});
 
 const validNames = computed(() => {
   return Object.values(names.value || {}).filter(d => d.status === 'AVAILABLE');
@@ -147,10 +144,9 @@ function handleSelect(value: string) {
       <UiMessage v-else type="danger">
         No ENS names found for the current wallet.
       </UiMessage>
-    </div>
-    <div class="space-y-3">
-      <h4 class="eyebrow">Register new ENS name</h4>
-      <FormEnsRegistration @submit="resumeEnsMonitoring" />
+      <AppLink to="https://app.ens.domains" class="inline-block">
+        Register a new ENS name <IH-arrow-sm-right class="-rotate-45 inline" />
+      </AppLink>
     </div>
   </div>
 </template>
