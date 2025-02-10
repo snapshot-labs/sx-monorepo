@@ -43,6 +43,7 @@ const inputValue = computed({
   },
   set(newValue: T | null) {
     dirty.value = true;
+    query.value = '';
     model.value = newValue;
   }
 });
@@ -105,31 +106,29 @@ watch(model, () => {
             as="div"
             :data-value="content"
             :class="{
-              sizer: inline
+              sizer: inline,
+              'sizer-with-icon': inline && icon
             }"
           >
-            <div
-              class="s-input !flex items-center !mb-0"
+            <component
+              :is="icon"
+              class="absolute size-[20px] left-3 bottom-2.5"
+            />
+            <ComboboxInput
+              class="s-input !flex items-center justify-between !mb-0"
               :class="{
                 '!rounded-b-none': !gap && open,
-                'h-[42px]': inline
+                'h-[42px] min-w-11': inline,
+                '!pl-[42px]': icon
               }"
-            >
-              <component :is="icon" class="size-[20px] mr-2" />
-              <ComboboxInput
-                class="bg-transparent"
-                :size="content.length"
-                :class="{
-                  'h-[42px] min-w-11': inline
-                }"
-                autocomplete="off"
-                :placeholder="definition.examples?.[0]"
-                :display-value="item => getDisplayValue(item as T)"
-                @keydown.enter="() => (query = '')"
-                @change="e => (query = e.target.value)"
-                @focus="event => handleFocus(event, open)"
-              />
-            </div>
+              :size="'1'"
+              autocomplete="off"
+              :placeholder="definition.examples?.[0]"
+              :display-value="item => getDisplayValue(item as T)"
+              @keydown.enter="() => (query = '')"
+              @change="e => (query = e.target.value)"
+              @focus="event => handleFocus(event, open)"
+            />
           </ComboboxButton>
           <ComboboxButton v-if="!inline" class="absolute right-3 bottom-[14px]">
             <IH-chevron-up v-if="open" />
@@ -195,6 +194,17 @@ watch(model, () => {
 
   input {
     @apply col-start-1 row-start-1;
+  }
+
+  &::after {
+    content: attr(data-value);
+    @apply px-3 border-x col-start-1 row-start-1;
+    visibility: hidden;
+    white-space: pre-wrap;
+  }
+
+  &.sizer-with-icon::after {
+    @apply pl-[42px];
   }
 }
 </style>
