@@ -102,7 +102,6 @@ watch(model, () => {
           }"
         >
           <ComboboxButton
-            class="w-full"
             as="div"
             :data-value="content"
             :class="{
