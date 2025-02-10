@@ -22,16 +22,15 @@ const {
   refresh
 } = useWalletEns(props.networkId);
 const { web3 } = useWeb3();
-const { resume: resumeEnsMonitoring } = useIntervalFn(() => refresh, 5000, {
-  immediate: false
-});
 
 const validNames = computed(() => {
   return Object.values(names.value || {}).filter(d => d.status === 'AVAILABLE');
 });
 
 const invalidNames = computed(() => {
-  return Object.values(names.value || {}).filter(d => d.status !== 'AVAILABLE');
+  return Object.values(names.value || {}).filter(
+    d => !['AVAILABLE', 'USED'].includes(d.status)
+  );
 });
 
 const isTestnet = computed(() => {
@@ -114,19 +113,7 @@ function handleSelect(value: string) {
             <IH-Exclamation class="mt-[5px] text-skin-danger shrink-0" />
             <div class="flex flex-col">
               <div class="text-skin-danger" v-text="name.name" />
-              <div v-if="name.status === 'USED'">
-                ENS name already attached to a
-                <AppLink
-                  :to="{
-                    name: 'space',
-                    params: { space: `${networkId}:${name.name}` }
-                  }"
-                  class="text-skin-link"
-                >
-                  space
-                </AppLink>
-              </div>
-              <div v-else-if="name.status === 'TOO_LONG'">
+              <div v-if="name.status === 'TOO_LONG'">
                 ENS name is too long. It must be less than
                 {{ MAX_ENS_NAME_LENGTH }} characters
               </div>
@@ -148,10 +135,9 @@ function handleSelect(value: string) {
       <UiMessage v-else type="danger">
         No ENS names found for the current wallet.
       </UiMessage>
-    </div>
-    <div class="space-y-3">
-      <h4 class="eyebrow">Register new ENS name</h4>
-      <FormEnsRegistration @submit="resumeEnsMonitoring" />
+      <AppLink to="https://app.ens.domains" class="inline-block">
+        Register a new ENS name <IH-arrow-sm-right class="-rotate-45 inline" />
+      </AppLink>
     </div>
 
     <div class="space-y-3">
