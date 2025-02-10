@@ -1,5 +1,6 @@
 import App from '@/views/App.vue';
-import Create from '@/views/Create.vue';
+import CreateSpaceSnapshot from '@/views/CreateSpaceSnapshot.vue';
+import CreateSpaceSnapshotX from '@/views/CreateSpaceSnapshotX.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
@@ -40,9 +41,18 @@ export default [
 
   {
     path: '/create',
-    redirect: { name: 'create', params: { protocol: 'snapshot-x' } }
+    redirect: { name: 'create-space-snapshot-x' }
   },
-  { path: '/create/:protocol', name: 'create', component: Create },
+  {
+    path: '/create/snapshot-x',
+    name: 'create-space-snapshot-x',
+    component: CreateSpaceSnapshotX
+  },
+  {
+    path: '/create/snapshot',
+    name: 'create-space-snapshot',
+    component: CreateSpaceSnapshot
+  },
   {
     path: '/settings',
     name: 'settings',
