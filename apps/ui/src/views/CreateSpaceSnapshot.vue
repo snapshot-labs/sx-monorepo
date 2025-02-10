@@ -2,7 +2,7 @@
 import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
-import { getNetwork, metadataNetwork } from '@/networks';
+import { metadataNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { Member, NetworkID, Validation } from '@/types';
 
