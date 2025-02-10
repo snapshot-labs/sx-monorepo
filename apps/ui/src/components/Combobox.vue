@@ -200,7 +200,7 @@ watch(model, () => {
     content: attr(data-value);
     @apply px-3 border-x col-start-1 row-start-1;
     visibility: hidden;
-    white-space: pre-wrap;
+    white-space: nowrap;
   }
 
   &.sizer-with-icon::after {
