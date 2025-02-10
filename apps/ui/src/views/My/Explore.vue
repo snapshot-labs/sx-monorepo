@@ -176,10 +176,7 @@ watchEffect(() => setTitle('Explore'));
       <UiTooltip title="Create new space">
         <UiButton
           :to="{
-            name: 'create',
-            params: {
-              protocol: protocol === 'snapshot' ? 'snapshot' : 'snapshot-x'
-            }
+            name: `create-space-${protocol}`
           }"
           class="!px-0 w-[46px]"
         >
