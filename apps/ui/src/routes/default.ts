@@ -1,4 +1,6 @@
 import App from '@/views/App.vue';
+import CreateSpaceSnapshot from '@/views/CreateSpaceSnapshot.vue';
+import CreateSpaceSnapshotX from '@/views/CreateSpaceSnapshotX.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
@@ -11,8 +13,6 @@ import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
-import SpaceCreateSnapshot from '@/views/Space/CreateSnapshot.vue';
-import SpaceCreateSnapshotX from '@/views/Space/CreateSnapshotX.vue';
 import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
 import User from '@/views/User.vue';
@@ -41,17 +41,17 @@ export default [
 
   {
     path: '/create',
-    redirect: { name: 'space-create-snapshot-x' }
+    redirect: { name: 'create-space-snapshot-x' }
   },
   {
     path: '/create/snapshot-x',
-    name: 'space-create-snapshot-x',
-    component: SpaceCreateSnapshotX
+    name: 'create-space-snapshot-x',
+    component: CreateSpaceSnapshotX
   },
   {
     path: '/create/snapshot',
-    name: 'space-create-snapshot',
-    component: SpaceCreateSnapshot
+    name: 'create-space-snapshot',
+    component: CreateSpaceSnapshot
   },
   {
     path: '/settings',
