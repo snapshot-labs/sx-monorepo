@@ -138,7 +138,6 @@ watch(selectedNetworkId, () => {
   <UiStepper v-else :steps="STEPS" @submit="handleSubmit">
     <template #content="{ currentStep }">
       <template v-if="currentStep === 'profile'">
-        <h3 class="mb-4">Space profile</h3>
         <FormSpaceProfile
           :form="metadataForm"
           @errors="v => handleErrors('profile', v)"
