@@ -56,8 +56,8 @@ function goToStep(stepName: string) {
         }"
         @click="goToStep(stepName)"
       >
-        <IH-check-circle v-if="!step.isValid()" :class="'opacity-20'" />
-        <IS-check-circle v-if="step.isValid()" class="text-skin-success" />
+        <IH-check v-if="!step.isValid()" :class="'opacity-20'" />
+        <IS-check v-if="step.isValid()" class="text-skin-success" />
         {{ step.title }}
       </button>
     </div>
