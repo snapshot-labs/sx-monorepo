@@ -3,7 +3,6 @@ export type StepRecords = Record<string, Step>;
 type Step = {
   title: string;
   isValid: () => boolean;
-  onBeforeQuit?: () => boolean;
 };
 
 const props = withDefaults(
@@ -37,8 +36,6 @@ const currentStep = computed(() => {
 });
 
 function goToStep(stepName: string) {
-  if (props.steps[currentStep.value]?.onBeforeQuit?.() === false) return;
-
   stepper.goTo(stepName);
   window.scrollTo({
     top: 0
