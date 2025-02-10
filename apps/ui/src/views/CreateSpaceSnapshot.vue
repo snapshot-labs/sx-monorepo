@@ -35,10 +35,11 @@ const networkId: NetworkID = metadataNetwork;
 
 type extendedStepRecords = Record<
   keyof StepRecords,
-  StepRecords[keyof StepRecords] & {
-    contentTitle: string;
-    contentDescription?: string;
-  }
+  StepRecords[keyof StepRecords] &
+    Partial<{
+      contentTitle: string;
+      contentDescription: string;
+    }>
 >;
 
 const STEPS: extendedStepRecords = {
@@ -62,9 +63,7 @@ const STEPS: extendedStepRecords = {
   },
   profile: {
     title: 'Profile',
-    isValid: () => !stepsErrors.value['profile'],
-    contentTitle: 'Space profile',
-    contentDescription: 'Tell us more about your space.'
+    isValid: () => !stepsErrors.value['profile']
   },
   network: {
     title: 'Network',
