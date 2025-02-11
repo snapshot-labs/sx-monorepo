@@ -281,25 +281,24 @@ const FAQ: { question: string; answer: string }[] = [
             v-else-if="feature[type] === true"
             class="mx-auto text-skin-success"
           />
-          <div
-            v-else
-            v-text="
+          <template v-else>
+            {{
               typeof feature[type] === 'number'
                 ? _n(feature[type])
                 : feature[type]
-            "
-          />
+            }}
+          </template>
         </div>
       </div>
     </div>
-    <div class="hidden md:flex items-center space-x-4 mx-4 py-3.5">
+    <div class="hidden md:flex items-center mx-4 py-3.5">
       <div class="basis-[250px]"></div>
       <div class="feature-value-col">Current plan</div>
       <div class="feature-value-col">
-        <UiButton class="primary feature-value-col">Upgrade</UiButton>
+        <UiButton class="primary">Upgrade</UiButton>
       </div>
       <div class="feature-value-col">
-        <UiButton class="feature-value-col">Talk to sales</UiButton>
+        <UiButton>Talk to sales</UiButton>
       </div>
     </div>
     <div class="border-b p-4 pt-[40px] space-y-[2px]">
