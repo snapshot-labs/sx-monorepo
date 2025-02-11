@@ -1,8 +1,11 @@
+import { utils } from '@snapshot-labs/sx';
 import { Response } from 'express';
 import * as herodotus from './herodotus';
 import { getClient, NETWORKS } from './networks';
 import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
+
+let tree: string[] | null = null;
 
 export const createNetworkHandler = (chainId: string) => {
   const networkConfig = NETWORKS.get(chainId);
@@ -150,12 +153,43 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
+  async function getMerkleRoot(id: number, params: any, res: Response) {
+    try {
+      const { hashes } = params;
+
+      tree = utils.merkle.generateMerkleTree(hashes);
+      const root = tree[0];
+
+      return rpcSuccess(res, root, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
+  async function getMerkleProof(id: number, params: any, res: Response) {
+    try {
+      if (!tree) throw new Error('Merkle tree not generated');
+
+      const { root, index } = params;
+
+      const proof = utils.merkle.getProof(tree, tree.length - 1 - index);
+
+      return rpcSuccess(res, proof, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
   return {
     send,
     execute,
     registerTransaction,
     registerProposal,
     getAccount,
-    getDataByMessageHash
+    getDataByMessageHash,
+    getMerkleRoot,
+    getMerkleProof
   };
 };
