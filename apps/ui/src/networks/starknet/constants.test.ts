@@ -33,7 +33,7 @@ describe('Starknet Constants', () => {
           });
 
           expect(summary).toEqual([
-            '0x26ac8b72505b27418bbc9b251f96d392e11a22152e38291903490c3d2d92948'
+            '0x4d1cfb0a286a8f340bf7a0108359a796c5763cf540b55bcc1d049d0ef8f18e8'
           ]);
         });
       });

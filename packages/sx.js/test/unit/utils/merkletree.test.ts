@@ -35,7 +35,7 @@ describe('generateMerkleRoot', () => {
     const root = generateMerkleRoot(hashes);
 
     expect(root).toBe(
-      '0x436373667bef3c745b30e5ae2b485ed5bed08a8c8696f8edeb5cd08ddcc5145'
+      '0x2cd57d8a58b881d7fa0d76116c16643a197ee50ca1e13b72f66eacd037402d8'
     );
   });
 });
@@ -43,14 +43,15 @@ describe('generateMerkleRoot', () => {
 describe('generateMerkleProof', () => {
   it('should compute proof', () => {
     const hashes = TEST_LEAVES.map(leaf => leaf.hash);
+
     const proof = generateMerkleProof(hashes, 2);
 
     expect(proof).toEqual([
       '0x58a8aa77c41ec244fe82f53a8e336ee2978e02af49477871f5eb18d6f89ba1f',
       '0x29b078fa0df4bf7784887539cf8afe0cec533cdc6a4bbf33ec3e6ed245c711b',
       '0x688b1e6adba3b93a03f9ce5c9d220aa403a922c72586eff397a34ad664838a5',
-      '0x64ce84b224c2acd608f05be345783252bb82c8e7c0e455598b0701b5b79903f',
-      '0x2637f8ef64f8b31c1901c56757722fe1dfa15678f5e8df4b7684c966bac16c2'
+      '0x723b259e0f6a643e0c79dbcca6c830755465c31ebd81ce480a07d00d9e5e8e7',
+      '0x64ce84b224c2acd608f05be345783252bb82c8e7c0e455598b0701b5b79903f'
     ]);
   });
 });

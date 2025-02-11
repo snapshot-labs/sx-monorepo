@@ -6,6 +6,17 @@ export enum AddressType {
   CUSTOM
 }
 
+export function throwError(message?: string): never {
+  throw new Error(message);
+}
+
+const leftChildIndex = (i: number) => 2 * i + 1;
+const rightChildIndex = (i: number) => 2 * i + 2;
+const parentIndex = (i: number) =>
+  i > 0 ? Math.floor((i - 1) / 2) : throwError('Root has no parent');
+const siblingIndex = (i: number) =>
+  i > 0 ? i - (-1) ** (i % 2) : throwError('Root has no siblings');
+
 export class Leaf {
   public readonly type: AddressType;
   public readonly address: string;
@@ -32,74 +43,38 @@ export class Leaf {
 }
 
 export function generateMerkleRoot(hashes: string[]) {
-  if (hashes.length === 1) {
-    return hashes[0];
+  const tree = generateMerkleTree(hashes);
+
+  return tree[0];
+}
+
+export function generateMerkleTree(leaves: string[]) {
+  const tree = new Array<string>(2 * leaves.length - 1);
+
+  for (const [i, leaf] of leaves.entries()) {
+    tree[tree.length - 1 - i] = leaf;
   }
 
-  if (hashes.length % 2 !== 0) {
-    hashes = [...hashes, '0x0'];
+  for (let i = tree.length - 1 - leaves.length; i >= 0; i--) {
+    const leftChild = tree[leftChildIndex(i)]!;
+    const rightChild = tree[rightChildIndex(i)]!;
+
+    tree[i] =
+      BigInt(leftChild) > BigInt(rightChild)
+        ? ec.starkCurve.pedersen(leftChild, rightChild)
+        : ec.starkCurve.pedersen(rightChild, leftChild);
   }
 
-  const newHashes: string[] = [];
-
-  for (let i = 0; i < hashes.length; i += 2) {
-    let left: string;
-    let right: string;
-
-    const firstValue = hashes[i];
-    const secondValue = hashes[i + 1];
-
-    if (!firstValue || !secondValue) throw new Error('Invalid hash');
-
-    if (BigInt(firstValue) > BigInt(secondValue)) {
-      left = firstValue;
-      right = secondValue;
-    } else {
-      left = secondValue;
-      right = firstValue;
-    }
-    newHashes.push(ec.starkCurve.pedersen(left, right));
-  }
-
-  return generateMerkleRoot(newHashes);
+  return tree;
 }
 
 export function generateMerkleProof(hashes: string[], index: number): string[] {
-  if (hashes.length === 1) {
-    return [];
+  const tree = generateMerkleTree(hashes);
+
+  const proof: string[] = [];
+  while (index > 0) {
+    proof.push(tree[siblingIndex(index)]!);
+    index = parentIndex(index);
   }
-
-  if (hashes.length % 2 !== 0) {
-    hashes = [...hashes, '0x0'];
-  }
-
-  const newHashes: string[] = [];
-
-  for (let i = 0; i < hashes.length; i += 2) {
-    let left: string;
-    let right: string;
-
-    const firstValue = hashes[i];
-    const secondValue = hashes[i + 1];
-
-    if (!firstValue || !secondValue) throw new Error('Invalid hash');
-
-    if (BigInt(firstValue) > BigInt(secondValue)) {
-      left = firstValue;
-      right = secondValue;
-    } else {
-      left = secondValue;
-      right = firstValue;
-    }
-
-    newHashes.push(ec.starkCurve.pedersen(left, right));
-  }
-
-  const proof = generateMerkleProof(newHashes, Math.floor(index / 2));
-
-  const prefixIndex = index % 2 === 0 ? index + 1 : index - 1;
-  const prefix = hashes[prefixIndex];
-  if (!prefix) throw new Error('Invalid hash');
-
-  return [prefix, ...proof];
+  return proof;
 }
