@@ -68,13 +68,17 @@ export function generateMerkleTree(leaves: string[]) {
   return tree;
 }
 
-export function generateMerkleProof(hashes: string[], index: number): string[] {
-  const tree = generateMerkleTree(hashes);
-
+export function getProof(tree: string[], index: number): string[] {
   const proof: string[] = [];
   while (index > 0) {
     proof.push(tree[siblingIndex(index)]!);
     index = parentIndex(index);
   }
   return proof;
+}
+
+export function generateMerkleProof(hashes: string[], index: number): string[] {
+  const tree = generateMerkleTree(hashes);
+
+  return getProof(tree, tree.length - 1 - index);
 }

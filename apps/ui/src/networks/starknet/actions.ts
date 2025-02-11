@@ -278,6 +278,11 @@ export function createActions(
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
+          const params =
+            space.voting_power_validation_strategy_strategies_params[
+              strategy.paramsIndex
+            ];
+
           const metadata = await parseStrategyMetadata(
             space.voting_power_validation_strategies_parsed_metadata[
               strategy.index
@@ -286,6 +291,7 @@ export function createActions(
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -457,12 +463,14 @@ export function createActions(
             strategy.index
           );
 
+          const params = proposal.strategies_params[strategy.paramsIndex];
           const metadata = await parseStrategyMetadata(
             proposal.space.strategies_parsed_metadata[metadataIndex].payload
           );
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })

@@ -62,6 +62,7 @@ export interface Strategy {
     signerAddress: string,
     address: string,
     index: number,
+    params: string,
     metadata: Record<string, any> | null,
     envelope: Envelope<Message>,
     clientConfig: ClientConfig
@@ -110,6 +111,7 @@ export type IndexedConfig = {
 export type StrategyConfig = {
   index: number;
   address: string;
+  params: string;
   metadata?: Record<string, any>;
 };
 

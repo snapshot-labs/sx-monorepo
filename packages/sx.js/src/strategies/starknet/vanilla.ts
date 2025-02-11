@@ -10,6 +10,7 @@ export default function createVanillaStrategy(): Strategy {
       signerAddress: string,
       address: string,
       index: number,
+      params: string,
       metadata: Record<string, any> | null,
       envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig
