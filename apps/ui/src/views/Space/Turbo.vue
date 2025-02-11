@@ -300,14 +300,12 @@ const FAQ: { question: string; answer: string }[] = [
       <div
         v-for="(question, i) in FAQ"
         :key="i"
-        :class="[
-          'mx-4 py-4 space-y-2 leading-6 text-md',
-          { 'border-t': i > 0 }
-        ]"
+        :class="['mx-4 space-y-2 leading-6 text-md', { 'border-t': i > 0 }]"
       >
         <button
           type="button"
-          class="flex items-center w-full text-left"
+          class="flex items-center py-4 w-full text-left"
+          :class="{ 'pb-0': currentQuestion === i }"
           @click="toggleQuestion(i)"
         >
           <div class="flex-auto text-skin-heading" v-text="question.question" />
@@ -317,7 +315,11 @@ const FAQ: { question: string; answer: string }[] = [
           />
           <IH-chevron-down v-else class="text-skin-text size-[16px]" />
         </button>
-        <div v-if="currentQuestion === i" v-text="question.answer" />
+        <div
+          v-if="currentQuestion === i"
+          class="pb-4"
+          v-text="question.answer"
+        />
       </div>
     </div>
   </div>
