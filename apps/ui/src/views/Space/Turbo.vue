@@ -202,7 +202,7 @@ const FAQ: { question: string; answer: string }[] = [
               per month
             </li>
             <li>
-              {{ _n(limits['space.turbo.body_limit']) }} Proposal character
+              {{ _n(limits['space.turbo.body_limit']) }} proposal character
               limit
             </li>
             <li>
@@ -214,7 +214,6 @@ const FAQ: { question: string; answer: string }[] = [
               voting strategies
             </li>
           </ul>
-
           <ul class="leading-[18px] space-y-2.5">
             <li>Enhanced visibility</li>
             <li>Enhanced monitoring service</li>
