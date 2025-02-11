@@ -2,10 +2,12 @@
 import { _n } from '@/helpers/utils';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICTurbo from '~icons/c/turbo.svg';
-import ICCheckCircle from '~icons/heroicons-outline/check-circle.vue';
+import ICCheck from '~icons/heroicons-outline/check.vue';
 
 type TierPlan = 'basic' | 'turbo' | 'custom';
-type Feature = { [key in TierPlan | string]: string | number | Component };
+type Feature = {
+  [key in TierPlan | string]: string | number | boolean | Component;
+};
 type SubscriptionLength = 'monthly' | 'yearly';
 
 const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
@@ -52,7 +54,7 @@ const features = computed<
       ]
     },
     choices: {
-      title: 'Choices',
+      title: 'Voting',
       features: [
         {
           title: 'Choices',
@@ -74,8 +76,8 @@ const features = computed<
         {
           title: 'Delegates dashboard',
           basic: '-',
-          turbo: ICCheckCircle,
-          custom: ICCheckCircle
+          turbo: true,
+          custom: true
         }
       ]
     },
@@ -85,26 +87,26 @@ const features = computed<
         {
           title: 'Whitelabel',
           basic: '-',
-          turbo: ICCheckCircle,
-          custom: ICCheckCircle
+          turbo: true,
+          custom: true
         },
         {
           title: 'Priority support',
           basic: '-',
-          turbo: ICCheckCircle,
-          custom: ICCheckCircle
+          turbo: true,
+          custom: true
         },
         {
           title: 'Early access to new features',
           basic: '-',
-          turbo: ICCheckCircle,
-          custom: ICCheckCircle
+          turbo: true,
+          custom: true
         },
         {
           title: 'Custom interface',
           basic: '-',
-          turbo: ICCheckCircle,
-          custom: ICCheckCircle
+          turbo: '-',
+          custom: true
         }
       ]
     }
@@ -169,7 +171,7 @@ const FAQ: { question: string; answer: string }[] = [
         </button>
       </div>
     </div>
-    <div class="flex flex-col md:flex-row p-4 pb-7 gap-3 justify-stretch">
+    <div class="flex flex-col md:flex-row p-4 pb-6 gap-3 justify-stretch">
       <div class="border rounded-lg p-3.5 flex flex-col gap-3.5 basis-2/3 grow">
         <div>
           <div class="float-right">
@@ -237,7 +239,7 @@ const FAQ: { question: string; answer: string }[] = [
       </div>
     </div>
     <div
-      class="flex border-b px-4 pb-1 text-skin-heading uppercase font-semibold text-sm"
+      class="flex border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm sticky top-[71px] lg:top-[72px]"
     >
       <div class="basis-[250px]">Features</div>
       <div
@@ -275,6 +277,10 @@ const FAQ: { question: string; answer: string }[] = [
             v-if="typeof feature[type] === 'object'"
             class="mx-auto text-skin-text"
           />
+          <ICCheck
+            v-else-if="feature[type] === true"
+            class="mx-auto text-skin-success"
+          />
           <div
             v-else
             v-text="
@@ -286,11 +292,15 @@ const FAQ: { question: string; answer: string }[] = [
         </div>
       </div>
     </div>
-    <div class="hidden md:flex space-x-4 mx-4 py-3.5">
+    <div class="hidden md:flex items-center space-x-4 mx-4 py-3.5">
       <div class="basis-[250px]"></div>
-      <UiButton class="feature-value-col" disabled>You're on basic</UiButton>
-      <UiButton class="feature-value-col">Upgrade</UiButton>
-      <UiButton class="feature-value-col">Talk to sales</UiButton>
+      <div class="feature-value-col">Current plan</div>
+      <div class="feature-value-col">
+        <UiButton class="primary feature-value-col">Upgrade</UiButton>
+      </div>
+      <div class="feature-value-col">
+        <UiButton class="feature-value-col">Talk to sales</UiButton>
+      </div>
     </div>
     <div class="border-b p-4 pt-[40px] space-y-[2px]">
       <h3 class="leading-6">Questions?</h3>
