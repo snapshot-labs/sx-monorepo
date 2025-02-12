@@ -2,6 +2,7 @@ import knex from './knex';
 
 export const REGISTERED_TRANSACTIONS = 'registered_transactions';
 export const REGISTERED_PROPOSALS = 'registered_proposals';
+export const MERKLETREES = 'merkletrees';
 
 export async function createTables() {
   const registeredTransactionsTableExists = await knex.schema.hasTable(
@@ -9,6 +10,7 @@ export async function createTables() {
   );
   const registeredProposalsTableExists =
     await knex.schema.hasTable(REGISTERED_PROPOSALS);
+  const merkletreesTableExists = await knex.schema.hasTable(MERKLETREES);
 
   if (!registeredTransactionsTableExists) {
     await knex.schema.createTable(REGISTERED_TRANSACTIONS, t => {
@@ -34,6 +36,14 @@ export async function createTables() {
       t.string('strategyAddress');
       t.string('herodotusId');
       t.boolean('processed').defaultTo(false).index();
+    });
+  }
+
+  if (!merkletreesTableExists) {
+    await knex.schema.createTable(MERKLETREES, t => {
+      t.string('id').primary();
+      t.timestamps(true, true);
+      t.jsonb('tree');
     });
   }
 }
@@ -119,4 +129,18 @@ export async function getDataByMessageHash(hash: string) {
     .select(['sender', 'type', 'data', 'hash', 'network'])
     .where({ hash })
     .first();
+}
+
+export async function saveMerkleTree(id: string, tree: string[]) {
+  return knex(MERKLETREES)
+    .insert({
+      id,
+      tree: JSON.stringify(tree)
+    })
+    .onConflict()
+    .ignore();
+}
+
+export async function getMerkleTree(id: string) {
+  return knex(MERKLETREES).select('*').where({ id }).first();
 }

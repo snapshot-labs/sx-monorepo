@@ -5,8 +5,6 @@ import { getClient, NETWORKS } from './networks';
 import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
 
-let tree: string[] | null = null;
-
 export const createNetworkHandler = (chainId: string) => {
   const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
@@ -157,8 +155,11 @@ export const createNetworkHandler = (chainId: string) => {
     try {
       const { entries } = params;
 
-      tree = await utils.merkle.generateMerkleTree(entries);
+      const tree = await utils.merkle.generateMerkleTree(entries);
       const root = tree[0];
+      if (!root) throw new Error('Merkle tree not generated');
+
+      await db.saveMerkleTree(root, tree);
 
       return rpcSuccess(res, root, id);
     } catch (e) {
@@ -169,11 +170,12 @@ export const createNetworkHandler = (chainId: string) => {
 
   async function getMerkleProof(id: number, params: any, res: Response) {
     try {
-      if (!tree) throw new Error('Merkle tree not generated');
-
       const { root, index } = params;
 
-      const proof = utils.merkle.generateMerkleProof(tree, index);
+      const result = await db.getMerkleTree(root);
+      if (!result) throw new Error('Merkle tree not generated');
+
+      const proof = utils.merkle.generateMerkleProof(result.tree, index);
 
       return rpcSuccess(res, proof, id);
     } catch (e) {
