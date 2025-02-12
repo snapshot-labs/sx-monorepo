@@ -22,10 +22,10 @@ const dirty = ref(false);
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
-      return typeof props.definition.default === 'function'
-        ? props.definition.default()
-        : props.definition.default;
+    const defaultValue = props.definition.default;
+
+    if (!model.value && !dirty.value && defaultValue) {
+      return typeof defaultValue === 'function' ? defaultValue() : defaultValue;
     }
     return model.value;
   },
