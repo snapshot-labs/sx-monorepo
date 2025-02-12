@@ -2,9 +2,9 @@ import { Web3Provider } from '@ethersproject/providers';
 import { clients, starknetNetworks } from '@snapshot-labs/sx';
 import { CallData, uint256 } from 'starknet';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
-import { getMerkleRoot } from '@/helpers/mana';
+import { generateMerkleTree, getMerkleRoot } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
-import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
+import { getUrl, shorten, sleep, verifyNetwork } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
 import { StrategyConfig, StrategyTemplate } from '../types';
@@ -288,11 +288,25 @@ export function createConstants(
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length);
 
-        const root = await getMerkleRoot(config.Meta.eip712ChainId, {
+        const requestId = await generateMerkleTree(config.Meta.eip712ChainId, {
           entries
         });
 
-        return [root];
+        await sleep(500);
+
+        while (true) {
+          try {
+            const root = await getMerkleRoot(config.Meta.eip712ChainId, {
+              requestId
+            });
+
+            if (root) return [root];
+          } catch {
+            console.log('request not ready yet');
+          }
+
+          await sleep(5000);
+        }
       },
       generateMetadata: async (params: Record<string, any>) => {
         const tree = params.whitelist

@@ -17,6 +17,7 @@ const jsonRpcRequestSchema = z.object({
     'registerTransaction',
     'registerProposal',
     'getDataByMessageHash',
+    'generateMerkleTree',
     'getMerkleRoot',
     'getMerkleProof'
   ]),
