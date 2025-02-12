@@ -114,7 +114,7 @@ function validateAndConvertColor(color: string): string {
         :placeholder="definition.examples && definition.examples[0]"
       />
       <button
-        v-if="isRequired"
+        v-if="definition.showControls"
         class="absolute right-3 mt-[20px]"
         @click="generateRandomColor"
       >

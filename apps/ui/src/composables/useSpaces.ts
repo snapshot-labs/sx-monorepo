@@ -103,7 +103,7 @@ export function useSpaces() {
     let unsortedExplorePageSpaces = overwrite ? [] : explorePageSpaces.value;
 
     if (
-      protocol.value === 'snapshotx' &&
+      protocol.value === 'snapshot-x' &&
       filter?.network &&
       filter.network !== 'all'
     ) {

@@ -41,7 +41,8 @@ const definition = {
       format: 'color',
       title: 'Color',
       minLength: 7,
-      examples: ['#FF0000']
+      examples: ['#FF0000'],
+      showControls: true
     }
   }
 };

@@ -83,6 +83,7 @@ async function handleExecute() {
       step.value = 'success';
       emit('confirmed', txId.value);
     } else {
+      emit('confirmed', null);
       emit('close');
     }
   } catch (e) {

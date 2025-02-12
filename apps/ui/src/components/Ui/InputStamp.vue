@@ -67,11 +67,12 @@ async function handleFileChange(e: Event) {
       v-if="imgUrl"
       :src="imgUrl"
       :class="[
-        `w-[${width}px] h-[${height}px] object-cover group-hover:opacity-80`,
+        `object-cover group-hover:opacity-80`,
         {
           'opacity-80': isUploadingImage
         }
       ]"
+      :style="{ width: `${width}px`, height: `${height}px` }"
     />
     <UiStamp
       v-else-if="fallback"
@@ -84,7 +85,11 @@ async function handleFileChange(e: Event) {
         'opacity-80': isUploadingImage
       }"
     />
-    <div v-else :class="`w-[${width}px] h-[${height}px]`" />
+    <div
+      v-else
+      class="block"
+      :style="{ width: ` ${width}px`, height: `${height}px` }"
+    />
     <div
       class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row size-full items-center content-center justify-center"
     >
