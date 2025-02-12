@@ -63,7 +63,8 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
     <img
       v-if="previewLogoUrl"
       :src="previewLogoUrl"
-      :class="`h-[${SPACE_LOGO_HEIGHT}px] w-[${SPACE_LOGO_WIDTH}px]`"
+      :width="SPACE_LOGO_WIDTH"
+      :height="SPACE_LOGO_HEIGHT"
       :alt="space.name"
     />
     <UiStamp
