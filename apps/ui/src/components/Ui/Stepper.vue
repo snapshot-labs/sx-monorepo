@@ -49,10 +49,9 @@ function goToStep(stepName: string) {
         v-for="(step, stepName) in steps"
         :key="stepName"
         type="button"
-        class="px-3 py-1 flex items-center gap-2 lg:w-full rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap"
+        class="px-3 py-1 flex items-center gap-2 lg:w-full text-skin-link rounded text-left scroll-mr-3 first:ml-auto last:mr-auto whitespace-nowrap hover:bg-skin-hover-bg"
         :class="{
-          'bg-skin-active-bg': stepper.isCurrent(stepName),
-          'hover:bg-skin-hover-bg': !stepper.isCurrent(stepName)
+          'bg-skin-active-bg': stepper.isCurrent(stepName)
         }"
         @click="goToStep(stepName)"
       >
