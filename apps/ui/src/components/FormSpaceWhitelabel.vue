@@ -99,20 +99,21 @@ const formErrors = computed(() => {
   );
   return errors;
 });
-const disabled = computed(() => {
-  return !props.space.turbo && !props.space.additionalRawData?.domain;
-});
+const isDisabled = computed(
+  () => !props.space.turbo && !props.space.additionalRawData?.domain
+);
 const previewDomain = computed(
   () => props.space.additionalRawData?.domain || window.location.host
 );
-const previewUrl = computed(() => {
-  return `${window.location.host}/#/?skin-preview=${encodeSkin(skinSettings.value)}`;
-});
+const previewUrl = computed(
+  () =>
+    `${window.location.host}/#/?skin-preview=${encodeSkin(skinSettings.value)}`
+);
 </script>
 
 <template>
   <UiMessage
-    v-if="disabled"
+    v-if="isDisabled"
     type="info"
     :learn-more-link="TURBO_URL"
     class="mb-4"
@@ -135,7 +136,7 @@ const previewUrl = computed(() => {
           v-model="customDomain"
           :definition="CUSTOM_DOMAIN_DEFINITION"
           :error="formErrors.customDomain"
-          :disabled="disabled"
+          :is-disabled="isDisabled"
         />
       </div>
       <div>
@@ -147,7 +148,7 @@ const previewUrl = computed(() => {
           v-model="skinSettings"
           :definition="SKIN_DEFINITION"
           :error="formErrors"
-          :disabled="disabled"
+          :is-disabled="isDisabled"
         />
       </div>
       <div>
@@ -158,7 +159,7 @@ const previewUrl = computed(() => {
         </div>
         <UiInputStamp
           v-model="skinSettings.logo"
-          :disabled="disabled"
+          :is-disabled="isDisabled"
           :fallback="false"
           :width="380"
           :height="76"
@@ -177,7 +178,7 @@ const previewUrl = computed(() => {
           <div class="browser-toolbar-address" v-text="previewDomain" />
         </div>
         <div class="browser-content-container flex items-center justify-center">
-          <IC-zap v-if="disabled" class="size-[126px] text-skin-border" />
+          <IC-zap v-if="isDisabled" class="size-[126px] text-skin-border" />
           <div v-else-if="!isWhiteLabel">
             Preview only available on
             <AppLink :to="`https://${previewDomain}/#/settings/whitelabel`">{{

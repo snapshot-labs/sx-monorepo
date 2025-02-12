@@ -1,7 +1,7 @@
 import { hexToRgb } from '@/helpers/utils';
 import { SkinSettings } from '@/types';
 
-function hexToCssRgb(hex: string) {
+function hexToCssRgb(hex: string): string {
   const { r, g, b } = hexToRgb(hex.slice(1));
   return `${r},${g},${b}`;
 }
@@ -15,22 +15,22 @@ const B64U_LOOKUP = {
   '.': '='
 };
 
-const encode = (str: string) =>
+const encode = (str: string): string =>
   btoa(str).replace(/(\+|\/|=)/g, m => B64U_LOOKUP[m]);
-const decode = (str: string) =>
+const decode = (str: string): string =>
   atob(str.replace(/(-|_|\.)/g, m => B64U_LOOKUP[m]));
 
-const encodeSkin = (skin: SkinSettings) => encode(JSON.stringify(skin));
-const decodeSkin = (str: string) => JSON.parse(decode(str));
+const encodeSkin = (skin: SkinSettings): string => encode(JSON.stringify(skin));
+const decodeSkin = (str: string): SkinSettings => JSON.parse(decode(str));
 
-const logo = ref<string | null>(null);
+const logo = ref<SkinSettings['logo']>();
 
 export function useSkin() {
   const { css } = useStyleTag('');
   const { previewTheme } = useTheme();
   const route = useRoute();
 
-  function getCssVariables(skinSettings: SkinSettings) {
+  function getCssVariables(skinSettings: SkinSettings): Record<string, string> {
     const colorVariables = Object.entries(skinSettings).reduce(
       (acc, [colorName, hex]) => {
         if (!hex || !colorName.includes('_color')) return acc;
