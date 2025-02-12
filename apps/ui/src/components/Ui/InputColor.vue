@@ -18,8 +18,6 @@ const { currentMode } = useUserSkin();
 
 const dirty = ref(false);
 
-const isRequired = computed(() => props.definition.minLength);
-
 const inputValue = computed({
   get() {
     if (!model.value && !dirty.value && props.definition.default) {
@@ -61,7 +59,7 @@ debouncedWatch(
 );
 
 onMounted(() => {
-  if (!model.value && isRequired.value) {
+  if (!model.value) {
     generateRandomColor();
   }
 });
