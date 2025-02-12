@@ -47,7 +47,7 @@ export function useSkin() {
     return colorVariables;
   }
 
-  function setSkin(skinSettings: SkinSettings) {
+  function setSkin(skinSettings?: SkinSettings) {
     if (!skinSettings) return;
 
     const skinVariables = Object.entries(getCssVariables(skinSettings));

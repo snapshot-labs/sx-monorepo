@@ -88,7 +88,7 @@ const DEFAULT_SKIN_SETTINGS = {
   border_color: null,
   heading_color: null,
   primary_color: null,
-  theme: 'light',
+  theme: 'light' as Theme,
   logo: undefined
 };
 
