@@ -241,7 +241,7 @@ const FAQ: { question: string; answer: string }[] = [
     <div
       class="flex border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm sticky top-[71px] lg:top-[72px]"
     >
-      <div class="basis-[250px]">Features</div>
+      <div class="basis-[250px] grow">Features</div>
       <div
         v-for="tier in TIER_PLAN"
         :key="tier"
@@ -266,7 +266,7 @@ const FAQ: { question: string; answer: string }[] = [
           { 'border-t': i > 0 }
         ]"
       >
-        <div class="basis-[250px]" v-text="feature.title" />
+        <div class="basis-[250px] grow" v-text="feature.title" />
         <div
           v-for="type in ['basic', 'turbo', 'custom']"
           :key="type"
@@ -292,7 +292,7 @@ const FAQ: { question: string; answer: string }[] = [
       </div>
     </div>
     <div class="hidden md:flex items-center mx-4 py-3.5">
-      <div class="basis-[250px]"></div>
+      <div class="basis-[250px] grow"></div>
       <div class="feature-value-col">Current plan</div>
       <div class="feature-value-col">
         <UiButton class="primary">Upgrade</UiButton>
@@ -349,6 +349,6 @@ const FAQ: { question: string; answer: string }[] = [
 }
 
 .feature-value-col {
-  @apply grow shrink-0 text-center basis-[60px];
+  @apply grow shrink-0 text-center basis-[60px] max-w-[300px];
 }
 </style>
