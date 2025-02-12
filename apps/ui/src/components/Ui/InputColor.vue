@@ -51,7 +51,7 @@ function isColorValid(color: string): boolean {
   return /^#[0-9A-F]{6}$/i.test(color);
 }
 
-function generateRandomColor() {
+function setRandomColor() {
   model.value = getRandomHexColor();
 }
 
@@ -119,7 +119,7 @@ function validateAndConvertColor(color: string): string {
         v-if="definition.showControls"
         title="Generate random color"
         class="absolute right-3 mt-[20px]"
-        @click="generateRandomColor"
+        @click="setRandomColor"
       >
         <IH-refresh class="text-skin-link" />
       </button>
