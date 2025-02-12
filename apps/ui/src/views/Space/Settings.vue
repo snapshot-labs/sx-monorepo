@@ -305,7 +305,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     </div>
     <div
       v-else
-      class="space-y-4 pb-[100px]"
+      class="space-y-4 pb-[100px] h-full"
       :class="{
         'mx-4 max-w-[592px]': !['profile', 'whitelabel'].includes(activeTab)
       }"
@@ -458,7 +458,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-show="activeTab === 'whitelabel'"
         title="Whitelabel"
         description="Customize the appearance of your space to match your brand."
-        class="mx-4"
+        class="mx-4 h-full"
       >
         <FormSpaceWhitelabel
           v-model:custom-domain="customDomain"

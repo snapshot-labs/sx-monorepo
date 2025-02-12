@@ -120,7 +120,7 @@ const previewUrl = computed(
   >
     Whitelabel features are only available for Turbo subscribers.
   </UiMessage>
-  <div class="flex flex-col md:flex-row gap-4">
+  <div class="flex flex-col items-stretch md:flex-row md:h-full gap-4">
     <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">
       <div>
         <h4 class="eyebrow mb-2 font-medium">Custom domain</h4>
@@ -171,29 +171,39 @@ const previewUrl = computed(
         />
       </div>
     </div>
-    <div v-if="space.additionalRawData?.domain" class="shrink-0">
-      <h4 class="eyebrow mb-2 font-medium">Preview</h4>
-      <div class="browser">
-        <div class="browser-toolbar">
-          <div class="browser-toolbar-address" v-text="previewDomain" />
-        </div>
-        <div class="browser-content-container flex items-center justify-center">
-          <IC-zap v-if="isDisabled" class="size-[126px] text-skin-border" />
-          <div v-else-if="!isWhiteLabel">
-            Preview only available on
-            <AppLink :to="`https://${previewDomain}/#/settings/whitelabel`">{{
-              previewDomain
-            }}</AppLink>
+    <div
+      v-if="space.additionalRawData?.domain"
+      class="shrink-0 relative h-full"
+    >
+      <Affix :top="137" :bottom="100">
+        <div>
+          <h4 class="eyebrow mb-2 font-medium">Preview</h4>
+          <div class="browser">
+            <div class="browser-toolbar">
+              <div class="browser-toolbar-address" v-text="previewDomain" />
+            </div>
+            <div
+              class="browser-content-container flex items-center justify-center"
+            >
+              <IC-zap v-if="isDisabled" class="size-[126px] text-skin-border" />
+              <div v-else-if="!isWhiteLabel">
+                Preview only available on
+                <AppLink
+                  :to="`https://${previewDomain}/#/settings/whitelabel`"
+                  >{{ previewDomain }}</AppLink
+                >
+              </div>
+              <div v-else class="browser-content">
+                <iframe
+                  :src="previewUrl"
+                  inert="true"
+                  sandbox="allow-same-origin allow-scripts"
+                ></iframe>
+              </div>
+            </div>
           </div>
-          <div v-else class="browser-content">
-            <iframe
-              :src="previewUrl"
-              inert="true"
-              sandbox="allow-same-origin allow-scripts"
-            ></iframe>
-          </div>
         </div>
-      </div>
+      </Affix>
     </div>
   </div>
 </template>
