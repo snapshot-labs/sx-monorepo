@@ -140,7 +140,9 @@ const disabled = computed(() => {
     </div>
     <div>
       <h4 class="eyebrow font-medium">Skin colors</h4>
-      <div class="mb-2">fallback to the base theme color.</div>
+      <div class="mb-2">
+        Empty colors value will fallback to the base theme color.
+      </div>
       <UiForm
         v-model="skinSettings"
         :definition="SKIN_DEFINITION"
