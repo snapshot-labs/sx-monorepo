@@ -272,7 +272,7 @@ export async function setup({
   };
   const merkleWhitelistStrategyMetadata = {
     tree: [leaf].map(leaf => ({
-      type: 0,
+      type: 1,
       address: leaf.address,
       votingPower: leaf.votingPower
     }))
@@ -280,6 +280,7 @@ export async function setup({
   const entries = [leaf].map(leaf => `${leaf.address}:${leaf.votingPower}`);
 
   const merkleTreeRoot = (await generateMerkleTree(entries))[0];
+  if (!merkleTreeRoot) throw new Error('Invalid merkle tree root');
 
   const networkConfig: NetworkConfig = {
     eip712ChainId: '0x534e5f5345504f4c4941',
