@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { clone } from '@/helpers/utils';
+import { clone, getRandomHexColor } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { SpaceMetadataLabel } from '@/types';
 
@@ -41,7 +41,8 @@ const definition = {
       format: 'color',
       title: 'Color',
       examples: ['#FF0000'],
-      showControls: true
+      showControls: true,
+      default: () => getRandomHexColor()
     }
   }
 };
