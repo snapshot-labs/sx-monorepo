@@ -27,7 +27,8 @@ describe('Starknet Constants', () => {
       });
 
       describe('generateParams', () => {
-        it('should return the encoded value of the whitelist tree root', async () => {
+        // NOTE: skiping because this calls mana, but this endpoint is not available on prod
+        it.skip('should return the encoded value of the whitelist tree root', async () => {
           const summary = await strategy.generateParams!({
             whitelist: input
           });
