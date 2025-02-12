@@ -84,14 +84,14 @@ const formErrors = computed(() => {
     required: [],
     properties: {
       customDomain: CUSTOM_DOMAIN_DEFINITION,
-      skinSettings: SKIN_DEFINITION
+      ...SKIN_DEFINITION.properties
     }
   });
 
   const errors = validator.validate(
     {
       customDomain: customDomain.value,
-      skinSettings: skinSettings.value
+      ...skinSettings.value
     },
     {
       skipEmptyOptionalFields: true
@@ -146,7 +146,7 @@ const previewUrl = computed(() => {
         <UiForm
           v-model="skinSettings"
           :definition="SKIN_DEFINITION"
-          :error="formErrors.skinSettings"
+          :error="formErrors"
           :disabled="disabled"
         />
       </div>

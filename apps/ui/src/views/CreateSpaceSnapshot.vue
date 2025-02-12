@@ -27,7 +27,7 @@ const DEFAULT_SETTINGS_FORM = {
 };
 
 const DEFAULT_STEP_ERRORS = {
-  profile: false,
+  profile: true,
   voting: false
 };
 
@@ -43,15 +43,15 @@ type extendedStepRecords = Record<
 >;
 
 const STEPS: extendedStepRecords = {
+  profile: {
+    title: 'Profile',
+    isValid: () => !stepsErrors.value['profile']
+  },
   id: {
     title: 'ENS name',
     isValid: () => !!settingsForm.value.id,
     contentTitle: 'ENS name',
     contentDescription: 'Select your space ENS name.'
-  },
-  profile: {
-    title: 'Profile',
-    isValid: () => !stepsErrors.value['profile']
   },
   network: {
     title: 'Network',
