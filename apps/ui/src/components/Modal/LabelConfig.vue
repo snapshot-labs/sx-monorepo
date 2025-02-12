@@ -41,6 +41,7 @@ const definition = {
       format: 'color',
       title: 'Color',
       examples: ['#FF0000'],
+      showControls: true,
       default: () => getRandomHexColor()
     }
   }

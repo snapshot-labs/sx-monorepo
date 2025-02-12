@@ -107,7 +107,12 @@ function validateAndConvertColor(color: string): string {
         v-bind="$attrs"
         :placeholder="definition.examples && definition.examples[0]"
       />
-      <button class="absolute right-3 mt-[20px]" @click="generateRandomColor">
+      <button
+        v-if="definition.showControls"
+        title="Generate random color"
+        class="absolute right-3 mt-[20px]"
+        @click="generateRandomColor"
+      >
         <IH-refresh class="text-skin-link" />
       </button>
     </div>
