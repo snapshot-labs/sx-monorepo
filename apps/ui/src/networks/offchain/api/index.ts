@@ -435,6 +435,7 @@ function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
         }
       : {},
     spaceCount: strategy.spacesCount,
+    verifiedSpaceCount: strategy.verifiedSpacesCount,
     paramsDefinition: hasDefinition
       ? strategy.schema.definitions?.Strategy
       : null
