@@ -2,7 +2,12 @@
 
 import { uint256, validateAndParseAddress } from 'starknet';
 import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
-import { AddressType, generateMerkleProof, Leaf } from '../../utils/merkletree';
+import {
+  AddressType,
+  generateMerkleProof,
+  generateMerkleTree,
+  Leaf
+} from '../../utils/merkletree';
 
 type Entry = {
   type: AddressType;
@@ -27,27 +32,54 @@ export default function createMerkleWhitelistStrategy(): Strategy {
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
-      const leaves: Leaf[] = tree.map(
-        entry => new Leaf(entry.type, entry.address, BigInt(entry.votingPower))
-      );
-      const hashes = leaves.map(leaf => leaf.hash);
-      const voterIndex = leaves.findIndex(
-        leaf =>
-          validateAndParseAddress(leaf.address) ===
+      const voterIndex = tree.findIndex(
+        entry =>
+          validateAndParseAddress(entry.address) ===
           validateAndParseAddress(signerAddress)
       );
 
-      const leaf = leaves[voterIndex];
-      if (voterIndex === -1 || !leaf)
+      const entry = tree[voterIndex];
+      if (voterIndex === -1 || !entry)
         throw new Error('Signer is not in whitelist');
 
-      const votingPowerUint256 = uint256.bnToUint256(leaf.votingPower);
+      const votingPowerUint256 = uint256.bnToUint256(entry.votingPower);
 
-      const proof = generateMerkleProof(hashes, voterIndex);
+      let proof: string[] = [];
+      try {
+        const res = await fetch(
+          `${clientConfig.manaUrl}/stark_rpc/${clientConfig.networkConfig.eip712ChainId}`,
+          {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'getMerkleProof',
+              params: {
+                root: params,
+                index: voterIndex
+              },
+              id: null
+            })
+          }
+        );
+
+        const data = await res.json();
+        if (!data.result) throw new Error('Merkle proof not found');
+
+        proof = data.result;
+      } catch {
+        const merkleTree = await generateMerkleTree(
+          tree.map(entry => `${entry.address}:${entry.votingPower}`)
+        );
+        proof = generateMerkleProof(merkleTree, voterIndex);
+      }
 
       return [
-        leaf.type.toString(),
-        leaf.address,
+        entry.type.toString(),
+        entry.address,
         votingPowerUint256.low.toString(),
         votingPowerUint256.high.toString(),
         proof.length.toString(),

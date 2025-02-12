@@ -81,19 +81,13 @@ export type ClientOpts = {
   ethUrl: string;
   starkProvider: RpcProvider;
   networkConfig: NetworkConfig;
+  manaUrl: string;
 };
 
 export type ClientConfig = {
   ethUrl: string;
   starkProvider: RpcProvider;
   networkConfig: NetworkConfig;
-};
-
-export type EthereumSigClientOpts = ClientOpts & {
-  manaUrl: string;
-};
-
-export type EthereumSigClientConfig = ClientConfig & {
   manaUrl: string;
 };
 

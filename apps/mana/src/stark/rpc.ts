@@ -155,9 +155,9 @@ export const createNetworkHandler = (chainId: string) => {
 
   async function getMerkleRoot(id: number, params: any, res: Response) {
     try {
-      const { hashes } = params;
+      const { entries } = params;
 
-      tree = utils.merkle.generateMerkleTree(hashes);
+      tree = await utils.merkle.generateMerkleTree(entries);
       const root = tree[0];
 
       return rpcSuccess(res, root, id);
@@ -173,7 +173,7 @@ export const createNetworkHandler = (chainId: string) => {
 
       const { root, index } = params;
 
-      const proof = utils.merkle.getProof(tree, tree.length - 1 - index);
+      const proof = utils.merkle.generateMerkleProof(tree, index);
 
       return rpcSuccess(res, proof, id);
     } catch (e) {

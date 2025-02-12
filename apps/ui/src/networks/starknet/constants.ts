@@ -1,7 +1,8 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { clients, starknetNetworks, utils } from '@snapshot-labs/sx';
+import { clients, starknetNetworks } from '@snapshot-labs/sx';
 import { CallData, uint256 } from 'starknet';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import { getMerkleRoot } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
 import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
@@ -283,24 +284,15 @@ export function createConstants(
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: async (params: Record<string, any>) => {
-        const leaves = params.whitelist
+        const entries = params.whitelist
           .split(/[\n,]/)
-          .filter((s: string) => s.trim().length)
-          .map((item: string) => {
-            const [address, votingPower] = item.split(':').map(s => s.trim());
-            const type =
-              address.length === 42
-                ? utils.merkle.AddressType.ETHEREUM
-                : utils.merkle.AddressType.STARKNET;
+          .filter((s: string) => s.trim().length);
 
-            return new utils.merkle.Leaf(type, address, BigInt(votingPower));
-          });
+        const root = await getMerkleRoot(config.Meta.eip712ChainId, {
+          entries
+        });
 
-        return [
-          utils.merkle.generateMerkleRoot(
-            leaves.map((leaf: utils.merkle.Leaf) => leaf.hash)
-          )
-        ];
+        return [root];
       },
       generateMetadata: async (params: Record<string, any>) => {
         const tree = params.whitelist

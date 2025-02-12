@@ -45,3 +45,12 @@ export async function executionCall(
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);
 }
+
+export async function getMerkleRoot(
+  chainId: number | string,
+  params: {
+    entries: string[];
+  }
+) {
+  return rpcCall(`stark_rpc/${chainId}`, 'getMerkleRoot', params);
+}

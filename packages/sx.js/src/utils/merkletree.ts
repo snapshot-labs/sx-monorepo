@@ -6,9 +6,20 @@ export enum AddressType {
   CUSTOM
 }
 
-export function throwError(message?: string): never {
+function throwError(message?: string): never {
   throw new Error(message);
 }
+
+const scheduleImmediate = () =>
+  new Promise(resolve => {
+    if (typeof setImmediate === 'function') {
+      setImmediate(() => resolve(true));
+    } else if (typeof window === 'object' && window.requestAnimationFrame) {
+      window.requestAnimationFrame(() => resolve(true));
+    } else {
+      setTimeout(() => resolve(true), 0);
+    }
+  });
 
 const leftChildIndex = (i: number) => 2 * i + 1;
 const rightChildIndex = (i: number) => 2 * i + 2;
@@ -42,20 +53,36 @@ export class Leaf {
   }
 }
 
-export function generateMerkleRoot(hashes: string[]) {
-  const tree = generateMerkleTree(hashes);
+/**
+ * Computes merkle tree in async mode. This uses setImmediate to yield to the event loop.
+ * This is useful for large trees to avoid blocking the event loop.
+ * There is still a blocking part in the computation of hashes (element hashes and node hashes).
+ * @param entries Array of whitelist entries in format of "address:votingPower"
+ */
+export async function generateMerkleTree(entries: string[]) {
+  const leaves = entries.map(entry => {
+    const [address, votingPower] = entry.split(':').map(s => s.trim());
+    if (!address || !votingPower) throwError('Invalid entry format');
+    const type =
+      address.length === 42 ? AddressType.ETHEREUM : AddressType.STARKNET;
 
-  return tree[0];
-}
+    return new Leaf(type, address, BigInt(votingPower));
+  });
 
-export function generateMerkleTree(leaves: string[]) {
-  const tree = new Array<string>(2 * leaves.length - 1);
+  const hashes: string[] = [];
 
-  for (const [i, leaf] of leaves.entries()) {
-    tree[tree.length - 1 - i] = leaf;
+  for (const leaf of leaves) {
+    hashes.push(leaf.hash);
+    await scheduleImmediate();
   }
 
-  for (let i = tree.length - 1 - leaves.length; i >= 0; i--) {
+  const tree = new Array<string>(2 * hashes.length - 1);
+
+  for (const [i, hash] of hashes.entries()) {
+    tree[tree.length - 1 - i] = hash;
+  }
+
+  for (let i = tree.length - 1 - hashes.length; i >= 0; i--) {
     const leftChild = tree[leftChildIndex(i)]!;
     const rightChild = tree[rightChildIndex(i)]!;
 
@@ -63,12 +90,14 @@ export function generateMerkleTree(leaves: string[]) {
       BigInt(leftChild) > BigInt(rightChild)
         ? ec.starkCurve.pedersen(leftChild, rightChild)
         : ec.starkCurve.pedersen(rightChild, leftChild);
+
+    await scheduleImmediate();
   }
 
   return tree;
 }
 
-export function getProof(tree: string[], index: number): string[] {
+function getProof(tree: string[], index: number): string[] {
   const proof: string[] = [];
   while (index > 0) {
     proof.push(tree[siblingIndex(index)]!);
@@ -77,8 +106,6 @@ export function getProof(tree: string[], index: number): string[] {
   return proof;
 }
 
-export function generateMerkleProof(hashes: string[], index: number): string[] {
-  const tree = generateMerkleTree(hashes);
-
+export function generateMerkleProof(tree: string[], index: number): string[] {
   return getProof(tree, tree.length - 1 - index);
 }
