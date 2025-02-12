@@ -5,6 +5,8 @@ export default {
 </script>
 
 <script setup lang="ts">
+import { getRandomHexColor } from '@/helpers/utils';
+
 const props = defineProps<{
   loading?: boolean;
   error?: string;
@@ -21,7 +23,9 @@ const dirty = ref(false);
 const inputValue = computed({
   get() {
     if (!model.value && !dirty.value && props.definition.default) {
-      return props.definition.default;
+      return typeof props.definition.default === 'function'
+        ? props.definition.default()
+        : props.definition.default;
     }
     return model.value;
   },
@@ -41,9 +45,7 @@ const backgroundColor = computed(() => {
 });
 
 function generateRandomColor() {
-  model.value = `#${Math.floor(Math.random() * 16777215)
-    .toString(16)
-    .padStart(6, '0')}`.toUpperCase();
+  model.value = getRandomHexColor();
 }
 
 watch(model, () => {
@@ -57,12 +59,6 @@ debouncedWatch(
   },
   { debounce: 1000 }
 );
-
-onMounted(() => {
-  if (!model.value) {
-    generateRandomColor();
-  }
-});
 
 function validateAndConvertColor(color: string): string {
   if (!color) return color;
