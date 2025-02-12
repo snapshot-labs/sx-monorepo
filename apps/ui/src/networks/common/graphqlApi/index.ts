@@ -50,12 +50,46 @@ import {
   USER_VOTES_QUERY,
   VOTES_QUERY
 } from './queries';
-import { ApiProposal, ApiSpace, ApiStrategyParsedMetadata } from './types';
+import {
+  ApiProposal,
+  ApiProposalWithMetadata,
+  ApiSpace,
+  ApiSpaceWithMetadata,
+  ApiStrategyParsedMetadata,
+  ApiVote
+} from './types';
 
 type ApiOptions = {
   baseNetworkId?: NetworkID;
   highlightApiUrl?: string;
 };
+
+function getAddressType(author: ApiProposal['author']) {
+  const isValidAddressType = (type: number): type is 0 | 1 | 2 =>
+    [0, 1, 2].includes(type);
+
+  if (isValidAddressType(author.address_type)) return author.address_type;
+
+  throw new Error('Invalid address type');
+}
+
+function isSpaceWithMetadata(space: ApiSpace): space is ApiSpaceWithMetadata {
+  return (
+    !!space.metadata &&
+    !!space.strategies_parsed_metadata &&
+    !!space.voting_power_validation_strategies_parsed_metadata
+  );
+}
+
+function isProposalWithMetadata(
+  proposal: ApiProposal
+): proposal is ApiProposalWithMetadata {
+  return (
+    !!proposal.metadata &&
+    !!proposal.space.metadata &&
+    !!proposal.space.strategies_parsed_metadata
+  );
+}
 
 function getProposalState(
   networkId: NetworkID,
@@ -151,21 +185,20 @@ function processExecutions(
   // are modified in the future it will affect pass proposals.
   // We should persist those values on proposal directly so it's stable.
   // Right now we can't really update subgraphs because of TheGraph issue.
+  if (!proposal.metadata?.execution) return [];
 
-  if (!proposal.metadata.execution) return [];
-
-  const transactions = formatExecution(proposal.metadata.execution);
+  const transactions = formatExecution(proposal.metadata?.execution);
   if (transactions.length === 0) return [];
 
-  const match = proposal.space.metadata.executors_strategies.find(
+  const match = proposal.space.metadata?.executors_strategies.find(
     strategy => strategy.address === proposal.execution_strategy
   );
 
-  const treasuries = proposal.space.metadata.treasuries.map(treasury =>
+  const treasuries = proposal.space.metadata?.treasuries.map(treasury =>
     formatMetadataTreasury(treasury)
   );
 
-  const matchingTreasury = treasuries.find(treasury => {
+  const matchingTreasury = treasuries?.find(treasury => {
     if (!match) return null;
 
     return (
@@ -188,7 +221,7 @@ function processExecutions(
 }
 
 function formatSpace(
-  space: ApiSpace,
+  space: ApiSpaceWithMetadata,
   networkId: NetworkID,
   constants: NetworkConstants
 ): Space {
@@ -260,7 +293,7 @@ function formatSpace(
 }
 
 function formatProposal(
-  proposal: ApiProposal,
+  proposal: ApiProposalWithMetadata,
   networkId: NetworkID,
   current: number,
   baseNetworkId?: NetworkID
@@ -270,6 +303,7 @@ function formatProposal(
       ? baseNetworkId
       : networkId;
   const state = getProposalState(networkId, proposal, current);
+
   return {
     ...proposal,
     space: {
@@ -286,6 +320,10 @@ function formatProposal(
         proposal.strategies_indices
       ),
       terms: ''
+    },
+    author: {
+      id: proposal.author.id,
+      address_type: getAddressType(proposal.author)
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',
@@ -347,8 +385,8 @@ export function createApi(
 
   const highlightVotesCache = {
     key: null as string | null,
-    data: [] as Vote[],
-    remaining: [] as Vote[]
+    data: [] as ApiVote[],
+    remaining: [] as ApiVote[]
   };
 
   return {
@@ -382,7 +420,7 @@ export function createApi(
           orderDirection,
           where: {
             space: proposal.space.id,
-            proposal: proposal.proposal_id,
+            proposal: Number(proposal.proposal_id),
             ...filters
           }
         }
@@ -425,12 +463,17 @@ export function createApi(
       const addresses = data.votes.map(vote => vote.voter.id);
       const names = await getNames(addresses);
 
-      return data.votes.map(vote => {
-        vote.voter.name = names[vote.voter.id] || null;
-        vote.reason = vote.metadata?.reason;
-        delete vote.metadata;
+      return data.votes.map(({ metadata, ...vote }) => {
+        const processedVote: Vote = {
+          ...vote,
+          voter: {
+            ...vote.voter,
+            name: names[vote.voter.id]
+          },
+          reason: metadata?.reason
+        };
 
-        return vote;
+        return processedVote;
       });
     },
     loadUserVotes: async (
@@ -449,7 +492,7 @@ export function createApi(
       });
 
       return Object.fromEntries(
-        (data.votes as Vote[]).map(vote => [
+        data.votes.map(vote => [
           `${networkId}:${vote.space.id}/${vote.proposal}`,
           vote
         ])
@@ -514,9 +557,11 @@ export function createApi(
         });
       }
 
-      return data.proposals.map(proposal =>
-        formatProposal(proposal, networkId, current, opts.baseNetworkId)
-      );
+      return data.proposals
+        .filter(proposal => isProposalWithMetadata(proposal))
+        .map(proposal =>
+          formatProposal(proposal, networkId, current, opts.baseNetworkId)
+        );
     },
     loadProposal: async (
       spaceId: string,
@@ -536,14 +581,14 @@ export function createApi(
           .catch(() => null)
       ]);
 
-      if (data.proposal?.metadata === null) return null;
+      if (!data.proposal) return null;
+
       data.proposal = joinHighlightProposal(
         data.proposal,
         highlightResult?.data.sxproposal
       );
 
-      if (!data.proposal) return null;
-
+      if (!isProposalWithMetadata(data.proposal)) return null;
       return formatProposal(
         data.proposal,
         networkId,
@@ -582,7 +627,7 @@ export function createApi(
           variables: { ids: data.spaces.map((space: any) => space.id) }
         });
 
-        data.spaces = data.spaces.map((space: ApiSpace) => {
+        data.spaces = data.spaces.map(space => {
           const highlightSpace = highlightData.sxspaces.find(
             (highlightSpace: any) => highlightSpace.id === space.id
           );
@@ -591,7 +636,9 @@ export function createApi(
         });
       }
 
-      return data.spaces.map(space => formatSpace(space, networkId, constants));
+      return data.spaces
+        .filter(space => isSpaceWithMetadata(space))
+        .map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
@@ -607,11 +654,14 @@ export function createApi(
           .catch(() => null)
       ]);
 
+      if (!data.space) return null;
+
       data.space = joinHighlightSpace(
         data.space,
         highlightResult?.data.sxspace
       );
 
+      if (!isSpaceWithMetadata(data.space)) return null;
       return formatSpace(data.space, networkId, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
@@ -633,29 +683,28 @@ export function createApi(
         highlightResult?.data?.sxuser ?? null
       );
     },
-    loadUserActivities(userId: string): Promise<UserActivity[]> {
-      return apollo
-        .query({
-          query: LEADERBOARD_QUERY,
-          variables: {
-            first: 1000,
-            skip: 0,
-            orderBy: 'proposal_count',
-            orderDirection: 'desc',
-            where: {
-              user: userId
-            }
+    async loadUserActivities(userId: string): Promise<UserActivity[]> {
+      const { data } = await apollo.query({
+        query: LEADERBOARD_QUERY,
+        variables: {
+          first: 1000,
+          skip: 0,
+          orderBy: 'proposal_count',
+          orderDirection: 'desc',
+          where: {
+            user: userId
           }
-        })
-        .then(({ data }) =>
-          data.leaderboards.map((leaderboard: any) => ({
-            spaceId: `${networkId}:${leaderboard.space.id}`,
-            vote_count: leaderboard.vote_count,
-            proposal_count: leaderboard.proposal_count
-          }))
-        );
+        }
+      });
+
+      return data.leaderboards.map(leaderboard => ({
+        id: `${networkId}:${leaderboard.space.id}`,
+        spaceId: `${networkId}:${leaderboard.space.id}`,
+        vote_count: leaderboard.vote_count,
+        proposal_count: leaderboard.proposal_count
+      }));
     },
-    loadLeaderboard(
+    async loadLeaderboard(
       spaceId: string,
       { limit, skip = 0 }: PaginationOpts,
       sortBy:
@@ -670,28 +719,26 @@ export function createApi(
         'desc' | 'asc'
       ];
 
-      return apollo
-        .query({
-          query: LEADERBOARD_QUERY,
-          variables: {
-            first: limit,
-            skip,
-            orderBy,
-            orderDirection,
-            where: {
-              space: spaceId,
-              user
-            }
+      const { data } = await apollo.query({
+        query: LEADERBOARD_QUERY,
+        variables: {
+          first: limit,
+          skip,
+          orderBy,
+          orderDirection,
+          where: {
+            space: spaceId,
+            user
           }
-        })
-        .then(({ data }) =>
-          data.leaderboards.map((leaderboard: any) => ({
-            id: leaderboard.user.id,
-            spaceId: leaderboard.space.id,
-            vote_count: leaderboard.vote_count,
-            proposal_count: leaderboard.proposal_count
-          }))
-        );
+        }
+      });
+
+      return data.leaderboards.map(leaderboard => ({
+        id: leaderboard.user.id,
+        spaceId: leaderboard.space.id,
+        vote_count: leaderboard.vote_count,
+        proposal_count: leaderboard.proposal_count
+      }));
     },
     loadFollows: async () => {
       return [] as Follow[];
