@@ -2,7 +2,7 @@
 import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
-import { getNetwork, metadataNetwork } from '@/networks';
+import { metadataNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { Member, NetworkID, Validation } from '@/types';
 
@@ -43,18 +43,6 @@ type extendedStepRecords = Record<
 >;
 
 const STEPS: extendedStepRecords = {
-  welcome: {
-    title: 'Getting started',
-    isValid: () => !web3.value.authLoading,
-    contentTitle: 'Getting started',
-    contentDescription: 'Create a snapshot space offchain.',
-    onBeforeQuit: () => {
-      if (web3.value.account) return true;
-
-      modalAccountOpen.value = true;
-      return false;
-    }
-  },
   id: {
     title: 'ENS name',
     isValid: () => !!settingsForm.value.id,
@@ -95,19 +83,12 @@ const STEPS: extendedStepRecords = {
     contentTitle: 'Members',
     contentDescription:
       'Assign different roles and permissions to your space members.'
-  },
-  controller: {
-    title: 'Controller',
-    isValid: () => true,
-    contentTitle: 'Controller',
-    contentDescription: "The controller is the space's owner."
   }
 } as const;
 
 const { createSpaceRaw } = useActions();
 const { web3, authInitiated } = useWeb3();
 const router = useRouter();
-const { modalAccountOpen } = useModal();
 useTitle('Create space');
 
 const sending = ref(false);
@@ -231,30 +212,6 @@ watch(
           :title="STEPS[currentStep].contentTitle"
           :description="STEPS[currentStep].contentDescription"
         >
-          <div v-if="currentStep === 'welcome'" class="space-y-4">
-            <div>
-              You will be guided through the process of creating a space.
-              <br />
-              Don't worry, all settings can be changed later.
-            </div>
-            <div class="border py-3 px-4 rounded-lg flex gap-3">
-              <IH-Book-open class="shrink-0 size-[30px]" />
-              <div>
-                <b>Not sure how to setup your space?</b>
-                <br />
-                Learn more in the
-                <AppLink
-                  :to="'https://docs.snapshot.box/user-guides/spaces/create'"
-                >
-                  documentation
-                </AppLink>
-                or contact support on
-                <AppLink :to="'https://help.snapshot.box/en'">
-                  Helpdesk </AppLink
-                >.
-              </div>
-            </div>
-          </div>
           <EnsConfiguratorOffchain
             v-if="currentStep === 'id'"
             v-model="settingsForm.id"
@@ -315,17 +272,6 @@ watch(
             :is-controller="true"
             :is-admin="true"
           />
-          <template v-if="currentStep === 'controller'">
-            <UiMessage type="danger" class="mb-3">
-              The controller is set to the ENS name owner. Any change of the ENS
-              name ownership will also change the controller.</UiMessage
-            >
-            <FormSpaceController
-              :controller="web3.account"
-              :network="getNetwork(networkId)"
-              :disabled="true"
-            />
-          </template>
         </UiContainerSettings>
       </template>
       <template #submit-text> Create space</template>

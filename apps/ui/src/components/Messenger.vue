@@ -3,11 +3,13 @@ import { HELPDESK_URL } from '@/helpers/constants';
 </script>
 
 <template>
-  <a
-    :href="HELPDESK_URL"
-    target="_blank"
-    class="hidden md:block fixed bottom-4 right-4 rounded-full bg-skin-link text-skin-bg p-2 z-40"
-  >
-    <IS-chat class="inline-block size-[32px]" />
-  </a>
+  <div class="hidden md:block fixed bottom-3 right-4 z-40">
+    <UiTooltip title="Get help">
+      <a :href="HELPDESK_URL" target="_blank">
+        <UiButton class="!px-0 w-[46px]">
+          <IS-chat class="inline-block" />
+        </UiButton>
+      </a>
+    </UiTooltip>
+  </div>
 </template>
