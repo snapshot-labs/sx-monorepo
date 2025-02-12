@@ -103,7 +103,7 @@ const disabled = computed(() => {
   return !props.space.turbo && !props.space.additionalRawData?.domain;
 });
 const previewDomain = computed(
-  () => customDomain.value || window.location.host
+  () => props.space.additionalRawData?.domain || window.location.host
 );
 const previewUrl = computed(() => {
   return `${window.location.host}/#/?skin-preview=${encodeSkin(skinSettings.value)}`;
@@ -120,7 +120,7 @@ const previewUrl = computed(() => {
     Whitelabel features are only available for Turbo subscribers.
   </UiMessage>
   <div class="flex flex-col md:flex-row gap-4">
-    <div class="s-box space-y-4 order-last md:order-first">
+    <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">
       <div>
         <h4 class="eyebrow mb-2 font-medium">Custom domain</h4>
         <UiMessage
@@ -170,7 +170,7 @@ const previewUrl = computed(() => {
         />
       </div>
     </div>
-    <div class="shrink-0">
+    <div v-if="space.additionalRawData?.domain" class="shrink-0">
       <h4 class="eyebrow mb-2 font-medium">Preview</h4>
       <div class="browser">
         <div class="browser-toolbar">
@@ -180,8 +180,8 @@ const previewUrl = computed(() => {
           <IC-zap v-if="disabled" class="size-[126px] text-skin-border" />
           <div v-else-if="!isWhiteLabel">
             Preview only available on
-            <AppLink :to="`https://${customDomain}/#/settings/whitelabel`">{{
-              customDomain
+            <AppLink :to="`https://${previewDomain}/#/settings/whitelabel`">{{
+              previewDomain
             }}</AppLink>
           </div>
           <div v-else class="browser-content">
