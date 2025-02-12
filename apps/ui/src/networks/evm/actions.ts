@@ -184,18 +184,22 @@ export function createActions(
         params: {
           ...params,
           authenticators: params.authenticators.map(config => config.address),
-          votingStrategies: params.votingStrategies.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)[0]
-              : '0x'
-          })),
+          votingStrategies: await Promise.all(
+            params.votingStrategies.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? (await config.generateParams(config.params))[0]
+                : '0x'
+            }))
+          ),
           votingStrategiesMetadata: metadataUris,
           proposalValidationStrategy: {
             addr: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
-              ? params.validationStrategy.generateParams(
-                  params.validationStrategy.params
+              ? (
+                  await params.validationStrategy.generateParams(
+                    params.validationStrategy.params
+                  )
                 )[0]
               : '0x'
           },
@@ -707,12 +711,14 @@ export function createActions(
             authenticatorsToRemove: space.authenticators.filter(
               (authenticator, index) => authenticatorsToRemove.includes(index)
             ),
-            votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-              addr: config.address,
-              params: config.generateParams
-                ? config.generateParams(config.params)[0]
-                : '0x'
-            })),
+            votingStrategiesToAdd: await Promise.all(
+              votingStrategiesToAdd.map(async config => ({
+                addr: config.address,
+                params: config.generateParams
+                  ? (await config.generateParams(config.params))[0]
+                  : '0x'
+              }))
+            ),
             votingStrategiesToRemove: votingStrategiesToRemove.map(
               index => space.strategies_indices[index]
             ),
@@ -720,8 +726,10 @@ export function createActions(
             proposalValidationStrategy: {
               addr: validationStrategy.address,
               params: validationStrategy.generateParams
-                ? validationStrategy.generateParams(
-                    validationStrategy.params
+                ? (
+                    await validationStrategy.generateParams(
+                      validationStrategy.params
+                    )
                   )[0]
                 : '0x'
             },

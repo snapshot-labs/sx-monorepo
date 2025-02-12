@@ -188,7 +188,7 @@ export function createActions(
           proposalValidationStrategy: {
             addr: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
-              ? params.validationStrategy.generateParams(
+              ? await params.validationStrategy.generateParams(
                   params.validationStrategy.params
                 )
               : []
@@ -197,12 +197,14 @@ export function createActions(
           metadataUri: `ipfs://${pinned.cid}`,
           daoUri: '',
           authenticators: params.authenticators.map(config => config.address),
-          votingStrategies: params.votingStrategies.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)
-              : []
-          })),
+          votingStrategies: await Promise.all(
+            params.votingStrategies.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? await config.generateParams(config.params)
+                : []
+            }))
+          ),
           votingStrategiesMetadata: metadataUris
         }
       });
@@ -635,12 +637,14 @@ export function createActions(
           authenticatorsToRemove: space.authenticators.filter(
             (authenticator, index) => authenticatorsToRemove.includes(index)
           ),
-          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)
-              : []
-          })),
+          votingStrategiesToAdd: await Promise.all(
+            votingStrategiesToAdd.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? await config.generateParams(config.params)
+                : []
+            }))
+          ),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
             index => space.strategies_indices[index]
           ),
@@ -648,7 +652,9 @@ export function createActions(
           proposalValidationStrategy: {
             addr: validationStrategy.address,
             params: validationStrategy.generateParams
-              ? validationStrategy.generateParams(validationStrategy.params)
+              ? await validationStrategy.generateParams(
+                  validationStrategy.params
+                )
               : []
           },
           proposalValidationStrategyMetadataUri,

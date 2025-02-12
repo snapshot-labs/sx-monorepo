@@ -95,7 +95,7 @@ export function createConstants(
     icon: IHCode,
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
-    generateParams: (params: Record<string, any>) => {
+    generateParams: async (params: Record<string, any>) => {
       return CallData.compile({
         contract_address: params.contractAddress,
         slot_index: uint256.bnToUint256(params.slotIndex)
@@ -207,15 +207,17 @@ export function createConstants(
         return params?.strategies?.length > 0;
       },
       generateSummary: (params: Record<string, any>) => `(${params.threshold})`,
-      generateParams: (params: Record<string, any>) => {
-        const strategies = params.strategies.map((strategy: StrategyConfig) => {
-          return {
-            address: strategy.address,
-            params: strategy.generateParams
-              ? strategy.generateParams(strategy.params)
-              : []
-          };
-        });
+      generateParams: async (params: Record<string, any>) => {
+        const strategies = await Promise.all(
+          params.strategies.map(async (strategy: StrategyConfig) => {
+            return {
+              address: strategy.address,
+              params: strategy.generateParams
+                ? await strategy.generateParams(strategy.params)
+                : []
+            };
+          })
+        );
 
         return CallData.compile({
           threshold: uint256.bnToUint256(params.threshold),
@@ -280,7 +282,7 @@ export function createConstants(
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
-      generateParams: (params: Record<string, any>) => {
+      generateParams: async (params: Record<string, any>) => {
         const leaves = params.whitelist
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
@@ -381,7 +383,9 @@ export function createConstants(
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: (params: Record<string, any>) => [params.contractAddress],
+      generateParams: async (params: Record<string, any>) => [
+        params.contractAddress
+      ],
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'ERC-20 Votes (EIP-5805)',
         properties: {

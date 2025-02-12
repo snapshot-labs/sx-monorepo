@@ -27,8 +27,8 @@ describe('EVM Constants', () => {
       });
 
       describe('generateParams', () => {
-        it('should return the encoded value of the whitelist tree root', () => {
-          const summary = strategy.generateParams!({
+        it('should return the encoded value of the whitelist tree root', async () => {
+          const summary = await strategy.generateParams!({
             whitelist: input
           });
 
