@@ -34,13 +34,8 @@ const SOCIALS = [
               <AppLink :to="{ name: 'my-explore' }"> Explore spaces </AppLink>
             </div>
             <div>
-              <AppLink
-                :to="{
-                  name: 'create-space-snapshot'
-                }"
-              >
+              <AppLink :to="{ name: 'create-space-snapshot' }">
                 Create a space
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
             </div>
             <div>
