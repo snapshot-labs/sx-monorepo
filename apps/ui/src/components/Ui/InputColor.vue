@@ -35,14 +35,21 @@ const inputValue = computed({
   }
 });
 
-const backgroundColor = computed(() => {
-  const color = inputValue.value;
-  return /^#[0-9A-F]{6}$/i.test(color)
-    ? color
-    : currentMode.value === 'dark'
-      ? '#000000'
-      : '#FFFFFF';
+const shadowColor = computed({
+  get() {
+    if (inputValue.value && isColorValid(inputValue.value)) {
+      return inputValue.value;
+    }
+    return currentMode.value === 'dark' ? '#000000' : '#FFFFFF';
+  },
+  set(newValue: string) {
+    model.value = newValue.toUpperCase();
+  }
 });
+
+function isColorValid(color: string): boolean {
+  return /^#[0-9A-F]{6}$/i.test(color);
+}
 
 function generateRandomColor() {
   model.value = getRandomHexColor();
@@ -95,9 +102,10 @@ function validateAndConvertColor(color: string): string {
     :input-value-length="inputValue?.length"
   >
     <div class="flex">
-      <div
-        class="absolute size-[18px] mt-[30px] ml-3 rounded border border-skin-text border-opacity-20"
-        :style="{ backgroundColor: backgroundColor }"
+      <input
+        v-model="shadowColor"
+        type="color"
+        class="absolute appearance-none cursor-pointer size-[18px] mt-[30px] ml-3 rounded border border-skin-text border-opacity-20 padding-0 margin-0"
       />
       <input
         :id="id"
@@ -118,3 +126,20 @@ function validateAndConvertColor(color: string): string {
     </div>
   </UiWrapperInput>
 </template>
+
+<style scoped>
+::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+::-webkit-color-swatch {
+  border: 0;
+  border-radius: 0;
+}
+
+::-moz-color-swatch,
+::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+</style>
