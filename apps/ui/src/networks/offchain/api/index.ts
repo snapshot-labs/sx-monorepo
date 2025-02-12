@@ -83,10 +83,17 @@ function getProposalState(
   if (proposal.state === 'closed') {
     const currentQuorum = getProposalCurrentQuorum(networkId, {
       scores: proposal.scores,
-      scores_total: proposal.scores_total
+      scores_total: proposal.scores_total,
+      quorum_type: proposal.quorumType
     });
 
-    if (currentQuorum < proposal.quorum) return 'rejected';
+    if (
+      proposal.quorumType === 'rejection'
+        ? currentQuorum > proposal.quorum
+        : currentQuorum < proposal.quorum
+    ) {
+      return 'rejected';
+    }
 
     if (proposal.type !== 'basic') {
       return 'closed';
