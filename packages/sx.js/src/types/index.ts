@@ -62,6 +62,7 @@ export interface Strategy {
     signerAddress: string,
     address: string,
     index: number,
+    params: string,
     metadata: Record<string, any> | null,
     envelope: Envelope<Message>,
     clientConfig: ClientConfig
@@ -80,19 +81,13 @@ export type ClientOpts = {
   ethUrl: string;
   starkProvider: RpcProvider;
   networkConfig: NetworkConfig;
+  manaUrl: string;
 };
 
 export type ClientConfig = {
   ethUrl: string;
   starkProvider: RpcProvider;
   networkConfig: NetworkConfig;
-};
-
-export type EthereumSigClientOpts = ClientOpts & {
-  manaUrl: string;
-};
-
-export type EthereumSigClientConfig = ClientConfig & {
   manaUrl: string;
 };
 
@@ -110,6 +105,7 @@ export type IndexedConfig = {
 export type StrategyConfig = {
   index: number;
   address: string;
+  params: string;
   metadata?: Record<string, any>;
 };
 

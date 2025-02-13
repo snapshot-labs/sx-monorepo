@@ -7,6 +7,7 @@ import {
 import { Account, constants, RpcProvider } from 'starknet';
 import { createAccountProxy, ETH_NODE_URLS, getProvider } from './dependencies';
 import { NonceManager } from './nonce-manager';
+import { PORT } from '../constants';
 
 export const NETWORKS = new Map<string, NetworkConfig>([
   [constants.StarknetChainId.SN_MAIN, starknetMainnet],
@@ -47,7 +48,8 @@ export function getClient(chainId: string) {
   const client = new clients.StarknetTx({
     starkProvider: provider,
     ethUrl,
-    networkConfig
+    networkConfig,
+    manaUrl: `http://localhost:${PORT}`
   });
 
   const herodotusController = new clients.HerodotusController(networkConfig);

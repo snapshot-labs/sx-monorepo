@@ -2,17 +2,15 @@ import { describe, expect, it } from 'vitest';
 import {
   AddressType,
   generateMerkleProof,
-  generateMerkleRoot,
+  generateMerkleTree,
   Leaf
 } from '../../../src/utils/merkletree';
 
-const TEST_LEAVES = new Array(20).fill(null).map((_, i) => {
+const ENTRIES = new Array(20).fill(null).map((_, i) => {
   const value = BigInt(i + 1);
 
-  const type = value % 2n === 0n ? AddressType.ETHEREUM : AddressType.STARKNET;
   const address = `0x${value.toString(16)}`;
-
-  return new Leaf(type, address, value);
+  return `${address}:${value}`;
 });
 
 describe('Leaf', () => {
@@ -29,28 +27,28 @@ describe('Leaf', () => {
   });
 });
 
-describe('generateMerkleRoot', () => {
-  it('should compute root', () => {
-    const hashes = TEST_LEAVES.map(leaf => leaf.hash);
-    const root = generateMerkleRoot(hashes);
+describe('generateMerkleTree', () => {
+  it('should compute root', async () => {
+    const tree = await generateMerkleTree(ENTRIES);
+    const root = tree[0];
 
     expect(root).toBe(
-      '0x436373667bef3c745b30e5ae2b485ed5bed08a8c8696f8edeb5cd08ddcc5145'
+      '0xbfddde52fc7d24a63693fb4dfa257571238e2d654aecbe6bc26f067e770bc5'
     );
   });
 });
 
 describe('generateMerkleProof', () => {
-  it('should compute proof', () => {
-    const hashes = TEST_LEAVES.map(leaf => leaf.hash);
-    const proof = generateMerkleProof(hashes, 2);
+  it('should compute proof', async () => {
+    const tree = await generateMerkleTree(ENTRIES);
+    const proof = generateMerkleProof(tree, 2);
 
     expect(proof).toEqual([
-      '0x58a8aa77c41ec244fe82f53a8e336ee2978e02af49477871f5eb18d6f89ba1f',
-      '0x29b078fa0df4bf7784887539cf8afe0cec533cdc6a4bbf33ec3e6ed245c711b',
-      '0x688b1e6adba3b93a03f9ce5c9d220aa403a922c72586eff397a34ad664838a5',
-      '0x64ce84b224c2acd608f05be345783252bb82c8e7c0e455598b0701b5b79903f',
-      '0x2637f8ef64f8b31c1901c56757722fe1dfa15678f5e8df4b7684c966bac16c2'
+      '0x3eca1772359b7a5b248088472ef392716c034e899c510d6e02c0c97704164ab',
+      '0x1919a163ca6cb8d28728b24847c269529cf3af4caafb0a2b3e2fd19715f1a8b',
+      '0x7a99182fabd949861d469e6e6143187c71ced341c2168de0f62e8e025d76dfc',
+      '0x2f0a9bf11b7f4792a3b732f518168d960cfa73d244c020cb88c80293b4fff91',
+      '0x2f5a19d2f01021cbd28d1073a68b4123cc56c5811d6da8dea6e0c4c921c0c21'
     ]);
   });
 });
