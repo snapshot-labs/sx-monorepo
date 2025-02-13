@@ -80,13 +80,13 @@ const DEFAULT_FORM_STATE: Form = {
 };
 
 const DEFAULT_SKIN_SETTINGS = {
-  bg_color: null,
-  link_color: null,
-  text_color: null,
-  content_color: null,
-  border_color: null,
-  heading_color: null,
-  primary_color: null,
+  bg_color: '',
+  link_color: '',
+  text_color: '',
+  content_color: '',
+  border_color: '',
+  heading_color: '',
+  primary_color: '',
   theme: 'light',
   logo: undefined
 };

@@ -73,6 +73,10 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const emit = defineEmits<{
+  (e: 'errors', value: any);
+}>();
+
 const formErrors = computed(() => {
   const validator = getValidator({
     type: 'object',
@@ -99,6 +103,12 @@ const formErrors = computed(() => {
 
 const disabled = computed(() => {
   return !props.space.turbo && !props.space.additionalRawData?.domain;
+});
+
+watch(formErrors, value => emit('errors', value));
+
+onMounted(() => {
+  emit('errors', formErrors.value);
 });
 </script>
 

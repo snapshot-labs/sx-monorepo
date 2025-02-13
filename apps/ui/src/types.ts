@@ -395,13 +395,13 @@ export type Metadata = {
 };
 
 export type SkinSettings = {
-  bg_color: string | null;
-  link_color: string | null;
-  text_color: string | null;
-  content_color: string | null;
-  border_color: string | null;
-  heading_color: string | null;
-  primary_color: string | null;
+  bg_color: string;
+  link_color: string;
+  text_color: string;
+  content_color: string;
+  border_color: string;
+  heading_color: string;
+  primary_color: string;
   theme: string;
   logo?: string;
 };

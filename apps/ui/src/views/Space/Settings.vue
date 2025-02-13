@@ -182,7 +182,7 @@ const isTicketValid = computed(() => {
 
 const error = computed(() => {
   if (Object.values(formErrors.value).length > 0) {
-    return 'Space profile is invalid';
+    return 'Some settings are invalid';
   }
 
   if (!isOffchainNetwork.value) {
@@ -463,6 +463,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           v-model:custom-domain="customDomain"
           v-model:skin-settings="skinSettings"
           :space="space"
+          @errors="v => (formErrors = v)"
         />
       </UiContainerSettings>
       <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
