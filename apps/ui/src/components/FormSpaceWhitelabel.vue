@@ -73,6 +73,10 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const emit = defineEmits<{
+  (e: 'errors', value: any);
+}>();
+
 const { encodeSkin } = useSkin();
 const { isWhiteLabel } = useWhiteLabel();
 
@@ -102,13 +106,21 @@ const formErrors = computed(() => {
 const isDisabled = computed(
   () => !props.space.turbo && !props.space.additionalRawData?.domain
 );
+
 const previewDomain = computed(
   () => props.space.additionalRawData?.domain || window.location.host
 );
+
 const previewUrl = computed(
   () =>
     `${window.location.host}/#/?skin-preview=${encodeSkin(skinSettings.value)}`
 );
+
+watch(formErrors, value => emit('errors', value));
+
+onMounted(() => {
+  emit('errors', formErrors.value);
+});
 </script>
 
 <template>

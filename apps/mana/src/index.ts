@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
+import { PORT } from './constants';
 import { createTables } from './db';
 import ethRpc from './eth';
 import starkRpc from './stark';
@@ -11,11 +12,11 @@ import {
 import pkg from '../package.json';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+
 const commit = process.env.COMMIT_HASH || '';
 const version = commit ? `${pkg.version}#${commit.substr(0, 7)}` : pkg.version;
 
-app.use(express.json({ limit: '4mb' }));
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '4mb', extended: false }));
 app.use(cors({ maxAge: 86400 }));
 app.use('/eth_rpc', ethRpc);

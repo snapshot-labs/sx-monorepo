@@ -26,6 +26,7 @@ import {
   ProposalState,
   RelatedSpace,
   Setting,
+  SkinSettings,
   Space,
   SpaceMetadataDelegation,
   SpaceMetadataTreasury,
@@ -152,15 +153,26 @@ function formatSpace(
     };
   }
 
+  function formatSkinSettings(skinSettings: SkinSettings): SkinSettings {
+    return {
+      bg_color: skinSettings.bg_color || '',
+      link_color: skinSettings.link_color || '',
+      text_color: skinSettings.text_color || '',
+      content_color: skinSettings.content_color || '',
+      border_color: skinSettings.border_color || '',
+      heading_color: skinSettings.heading_color || '',
+      primary_color: skinSettings.primary_color || '',
+      theme: skinSettings.theme || 'light',
+      logo: skinSettings.logo
+    };
+  }
+
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
     private: space.private,
     domain: space.domain,
     skin: space.skin,
-    skinSettings: {
-      ...space.skinSettings,
-      theme: space.skinSettings?.theme || 'light'
-    },
+    skinSettings: formatSkinSettings(space.skinSettings),
     strategies: space.strategies,
     categories: space.categories,
     admins: space.admins,
@@ -438,6 +450,7 @@ function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
         }
       : {},
     spaceCount: strategy.spacesCount,
+    verifiedSpaceCount: strategy.verifiedSpacesCount,
     paramsDefinition: hasDefinition
       ? strategy.schema.definitions?.Strategy
       : null

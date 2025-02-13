@@ -81,13 +81,13 @@ const DEFAULT_FORM_STATE: Form = {
 };
 
 const DEFAULT_SKIN_SETTINGS = {
-  bg_color: null,
-  link_color: null,
-  text_color: null,
-  content_color: null,
-  border_color: null,
-  heading_color: null,
-  primary_color: null,
+  bg_color: '',
+  link_color: '',
+  text_color: '',
+  content_color: '',
+  border_color: '',
+  heading_color: '',
+  primary_color: '',
   theme: 'light' as Theme,
   logo: undefined
 };
@@ -314,12 +314,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     let params: string[] = [];
     if (evmNetworks.includes(space.value.network)) {
       params = strategy.generateParams
-        ? strategy.generateParams(strategy.params)
+        ? await strategy.generateParams(strategy.params)
         : ['0x'];
       previousParams = previousParams ?? ['0x'];
     } else {
       params = strategy.generateParams
-        ? strategy.generateParams(strategy.params)
+        ? await strategy.generateParams(strategy.params)
         : [];
       previousParams = previousParams ?? [];
     }

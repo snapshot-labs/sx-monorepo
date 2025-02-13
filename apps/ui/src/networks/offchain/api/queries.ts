@@ -355,6 +355,7 @@ const STRATEGY_FRAGMENT = gql`
     about
     version
     spacesCount
+    verifiedSpacesCount
     examples
     schema
   }

@@ -98,17 +98,19 @@ export function createConstants(networkId: NetworkID) {
         return params?.strategies?.length > 0;
       },
       generateSummary: (params: Record<string, any>) => `(${params.threshold})`,
-      generateParams: (params: Record<string, any>) => {
+      generateParams: async (params: Record<string, any>) => {
         const abiCoder = new AbiCoder();
 
-        const strategies = params.strategies.map((strategy: StrategyConfig) => {
-          return {
-            addr: strategy.address,
-            params: strategy.generateParams
-              ? strategy.generateParams(strategy.params)[0]
-              : '0x00'
-          };
-        });
+        const strategies = await Promise.all(
+          params.strategies.map(async (strategy: StrategyConfig) => {
+            return {
+              addr: strategy.address,
+              params: strategy.generateParams
+                ? (await strategy.generateParams(strategy.params))[0]
+                : '0x00'
+            };
+          })
+        );
 
         return [
           abiCoder.encode(
@@ -219,7 +221,7 @@ export function createConstants(networkId: NetworkID) {
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
-      generateParams: (params: Record<string, any>) => {
+      generateParams: async (params: Record<string, any>) => {
         const whitelist = params.whitelist
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
@@ -313,7 +315,9 @@ export function createConstants(networkId: NetworkID) {
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: (params: Record<string, any>) => [params.contractAddress],
+      generateParams: async (params: Record<string, any>) => [
+        params.contractAddress
+      ],
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'ERC-20 Votes (EIP-5805)',
         properties: {
@@ -369,7 +373,9 @@ export function createConstants(networkId: NetworkID) {
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: (params: Record<string, any>) => [params.contractAddress],
+      generateParams: async (params: Record<string, any>) => [
+        params.contractAddress
+      ],
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'ERC-20 Votes Comp (EIP-5805)',
         properties: {

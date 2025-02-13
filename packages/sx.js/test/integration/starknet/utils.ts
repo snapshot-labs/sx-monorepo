@@ -46,11 +46,7 @@ import { executeContractCallWithSigners } from './safeUtils';
 import { StarknetTx } from '../../../src/clients';
 import { NetworkConfig } from '../../../src/types';
 import { hexPadLeft } from '../../../src/utils/encoding';
-import {
-  AddressType,
-  generateMerkleRoot,
-  Leaf
-} from '../../../src/utils/merkletree';
+import { AddressType, generateMerkleTree } from '../../../src/utils/merkletree';
 
 export type TestConfig = {
   starknetCore: string;
@@ -270,21 +266,21 @@ export async function setup({
   const masterSpaceClassHash = masterSpaceResult.class_hash;
   const factoryAddress = factoryResult.deploy.contract_address;
 
-  const leaf = new Leaf(
-    AddressType.ETHEREUM,
-    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-    42n
-  );
+  const leaf = {
+    address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    votingPower: 42n
+  };
   const merkleWhitelistStrategyMetadata = {
     tree: [leaf].map(leaf => ({
-      type: leaf.type,
+      type: 1,
       address: leaf.address,
       votingPower: leaf.votingPower
     }))
   };
-  const hashes = [leaf.hash];
+  const entries = [leaf].map(leaf => `${leaf.address}:${leaf.votingPower}`);
 
-  const merkleTreeRoot = generateMerkleRoot(hashes);
+  const merkleTreeRoot = (await generateMerkleTree(entries))[0];
+  if (!merkleTreeRoot) throw new Error('Invalid merkle tree root');
 
   const networkConfig: NetworkConfig = {
     eip712ChainId: '0x534e5f5345504f4c4941',
@@ -328,7 +324,8 @@ export async function setup({
   const client = new StarknetTx({
     starkProvider: starknetProvider,
     ethUrl: 'https://rpc.brovider.xyz/5',
-    networkConfig
+    networkConfig,
+    manaUrl: 'https://mana.pizza'
   });
 
   const { address } = await client.deploySpace({
