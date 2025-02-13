@@ -17,14 +17,26 @@ const TURBO_PRICES: Record<SubscriptionLength, number> = {
   monthly: 600
 } as const;
 
+const FAQ: { question: string; answer: string }[] = [
+  {
+    question: 'Can I switch between monthly and annual billing plans?',
+    answer: 'placeholder answer ...'
+  },
+  {
+    question:
+      'What happens if I exceed the daily or monthly proposal limit in the Basic plan?',
+    answer: 'placeholder answer ...'
+  },
+  {
+    question: 'Does the Turbo plan include whitelabel options?',
+    answer: 'placeholder answer ...'
+  }
+] as const;
+
 const { limits } = useSettings();
 
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
-
-function toggleQuestion(id: number) {
-  currentQuestion.value = currentQuestion.value === id ? undefined : id;
-}
 
 const features = computed<
   Record<string, { title: string; features: Feature[] }>
@@ -113,21 +125,9 @@ const features = computed<
   };
 });
 
-const FAQ: { question: string; answer: string }[] = [
-  {
-    question: 'Can I switch between monthly and annual billing plans?',
-    answer: 'placeholder answer ...'
-  },
-  {
-    question:
-      'What happens if I exceed the daily or monthly proposal limit in the Basic plan?',
-    answer: 'placeholder answer ...'
-  },
-  {
-    question: 'Does the Turbo plan include whitelabel options?',
-    answer: 'placeholder answer ...'
-  }
-] as const;
+function toggleQuestion(id: number) {
+  currentQuestion.value = currentQuestion.value === id ? undefined : id;
+}
 </script>
 <template>
   <div>
