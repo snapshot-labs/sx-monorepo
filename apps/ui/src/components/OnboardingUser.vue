@@ -32,7 +32,15 @@ const tasks = computed(() => ({
   },
   votes: {
     pending: !user.value?.votesCount,
-    description: 'Cast your first vote'
+    description: 'Cast your first vote',
+    link: {
+      name: 'space-proposal-overview',
+      params: {
+        space: 's:pistachiodao.eth',
+        proposal:
+          '0x38c654c0f81b63ea1839ec3b221fad6ecba474aa0c4e8b4e8bc957f70100e753'
+      }
+    }
   }
 }));
 
