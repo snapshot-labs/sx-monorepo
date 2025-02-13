@@ -41,8 +41,7 @@ const definition = {
       format: 'color',
       title: 'Color',
       examples: ['#FF0000'],
-      showControls: true,
-      default: () => getRandomHexColor()
+      showControls: true
     }
   }
 };
@@ -61,7 +60,7 @@ function generateDefaultState(): SpaceMetadataLabel {
     id: crypto.randomUUID().substring(0, 8),
     name: '',
     description: '',
-    color: ''
+    color: getRandomHexColor()
   };
 }
 
