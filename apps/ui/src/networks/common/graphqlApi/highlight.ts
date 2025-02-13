@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
-import { User, Vote } from '@/types';
-import { ApiProposal, ApiSpace } from './types';
+import { User } from '@/types';
+import { ApiProposal, ApiSpace, ApiVote } from './types';
 
 type HighlightSpace = {
   id: string;
@@ -154,13 +154,13 @@ export function joinHighlightUser(
 }
 
 export function mixinHighlightVotes(
-  votes: Vote[],
-  highlightVotes: Vote[],
+  votes: ApiVote[],
+  highlightVotes: ApiVote[],
   filter: 'any' | 'for' | 'against' | 'abstain',
   orderBy: 'created' | 'vp',
   orderDirection: 'desc' | 'asc',
   limit: number
-): { result: Vote[]; remaining: Vote[] } {
+): { result: ApiVote[]; remaining: ApiVote[] } {
   if (!highlightVotes.length) return { result: votes, remaining: [] };
 
   const filteredHighlightVotes = highlightVotes.filter(vote => {
@@ -189,7 +189,7 @@ export function mixinHighlightVotes(
 
             return res;
           },
-          { added: [] as Vote[], remaining: [] as Vote[] }
+          { added: [] as ApiVote[], remaining: [] as ApiVote[] }
         );
 
   const result = [...votes, ...mixins.added].sort((a, b) =>

@@ -78,6 +78,7 @@ export type StrategyTemplate = {
   author?: string;
   version?: string;
   spaceCount?: number;
+  verifiedSpaceCount?: number;
   link?: string;
   icon?: FunctionalComponent;
   type?: string;

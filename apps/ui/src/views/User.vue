@@ -233,9 +233,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       <span>This user does not have any activities yet.</span>
     </div>
     <AppLink
-      v-for="(activity, i) in activities"
+      v-for="activity in activities"
       v-else
-      :key="i"
+      :key="activity.id"
       :to="{
         name: 'space-user-statement',
         params: {
