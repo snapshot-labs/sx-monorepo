@@ -36,9 +36,9 @@ const tasks = computed(() => ({
     link: {
       name: 'space-proposal-overview',
       params: {
-        space: 's:pistachiodao.eth',
+        space: 's:vanilladao.eth',
         proposal:
-          '0x38c654c0f81b63ea1839ec3b221fad6ecba474aa0c4e8b4e8bc957f70100e753'
+          '0x675f74402f432194ffa5d403a95c8229e0dd6550558dc9eb9789aab43bdb2ea7'
       }
     }
   }
