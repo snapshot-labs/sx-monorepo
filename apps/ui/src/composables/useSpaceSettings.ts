@@ -311,12 +311,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     let params: string[] = [];
     if (evmNetworks.includes(space.value.network)) {
       params = strategy.generateParams
-        ? strategy.generateParams(strategy.params)
+        ? await strategy.generateParams(strategy.params)
         : ['0x'];
       previousParams = previousParams ?? ['0x'];
     } else {
       params = strategy.generateParams
-        ? strategy.generateParams(strategy.params)
+        ? await strategy.generateParams(strategy.params)
         : [];
       previousParams = previousParams ?? [];
     }

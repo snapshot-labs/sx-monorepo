@@ -2,6 +2,8 @@ import knex from './knex';
 
 export const REGISTERED_TRANSACTIONS = 'registered_transactions';
 export const REGISTERED_PROPOSALS = 'registered_proposals';
+export const MERKLETREE_REQUESTS = 'merkletree_requests';
+export const MERKLETREES = 'merkletrees';
 
 export async function createTables() {
   const registeredTransactionsTableExists = await knex.schema.hasTable(
@@ -9,6 +11,9 @@ export async function createTables() {
   );
   const registeredProposalsTableExists =
     await knex.schema.hasTable(REGISTERED_PROPOSALS);
+  const merkletreeRequestsTableExists =
+    await knex.schema.hasTable(MERKLETREE_REQUESTS);
+  const merkletreesTableExists = await knex.schema.hasTable(MERKLETREES);
 
   if (!registeredTransactionsTableExists) {
     await knex.schema.createTable(REGISTERED_TRANSACTIONS, t => {
@@ -34,6 +39,23 @@ export async function createTables() {
       t.string('strategyAddress');
       t.string('herodotusId');
       t.boolean('processed').defaultTo(false).index();
+    });
+  }
+
+  if (!merkletreeRequestsTableExists) {
+    await knex.schema.createTable(MERKLETREE_REQUESTS, t => {
+      t.string('id').primary();
+      t.timestamps(true, true);
+      t.boolean('processed').defaultTo(false).index();
+      t.string('root');
+    });
+  }
+
+  if (!merkletreesTableExists) {
+    await knex.schema.createTable(MERKLETREES, t => {
+      t.string('id').primary();
+      t.timestamps(true, true);
+      t.jsonb('tree');
     });
   }
 }
@@ -119,4 +141,30 @@ export async function getDataByMessageHash(hash: string) {
     .select(['sender', 'type', 'data', 'hash', 'network'])
     .where({ hash })
     .first();
+}
+
+export async function saveMerkleTree(id: string, root: string, tree: string[]) {
+  return knex.transaction(async trx => {
+    await trx(MERKLETREES)
+      .insert({
+        id: root,
+        tree: JSON.stringify(tree)
+      })
+      .onConflict()
+      .ignore();
+
+    await trx(MERKLETREE_REQUESTS).insert({
+      id,
+      processed: true,
+      root
+    });
+  });
+}
+
+export async function getMerkleTreeRequest(id: string) {
+  return knex(MERKLETREE_REQUESTS).select('*').where({ id }).first();
+}
+
+export async function getMerkleTree(id: string) {
+  return knex(MERKLETREES).select('*').where({ id }).first();
 }
