@@ -62,7 +62,7 @@ export const METADATA: Record<string, Metadata> = {
   mantle: {
     name: 'Mantle',
     chainId: 5000,
-    apiUrl: 'http://localhost:3000',
+    apiUrl: 'https://mantle-api.snapshot.box',
     avatar:
       'ipfs://bafkreidkucwfn4mzo2gtydrt2wogk3je5xpugom67vhi4h4comaxxjzoz4',
     blockTime: 2
