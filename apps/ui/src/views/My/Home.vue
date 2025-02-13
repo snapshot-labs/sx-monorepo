@@ -122,7 +122,7 @@ watch(
 
 <template>
   <div>
-    <OnboardingUser />
+    <OnboardingUser class="mb-2" />
     <div class="flex justify-between">
       <div class="flex flex-row p-4 space-x-2">
         <UiSelectDropdown
