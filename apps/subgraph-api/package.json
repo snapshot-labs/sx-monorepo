@@ -19,7 +19,7 @@
     "deploy-studio-polygon": "yarn deploy-studio --network matic sx-polygon",
     "deploy-studio-arbitrum": "yarn deploy-studio --network arbitrum-one sx-arbitrum",
     "deploy-studio-base": "yarn deploy-studio --network base sx-base",
-    "deploy-mantle": "yarn deploy-with-label sekhmet-sx-mantle --node https://subgraph-api.mantle.xyz/deploy --ipfs https://subgraph-api.mantle.xyz/ipfs --network mantle"
+    "deploy-mantle": "yarn deploy-with-label snapshot-labs/sx-mantle --node https://subgraph-api.mantle.xyz/deploy --ipfs https://subgraph-api.mantle.xyz/ipfs --network mantle"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.72.1",
