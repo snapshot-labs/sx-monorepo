@@ -110,7 +110,8 @@ export const evmNetworks = {
   }),
   matic: createStandardConfig(137),
   arb1: createStandardConfig(42161),
-  base: createStandardConfig(8453)
+  base: createStandardConfig(8453),
+  mantle: createStandardConfig(5000)
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');
@@ -119,3 +120,4 @@ export const evmOptimism = createEvmConfig('oeth');
 export const evmPolygon = createEvmConfig('matic');
 export const evmArbitrum = createEvmConfig('arb1');
 export const evmBase = createEvmConfig('base');
+export const evmMantle = createEvmConfig('mantle');

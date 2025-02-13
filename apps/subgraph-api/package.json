@@ -11,13 +11,15 @@
     "create-local": "graph create --node http://localhost:8020/ snapshot-labs/sx-subgraph",
     "remove-local": "graph remove --node http://localhost:8020/ snapshot-labs/sx-subgraph",
     "deploy-local": "yarn create-local && graph deploy --node http://localhost:8020/ --network sepolia -l `LC_ALL=C tr -dc a-z0-9 </dev/urandom | head -c 32` snapshot-labs/sx-subgraph",
-    "deploy-studio": "graph deploy --studio -l v${npm_package_version}",
+    "deploy-with-label": "graph deploy -l v${npm_package_version}",
+    "deploy-studio": "yarn deploy-with-label --studio",
     "deploy-studio-mainnet": "yarn deploy-studio --network mainnet sx",
     "deploy-studio-sepolia": "yarn deploy-studio --network sepolia sx-sepolia",
     "deploy-studio-optimism": "yarn deploy-studio --network optimism sx-optimism",
     "deploy-studio-polygon": "yarn deploy-studio --network matic sx-polygon",
     "deploy-studio-arbitrum": "yarn deploy-studio --network arbitrum-one sx-arbitrum",
-    "deploy-studio-base": "yarn deploy-studio --network base sx-base"
+    "deploy-studio-base": "yarn deploy-studio --network base sx-base",
+    "deploy-mantle": "yarn deploy-with-label sekhmet-sx-mantle --node https://subgraph-api.mantle.xyz/deploy --ipfs https://subgraph-api.mantle.xyz/ipfs --network mantle"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.72.1",
