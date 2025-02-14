@@ -395,15 +395,14 @@ export type Metadata = {
 };
 
 export type SkinSettings = {
-  bg_color: string;
-  link_color: string;
-  text_color: string;
-  content_color: string;
-  border_color: string;
-  heading_color: string;
-  primary_color: string;
-  theme: string;
-  logo?: string;
+  bg_color?: string;
+  link_color?: string;
+  text_color?: string;
+  content_color?: string;
+  border_color?: string;
+  heading_color?: string;
+  primary_color?: string;
+  theme?: string;
 };
 
 export type Drafts = Record<string, Draft>;

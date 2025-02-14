@@ -100,7 +100,6 @@ const SPACE_FRAGMENT = gql`
       heading_color
       primary_color
       theme
-      logo
     }
     guidelines
     template
