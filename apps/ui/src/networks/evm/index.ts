@@ -147,6 +147,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'oeth',
       'matic',
       'base',
+      'mantle',
       'arb1'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
