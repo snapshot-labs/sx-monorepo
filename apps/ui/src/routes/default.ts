@@ -38,7 +38,11 @@ export default [
     component: Space,
     children: spaceChildrenRoutes
   },
-
+  {
+    path: '/pulse',
+    name: 'pulse',
+    component: Pulse
+  },
   {
     path: '/create',
     redirect: { name: 'create-space-snapshot' }
