@@ -190,7 +190,12 @@ onMounted(() => {
     >
       <Affix :top="137" :bottom="100">
         <div>
-          <h4 class="eyebrow mb-2 font-medium">Preview</h4>
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="eyebrow font-medium">Preview</h4>
+            <AppLink :to="previewUrl" target="_blank">
+              <IHArrowsExpand class="cursor-pointer" />
+            </AppLink>
+          </div>
           <div class="browser">
             <div class="browser-toolbar">
               <div class="browser-toolbar-address" v-text="previewDomain" />
