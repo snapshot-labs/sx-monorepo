@@ -113,7 +113,7 @@ const previewDomain = computed(
 
 const previewUrl = computed(
   () =>
-    `${window.location.host}/#/?skin-preview=${encodeSkin(skinSettings.value)}`
+    `${window.location.origin}/#/?skin-preview=${encodeSkin(skinSettings.value)}`
 );
 
 watch(formErrors, value => emit('errors', value));
