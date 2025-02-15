@@ -9,6 +9,7 @@ import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
+import Pulse from '@/views/Pulse.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
