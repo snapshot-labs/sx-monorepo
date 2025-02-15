@@ -25,7 +25,7 @@ const EXAMPLES = [
 </script>
 
 <template>
-  <div class="max-w-[680px] mx-auto">
+  <div class="max-w-[680px]">
     <div class="s-box">
       <div class="border rounded-lg p-4 mb-4 bg-skin-bg space-y-4">
         <div>
