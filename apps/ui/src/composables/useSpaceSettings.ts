@@ -11,7 +11,6 @@ import {
 } from '@/networks/types';
 import {
   Member,
-  SkinSettings,
   Space,
   SpaceMetadata,
   SpaceMetadataLabel,
@@ -54,7 +53,6 @@ export type OffchainSpaceSettings = {
   boost: OffchainApiSpace['boost'];
   validation: OffchainApiSpace['validation'];
   voteValidation: OffchainApiSpace['voteValidation'];
-  skinSettings: SkinSettings;
 };
 
 type Form = SpaceMetadata & {
@@ -190,7 +188,6 @@ export function useSpaceSettings(space: Ref<Space>) {
   const termsOfServices = ref('');
   const customDomain = ref('');
   const isPrivate = ref(false);
-  const skinSettings = ref<SkinSettings>(clone(DEFAULT_SKIN_SETTINGS));
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -608,9 +605,9 @@ export function useSpaceSettings(space: Ref<Space>) {
           ? space.value.additionalRawData.validation
           : proposalValidation.value,
       voteValidation: voteValidation.value,
-      boost: space.value.additionalRawData.boost,
-      skinSettings: skinSettings.value
+      boost: space.value.additionalRawData.boost
     };
+
     const prunedSaveData: Partial<OffchainSpaceSettings> = clone(saveData);
     Object.entries(prunedSaveData).forEach(([key, value]) => {
       if (value === null || value === '') delete prunedSaveData[key];
@@ -627,13 +624,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       prunedSaveData.voting.quorumType === 'default'
     ) {
       delete prunedSaveData.voting.quorumType;
-    }
-    if (prunedSaveData.skinSettings) {
-      Object.entries(prunedSaveData.skinSettings).forEach(([key, value]) => {
-        if (value === null || value === '') {
-          delete prunedSaveData.skinSettings?.[key];
-        }
-      });
     }
 
     return updateSettingsRaw(space.value, JSON.stringify(prunedSaveData));
@@ -799,7 +789,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     const termsOfServicesValue = termsOfServices.value;
     const customDomainValue = customDomain.value;
     const isPrivateValue = isPrivate.value;
-    const skinSettingsValue = skinSettings.value;
 
     if (loading.value) {
       isModified.value = false;
@@ -954,14 +943,6 @@ export function useSpaceSettings(space: Ref<Space>) {
         isModified.value = true;
         return;
       }
-
-      if (
-        objectHash(space.value.additionalRawData?.skinSettings) !==
-        objectHash(skinSettingsValue)
-      ) {
-        isModified.value = true;
-        return;
-      }
     } else {
       const [authenticatorsToAdd, authenticatorsToRemove] =
         await processChanges(
@@ -1033,7 +1014,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     termsOfServices,
     customDomain,
     isPrivate,
-    skinSettings,
     save,
     saveController,
     deleteSpace,

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { TURBO_URL } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
-import { SkinSettings, Space } from '@/types';
+import { Space } from '@/types';
 
 const CUSTOM_DOMAIN_DEFINITION = {
   type: 'string',
@@ -11,65 +10,9 @@ const CUSTOM_DOMAIN_DEFINITION = {
   examples: ['vote.balancer.fi']
 };
 
-const COLOR_VALIDATION = {
-  type: 'string',
-  format: 'color',
-  examples: ['#FF0000']
-};
-
-const SKIN_DEFINITION = {
-  type: 'object',
-  title: 'Skin settings',
-  additionalProperties: false,
-  required: [],
-  properties: {
-    bg_color: {
-      ...COLOR_VALIDATION,
-      title: 'Background color'
-    },
-    text_color: {
-      ...COLOR_VALIDATION,
-      title: 'Text color'
-    },
-    link_color: {
-      ...COLOR_VALIDATION,
-      title: 'Link color'
-    },
-    content_color: {
-      ...COLOR_VALIDATION,
-      title: 'Content color',
-      tooltip: 'Proposal text color'
-    },
-    border_color: {
-      ...COLOR_VALIDATION,
-      title: 'Border color'
-    },
-    heading_color: {
-      ...COLOR_VALIDATION,
-      title: 'Heading color'
-    },
-    primary_color: {
-      ...COLOR_VALIDATION,
-      title: 'Primary color'
-    },
-    theme: {
-      type: 'string',
-      title: 'Base theme',
-      enum: ['light', 'dark'],
-      options: [
-        { id: 'light', name: 'Light' },
-        { id: 'dark', name: 'Dark' }
-      ]
-    }
-  }
-};
-
 const customDomain = defineModel<string>('customDomain', { required: true });
-const skinSettings = defineModel<SkinSettings>('skinSettings', {
-  required: true
-});
 
-const props = defineProps<{
+defineProps<{
   space: Space;
 }>();
 
@@ -83,19 +26,17 @@ const { isWhiteLabel } = useWhiteLabel();
 const formErrors = computed(() => {
   const validator = getValidator({
     type: 'object',
-    title: 'Whitelabel',
+    title: 'White Label',
     additionalProperties: false,
     required: [],
     properties: {
-      customDomain: CUSTOM_DOMAIN_DEFINITION,
-      ...SKIN_DEFINITION.properties
+      customDomain: CUSTOM_DOMAIN_DEFINITION
     }
   });
 
   const errors = validator.validate(
     {
-      customDomain: customDomain.value,
-      ...skinSettings.value
+      customDomain: customDomain.value
     },
     {
       skipEmptyOptionalFields: true
@@ -124,13 +65,15 @@ onMounted(() => {
 </script>
 
 <template>
+  <h4 class="eyebrow mb-2 font-medium mt-4">Custom domain</h4>
   <UiMessage
     v-if="isDisabled"
     type="info"
-    :learn-more-link="TURBO_URL"
-    class="mb-4"
+    :learn-more-link="'https://docs.snapshot.box/spaces/add-custom-domain'"
   >
-    Whitelabel features are only available for Turbo subscribers.
+    To set up a custom domain, you must subscribe to the Turbo plan and create a
+    CNAME record pointing to "cname.snapshot.box" with your DNS provider or
+    registrar.
   </UiMessage>
   <div class="flex flex-col items-stretch md:flex-row md:h-full gap-4">
     <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">

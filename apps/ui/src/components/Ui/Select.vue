@@ -7,7 +7,6 @@ const props = defineProps<{
   error?: string;
   required?: boolean;
   definition: DefinitionWithOptions<T>;
-  disabled?: boolean;
 }>();
 
 const dirty = ref(false);
@@ -38,7 +37,7 @@ watch(model, () => {
     :dirty="dirty"
     :required="required"
   >
-    <select v-model="inputValue" class="s-input" :disabled="disabled">
+    <select v-model="inputValue" class="s-input">
       <option disabled value="">Please select one</option>
       <option
         v-for="option in definition.options"
@@ -50,9 +49,3 @@ watch(model, () => {
     </select>
   </UiWrapperInput>
 </template>
-
-<style lang="scss" scoped>
-select:disabled {
-  @apply cursor-not-allowed opacity-100;
-}
-</style>

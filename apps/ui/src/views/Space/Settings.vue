@@ -39,7 +39,6 @@ const {
   termsOfServices,
   customDomain,
   isPrivate,
-  skinSettings,
   save,
   saveController,
   deleteSpace,
@@ -182,7 +181,7 @@ const isTicketValid = computed(() => {
 
 const error = computed(() => {
   if (Object.values(formErrors.value).length > 0) {
-    return 'Some settings are invalid';
+    return 'Space profile is invalid';
   }
 
   if (!isOffchainNetwork.value) {
@@ -462,9 +461,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       >
         <FormSpaceWhitelabel
           v-model:custom-domain="customDomain"
-          v-model:skin-settings="skinSettings"
           :space="space"
-          @errors="v => (formErrors = v)"
         />
       </UiContainerSettings>
       <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
