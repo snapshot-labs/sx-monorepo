@@ -193,7 +193,7 @@ function formatSpace(
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
-    voting_power_symbol: space.symbol,
+    voting_power_symbol: space.symbol || '',
     active_proposals: space.activeProposals,
     voting_delay: space.voting.delay ?? 0,
     voting_types: space.voting.type
@@ -326,7 +326,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       controller: '',
       admins: proposal.space.admins,
       moderators: proposal.space.moderators,
-      voting_power_symbol: proposal.space.symbol,
+      voting_power_symbol: proposal.space.symbol || '',
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
       executors_types: [],
