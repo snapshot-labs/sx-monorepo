@@ -124,7 +124,6 @@ onMounted(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Custom domain</h4>
   <UiMessage
     v-if="isDisabled"
     type="info"
