@@ -151,7 +151,6 @@ onMounted(() => {
 </script>
 
 <template>
-  {{ form }}
   <UiInputStampCover v-model="(form as any).cover" :space="space" />
   <div class="s-box p-4 mt-[-80px] max-w-[640px]">
     <UiInputStamp
