@@ -67,6 +67,10 @@ export default [
     name: 'my',
     component: My,
     children: [
+      {
+        path: '/home',
+        redirect: { name: 'my-home' }
+      },
       { path: '/', name: 'my-home', component: Home },
       { path: '/explore', name: 'my-explore', component: Explore },
       {
