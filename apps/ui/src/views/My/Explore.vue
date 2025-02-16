@@ -211,23 +211,22 @@ watchEffect(() => setTitle('Explore'));
         </div>
       </div>
     </div>
-    <UiToolbarBottom
-      v-if="!web3.authLoading && !web3.account"
-      class="px-4 py-3 flex justify-between items-center"
-    >
-      <h4
-        class="hidden sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
-      >
-        Log in to start making decisions with your community.
-      </h4>
-      <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
-        <UiButton
-          class="primary w-full sm:w-auto"
-          @click="modalAccountOpen = true"
+    <div v-if="!web3.authLoading && !web3.account" class="mt-8">
+      <UiToolbarBottom class="px-4 py-3 flex justify-between items-center">
+        <h4
+          class="hidden sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
         >
-          Log in
-        </UiButton>
-      </div>
-    </UiToolbarBottom>
+          Log in to start making decisions with your community.
+        </h4>
+        <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
+          <UiButton
+            class="primary w-full sm:w-auto"
+            @click="modalAccountOpen = true"
+          >
+            Log in
+          </UiButton>
+        </div>
+      </UiToolbarBottom>
+    </div>
   </div>
 </template>
