@@ -30,6 +30,8 @@ const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
 const route = useRoute();
 const router = useRouter();
+const { web3 } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 const network = ref<string>(DEFAULT_NETWORK);
@@ -209,5 +211,18 @@ watchEffect(() => setTitle('Explore'));
         </div>
       </div>
     </div>
+    <UiToolbarBottom
+      v-if="!web3.authLoading && !web3.account"
+      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+    >
+      <h4 class="leading-7 font-medium truncate mb-2 xs:mb-0">
+        Log in to start making decisions with your community.
+      </h4>
+      <div class="flex space-x-3 shrink-0">
+        <UiButton class="primary" @click="modalAccountOpen = true">
+          Log in
+        </UiButton>
+      </div>
+    </UiToolbarBottom>
   </div>
 </template>
