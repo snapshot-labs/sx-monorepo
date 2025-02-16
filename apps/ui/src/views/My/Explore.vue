@@ -215,11 +215,14 @@ watchEffect(() => setTitle('Explore'));
       v-if="!web3.authLoading && !web3.account"
       class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
     >
-      <h4 class="leading-7 font-medium truncate mb-2 xs:mb-0">
+      <h4 class="hidden sm:block leading-7 font-medium truncate mb-2 xs:mb-0">
         Log in to start making decisions with your community.
       </h4>
-      <div class="flex space-x-3 shrink-0">
-        <UiButton class="primary" @click="modalAccountOpen = true">
+      <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
+        <UiButton
+          class="primary w-full sm:w-auto"
+          @click="modalAccountOpen = true"
+        >
           Log in
         </UiButton>
       </div>
