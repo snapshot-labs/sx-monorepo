@@ -15,6 +15,10 @@ export function useApp() {
     // Auto connect with gnosis-connector when inside gnosis-safe iframe
     autoLogin(window?.parent === window ? undefined : 'gnosis');
 
+    // Auto connect with thirdweb
+    const searchParams = new URLSearchParams(window.location.search);
+    if (searchParams.get('walletId')) autoLogin('unicorn');
+
     state.init = true;
     state.loading = false;
   }
