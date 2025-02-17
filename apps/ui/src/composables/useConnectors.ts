@@ -70,6 +70,12 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
     options: {
       app: APP_NAME
     }
+  },
+  unicorn: {
+    info: {
+      name: 'Unicorn',
+      icon: 'https://cdn.prod.website-files.com/66530e16a1530eb2c5731631/674997f5c22f84a47496e73c_hero_unicorn.png'
+    }
   }
 } as const;
 

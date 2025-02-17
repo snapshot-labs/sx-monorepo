@@ -124,7 +124,10 @@ export function useWeb3() {
       attachConnectorEvents(connector);
       let network, accounts;
       try {
-        if (connector.id === 'gnosis' && web3.provider.safe) {
+        if (
+          (connector.id === 'gnosis' || connector.id === 'unicorn') &&
+          web3.provider.safe
+        ) {
           const { chainId: safeChainId, safeAddress } = web3.provider.safe;
           network = { chainId: safeChainId };
           accounts = [safeAddress];

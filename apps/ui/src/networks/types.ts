@@ -42,7 +42,8 @@ export type ConnectorType =
   | 'walletconnect'
   | 'walletlink'
   | 'gnosis'
-  | 'sequence';
+  | 'sequence'
+  | 'unicorn';
 export type Connector = {
   id: string;
   type: ConnectorType;
