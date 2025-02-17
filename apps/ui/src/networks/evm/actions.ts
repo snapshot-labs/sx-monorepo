@@ -7,6 +7,7 @@ import {
   evmArbitrum,
   evmBase,
   evmMainnet,
+  evmMantle,
   EvmNetworkConfig,
   evmOptimism,
   evmPolygon,
@@ -55,6 +56,7 @@ import { EDITOR_APP_NAME } from '../common/constants';
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
   137: evmPolygon,
+  5000: evmMantle,
   8453: evmBase,
   42161: evmArbitrum,
   1: evmMainnet,

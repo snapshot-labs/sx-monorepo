@@ -11,6 +11,7 @@ const starknetSepoliaNetwork = createStarknetNetwork('sn-sep');
 const polygonNetwork = createEvmNetwork('matic');
 const arbitrumNetwork = createEvmNetwork('arb1');
 const baseNetwork = createEvmNetwork('base');
+const mantleNetwork = createEvmNetwork('mantle');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
 const sepoliaNetwork = createEvmNetwork('sep');
@@ -25,6 +26,7 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'matic',
       'arb1',
       'base',
+      'mantle',
       'oeth',
       'sep',
       'sn',
@@ -35,6 +37,7 @@ export const evmNetworks: NetworkID[] = [
   'eth',
   'matic',
   'arb1',
+  'mantle',
   'base',
   'oeth',
   'sep'
@@ -54,6 +57,7 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'matic') return polygonNetwork;
   if (id === 'arb1') return arbitrumNetwork;
   if (id === 'base') return baseNetwork;
+  if (id === 'mantle') return mantleNetwork;
   if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
   if (id === 'sep') return sepoliaNetwork;

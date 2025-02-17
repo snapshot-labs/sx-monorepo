@@ -20,6 +20,7 @@ export type NetworkID =
   | 'arb1'
   | 'oeth'
   | 'base'
+  | 'mantle'
   | 'sep'
   | 'sn'
   | 'sn-sep';
