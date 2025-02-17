@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
 const route = useRoute();
-const spacesStore = useSpacesStore();
 const { isWhiteLabel } = useWhiteLabel();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
+const { data: spaceData } = useSpaceQuery({
+  networkId: networkId,
+  spaceId: spaceAddress
+});
 
 const showSpace = computed(
   () =>
@@ -25,7 +29,7 @@ const space = computed(() => {
     return null;
   }
 
-  return spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`);
+  return spaceData.value;
 });
 </script>
 

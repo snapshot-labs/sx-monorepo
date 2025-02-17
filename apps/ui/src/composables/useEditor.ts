@@ -1,6 +1,8 @@
+import { useQueryClient } from '@tanstack/vue-query';
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { clone, lsGet, lsSet, omit } from '@/helpers/utils';
-import { Draft, Drafts, Privacy, VoteType } from '@/types';
+import { getSpaces } from '@/queries/spaces';
+import { Draft, Drafts, Privacy, Space, VoteType } from '@/types';
 
 const PREFERRED_VOTE_TYPE = 'basic';
 
@@ -40,7 +42,7 @@ function getSpaceId(draftId: string) {
 }
 
 export function useEditor() {
-  const spacesStore = useSpacesStore();
+  const queryClient = useQueryClient();
 
   const drafts = computed(() => {
     return Object.entries(removeEmpty(proposals))
@@ -92,16 +94,38 @@ export function useEditor() {
     }, {});
   }
 
+  async function fetchSpacesAndStore(ids: string[]) {
+    if (!ids.length) return;
+
+    const unavailableIds = ids.filter(
+      id => !queryClient.getQueryData(['spaces', 'detail', id])
+    );
+
+    const spaces = await getSpaces({
+      id_in: unavailableIds
+    });
+
+    for (const space of spaces) {
+      queryClient.setQueryData(
+        ['spaces', 'detail', `${space.network}:${space.id}`],
+        space
+      );
+    }
+  }
+
   async function getInitialProposalBody(spaceId: string) {
     if (spaceTemplate.has(spaceId)) {
       return spaceTemplate.get(spaceId) as string;
     }
 
-    if (!spacesStore.spacesMap.has(spaceId)) {
-      await spacesStore.fetchSpaces([spaceId]);
-    }
+    await fetchSpacesAndStore([spaceId]);
+    const space = queryClient.getQueryData<Space>([
+      'spaces',
+      'detail',
+      spaceId
+    ]);
 
-    const template = spacesStore.spacesMap.get(spaceId)?.template ?? '';
+    const template = space?.template ?? '';
 
     spaceTemplate.set(spaceId, template);
 
@@ -113,14 +137,10 @@ export function useEditor() {
 
     if (!newIds.length) return;
 
-    const spacesToFetch = newIds.filter(id => !spacesStore.spacesMap.has(id));
-    if (spacesToFetch.length) {
-      await spacesStore.fetchSpaces(spacesToFetch);
-    }
+    await fetchSpacesAndStore(newIds);
 
     for (const id of newIds) {
-      const space = spacesStore.spacesMap.get(id);
-
+      const space = queryClient.getQueryData<Space>(['spaces', 'detail', id]);
       if (!space) continue;
 
       const type = space.voting_types.includes(PREFERRED_VOTE_TYPE)

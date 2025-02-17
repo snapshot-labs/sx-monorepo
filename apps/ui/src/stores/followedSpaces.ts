@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { useFollowedSpacesQuery } from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
 import pkg from '../../package.json';
 
@@ -10,12 +11,17 @@ function getCompositeSpaceId(space: Space) {
 }
 
 export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
-  const spacesStore = useSpacesStore();
   const actions = useActions();
   const { web3, authInitiated } = useWeb3();
   const { isWhiteLabel } = useWhiteLabel();
   const { limits } = useSettings();
 
+  /**
+   * This Ref tracks if we have any space data already loaded. We want to show loading indicator if we have nothing,
+   * but once we have some data already we ignore loading indicator, just showing old data until it's refetched.
+   * This should be reset when account changes.
+   * */
+  const hasSpaceDataLoaded = ref(false);
   const followedSpacesIds = ref<string[]>([]);
   const followedSpacesLoaded = ref(false);
   const followedSpaceLoading = reactive(new Set<string>());
@@ -24,23 +30,22 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     {} as Record<string, string[]>
   );
 
+  const { data } = useFollowedSpacesQuery({
+    followedSpacesLoaded,
+    followedSpacesIds
+  });
+
   const maxFollowLimit = computed(() => {
     return limits.value['user.default.follow_limit'];
   });
 
-  const followedSpacesMap = computed(
-    () =>
-      new Map(
-        followedSpacesIds.value
-          .map(spaceId => {
-            const space = spacesStore.spacesMap.get(spaceId);
-            if (!space) return;
+  const followedSpacesMap = computed(() => {
+    if (!data.value) return new Map<string, Space>();
 
-            return [getCompositeSpaceId(space), space] as const;
-          })
-          .filter(space => space !== undefined)
-      )
-  );
+    return new Map(
+      data.value.map(space => [getCompositeSpaceId(space), space] as const)
+    );
+  });
 
   const followedSpaces = computed({
     get() {
@@ -71,19 +76,10 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
       )
   );
 
-  async function fetchSpacesData(ids: string[]) {
-    if (!ids.length) return;
-
-    await spacesStore.fetchSpaces(
-      ids.filter(id => !spacesStore.spacesMap.has(id))
-    );
-  }
-
   async function loadFollowedSpaces() {
     const followedIds = (await network.api.loadFollows(web3.value.account)).map(
       follow => getCompositeSpaceId(follow.space)
     );
-    const newIds = followedIds.filter(id => !isFollowed(id));
     followedSpacesIds.value = followedIds;
     followedSpacesIdsByAccount.value[web3.value.account] = Array.from(
       new Set(
@@ -93,7 +89,6 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         ].filter(id => followedIds.includes(id))
       )
     );
-    await fetchSpacesData(newIds);
   }
 
   async function toggleSpaceFollow(id: string) {
@@ -123,8 +118,6 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         const result = await actions.followSpace(spaceNetwork, spaceId);
         if (!result) return;
 
-        fetchSpacesData([id]);
-
         followedSpacesIds.value.unshift(id);
         followedSpacesIdsByAccount.value[web3.value.account].unshift(id);
       }
@@ -137,6 +130,10 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     return followedSpacesIds.value.includes(spaceId);
   }
 
+  watch(data, data => {
+    if (data) hasSpaceDataLoaded.value = true;
+  });
+
   watch(
     [
       () => web3.value.account,
@@ -147,6 +144,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     async ([web3, authLoading, authInitiated, isWhiteLabel]) => {
       if (!authInitiated || authLoading || isWhiteLabel) return;
 
+      hasSpaceDataLoaded.value = false;
       followedSpacesLoaded.value = false;
 
       if (!web3) {
@@ -167,7 +165,9 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     followedSpaces,
     followedSpacesIds,
     followedSpaceIdsByNetwork,
-    followedSpacesLoaded,
+    followedSpacesLoaded: computed(
+      () => followedSpacesLoaded.value && hasSpaceDataLoaded.value
+    ),
     followedSpaceLoading,
     toggleSpaceFollow,
     isFollowed
