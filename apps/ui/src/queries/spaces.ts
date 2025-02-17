@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useQuery,
   useQueryClient
@@ -12,7 +13,7 @@ import {
   offchainNetworks
 } from '@/networks';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
-import { NetworkID } from '@/types';
+import { NetworkID, Space } from '@/types';
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
@@ -92,6 +93,57 @@ async function fetchSpaces(
       Number(b.verified) - Number(a.verified) ||
       b.vote_count - a.vote_count
     );
+  });
+}
+
+export function useFollowedSpacesQuery({
+  followedSpacesLoaded,
+  followedSpacesIds
+}: {
+  followedSpacesLoaded: MaybeRefOrGetter<boolean>;
+  followedSpacesIds: MaybeRefOrGetter<string[]>;
+}) {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ['spaces', 'followedSpaces', followedSpacesIds],
+    queryFn: async () => {
+      const ids = toValue(followedSpacesIds);
+
+      const [existingSpaces, unavailableIds] = ids.reduce(
+        (acc, id) => {
+          const existingData = queryClient.getQueryData<Space>([
+            'spaces',
+            'detail',
+            id
+          ]);
+
+          if (existingData) {
+            acc[0].push(existingData);
+          } else {
+            acc[1].push(id);
+          }
+
+          return acc;
+        },
+        [[], []] as [Space[], string[]]
+      );
+
+      const spaces = await getSpaces({
+        id_in: unavailableIds
+      });
+
+      for (const space of spaces) {
+        queryClient.setQueryData<Space>(
+          ['spaces', 'detail', `${space.network}:${space.id}`],
+          space
+        );
+      }
+
+      return [...existingSpaces, ...spaces];
+    },
+    placeholderData: keepPreviousData,
+    enabled: () => toValue(followedSpacesLoaded) !== false
   });
 }
 
