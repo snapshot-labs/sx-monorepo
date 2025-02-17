@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { TokenId } from '@/composables/usePayment';
+import { SubscriptionLength } from '@/composables/usePaymentFactory';
 import { _n } from '@/helpers/utils';
+import { ChainId, Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
@@ -8,13 +11,13 @@ type TierPlan = 'basic' | 'turbo' | 'custom';
 type Feature = {
   [key in TierPlan | string]: string | number | boolean | Component;
 };
-type SubscriptionLength = 'monthly' | 'yearly';
 
 const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
 
+// TODO: Prices divided per 1000 for testing
 const TURBO_PRICES: Record<SubscriptionLength, number> = {
-  yearly: 6000,
-  monthly: 600
+  yearly: 6,
+  monthly: 0.6
 } as const;
 
 const FAQ: { question: string; answer: string }[] = [
@@ -33,10 +36,18 @@ const FAQ: { question: string; answer: string }[] = [
   }
 ] as const;
 
+const props = defineProps<{ space: Space }>();
+
 const { limits } = useSettings();
+const { createSteps, goToNextStep, isLastStep, currentStep } =
+  usePaymentFactory();
 
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const modalTransactionProgressOpen = ref(false);
+// TODO: Hardcoding sepolia USDC until we have an UI switcher
+const chainId = ref<ChainId>(11155111);
+const tokenId = ref<TokenId>('USDC');
 
 const features = computed<
   Record<string, { title: string; features: Feature[] }>
@@ -128,6 +139,28 @@ const features = computed<
 function toggleQuestion(id: number) {
   currentQuestion.value = currentQuestion.value === id ? undefined : id;
 }
+
+async function handleUpgradeTurbo() {
+  await createSteps({
+    chainId: chainId.value,
+    tokenId: tokenId.value,
+    amount: TURBO_PRICES[subscriptionLength.value],
+    id: props.space.id,
+    type: 'turbo'
+  });
+
+  modalTransactionProgressOpen.value = true;
+}
+
+async function moveToNextStep() {
+  if (isLastStep.value) return;
+
+  modalTransactionProgressOpen.value = false;
+
+  if (await goToNextStep()) {
+    modalTransactionProgressOpen.value = true;
+  }
+}
 </script>
 <template>
   <div>
@@ -189,6 +222,9 @@ function toggleQuestion(id: number) {
             <UiButton class="w-full" primary>Upgrade</UiButton>
           </div>
         </div>
+        <UiButton class="w-full" primary @click="handleUpgradeTurbo"
+          >Upgrade</UiButton
+        >
         <hr />
         <ul
           class="leading-[18px] space-y-2 gap-5 list-disc list-outside md:columns-2 w-full text-skin-heading ml-2.5"
@@ -271,7 +307,7 @@ function toggleQuestion(id: number) {
       <div class="basis-[250px] grow"></div>
       <div class="feature-value-col"></div>
       <div class="feature-value-col">
-        <UiButton class="primary">Upgrade</UiButton>
+        <UiButton class="primary" @click="handleUpgradeTurbo">Upgrade</UiButton>
       </div>
       <div class="feature-value-col">
         <UiButton>Talk to sales</UiButton>
@@ -307,6 +343,19 @@ function toggleQuestion(id: number) {
         />
       </div>
     </div>
+    <ModalTransactionProgress
+      :open="modalTransactionProgressOpen"
+      :execute="currentStep.execute"
+      :chain-id="chainId"
+      :messages="{
+        approveTitle: currentStep.approveTitle,
+        approveSubtitle: currentStep.approveSubtitle,
+        failTitle: currentStep.failTitle,
+        failSubtitle: currentStep.failSubtitle
+      }"
+      @close="modalTransactionProgressOpen = false"
+      @confirmed="moveToNextStep"
+    />
   </div>
 </template>
 
