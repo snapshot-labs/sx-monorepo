@@ -170,6 +170,16 @@ const formErrors = computed(() => {
     }
   );
 });
+const isSubmitButtonLoading = computed(() => {
+  if (web3.value.authLoading) return true;
+  if (!web3.value.account) return false;
+
+  return (
+    sending.value ||
+    (!propositionPower.value && !isPropositionPowerError.value) ||
+    isPropositionPowerPending.value
+  );
+});
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
     !props.space.turbo &&
@@ -449,12 +459,7 @@ watchEffect(() => {
       </UiTooltip>
       <UiButton
         class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-        :loading="
-          !!web3.account &&
-          (sending ||
-            (!propositionPower && !isPropositionPowerError) ||
-            isPropositionPowerPending)
-        "
+        :loading="isSubmitButtonLoading"
         :disabled="!canSubmit"
         @click="handleProposeClick"
       >

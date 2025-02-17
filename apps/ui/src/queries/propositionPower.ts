@@ -71,7 +71,7 @@ export function usePropositionPowerQuery(space: Space) {
   return useQuery({
     queryKey: ['propositionPower', () => web3.value.account, space.id, block],
     queryFn: async () => getPropositionPower(space, block),
-    enabled: !!web3.value.account && !web3.value.authLoading,
+    enabled: () => !!web3.value.account && !web3.value.authLoading,
     staleTime: 60 * 1000
   });
 }
