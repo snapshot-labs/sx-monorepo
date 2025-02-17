@@ -219,12 +219,11 @@ async function moveToNextStep() {
                 ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
-            <UiButton class="w-full" primary>Upgrade</UiButton>
+            <UiButton class="w-full" primary @click="handleUpgradeTurbo">
+              Upgrade
+            </UiButton>
           </div>
         </div>
-        <UiButton class="w-full" primary @click="handleUpgradeTurbo"
-          >Upgrade</UiButton
-        >
         <hr />
         <ul
           class="leading-[18px] space-y-2 gap-5 list-disc list-outside md:columns-2 w-full text-skin-heading ml-2.5"
