@@ -155,6 +155,7 @@ function formatSpace(
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
     private: space.private,
+    flagged: space.flagged,
     domain: space.domain,
     skin: space.skin,
     skinSettings: space.skinSettings,
