@@ -29,10 +29,14 @@ const spaceLabels = computed(() => {
 });
 
 const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
-  useProposalsQuery(props.space.network, props.space.id, {
-    state,
-    labels
-  });
+  useProposalsQuery(
+    toRef(() => props.space.network),
+    toRef(() => props.space.id),
+    {
+      state,
+      labels
+    }
+  );
 
 function handleClearLabelsFilter(close: () => void) {
   labels.value = [];
