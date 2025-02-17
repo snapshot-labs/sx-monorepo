@@ -8,7 +8,7 @@ const props = defineProps<{
   to?: RouteLocationNamedRaw;
 }>();
 
-const { currentMode } = useUserSkin();
+const { currentTheme } = useTheme();
 
 const colorProperties = computed(() => checkColorProximity(props.color));
 
@@ -21,8 +21,8 @@ function checkColorProximity(color: string): {
   if (!color.match(/^#[0-9A-F]{6}$/)) {
     return {
       showBorder: true,
-      backgroundColor: currentMode.value === 'dark' ? '#000000' : '#FFFFFF',
-      textColor: currentMode.value === 'dark' ? '#FFFFFF' : '#000000'
+      backgroundColor: currentTheme.value === 'dark' ? '#000000' : '#FFFFFF',
+      textColor: currentTheme.value === 'dark' ? '#FFFFFF' : '#000000'
     };
   }
   const hex = color.replace('#', '');
@@ -34,8 +34,8 @@ function checkColorProximity(color: string): {
   const textColor = brightness > 155 ? '#000000' : '#FFFFFF';
   return {
     showBorder:
-      (currentMode.value === 'dark' && nearToBlack) ||
-      (currentMode.value === 'light' && nearToWhite),
+      (currentTheme.value === 'dark' && nearToBlack) ||
+      (currentTheme.value === 'light' && nearToWhite),
     backgroundColor: color,
     textColor
   };

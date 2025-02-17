@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const model = defineModel<string>();
 
-const { currentMode } = useUserSkin();
+const { currentTheme } = useTheme();
 
 const dirty = ref(false);
 
@@ -38,7 +38,7 @@ const shadowColor = computed({
     if (inputValue.value && isColorValid(inputValue.value)) {
       return inputValue.value;
     }
-    return currentMode.value === 'dark' ? '#000000' : '#FFFFFF';
+    return currentTheme.value === 'dark' ? '#000000' : '#FFFFFF';
   },
   set(newValue: string) {
     model.value = newValue.toUpperCase();
