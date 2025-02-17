@@ -4,13 +4,19 @@ import { HELPDESK_URL } from '@/helpers/constants';
 const { isWhiteLabel, resolved } = useWhiteLabel();
 const route = useRoute();
 
-const routeName = computed(() => route.name as string);
+const isSiteRoute = computed(() => {
+  if (typeof route.name === 'string') {
+    return route.name.startsWith('site-');
+  }
+
+  return false;
+});
 </script>
 
 <template>
   <div class="hidden xl:block fixed bottom-3 right-4 z-40 space-x-2">
     <UiTooltip
-      v-if="resolved && !isWhiteLabel && !routeName.startsWith('site-')"
+      v-if="resolved && !isWhiteLabel && !isSiteRoute"
       title="About Snapshot"
     >
       <router-link :to="{ name: 'site-landing' }" tabindex="-1">
