@@ -1,5 +1,6 @@
 import {
   keepPreviousData,
+  skipToken,
   useInfiniteQuery,
   useQuery,
   useQueryClient
@@ -97,19 +98,18 @@ async function fetchSpaces(
 }
 
 export function useFollowedSpacesQuery({
-  followedSpacesLoaded,
   followedSpacesIds
 }: {
-  followedSpacesLoaded: MaybeRefOrGetter<boolean>;
-  followedSpacesIds: MaybeRefOrGetter<string[]>;
+  followedSpacesIds: MaybeRefOrGetter<string[] | undefined>;
 }) {
   const queryClient = useQueryClient();
 
-  return useQuery({
-    queryKey: ['spaces', 'followedSpaces', followedSpacesIds],
-    queryFn: async () => {
-      const ids = toValue(followedSpacesIds);
+  const queryFn = computed(() => {
+    const ids = toValue(followedSpacesIds);
 
+    if (!ids) return skipToken;
+
+    return async (): Promise<Space[]> => {
       const [existingSpaces, unavailableIds] = ids.reduce(
         (acc, id) => {
           const existingData = queryClient.getQueryData<Space>([
@@ -141,9 +141,13 @@ export function useFollowedSpacesQuery({
       }
 
       return [...existingSpaces, ...spaces];
-    },
-    placeholderData: keepPreviousData,
-    enabled: () => toValue(followedSpacesLoaded) !== false
+    };
+  });
+
+  return useQuery({
+    queryKey: ['spaces', 'followedSpaces', followedSpacesIds],
+    queryFn,
+    placeholderData: keepPreviousData
   });
 }
 
