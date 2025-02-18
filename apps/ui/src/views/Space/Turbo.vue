@@ -319,7 +319,6 @@ async function handleTurboClick() {
       </div>
     </div>
     <ModalPayment
-      :id="space.id"
       :open="modalPaymentOpen"
       :amount="TURBO_PRICES[subscriptionLength]"
       :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
