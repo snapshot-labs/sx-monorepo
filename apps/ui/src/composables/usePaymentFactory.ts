@@ -121,12 +121,10 @@ export default function usePaymentFactory() {
     await verifyNetwork(auth.value.provider, Number(chainId));
 
     const asset = TOKENS[chainId][tokenId];
-    const {
-      hasBalance,
-      isApproved: hasApproved,
-      approve,
-      pay
-    } = usePayment(asset, auth.value.provider);
+    const { hasBalance, hasApproved, approve, pay } = usePayment(
+      asset,
+      auth.value.provider
+    );
 
     currentStepId.value = 'check_balance';
     stepExecuteResults.value.clear();
