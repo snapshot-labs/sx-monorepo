@@ -1,8 +1,8 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
-import { Web3Provider } from '@ethersproject/providers';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { abis } from '@/helpers/abis';
+import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
 export type TokenId = 'USDC' | 'USDT';
@@ -17,7 +17,7 @@ const PAYMENT_CONTRACT_ADDRESS = '0xA92D665c4814c8E1681AaB292BA6d2278D01DEE0';
 
 const PAYMENT_CONTRACT_ABI = [
   'function payWithERC20Token(address token, uint256 amount, bytes barcode)'
-];
+] as const;
 
 export const ASSETS = {
   USDC: {
@@ -70,54 +70,92 @@ export const TOKENS: Record<ChainId, Record<TokenId, Token>> = {
   }
 } as const;
 
-export default function usePayment(token: Token, web3: Web3Provider) {
-  function getWeiAmount(amount: number): BigNumber {
-    return BigNumber.from(amount * 10 ** token.decimal);
+function getWeiAmount(token: Token, amount: number): BigNumber {
+  return BigNumber.from(amount * 10 ** token.decimal);
+}
+
+export default function usePayment() {
+  const { auth } = useWeb3();
+  const { modalAccountOpen } = useModal();
+
+  async function hasBalance(token: Token, amount: number): Promise<boolean> {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return false;
+    }
+
+    await verifyNetwork(auth.value.provider, Number(token.chainId));
+
+    const signer = auth.value.provider.getSigner();
+    const tokenContract = new Contract(token.address, abis.erc20, signer);
+    const balance = await tokenContract.balanceOf(signer.getAddress());
+
+    return BigNumber.from(balance).gte(getWeiAmount(token, amount));
   }
 
-  const tokenContract = new Contract(
-    token.address,
-    abis.erc20,
-    web3.getSigner()
-  );
+  async function hasApproved(token: Token, amount: number): Promise<boolean> {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return false;
+    }
 
-  const paymentContract = new Contract(
-    PAYMENT_CONTRACT_ADDRESS,
-    PAYMENT_CONTRACT_ABI,
-    web3.getSigner()
-  );
+    await verifyNetwork(auth.value.provider, Number(token.chainId));
 
-  async function hasBalance(amount: number): Promise<boolean> {
-    const balance = await tokenContract.balanceOf(
-      web3.getSigner().getAddress()
-    );
-
-    return BigNumber.from(balance).gte(getWeiAmount(amount));
-  }
-
-  async function hasApproved(amount: number): Promise<boolean> {
+    const signer = auth.value.provider.getSigner();
+    const tokenContract = new Contract(token.address, abis.erc20, signer);
     const allowance = await tokenContract.allowance(
-      web3.getSigner().getAddress(),
+      signer.getAddress(),
       PAYMENT_CONTRACT_ADDRESS
     );
 
-    return BigNumber.from(allowance).gte(getWeiAmount(amount));
+    return BigNumber.from(allowance).gte(getWeiAmount(token, amount));
   }
 
-  function approve(amount: number) {
+  async function approve(token: Token, amount: number) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return false;
+    }
+
+    await verifyNetwork(auth.value.provider, Number(token.chainId));
+
+    const tokenContract = new Contract(
+      token.address,
+      abis.erc20,
+      auth.value.provider.getSigner()
+    );
+
     return tokenContract.approve(
       PAYMENT_CONTRACT_ADDRESS,
-      getWeiAmount(amount)
+      getWeiAmount(token, amount)
     );
   }
 
-  function pay(amount: number, barcode: string) {
+  async function pay(token: Token, amount: number, barcode: string) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return false;
+    }
+
+    await verifyNetwork(auth.value.provider, Number(token.chainId));
+
+    const paymentContract = new Contract(
+      PAYMENT_CONTRACT_ADDRESS,
+      PAYMENT_CONTRACT_ABI,
+      auth.value.provider.getSigner()
+    );
+
     return paymentContract.payWithERC20Token(
       token.address,
-      getWeiAmount(amount),
+      getWeiAmount(token, amount),
       toUtf8Bytes(barcode)
     );
   }
 
-  return { hasBalance, hasApproved, approve, pay };
+  return {
+    hasBalance,
+    hasApproved,
+    approve,
+    pay
+  };
 }

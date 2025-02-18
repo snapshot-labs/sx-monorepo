@@ -7,7 +7,7 @@ import { ChainId } from '@/types';
 
 const NETWORK_IDS = Object.keys(TOKENS);
 
-const props = defineProps<{
+defineProps<{
   open: boolean;
   amount: number;
   barcodePayload: BarcodePayload;
@@ -17,8 +17,12 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
-const { createSteps, goToNextStep, isLastStep, currentStep } =
-  usePaymentFactory();
+const {
+  start: startPaymentProcess,
+  goToNextStep,
+  isLastStep,
+  currentStep
+} = usePaymentFactory();
 
 const modalTransactionProgressOpen = ref(false);
 const chainId = ref<ChainId>(NETWORK_IDS[0]);
@@ -39,19 +43,10 @@ const availableNetworks = computed(() => {
   }).filter(Boolean);
 });
 
-async function handleSubmit() {
-  const token = TOKENS[chainId.value][tokenId.value];
+const token = computed(() => TOKENS[chainId.value][tokenId.value]);
 
-  if (!token) {
-    console.error('Invalid payment token');
-    return;
-  }
-
-  await createSteps({
-    token,
-    amount: props.amount,
-    barcodePayload: props.barcodePayload
-  });
+function handleSubmit() {
+  startPaymentProcess();
 
   emit('close');
   modalTransactionProgressOpen.value = true;
@@ -124,7 +119,7 @@ async function moveToNextStep() {
   </UiModal>
   <ModalTransactionProgress
     :open="modalTransactionProgressOpen"
-    :execute="currentStep.execute"
+    :execute="() => currentStep.execute(token, amount, barcodePayload)"
     :chain-id="chainId"
     :messages="currentStep.messages"
     @close="modalTransactionProgressOpen = false"
