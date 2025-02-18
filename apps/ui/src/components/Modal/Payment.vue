@@ -5,7 +5,7 @@ import { getStampUrl, getUrl } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
 import { ChainId } from '@/types';
 
-const NETWORK_IDS = Object.keys(TOKENS);
+const NETWORK_IDS: ChainId[] = Object.keys(TOKENS);
 
 defineProps<{
   open: boolean;
@@ -23,24 +23,35 @@ const {
   isLastStep,
   currentStep
 } = usePaymentFactory();
+const { networks } = useOffchainNetworksList(metadataNetwork);
 
 const modalTransactionProgressOpen = ref(false);
-const chainId = ref<ChainId>(NETWORK_IDS[0]);
+const chainId = ref<ChainId>(Number(NETWORK_IDS[0]));
 const tokenId = ref<TokenId>(Object.keys(TOKENS[NETWORK_IDS[0]])[0] as TokenId);
 
-const availableNetworks = computed(() => {
-  const { networks } = useOffchainNetworksList(metadataNetwork);
-
+const availableNetworks = computed<
+  {
+    id: ChainId;
+    name: string;
+    avatar: string;
+  }[]
+>(() => {
   return NETWORK_IDS.map(id => {
     const network = networks.value.find(network => network.key === id);
 
-    if (!network) return;
+    if (
+      !network ||
+      (metadataNetwork === 's' && 'testnet' in network && network.testnet)
+    ) {
+      return;
+    }
+
     return {
-      id,
+      id: Number(id),
       name: network.name,
       avatar: network.logo
     };
-  }).filter(Boolean);
+  }).filter(n => !!n);
 });
 
 const token = computed(() => TOKENS[chainId.value][tokenId.value]);
@@ -68,52 +79,68 @@ async function moveToNextStep() {
     <template #header>
       <h3>Payment</h3>
     </template>
-    <div class="p-4 flex flex-col gap-2.5">
-      <h4>Network</h4>
-      <div
-        class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg justify-stretch"
-      >
-        <button
-          v-for="network in availableNetworks"
-          :key="network.id"
-          type="button"
-          :class="[
-            'w-full  justify-center rounded-full py-1 flex items-center px-2  gap-1 text-skin-link cursor-pointer',
-            { 'bg-skin-active-bg': Number(chainId) === Number(network.id) }
-          ]"
-          @click="chainId = network.id as ChainId"
+    <div class="p-4 space-y-3">
+      <div class="space-y-1.5">
+        <div>Network</div>
+        <div
+          class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
         >
-          <img
-            :src="getUrl(network.avatar) ?? undefined"
-            class="size-[20px] rounded-lg"
-          />
-          {{ network.name }}
-        </button>
+          <button
+            v-for="network in availableNetworks"
+            :key="network.id"
+            type="button"
+            :class="[
+              'grow justify-center rounded-full py-1 flex items-center px-2 gap-1 text-skin-link',
+              { 'bg-skin-active-bg': chainId === network.id }
+            ]"
+            @click="chainId = network.id as ChainId"
+          >
+            <img
+              :src="getUrl(network.avatar) ?? undefined"
+              class="size-[20px] rounded-lg shrink-0"
+            />
+            {{ network.name }}
+          </button>
+        </div>
       </div>
-      <h4>Currency</h4>
-      <div
-        class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
-      >
-        <button
-          v-for="[id, asset] in Object.entries(TOKENS[NETWORK_IDS[0]])"
-          :key="id"
-          :class="[
-            'w-full justify-center rounded-full py-1 flex items-center px-2  gap-1 text-skin-link cursor-pointer',
-            { 'bg-skin-active-bg': tokenId === id }
-          ]"
-          @click="tokenId = id as TokenId"
+      <div class="space-y-1.5">
+        <div>Currency</div>
+        <div
+          class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
         >
-          <img
-            :src="getStampUrl('token', TOKENS[1][id].address, 20)"
-            class="rounded-full bg-skin-border size-[20px]"
-            :alt="asset.symbol"
-          />
-          {{ asset.symbol }}
-        </button>
+          <button
+            v-for="[id, asset] in Object.entries(TOKENS[NETWORK_IDS[0]])"
+            :key="id"
+            :class="[
+              'grow justify-center rounded-full py-1 flex items-center px-2  gap-1 text-skin-link',
+              { 'bg-skin-active-bg': tokenId === id }
+            ]"
+            @click="tokenId = id as TokenId"
+          >
+            <img
+              :src="getStampUrl('token', TOKENS[1][id].address, 20)"
+              class="rounded-full bg-skin-border size-[20px]"
+              :alt="asset.symbol"
+            />
+            {{ asset.symbol }}
+          </button>
+        </div>
       </div>
     </div>
     <template #footer>
-      <div class="border rounded-lg mb-4">You will pay {{ amount }}</div>
+      <div class="border rounded-lg mb-4 bg-skin-input-bg p-3 py-2.5">
+        <div class="flex justify-between">
+          You will pay
+          <div class="flex items-center gap-1">
+            <img
+              :src="getStampUrl('token', token.address, 20)"
+              class="rounded-full bg-skin-border size-[18px]"
+              :alt="token.symbol"
+            />
+            {{ amount }} {{ token.symbol }}
+          </div>
+        </div>
+      </div>
       <UiButton class="w-full" primary @click="handleSubmit">Pay</UiButton>
     </template>
   </UiModal>
