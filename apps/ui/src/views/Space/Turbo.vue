@@ -13,10 +13,10 @@ type Feature = {
 
 const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
 
-// TODO: Prices divided per 1000 for testing
+// TODO: Prices divided per 10000 for testing
 const TURBO_PRICES: Record<SubscriptionLength, number> = {
-  yearly: 6,
-  monthly: 0.6
+  yearly: 0.6,
+  monthly: 0.06
 } as const;
 
 const FAQ: { question: string; answer: string }[] = [

@@ -6,7 +6,10 @@ import { TokenId } from './usePayment';
 type StepId = 'check_balance' | 'check_approval' | 'approve' | 'pay';
 type Step = {
   approveTitle: string;
-  approveSubtitle: string;
+  approveSubtitle?: string;
+  confirmingTitle?: string;
+  confirmingSubtitle?: string;
+  successTitle?: string;
   failTitle?: string;
   failSubtitle?: string;
   nextStep: () => StepId | false;
@@ -37,21 +40,22 @@ export default function usePaymentFactory() {
       execute: async () => null
     },
     check_approval: {
-      approveTitle: 'Checking spending cap',
-      approveSubtitle: '',
+      approveTitle: 'Checking token allowance',
+      approveSubtitle: 'Please wait...',
       nextStep: () =>
         stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve',
       execute: async () => null
     },
     approve: {
-      approveTitle: 'Approving spending cap',
-      approveSubtitle: '',
+      approveTitle: 'Setting token allowance',
+      confirmingTitle: 'Waiting for token allowance',
       nextStep: () => 'check_approval',
       execute: async () => null
     },
     pay: {
       approveTitle: 'Confirm payment',
-      approveSubtitle: 'Please sign the payment transaction',
+      confirmingTitle: 'Confirming payment',
+      successTitle: 'Payment successful',
       nextStep: () => false,
       execute: async () => null
     }
@@ -89,10 +93,20 @@ export default function usePaymentFactory() {
     promise: Promise<any>,
     chainId: ChainId
   ): Promise<string> {
-    const tx = await promise;
-    uiStore.addPendingTransaction(tx.hash, chainId);
+    try {
+      const tx = await promise;
+      uiStore.addPendingTransaction(tx.hash, chainId);
 
-    return tx.hash;
+      return tx.hash;
+    } catch (e) {
+      if (e.code === 'ACTION_REJECTED') {
+        currentStepErrorMessage.value = {
+          failTitle: 'Transaction cancelled',
+          failSubtitle: ' '
+        };
+      }
+      throw e;
+    }
   }
 
   const isLastStep = computed(() => {
@@ -133,7 +147,7 @@ export default function usePaymentFactory() {
       if (!result) {
         currentStepErrorMessage.value = {
           failTitle: 'Insufficient balance',
-          failSubtitle: `You need a minimum of ${amount} ${asset.symbol} to complete this action.`
+          failSubtitle: `You need a minimum of ${amount} ${asset.symbol} to complete this transaction`
         };
         throw new Error('Insufficient balance');
       }

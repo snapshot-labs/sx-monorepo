@@ -98,6 +98,9 @@ async function moveToNextStep() {
     :messages="{
       approveTitle: currentStep.approveTitle,
       approveSubtitle: currentStep.approveSubtitle,
+      confirmingTitle: currentStep.confirmingTitle,
+      confirmingSubtitle: currentStep.confirmingSubtitle,
+      successTitle: currentStep.successTitle,
       failTitle: currentStep.failTitle,
       failSubtitle: currentStep.failSubtitle
     }"
