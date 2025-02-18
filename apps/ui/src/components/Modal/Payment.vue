@@ -95,15 +95,7 @@ async function moveToNextStep() {
     :open="modalTransactionProgressOpen"
     :execute="currentStep.execute"
     :chain-id="chainId"
-    :messages="{
-      approveTitle: currentStep.approveTitle,
-      approveSubtitle: currentStep.approveSubtitle,
-      confirmingTitle: currentStep.confirmingTitle,
-      confirmingSubtitle: currentStep.confirmingSubtitle,
-      successTitle: currentStep.successTitle,
-      failTitle: currentStep.failTitle,
-      failSubtitle: currentStep.failSubtitle
-    }"
+    :messages="currentStep.messages"
     @close="modalTransactionProgressOpen = false"
     @confirmed="moveToNextStep"
   />

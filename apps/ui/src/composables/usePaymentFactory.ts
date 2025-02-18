@@ -1,70 +1,74 @@
 import { pinPineapple } from '@/helpers/pin';
-import { clone, verifyNetwork } from '@/helpers/utils';
+import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
 import { TokenId } from './usePayment';
 
 type StepId = 'check_balance' | 'check_approval' | 'approve' | 'pay';
 type Step = {
-  approveTitle: string;
-  approveSubtitle?: string;
-  confirmingTitle?: string;
-  confirmingSubtitle?: string;
-  successTitle?: string;
-  failTitle?: string;
-  failSubtitle?: string;
+  messages: {
+    approveTitle: string;
+    approveSubtitle?: string;
+    confirmingTitle?: string;
+    confirmingSubtitle?: string;
+    successTitle?: string;
+    failTitle?: string;
+    failSubtitle?: string;
+  };
   nextStep: () => StepId | false;
-  execute: () => Promise<string | null>;
+  execute?: () => Promise<string | null>;
 };
 export type BarcodePayload = Record<string, any>;
 
 const BARCODE_VERSION = '0.1';
-
-const DEFAULT_FAIL_MESSAGES = {
-  failTitle: '',
-  failSubtitle: ''
-};
 
 export default function usePaymentFactory() {
   const { modalAccountOpen } = useModal();
   const { auth } = useWeb3();
   const uiStore = useUiStore();
 
-  const currentStepErrorMessage = ref(clone(DEFAULT_FAIL_MESSAGES));
+  const currentStepMessages = ref({});
   const currentStepId = ref<StepId>('check_balance');
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
   const steps = ref<Record<StepId, Step>>({
     check_balance: {
-      approveTitle: 'Checking balance',
-      approveSubtitle: 'Verifying that your wallet has enough funds...',
-      nextStep: () => 'check_approval',
-      execute: async () => null
+      messages: {
+        approveTitle: 'Checking balance',
+        approveSubtitle: 'Verifying that your wallet has enough funds...'
+      },
+      nextStep: () => 'check_approval'
     },
     check_approval: {
-      approveTitle: 'Checking token allowance',
-      approveSubtitle: 'Please wait...',
+      messages: {
+        approveTitle: 'Checking token allowance',
+        approveSubtitle: 'Please wait...'
+      },
       nextStep: () =>
-        stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve',
-      execute: async () => null
+        stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve'
     },
     approve: {
-      approveTitle: 'Setting token allowance',
-      confirmingTitle: 'Waiting for token allowance',
-      nextStep: () => 'check_approval',
-      execute: async () => null
+      messages: {
+        approveTitle: 'Setting token allowance',
+        confirmingTitle: 'Waiting for token allowance'
+      },
+      nextStep: () => 'check_approval'
     },
     pay: {
-      approveTitle: 'Confirm payment',
-      confirmingTitle: 'Confirming payment',
-      successTitle: 'Payment successful',
-      nextStep: () => false,
-      execute: async () => null
+      messages: {
+        approveTitle: 'Confirm payment',
+        confirmingTitle: 'Confirming payment',
+        successTitle: 'Payment successful'
+      },
+      nextStep: () => false
     }
   });
 
   const currentStep = computed<Step>(() => {
     return {
       ...steps.value[currentStepId.value],
-      ...currentStepErrorMessage.value
+      messages: {
+        ...steps.value[currentStepId.value].messages,
+        ...currentStepMessages.value
+      }
     };
   });
 
@@ -72,7 +76,7 @@ export default function usePaymentFactory() {
     const nextStep = currentStep.value.nextStep();
 
     if (nextStep) {
-      currentStepErrorMessage.value = clone(DEFAULT_FAIL_MESSAGES);
+      currentStepMessages.value = {};
       currentStepId.value = nextStep;
       return true;
     }
@@ -100,7 +104,7 @@ export default function usePaymentFactory() {
       return tx.hash;
     } catch (e) {
       if (e.code === 'ACTION_REJECTED') {
-        currentStepErrorMessage.value = {
+        currentStepMessages.value = {
           failTitle: 'Transaction cancelled',
           failSubtitle: ' '
         };
@@ -112,6 +116,12 @@ export default function usePaymentFactory() {
   const isLastStep = computed(() => {
     return currentStepId.value === Object.keys(steps.value).pop();
   });
+
+  function reset() {
+    currentStepId.value = 'check_balance';
+    stepExecuteResults.value.clear();
+    currentStepMessages.value = {};
+  }
 
   async function createSteps({
     chainId,
@@ -138,14 +148,13 @@ export default function usePaymentFactory() {
       auth.value.provider
     );
 
-    currentStepId.value = 'check_balance';
-    stepExecuteResults.value.clear();
+    reset();
 
     steps.value.check_balance.execute = async () => {
       const result = await hasBalance(amount);
 
       if (!result) {
-        currentStepErrorMessage.value = {
+        currentStepMessages.value = {
           failTitle: 'Insufficient balance',
           failSubtitle: `You need a minimum of ${amount} ${asset.symbol} to complete this transaction`
         };
