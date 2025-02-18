@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { _n } from '@/helpers/utils';
 import ICInfinity from '~icons/c/infinity.svg';
-import ICTurbo from '~icons/c/turbo.svg';
+import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
 
 type TierPlan = 'basic' | 'turbo' | 'custom';
@@ -134,18 +134,15 @@ function toggleQuestion(id: number) {
     <div
       class="text-center flex flex-col items-center justify-center h-[295px] gap-3 relative overflow-hidden"
     >
-      <div class="hero hero-bg"></div>
-      <div class="text-[56px] leading-[48px] text-skin-heading font-semibold">
+      <div class="hero hero-bg text-center"></div>
+      <div
+        class="text-[56px] leading-[48px] text-skin-heading font-semibold space-x-2"
+      >
         The power of
-        <div
-          class="bg-skin-heading text-skin-bg uppercase text-[46px] px-2 inline-block leading-[46px] rounded-lg -skew-x-[10deg] top-[-3px] relative"
-        >
-          pro
-        </div>
+        <ICPro class="h-[46px] inline" />
       </div>
       <div class="max-w-[290px] text-md leading-6">
         Pick the plan that works best for your organization.
-        <span class="underline text-skin-heading">Cancel anytime</span>
       </div>
       <div
         class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
@@ -172,70 +169,47 @@ function toggleQuestion(id: number) {
       </div>
     </div>
     <div class="flex flex-col md:flex-row p-4 pb-6 gap-3 justify-stretch">
-      <div class="border rounded-lg p-3.5 flex flex-col gap-3.5 basis-2/3 grow">
-        <div>
-          <div class="float-right">
-            <span class="text-xl text-skin-heading font-semibold">
-              ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
-            >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
+      <div class="border rounded-lg p-3.5 flex flex-col gap-3.5 grow">
+        <div class="flex flex-col sm:flex-row justify-between gap-2.5">
+          <div class="flex flex-col justify-between">
+            <ICPro class="mb-2 w-[54px] h-[28px]" />
+            <div class="max-w-[318px] leading-5">
+              Empower your Snapshot space with advanced governance tools.
+            </div>
           </div>
-          <div
-            class="inline-flex border rounded-full items-center gap-1 py-1 pl-2 pr-[10px] text-sm text-skin-heading leading-[18px]"
-          >
-            <IH-bolt class="size-[14px]" />Most popular
-          </div>
-          <ICTurbo class="mt-3 mb-2 text-skin-heading w-[102px] h-[31px]" />
-          <div class="max-w-[318px] leading-5">
-            Empower your Snapshot space with advanced governance tools.
+
+          <div class="flex flex-col justify-between items-start sm:items-end">
+            <div>
+              <span class="text-xl text-skin-heading font-semibold">
+                ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
+              >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
+            </div>
+            <UiButton class="w-full" primary>Upgrade</UiButton>
           </div>
         </div>
-        <UiButton class="w-full" primary>Upgrade</UiButton>
         <hr />
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-5 text-skin-heading"
+        <ul
+          class="leading-[18px] space-y-2 gap-5 list-disc list-outside md:columns-2 w-full text-skin-heading ml-2.5"
         >
-          <ul class="leading-[18px] space-y-2.5">
-            <li>
-              {{ _n(limits['space.turbo.proposal_limit_per_day']) }}
-              proposals per day
-            </li>
-            <li>
-              {{ _n(limits['space.turbo.proposal_limit_per_month']) }} proposals
-              per month
-            </li>
-            <li>
-              {{ _n(limits['space.turbo.body_limit']) }} proposal character
-              limit
-            </li>
-            <li>
-              {{ _n(limits['space.turbo.choices_limit']) }} voting options per
-              proposal
-            </li>
-            <li>
-              {{ _n(limits['space.turbo.strategies_limit']) }} customizable
-              voting strategies
-            </li>
-          </ul>
-          <ul class="leading-[18px] space-y-2.5">
-            <li>Enhanced visibility</li>
-            <li>Enhanced monitoring service</li>
-            <li>Promote your first proposal</li>
-            <li>Dedicated Telegram support</li>
-            <li>Support non-premium network</li>
-          </ul>
-        </div>
+          <li>Increase proposal limits effortlessly.</li>
+          <li>More voting options and flexibility.</li>
+          <li>Manage delegates with ease.</li>
+          <li>Customize your space with support.</li>
+        </ul>
       </div>
+
       <div
-        class="border rounded-lg p-3.5 flex flex-col bg-skin-input-bg basis-1/3"
+        class="border rounded-lg p-3.5 flex flex-col bg-skin-input-bg md:basis-[236px]"
       >
-        <ICInfinity class="size-[20px] mb-1 text-skin-heading" />
         <div class="text-skin-heading font-semibold text-lg leading-6 mb-1.5">
           Custom plan
         </div>
         <div class="leading-[18px] grow mb-3.5">
           Customize your plan and enjoy all the benefits without limits.
         </div>
-        <UiButton class="w-full !bg-transparent">Talk to sales</UiButton>
+        <div>
+          <UiButton class="!bg-transparent">Talk to sales</UiButton>
+        </div>
       </div>
     </div>
     <div
@@ -293,7 +267,7 @@ function toggleQuestion(id: number) {
     </div>
     <div class="hidden md:flex items-center mx-4 py-3.5">
       <div class="basis-[250px] grow"></div>
-      <div class="feature-value-col">Current plan</div>
+      <div class="feature-value-col"></div>
       <div class="feature-value-col">
         <UiButton class="primary">Upgrade</UiButton>
       </div>
