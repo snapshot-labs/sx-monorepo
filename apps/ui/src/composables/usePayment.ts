@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
-import { formatBytes32String } from '@ethersproject/strings';
+import { toUtf8Bytes } from '@ethersproject/strings';
 import { abis } from '@/helpers/abis';
 import { ChainId } from '@/types';
 
@@ -87,7 +87,7 @@ export default function usePayment(token: PaymentToken, web3: Web3Provider) {
     return paymentContract.payWithERC20Token(
       token.contractAddress,
       getWeiAmount(amount),
-      formatBytes32String(barcode)
+      toUtf8Bytes(barcode)
     );
   }
 
