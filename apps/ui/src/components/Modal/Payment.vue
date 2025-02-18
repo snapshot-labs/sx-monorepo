@@ -82,17 +82,12 @@ async function moveToNextStep() {
     <div class="p-4 space-y-3">
       <div class="space-y-1.5">
         <div>Network</div>
-        <div
-          class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
-        >
+        <div class="pill-switcher">
           <button
             v-for="network in availableNetworks"
             :key="network.id"
             type="button"
-            :class="[
-              'grow justify-center rounded-full py-1 flex items-center px-2 gap-1 text-skin-link',
-              { 'bg-skin-active-bg': chainId === network.id }
-            ]"
+            :class="[{ 'bg-skin-active-bg': chainId === network.id }]"
             @click="chainId = network.id as ChainId"
           >
             <img
@@ -105,16 +100,11 @@ async function moveToNextStep() {
       </div>
       <div class="space-y-1.5">
         <div>Currency</div>
-        <div
-          class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
-        >
+        <div class="pill-switcher">
           <button
             v-for="[id, asset] in Object.entries(TOKENS[NETWORK_IDS[0]])"
             :key="id"
-            :class="[
-              'grow justify-center rounded-full py-1 flex items-center px-2  gap-1 text-skin-link',
-              { 'bg-skin-active-bg': tokenId === id }
-            ]"
+            :class="[{ 'bg-skin-active-bg': tokenId === id }]"
             @click="tokenId = id as TokenId"
           >
             <img
@@ -133,7 +123,7 @@ async function moveToNextStep() {
           You will pay
           <div class="flex items-center gap-1">
             <img
-              :src="getStampUrl('token', token.address, 20)"
+              :src="getStampUrl('token', TOKENS[1][tokenId].address, 20)"
               class="rounded-full bg-skin-border size-[18px]"
               :alt="token.symbol"
             />
@@ -153,3 +143,13 @@ async function moveToNextStep() {
     @confirmed="moveToNextStep"
   />
 </template>
+
+<style lang="scss" scoped>
+.pill-switcher {
+  @apply flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg;
+
+  button {
+    @apply grow justify-center rounded-full py-1 flex items-center px-2 gap-1 text-skin-link;
+  }
+}
+</style>
