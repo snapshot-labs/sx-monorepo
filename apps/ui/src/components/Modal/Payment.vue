@@ -1,18 +1,11 @@
 <script setup lang="ts">
-import { TokenId } from '@/composables/usePayment';
+import { TokenId, TOKENS } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
+import { getStampUrl, getUrl } from '@/helpers/utils';
+import { metadataNetwork } from '@/networks';
 import { ChainId } from '@/types';
 
-const NETWORKS = {
-  1: 'Ethereum',
-  11155111: 'Sepolia',
-  8453: 'Base'
-};
-
-const TOKENS: Record<TokenId, string> = {
-  USDC: 'USDC',
-  USDT: 'USDT'
-};
+const NETWORK_IDS = Object.keys(TOKENS);
 
 const props = defineProps<{
   open: boolean;
@@ -28,13 +21,34 @@ const { createSteps, goToNextStep, isLastStep, currentStep } =
   usePaymentFactory();
 
 const modalTransactionProgressOpen = ref(false);
-const chainId = ref<ChainId>(11155111);
-const tokenId = ref<TokenId>('USDC');
+const chainId = ref<ChainId>(NETWORK_IDS[0]);
+const tokenId = ref<TokenId>(Object.keys(TOKENS[NETWORK_IDS[0]])[0] as TokenId);
+
+const availableNetworks = computed(() => {
+  const { networks } = useOffchainNetworksList(metadataNetwork);
+
+  return NETWORK_IDS.map(id => {
+    const network = networks.value.find(network => network.key === id);
+
+    if (!network) return;
+    return {
+      id,
+      name: network.name,
+      avatar: network.logo
+    };
+  }).filter(Boolean);
+});
 
 async function handleSubmit() {
+  const token = TOKENS[chainId.value][tokenId.value];
+
+  if (!token) {
+    console.error('Invalid payment token');
+    return;
+  }
+
   await createSteps({
-    chainId: chainId.value,
-    tokenId: tokenId.value,
+    token,
     amount: props.amount,
     barcodePayload: props.barcodePayload
   });
@@ -61,33 +75,50 @@ async function moveToNextStep() {
     </template>
     <div class="p-4 flex flex-col gap-2.5">
       <h4>Network</h4>
-      <div class="flex gap-2.5">
-        <UiButton
-          v-for="[networkId, name] in Object.entries(NETWORKS)"
-          :key="networkId"
-          :class="{
-            'border-skin-heading': Number(chainId) === Number(networkId)
-          }"
-          @click="chainId = networkId"
+      <div
+        class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg justify-stretch"
+      >
+        <button
+          v-for="network in availableNetworks"
+          :key="network.id"
+          type="button"
+          :class="[
+            'w-full  justify-center rounded-full py-1 flex items-center px-2  gap-1 text-skin-link cursor-pointer',
+            { 'bg-skin-active-bg': Number(chainId) === Number(network.id) }
+          ]"
+          @click="chainId = network.id as ChainId"
         >
-          {{ name }}
-        </UiButton>
+          <img
+            :src="getUrl(network.avatar) ?? undefined"
+            class="size-[20px] rounded-lg"
+          />
+          {{ network.name }}
+        </button>
       </div>
       <h4>Currency</h4>
-      <div class="flex gap-2.5">
-        <UiButton
-          v-for="(token, i) in Object.keys(TOKENS) as TokenId[]"
-          :key="i"
-          :class="{ 'border-skin-heading': tokenId === token }"
-          @click="tokenId = token"
+      <div
+        class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
+      >
+        <button
+          v-for="[id, asset] in Object.entries(TOKENS[NETWORK_IDS[0]])"
+          :key="id"
+          :class="[
+            'w-full justify-center rounded-full py-1 flex items-center px-2  gap-1 text-skin-link cursor-pointer',
+            { 'bg-skin-active-bg': tokenId === id }
+          ]"
+          @click="tokenId = id as TokenId"
         >
-          {{ TOKENS[token] }}
-        </UiButton>
+          <img
+            :src="getStampUrl('token', TOKENS[1][id].address, 20)"
+            class="rounded-full bg-skin-border size-[20px]"
+            :alt="asset.symbol"
+          />
+          {{ asset.symbol }}
+        </button>
       </div>
-
-      You will pay {{ amount }}
     </div>
     <template #footer>
+      <div class="border rounded-lg mb-4">You will pay {{ amount }}</div>
       <UiButton class="w-full" primary @click="handleSubmit">Pay</UiButton>
     </template>
   </UiModal>

@@ -6,10 +6,11 @@ import { abis } from '@/helpers/abis';
 import { ChainId } from '@/types';
 
 export type TokenId = 'USDC' | 'USDT';
-type PaymentToken = {
-  contractAddress: string;
+export type Token = {
+  address: string;
   decimal: number;
   symbol: string;
+  chainId: ChainId;
 };
 
 const PAYMENT_CONTRACT_ADDRESS = '0xA92D665c4814c8E1681AaB292BA6d2278D01DEE0';
@@ -18,53 +19,64 @@ const PAYMENT_CONTRACT_ABI = [
   'function payWithERC20Token(address token, uint256 amount, bytes barcode)'
 ];
 
+export const ASSETS = {
+  USDC: {
+    decimal: 6,
+    symbol: 'USDC'
+  },
+  USDT: {
+    decimal: 6,
+    symbol: 'USDT'
+  }
+} as const;
+
 // TODO: Double check contract addresses for each token
-export const TOKENS: Record<ChainId, Record<TokenId, PaymentToken>> = {
+export const TOKENS: Record<ChainId, Record<TokenId, Token>> = {
   11155111: {
     USDC: {
-      contractAddress: '0x1c7d4b196cb0c7b01d743fbc6116a902379c7238',
-      decimal: 6,
-      symbol: 'USDC'
+      address: '0x1c7d4b196cb0c7b01d743fbc6116a902379c7238',
+      chainId: 11155111,
+      ...ASSETS['USDC']
     },
     USDT: {
-      contractAddress: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
-      decimal: 6,
-      symbol: 'USDT'
+      address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
+      chainId: 11155111,
+      ...ASSETS['USDT']
     }
   },
   1: {
     USDC: {
-      contractAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-      decimal: 6,
-      symbol: 'USDC'
+      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      chainId: 1,
+      ...ASSETS['USDC']
     },
     USDT: {
-      contractAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-      decimal: 6,
-      symbol: 'USDTds'
+      address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      chainId: 1,
+      ...ASSETS['USDT']
     }
   },
   8453: {
     USDC: {
-      contractAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
-      decimal: 6,
-      symbol: 'USDC'
+      address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+      chainId: 8453,
+      ...ASSETS['USDC']
     },
     USDT: {
-      contractAddress: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
-      decimal: 6,
-      symbol: 'USDT'
+      address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
+      chainId: 8453,
+      ...ASSETS['USDT']
     }
   }
-};
+} as const;
 
-export default function usePayment(token: PaymentToken, web3: Web3Provider) {
+export default function usePayment(token: Token, web3: Web3Provider) {
   function getWeiAmount(amount: number): BigNumber {
     return BigNumber.from(amount * 10 ** token.decimal);
   }
 
   const tokenContract = new Contract(
-    token.contractAddress,
+    token.address,
     abis.erc20,
     web3.getSigner()
   );
@@ -101,7 +113,7 @@ export default function usePayment(token: PaymentToken, web3: Web3Provider) {
 
   function pay(amount: number, barcode: string) {
     return paymentContract.payWithERC20Token(
-      token.contractAddress,
+      token.address,
       getWeiAmount(amount),
       toUtf8Bytes(barcode)
     );

@@ -1,7 +1,7 @@
 import { pinPineapple } from '@/helpers/pin';
 import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
-import { TokenId } from './usePayment';
+import { Token } from './usePayment';
 
 type StepId = 'check_balance' | 'check_approval' | 'approve' | 'pay';
 type Step = {
@@ -15,7 +15,7 @@ type Step = {
     failSubtitle?: string;
   };
   nextStep: () => StepId | false;
-  execute?: () => Promise<string | null>;
+  execute: () => Promise<string | null>;
 };
 export type BarcodePayload = Record<string, any>;
 
@@ -35,7 +35,8 @@ export default function usePaymentFactory() {
         approveTitle: 'Checking balance',
         approveSubtitle: 'Verifying that your wallet has enough funds...'
       },
-      nextStep: () => 'check_approval'
+      nextStep: () => 'check_approval',
+      execute: async () => null
     },
     check_approval: {
       messages: {
@@ -43,14 +44,16 @@ export default function usePaymentFactory() {
         approveSubtitle: 'Please wait...'
       },
       nextStep: () =>
-        stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve'
+        stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve',
+      execute: async () => null
     },
     approve: {
       messages: {
         approveTitle: 'Setting token allowance',
         confirmingTitle: 'Waiting for token allowance'
       },
-      nextStep: () => 'check_approval'
+      nextStep: () => 'check_approval',
+      execute: async () => null
     },
     pay: {
       messages: {
@@ -58,7 +61,8 @@ export default function usePaymentFactory() {
         confirmingTitle: 'Confirming payment',
         successTitle: 'Payment successful'
       },
-      nextStep: () => false
+      nextStep: () => false,
+      execute: async () => null
     }
   });
 
@@ -124,13 +128,11 @@ export default function usePaymentFactory() {
   }
 
   async function createSteps({
-    chainId,
-    tokenId,
+    token,
     amount,
     barcodePayload
   }: {
-    chainId: ChainId;
-    tokenId: TokenId;
+    token: Token;
     amount: number;
     barcodePayload: BarcodePayload;
   }) {
@@ -140,11 +142,10 @@ export default function usePaymentFactory() {
     }
 
     // TODO: Handle error when network is not supported by the wallet
-    await verifyNetwork(auth.value.provider, Number(chainId));
+    await verifyNetwork(auth.value.provider, Number(token.chainId));
 
-    const asset = TOKENS[chainId][tokenId];
     const { hasBalance, hasApproved, approve, pay } = usePayment(
-      asset,
+      token,
       auth.value.provider
     );
 
@@ -156,7 +157,7 @@ export default function usePaymentFactory() {
       if (!result) {
         currentStepMessages.value = {
           failTitle: 'Insufficient balance',
-          failSubtitle: `You need a minimum of ${amount} ${asset.symbol} to complete this transaction`
+          failSubtitle: `You need a minimum of ${amount} ${token.symbol} to complete this transaction`
         };
         throw new Error('Insufficient balance');
       }
@@ -171,13 +172,13 @@ export default function usePaymentFactory() {
     };
 
     steps.value.approve.execute = async () => {
-      return wrapPromise(approve(amount), chainId);
+      return wrapPromise(approve(amount), token.chainId);
     };
 
     steps.value.pay.execute = async () => {
       return wrapPromise(
         pay(amount, await getBarcode(barcodePayload)),
-        chainId
+        token.chainId
       );
     };
   }
