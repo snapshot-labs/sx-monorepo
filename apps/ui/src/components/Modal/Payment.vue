@@ -141,7 +141,14 @@ async function moveToNextStep() {
     :messages="currentStep.messages"
     @close="modalTransactionProgressOpen = false"
     @confirmed="moveToNextStep"
-  />
+  >
+    <template #successTitle>
+      <h4 class="font-semibold text-skin-heading text-lg">
+        Upgraded to <ICPro class="w-[44px] inline" />
+      </h4>
+    </template>
+    <template #successSubtitle>Thank you for your subscription!</template>
+  </ModalTransactionProgress>
 </template>
 
 <style lang="scss" scoped>

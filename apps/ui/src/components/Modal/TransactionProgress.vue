@@ -112,7 +112,6 @@ watch(
       >
         <UiLoading :size="28" />
       </div>
-
       <div
         v-if="step === 'success'"
         class="bg-skin-success rounded-full p-[12px]"
@@ -123,11 +122,20 @@ watch(
         <IS-x-mark :width="28" :height="28" class="text-skin-bg" />
       </div>
       <div class="flex flex-col space-y-1 leading-6">
+        <slot
+          v-if="$slots.successTitle && step === 'success'"
+          name="successTitle"
+        />
         <h4
+          v-else
           class="font-semibold text-skin-heading text-lg"
           v-text="text.title"
         />
-        <div v-text="text.subtitle" />
+        <slot
+          v-if="$slots.successSubtitle && step === 'success'"
+          name="successSubtitle"
+        />
+        <div v-else v-text="text.subtitle" />
       </div>
     </div>
     <slot id="content" :step="step" :tx-id="txId" />
