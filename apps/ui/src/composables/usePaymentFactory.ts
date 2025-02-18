@@ -1,9 +1,8 @@
 import { pinPineapple } from '@/helpers/pin';
-import { verifyNetwork } from '@/helpers/utils';
+import { clone, verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
 import { TokenId } from './usePayment';
 
-export type SubscriptionLength = 'monthly' | 'yearly';
 type StepId = 'check_balance' | 'check_approval' | 'approve' | 'pay';
 type Step = {
   approveTitle: string;
@@ -13,15 +12,21 @@ type Step = {
   nextStep: () => StepId | false;
   execute: () => Promise<string | null>;
 };
+export type BarcodePayload = Record<string, any>;
 
 const BARCODE_VERSION = '0.1';
+
+const DEFAULT_FAIL_MESSAGES = {
+  failTitle: '',
+  failSubtitle: ''
+};
 
 export default function usePaymentFactory() {
   const { modalAccountOpen } = useModal();
   const { auth } = useWeb3();
   const uiStore = useUiStore();
 
-  const currentStepErrorMessage = ref({ failTitle: '', failSubtitle: '' });
+  const currentStepErrorMessage = ref(clone(DEFAULT_FAIL_MESSAGES));
   const currentStepId = ref<StepId>('check_balance');
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
   const steps = ref<Record<StepId, Step>>({
@@ -63,7 +68,7 @@ export default function usePaymentFactory() {
     const nextStep = currentStep.value.nextStep();
 
     if (nextStep) {
-      currentStepErrorMessage.value = { failTitle: '', failSubtitle: '' };
+      currentStepErrorMessage.value = clone(DEFAULT_FAIL_MESSAGES);
       currentStepId.value = nextStep;
       return true;
     }
@@ -71,19 +76,13 @@ export default function usePaymentFactory() {
     return false;
   }
 
-  async function getBarcode(id: string, type: string): Promise<string> {
-    const schema = {
+  async function getBarcode(contents: BarcodePayload): Promise<string> {
+    const receipt = await pinPineapple({
       version: BARCODE_VERSION,
-      type,
-      data: {
-        params: {
-          id
-        }
-      }
-    };
-    const r = await pinPineapple(schema);
-    console.log(r);
-    return r.cid;
+      ...contents
+    });
+
+    return receipt.cid;
   }
 
   async function wrapPromise(
@@ -104,14 +103,12 @@ export default function usePaymentFactory() {
     chainId,
     tokenId,
     amount,
-    id,
-    type
+    barcodePayload
   }: {
     chainId: ChainId;
     tokenId: TokenId;
     amount: number;
-    id: string;
-    type: string;
+    barcodePayload: BarcodePayload;
   }) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -155,7 +152,10 @@ export default function usePaymentFactory() {
     };
 
     steps.value.pay.execute = async () => {
-      return wrapPromise(pay(amount, await getBarcode(id, type)), chainId);
+      return wrapPromise(
+        pay(amount, await getBarcode(barcodePayload)),
+        chainId
+      );
     };
   }
 

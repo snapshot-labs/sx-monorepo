@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { SubscriptionLength } from '@/composables/usePaymentFactory';
 import { _n } from '@/helpers/utils';
 import { Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
 
+type SubscriptionLength = 'yearly' | 'monthly';
 type TierPlan = 'basic' | 'turbo' | 'custom';
 type Feature = {
   [key in TierPlan | string]: string | number | boolean | Component;
@@ -134,7 +134,7 @@ function toggleQuestion(id: number) {
   currentQuestion.value = currentQuestion.value === id ? undefined : id;
 }
 
-async function handleUpgradeTurbo() {
+async function handleTurboClick() {
   modalPaymentOpen.value = true;
 }
 </script>
@@ -195,7 +195,7 @@ async function handleUpgradeTurbo() {
                 ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
-            <UiButton class="w-full" primary @click="handleUpgradeTurbo">
+            <UiButton class="w-full" primary @click="handleTurboClick">
               Upgrade
             </UiButton>
           </div>
@@ -282,7 +282,7 @@ async function handleUpgradeTurbo() {
       <div class="basis-[250px] grow"></div>
       <div class="feature-value-col"></div>
       <div class="feature-value-col">
-        <UiButton class="primary" @click="handleUpgradeTurbo">Upgrade</UiButton>
+        <UiButton class="primary" @click="handleTurboClick">Upgrade</UiButton>
       </div>
       <div class="feature-value-col">
         <UiButton>Talk to sales</UiButton>
@@ -322,7 +322,7 @@ async function handleUpgradeTurbo() {
       :id="space.id"
       :open="modalPaymentOpen"
       :amount="TURBO_PRICES[subscriptionLength]"
-      product="turbo"
+      :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
       @close="modalPaymentOpen = false"
     />
   </div>

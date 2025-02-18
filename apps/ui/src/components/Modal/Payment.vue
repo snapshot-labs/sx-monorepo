@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { TokenId } from '@/composables/usePayment';
+import { BarcodePayload } from '@/composables/usePaymentFactory';
 import { ChainId } from '@/types';
 
 const NETWORKS = {
@@ -15,9 +16,8 @@ const TOKENS: Record<TokenId, string> = {
 
 const props = defineProps<{
   open: boolean;
-  id: string;
   amount: number;
-  product: string;
+  barcodePayload: BarcodePayload;
 }>();
 
 const emit = defineEmits<{
@@ -36,8 +36,7 @@ async function handleSubmit() {
     chainId: chainId.value,
     tokenId: tokenId.value,
     amount: props.amount,
-    id: props.id,
-    type: props.product
+    barcodePayload: props.barcodePayload
   });
 
   emit('close');
