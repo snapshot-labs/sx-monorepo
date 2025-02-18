@@ -172,7 +172,7 @@ function toggleQuestion(id: number) {
       <div class="border rounded-lg p-3.5 flex flex-col gap-3.5 grow">
         <div class="flex flex-col sm:flex-row justify-between gap-2.5">
           <div class="flex flex-col justify-between">
-            <ICPro class="mb-2 w-[54px] h-[28px]" />
+            <ICPro class="mb-2 w-[54px] h-[28px] text-skin-heading" />
             <div class="max-w-[318px] leading-5">
               Empower your Snapshot space with advanced governance tools.
             </div>
