@@ -134,7 +134,7 @@ function toggleQuestion(id: number) {
     <div
       class="text-center flex flex-col items-center justify-center h-[295px] gap-3 relative overflow-hidden"
     >
-      <div class="hero hero-bg text-center"></div>
+      <div class="hero hero-bg"></div>
       <div
         class="text-[56px] leading-[48px] text-skin-heading font-semibold space-x-2"
       >
@@ -164,7 +164,7 @@ function toggleQuestion(id: number) {
               -20%
             </div>
           </div>
-          <div v-else class="px-3">Monthly</div>
+          <div v-else class="px-3" v-text="'Monthly'" />
         </button>
       </div>
     </div>
@@ -178,9 +178,11 @@ function toggleQuestion(id: number) {
             </div>
           </div>
 
-          <div class="flex flex-col justify-between items-start sm:items-end">
+          <div
+            class="flex flex-col justify-between items-start sm:items-end gap-1"
+          >
             <div>
-              <span class="text-xl text-skin-heading font-semibold">
+              <span class="text-xl text-skin-heading font-semibold leading-8">
                 ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
@@ -287,20 +289,20 @@ function toggleQuestion(id: number) {
       >
         <button
           type="button"
-          class="flex items-center py-4 w-full text-left"
+          class="flex items-center py-4 w-full text-left gap-2"
           :class="{ 'pb-0': currentQuestion === i }"
           @click="toggleQuestion(i)"
         >
-          <div class="flex-auto text-skin-heading" v-text="question.question" />
-          <IH-chevron-up
+          <IH-chevron-down
             v-if="currentQuestion === i"
             class="text-skin-text size-[16px]"
           />
-          <IH-chevron-down v-else class="text-skin-text size-[16px]" />
+          <IH-chevron-right v-else class="text-skin-text size-[16px]" />
+          <div class="text-skin-heading" v-text="question.question" />
         </button>
         <div
           v-if="currentQuestion === i"
-          class="pb-4"
+          class="pb-4 pl-4"
           v-text="question.answer"
         />
       </div>
