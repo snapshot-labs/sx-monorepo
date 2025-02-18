@@ -5,8 +5,6 @@ const props = defineProps<{
   space: { id: string; network: NetworkID; snapshot_chain_id?: number };
 }>();
 
-const spaceIdComposite = `${props.space.network}:${props.space.id}`;
-
 const { isSafeWallet } = useSafeWallet(
   props.space.network,
   props.space.snapshot_chain_id
@@ -15,14 +13,18 @@ const followedSpacesStore = useFollowedSpacesStore();
 const { isWhiteLabel } = useWhiteLabel();
 const uiStore = useUiStore();
 
+const spaceIdComposite = computed(
+  () => `${props.space.network}:${props.space.id}`
+);
+
 const spaceFollowed = computed(() =>
-  followedSpacesStore.isFollowed(spaceIdComposite)
+  followedSpacesStore.isFollowed(spaceIdComposite.value)
 );
 
 const loading = computed(
   () =>
     !followedSpacesStore.followedSpacesLoaded ||
-    followedSpacesStore.followedSpaceLoading.has(spaceIdComposite)
+    followedSpacesStore.followedSpaceLoading.has(spaceIdComposite.value)
 );
 
 const maxFollowLimitReached = computed(
@@ -49,7 +51,7 @@ const tooltipMessage = computed(() => {
 
 async function handleClick() {
   try {
-    await followedSpacesStore.toggleSpaceFollow(spaceIdComposite);
+    await followedSpacesStore.toggleSpaceFollow(spaceIdComposite.value);
   } catch (error) {
     uiStore.addNotification('error', error.message);
   }

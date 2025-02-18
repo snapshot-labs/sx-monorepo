@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
+import { useSpaceQuery } from '@/queries/spaces';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -18,16 +19,15 @@ const props = withDefaults(
 );
 
 const { getTsFromCurrent } = useMetaStore();
-const spacesStore = useSpacesStore();
 const { votes } = useAccount();
+const { data: space } = useSpaceQuery({
+  networkId: toRef(() => props.proposal.network),
+  spaceId: toRef(() => props.proposal.space.id)
+});
+
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
-const space = computed(() =>
-  spacesStore.spacesMap.get(
-    `${props.proposal.network}:${props.proposal.space.id}`
-  )
-);
 </script>
 <template>
   <div v-bind="$attrs">

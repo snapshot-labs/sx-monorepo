@@ -3,6 +3,7 @@ import { FunctionalComponent } from 'vue';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
+import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -27,20 +28,25 @@ type NavigationItem = {
 };
 
 const route = useRoute();
-const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
+const { data: spaceData } = useSpaceQuery({
+  networkId: networkId,
+  spaceId: address
+});
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
-const space = computed(() =>
-  currentRouteName.value === 'space' && resolved.value
-    ? spacesStore.spacesMap.get(`${networkId.value}:${address.value}`)
-    : null
-);
+const space = computed(() => {
+  if (currentRouteName.value === 'space' && resolved.value) {
+    return spaceData.value;
+  }
+
+  return null;
+});
 
 const isController = computedAsync(async () => {
   if (!networkId.value || !space.value) return false;

@@ -12,7 +12,9 @@ const props = defineProps<{ space: Space }>();
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 
-const isOffchainSpace = offchainNetworks.includes(props.space.network);
+const isOffchainSpace = computed(() =>
+  offchainNetworks.includes(props.space.network)
+);
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
