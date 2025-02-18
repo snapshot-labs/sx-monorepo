@@ -44,21 +44,13 @@ export default class Unicorn extends Connector {
     try {
       const wallet = await this.getWallet();
       this.wallet = wallet;
-      const { EIP1193 } = await import('thirdweb/wallets');
+      const { viemAdapter } = await import('thirdweb/adapters/viem');
       if (wallet) {
-        const EIP1193provider = EIP1193.toProvider({
+        this.provider = viemAdapter.wallet.toViem({
           wallet,
           chain: this.chain!,
           client: this.client!
         });
-
-        this.provider = {
-          ...EIP1193provider,
-          switchChain: async () => {
-            // TODO: waiting for Thirdweb to expose a new API for this
-            return;
-          }
-        };
       }
     } catch (e) {
       console.error(e);

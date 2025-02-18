@@ -369,15 +369,10 @@ export async function verifyNetwork(
   const encodedChainId = `0x${chainId.toString(16)}`;
 
   try {
-    if ('switchChain' in web3Provider.provider) {
-      // TODO: to implement
-      return;
-    } else {
-      await web3Provider.provider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: encodedChainId }]
-      });
-    }
+    await web3Provider.provider.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: encodedChainId }]
+    });
   } catch (err) {
     if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId])
       throw new Error(err.message);

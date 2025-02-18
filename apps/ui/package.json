@@ -88,7 +88,7 @@
     "starknet": "6.11.0",
     "starknetkit": "^1.1.9",
     "stream-browserify": "^3.0.0",
-    "thirdweb": "^5.88.5",
+    "thirdweb": "^5.88.6",
     "tippy.js": "^6.3.7",
     "turndown": "^7.2.0",
     "unplugin-auto-import": "^0.16.6",
