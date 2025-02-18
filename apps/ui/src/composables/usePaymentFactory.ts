@@ -13,7 +13,6 @@ type Step = {
   nextStep: () => StepId | false;
   execute: () => Promise<string | null>;
 };
-type Product = 'turbo';
 
 const BARCODE_VERSION = '0.1';
 
@@ -112,12 +111,14 @@ export default function usePaymentFactory() {
     tokenId: TokenId;
     amount: number;
     id: string;
-    type: Product;
+    type: string;
   }) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return;
     }
+
+    // TODO: Handle error when network is not supported by the wallet
     await verifyNetwork(auth.value.provider, Number(chainId));
 
     const asset = TOKENS[chainId][tokenId];

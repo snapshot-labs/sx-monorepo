@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { TokenId } from '@/composables/usePayment';
 import { SubscriptionLength } from '@/composables/usePaymentFactory';
 import { _n } from '@/helpers/utils';
-import { ChainId, Space } from '@/types';
+import { Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
@@ -36,18 +35,13 @@ const FAQ: { question: string; answer: string }[] = [
   }
 ] as const;
 
-const props = defineProps<{ space: Space }>();
+defineProps<{ space: Space }>();
 
 const { limits } = useSettings();
-const { createSteps, goToNextStep, isLastStep, currentStep } =
-  usePaymentFactory();
 
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
-const modalTransactionProgressOpen = ref(false);
-// TODO: Hardcoding sepolia USDC until we have an UI switcher
-const chainId = ref<ChainId>(11155111);
-const tokenId = ref<TokenId>('USDC');
+const modalPaymentOpen = ref(false);
 
 const features = computed<
   Record<string, { title: string; features: Feature[] }>
@@ -141,25 +135,7 @@ function toggleQuestion(id: number) {
 }
 
 async function handleUpgradeTurbo() {
-  await createSteps({
-    chainId: chainId.value,
-    tokenId: tokenId.value,
-    amount: TURBO_PRICES[subscriptionLength.value],
-    id: props.space.id,
-    type: 'turbo'
-  });
-
-  modalTransactionProgressOpen.value = true;
-}
-
-async function moveToNextStep() {
-  if (isLastStep.value) return;
-
-  modalTransactionProgressOpen.value = false;
-
-  if (await goToNextStep()) {
-    modalTransactionProgressOpen.value = true;
-  }
+  modalPaymentOpen.value = true;
 }
 </script>
 <template>
@@ -342,18 +318,12 @@ async function moveToNextStep() {
         />
       </div>
     </div>
-    <ModalTransactionProgress
-      :open="modalTransactionProgressOpen"
-      :execute="currentStep.execute"
-      :chain-id="chainId"
-      :messages="{
-        approveTitle: currentStep.approveTitle,
-        approveSubtitle: currentStep.approveSubtitle,
-        failTitle: currentStep.failTitle,
-        failSubtitle: currentStep.failSubtitle
-      }"
-      @close="modalTransactionProgressOpen = false"
-      @confirmed="moveToNextStep"
+    <ModalPayment
+      :id="space.id"
+      :open="modalPaymentOpen"
+      :amount="TURBO_PRICES[subscriptionLength]"
+      product="turbo"
+      @close="modalPaymentOpen = false"
     />
   </div>
 </template>

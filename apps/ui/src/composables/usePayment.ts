@@ -5,7 +5,7 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { abis } from '@/helpers/abis';
 import { ChainId } from '@/types';
 
-export type TokenId = 'USDC';
+export type TokenId = 'USDC' | 'USDT';
 type PaymentToken = {
   contractAddress: string;
   decimal: number;
@@ -18,12 +18,18 @@ const PAYMENT_CONTRACT_ABI = [
   'function payWithERC20Token(address token, uint256 amount, bytes barcode)'
 ];
 
+// TODO: Double check contract addresses for each token
 export const TOKENS: Record<ChainId, Record<TokenId, PaymentToken>> = {
   11155111: {
     USDC: {
       contractAddress: '0x1c7d4b196cb0c7b01d743fbc6116a902379c7238',
       decimal: 6,
       symbol: 'USDC'
+    },
+    USDT: {
+      contractAddress: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
+      decimal: 6,
+      symbol: 'USDT'
     }
   },
   1: {
@@ -31,6 +37,11 @@ export const TOKENS: Record<ChainId, Record<TokenId, PaymentToken>> = {
       contractAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
       decimal: 6,
       symbol: 'USDC'
+    },
+    USDT: {
+      contractAddress: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      decimal: 6,
+      symbol: 'USDTds'
     }
   },
   8453: {
@@ -38,6 +49,11 @@ export const TOKENS: Record<ChainId, Record<TokenId, PaymentToken>> = {
       contractAddress: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
       decimal: 6,
       symbol: 'USDC'
+    },
+    USDT: {
+      contractAddress: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
+      decimal: 6,
+      symbol: 'USDT'
     }
   }
 };
