@@ -1,20 +1,33 @@
 <script setup lang="ts">
 import { _n } from '@/helpers/utils';
+import { metadataNetwork } from '@/networks';
+import { Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
 
+type SubscriptionLength = 'yearly' | 'monthly';
 type TierPlan = 'basic' | 'turbo' | 'custom';
 type Feature = {
   [key in TierPlan | string]: string | number | boolean | Component;
 };
-type SubscriptionLength = 'monthly' | 'yearly';
 
 const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
 
-const TURBO_PRICES: Record<SubscriptionLength, number> = {
-  yearly: 6000,
-  monthly: 600
+const NETWORKS_REALM = {
+  mainnet: [1, 8453],
+  testnet: [11155111, 84532]
+};
+
+const TURBO_PRICES: Record<
+  keyof typeof NETWORKS_REALM,
+  Record<SubscriptionLength, number>
+> = {
+  mainnet: {
+    yearly: 6000,
+    monthly: 600
+  },
+  testnet: { yearly: 1, monthly: 0.1 }
 } as const;
 
 const FAQ: { question: string; answer: string }[] = [
@@ -33,10 +46,21 @@ const FAQ: { question: string; answer: string }[] = [
   }
 ] as const;
 
+defineProps<{ space: Space }>();
+
 const { limits } = useSettings();
 
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const modalPaymentOpen = ref(false);
+
+const currentNetworkRealm = computed(() => {
+  return metadataNetwork === 's' ? 'mainnet' : 'testnet';
+});
+
+const prices = computed(() => {
+  return TURBO_PRICES[currentNetworkRealm.value];
+});
 
 const features = computed<
   Record<string, { title: string; features: Feature[] }>
@@ -128,6 +152,10 @@ const features = computed<
 function toggleQuestion(id: number) {
   currentQuestion.value = currentQuestion.value === id ? undefined : id;
 }
+
+async function handleTurboClick() {
+  modalPaymentOpen.value = true;
+}
 </script>
 <template>
   <div>
@@ -148,7 +176,7 @@ function toggleQuestion(id: number) {
         class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
       >
         <button
-          v-for="p in Object.keys(TURBO_PRICES) as SubscriptionLength[]"
+          v-for="p in Object.keys(prices) as SubscriptionLength[]"
           :key="p"
           :class="[
             'rounded-full py-1 text-skin-link',
@@ -183,10 +211,12 @@ function toggleQuestion(id: number) {
           >
             <div>
               <span class="text-xl text-skin-heading font-semibold leading-8">
-                ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
+                ${{ _n(prices[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
-            <UiButton class="w-full" primary>Upgrade</UiButton>
+            <UiButton class="w-full" primary @click="handleTurboClick">
+              Upgrade
+            </UiButton>
           </div>
         </div>
         <hr />
@@ -271,7 +301,7 @@ function toggleQuestion(id: number) {
       <div class="basis-[250px] grow"></div>
       <div class="feature-value-col"></div>
       <div class="feature-value-col">
-        <UiButton class="primary">Upgrade</UiButton>
+        <UiButton class="primary" @click="handleTurboClick">Upgrade</UiButton>
       </div>
       <div class="feature-value-col">
         <UiButton>Talk to sales</UiButton>
@@ -307,6 +337,13 @@ function toggleQuestion(id: number) {
         />
       </div>
     </div>
+    <ModalPayment
+      :open="modalPaymentOpen"
+      :chain-ids="NETWORKS_REALM[currentNetworkRealm]"
+      :amount="prices[subscriptionLength]"
+      :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
+      @close="modalPaymentOpen = false"
+    />
   </div>
 </template>
 
