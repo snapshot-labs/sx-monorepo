@@ -5,11 +5,10 @@ import { getStampUrl, getUrl } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
 import { ChainId } from '@/types';
 
-const NETWORK_IDS: ChainId[] = Object.keys(TOKENS);
-
-defineProps<{
+const props = defineProps<{
   open: boolean;
   amount: number;
+  chainIds: ChainId[];
   barcodePayload: BarcodePayload;
 }>();
 
@@ -23,35 +22,38 @@ const {
   isLastStep,
   currentStep
 } = usePaymentFactory();
-const { networks } = useOffchainNetworksList(metadataNetwork);
+const { networks: allNetworks } = useOffchainNetworksList(metadataNetwork);
 
 const modalTransactionProgressOpen = ref(false);
-const chainId = ref<ChainId>(Number(NETWORK_IDS[0]));
-const tokenId = ref<TokenId>(Object.keys(TOKENS[NETWORK_IDS[0]])[0] as TokenId);
+const chainId = ref<ChainId>(Number(props.chainIds[0]));
+const tokenId = ref<TokenId>(
+  Object.keys(TOKENS[props.chainIds[0]])[0] as TokenId
+);
 
-const availableNetworks = computed<
+const networks = computed<
   {
     id: ChainId;
     name: string;
     avatar: string;
   }[]
 >(() => {
-  return NETWORK_IDS.map(id => {
-    const network = networks.value.find(network => network.key === id);
+  return props.chainIds
+    .map(id => {
+      const network = allNetworks.value.find(
+        network => Number(network.key) === id
+      );
 
-    if (
-      !network ||
-      (metadataNetwork === 's' && 'testnet' in network && network.testnet)
-    ) {
-      return;
-    }
+      if (!network) {
+        return;
+      }
 
-    return {
-      id: Number(id),
-      name: network.name,
-      avatar: network.logo
-    };
-  }).filter(n => !!n);
+      return {
+        id: Number(id),
+        name: network.name,
+        avatar: network.logo
+      };
+    })
+    .filter(n => !!n);
 });
 
 const token = computed(() => TOKENS[chainId.value][tokenId.value]);
@@ -84,7 +86,7 @@ async function moveToNextStep() {
         <div>Network</div>
         <div class="pill-switcher">
           <button
-            v-for="network in availableNetworks"
+            v-for="network in networks"
             :key="network.id"
             type="button"
             :class="[{ 'bg-skin-active-bg': chainId === network.id }]"
@@ -102,7 +104,7 @@ async function moveToNextStep() {
         <div>Currency</div>
         <div class="pill-switcher">
           <button
-            v-for="[id, asset] in Object.entries(TOKENS[NETWORK_IDS[0]])"
+            v-for="[id, asset] in Object.entries(TOKENS[chainIds[0]])"
             :key="id"
             :class="[{ 'bg-skin-active-bg': tokenId === id }]"
             @click="tokenId = id as TokenId"

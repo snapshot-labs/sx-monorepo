@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { _n } from '@/helpers/utils';
+import { metadataNetwork } from '@/networks';
 import { Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
@@ -13,10 +14,20 @@ type Feature = {
 
 const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
 
-// TODO: Prices divided per 10000 for testing
-const TURBO_PRICES: Record<SubscriptionLength, number> = {
-  yearly: 0.6,
-  monthly: 0.06
+const NETWORKS_REALM = {
+  mainnet: [1, 8453],
+  testnet: [11155111, 84532]
+};
+
+const TURBO_PRICES: Record<
+  keyof typeof NETWORKS_REALM,
+  Record<SubscriptionLength, number>
+> = {
+  mainnet: {
+    yearly: 6000,
+    monthly: 600
+  },
+  testnet: { yearly: 1, monthly: 0.1 }
 } as const;
 
 const FAQ: { question: string; answer: string }[] = [
@@ -42,6 +53,14 @@ const { limits } = useSettings();
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
 const modalPaymentOpen = ref(false);
+
+const currentNetworkRealm = computed(() => {
+  return metadataNetwork === 's' ? 'mainnet' : 'testnet';
+});
+
+const prices = computed(() => {
+  return TURBO_PRICES[currentNetworkRealm.value];
+});
 
 const features = computed<
   Record<string, { title: string; features: Feature[] }>
@@ -157,7 +176,7 @@ async function handleTurboClick() {
         class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
       >
         <button
-          v-for="p in Object.keys(TURBO_PRICES) as SubscriptionLength[]"
+          v-for="p in Object.keys(prices) as SubscriptionLength[]"
           :key="p"
           :class="[
             'rounded-full py-1 text-skin-link',
@@ -192,7 +211,7 @@ async function handleTurboClick() {
           >
             <div>
               <span class="text-xl text-skin-heading font-semibold leading-8">
-                ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
+                ${{ _n(prices[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
             <UiButton class="w-full" primary @click="handleTurboClick">
@@ -320,7 +339,8 @@ async function handleTurboClick() {
     </div>
     <ModalPayment
       :open="modalPaymentOpen"
-      :amount="TURBO_PRICES[subscriptionLength]"
+      :chain-ids="NETWORKS_REALM[currentNetworkRealm]"
+      :amount="prices[subscriptionLength]"
       :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
       @close="modalPaymentOpen = false"
     />
