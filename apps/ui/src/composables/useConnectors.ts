@@ -23,12 +23,9 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
     },
     options: {
       projectId: 'e6454bd61aba40b786e866a69bd4c5c6',
-      chains: [],
-      optionalChains: [
-        1, 10, 56, 100, 146, 250, 4002, 8453, 42161, 137, 1088, 11155111
-      ],
-      optionalMethods: ['eth_sendTransaction', 'eth_signTypedData_v4'],
-      showQrModal: true
+      name: APP_NAME,
+      url: 'https://snapshot.box',
+      icons: ['https://snapshot.box/favicon.svg']
     }
   },
   walletlink: {
