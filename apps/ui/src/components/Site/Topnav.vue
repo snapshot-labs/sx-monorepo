@@ -22,8 +22,14 @@ const { toggleSkin, currentMode } = useUserSkin();
       </AppLink>
     </div>
     <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
-      <li><AppLink to="/#features">Features</AppLink></li>
-      <li><AppLink to="/#ecosystem">Ecosystem</AppLink></li>
+      <li>
+        <router-link :to="{ name: 'site-landing', hash: '#features' }">
+          Features
+        </router-link>
+      </li>
+      <li>
+        <router-link :to="{ name: 'site-ecosystem' }">Ecosystem</router-link>
+      </li>
       <li>
         <a href="https://docs.snapshot.box" target="_blank">
           Developers

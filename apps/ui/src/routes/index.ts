@@ -1,19 +1,19 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import SplashScreen from '@/components/Layout/SplashScreen.vue';
+import Splash from '@/components/Layout/Splash.vue';
 import aliases from '@/helpers/aliases.json';
 import { metadataNetwork } from '@/networks';
 import defaultRoutes from '@/routes/default';
 
 const { resolved, isWhiteLabel } = useWhiteLabel();
 
-const splashScreenRoute = {
+const splashRoute = {
   path: '/:catchAll(.*)*',
-  name: 'splash-screen',
-  component: SplashScreen
+  name: 'splash',
+  component: Splash
 };
 
-// At this stage, we're not sure whether the app is a white label
-const routes = !resolved.value ? [splashScreenRoute] : defaultRoutes;
+// At this stage, we're not sure whether the app is a whitelabel
+const routes = !resolved.value ? [splashRoute] : defaultRoutes;
 
 const router = createRouter({
   history: createWebHashHistory(),
