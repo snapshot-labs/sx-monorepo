@@ -24,8 +24,9 @@ watch(
 
     const space = spacesStore.spacesMap.get(spaceKey.value);
     const hasUnnamedChildren = space?.children?.some(child => !child.name);
+    const hasUnnamedParent = space?.parent && !space.parent.name;
 
-    if (!space || hasUnnamedChildren) {
+    if (!space || hasUnnamedChildren || hasUnnamedParent) {
       spacesStore.fetchSpace(address, networkId);
     }
 
