@@ -306,7 +306,14 @@ onBeforeUnmount(() => destroyAudio());
         >
           <UiStamp :id="proposal.author.id" :size="32" class="mr-1" />
           <div class="flex flex-col ml-2 leading-4 gap-1">
-            {{ proposal.author.name || shortenAddress(proposal.author.id) }}
+            <div>
+              {{ proposal.author.name || shortenAddress(proposal.author.id) }}
+              <span
+                v-if="proposal.author.role"
+                class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
+                v-text="proposal.author.role"
+              />
+            </div>
             <span class="text-skin-text text-sm">
               In
               <AppLink
