@@ -30,6 +30,8 @@ const { setTitle } = useTitle();
 const spacesStore = useSpacesStore();
 const route = useRoute();
 const router = useRouter();
+const { web3 } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 const network = ref<string>(DEFAULT_NETWORK);
@@ -47,15 +49,11 @@ const networks = computed(() => {
   if (protocol.value === 'snapshot') {
     protocolNetworks = offchainNetworks.value
       .filter(network => {
-        if (
+        return !(
           metadataNetwork === 's' &&
           'testnet' in network &&
           network.testnet
-        ) {
-          return false;
-        }
-
-        return true;
+        );
       })
       .map(network => ({
         id: network.key,
@@ -141,6 +139,7 @@ watchEffect(() => setTitle('Explore'));
 
 <template>
   <div>
+    <OnboardingUser class="mb-2" />
     <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
       <div class="flex sm:flex-row flex-col flex-wrap gap-2">
         <UiSelectDropdown
@@ -211,6 +210,23 @@ watchEffect(() => setTitle('Explore'));
           <span>No results found for your search</span>
         </div>
       </div>
+    </div>
+    <div v-if="!web3.authLoading && !web3.account" class="mt-8">
+      <UiToolbarBottom class="px-4 py-3 flex justify-between items-center">
+        <h4
+          class="hidden sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
+        >
+          Log in to start making decisions with your community.
+        </h4>
+        <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
+          <UiButton
+            class="primary w-full sm:w-auto"
+            @click="modalAccountOpen = true"
+          >
+            Log in
+          </UiButton>
+        </div>
+      </UiToolbarBottom>
     </div>
   </div>
 </template>

@@ -10,7 +10,12 @@ const route = useRoute();
 const query = computed(() => (route.query.q as string) || '');
 
 const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
-  useProposalsQuery(props.space.network, props.space.id, {}, query);
+  useProposalsQuery(
+    toRef(() => props.space.network),
+    toRef(() => props.space.id),
+    {},
+    query
+  );
 
 async function handleEndReached() {
   if (!hasNextPage.value) return;

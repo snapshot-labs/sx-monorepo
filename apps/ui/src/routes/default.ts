@@ -20,11 +20,11 @@ import { spaceChildrenRoutes } from './common';
 
 export default [
   {
-    path: '/',
+    path: '/about',
     name: 'site',
     component: Site,
     children: [
-      { path: '', name: 'site-landing', component: Landing },
+      { path: '/about', name: 'site-landing', component: Landing },
       { path: '/network', name: 'site-network', component: Network },
       { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
       { path: '/ecosystem/:app', name: 'site-app', component: App },
@@ -41,7 +41,7 @@ export default [
 
   {
     path: '/create',
-    redirect: { name: 'create-space-snapshot-x' }
+    redirect: { name: 'create-space-snapshot' }
   },
   {
     path: '/create/snapshot-x',
@@ -67,7 +67,11 @@ export default [
     name: 'my',
     component: My,
     children: [
-      { path: '/home', name: 'my-home', component: Home },
+      {
+        path: '/home',
+        redirect: { name: 'my-home' }
+      },
+      { path: '/', name: 'my-home', component: Home },
       { path: '/explore', name: 'my-explore', component: Explore },
       {
         path: '/notifications',

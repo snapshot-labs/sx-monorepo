@@ -98,17 +98,19 @@ export function createConstants(networkId: NetworkID) {
         return params?.strategies?.length > 0;
       },
       generateSummary: (params: Record<string, any>) => `(${params.threshold})`,
-      generateParams: (params: Record<string, any>) => {
+      generateParams: async (params: Record<string, any>) => {
         const abiCoder = new AbiCoder();
 
-        const strategies = params.strategies.map((strategy: StrategyConfig) => {
-          return {
-            addr: strategy.address,
-            params: strategy.generateParams
-              ? strategy.generateParams(strategy.params)[0]
-              : '0x00'
-          };
-        });
+        const strategies = await Promise.all(
+          params.strategies.map(async (strategy: StrategyConfig) => {
+            return {
+              addr: strategy.address,
+              params: strategy.generateParams
+                ? (await strategy.generateParams(strategy.params))[0]
+                : '0x00'
+            };
+          })
+        );
 
         return [
           abiCoder.encode(
@@ -219,7 +221,7 @@ export function createConstants(networkId: NetworkID) {
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
-      generateParams: (params: Record<string, any>) => {
+      generateParams: async (params: Record<string, any>) => {
         const whitelist = params.whitelist
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
@@ -313,7 +315,9 @@ export function createConstants(networkId: NetworkID) {
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: (params: Record<string, any>) => [params.contractAddress],
+      generateParams: async (params: Record<string, any>) => [
+        params.contractAddress
+      ],
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'ERC-20 Votes (EIP-5805)',
         properties: {
@@ -369,7 +373,9 @@ export function createConstants(networkId: NetworkID) {
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: (params: Record<string, any>) => [params.contractAddress],
+      generateParams: async (params: Record<string, any>) => [
+        params.contractAddress
+      ],
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'ERC-20 Votes Comp (EIP-5805)',
         properties: {
@@ -538,146 +544,160 @@ export function createConstants(networkId: NetworkID) {
         }
       }
     },
-    {
-      address: '',
-      type: 'Axiom',
-      name: EXECUTORS.Axiom,
-      about:
-        'This strategy enables offchain votes on the space. The validity of votes and voting power is verified onchain in bulk using a zkSNARK of storage proofs, which then triggers the execution of transactions.',
-      icon: IHCode,
-      generateSummary: (params: Record<string, any>) =>
-        `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
-      deploy: async (
-        client: clients.EvmEthereumTx,
-        web3: Web3Provider,
-        _controller: string,
-        spaceAddress: string,
-        params: Record<string, any>
-      ): Promise<{ address: string; txId: string }> => {
-        return client.deployAxiomExecution({
-          signer: web3.getSigner(),
-          params: {
-            controller:
-              params.controller || '0x0000000000000000000000000000000000000000',
-            quorum: BigInt(params.quorum),
-            contractAddress:
-              params.contractAddress ||
-              '0x0000000000000000000000000000000000000000',
-            slotIndex: BigInt(params.slotIndex),
-            space: spaceAddress,
-            querySchema:
-              '0xa09cc16ccaa32b96ca5c404c1b4be60d7883a7178f432e8f9f3c22157fc0f873'
+    ...(config.ExecutionStrategies.Axiom
+      ? [
+          {
+            address: '',
+            type: 'Axiom',
+            name: EXECUTORS.Axiom,
+            about:
+              'This strategy enables offchain votes on the space. The validity of votes and voting power is verified onchain in bulk using a zkSNARK of storage proofs, which then triggers the execution of transactions.',
+            icon: IHCode,
+            generateSummary: (params: Record<string, any>) =>
+              `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
+            deploy: async (
+              client: clients.EvmEthereumTx,
+              web3: Web3Provider,
+              _controller: string,
+              spaceAddress: string,
+              params: Record<string, any>
+            ): Promise<{ address: string; txId: string }> => {
+              return client.deployAxiomExecution({
+                signer: web3.getSigner(),
+                params: {
+                  controller:
+                    params.controller ||
+                    '0x0000000000000000000000000000000000000000',
+                  quorum: BigInt(params.quorum),
+                  contractAddress:
+                    params.contractAddress ||
+                    '0x0000000000000000000000000000000000000000',
+                  slotIndex: BigInt(params.slotIndex),
+                  space: spaceAddress,
+                  querySchema:
+                    '0xa09cc16ccaa32b96ca5c404c1b4be60d7883a7178f432e8f9f3c22157fc0f873'
+                }
+              });
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: [
+                'controller',
+                'quorum',
+                'contractAddress',
+                'slotIndex'
+              ],
+              properties: {
+                controller: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Controller address',
+                  examples: ['0x0000…']
+                },
+                quorum: {
+                  type: 'integer',
+                  title: 'Quorum',
+                  examples: ['1']
+                },
+                contractAddress: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Contract address',
+                  examples: ['0x0000…']
+                },
+                slotIndex: {
+                  type: 'integer',
+                  title: 'Slot index',
+                  examples: ['0']
+                }
+              }
+            }
           }
-        });
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: ['controller', 'quorum', 'contractAddress', 'slotIndex'],
-        properties: {
-          controller: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Controller address',
-            examples: ['0x0000…']
-          },
-          quorum: {
-            type: 'integer',
-            title: 'Quorum',
-            examples: ['1']
-          },
-          contractAddress: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Contract address',
-            examples: ['0x0000…']
-          },
-          slotIndex: {
-            type: 'integer',
-            title: 'Slot index',
-            examples: ['0']
+        ]
+      : []),
+    ...(config.ExecutionStrategies.Isokratia
+      ? [
+          {
+            address: '',
+            type: 'Isokratia',
+            name: EXECUTORS.Isokratia,
+            about:
+              'This strategy enables offchain votes on the space. The validity of votes is verified onchain in bulk using a zkSNARK, which then triggers the execution of transactions.',
+            icon: IHCode,
+            generateSummary: (params: Record<string, any>) =>
+              `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
+            deploy: async (
+              client: clients.EvmEthereumTx,
+              web3: Web3Provider,
+              _controller: string,
+              _spaceAddress: string,
+              params: Record<string, any>
+            ): Promise<{ address: string; txId: string }> => {
+              return client.deployIsokratiaExecution({
+                signer: web3.getSigner(),
+                params: {
+                  provingTimeAllowance: params.provingTimeAllowance,
+                  quorum: BigInt(params.quorum),
+                  queryAddress:
+                    params.queryAddress ||
+                    '0x0000000000000000000000000000000000000000',
+                  contractAddress:
+                    params.contractAddress ||
+                    '0x0000000000000000000000000000000000000000',
+                  slotIndex: BigInt(params.slotIndex)
+                }
+              });
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: [
+                'provingTimeAllowance',
+                'quorum',
+                'queryAddress',
+                'contractAddress',
+                'slotIndex'
+              ],
+              properties: {
+                provingTimeAllowance: {
+                  type: 'integer',
+                  title: 'Proving time allowance',
+                  examples: ['3600']
+                },
+                quorum: {
+                  type: 'integer',
+                  title: 'Quorum',
+                  examples: ['1']
+                },
+                queryAddress: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Query address',
+                  examples: ['0x0000…']
+                },
+                contractAddress: {
+                  type: 'string',
+                  format: 'address',
+                  chainId: config.Meta.eip712ChainId,
+                  title: 'Contract address',
+                  examples: ['0x0000…']
+                },
+                slotIndex: {
+                  type: 'integer',
+                  title: 'Slot index',
+                  examples: ['0']
+                }
+              }
+            }
           }
-        }
-      }
-    },
-    {
-      address: '',
-      type: 'Isokratia',
-      name: EXECUTORS.Isokratia,
-      about:
-        'This strategy enables offchain votes on the space. The validity of votes is verified onchain in bulk using a zkSNARK, which then triggers the execution of transactions.',
-      icon: IHCode,
-      generateSummary: (params: Record<string, any>) =>
-        `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
-      deploy: async (
-        client: clients.EvmEthereumTx,
-        web3: Web3Provider,
-        _controller: string,
-        _spaceAddress: string,
-        params: Record<string, any>
-      ): Promise<{ address: string; txId: string }> => {
-        return client.deployIsokratiaExecution({
-          signer: web3.getSigner(),
-          params: {
-            provingTimeAllowance: params.provingTimeAllowance,
-            quorum: BigInt(params.quorum),
-            queryAddress:
-              params.queryAddress ||
-              '0x0000000000000000000000000000000000000000',
-            contractAddress:
-              params.contractAddress ||
-              '0x0000000000000000000000000000000000000000',
-            slotIndex: BigInt(params.slotIndex)
-          }
-        });
-      },
-      paramsDefinition: {
-        type: 'object',
-        title: 'Params',
-        additionalProperties: false,
-        required: [
-          'provingTimeAllowance',
-          'quorum',
-          'queryAddress',
-          'contractAddress',
-          'slotIndex'
-        ],
-        properties: {
-          provingTimeAllowance: {
-            type: 'integer',
-            title: 'Proving time allowance',
-            examples: ['3600']
-          },
-          quorum: {
-            type: 'integer',
-            title: 'Quorum',
-            examples: ['1']
-          },
-          queryAddress: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Query address',
-            examples: ['0x0000…']
-          },
-          contractAddress: {
-            type: 'string',
-            format: 'address',
-            chainId: config.Meta.eip712ChainId,
-            title: 'Contract address',
-            examples: ['0x0000…']
-          },
-          slotIndex: {
-            type: 'integer',
-            title: 'Slot index',
-            examples: ['0']
-          }
-        }
-      }
-    }
+        ]
+      : [])
   ];
 
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];

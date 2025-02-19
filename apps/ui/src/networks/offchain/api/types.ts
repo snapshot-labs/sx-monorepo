@@ -153,6 +153,7 @@ export type ApiStrategy = {
   author: string;
   version: string;
   spacesCount: number;
+  verifiedSpacesCount: number;
   examples: any;
   schema: any;
 };

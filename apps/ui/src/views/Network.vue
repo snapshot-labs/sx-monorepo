@@ -57,7 +57,7 @@ function toggleQuestion(id) {
         class="text-skin-link text-lg space-y-4 px-5 py-4 text-left border rounded-lg max-w-[500px] mx-auto"
       >
         <div>
-          <h3 class="font-display mb-3">Basic plan</h3>
+          <h3 class="font-display mb-3">Premium plan</h3>
           <div class="text-left">
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
@@ -65,15 +65,19 @@ function toggleQuestion(id) {
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
-              Custom domain registry support
+              Testnet network support
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
-              Dedicated customer support
+              Dedicated support
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
               Quick setup (~48 hours)
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              1 Turbo space
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
@@ -83,23 +87,15 @@ function toggleQuestion(id) {
         </div>
 
         <div>
-          <h3 class="font-display mb-3">Premium plan</h3>
+          <h3 class="font-display mb-3">Platinum plan</h3>
           <div class="text-left">
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
+              Everything from Premium plan
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
               Snapshot X integration
-            </div>
-            <div>
-              <IH-check class="inline-block text-skin-success mr-2" />
-              Support for Safe voting
-            </div>
-            <div>
-              <IH-check class="inline-block text-skin-success mr-2" />
-              Support for delegate registry
-            </div>
-            <div>
-              <IH-check class="inline-block text-skin-success mr-2" />
-              Testnet network support
             </div>
           </div>
         </div>

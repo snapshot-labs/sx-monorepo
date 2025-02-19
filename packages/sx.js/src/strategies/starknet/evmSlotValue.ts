@@ -50,6 +50,7 @@ export default function createEvmSlotValueStrategy(): Strategy {
       signerAddress: string,
       address: string,
       index: number,
+      params: string,
       metadata: Record<string, any> | null,
       envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig

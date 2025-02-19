@@ -6,6 +6,28 @@ export enum AddressType {
   CUSTOM
 }
 
+function throwError(message?: string): never {
+  throw new Error(message);
+}
+
+const scheduleImmediate = () =>
+  new Promise(resolve => {
+    if (typeof setImmediate === 'function') {
+      setImmediate(() => resolve(true));
+    } else if (typeof window === 'object' && window.requestAnimationFrame) {
+      window.requestAnimationFrame(() => resolve(true));
+    } else {
+      setTimeout(() => resolve(true), 0);
+    }
+  });
+
+const leftChildIndex = (i: number) => 2 * i + 1;
+const rightChildIndex = (i: number) => 2 * i + 2;
+const parentIndex = (i: number) =>
+  i > 0 ? Math.floor((i - 1) / 2) : throwError('Root has no parent');
+const siblingIndex = (i: number) =>
+  i > 0 ? i - (-1) ** (i % 2) : throwError('Root has no siblings');
+
 export class Leaf {
   public readonly type: AddressType;
   public readonly address: string;
@@ -31,75 +53,59 @@ export class Leaf {
   }
 }
 
-export function generateMerkleRoot(hashes: string[]) {
-  if (hashes.length === 1) {
-    return hashes[0];
+/**
+ * Computes merkle tree in async mode. This uses setImmediate to yield to the event loop.
+ * This is useful for large trees to avoid blocking the event loop.
+ * There is still a blocking part in the computation of hashes (element hashes and node hashes).
+ * @param entries Array of whitelist entries in format of "address:votingPower"
+ */
+export async function generateMerkleTree(entries: string[]) {
+  const leaves = entries.map(entry => {
+    const [address, votingPower] = entry.split(':').map(s => s.trim());
+    if (!address || !votingPower) throwError('Invalid entry format');
+    const type =
+      address.length === 42 ? AddressType.ETHEREUM : AddressType.STARKNET;
+
+    return new Leaf(type, address, BigInt(votingPower));
+  });
+
+  const hashes: string[] = [];
+
+  for (const leaf of leaves) {
+    hashes.push(leaf.hash);
+    await scheduleImmediate();
   }
 
-  if (hashes.length % 2 !== 0) {
-    hashes = [...hashes, '0x0'];
+  const tree = new Array<string>(2 * hashes.length - 1);
+
+  for (const [i, hash] of hashes.entries()) {
+    tree[tree.length - 1 - i] = hash;
   }
 
-  const newHashes: string[] = [];
+  for (let i = tree.length - 1 - hashes.length; i >= 0; i--) {
+    const leftChild = tree[leftChildIndex(i)]!;
+    const rightChild = tree[rightChildIndex(i)]!;
 
-  for (let i = 0; i < hashes.length; i += 2) {
-    let left: string;
-    let right: string;
+    tree[i] =
+      BigInt(leftChild) > BigInt(rightChild)
+        ? ec.starkCurve.pedersen(leftChild, rightChild)
+        : ec.starkCurve.pedersen(rightChild, leftChild);
 
-    const firstValue = hashes[i];
-    const secondValue = hashes[i + 1];
-
-    if (!firstValue || !secondValue) throw new Error('Invalid hash');
-
-    if (BigInt(firstValue) > BigInt(secondValue)) {
-      left = firstValue;
-      right = secondValue;
-    } else {
-      left = secondValue;
-      right = firstValue;
-    }
-    newHashes.push(ec.starkCurve.pedersen(left, right));
+    await scheduleImmediate();
   }
 
-  return generateMerkleRoot(newHashes);
+  return tree;
 }
 
-export function generateMerkleProof(hashes: string[], index: number): string[] {
-  if (hashes.length === 1) {
-    return [];
+function getProof(tree: string[], index: number): string[] {
+  const proof: string[] = [];
+  while (index > 0) {
+    proof.push(tree[siblingIndex(index)]!);
+    index = parentIndex(index);
   }
+  return proof;
+}
 
-  if (hashes.length % 2 !== 0) {
-    hashes = [...hashes, '0x0'];
-  }
-
-  const newHashes: string[] = [];
-
-  for (let i = 0; i < hashes.length; i += 2) {
-    let left: string;
-    let right: string;
-
-    const firstValue = hashes[i];
-    const secondValue = hashes[i + 1];
-
-    if (!firstValue || !secondValue) throw new Error('Invalid hash');
-
-    if (BigInt(firstValue) > BigInt(secondValue)) {
-      left = firstValue;
-      right = secondValue;
-    } else {
-      left = secondValue;
-      right = firstValue;
-    }
-
-    newHashes.push(ec.starkCurve.pedersen(left, right));
-  }
-
-  const proof = generateMerkleProof(newHashes, Math.floor(index / 2));
-
-  const prefixIndex = index % 2 === 0 ? index + 1 : index - 1;
-  const prefix = hashes[prefixIndex];
-  if (!prefix) throw new Error('Invalid hash');
-
-  return [prefix, ...proof];
+export function generateMerkleProof(tree: string[], index: number): string[] {
+  return getProof(tree, tree.length - 1 - index);
 }
