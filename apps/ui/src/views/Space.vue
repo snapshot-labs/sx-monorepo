@@ -22,7 +22,11 @@ watch(
   async ([resolved, networkId, address, account]) => {
     if (!resolved || !networkId || !address) return;
 
-    if (!spacesStore.spacesMap.has(spaceKey.value)) {
+    const space = spacesStore.spacesMap.get(spaceKey.value);
+    const hasUnnamedChildren = space?.children?.some(child => !child.name);
+    const hasUnnamedParent = space?.parent && !space.parent.name;
+
+    if (!space || hasUnnamedChildren || hasUnnamedParent) {
       spacesStore.fetchSpace(address, networkId);
     }
 
