@@ -45,6 +45,7 @@ const {
   deleteSpace,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
+const { invalidateController } = useSpaceController(toRef(props, 'space'));
 const spacesStore = useSpacesStore();
 const { setTitle } = useTitle();
 
@@ -225,6 +226,9 @@ function isValidTab(param: string | string[]): param is Tab['id'] {
 
 async function reloadSpaceAndReset() {
   await spacesStore.fetchSpace(props.space.id, props.space.network);
+
+  invalidateController();
+
   await reset({ force: true });
 }
 

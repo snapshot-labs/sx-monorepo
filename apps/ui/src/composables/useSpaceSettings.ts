@@ -105,15 +105,8 @@ export function useSpaceSettings(space: Ref<Space>) {
   const isModified = ref(false);
 
   const network = computed(() => getNetwork(space.value.network));
-  const isController = computedAsync(async () => {
-    const { account } = web3.value;
 
-    const controller = await network.value.helpers.getSpaceController(
-      space.value
-    );
-
-    return compareAddresses(controller, account);
-  }, false);
+  const { isController } = useSpaceController(space);
   const isOwner = computedAsync(async () => {
     if (!offchainNetworks.includes(space.value.network)) {
       return isController.value;
