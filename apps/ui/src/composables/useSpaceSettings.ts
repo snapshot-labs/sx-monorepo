@@ -107,20 +107,24 @@ export function useSpaceSettings(space: Ref<Space>) {
   const network = computed(() => getNetwork(space.value.network));
 
   const { isController } = useSpaceController(space);
-  const isOwner = computedAsync(async () => {
-    if (!offchainNetworks.includes(space.value.network)) {
-      return isController.value;
-    }
+  const isOwner = computedAsync(
+    async () => {
+      if (!offchainNetworks.includes(space.value.network)) {
+        return isController.value;
+      }
 
-    const { account } = web3.value;
+      const { account } = web3.value;
 
-    const owner = await getNameOwner(
-      space.value.id,
-      network.value.chainId as ENSChainId
-    );
+      const owner = await getNameOwner(
+        space.value.id,
+        network.value.chainId as ENSChainId
+      );
 
-    return compareAddresses(owner, account);
-  }, false);
+      return compareAddresses(owner, account);
+    },
+    false,
+    { lazy: true }
+  );
   const isAdmin = computed(() => {
     if (!offchainNetworks.includes(space.value.network)) return false;
 

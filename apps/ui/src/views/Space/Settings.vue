@@ -238,7 +238,7 @@ function handleSettingsSave() {
 }
 
 function handleControllerSave(value: string) {
-  if (!isOwner.value) return;
+  if (!isController.value) return;
   controller.value = value;
 
   saving.value = true;
