@@ -115,7 +115,7 @@ export const evmNetworks = {
   matic: createStandardConfig(137),
   arb1: createStandardConfig(42161),
   base: createStandardConfig(8453),
-  mantle: createStandardConfig(5000, {
+  mnt: createStandardConfig(5000, {
     // https://docs.mantle.xyz/network/system-information/fee-mechanism/eip-1559-support#application-of-eip-1559-in-mantle-v2-tectonic
     maxPriorityFeePerGas: 0
   })
@@ -127,4 +127,4 @@ export const evmOptimism = createEvmConfig('oeth');
 export const evmPolygon = createEvmConfig('matic');
 export const evmArbitrum = createEvmConfig('arb1');
 export const evmBase = createEvmConfig('base');
-export const evmMantle = createEvmConfig('mantle');
+export const evmMantle = createEvmConfig('mnt');

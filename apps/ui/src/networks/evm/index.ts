@@ -59,7 +59,7 @@ export const METADATA: Record<string, Metadata> = {
     avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
     blockTime: 2
   },
-  mantle: {
+  mnt: {
     name: 'Mantle',
     chainId: 5000,
     apiUrl: 'https://mantle-api.snapshot.box',
@@ -91,7 +91,7 @@ export const METADATA: Record<string, Metadata> = {
 export function createEvmNetwork(networkId: NetworkID): Network {
   const { name, chainId, currentChainId, apiUrl, avatar } = METADATA[networkId];
 
-  const pin = networkId === 'mantle' ? pinPineapple : pinGraph;
+  const pin = networkId === 'mnt' ? pinPineapple : pinGraph;
 
   const provider = getProvider(chainId);
   const constants = createConstants(networkId, { pin });
@@ -147,7 +147,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'oeth',
       'matic',
       'base',
-      'mantle',
+      'mnt',
       'arb1'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
