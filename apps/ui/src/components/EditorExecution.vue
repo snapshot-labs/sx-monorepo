@@ -148,7 +148,7 @@ watch(
         <div class="space-x-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
-              :disabled="!treasury || disabled"
+              :disabled="!treasury || disabled || !treasury.supportsTokens"
               class="!px-0 w-[46px]"
               @click="openModal('sendToken')"
             >
@@ -157,7 +157,7 @@ watch(
           </UiTooltip>
           <UiTooltip title="Send NFT">
             <UiButton
-              :disabled="!treasury || disabled"
+              :disabled="!treasury || disabled || !treasury.supportsNfts"
               class="!px-0 w-[46px]"
               @click="openModal('sendNft')"
             >
@@ -247,7 +247,7 @@ watch(
 
     <teleport to="#modal">
       <ModalSendToken
-        v-if="treasury"
+        v-if="treasury && treasury.supportsTokens"
         :open="modalOpen.sendToken"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -257,7 +257,7 @@ watch(
         @add="addTx"
       />
       <ModalSendNft
-        v-if="treasury"
+        v-if="treasury && treasury.supportsNfts"
         :open="modalOpen.sendNft"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -267,7 +267,7 @@ watch(
         @add="addTx"
       />
       <ModalStakeToken
-        v-if="treasury"
+        v-if="treasury && treasury.supportsTokens"
         :open="modalOpen.stakeToken"
         :address="treasury.wallet"
         :network="treasury.network"

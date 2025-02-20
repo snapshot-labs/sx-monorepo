@@ -3,6 +3,7 @@ import {
   evmArbitrum,
   evmBase,
   evmMainnet,
+  evmMantle,
   EvmNetworkConfig,
   evmOptimism,
   evmPolygon,
@@ -17,6 +18,7 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [137, evmPolygon],
   [8453, evmBase],
+  [5000, evmMantle],
   [42161, evmArbitrum],
   [1, evmMainnet],
   [11155111, evmSepolia]

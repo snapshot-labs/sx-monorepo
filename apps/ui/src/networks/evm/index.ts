@@ -1,5 +1,5 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { pinGraph } from '@/helpers/pin';
+import { pinGraph, pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -59,6 +59,14 @@ export const METADATA: Record<string, Metadata> = {
     avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
     blockTime: 2
   },
+  mnt: {
+    name: 'Mantle',
+    chainId: 5000,
+    apiUrl: 'https://mantle-api.snapshot.box',
+    avatar:
+      'ipfs://bafkreidkucwfn4mzo2gtydrt2wogk3je5xpugom67vhi4h4comaxxjzoz4',
+    blockTime: 2
+  },
   eth: {
     name: 'Ethereum',
     chainId: 1,
@@ -83,8 +91,10 @@ export const METADATA: Record<string, Metadata> = {
 export function createEvmNetwork(networkId: NetworkID): Network {
   const { name, chainId, currentChainId, apiUrl, avatar } = METADATA[networkId];
 
+  const pin = networkId === 'mnt' ? pinPineapple : pinGraph;
+
   const provider = getProvider(chainId);
-  const constants = createConstants(networkId);
+  const constants = createConstants(networkId, { pin });
   const api = createApi(apiUrl, networkId, constants, {
     // NOTE: Highlight is currently disabled
     // highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
@@ -101,7 +111,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
-    pin: pinGraph,
+    pin,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
@@ -138,6 +148,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'oeth',
       'matic',
       'base',
+      'mnt',
       'arb1'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,

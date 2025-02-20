@@ -3,7 +3,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
-import { pinGraph } from '@/helpers/pin';
+import { PinFunction } from '@/helpers/pin';
 import { getUrl, shorten } from '@/helpers/utils';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { StrategyConfig } from '../types';
@@ -15,7 +15,10 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHPencil from '~icons/heroicons-outline/pencil';
 import IHUserCircle from '~icons/heroicons-outline/user-circle';
 
-export function createConstants(networkId: NetworkID) {
+export function createConstants(
+  networkId: NetworkID,
+  { pin }: { pin: PinFunction }
+) {
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
@@ -125,7 +128,7 @@ export function createConstants(networkId: NetworkID) {
             if (!strategy.generateMetadata) return;
 
             const metadata = await strategy.generateMetadata(strategy.params);
-            const pinned = await pinGraph(metadata);
+            const pinned = await pin(metadata);
 
             return `ipfs://${pinned.cid}`;
           })
@@ -249,7 +252,7 @@ export function createConstants(networkId: NetworkID) {
             };
           });
 
-        const pinned = await pinGraph({ tree });
+        const pinned = await pin({ tree });
 
         return {
           name: 'Whitelist',
