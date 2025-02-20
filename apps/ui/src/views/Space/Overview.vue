@@ -17,8 +17,8 @@ const isOffchainSpace = offchainNetworks.includes(props.space.network);
 const socials = computed(() => getSocialNetworksLink(props.space));
 
 const { data, isPending } = useProposalsSummaryQuery(
-  props.space.network,
-  props.space.id
+  toRef(() => props.space.network),
+  toRef(() => props.space.id)
 );
 
 watchEffect(() => setTitle(props.space.name));

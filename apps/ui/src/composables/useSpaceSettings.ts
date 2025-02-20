@@ -611,7 +611,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       boost: space.value.additionalRawData.boost,
       skinSettings: skinSettings.value
     };
-
     const prunedSaveData: Partial<OffchainSpaceSettings> = clone(saveData);
     Object.entries(prunedSaveData).forEach(([key, value]) => {
       if (value === null || value === '') delete prunedSaveData[key];
@@ -630,11 +629,15 @@ export function useSpaceSettings(space: Ref<Space>) {
       delete prunedSaveData.voting.quorumType;
     }
     if (prunedSaveData.skinSettings) {
-      Object.entries(prunedSaveData.skinSettings).forEach(([key, value]) => {
-        if (value === null || value === '') {
-          delete prunedSaveData.skinSettings?.[key];
-        }
-      });
+      if (!customDomain.value && !space.value.turbo) {
+        delete prunedSaveData.skinSettings;
+      } else {
+        Object.entries(prunedSaveData.skinSettings).forEach(([key, value]) => {
+          if (value === null || value === '') {
+            delete prunedSaveData.skinSettings?.[key];
+          }
+        });
+      }
     }
 
     return updateSettingsRaw(space.value, JSON.stringify(prunedSaveData));

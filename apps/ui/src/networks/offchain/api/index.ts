@@ -7,7 +7,7 @@ import { CHAIN_IDS } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
-import { clone } from '@/helpers/utils';
+import { clone, compareAddresses } from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -19,6 +19,7 @@ import {
 import {
   Alias,
   Follow,
+  Member,
   NetworkID,
   OffchainAdditionalRawData,
   Proposal,
@@ -104,6 +105,28 @@ function getProposalState(
   }
 
   return proposal.state;
+}
+
+function getAuthorRole(
+  authorAddress: string,
+  {
+    admins,
+    moderators,
+    members
+  }: {
+    admins: string[];
+    moderators: string[];
+    members: string[];
+  }
+): Member['role'] | null {
+  if (admins.some(address => compareAddresses(address, authorAddress)))
+    return 'admin';
+  if (moderators.some(address => compareAddresses(address, authorAddress)))
+    return 'moderator';
+  if (members.some(address => compareAddresses(address, authorAddress)))
+    return 'author';
+
+  return null;
 }
 
 function formatSpace(
@@ -208,7 +231,7 @@ function formatSpace(
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
-    voting_power_symbol: space.symbol,
+    voting_power_symbol: space.symbol || '',
     active_proposals: space.activeProposals,
     voting_delay: space.voting.delay ?? 0,
     voting_types: space.voting.type
@@ -302,13 +325,20 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
 
   const state = getProposalState(networkId, proposal);
 
+  const { admins, moderators, members } = proposal.space;
+
   return {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
     author: {
       id: proposal.author,
-      address_type: 1
+      address_type: 1,
+      role: getAuthorRole(proposal.author, {
+        admins,
+        moderators,
+        members
+      })
     },
     proposal_id: proposal.id,
     type: proposal.type,
@@ -339,9 +369,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       snapshot_chain_id: parseInt(proposal.space.network),
       avatar: proposal.space.avatar,
       controller: '',
-      admins: proposal.space.admins,
-      moderators: proposal.space.moderators,
-      voting_power_symbol: proposal.space.symbol,
+      admins,
+      moderators,
+      voting_power_symbol: proposal.space.symbol || '',
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
       executors_types: [],

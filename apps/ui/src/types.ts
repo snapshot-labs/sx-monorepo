@@ -256,6 +256,7 @@ export type Proposal = {
     id: string;
     address_type: 0 | 1 | 2;
     name?: string;
+    role: Member['role'] | null;
   };
   execution_hash: string;
   metadata_uri: string;

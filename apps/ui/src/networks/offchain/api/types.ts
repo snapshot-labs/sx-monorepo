@@ -104,6 +104,7 @@ export type ApiProposal = {
     network: string;
     admins: string[];
     moderators: string[];
+    members: string[];
     symbol: string;
     terms: string;
   };

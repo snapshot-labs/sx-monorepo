@@ -323,7 +323,8 @@ function formatProposal(
     },
     author: {
       id: proposal.author.id,
-      address_type: getAddressType(proposal.author)
+      address_type: getAddressType(proposal.author),
+      role: null
     },
     metadata_uri: proposal.metadata.id,
     type: 'basic',

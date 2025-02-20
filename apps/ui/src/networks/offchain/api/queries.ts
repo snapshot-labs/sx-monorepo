@@ -129,6 +129,7 @@ const PROPOSAL_FRAGMENT = gql`
       network
       admins
       moderators
+      members
       symbol
       terms
     }
