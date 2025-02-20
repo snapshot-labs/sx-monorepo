@@ -11,11 +11,13 @@ withDefaults(
     height?: number;
     disabled?: boolean;
     fallback?: boolean;
+    cropped?: boolean;
   }>(),
   {
     width: 80,
     height: 80,
-    fallback: true
+    fallback: true,
+    cropped: true
   }
 );
 
@@ -72,13 +74,17 @@ async function handleFileChange(e: Event) {
           'opacity-80': isUploadingImage
         }
       ]"
-      :style="{ width: `${width}px`, height: `${height}px` }"
+      :style="{
+        [`${cropped ? '' : 'max-'}width`]: `${width}px`,
+        [`${cropped ? '' : 'max-'}height`]: `${height}px`
+      }"
     />
     <UiStamp
       v-else-if="fallback"
       :id="definition.default"
       :width="width"
       :height="height"
+      :cropped="cropped"
       class="pointer-events-none !rounded-none group-hover:opacity-80"
       type="space"
       :class="{
@@ -88,7 +94,10 @@ async function handleFileChange(e: Event) {
     <div
       v-else
       class="block"
-      :style="{ width: ` ${width}px`, height: `${height}px` }"
+      :style="{
+        [`${cropped ? '' : 'max-'}width`]: `${width}px`,
+        [`${cropped ? '' : 'max-'}height`]: `${height}px`
+      }"
     />
     <div
       class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row size-full items-center content-center justify-center"

@@ -37,7 +37,7 @@ const previewLogoUrl = computed(() => {
   if (
     !isWhiteLabel.value ||
     !logo.value ||
-    logo.value !== space.value?.additionalRawData?.skinSettings?.logo
+    logo.value === space.value?.additionalRawData?.skinSettings?.logo
   )
     return;
   return getUrl(logo.value);
@@ -63,17 +63,18 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
     <img
       v-if="previewLogoUrl"
       :src="previewLogoUrl"
-      :width="SPACE_LOGO_WIDTH"
-      :height="SPACE_LOGO_HEIGHT"
+      :style="`max-width:${SPACE_LOGO_WIDTH}px; max-height:${SPACE_LOGO_HEIGHT}px;`"
       :alt="space.name"
     />
     <UiStamp
       v-else-if="hasWhiteLabelLogo"
       :id="space.id"
+      :cropped="false"
       type="space-logo"
       :width="SPACE_LOGO_WIDTH"
       :height="SPACE_LOGO_HEIGHT"
       class="rounded-none border-none"
+      :style="`max-width:${SPACE_LOGO_WIDTH}px; max-height:${SPACE_LOGO_HEIGHT}px;`"
       :cb="cb"
     />
     <template v-else>

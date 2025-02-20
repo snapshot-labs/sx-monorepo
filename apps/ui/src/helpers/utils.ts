@@ -496,7 +496,8 @@ export function getStampUrl(
     | 'token',
   id: string,
   size: number | { width: number; height: number },
-  hash?: string
+  hash?: string,
+  cropped?: boolean
 ) {
   let sizeParam = '';
   if (typeof size === 'number') {
@@ -506,8 +507,9 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
+  const cropParam = !cropped ? `&crop=false` : '';
 
-  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
 
 export async function imageUpload(file: File) {
