@@ -167,7 +167,7 @@ onMounted(() => {
         <h4 class="eyebrow font-medium">Custom logo</h4>
         <div class="mb-2">
           You can replace your space name in the upper left corner by a custom
-          logo. Recommended size is 380x76 pixels.
+          logo. Max dimensions are 380x76 pixels.
         </div>
         <UiInputStamp
           v-model="skinSettings.logo"

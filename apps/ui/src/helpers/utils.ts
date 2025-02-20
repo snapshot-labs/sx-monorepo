@@ -507,7 +507,7 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
-  const cropParam = !cropped ? `&crop=false` : '';
+  const cropParam = !cropped ? `&fit=inside` : '';
 
   return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
