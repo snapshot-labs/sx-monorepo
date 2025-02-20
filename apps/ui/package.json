@@ -62,7 +62,6 @@
     "@tanstack/vue-query": "^5.64.2",
     "@vueuse/core": "^10.4.1",
     "@walletconnect/core": "^2.11.0",
-    "@walletconnect/modal": "2.6.2",
     "@walletconnect/types": "^2.11.0",
     "@walletconnect/utils": "^2.11.0",
     "@walletconnect/web3wallet": "^1.10.0",
