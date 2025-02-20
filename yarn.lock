@@ -3599,25 +3599,6 @@
   resolved "https://registry.yarnpkg.com/@radix-ui/rect/-/rect-1.1.0.tgz#f817d1d3265ac5415dadc67edab30ae196696438"
   integrity sha512-A9+lCBZoaMJlVKcRBz2YByCG+Cp2t6nAnMnNba+XiWxnj6r4JUFqfsgwocMBZU9LPtdxC6wB56ySYpc7LQIoJg==
 
-"@reown/appkit-adapter-ethers@^1.6.8":
-  version "1.6.8"
-  resolved "https://registry.yarnpkg.com/@reown/appkit-adapter-ethers/-/appkit-adapter-ethers-1.6.8.tgz#e6c11a267139ace0428794831047c72fa3c854a4"
-  integrity sha512-ShsGfUGgqOzlu3iE0J7blUbvdRkoqqY1/GYcZznIgck9lQekxoT6JkyiOVXytvKg0q9H1QQdBmbXhrIUH9bFLQ==
-  dependencies:
-    "@reown/appkit" "1.6.8"
-    "@reown/appkit-common" "1.6.8"
-    "@reown/appkit-core" "1.6.8"
-    "@reown/appkit-polyfills" "1.6.8"
-    "@reown/appkit-scaffold-ui" "1.6.8"
-    "@reown/appkit-ui" "1.6.8"
-    "@reown/appkit-utils" "1.6.8"
-    "@reown/appkit-wallet" "1.6.8"
-    "@walletconnect/universal-provider" "2.18.0"
-    "@walletconnect/utils" "2.18.0"
-    valtio "1.13.2"
-  optionalDependencies:
-    "@coinbase/wallet-sdk" "4.3.0"
-
 "@reown/appkit-common@1.6.8":
   version "1.6.8"
   resolved "https://registry.yarnpkg.com/@reown/appkit-common/-/appkit-common-1.6.8.tgz#7e57d4fdb67629713331705bfec94245694c6103"
@@ -3689,7 +3670,7 @@
     "@walletconnect/logger" "2.1.2"
     zod "3.22.4"
 
-"@reown/appkit@1.6.8", "@reown/appkit@^1.6.8":
+"@reown/appkit@^1.6.8":
   version "1.6.8"
   resolved "https://registry.yarnpkg.com/@reown/appkit/-/appkit-1.6.8.tgz#5c25486b4bf8e8caa20bb82c75d2d679b0efac93"
   integrity sha512-GA7VZ+TZ7POVjfjWNyeffLoTIjX+iEvmRdKo9TEEvPBZ77996eiQFnhaaQHCNg1Wf9Ba/lptxVJT07gSZknh5A==
