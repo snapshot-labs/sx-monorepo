@@ -21,6 +21,13 @@ const { data, isPending } = useProposalsSummaryQuery(
   toRef(() => props.space.id)
 );
 
+const showChildren = computed(
+  () =>
+    !isWhiteLabel.value &&
+    !!props.space.children.length &&
+    props.space.children.every(child => child.name)
+);
+
 watchEffect(() => setTitle(props.space.name));
 </script>
 
@@ -87,7 +94,7 @@ watchEffect(() => setTitle(props.space.name));
               followers
             </div>
           </template>
-          <template v-if="!isWhiteLabel && space.parent">
+          <template v-if="!isWhiteLabel && space.parent?.name">
             <div>·</div>
             <AppLink
               :to="{
@@ -126,7 +133,7 @@ watchEffect(() => setTitle(props.space.name));
       </div>
     </div>
     <OnboardingSpace :space="space" />
-    <template v-if="!isWhiteLabel && space.children.length">
+    <template v-if="showChildren">
       <UiLabel :label="'Sub-spaces'" />
       <UiScrollerHorizontal gradient="md">
         <div class="px-4 py-3 flex gap-3 min-w-max">
