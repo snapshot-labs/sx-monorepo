@@ -10,6 +10,8 @@ import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
 import Pulse from '@/views/Pulse.vue';
+import PulseCreate from '@/views/PulseCreate.vue';
+import PulseDiscussion from '@/views/PulseDiscussion.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
@@ -43,6 +45,16 @@ export default [
     path: '/pulse',
     name: 'pulse',
     component: Pulse
+  },
+  {
+    path: '/pulse/create',
+    name: 'pulse-create',
+    component: PulseCreate
+  },
+  {
+    path: '/pulse/:id',
+    name: 'pulse-discussion',
+    component: PulseDiscussion
   },
   {
     path: '/create',

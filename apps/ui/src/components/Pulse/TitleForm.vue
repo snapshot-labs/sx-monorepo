@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import router from '@/routes';
+
 const title = ref('');
-const discussion = ref('');
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -9,23 +10,19 @@ const TITLE_DEFINITION = {
   maxLength: 256
 };
 
-const BODY_DEFINITION = {
-  type: 'string',
-  format: 'long',
-  title: 'Context',
-  maxLength: 10e3,
-  examples: ['Add more context…']
-};
-
 const EXAMPLES = [
   "What features you'd like to see?",
   // 'What should be our main KPI?',
   'Who are the best delegates?'
 ];
+
+function handleSubmit() {
+  router.push({ name: 'pulse-create', query: { title: title.value } });
+}
 </script>
 
 <template>
-  <div class="max-w-[680px]">
+  <div>
     <div class="s-box">
       <div class="border rounded-lg p-4 mb-4 bg-skin-bg space-y-4">
         <div>
@@ -33,6 +30,7 @@ const EXAMPLES = [
             v-model="title"
             :definition="TITLE_DEFINITION"
             :required="true"
+            @keyup.enter="handleSubmit"
           />
           <div class="space-x-2">
             e.g.
@@ -44,9 +42,6 @@ const EXAMPLES = [
               v-text="example"
             />
           </div>
-        </div>
-        <div v-if="title" class="s-base">
-          <UiComposer v-model="discussion" :definition="BODY_DEFINITION" />
         </div>
       </div>
     </div>

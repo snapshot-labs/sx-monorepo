@@ -107,6 +107,12 @@ onUnmounted(() => {
           { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
         ]"
       />
+      <router-link
+        :to="{ name: 'pulse' }"
+        class="flex h-full items-center px-4"
+      >
+        <IC-pulse class="size-[26px] text-skin-link" />
+      </router-link>
     </div>
     <form
       v-if="searchConfig"
