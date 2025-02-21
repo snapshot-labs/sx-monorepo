@@ -506,13 +506,19 @@ watchEffect(() => {
             </div>
           </UiAlert>
           <template v-else>
-            <MessagePropositionPower
-              v-if="!isPropositionPowerPending"
-              class="mb-4"
-              :proposition-power="propositionPower"
-              :is-error="isPropositionPowerError"
-              @fetch="fetchPropositionPower"
-            />
+            <template v-if="!isPropositionPowerPending">
+              <MessageErrorFetchPower
+                v-if="isPropositionPowerError || !propositionPower"
+                class="mb-4"
+                :type="'proposition'"
+                @fetch="fetchPropositionPower"
+              />
+              <MessagePropositionPower
+                v-else-if="propositionPower && !propositionPower.canPropose"
+                class="mb-4"
+                :proposition-power="propositionPower"
+              />
+            </template>
             <UiAlert
               v-if="
                 propositionPower &&

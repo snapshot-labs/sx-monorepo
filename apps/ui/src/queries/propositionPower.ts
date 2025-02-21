@@ -4,10 +4,17 @@ import { getNetwork, supportsNullCurrent } from '@/networks';
 import { VotingPower } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
+type Strategy = {
+  name: string;
+  params: any;
+};
+
 export type PropositionPowerItem = {
   votingPowers: VotingPower[];
+  threshold: string;
   symbol: string;
   canPropose: boolean;
+  strategies: Strategy[];
 };
 
 const { web3 } = useWeb3();
@@ -31,10 +38,28 @@ async function getPropositionPower(space: Space, block: number | null) {
   const account = web3.value.account;
   const isSpaceMember = getIsSpaceMember(space, account);
   const network = getNetwork(space.network);
+
   const vpItem: PropositionPowerItem = {
     votingPowers: [],
     symbol: space.voting_power_symbol,
-    canPropose: isSpaceMember
+    threshold: space.proposal_threshold,
+    canPropose: isSpaceMember,
+    strategies: space.voting_power_validation_strategy_strategies.map(
+      (name, i) => {
+        if (space.voting_power_validation_strategies_parsed_metadata[i]) {
+          return {
+            name: space.voting_power_validation_strategies_parsed_metadata[i]
+              .name,
+            params: space.voting_power_validation_strategies_parsed_metadata[i]
+          };
+        }
+
+        return {
+          name,
+          params: space.voting_power_validation_strategy_strategies_params[i]
+        };
+      }
+    )
   };
 
   if (vpItem.canPropose) {
