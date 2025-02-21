@@ -25,19 +25,27 @@ const { setTitle } = useTitle();
 const route = useRoute();
 const router = useRouter();
 const { copy, copied } = useClipboard();
-const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
-const { isPending, isSuccess, assets } = useBalances({
-  treasury: toRef(() => {
-    if (!treasury.value?.network) return null;
 
-    return {
-      chainId: treasury.value.network,
-      address: treasury.value.wallet
-    };
-  })
+const balancesTreasury = computed(() => {
+  if (!treasury.value?.network) return null;
+
+  return {
+    chainId: treasury.value.network,
+    address: treasury.value.wallet
+  };
+});
+const { isPending, isSuccess, assets } = useBalances({
+  treasury: balancesTreasury
+});
+const {
+  isPending: isNftsPending,
+  isSuccess: isNftsSuccess,
+  nfts
+} = useNfts({
+  treasury: balancesTreasury
 });
 
 const page: Ref<'tokens' | 'nfts'> = computed(() => {
@@ -117,14 +125,6 @@ async function addTx(tx: Transaction) {
     params: { key: draftId }
   });
 }
-
-onMounted(() => {
-  if (!treasury.value) return;
-
-  if (treasury.value.supportsNfts) {
-    loadNfts(treasury.value.wallet, treasury.value.network);
-  }
-});
 
 watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
@@ -365,16 +365,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </div>
         <div v-else-if="page === 'nfts'">
           <div
-            v-if="nftsLoaded && nfts.length === 0"
+            v-if="isNftsSuccess && nfts.length === 0"
             class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
             <IH-exclamation-circle class="inline-block shrink-0" />
             <span>There are no NFTs in treasury.</span>
           </div>
-          <UiLoading
-            v-if="nftsLoading && !nftsLoaded"
-            class="px-4 py-3 block"
-          />
+          <UiLoading v-if="isNftsPending" class="px-4 py-3 block" />
           <div
             class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 max-w-fit mx-auto p-4"
           >
