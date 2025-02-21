@@ -95,8 +95,8 @@ async function handleFileChange(e: Event) {
       v-else
       class="block"
       :style="{
-        [`${cropped ? '' : 'max-'}width`]: `${width}px`,
-        [`${cropped ? '' : 'max-'}height`]: `${height}px`
+        width: `${width}px`,
+        height: `${height}px`
       }"
     />
     <div
