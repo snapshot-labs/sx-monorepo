@@ -64,6 +64,7 @@ export default class Walletconnect extends Connector {
           fantomTestnet
         ],
         themeMode: currentMode.value,
+        allWallets: 'HIDE',
         metadata,
         projectId
       });
