@@ -79,10 +79,13 @@ export default function usePayment() {
   const { auth } = useWeb3();
   const { modalAccountOpen } = useModal();
 
-  async function hasBalance(token: Token, amount: number): Promise<boolean> {
+  async function hasBalance(
+    token: Token,
+    amount: number
+  ): Promise<boolean | undefined> {
     if (!auth.value) {
       modalAccountOpen.value = true;
-      return false;
+      return;
     }
 
     await verifyNetwork(auth.value.provider, Number(token.chainId));
@@ -94,10 +97,13 @@ export default function usePayment() {
     return BigNumber.from(balance).gte(getWeiAmount(token, amount));
   }
 
-  async function hasApproved(token: Token, amount: number): Promise<boolean> {
+  async function hasApproved(
+    token: Token,
+    amount: number
+  ): Promise<boolean | undefined> {
     if (!auth.value) {
       modalAccountOpen.value = true;
-      return false;
+      return;
     }
 
     await verifyNetwork(auth.value.provider, Number(token.chainId));
@@ -115,7 +121,7 @@ export default function usePayment() {
   async function approve(token: Token, amount: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
-      return false;
+      return;
     }
 
     await verifyNetwork(auth.value.provider, Number(token.chainId));
@@ -135,7 +141,7 @@ export default function usePayment() {
   async function pay(token: Token, amount: number, barcode: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
-      return false;
+      return;
     }
 
     await verifyNetwork(auth.value.provider, Number(token.chainId));

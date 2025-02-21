@@ -54,6 +54,14 @@ export default function usePaymentFactory() {
       execute: async (token, amount) => {
         const result = await hasBalance(token, amount);
 
+        if (result === undefined) {
+          currentStepMessages.value = {
+            failTitle: 'Wallet not found',
+            failSubtitle: `Unable to check the wallet's balance`
+          };
+          throw new Error('wallet not found');
+        }
+
         if (!result) {
           currentStepMessages.value = {
             failTitle: 'Insufficient balance',
@@ -74,10 +82,16 @@ export default function usePaymentFactory() {
       nextStep: () =>
         stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve',
       execute: async (token, amount) => {
-        stepExecuteResults.value.set(
-          'check_approval',
-          await hasApproved(token, amount)
-        );
+        const result = await hasApproved(token, amount);
+
+        if (result === undefined) {
+          currentStepMessages.value = {
+            failTitle: 'Wallet not found'
+          };
+          throw new Error('wallet not found');
+        }
+
+        stepExecuteResults.value.set('check_approval', result);
 
         return null;
       }
