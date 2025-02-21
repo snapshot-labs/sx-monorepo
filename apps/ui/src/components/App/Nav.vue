@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
+import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
-import { compareAddresses } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -36,22 +35,14 @@ const { resolved, address, networkId } = useResolve(param);
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
+const spaceIdComposite = computed(() => `${networkId.value}:${address.value}`);
 const space = computed(() =>
   currentRouteName.value === 'space' && resolved.value
-    ? spacesStore.spacesMap.get(`${networkId.value}:${address.value}`)
+    ? spacesStore.spacesMap.get(spaceIdComposite.value) ?? null
     : null
 );
 
-const isController = computedAsync(async () => {
-  if (!networkId.value || !space.value) return false;
-
-  const { account } = web3.value;
-
-  const network = getNetwork(networkId.value);
-  const controller = await network.helpers.getSpaceController(space.value);
-
-  return compareAddresses(controller, account);
-});
+const { isController } = useSpaceController(space);
 
 const canSeeSettings = computed(() => {
   if (isController.value) return true;
