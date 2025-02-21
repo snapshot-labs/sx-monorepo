@@ -198,7 +198,7 @@ router.afterEach(() => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else :class="['flex min-h-screen']">
+    <div v-else class="flex min-h-screen">
       <AppBottomNav
         v-if="web3.account && !isWhiteLabel"
         :class="[
@@ -335,7 +335,7 @@ $placeholderSidebarWidth: 240px;
   @apply w-[#{$placeholderSidebarWidth}];
 
   &::before {
-    @apply block fixed border-l top-[72px] bottom-0 right-0 w-[#{$placeholderSidebarWidth}];
+    @apply block fixed border-l top-[72px] bottom-0 w-[#{$placeholderSidebarWidth}];
 
     content: '';
   }
@@ -351,8 +351,8 @@ $placeholderSidebarWidth: 240px;
   .app-sidebar {
     & ~ :deep(main),
     & ~ .backdrop,
-    & ~ :deep(header.fixed),
-    & ~ :deep(main header.fixed),
+    & ~ :deep(header.fixed > div),
+    & ~ :deep(main header.fixed > div),
     & ~ :deep(main .app-toolbar-bottom),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
@@ -361,8 +361,8 @@ $placeholderSidebarWidth: 240px;
     &:has(~ .app-nav) ~ .app-nav {
       & ~ :deep(main),
       & ~ .backdrop,
-      & ~ :deep(header.fixed),
-      & ~ :deep(main header.fixed),
+      & ~ :deep(header.fixed > div),
+      & ~ :deep(main header.fixed > div),
       & ~ :deep(main .app-toolbar-bottom),
       & ~ :deep(.app-nav) {
         @apply ml-[#{$sidebarWidth + $navWidth}];

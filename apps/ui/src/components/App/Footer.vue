@@ -14,7 +14,9 @@ const isSiteRoute = computed(() => {
 </script>
 
 <template>
-  <div class="hidden xl:block fixed bottom-3 right-4 z-40 space-x-2">
+  <div
+    class="hidden xl:flex fixed bottom-3 pr-4 inset-x-0 max-w-maximum !mx-auto justify-end z-50 space-x-2"
+  >
     <UiTooltip
       v-if="resolved && !isWhiteLabel && !isSiteRoute"
       title="About Snapshot"
