@@ -28,11 +28,12 @@ defineEmits<{
       <IH-refresh />Retry
     </UiButton>
   </div>
-  <UiAlert
-    v-else-if="!propositionPower.canPropose"
-    type="error"
-    v-bind="$attrs"
-  >
-    You do not have enough proposition power to create proposal in this space.
-  </UiAlert>
+  <div v-bind="$attrs" class="flex border border-skin-danger/40 rounded-lg">
+    <div class="p-[14px] bg-skin-danger-active text-skin-danger shrink-0">
+      <IH-exclamation-circle />
+    </div>
+    <div class="px-3 py-2.5 leading-[22px]">
+      You do not have enough proposition power to create proposal in this space.
+    </div>
+  </div>
 </template>
