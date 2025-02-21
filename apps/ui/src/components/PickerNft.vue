@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { Nft } from '@/composables/useNfts';
+
 const props = defineProps<{
   searchValue: string;
   loading: boolean;
-  nfts: any[];
+  nfts: Nft[];
 }>();
 
 const emit = defineEmits<{
