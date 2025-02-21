@@ -42,7 +42,12 @@ const searchValue = ref('');
 const customTokens: Ref<Token[]> = ref([]);
 const formValidated = ref(false);
 const formErrors = ref({} as Record<string, any>);
-const { loading, assets, assetsMap, loadBalances } = useBalances();
+const { isPending, assets, assetsMap } = useBalances({
+  treasury: toRef(() => ({
+    chainId: props.network,
+    address: props.address
+  }))
+});
 
 const allAssets = computed(() => [...assets.value, ...customTokens.value]);
 
@@ -177,10 +182,6 @@ async function handleSubmit() {
   emit('close');
 }
 
-onMounted(() => {
-  loadBalances(props.address, props.network);
-});
-
 watch(
   () => props.open,
   () => {
@@ -202,10 +203,6 @@ watch(
     }
   }
 );
-
-watch([() => props.address, () => props.network], ([address, network]) => {
-  loadBalances(address, network);
-});
 
 watch(currentToken, token => {
   if (!token || form.amount === '') return;
@@ -257,7 +254,7 @@ watchEffect(async () => {
         :assets="allAssets"
         :address="address"
         :network="network"
-        :loading="loading"
+        :loading="isPending"
         :search-value="searchValue"
         @pick="
           form.token = $event;

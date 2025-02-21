@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
@@ -26,11 +25,20 @@ const { setTitle } = useTitle();
 const route = useRoute();
 const router = useRouter();
 const { copy, copied } = useClipboard();
-const { loading, loaded, assets, loadBalances } = useBalances();
 const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
+const { isPending, isSuccess, assets } = useBalances({
+  treasury: toRef(() => {
+    if (!treasury.value?.network) return null;
+
+    return {
+      chainId: treasury.value.network,
+      address: treasury.value.wallet
+    };
+  })
+});
 
 const page: Ref<'tokens' | 'nfts'> = computed(() => {
   return route.params.tab === 'nfts' ? 'nfts' : 'tokens';
@@ -76,15 +84,6 @@ const totalChange = computed(() => {
   );
 });
 
-const sortedAssets = computed(() =>
-  (assets || []).value.sort((a, b) => {
-    const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
-    if (isEth(a)) return -1;
-    if (isEth(b)) return 1;
-    return 0;
-  })
-);
-
 const treasuryExplorerUrl = computed(() => {
   if (!treasury.value) return '';
 
@@ -121,10 +120,6 @@ async function addTx(tx: Transaction) {
 
 onMounted(() => {
   if (!treasury.value) return;
-
-  if (treasury.value.supportsTokens) {
-    loadBalances(treasury.value.wallet, treasury.value.network);
-  }
 
   if (treasury.value.supportsNfts) {
     loadNfts(treasury.value.wallet, treasury.value.network);
@@ -210,7 +205,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             />
           </div>
           <div
-            v-if="loaded"
+            v-if="isSuccess"
             class="flex-col items-end text-right leading-[22px]"
           >
             <h4
@@ -270,16 +265,16 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <span>This treasury network is not supported.</span>
         </div>
         <div v-else-if="page === 'tokens'">
-          <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
+          <UiLoading v-if="isPending" class="px-4 py-3 block" />
           <div
-            v-else-if="loaded && sortedAssets.length === 0"
+            v-else-if="isSuccess && assets.length === 0"
             class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
             <IH-exclamation-circle class="inline-block shrink-0" />
             <span>There are no tokens in treasury.</span>
           </div>
           <a
-            v-for="(asset, i) in sortedAssets"
+            v-for="(asset, i) in assets"
             v-else
             :key="i"
             :href="
