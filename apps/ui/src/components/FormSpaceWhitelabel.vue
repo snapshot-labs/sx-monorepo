@@ -148,7 +148,7 @@ onMounted(() => {
           v-model="customDomain"
           :definition="CUSTOM_DOMAIN_DEFINITION"
           :error="formErrors.customDomain"
-          :is-disabled="isDisabled"
+          :disabled="isDisabled"
         />
       </div>
       <div>
@@ -160,7 +160,7 @@ onMounted(() => {
           v-model="skinSettings"
           :definition="SKIN_DEFINITION"
           :error="formErrors"
-          :is-disabled="isDisabled"
+          :disabled="isDisabled"
         />
       </div>
       <div>
@@ -171,7 +171,7 @@ onMounted(() => {
         </div>
         <UiInputStamp
           v-model="skinSettings.logo"
-          :is-disabled="isDisabled"
+          :disabled="isDisabled"
           :fallback="false"
           :width="380"
           :height="76"
