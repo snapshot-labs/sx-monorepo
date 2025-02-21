@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { TokenId, TOKENS } from '@/composables/usePayment';
+import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
-import { getStampUrl, getUrl } from '@/helpers/utils';
+import { _n, getUrl, uniqBy } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
 import { ChainId } from '@/types';
 
 const props = defineProps<{
   open: boolean;
   amount: number;
-  chainIds: ChainId[];
+  tokens: Token[];
   barcodePayload: BarcodePayload;
 }>();
 
@@ -25,30 +25,26 @@ const {
 const { networks: allNetworks } = useOffchainNetworksList(metadataNetwork);
 
 const modalTransactionProgressOpen = ref(false);
-const chainId = ref<ChainId>(Number(props.chainIds[0]));
-const tokenId = ref<TokenId>(
-  Object.keys(TOKENS[props.chainIds[0]])[0] as TokenId
-);
+const token = ref<Token>(props.tokens[0]);
+const chainId = ref<ChainId>(Number(token.value.chainId));
 
 const networks = computed<
   {
-    id: ChainId;
+    chainId: ChainId;
     name: string;
     avatar: string;
   }[]
 >(() => {
-  return props.chainIds
-    .map(id => {
-      const network = allNetworks.value.find(
-        network => Number(network.key) === id
-      );
+  return uniqBy(props.tokens, 'chainId')
+    .map(t => {
+      const network = allNetworks.value.find(n => Number(n.key) === t.chainId);
 
       if (!network) {
         return;
       }
 
       return {
-        id: Number(id),
+        chainId: Number(t.chainId),
         name: network.name,
         avatar: network.logo
       };
@@ -56,13 +52,26 @@ const networks = computed<
     .filter(n => !!n);
 });
 
-const token = computed(() => TOKENS[chainId.value][tokenId.value]);
+const currentChainIdTokens = computed(() => {
+  return props.tokens.filter(t => t.chainId === chainId.value);
+});
 
 function handleSubmit() {
   startPaymentProcess();
 
   emit('close');
   modalTransactionProgressOpen.value = true;
+}
+
+function handleChainIdClick(id: ChainId) {
+  if (chainId.value === id) return;
+
+  chainId.value = id;
+  token.value = currentChainIdTokens.value[0];
+}
+
+function handleTokenClick(t: Token) {
+  token.value = t;
 }
 
 async function moveToNextStep() {
@@ -87,13 +96,14 @@ async function moveToNextStep() {
         <div class="pill-switcher">
           <button
             v-for="network in networks"
-            :key="network.id"
+            :key="network.chainId"
             type="button"
-            :class="[{ 'bg-skin-active-bg': chainId === network.id }]"
-            @click="chainId = network.id as ChainId"
+            :class="[{ 'bg-skin-active-bg': chainId === network.chainId }]"
+            @click="handleChainIdClick(network.chainId)"
           >
             <img
-              :src="getUrl(network.avatar) ?? undefined"
+              :src="getUrl(network.avatar) || undefined"
+              :alt="network.name"
               class="size-[20px] rounded-lg shrink-0"
             />
             {{ network.name }}
@@ -104,17 +114,18 @@ async function moveToNextStep() {
         <div>Currency</div>
         <div class="pill-switcher">
           <button
-            v-for="[id, asset] in Object.entries(TOKENS[chainIds[0]])"
-            :key="id"
-            :class="[{ 'bg-skin-active-bg': tokenId === id }]"
-            @click="tokenId = id as TokenId"
+            v-for="(t, i) in currentChainIdTokens"
+            :key="i"
+            type="button"
+            :class="[{ 'bg-skin-active-bg': token.address === t.address }]"
+            @click="handleTokenClick(t)"
           >
             <img
-              :src="getStampUrl('token', TOKENS[1][id].address, 20)"
+              :src="getUrl(t.logo) || undefined"
               class="rounded-full bg-skin-border size-[20px]"
-              :alt="asset.symbol"
+              :alt="t.symbol"
             />
-            {{ asset.symbol }}
+            {{ t.symbol }}
           </button>
         </div>
       </div>
@@ -125,11 +136,11 @@ async function moveToNextStep() {
           You will pay
           <div class="flex items-center gap-1">
             <img
-              :src="getStampUrl('token', TOKENS[1][tokenId].address, 20)"
+              :src="getUrl(token.logo) || undefined"
               class="rounded-full bg-skin-border size-[18px]"
               :alt="token.symbol"
             />
-            {{ amount }} {{ token.symbol }}
+            {{ _n(amount) }} {{ token.symbol }}
           </div>
         </div>
       </div>

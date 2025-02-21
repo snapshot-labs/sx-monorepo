@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
-import { Space } from '@/types';
+import { ChainId, Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
@@ -9,15 +10,17 @@ import ICCheck from '~icons/heroicons-outline/check.vue';
 type SubscriptionLength = 'yearly' | 'monthly';
 type TierPlan = 'basic' | 'turbo' | 'custom';
 type Feature = {
-  [key in TierPlan | string]: string | number | boolean | Component;
+  [key in TierPlan | 'title']: string | number | boolean | Component;
 };
 
 const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
 
-const NETWORKS_REALM = {
+const NETWORKS_REALM: Record<'mainnet' | 'testnet', ChainId[]> = {
   mainnet: [1, 8453],
   testnet: [11155111, 84532]
 };
+
+const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT'] as const;
 
 const TURBO_PRICES: Record<
   keyof typeof NETWORKS_REALM,
@@ -60,6 +63,17 @@ const currentNetworkRealm = computed(() => {
 
 const prices = computed(() => {
   return TURBO_PRICES[currentNetworkRealm.value];
+});
+
+const tokens = computed(() => {
+  const networkIds = NETWORKS_REALM[currentNetworkRealm.value];
+
+  return TOKENS.filter(t => {
+    return (
+      networkIds.includes(t.chainId) &&
+      ACCEPTED_TOKENS_SYMBOL.includes(t.symbol)
+    );
+  });
 });
 
 const features = computed<
@@ -339,7 +353,7 @@ async function handleTurboClick() {
     </div>
     <ModalPayment
       :open="modalPaymentOpen"
-      :chain-ids="NETWORKS_REALM[currentNetworkRealm]"
+      :tokens="tokens"
       :amount="prices[subscriptionLength]"
       :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
       @close="modalPaymentOpen = false"

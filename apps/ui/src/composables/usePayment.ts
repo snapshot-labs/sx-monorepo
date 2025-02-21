@@ -5,12 +5,12 @@ import { abis } from '@/helpers/abis';
 import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
-export type TokenId = 'USDC' | 'USDT';
 export type Token = {
   address: string;
   decimal: number;
   symbol: string;
   chainId: ChainId;
+  logo: string;
 };
 
 // TODO: Double check contract address for each network
@@ -28,65 +28,48 @@ const PAYMENT_CONTRACT_ABI = [
 export const ASSETS = {
   USDC: {
     decimal: 6,
-    symbol: 'USDC'
+    symbol: 'USDC',
+    logo: 'ipfs://bafybeienhj4ymzglig6at2bovugjhb6rj4xlfloj2rc4lqad57zwi4zs54'
   },
   USDT: {
     decimal: 6,
-    symbol: 'USDT'
+    symbol: 'USDT',
+    logo: 'ipfs://bafkreidg7faht426jy7z36ssmz37smzsorhpu54mf4ceygsdgwucv3eiua'
   }
 } as const;
 
-// TODO: Double check contract addresses for each token
-export const TOKENS: Record<ChainId, Record<TokenId, Token>> = {
-  11155111: {
-    USDC: {
-      address: '0x1c7d4b196cb0c7b01d743fbc6116a902379c7238',
-      chainId: 11155111,
-      ...ASSETS['USDC']
-    },
-    USDT: {
-      address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
-      chainId: 11155111,
-      ...ASSETS['USDT']
-    }
+export const TOKENS: Token[] = [
+  {
+    address: '0x1c7d4b196cb0c7b01d743fbc6116a902379c7238',
+    chainId: 11155111,
+    ...ASSETS['USDC']
   },
-  1: {
-    USDC: {
-      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-      chainId: 1,
-      ...ASSETS['USDC']
-    },
-    USDT: {
-      address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
-      chainId: 1,
-      ...ASSETS['USDT']
-    }
+  {
+    address: '0xaa8e23fb1079ea71e0a56f48a2aa51851d8433d0',
+    chainId: 11155111,
+    ...ASSETS['USDT']
   },
-  8453: {
-    USDC: {
-      address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
-      chainId: 8453,
-      ...ASSETS['USDC']
-    },
-    USDT: {
-      address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
-      chainId: 8453,
-      ...ASSETS['USDT']
-    }
+  {
+    address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+    chainId: 1,
+    ...ASSETS['USDC']
   },
-  84532: {
-    USDC: {
-      address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
-      chainId: 84532,
-      ...ASSETS['USDC']
-    },
-    USDT: {
-      address: '0xfde4C96c8593536E31F229EA8f37b2ADa2699bb2',
-      chainId: 84532,
-      ...ASSETS['USDT']
-    }
+  {
+    address: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+    chainId: 1,
+    ...ASSETS['USDT']
+  },
+  {
+    address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
+    chainId: 8453,
+    ...ASSETS['USDC']
+  },
+  {
+    address: '0x036cbd53842c5426634e7929541ec2318f3dcf7e',
+    chainId: 84532,
+    ...ASSETS['USDC']
   }
-} as const;
+] as const;
 
 function getWeiAmount(token: Token, amount: number): BigNumber {
   return BigNumber.from(amount * 10 ** token.decimal);
