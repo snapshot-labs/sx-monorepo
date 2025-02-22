@@ -15,7 +15,6 @@ const OFFCHAIN_ERRORS = {
     `You need at least ${_n(strategy.params.minScore, 'compact')} ${props.propositionPower.symbol} to create a proposal.`,
   'passport-gated': (strategy: Strategy) =>
     `You need a Gitcoin Passport with ${strategy.params.operator === 'AND' ? 'all' : 'one'} of the following stamps to create a proposal: ${prettyConcat(strategy.params.stamps, strategy.params.operator === 'AND' ? 'and' : 'or')}.`,
-  'passport-weighted': () => '',
   'karma-eas-attestation': () =>
     'You need to be attested by Karma EAS to create a proposal.',
   arbitrum: () =>
