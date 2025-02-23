@@ -10,7 +10,7 @@ const props = defineProps<{
 
 const OFFCHAIN_ERRORS = {
   'only-members': () =>
-    'You need to be a member of the space in order to submit a proposal.',
+    'You need to be a member of the space in order to create a proposal.',
   basic: (strategy: Strategy) =>
     `You need at least ${_n(strategy.params.minScore, 'compact')} ${props.propositionPower.symbol} to create a proposal.`,
   'passport-gated': (strategy: Strategy) =>
@@ -21,10 +21,6 @@ const OFFCHAIN_ERRORS = {
 
 const LINKS = {
   'passport-gated': {
-    label: 'Gitcoin Passport',
-    url: 'https://passport.gitcoin.co/#/dashboard'
-  },
-  'passport-weighted': {
     label: 'Gitcoin Passport',
     url: 'https://passport.gitcoin.co/#/dashboard'
   }
