@@ -9,7 +9,6 @@ type ValidationDetailId =
   | 'only-members'
   | 'basic'
   | 'passport-gated'
-  | 'arbitrum'
   | 'karma-eas-attestation';
 type ValidationDetailsExtra = {
   tag?: string;
@@ -31,7 +30,6 @@ const PROPOSAL_VALIDATIONS: Record<ValidationDetailId, ValidationDetailsExtra> =
       tag: 'Beta',
       icon: IHBeaker
     },
-    arbitrum: {},
     'karma-eas-attestation': {}
   } as const;
 

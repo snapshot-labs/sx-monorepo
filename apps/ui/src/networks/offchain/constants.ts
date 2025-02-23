@@ -6,7 +6,6 @@ export const PROPOSAL_VALIDATIONS = {
   any: 'Any',
   basic: 'Basic',
   'passport-gated': 'Passport gated',
-  arbitrum: 'Arbitrum',
   'karma-eas-attestation': 'Karma EAS Attestation',
   'only-members': 'Only members'
 };
