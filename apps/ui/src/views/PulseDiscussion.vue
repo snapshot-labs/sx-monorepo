@@ -1,42 +1,57 @@
 <script setup lang="ts">
-import { client } from '@/helpers/kbyte';
-
-interface Discussion {
-  id: number;
-  title: string;
-  body: string;
-  statement_count: number;
-  vote_count: number;
-}
+import { Discussion, Statement } from '@/helpers/pulse';
+import { _n } from '@/helpers/utils';
 
 const route = useRoute();
+const { web3 } = useWeb3();
+const { discussions, votes, loadDiscussion, loadVotes, sendStatement } =
+  usePulse();
 
-const id = route.params.id;
+const id = parseInt(route.params.id as string);
 
-const discussion: Ref<Discussion | null> = ref(null);
-const statements: Ref<any[]> = ref([]);
 const loading = ref(false);
 const loaded = ref(false);
 const submitLoading = ref(false);
 const statement = ref('');
 
+const discussion: ComputedRef<Discussion> = computed(
+  () => discussions.value[id]
+);
+const statements: ComputedRef<Statement[]> = computed(
+  () => discussion.value.statements
+);
+const pendingStatements: ComputedRef<Statement[]> = computed(() =>
+  statements.value.filter(
+    s => !votes.value[s.discussion].find(v => v.statement === s.id)
+  )
+);
+const results: ComputedRef<Statement[]> = computed(() =>
+  statements.value.sort((a, b) => b.vote_count - a.vote_count)
+);
+
 onMounted(async () => {
-  loading.value = true;
+  if (!discussion.value) {
+    loading.value = true;
 
-  discussion.value = await client.requestAsync('get_discussion', id);
+    await loadDiscussion(id);
+    await loadVotes(id);
 
-  if (discussion.value && discussion.value.statement_count > 0) {
-    statements.value = await client.requestAsync('get_statements', id);
+    loading.value = false;
+    loaded.value = true;
   }
-
-  loading.value = false;
-  loaded.value = true;
 });
+
+watch(
+  () => web3.value.account,
+  async () => {
+    await loadVotes(id);
+  }
+);
 
 const STATEMENT_DEFINITION = {
   type: 'string',
   format: 'long',
-  title: 'Add a statement',
+  title: 'Statement',
   minLength: 1,
   maxLength: 256
 };
@@ -44,20 +59,21 @@ const STATEMENT_DEFINITION = {
 async function handleSubmit() {
   submitLoading.value = true;
 
-  await client.requestAsync('broadcast', {
-    type: 'statement',
-    from: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
-    sig: '0xf0e14ebfa7f08ee13811725e8171465f710decd56a1e4c67cffa99e2e51acf742ef326836affeb4c8c110e89818895acc24cb0893f4bae47eddbbd57138c6ca41b',
-    payload: {
-      author: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
-      discussion: id,
-      statement: statement.value
-    }
-  });
+  await sendStatement(id, statement.value);
 
   statement.value = '';
   submitLoading.value = false;
 }
+
+const markdownBody = ref<HTMLElement | null>(null);
+
+// Detect if the proposal body is too long and should be shortened
+const truncateMarkdownBody = computed(() => {
+  const markdownBodyHeight = markdownBody.value?.clientHeight
+    ? markdownBody.value.clientHeight
+    : 0;
+  return markdownBodyHeight > 380;
+});
 </script>
 
 <template>
@@ -67,7 +83,7 @@ async function handleSubmit() {
     </div>
     <div v-else-if="loaded && discussion">
       <div class="mb-6">
-        <div class="py-6 bg-skin-border/20 border-b mb-5">
+        <div class="pt-10 pb-6 bg-skin-border/20 border-b mb-5">
           <UiContainer class="!max-w-[740px]">
             <h1 class="leading-[1.1em]" v-text="discussion.title" />
           </UiContainer>
@@ -77,17 +93,17 @@ async function handleSubmit() {
           <UiMarkdown v-if="discussion.body" :body="discussion.body" />
 
           <div class="space-y-6">
-            <div v-if="discussion.statement_count > 0">
+            <div v-if="pendingStatements.length > 0">
               <h4 class="mb-3 eyebrow flex items-center gap-2">
                 <IH-eye />
                 Pending statement(s)
                 <div
                   class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
                 >
-                  2
+                  {{ _n(pendingStatements.length) }}
                 </div>
               </h4>
-              <PulseStatements />
+              <PulseStatements :statements="pendingStatements" />
             </div>
 
             <div>
@@ -100,8 +116,8 @@ async function handleSubmit() {
                   <IH-light-bulb
                     class="inline-block align-middle relative -top-0.5"
                   />
-                  First time here? Lorem ipsum dolor sit amet consectetur
-                  adipisicing elit.
+                  Share one clear, concise idea or opinion without targeting
+                  individuals, so everyone can easily understand and vote on it.
                 </div>
                 <UiTextarea
                   v-model="statement"
@@ -122,11 +138,16 @@ async function handleSubmit() {
               </div>
             </div>
 
-            <div v-if="discussion.statement_count > 0">
+            <div v-if="discussion.statements.length > 0">
               <div class="mb-3 flex">
                 <h4 class="eyebrow flex items-center gap-2 flex-1">
                   <IH-chart-square-bar />
                   Results
+                  <div
+                    class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
+                  >
+                    {{ _n(results.length) }}
+                  </div>
                 </h4>
                 <div>
                   Sort by:
@@ -136,7 +157,7 @@ async function handleSubmit() {
               </div>
               <div class="space-y-3">
                 <PulseStatementItem
-                  v-for="(s, i) in statements"
+                  v-for="(s, i) in results"
                   :key="i"
                   :statement="s"
                 />

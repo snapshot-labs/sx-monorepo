@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { client } from '@/helpers/kbyte';
 import router from '@/routes';
 
 const route = useRoute();
+const { sendDiscussion } = usePulse();
 
 const title = ref(route.query.title as string);
 const body = ref('');
@@ -44,16 +44,8 @@ const EXAMPLES = [
 async function handleSubmit() {
   submitLoading.value = true;
 
-  const res = await client.requestAsync('broadcast', {
-    type: 'discussion',
-    from: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
-    sig: '0xf0e14ebfa7f08ee13811725e8171465f710decd56a1e4c67cffa99e2e51acf742ef326836affeb4c8c110e89818895acc24cb0893f4bae47eddbbd57138c6ca41b',
-    payload: {
-      author: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
-      title: title.value,
-      body: body.value
-    }
-  });
+  const res = await sendDiscussion(title.value, body.value);
+
   await router.push({ name: 'pulse-discussion', params: { id: res.id } });
 
   submitLoading.value = false;

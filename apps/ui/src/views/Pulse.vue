@@ -81,7 +81,8 @@ const statement = {
               class="absolute left-0 right-0 bottom-0 top-0 z-10 bg-gradient-to-l from-skin-bg to-transparent"
             />
             <div class="-mr-[180px] mt-6">
-              <PulseStatements class="text-left" />
+              <IC-pulse class="size-[500px] text-skin-link/20" />
+              <PulseStatements :statements="[]" class="text-left" />
             </div>
           </div>
         </div>
