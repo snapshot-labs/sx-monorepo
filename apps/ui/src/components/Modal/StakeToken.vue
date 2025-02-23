@@ -56,7 +56,12 @@ const form: {
   amount: string;
 } = reactive(clone(DEFAULT_FORM_STATE));
 
-const { assetsMap, loadBalances } = useBalances();
+const { assetsMap } = useBalances({
+  treasury: toRef(() => ({
+    chainId: props.network,
+    address: props.address
+  }))
+});
 
 const formErrors = computed(() =>
   validator.validate({
@@ -110,10 +115,6 @@ async function handleSubmit() {
   emit('add', tx);
   emit('close');
 }
-
-onMounted(() => {
-  loadBalances(props.address, props.network);
-});
 
 watch(
   () => props.open,

@@ -214,9 +214,12 @@ watchEffect(() => setTitle('Explore'));
     <div v-if="!web3.authLoading && !web3.account" class="mt-8">
       <UiToolbarBottom class="px-4 py-3 flex justify-between items-center">
         <h4
-          class="hidden sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
+          class="hidden text-skin-text sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
         >
-          Log in to start making decisions with your community.
+          Log in to start making decisions.
+          <router-link :to="{ name: 'site-landing' }"
+            >See how it works</router-link
+          >.
         </h4>
         <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
           <UiButton

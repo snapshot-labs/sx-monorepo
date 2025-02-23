@@ -5,7 +5,6 @@ type ValidationDetails = {
     | 'only-members'
     | 'basic'
     | 'passport-gated'
-    | 'arbitrum'
     | 'karma-eas-attestation';
   schema: Record<string, any> | null;
   proposalValidationOnly?: boolean;
