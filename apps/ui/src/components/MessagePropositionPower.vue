@@ -16,9 +16,7 @@ const OFFCHAIN_ERRORS = {
   'passport-gated': (strategy: Strategy) =>
     `You need a Gitcoin Passport with ${strategy.params.operator === 'AND' ? 'all' : 'one'} of the following stamps to create a proposal: ${prettyConcat(strategy.params.stamps, strategy.params.operator === 'AND' ? 'and' : 'or')}.`,
   'karma-eas-attestation': () =>
-    'You need to be attested by Karma EAS to create a proposal.',
-  arbitrum: () =>
-    'You do not have the required minimum of ARB tokens to create a proposal.'
+    'You need to be attested by Karma EAS to create a proposal.'
 } as const;
 
 const LINKS = {
