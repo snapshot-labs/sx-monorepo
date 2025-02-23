@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  type: 'proposition';
+  type: 'proposition' | 'voting';
 }>();
 
 defineEmits<{
