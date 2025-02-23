@@ -44,11 +44,9 @@ const offchainStrategy = computed(() => {
 </script>
 
 <template>
-  <div v-bind="$attrs" class="flex border border-skin-danger/40 rounded-lg">
-    <div class="p-[14px] bg-skin-danger-active text-skin-danger shrink-0">
-      <IH-exclamation-circle />
-    </div>
-    <div class="px-3 py-2.5 leading-[22px]">
+  <UiAlert type="error" v-bind="$attrs">
+    <div class="flex gap-1">
+      <IH-information-circle class="grow-0 shrink-0 mt-0.5" />
       <template v-if="offchainStrategy">
         {{ OFFCHAIN_ERRORS[offchainStrategy.name](offchainStrategy) }}
         <AppLink
@@ -71,5 +69,5 @@ const offchainStrategy = computed(() => {
         to create a proposal.
       </template>
     </div>
-  </div>
+  </UiAlert>
 </template>
