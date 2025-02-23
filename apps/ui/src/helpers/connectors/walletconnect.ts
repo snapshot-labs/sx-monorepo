@@ -27,7 +27,7 @@ export default class Walletconnect extends Connector {
   private modal: AppKit | null = null;
 
   async connect(isAutoConnect = false) {
-    const { currentMode } = useUserSkin();
+    const { currentTheme } = useTheme();
 
     try {
       const { createAppKit } = await import('@reown/appkit');
@@ -63,7 +63,7 @@ export default class Walletconnect extends Connector {
           sepolia,
           fantomTestnet
         ],
-        themeMode: currentMode.value,
+        themeMode: currentTheme.value,
         allWallets: 'HIDE',
         metadata,
         projectId
@@ -71,7 +71,7 @@ export default class Walletconnect extends Connector {
 
       // This is needed in case the user changes the theme mode
       // otherwise modal will be opened with half light and half dark theme
-      await this.modal.setThemeMode(currentMode.value);
+      await this.modal.setThemeMode(currentTheme.value);
 
       if (!isAutoConnect) {
         await this.disconnect();
