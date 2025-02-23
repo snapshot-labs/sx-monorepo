@@ -5,10 +5,9 @@ type ApiNft = {
   collection: string;
   contract: string;
   token_standard: string;
-  name: any;
-  description: any;
-  image_url: any;
-  metadata_url: any;
+  name: string;
+  description: string;
+  image_url: string;
   opensea_url: string;
   updated_at: string;
   is_disabled: boolean;
@@ -50,10 +49,7 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], ChainItem> = {
 
 const SUPPORTED_ABIS = ['erc721', 'erc1155'];
 
-export async function getNfts(
-  address: string,
-  chainId: ChainId
-): Promise<ApiNft[]> {
+export async function getNfts(address: string, chainId: ChainId) {
   const network = NETWORKS[chainId];
   if (!network) throw new Error('Unsupported chain for OpenSea NFTs');
   const { name, isTestnet } = network;
@@ -70,8 +66,9 @@ export async function getNfts(
   });
 
   const result = await res.json();
+  const nfts: ApiNft[] = result.nfts;
 
-  return result.nfts
+  return nfts
     .filter(asset => SUPPORTED_ABIS.includes(asset.token_standard))
     .map(asset => {
       const tokenId = asset.identifier;
@@ -81,6 +78,7 @@ export async function getNfts(
 
       return {
         ...asset,
+        id: `${asset.contract}:${tokenId}`,
         type: asset.token_standard,
         tokenId,
         title,

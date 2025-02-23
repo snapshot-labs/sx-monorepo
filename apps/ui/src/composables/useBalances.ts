@@ -1,5 +1,7 @@
 import { formatUnits } from '@ethersproject/units';
-import { getBalances, GetBalancesResponse } from '@/helpers/alchemy';
+import { skipToken, useQuery } from '@tanstack/vue-query';
+import { MaybeRefOrGetter } from 'vue';
+import { getBalances, Token } from '@/helpers/alchemy';
 import {
   COINGECKO_ASSET_PLATFORMS,
   COINGECKO_BASE_ASSETS,
@@ -19,11 +21,16 @@ export const METADATA_BY_CHAIN_ID = new Map(
   ])
 );
 
-export function useBalances() {
-  const assets: Ref<GetBalancesResponse> = ref([]);
-  const loading = ref(true);
-  const loaded = ref(false);
+type Treasury = {
+  chainId: ChainId;
+  address: string;
+};
 
+export function useBalances({
+  treasury
+}: {
+  treasury: MaybeRefOrGetter<Treasury | null>;
+}) {
   async function callCoinGecko(apiUrl: string) {
     const res = await fetch(apiUrl);
     return res.json();
@@ -78,7 +85,7 @@ export function useBalances() {
           )
         : [];
 
-    assets.value = tokensWithBalance
+    return tokensWithBalance
       .map(asset => {
         if (!coins[asset.contractAddress]) return asset;
 
@@ -94,15 +101,34 @@ export function useBalances() {
           value
         };
       })
-      .sort((a, b) => b.value - a.value);
+      .sort((a, b) => {
+        const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
+        if (isEth(a)) return -1;
+        if (isEth(b)) return 1;
 
-    loading.value = false;
-    loaded.value = true;
+        return b.value - a.value;
+      });
   }
 
+  const queryFn = computed(() => {
+    const treasuryValue = toValue(treasury);
+
+    if (!treasuryValue) return skipToken;
+
+    return () => loadBalances(treasuryValue.address, treasuryValue.chainId);
+  });
+
+  const { data, isPending, isSuccess } = useQuery({
+    queryKey: ['balances', treasury],
+    queryFn: queryFn,
+    staleTime: 5 * 60 * 1000
+  });
+
+  const assets = computed(() => data.value ?? []);
+
   const assetsMap = computed(
-    () => new Map(assets.value.map(asset => [asset.contractAddress, asset]))
+    () => new Map(data.value?.map(asset => [asset.contractAddress, asset]))
   );
 
-  return { loading, loaded, assets, assetsMap, loadBalances };
+  return { isPending, isSuccess, assets, assetsMap };
 }
