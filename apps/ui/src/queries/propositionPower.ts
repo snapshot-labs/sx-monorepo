@@ -46,17 +46,14 @@ async function getPropositionPower(space: Space, block: number | null) {
     canPropose: isSpaceMember,
     strategies: space.voting_power_validation_strategy_strategies.map(
       (name, i) => {
-        if (space.voting_power_validation_strategies_parsed_metadata[i]) {
-          return {
-            name: space.voting_power_validation_strategies_parsed_metadata[i]
-              .name,
-            params: space.voting_power_validation_strategies_parsed_metadata[i]
-          };
-        }
+        const metadata =
+          space.voting_power_validation_strategies_parsed_metadata[i];
 
         return {
-          name,
-          params: space.voting_power_validation_strategy_strategies_params[i]
+          name: metadata?.name ?? name,
+          params:
+            metadata ??
+            space.voting_power_validation_strategy_strategies_params[i]
         };
       }
     )
