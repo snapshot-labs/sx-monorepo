@@ -39,29 +39,26 @@ const offchainStrategy = computed(() => {
 
 <template>
   <UiAlert type="error" v-bind="$attrs">
-    <div class="flex gap-1">
-      <IH-information-circle class="grow-0 shrink-0 mt-0.5" />
-      <template v-if="offchainStrategy">
-        {{ OFFCHAIN_ERRORS[offchainStrategy.name](offchainStrategy) }}
-        <AppLink
-          v-if="LINKS[offchainStrategy.name]"
-          :to="LINKS[offchainStrategy.name].url"
-        >
-          {{ LINKS[offchainStrategy.name].label }}
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </AppLink>
-      </template>
-      <template v-else>
-        You need at least {{ _n(propositionPower.threshold) }}
-        {{
-          prettyConcat(
-            propositionPower.strategies.map(
-              s => s.params.symbol || propositionPower.symbol
-            )
+    <template v-if="offchainStrategy">
+      {{ OFFCHAIN_ERRORS[offchainStrategy.name](offchainStrategy) }}
+      <AppLink
+        v-if="LINKS[offchainStrategy.name]"
+        :to="LINKS[offchainStrategy.name].url"
+      >
+        {{ LINKS[offchainStrategy.name].label }}
+        <IH-arrow-sm-right class="inline-block -rotate-45" />
+      </AppLink>
+    </template>
+    <template v-else>
+      You need at least {{ _n(propositionPower.threshold) }}
+      {{
+        prettyConcat(
+          propositionPower.strategies.map(
+            s => s.params.symbol || propositionPower.symbol
           )
-        }}
-        to create a proposal.
-      </template>
-    </div>
+        )
+      }}
+      to create a proposal.
+    </template>
   </UiAlert>
 </template>
