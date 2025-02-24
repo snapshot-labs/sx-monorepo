@@ -341,19 +341,12 @@ $placeholderSidebarWidth: 240px;
   }
 }
 
-@media (screen(xl)) {
-  main > div:has(+ .app-placeholder-sidebar) :deep(.app-toolbar-bottom) {
-    @apply right-[#{$placeholderSidebarWidth}];
-  }
-}
-
 @media (screen(lg)) {
   .app-sidebar {
     & ~ :deep(main),
     & ~ .backdrop,
     & ~ :deep(header.fixed > div),
     & ~ :deep(main header.fixed > div),
-    & ~ :deep(main .app-toolbar-bottom),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
     }
@@ -363,7 +356,6 @@ $placeholderSidebarWidth: 240px;
       & ~ .backdrop,
       & ~ :deep(header.fixed > div),
       & ~ :deep(main header.fixed > div),
-      & ~ :deep(main .app-toolbar-bottom),
       & ~ :deep(.app-nav) {
         @apply ml-[#{$sidebarWidth + $navWidth}];
       }
