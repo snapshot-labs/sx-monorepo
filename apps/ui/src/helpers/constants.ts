@@ -77,6 +77,7 @@ export const SUPPORTED_VOTING_TYPES: VoteType[] = [
   'basic',
   'single-choice',
   'approval',
+  'copeland',
   'ranked-choice',
   'weighted',
   'quadratic'

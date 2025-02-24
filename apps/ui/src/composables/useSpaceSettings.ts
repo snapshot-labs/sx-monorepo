@@ -168,6 +168,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       | 'any'
       | 'single-choice'
       | 'approval'
+      | 'copeland'
       | 'quadratic'
       | 'ranked-choice'
       | 'weighted'
