@@ -58,5 +58,15 @@
       "address": "0x0000000000021210000000000000000000000000",
       "startBlock": 23524251
     }
+  },
+  "mantle": {
+    "ProxyFactory": {
+      "address": "0x4b4f7f64be813ccc66aefc3bfce2baa01188631c",
+      "startBlock": 75483878
+    },
+    "L1AvatarExecutionStrategyFactory": {
+      "address": "0x0000000000021210000000000000000000000000",
+      "startBlock": 75483878
+    }
   }
 }

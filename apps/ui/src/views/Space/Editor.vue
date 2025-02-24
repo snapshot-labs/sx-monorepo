@@ -58,6 +58,7 @@ const { limits, lists } = useSettings();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
+const { modalAccountOpen } = useModal();
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -244,7 +245,7 @@ const {
   isPending: isPropositionPowerPending,
   isError: isPropositionPowerError,
   refetch: fetchPropositionPower
-} = usePropositionPowerQuery(props.space);
+} = usePropositionPowerQuery(toRef(props, 'space'));
 
 const unsupportedProposalNetworks = computed(() => {
   if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
@@ -270,6 +271,11 @@ async function handleProposeClick() {
 
   if (props.space.terms && !termsStore.areAccepted(props.space)) {
     modalOpenTerms.value = true;
+    return;
+  }
+
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
     return;
   }
 

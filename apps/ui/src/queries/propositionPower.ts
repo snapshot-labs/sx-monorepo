@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/vue-query';
+import { MaybeRefOrGetter } from 'vue';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork, supportsNullCurrent } from '@/networks';
 import { VotingPower } from '@/networks/types';
@@ -87,12 +88,17 @@ async function getPropositionPower(space: Space, block: number | null) {
   return vpItem;
 }
 
-export function usePropositionPowerQuery(space: Space) {
-  const block = getLatestBlock(space.network);
+export function usePropositionPowerQuery(space: MaybeRefOrGetter<Space>) {
+  const block = computed(() => getLatestBlock(toValue(space).network));
 
   return useQuery({
-    queryKey: ['propositionPower', () => web3.value.account, space.id, block],
-    queryFn: async () => getPropositionPower(space, block),
+    queryKey: [
+      'propositionPower',
+      () => web3.value.account,
+      () => toValue(space).id,
+      block
+    ],
+    queryFn: async () => getPropositionPower(toValue(space), block.value),
     enabled: () => !!web3.value.account && !web3.value.authLoading,
     staleTime: 60 * 1000
   });

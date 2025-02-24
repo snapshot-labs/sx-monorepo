@@ -1,3 +1,5 @@
+import { BigNumberish } from '@ethersproject/bignumber';
+
 export type ExecutorType =
   | 'SimpleQuorumVanilla'
   | 'SimpleQuorumAvatar'
@@ -100,6 +102,7 @@ export type EvmNetworkConfig = Omit<
   | 'herodotusAccumulatesChainId'
 > & {
   eip712ChainId: number;
+  maxPriorityFeePerGas?: BigNumberish;
   proxyFactory: string;
   executionStrategiesImplementations: {
     [key in ExecutorType]?: string;
