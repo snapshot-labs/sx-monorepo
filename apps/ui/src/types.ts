@@ -255,6 +255,7 @@ export type Proposal = {
     id: string;
     address_type: 0 | 1 | 2;
     name?: string;
+    role: Member['role'] | null;
   };
   execution_hash: string;
   metadata_uri: string;
@@ -396,14 +397,15 @@ export type Metadata = {
 };
 
 export type SkinSettings = {
-  bg_color?: string;
-  link_color?: string;
-  text_color?: string;
-  content_color?: string;
-  border_color?: string;
-  heading_color?: string;
-  primary_color?: string;
-  theme?: string;
+  bg_color: string;
+  link_color: string;
+  text_color: string;
+  content_color: string;
+  border_color: string;
+  heading_color: string;
+  primary_color: string;
+  theme: string;
+  logo?: string;
 };
 
 export type Drafts = Record<string, Draft>;

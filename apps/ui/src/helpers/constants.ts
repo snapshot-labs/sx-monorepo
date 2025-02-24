@@ -144,7 +144,6 @@ export const VALIDATION_TYPES_INFO: Record<
   | 'only-members'
   | 'basic'
   | 'passport-gated'
-  | 'arbitrum'
   | 'karma-eas-attestation',
   { label: string; description: string }
 > = {
@@ -165,11 +164,6 @@ export const VALIDATION_TYPES_INFO: Record<
     label: 'Gitcoin Passport gated',
     description:
       'Protect your space from spam by requiring users to have a Gitcoin Passport to create a proposal.'
-  },
-  arbitrum: {
-    label: 'Arbitrum DAO votable supply',
-    description:
-      'Use with erc20-votes to validate by percentage of votable supply.'
   },
   'karma-eas-attestation': {
     label: 'Karma EAS Attestation',

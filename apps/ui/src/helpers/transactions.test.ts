@@ -64,6 +64,7 @@ describe('transactions', () => {
   describe('createSendNftTransaction', () => {
     const erc721Nft = {
       collectionName: 'BekoNekoz VX',
+      title: 'BekoNekoz VX #162',
       contractAddress: '0x9ed9dc8af51d74e638528ececd510dca5fe2a539',
       type: 'erc721',
       id: '0x9ed9dc8af51d74e638528ececd510dca5fe2a539:162',
@@ -72,6 +73,7 @@ describe('transactions', () => {
 
     const erc1155Nft = {
       collectionName: 'OpenSea Shared Storefront',
+      title: 'OpenSea Shared Storefront #1',
       contractAddress: '0x495f947276749ce646f68ac8c248420045cb7b5e',
       type: 'erc1155',
       id: '0x495f947276749ce646f68ac8c248420045cb7b5e:90408759670418442924295527194769699607350667425091321551161727238095924887553',
@@ -81,7 +83,6 @@ describe('transactions', () => {
 
     const form = {
       to: '0x000000000000000000000000000000000000dead',
-      nft: '0x9ed9dc8af51d74e638528ececd510dca5fe2a539:162',
       amount: '1'
     };
 

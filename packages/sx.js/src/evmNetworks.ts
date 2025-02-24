@@ -107,10 +107,10 @@ export const evmNetworks = {
   eth: createStandardConfig(1),
   oeth: createStandardConfig(10),
   sep: createStandardConfig(11155111, {
-    executionStrategies: {
-      Axiom: '0xaC6dbd42Ed254E9407fe0D2798784d0110979DC2',
-      Isokratia: '0xc674eCf233920aa3052738BFCDbDd0812AEE5A83'
-    }
+    // executionStrategies: {
+    //   Axiom: '0xaC6dbd42Ed254E9407fe0D2798784d0110979DC2',
+    //   Isokratia: '0xc674eCf233920aa3052738BFCDbDd0812AEE5A83'
+    // }
   }),
   matic: createStandardConfig(137),
   arb1: createStandardConfig(42161),

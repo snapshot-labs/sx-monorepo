@@ -1,6 +1,7 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
 import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
+import { Nft } from '@/composables/useNfts';
 import { abis } from '@/helpers/abis';
 import { Token } from '@/helpers/alchemy';
 import { resolver } from '@/helpers/resolver';
@@ -58,6 +59,16 @@ export async function createSendNftTransaction({
   nft,
   address,
   form
+}: {
+  nft: Pick<
+    Nft,
+    'type' | 'contractAddress' | 'tokenId' | 'title' | 'collectionName'
+  >;
+  address: string;
+  form: {
+    to: string;
+    amount: string | number;
+  };
 }): Promise<SendNftTransaction> {
   let data = '';
 
