@@ -161,7 +161,7 @@ function toggleQuestion(id: number) {
             <div
               class="bg-orange-300/20 border border-orange-300 rounded-full px-2 text-sm leading-[18px]"
             >
-              -20%
+              -16%
             </div>
           </div>
           <div v-else class="px-3" v-text="'Monthly'" />
