@@ -282,12 +282,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <div>
-    <UiScrollerHorizontal
-      class="sticky top-[72px] z-40"
-      with-buttons
-      gradient="xxl"
-    >
+  <div class="!pb-0">
+    <UiScrollerHorizontal class="sticky z-40" with-buttons gradient="xxl">
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <AppLink
           v-for="tab in tabs.filter(tab => tab.visible)"
@@ -309,12 +305,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     </div>
     <div
       v-else
-      class="space-y-4 pb-[100px]"
-      :class="{
-        'mx-4 max-w-[592px]': activeTab !== 'profile'
-      }"
+      class="space-y-4 flex flex-col"
+      style="min-height: calc(100vh - 114px)"
     >
-      <div v-show="activeTab === 'profile'">
+      <div v-show="activeTab === 'profile'" class="flex-grow">
         <FormSpaceProfile
           :id="space.id"
           :space="space"
