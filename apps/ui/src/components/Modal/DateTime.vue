@@ -59,6 +59,7 @@ function getBaseTime(ts: number): string {
 }
 
 function updateDateWithTime() {
+  if (!time.value) return;
   const [hours, minutes] = time.value.split(':');
 
   date.value = dayjs
