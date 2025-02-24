@@ -6,7 +6,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -238,6 +238,12 @@ const proposalMaxEnd = computed(() => {
       (props.space.max_voting_period || defaultVotingDelay.value)
   );
 });
+
+const votingTypes = computed(() =>
+  metadataNetwork !== 's-tn'
+    ? props.space.voting_types.filter(a => a !== 'copeland')
+    : props.space.voting_types
+);
 
 const {
   data: propositionPower,
@@ -661,9 +667,7 @@ watchEffect(() => {
         <div class="flex flex-col p-4 space-y-4">
           <EditorVotingType
             v-model="proposal"
-            :voting-types="
-              enforcedVoteType ? [enforcedVoteType] : space.voting_types
-            "
+            :voting-types="enforcedVoteType ? [enforcedVoteType] : votingTypes"
           />
           <EditorChoices
             v-model="proposal"
