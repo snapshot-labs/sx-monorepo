@@ -245,7 +245,7 @@ const {
   isPending: isPropositionPowerPending,
   isError: isPropositionPowerError,
   refetch: fetchPropositionPower
-} = usePropositionPowerQuery(props.space);
+} = usePropositionPowerQuery(toRef(props, 'space'));
 
 const unsupportedProposalNetworks = computed(() => {
   if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
