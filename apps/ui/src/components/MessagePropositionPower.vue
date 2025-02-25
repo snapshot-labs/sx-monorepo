@@ -1,38 +1,64 @@
 <script setup lang="ts">
+import { _n, prettyConcat } from '@/helpers/utils';
 import { PropositionPowerItem } from '@/queries/propositionPower';
 
-defineProps<{
-  propositionPower?: PropositionPowerItem;
-  isError: boolean;
+type Strategy = PropositionPowerItem['strategies'][0];
+
+const props = defineProps<{
+  propositionPower: PropositionPowerItem;
 }>();
 
-defineEmits<{
-  (e: 'fetch');
-}>();
+const OFFCHAIN_ERRORS = {
+  'only-members': () =>
+    'You need to be a member of the space in order to create a proposal.',
+  basic: (strategy: Strategy) =>
+    `You need at least ${_n(strategy.params.minScore, 'compact')} ${props.propositionPower.symbol} to create a proposal.`,
+  'passport-gated': (strategy: Strategy) =>
+    `You need a Gitcoin Passport with ${strategy.params.operator === 'AND' ? 'all' : 'one'} of the following stamps to create a proposal: ${prettyConcat(strategy.params.stamps, strategy.params.operator === 'AND' ? 'and' : 'or')}.`,
+  'karma-eas-attestation': () =>
+    'You need to be attested by Karma EAS to create a proposal.'
+} as const;
+
+const LINKS = {
+  'passport-gated': {
+    label: 'Gitcoin Passport',
+    url: 'https://passport.gitcoin.co/#/dashboard'
+  }
+} as const;
+
+const offchainStrategy = computed(() => {
+  const name = props.propositionPower.strategies[0].name;
+
+  if (OFFCHAIN_ERRORS[name]) {
+    return props.propositionPower.strategies[0];
+  }
+
+  return null;
+});
 </script>
 
 <template>
-  <div
-    v-if="isError || !propositionPower"
-    class="flex flex-col gap-3 items-start"
-    v-bind="$attrs"
-  >
-    <UiAlert type="error">
-      There was an error fetching your proposition power.
-    </UiAlert>
-    <UiButton
-      type="button"
-      class="flex items-center gap-2"
-      @click="$emit('fetch')"
-    >
-      <IH-refresh />Retry
-    </UiButton>
-  </div>
-  <UiAlert
-    v-else-if="!propositionPower.canPropose"
-    type="error"
-    v-bind="$attrs"
-  >
-    You do not have enough proposition power to create proposal in this space.
+  <UiAlert type="error" v-bind="$attrs">
+    <template v-if="offchainStrategy">
+      {{ OFFCHAIN_ERRORS[offchainStrategy.name](offchainStrategy) }}
+      <AppLink
+        v-if="LINKS[offchainStrategy.name]"
+        :to="LINKS[offchainStrategy.name].url"
+      >
+        {{ LINKS[offchainStrategy.name].label }}
+        <IH-arrow-sm-right class="inline-block -rotate-45" />
+      </AppLink>
+    </template>
+    <template v-else>
+      You need at least {{ _n(propositionPower.threshold) }}
+      {{
+        prettyConcat(
+          propositionPower.strategies.map(
+            s => s.params.symbol || propositionPower.symbol
+          )
+        )
+      }}
+      to create a proposal.
+    </template>
   </UiAlert>
 </template>

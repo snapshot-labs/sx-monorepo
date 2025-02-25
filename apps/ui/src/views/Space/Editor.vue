@@ -488,37 +488,41 @@ watchEffect(() => {
             type="error"
             class="mb-4"
           >
-            <div>
-              You cannot create proposals. This space is configured with
-              non-premium networks (<template
-                v-for="(n, i) in unsupportedProposalNetworks"
-                :key="n.key"
-              >
-                <b>{{ n.name }}</b>
-                <template
-                  v-if="
-                    unsupportedProposalNetworks.length > 1 &&
-                    i < unsupportedProposalNetworks.length - 1
-                  "
-                  >,
-                </template> </template
-              >). Change to a
-              <AppLink
-                to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
-                >premium network
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
-              or upgrade networks to continue.
-            </div>
+            You cannot create proposals. This space is configured with
+            non-premium networks (<template
+              v-for="(n, i) in unsupportedProposalNetworks"
+              :key="n.key"
+            >
+              <b>{{ n.name }}</b>
+              <template
+                v-if="
+                  unsupportedProposalNetworks.length > 1 &&
+                  i < unsupportedProposalNetworks.length - 1
+                "
+                >,
+              </template> </template
+            >). Change to a
+            <AppLink
+              to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              >premium network
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </AppLink>
+            or upgrade networks to continue.
           </UiAlert>
           <template v-else>
-            <MessagePropositionPower
-              v-if="!isPropositionPowerPending"
-              class="mb-4"
-              :proposition-power="propositionPower"
-              :is-error="isPropositionPowerError"
-              @fetch="fetchPropositionPower"
-            />
+            <template v-if="!isPropositionPowerPending">
+              <MessageErrorFetchPower
+                v-if="isPropositionPowerError || !propositionPower"
+                class="mb-4"
+                :type="'proposition'"
+                @fetch="fetchPropositionPower"
+              />
+              <MessagePropositionPower
+                v-else-if="propositionPower && !propositionPower.canPropose"
+                class="mb-4"
+                :proposition-power="propositionPower"
+              />
+            </template>
             <UiAlert
               v-if="
                 propositionPower &&

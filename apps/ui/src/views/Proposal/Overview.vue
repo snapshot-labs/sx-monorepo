@@ -491,20 +491,18 @@ onBeforeUnmount(() => destroyAudio());
             v-if="proposal.execution_strategy_type === 'safeSnap'"
             type="warning"
           >
-            <div>
-              This proposal uses SafeSnap execution which is currently not
-              supported on the new interface. You can view execution details on
-              the
-              <a
-                :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-                target="_blank"
-                class="inline-flex items-center font-bold"
-              >
-                previous interface
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
-              .
-            </div>
+            This proposal uses SafeSnap execution which is currently not
+            supported on the new interface. You can view execution details on
+            the
+            <a
+              :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
+              target="_blank"
+              class="inline-flex items-center font-bold"
+            >
+              previous interface
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </a>
+            .
           </UiAlert>
           <ProposalExecutionsList
             :proposal="proposal"
