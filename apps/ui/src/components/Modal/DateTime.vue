@@ -73,6 +73,11 @@ function updateDateWithTime() {
 function validateForm() {
   if (!props.min) return;
 
+  if (!time.value) {
+    formError.value = 'Time is required';
+    return;
+  }
+
   const minDate = dayjs.unix(props.min).startOf('minute');
 
   if (date.value < minDate.unix()) {
