@@ -169,11 +169,14 @@ watchEffect(async () => {
       <h3>Cast your vote</h3>
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
+      <MessageErrorFetchPower
+        v-if="votingPower?.status === 'error'"
+        type="voting"
+        @fetch="handleFetchVotingPower"
+      />
       <MessageVotingPower
-        v-if="votingPower"
+        v-else-if="votingPower && !votingPower.canVote"
         :voting-power="votingPower"
-        action="vote"
-        @fetch-voting-power="handleFetchVotingPower"
       />
       <dl>
         <dt class="text-sm leading-5">Choice</dt>

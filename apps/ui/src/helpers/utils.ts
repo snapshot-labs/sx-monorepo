@@ -656,3 +656,11 @@ export function getRandomHexColor(): string {
     .toString(16)
     .padStart(6, '0')}`.toUpperCase();
 }
+
+export function prettyConcat(options: string[], connector = 'or') {
+  const uniqOptions = Array.from(new Set(options));
+
+  return uniqOptions.length > 1
+    ? `${uniqOptions.slice(0, -1).join(', ')} ${connector} ${uniqOptions.slice(-1)}`
+    : uniqOptions[0];
+}

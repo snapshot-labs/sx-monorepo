@@ -25,6 +25,7 @@ withDefaults(
 
 <template>
   <img
+    :key="cb"
     :src="getStampUrl(type, id, width && height ? { width, height } : size, cb)"
     class="rounded-full inline-block bg-skin-border"
     :style="

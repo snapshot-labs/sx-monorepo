@@ -45,20 +45,20 @@ function handleSelect(value: string) {
 </script>
 
 <template>
-  <UiAlert v-if="hasError" type="error">
-    <div>
+  <div v-if="hasError" class="flex flex-col gap-3 items-start">
+    <UiAlert type="error">
       An error happened while fetching the ENS names associated to your wallet.
       Please try again
-    </div>
+    </UiAlert>
     <UiButton
-      class="flex items-center justify-center gap-2"
+      class="flex items-center gap-2"
       :loading="isRefreshing"
       @click="load"
     >
       <IH-refresh />
       Retry
     </UiButton>
-  </UiAlert>
+  </div>
   <div v-else class="space-y-4">
     <div class="space-y-2">
       <div>

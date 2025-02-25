@@ -58,6 +58,7 @@ const { limits, lists } = useSettings();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
+const { modalAccountOpen } = useModal();
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -244,7 +245,7 @@ const {
   isPending: isPropositionPowerPending,
   isError: isPropositionPowerError,
   refetch: fetchPropositionPower
-} = usePropositionPowerQuery(props.space);
+} = usePropositionPowerQuery(toRef(props, 'space'));
 
 const unsupportedProposalNetworks = computed(() => {
   if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
@@ -270,6 +271,11 @@ async function handleProposeClick() {
 
   if (props.space.terms && !termsStore.areAccepted(props.space)) {
     modalOpenTerms.value = true;
+    return;
+  }
+
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
     return;
   }
 
@@ -482,37 +488,41 @@ watchEffect(() => {
             type="error"
             class="mb-4"
           >
-            <div>
-              You cannot create proposals. This space is configured with
-              non-premium networks (<template
-                v-for="(n, i) in unsupportedProposalNetworks"
-                :key="n.key"
-              >
-                <b>{{ n.name }}</b>
-                <template
-                  v-if="
-                    unsupportedProposalNetworks.length > 1 &&
-                    i < unsupportedProposalNetworks.length - 1
-                  "
-                  >,
-                </template> </template
-              >). Change to a
-              <AppLink
-                to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
-                >premium network
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
-              or upgrade networks to continue.
-            </div>
+            You cannot create proposals. This space is configured with
+            non-premium networks (<template
+              v-for="(n, i) in unsupportedProposalNetworks"
+              :key="n.key"
+            >
+              <b>{{ n.name }}</b>
+              <template
+                v-if="
+                  unsupportedProposalNetworks.length > 1 &&
+                  i < unsupportedProposalNetworks.length - 1
+                "
+                >,
+              </template> </template
+            >). Change to a
+            <AppLink
+              to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              >premium network
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </AppLink>
+            or upgrade networks to continue.
           </UiAlert>
           <template v-else>
-            <MessagePropositionPower
-              v-if="!isPropositionPowerPending"
-              class="mb-4"
-              :proposition-power="propositionPower"
-              :is-error="isPropositionPowerError"
-              @fetch="fetchPropositionPower"
-            />
+            <template v-if="!isPropositionPowerPending">
+              <MessageErrorFetchPower
+                v-if="isPropositionPowerError || !propositionPower"
+                class="mb-4"
+                :type="'proposition'"
+                @fetch="fetchPropositionPower"
+              />
+              <MessagePropositionPower
+                v-else-if="propositionPower && !propositionPower.canPropose"
+                class="mb-4"
+                :proposition-power="propositionPower"
+              />
+            </template>
             <UiAlert
               v-if="
                 propositionPower &&
