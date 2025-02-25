@@ -85,7 +85,7 @@ function isSelectable(date: dayjs.Dayjs) {
         class="cell day unselectable"
         :class="{
           '!cursor-default !bg-transparent': !date.isSame(currentView, 'month'),
-          today: date.isSame(today),
+          today: date.isSame(today) && date.isSame(currentView, 'month'),
           selected: selectedDate && selectedDate.isSame(date),
           selectable: isSelectable(date)
         }"
