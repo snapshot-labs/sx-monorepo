@@ -1,6 +1,8 @@
+import { BigNumberish } from '@ethersproject/bignumber';
 import { EvmNetworkConfig } from './types';
 
 type AdditionalProperties = {
+  maxPriorityFeePerGas?: BigNumberish;
   authenticators?: Record<string, string>;
   strategies?: Record<string, string>;
   executionStrategies?: {
@@ -21,6 +23,7 @@ function createStandardConfig(
   return {
     Meta: {
       eip712ChainId,
+      maxPriorityFeePerGas: additionalProperties.maxPriorityFeePerGas,
       proxyFactory: '0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c',
       masterSpace: '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D'
     },
@@ -91,6 +94,7 @@ function createEvmConfig(
 
   return {
     eip712ChainId: network.Meta.eip712ChainId,
+    maxPriorityFeePerGas: network.Meta.maxPriorityFeePerGas,
     proxyFactory: network.Meta.proxyFactory,
     masterSpace: network.Meta.masterSpace,
     authenticators,
@@ -110,7 +114,11 @@ export const evmNetworks = {
   }),
   matic: createStandardConfig(137),
   arb1: createStandardConfig(42161),
-  base: createStandardConfig(8453)
+  base: createStandardConfig(8453),
+  mnt: createStandardConfig(5000, {
+    // https://docs.mantle.xyz/network/system-information/fee-mechanism/eip-1559-support#application-of-eip-1559-in-mantle-v2-tectonic
+    maxPriorityFeePerGas: 0
+  })
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');
@@ -119,3 +127,4 @@ export const evmOptimism = createEvmConfig('oeth');
 export const evmPolygon = createEvmConfig('matic');
 export const evmArbitrum = createEvmConfig('arb1');
 export const evmBase = createEvmConfig('base');
+export const evmMantle = createEvmConfig('mnt');

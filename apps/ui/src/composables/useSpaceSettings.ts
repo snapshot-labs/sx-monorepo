@@ -102,7 +102,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   } = useActions();
 
   const loading = ref(true);
-  const isModified = ref(false);
+  const isModifiedEvaluating = ref(false);
 
   const network = computed(() => getNetwork(space.value.network));
 
@@ -765,240 +765,221 @@ export function useSpaceSettings(space: Ref<Space>) {
     }
   }
 
-  watchEffect(async () => {
-    isModified.value = false;
+  const isModified = computedAsync(
+    async () => {
+      // NOTE: those need to be reassigned there as async watcher won't track changes after await call
+      const formValue = form.value;
+      const votingDelayValue = votingDelay.value;
+      const minVotingPeriodValue = minVotingPeriod.value;
+      const maxVotingPeriodValue = maxVotingPeriod.value;
+      const authenticatorsValue = authenticators.value;
+      const votingStrategiesValue = votingStrategies.value;
+      const validationStrategyValue = validationStrategy.value;
+      const initialValidationStrategyObjectHashValue =
+        initialValidationStrategyObjectHash.value;
+      const proposalValidationValue = proposalValidation.value;
+      const guidelinesValue = guidelines.value;
+      const templateValue = template.value;
+      const quorumTypeValue = quorumType.value;
+      const quorumValue = quorum.value;
+      const votingTypeValue = voteType.value;
+      const privacyValue = privacy.value;
+      const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
+      const voteValidationValue = voteValidation.value;
+      const snapshotChainIdValue = snapshotChainId.value;
+      const strategiesValue = strategies.value;
+      const membersValue = members.value;
+      const parentValue = parent.value;
+      const childrenValue = children.value;
+      const termsOfServicesValue = termsOfServices.value;
+      const customDomainValue = customDomain.value;
+      const isPrivateValue = isPrivate.value;
+      const skinSettingsValue = skinSettings.value;
 
-    // NOTE: those need to be reassigned there as async watcher won't track changes after await call
-    const formValue = form.value;
-    const votingDelayValue = votingDelay.value;
-    const minVotingPeriodValue = minVotingPeriod.value;
-    const maxVotingPeriodValue = maxVotingPeriod.value;
-    const authenticatorsValue = authenticators.value;
-    const votingStrategiesValue = votingStrategies.value;
-    const validationStrategyValue = validationStrategy.value;
-    const initialValidationStrategyObjectHashValue =
-      initialValidationStrategyObjectHash.value;
-    const proposalValidationValue = proposalValidation.value;
-    const guidelinesValue = guidelines.value;
-    const templateValue = template.value;
-    const quorumTypeValue = quorumType.value;
-    const quorumValue = quorum.value;
-    const votingTypeValue = voteType.value;
-    const privacyValue = privacy.value;
-    const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
-    const voteValidationValue = voteValidation.value;
-    const snapshotChainIdValue = snapshotChainId.value;
-    const strategiesValue = strategies.value;
-    const membersValue = members.value;
-    const parentValue = parent.value;
-    const childrenValue = children.value;
-    const termsOfServicesValue = termsOfServices.value;
-    const customDomainValue = customDomain.value;
-    const isPrivateValue = isPrivate.value;
-    const skinSettingsValue = skinSettings.value;
-
-    if (loading.value) {
-      isModified.value = false;
-      return;
-    }
-
-    if (objectHash(formValue) !== objectHash(getInitialForm(space.value))) {
-      isModified.value = true;
-      return;
-    }
-
-    if (
-      votingDelayValue !== null &&
-      votingDelayValue !== currentToMinutesOnly(space.value.voting_delay)
-    ) {
-      isModified.value = true;
-      return;
-    }
-
-    if (
-      minVotingPeriodValue !== null &&
-      minVotingPeriodValue !==
-        currentToMinutesOnly(space.value.min_voting_period)
-    ) {
-      isModified.value = true;
-      return;
-    }
-
-    if (
-      maxVotingPeriodValue !== null &&
-      maxVotingPeriodValue !==
-        currentToMinutesOnly(space.value.max_voting_period)
-    ) {
-      isModified.value = true;
-      return;
-    }
-
-    if (offchainNetworks.includes(space.value.network)) {
-      const ignoreOrderOpts = { unorderedArrays: true };
-
-      const initialProposalValidation = getInitialProposalValidation(
-        space.value
-      );
-
-      if (
-        objectHash(proposalValidationValue) !==
-        objectHash(initialProposalValidation)
-      ) {
-        isModified.value = true;
-        return;
+      if (loading.value) {
+        return false;
       }
 
-      if (guidelinesValue !== (space.value.guidelines ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      if (templateValue !== (space.value.template ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      const initialVotingProperties = getInitialVotingProperties(space.value);
-
-      if (quorumTypeValue !== initialVotingProperties.quorumType) {
-        isModified.value = true;
-        return;
-      }
-
-      if (quorumValue !== initialVotingProperties.quorum) {
-        isModified.value = true;
-        return;
-      }
-
-      if (votingTypeValue !== initialVotingProperties.votingType) {
-        isModified.value = true;
-        return;
-      }
-
-      if (privacyValue !== initialVotingProperties.privacy) {
-        isModified.value = true;
-        return;
+      if (objectHash(formValue) !== objectHash(getInitialForm(space.value))) {
+        return true;
       }
 
       if (
-        ignoreAbstainVotesValue !== initialVotingProperties.ignoreAbstainVotes
+        votingDelayValue !== null &&
+        votingDelayValue !== currentToMinutesOnly(space.value.voting_delay)
       ) {
-        isModified.value = true;
-        return;
-      }
-
-      const initialVoteValidation = space.value.additionalRawData
-        ?.voteValidation ?? {
-        name: 'any',
-        params: {}
-      };
-
-      if (
-        objectHash(voteValidationValue) !== objectHash(initialVoteValidation)
-      ) {
-        isModified.value = true;
-        return;
-      }
-
-      if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? 1)) {
-        isModified.value = true;
-        return;
+        return true;
       }
 
       if (
-        hasStrategiesChanged(strategiesValue, getInitialStrategies(space.value))
+        minVotingPeriodValue !== null &&
+        minVotingPeriodValue !==
+          currentToMinutesOnly(space.value.min_voting_period)
       ) {
-        isModified.value = true;
-        return;
+        return true;
       }
 
       if (
-        objectHash(membersValue, ignoreOrderOpts) !==
-        objectHash(getInitialMembers(space.value), ignoreOrderOpts)
+        maxVotingPeriodValue !== null &&
+        maxVotingPeriodValue !==
+          currentToMinutesOnly(space.value.max_voting_period)
       ) {
-        isModified.value = true;
-        return;
+        return true;
       }
 
-      if (parentValue !== (space.value.parent?.id ?? '')) {
-        isModified.value = true;
-        return;
-      }
+      if (offchainNetworks.includes(space.value.network)) {
+        const ignoreOrderOpts = { unorderedArrays: true };
 
-      if (
-        objectHash(childrenValue, ignoreOrderOpts) !==
-        objectHash(
-          space.value.children.map(child => child.id),
-          ignoreOrderOpts
-        )
-      ) {
-        isModified.value = true;
-        return;
-      }
-
-      if (termsOfServicesValue !== (space.value.terms ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      if (customDomainValue !== (space.value.additionalRawData?.domain ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      if (isPrivateValue !== space.value.additionalRawData?.private) {
-        isModified.value = true;
-        return;
-      }
-
-      if (
-        objectHash(space.value.additionalRawData?.skinSettings) !==
-        objectHash(skinSettingsValue)
-      ) {
-        isModified.value = true;
-        return;
-      }
-    } else {
-      const [authenticatorsToAdd, authenticatorsToRemove] =
-        await processChanges(
-          authenticatorsValue,
-          space.value.authenticators,
-          [],
-          []
+        const initialProposalValidation = getInitialProposalValidation(
+          space.value
         );
 
-      if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
-        isModified.value = true;
-        return;
+        if (
+          objectHash(proposalValidationValue) !==
+          objectHash(initialProposalValidation)
+        ) {
+          return true;
+        }
+
+        if (guidelinesValue !== (space.value.guidelines ?? '')) {
+          return true;
+        }
+
+        if (templateValue !== (space.value.template ?? '')) {
+          return true;
+        }
+
+        const initialVotingProperties = getInitialVotingProperties(space.value);
+
+        if (quorumTypeValue !== initialVotingProperties.quorumType) {
+          return true;
+        }
+
+        if (quorumValue !== initialVotingProperties.quorum) {
+          return true;
+        }
+
+        if (votingTypeValue !== initialVotingProperties.votingType) {
+          return true;
+        }
+
+        if (privacyValue !== initialVotingProperties.privacy) {
+          return true;
+        }
+
+        if (
+          ignoreAbstainVotesValue !== initialVotingProperties.ignoreAbstainVotes
+        ) {
+          return true;
+        }
+
+        const initialVoteValidation = space.value.additionalRawData
+          ?.voteValidation ?? {
+          name: 'any',
+          params: {}
+        };
+
+        if (
+          objectHash(voteValidationValue) !== objectHash(initialVoteValidation)
+        ) {
+          return true;
+        }
+
+        if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? 1)) {
+          return true;
+        }
+
+        if (
+          hasStrategiesChanged(
+            strategiesValue,
+            getInitialStrategies(space.value)
+          )
+        ) {
+          return true;
+        }
+
+        if (
+          objectHash(membersValue, ignoreOrderOpts) !==
+          objectHash(getInitialMembers(space.value), ignoreOrderOpts)
+        ) {
+          return true;
+        }
+
+        if (parentValue !== (space.value.parent?.id ?? '')) {
+          return true;
+        }
+
+        if (
+          objectHash(childrenValue, ignoreOrderOpts) !==
+          objectHash(
+            space.value.children.map(child => child.id),
+            ignoreOrderOpts
+          )
+        ) {
+          return true;
+        }
+
+        if (termsOfServicesValue !== (space.value.terms ?? '')) {
+          return true;
+        }
+
+        if (
+          customDomainValue !== (space.value.additionalRawData?.domain ?? '')
+        ) {
+          return true;
+        }
+
+        if (isPrivateValue !== space.value.additionalRawData?.private) {
+          return true;
+        }
+
+        if (
+          objectHash(space.value.additionalRawData?.skinSettings) !==
+          objectHash(skinSettingsValue)
+        ) {
+          return true;
+        }
+      } else {
+        const [authenticatorsToAdd, authenticatorsToRemove] =
+          await processChanges(
+            authenticatorsValue,
+            space.value.authenticators,
+            [],
+            []
+          );
+
+        if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
+          return true;
+        }
+
+        const [strategiesToAdd, strategiesToRemove] = await processChanges(
+          votingStrategiesValue,
+          space.value.strategies,
+          space.value.strategies_params,
+          space.value.strategies_parsed_metadata
+        );
+
+        if (strategiesToAdd.length || strategiesToRemove.length) {
+          return true;
+        }
+
+        const hasValidationStrategyChanged =
+          objectHash(validationStrategyValue) !==
+          initialValidationStrategyObjectHashValue;
+        if (hasValidationStrategyChanged) {
+          return true;
+        }
       }
-
-      const [strategiesToAdd, strategiesToRemove] = await processChanges(
-        votingStrategiesValue,
-        space.value.strategies,
-        space.value.strategies_params,
-        space.value.strategies_parsed_metadata
-      );
-
-      if (strategiesToAdd.length || strategiesToRemove.length) {
-        isModified.value = true;
-        return;
-      }
-
-      const hasValidationStrategyChanged =
-        objectHash(validationStrategyValue) !==
-        initialValidationStrategyObjectHashValue;
-      if (hasValidationStrategyChanged) {
-        isModified.value = true;
-        return;
-      }
-    }
-
-    isModified.value = false;
-  });
+    },
+    false,
+    isModifiedEvaluating
+  );
 
   return {
     loading,
-    isModified,
+    isModified: computed(() =>
+      isModifiedEvaluating.value ? false : isModified.value
+    ),
     isController,
     isOwner,
     isAdmin,

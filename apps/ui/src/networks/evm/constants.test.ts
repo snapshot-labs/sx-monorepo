@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { createConstants } from './constants';
 
 describe('EVM Constants', () => {
-  const constants = createConstants('eth');
+  const pin = async () => ({ provider: 'dummy', cid: '1' });
+  const constants = createConstants('eth', { pin });
   const input = `0x395ed61716b48dc904140b515e9f682e33330154:1,0x395ed61716b48dc904140b515e9f682e33330154:2,0x395ed61716b48dc904140b515e9f682e33330154:3,
       0x395ed61716b48dc904140b515e9f682e33330154:4
 

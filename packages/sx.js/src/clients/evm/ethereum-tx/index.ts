@@ -96,6 +96,12 @@ export class EthereumTx {
     this.networkConfig = opts.networkConfig;
   }
 
+  get defaultTransactionOverrides() {
+    return {
+      maxPriorityFeePerGas: this.networkConfig.maxPriorityFeePerGas
+    };
+  }
+
   async deployAvatarExecution({
     signer,
     params: { controller, target, spaces, quorum },
@@ -147,7 +153,8 @@ export class EthereumTx {
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
-      saltNonce
+      saltNonce,
+      this.defaultTransactionOverrides
     );
 
     return { address, txId: response.hash };
@@ -204,7 +211,8 @@ export class EthereumTx {
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
-      saltNonce
+      saltNonce,
+      this.defaultTransactionOverrides
     );
 
     return { address, txId: response.hash };
@@ -266,7 +274,8 @@ export class EthereumTx {
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
-      saltNonce
+      saltNonce,
+      this.defaultTransactionOverrides
     );
 
     return { address, txId: response.hash };
@@ -327,7 +336,8 @@ export class EthereumTx {
     const response = await proxyFactoryContract.deployProxy(
       implementationAddress,
       functionData,
-      saltNonce
+      saltNonce,
+      this.defaultTransactionOverrides
     );
 
     return { address, txId: response.hash };
@@ -391,7 +401,8 @@ export class EthereumTx {
     const response = await proxyFactoryContract.deployProxy(
       this.networkConfig.masterSpace,
       functionData,
-      saltNonce
+      saltNonce,
+      this.defaultTransactionOverrides
     );
 
     return { address, txId: response.hash };
@@ -469,7 +480,11 @@ export class EthereumTx {
       abi,
       signer
     );
-    const promise = authenticatorContract.authenticate(...args);
+
+    const promise = authenticatorContract.authenticate(
+      ...args,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -514,7 +529,10 @@ export class EthereumTx {
       abi,
       signer
     );
-    const promise = authenticatorContract.authenticate(...args);
+    const promise = authenticatorContract.authenticate(
+      ...args,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -562,7 +580,10 @@ export class EthereumTx {
       abi,
       signer
     );
-    const promise = authenticatorContract.authenticate(...args);
+    const promise = authenticatorContract.authenticate(
+      ...args,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -582,7 +603,11 @@ export class EthereumTx {
     opts: CallOptions = {}
   ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
-    const promise = spaceContract.execute(proposal, executionParams);
+    const promise = spaceContract.execute(
+      proposal,
+      executionParams,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -604,8 +629,10 @@ export class EthereumTx {
       TimelockExecutionStrategyAbi,
       signer
     );
-    const promise =
-      executionStrategyContract.executeQueuedProposal(executionParams);
+    const promise = executionStrategyContract.executeQueuedProposal(
+      executionParams,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -627,7 +654,10 @@ export class EthereumTx {
       TimelockExecutionStrategyAbi,
       signer
     );
-    const promise = executionStrategyContract.veto(executionHash);
+    const promise = executionStrategyContract.veto(
+      executionHash,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -641,7 +671,10 @@ export class EthereumTx {
     opts: CallOptions = {}
   ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
-    const promise = spaceContract.cancel(proposal);
+    const promise = spaceContract.cancel(
+      proposal,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -672,25 +705,28 @@ export class EthereumTx {
     opts: CallOptions = {}
   ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
-    const promise = spaceContract.updateSettings({
-      minVotingDuration: settings.minVotingDuration ?? NO_UPDATE_UINT32,
-      maxVotingDuration: settings.maxVotingDuration ?? NO_UPDATE_UINT32,
-      votingDelay: settings.votingDelay ?? NO_UPDATE_UINT32,
-      metadataURI: settings.metadataUri ?? NO_UPDATE_STRING,
-      daoURI: settings.daoUri ?? NO_UPDATE_STRING,
-      proposalValidationStrategy: settings.proposalValidationStrategy ?? {
-        addr: NO_UPDATE_ADDRESS,
-        params: '0x00'
+    const promise = spaceContract.updateSettings(
+      {
+        minVotingDuration: settings.minVotingDuration ?? NO_UPDATE_UINT32,
+        maxVotingDuration: settings.maxVotingDuration ?? NO_UPDATE_UINT32,
+        votingDelay: settings.votingDelay ?? NO_UPDATE_UINT32,
+        metadataURI: settings.metadataUri ?? NO_UPDATE_STRING,
+        daoURI: settings.daoUri ?? NO_UPDATE_STRING,
+        proposalValidationStrategy: settings.proposalValidationStrategy ?? {
+          addr: NO_UPDATE_ADDRESS,
+          params: '0x00'
+        },
+        proposalValidationStrategyMetadataURI:
+          settings.proposalValidationStrategyMetadataUri ?? '',
+        authenticatorsToAdd: settings.authenticatorsToAdd ?? [],
+        authenticatorsToRemove: settings.authenticatorsToRemove ?? [],
+        votingStrategiesToAdd: settings.votingStrategiesToAdd ?? [],
+        votingStrategiesToRemove: settings.votingStrategiesToRemove ?? [],
+        votingStrategyMetadataURIsToAdd:
+          settings.votingStrategyMetadataUrisToAdd ?? []
       },
-      proposalValidationStrategyMetadataURI:
-        settings.proposalValidationStrategyMetadataUri ?? '',
-      authenticatorsToAdd: settings.authenticatorsToAdd ?? [],
-      authenticatorsToRemove: settings.authenticatorsToRemove ?? [],
-      votingStrategiesToAdd: settings.votingStrategiesToAdd ?? [],
-      votingStrategiesToRemove: settings.votingStrategiesToRemove ?? [],
-      votingStrategyMetadataURIsToAdd:
-        settings.votingStrategyMetadataUrisToAdd ?? []
-    });
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
@@ -804,7 +840,10 @@ export class EthereumTx {
     opts: CallOptions = {}
   ) {
     const spaceContract = new Contract(space, SpaceAbi, signer);
-    const promise = spaceContract.transferOwnership(owner);
+    const promise = spaceContract.transferOwnership(
+      owner,
+      this.defaultTransactionOverrides
+    );
 
     return opts.noWait ? null : promise;
   }
