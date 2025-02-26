@@ -74,8 +74,9 @@ export function usePulse() {
 
   async function send(type: string, payload: any) {
     return await client.requestAsync('broadcast', {
-      type,
       from: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
+      alias: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
+      type,
       sig: '0xf0e14ebfa7f08ee13811725e8171465f710decd56a1e4c67cffa99e2e51acf742ef326836affeb4c8c110e89818895acc24cb0893f4bae47eddbbd57138c6ca41b',
       payload
     });

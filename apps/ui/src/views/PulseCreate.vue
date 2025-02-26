@@ -3,6 +3,7 @@ import router from '@/routes';
 
 const route = useRoute();
 const { sendDiscussion } = usePulse();
+const { addNotification } = useUiStore();
 
 const title = ref(route.query.title as string);
 const body = ref('');
@@ -44,9 +45,13 @@ const EXAMPLES = [
 async function handleSubmit() {
   submitLoading.value = true;
 
-  const res = await sendDiscussion(title.value, body.value);
+  try {
+    const res = await sendDiscussion(title.value, body.value);
 
-  await router.push({ name: 'pulse-discussion', params: { id: res.id } });
+    await router.push({ name: 'pulse-discussion', params: { id: res.id } });
+  } catch (e) {
+    addNotification('error', e.message);
+  }
 
   submitLoading.value = false;
 }

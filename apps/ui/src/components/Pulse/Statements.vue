@@ -2,6 +2,7 @@
 defineProps<{ statements: any[] }>();
 
 const { sendVote } = usePulse();
+const { addNotification } = useUiStore();
 
 const loading = ref(false);
 
@@ -12,7 +13,11 @@ async function handleVote(
 ) {
   loading.value = true;
 
-  await sendVote(discussion, statement, choice);
+  try {
+    await sendVote(discussion, statement, choice);
+  } catch (e) {
+    addNotification('error', e.message);
+  }
 
   loading.value = false;
 }
@@ -22,7 +27,8 @@ async function handleVote(
   <div v-if="statements[0]">
     <div class="border rounded-md p-4 h-[220px] flex flex-col">
       <div class="text-lg text-skin-link flex-auto">
-        {{ statements[0].body }}
+        <UiLoading v-if="loading" />
+        <div v-else v-text="statements[0].body" />
       </div>
       <div class="items-end space-x-2 grid grid-cols-3">
         <UiButton
@@ -62,4 +68,3 @@ async function handleVote(
     </div>
   </div>
 </template>
-<script setup lang="ts"></script>
