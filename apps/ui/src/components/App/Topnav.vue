@@ -108,6 +108,7 @@ onUnmounted(() => {
         ]"
       />
       <router-link
+        v-if="(route.name as string).startsWith('pulse')"
         :to="{ name: 'pulse' }"
         class="flex h-full items-center px-4"
       >
