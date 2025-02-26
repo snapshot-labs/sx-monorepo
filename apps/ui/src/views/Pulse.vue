@@ -12,8 +12,9 @@ const statement = {
 
 <template>
   <div>
-    <div class="py-8 bg-skin-border/20 border-b">
-      <UiContainer class="mt-8 pb-8 !max-w-[990px] space-y-8">
+    <div class="py-8">
+      <UiContainer class="pb-8 !max-w-[990px]">
+        <div class="eyebrow mb-3">Townhall</div>
         <h2 class="mono-display">
           Think together,<br />
           spark changes
