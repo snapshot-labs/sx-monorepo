@@ -13,7 +13,7 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
-import { VotingPowerItem } from '@/stores/votingPowers';
+import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';

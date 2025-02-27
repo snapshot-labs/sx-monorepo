@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VotingPowerItem } from '@/stores/votingPowers';
+import { VotingPowerItem } from '@/queries/votingPower';
 
 defineProps<{
   votingPower: VotingPowerItem;
