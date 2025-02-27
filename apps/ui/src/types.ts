@@ -140,6 +140,7 @@ export type OffchainAdditionalRawData = {
 } & Pick<
   OffchainApiSpace,
   | 'private'
+  | 'flagged'
   | 'domain'
   | 'skin'
   | 'skinSettings'
