@@ -13,7 +13,7 @@ const props = defineProps<{
   votingPower?: VotingPowerItem;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close');
   (e: 'fetch');
 }>();
@@ -27,7 +27,7 @@ const baseNetwork = computed(() =>
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Your voting power</h3>
     </template>
@@ -36,7 +36,7 @@ const baseNetwork = computed(() =>
       v-else-if="isError"
       type="voting"
       class="p-4"
-      @fetch="$emit('fetch')"
+      @fetch="emit('fetch')"
     />
     <template v-else-if="votingPower">
       <div

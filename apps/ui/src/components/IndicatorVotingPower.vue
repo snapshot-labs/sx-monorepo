@@ -11,7 +11,7 @@ const props = defineProps<{
   votingPower?: VotingPowerItem;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'fetch');
 }>();
 
@@ -59,7 +59,7 @@ function handleModalOpen() {
       :is-loading="isLoading"
       :is-error="isError"
       @close="modalOpen = false"
-      @fetch="$emit('fetch')"
+      @fetch="emit('fetch')"
     />
   </teleport>
 </template>

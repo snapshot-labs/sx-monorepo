@@ -41,7 +41,7 @@ function isOffchainPendingProposal(proposal: Proposal): boolean {
   );
 }
 
-function getProposalSnapshot(proposal: Proposal | null | undefined): Snapshot {
+function getProposalSnapshot(proposal?: Proposal | null): Snapshot {
   if (!proposal) return null;
 
   const snapshot = isOffchainPendingProposal(proposal)
@@ -60,17 +60,17 @@ function getLatestBlock(network: NetworkID): Snapshot {
 async function getVotingPower(
   block: Snapshot,
   space: SpaceLike,
-  strategies: [
+  strategiesData: [
     Proposal['strategies'],
     Proposal['strategies_params'],
     Proposal['space']['strategies_parsed_metadata']
   ]
-) {
+): Promise<VotingPowerItem> {
   try {
     const network = getNetwork(space.network);
     const vp = await network.actions.getVotingPower(
       space.id,
-      ...strategies,
+      ...strategiesData,
       web3.value.account,
       {
         at: block,
@@ -95,7 +95,7 @@ async function getVotingPower(
   }
 }
 
-function isLoggedIn() {
+function isLoggedIn(): boolean {
   return !!web3.value.account && !web3.value.authLoading;
 }
 
