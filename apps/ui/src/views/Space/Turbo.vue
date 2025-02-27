@@ -5,7 +5,7 @@ import { metadataNetwork } from '@/networks';
 import { ChainId, Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
-import ICCheck from '~icons/heroicons-outline/check.vue';
+import ICCheck from '~icons/heroicons-outline/check';
 
 type SubscriptionLength = 'yearly' | 'monthly';
 type TierPlan = 'basic' | 'turbo' | 'custom';
