@@ -42,6 +42,7 @@ export type VoteType =
   | 'basic'
   | 'single-choice'
   | 'approval'
+  | 'copeland'
   | 'ranked-choice'
   | 'quadratic'
   | 'weighted'

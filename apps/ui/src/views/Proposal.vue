@@ -368,7 +368,9 @@ watchEffect(() => {
                     @vote="handleVoteClick"
                   />
                   <ProposalVoteRankedChoice
-                    v-else-if="proposal.type === 'ranked-choice'"
+                    v-else-if="
+                      ['ranked-choice', 'copeland'].includes(proposal.type)
+                    "
                     :proposal="proposal"
                     :default-choice="currentVote?.choice"
                     @vote="handleVoteClick"
