@@ -27,6 +27,7 @@ withDefaults(
 
 <template>
   <img
+    :key="cb"
     :src="
       getStampUrl(
         type,

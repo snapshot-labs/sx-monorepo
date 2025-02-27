@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getCacheHash, getUrl } from '@/helpers/utils';
+import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID } from '@/types';
 
 const SPACE_LOGO_WIDTH = 190;
@@ -8,11 +9,14 @@ const SPACE_LOGO_HEIGHT = 38;
 defineOptions({ inheritAttrs: false });
 
 const route = useRoute();
-const spacesStore = useSpacesStore();
 const { isWhiteLabel } = useWhiteLabel();
 const { logo } = useSkin();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
+const { data: spaceData } = useSpaceQuery({
+  networkId: networkId,
+  spaceId: spaceAddress
+});
 
 const showSpace = computed(
   () =>
@@ -30,7 +34,7 @@ const space = computed(() => {
     return null;
   }
 
-  return spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`);
+  return spaceData.value;
 });
 
 const previewLogoUrl = computed(() => {

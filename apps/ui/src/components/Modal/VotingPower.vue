@@ -34,10 +34,11 @@ const loading = computed(
     </template>
     <UiLoading v-if="loading" class="p-4 block text-center" />
     <div v-else-if="votingPower">
-      <MessageVotingPower
+      <MessageErrorFetchPower
+        v-if="votingPower.status === 'error'"
+        type="voting"
         class="p-4"
-        :voting-power="votingPower"
-        @fetch-voting-power="$emit('fetchVotingPower')"
+        @fetch="$emit('fetchVotingPower')"
       />
       <div
         v-for="(strategy, i) in votingPower.votingPowers"

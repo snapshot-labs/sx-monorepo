@@ -1,34 +1,23 @@
 <script setup lang="ts">
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
+import { useSpaceQuery } from '@/queries/spaces';
 
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
-const spacesStore = useSpacesStore();
 const { loadVotes } = useAccount();
 const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
 
-const spaceKey = computed(() => `${networkId.value}:${address.value}`);
-
-const space = computed(() => {
-  if (!resolved.value) return null;
-
-  return spacesStore.spacesMap.get(spaceKey.value);
+const { data: space, isPending } = useSpaceQuery({
+  networkId,
+  spaceId: address
 });
 
 watch(
   [resolved, networkId, address, () => web3.value.account],
   async ([resolved, networkId, address, account]) => {
     if (!resolved || !networkId || !address) return;
-
-    const space = spacesStore.spacesMap.get(spaceKey.value);
-    const hasUnnamedChildren = space?.children?.some(child => !child.name);
-    const hasUnnamedParent = space?.parent && !space.parent.name;
-
-    if (!space || hasUnnamedChildren || hasUnnamedParent) {
-      spacesStore.fetchSpace(address, networkId);
-    }
 
     if (account) {
       loadVotes(networkId, [address]);
@@ -60,6 +49,6 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <UiLoading v-if="!space" class="block p-4" />
+  <UiLoading v-if="isPending" class="block p-4" />
   <router-view v-else :space="space" />
 </template>
