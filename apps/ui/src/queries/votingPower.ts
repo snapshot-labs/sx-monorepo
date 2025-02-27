@@ -127,7 +127,7 @@ export function useProposalVotingPowerQuery(
     queryFn: async () => {
       const proposalValue = toValue(proposal);
 
-      if (!proposalValue) return null;
+      if (!proposalValue) return;
 
       return getVotingPower(
         getProposalSnapshot(toValue(proposal)),

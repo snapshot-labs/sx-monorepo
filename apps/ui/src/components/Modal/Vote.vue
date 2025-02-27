@@ -34,6 +34,7 @@ const { loadVotes, votes } = useAccount();
 const route = useRoute();
 const {
   data: votingPower,
+  isPending: isVotingPowerLoading,
   isError: isVotingPowerError,
   refetch: fetchVotingPower
 } = useProposalVotingPowerQuery(toRef(props, 'proposal'));
@@ -189,16 +190,11 @@ watchEffect(async () => {
           </div>
         </dd>
         <dt class="text-sm leading-5 mt-3">Voting power</dt>
-        <dd v-if="!votingPower || votingPower.status === 'loading'">
+        <dd v-if="isVotingPowerLoading">
           <UiLoading />
         </dd>
         <dd
-          v-else-if="votingPower.status === 'success'"
-          class="font-semibold text-skin-heading text-[20px] leading-6"
-          v-text="formattedVotingPower"
-        />
-        <dd
-          v-else-if="votingPower.status === 'error'"
+          v-else-if="votingPower"
           class="font-semibold text-skin-heading text-[20px] leading-6"
           v-text="formattedVotingPower"
         />
