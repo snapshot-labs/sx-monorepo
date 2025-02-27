@@ -120,11 +120,7 @@ async function moveToNextStep() {
             :class="[{ 'bg-skin-active-bg': token.address === t.address }]"
             @click="handleTokenClick(t)"
           >
-            <img
-              :src="getUrl(t.logo) || undefined"
-              class="rounded-full bg-skin-border size-[20px]"
-              :alt="t.symbol"
-            />
+            <UiStamp :id="`eip155:${chainId}:${t.address}`" type="token" />
             {{ t.symbol }}
           </button>
         </div>
@@ -135,11 +131,7 @@ async function moveToNextStep() {
         <div class="flex justify-between">
           You will pay
           <div class="flex items-center gap-1">
-            <img
-              :src="getUrl(token.logo) || undefined"
-              class="rounded-full bg-skin-border size-[18px]"
-              :alt="token.symbol"
-            />
+            <UiStamp :id="`eip155:${chainId}:${token.address}`" type="token" />
             {{ _n(amount) }} {{ token.symbol }}
           </div>
         </div>

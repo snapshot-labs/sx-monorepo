@@ -10,7 +10,6 @@ export type Token = {
   decimal: number;
   symbol: string;
   chainId: ChainId;
-  logo: string;
 };
 
 // TODO: Double check contract address for each network
@@ -28,13 +27,11 @@ const PAYMENT_CONTRACT_ABI = [
 export const ASSETS = {
   USDC: {
     decimal: 6,
-    symbol: 'USDC',
-    logo: 'ipfs://bafybeienhj4ymzglig6at2bovugjhb6rj4xlfloj2rc4lqad57zwi4zs54'
+    symbol: 'USDC'
   },
   USDT: {
     decimal: 6,
-    symbol: 'USDT',
-    logo: 'ipfs://bafkreidg7faht426jy7z36ssmz37smzsorhpu54mf4ceygsdgwucv3eiua'
+    symbol: 'USDT'
   }
 } as const;
 
