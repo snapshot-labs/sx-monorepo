@@ -5,6 +5,7 @@ import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -29,9 +30,13 @@ const emit = defineEmits<{
 const queryClient = useQueryClient();
 const { vote } = useActions();
 const { web3 } = useWeb3();
-const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
+const {
+  data: votingPower,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useProposalVotingPowerQuery(toRef(props, 'proposal'));
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -52,10 +57,6 @@ const formValidator = getValidator({
     reason: REASON_DEFINITION
   }
 });
-
-const votingPower = computed(() =>
-  getVotingPower(props.proposal.space, props.proposal)
-);
 
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
@@ -129,10 +130,6 @@ async function handleConfirmed(tx?: string | null) {
   }
 }
 
-function handleFetchVotingPower() {
-  fetchVotingPower(props.proposal.space, props.proposal);
-}
-
 watch(
   [() => props.open, () => web3.value.account],
   async ([open, toAccount], [, fromAccount]) => {
@@ -144,7 +141,7 @@ watch(
       await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
 
-    handleFetchVotingPower();
+    fetchVotingPower();
 
     form.value.reason =
       votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
@@ -170,9 +167,9 @@ watchEffect(async () => {
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
       <MessageErrorFetchPower
-        v-if="votingPower?.status === 'error'"
+        v-if="isVotingPowerError"
         type="voting"
-        @fetch="handleFetchVotingPower"
+        @fetch="fetchVotingPower"
       />
       <MessageVotingPower
         v-else-if="votingPower && !votingPower.canVote"
