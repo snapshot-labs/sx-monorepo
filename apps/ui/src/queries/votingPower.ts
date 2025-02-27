@@ -95,6 +95,10 @@ async function getVotingPower(
   }
 }
 
+function isLoggedIn() {
+  return !!web3.value.account && !web3.value.authLoading;
+}
+
 export function useSpaceVotingPowerQuery(space: MaybeRefOrGetter<Space>) {
   return useQuery({
     queryKey: VOTING_POWER_KEYS.space(
@@ -110,7 +114,7 @@ export function useSpaceVotingPowerQuery(space: MaybeRefOrGetter<Space>) {
         spaceValue.strategies_parsed_metadata
       ]);
     },
-    enabled: () => !!web3.value.account && !web3.value.authLoading,
+    enabled: () => isLoggedIn(),
     staleTime: CACHE_TTL
   });
 }
@@ -142,7 +146,7 @@ export function useProposalVotingPowerQuery(
         ]
       );
     },
-    enabled: false,
+    enabled: () => isLoggedIn() && toValue(proposal)?.state === 'active',
     staleTime: CACHE_TTL
   });
 }

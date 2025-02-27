@@ -118,16 +118,6 @@ async function handleVoteSubmitted() {
 }
 
 watch(
-  [proposal, () => web3.value.account, () => web3.value.authLoading],
-  ([proposal, account, authLoading]) => {
-    if (authLoading || !proposal || !account) return;
-
-    fetchVotingPower();
-  },
-  { immediate: true }
-);
-
-watch(
   [id, proposal],
   async ([id, proposal]) => {
     modalOpenVote.value = false;

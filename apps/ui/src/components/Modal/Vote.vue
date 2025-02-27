@@ -142,8 +142,6 @@ watch(
       await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
 
-    fetchVotingPower();
-
     form.value.reason =
       votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
       '';
