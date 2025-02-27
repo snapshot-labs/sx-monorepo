@@ -91,7 +91,7 @@ async function getVotingPower(
     ) {
       throw new Error('NOT_READY_YET');
     }
-    throw new Error(e);
+    throw e;
   }
 }
 
