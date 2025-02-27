@@ -61,6 +61,11 @@ async function handleFileChange(e: Event) {
     v-bind="$attrs"
     class="relative group max-w-max cursor-pointer mb-3 border-4 border-skin-bg rounded-lg overflow-hidden bg-skin-border"
     :disabled="disabled"
+    :style="{
+      'max-width': `${width}px`,
+      height: `${height}px`,
+      width: '100%'
+    }"
     @click="openFilePicker()"
   >
     <img
@@ -72,7 +77,6 @@ async function handleFileChange(e: Event) {
           'opacity-80': isUploadingImage
         }
       ]"
-      :style="{ width: `${width}px`, height: `${height}px` }"
     />
     <UiStamp
       v-else-if="fallback"
@@ -85,11 +89,7 @@ async function handleFileChange(e: Event) {
         'opacity-80': isUploadingImage
       }"
     />
-    <div
-      v-else
-      class="block"
-      :style="{ width: ` ${width}px`, height: `${height}px` }"
-    />
+    <div v-else class="block w-full h-full" />
     <div
       class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row size-full items-center content-center justify-center"
     >
