@@ -12,7 +12,7 @@ Those things include:
 - Handling data fetching state (loading, loaded, failed states).
 - Caching data.
 - Automatic retries.
-- Simplified padgination and infinite loading.
+- Simplified pagination and infinite loading.
 - Support for optimistic updates.
 - [And more](https://tanstack.com/query/v5/docs/framework/vue/overview).
 
@@ -34,7 +34,7 @@ to avoid surprises.
 Most often you will use [`useQuery`](https://tanstack.com/query/v5/docs/framework/vue/reference/useQuery) or [`useInfiniteQuery`](https://tanstack.com/query/v5/docs/framework/vue/reference/useInfiniteQuery) to create your queries.
 
 You can use those directly in components, other composables or create composable just for that query.
-Ccreating composable is generally good idea if you'd like to use it in multiple places.
+Creating composable is generally good idea if you'd like to use it in multiple places.
 
 When creating composables for queries put them in `src/queries` directory.
 
