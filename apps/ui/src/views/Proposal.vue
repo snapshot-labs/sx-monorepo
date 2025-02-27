@@ -41,7 +41,10 @@ const {
   isPending: isVotingPowerPending,
   isError: isVotingPowerError,
   refetch: fetchVotingPower
-} = useProposalVotingPowerQuery(toRef(() => proposal.value));
+} = useProposalVotingPowerQuery(
+  toRef(() => proposal.value),
+  toRef(() => proposal.value?.state === 'active')
+);
 
 const discussion = computed(() => {
   if (!proposal.value) return null;

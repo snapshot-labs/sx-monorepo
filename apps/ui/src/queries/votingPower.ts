@@ -120,7 +120,8 @@ export function useSpaceVotingPowerQuery(space: MaybeRefOrGetter<Space>) {
 }
 
 export function useProposalVotingPowerQuery(
-  proposal: MaybeRefOrGetter<Proposal | null | undefined>
+  proposal: MaybeRefOrGetter<Proposal | null | undefined>,
+  active: MaybeRefOrGetter<boolean>
 ) {
   return useQuery({
     queryKey: VOTING_POWER_KEYS.proposal(
@@ -146,7 +147,7 @@ export function useProposalVotingPowerQuery(
         ]
       );
     },
-    enabled: () => isLoggedIn() && toValue(proposal)?.state === 'active',
+    enabled: () => isLoggedIn() && toValue(active),
     staleTime: CACHE_TTL
   });
 }
