@@ -91,3 +91,7 @@ is to execute `yarn changeset`, specify package you updated, version bump per [s
 Then commit generated files in your PR.
 
 Once merged changesets actions will create PR that can be used to release and publish those packages.
+
+## Development docs
+
+- [Using `vue-query` to fetch data](./docs/vue-query.md)

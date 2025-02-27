@@ -59,6 +59,7 @@ function getBaseTime(ts: number): string {
 }
 
 function updateDateWithTime() {
+  if (!time.value) return;
   const [hours, minutes] = time.value.split(':');
 
   date.value = dayjs
@@ -71,6 +72,11 @@ function updateDateWithTime() {
 
 function validateForm() {
   if (!props.min) return;
+
+  if (!time.value) {
+    formError.value = 'Time is required';
+    return;
+  }
 
   const minDate = dayjs.unix(props.min).startOf('minute');
 
