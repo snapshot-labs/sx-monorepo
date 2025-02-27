@@ -92,7 +92,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <UiTopnav v-bind="$attrs" class="gap-4 pr-4">
+  <UiTopnav v-bind="$attrs">
     <div
       class="flex items-center h-full truncate"
       :class="{

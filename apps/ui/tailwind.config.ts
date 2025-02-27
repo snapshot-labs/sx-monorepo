@@ -64,7 +64,8 @@ export default {
       lg: '1012px',
       xl: '1280px',
       '2xl': '1536px',
-      '3xl': '1844px'
+      '3xl': '1844px',
+      maximum: '1900px'
     },
     spacing: {
       0: '0px',
@@ -83,7 +84,8 @@ export default {
       9: '72px',
       10: '80px',
       11: '88px',
-      12: '96px'
+      12: '96px',
+      maximum: '1900px'
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']

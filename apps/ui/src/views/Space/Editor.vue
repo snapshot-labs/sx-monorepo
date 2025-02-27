@@ -446,10 +446,10 @@ watchEffect(() => {
 </script>
 <template>
   <div v-if="proposal">
-    <UiTopnav class="gap-2 px-4">
+    <UiTopnav>
       <UiButton
         :to="{ name: 'space-overview', params: { space: spaceKey } }"
-        class="w-[46px] !px-0 mr-2 shrink-0"
+        class="w-[46px] !px-0 mr-2 ml-4 shrink-0"
       >
         <IH-arrow-narrow-left />
       </UiButton>

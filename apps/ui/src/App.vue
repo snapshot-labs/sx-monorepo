@@ -41,8 +41,10 @@ onMounted(() => initWhiteLabel());
 </script>
 
 <template>
-  <LayoutSplash v-if="!whiteLabelResolved" />
-  <LayoutSite v-else-if="routeName === 'site'" />
-  <LayoutApp v-else />
-  <AppFooter />
+  <div class="max-w-maximum mx-auto">
+    <LayoutSplash v-if="!whiteLabelResolved" />
+    <LayoutSite v-else-if="routeName === 'site'" />
+    <LayoutApp v-else />
+    <AppFooter />
+  </div>
 </template>
