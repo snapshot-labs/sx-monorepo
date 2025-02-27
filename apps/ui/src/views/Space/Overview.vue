@@ -18,7 +18,7 @@ const isOffchainSpace = computed(() =>
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
-const { data, isPending } = useProposalsSummaryQuery(
+const { data, isPending, isError } = useProposalsSummaryQuery(
   toRef(() => props.space.network),
   toRef(() => props.space.id)
 );
@@ -152,6 +152,7 @@ watchEffect(() => setTitle(props.space.name));
     <div>
       <ProposalsList
         title="Proposals"
+        :is-error="isError"
         :loading="isPending"
         :limit="PROPOSALS_SUMMARY_LIMIT - 1"
         :proposals="data ?? []"

@@ -28,15 +28,21 @@ const spaceLabels = computed(() => {
   return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
 });
 
-const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
-  useProposalsQuery(
-    toRef(() => props.space.network),
-    toRef(() => props.space.id),
-    {
-      state,
-      labels
-    }
-  );
+const {
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isPending,
+  isError,
+  isFetchingNextPage
+} = useProposalsQuery(
+  toRef(() => props.space.network),
+  toRef(() => props.space.id),
+  {
+    state,
+    labels
+  }
+);
 
 function handleClearLabelsFilter(close: () => void) {
   labels.value = [];
@@ -225,6 +231,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
     <ProposalsList
       title="Proposals"
       limit="off"
+      :is-error="isError"
       :loading="isPending"
       :loading-more="isFetchingNextPage"
       :proposals="data?.pages.flat() ?? []"

@@ -4,6 +4,7 @@ import { Proposal as ProposalType } from '@/types';
 const props = withDefaults(
   defineProps<{
     title?: string;
+    isError?: boolean;
     loading?: boolean;
     loadingMore?: boolean;
     limit?: number | 'off';
@@ -36,6 +37,13 @@ const currentLimit = computed(() => {
   <div>
     <UiLabel v-if="title" :label="title" sticky />
     <UiLoading v-if="loading" class="block px-4 py-3" />
+    <div
+      v-else-if="isError"
+      class="px-4 py-3 flex items-center text-skin-link gap-2"
+    >
+      <IH-exclamation-circle />
+      <span v-text="'Failed to load proposals.'" />
+    </div>
     <div v-else>
       <UiContainerInfiniteScroll
         :loading-more="loadingMore"
