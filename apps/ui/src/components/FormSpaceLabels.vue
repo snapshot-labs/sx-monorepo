@@ -45,14 +45,16 @@ function handleDeleteLabel(id: string) {
   <div class="flex flex-col gap-3">
     <div v-for="(label, i) in labels" :key="i">
       <div
-        class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
+        class="flex justify-between items-start md:items-center rounded-lg border px-4 py-3 text-skin-link gap-3"
       >
-        <div class="flex items-center max-w-md gap-3">
+        <div
+          class="flex flex-col md:flex-row max-w-md truncate gap-x-3 gap-y-2"
+        >
           <UiProposalLabel
             :label="label.name || 'label preview'"
             :color="label.color"
           />
-          <div class="truncate">
+          <div v-if="label.description" class="truncate">
             {{ label.description }}
           </div>
         </div>
