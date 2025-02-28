@@ -43,29 +43,32 @@ function handleDeleteLabel(id: string) {
 
 <template>
   <div class="flex flex-col gap-3">
-    <div v-for="(label, i) in labels" :key="i">
+    <div
+      v-for="(label, i) in labels"
+      :key="i"
+      class="flex justify-between w-full items-start md:items-center rounded-lg border px-4 py-3 text-skin-link gap-3"
+    >
       <div
-        class="flex justify-between items-start md:items-center rounded-lg border px-4 py-3 text-skin-link gap-3"
+        class="flex flex-wrap md:flex-nowrap items-center gap-x-3 gap-y-1 truncate"
       >
-        <div
-          class="flex flex-col md:flex-row max-w-md truncate gap-x-3 gap-y-2"
-        >
+        <div class="md:min-w-max min-w-0">
           <UiProposalLabel
             :label="label.name || 'label preview'"
             :color="label.color"
+            class="w-full"
           />
-          <div v-if="label.description" class="truncate">
-            {{ label.description }}
-          </div>
         </div>
-        <div class="flex gap-3">
-          <button type="button" @click="() => setModalStatus(true, label.id)">
-            <IH-pencil />
-          </button>
-          <button type="button" @click="() => handleDeleteLabel(label.id)">
-            <IH-trash />
-          </button>
+        <div v-if="label.description" class="w-full">
+          <div class="truncate" v-text="label.description" />
         </div>
+      </div>
+      <div class="flex gap-3 items-center h-[24px]">
+        <button type="button" @click="() => setModalStatus(true, label.id)">
+          <IH-pencil />
+        </button>
+        <button type="button" @click="() => handleDeleteLabel(label.id)">
+          <IH-trash />
+        </button>
       </div>
     </div>
     <UiButton
