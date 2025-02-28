@@ -186,7 +186,7 @@ onMounted(() => {
     </div>
     <div
       v-if="space.additionalRawData?.domain"
-      class="shrink-0 relative h-full"
+      class="shrink-0 relative h-full hidden sm:block"
     >
       <Affix :top="137" :bottom="100">
         <div>
