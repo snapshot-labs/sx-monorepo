@@ -5,7 +5,7 @@ import { _n } from '@/helpers/utils';
 const route = useRoute();
 const { web3 } = useWeb3();
 const { discussions, votes, loadDiscussion, loadVotes, sendStatement } =
-  usePulse();
+  useTownhall();
 const { addNotification } = useUiStore();
 
 const id = parseInt(route.params.id as string);

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{ statements: any[] }>();
 
-const { sendVote } = usePulse();
+const { sendVote } = useTownhall();
 const { addNotification } = useUiStore();
 
 const loading = ref(false);

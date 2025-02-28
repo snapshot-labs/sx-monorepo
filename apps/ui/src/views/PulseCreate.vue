@@ -2,7 +2,7 @@
 import router from '@/routes';
 
 const route = useRoute();
-const { sendDiscussion } = usePulse();
+const { sendDiscussion } = useTownhall();
 const { addNotification } = useUiStore();
 
 const title = ref(route.query.title as string);

@@ -27,9 +27,9 @@ client.subscribe(([subject, body]) => {
   }
 });
 
-export function usePulse() {
+export function useTownhall() {
   async function loadDiscussion(id: number) {
-    discussions.value[id] = await client.requestAsync('get_discussion', id);
+    discussions.value[id] = await client.requestAsync('getDiscussion', id);
     await client.requestAsync('subscribe', id);
   }
 
@@ -37,7 +37,7 @@ export function usePulse() {
     const voter = web3.value.account;
 
     if (voter) {
-      votes.value[id] = await client.requestAsync('get_votes', [id, voter]);
+      votes.value[id] = await client.requestAsync('getVotes', [id, voter]);
     } else {
       votes.value[id] = [];
     }
