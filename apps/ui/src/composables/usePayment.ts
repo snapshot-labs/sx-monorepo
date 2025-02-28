@@ -15,13 +15,13 @@ export type Token = {
 // TODO: Double check contract address for each network
 const PAYMENT_CONTRACT_ADDRESSES: Record<ChainId, string> = {
   1: '',
-  11155111: '0xA92D665c4814c8E1681AaB292BA6d2278D01DEE0',
-  8453: '0xA92D665c4814c8E1681AaB292BA6d2278D01DEE0',
+  11155111: '0xE40BfEB5a3014c9b98597088cA71eccdc27Ca410',
+  8453: '0xE40BfEB5a3014c9b98597088cA71eccdc27Ca410',
   84532: ''
 } as const;
 
 const PAYMENT_CONTRACT_ABI = [
-  'function payWithERC20Token(address token, uint256 amount, bytes barcode)'
+  'function payWithERC20Token(address token, uint256 amount, string barcode)'
 ] as const;
 
 export const ASSETS = {
