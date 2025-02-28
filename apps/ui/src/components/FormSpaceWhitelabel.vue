@@ -171,7 +171,7 @@ onMounted(() => {
         </div>
         <UiInputStamp
           v-model="skinSettings.logo"
-          :disabled="disabled"
+          :disabled="isDisabled"
           :fallback="false"
           :width="380"
           :height="76"
