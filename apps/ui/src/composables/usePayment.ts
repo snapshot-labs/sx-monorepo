@@ -1,6 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
-import { toUtf8Bytes } from '@ethersproject/strings';
 import { abis } from '@/helpers/abis';
 import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
@@ -152,7 +151,7 @@ export default function usePayment() {
     return paymentContract.payWithERC20Token(
       token.address,
       getWeiAmount(token, amount),
-      toUtf8Bytes(barcode)
+      barcode
     );
   }
 
