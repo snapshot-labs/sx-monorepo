@@ -312,7 +312,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       class="space-y-4 flex flex-col"
       style="min-height: calc(100vh - 114px)"
     >
-      <div v-show="activeTab === 'profile'" class="flex-grow">
+      <div v-show="activeTab === 'profile'" class="flex-grow pb-[100px]">
         <FormSpaceProfile
           :id="space.id"
           :space="space"
