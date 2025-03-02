@@ -445,7 +445,7 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal">
+  <div v-if="proposal" class="!pb-0">
     <UiTopnav>
       <UiButton
         :to="{ name: 'space-overview', params: { space: spaceKey } }"
@@ -664,11 +664,11 @@ watchEffect(() => {
       </div>
 
       <Affix
-        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6']"
+        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l']"
         :top="72"
         :bottom="64"
       >
-        <div class="flex flex-col p-4 space-y-4">
+        <div class="flex flex-col p-4 space-y-4 md:mb-6">
           <EditorVotingType
             v-model="proposal"
             :voting-types="
