@@ -11,6 +11,7 @@ import { NetworkID } from '@/types';
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
+  hiddenStrategies?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -25,6 +26,8 @@ const hasError = ref(false);
 const network = computed(() => getNetwork(props.networkId));
 const filteredStrategies = computed(() => {
   return strategies.value.filter(strategy => {
+    if (props.hiddenStrategies?.includes(strategy.name)) return false;
+
     if (!searchValue.value) return true;
 
     return strategy.name
