@@ -222,12 +222,11 @@ function processExecutions(
 
 function formatSpace(
   space: ApiSpaceWithMetadata,
-  networkId: NetworkID,
   constants: NetworkConstants
 ): Space {
   return {
     ...space,
-    network: networkId,
+    network: space._indexer as NetworkID,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
     cover: space.metadata.cover,
@@ -602,6 +601,12 @@ export function createApi(
       if (_filter.searchQuery) {
         _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
       }
+
+      let indexer;
+      if (_filter?.network && _filter.network !== 'all') {
+        indexer = _filter.network;
+      }
+
       delete _filter.searchQuery;
       delete _filter.category;
       delete _filter.network;
@@ -609,7 +614,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
-          indexer: networkId,
+          indexer,
           first: limit,
           skip,
           where: {
@@ -636,7 +641,7 @@ export function createApi(
 
       return data.spaces
         .filter(space => isSpaceWithMetadata(space))
-        .map(space => formatSpace(space, networkId, constants));
+        .map(space => formatSpace(space, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
@@ -660,7 +665,7 @@ export function createApi(
       );
 
       if (!isSpaceWithMetadata(data.space)) return null;
-      return formatSpace(data.space, networkId, constants);
+      return formatSpace(data.space, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
       const [{ data }, highlightResult] = await Promise.all([

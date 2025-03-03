@@ -21,6 +21,7 @@ gql(`
 
   fragment spaceFields on Space {
     id
+    _indexer
     verified
     turbo
     metadata {
@@ -244,7 +245,7 @@ export const SPACE_QUERY = gql(`
 `);
 
 export const SPACES_QUERY = gql(`
-  query Spaces($indexer: String!, $first: Int!, $skip: Int!, $where: Space_filter) {
+  query Spaces($indexer: String, $first: Int!, $skip: Int!, $where: Space_filter) {
     spaces(
       indexer: $indexer
       first: $first
