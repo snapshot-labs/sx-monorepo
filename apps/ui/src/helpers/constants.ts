@@ -10,6 +10,9 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
+export const UNIFIED_API_URL =
+  'https://sx-api-unified-l4gfp.ondigitalocean.app';
+
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
 export const TURBO_URL =

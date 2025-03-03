@@ -415,6 +415,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: VOTES_QUERY,
         variables: {
+          indexer: networkId,
           first: limit,
           skip,
           orderBy,
@@ -484,12 +485,7 @@ export function createApi(
     ): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
-        variables: {
-          spaceIds,
-          voter,
-          first: limit,
-          skip
-        }
+        variables: { indexer: networkId, spaceIds, voter, first: limit, skip }
       });
 
       return Object.fromEntries(
@@ -613,6 +609,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
+          indexer: networkId,
           first: limit,
           skip,
           where: {
@@ -645,7 +642,7 @@ export function createApi(
       const [{ data }, highlightResult] = await Promise.all([
         apollo.query({
           query: SPACE_QUERY,
-          variables: { id }
+          variables: { indexer: networkId, id }
         }),
         highlightApolloClient
           ?.query({
@@ -669,7 +666,7 @@ export function createApi(
       const [{ data }, highlightResult] = await Promise.all([
         apollo.query({
           query: USER_QUERY,
-          variables: { id }
+          variables: { indexer: networkId, id }
         }),
         highlightApolloClient
           ?.query({
@@ -688,6 +685,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: LEADERBOARD_QUERY,
         variables: {
+          indexer: networkId,
           first: 1000,
           skip: 0,
           orderBy: 'proposal_count',
@@ -723,6 +721,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: LEADERBOARD_QUERY,
         variables: {
+          indexer: networkId,
           first: limit,
           skip,
           orderBy,
