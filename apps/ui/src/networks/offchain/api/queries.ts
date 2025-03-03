@@ -322,6 +322,10 @@ export const USER_QUERY = gql`
       farcaster
       votesCount
       created
+      emailSubscription {
+        status
+        subscriptions
+      }
     }
   }
 `;
