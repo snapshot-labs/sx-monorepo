@@ -1,5 +1,6 @@
 import { client } from '@/helpers/kbyte';
 import { Discussion, Vote } from '@/helpers/pulse';
+import { getDiscussion, getVotes } from '@/helpers/townhall';
 
 const { web3 } = useWeb3();
 
@@ -10,7 +11,18 @@ client.subscribe(([subject, body]) => {
   if (subject === 'justsaying') {
     if (body.subject === 'new_statement') {
       const statement = body.body;
-      discussions.value[statement.discussion].statements.push(statement);
+      statement.discussion = { id: statement.discussion };
+      statement.vote_count = 0;
+      statement.scores_1 = 0;
+      statement.scores_2 = 0;
+      statement.scores_3 = 0;
+
+      const currentDiscussion = discussions.value[statement.discussion.id];
+
+      discussions.value[statement.discussion.id] = {
+        ...currentDiscussion,
+        statements: [...(currentDiscussion.statements || []), statement]
+      };
     }
 
     if (body.subject === 'new_vote') {
@@ -29,18 +41,14 @@ client.subscribe(([subject, body]) => {
 
 export function useTownhall() {
   async function loadDiscussion(id: number) {
-    discussions.value[id] = await client.requestAsync('getDiscussion', id);
+    discussions.value[id] = await getDiscussion(id.toString());
     await client.requestAsync('subscribe', id);
   }
 
   async function loadVotes(id: number) {
     const voter = web3.value.account;
 
-    if (voter) {
-      votes.value[id] = await client.requestAsync('getVotes', [id, voter]);
-    } else {
-      votes.value[id] = [];
-    }
+    votes.value[id] = voter ? await getVotes(id.toString(), voter) : [];
   }
 
   async function sendDiscussion(title: string, body: string) {

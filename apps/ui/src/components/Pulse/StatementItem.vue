@@ -37,7 +37,7 @@ const choice = computed(() => {
           {{ _p(statement.scores_3 / statement.vote_count, 1) }} pass
         </div>
       </div>
-      <div class="justify-end" v-text="`${_n(statement.vote_count)} votes`" />
+      <div class="flex-1" v-text="`${_n(statement.vote_count)} votes`" />
       <div class="justify-end" v-text="`#${statement.id}`" />
     </div>
   </div>

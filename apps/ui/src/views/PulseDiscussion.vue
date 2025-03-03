@@ -19,11 +19,11 @@ const discussion: ComputedRef<Discussion> = computed(
   () => discussions.value[id]
 );
 const statements: ComputedRef<Statement[]> = computed(
-  () => discussion.value.statements
+  () => discussion.value.statements || []
 );
 const pendingStatements: ComputedRef<Statement[]> = computed(() =>
   statements.value.filter(
-    s => !votes.value[s.discussion].find(v => v.statement === s.id)
+    s => !votes.value[s.discussion.id].find(v => v.statement.id === s.id)
   )
 );
 const results: ComputedRef<Statement[]> = computed(() =>
@@ -34,8 +34,7 @@ onMounted(async () => {
   if (!discussion.value) {
     loading.value = true;
 
-    await loadDiscussion(id);
-    await loadVotes(id);
+    await Promise.all([loadDiscussion(id), loadVotes(id)]);
 
     loading.value = false;
     loaded.value = true;

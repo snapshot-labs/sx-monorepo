@@ -11,20 +11,20 @@ export interface Discussion {
 
 export interface Statement {
   id: number;
-  discussion: number;
   body: string;
   score_1: number;
   score_2: number;
   score_3: number;
   vote_count: number;
   created: number;
+  discussion: Discussion;
 }
 
 export interface Vote {
   id: number;
   voter: string;
-  discussion: number;
-  statement: number;
+  discussion: Discussion;
+  statement: Statement;
   choice: number;
   created: number;
 }
