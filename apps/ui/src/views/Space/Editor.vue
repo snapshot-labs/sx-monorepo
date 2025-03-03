@@ -451,11 +451,11 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal">
-    <UiTopnav class="gap-2 px-4">
+  <div v-if="proposal" class="!pb-0">
+    <UiTopnav>
       <UiButton
         :to="{ name: 'space-overview', params: { space: spaceKey } }"
-        class="w-[46px] !px-0 mr-2 shrink-0"
+        class="w-[46px] !px-0 mr-2 ml-4 shrink-0"
       >
         <IH-arrow-narrow-left />
       </UiButton>
@@ -510,10 +510,20 @@ watchEffect(() => {
             >). Change to a
             <AppLink
               to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              class="font-semibold text-rose-500"
               >premium network
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
-            or upgrade networks to continue.
+            or
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="font-semibold text-rose-500"
+            >
+              upgrade your space
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </a>
+            to continue.
           </UiAlert>
           <template v-else>
             <template v-if="!isPropositionPowerPending">
@@ -670,11 +680,11 @@ watchEffect(() => {
       </div>
 
       <Affix
-        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6']"
+        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l']"
         :top="72"
         :bottom="64"
       >
-        <div class="flex flex-col p-4 space-y-4">
+        <div class="flex flex-col p-4 space-y-4 md:mb-6">
           <EditorVotingType
             v-model="proposal"
             :voting-types="enforcedVoteType ? [enforcedVoteType] : votingTypes"
