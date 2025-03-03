@@ -239,10 +239,7 @@ function formatSpace(
       : constants.EDITOR_VOTING_TYPES,
     min_voting_period: space.voting.period ?? 0,
     max_voting_period: space.voting.period ?? 0,
-    proposal_threshold:
-      String(validationParams.minScore) ||
-      String(validationParams.scoreThreshold) ||
-      '1',
+    proposal_threshold: String(validationParams.minScore) || '1',
     treasuries,
     labels: space.labels,
     delegations: formatDelegations(space, networkId),
