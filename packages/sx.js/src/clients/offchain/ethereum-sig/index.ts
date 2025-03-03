@@ -268,6 +268,7 @@ export class EthereumSig {
         voteType = approvalVoteTypes;
         choice = data.choice as number[];
         break;
+      case 'copeland':
       case 'ranked-choice':
         voteType = rankedChoiceVoteTypes;
         choice = data.choice as number[];
