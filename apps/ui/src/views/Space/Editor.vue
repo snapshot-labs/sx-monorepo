@@ -504,10 +504,20 @@ watchEffect(() => {
             >). Change to a
             <AppLink
               to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              class="font-semibold text-rose-500"
               >premium network
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
-            or upgrade networks to continue.
+            or
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="font-semibold text-rose-500"
+            >
+              upgrade your space
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </a>
+            to continue.
           </UiAlert>
           <template v-else>
             <template v-if="!isPropositionPowerPending">
