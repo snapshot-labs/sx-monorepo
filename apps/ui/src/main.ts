@@ -17,8 +17,7 @@ const knownHosts = [
   'horizen-eon.safe.onchainden.com',
   'safe.fantom.network',
   'safe.apechain.com',
-  'console.brahma.fi',
-  window.location.host
+  'console.brahma.fi'
 ];
 const parentUrl =
   window.location != window.parent.location
@@ -28,7 +27,10 @@ const parentUrl =
       ]
     : document.location.href;
 const parentHost = new URL(parentUrl).host;
-if (window !== window.parent && !knownHosts.includes(parentHost)) {
+if (
+  window.location.host !== window.parent.location.host &&
+  !knownHosts.includes(parentHost)
+) {
   document.documentElement.style.display = 'none';
   throw new Error(`Unknown host: ${parentHost}`);
 }
