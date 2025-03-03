@@ -61,13 +61,11 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <div class="px-4">
       <div class="mb-4 relative">
-        <AppLink :to="{ name: 'space-overview' }">
-          <SpaceAvatar
-            :space="space"
-            :size="90"
-            class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
-          />
-        </AppLink>
+        <SpaceAvatar
+          :space="space"
+          :size="90"
+          class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
+        />
         <div class="flex items-center">
           <h1 v-text="space.name" />
           <UiBadgeVerified
