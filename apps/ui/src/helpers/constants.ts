@@ -78,6 +78,7 @@ export const SUPPORTED_VOTING_TYPES: VoteType[] = [
   'basic',
   'single-choice',
   'approval',
+  'copeland',
   'ranked-choice',
   'weighted',
   'quadratic'
@@ -118,6 +119,11 @@ export const VOTING_TYPES_INFO: Record<
     label: 'Quadratic voting',
     description:
       'Each voter may spread voting power across any number of choices. Results are calculated quadratically.'
+  },
+  copeland: {
+    label: 'Copeland voting (BETA)',
+    description:
+      'Voters can rank multiple choices. Results are calculated by Copeland method.'
   }
 };
 
