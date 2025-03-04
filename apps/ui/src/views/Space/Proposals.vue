@@ -11,12 +11,16 @@ const props = defineProps<{ space: Space }>();
 const { setTitle } = useTitle();
 const router = useRouter();
 const route = useRoute();
+const { web3 } = useWeb3();
 const {
   data: votingPower,
   isPending: isVotingPowerPending,
   isError: isVotingPowerError,
   refetch: fetchVotingPower
-} = useSpaceVotingPowerQuery(toRef(props, 'space'));
+} = useSpaceVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'space')
+);
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);

@@ -42,6 +42,7 @@ const {
   isError: isVotingPowerError,
   refetch: fetchVotingPower
 } = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
   toRef(() => proposal.value),
   toRef(() => proposal.value?.state === 'active')
 );

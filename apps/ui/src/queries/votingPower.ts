@@ -22,15 +22,17 @@ const CACHE_TTL = 1000 * 60;
 
 const VOTING_POWER_KEYS = {
   space: (
+    account: MaybeRefOrGetter<string>,
     block: MaybeRefOrGetter<Snapshot>,
     spaceId: MaybeRefOrGetter<string>
-  ) =>
-    ['votingPower', toRef(() => web3.value.account), block, spaceId] as const,
+  ) => ['votingPower', account, block, spaceId] as const,
   proposal: (
+    account: MaybeRefOrGetter<string>,
     block: MaybeRefOrGetter<Snapshot>,
     spaceId: MaybeRefOrGetter<string>,
     proposalId: MaybeRefOrGetter<string>
-  ) => [...VOTING_POWER_KEYS.space(block, spaceId), proposalId] as const
+  ) =>
+    [...VOTING_POWER_KEYS.space(account, block, spaceId), proposalId] as const
 };
 
 const { web3 } = useWeb3();
@@ -95,13 +97,13 @@ async function getVotingPower(
   }
 }
 
-function isLoggedIn(): boolean {
-  return !!web3.value.account && !web3.value.authLoading;
-}
-
-export function useSpaceVotingPowerQuery(space: MaybeRefOrGetter<Space>) {
+export function useSpaceVotingPowerQuery(
+  account: MaybeRefOrGetter<string>,
+  space: MaybeRefOrGetter<Space>
+) {
   return useQuery({
     queryKey: VOTING_POWER_KEYS.space(
+      toRef(() => toValue(account)),
       toRef(() => getLatestBlock(toValue(space).network)),
       toRef(() => toValue(space).id)
     ),
@@ -114,17 +116,19 @@ export function useSpaceVotingPowerQuery(space: MaybeRefOrGetter<Space>) {
         spaceValue.strategies_parsed_metadata
       ]);
     },
-    enabled: () => isLoggedIn(),
+    enabled: () => !!toValue(account),
     staleTime: CACHE_TTL
   });
 }
 
 export function useProposalVotingPowerQuery(
+  account: MaybeRefOrGetter<string>,
   proposal: MaybeRefOrGetter<Proposal | null | undefined>,
   active: MaybeRefOrGetter<boolean>
 ) {
   return useQuery({
     queryKey: VOTING_POWER_KEYS.proposal(
+      toRef(() => toValue(account)),
       toRef(() => getProposalSnapshot(toValue(proposal))),
       toRef(() => toValue(proposal)?.space?.id || ''),
       toRef(() => toValue(proposal)?.id || '')
@@ -147,7 +151,7 @@ export function useProposalVotingPowerQuery(
         ]
       );
     },
-    enabled: () => isLoggedIn() && toValue(active),
+    enabled: () => !!toValue(account) && toValue(active),
     staleTime: CACHE_TTL
   });
 }

@@ -37,7 +37,11 @@ const {
   isPending: isVotingPowerPending,
   isError: isVotingPowerError,
   refetch: fetchVotingPower
-} = useProposalVotingPowerQuery(toRef(props, 'proposal'), toRef(props, 'open'));
+} = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'proposal'),
+  toRef(props, 'open')
+);
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
