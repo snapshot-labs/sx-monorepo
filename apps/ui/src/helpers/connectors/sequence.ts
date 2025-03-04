@@ -9,7 +9,7 @@ export default class Sequence extends Connector {
   }
 
   async connect() {
-    const { currentMode } = useUserSkin();
+    const { currentTheme } = useTheme();
 
     try {
       const wallet = await this.getWallet();
@@ -18,7 +18,7 @@ export default class Sequence extends Connector {
         ...this.options,
         authorize: true,
         settings: {
-          theme: currentMode.value
+          theme: currentTheme.value
         }
       });
 

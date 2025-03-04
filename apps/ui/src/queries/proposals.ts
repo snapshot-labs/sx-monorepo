@@ -24,6 +24,19 @@ export const PROPOSALS_KEYS = {
     networkId: MaybeRefOrGetter<NetworkID>,
     spaceId: MaybeRefOrGetter<string>
   ) => [...PROPOSALS_KEYS.all, networkId, spaceId] as const,
+  followedSpacesList: (
+    networkId: MaybeRefOrGetter<NetworkID>,
+    spacesIds: MaybeRefOrGetter<string[]>,
+    filters: Filters,
+    query?: MaybeRefOrGetter<string>
+  ) =>
+    [
+      ...PROPOSALS_KEYS.all,
+      'followedList',
+      networkId,
+      spacesIds,
+      { ...filters, query }
+    ] as const,
   spaceSummary: (
     networkId: MaybeRefOrGetter<NetworkID>,
     spaceId: MaybeRefOrGetter<string>
@@ -63,14 +76,13 @@ async function withAuthorNames(proposals: Proposal[]) {
 function setProposalsDetails(
   queryClient: QueryClient,
   networkId: NetworkID,
-  spaceId: string,
   proposals: Proposal[]
 ) {
   for (const proposal of proposals) {
     queryClient.setQueryData(
       PROPOSALS_KEYS.detail(
         networkId,
-        spaceId,
+        proposal.space.id,
         proposal.proposal_id.toString()
       ),
       proposal
@@ -79,7 +91,7 @@ function setProposalsDetails(
 }
 
 async function getProposals(
-  spaceId: string,
+  spaceIds: string[],
   networkId: NetworkID,
   { limit, skip }: { limit: number; skip: number },
   filters?: ProposalsFilter,
@@ -90,7 +102,7 @@ async function getProposals(
 
   return withAuthorNames(
     await getNetwork(networkId).api.loadProposals(
-      [spaceId],
+      spaceIds,
       {
         limit,
         skip
@@ -102,19 +114,21 @@ async function getProposals(
   );
 }
 
-export function useProposalsQuery(
+function getProposalsQuery(
+  queryKey: Parameters<typeof useInfiniteQuery>[0]['queryKey'],
   networkId: MaybeRefOrGetter<NetworkID>,
-  spaceId: MaybeRefOrGetter<string>,
+  spacesIds: MaybeRefOrGetter<string[]>,
   filters: Filters,
   query?: MaybeRefOrGetter<string>
 ) {
   const queryClient = useQueryClient();
+
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: PROPOSALS_KEYS.spaceList(networkId, spaceId, filters, query),
+    queryKey: queryKey,
     queryFn: async ({ pageParam = 0 }) => {
       const proposals = await getProposals(
-        toValue(spaceId),
+        toValue(spacesIds),
         toValue(networkId),
         {
           limit: PROPOSALS_LIMIT,
@@ -127,12 +141,7 @@ export function useProposalsQuery(
         toValue(query)
       );
 
-      setProposalsDetails(
-        queryClient,
-        toValue(networkId),
-        toValue(spaceId),
-        proposals
-      );
+      setProposalsDetails(queryClient, toValue(networkId), proposals);
 
       return proposals;
     },
@@ -142,6 +151,37 @@ export function useProposalsQuery(
       return pages.length * PROPOSALS_LIMIT;
     }
   });
+}
+
+// TODO: Support multiple networks
+export function useHomeProposalsQuery(
+  networkId: MaybeRefOrGetter<NetworkID>,
+  spacesIds: MaybeRefOrGetter<string[]>,
+  filters: Filters,
+  query?: MaybeRefOrGetter<string>
+) {
+  return getProposalsQuery(
+    PROPOSALS_KEYS.followedSpacesList(networkId, spacesIds, filters, query),
+    networkId,
+    spacesIds,
+    filters,
+    query
+  );
+}
+
+export function useProposalsQuery(
+  networkId: MaybeRefOrGetter<NetworkID>,
+  spaceId: MaybeRefOrGetter<string>,
+  filters: Filters,
+  query?: MaybeRefOrGetter<string>
+) {
+  return getProposalsQuery(
+    PROPOSALS_KEYS.spaceList(networkId, spaceId, filters, query),
+    networkId,
+    toRef(() => [toValue(spaceId)]),
+    filters,
+    query
+  );
 }
 
 export function useProposalsSummaryQuery(
@@ -154,7 +194,7 @@ export function useProposalsSummaryQuery(
     queryKey: PROPOSALS_KEYS.spaceSummary(networkId, spaceId),
     queryFn: async () => {
       const proposals = await getProposals(
-        toValue(spaceId),
+        [toValue(spaceId)],
         toValue(networkId),
         {
           skip: 0,
@@ -162,12 +202,7 @@ export function useProposalsSummaryQuery(
         }
       );
 
-      setProposalsDetails(
-        queryClient,
-        toValue(networkId),
-        toValue(spaceId),
-        proposals
-      );
+      setProposalsDetails(queryClient, toValue(networkId), proposals);
 
       return proposals;
     }
