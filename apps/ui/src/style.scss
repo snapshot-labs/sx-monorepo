@@ -95,6 +95,10 @@
   src: url('./assets/fonts/Stolzl-Medium.woff2') format('woff2');
 }
 
+html {
+  overflow-y: scroll !important;
+}
+
 body {
   @apply font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
 }
