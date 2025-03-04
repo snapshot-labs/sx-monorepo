@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Discussion, Statement } from '@/helpers/pulse';
-import { _n } from '@/helpers/utils';
+import {_n, clone} from '@/helpers/utils';
 
 const route = useRoute();
 const { web3 } = useWeb3();
@@ -18,16 +18,15 @@ const statement = ref('');
 const discussion: ComputedRef<Discussion> = computed(
   () => discussions.value[id]
 );
-const statements: ComputedRef<Statement[]> = computed(
-  () => discussion.value.statements || []
-);
 const pendingStatements: ComputedRef<Statement[]> = computed(() =>
-  statements.value.filter(
+  (discussion.value.statements || []).filter(
     s => !votes.value[s.discussion.id].find(v => v.statement.id === s.id)
   )
 );
 const results: ComputedRef<Statement[]> = computed(() =>
-  statements.value.sort((a, b) => b.vote_count - a.vote_count)
+  clone(discussion.value.statements || []).sort(
+    (a, b) => b.vote_count - a.vote_count
+  )
 );
 
 onMounted(async () => {
@@ -128,7 +127,7 @@ async function handleSubmit() {
         </div>
       </div>
 
-      <div v-if="discussion.statements.length > 0">
+      <div v-if="results.length > 0">
         <div class="mb-3 flex">
           <h4 class="eyebrow flex items-center gap-2 flex-1">
             <IH-chart-square-bar />
