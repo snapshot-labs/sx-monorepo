@@ -374,8 +374,7 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId])
-      throw new Error(err.message);
+    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId]) throw err;
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',
