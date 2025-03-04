@@ -87,6 +87,10 @@ async function handleExecute() {
       emit('close');
     }
   } catch (e) {
+    if (e.code === 'ACTION_REJECTED') {
+      emit('close');
+      return;
+    }
     console.warn('Transaction failed', e);
 
     step.value = 'fail';
