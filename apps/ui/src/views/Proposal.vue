@@ -286,7 +286,6 @@ watchEffect(() => {
                   :voting-power="votingPower"
                   :is-loading="isVotingPowerPending"
                   :is-error="isVotingPowerError"
-                  class="mb-2 flex items-center"
                   @fetch="fetchVotingPower"
                 >
                   <div v-if="votingPowerError?.message === 'NOT_READY_YET'">
