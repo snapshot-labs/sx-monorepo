@@ -47,6 +47,7 @@ const strategiesLimit = computed(() => {
   <UiContainerSettings
     :title="`Select up to ${strategiesLimit} strategies`"
     description="(Voting power is cumulative)"
+    class="!mx-0"
   >
     <UiMessage
       v-if="!isTicketValid"
