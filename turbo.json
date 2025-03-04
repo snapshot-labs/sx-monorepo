@@ -27,7 +27,12 @@
         "generated/**",
         "src/networks/common/graphqlApi/gql/**"
       ],
-      "inputs": ["**/*.graphql", "**/*.gql", "codegen.ts"]
+      "inputs": [
+        "**/*.graphql",
+        "**/*.gql",
+        "codegen.ts",
+        "src/networks/common/graphqlApi/queries.ts"
+      ]
     }
   }
 }

@@ -246,6 +246,7 @@ export type Proposal = {
     controller: string;
     admins?: string[];
     moderators?: string[];
+    labels?: SpaceMetadataLabel[];
     voting_power_symbol: string;
     authenticators: string[];
     executors: string[];
