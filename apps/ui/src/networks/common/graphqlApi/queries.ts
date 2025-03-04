@@ -101,6 +101,7 @@ gql(`
         id
         name
         avatar
+        labels
         voting_power_symbol
         treasuries
         executors

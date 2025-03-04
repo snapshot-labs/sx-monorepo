@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
-import { useSpaceQuery } from '@/queries/spaces';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -20,10 +19,6 @@ const props = withDefaults(
 
 const { getTsFromCurrent } = useMetaStore();
 const { votes } = useAccount();
-const { data: space } = useSpaceQuery({
-  networkId: toRef(() => props.proposal.network),
-  spaceId: toRef(() => props.proposal.space.id)
-});
 
 const modalOpenTimeline = ref(false);
 
@@ -71,9 +66,10 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <ProposalLabels
-            v-if="space?.labels && proposal.labels.length"
+            v-if="proposal.space?.labels && proposal.labels.length"
+            :space-id="`${proposal.network}:${proposal.space.id}`"
+            :space-labels="proposal.space.labels"
             :labels="proposal.labels"
-            :space="space"
             inline
             with-link
           />

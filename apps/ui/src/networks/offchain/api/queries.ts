@@ -131,6 +131,12 @@ const PROPOSAL_FRAGMENT = gql`
       moderators
       members
       symbol
+      labels {
+        id
+        name
+        description
+        color
+      }
       terms
     }
     type

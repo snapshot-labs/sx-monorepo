@@ -376,6 +376,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       executors: [],
       executors_types: [],
       strategies_parsed_metadata: [],
+      labels: proposal.space.labels,
       terms: proposal.space.terms
     },
     execution_strategy_type: executionType,

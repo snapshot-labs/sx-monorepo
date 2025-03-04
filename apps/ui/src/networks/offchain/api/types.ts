@@ -106,6 +106,7 @@ export type ApiProposal = {
     moderators: string[];
     members: string[];
     symbol: string;
+    labels: SpaceMetadataLabel[];
     terms: string;
   };
   type: VoteType;

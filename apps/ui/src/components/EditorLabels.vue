@@ -24,6 +24,10 @@ const labels = defineModel<string[]>({
         </div>
       </template>
     </PickerLabel>
-    <ProposalLabels :labels="labels" :space="space" />
+    <ProposalLabels
+      :space-id="`${space.network}:${space.id}`"
+      :space-labels="space.labels"
+      :labels="labels"
+    />
   </div>
 </template>

@@ -149,6 +149,13 @@ function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
   };
 }
 
+function formatLabels(labels: string[]) {
+  return labels.map(label => {
+    const { id, name, description, color } = JSON.parse(label);
+    return { id, name, description, color };
+  });
+}
+
 function processStrategiesMetadata(
   parsedMetadata: ApiStrategyParsedMetadata[],
   strategiesIndicies?: number[]
@@ -244,10 +251,7 @@ function formatSpace(
     treasuries: space.metadata.treasuries.map(treasury =>
       formatMetadataTreasury(treasury)
     ),
-    labels: space.metadata.labels.map(label => {
-      const { id, name, description, color } = JSON.parse(label);
-      return { id, name, description, color };
-    }),
+    labels: formatLabels(space.metadata.labels),
     delegations: space.metadata.delegations.map(delegation => {
       const { name, api_type, api_url, contract, chain_id } =
         JSON.parse(delegation);
@@ -311,6 +315,7 @@ function formatProposal(
       name: proposal.space.metadata.name,
       avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,
+      labels: formatLabels(proposal.space.metadata.labels),
       authenticators: proposal.space.authenticators,
       voting_power_symbol: proposal.space.metadata.voting_power_symbol,
       executors: proposal.space.metadata.executors,
