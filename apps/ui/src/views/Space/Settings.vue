@@ -240,9 +240,13 @@ async function handleSettingsSave() {
   saving.value = true;
 
   if (isOffchainNetwork.value) {
-    await save();
-    reloadSpaceAndReset();
-    saving.value = false;
+    try {
+      await save();
+      reloadSpaceAndReset();
+    } catch (e) {
+    } finally {
+      saving.value = false;
+    }
   } else {
     executeFn.value = saveController;
   }
