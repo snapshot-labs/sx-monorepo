@@ -312,200 +312,205 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       class="space-y-4 flex flex-col"
       style="min-height: calc(100vh - 114px)"
     >
-      <div v-show="activeTab === 'profile'" class="flex-grow pb-[100px]">
-        <FormSpaceProfile
-          :id="space.id"
-          :space="space"
-          :form="form"
-          @errors="v => (formErrors = v)"
-        />
-      </div>
-      <template v-if="activeTab === 'proposal'">
-        <UiContainerSettings
-          v-if="isOffchainNetwork"
-          title="Proposal"
-          description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
-        >
-          <FormSpaceProposal
-            v-model:proposal-validation="proposalValidation"
-            v-model:guidelines="guidelines"
-            v-model:template="template"
-            :network-id="space.network"
-            :snapshot-chain-id="snapshotChainId"
+      <div class="flex-grow pb-[100px]">
+        <div v-show="activeTab === 'profile'">
+          <FormSpaceProfile
+            :id="space.id"
             :space="space"
-            @update-validity="v => (hasProposalErrors = !v)"
-          />
-        </UiContainerSettings>
-        <FormValidation
-          v-else
-          v-model="validationStrategy"
-          :network-id="space.network"
-          :available-strategies="network.constants.EDITOR_PROPOSAL_VALIDATIONS"
-          :available-voting-strategies="
-            network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
-          "
-          title="Proposal"
-          description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
-        />
-      </template>
-      <template v-if="activeTab === 'voting-strategies'">
-        <UiContainerSettings
-          v-if="isOffchainNetwork"
-          title="Voting strategies"
-          description="Voting strategies are sets of conditions used to calculate user's voting power."
-        >
-          <FormSpaceStrategies
-            v-model:snapshot-chain-id="snapshotChainId"
-            v-model:strategies="strategies"
-            :network-id="space.network"
-            :is-ticket-valid="isTicketValid"
-            :space="space"
-          />
-        </UiContainerSettings>
-        <FormStrategies
-          v-else
-          v-model="votingStrategies"
-          :network-id="space.network"
-          :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
-          title="Voting strategies"
-          description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
-        />
-      </template>
-      <UiContainerSettings
-        v-else-if="activeTab === 'voting'"
-        title="Voting"
-        description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
-      >
-        <FormSpaceVoting
-          v-model:voting-delay="votingDelay"
-          v-model:min-voting-period="minVotingPeriod"
-          v-model:max-voting-period="maxVotingPeriod"
-          v-model:quorum-type="quorumType"
-          v-model:quorum="quorum"
-          v-model:voting-type="votingType"
-          v-model:privacy="privacy"
-          v-model:vote-validation="voteValidation"
-          v-model:ignore-abstain-votes="ignoreAbstainVotes"
-          :snapshot-chain-id="snapshotChainId"
-          :space="space"
-          @update-validity="v => (hasVotingErrors = !v)"
-        />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="activeTab === 'members'"
-        title="Members"
-        description="Members have different roles and permissions within the space."
-      >
-        <FormSpaceMembers
-          v-model="members"
-          :network-id="space.network"
-          :is-controller="isController"
-          :is-admin="isAdmin"
-        />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="activeTab === 'execution'"
-        title="Execution(s)"
-        description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
-      >
-        <div class="space-y-3">
-          <FormStrategiesStrategyActive
-            v-for="strategy in executionStrategies"
-            :key="strategy.id"
-            read-only
-            :network-id="space.network"
-            :strategy="strategy"
+            :form="form"
+            @errors="v => (formErrors = v)"
           />
         </div>
-      </UiContainerSettings>
-      <FormStrategies
-        v-if="activeTab === 'authenticators'"
-        v-model="authenticators"
-        unique
-        :network-id="space.network"
-        :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
-        title="Authenticators"
-        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
-      />
-      <UiContainerSettings
-        v-if="activeTab === 'treasuries'"
-        title="Treasuries"
-        description="Treasuries are used to manage the funds of the space."
-      >
-        <FormSpaceTreasuries
-          v-model="form.treasuries"
-          :network-id="space.network"
-          :limit="isOffchainNetwork ? 10 : undefined"
-        />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="activeTab === 'delegations'"
-        title="Delegations"
-        description="Delegations allow users to delegate their voting power to other users."
-      >
-        <FormSpaceDelegations
-          v-model="form.delegations"
-          :network-id="space.network"
-          :limit="isOffchainNetwork ? 1 : undefined"
-        />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="activeTab === 'labels'"
-        title="Labels"
-        description="Labels are used to categorize proposals."
-      >
-        <FormSpaceLabels v-model="form.labels" />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-show="activeTab === 'whitelabel'"
-        title="Whitelabel"
-        description="Customize the appearance of your space to match your brand."
-      >
-        <FormSpaceWhitelabel
-          v-model:custom-domain="customDomain"
-          v-model:skin-settings="skinSettings"
-          :space="space"
-          @errors="v => (formErrors = v)"
-        />
-      </UiContainerSettings>
-      <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
-        <FormSpaceAdvanced
-          v-model:parent="parent"
-          v-model:children="children"
-          v-model:terms-of-services="termsOfServices"
-          v-model:is-private="isPrivate"
-          :network-id="space.network"
-          :space="space"
-          :is-controller="isController"
-          @delete-space="handleSpaceDelete"
-          @update-validity="
-            (valid, resolved) => {
-              hasAdvancedErrors = !valid;
-              isAdvancedFormResolved = resolved;
-            }
-          "
-        />
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-if="activeTab === 'controller'"
-        title="Controller"
-        description="The controller is the account able to change the space settings and cancel pending proposals."
-      >
-        <UiMessage
-          v-if="isOffchainNetwork && isOwner"
-          type="danger"
-          class="mb-3"
+        <template v-if="activeTab === 'proposal'">
+          <UiContainerSettings
+            v-if="isOffchainNetwork"
+            title="Proposal"
+            description="Set proposal validation to define who can create proposals and provide additional resources for proposal authors."
+          >
+            <FormSpaceProposal
+              v-model:proposal-validation="proposalValidation"
+              v-model:guidelines="guidelines"
+              v-model:template="template"
+              :network-id="space.network"
+              :snapshot-chain-id="snapshotChainId"
+              :space="space"
+              @update-validity="v => (hasProposalErrors = !v)"
+            />
+          </UiContainerSettings>
+          <FormValidation
+            v-else
+            v-model="validationStrategy"
+            :network-id="space.network"
+            :available-strategies="
+              network.constants.EDITOR_PROPOSAL_VALIDATIONS
+            "
+            :available-voting-strategies="
+              network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
+            "
+            title="Proposal"
+            description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
+          />
+        </template>
+        <template v-if="activeTab === 'voting-strategies'">
+          <UiContainerSettings
+            v-if="isOffchainNetwork"
+            title="Voting strategies"
+            description="Voting strategies are sets of conditions used to calculate user's voting power."
+          >
+            <FormSpaceStrategies
+              v-model:snapshot-chain-id="snapshotChainId"
+              v-model:strategies="strategies"
+              :network-id="space.network"
+              :is-ticket-valid="isTicketValid"
+              :space="space"
+            />
+          </UiContainerSettings>
+          <FormStrategies
+            v-else
+            v-model="votingStrategies"
+            :network-id="space.network"
+            :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
+            title="Voting strategies"
+            description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+          />
+        </template>
+        <UiContainerSettings
+          v-else-if="activeTab === 'voting'"
+          title="Voting"
+          description="Set the proposal delay, minimum duration, which is the shortest time needed to execute a proposal if quorum passes, and maximum duration for voting."
         >
-          The controller is the owner of the ENS name. To change the controller,
-          you need to change the owner of the ENS name.
-        </UiMessage>
-        <FormSpaceController
-          :controller="controller"
-          :network="network"
-          :disabled="!isController || isOffchainNetwork"
-          @save="handleControllerSave"
+          <FormSpaceVoting
+            v-model:voting-delay="votingDelay"
+            v-model:min-voting-period="minVotingPeriod"
+            v-model:max-voting-period="maxVotingPeriod"
+            v-model:quorum-type="quorumType"
+            v-model:quorum="quorum"
+            v-model:voting-type="votingType"
+            v-model:privacy="privacy"
+            v-model:vote-validation="voteValidation"
+            v-model:ignore-abstain-votes="ignoreAbstainVotes"
+            :snapshot-chain-id="snapshotChainId"
+            :space="space"
+            @update-validity="v => (hasVotingErrors = !v)"
+          />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else-if="activeTab === 'members'"
+          title="Members"
+          description="Members have different roles and permissions within the space."
+        >
+          <FormSpaceMembers
+            v-model="members"
+            :network-id="space.network"
+            :is-controller="isController"
+            :is-admin="isAdmin"
+          />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else-if="activeTab === 'execution'"
+          title="Execution(s)"
+          description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
+        >
+          <div class="space-y-3">
+            <FormStrategiesStrategyActive
+              v-for="strategy in executionStrategies"
+              :key="strategy.id"
+              read-only
+              :network-id="space.network"
+              :strategy="strategy"
+            />
+          </div>
+        </UiContainerSettings>
+        <FormStrategies
+          v-if="activeTab === 'authenticators'"
+          v-model="authenticators"
+          unique
+          :network-id="space.network"
+          :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
+          title="Authenticators"
+          description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
         />
-      </UiContainerSettings>
+        <UiContainerSettings
+          v-if="activeTab === 'treasuries'"
+          title="Treasuries"
+          description="Treasuries are used to manage the funds of the space."
+        >
+          <FormSpaceTreasuries
+            v-model="form.treasuries"
+            :network-id="space.network"
+            :limit="isOffchainNetwork ? 10 : undefined"
+          />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else-if="activeTab === 'delegations'"
+          title="Delegations"
+          description="Delegations allow users to delegate their voting power to other users."
+        >
+          <FormSpaceDelegations
+            v-model="form.delegations"
+            :network-id="space.network"
+            :limit="isOffchainNetwork ? 1 : undefined"
+          />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else-if="activeTab === 'labels'"
+          title="Labels"
+          description="Labels are used to categorize proposals."
+        >
+          <FormSpaceLabels v-model="form.labels" />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-show="activeTab === 'whitelabel'"
+          title="Whitelabel"
+          description="Customize the appearance of your space to match your brand."
+        >
+          <FormSpaceWhitelabel
+            v-model:custom-domain="customDomain"
+            v-model:skin-settings="skinSettings"
+            :space="space"
+            @errors="v => (formErrors = v)"
+          />
+        </UiContainerSettings>
+        <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">
+          <FormSpaceAdvanced
+            v-model:parent="parent"
+            v-model:children="children"
+            v-model:terms-of-services="termsOfServices"
+            v-model:is-private="isPrivate"
+            :network-id="space.network"
+            :space="space"
+            :is-controller="isController"
+            @delete-space="handleSpaceDelete"
+            @update-validity="
+              (valid, resolved) => {
+                hasAdvancedErrors = !valid;
+                isAdvancedFormResolved = resolved;
+              }
+            "
+          />
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-if="activeTab === 'controller'"
+          title="Controller"
+          description="The controller is the account able to change the space settings and cancel pending proposals."
+        >
+          <UiMessage
+            v-if="isOffchainNetwork && isOwner"
+            type="danger"
+            class="mb-3"
+          >
+            The controller is the owner of the ENS name. To change the
+            controller, you need to change the owner of the ENS name.
+          </UiMessage>
+          <FormSpaceController
+            :controller="controller"
+            :network="network"
+            :disabled="!isController || isOffchainNetwork"
+            @save="handleControllerSave"
+          />
+        </UiContainerSettings>
+      </div>
+
       <UiToolbarBottom
         v-if="
           (isModified && isAdvancedFormResolved && canModifySettings) || error
