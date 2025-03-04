@@ -94,7 +94,7 @@ export default class Walletconnect extends Connector {
   async disconnect() {
     await sleep(DISCONNECT_DELAY);
 
-    await this.modal?.disconnect();
+    await this.modal?.adapter?.connectionControllerClient?.disconnect();
 
     if (this.provider && 'disconnect' in this.provider) {
       this.provider.disconnect();
