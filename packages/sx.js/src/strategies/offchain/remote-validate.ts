@@ -19,7 +19,7 @@ export default function createRemoteValidateStrategy(type: string): Strategy {
         params: params[0]
       });
 
-      return [isValid ? 1n : 0n];
+      return [isValid ? params[0].minScore ?? 1n : 0n];
     }
   };
 }
