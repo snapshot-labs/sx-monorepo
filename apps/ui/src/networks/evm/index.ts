@@ -1,4 +1,5 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { UNIFIED_API_URL } from '@/helpers/constants';
 import { pinGraph, pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
@@ -26,8 +27,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Polygon',
     ticker: 'MATIC',
     chainId: 137,
-    apiUrl:
-      'https://subgrapher.snapshot.org/subgraph/arbitrum/5DzKWssJUVKA1imXGyExrycUjdz7t5t7gzTsE9GQhBUn',
+    apiUrl: UNIFIED_API_URL,
     avatar:
       'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am',
     blockTime: 2.15812
@@ -36,8 +36,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Arbitrum One',
     chainId: 42161,
     currentChainId: 1,
-    apiUrl:
-      'https://subgrapher.snapshot.org/subgraph/arbitrum/4QovVxoK3TBLwZKPD1YPHHko5Zz87HvdjpEDBvitCWcH',
+    apiUrl: UNIFIED_API_URL,
     avatar:
       'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -45,8 +44,7 @@ export const METADATA: Record<string, Metadata> = {
   oeth: {
     name: 'OP Mainnet',
     chainId: 10,
-    apiUrl:
-      'https://subgrapher.snapshot.org/subgraph/arbitrum/4zXNNp5B34DUNACzonVsHivNJRUHnFBqhvBPYJVaNyks',
+    apiUrl: UNIFIED_API_URL,
     avatar:
       'ipfs://bafkreifu2remiqfpsb4hgisbwb3qxedrzpwsea7ik4el45znjcf56xf2ku',
     blockTime: 2
@@ -54,15 +52,14 @@ export const METADATA: Record<string, Metadata> = {
   base: {
     name: 'Base',
     chainId: 8453,
-    apiUrl:
-      'https://subgrapher.snapshot.org/subgraph/arbitrum/BmcnmDYyCcN7NmQuWXyx3p1xLEiq3sYmvFct8uvBQfum',
+    apiUrl: UNIFIED_API_URL,
     avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
     blockTime: 2
   },
   mnt: {
     name: 'Mantle',
     chainId: 5000,
-    apiUrl: 'https://mantle-api.snapshot.box',
+    apiUrl: UNIFIED_API_URL,
     avatar:
       'ipfs://bafkreidkucwfn4mzo2gtydrt2wogk3je5xpugom67vhi4h4comaxxjzoz4',
     blockTime: 2
@@ -70,8 +67,7 @@ export const METADATA: Record<string, Metadata> = {
   eth: {
     name: 'Ethereum',
     chainId: 1,
-    apiUrl:
-      'https://subgrapher.snapshot.org/subgraph/arbitrum/GerdwbJnTbEz45K7S3D2MLET6VFiY8VqwrqWZg52x2vx',
+    apiUrl: UNIFIED_API_URL,
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -79,9 +75,7 @@ export const METADATA: Record<string, Metadata> = {
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
-    apiUrl:
-      import.meta.env.VITE_EVM_SEPOLIA_API ??
-      'https://subgrapher.snapshot.org/subgraph/arbitrum/3682UpSJVQ89v6BMSzxDSiQWZKa3Hbn6RKucpT8jZ5nT',
+    apiUrl: import.meta.env.VITE_EVM_SEPOLIA_API ?? UNIFIED_API_URL,
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816
