@@ -87,7 +87,7 @@ async function handleExecute() {
       emit('close');
     }
   } catch (e) {
-    if (e.code === 'ACTION_REJECTED') {
+    if (['ACTION_REJECTED', 4001].includes(e.code)) {
       emit('close');
       return;
     }
