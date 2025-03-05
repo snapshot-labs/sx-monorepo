@@ -96,11 +96,11 @@
 }
 
 html {
-  overflow-y: scroll !important;
+  @apply overflow-y-scroll;
 }
 
 body {
-  @apply font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  @apply h-0 font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
 }
 
 .font-display {
