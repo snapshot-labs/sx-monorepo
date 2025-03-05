@@ -40,7 +40,7 @@ export type ConnectorType =
   | 'argentx'
   | 'injected'
   | 'walletconnect'
-  | 'walletlink'
+  | 'coinbase'
   | 'gnosis'
   | 'sequence'
   | 'unicorn';

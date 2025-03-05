@@ -14,7 +14,7 @@ export const EXECUTORS = {};
 export const CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
-  'walletlink',
+  'coinbase',
   'gnosis',
   'sequence'
 ];

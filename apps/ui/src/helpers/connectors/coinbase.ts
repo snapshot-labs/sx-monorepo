@@ -1,6 +1,6 @@
 import Connector from './connector';
 
-export default class Walletlink extends Connector {
+export default class Coinbase extends Connector {
   async connect() {
     try {
       let CoinbaseWalletSDK = await import('@coinbase/wallet-sdk'!);
@@ -19,23 +19,7 @@ export default class Walletlink extends Connector {
     }
   }
 
-  removeHashFromLocalStorage() {
-    if (!localStorage) return;
-
-    const keys: string[] = [];
-
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i) as string;
-
-      if (key.startsWith('-walletlink:')) {
-        keys.push(key);
-      }
-    }
-
-    keys.forEach(key => localStorage.removeItem(key));
-  }
-
   async disconnect() {
-    this.removeHashFromLocalStorage();
+    this.provider.disconnect();
   }
 }
