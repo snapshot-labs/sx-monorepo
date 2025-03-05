@@ -27,10 +27,8 @@ const parentUrl =
       ]
     : document.location.href;
 const parentHost = new URL(parentUrl).host;
-if (
-  window.location.host !== window.parent.location.host &&
-  !knownHosts.includes(parentHost)
-) {
+
+if (window.location.host !== parentHost && !knownHosts.includes(parentHost)) {
   document.documentElement.style.display = 'none';
   throw new Error(`Unknown host: ${parentHost}`);
 }
