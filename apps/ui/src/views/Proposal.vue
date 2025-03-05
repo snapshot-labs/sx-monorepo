@@ -423,8 +423,9 @@ watchEffect(() => {
                 Labels
               </h4>
               <ProposalLabels
+                :space-id="`${space.network}:${space.id}`"
+                :space-labels="space.labels"
                 :labels="proposal.labels"
-                :space="space"
                 with-link
               />
             </div>
