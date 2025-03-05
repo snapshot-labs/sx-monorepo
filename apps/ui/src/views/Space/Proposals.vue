@@ -3,15 +3,24 @@ import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
 import { useProposalsQuery } from '@/queries/proposals';
+import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
-const { web3 } = useWeb3();
 const router = useRouter();
 const route = useRoute();
+const { web3 } = useWeb3();
+const {
+  data: votingPower,
+  isPending: isVotingPowerPending,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useSpaceVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'space')
+);
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
@@ -19,8 +28,6 @@ const labels = ref<string[]>([]);
 const selectIconBaseProps = {
   size: 16
 };
-
-const votingPower = computed(() => getVotingPower(props.space));
 
 const spaceLabels = computed(() => {
   if (!props.space.labels) return {};
@@ -53,10 +60,6 @@ async function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
-}
-
-function handleFetchVotingPower() {
-  fetchVotingPower(props.space);
 }
 
 watchThrottled(
@@ -104,16 +107,6 @@ watch(
         router.push({ query });
       }
     }
-  },
-  { immediate: true }
-);
-
-watch(
-  [() => props.space, () => web3.value.account, () => web3.value.authLoading],
-  ([space, account, authLoading]) => {
-    if (authLoading || !space || !account) return;
-
-    handleFetchVotingPower();
   },
   { immediate: true }
 );
@@ -213,7 +206,9 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         <IndicatorVotingPower
           :network-id="space.network"
           :voting-power="votingPower"
-          @fetch-voting-power="handleFetchVotingPower"
+          :is-loading="isVotingPowerPending"
+          :is-error="isVotingPowerError"
+          @fetch="fetchVotingPower"
         />
         <UiTooltip title="New proposal">
           <UiButton
