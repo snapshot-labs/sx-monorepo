@@ -91,6 +91,7 @@ function handleAcceptTerms() {
       @accept="handleAcceptTerms"
     />
     <ModalVote
+      v-if="proposal.type === 'basic' && proposal.state === 'active'"
       :choice="selectedChoice"
       :proposal="proposal"
       :open="modalOpenVote"
