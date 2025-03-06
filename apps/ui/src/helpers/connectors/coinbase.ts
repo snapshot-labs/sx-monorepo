@@ -8,18 +8,21 @@ export default class Coinbase extends Connector {
         CoinbaseWalletSDK = CoinbaseWalletSDK.default;
       if (CoinbaseWalletSDK.default)
         CoinbaseWalletSDK = CoinbaseWalletSDK.default;
+
       const walletSDK = new CoinbaseWalletSDK(this.options);
-      this.provider = walletSDK.makeWeb3Provider(
-        this.options.ethJsonrpcUrl,
-        this.options.chainId
-      );
-      await this.provider.request({ method: 'eth_requestAccounts' });
+      const provider = walletSDK.makeWeb3Provider();
+
+      await provider.request({ method: 'eth_requestAccounts' });
+
+      this.provider = provider;
     } catch (e) {
       console.error(e);
     }
   }
 
   async disconnect() {
-    this.provider.disconnect();
+    if (this.provider) {
+      await this.provider.disconnect();
+    }
   }
 }
