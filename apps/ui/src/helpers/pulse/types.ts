@@ -10,21 +10,27 @@ export interface Discussion {
 }
 
 export interface Statement {
-  id: number;
+  id: string;
   body: string;
-  score_1: number;
-  score_2: number;
-  score_3: number;
+  scores_1: number;
+  scores_2: number;
+  scores_3: number;
   vote_count: number;
   created: number;
-  discussion: Discussion;
+  discussion_id: number;
+  statement_id: number;
+  discussion: {
+    id: number;
+  };
 }
 
 export interface Vote {
-  id: number;
+  id: string;
   voter: string;
-  discussion: Discussion;
-  statement: Statement;
   choice: number;
   created: number;
+  discussion_id: number;
+  statement_id: number;
+  discussion: { id: number };
+  statement: { id: number };
 }

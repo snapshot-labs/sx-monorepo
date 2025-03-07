@@ -38,7 +38,7 @@ const choice = computed(() => {
         </div>
       </div>
       <div class="flex-1" v-text="`${_n(statement.vote_count)} votes`" />
-      <div class="justify-end" v-text="`#${statement.id}`" />
+      <div class="justify-end" v-text="`#${statement.statement_id}`" />
     </div>
   </div>
 </template>

@@ -34,7 +34,13 @@ async function handleVote(
         <UiButton
           :disabled="loading"
           class="!border-skin-success !text-skin-success space-x-1"
-          @click="handleVote(statements[0].discussion, statements[0].id, 1)"
+          @click="
+            handleVote(
+              statements[0].discussion_id,
+              statements[0].statement_id,
+              1
+            )
+          "
         >
           <IH-check class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Agree'" />
@@ -42,7 +48,13 @@ async function handleVote(
         <UiButton
           :disabled="loading"
           class="!border-skin-danger !text-skin-danger space-x-1"
-          @click="handleVote(statements[0].discussion, statements[0].id, 2)"
+          @click="
+            handleVote(
+              statements[0].discussion_id,
+              statements[0].statement_id,
+              2
+            )
+          "
         >
           <IH-x class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Disagree'" />
@@ -50,7 +62,13 @@ async function handleVote(
         <UiButton
           :disabled="loading"
           class="!border-skin-text !text-skin-text space-x-1"
-          @click="handleVote(statements[0].discussion, statements[0].id, 3)"
+          @click="
+            handleVote(
+              statements[0].discussion_id,
+              statements[0].statement_id,
+              3
+            )
+          "
         >
           <IH-minus-sm class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Pass'" />

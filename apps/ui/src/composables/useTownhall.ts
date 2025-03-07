@@ -1,56 +1,8 @@
 import { client } from '@/helpers/kbyte';
-import { Discussion, Vote } from '@/helpers/pulse';
-import { getDiscussion, getVotes } from '@/helpers/townhall';
 
 const { web3 } = useWeb3();
 
-const discussions: Ref<{ [key: number]: Discussion }> = ref({});
-const votes: Ref<{ [key: number]: Vote[] }> = ref({});
-
-client.subscribe(([subject, body]) => {
-  if (subject === 'justsaying') {
-    if (body.subject === 'new_statement') {
-      const statement = body.body;
-      statement.discussion = { id: statement.discussion };
-      statement.vote_count = 0;
-      statement.scores_1 = 0;
-      statement.scores_2 = 0;
-      statement.scores_3 = 0;
-
-      const currentDiscussion = discussions.value[statement.discussion.id];
-
-      discussions.value[statement.discussion.id] = {
-        ...currentDiscussion,
-        statements: [...(currentDiscussion.statements || []), statement]
-      };
-    }
-
-    if (body.subject === 'new_vote') {
-      const vote = body.body;
-      const statement = discussions.value[vote.discussion].statements.findIndex(
-        s => s.id === vote.statement
-      );
-      discussions.value[vote.discussion].statements[statement].vote_count++;
-      discussions.value[vote.discussion].statements[statement][
-        `scores_${vote.choice}`
-      ]++;
-      votes.value[vote.discussion].push(vote);
-    }
-  }
-});
-
 export function useTownhall() {
-  async function loadDiscussion(id: number) {
-    discussions.value[id] = await getDiscussion(id.toString());
-    await client.requestAsync('subscribe', id);
-  }
-
-  async function loadVotes(id: number) {
-    const voter = web3.value.account;
-
-    votes.value[id] = voter ? await getVotes(id.toString(), voter) : [];
-  }
-
   async function sendDiscussion(title: string, body: string) {
     return send('discussion', {
       author: web3.value.account,
@@ -91,10 +43,6 @@ export function useTownhall() {
   }
 
   return {
-    discussions,
-    votes,
-    loadDiscussion,
-    loadVotes,
     sendDiscussion,
     sendStatement,
     sendVote

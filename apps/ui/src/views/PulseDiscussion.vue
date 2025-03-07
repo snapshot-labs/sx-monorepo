@@ -1,49 +1,90 @@
 <script setup lang="ts">
-import { Discussion, Statement } from '@/helpers/pulse';
-import {_n, clone} from '@/helpers/utils';
+import { client } from '@/helpers/kbyte';
+import { Discussion, Statement, Vote } from '@/helpers/pulse';
+import {
+  getDiscussion,
+  getVotes,
+  newStatementEventToEntry,
+  newVoteEventToEntry
+} from '@/helpers/townhall';
+import { _n, clone } from '@/helpers/utils';
 
 const route = useRoute();
 const { web3 } = useWeb3();
-const { discussions, votes, loadDiscussion, loadVotes, sendStatement } =
-  useTownhall();
 const { addNotification } = useUiStore();
+const { sendStatement } = useTownhall();
 
 const id = parseInt(route.params.id as string);
 
+const discussion = ref<Discussion | null>(null);
+const statements = ref<Statement[]>([]);
+const votes = ref<Vote[]>([]);
 const loading = ref(false);
 const loaded = ref(false);
 const submitLoading = ref(false);
-const statement = ref('');
+const statementInput = ref('');
 
-const discussion: ComputedRef<Discussion> = computed(
-  () => discussions.value[id]
-);
 const pendingStatements: ComputedRef<Statement[]> = computed(() =>
-  (discussion.value.statements || []).filter(
-    s => !votes.value[s.discussion.id].find(v => v.statement.id === s.id)
+  statements.value.filter(
+    s => !votes.value.find(v => v.statement_id === s.statement_id)
   )
 );
 const results: ComputedRef<Statement[]> = computed(() =>
-  clone(discussion.value.statements || []).sort(
-    (a, b) => b.vote_count - a.vote_count
-  )
+  clone(statements.value).sort((a, b) => b.vote_count - a.vote_count)
 );
 
-onMounted(async () => {
-  if (!discussion.value) {
-    loading.value = true;
+client.subscribe(([subject, body]) => {
+  if (subject === 'justsaying') {
+    if (body.subject === 'new_statement') {
+      const statement = newStatementEventToEntry(body.body);
 
-    await Promise.all([loadDiscussion(id), loadVotes(id)]);
+      if (statement.discussion_id === id) {
+        statements.value = [...statements.value, statement];
+      }
+    }
 
-    loading.value = false;
-    loaded.value = true;
+    if (body.subject === 'new_vote') {
+      const vote = newVoteEventToEntry(body.body);
+
+      if (vote.discussion_id === id) {
+        if (vote.voter === web3.value.account) {
+          votes.value = [...votes.value, vote];
+        }
+
+        const statementIndex = statements.value.findIndex(
+          s => s.statement_id === vote.statement_id
+        );
+        const statement = clone(statements.value[statementIndex]);
+        statement.vote_count += 1;
+        statement[`scores_${vote.choice}`] += 1;
+
+        const statementsClone = clone(statements.value);
+        statementsClone[statementIndex] = statement;
+        statements.value = statementsClone;
+      }
+    }
   }
+});
+
+onMounted(async () => {
+  loading.value = true;
+
+  discussion.value = await getDiscussion(id.toString());
+  statements.value = discussion?.value?.statements || [];
+  client.requestAsync('subscribe', id);
+
+  const voter = web3.value.account;
+  votes.value = voter ? await getVotes(id.toString(), voter) : [];
+
+  loading.value = false;
+  loaded.value = true;
 });
 
 watch(
   () => web3.value.account,
   async () => {
-    await loadVotes(id);
+    const voter = web3.value.account;
+    votes.value = voter ? await getVotes(id.toString(), voter) : [];
   }
 );
 
@@ -59,9 +100,9 @@ async function handleSubmit() {
   submitLoading.value = true;
 
   try {
-    await sendStatement(id, statement.value);
+    await sendStatement(id, statementInput.value);
 
-    statement.value = '';
+    statementInput.value = '';
   } catch (e) {
     addNotification('error', e.message);
   }
@@ -109,7 +150,7 @@ async function handleSubmit() {
             individuals, so everyone can easily understand and vote on it.
           </div>
           <UiTextarea
-            v-model="statement"
+            v-model="statementInput"
             :definition="STATEMENT_DEFINITION"
             :required="true"
             :disabled="submitLoading"
@@ -117,7 +158,9 @@ async function handleSubmit() {
           <div>
             <UiButton
               class="primary items-center flex space-x-1"
-              :disabled="submitLoading || !statement.trim()"
+              :disabled="
+                submitLoading || !statementInput.trim() || !web3.account
+              "
               @click="handleSubmit"
             >
               <div>Publish</div>
