@@ -32,7 +32,7 @@ async function getBarcode(contents: BarcodePayload): Promise<string> {
     ...contents
   });
 
-  return receipt.cid;
+  return `ipfs://${receipt.cid}`;
 }
 
 export default function usePaymentFactory() {
