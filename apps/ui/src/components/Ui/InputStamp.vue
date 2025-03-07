@@ -11,11 +11,13 @@ withDefaults(
     height?: number;
     disabled?: boolean;
     fallback?: boolean;
+    cropped?: boolean;
   }>(),
   {
     width: 80,
     height: 80,
-    fallback: true
+    fallback: true,
+    cropped: true
   }
 );
 
@@ -83,6 +85,7 @@ async function handleFileChange(e: Event) {
       :id="definition.default"
       :width="width"
       :height="height"
+      :cropped="cropped"
       class="pointer-events-none !rounded-none group-hover:opacity-80"
       type="space"
       :class="{

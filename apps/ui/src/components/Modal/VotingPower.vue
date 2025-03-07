@@ -2,18 +2,20 @@
 import { _n, shorten } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
-import { VotingPowerItem } from '@/stores/votingPowers';
+import { VotingPowerItem } from '@/queries/votingPower';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
+  isLoading: boolean;
+  isError: boolean;
   votingPower?: VotingPowerItem;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close');
-  (e: 'fetchVotingPower');
+  (e: 'fetch');
 }>();
 
 const network = computed(() => getNetwork(props.networkId));
@@ -22,24 +24,21 @@ const baseNetwork = computed(() =>
     ? getNetwork(network.value.baseNetworkId)
     : network.value
 );
-const loading = computed(
-  () => !props.votingPower || props.votingPower.status === 'loading'
-);
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Your voting power</h3>
     </template>
-    <UiLoading v-if="loading" class="p-4 block text-center" />
-    <div v-else-if="votingPower">
-      <MessageErrorFetchPower
-        v-if="votingPower.status === 'error'"
-        type="voting"
-        class="p-4"
-        @fetch="$emit('fetchVotingPower')"
-      />
+    <UiLoading v-if="isLoading" class="p-4 block text-center" />
+    <MessageErrorFetchPower
+      v-else-if="isError"
+      type="voting"
+      class="p-4"
+      @fetch="emit('fetch')"
+    />
+    <template v-else-if="votingPower">
       <div
         v-for="(strategy, i) in votingPower.votingPowers"
         :key="i"
@@ -115,6 +114,6 @@ const loading = computed(
           </div>
         </div>
       </div>
-    </div>
+    </template>
   </UiModal>
 </template>

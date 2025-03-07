@@ -56,7 +56,7 @@
     "@snapshot-labs/highlight": "^0.1.0-beta.2",
     "@snapshot-labs/pineapple": "^1.1.0",
     "@snapshot-labs/prettier-config": "^0.1.0-beta.18",
-    "@snapshot-labs/snapshot.js": "^0.12.52",
+    "@snapshot-labs/snapshot.js": "^0.12.54",
     "@snapshot-labs/sx": "^0.1.0",
     "@tanstack/vue-query": "^5.64.2",
     "@vueuse/core": "^10.4.1",

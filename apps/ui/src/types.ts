@@ -4,6 +4,8 @@ import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
+export type Theme = 'light' | 'dark';
+
 export type ProposalState =
   | 'pending'
   | 'active'
@@ -246,6 +248,7 @@ export type Proposal = {
     controller: string;
     admins?: string[];
     moderators?: string[];
+    labels?: SpaceMetadataLabel[];
     voting_power_symbol: string;
     authenticators: string[];
     executors: string[];
@@ -405,7 +408,7 @@ export type SkinSettings = {
   border_color: string;
   heading_color: string;
   primary_color: string;
-  theme: string;
+  theme: Theme;
   logo?: string;
 };
 

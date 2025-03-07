@@ -17,6 +17,7 @@ import {
   SpaceMetadataLabel,
   SpacePrivacy,
   StrategyParsedMetadata,
+  Theme,
   Validation
 } from '@/types';
 
@@ -87,7 +88,7 @@ const DEFAULT_SKIN_SETTINGS = {
   border_color: '',
   heading_color: '',
   primary_color: '',
-  theme: 'light',
+  theme: 'light' as Theme,
   logo: undefined
 };
 
@@ -100,6 +101,8 @@ export function useSpaceSettings(space: Ref<Space>) {
     transferOwnership,
     deleteSpace: deleteSpaceAction
   } = useActions();
+  const { isWhiteLabel } = useWhiteLabel();
+  const { setSkin } = useSkin();
 
   const loading = ref(true);
   const isModifiedEvaluating = ref(false);
@@ -762,6 +765,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       skinSettings.value = clone(
         space.value.additionalRawData?.skinSettings || DEFAULT_SKIN_SETTINGS
       );
+      if (isWhiteLabel.value) {
+        setSkin(skinSettings.value);
+      }
     }
   }
 
