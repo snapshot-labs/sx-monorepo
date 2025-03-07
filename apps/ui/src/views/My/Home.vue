@@ -20,7 +20,7 @@ const { loadVotes } = useAccount();
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 
 const spacesIds = computed(
-  () => followedSpacesStore.followedSpaceIdsByNetwork[metadataNetwork]
+  () => followedSpacesStore.followedSpaceIdsByNetwork[metadataNetwork] ?? []
 );
 
 const {

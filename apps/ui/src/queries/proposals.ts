@@ -100,6 +100,8 @@ async function getProposals(
   const metaStore = useMetaStore();
   await metaStore.fetchBlock(networkId);
 
+  if (spaceIds.length === 0) return [];
+
   return withAuthorNames(
     await getNetwork(networkId).api.loadProposals(
       spaceIds,
