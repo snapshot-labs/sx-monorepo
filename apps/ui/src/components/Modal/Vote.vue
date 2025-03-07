@@ -114,12 +114,12 @@ async function handleConfirmed(tx?: string | null) {
   modalTransactionOpen.value = false;
   if (tx) {
     txId.value = tx;
-    modalShareOpen.value = true;
   }
 
   emit('voted');
   emit('close');
 
+  modalShareOpen.value = true;
   loading.value = false;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
