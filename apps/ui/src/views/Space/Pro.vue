@@ -8,12 +8,12 @@ import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check';
 
 type SubscriptionLength = 'yearly' | 'monthly';
-type TierPlan = 'basic' | 'turbo' | 'custom';
+type TierPlan = 'basic' | 'pro' | 'custom';
 type Feature = {
   [key in TierPlan | 'title']: string | number | boolean | Component;
 };
 
-const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
+const TIER_PLAN: TierPlan[] = ['basic', 'pro', 'custom'] as const;
 
 const NETWORKS_REALM: Record<'mainnet' | 'testnet', ChainId[]> = {
   mainnet: [1, 8453],
@@ -22,7 +22,7 @@ const NETWORKS_REALM: Record<'mainnet' | 'testnet', ChainId[]> = {
 
 const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT'] as const;
 
-const TURBO_PRICES: Record<
+const PRO_PRICES: Record<
   keyof typeof NETWORKS_REALM,
   Record<SubscriptionLength, number>
 > = {
@@ -44,12 +44,14 @@ const FAQ: { question: string; answer: string }[] = [
     answer: 'placeholder answer ...'
   },
   {
-    question: 'Does the Turbo plan include whitelabel options?',
+    question: 'Does the Pro plan include whitelabel options?',
     answer: 'placeholder answer ...'
   }
 ] as const;
 
-defineProps<{ space: Space }>();
+defineProps<{
+  space: Space;
+}>();
 
 const { limits } = useSettings();
 
@@ -62,7 +64,7 @@ const currentNetworkRealm = computed(() => {
 });
 
 const prices = computed(() => {
-  return TURBO_PRICES[currentNetworkRealm.value];
+  return PRO_PRICES[currentNetworkRealm.value];
 });
 
 const tokens = computed(() => {
@@ -86,19 +88,19 @@ const features = computed<
         {
           title: 'Daily proposals',
           basic: limits.value['space.default.proposal_limit_per_day'],
-          turbo: limits.value['space.turbo.proposal_limit_per_day'],
+          pro: limits.value['space.turbo.proposal_limit_per_day'],
           custom: ICInfinity
         },
         {
           title: 'Monthly proposals',
           basic: limits.value['space.default.proposal_limit_per_month'],
-          turbo: limits.value['space.turbo.proposal_limit_per_month'],
+          pro: limits.value['space.turbo.proposal_limit_per_month'],
           custom: ICInfinity
         },
         {
           title: 'Proposal character limit',
           basic: limits.value['space.default.body_limit'],
-          turbo: limits.value['space.turbo.body_limit'],
+          pro: limits.value['space.turbo.body_limit'],
           custom: ICInfinity
         }
       ]
@@ -109,13 +111,13 @@ const features = computed<
         {
           title: 'Choices',
           basic: limits.value['space.default.choices_limit'],
-          turbo: limits.value['space.turbo.choices_limit'],
+          pro: limits.value['space.turbo.choices_limit'],
           custom: ICInfinity
         },
         {
           title: 'Voting strategies',
           basic: limits.value['space.default.strategies_limit'],
-          turbo: limits.value['space.turbo.strategies_limit'],
+          pro: limits.value['space.turbo.strategies_limit'],
           custom: ICInfinity
         }
       ]
@@ -126,7 +128,7 @@ const features = computed<
         {
           title: 'Delegates dashboard',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         }
       ]
@@ -137,25 +139,25 @@ const features = computed<
         {
           title: 'Whitelabel',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         },
         {
           title: 'Priority support',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         },
         {
           title: 'Early access to new features',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         },
         {
           title: 'Custom interface',
           basic: '-',
-          turbo: '-',
+          pro: '-',
           custom: true
         }
       ]
@@ -203,7 +205,7 @@ async function handleTurboClick() {
             <div
               class="bg-orange-300/20 border border-orange-300 rounded-full px-2 text-sm leading-[18px]"
             >
-              -20%
+              -16%
             </div>
           </div>
           <div v-else class="px-3" v-text="'Monthly'" />
@@ -229,7 +231,7 @@ async function handleTurboClick() {
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
             <UiButton class="w-full" primary @click="handleTurboClick">
-              Upgrade
+              {{ space.turbo ? 'Extend' : 'Upgrade' }}
             </UiButton>
           </div>
         </div>
@@ -288,7 +290,7 @@ async function handleTurboClick() {
       >
         <div class="basis-[250px] grow" v-text="feature.title" />
         <div
-          v-for="type in ['basic', 'turbo', 'custom']"
+          v-for="type in ['basic', 'pro', 'custom']"
           :key="type"
           class="feature-value-col"
         >
@@ -315,7 +317,9 @@ async function handleTurboClick() {
       <div class="basis-[250px] grow"></div>
       <div class="feature-value-col"></div>
       <div class="feature-value-col">
-        <UiButton class="primary" @click="handleTurboClick">Upgrade</UiButton>
+        <UiButton class="primary" @click="handleTurboClick">{{
+          space.turbo ? 'Extend' : 'Upgrade'
+        }}</UiButton>
       </div>
       <div class="feature-value-col">
         <UiButton>Talk to sales</UiButton>
