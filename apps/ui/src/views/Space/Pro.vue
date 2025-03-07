@@ -4,15 +4,15 @@ import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
 
-type TierPlan = 'basic' | 'turbo' | 'custom';
+type TierPlan = 'basic' | 'pro' | 'custom';
 type Feature = {
   [key in TierPlan | string]: string | number | boolean | Component;
 };
 type SubscriptionLength = 'monthly' | 'yearly';
 
-const TIER_PLAN: TierPlan[] = ['basic', 'turbo', 'custom'] as const;
+const TIER_PLAN: TierPlan[] = ['basic', 'pro', 'custom'] as const;
 
-const TURBO_PRICES: Record<SubscriptionLength, number> = {
+const PRO_PRICES: Record<SubscriptionLength, number> = {
   yearly: 6000,
   monthly: 600
 } as const;
@@ -28,7 +28,7 @@ const FAQ: { question: string; answer: string }[] = [
     answer: 'placeholder answer ...'
   },
   {
-    question: 'Does the Turbo plan include whitelabel options?',
+    question: 'Does the Pro plan include whitelabel options?',
     answer: 'placeholder answer ...'
   }
 ] as const;
@@ -52,19 +52,19 @@ const features = computed<
         {
           title: 'Daily proposals',
           basic: limits.value['space.default.proposal_limit_per_day'],
-          turbo: limits.value['space.turbo.proposal_limit_per_day'],
+          pro: limits.value['space.turbo.proposal_limit_per_day'],
           custom: ICInfinity
         },
         {
           title: 'Monthly proposals',
           basic: limits.value['space.default.proposal_limit_per_month'],
-          turbo: limits.value['space.turbo.proposal_limit_per_month'],
+          pro: limits.value['space.turbo.proposal_limit_per_month'],
           custom: ICInfinity
         },
         {
           title: 'Proposal character limit',
           basic: limits.value['space.default.body_limit'],
-          turbo: limits.value['space.turbo.body_limit'],
+          pro: limits.value['space.turbo.body_limit'],
           custom: ICInfinity
         }
       ]
@@ -75,13 +75,13 @@ const features = computed<
         {
           title: 'Choices',
           basic: limits.value['space.default.choices_limit'],
-          turbo: limits.value['space.turbo.choices_limit'],
+          pro: limits.value['space.turbo.choices_limit'],
           custom: ICInfinity
         },
         {
           title: 'Voting strategies',
           basic: limits.value['space.default.strategies_limit'],
-          turbo: limits.value['space.turbo.strategies_limit'],
+          pro: limits.value['space.turbo.strategies_limit'],
           custom: ICInfinity
         }
       ]
@@ -92,7 +92,7 @@ const features = computed<
         {
           title: 'Delegates dashboard',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         }
       ]
@@ -103,25 +103,25 @@ const features = computed<
         {
           title: 'Whitelabel',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         },
         {
           title: 'Priority support',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         },
         {
           title: 'Early access to new features',
           basic: '-',
-          turbo: true,
+          pro: true,
           custom: true
         },
         {
           title: 'Custom interface',
           basic: '-',
-          turbo: '-',
+          pro: '-',
           custom: true
         }
       ]
@@ -152,7 +152,7 @@ function toggleQuestion(id: number) {
         class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
       >
         <button
-          v-for="p in Object.keys(TURBO_PRICES) as SubscriptionLength[]"
+          v-for="p in Object.keys(PRO_PRICES) as SubscriptionLength[]"
           :key="p"
           :class="[
             'rounded-full py-1 text-skin-link',
@@ -187,7 +187,7 @@ function toggleQuestion(id: number) {
           >
             <div>
               <span class="text-xl text-skin-heading font-semibold leading-8">
-                ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
+                ${{ _n(PRO_PRICES[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
             <UiButton class="w-full" primary>
@@ -250,7 +250,7 @@ function toggleQuestion(id: number) {
       >
         <div class="basis-[250px] grow" v-text="feature.title" />
         <div
-          v-for="type in ['basic', 'turbo', 'custom']"
+          v-for="type in ['basic', 'pro', 'custom']"
           :key="type"
           class="feature-value-col"
         >
