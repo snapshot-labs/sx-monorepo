@@ -54,6 +54,8 @@ defineProps<{
 }>();
 
 const { limits } = useSettings();
+const { web3 } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
@@ -170,6 +172,11 @@ function toggleQuestion(id: number) {
 }
 
 async function handleTurboClick() {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   modalPaymentOpen.value = true;
 }
 </script>
