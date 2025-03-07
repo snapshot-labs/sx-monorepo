@@ -33,6 +33,10 @@ const FAQ: { question: string; answer: string }[] = [
   }
 ] as const;
 
+defineProps<{
+  space: Space;
+}>();
+
 const { limits } = useSettings();
 
 const currentQuestion = ref<number>();
@@ -186,7 +190,9 @@ function toggleQuestion(id: number) {
                 ${{ _n(TURBO_PRICES[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
-            <UiButton class="w-full" primary>Upgrade</UiButton>
+            <UiButton class="w-full" primary>
+              {{ space.turbo ? 'Extend' : 'Upgrade' }}
+            </UiButton>
           </div>
         </div>
         <hr />
@@ -271,7 +277,9 @@ function toggleQuestion(id: number) {
       <div class="basis-[250px] grow"></div>
       <div class="feature-value-col"></div>
       <div class="feature-value-col">
-        <UiButton class="primary">Upgrade</UiButton>
+        <UiButton class="primary">
+          {{ space.turbo ? 'Extend' : 'Upgrade' }}
+        </UiButton>
       </div>
       <div class="feature-value-col">
         <UiButton>Talk to sales</UiButton>
