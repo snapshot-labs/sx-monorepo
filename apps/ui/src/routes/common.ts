@@ -7,6 +7,7 @@ import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceLeaderboard from '@/views/Space/Leaderboard.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
+import SpacePro from '@/views/Space/Pro.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
 import SpaceSearch from '@/views/Space/Search.vue';
 import SpaceSettings from '@/views/Space/Settings.vue';
@@ -94,5 +95,6 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
       },
       { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
     ]
-  }
+  },
+  { path: 'pro', name: 'space-pro', component: SpacePro }
 ];
