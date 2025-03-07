@@ -14,8 +14,6 @@ type Messages = {
   successSubtitle?: string;
   failTitle?: string;
   failSubtitle?: string;
-  rejectedTitle?: string;
-  rejectedSubtitle?: string;
 };
 
 const props = withDefaults(
@@ -35,8 +33,7 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const step: Ref<'approve' | 'confirming' | 'success' | 'fail' | 'reject'> =
-  ref('approve');
+const step: Ref<'approve' | 'confirming' | 'success' | 'fail'> = ref('approve');
 const txId: Ref<string | null> = ref(null);
 
 const text = computed(() => {
@@ -70,15 +67,6 @@ const text = computed(() => {
     };
   }
 
-  if (step.value === 'reject') {
-    return {
-      title: props.messages.rejectedTitle || 'Transaction cancelled',
-      subtitle:
-        props.messages.rejectedSubtitle ||
-        'You need to confirm the transaction to proceed'
-    };
-  }
-
   throw new Error('Invalid step');
 });
 
@@ -100,7 +88,7 @@ async function handleExecute() {
     }
   } catch (e) {
     if (['ACTION_REJECTED', 4001].includes(e.code)) {
-      step.value = 'reject';
+      emit('close');
       return;
     }
     console.warn('Transaction failed', e);
@@ -138,12 +126,6 @@ watch(
       <div v-if="step === 'fail'" class="bg-skin-danger rounded-full p-[12px]">
         <IS-x-mark :width="28" :height="28" class="text-skin-bg" />
       </div>
-      <div
-        v-if="step === 'reject'"
-        class="bg-yellow-600 dark:bg-amber-500 rounded-full p-[12px]"
-      >
-        <IS-exclamation-circle :width="28" :height="28" class="text-skin-bg" />
-      </div>
       <div class="flex flex-col space-y-1 leading-6">
         <h4
           class="font-semibold text-skin-heading text-lg"
@@ -170,7 +152,7 @@ watch(
         <IH-arrow-sm-right class="inline-block -rotate-45" />
       </a>
       <div
-        v-else-if="step === 'fail' || step === 'reject'"
+        v-else-if="step === 'fail'"
         class="w-full flex justify-between space-x-[10px]"
       >
         <UiButton class="w-full" @click="$emit('close')">Cancel</UiButton>
