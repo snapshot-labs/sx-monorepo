@@ -89,6 +89,7 @@ const SPACE_FRAGMENT = gql`
     # needed for settings
     terms
     private
+    flagged
     domain
     skin
     skinSettings {
