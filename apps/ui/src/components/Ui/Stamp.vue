@@ -15,10 +15,12 @@ withDefaults(
     width?: number;
     height?: number;
     cb?: string;
+    cropped?: boolean;
   }>(),
   {
     type: 'avatar',
-    size: 22
+    size: 22,
+    cropped: true
   }
 );
 </script>
@@ -26,13 +28,21 @@ withDefaults(
 <template>
   <img
     :key="cb"
-    :src="getStampUrl(type, id, width && height ? { width, height } : size, cb)"
+    :src="
+      getStampUrl(
+        type,
+        id,
+        width && height ? { width, height } : size,
+        cb,
+        cropped
+      )
+    "
     class="rounded-full inline-block bg-skin-border"
     :style="
       !width && !height
         ? {
-            width: `${size}px`,
-            height: `${size}px`
+            [`${cropped ? '' : 'max-'}width`]: `${size}px`,
+            [`${cropped ? '' : 'max-'}height`]: `${size}px`
           }
         : {}
     "
