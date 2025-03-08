@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { formatUnits } from '@ethersproject/units';
 import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
-import { _n, getUrl, uniqBy } from '@/helpers/utils';
-import { metadataNetwork } from '@/networks';
+import { _n, compareAddresses } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
 const props = defineProps<{
   open: boolean;
   amount: number;
   tokens: Token[];
+  network: ChainId;
   barcodePayload: BarcodePayload;
 }>();
 
@@ -21,58 +22,80 @@ const {
   goToNextStep,
   isLastStep,
   currentStep
-} = usePaymentFactory();
-const { networks: allNetworks } = useOffchainNetworksList(metadataNetwork);
+} = usePaymentFactory(props.network);
+const { loading, assetsMap, loadBalances } = useBalances();
+const { web3 } = useWeb3();
 
+const searchInput: Ref<HTMLElement | null> = ref(null);
+const selectedTokenAddress = ref<string>('');
+const showPicker = ref(false);
+const searchValue = ref('');
 const modalTransactionProgressOpen = ref(false);
-const token = ref<Token>(props.tokens[0]);
-const chainId = ref<ChainId>(Number(token.value.chainId));
 const isTermsAccepted = ref(false);
 
-const networks = computed<
-  {
-    chainId: ChainId;
-    name: string;
-    avatar: string;
-  }[]
->(() => {
-  return uniqBy(props.tokens, 'chainId')
-    .map(t => {
-      const network = allNetworks.value.find(n => Number(n.key) === t.chainId);
+const currentToken = computed(() => {
+  return (
+    filteredAssets.value.find(asset =>
+      compareAddresses(asset.contractAddress, selectedTokenAddress.value)
+    ) || filteredAssets.value[0]
+  );
+});
 
-      if (!network) {
-        return;
+const filteredAssets = computed(() => {
+  return props.tokens.map(token => {
+    return (
+      assetsMap.value.get(token.contractAddress) || {
+        ...token,
+        name: token.symbol,
+        logo: null,
+        tokenBalance: '0x0',
+        price: 0,
+        value: 0,
+        change: 0
       }
-
-      return {
-        chainId: Number(t.chainId),
-        name: network.name,
-        avatar: network.logo
-      };
-    })
-    .filter(n => !!n);
+    );
+  });
 });
 
-const currentChainIdTokens = computed(() => {
-  return props.tokens.filter(t => t.chainId === chainId.value);
+const isInsufficientBalance = computed(() => {
+  return (
+    Number(
+      formatUnits(currentToken.value.tokenBalance, currentToken.value.decimals)
+    ) < props.amount
+  );
 });
+
+const canSubmit = computed(
+  () =>
+    isTermsAccepted.value &&
+    !loading.value &&
+    web3.value.account &&
+    !isInsufficientBalance.value
+);
 
 function handleSubmit() {
+  if (!canSubmit.value) return;
+
   startPaymentProcess();
 
   emit('close');
   modalTransactionProgressOpen.value = true;
 }
 
-function handleChainIdClick(id: ChainId) {
-  if (chainId.value === id) return;
+function handlePickerClick() {
+  showPicker.value = true;
+  searchValue.value = '';
 
-  chainId.value = id;
-  token.value = currentChainIdTokens.value[0];
+  nextTick(() => {
+    if (searchInput.value) {
+      searchInput.value.focus();
+    }
+  });
 }
 
-function handleTokenClick(t: Token) {
-  token.value = t;
+function handleTokenPick(address: string) {
+  selectedTokenAddress.value = address;
+  showPicker.value = false;
 }
 
 async function moveToNextStep() {
@@ -85,64 +108,80 @@ async function moveToNextStep() {
   }
 }
 
-watch(
-  () => props.open,
-  open => {
-    if (open) return;
-
+watch([() => props.open, () => web3.value.account], ([open, account]) => {
+  if (!open) {
     isTermsAccepted.value = false;
+    return;
   }
-);
+
+  loadBalances(account, props.network);
+});
 </script>
 
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Payment</h3>
+      <template v-if="showPicker">
+        <button
+          type="button"
+          class="absolute left-0 -top-1 p-4"
+          @click="showPicker = false"
+        >
+          <IH-arrow-narrow-left class="mr-2" />
+        </button>
+        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
+          <IH-search class="mx-2" />
+          <input
+            ref="searchInput"
+            v-model="searchValue"
+            type="text"
+            :placeholder="'Search name or paste address'"
+            class="flex-auto bg-transparent text-skin-link"
+          />
+        </div>
+      </template>
     </template>
-    <div class="p-4 space-y-3">
-      <div class="space-y-1.5">
-        <div>Network</div>
-        <div class="pill-switcher">
-          <button
-            v-for="network in networks"
-            :key="network.chainId"
-            type="button"
-            :class="[{ 'bg-skin-active-bg': chainId === network.chainId }]"
-            @click="handleChainIdClick(network.chainId)"
-          >
-            <img
-              :src="getUrl(network.avatar) || undefined"
-              :alt="network.name"
-              class="size-[20px] rounded-lg shrink-0"
+    <PickerToken
+      v-if="showPicker"
+      :assets="filteredAssets"
+      :address="web3.account"
+      :network="network"
+      :loading="loading"
+      :search-value="searchValue"
+      @pick="handleTokenPick"
+    />
+    <div v-else class="s-box p-4 space-y-3">
+      <div class="s-base">
+        <div class="s-label" v-text="'Token *'" />
+        <button
+          type="button"
+          class="s-input text-left h-[61px]"
+          @click="handlePickerClick()"
+        >
+          <div class="flex items-center">
+            <UiStamp
+              v-if="currentToken"
+              :id="`eip155:${network}:${currentToken.contractAddress}`"
+              type="token"
+              class="mr-2"
+              :size="20"
             />
-            {{ network.name }}
-          </button>
-        </div>
-      </div>
-      <div class="space-y-1.5">
-        <div>Currency</div>
-        <div class="pill-switcher">
-          <button
-            v-for="(t, i) in currentChainIdTokens"
-            :key="i"
-            type="button"
-            :class="[{ 'bg-skin-active-bg': token.address === t.address }]"
-            @click="handleTokenClick(t)"
-          >
-            <UiStamp :id="`eip155:${chainId}:${t.address}`" type="token" />
-            {{ t.symbol }}
-          </button>
-        </div>
+            <div class="truncate" v-text="currentToken.symbol" />
+          </div>
+        </button>
       </div>
     </div>
-    <template #footer>
+    <template v-if="!showPicker" #footer>
       <div class="border rounded-lg mb-4 bg-skin-input-bg p-3 py-2.5">
         <div class="flex justify-between">
           You will pay
           <div class="flex items-center gap-1">
-            <UiStamp :id="`eip155:${chainId}:${token.address}`" type="token" />
-            {{ _n(amount) }} {{ token.symbol }}
+            <UiStamp
+              :id="`eip155:${network}:${currentToken.contractAddress}`"
+              type="token"
+            />
+            {{ _n(amount) }} {{ currentToken.symbol }}
           </div>
         </div>
       </div>
@@ -155,16 +194,21 @@ watch(
       <UiButton
         class="w-full"
         primary
-        :disabled="!isTermsAccepted"
+        :disabled="!canSubmit"
+        :loading="loading"
         @click="handleSubmit"
-        >Pay</UiButton
       >
+        <template v-if="isInsufficientBalance">
+          Insufficient {{ currentToken.symbol }}
+        </template>
+        <template v-else>Pay</template>
+      </UiButton>
     </template>
   </UiModal>
   <ModalTransactionProgress
     :open="modalTransactionProgressOpen"
-    :execute="() => currentStep.execute(token, amount, barcodePayload)"
-    :chain-id="chainId"
+    :execute="() => currentStep.execute(currentToken, amount, barcodePayload)"
+    :chain-id="network"
     :messages="currentStep.messages"
     @close="modalTransactionProgressOpen = false"
     @confirmed="moveToNextStep"

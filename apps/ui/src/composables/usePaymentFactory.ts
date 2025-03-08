@@ -3,7 +3,7 @@ import { ChainId } from '@/types';
 import { Token } from './usePayment';
 
 export type BarcodePayload = { type: string; params: Record<string, any> };
-type StepId = 'check_balance' | 'check_approval' | 'approve' | 'pay';
+type StepId = 'check_approval' | 'approve' | 'pay';
 type Step = {
   messages: {
     approveTitle: string;
@@ -24,7 +24,7 @@ type Step = {
 
 const BARCODE_VERSION = '0.1';
 
-const FIRST_STEP: StepId = 'check_balance';
+const FIRST_STEP: StepId = 'check_approval';
 
 async function getBarcode(contents: BarcodePayload): Promise<string> {
   const receipt = await pinPineapple({
@@ -35,44 +35,15 @@ async function getBarcode(contents: BarcodePayload): Promise<string> {
   return `ipfs://${receipt.cid}`;
 }
 
-export default function usePaymentFactory() {
+export default function usePaymentFactory(network: ChainId) {
   const uiStore = useUiStore();
 
-  const { hasBalance, hasApproved, approve, pay } = usePayment();
+  const { hasApproved, approve, pay } = usePayment(network);
   const currentStepMessages = ref({});
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
   const STEPS = ref<Record<StepId, Step>>({
-    check_balance: {
-      messages: {
-        approveTitle: 'Checking balance',
-        approveSubtitle: 'Verifying that your wallet has enough funds...',
-        failTitle: 'Unable to check balance'
-      },
-      nextStep: () => 'check_approval',
-      execute: async (token, amount) => {
-        const result = await hasBalance(token, amount);
-
-        if (result === undefined) {
-          currentStepMessages.value = {
-            failTitle: 'Wallet not found',
-            failSubtitle: `Unable to check the wallet's balance`
-          };
-          throw new Error('wallet not found');
-        }
-
-        if (!result) {
-          currentStepMessages.value = {
-            failTitle: 'Insufficient balance',
-            failSubtitle: `You need a minimum of ${amount} ${token.symbol} to complete this transaction`
-          };
-          throw new Error('Insufficient balance');
-        }
-
-        return null;
-      }
-    },
     check_approval: {
       messages: {
         approveTitle: 'Checking token allowance',
@@ -103,7 +74,7 @@ export default function usePaymentFactory() {
       },
       nextStep: () => 'check_approval',
       execute: async (token, amount) =>
-        wrapPromise(approve(token, amount), token.chainId)
+        wrapPromise(approve(token, amount), network)
     },
     pay: {
       messages: {
@@ -119,7 +90,7 @@ export default function usePaymentFactory() {
 
         return wrapPromise(
           pay(token, amount, await getBarcode(payload)),
-          token.chainId
+          network
         );
       }
     }

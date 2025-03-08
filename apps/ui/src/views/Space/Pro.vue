@@ -15,22 +15,14 @@ type Feature = {
 
 const TIER_PLAN: TierPlan[] = ['basic', 'pro', 'custom'] as const;
 
-const NETWORKS_REALM: Record<'mainnet' | 'testnet', ChainId[]> = {
-  mainnet: [1, 8453],
-  testnet: [11155111, 84532]
-};
-
 const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT'] as const;
 
-const PRO_PRICES: Record<
-  keyof typeof NETWORKS_REALM,
-  Record<SubscriptionLength, number>
-> = {
-  mainnet: {
+const PRO_PRICES: Record<ChainId, Record<SubscriptionLength, number>> = {
+  1: {
     yearly: 6000,
     monthly: 600
   },
-  testnet: { yearly: 1, monthly: 0.1 }
+  11155111: { yearly: 1, monthly: 0.1 }
 } as const;
 
 const FAQ: { question: string; answer: string }[] = [
@@ -61,22 +53,17 @@ const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
 const modalPaymentOpen = ref(false);
 
-const currentNetworkRealm = computed(() => {
-  return metadataNetwork === 's' ? 'mainnet' : 'testnet';
+const paymentNetwork = computed(() => {
+  return metadataNetwork === 's' ? 1 : 11155111;
 });
 
 const prices = computed(() => {
-  return PRO_PRICES[currentNetworkRealm.value];
+  return PRO_PRICES[paymentNetwork.value];
 });
 
 const tokens = computed(() => {
-  const networkIds = NETWORKS_REALM[currentNetworkRealm.value];
-
-  return TOKENS.filter(t => {
-    return (
-      networkIds.includes(t.chainId) &&
-      ACCEPTED_TOKENS_SYMBOL.includes(t.symbol)
-    );
+  return TOKENS[paymentNetwork.value].filter(t => {
+    return ACCEPTED_TOKENS_SYMBOL.includes(t.symbol);
   });
 });
 
@@ -365,6 +352,7 @@ async function handleTurboClick() {
     <ModalPayment
       :open="modalPaymentOpen"
       :tokens="tokens"
+      :network="paymentNetwork"
       :amount="prices[subscriptionLength]"
       :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
       @close="modalPaymentOpen = false"
