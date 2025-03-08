@@ -27,6 +27,7 @@ const { networks: allNetworks } = useOffchainNetworksList(metadataNetwork);
 const modalTransactionProgressOpen = ref(false);
 const token = ref<Token>(props.tokens[0]);
 const chainId = ref<ChainId>(Number(token.value.chainId));
+const isTermsAccepted = ref(false);
 
 const networks = computed<
   {
@@ -83,6 +84,15 @@ async function moveToNextStep() {
     modalTransactionProgressOpen.value = true;
   }
 }
+
+watch(
+  () => props.open,
+  open => {
+    if (open) return;
+
+    isTermsAccepted.value = false;
+  }
+);
 </script>
 
 <template>
@@ -136,7 +146,19 @@ async function moveToNextStep() {
           </div>
         </div>
       </div>
-      <UiButton class="w-full" primary @click="handleSubmit">Pay</UiButton>
+      <UiCheckbox v-model="isTermsAccepted" class="mb-3 text-start">
+        <div class="text-skin-text leading-[22px] top-[-1px] relative">
+          Before confirming, please read and agree to the
+          <AppLink :to="{ name: 'site-terms' }">Terms of service </AppLink>.
+        </div>
+      </UiCheckbox>
+      <UiButton
+        class="w-full"
+        primary
+        :disabled="!isTermsAccepted"
+        @click="handleSubmit"
+        >Pay</UiButton
+      >
     </template>
   </UiModal>
   <ModalTransactionProgress
