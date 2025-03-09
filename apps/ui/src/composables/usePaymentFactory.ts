@@ -126,20 +126,10 @@ export default function usePaymentFactory(network: ChainId) {
     promise: Promise<any>,
     chainId: ChainId
   ): Promise<string> {
-    try {
-      const tx = await promise;
-      uiStore.addPendingTransaction(tx.hash, chainId);
+    const tx = await promise;
+    uiStore.addPendingTransaction(tx.hash, chainId);
 
-      return tx.hash;
-    } catch (e) {
-      if (e.code === 'ACTION_REJECTED') {
-        currentStepMessages.value = {
-          failTitle: 'Transaction cancelled',
-          failSubtitle: ' '
-        };
-      }
-      throw e;
-    }
+    return tx.hash;
   }
 
   function start() {
