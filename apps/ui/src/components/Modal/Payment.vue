@@ -2,16 +2,27 @@
 import { formatUnits } from '@ethersproject/units';
 import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
-import { _n, compareAddresses } from '@/helpers/utils';
+import { _n, clone, compareAddresses } from '@/helpers/utils';
+import { getValidator } from '@/helpers/validation';
 import { ChainId } from '@/types';
 
-const props = defineProps<{
-  open: boolean;
-  amount: number;
-  tokens: Token[];
-  network: ChainId;
-  barcodePayload: BarcodePayload;
-}>();
+const FORM = {
+  quantity: 1
+};
+
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    amount: number;
+    tokens: Token[];
+    network: ChainId;
+    barcodePayload: BarcodePayload;
+    quantityLabel?: string | false;
+  }>(),
+  {
+    quantityLabel: 'Quantity'
+  }
+);
 
 const emit = defineEmits<{
   (e: 'close');
@@ -32,6 +43,22 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const modalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
+const form = ref(clone(FORM));
+
+const definition = computed(() => ({
+  type: 'object',
+  title: 'Payment',
+  additionalProperties: false,
+  required: ['quantity'],
+  properties: {
+    quantity: {
+      type: 'integer',
+      title: props.quantityLabel || '',
+      minimum: 1,
+      examples: [FORM.quantity]
+    }
+  }
+}));
 
 const currentToken = computed(() => {
   return (
@@ -61,7 +88,7 @@ const isInsufficientBalance = computed(() => {
   return (
     Number(
       formatUnits(currentToken.value.tokenBalance, currentToken.value.decimals)
-    ) < props.amount
+    ) < totalAmount.value
   );
 });
 
@@ -70,8 +97,22 @@ const canSubmit = computed(
     isTermsAccepted.value &&
     !loading.value &&
     web3.value.account &&
-    !isInsufficientBalance.value
+    !isInsufficientBalance.value &&
+    formValid.value
 );
+
+const totalAmount = computed(() => {
+  return props.amount * Number(form.value.quantity);
+});
+
+const formErrors = computed(() => {
+  const validator = getValidator(definition.value);
+  return validator.validate(form.value, { skipEmptyOptionalFields: true });
+});
+
+const formValid = computed(() => {
+  return Object.keys(formErrors.value).length === 0;
+});
 
 function handleSubmit() {
   if (!canSubmit.value) return;
@@ -111,6 +152,7 @@ async function moveToNextStep() {
 watch([() => props.open, () => web3.value.account], ([open, account]) => {
   if (!open) {
     isTermsAccepted.value = false;
+    form.value = clone(FORM);
     return;
   }
 
@@ -151,7 +193,7 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
       :search-value="searchValue"
       @pick="handleTokenPick"
     />
-    <div v-else class="s-box p-4 space-y-3">
+    <div v-else class="s-box p-4 pb-[10px] space-y-3">
       <div class="s-base">
         <div class="s-label" v-text="'Token *'" />
         <button
@@ -171,6 +213,12 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
           </div>
         </button>
       </div>
+      <UiInputNumber
+        v-if="quantityLabel"
+        v-model="form.quantity"
+        :definition="definition.properties.quantity"
+        :error="formErrors.quantity"
+      />
     </div>
     <template v-if="!showPicker" #footer>
       <div class="border rounded-lg mb-4 bg-skin-input-bg p-3 py-2.5">
@@ -179,9 +227,10 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
           <div class="flex items-center gap-1">
             <UiStamp
               :id="`eip155:${network}:${currentToken.contractAddress}`"
+              :size="18"
               type="token"
             />
-            {{ _n(amount) }} {{ currentToken.symbol }}
+            {{ _n(totalAmount) }} {{ currentToken.symbol }}
           </div>
         </div>
       </div>
@@ -207,7 +256,9 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
   </UiModal>
   <ModalTransactionProgress
     :open="modalTransactionProgressOpen"
-    :execute="() => currentStep.execute(currentToken, amount, barcodePayload)"
+    :execute="
+      () => currentStep.execute(currentToken, totalAmount, barcodePayload)
+    "
     :chain-id="network"
     :messages="currentStep.messages"
     @close="modalTransactionProgressOpen = false"

@@ -353,6 +353,7 @@ async function handleTurboClick() {
       :open="modalPaymentOpen"
       :tokens="tokens"
       :network="paymentNetwork"
+      :quantity-label="subscriptionLength === 'yearly' ? 'Years' : 'Months'"
       :amount="prices[subscriptionLength]"
       :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
       @close="modalPaymentOpen = false"
