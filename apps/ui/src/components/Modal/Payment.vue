@@ -152,6 +152,7 @@ async function moveToNextStep() {
 watch([() => props.open, () => web3.value.account], ([open, account]) => {
   if (!open) {
     isTermsAccepted.value = false;
+    selectedTokenAddress.value = '';
     form.value = clone(FORM);
     return;
   }
