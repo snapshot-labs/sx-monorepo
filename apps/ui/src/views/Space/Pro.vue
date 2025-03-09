@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
@@ -357,7 +358,32 @@ async function handleTurboClick() {
       :amount="prices[subscriptionLength]"
       :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
       @close="modalPaymentOpen = false"
-    />
+    >
+      <template #summary="{ quantity }">
+        <div class="flex justify-between">
+          <div>
+            {{ subscriptionLength === 'yearly' ? 'Annual' : 'Monthly' }} plan
+          </div>
+          <ICPro class="h-[15px] w-auto inline text-skin-heading" />
+        </div>
+        <div class="flex justify-between">
+          <div>End date</div>
+          <div>
+            {{
+              dayjs(new Date())
+                .add(
+                  quantity,
+                  subscriptionLength === 'yearly' ? 'year' : 'month'
+                )
+                .format('D MMM YYYY')
+            }}
+            ({{ quantity }}
+            {{ subscriptionLength === 'yearly' ? 'year' : 'month'
+            }}{{ quantity > 1 ? 's' : '' }})
+          </div>
+        </div>
+      </template>
+    </ModalPayment>
   </div>
 </template>
 

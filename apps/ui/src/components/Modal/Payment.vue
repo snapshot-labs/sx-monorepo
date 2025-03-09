@@ -222,7 +222,9 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
       />
     </div>
     <template v-if="!showPicker" #footer>
-      <div class="border rounded-lg mb-4 bg-skin-input-bg p-3 py-2.5">
+      <div
+        class="border rounded-lg mb-4 text-[16px] bg-skin-input-bg p-3 py-2.5"
+      >
         <div class="flex justify-between">
           You will pay
           <div class="flex items-center gap-1">
@@ -232,6 +234,11 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
               type="token"
             />
             {{ _n(totalAmount) }} {{ currentToken.symbol }}
+          </div>
+        </div>
+        <div v-if="$slots.summary">
+          <div class="border-t mt-[14px] pt-[14px] space-y-1 leading-5">
+            <slot name="summary" :quantity="form.quantity" />
           </div>
         </div>
       </div>
