@@ -533,32 +533,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </UiContainerSettings>
     </div>
-
-    <!-- <template v-if="showToolbar" #toolbar>
-      <div
-        class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
-      >
-        <h4
-          class="leading-7 font-medium truncate mb-2 xs:mb-0"
-          :class="{ 'text-skin-danger': error }"
-        >
-          {{ error || 'You have unsaved changes' }}
-        </h4>
-        <div class="flex space-x-3">
-          <button type="reset" class="text-skin-heading" @click="reset()">
-            Reset
-          </button>
-          <UiButton
-            v-if="!error"
-            :loading="saving"
-            primary
-            @click="handleSettingsSave"
-          >
-            Save
-          </UiButton>
-        </div>
-      </div>
-    </template> -->
   </div>
   <UiToolbarBottom v-if="showToolbar" ref="el">
     <div
