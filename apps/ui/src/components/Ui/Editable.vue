@@ -87,7 +87,8 @@ watch(
     :class="{
       'mt-2': editing,
       'w-fit': definition.format !== 'duration',
-      's-box w-full max-w-xl': definition.format === 'duration'
+      's-box s-no-padding-bottom w-full max-w-xl':
+        definition.format === 'duration'
     }"
   >
     <UiLoading v-if="loading" />
@@ -108,8 +109,7 @@ watch(
             'top-[-19.5px]':
               definition.format !== 'duration' && !!formErrors.value,
             'top-[-18.5px]':
-              definition.format === 'duration' && !!formErrors.value,
-            '-top-1.5': definition.format === 'duration'
+              definition.format === 'duration' && !!formErrors.value
           }"
         >
           <button
