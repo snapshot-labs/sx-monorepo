@@ -175,7 +175,7 @@ onMounted(() => {
           :fallback="false"
           :width="380"
           :height="76"
-          class="!border-0"
+          class="!border-0 !mb-0"
           :definition="{
             type: 'string',
             format: 'stamp',

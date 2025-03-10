@@ -86,11 +86,12 @@ const formErrors = computed(() => {
 
 <template>
   <UiContainerSettings :title="title" :description="description">
-    <div class="s-box">
+    <div class="s-box [&>*]:space-y-3">
       <UiForm
         :model-value="form"
         :error="formErrors"
         :definition="definition"
+        class="s-no-padding-bottom"
       />
     </div>
   </UiContainerSettings>

@@ -208,12 +208,7 @@ watch(
   <div class="pt-5 max-w-[50rem] mx-auto px-4">
     <UiStepper :steps="STEPS" :submitting="sending" @submit="handleSubmit">
       <template #content="{ currentStep, goToNext }">
-        <div
-          :class="{
-            '!pb-4': !['profile', 'network', 'voting'].includes(currentStep),
-            'pb-[10px]': ['profile', 'network', 'voting'].includes(currentStep)
-          }"
-        >
+        <div class="pb-4">
           <UiContainerSettings
             :title="STEPS[currentStep].contentTitle"
             :description="STEPS[currentStep].contentDescription"
@@ -233,6 +228,7 @@ watch(
             <div v-if="currentStep === 'network'" class="s-box">
               <UiSelectorNetwork
                 v-model="settingsForm.chainId"
+                class="!mb-0"
                 :definition="{
                   type: 'number',
                   title: 'Network',

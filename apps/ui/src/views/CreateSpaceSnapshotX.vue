@@ -139,12 +139,7 @@ watch(selectedNetworkId, () => {
     />
     <UiStepper v-else :steps="STEPS" @submit="handleSubmit">
       <template #content="{ currentStep }">
-        <div
-          :class="{
-            '!pb-4': !['controller', 'voting'].includes(currentStep),
-            'pb-[10px]': ['controller', 'voting'].includes(currentStep)
-          }"
-        >
+        <div class="!pb-4">
           <template v-if="currentStep === 'profile'">
             <FormSpaceProfile
               :form="metadataForm"
@@ -223,6 +218,7 @@ watch(selectedNetworkId, () => {
           <FormController
             v-else-if="currentStep === 'controller'"
             v-model="controller"
+            class="s-form"
             title="Controller"
             :chain-id="selectedNetwork.chainId"
             @errors="v => handleErrors('controller', v)"

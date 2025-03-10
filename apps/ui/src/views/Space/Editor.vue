@@ -32,6 +32,8 @@ const props = defineProps<{
   space: Space;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
 const { proposals, createDraft } = useEditor();
@@ -451,7 +453,7 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal" class="!pb-0">
+  <div v-if="proposal" class="h-full">
     <UiTopnav>
       <UiButton
         :to="{ name: 'space-overview', params: { space: spaceKey } }"
@@ -483,7 +485,10 @@ watchEffect(() => {
       </UiButton>
     </UiTopnav>
     <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
-      <div class="flex-1 grow min-w-0">
+      <div
+        class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
+        v-bind="$attrs"
+      >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
             v-if="
@@ -638,18 +643,13 @@ watchEffect(() => {
               >.
             </template>
           </UiComposer>
-          <div class="s-base mb-5">
-            <UiInputString
-              :key="proposalKey || ''"
-              v-model="proposal.discussion"
-              :definition="DISCUSSION_DEFINITION"
-              :error="formErrors.discussion"
-            />
-            <UiLinkPreview
-              :key="proposalKey || ''"
-              :url="proposal.discussion"
-            />
-          </div>
+          <UiInputString
+            :key="proposalKey || ''"
+            v-model="proposal.discussion"
+            :definition="DISCUSSION_DEFINITION"
+            :error="formErrors.discussion"
+          />
+          <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
           <div
             v-if="
               network &&
@@ -657,7 +657,7 @@ watchEffect(() => {
               strategiesWithTreasuries.length > 0
             "
           >
-            <h4 class="eyebrow mb-2">Execution</h4>
+            <h4 class="eyebrow mb-2 mt-4">Execution</h4>
             <EditorExecution
               v-for="execution in editorExecutions"
               :key="execution.address"
@@ -670,7 +670,7 @@ watchEffect(() => {
               :space="space"
               :strategy="execution"
               :extra-contacts="extraContacts"
-              class="mb-3"
+              class="mb-0"
               @update:model-value="
                 value => handleExecutionUpdated(execution.address, value)
               "
@@ -679,12 +679,8 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix
-        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l']"
-        :top="72"
-        :bottom="64"
-      >
-        <div class="flex flex-col p-4 space-y-4 md:mb-6">
+      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+        <div class="flex flex-col px-4 gap-y-4 pt-4" v-bind="$attrs">
           <EditorVotingType
             v-model="proposal"
             :voting-types="enforcedVoteType ? [enforcedVoteType] : votingTypes"

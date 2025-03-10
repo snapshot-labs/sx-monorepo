@@ -11,6 +11,8 @@ const props = defineProps<{
   space: Space;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 const route = useRoute();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
@@ -157,11 +159,14 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-stretch md:flex-row flex-col w-full md:h-full !pb-0">
+  <div class="flex items-stretch md:flex-row flex-col w-full h-full">
     <UiLoading v-if="isPending" class="ml-4 mt-3" />
     <template v-else-if="proposal">
       <div
-        :class="['flex-1 grow min-w-0', { '!pb-0': withoutBottomPadding }]"
+        :class="[
+          'flex-1 grow min-w-0 max-md:pb-0',
+          { '!pb-0': withoutBottomPadding }
+        ]"
         v-bind="$attrs"
       >
         <UiScrollerHorizontal
@@ -257,7 +262,7 @@ watchEffect(() => {
         ]"
       >
         <Affix :top="72" :bottom="64">
-          <div class="flex flex-col space-y-4 p-4">
+          <div class="flex flex-col space-y-4 p-4 pb-0" v-bind="$attrs">
             <div
               v-if="
                 !proposal.cancelled &&
