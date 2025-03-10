@@ -31,6 +31,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'confirmed', txId: string | null): void;
   (e: 'close'): void;
+  (e: 'cancelled'): void;
 }>();
 
 const step: Ref<'approve' | 'confirming' | 'success' | 'fail'> = ref('approve');
@@ -87,6 +88,10 @@ async function handleExecute() {
       emit('close');
     }
   } catch (e) {
+    if (['ACTION_REJECTED', 4001].includes(e.code)) {
+      emit('cancelled');
+      return;
+    }
     console.warn('Transaction failed', e);
 
     step.value = 'fail';
