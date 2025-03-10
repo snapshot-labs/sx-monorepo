@@ -3,9 +3,9 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-defineOptions({ inheritAttrs: false });
-
 const props = defineProps<{ space: Space }>();
+
+defineOptions({ inheritAttrs: false });
 
 const router = useRouter();
 const route = useRoute();
