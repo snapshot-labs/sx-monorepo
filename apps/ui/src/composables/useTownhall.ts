@@ -19,6 +19,20 @@ export function useTownhall() {
     });
   }
 
+  async function sendHideStatement(discussion: number, statement: number) {
+    return send('hide_statement', {
+      discussion,
+      statement
+    });
+  }
+
+  async function sendPinStatement(discussion: number, statement: number) {
+    return send('pin_statement', {
+      discussion,
+      statement
+    });
+  }
+
   async function sendVote(
     discussion: number,
     statement: number,
@@ -45,6 +59,8 @@ export function useTownhall() {
   return {
     sendDiscussion,
     sendStatement,
+    sendHideStatement,
+    sendPinStatement,
     sendVote
   };
 }

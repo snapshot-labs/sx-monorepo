@@ -1,5 +1,5 @@
 export interface Discussion {
-  id: number;
+  id: string;
   author: string;
   title: string;
   body: string;
@@ -16,6 +16,8 @@ export interface Statement {
   scores_2: number;
   scores_3: number;
   vote_count: number;
+  pinned: boolean;
+  hidden: boolean;
   created: number;
   discussion_id: number;
   statement_id: number;

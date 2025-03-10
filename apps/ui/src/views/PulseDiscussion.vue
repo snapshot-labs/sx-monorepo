@@ -30,38 +30,74 @@ const pendingStatements: ComputedRef<Statement[]> = computed(() =>
   )
 );
 const results: ComputedRef<Statement[]> = computed(() =>
-  clone(statements.value).sort((a, b) => b.vote_count - a.vote_count)
+  clone(statements.value)
+    .filter(s => !s.hidden)
+    .sort((a, b) => b.vote_count - a.vote_count)
+    .sort((a, b) => Number(b.pinned) - Number(a.pinned))
 );
 
 client.subscribe(([subject, body]) => {
   if (subject === 'justsaying') {
-    if (body.subject === 'new_statement') {
-      const statement = newStatementEventToEntry(body.body);
+    const event = body.body;
 
-      if (statement.discussion_id === id) {
-        statements.value = [...statements.value, statement];
-      }
-    }
+    switch (body.subject) {
+      case 'new_statement':
+        const statement = newStatementEventToEntry(event);
 
-    if (body.subject === 'new_vote') {
-      const vote = newVoteEventToEntry(body.body);
-
-      if (vote.discussion_id === id) {
-        if (vote.voter === web3.value.account) {
-          votes.value = [...votes.value, vote];
+        if (statement.discussion_id === id) {
+          statements.value = [...statements.value, statement];
         }
 
-        const statementIndex = statements.value.findIndex(
-          s => s.statement_id === vote.statement_id
-        );
-        const statement = clone(statements.value[statementIndex]);
-        statement.vote_count += 1;
-        statement[`scores_${vote.choice}`] += 1;
+        break;
+      case 'hide_statement':
+        if (event.discussion === id) {
+          const statementIndex = statements.value.findIndex(
+            s => s.statement_id === event.statement
+          );
 
-        const statementsClone = clone(statements.value);
-        statementsClone[statementIndex] = statement;
-        statements.value = statementsClone;
-      }
+          if (statementIndex !== -1) {
+            statements.value = clone(
+              statements.value.filter((_, i) => i !== statementIndex)
+            );
+          }
+        }
+
+        break;
+      case 'pin_statement':
+        if (event.discussion === id) {
+          const statementIndex = statements.value.findIndex(
+            s => s.statement_id === event.statement
+          );
+
+          if (statementIndex !== -1) {
+            const statementsClone = clone(statements.value);
+            statementsClone[statementIndex].pinned = true;
+            statements.value = statementsClone;
+          }
+        }
+
+        break;
+      case 'new_vote':
+        const vote = newVoteEventToEntry(event);
+
+        if (vote.discussion_id === id) {
+          if (vote.voter === web3.value.account) {
+            votes.value = [...votes.value, vote];
+          }
+
+          const statementIndex = statements.value.findIndex(
+            s => s.statement_id === vote.statement_id
+          );
+          const statement = clone(statements.value[statementIndex]);
+          statement.vote_count += 1;
+          statement[`scores_${vote.choice}`] += 1;
+
+          const statementsClone = clone(statements.value);
+          statementsClone[statementIndex] = statement;
+          statements.value = statementsClone;
+        }
+
+        break;
     }
   }
 });
@@ -70,7 +106,10 @@ onMounted(async () => {
   loading.value = true;
 
   discussion.value = await getDiscussion(id.toString());
-  statements.value = discussion?.value?.statements || [];
+  statements.value = (discussion?.value?.statements || [])
+    .filter(s => !s.hidden)
+    .sort(() => 0.5 - Math.random())
+    .sort((a, b) => Number(b.pinned) - Number(a.pinned));
   client.requestAsync('subscribe', id);
 
   const voter = web3.value.account;
@@ -120,6 +159,17 @@ async function handleSubmit() {
     >
       <div class="space-y-3">
         <h1 class="leading-[1.1em] mb-3" v-text="discussion.title" />
+        <div class="space-x-2">
+          <UiButton class="!px-0 w-[46px]">
+            <IH-share class="inline-block" />
+          </UiButton>
+          <UiButton
+            v-if="web3.account && web3.account === discussion.author"
+            class="!px-0 w-[46px]"
+          >
+            <IH-cog class="inline-block" />
+          </UiButton>
+        </div>
         <UiMarkdown v-if="discussion.body" :body="discussion.body" />
       </div>
 
@@ -133,7 +183,10 @@ async function handleSubmit() {
             {{ _n(pendingStatements.length) }}
           </div>
         </h4>
-        <PulseStatements :statements="pendingStatements" />
+        <PulseStatements
+          :discussion="discussion"
+          :statements="pendingStatements"
+        />
       </div>
 
       <div>
@@ -183,7 +236,7 @@ async function handleSubmit() {
           </h4>
           <div>
             Sort by:
-            <span class="text-skin-link">agree %</span>
+            <span class="text-skin-link">% agreed</span>
             <IH-arrow-sm-down class="inline-block ml-2" />
           </div>
         </div>
@@ -191,6 +244,7 @@ async function handleSubmit() {
           <PulseStatementItem
             v-for="(s, i) in results"
             :key="i"
+            :discussion="discussion"
             :statement="s"
           />
         </div>

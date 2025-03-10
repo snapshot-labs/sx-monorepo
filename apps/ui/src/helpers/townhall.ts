@@ -39,6 +39,8 @@ const DISCUSSION_QUERY = gql`
         scores_2
         scores_3
         vote_count
+        pinned
+        hidden
         created
         discussion_id
         statement_id
@@ -95,6 +97,8 @@ export function newStatementEventToEntry(event: NewStatementEvent): Statement {
     scores_1: 0,
     scores_2: 0,
     scores_3: 0,
+    pinned: false,
+    hidden: false,
     created: 0,
     discussion_id: event.discussion,
     statement_id: event.id,

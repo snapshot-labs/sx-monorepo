@@ -7,7 +7,7 @@ const { addNotification } = useUiStore();
 
 const title = ref(route.query.title as string);
 const body = ref('');
-const strategy = ref('');
+const strategy = ref('anyone');
 const submitLoading = ref(false);
 
 const TITLE_DEFINITION = {
@@ -29,9 +29,10 @@ const STRATEGY_DEFINITION = {
   type: 'string',
   enum: ['ACTIVE', 'INACTIVE'],
   options: [
-    { id: 'ACTIVE', name: 'Snapshot users' },
-    { id: 'ACTIVE', name: 'Hats protocol role(s)' },
-    { id: 'ACTIVE', name: 'Zupass holder' }
+    { id: 'anyone', name: 'Anyone' },
+    { id: 'snapshot', name: 'Snapshot users' },
+    { id: 'hats-protocol', name: 'Hats protocol role(s)' },
+    { id: 'zupass', name: 'Zupass holder' }
   ],
   title: 'Who can participate?'
 };

@@ -1,10 +1,40 @@
 <script setup lang="ts">
-defineProps<{ statements: any[] }>();
+import { Discussion, Statement } from '@/helpers/pulse';
 
-const { sendVote } = useTownhall();
+const props = defineProps<{
+  discussion: Discussion;
+  statements: Statement[];
+}>();
+
+const { web3 } = useWeb3();
+const { sendVote, sendHideStatement, sendPinStatement } = useTownhall();
 const { addNotification } = useUiStore();
 
 const loading = ref(false);
+
+async function handleHideStatement(statement: number) {
+  loading.value = true;
+
+  try {
+    await sendHideStatement(parseInt(props.discussion.id), statement);
+  } catch (e) {
+    addNotification('error', e.message);
+  }
+
+  loading.value = false;
+}
+
+async function handlePinStatement(statement: number) {
+  loading.value = true;
+
+  try {
+    await sendPinStatement(parseInt(props.discussion.id), statement);
+  } catch (e) {
+    addNotification('error', e.message);
+  }
+
+  loading.value = false;
+}
 
 async function handleVote(
   discussion: number,
@@ -25,10 +55,44 @@ async function handleVote(
 
 <template>
   <div v-if="statements[0]">
-    <div class="border rounded-md p-4 h-[220px] flex flex-col">
+    <div class="border rounded-md p-4 min-h-[220px] flex flex-col">
       <div class="text-lg text-skin-link flex-auto">
         <UiLoading v-if="loading" />
-        <div v-else v-text="statements[0].body" />
+        <div v-else class="flex">
+          <div class="flex-1 mb-4" v-text="statements[0].body" />
+          <UiDropdown v-if="web3.account && discussion.author === web3.account">
+            <template #button>
+              <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <IH-dots-horizontal class="text-skin-link" />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handlePinStatement(statements[0].statement_id)"
+                >
+                  <IC-pin class="w-[16px] h-[16px]" />
+                  {{ statements[0].pinned ? 'Unpin' : 'Pin' }} statement
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  :disabled="loading"
+                  @click="handleHideStatement(statements[0].statement_id)"
+                >
+                  <IH-flag :width="16" />
+                  Hide statement
+                </button>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+        </div>
       </div>
       <div class="items-end space-x-2 grid grid-cols-3">
         <UiButton
