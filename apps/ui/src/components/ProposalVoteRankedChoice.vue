@@ -16,10 +16,9 @@ const emit = defineEmits<{
 const selectedChoices = ref<RankedChoice>(
   (props.proposal.privacy === 'none' &&
     (props.defaultChoice as RankedChoice)) ||
-    [...props.proposal.choices.map((_, i) => i + 1)]
-      .map(value => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value)
+    Array.from({ length: props.proposal.choices.length }, (_, i) => i + 1).sort(
+      () => Math.random() - 0.5
+    )
 );
 </script>
 
