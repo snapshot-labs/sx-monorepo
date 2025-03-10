@@ -71,7 +71,7 @@ const currentVote = computed(
     votes.value[`${proposal.value.network}:${proposal.value.id}`]
 );
 
-const withoutBottomPadding = computed(
+const withoutContentInBottom = computed(
   () => 'space-proposal-votes' === String(route.name)
 );
 
@@ -164,8 +164,8 @@ watchEffect(() => {
     <template v-else-if="proposal">
       <div
         :class="[
-          'flex-1 grow min-w-0 max-md:pb-0',
-          { '!pb-0': withoutBottomPadding }
+          'flex-1 grow min-w-0',
+          { 'max-md:pb-0': !withoutContentInBottom }
         ]"
         v-bind="$attrs"
       >
@@ -262,7 +262,7 @@ watchEffect(() => {
         ]"
       >
         <Affix :top="72" :bottom="64">
-          <div class="flex flex-col space-y-4 p-4 pb-0" v-bind="$attrs">
+          <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 h-auto">
             <div
               v-if="
                 !proposal.cancelled &&
