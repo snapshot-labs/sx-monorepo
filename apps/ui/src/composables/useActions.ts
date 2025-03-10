@@ -703,7 +703,7 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
       return false;
     }
 
@@ -729,7 +729,7 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
       return false;
     }
 
