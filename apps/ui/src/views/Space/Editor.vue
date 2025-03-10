@@ -680,7 +680,7 @@ watchEffect(() => {
       </div>
 
       <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
-        <div class="flex flex-col px-4 gap-y-4 pt-4" v-bind="$attrs">
+        <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
             :voting-types="enforcedVoteType ? [enforcedVoteType] : votingTypes"

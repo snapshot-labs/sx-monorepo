@@ -262,7 +262,7 @@ watchEffect(() => {
         ]"
       >
         <Affix :top="72" :bottom="64">
-          <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 h-auto">
+          <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
                 !proposal.cancelled &&
