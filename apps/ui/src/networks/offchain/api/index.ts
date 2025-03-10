@@ -484,7 +484,8 @@ function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
     verifiedSpaceCount: strategy.verifiedSpacesCount,
     paramsDefinition: hasDefinition
       ? strategy.schema.definitions?.Strategy
-      : null
+      : null,
+    disabled: strategy.disabled
   };
 }
 
