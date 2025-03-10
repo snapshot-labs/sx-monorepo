@@ -665,3 +665,10 @@ export function prettyConcat(options: string[], connector = 'or') {
     ? `${uniqOptions.slice(0, -1).join(', ')} ${connector} ${uniqOptions.slice(-1)}`
     : uniqOptions[0];
 }
+
+export function isUserAbortError(e: any) {
+  return (
+    ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
+    ['User abort', 'User rejected the request.'].includes(e.message)
+  );
+}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getGenericExplorerUrl, waitForTransaction } from '@/helpers/generic';
-import { sleep } from '@/helpers/utils';
+import { isUserAbortError, sleep } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
 const API_DELAY = 10000;
@@ -88,7 +88,7 @@ async function handleExecute() {
       emit('close');
     }
   } catch (e) {
-    if (['ACTION_REJECTED', 4001].includes(e.code)) {
+    if (isUserAbortError(e)) {
       emit('cancelled');
       return;
     }
