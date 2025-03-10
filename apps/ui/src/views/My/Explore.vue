@@ -148,11 +148,7 @@ watchEffect(() => setTitle('Explore'));
 </script>
 
 <template>
-  <div
-    class="flex flex-col"
-    style="min-height: calc(100vh - 72px)"
-    v-bind="$attrs"
-  >
+  <div class="!pb-0 flex flex-col" style="min-height: calc(100vh - 72px)">
     <OnboardingUser class="mb-2" />
     <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
       <div class="flex sm:flex-row flex-col flex-wrap gap-2">
@@ -219,25 +215,26 @@ watchEffect(() => setTitle('Explore'));
         </div>
       </div>
     </div>
-  </div>
-  <UiToolbarBottom
-    v-if="!web3.authLoading && !web3.account"
-    class="mt-4 px-4 py-3 flex justify-between items-center"
-  >
-    <h4
-      class="hidden text-skin-text sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
+    <UiToolbarBottom
+      v-if="!web3.authLoading && !web3.account"
+      class="mt-4 px-4 py-3 flex justify-between items-center"
     >
-      Log in to start making decisions.
-      <router-link :to="{ name: 'site-landing' }">See how it works</router-link
-      >.
-    </h4>
-    <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
-      <UiButton
-        class="primary w-full sm:w-auto"
-        @click="modalAccountOpen = true"
+      <h4
+        class="hidden text-skin-text sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
       >
-        Log in
-      </UiButton>
-    </div>
-  </UiToolbarBottom>
+        Log in to start making decisions.
+        <router-link :to="{ name: 'site-landing' }"
+          >See how it works</router-link
+        >.
+      </h4>
+      <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
+        <UiButton
+          class="primary w-full sm:w-auto"
+          @click="modalAccountOpen = true"
+        >
+          Log in
+        </UiButton>
+      </div>
+    </UiToolbarBottom>
+  </div>
 </template>
