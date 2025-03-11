@@ -6,7 +6,6 @@ export const PROPOSAL_VALIDATIONS = {
   any: 'Any',
   basic: 'Basic',
   'passport-gated': 'Passport gated',
-  arbitrum: 'Arbitrum',
   'karma-eas-attestation': 'Karma EAS Attestation',
   'only-members': 'Only members'
 };
@@ -15,7 +14,7 @@ export const EXECUTORS = {};
 export const CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
-  'walletlink',
+  'coinbase',
   'gnosis',
   'sequence'
 ];
@@ -29,6 +28,7 @@ export const EDITOR_VOTING_TYPES: VoteType[] = [
   'basic',
   'single-choice',
   'approval',
+  'copeland',
   'ranked-choice',
   'weighted',
   'quadratic'

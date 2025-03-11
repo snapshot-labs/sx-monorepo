@@ -40,9 +40,10 @@ export type ConnectorType =
   | 'argentx'
   | 'injected'
   | 'walletconnect'
-  | 'walletlink'
+  | 'coinbase'
   | 'gnosis'
-  | 'sequence';
+  | 'sequence'
+  | 'unicorn';
 export type Connector = {
   id: string;
   type: ConnectorType;

@@ -27,6 +27,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   matic: 137,
   base: 8453,
   arb1: 42161,
+  mnt: 5000,
   sep: 11155111,
   // Starknet
   sn: '0x534e5f4d41494e',
@@ -77,6 +78,7 @@ export const SUPPORTED_VOTING_TYPES: VoteType[] = [
   'basic',
   'single-choice',
   'approval',
+  'copeland',
   'ranked-choice',
   'weighted',
   'quadratic'
@@ -117,6 +119,11 @@ export const VOTING_TYPES_INFO: Record<
     label: 'Quadratic voting',
     description:
       'Each voter may spread voting power across any number of choices. Results are calculated quadratically.'
+  },
+  copeland: {
+    label: 'Copeland voting (BETA)',
+    description:
+      'Voters can rank multiple choices. Results are calculated by Copeland method.'
   }
 };
 
@@ -143,7 +150,6 @@ export const VALIDATION_TYPES_INFO: Record<
   | 'only-members'
   | 'basic'
   | 'passport-gated'
-  | 'arbitrum'
   | 'karma-eas-attestation',
   { label: string; description: string }
 > = {
@@ -164,11 +170,6 @@ export const VALIDATION_TYPES_INFO: Record<
     label: 'Gitcoin Passport gated',
     description:
       'Protect your space from spam by requiring users to have a Gitcoin Passport to create a proposal.'
-  },
-  arbitrum: {
-    label: 'Arbitrum DAO votable supply',
-    description:
-      'Use with erc20-votes to validate by percentage of votable supply.'
   },
   'karma-eas-attestation': {
     label: 'Karma EAS Attestation',

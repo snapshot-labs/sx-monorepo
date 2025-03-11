@@ -3,9 +3,10 @@ import { ConnectorType } from '@/networks/types';
 export const EVM_CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
-  'walletlink',
+  'coinbase',
   'gnosis',
-  'sequence'
+  'sequence',
+  'unicorn'
 ];
 
 export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx'];

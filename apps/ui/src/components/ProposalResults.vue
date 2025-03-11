@@ -128,7 +128,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="isFinalizing" class="border rounded-lg px-3 py-2.5">
+  <div v-if="isFinalizing && withDetails" class="border rounded-lg px-3 py-2.5">
     <div class="flex items-center gap-2 text-skin-link">
       <IH-exclamation-circle class="shrink-0" />
       Finalizing results

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -39,12 +40,15 @@ const {
   termsOfServices,
   customDomain,
   isPrivate,
+  skinSettings,
   save,
   saveController,
   deleteSpace,
   reset
 } = useSpaceSettings(toRef(props, 'space'));
-const spacesStore = useSpacesStore();
+const { invalidateController } = useSpaceController(toRef(props, 'space'));
+
+const queryClient = useQueryClient();
 const { setTitle } = useTitle();
 
 const isAdvancedFormResolved = ref(false);
@@ -181,7 +185,7 @@ const isTicketValid = computed(() => {
 
 const error = computed(() => {
   if (Object.values(formErrors.value).length > 0) {
-    return 'Space profile is invalid';
+    return 'Space settings are invalid';
   }
 
   if (!isOffchainNetwork.value) {
@@ -223,7 +227,12 @@ function isValidTab(param: string | string[]): param is Tab['id'] {
 }
 
 async function reloadSpaceAndReset() {
-  await spacesStore.fetchSpace(props.space.id, props.space.network);
+  await queryClient.invalidateQueries({
+    queryKey: ['spaces', 'detail', `${props.space.network}:${props.space.id}`]
+  });
+
+  await invalidateController();
+
   await reset({ force: true });
 }
 
@@ -233,7 +242,7 @@ function handleSettingsSave() {
 }
 
 function handleControllerSave(value: string) {
-  if (!isOwner.value) return;
+  if (!isController.value) return;
   controller.value = value;
 
   saving.value = true;
@@ -277,12 +286,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <div>
-    <UiScrollerHorizontal
-      class="sticky top-[72px] z-40"
-      with-buttons
-      gradient="xxl"
-    >
+  <div class="!pb-0">
+    <UiScrollerHorizontal class="sticky z-40" with-buttons gradient="xxl">
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
         <AppLink
           v-for="tab in tabs.filter(tab => tab.visible)"
@@ -304,12 +309,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     </div>
     <div
       v-else
-      class="space-y-4 pb-[100px]"
+      class="space-y-4 flex flex-col pb-[100px] h-full"
       :class="{
-        'mx-4 max-w-[592px]': activeTab !== 'profile'
+        'mx-4 max-w-[592px]': !['profile', 'whitelabel'].includes(activeTab)
       }"
+      style="min-height: calc(100vh - 114px)"
     >
-      <div v-show="activeTab === 'profile'">
+      <div v-show="activeTab === 'profile'" class="flex-grow pb-[100px]">
         <FormSpaceProfile
           :id="space.id"
           :space="space"
@@ -456,10 +462,14 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       <UiContainerSettings
         v-show="activeTab === 'whitelabel'"
         title="Whitelabel"
+        description="Customize the appearance of your space to match your brand."
+        class="mx-4 h-full"
       >
         <FormSpaceWhitelabel
           v-model:custom-domain="customDomain"
+          v-model:skin-settings="skinSettings"
           :space="space"
+          @errors="v => (formErrors = v)"
         />
       </UiContainerSettings>
       <UiContainerSettings v-show="activeTab === 'advanced'" title="Advanced">

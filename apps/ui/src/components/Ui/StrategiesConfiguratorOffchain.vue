@@ -12,6 +12,7 @@ const props = defineProps<{
   allowDuplicates?: boolean;
   defaultChainId?: ChainId;
   limit?: number;
+  hiddenStrategies?: string[];
 }>();
 
 const isStrategiesModalOpen = ref(false);
@@ -109,6 +110,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
       <ModalStrategies
         :open="isStrategiesModalOpen"
         :network-id="networkId"
+        :hidden-strategies="hiddenStrategies"
         @add-strategy="handleAddStrategy"
         @close="isStrategiesModalOpen = false"
       />

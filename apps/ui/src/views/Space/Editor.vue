@@ -6,7 +6,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -55,9 +55,11 @@ const {
   loaded: networksLoaded
 } = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
+const { isWhiteLabel } = useWhiteLabel();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
+const { modalAccountOpen } = useModal();
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -170,6 +172,16 @@ const formErrors = computed(() => {
     }
   );
 });
+const isSubmitButtonLoading = computed(() => {
+  if (web3.value.authLoading) return true;
+  if (!web3.value.account) return false;
+
+  return (
+    sending.value ||
+    (!propositionPower.value && !isPropositionPowerError.value) ||
+    isPropositionPowerPending.value
+  );
+});
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
     !props.space.turbo &&
@@ -229,12 +241,18 @@ const proposalMaxEnd = computed(() => {
   );
 });
 
+const votingTypes = computed(() =>
+  metadataNetwork !== 's-tn'
+    ? props.space.voting_types.filter(a => a !== 'copeland')
+    : props.space.voting_types
+);
+
 const {
   data: propositionPower,
   isPending: isPropositionPowerPending,
   isError: isPropositionPowerError,
   refetch: fetchPropositionPower
-} = usePropositionPowerQuery(props.space);
+} = usePropositionPowerQuery(toRef(props, 'space'));
 
 const unsupportedProposalNetworks = computed(() => {
   if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
@@ -260,6 +278,11 @@ async function handleProposeClick() {
 
   if (props.space.terms && !termsStore.areAccepted(props.space)) {
     modalOpenTerms.value = true;
+    return;
+  }
+
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
     return;
   }
 
@@ -429,41 +452,43 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal">
-    <UiTopnav class="gap-2 px-4">
-      <UiButton
-        :to="{ name: 'space-overview', params: { space: spaceKey } }"
-        class="w-[46px] !px-0 mr-2 shrink-0"
-      >
-        <IH-arrow-narrow-left />
-      </UiButton>
-      <h4
-        class="grow truncate"
-        v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
-      />
-      <IndicatorPendingTransactions />
-      <UiTooltip title="Drafts">
-        <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-          <IH-collection class="inline-block" />
+  <div v-if="proposal" class="!pb-0">
+    <UiTopnav
+      :class="{ 'maximum:border-l': isWhiteLabel }"
+      class="maximum:border-r"
+    >
+      <div class="flex items-center gap-3 shrink truncate">
+        <UiButton
+          :to="{ name: 'space-overview', params: { space: spaceKey } }"
+          class="w-[46px] !px-0 ml-4 shrink-0"
+        >
+          <IH-arrow-narrow-left />
         </UiButton>
-      </UiTooltip>
-      <UiButton
-        class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-        :loading="
-          !!web3.account &&
-          (sending ||
-            (!propositionPower && !isPropositionPowerError) ||
-            isPropositionPowerPending)
-        "
-        :disabled="!canSubmit"
-        @click="handleProposeClick"
-      >
-        <span
-          class="hidden md:inline-block"
-          v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+        <h4
+          class="grow truncate"
+          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
         />
-        <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-      </UiButton>
+      </div>
+      <div class="flex gap-2 items-center">
+        <IndicatorPendingTransactions />
+        <UiTooltip title="Drafts">
+          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+            <IH-collection class="inline-block" />
+          </UiButton>
+        </UiTooltip>
+        <UiButton
+          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          :loading="isSubmitButtonLoading"
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
+        >
+          <span
+            class="hidden md:inline-block"
+            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
+      </div>
     </UiTopnav>
     <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
       <div class="flex-1 grow min-w-0">
@@ -477,37 +502,51 @@ watchEffect(() => {
             type="error"
             class="mb-4"
           >
-            <div>
-              You cannot create proposals. This space is configured with
-              non-premium networks (<template
-                v-for="(n, i) in unsupportedProposalNetworks"
-                :key="n.key"
-              >
-                <b>{{ n.name }}</b>
-                <template
-                  v-if="
-                    unsupportedProposalNetworks.length > 1 &&
-                    i < unsupportedProposalNetworks.length - 1
-                  "
-                  >,
-                </template> </template
-              >). Change to a
-              <AppLink
-                to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
-                >premium network
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
-              or upgrade networks to continue.
-            </div>
+            You cannot create proposals. This space is configured with
+            non-premium networks (<template
+              v-for="(n, i) in unsupportedProposalNetworks"
+              :key="n.key"
+            >
+              <b>{{ n.name }}</b>
+              <template
+                v-if="
+                  unsupportedProposalNetworks.length > 1 &&
+                  i < unsupportedProposalNetworks.length - 1
+                "
+                >,
+              </template> </template
+            >). Change to a
+            <AppLink
+              to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              class="font-semibold text-rose-500"
+              >premium network
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </AppLink>
+            or
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="font-semibold text-rose-500"
+            >
+              upgrade your space
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </a>
+            to continue.
           </UiAlert>
           <template v-else>
-            <MessagePropositionPower
-              v-if="!isPropositionPowerPending"
-              class="mb-4"
-              :proposition-power="propositionPower"
-              :is-error="isPropositionPowerError"
-              @fetch="fetchPropositionPower"
-            />
+            <template v-if="!isPropositionPowerPending">
+              <MessageErrorFetchPower
+                v-if="isPropositionPowerError || !propositionPower"
+                class="mb-4"
+                :type="'proposition'"
+                @fetch="fetchPropositionPower"
+              />
+              <MessagePropositionPower
+                v-else-if="propositionPower && !propositionPower.canPropose"
+                class="mb-4"
+                :proposition-power="propositionPower"
+              />
+            </template>
             <UiAlert
               v-if="
                 propositionPower &&
@@ -649,16 +688,14 @@ watchEffect(() => {
       </div>
 
       <Affix
-        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6']"
+        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l']"
         :top="72"
         :bottom="64"
       >
-        <div class="flex flex-col p-4 space-y-4">
+        <div class="flex flex-col p-4 space-y-4 md:mb-6">
           <EditorVotingType
             v-model="proposal"
-            :voting-types="
-              enforcedVoteType ? [enforcedVoteType] : space.voting_types
-            "
+            :voting-types="enforcedVoteType ? [enforcedVoteType] : votingTypes"
           />
           <EditorChoices
             v-model="proposal"

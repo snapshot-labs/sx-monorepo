@@ -5,6 +5,8 @@ const resolvedAddresses = new Map<string, string | null>();
 
 const STAMP_URL = 'https://stamp.fyi';
 
+const SKIP_LIST = ['shawnpetersisastupidnigger.eth'];
+
 export async function getNames(
   addresses: string[]
 ): Promise<Record<string, string>> {
@@ -37,10 +39,13 @@ export async function getNames(
     }
 
     const entries: any = Object.entries(inputMapping)
-      .map(([address, formatted]) => [
-        address,
-        resolvedAddresses.get(formatted) || null
-      ])
+      .map(([address, formatted]) => {
+        let name = resolvedAddresses.get(formatted);
+        if (name && SKIP_LIST.includes(name)) {
+          name = null;
+        }
+        return [address, name];
+      })
       .filter(([, name]) => name);
 
     return Object.fromEntries(entries);

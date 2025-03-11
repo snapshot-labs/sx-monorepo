@@ -5,6 +5,7 @@ import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -29,9 +30,18 @@ const emit = defineEmits<{
 const queryClient = useQueryClient();
 const { vote } = useActions();
 const { web3 } = useWeb3();
-const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
+const {
+  data: votingPower,
+  isPending: isVotingPowerPending,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'proposal'),
+  toRef(props, 'open')
+);
 
 const loading = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
@@ -52,10 +62,6 @@ const formValidator = getValidator({
     reason: REASON_DEFINITION
   }
 });
-
-const votingPower = computed(() =>
-  getVotingPower(props.proposal.space, props.proposal)
-);
 
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
@@ -129,10 +135,6 @@ async function handleConfirmed(tx?: string | null) {
   }
 }
 
-function handleFetchVotingPower() {
-  fetchVotingPower(props.proposal.space, props.proposal);
-}
-
 watch(
   [() => props.open, () => web3.value.account],
   async ([open, toAccount], [, fromAccount]) => {
@@ -143,8 +145,6 @@ watch(
       form.value.reason = '';
       await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
-
-    handleFetchVotingPower();
 
     form.value.reason =
       votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
@@ -169,11 +169,14 @@ watchEffect(async () => {
       <h3>Cast your vote</h3>
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
+      <MessageErrorFetchPower
+        v-if="isVotingPowerError"
+        type="voting"
+        @fetch="fetchVotingPower"
+      />
       <MessageVotingPower
-        v-if="votingPower"
+        v-else-if="votingPower && !votingPower.canVote"
         :voting-power="votingPower"
-        action="vote"
-        @fetch-voting-power="handleFetchVotingPower"
       />
       <dl>
         <dt class="text-sm leading-5">Choice</dt>
@@ -189,16 +192,11 @@ watchEffect(async () => {
           </div>
         </dd>
         <dt class="text-sm leading-5 mt-3">Voting power</dt>
-        <dd v-if="!votingPower || votingPower.status === 'loading'">
+        <dd v-if="isVotingPowerPending">
           <UiLoading />
         </dd>
         <dd
-          v-else-if="votingPower.status === 'success'"
-          class="font-semibold text-skin-heading text-[20px] leading-6"
-          v-text="formattedVotingPower"
-        />
-        <dd
-          v-else-if="votingPower.status === 'error'"
+          v-else-if="votingPower"
           class="font-semibold text-skin-heading text-[20px] leading-6"
           v-text="formattedVotingPower"
         />

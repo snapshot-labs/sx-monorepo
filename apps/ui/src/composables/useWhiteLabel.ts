@@ -1,5 +1,5 @@
+import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, metadataNetwork } from '@/networks';
-import { useSpacesStore } from '@/stores/spaces';
 import { Space } from '@/types';
 
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
@@ -27,7 +27,7 @@ async function getSpace(domain: string): Promise<Space | null> {
     loadSpacesParams.domain = domain;
   }
 
-  const spacesStore = useSpacesStore();
+  const queryClient = useQueryClient();
   const network = getNetwork(metadataNetwork);
   const space = (
     await network.api.loadSpaces({ limit: 1 }, loadSpacesParams)
@@ -35,10 +35,10 @@ async function getSpace(domain: string): Promise<Space | null> {
 
   if (!space) return null;
 
-  spacesStore.networksMap[space.network].spaces = {
-    ...spacesStore.networksMap[space.network].spaces,
-    [space.id]: space
-  };
+  queryClient.setQueryData(
+    ['spaces', 'detail', `${space.network}:${space.id}`],
+    space
+  );
 
   return space;
 }
