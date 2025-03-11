@@ -153,7 +153,7 @@ function toggleQuestion(id: number) {
         class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
       >
         <button
-          v-for="p in Object.keys(PRO_PRICES) as SubscriptionLength[]"
+          v-for="(_, p) in PRO_PRICES"
           :key="p"
           :class="[
             'rounded-full py-1 text-skin-link',
