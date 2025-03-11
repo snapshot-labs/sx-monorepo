@@ -76,7 +76,7 @@ export type StrategyTemplate = {
   address: string;
   name: string;
   /**
-   * Deprecated startegy can still be used but can't be added to new spaces.
+   * Deprecated strategy can still be used but can't be added to new spaces.
    */
   deprecated?: boolean;
   about?: string;
