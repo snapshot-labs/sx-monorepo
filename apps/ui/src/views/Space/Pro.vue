@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { _n } from '@/helpers/utils';
+import { Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
 import ICCheck from '~icons/heroicons-outline/check.vue';
