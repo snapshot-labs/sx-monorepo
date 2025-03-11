@@ -187,7 +187,7 @@ async function handleTurboClick() {
         class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
       >
         <button
-          v-for="(_, p) in PRO_PRICES"
+          v-for="(_, p) in PRO_PRICES[paymentNetwork]"
           :key="p"
           :class="[
             'rounded-full py-1 text-skin-link',

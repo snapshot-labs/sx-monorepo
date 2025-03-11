@@ -28,14 +28,21 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
+const { web3 } = useWeb3();
 const {
   start: startPaymentProcess,
   goToNextStep,
   isLastStep,
   currentStep
 } = usePaymentFactory(props.network);
-const { loading, assetsMap, loadBalances } = useBalances();
-const { web3 } = useWeb3();
+const { isPending, assetsMap } = useBalances({
+  treasury: toRef(() => {
+    return {
+      chainId: props.network,
+      address: web3.value.account
+    };
+  })
+});
 
 const searchInput: Ref<HTMLElement | null> = ref(null);
 const selectedTokenAddress = ref<string>('');
@@ -95,7 +102,7 @@ const isInsufficientBalance = computed(() => {
 const canSubmit = computed(
   () =>
     isTermsAccepted.value &&
-    !loading.value &&
+    !isPending.value &&
     web3.value.account &&
     !isInsufficientBalance.value &&
     formValid.value
@@ -149,16 +156,16 @@ async function moveToNextStep() {
   }
 }
 
-watch([() => props.open, () => web3.value.account], ([open, account]) => {
-  if (!open) {
+watch(
+  () => props.open,
+  open => {
+    if (open) return;
+
     isTermsAccepted.value = false;
     selectedTokenAddress.value = '';
     form.value = clone(FORM);
-    return;
   }
-
-  loadBalances(account, props.network);
-});
+);
 </script>
 
 <template>
@@ -190,7 +197,7 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
       :assets="filteredAssets"
       :address="web3.account"
       :network="network"
-      :loading="loading"
+      :loading="isPending"
       :search-value="searchValue"
       @pick="handleTokenPick"
     />
@@ -252,7 +259,7 @@ watch([() => props.open, () => web3.value.account], ([open, account]) => {
         class="w-full"
         primary
         :disabled="!canSubmit"
-        :loading="loading"
+        :loading="isPending"
         @click="handleSubmit"
       >
         <template v-if="isInsufficientBalance">
