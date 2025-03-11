@@ -20,6 +20,10 @@ export type EthSigAuthenticatorConfig = {
   type: 'ethSig';
 };
 
+export type EthSigV2AuthenticatorConfig = {
+  type: 'ethSigV2';
+};
+
 export type StarkSigAuthenticatorConfig = {
   type: 'starkSig';
 };
@@ -74,6 +78,7 @@ export type NetworkConfig = {
       | VanillaAuthenticatorConfig
       | EthTxAuthenticatorConfig
       | EthSigAuthenticatorConfig
+      | EthSigV2AuthenticatorConfig
       | StarkSigAuthenticatorConfig
       | StarkTxAuthenticatorConfig
       | undefined;
