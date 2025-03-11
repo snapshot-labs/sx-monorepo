@@ -137,14 +137,14 @@ function toggleQuestion(id: number) {
 <template>
   <div>
     <div
-      class="text-center flex flex-col items-center justify-center h-[295px] gap-3 relative overflow-hidden"
+      class="text-center flex flex-col items-center justify-center h-[295px] gap-3 mx-4 relative overflow-hidden"
     >
       <div class="hero hero-bg" />
       <div
-        class="text-[56px] leading-[48px] text-skin-heading font-semibold space-x-2"
+        class="text-[56px] leading-[48px] text-skin-heading font-semibold gap-[0.65rem]"
       >
         The power of
-        <ICPro class="h-[46px] inline" />
+        <ICPro class="h-[46px] inline top-[-3px] relative" />
       </div>
       <div class="max-w-[290px] text-md leading-6">
         Pick the plan that works best for your organization.
