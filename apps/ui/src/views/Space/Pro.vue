@@ -173,7 +173,7 @@ async function handleTurboClick() {
     <div
       class="text-center flex flex-col items-center justify-center h-[295px] gap-3 relative overflow-hidden"
     >
-      <div class="hero hero-bg"></div>
+      <div class="hero hero-bg" />
       <div
         class="text-[56px] leading-[48px] text-skin-heading font-semibold space-x-2"
       >
@@ -187,7 +187,7 @@ async function handleTurboClick() {
         class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
       >
         <button
-          v-for="p in Object.keys(prices) as SubscriptionLength[]"
+          v-for="(_, p) in PRO_PRICES"
           :key="p"
           :class="[
             'rounded-full py-1 text-skin-link',

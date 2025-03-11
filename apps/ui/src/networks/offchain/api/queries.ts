@@ -100,6 +100,7 @@ const SPACE_FRAGMENT = gql`
       heading_color
       primary_color
       theme
+      logo
     }
     guidelines
     template
@@ -128,7 +129,14 @@ const PROPOSAL_FRAGMENT = gql`
       network
       admins
       moderators
+      members
       symbol
+      labels {
+        id
+        name
+        description
+        color
+      }
       terms
     }
     type

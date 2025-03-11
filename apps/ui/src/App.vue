@@ -20,7 +20,7 @@ function mountCustomDomainRoutes() {
   const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
 
   routes.forEach(route => router.addRoute(route));
-  router.removeRoute('splash-screen');
+  router.removeRoute('splash');
 }
 
 watchEffect(() => setTitle(app.value.app_name));
@@ -37,14 +37,14 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  initWhiteLabel();
-});
+onMounted(() => initWhiteLabel());
 </script>
 
 <template>
-  <LayoutSplash v-if="!whiteLabelResolved" />
-  <LayoutSite v-else-if="routeName === 'site'" />
-  <LayoutApp v-else />
-  <Messenger />
+  <div class="max-w-maximum mx-auto">
+    <LayoutSplash v-if="!whiteLabelResolved" />
+    <LayoutSite v-else-if="routeName === 'site'" />
+    <LayoutApp v-else />
+    <AppFooter />
+  </div>
 </template>

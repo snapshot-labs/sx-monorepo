@@ -3,15 +3,24 @@ import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
 import { ProposalsFilter } from '@/networks/types';
 import { useProposalsQuery } from '@/queries/proposals';
+import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
-const { web3 } = useWeb3();
 const router = useRouter();
 const route = useRoute();
+const { web3 } = useWeb3();
+const {
+  data: votingPower,
+  isPending: isVotingPowerPending,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useSpaceVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'space')
+);
 
 const state = ref<NonNullable<ProposalsFilter['state']>>('any');
 const labels = ref<string[]>([]);
@@ -20,19 +29,27 @@ const selectIconBaseProps = {
   size: 16
 };
 
-const votingPower = computed(() => getVotingPower(props.space));
-
 const spaceLabels = computed(() => {
   if (!props.space.labels) return {};
 
   return Object.fromEntries(props.space.labels.map(label => [label.id, label]));
 });
 
-const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
-  useProposalsQuery(props.space.network, props.space.id, {
+const {
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isPending,
+  isError,
+  isFetchingNextPage
+} = useProposalsQuery(
+  toRef(() => props.space.network),
+  toRef(() => props.space.id),
+  {
     state,
     labels
-  });
+  }
+);
 
 function handleClearLabelsFilter(close: () => void) {
   labels.value = [];
@@ -43,10 +60,6 @@ async function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
-}
-
-function handleFetchVotingPower() {
-  fetchVotingPower(props.space);
 }
 
 watchThrottled(
@@ -68,10 +81,10 @@ watchThrottled(
 );
 
 watch(
-  [props.space, state, labels],
-  ([toSpace, toState, toLabels], [fromSpace, fromState, fromLabels]) => {
+  [() => props.space.id, state, labels],
+  ([toSpaceId, toState, toLabels], [fromSpaceId, fromState, fromLabels]) => {
     if (
-      toSpace.id !== fromSpace?.id ||
+      toSpaceId !== fromSpaceId ||
       toState !== fromState ||
       toLabels !== fromLabels
     ) {
@@ -94,16 +107,6 @@ watch(
         router.push({ query });
       }
     }
-  },
-  { immediate: true }
-);
-
-watch(
-  [props.space, () => web3.value.account, () => web3.value.authLoading],
-  ([proposal, account, authLoading]) => {
-    if (authLoading || !proposal || !account) return;
-
-    handleFetchVotingPower();
   },
   { immediate: true }
 );
@@ -203,7 +206,9 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
         <IndicatorVotingPower
           :network-id="space.network"
           :voting-power="votingPower"
-          @fetch-voting-power="handleFetchVotingPower"
+          :is-loading="isVotingPowerPending"
+          :is-error="isVotingPowerError"
+          @fetch="fetchVotingPower"
         />
         <UiTooltip title="New proposal">
           <UiButton
@@ -221,6 +226,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
     <ProposalsList
       title="Proposals"
       limit="off"
+      :is-error="isError"
       :loading="isPending"
       :loading-more="isFetchingNextPage"
       :proposals="data?.pages.flat() ?? []"

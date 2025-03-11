@@ -4,6 +4,8 @@ import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
 
+export type Theme = 'light' | 'dark';
+
 export type ProposalState =
   | 'pending'
   | 'active'
@@ -20,6 +22,7 @@ export type NetworkID =
   | 'arb1'
   | 'oeth'
   | 'base'
+  | 'mnt'
   | 'sep'
   | 'sn'
   | 'sn-sep';
@@ -41,6 +44,7 @@ export type VoteType =
   | 'basic'
   | 'single-choice'
   | 'approval'
+  | 'copeland'
   | 'ranked-choice'
   | 'quadratic'
   | 'weighted'
@@ -244,6 +248,7 @@ export type Proposal = {
     controller: string;
     admins?: string[];
     moderators?: string[];
+    labels?: SpaceMetadataLabel[];
     voting_power_symbol: string;
     authenticators: string[];
     executors: string[];
@@ -254,6 +259,7 @@ export type Proposal = {
     id: string;
     address_type: 0 | 1 | 2;
     name?: string;
+    role: Member['role'] | null;
   };
   execution_hash: string;
   metadata_uri: string;
@@ -395,14 +401,15 @@ export type Metadata = {
 };
 
 export type SkinSettings = {
-  bg_color?: string;
-  link_color?: string;
-  text_color?: string;
-  content_color?: string;
-  border_color?: string;
-  heading_color?: string;
-  primary_color?: string;
-  theme?: string;
+  bg_color: string;
+  link_color: string;
+  text_color: string;
+  content_color: string;
+  border_color: string;
+  heading_color: string;
+  primary_color: string;
+  theme: Theme;
+  logo?: string;
 };
 
 export type Drafts = Record<string, Draft>;

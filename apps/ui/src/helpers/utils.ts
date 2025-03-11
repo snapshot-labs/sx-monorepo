@@ -13,7 +13,7 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
-import { VotingPowerItem } from '@/stores/votingPowers';
+import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
@@ -487,10 +487,17 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type: 'avatar' | 'user-cover' | 'space' | 'space-cover' | 'token',
+  type:
+    | 'avatar'
+    | 'user-cover'
+    | 'space'
+    | 'space-cover'
+    | 'space-logo'
+    | 'token',
   id: string,
   size: number | { width: number; height: number },
-  hash?: string
+  hash?: string,
+  cropped?: boolean
 ) {
   let sizeParam = '';
   if (typeof size === 'number') {
@@ -500,8 +507,9 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
+  const cropParam = cropped === false ? `&fit=inside` : '';
 
-  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
 
 export async function imageUpload(file: File) {
@@ -649,4 +657,12 @@ export function getRandomHexColor(): string {
   return `#${Math.floor(Math.random() * 16777215)
     .toString(16)
     .padStart(6, '0')}`.toUpperCase();
+}
+
+export function prettyConcat(options: string[], connector = 'or') {
+  const uniqOptions = Array.from(new Set(options));
+
+  return uniqOptions.length > 1
+    ? `${uniqOptions.slice(0, -1).join(', ')} ${connector} ${uniqOptions.slice(-1)}`
+    : uniqOptions[0];
 }

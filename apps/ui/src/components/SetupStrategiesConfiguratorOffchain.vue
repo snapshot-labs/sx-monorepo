@@ -104,6 +104,7 @@ onMounted(() => {
         v-model:model-value="strategies"
         :network-id="networkId"
         :default-chain-id="chainId"
+        :hidden-strategies="['ticket']"
         :limit="limits['space.default.strategies_limit']"
       >
         <template #empty>
