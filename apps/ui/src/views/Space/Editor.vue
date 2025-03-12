@@ -57,6 +57,7 @@ const {
   loaded: networksLoaded
 } = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
+const { isWhiteLabel } = useWhiteLabel();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -454,35 +455,42 @@ watchEffect(() => {
 </script>
 <template>
   <div v-if="proposal" class="h-full">
-    <UiTopnav>
-      <UiButton
-        :to="{ name: 'space-overview', params: { space: spaceKey } }"
-        class="w-[46px] !px-0 mr-2 ml-4 shrink-0"
-      >
-        <IH-arrow-narrow-left />
-      </UiButton>
-      <h4
-        class="grow truncate"
-        v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
-      />
-      <IndicatorPendingTransactions />
-      <UiTooltip title="Drafts">
-        <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-          <IH-collection class="inline-block" />
+    <UiTopnav
+      :class="{ 'maximum:border-l': isWhiteLabel }"
+      class="maximum:border-r"
+    >
+      <div class="flex items-center gap-3 shrink truncate">
+        <UiButton
+          :to="{ name: 'space-overview', params: { space: spaceKey } }"
+          class="w-[46px] !px-0 ml-4 shrink-0"
+        >
+          <IH-arrow-narrow-left />
         </UiButton>
-      </UiTooltip>
-      <UiButton
-        class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-        :loading="isSubmitButtonLoading"
-        :disabled="!canSubmit"
-        @click="handleProposeClick"
-      >
-        <span
-          class="hidden md:inline-block"
-          v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+        <h4
+          class="grow truncate"
+          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
         />
-        <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-      </UiButton>
+      </div>
+      <div class="flex gap-2 items-center">
+        <IndicatorPendingTransactions />
+        <UiTooltip title="Drafts">
+          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+            <IH-collection class="inline-block" />
+          </UiButton>
+        </UiTooltip>
+        <UiButton
+          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          :loading="isSubmitButtonLoading"
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
+        >
+          <span
+            class="hidden md:inline-block"
+            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
+      </div>
     </UiTopnav>
     <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
       <div
