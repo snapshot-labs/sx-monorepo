@@ -155,7 +155,7 @@ async function handleSubmit() {
     <UiLoading v-if="loading" class="p-4" />
     <UiContainer
       v-else-if="loaded && discussion"
-      class="!max-w-[740px] s-box space-y-5 mt-3"
+      class="!max-w-[740px] s-box space-y-4 mt-3"
     >
       <div class="space-y-3">
         <h1 class="leading-[1.1em] mb-3" v-text="discussion.title" />

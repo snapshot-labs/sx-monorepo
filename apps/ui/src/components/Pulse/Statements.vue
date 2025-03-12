@@ -139,12 +139,14 @@ async function handleVote(
         </UiButton>
       </div>
     </div>
-    <div v-if="statements[1]" class="mx-1">
-      <div class="border border-t-0 rounded-b-md h-2" />
-      <div v-if="statements[2]" class="mx-1">
+    <div class="h-4">
+      <div v-if="statements[1]" class="mx-1">
         <div class="border border-t-0 rounded-b-md h-2" />
-        <div v-if="statements[3]" class="mx-1">
+        <div v-if="statements[2]" class="mx-1">
           <div class="border border-t-0 rounded-b-md h-2" />
+          <div v-if="statements[3]" class="mx-1">
+            <div class="border border-t-0 rounded-b-md h-2" />
+          </div>
         </div>
       </div>
     </div>
