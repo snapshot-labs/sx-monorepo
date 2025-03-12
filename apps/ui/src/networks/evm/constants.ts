@@ -23,11 +23,13 @@ export function createConstants(
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
   const SUPPORTED_AUTHENTICATORS = {
+    [config.Authenticators.EthSigV2]: true,
     [config.Authenticators.EthSig]: true,
     [config.Authenticators.EthTx]: true
   };
 
   const CONTRACT_SUPPORTED_AUTHENTICATORS = {
+    [config.Authenticators.EthSigV2]: true,
     [config.Authenticators.EthTx]: true
   };
 
@@ -46,11 +48,13 @@ export function createConstants(
   };
 
   const RELAYER_AUTHENTICATORS = {
-    [config.Authenticators.EthSig]: 'evm'
+    [config.Authenticators.EthSig]: 'evm',
+    [config.Authenticators.EthSigV2]: 'evm'
   } as const;
 
   const AUTHS = {
-    [config.Authenticators.EthSig]: 'Ethereum signature',
+    [config.Authenticators.EthSig]: 'Ethereum signature (deprecated)',
+    [config.Authenticators.EthSigV2]: 'Ethereum signature',
     [config.Authenticators.EthTx]: 'Ethereum transaction'
   };
 
@@ -82,7 +86,17 @@ export function createConstants(
       paramsDefinition: null
     },
     {
+      // Deprecated because of missing EIP-1271 support, superseded by EthSigV2
       address: config.Authenticators.EthSig,
+      name: 'Ethereum signature (deprecated)',
+      deprecated: true,
+      about:
+        'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
+      icon: IHPencil,
+      paramsDefinition: null
+    },
+    {
+      address: config.Authenticators.EthSigV2,
       name: 'Ethereum signature',
       about:
         'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
