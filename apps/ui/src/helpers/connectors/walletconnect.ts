@@ -11,8 +11,12 @@ import { sleep } from '../utils';
  * Adding a delay was the most reliable way to handle this.
  */
 const DISCONNECT_DELAY = 1000;
+const RECONNECT_TIMEOUT = 5000;
 
-const awaitProvider = (appKit: AppKit) =>
+const awaitProvider = (
+  appKit: AppKit,
+  { isAutoConnect }: { isAutoConnect: boolean }
+) =>
   new Promise((resolve, reject) => {
     appKit.subscribeEvents(event => {
       if (event.data.event === 'MODAL_CLOSE') reject('User closed modal');
@@ -21,6 +25,12 @@ const awaitProvider = (appKit: AppKit) =>
     appKit.subscribeProviders(state => {
       resolve(state['eip155']);
     });
+
+    if (isAutoConnect) {
+      setTimeout(() => {
+        reject('Timeout');
+      }, RECONNECT_TIMEOUT);
+    }
   });
 
 export default class Walletconnect extends Connector {
@@ -79,7 +89,7 @@ export default class Walletconnect extends Connector {
         await this.modal.open();
       }
 
-      this.provider = await awaitProvider(this.modal);
+      this.provider = await awaitProvider(this.modal, { isAutoConnect });
 
       this.modal.close();
     } catch (e) {
