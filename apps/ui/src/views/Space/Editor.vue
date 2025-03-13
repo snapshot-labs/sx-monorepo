@@ -678,7 +678,7 @@ watchEffect(() => {
               :space="space"
               :strategy="execution"
               :extra-contacts="extraContacts"
-              class="mb-0"
+              class="mb-3"
               @update:model-value="
                 value => handleExecutionUpdated(execution.address, value)
               "

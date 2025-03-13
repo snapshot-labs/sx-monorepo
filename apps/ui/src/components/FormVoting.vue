@@ -91,7 +91,7 @@ const formErrors = computed(() => {
         :model-value="form"
         :error="formErrors"
         :definition="definition"
-        class="s-no-padding-bottom"
+        class="s-input-pb-0"
       />
     </div>
   </UiContainerSettings>

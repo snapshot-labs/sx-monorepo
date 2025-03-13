@@ -174,7 +174,7 @@ watch([sortBy, choiceFilter], () => {
     </div>
   </div>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
-    <div class="min-w-[735px] min-h-[calc(100vh-141px)]">
+    <div class="min-w-[735px]">
       <UiLoading v-if="!loaded" class="px-4 py-3 block absolute" />
       <template v-else>
         <div

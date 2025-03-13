@@ -311,7 +311,7 @@ input:placeholder-shown {
   }
 }
 
-.s-form .s-base:last-child, .s-no-padding-bottom .s-base {
+.s-form > .s-base:last-child, .s-input-pb-0 .s-base {
     .s-input, &.s-error {
       @apply mb-0;
     }

@@ -337,14 +337,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       class="flex-grow"
       :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
     >
-      <template v-if="activeTab === 'profile'">
-        <FormSpaceProfile
-          :id="space.id"
-          :space="space"
-          :form="form"
-          @errors="v => (formErrors = v)"
-        />
-      </template>
+      <FormSpaceProfile
+        v-if="activeTab === 'profile'"
+        :id="space.id"
+        :space="space"
+        :form="form"
+        @errors="v => (formErrors = v)"
+      />
       <template v-if="activeTab === 'proposal'">
         <UiContainerSettings
           v-if="isOffchainNetwork"

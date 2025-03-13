@@ -87,8 +87,7 @@ watch(
     :class="{
       'mt-2': editing,
       'w-fit': definition.format !== 'duration',
-      's-box s-no-padding-bottom w-full max-w-xl':
-        definition.format === 'duration'
+      's-box s-input-pb-0 w-full max-w-xl': definition.format === 'duration'
     }"
   >
     <UiLoading v-if="loading" />
