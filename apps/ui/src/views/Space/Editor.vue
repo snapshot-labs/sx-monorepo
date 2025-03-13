@@ -360,6 +360,7 @@ async function handleProposeClick() {
     } else {
       router.push({ name: 'space-proposals' });
     }
+  } catch (e) {
   } finally {
     sending.value = false;
   }

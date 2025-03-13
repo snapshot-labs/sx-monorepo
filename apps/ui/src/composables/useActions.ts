@@ -1,6 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
+import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
@@ -40,12 +41,7 @@ export function useActions() {
       try {
         return await fn(...args);
       } catch (e) {
-        const isUserAbortError =
-          e.code === 4001 ||
-          e.message === 'User rejected the request.' ||
-          e.code === 'ACTION_REJECTED';
-
-        if (!isUserAbortError) {
+        if (!isUserAbortError(e)) {
           uiStore.addNotification(
             'error',
             'Something went wrong. Please try again later.'
@@ -703,7 +699,7 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
       return false;
     }
 
@@ -729,7 +725,7 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
       return false;
     }
 

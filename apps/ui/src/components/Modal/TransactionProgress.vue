@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getGenericExplorerUrl, waitForTransaction } from '@/helpers/generic';
-import { sleep } from '@/helpers/utils';
+import { isUserAbortError, sleep } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
 const API_DELAY = 10000;
@@ -31,6 +31,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'confirmed', txId: string | null): void;
   (e: 'close'): void;
+  (e: 'cancelled'): void;
 }>();
 
 const step: Ref<'approve' | 'confirming' | 'success' | 'fail'> = ref('approve');
@@ -87,6 +88,10 @@ async function handleExecute() {
       emit('close');
     }
   } catch (e) {
+    if (isUserAbortError(e)) {
+      emit('cancelled');
+      return;
+    }
     console.warn('Transaction failed', e);
 
     step.value = 'fail';
