@@ -287,7 +287,7 @@ Any dispute arising out of or in conjunction with these Terms shall be submitted
     <UiContainer class="!max-w-screen-md pt-6">
       <div class="mb-6">
         <h1 class="font-display mb-2">Terms of use</h1>
-        <div>Last updated: 1 August 2024</div>
+        <div>Last updated: 4 March 2025</div>
       </div>
       <UiMarkdown :body="terms" />
     </UiContainer>
