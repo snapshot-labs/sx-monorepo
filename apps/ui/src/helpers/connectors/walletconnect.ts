@@ -97,7 +97,12 @@ export default class Walletconnect extends Connector {
     await this.modal?.adapter?.connectionControllerClient?.disconnect();
 
     if (this.provider && 'disconnect' in this.provider) {
-      this.provider.disconnect();
+      try {
+        // NOTE: This sometimes fails if we try to disconnect from 'disconnect' event
+        // We need to handle this error so logout can safely continue
+        await this.provider.disconnect();
+      } catch {}
+
       this.provider = null;
     }
 
