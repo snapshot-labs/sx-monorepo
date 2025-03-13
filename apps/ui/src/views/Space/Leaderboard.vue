@@ -134,7 +134,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
       >
         <IH-exclamation-circle class="inline-block" />
         <span v-if="isError">Failed to load the leaderboard.</span>
-        <span v-else-if="data?.pages.flat().length">
+        <span v-else-if="data?.pages.flat().length === 0">
           This space does not have any activities yet.
         </span>
       </div>
