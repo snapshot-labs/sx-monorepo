@@ -28,8 +28,8 @@ export const EDITOR_VOTING_TYPES: VoteType[] = [
   'basic',
   'single-choice',
   'approval',
-  'copeland',
   'ranked-choice',
+  'copeland',
   'weighted',
   'quadratic'
 ];

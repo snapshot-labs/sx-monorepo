@@ -62,11 +62,6 @@ const isSelectPrivacyModalOpen = ref(false);
 const isSelectValidationModalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.space.network));
-const votingTypes = computed(() =>
-  metadataNetwork !== 's-tn'
-    ? network.value.constants.EDITOR_VOTING_TYPES.filter(a => a !== 'copeland')
-    : network.value.constants.EDITOR_VOTING_TYPES
-);
 
 const isOffchainNetwork = computed(() =>
   offchainNetworks.includes(props.space.network)
@@ -302,7 +297,7 @@ watchEffect(() => {
       :open="isSelectVotingTypeModalOpen"
       :with-any="true"
       :initial-state="votingType"
-      :voting-types="votingTypes"
+      :voting-types="network.constants.EDITOR_VOTING_TYPES"
       @save="value => (votingType = value)"
       @close="isSelectVotingTypeModalOpen = false"
     />
