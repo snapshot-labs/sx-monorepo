@@ -401,7 +401,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       <UiLoading v-if="isPending" class="px-4 py-3 block" />
       <template v-else>
         <div
-          v-if="data?.pages.length === 0 || isError"
+          v-if="data?.pages.flat().length === 0 || isError"
           class="px-4 py-3 flex items-center space-x-1"
         >
           <IH-exclamation-circle class="shrink-0" />
@@ -409,7 +409,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             Delegates are being computed, please come back later.
           </span>
           <span v-else-if="isError">Failed to load delegates.</span>
-          <span v-else-if="data?.pages.length === 0">
+          <span v-else-if="data?.pages.flat().length === 0">
             There are no delegates.</span
           >
         </div>
