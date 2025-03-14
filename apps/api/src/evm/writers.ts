@@ -8,7 +8,7 @@ import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecut
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
-import { convertChoice, updateProposaValidationStrategy } from './utils';
+import { convertChoice, updateProposalValidationStrategy } from './utils';
 import {
   ExecutionHash,
   ExecutionStrategy,
@@ -213,7 +213,7 @@ export function createWriters(config: FullConfig) {
     space.created = block?.timestamp ?? getCurrentTimestamp();
     space.tx = tx.hash;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.args.input.proposalValidationStrategy.addr,
       event.args.input.proposalValidationStrategy.params,
@@ -475,7 +475,7 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.args.newProposalValidationStrategy.addr,
       event.args.newProposalValidationStrategy.params,

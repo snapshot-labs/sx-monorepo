@@ -20,7 +20,7 @@ export function convertChoice(rawChoice: number): 1 | 2 | 3 | null {
   return null;
 }
 
-export async function updateProposaValidationStrategy(
+export async function updateProposalValidationStrategy(
   space: Space,
   validationStrategyAddress: string,
   validationStrategyParams: string,
