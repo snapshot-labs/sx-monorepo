@@ -62,7 +62,7 @@ watch(
         <h4 class="text-skin-link inline" v-text="activeVotingType.label" />
         <span
           v-if="activeVotingType.isBeta"
-          class="ml-2.5 bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
+          class="ml-2 bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
           >beta</span
         >
       </div>
