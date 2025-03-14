@@ -6,7 +6,7 @@ import {
 } from '@/helpers/constants';
 import { _d } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { ChainId, Space, SpacePrivacy, Validation, VoteType } from '@/types';
 
 const votingDelay = defineModel<number | null>('votingDelay', {
