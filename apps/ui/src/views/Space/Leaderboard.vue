@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useInfiniteQuery } from '@tanstack/vue-query';
 import { getNames } from '@/helpers/stamp';
 import { _n, _p, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
@@ -8,14 +9,8 @@ const USERS_LIMIT = 20;
 
 const props = defineProps<{ space: Space }>();
 
-const uiStore = useUiStore();
 const { setTitle } = useTitle();
 
-const loaded = ref(false);
-const loadingMore = ref(false);
-const failed = ref(false);
-const hasMore = ref(false);
-const users = ref<UserActivity[]>([]);
 const sortBy = ref(
   'vote_count-desc' as
     | 'vote_count-desc'
@@ -25,6 +20,42 @@ const sortBy = ref(
 );
 
 const network = computed(() => getNetwork(props.space.network));
+
+const {
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isPending,
+  isFetchingNextPage,
+  isError
+} = useInfiniteQuery({
+  initialPageParam: 0,
+  queryKey: [
+    'leaderboard',
+    () => props.space.id,
+    'list',
+    {
+      sortBy
+    }
+  ],
+  queryFn: async ({ pageParam }) => {
+    return withAuthorNames(
+      await network.value.api.loadLeaderboard(
+        props.space.id,
+        {
+          limit: USERS_LIMIT,
+          skip: pageParam
+        },
+        sortBy.value
+      )
+    );
+  },
+  getNextPageParam: (lastPage, pages) => {
+    if (lastPage.length < USERS_LIMIT) return null;
+
+    return pages.length * USERS_LIMIT;
+  }
+});
 
 async function withAuthorNames(users: UserActivity[]): Promise<UserActivity[]> {
   if (!users.length) return [];
@@ -38,55 +69,6 @@ async function withAuthorNames(users: UserActivity[]): Promise<UserActivity[]> {
   });
 }
 
-function reset() {
-  users.value = [];
-  loaded.value = false;
-  failed.value = false;
-  loadingMore.value = false;
-  hasMore.value = false;
-}
-
-async function loadUsers(): Promise<UserActivity[]> {
-  return withAuthorNames(
-    await network.value.api.loadLeaderboard(
-      props.space.id,
-      {
-        limit: USERS_LIMIT,
-        skip: users.value.length
-      },
-      sortBy.value
-    )
-  );
-}
-
-async function fetch() {
-  loaded.value = false;
-
-  try {
-    users.value = await loadUsers();
-    hasMore.value = users.value.length === USERS_LIMIT;
-  } catch (e) {
-    failed.value = true;
-  } finally {
-    loaded.value = true;
-  }
-}
-
-async function fetchMore() {
-  loadingMore.value = true;
-
-  try {
-    const moreUsers = await loadUsers();
-
-    users.value = [...users.value, ...moreUsers];
-    hasMore.value = moreUsers.length === USERS_LIMIT;
-  } catch (e) {
-    uiStore.addNotification('error', 'Failed to load more users');
-  } finally {
-    loadingMore.value = false;
-  }
-}
-
 function handleSortChange(type: 'vote_count' | 'proposal_count') {
   if (sortBy.value.startsWith(type)) {
     sortBy.value = sortBy.value.endsWith('desc')
@@ -98,15 +80,10 @@ function handleSortChange(type: 'vote_count' | 'proposal_count') {
 }
 
 function handleEndReached() {
-  if (hasMore.value) fetchMore();
+  if (!hasNextPage.value) return;
+
+  fetchNextPage();
 }
-
-onMounted(() => fetch());
-
-watch([sortBy], () => {
-  reset();
-  fetch();
-});
 
 watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 </script>
@@ -149,24 +126,24 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
         />
       </button>
     </div>
-    <UiLoading v-if="!loaded" class="px-4 py-3 block" />
+    <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <template v-else>
       <div
-        v-if="failed || users.length === 0"
+        v-if="isError || data?.pages.flat().length === 0"
         class="px-4 py-3 flex items-center space-x-2"
       >
         <IH-exclamation-circle class="inline-block" />
-        <span v-if="failed">Failed to load the leaderboard.</span>
-        <span v-else-if="users.length === 0">
+        <span v-if="isError">Failed to load the leaderboard.</span>
+        <span v-else-if="data?.pages.flat().length === 0">
           This space does not have any activities yet.
         </span>
       </div>
       <UiContainerInfiniteScroll
-        :loading-more="loadingMore"
+        :loading-more="isFetchingNextPage"
         @end-reached="handleEndReached"
       >
         <div
-          v-for="(user, i) in users"
+          v-for="(user, i) in data?.pages.flat()"
           :key="i"
           class="border-b flex space-x-1"
         >
