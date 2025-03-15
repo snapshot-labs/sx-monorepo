@@ -243,12 +243,6 @@ const proposalMaxEnd = computed(() => {
   );
 });
 
-const votingTypes = computed(() =>
-  metadataNetwork !== 's-tn'
-    ? props.space.voting_types.filter(a => a !== 'copeland')
-    : props.space.voting_types
-);
-
 const {
   data: propositionPower,
   isPending: isPropositionPowerPending,
@@ -691,7 +685,9 @@ watchEffect(() => {
         <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
-            :voting-types="enforcedVoteType ? [enforcedVoteType] : votingTypes"
+            :voting-types="
+              enforcedVoteType ? [enforcedVoteType] : space.voting_types
+            "
           />
           <EditorChoices
             v-model="proposal"
