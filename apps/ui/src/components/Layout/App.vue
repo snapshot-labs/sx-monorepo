@@ -218,7 +218,7 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0 mt-[72px]">
+        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
           <router-view class="h-full pb-6" />
         </div>
         <div
