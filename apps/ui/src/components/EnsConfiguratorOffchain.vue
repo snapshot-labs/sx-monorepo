@@ -148,8 +148,8 @@ function handleSelect(value: string) {
       <div class="space-y-3">
         <h4 class="eyebrow">Controller</h4>
         <UiMessage type="info">
-          Your space controller will be set to the ENS name owner. Any changes
-          to the ENS name ownership will also change the controller.</UiMessage
+          By default, the ENS domain’s controller is its owner. You can change
+          it later in your space setting.</UiMessage
         >
         <FormSpaceController
           :controller="web3.account"
