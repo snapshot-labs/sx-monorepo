@@ -495,6 +495,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         title="Controller"
         description="The controller is the account able to change the space settings and cancel pending proposals."
       >
+        <UiMessage
+          v-if="isOffchainNetwork && isController && !isOwner"
+          type="danger"
+          class="mb-3"
+        >
+          Controller can only be edited by the ENS owner
+        </UiMessage>
         <FormSpaceController
           :controller="controller"
           :network="network"
