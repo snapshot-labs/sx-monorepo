@@ -490,7 +490,9 @@ watchEffect(() => {
         </UiButton>
       </div>
     </UiTopnav>
-    <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
+    <div
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
+    >
       <div class="flex-1 grow min-w-0">
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
