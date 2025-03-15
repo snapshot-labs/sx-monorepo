@@ -128,7 +128,7 @@ onMounted(() => {
     v-if="isDisabled"
     type="info"
     :learn-more-link="TURBO_URL"
-    class="mb-4"
+    class="mb-4 max-w-[592px]"
   >
     Whitelabel features are only available for Turbo subscribers.
   </UiMessage>
@@ -175,7 +175,7 @@ onMounted(() => {
           :fallback="false"
           :width="380"
           :height="76"
-          class="!border-0"
+          class="!border-0 !mb-0"
           :definition="{
             type: 'string',
             format: 'stamp',

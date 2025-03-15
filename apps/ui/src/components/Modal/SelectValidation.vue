@@ -288,7 +288,7 @@ watch(
           :error="formErrors.rawParams"
         />
         <template v-if="selectedValidation.key === 'basic'">
-          <div class="flex items-center gap-1 mb-2">
+          <div class="flex items-center gap-1 mb-2 mt-4">
             <h4 class="eyebrow font-medium">Custom strategies</h4>
             <UiTooltip
               title="Calculate the score with a different configuration of Voting Strategies"

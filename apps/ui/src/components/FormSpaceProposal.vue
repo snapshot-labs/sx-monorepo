@@ -93,7 +93,7 @@ watchEffect(() => {
     </UiWrapperInput>
   </div>
   <h4 class="eyebrow mb-2 font-medium">Proposal</h4>
-  <div class="s-box mb-4">
+  <div class="s-box">
     <UiInputString
       v-model="guidelines"
       :definition="GUIDELINES_DEFINITION"

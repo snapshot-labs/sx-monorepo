@@ -133,7 +133,7 @@ function handleScrollEvent(target: HTMLElement) {
     </div>
   </div>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
-    <div class="min-w-[735px] min-h-[calc(100vh-141px)]">
+    <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />
       <div v-if="isError" class="px-4 py-3 flex items-center space-x-2">
         <IH-exclamation-circle class="inline-block" />

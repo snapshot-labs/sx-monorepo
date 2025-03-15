@@ -224,9 +224,10 @@ watch(
             :space="space"
             @errors="v => handleErrors('profile', v)"
           />
-          <div v-if="currentStep === 'network'" class="s-box mb-4">
+          <div v-if="currentStep === 'network'" class="s-box">
             <UiSelectorNetwork
               v-model="settingsForm.chainId"
+              class="!mb-0"
               :definition="{
                 type: 'number',
                 title: 'Network',

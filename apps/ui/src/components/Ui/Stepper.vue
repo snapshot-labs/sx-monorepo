@@ -57,7 +57,7 @@ function goToStep(stepName: string) {
         {{ step.title }}
       </button>
     </div>
-    <div class="flex-1">
+    <div class="flex-1 space-y-4">
       <div class="mt-8 lg:mt-0">
         <slot
           name="content"

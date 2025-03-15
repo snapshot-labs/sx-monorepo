@@ -311,6 +311,13 @@ input:placeholder-shown {
   }
 }
 
+.s-form > .s-base:last-child, .s-input-pb-0 .s-base {
+    .s-input, &.s-error {
+      @apply mb-0;
+    }
+}
+
+
 .s-error {
   @apply mb-2;
 

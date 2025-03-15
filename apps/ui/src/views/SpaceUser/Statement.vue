@@ -65,7 +65,7 @@ watchEffect(() =>
 </script>
 
 <template>
-  <div class="p-4">
+  <div class="p-4 pb-0">
     <UiLoading v-if="loading" class="block" />
     <template v-else-if="statement">
       <EditorStatement
