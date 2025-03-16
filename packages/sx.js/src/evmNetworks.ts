@@ -29,6 +29,7 @@ function createStandardConfig(
     },
     Authenticators: {
       EthSig: '0x5f9B7D78c9a37a439D78f801E0E339C6E711e260',
+      EthSigV2: '0x95CF9B585fDb12DeB78002B5643dFF8fe67a496D',
       EthTx: '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1',
       ...additionalAuthenticators
     },
@@ -60,6 +61,9 @@ function createEvmConfig(
   const authenticators = {
     [network.Authenticators.EthSig]: {
       type: 'ethSig'
+    },
+    [network.Authenticators.EthSigV2]: {
+      type: 'ethSigV2'
     },
     [network.Authenticators.EthTx]: {
       type: 'ethTx'

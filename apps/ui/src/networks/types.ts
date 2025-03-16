@@ -75,6 +75,10 @@ export type GeneratedMetadata =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  /**
+   * Deprecated strategy can still be used but can't be added to new spaces.
+   */
+  deprecated?: boolean;
   about?: string;
   author?: string;
   version?: string;
@@ -431,6 +435,7 @@ export type ExplorePageProtocol = 'snapshot' | 'snapshot-x';
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
+  apiNetwork: NetworkID;
   networks: NetworkID[];
   limit: number;
 };

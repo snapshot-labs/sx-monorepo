@@ -199,7 +199,11 @@ export function useWeb3() {
       });
     }
 
-    // provider.on('disconnect', async () => {});
+    if (connector.type === 'walletconnect') {
+      connector.provider.on('disconnect', async () => {
+        logout();
+      });
+    }
   }
 
   function removeConnectorEvents(connector: Connector) {
