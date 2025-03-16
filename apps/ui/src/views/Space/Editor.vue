@@ -361,6 +361,7 @@ async function handleProposeClick() {
       router.push({ name: 'space-proposals' });
     }
   } catch (e) {
+    console.error(e);
   } finally {
     sending.value = false;
   }
