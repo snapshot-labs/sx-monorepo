@@ -248,7 +248,7 @@ async function handleSettingsSave() {
       saving.value = false;
     }
   } else {
-    executeFn.value = saveController;
+    executeFn.value = save;
   }
 }
 
