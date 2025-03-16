@@ -9,9 +9,11 @@ import {
 } from '../../clients/evm/types';
 import { getRSVFromSig, hexPadLeft } from '../../utils/encoding';
 
-export default function createEthSigAuthenticator(): Authenticator {
+export default function createEthSigAuthenticator(
+  type: 'ethSig' | 'ethSigV2'
+): Authenticator {
   return {
-    type: 'ethSig',
+    type,
     createCall(
       envelope: Envelope<Propose | UpdateProposal | Vote>,
       selector: string,

@@ -44,7 +44,7 @@ const {
 } = useProposalVotingPowerQuery(
   toRef(() => web3.value.account),
   toRef(() => proposal.value),
-  toRef(() => proposal.value?.state === 'active')
+  toRef(() => ['active', 'pending'].includes(proposal.value?.state || ''))
 );
 
 const discussion = computed(() => {
