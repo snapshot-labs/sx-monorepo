@@ -688,12 +688,19 @@ export function createWriters(config: FullConfig) {
     proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
 
     if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
-      const executionHash = new ExecutionHash(
+      let executionHash = await ExecutionHash.loadEntity(
         proposal.execution_hash,
         config.indexerName
       );
-      executionHash.proposal_id = `${spaceId}/${proposalId}`;
-      await executionHash.save();
+
+      if (!executionHash) {
+        executionHash = new ExecutionHash(
+          proposal.execution_hash,
+          config.indexerName
+        );
+        executionHash.proposal_id = `${spaceId}/${proposalId}`;
+        await executionHash.save();
+      }
     }
 
     await proposal.save();
