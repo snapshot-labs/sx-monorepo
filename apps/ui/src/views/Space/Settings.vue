@@ -253,9 +253,20 @@ async function reloadSpaceAndReset() {
   await reset({ force: true });
 }
 
-function handleSettingsSave() {
+async function handleSettingsSave() {
   saving.value = true;
-  executeFn.value = save;
+
+  if (isOffchainNetwork.value) {
+    try {
+      await save();
+      reloadSpaceAndReset();
+    } catch (e) {
+    } finally {
+      saving.value = false;
+    }
+  } else {
+    executeFn.value = save;
+  }
 }
 
 function handleControllerSave(value: string) {
@@ -560,7 +571,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </UiToolbarBottom>
   <teleport to="#modal">
     <ModalTransactionProgress
-      :open="saving"
+      :open="saving && !isOffchainNetwork"
       :chain-id="network.chainId"
       :messages="{
         approveTitle: 'Confirm your changes',

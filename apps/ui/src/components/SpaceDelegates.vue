@@ -566,6 +566,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :execute="undelegateFn"
         @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"
+        @cancelled="isUndelegating = false"
       />
     </teleport>
   </template>

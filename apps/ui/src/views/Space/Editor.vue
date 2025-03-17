@@ -6,7 +6,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -356,6 +356,8 @@ async function handleProposeClick() {
     } else {
       router.push({ name: 'space-proposals' });
     }
+  } catch (e) {
+    console.error(e);
   } finally {
     sending.value = false;
   }
