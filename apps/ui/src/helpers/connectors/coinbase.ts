@@ -3,9 +3,7 @@ import Connector from './connector';
 export default class Coinbase extends Connector {
   async connect() {
     try {
-      const { default: CoinbaseWalletSDK } = await import(
-        '@coinbase/wallet-sdk'
-      );
+      const { CoinbaseWalletSDK } = await import('@coinbase/wallet-sdk'!);
 
       const walletSDK = new CoinbaseWalletSDK(this.options);
       const provider = walletSDK.makeWeb3Provider();
