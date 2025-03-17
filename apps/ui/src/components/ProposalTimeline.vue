@@ -106,7 +106,7 @@ function isInThePast(timestamp: number): boolean {
       <div
         v-for="(state, i) in states"
         :key="state.id"
-        class="flex relative h-[60px]"
+        class="flex relative h-[60px] last:h-0"
       >
         <div
           class="absolute size-[15px] inline-block rounded-full left-[-7px] border-4 border-skin-bg"
