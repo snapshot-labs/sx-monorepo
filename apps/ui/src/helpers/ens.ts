@@ -1,7 +1,7 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
+import snapshot from '@snapshot-labs/snapshot.js';
 import { call, multicall } from '@/helpers/call';
 import { getProvider } from '@/helpers/provider';
 
@@ -80,25 +80,6 @@ export async function resolveName(name: string, chainId: ENSChainId) {
   return address;
 }
 
-export async function getEnsTextRecord(
-  ens: string,
-  record: string,
-  chainId: ENSChainId
-) {
-  const resolvers = ENS_CONTRACTS.resolvers[chainId];
-  if (!resolvers) throw new Error('Unsupported chainId');
-
-  let ensHash: string;
-
-  try {
-    ensHash = namehash(ensNormalize(ens));
-  } catch (e: any) {
-    return null;
-  }
-
-  return deepResolve(chainId, ensHash, 'text', [ensHash, record]);
-}
-
 export async function setEnsTextRecord(
   signer: Signer,
   ens: string,
@@ -130,40 +111,9 @@ export async function setEnsTextRecord(
 }
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
-  const provider = getProvider(chainId);
-  const ensHash = namehash(name);
-
-  const owner = await call(
-    provider,
-    ENS_CONTRACTS.registryAbi,
-    [ENS_CONTRACTS.registry, 'owner', [ensHash]],
-    {
-      blockTag: 'latest'
-    }
-  );
-
-  if (owner !== ENS_CONTRACTS.nameWrappers[chainId]) return owner;
-
-  return call(
-    provider,
-    ENS_CONTRACTS.nameWrapperAbi,
-    [ENS_CONTRACTS.nameWrappers[chainId], 'ownerOf', [ensHash]],
-    {
-      blockTag: 'latest'
-    }
-  );
+  return snapshot.utils.getEnsOwner(name, chainId.toString());
 }
 
 export async function getSpaceController(name: string, chainId: ENSChainId) {
-  const snapshotRecord = await getEnsTextRecord(name, 'snapshot', chainId);
-  if (snapshotRecord) {
-    if (isAddress(snapshotRecord)) return snapshotRecord;
-
-    const uriParts = snapshotRecord.split('/');
-    const position = uriParts.includes('testnet') ? 5 : 4;
-    const address = uriParts[position];
-    if (isAddress(address)) return address;
-  }
-
-  return getNameOwner(name, chainId);
+  return snapshot.utils.getSpaceController(name, chainId.toString());
 }
