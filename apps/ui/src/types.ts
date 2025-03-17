@@ -49,9 +49,11 @@ export type VoteType =
   | 'quadratic'
   | 'weighted'
   | 'custom';
+
 export type VoteTypeInfo = {
   label: string;
   description: string;
+  isBeta?: boolean;
 };
 
 export type DelegationType =
