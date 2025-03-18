@@ -144,7 +144,7 @@ watch(selectedNetworkId, () => {
             :form="metadataForm"
             @errors="v => handleErrors('profile', v)"
           />
-          <div class="s-box p-4 -mt-6">
+          <div class="px-4 pt-4">
             <FormSpaceTreasuries
               v-model="metadataForm.treasuries"
               :network-id="selectedNetworkId"
@@ -152,7 +152,7 @@ watch(selectedNetworkId, () => {
             <FormSpaceDelegations
               v-model="metadataForm.delegations"
               :network-id="selectedNetworkId"
-              class="mt-2"
+              class="mt-4"
             />
           </div>
         </template>
@@ -217,6 +217,7 @@ watch(selectedNetworkId, () => {
         <FormController
           v-else-if="currentStep === 'controller'"
           v-model="controller"
+          class="s-input-pb-0"
           title="Controller"
           :chain-id="selectedNetwork.chainId"
           @errors="v => handleErrors('controller', v)"

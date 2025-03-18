@@ -6,7 +6,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -31,6 +31,8 @@ const DISCUSSION_DEFINITION = {
 const props = defineProps<{
   space: Space;
 }>();
+
+defineOptions({ inheritAttrs: false });
 
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
@@ -241,12 +243,6 @@ const proposalMaxEnd = computed(() => {
   );
 });
 
-const votingTypes = computed(() =>
-  metadataNetwork !== 's-tn'
-    ? props.space.voting_types.filter(a => a !== 'copeland')
-    : props.space.voting_types
-);
-
 const {
   data: propositionPower,
   isPending: isPropositionPowerPending,
@@ -360,6 +356,8 @@ async function handleProposeClick() {
     } else {
       router.push({ name: 'space-proposals' });
     }
+  } catch (e) {
+    console.error(e);
   } finally {
     sending.value = false;
   }
@@ -452,7 +450,7 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal" class="!pb-0">
+  <div v-if="proposal" class="h-full">
     <UiTopnav
       :class="{ 'maximum:border-l': isWhiteLabel }"
       class="maximum:border-r"
@@ -490,10 +488,11 @@ watchEffect(() => {
         </UiButton>
       </div>
     </UiTopnav>
-    <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
-    >
-      <div class="flex-1 grow min-w-0">
+    <div class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]">
+      <div
+        class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
+        v-bind="$attrs"
+      >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
             v-if="
@@ -648,18 +647,13 @@ watchEffect(() => {
               >.
             </template>
           </UiComposer>
-          <div class="s-base mb-5">
-            <UiInputString
-              :key="proposalKey || ''"
-              v-model="proposal.discussion"
-              :definition="DISCUSSION_DEFINITION"
-              :error="formErrors.discussion"
-            />
-            <UiLinkPreview
-              :key="proposalKey || ''"
-              :url="proposal.discussion"
-            />
-          </div>
+          <UiInputString
+            :key="proposalKey || ''"
+            v-model="proposal.discussion"
+            :definition="DISCUSSION_DEFINITION"
+            :error="formErrors.discussion"
+          />
+          <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
           <div
             v-if="
               network &&
@@ -667,7 +661,7 @@ watchEffect(() => {
               strategiesWithTreasuries.length > 0
             "
           >
-            <h4 class="eyebrow mb-2">Execution</h4>
+            <h4 class="eyebrow mb-2 mt-4">Execution</h4>
             <EditorExecution
               v-for="execution in editorExecutions"
               :key="execution.address"
@@ -689,15 +683,13 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix
-        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l']"
-        :top="72"
-        :bottom="64"
-      >
-        <div class="flex flex-col p-4 space-y-4 md:mb-6">
+      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+        <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
-            :voting-types="enforcedVoteType ? [enforcedVoteType] : votingTypes"
+            :voting-types="
+              enforcedVoteType ? [enforcedVoteType] : space.voting_types
+            "
           />
           <EditorChoices
             v-model="proposal"
