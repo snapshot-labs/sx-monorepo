@@ -7,6 +7,31 @@ const STAMP_URL = 'https://stamp.fyi';
 
 const SKIP_LIST = ['shawnpetersisastupidnigger.eth'];
 
+export async function getAddress(
+  name: string,
+  chainId: ChainId
+): Promise<string> {
+  try {
+    const res = await fetch(STAMP_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        method: 'resolve_names',
+        params: [name],
+        network: chainId
+      })
+    });
+    const data = (await res.json()).result;
+
+    return data[name] || '';
+  } catch (e) {
+    console.error('Failed to resolve names', e);
+    return '';
+  }
+}
+
 export async function getNames(
   addresses: string[]
 ): Promise<Record<string, string>> {
@@ -57,7 +82,7 @@ export async function getNames(
 
 export async function getENSNames(
   address: string,
-  chaindId: ChainId
+  chainId: ChainId
 ): Promise<string[]> {
   const res = await fetch(STAMP_URL, {
     method: 'POST',
@@ -67,7 +92,7 @@ export async function getENSNames(
     body: JSON.stringify({
       method: 'lookup_domains',
       params: formatAddress(address),
-      network: chaindId
+      network: chainId
     })
   });
 

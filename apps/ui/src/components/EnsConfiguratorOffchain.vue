@@ -24,6 +24,8 @@ const {
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
 
+const isModalEnsNameOpen = ref(false);
+
 const validNames = computed(() => {
   return Object.values(names.value || {}).filter(d => d.status === 'AVAILABLE');
 });
@@ -37,6 +39,15 @@ const invalidNames = computed(() => {
 const isTestnet = computed(() => {
   return getNetwork(props.networkId).name.includes('testnet');
 });
+
+function attachEnsName(name: string) {
+  isModalEnsNameOpen.value = false;
+
+  if (validNames.value.find(n => n.name === name)) {
+    spaceId.value = name;
+    emit('select');
+  }
+}
 
 function handleSelect(value: string) {
   spaceId.value = value;
@@ -142,8 +153,11 @@ function handleSelect(value: string) {
         </UiMessage>
         <AppLink to="https://app.ens.domains" class="inline-block">
           Register a new ENS name
-          <IH-arrow-sm-right class="-rotate-45 inline" />
-        </AppLink>
+          <IH-arrow-sm-right class="-rotate-45 inline" /> </AppLink
+        >, or
+        <button class="text-skin-link" @click="isModalEnsNameOpen = true">
+          attach a custom domain</button
+        >.
       </div>
       <div class="space-y-3">
         <h4 class="eyebrow">Controller</h4>
@@ -165,4 +179,13 @@ function handleSelect(value: string) {
       in order to see your ENS names
     </UiMessage>
   </div>
+  <teleport to="#modal">
+    <ModalEnsName
+      :open="isModalEnsNameOpen"
+      :account="web3.account"
+      :network-id="networkId"
+      @attach="attachEnsName"
+      @close="isModalEnsNameOpen = false"
+    />
+  </teleport>
 </template>
