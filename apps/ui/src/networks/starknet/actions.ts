@@ -607,7 +607,7 @@ export function createActions(
       minVotingDuration: number | null,
       maxVotingDuration: number | null
     ) => {
-      await verifyStarknetNetwork(web3, chainId);
+      // await verifyStarknetNetwork(web3, chainId);
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
