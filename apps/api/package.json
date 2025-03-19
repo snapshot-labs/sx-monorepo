@@ -8,6 +8,7 @@
     "lint": "eslint src/ test/ --ext .ts",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
+    "dev:debug": "nodemon --exec \"node --inspect --require ts-node/register src/index.ts\"",
     "start": "node dist/src/index.js",
     "test": "vitest run"
   },
