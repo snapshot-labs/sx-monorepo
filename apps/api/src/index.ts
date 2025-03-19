@@ -19,6 +19,13 @@ const schema = fs.readFileSync(schemaFile, 'utf8');
 const PRODUCTION_INDEXER_DELAY = 60 * 1000;
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
+/**
+ * IS_INDEXER is a boolean that determines if the current process is an indexer.
+ *
+ * If not set only GraphQL API will be started.
+ */
+const IS_INDEXER = process.env.IS_INDEXER === 'true';
+
 if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
@@ -34,6 +41,19 @@ addStarknetIndexers(checkpoint);
 addEvmIndexers(checkpoint);
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+async function startIndexer() {
+  if (process.env.NODE_ENV === 'production') {
+    console.log(
+      'Delaying indexer to prevent multiple processes indexing at the same time.'
+    );
+    await sleep(PRODUCTION_INDEXER_DELAY);
+  }
+
+  await checkpoint.resetMetadata();
+  await checkpoint.reset();
+  checkpoint.start();
+}
 
 async function run() {
   const server = new ApolloServer({
@@ -55,16 +75,9 @@ async function run() {
 
   console.log(`Listening at ${url}`);
 
-  if (process.env.NODE_ENV === 'production') {
-    console.log(
-      'Delaying indexer to prevent multiple processes indexing at the same time.'
-    );
-    await sleep(PRODUCTION_INDEXER_DELAY);
+  if (IS_INDEXER) {
+    await startIndexer();
   }
-
-  await checkpoint.resetMetadata();
-  await checkpoint.reset();
-  checkpoint.start();
 }
 
 run();
