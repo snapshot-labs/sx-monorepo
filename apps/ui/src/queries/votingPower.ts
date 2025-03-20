@@ -37,16 +37,16 @@ const VOTING_POWER_KEYS = {
 
 const { web3 } = useWeb3();
 
-function isOffchainPendingProposal(proposal: Proposal): boolean {
+function isOnchainPendingProposal(proposal: Proposal): boolean {
   return (
-    proposal.state === 'pending' && offchainNetworks.includes(proposal.network)
+    proposal.state === 'pending' && !offchainNetworks.includes(proposal.network)
   );
 }
 
 function getProposalSnapshot(proposal?: Proposal | null): Snapshot {
   if (!proposal) return null;
 
-  const snapshot = isOffchainPendingProposal(proposal)
+  const snapshot = isOnchainPendingProposal(proposal)
     ? null
     : proposal.snapshot;
 
