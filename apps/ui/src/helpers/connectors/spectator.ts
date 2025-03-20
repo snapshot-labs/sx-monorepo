@@ -3,8 +3,8 @@ import { validateAndParseAddress } from 'starknet';
 import Connector from './connector';
 import { getAddresses } from '../stamp';
 
-const PREVIOUS_ADDRESS_KEY = 'connector:spectator:address';
-const PREVIOUS_CHAIN_ID_KEY = 'connector:spectator:chainId';
+const ADDRESS_KEY = 'connector:spectator:address';
+const CHAIN_ID_KEY = 'connector:spectator:chainId';
 const DEFAULT_CHAIN_ID = 1;
 
 export function formatAddress(address: string): string {
@@ -45,8 +45,8 @@ export default class Spectator extends Connector {
         }
       };
 
-      localStorage.setItem(PREVIOUS_ADDRESS_KEY, address);
-      localStorage.setItem(PREVIOUS_CHAIN_ID_KEY, chainId.toString());
+      localStorage.setItem(ADDRESS_KEY, address);
+      localStorage.setItem(CHAIN_ID_KEY, chainId.toString());
 
       this.provider = provider;
     } catch (e) {
@@ -55,12 +55,12 @@ export default class Spectator extends Connector {
   }
 
   async disconnect() {
-    localStorage.removeItem(PREVIOUS_ADDRESS_KEY);
-    localStorage.removeItem(PREVIOUS_CHAIN_ID_KEY);
+    localStorage.removeItem(ADDRESS_KEY);
+    localStorage.removeItem(CHAIN_ID_KEY);
   }
 
   async getAddress(connectAs: string, chainId: number): Promise<string> {
-    const address = connectAs || localStorage.getItem(PREVIOUS_ADDRESS_KEY);
+    const address = connectAs || localStorage.getItem(ADDRESS_KEY);
 
     if (!address) {
       throw new Error('No address provided');
@@ -76,7 +76,7 @@ export default class Spectator extends Connector {
 
   async getChainId(chainId: string): Promise<number> {
     return Number(
-      chainId || localStorage.getItem(PREVIOUS_CHAIN_ID_KEY) || DEFAULT_CHAIN_ID
+      chainId || localStorage.getItem(CHAIN_ID_KEY) || DEFAULT_CHAIN_ID
     );
   }
 }
