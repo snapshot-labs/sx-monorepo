@@ -32,6 +32,8 @@ export default class Spectator extends Connector {
       const address = await this.getAddress(addressParams, chainId);
 
       const provider = {
+        selectedAddress: address,
+        chainId,
         request: async (args: { method: string; params?: any[] }) => {
           if (args.method === 'eth_chainId' || args.method === 'net_version') {
             return chainId;

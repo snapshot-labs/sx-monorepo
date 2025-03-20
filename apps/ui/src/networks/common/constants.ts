@@ -10,5 +10,5 @@ export const EVM_CONNECTORS: ConnectorType[] = [
   'spectator'
 ];
 
-export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx'];
+export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx', 'spectator'];
 export const EDITOR_APP_NAME = 'snapshot-v2';
