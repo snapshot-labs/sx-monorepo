@@ -116,6 +116,11 @@ export function useSpaceVotingPowerQuery(
         spaceValue.strategies_parsed_metadata
       ]);
     },
+    retry: (failureCount, error) => {
+      if (error?.message.includes('NOT_READY_YET')) return false;
+
+      return failureCount < 3;
+    },
     enabled: () => !!toValue(account),
     staleTime: CACHE_TTL
   });
@@ -150,6 +155,11 @@ export function useProposalVotingPowerQuery(
           proposalValue.space.strategies_parsed_metadata
         ]
       );
+    },
+    retry: (failureCount, error) => {
+      if (error?.message.includes('NOT_READY_YET')) return false;
+
+      return failureCount < 3;
     },
     enabled: () => !!toValue(account) && toValue(active),
     staleTime: CACHE_TTL
