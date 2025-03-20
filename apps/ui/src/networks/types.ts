@@ -43,7 +43,8 @@ export type ConnectorType =
   | 'coinbase'
   | 'gnosis'
   | 'sequence'
-  | 'unicorn';
+  | 'unicorn'
+  | 'spectator';
 export type Connector = {
   id: string;
   type: ConnectorType;

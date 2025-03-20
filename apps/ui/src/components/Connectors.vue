@@ -23,7 +23,9 @@ const availableConnectors = computed(() => {
           (props.supportedConnectors &&
             !props.supportedConnectors.includes(connector.type)) ||
           connector.type === 'gnosis'
-        ) && connector.id !== 'unicorn'
+        ) &&
+        connector.id !== 'unicorn' &&
+        connector.id !== 'spectator'
       );
     })
     .sort((a, b) =>

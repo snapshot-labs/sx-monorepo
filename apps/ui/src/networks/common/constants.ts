@@ -6,7 +6,8 @@ export const EVM_CONNECTORS: ConnectorType[] = [
   'coinbase',
   'gnosis',
   'sequence',
-  'unicorn'
+  'unicorn',
+  'spectator'
 ];
 
 export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx'];
