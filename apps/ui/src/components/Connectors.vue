@@ -20,12 +20,9 @@ const availableConnectors = computed(() => {
     .filter(connector => {
       return (
         !(
-          (props.supportedConnectors &&
-            !props.supportedConnectors.includes(connector.type)) ||
-          connector.type === 'gnosis'
-        ) &&
-        connector.id !== 'unicorn' &&
-        connector.id !== 'spectator'
+          props.supportedConnectors &&
+          !props.supportedConnectors.includes(connector.type)
+        ) && !connector.autoConnectOnly
       );
     })
     .sort((a, b) =>
