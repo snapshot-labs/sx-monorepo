@@ -44,7 +44,8 @@ export function createConstants(
     SimpleQuorumAvatar: true,
     SimpleQuorumTimelock: true,
     Axiom: true,
-    Isokratia: true
+    Isokratia: true,
+    SimpleQuorumImmediateExecution: true
   };
 
   const RELAYER_AUTHENTICATORS = {
