@@ -95,4 +95,6 @@ export async function handleSpaceMetadata(
   }
 
   await spaceMetadataItem.save();
+
+  return spaceMetadataItem;
 }
