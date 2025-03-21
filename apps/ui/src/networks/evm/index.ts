@@ -72,6 +72,24 @@ export const METADATA: Record<string, Metadata> = {
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: ETH_MAINNET_BLOCK_TIME
   },
+  apechain: {
+    name: 'ApeChain',
+    chainId: 33139,
+    currentChainId: 1,
+    apiUrl: UNIFIED_API_URL,
+    avatar:
+      'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4',
+    blockTime: ETH_MAINNET_BLOCK_TIME
+  },
+  curtis: {
+    name: 'Curtis',
+    chainId: 33111,
+    currentChainId: 11155111,
+    apiUrl: UNIFIED_API_TESTNET_URL,
+    avatar:
+      'ipfs://bafkreicljxttjq2xkgfwwpii5xegirgq2ctrnsjnzelxudjj33qzq65apu',
+    blockTime: ETH_MAINNET_BLOCK_TIME
+  },
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
@@ -143,7 +161,9 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'matic',
       'base',
       'mnt',
-      'arb1'
+      'arb1',
+      'apechain',
+      'curtis'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),
