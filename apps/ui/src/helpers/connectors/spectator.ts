@@ -19,13 +19,11 @@ export function formatAddress(address: string): string {
 
 export default class Spectator extends Connector {
   async connect() {
-    const searchParams = useUrlSearchParams('history', {
+    const searchParams = useUrlSearchParams('hash', {
       removeFalsyValues: true
     });
     const addressParams = searchParams.connectAs as string;
     const chainIdParams = searchParams.chainId as string;
-    searchParams.connectAs = '';
-    searchParams.chainId = '';
 
     try {
       const chainId = await this.getChainId(chainIdParams);
@@ -51,6 +49,9 @@ export default class Spectator extends Connector {
       this.provider = provider;
     } catch (e) {
       console.error(e);
+    } finally {
+      searchParams.connectAs = '';
+      searchParams.chainId = '';
     }
   }
 
