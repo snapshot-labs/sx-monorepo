@@ -23,6 +23,8 @@ export type NetworkID =
   | 'oeth'
   | 'base'
   | 'mnt'
+  | 'apechain'
+  | 'curtis'
   | 'sep'
   | 'sn'
   | 'sn-sep';
