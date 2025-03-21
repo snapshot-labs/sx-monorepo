@@ -72,7 +72,7 @@ export const METADATA: Record<string, Metadata> = {
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: ETH_MAINNET_BLOCK_TIME
   },
-  apechain: {
+  ape: {
     name: 'ApeChain',
     chainId: 33139,
     currentChainId: 1,
@@ -162,7 +162,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'base',
       'mnt',
       'arb1',
-      'apechain',
+      'ape',
       'curtis'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
