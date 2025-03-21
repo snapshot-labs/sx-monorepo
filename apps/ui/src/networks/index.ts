@@ -14,7 +14,7 @@ const baseNetwork = createEvmNetwork('base');
 const mantleNetwork = createEvmNetwork('mnt');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
-const apechainNetwork = createEvmNetwork('apechain');
+const apeNetwork = createEvmNetwork('ape');
 const curtisNetwork = createEvmNetwork('curtis');
 const sepoliaNetwork = createEvmNetwork('sep');
 
@@ -30,7 +30,7 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'base',
       'mnt',
       'oeth',
-      'apechain',
+      'ape',
       'curtis',
       'sep',
       'sn',
@@ -44,7 +44,7 @@ export const evmNetworks: NetworkID[] = [
   'mnt',
   'base',
   'oeth',
-  'apechain',
+  'ape',
   'curtis',
   'sep'
 ];
@@ -66,7 +66,7 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'mnt') return mantleNetwork;
   if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
-  if (id === 'apechain') return apechainNetwork;
+  if (id === 'ape') return apeNetwork;
   if (id === 'curtis') return curtisNetwork;
   if (id === 'sep') return sepoliaNetwork;
   if (id === 'sn') return starknetNetwork;

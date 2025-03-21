@@ -15,7 +15,7 @@ type NetworkID =
   | 'arb1'
   | 'base'
   | 'mnt'
-  | 'apechain'
+  | 'ape'
   | 'curtis';
 
 const START_BLOCKS: Record<NetworkID, number> = {
@@ -26,7 +26,7 @@ const START_BLOCKS: Record<NetworkID, number> = {
   arb1: 157825417,
   base: 23524251,
   mnt: 75662182,
-  apechain: 12100384,
+  ape: 12100384,
   curtis: 16682282
 };
 

@@ -31,7 +31,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   base: 8453,
   arb1: 42161,
   mnt: 5000,
-  apechain: 33139,
+  ape: 33139,
   curtis: 33111,
   sep: 11155111,
   // Starknet

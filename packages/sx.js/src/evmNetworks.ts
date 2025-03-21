@@ -123,7 +123,7 @@ export const evmNetworks = {
     // https://docs.mantle.xyz/network/system-information/fee-mechanism/eip-1559-support#application-of-eip-1559-in-mantle-v2-tectonic
     maxPriorityFeePerGas: 0
   }),
-  apechain: createStandardConfig(33139),
+  ape: createStandardConfig(33139),
   curtis: createStandardConfig(33111)
 } as const;
 
@@ -134,5 +134,5 @@ export const evmPolygon = createEvmConfig('matic');
 export const evmArbitrum = createEvmConfig('arb1');
 export const evmBase = createEvmConfig('base');
 export const evmMantle = createEvmConfig('mnt');
-export const evmApechain = createEvmConfig('apechain');
+export const evmApe = createEvmConfig('ape');
 export const evmCurtis = createEvmConfig('curtis');
