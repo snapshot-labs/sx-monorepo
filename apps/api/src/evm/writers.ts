@@ -15,6 +15,7 @@ import {
   Leaderboard,
   Proposal,
   Space,
+  SpaceMetadataItem,
   StarknetL1Execution,
   User,
   Vote
@@ -501,6 +502,10 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
+    const spaceMetadataItem = space.metadata
+      ? await SpaceMetadataItem.loadEntity(space.metadata, config.indexerName)
+      : null;
+
     const proposalId = event.args.proposalId.toNumber();
     const author = getAddress(event.args.author);
     const created = block?.timestamp ?? getCurrentTimestamp();
@@ -535,6 +540,7 @@ export function createWriters(config: FullConfig) {
     proposal.veto_tx = null;
     proposal.vote_count = 0;
 
+    proposal.treasuries = spaceMetadataItem?.treasuries ?? [];
     proposal.execution_strategy = getAddress(
       event.args.proposal.executionStrategy
     );
@@ -548,6 +554,7 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy,
       config.indexerName
     );
+
     if (executionStrategy) {
       proposal.quorum = BigInt(executionStrategy.quorum);
       proposal.timelock_veto_guardian =
@@ -557,6 +564,11 @@ export function createWriters(config: FullConfig) {
         executionStrategy.axiom_snapshot_address;
       proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot;
       proposal.execution_strategy_type = executionStrategy.type;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      proposal.execution_strategy_details = executionStrategy.id;
     } else {
       proposal.quorum = 0n;
       proposal.timelock_veto_guardian = null;
