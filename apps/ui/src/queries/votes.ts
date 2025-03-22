@@ -22,7 +22,7 @@ export function useProposalVotesQuery({
     initialPageParam: 0,
     queryKey: [
       'votes',
-      proposal,
+      () => toValue(proposal).id,
       'list',
       {
         choiceFilter,
