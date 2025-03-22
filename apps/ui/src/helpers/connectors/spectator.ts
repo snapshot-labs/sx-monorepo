@@ -1,3 +1,4 @@
+import EventEmitter from 'events';
 import { getAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import Connector from './connector';
@@ -6,6 +7,54 @@ import { getAddresses } from '../stamp';
 const ADDRESS_KEY = 'connector:spectator:address';
 const CHAIN_ID_KEY = 'connector:spectator:chainId';
 const DEFAULT_CHAIN_ID = 1;
+
+class SpectatorProvider extends EventEmitter {
+  public selectedAddress: string;
+  public chainId: number;
+
+  constructor(address: string, chainId: number) {
+    super();
+
+    this.selectedAddress = address;
+    this.chainId = chainId;
+    this.#save();
+  }
+
+  async request(args: { method: string; params?: any[] }): Promise<any> {
+    switch (args.method) {
+      case 'eth_chainId':
+      case 'net_version':
+        return this.chainId;
+      case 'eth_accounts':
+        return [this.selectedAddress];
+      default:
+        throw new Error('Not available when connected as spectator');
+    }
+  }
+
+  changeAccount(address: string, chainId: number) {
+    this.#save();
+
+    if (this.selectedAddress !== address) {
+      this.emit('accountsChanged', [address]);
+      this.selectedAddress = address;
+    }
+    if (this.chainId !== chainId) {
+      this.emit('chainChanged', chainId);
+      this.chainId = chainId;
+    }
+  }
+
+  disconnect() {
+    localStorage.removeItem(ADDRESS_KEY);
+    localStorage.removeItem(CHAIN_ID_KEY);
+  }
+
+  #save() {
+    localStorage.setItem(ADDRESS_KEY, this.selectedAddress);
+    localStorage.setItem(CHAIN_ID_KEY, this.chainId.toString());
+  }
+}
 
 export function formatAddress(address: string): string {
   try {
@@ -18,49 +67,56 @@ export function formatAddress(address: string): string {
 }
 
 export default class Spectator extends Connector {
-  async connect() {
-    const searchParams = useUrlSearchParams('hash', {
-      removeFalsyValues: true
-    });
-    const addressParams = searchParams.as as string;
-    const chainIdParams = searchParams.chainId as string;
+  constructor(options) {
+    super(options);
+
+    const router = useRouter();
+
+    watch(
+      () => router.currentRoute.value.query.as,
+      async address => {
+        if (!address) return;
+
+        await this.connect();
+
+        const query = { ...router.currentRoute.value.query };
+        delete query.as;
+        delete query.chainId;
+
+        router.push({ query });
+      }
+    );
+  }
+
+  async connect(): Promise<void> {
+    const searchParams = useUrlSearchParams('hash');
 
     try {
-      const chainId = await this.getChainId(chainIdParams);
-      const address = await this.getAddress(addressParams, chainId);
+      const chainId = await this.#getChainId(searchParams.chainId as string);
+      const address = await this.#getAddress(
+        searchParams.as as string,
+        chainId
+      );
 
-      const provider = {
-        selectedAddress: address,
-        chainId,
-        request: async (args: { method: string; params?: any[] }) => {
-          if (args.method === 'eth_chainId' || args.method === 'net_version') {
-            return chainId;
-          } else if (args.method === 'eth_accounts') {
-            return [address];
-          }
+      if (address && address === this.provider?.selectedAddress) {
+        return;
+      }
 
-          throw new Error('Not available when connected as spectator');
-        }
-      };
-
-      localStorage.setItem(ADDRESS_KEY, address);
-      localStorage.setItem(CHAIN_ID_KEY, chainId.toString());
-
-      this.provider = provider;
+      if (this.provider) {
+        this.provider.changeAccount(address, chainId);
+      } else {
+        this.provider = new SpectatorProvider(address, chainId);
+      }
     } catch (e) {
       console.error(e);
-    } finally {
-      searchParams.as = '';
-      searchParams.chainId = '';
     }
   }
 
   async disconnect() {
-    localStorage.removeItem(ADDRESS_KEY);
-    localStorage.removeItem(CHAIN_ID_KEY);
+    this.provider.disconnect();
   }
 
-  async getAddress(input: string, chainId: number): Promise<string> {
+  async #getAddress(input: string, chainId: number): Promise<string> {
     const address = input || localStorage.getItem(ADDRESS_KEY);
 
     if (!address) {
@@ -75,7 +131,7 @@ export default class Spectator extends Connector {
     return formatAddress(address);
   }
 
-  async getChainId(chainId: string): Promise<number> {
+  async #getChainId(chainId: string): Promise<number> {
     return Number(
       chainId || localStorage.getItem(CHAIN_ID_KEY) || DEFAULT_CHAIN_ID
     );
