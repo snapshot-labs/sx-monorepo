@@ -6,8 +6,9 @@ export const EVM_CONNECTORS: ConnectorType[] = [
   'coinbase',
   'gnosis',
   'sequence',
-  'unicorn'
+  'unicorn',
+  'spectator'
 ];
 
-export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx'];
+export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx', 'spectator'];
 export const EDITOR_APP_NAME = 'snapshot-v2';
