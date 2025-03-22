@@ -22,7 +22,7 @@ export default class Spectator extends Connector {
     const searchParams = useUrlSearchParams('hash', {
       removeFalsyValues: true
     });
-    const addressParams = searchParams.connectAs as string;
+    const addressParams = searchParams.as as string;
     const chainIdParams = searchParams.chainId as string;
 
     try {
@@ -50,7 +50,7 @@ export default class Spectator extends Connector {
     } catch (e) {
       console.error(e);
     } finally {
-      searchParams.connectAs = '';
+      searchParams.as = '';
       searchParams.chainId = '';
     }
   }
@@ -60,8 +60,8 @@ export default class Spectator extends Connector {
     localStorage.removeItem(CHAIN_ID_KEY);
   }
 
-  async getAddress(connectAs: string, chainId: number): Promise<string> {
-    const address = connectAs || localStorage.getItem(ADDRESS_KEY);
+  async getAddress(input: string, chainId: number): Promise<string> {
+    const address = input || localStorage.getItem(ADDRESS_KEY);
 
     if (!address) {
       throw new Error('No address provided');
