@@ -365,6 +365,7 @@ const STRATEGY_FRAGMENT = gql`
     verifiedSpacesCount
     examples
     schema
+    disabled
   }
 `;
 
