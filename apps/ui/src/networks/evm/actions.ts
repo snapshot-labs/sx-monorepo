@@ -4,8 +4,10 @@ import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
+  evmApe,
   evmArbitrum,
   evmBase,
+  evmCurtis,
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
@@ -60,6 +62,8 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   8453: evmBase,
   42161: evmArbitrum,
   1: evmMainnet,
+  33139: evmApe,
+  33111: evmCurtis,
   11155111: evmSepolia
 };
 
