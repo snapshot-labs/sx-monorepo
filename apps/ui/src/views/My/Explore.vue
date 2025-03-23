@@ -6,6 +6,8 @@ import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 import { useExploreSpacesQuery } from '@/queries/spaces';
 import { SelectItem } from '@/types';
 
+defineOptions({ inheritAttrs: false });
+
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
 const DEFAULT_PROTOCOL = 'snapshot';
@@ -148,7 +150,7 @@ watchEffect(() => setTitle('Explore'));
 </script>
 
 <template>
-  <div class="!pb-0 flex flex-col" style="min-height: calc(100vh - 72px)">
+  <div class="flex flex-col" style="min-height: calc(100vh - 72px)">
     <OnboardingUser class="mb-2" />
     <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
       <div class="flex sm:flex-row flex-col flex-wrap gap-2">
@@ -193,7 +195,7 @@ watchEffect(() => setTitle('Explore'));
         </UiButton>
       </UiTooltip>
     </div>
-    <div class="flex-grow">
+    <div class="flex-grow" v-bind="$attrs">
       <UiLabel label="Spaces" sticky />
       <UiLoading v-if="isPending" class="block m-4" />
       <div v-else-if="data">
@@ -217,7 +219,7 @@ watchEffect(() => setTitle('Explore'));
     </div>
     <UiToolbarBottom
       v-if="!web3.authLoading && !web3.account"
-      class="mt-4 px-4 py-3 flex justify-between items-center"
+      class="px-4 py-3 flex justify-between items-center"
     >
       <h4
         class="hidden text-skin-text sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"

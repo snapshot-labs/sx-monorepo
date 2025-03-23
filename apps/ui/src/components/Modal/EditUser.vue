@@ -104,6 +104,7 @@ async function handleSubmit() {
     </div>
     <template #footer>
       <UiButton
+        primary
         class="w-full"
         :disabled="Object.keys(formErrors).length > 0"
         :loading="sending"

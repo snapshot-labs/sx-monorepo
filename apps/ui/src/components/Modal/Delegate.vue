@@ -233,6 +233,7 @@ watchEffect(async () => {
       </UiButton>
       <UiButton
         v-else
+        primary
         class="w-full"
         :loading="sending"
         :disabled="Object.keys(formErrors).length > 0"

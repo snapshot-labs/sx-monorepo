@@ -96,7 +96,7 @@ const otherResultsSummary = computed(() => {
 const isFinalizing = computed(() => {
   return (
     !props.proposal.completed &&
-    ['passed', 'executed', 'rejected'].includes(props.proposal.state)
+    ['passed', 'executed', 'rejected', 'closed'].includes(props.proposal.state)
   );
 });
 

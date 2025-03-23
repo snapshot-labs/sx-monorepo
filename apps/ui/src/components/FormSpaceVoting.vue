@@ -6,7 +6,7 @@ import {
 } from '@/helpers/constants';
 import { _d } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { ChainId, Space, SpacePrivacy, Validation, VoteType } from '@/types';
 
 const votingDelay = defineModel<number | null>('votingDelay', {
@@ -62,11 +62,6 @@ const isSelectPrivacyModalOpen = ref(false);
 const isSelectValidationModalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.space.network));
-const votingTypes = computed(() =>
-  metadataNetwork !== 's-tn'
-    ? network.value.constants.EDITOR_VOTING_TYPES.filter(a => a !== 'copeland')
-    : network.value.constants.EDITOR_VOTING_TYPES
-);
 
 const isOffchainNetwork = computed(() =>
   offchainNetworks.includes(props.space.network)
@@ -302,7 +297,7 @@ watchEffect(() => {
       :open="isSelectVotingTypeModalOpen"
       :with-any="true"
       :initial-state="votingType"
-      :voting-types="votingTypes"
+      :voting-types="network.constants.EDITOR_VOTING_TYPES"
       @save="value => (votingType = value)"
       @close="isSelectVotingTypeModalOpen = false"
     />
