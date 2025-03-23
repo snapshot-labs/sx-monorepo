@@ -171,20 +171,20 @@ async function handleTurboClick() {
 <template>
   <div>
     <div
-      class="text-center flex flex-col items-center justify-center h-[295px] gap-3 relative overflow-hidden"
+      class="text-center flex flex-col items-center justify-center h-[295px] gap-3 mx-4 relative overflow-hidden"
     >
       <div class="hero hero-bg" />
       <div
-        class="text-[56px] leading-[48px] text-skin-heading font-semibold space-x-2"
+        class="text-[56px] leading-[48px] text-skin-heading font-semibold gap-[0.65rem]"
       >
         The power of
-        <ICPro class="h-[46px] inline" />
+        <ICPro class="h-[46px] inline top-[-3px] relative" />
       </div>
       <div class="max-w-[290px] text-md leading-6">
         Pick the plan that works best for your organization.
       </div>
       <div
-        class="flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg"
+        class="flex border rounded-full p-1 items-center leading-6 bg-skin-bg"
       >
         <button
           v-for="(_, p) in PRO_PRICES[paymentNetwork]"
@@ -198,7 +198,7 @@ async function handleTurboClick() {
           <div v-if="p === 'yearly'" class="pl-3 pr-1 flex gap-1">
             Annual
             <div
-              class="bg-orange-300/20 border border-orange-300 rounded-full px-2 text-sm leading-[18px]"
+              class="bg-orange-300/20 border border-orange-300 rounded-full px-2 text-sm leading-5"
             >
               -16%
             </div>
@@ -232,7 +232,7 @@ async function handleTurboClick() {
         </div>
         <hr />
         <ul
-          class="leading-[18px] space-y-2 gap-5 list-disc list-outside md:columns-2 w-full text-skin-heading ml-2.5"
+          class="leading-5 space-y-2 gap-5 list-disc list-outside md:columns-2 w-full text-skin-heading ml-2.5"
         >
           <li>Increase proposal limits effortlessly.</li>
           <li>More voting options and flexibility.</li>
@@ -247,7 +247,7 @@ async function handleTurboClick() {
         <div class="text-skin-heading font-semibold text-lg leading-6 mb-1.5">
           Custom plan
         </div>
-        <div class="leading-[18px] grow mb-3.5">
+        <div class="leading-5 grow mb-3.5">
           Customize your plan and enjoy all the benefits without limits.
         </div>
         <div>
@@ -258,7 +258,7 @@ async function handleTurboClick() {
     <div
       class="flex border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm sticky top-[71px] lg:top-[72px]"
     >
-      <div class="basis-[250px] grow">Features</div>
+      <div class="feature-key-col">Features</div>
       <div
         v-for="tier in TIER_PLAN"
         :key="tier"
@@ -279,7 +279,7 @@ async function handleTurboClick() {
         v-for="(feature, i) in details.features"
         :key="i"
         :class="[
-          `flex mx-4 text-skin-heading py-3.5 leading-[18px] items-center`,
+          `flex mx-4 text-skin-heading py-3.5 leading-5 items-center`,
           { 'border-t': i > 0 }
         ]"
       >
@@ -320,7 +320,7 @@ async function handleTurboClick() {
         <UiButton>Talk to sales</UiButton>
       </div>
     </div>
-    <div class="border-b p-4 pt-[40px] space-y-[2px]">
+    <div class="border-b p-4 pt-6 space-y-0.5">
       <h3 class="leading-6">Questions?</h3>
       <div>Frequently asked questions</div>
     </div>
@@ -332,15 +332,18 @@ async function handleTurboClick() {
       >
         <button
           type="button"
-          class="flex items-center py-4 w-full text-left gap-2"
+          class="flex py-4 w-full text-left gap-2"
           :class="{ 'pb-0': currentQuestion === i }"
           @click="toggleQuestion(i)"
         >
           <IH-chevron-down
             v-if="currentQuestion === i"
-            class="text-skin-text size-[16px]"
+            class="text-skin-text mt-1 size-[16px] shrink-0"
           />
-          <IH-chevron-right v-else class="text-skin-text size-[16px]" />
+          <IH-chevron-right
+            v-else
+            class="text-skin-text mt-1 size-[16px] shrink-0"
+          />
           <div class="text-skin-heading" v-text="question.question" />
         </button>
         <div
@@ -392,16 +395,16 @@ async function handleTurboClick() {
   @apply absolute h-full w-full z-[-1] opacity-50 scale-150;
 
   &:after {
-    @apply bg-gradient-to-t from-skin-bg to-transparent via-skin-bg via-30%;
+    @apply bg-gradient-to-t from-skin-bg to-transparent via-skin-bg via-30% block w-full h-full;
     content: '';
-    display: block;
-    height: 100%;
-    width: 100%;
-    border: 1px solid red;
   }
 }
 
 .feature-value-col {
   @apply grow shrink-0 text-center basis-[60px] max-w-[300px];
+}
+
+.feature-key-col {
+  @apply basis-[250px] grow;
 }
 </style>

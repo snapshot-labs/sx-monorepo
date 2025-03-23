@@ -94,7 +94,7 @@ function handleStrategySave(value: Record<string, any>) {
     <div v-if="availableStrategies.length === 0">No strategies available</div>
     <div v-else class="space-y-3">
       <ButtonStrategy
-        v-for="strategy in availableStrategies"
+        v-for="strategy in availableStrategies.filter(s => !s.deprecated)"
         :key="strategy.address"
         :disabled="
           limitReached || (unique && !!activeStrategiesMap[strategy.name])

@@ -89,11 +89,11 @@ function getProposalState(
       quorum_type: proposal.quorumType
     });
 
-    if (
-      proposal.quorumType === 'rejection'
-        ? currentQuorum > proposal.quorum
-        : currentQuorum < proposal.quorum
-    ) {
+    if (proposal.quorumType === 'rejection') {
+      return currentQuorum > proposal.quorum ? 'rejected' : 'passed';
+    }
+
+    if (currentQuorum < proposal.quorum) {
       return 'rejected';
     }
 

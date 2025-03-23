@@ -75,6 +75,10 @@ export type GeneratedMetadata =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  /**
+   * Deprecated strategy can still be used but can't be added to new spaces.
+   */
+  deprecated?: boolean;
   about?: string;
   author?: string;
   version?: string;

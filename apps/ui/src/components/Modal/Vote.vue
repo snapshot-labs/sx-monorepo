@@ -44,6 +44,7 @@ const {
 );
 
 const loading = ref(false);
+const hidden = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
@@ -87,12 +88,12 @@ async function handleSubmit() {
     try {
       await voteFn();
       handleConfirmed();
+    } catch (e) {
     } finally {
       loading.value = false;
     }
   } else {
-    emit('close');
-    loading.value = false;
+    hidden.value = true;
     modalTransactionOpen.value = true;
   }
 }
@@ -114,12 +115,13 @@ async function handleConfirmed(tx?: string | null) {
   modalTransactionOpen.value = false;
   if (tx) {
     txId.value = tx;
-    modalShareOpen.value = true;
   }
 
   emit('voted');
   emit('close');
 
+  modalShareOpen.value = true;
+  hidden.value = false;
   loading.value = false;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
@@ -133,6 +135,12 @@ async function handleConfirmed(tx?: string | null) {
     });
     await loadVotes(props.proposal.network, [props.proposal.space.id]);
   }
+}
+
+function handleCancelled() {
+  modalTransactionOpen.value = false;
+  loading.value = false;
+  hidden.value = false;
 }
 
 watch(
@@ -164,7 +172,7 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" :class="{ hidden }" @close="$emit('close')">
     <template #header>
       <h3>Cast your vote</h3>
     </template>
@@ -240,6 +248,7 @@ watchEffect(async () => {
       }"
       :execute="voteFn"
       @confirmed="handleConfirmed"
+      @cancelled="handleCancelled"
       @close="modalTransactionOpen = false"
     />
     <ModalShare

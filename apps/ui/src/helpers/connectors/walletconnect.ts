@@ -11,8 +11,12 @@ import { sleep } from '../utils';
  * Adding a delay was the most reliable way to handle this.
  */
 const DISCONNECT_DELAY = 1000;
+const RECONNECT_TIMEOUT = 5000;
 
-const awaitProvider = (appKit: AppKit) =>
+const awaitProvider = (
+  appKit: AppKit,
+  { isAutoConnect }: { isAutoConnect: boolean }
+) =>
   new Promise((resolve, reject) => {
     appKit.subscribeEvents(event => {
       if (event.data.event === 'MODAL_CLOSE') reject('User closed modal');
@@ -21,6 +25,12 @@ const awaitProvider = (appKit: AppKit) =>
     appKit.subscribeProviders(state => {
       resolve(state['eip155']);
     });
+
+    if (isAutoConnect) {
+      setTimeout(() => {
+        reject('Timeout');
+      }, RECONNECT_TIMEOUT);
+    }
   });
 
 export default class Walletconnect extends Connector {
@@ -43,6 +53,7 @@ export default class Walletconnect extends Connector {
         polygon,
         metis,
         sepolia,
+        apeChain,
         fantomTestnet
       } = await import('@reown/appkit/networks');
 
@@ -61,6 +72,7 @@ export default class Walletconnect extends Connector {
           polygon,
           metis,
           sepolia,
+          apeChain,
           fantomTestnet
         ],
         themeMode: currentTheme.value,
@@ -79,7 +91,7 @@ export default class Walletconnect extends Connector {
         await this.modal.open();
       }
 
-      this.provider = await awaitProvider(this.modal);
+      this.provider = await awaitProvider(this.modal, { isAutoConnect });
 
       this.modal.close();
     } catch (e) {
@@ -97,7 +109,12 @@ export default class Walletconnect extends Connector {
     await this.modal?.adapter?.connectionControllerClient?.disconnect();
 
     if (this.provider && 'disconnect' in this.provider) {
-      this.provider.disconnect();
+      try {
+        // NOTE: This sometimes fails if we try to disconnect from 'disconnect' event
+        // We need to handle this error so logout can safely continue
+        await this.provider.disconnect();
+      } catch {}
+
       this.provider = null;
     }
 

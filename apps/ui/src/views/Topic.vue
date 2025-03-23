@@ -130,7 +130,7 @@ onMounted(async () => {
       </div>
     </div>
     <div v-if="loaded && !failed && discussion" class="bg-skin-bg border-t">
-      <div class="max-w-[710px] mx-auto p-4">
+      <div class="max-w-[710px] mx-auto p-4 pb-0">
         <a :href="discussion" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <IC-discourse class="size-[22px] shrink-0" />

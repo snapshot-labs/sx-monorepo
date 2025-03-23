@@ -147,7 +147,7 @@ export async function handleExecutionStrategy(
   }
 }
 
-export async function updateProposaValidationStrategy(
+export async function updateProposalValidationStrategy(
   space: Space,
   validationStrategyAddress: string,
   validationStrategyParams: string[],
