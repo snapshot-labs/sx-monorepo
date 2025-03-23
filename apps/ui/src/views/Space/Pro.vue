@@ -2,7 +2,8 @@
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
-import { metadataNetwork } from '@/networks';
+import { getNetwork, metadataNetwork } from '@/networks';
+import { Connector } from '@/networks/types';
 import { ChainId, Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
@@ -47,12 +48,13 @@ defineProps<{
 }>();
 
 const { limits } = useSettings();
-const { web3 } = useWeb3();
+const { login, auth } = useWeb3();
 const { modalAccountOpen } = useModal();
 
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
 const modalPaymentOpen = ref(false);
+const modalConnectorOpen = ref(false);
 
 const paymentNetwork = computed(() => {
   return metadataNetwork === 's' ? 1 : 11155111;
@@ -66,6 +68,11 @@ const tokens = computed(() => {
   return TOKENS[paymentNetwork.value].filter(t => {
     return ACCEPTED_TOKENS_SYMBOL.includes(t.symbol);
   });
+});
+
+const supportedConnectors = computed(() => {
+  const network = getNetwork(metadataNetwork);
+  return network.managerConnectors;
 });
 
 const features = computed<
@@ -155,13 +162,34 @@ const features = computed<
   };
 });
 
+const isCurrentConnectorSupported = computed(() => {
+  return (
+    auth.value && supportedConnectors.value.includes(auth.value.connector.type)
+  );
+});
+
 function toggleQuestion(id: number) {
   currentQuestion.value = currentQuestion.value === id ? undefined : id;
 }
 
+async function handleConnectorPick(connector: Connector) {
+  modalConnectorOpen.value = false;
+
+  await login(connector);
+
+  if (auth.value) {
+    modalPaymentOpen.value = true;
+  }
+}
+
 async function handleTurboClick() {
-  if (!web3.value.account) {
+  if (!auth.value) {
     modalAccountOpen.value = true;
+    return;
+  }
+
+  if (!isCurrentConnectorSupported.value) {
+    modalConnectorOpen.value = true;
     return;
   }
 
@@ -354,6 +382,7 @@ async function handleTurboClick() {
       </div>
     </div>
     <ModalPayment
+      v-if="auth && isCurrentConnectorSupported"
       :open="modalPaymentOpen"
       :tokens="tokens"
       :network="paymentNetwork"
@@ -387,6 +416,12 @@ async function handleTurboClick() {
         </div>
       </template>
     </ModalPayment>
+    <ModalConnector
+      :open="modalConnectorOpen"
+      :supported-connectors="supportedConnectors"
+      @pick="handleConnectorPick"
+      @close="modalConnectorOpen = false"
+    />
   </div>
 </template>
 
