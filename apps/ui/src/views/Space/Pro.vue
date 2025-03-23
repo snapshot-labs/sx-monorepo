@@ -1,21 +1,30 @@
 <script setup lang="ts">
+import dayjs from 'dayjs';
+import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
-import { Space } from '@/types';
+import { getNetwork, metadataNetwork } from '@/networks';
+import { Connector } from '@/networks/types';
+import { ChainId, Space } from '@/types';
 import ICInfinity from '~icons/c/infinity.svg';
 import ICPro from '~icons/c/pro.svg';
-import ICCheck from '~icons/heroicons-outline/check.vue';
+import ICCheck from '~icons/heroicons-outline/check';
 
+type SubscriptionLength = 'yearly' | 'monthly';
 type TierPlan = 'basic' | 'pro' | 'custom';
 type Feature = {
-  [key in TierPlan | string]: string | number | boolean | Component;
+  [key in TierPlan | 'title']: string | number | boolean | Component;
 };
-type SubscriptionLength = 'monthly' | 'yearly';
 
 const TIER_PLAN: TierPlan[] = ['basic', 'pro', 'custom'] as const;
 
-const PRO_PRICES: Record<SubscriptionLength, number> = {
-  yearly: 6000,
-  monthly: 600
+const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT'] as const;
+
+const PRO_PRICES: Record<ChainId, Record<SubscriptionLength, number>> = {
+  1: {
+    yearly: 6000,
+    monthly: 600
+  },
+  11155111: { yearly: 1, monthly: 0.1 }
 } as const;
 
 const FAQ: { question: string; answer: string }[] = [
@@ -39,9 +48,32 @@ defineProps<{
 }>();
 
 const { limits } = useSettings();
+const { login, auth } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const currentQuestion = ref<number>();
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const modalPaymentOpen = ref(false);
+const modalConnectorOpen = ref(false);
+
+const paymentNetwork = computed(() => {
+  return metadataNetwork === 's' ? 1 : 11155111;
+});
+
+const prices = computed(() => {
+  return PRO_PRICES[paymentNetwork.value];
+});
+
+const tokens = computed(() => {
+  return TOKENS[paymentNetwork.value].filter(t => {
+    return ACCEPTED_TOKENS_SYMBOL.includes(t.symbol);
+  });
+});
+
+const supportedConnectors = computed(() => {
+  const network = getNetwork(metadataNetwork);
+  return network.managerConnectors;
+});
 
 const features = computed<
   Record<string, { title: string; features: Feature[] }>
@@ -130,8 +162,38 @@ const features = computed<
   };
 });
 
+const isCurrentConnectorSupported = computed(() => {
+  return (
+    auth.value && supportedConnectors.value.includes(auth.value.connector.type)
+  );
+});
+
 function toggleQuestion(id: number) {
   currentQuestion.value = currentQuestion.value === id ? undefined : id;
+}
+
+async function handleConnectorPick(connector: Connector) {
+  modalConnectorOpen.value = false;
+
+  await login(connector);
+
+  if (auth.value) {
+    modalPaymentOpen.value = true;
+  }
+}
+
+async function handleTurboClick() {
+  if (!auth.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
+  if (!isCurrentConnectorSupported.value) {
+    modalConnectorOpen.value = true;
+    return;
+  }
+
+  modalPaymentOpen.value = true;
 }
 </script>
 <template>
@@ -153,7 +215,7 @@ function toggleQuestion(id: number) {
         class="flex border rounded-full p-1 items-center leading-6 bg-skin-bg"
       >
         <button
-          v-for="(_, p) in PRO_PRICES"
+          v-for="(_, p) in PRO_PRICES[paymentNetwork]"
           :key="p"
           :class="[
             'rounded-full py-1 text-skin-link',
@@ -188,10 +250,10 @@ function toggleQuestion(id: number) {
           >
             <div>
               <span class="text-xl text-skin-heading font-semibold leading-8">
-                ${{ _n(PRO_PRICES[subscriptionLength]) }} </span
+                ${{ _n(prices[subscriptionLength]) }} </span
               >/{{ subscriptionLength === 'yearly' ? 'yr' : 'mo' }}
             </div>
-            <UiButton class="w-full" primary>
+            <UiButton class="w-full" primary @click="handleTurboClick">
               {{ space.turbo ? 'Extend' : 'Upgrade' }}
             </UiButton>
           </div>
@@ -278,9 +340,9 @@ function toggleQuestion(id: number) {
       <div class="basis-[250px] grow"></div>
       <div class="feature-value-col"></div>
       <div class="feature-value-col">
-        <UiButton class="primary">
-          {{ space.turbo ? 'Extend' : 'Upgrade' }}
-        </UiButton>
+        <UiButton class="primary" @click="handleTurboClick">{{
+          space.turbo ? 'Extend' : 'Upgrade'
+        }}</UiButton>
       </div>
       <div class="feature-value-col">
         <UiButton>Talk to sales</UiButton>
@@ -319,6 +381,47 @@ function toggleQuestion(id: number) {
         />
       </div>
     </div>
+    <ModalPayment
+      v-if="auth && isCurrentConnectorSupported"
+      :open="modalPaymentOpen"
+      :tokens="tokens"
+      :network="paymentNetwork"
+      :quantity-label="subscriptionLength === 'yearly' ? 'Years' : 'Months'"
+      :amount="prices[subscriptionLength]"
+      :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
+      @close="modalPaymentOpen = false"
+    >
+      <template #summary="{ quantity }">
+        <div class="flex justify-between">
+          <div>
+            {{ subscriptionLength === 'yearly' ? 'Annual' : 'Monthly' }} plan
+          </div>
+          <ICPro class="h-[15px] w-auto inline text-skin-heading" />
+        </div>
+        <div class="flex justify-between">
+          <div>End date</div>
+          <div>
+            {{
+              dayjs(new Date())
+                .add(
+                  quantity,
+                  subscriptionLength === 'yearly' ? 'year' : 'month'
+                )
+                .format('D MMM YYYY')
+            }}
+            ({{ quantity }}
+            {{ subscriptionLength === 'yearly' ? 'year' : 'month'
+            }}{{ quantity > 1 ? 's' : '' }})
+          </div>
+        </div>
+      </template>
+    </ModalPayment>
+    <ModalConnector
+      :open="modalConnectorOpen"
+      :supported-connectors="supportedConnectors"
+      @pick="handleConnectorPick"
+      @close="modalConnectorOpen = false"
+    />
   </div>
 </template>
 
