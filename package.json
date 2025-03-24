@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "turbo run dev --filter=!mana --filter=!api --filter=!api-subgraph",
     "dev:full": "./scripts/dev-full.sh",
-    "build": "turbo run build",
+    "build": "turbo run build --filter=!api-subgraph",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
     "lint": "turbo run lint",
