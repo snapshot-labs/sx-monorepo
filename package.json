@@ -17,7 +17,7 @@
     "release": "yarn build && changeset publish"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
+    "@changesets/cli": "^2.28.1",
     "turbo": "^2.4.0"
   },
   "engines": {
