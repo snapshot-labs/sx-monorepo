@@ -3,6 +3,7 @@ name: Check changesets
 on:
   pull_request:
     types:
+      - opened
       - synchronize
 
 jobs:
