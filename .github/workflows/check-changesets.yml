@@ -1,0 +1,36 @@
+name: Check changesets
+
+on:
+  pull_request:
+    types:
+      - synchronize
+
+jobs:
+  check_changesets:
+    name: Check Changesets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 100
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+      - name: Install Dependencies
+        run: yarn
+      - name: Check if changesets exists for changed packages
+        run: yarn changeset status --since=origin/master
+      - name: Add comment
+        if: ${{ failure() }}
+        run: gh pr comment ${{ github.event.pull_request.number }} --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BODY: >
+            It looks like changes you made require changesets to be created.
+            Please create a changeset for each package you've changed.
+
+            ```bash
+            yarn changeset
+            ```
