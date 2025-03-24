@@ -30,7 +30,4 @@ jobs:
           BODY: >
             It looks like changes you made require changesets to be created.
             Please create a changeset for each package you've changed.
-
-            ```bash
-            yarn changeset
-            ```
+            You can do this by executing `yarn changeset`.
