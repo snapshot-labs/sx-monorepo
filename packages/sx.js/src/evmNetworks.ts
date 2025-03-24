@@ -121,7 +121,7 @@ export const evmNetworks = {
   base: createStandardConfig(8453),
   mnt: createStandardConfig(5000, {
     // https://docs.mantle.xyz/network/system-information/fee-mechanism/eip-1559-support#application-of-eip-1559-in-mantle-v2-tectonic
-    maxPriorityFeePerGas: 0
+    maxPriorityFeePerGas: 1
   })
 } as const;
 
