@@ -74,6 +74,7 @@ export const METADATA: Record<string, Metadata> = {
   },
   ape: {
     name: 'ApeChain',
+    ticker: 'APE',
     chainId: 33139,
     currentChainId: 1,
     apiUrl: UNIFIED_API_URL,
@@ -83,6 +84,7 @@ export const METADATA: Record<string, Metadata> = {
   },
   curtis: {
     name: 'Curtis',
+    ticker: 'APE',
     chainId: 33111,
     currentChainId: 11155111,
     apiUrl: UNIFIED_API_TESTNET_URL,

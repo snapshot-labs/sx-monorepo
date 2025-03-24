@@ -15,6 +15,8 @@ export const SUPPORTED_CHAIN_IDS = [
   137, // Polygon,
   324, // ZkSync Era
   8453, // Base
+  33111, // Curtis
+  33139, // Apechain
   42161, // Arbitrum
   42170, // Arbitrum Nova
   11155111 // Sepolia
@@ -26,6 +28,8 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], string> = {
   137: 'polygon-mainnet',
   324: 'zksync-mainnet',
   8453: 'base-mainnet',
+  33111: 'apechain-curtis',
+  33139: 'apechain-mainnet',
   42161: 'arb-mainnet',
   42170: 'arbnova-mainnet',
   11155111: 'eth-sepolia'

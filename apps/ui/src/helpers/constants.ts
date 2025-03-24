@@ -44,7 +44,9 @@ export const COINGECKO_ASSET_PLATFORMS = {
   10: 'optimistic-ethereum',
   137: 'polygon-pos',
   8453: 'base',
-  42161: 'arbitrum-one'
+  42161: 'arbitrum-one',
+  33139: 'ethereum',
+  33111: 'apechain'
 };
 
 export const COINGECKO_BASE_ASSETS = {
@@ -52,7 +54,9 @@ export const COINGECKO_BASE_ASSETS = {
   10: 'ethereum',
   137: 'matic-network',
   8453: 'ethereum',
-  42161: 'ethereum'
+  42161: 'ethereum',
+  33139: 'ethereum',
+  33111: 'apecoin'
 };
 
 export const MAX_SYMBOL_LENGTH = 12;
