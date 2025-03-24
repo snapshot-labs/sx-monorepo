@@ -87,24 +87,22 @@ export const supportsNullCurrent = (networkID: NetworkID) => {
   return !evmNetworks.includes(networkID);
 };
 
+export const DEFAULT_SPACES_LIMIT = 1000;
+
 export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
   {
     snapshot: {
       key: 'snapshot',
       label: 'Snapshot',
-      apiNetwork: metadataNetwork,
       networks: [metadataNetwork],
       limit: 18
     },
     'snapshot-x': {
       key: 'snapshot-x',
       label: 'Snapshot X',
-      apiNetwork:
-        enabledNetworks.find(network => !offchainNetworks.includes(network)) ||
-        'eth',
       networks: enabledNetworks.filter(
         network => !offchainNetworks.includes(network)
       ),
-      limit: 18
+      limit: DEFAULT_SPACES_LIMIT
     }
   };
