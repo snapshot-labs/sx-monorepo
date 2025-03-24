@@ -55,7 +55,7 @@ export const COINGECKO_BASE_ASSETS = {
   137: 'matic-network',
   8453: 'ethereum',
   42161: 'ethereum',
-  33139: 'ethereum',
+  33139: 'apecoin',
   33111: 'apecoin'
 };
 

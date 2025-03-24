@@ -35,6 +35,13 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], string> = {
   11155111: 'eth-sepolia'
 };
 
+const DEFAULT_METADATA: GetTokensMetadataResponse[number] = {
+  name: 'This token is not recognized',
+  symbol: '?',
+  decimals: 18,
+  logo: ''
+};
+
 function getApiUrl(chainId: ChainId) {
   const network = NETWORKS[chainId];
   if (!network) throw new Error('Unsupported chain for Alchemy API');
@@ -135,13 +142,15 @@ export async function getTokensMetadata(
   addresses: string[],
   chainId: ChainId
 ): Promise<GetTokensMetadataResponse> {
-  return batchRequest(
+  const response = await batchRequest(
     addresses.map(address => ({
       method: 'alchemy_getTokenMetadata',
       params: [address]
     })),
     chainId
   );
+
+  return response.map(metadata => metadata || DEFAULT_METADATA);
 }
 
 /**
