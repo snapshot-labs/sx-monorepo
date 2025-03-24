@@ -87,7 +87,7 @@ export const METADATA: Record<string, Metadata> = {
     currentChainId: 11155111,
     apiUrl: UNIFIED_API_TESTNET_URL,
     avatar:
-      'ipfs://bafkreicljxttjq2xkgfwwpii5xegirgq2ctrnsjnzelxudjj33qzq65apu',
+      'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4',
     blockTime: ETH_MAINNET_BLOCK_TIME
   },
   sep: {
