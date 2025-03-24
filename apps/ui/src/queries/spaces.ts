@@ -7,12 +7,7 @@ import {
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
-import {
-  enabledNetworks,
-  explorePageProtocols,
-  getNetwork,
-  offchainNetworks
-} from '@/networks';
+import { enabledNetworks, explorePageProtocols, getNetwork } from '@/networks';
 import { ExplorePageProtocol, SpacesFilter } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
@@ -56,45 +51,17 @@ async function fetchSpaces(
   skip = 0
 ) {
   const { limit } = explorePageProtocols[protocol];
-  let { networks } = explorePageProtocols[protocol];
+  const { apiNetwork } = explorePageProtocols[protocol];
 
-  if (
-    protocol === 'snapshot-x' &&
-    filter?.network &&
-    filter.network !== 'all'
-  ) {
-    networks = [filter.network as NetworkID];
-  }
+  const network = getNetwork(apiNetwork);
 
-  const results = await Promise.all(
-    networks.map(async id => {
-      const network = getNetwork(id);
-
-      return network.api.loadSpaces(
-        {
-          skip,
-          limit
-        },
-        filter
-      );
-    })
+  return network.api.loadSpaces(
+    {
+      skip,
+      limit
+    },
+    filter
   );
-
-  const allResults = results.flat();
-
-  if (offchainNetworks.includes(networks[0])) {
-    return allResults;
-  }
-
-  // this only works, because we fetch 1000 spaces per network
-  // to have proper handling of this we would need unified API
-  return allResults.sort((a, b) => {
-    return (
-      Number(b.turbo) - Number(a.turbo) ||
-      Number(b.verified) - Number(a.verified) ||
-      b.vote_count - a.vote_count
-    );
-  });
 }
 
 export function useFollowedSpacesQuery({
@@ -231,12 +198,6 @@ export function useExploreSpacesQuery({
       return results;
     },
     getNextPageParam: (lastPage, pages) => {
-      if (toValue(protocol) === 'snapshot-x') {
-        // SnapshotX has disabled pagination until unified API is implemented.
-        // Right now we fetch 1000 spaces per network.
-        return null;
-      }
-
       if (lastPage.length < protocolConfig.value.limit) return null;
 
       return pages.length * protocolConfig.value.limit;
