@@ -39,9 +39,10 @@ router.beforeEach((to, _from, next) => {
   if (isWhiteLabel.value) return next();
 
   const [, space, ...rest] = to.path.split('/');
-  let spaceName = space.replace(`${metadataNetwork}:`, '');
   // skip if network is not metadataNetwork
-  if (spaceName.includes(':')) return next();
+  if (!space.startsWith(`${metadataNetwork}:`)) return next();
+
+  let spaceName = space.replace(`${metadataNetwork}:`, '');
 
   let redirectPath: string | null = null;
 
