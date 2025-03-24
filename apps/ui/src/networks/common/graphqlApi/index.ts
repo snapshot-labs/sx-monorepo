@@ -229,11 +229,12 @@ function processExecutions(
 
 function formatSpace(
   space: ApiSpaceWithMetadata,
+  networkId: NetworkID,
   constants: NetworkConstants
 ): Space {
   return {
     ...space,
-    network: space._indexer as NetworkID,
+    network: networkId,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
     cover: space.metadata.cover,
@@ -419,7 +420,6 @@ export function createApi(
       const { data } = await apollo.query({
         query: VOTES_QUERY,
         variables: {
-          indexer: networkId,
           first: limit,
           skip,
           orderBy,
@@ -489,7 +489,12 @@ export function createApi(
     ): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
-        variables: { indexer: networkId, spaceIds, voter, first: limit, skip }
+        variables: {
+          spaceIds,
+          voter,
+          first: limit,
+          skip
+        }
       });
 
       return Object.fromEntries(
@@ -606,12 +611,6 @@ export function createApi(
       if (_filter.searchQuery) {
         _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
       }
-
-      let indexer;
-      if (_filter?.network && _filter.network !== 'all') {
-        indexer = _filter.network;
-      }
-
       delete _filter.searchQuery;
       delete _filter.category;
       delete _filter.network;
@@ -619,7 +618,6 @@ export function createApi(
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
-          indexer,
           first: limit,
           skip,
           where: {
@@ -646,13 +644,13 @@ export function createApi(
 
       return data.spaces
         .filter(space => isSpaceWithMetadata(space))
-        .map(space => formatSpace(space, constants));
+        .map(space => formatSpace(space, networkId, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
         apollo.query({
           query: SPACE_QUERY,
-          variables: { indexer: networkId, id }
+          variables: { id }
         }),
         highlightApolloClient
           ?.query({
@@ -670,13 +668,13 @@ export function createApi(
       );
 
       if (!isSpaceWithMetadata(data.space)) return null;
-      return formatSpace(data.space, constants);
+      return formatSpace(data.space, networkId, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
       const [{ data }, highlightResult] = await Promise.all([
         apollo.query({
           query: USER_QUERY,
-          variables: { indexer: networkId, id }
+          variables: { id }
         }),
         highlightApolloClient
           ?.query({
@@ -695,7 +693,6 @@ export function createApi(
       const { data } = await apollo.query({
         query: LEADERBOARD_QUERY,
         variables: {
-          indexer: networkId,
           first: 1000,
           skip: 0,
           orderBy: 'proposal_count',
@@ -731,7 +728,6 @@ export function createApi(
       const { data } = await apollo.query({
         query: LEADERBOARD_QUERY,
         variables: {
-          indexer: networkId,
           first: limit,
           skip,
           orderBy,

@@ -21,7 +21,6 @@ gql(`
 
   fragment spaceFields on Space {
     id
-    _indexer
     verified
     turbo
     metadata {
@@ -198,7 +197,6 @@ export const PROPOSALS_QUERY = gql(`
 
 export const VOTES_QUERY = gql(`
   query Votes(
-    $indexer: String!
     $first: Int!
     $skip: Int!
     $orderBy: Vote_orderBy!
@@ -206,7 +204,6 @@ export const VOTES_QUERY = gql(`
     $where: Vote_filter
   ) {
     votes(
-      indexer: $indexer
       first: $first
       skip: $skip
       where: $where
@@ -220,14 +217,12 @@ export const VOTES_QUERY = gql(`
 
 export const USER_VOTES_QUERY = gql(`
   query UserVotes(
-    $indexer: String!
     $first: Int
     $skip: Int
     $spaceIds: [String]
     $voter: String
   ) {
     votes(
-      indexer: $indexer
       first: $first
       skip: $skip
       where: { space_in: $spaceIds, voter: $voter }
@@ -238,17 +233,16 @@ export const USER_VOTES_QUERY = gql(`
 `);
 
 export const SPACE_QUERY = gql(`
-  query Space($indexer: String!, $id: String!) {
-    space(indexer: $indexer, id: $id) {
+  query Space($id: String!) {
+    space(id: $id) {
       ...spaceFields
     }
   }
 `);
 
 export const SPACES_QUERY = gql(`
-  query Spaces($indexer: String, $first: Int!, $skip: Int!, $where: Space_filter) {
+  query Spaces($first: Int!, $skip: Int!, $where: Space_filter) {
     spaces(
-      indexer: $indexer
       first: $first
       skip: $skip
       orderBy: vote_count
@@ -261,8 +255,8 @@ export const SPACES_QUERY = gql(`
 `);
 
 export const USER_QUERY = gql(`
-  query User($indexer: String!, $id: String!) {
-    user(indexer: $indexer, id: $id) {
+  query User($id: String!) {
+    user(id: $id) {
       id
       proposal_count
       vote_count
@@ -273,7 +267,6 @@ export const USER_QUERY = gql(`
 
 export const LEADERBOARD_QUERY = gql(`
   query Leaderboard(
-    $indexer: String!
     $first: Int!
     $skip: Int!
     $orderBy: Leaderboard_orderBy
@@ -281,7 +274,6 @@ export const LEADERBOARD_QUERY = gql(`
     $where: Leaderboard_filter
   ) {
     leaderboards(
-      indexer: $indexer
       first: $first
       skip: $skip
       orderBy: $orderBy
