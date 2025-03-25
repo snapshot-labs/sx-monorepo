@@ -13,6 +13,7 @@ const space = ref<Space | null>(null);
 
 async function getSpace(domain: string): Promise<Space | null> {
   const loadSpacesParams: Record<string, string> = {};
+  let spaceNetwork = metadataNetwork;
 
   // Resolve white label domain locally if mapping is provided
   // for easier local testing
@@ -21,14 +22,15 @@ async function getSpace(domain: string): Promise<Space | null> {
   if (localMapping) {
     const [localDomain, localSpaceId] = localMapping.split(';');
     if (domain === localDomain) {
-      loadSpacesParams.id = localSpaceId;
+      spaceNetwork = localSpaceId.split(':')[0];
+      loadSpacesParams.id = localSpaceId.split(':')[1];
     }
   } else {
     loadSpacesParams.domain = domain;
   }
 
   const queryClient = useQueryClient();
-  const network = getNetwork(metadataNetwork);
+  const network = getNetwork(spaceNetwork);
   const space = (
     await network.api.loadSpaces({ limit: 1 }, loadSpacesParams)
   )[0];
