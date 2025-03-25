@@ -1,15 +1,13 @@
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { ChainId } from '@/types';
-import {
-  GetBalancesResponse,
-  GetTokenBalancesResponse,
-  GetTokensMetadataResponse
-} from './types';
+import { GetBalancesResponse, GetTokenBalancesResponse } from './types';
+import { getTokensMetadata } from '../contracts';
+import { getProvider } from '../provider';
 export * from './types';
 
 const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
 
-export const SUPPORTED_CHAIN_IDS = [
+export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
   1, // Ethereum,
   10, // Optimism,
   137, // Polygon,
@@ -22,7 +20,19 @@ export const SUPPORTED_CHAIN_IDS = [
   11155111 // Sepolia
 ] as const;
 
-const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], string> = {
+/**
+ * Those ChainIds will only show native token balance.
+ */
+export const MINIMAL_SUPPORTED_CHAIN_IDS = [
+  5000 // Mantle
+] as const;
+
+export const SUPPORTED_CHAIN_IDS = [
+  ...ALCHEMY_SUPPORTED_CHAIN_IDS,
+  ...MINIMAL_SUPPORTED_CHAIN_IDS
+] as const;
+
+const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
   1: 'eth-mainnet',
   10: 'opt-mainnet',
   137: 'polygon-mainnet',
@@ -33,13 +43,6 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], string> = {
   42161: 'arb-mainnet',
   42170: 'arbnova-mainnet',
   11155111: 'eth-sepolia'
-};
-
-const DEFAULT_METADATA: GetTokensMetadataResponse[number] = {
-  name: 'This token is not recognized',
-  symbol: '?',
-  decimals: 18,
-  logo: ''
 };
 
 function getApiUrl(chainId: ChainId) {
@@ -96,7 +99,10 @@ export async function getBalance(
   address: string,
   chainId: ChainId
 ): Promise<string> {
-  return request('eth_getBalance', [address, 'latest'], chainId);
+  const provider = getProvider(Number(chainId));
+  const blanace = await provider.getBalance(address, 'latest');
+
+  return blanace.toHexString();
 }
 
 /**
@@ -111,6 +117,11 @@ export async function getTokenBalances(
   chainId: ChainId
 ): Promise<GetTokenBalancesResponse> {
   const results = { address, tokenBalances: [], pageKey: null };
+
+  if (MINIMAL_SUPPORTED_CHAIN_IDS.includes(chainId as any)) {
+    return results;
+  }
+
   let pageKey = null;
 
   while (true) {
@@ -133,27 +144,6 @@ export async function getTokenBalances(
 }
 
 /**
- * Gets ERC20 tokens metadata (name, symbol, decimals, logo).
- * @param addresses Array of ERC20 tokens addresses
- * @param chainId ChainId
- * @returns Array of token metadata
- */
-export async function getTokensMetadata(
-  addresses: string[],
-  chainId: ChainId
-): Promise<GetTokensMetadataResponse> {
-  const response = await batchRequest(
-    addresses.map(address => ({
-      method: 'alchemy_getTokenMetadata',
-      params: [address]
-    })),
-    chainId
-  );
-
-  return response.map(metadata => metadata || DEFAULT_METADATA);
-}
-
-/**
  * Gets Ethereum and ERC20 balances including metadata for tokens.
  * @param address Ethereum address to fetch balances for
  * @param chainId ChainId
@@ -172,7 +162,7 @@ export async function getBalances(
   const contractAddresses = tokenBalances.map(
     balance => balance.contractAddress
   );
-  const metadata = await getTokensMetadata(contractAddresses, chainId);
+  const metadata = await getTokensMetadata(Number(chainId), contractAddresses);
 
   return [
     {
@@ -189,6 +179,7 @@ export async function getBalances(
     ...tokenBalances
       .map((balance, i) => ({
         ...balance,
+        logo: null,
         ...metadata[i],
         price: 0,
         value: 0,
