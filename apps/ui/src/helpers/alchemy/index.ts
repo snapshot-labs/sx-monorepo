@@ -100,9 +100,9 @@ export async function getBalance(
   chainId: ChainId
 ): Promise<string> {
   const provider = getProvider(Number(chainId));
-  const blanace = await provider.getBalance(address, 'latest');
+  const balance = await provider.getBalance(address, 'latest');
 
-  return blanace.toHexString();
+  return balance.toHexString();
 }
 
 /**
