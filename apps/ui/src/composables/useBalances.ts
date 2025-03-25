@@ -14,12 +14,22 @@ const COINGECKO_API_KEY = 'CG-1z19sMoCC6LoqR4b6avyLi3U';
 const COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3/simple';
 const COINGECKO_PARAMS = '&vs_currencies=usd&include_24hr_change=true';
 
-export const METADATA_BY_CHAIN_ID = new Map(
+type Metadata = {
+  name: string;
+  ticker?: string;
+};
+
+export const METADATA_BY_CHAIN_ID = new Map<ChainId, Metadata>(
   Object.entries(METADATA).map(([, metadata]) => [
     metadata.chainId as ChainId,
     metadata
   ])
 );
+
+METADATA_BY_CHAIN_ID.set(100, {
+  name: 'Gnosis Chain',
+  ticker: 'XDAI'
+});
 
 type Treasury = {
   chainId: ChainId;

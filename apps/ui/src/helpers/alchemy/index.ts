@@ -10,6 +10,7 @@ const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
 export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
   1, // Ethereum,
   10, // Optimism,
+  100, // Gnosis Safe
   137, // Polygon,
   324, // ZkSync Era
   8453, // Base
@@ -35,6 +36,7 @@ export const SUPPORTED_CHAIN_IDS = [
 const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
   1: 'eth-mainnet',
   10: 'opt-mainnet',
+  100: 'gnosis-mainnet',
   137: 'polygon-mainnet',
   324: 'zksync-mainnet',
   8453: 'base-mainnet',
