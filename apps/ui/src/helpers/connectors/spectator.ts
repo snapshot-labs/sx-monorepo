@@ -17,7 +17,7 @@ class SpectatorProvider extends EventEmitter {
 
     this.selectedAddress = address;
     this.chainId = chainId;
-    this.#save();
+    this.#save(address, chainId);
   }
 
   async request(args: { method: string; params?: any[] }): Promise<any> {
@@ -33,7 +33,7 @@ class SpectatorProvider extends EventEmitter {
   }
 
   changeAccount(address: string, chainId: number) {
-    this.#save();
+    this.#save(address, chainId);
 
     if (this.selectedAddress !== address) {
       this.emit('accountsChanged', [address]);
@@ -50,9 +50,9 @@ class SpectatorProvider extends EventEmitter {
     localStorage.removeItem(CHAIN_ID_KEY);
   }
 
-  #save() {
-    localStorage.setItem(ADDRESS_KEY, this.selectedAddress);
-    localStorage.setItem(CHAIN_ID_KEY, this.chainId.toString());
+  #save(address: string, chainId: number) {
+    localStorage.setItem(ADDRESS_KEY, address);
+    localStorage.setItem(CHAIN_ID_KEY, chainId.toString());
   }
 }
 
