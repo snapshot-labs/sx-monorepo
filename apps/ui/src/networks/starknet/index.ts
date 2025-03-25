@@ -83,6 +83,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
+    isExecutorActionsSupported: (executor: string) =>
+      constants.SUPPORTED_EXECUTORS[executor],
     pin: pinPineapple,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: txId => provider.getTransactionReceipt(txId),
