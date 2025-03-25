@@ -128,7 +128,7 @@ export function useBalances({
     return () => loadBalances(treasuryValue.address, treasuryValue.chainId);
   });
 
-  const { data, isPending, isSuccess } = useQuery({
+  const { data, isPending, isSuccess, isError } = useQuery({
     queryKey: ['balances', treasury],
     queryFn: queryFn,
     staleTime: 5 * 60 * 1000
@@ -140,5 +140,5 @@ export function useBalances({
     () => new Map(data.value?.map(asset => [asset.contractAddress, asset]))
   );
 
-  return { isPending, isSuccess, assets, assetsMap };
+  return { isPending, isSuccess, isError, assets, assetsMap };
 }
