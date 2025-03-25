@@ -38,11 +38,13 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   if (isWhiteLabel.value) return next();
 
-  const [, space, ...rest] = to.path.split('/');
-  // skip if network is not metadataNetwork
-  if (!space.startsWith(`${metadataNetwork}:`)) return next();
+  const [, space = '', ...rest] = to.path.split('/');
 
-  let spaceName = space.replace(`${metadataNetwork}:`, '');
+  let spaceName = space.startsWith(`${metadataNetwork}:`)
+    ? space.substring(metadataNetwork.length + 1)
+    : space;
+  // skip if network is not metadataNetwork
+  if (spaceName.includes(':')) return next();
 
   let redirectPath: string | null = null;
 
