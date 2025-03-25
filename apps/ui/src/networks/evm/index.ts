@@ -124,7 +124,8 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       constants.RELAYER_AUTHENTICATORS[authenticator],
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
-    isExecutorSupported: () => true,
+    isExecutorSupported: (executorType: string) =>
+      executorType !== 'ReadOnlyExecution',
     isExecutorActionsSupported: (executorType: string) =>
       constants.SUPPORTED_EXECUTORS[executorType],
     pin,
