@@ -436,6 +436,7 @@ export type ExplorePageProtocol = 'snapshot' | 'snapshot-x';
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
+  apiNetwork: NetworkID;
   networks: NetworkID[];
   limit: number;
 };

@@ -196,6 +196,7 @@ router.afterEach(() => {
             v-if="hasSwipeableContent"
             type="button"
             class="text-skin-link lg:hidden ml-4"
+            :class="{ hidden: uiStore.sideMenuOpen }"
             @click="uiStore.toggleSidebar"
           >
             <IH-menu-alt-2 />
@@ -218,7 +219,7 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0 mt-[72px]">
+        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
           <router-view class="h-full pb-10" />
         </div>
         <div

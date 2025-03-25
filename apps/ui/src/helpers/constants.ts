@@ -10,6 +10,9 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
+export const UNIFIED_API_URL = 'https://api.snapshot.box';
+export const UNIFIED_API_TESTNET_URL = 'https://testnet-api.snapshot.box';
+
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
 export const TURBO_URL =
@@ -28,6 +31,8 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   base: 8453,
   arb1: 42161,
   mnt: 5000,
+  ape: 33139,
+  curtis: 33111,
   sep: 11155111,
   // Starknet
   sn: '0x534e5f4d41494e',
@@ -39,7 +44,9 @@ export const COINGECKO_ASSET_PLATFORMS = {
   10: 'optimistic-ethereum',
   137: 'polygon-pos',
   8453: 'base',
-  42161: 'arbitrum-one'
+  42161: 'arbitrum-one',
+  33139: 'ethereum',
+  33111: 'apechain'
 };
 
 export const COINGECKO_BASE_ASSETS = {
@@ -47,7 +54,9 @@ export const COINGECKO_BASE_ASSETS = {
   10: 'ethereum',
   137: 'matic-network',
   8453: 'ethereum',
-  42161: 'ethereum'
+  42161: 'ethereum',
+  33139: 'apecoin',
+  33111: 'apecoin'
 };
 
 export const MAX_SYMBOL_LENGTH = 12;

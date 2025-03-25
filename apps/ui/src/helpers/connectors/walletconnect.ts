@@ -53,6 +53,7 @@ export default class Walletconnect extends Connector {
         polygon,
         metis,
         sepolia,
+        apeChain,
         fantomTestnet
       } = await import('@reown/appkit/networks');
 
@@ -71,6 +72,7 @@ export default class Walletconnect extends Connector {
           polygon,
           metis,
           sepolia,
+          apeChain,
           fantomTestnet
         ],
         themeMode: currentTheme.value,
