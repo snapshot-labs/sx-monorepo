@@ -5,7 +5,7 @@ import { SkinSettings, Space } from '@/types';
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
 
-// Hardcoded white label mappings for onchain spaces
+// Hardcoded whitelabel mappings for onchain spaces
 const MAPPING = {
   'vanilla.box': {
     network: 'base',
