@@ -1,7 +1,9 @@
 import {
   clients,
+  evmApe,
   evmArbitrum,
   evmBase,
+  evmCurtis,
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
@@ -21,6 +23,8 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [5000, evmMantle],
   [42161, evmArbitrum],
   [1, evmMainnet],
+  [33139, evmApe],
+  [33111, evmCurtis],
   [11155111, evmSepolia]
 ]);
 

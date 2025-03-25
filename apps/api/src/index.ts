@@ -1,70 +1,52 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import { ApolloServer } from '@apollo/server';
-import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import { startStandaloneServer } from '@apollo/server/standalone';
-import Checkpoint, {
-  createGetLoader,
-  LogLevel
-} from '@snapshot-labs/checkpoint';
-import { addEvmIndexers } from './evm';
+import Checkpoint, { LogLevel } from '@snapshot-labs/checkpoint';
+import { startApiServer } from './api';
+import { startIndexer } from './indexer';
 import overrides from './overrides.json';
-import { addStarknetIndexers } from './starknet';
 
-const dir = __dirname.endsWith('dist/src') ? '../' : '';
-const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
-const schema = fs.readFileSync(schemaFile, 'utf8');
-
-const PRODUCTION_INDEXER_DELAY = 60 * 1000;
-const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
+/**
+ * IS_INDEXER is a boolean that determines if the current process is an indexer.
+ *
+ * If not set only GraphQL API will be started.
+ */
+const IS_INDEXER = process.env.IS_INDEXER === 'true';
 
 if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
 
-const checkpoint = new Checkpoint(schema, {
-  logLevel: LogLevel.Info,
-  resetOnConfigChange: true,
-  prettifyLogs: process.env.NODE_ENV !== 'production',
-  overridesConfig: overrides
-});
-
-addStarknetIndexers(checkpoint);
-addEvmIndexers(checkpoint);
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-async function run() {
-  const server = new ApolloServer({
-    schema: checkpoint.getSchema(),
-    plugins: [ApolloServerPluginLandingPageLocalDefault({ footer: false })],
-    introspection: true
-  });
-
-  const { url } = await startStandaloneServer(server, {
-    listen: { port: PORT },
-    context: async () => {
-      const baseContext = checkpoint.getBaseContext();
-      return {
-        ...baseContext,
-        getLoader: createGetLoader(baseContext)
-      };
-    }
-  });
-
-  console.log(`Listening at ${url}`);
-
-  if (process.env.NODE_ENV === 'production') {
-    console.log(
-      'Delaying indexer to prevent multiple processes indexing at the same time.'
-    );
-    await sleep(PRODUCTION_INDEXER_DELAY);
+function getDatabaseConnection() {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
   }
 
-  await checkpoint.resetMetadata();
-  await checkpoint.reset();
-  checkpoint.start();
+  if (process.env.DATABASE_URL_INDEX) {
+    return process.env[`DATABASE_URL_${process.env.DATABASE_URL_INDEX}`];
+  }
+
+  throw new Error('No valid database connection URL found.');
+}
+
+async function run() {
+  const dir = __dirname.endsWith('dist/src') ? '../' : '';
+  const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
+  const schema = fs.readFileSync(schemaFile, 'utf8');
+
+  const checkpoint = new Checkpoint(schema, {
+    logLevel: LogLevel.Info,
+    resetOnConfigChange: true,
+    prettifyLogs: process.env.NODE_ENV !== 'production',
+    overridesConfig: overrides,
+    dbConnection: getDatabaseConnection()
+  });
+
+  await startApiServer(checkpoint);
+
+  if (IS_INDEXER) {
+    await startIndexer(checkpoint);
+  }
 }
 
 run();
