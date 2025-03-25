@@ -35,7 +35,7 @@ async function getSpace(domain: string): Promise<Space | null> {
 
   // Resolve white label domain locally if mapping is provided
   // for easier local testing
-  // e.g. VITE_WHITE_LABEL_MAPPING='127.0.0.1;snapshot.eth'
+  // e.g. VITE_WHITE_LABEL_MAPPING='127.0.0.1;s:snapshot.eth'
   const localMapping = import.meta.env.VITE_WHITE_LABEL_MAPPING;
   if (localMapping) {
     const [localDomain, localSpaceId] = localMapping.split(';');
