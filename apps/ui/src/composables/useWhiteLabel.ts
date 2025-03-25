@@ -1,15 +1,33 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, metadataNetwork } from '@/networks';
-import { Space } from '@/types';
+import { SkinSettings, Space } from '@/types';
 
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
+
+// Hardcoded white label mappings for onchain spaces
+const MAPPING = {
+  'vanilla.box': {
+    network: 'base',
+    id: '0x8cF43759f3d4E72cB72cED6bd69cCe43d4428264',
+    skinSettings: {
+      bg_color: '#252739',
+      link_color: '#91ACEE',
+      text_color: '#CDD6F4',
+      border_color: '#313244',
+      heading_color: '#CCD3F2',
+      theme: 'dark',
+      logo: 'ipfs://bafkreiab7pgyo4gzvospqgrlnfp6o5d6dpq4vijnzvcf5mhwzevt4hnd2m'
+    }
+  }
+};
 
 const isWhiteLabel = ref(false);
 const isCustomDomain = ref(domain !== DEFAULT_DOMAIN);
 const failed = ref(false);
 const resolved = ref(domain === DEFAULT_DOMAIN);
 const space = ref<Space | null>(null);
+const skinSettings = ref<SkinSettings>();
 
 async function getSpace(domain: string): Promise<Space | null> {
   const loadSpacesParams: Record<string, string> = {};
@@ -22,9 +40,13 @@ async function getSpace(domain: string): Promise<Space | null> {
   if (localMapping) {
     const [localDomain, localSpaceId] = localMapping.split(';');
     if (domain === localDomain) {
-      spaceNetwork = localSpaceId.split(':')[0];
-      loadSpacesParams.id = localSpaceId.split(':')[1];
+      const [network, id] = localSpaceId.split(':');
+      spaceNetwork = network;
+      loadSpacesParams.id = id;
     }
+  } else if (MAPPING[domain]) {
+    loadSpacesParams.id = MAPPING[domain].id;
+    spaceNetwork = MAPPING[domain].network;
   } else {
     loadSpacesParams.domain = domain;
   }
@@ -54,6 +76,9 @@ export function useWhiteLabel() {
 
       if (space.value) {
         isWhiteLabel.value = true;
+        skinSettings.value =
+          MAPPING[domain]?.skinSettings ||
+          space.value.additionalRawData?.skinSettings;
       }
     } catch (e) {
       console.log(e);
@@ -69,6 +94,7 @@ export function useWhiteLabel() {
     isCustomDomain,
     failed,
     space,
+    skinSettings,
     resolved
   };
 }
