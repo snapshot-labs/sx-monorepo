@@ -110,7 +110,7 @@ onMounted(async () => {
 
 watch(scrollDisabled, val => {
   const el = document.body;
-  el.classList[val ? 'add' : 'remove']('overflow-hidden');
+  el.classList[val ? 'add' : 'remove']('overflow-y-hidden');
 });
 
 watch(isSwiping, () => {
