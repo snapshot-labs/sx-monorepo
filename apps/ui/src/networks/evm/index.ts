@@ -58,6 +58,7 @@ export const METADATA: Record<string, Metadata> = {
   },
   mnt: {
     name: 'Mantle',
+    ticker: 'MNT',
     chainId: 5000,
     apiUrl: UNIFIED_API_URL,
     avatar:

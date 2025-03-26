@@ -22,7 +22,7 @@ const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
-const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
+const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
@@ -110,7 +110,7 @@ onMounted(async () => {
 
 watch(scrollDisabled, val => {
   const el = document.body;
-  el.classList[val ? 'add' : 'remove']('overflow-hidden');
+  el.classList[val ? 'add' : 'remove']('overflow-y-hidden');
 });
 
 watch(isSwiping, () => {
@@ -150,7 +150,7 @@ watch(
 
     setFavicon(faviconUrl);
     setAppName(whiteLabelSpace.value.name);
-    setSkin(whiteLabelSpace.value.additionalRawData?.skinSettings);
+    setSkin(skinSettings.value);
   },
   { immediate: true }
 );

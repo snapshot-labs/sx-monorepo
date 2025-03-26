@@ -12,7 +12,11 @@ const OFFCHAIN_ERRORS = {
   'only-members': () =>
     'You need to be a member of the space in order to create a proposal.',
   basic: (strategy: Strategy) =>
-    `You need at least ${_n(strategy.params.minScore, 'compact')} ${props.propositionPower.symbol} to create a proposal.`,
+    `You need at least ${_n(strategy.params.minScore, 'compact')} ${prettySymbolsList(
+      strategy.params.strategies.map(
+        s => s.params.symbol || props.propositionPower.symbol
+      )
+    )} to create a proposal.`,
   'passport-gated': (strategy: Strategy) =>
     `You need a Gitcoin Passport with ${strategy.params.operator === 'AND' ? 'all' : 'one'} of the following stamps to create a proposal: ${prettyConcat(strategy.params.stamps, strategy.params.operator === 'AND' ? 'and' : 'or')}.`,
   'karma-eas-attestation': () =>
@@ -35,6 +39,10 @@ const offchainStrategy = computed(() => {
 
   return null;
 });
+
+function prettySymbolsList(symbols: string[]): string {
+  return prettyConcat(Array.from(new Set(symbols)));
+}
 </script>
 
 <template>
@@ -52,7 +60,7 @@ const offchainStrategy = computed(() => {
     <template v-else>
       You need at least {{ _n(propositionPower.threshold) }}
       {{
-        prettyConcat(
+        prettySymbolsList(
           propositionPower.strategies.map(
             s => s.params.symbol || propositionPower.symbol
           )

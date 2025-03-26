@@ -42,7 +42,9 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
 export const COINGECKO_ASSET_PLATFORMS = {
   1: 'ethereum',
   10: 'optimistic-ethereum',
+  100: 'xdai',
   137: 'polygon-pos',
+  5000: 'mantle',
   8453: 'base',
   42161: 'arbitrum-one',
   33139: 'ethereum',
@@ -52,7 +54,9 @@ export const COINGECKO_ASSET_PLATFORMS = {
 export const COINGECKO_BASE_ASSETS = {
   1: 'ethereum',
   10: 'ethereum',
+  100: 'xdai',
   137: 'matic-network',
+  5000: 'mantle',
   8453: 'ethereum',
   42161: 'ethereum',
   33139: 'apecoin',

@@ -23,7 +23,7 @@ export function useNfts({
     return () => getNfts(treasuryValue.address, treasuryValue.chainId);
   });
 
-  const { data, isPending, isSuccess } = useQuery({
+  const { data, isPending, isSuccess, isError } = useQuery({
     queryKey: ['nfts', treasury],
     queryFn: queryFn,
     staleTime: 5 * 60 * 1000
@@ -35,5 +35,5 @@ export function useNfts({
     () => new Map(nfts.value.map(asset => [asset.id, asset]))
   );
 
-  return { isPending, isSuccess, nfts, nftsMap };
+  return { isPending, isSuccess, isError, nfts, nftsMap };
 }
