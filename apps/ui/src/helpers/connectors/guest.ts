@@ -4,11 +4,11 @@ import { validateAndParseAddress } from 'starknet';
 import Connector from './connector';
 import { getAddresses } from '../stamp';
 
-const ADDRESS_KEY = 'connector:spectator:address';
-const CHAIN_ID_KEY = 'connector:spectator:chainId';
+const ADDRESS_KEY = 'connector:guest:address';
+const CHAIN_ID_KEY = 'connector:guest:chainId';
 const DEFAULT_CHAIN_ID = 1;
 
-class SpectatorProvider extends EventEmitter {
+class GuestProvider extends EventEmitter {
   public selectedAddress: string;
   public chainId: number;
 
@@ -28,7 +28,7 @@ class SpectatorProvider extends EventEmitter {
       case 'eth_accounts':
         return [this.selectedAddress];
       default:
-        throw new Error('Not available when connected as spectator');
+        throw new Error('Not available when connected as guest');
     }
   }
 
@@ -66,7 +66,7 @@ export function formatAddress(address: string): string {
   }
 }
 
-export default class Spectator extends Connector {
+export default class Guest extends Connector {
   constructor(options) {
     super(options);
 
@@ -105,7 +105,7 @@ export default class Spectator extends Connector {
       if (this.provider) {
         this.provider.changeAccount(address, chainId);
       } else {
-        this.provider = new SpectatorProvider(address, chainId);
+        this.provider = new GuestProvider(address, chainId);
       }
     } catch (e) {
       console.error(e);

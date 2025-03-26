@@ -44,7 +44,7 @@ export type ConnectorType =
   | 'gnosis'
   | 'sequence'
   | 'unicorn'
-  | 'spectator';
+  | 'guest';
 export type Connector = {
   id: string;
   type: ConnectorType;

@@ -19,7 +19,7 @@ export function useApp() {
     const hashParams = useUrlSearchParams('hash');
 
     if (searchParams.get('walletId')) connectorId = 'unicorn';
-    else if (hashParams.as) connectorId = 'spectator';
+    else if (hashParams.as) connectorId = 'guest';
     // Auto connect with gnosis-connector when inside gnosis-safe iframe
     if (window?.parent !== window) connectorId = 'gnosis';
 
