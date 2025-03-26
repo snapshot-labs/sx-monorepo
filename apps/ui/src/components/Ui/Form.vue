@@ -90,14 +90,17 @@ const getComponent = (property: {
 </script>
 
 <template>
-  <component
-    :is="getComponent(property)"
-    v-for="(property, i) in definition.properties"
-    :key="i"
-    v-bind="$attrs"
-    v-model="inputValue[i]"
-    :path="path ? `${path}.${i}` : i"
-    :definition="property"
-    :error="error?.[i]"
-  />
+  <div class="s-form">
+    <component
+      :is="getComponent(property)"
+      v-for="(property, i) in definition.properties"
+      :key="i"
+      v-bind="$attrs"
+      v-model="inputValue[i]"
+      :path="path ? `${path}.${i}` : i"
+      :definition="property"
+      :error="error?.[i]"
+      :required="definition.required?.includes(i)"
+    />
+  </div>
 </template>

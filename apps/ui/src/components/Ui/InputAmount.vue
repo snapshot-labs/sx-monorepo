@@ -11,6 +11,7 @@ const model = defineModel<string>({
 
 const props = defineProps<{
   error?: string;
+  required?: boolean;
   definition: any;
 }>();
 
@@ -55,6 +56,7 @@ watch(model, () => {
     :definition="definition"
     :error="error"
     :dirty="dirty"
+    :required="required"
     :input-value-length="inputValue?.length"
   >
     <input

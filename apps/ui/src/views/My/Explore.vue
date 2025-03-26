@@ -2,9 +2,11 @@
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { getUrl } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork, metadataNetwork } from '@/networks';
-import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
+import { useExploreSpacesQuery } from '@/queries/spaces';
 import { SelectItem } from '@/types';
+
+defineOptions({ inheritAttrs: false });
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
@@ -28,13 +30,23 @@ const categories = [
 ];
 
 const { setTitle } = useTitle();
-const spacesStore = useSpacesStore();
 const route = useRoute();
 const router = useRouter();
+const { web3 } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 const network = ref<string>(DEFAULT_NETWORK);
 const category = ref<SpaceCategory>(DEFAULT_CATEGORY);
+const searchQuery = ref<string | undefined>(undefined);
+
+const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
+  useExploreSpacesQuery({
+    searchQuery,
+    protocol,
+    network,
+    category
+  });
 
 const { networks: offchainNetworks } = useOffchainNetworksList(
   metadataNetwork,
@@ -48,15 +60,11 @@ const networks = computed(() => {
   if (protocol.value === 'snapshot') {
     protocolNetworks = offchainNetworks.value
       .filter(network => {
-        if (
+        return !(
           metadataNetwork === 's' &&
           'testnet' in network &&
           network.testnet
-        ) {
-          return false;
-        }
-
-        return true;
+        );
       })
       .map(network => ({
         id: network.key,
@@ -94,6 +102,12 @@ function isValidCategory(category: string): category is SpaceCategory {
   return category === 'all' || SPACE_CATEGORIES.some(c => c.id === category);
 }
 
+function handleEndReached() {
+  if (!hasNextPage.value) return;
+
+  fetchNextPage();
+}
+
 watch([protocol, category, network], ([p, c, n]) => {
   const props: { p?: string; c?: string; n?: string } = {
     ...route.query,
@@ -113,7 +127,7 @@ watch(
     () => route.query.c as string,
     () => route.query.n as string
   ],
-  ([searchQuery, protocolQuery, categoryQuery, networkQuery]) => {
+  ([searchQueryValue, protocolQuery, categoryQuery, networkQuery]) => {
     const _protocol = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
@@ -125,12 +139,7 @@ watch(
     category.value = isValidCategory(categoryQuery)
       ? categoryQuery
       : DEFAULT_CATEGORY;
-    spacesStore.protocol = _protocol;
-    spacesStore.fetch({
-      searchQuery,
-      category: category.value,
-      network: network.value
-    });
+    searchQuery.value = searchQueryValue ? searchQueryValue : undefined;
   },
   {
     immediate: true
@@ -141,9 +150,10 @@ watchEffect(() => setTitle('Explore'));
 </script>
 
 <template>
-  <div>
+  <div class="flex flex-col" style="min-height: calc(100vh - 72px)">
+    <OnboardingUser class="mb-2" />
     <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
-      <div class="flex flex-row flex-wrap gap-2">
+      <div class="flex sm:flex-row flex-col flex-wrap gap-2">
         <UiSelectDropdown
           v-model="protocol"
           class="min-h-[46px]"
@@ -176,35 +186,27 @@ watchEffect(() => setTitle('Explore'));
       </div>
       <UiTooltip title="Create new space">
         <UiButton
-          :to="
-            protocol === 'snapshot'
-              ? `${SNAPSHOT_URLS[metadataNetwork]}/#/setup`
-              : 'create'
-          "
+          :to="{
+            name: `create-space-${protocol}`
+          }"
           class="!px-0 w-[46px]"
         >
           <IH-plus-sm />
         </UiButton>
       </UiTooltip>
     </div>
-    <div>
+    <div class="flex-grow" v-bind="$attrs">
       <UiLabel label="Spaces" sticky />
-      <UiLoading v-if="spacesStore.loading" class="block m-4" />
-      <div v-else-if="spacesStore.loaded">
+      <UiLoading v-if="isPending" class="block m-4" />
+      <div v-else-if="data">
         <UiContainerInfiniteScroll
-          v-if="spacesStore.explorePageSpaces.length"
-          :loading-more="spacesStore.loadingMore"
+          v-if="data.pages.flat().length"
+          :loading-more="isFetchingNextPage"
           class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3"
-          @end-reached="
-            spacesStore.fetchMore({
-              searchQuery: route.query.q as string,
-              category: category,
-              network: network
-            })
-          "
+          @end-reached="handleEndReached"
         >
           <SpacesListItem
-            v-for="space in spacesStore.explorePageSpaces"
+            v-for="space in data.pages.flat()"
             :key="space.id"
             :space="space"
           />
@@ -215,5 +217,26 @@ watchEffect(() => setTitle('Explore'));
         </div>
       </div>
     </div>
+    <UiToolbarBottom
+      v-if="!web3.authLoading && !web3.account"
+      class="px-4 py-3 flex justify-between items-center"
+    >
+      <h4
+        class="hidden text-skin-text sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
+      >
+        Log in to start making decisions.
+        <router-link :to="{ name: 'site-landing' }"
+          >See how it works</router-link
+        >.
+      </h4>
+      <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
+        <UiButton
+          class="primary w-full sm:w-auto"
+          @click="modalAccountOpen = true"
+        >
+          Log in
+        </UiButton>
+      </div>
+    </UiToolbarBottom>
   </div>
 </template>

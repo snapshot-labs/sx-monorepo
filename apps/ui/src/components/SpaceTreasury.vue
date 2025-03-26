@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
@@ -26,11 +25,29 @@ const { setTitle } = useTitle();
 const route = useRoute();
 const router = useRouter();
 const { copy, copied } = useClipboard();
-const { loading, loaded, assets, loadBalances } = useBalances();
-const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
+
+const balancesTreasury = computed(() => {
+  if (!treasury.value?.network) return null;
+
+  return {
+    chainId: treasury.value.network,
+    address: treasury.value.wallet
+  };
+});
+const { isPending, isSuccess, isError, assets } = useBalances({
+  treasury: balancesTreasury
+});
+const {
+  isPending: isNftsPending,
+  isSuccess: isNftsSuccess,
+  isError: isNftsError,
+  nfts
+} = useNfts({
+  treasury: balancesTreasury
+});
 
 const page: Ref<'tokens' | 'nfts'> = computed(() => {
   return route.params.tab === 'nfts' ? 'nfts' : 'tokens';
@@ -76,15 +93,6 @@ const totalChange = computed(() => {
   );
 });
 
-const sortedAssets = computed(() =>
-  (assets || []).value.sort((a, b) => {
-    const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
-    if (isEth(a)) return -1;
-    if (isEth(b)) return 1;
-    return 0;
-  })
-);
-
 const treasuryExplorerUrl = computed(() => {
   if (!treasury.value) return '';
 
@@ -118,18 +126,6 @@ async function addTx(tx: Transaction) {
     params: { key: draftId }
   });
 }
-
-onMounted(() => {
-  if (!treasury.value) return;
-
-  if (treasury.value.supportsTokens) {
-    loadBalances(treasury.value.wallet, treasury.value.network);
-  }
-
-  if (treasury.value.supportsNfts) {
-    loadNfts(treasury.value.wallet, treasury.value.network);
-  }
-});
 
 watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
@@ -210,7 +206,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             />
           </div>
           <div
-            v-if="loaded"
+            v-if="isSuccess"
             class="flex-col items-end text-right leading-[22px]"
           >
             <h4
@@ -270,16 +266,23 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <span>This treasury network is not supported.</span>
         </div>
         <div v-else-if="page === 'tokens'">
-          <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
+          <UiLoading v-if="isPending" class="px-4 py-3 block" />
           <div
-            v-else-if="loaded && sortedAssets.length === 0"
+            v-else-if="isSuccess && assets.length === 0"
             class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
             <IH-exclamation-circle class="inline-block shrink-0" />
             <span>There are no tokens in treasury.</span>
           </div>
+          <div
+            v-else-if="isError"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+          >
+            <IH-exclamation-circle class="inline-block shrink-0" />
+            <span>Failed to load treasury tokens.</span>
+          </div>
           <a
-            v-for="(asset, i) in sortedAssets"
+            v-for="(asset, i) in assets"
             v-else
             :key="i"
             :href="
@@ -370,16 +373,20 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </div>
         <div v-else-if="page === 'nfts'">
           <div
-            v-if="nftsLoaded && nfts.length === 0"
+            v-if="isNftsSuccess && nfts.length === 0"
             class="px-4 py-3 flex items-center text-skin-link space-x-2"
           >
             <IH-exclamation-circle class="inline-block shrink-0" />
             <span>There are no NFTs in treasury.</span>
           </div>
-          <UiLoading
-            v-if="nftsLoading && !nftsLoaded"
-            class="px-4 py-3 block"
-          />
+          <div
+            v-else-if="isNftsError"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+          >
+            <IH-exclamation-circle class="inline-block shrink-0" />
+            <span>Failed to load treasury NFTs.</span>
+          </div>
+          <UiLoading v-if="isNftsPending" class="px-4 py-3 block" />
           <div
             class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 max-w-fit mx-auto p-4"
           >

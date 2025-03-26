@@ -40,9 +40,10 @@ export type ConnectorType =
   | 'argentx'
   | 'injected'
   | 'walletconnect'
-  | 'walletlink'
+  | 'coinbase'
   | 'gnosis'
-  | 'sequence';
+  | 'sequence'
+  | 'unicorn';
 export type Connector = {
   id: string;
   type: ConnectorType;
@@ -74,10 +75,15 @@ export type GeneratedMetadata =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  /**
+   * Deprecated strategy can still be used but can't be added to new spaces.
+   */
+  deprecated?: boolean;
   about?: string;
   author?: string;
   version?: string;
   spaceCount?: number;
+  verifiedSpaceCount?: number;
   link?: string;
   icon?: FunctionalComponent;
   type?: string;
@@ -85,7 +91,7 @@ export type StrategyTemplate = {
   paramsDefinition: any;
   validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
-  generateParams?: (params: Record<string, any>) => any[];
+  generateParams?: (params: Record<string, any>) => Promise<any[]>;
   generateMetadata?: (
     params: Record<string, any>
   ) => Promise<GeneratedMetadata>;
@@ -229,6 +235,7 @@ export type ReadOnlyNetworkActions = {
     owner: string
   );
   updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
+  createSpaceRaw(web3: Web3Provider, id: string, settings: string);
   deleteSpace(web3: Web3Provider, space: Space);
   send(envelope: any): Promise<any>;
 };
@@ -422,11 +429,12 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshotx';
+export type ExplorePageProtocol = 'snapshot' | 'snapshot-x';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
+  apiNetwork: NetworkID;
   networks: NetworkID[];
   limit: number;
 };

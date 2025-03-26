@@ -148,7 +148,11 @@ export function createStrategyPicker({
     const selectedStrategies = strategies
       .map(
         (strategy, index) =>
-          ({ address: strategy, index: strategiesIndicies[index] }) as const
+          ({
+            address: strategy,
+            index: strategiesIndicies[index],
+            paramsIndex: index
+          }) as const
       )
       .filter(({ address }) => helpers.isStrategySupported(address));
 

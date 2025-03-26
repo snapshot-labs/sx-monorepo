@@ -8,7 +8,7 @@ import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecut
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
-import { convertChoice, updateProposaValidationStrategy } from './utils';
+import { convertChoice, updateProposalValidationStrategy } from './utils';
 import {
   ExecutionHash,
   ExecutionStrategy,
@@ -213,7 +213,7 @@ export function createWriters(config: FullConfig) {
     space.created = block?.timestamp ?? getCurrentTimestamp();
     space.tx = tx.hash;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.args.input.proposalValidationStrategy.addr,
       event.args.input.proposalValidationStrategy.params,
@@ -475,7 +475,7 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.args.newProposalValidationStrategy.addr,
       event.args.newProposalValidationStrategy.params,
@@ -688,12 +688,19 @@ export function createWriters(config: FullConfig) {
     proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
 
     if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
-      const executionHash = new ExecutionHash(
+      let executionHash = await ExecutionHash.loadEntity(
         proposal.execution_hash,
         config.indexerName
       );
-      executionHash.proposal_id = `${spaceId}/${proposalId}`;
-      await executionHash.save();
+
+      if (!executionHash) {
+        executionHash = new ExecutionHash(
+          proposal.execution_hash,
+          config.indexerName
+        );
+        executionHash.proposal_id = `${spaceId}/${proposalId}`;
+        await executionHash.save();
+      }
     }
 
     await proposal.save();

@@ -52,7 +52,12 @@ const form: { to: string; nft: string; amount: string | number } = reactive(
   clone(DEFAULT_FORM_STATE)
 );
 
-const { loading, loaded, nfts, nftsMap, loadNfts } = useNfts();
+const { isPending, nfts, nftsMap } = useNfts({
+  treasury: toRef(() => ({
+    chainId: props.network,
+    address: props.address
+  }))
+});
 
 const currentNft = computed(() => nftsMap.value?.get(form.nft));
 
@@ -65,10 +70,6 @@ const formValid = computed(
 );
 
 function handlePickerClick(type: 'nft' | 'contact') {
-  if (type === 'nft' && !loaded.value) {
-    loadNfts(props.address, props.network);
-  }
-
   showPicker.value = true;
   pickerType.value = type;
 
@@ -80,6 +81,8 @@ function handlePickerClick(type: 'nft' | 'contact') {
 }
 
 async function handleSubmit() {
+  if (!currentNft.value) return;
+
   const tx = await createSendNftTransaction({
     nft: currentNft.value,
     address: props.address,
@@ -99,10 +102,6 @@ watch(
       form.to = props.initialState.recipient;
       form.nft = `${props.initialState.nft.address}:${props.initialState.nft.id}`;
       form.amount = props.initialState.amount;
-
-      if (!loaded.value) {
-        loadNfts(props.address, props.network);
-      }
     } else {
       form.to = DEFAULT_FORM_STATE.to;
       form.nft = DEFAULT_FORM_STATE.nft;
@@ -149,7 +148,7 @@ watchEffect(async () => {
       <PickerNft
         v-if="pickerType === 'nft'"
         :nfts="nfts"
-        :loading="loading"
+        :loading="isPending"
         :search-value="searchValue"
         @pick="
           form.nft = $event;
@@ -172,10 +171,11 @@ watchEffect(async () => {
         v-model="form.to"
         :definition="recipientDefinition"
         :error="formErrors.to"
+        :required="true"
         @pick="handlePickerClick('contact')"
       />
       <div class="s-base">
-        <div class="s-label" v-text="'NFT'" />
+        <div class="s-label" v-text="'NFT *'" />
         <button
           type="button"
           class="s-input text-left h-[61px]"

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 defineProps<{
-  title: string;
+  title?: string;
   description?: string;
 }>();
 </script>
 
 <template>
-  <div class="mb-4">
+  <div class="max-w-[592px]">
     <h3
-      class="text-md leading-6"
+      v-if="title"
       :class="{
         'mb-4': !description
       }"

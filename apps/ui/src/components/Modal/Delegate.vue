@@ -219,6 +219,7 @@ watchEffect(async () => {
         v-model="form.delegatee"
         :definition="delegateDefinition"
         :error="formErrors.delegatee"
+        :required="true"
         @pick="showPicker = true"
       />
     </div>
@@ -232,6 +233,7 @@ watchEffect(async () => {
       </UiButton>
       <UiButton
         v-else
+        primary
         class="w-full"
         :loading="sending"
         :disabled="Object.keys(formErrors).length > 0"

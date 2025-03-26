@@ -140,7 +140,10 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[]
     ) {
-      if (space.snapshot_chain_id) {
+      if (
+        space.snapshot_chain_id &&
+        (web3.provider as any)._isSequenceProvider
+      ) {
         await verifyNetwork(web3, space.snapshot_chain_id);
       }
 
@@ -180,7 +183,10 @@ export function createActions(
       labels: string[],
       executions: ExecutionInfo[]
     ) {
-      if (space.snapshot_chain_id) {
+      if (
+        space.snapshot_chain_id &&
+        (web3.provider as any)._isSequenceProvider
+      ) {
         await verifyNetwork(web3, space.snapshot_chain_id);
       }
 
@@ -202,7 +208,10 @@ export function createActions(
       return client.updateProposal({ signer: web3.getSigner(), data });
     },
     async flagProposal(web3: Web3Provider, proposal: Proposal) {
-      if (proposal.space.snapshot_chain_id) {
+      if (
+        proposal.space.snapshot_chain_id &&
+        (web3.provider as any)._isSequenceProvider
+      ) {
         await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
@@ -219,7 +228,10 @@ export function createActions(
       connectorType: ConnectorType,
       proposal: Proposal
     ) {
-      if (proposal.space.snapshot_chain_id) {
+      if (
+        proposal.space.snapshot_chain_id &&
+        (web3.provider as any)._isSequenceProvider
+      ) {
         await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
@@ -240,7 +252,10 @@ export function createActions(
       reason: string,
       app: string
     ): Promise<any> {
-      if (proposal.space.snapshot_chain_id) {
+      if (
+        proposal.space.snapshot_chain_id &&
+        (web3.provider as any)._isSequenceProvider
+      ) {
         await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
@@ -393,9 +408,7 @@ export function createActions(
       space: Space,
       owner: string
     ) => {
-      if (space.snapshot_chain_id) {
-        await verifyNetwork(web3, space.snapshot_chain_id);
-      }
+      await verifyNetwork(web3, chainId);
 
       return setEnsTextRecord(
         web3.getSigner(),
@@ -404,6 +417,18 @@ export function createActions(
         owner,
         chainId
       );
+    },
+    createSpaceRaw: async (
+      web3: Web3Provider,
+      id: string,
+      settings: string
+    ) => {
+      await verifyNetwork(web3, chainId);
+
+      return client.createSpace({
+        signer: web3.getSigner(),
+        data: { space: id, settings }
+      });
     },
     updateSettingsRaw: async (
       web3: Web3Provider,
@@ -418,9 +443,7 @@ export function createActions(
       });
     },
     deleteSpace: async (web3: Web3Provider, space: Space) => {
-      if (space.snapshot_chain_id) {
-        await verifyNetwork(web3, space.snapshot_chain_id);
-      }
+      await verifyNetwork(web3, chainId);
 
       return client.deleteSpace({
         signer: web3.getSigner(),

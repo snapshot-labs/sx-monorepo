@@ -3,6 +3,7 @@ const strategies = ref([] as StrategyTemplate[]);
 </script>
 
 <script setup lang="ts">
+import { _n } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { StrategyTemplate } from '@/networks/types';
 import { NetworkID } from '@/types';
@@ -10,6 +11,7 @@ import { NetworkID } from '@/types';
 const props = defineProps<{
   open: boolean;
   networkId: NetworkID;
+  hiddenStrategies?: string[];
 }>();
 
 const emit = defineEmits<{
@@ -24,6 +26,8 @@ const hasError = ref(false);
 const network = computed(() => getNetwork(props.networkId));
 const filteredStrategies = computed(() => {
   return strategies.value.filter(strategy => {
+    if (props.hiddenStrategies?.includes(strategy.name)) return false;
+
     if (!searchValue.value) return true;
 
     return strategy.name
@@ -45,9 +49,7 @@ watchEffect(async () => {
   hasError.value = false;
 
   try {
-    strategies.value = (await network.value.api.loadStrategies()).sort(
-      (a, b) => (b.spaceCount || 0) - (a.spaceCount || 0)
-    );
+    strategies.value = await network.value.api.loadStrategies();
   } catch (e) {
     console.log('failed to load strategies', e);
     hasError.value = true;
@@ -113,8 +115,8 @@ watch(
             <IC-github class="shrink-0" />
             <span class="leading-[18px] truncate">{{ strategy.author }}</span>
           </div>
-          <div v-if="strategy.spaceCount !== undefined" class="leading-[18px]">
-            In {{ strategy.spaceCount }} space(s)
+          <div v-if="strategy.spaceCount !== undefined" class="text-left">
+            In {{ _n(strategy.spaceCount) }} space(s)
           </div>
         </button>
       </div>

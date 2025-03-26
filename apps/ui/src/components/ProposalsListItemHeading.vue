@@ -18,16 +18,11 @@ const props = withDefaults(
 );
 
 const { getTsFromCurrent } = useMetaStore();
-const spacesStore = useSpacesStore();
 const { votes } = useAccount();
+
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
-const space = computed(() =>
-  spacesStore.spacesMap.get(
-    `${props.proposal.network}:${props.proposal.space.id}`
-  )
-);
 </script>
 <template>
   <div v-bind="$attrs">
@@ -71,9 +66,10 @@ const space = computed(() =>
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <ProposalLabels
-            v-if="space?.labels && proposal.labels.length"
+            v-if="proposal.space?.labels && proposal.labels.length"
+            :space-id="`${proposal.network}:${proposal.space.id}`"
+            :space-labels="proposal.space.labels"
             :labels="proposal.labels"
-            :space="space"
             inline
             with-link
           />
@@ -101,6 +97,11 @@ const space = computed(() =>
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
+          <span
+            v-if="proposal.author.role"
+            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
+            v-text="proposal.author.role"
+          />
         </AppLink>
       </template>
     </div>

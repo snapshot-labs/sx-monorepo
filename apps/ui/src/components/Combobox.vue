@@ -19,6 +19,7 @@ const props = defineProps<{
   inline?: boolean;
   definition: DefinitionWithOptions<T | null>;
   gap?: number;
+  required?: boolean;
 }>();
 
 const dirty = ref(false);
@@ -42,11 +43,18 @@ const inputValue = computed({
   },
   set(newValue: T | null) {
     dirty.value = true;
+    query.value = '';
     model.value = newValue;
   }
 });
 
 const content = computed(() => query.value || getDisplayValue(model.value));
+const icon = computed(() => {
+  const option = props.definition.options.find(
+    option => option.id === model.value
+  );
+  return option ? option.icon : null;
+});
 
 function handleFocus(event: FocusEvent, open: boolean) {
   if (!event.target || open) return;
@@ -75,7 +83,11 @@ watch(model, () => {
     :definition="inline ? omit(definition, ['title']) : definition"
     :error="error"
     :dirty="dirty"
-    class="relative mb-[14px] w-auto"
+    :required="required"
+    class="relative w-auto"
+    :class="{
+      'mb-[14px]': !inline
+    }"
   >
     <Combobox v-slot="{ open }" v-model="inputValue" as="div" nullable>
       <Float
@@ -90,18 +102,23 @@ watch(model, () => {
           }"
         >
           <ComboboxButton
-            class="w-full"
             as="div"
             :data-value="content"
             :class="{
-              sizer: inline
+              sizer: inline,
+              'sizer-with-icon': inline && icon
             }"
           >
+            <component
+              :is="icon"
+              class="absolute size-[20px] left-3 bottom-2.5"
+            />
             <ComboboxInput
               class="s-input !flex items-center justify-between !mb-0"
               :class="{
                 '!rounded-b-none': !gap && open,
-                'h-[42px] min-w-11': inline
+                'h-[42px] min-w-11': inline,
+                '!pl-[42px]': icon
               }"
               :size="'1'"
               autocomplete="off"
@@ -182,7 +199,11 @@ watch(model, () => {
     content: attr(data-value);
     @apply px-3 border-x col-start-1 row-start-1;
     visibility: hidden;
-    white-space: pre-wrap;
+    white-space: nowrap;
+  }
+
+  &.sizer-with-icon::after {
+    @apply pl-[42px];
   }
 }
 </style>

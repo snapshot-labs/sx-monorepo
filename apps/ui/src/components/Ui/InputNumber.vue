@@ -6,6 +6,7 @@ const props = withDefaults(
     error?: string;
     definition: any;
     disabled?: boolean;
+    required?: boolean;
   }>(),
   { disabled: false }
 );
@@ -37,6 +38,7 @@ watch(model, () => {
     :definition="definition"
     :error="error"
     :dirty="dirty"
+    :required="required"
   >
     <input
       :id="id"

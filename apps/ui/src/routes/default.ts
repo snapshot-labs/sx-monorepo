@@ -1,5 +1,6 @@
 import App from '@/views/App.vue';
-import Create from '@/views/Create.vue';
+import CreateSpaceSnapshot from '@/views/CreateSpaceSnapshot.vue';
+import CreateSpaceSnapshotX from '@/views/CreateSpaceSnapshotX.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
@@ -19,11 +20,11 @@ import { spaceChildrenRoutes } from './common';
 
 export default [
   {
-    path: '/',
+    path: '/about',
     name: 'site',
     component: Site,
     children: [
-      { path: '', name: 'site-landing', component: Landing },
+      { path: '/about', name: 'site-landing', component: Landing },
       { path: '/network', name: 'site-network', component: Network },
       { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
       { path: '/ecosystem/:app', name: 'site-app', component: App },
@@ -38,7 +39,20 @@ export default [
     children: spaceChildrenRoutes
   },
 
-  { path: '/create', name: 'create', component: Create },
+  {
+    path: '/create',
+    redirect: { name: 'create-space-snapshot' }
+  },
+  {
+    path: '/create/snapshot-x',
+    name: 'create-space-snapshot-x',
+    component: CreateSpaceSnapshotX
+  },
+  {
+    path: '/create/snapshot',
+    name: 'create-space-snapshot',
+    component: CreateSpaceSnapshot
+  },
   {
     path: '/settings',
     name: 'settings',
@@ -53,7 +67,11 @@ export default [
     name: 'my',
     component: My,
     children: [
-      { path: '/home', name: 'my-home', component: Home },
+      {
+        path: '/home',
+        redirect: { name: 'my-home' }
+      },
+      { path: '/', name: 'my-home', component: Home },
       { path: '/explore', name: 'my-explore', component: Explore },
       {
         path: '/notifications',

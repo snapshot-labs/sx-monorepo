@@ -1,14 +1,14 @@
 import { Provider } from '@ethersproject/providers';
 import set from 'lodash.set';
-import { multicall } from '@/helpers/call';
+import { multicall3 } from '@/helpers/call';
 
 export default class Multicaller {
   public network: string;
   public provider: Provider;
   public abi: any[];
   public options: any = {};
-  public calls: any[] = [];
-  public paths: any[] = [];
+  public calls: [string, string, any[]?][] = [];
+  public paths: string[] = [];
 
   constructor(network: string, provider: Provider, abi: any[], options?) {
     this.network = network;
@@ -17,22 +17,30 @@ export default class Multicaller {
     this.options = options || {};
   }
 
-  call(path, address, fn, params?): Multicaller {
+  call(path: string, address: string, fn: string, params?: any[]): Multicaller {
     this.calls.push([address, fn, params]);
     this.paths.push(path);
     return this;
   }
 
-  async execute(from?: any): Promise<any> {
-    const obj = from || {};
-    const result = await multicall(
-      this.network,
+  async execute(
+    options: { allowFailure: boolean } = { allowFailure: false }
+  ): Promise<any> {
+    const obj = {};
+    const result = await multicall3(
       this.provider,
       this.abi,
       this.calls,
+      options.allowFailure,
       this.options
     );
-    result.forEach((r, i) => set(obj, this.paths[i], r.length > 1 ? r : r[0]));
+
+    result.forEach((r, i) => {
+      const [success, data] = r;
+      const result = success ? (data.length > 1 ? data : data[0]) : null;
+
+      return set(obj, this.paths[i], result);
+    });
     this.calls = [];
     this.paths = [];
     return obj;

@@ -4,9 +4,12 @@ import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
+  evmApe,
   evmArbitrum,
   evmBase,
+  evmCurtis,
   evmMainnet,
+  evmMantle,
   EvmNetworkConfig,
   evmOptimism,
   evmPolygon,
@@ -55,9 +58,12 @@ import { EDITOR_APP_NAME } from '../common/constants';
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
   137: evmPolygon,
+  5000: evmMantle,
   8453: evmBase,
   42161: evmArbitrum,
   1: evmMainnet,
+  33139: evmApe,
+  33111: evmCurtis,
   11155111: evmSepolia
 };
 
@@ -184,18 +190,22 @@ export function createActions(
         params: {
           ...params,
           authenticators: params.authenticators.map(config => config.address),
-          votingStrategies: params.votingStrategies.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)[0]
-              : '0x'
-          })),
+          votingStrategies: await Promise.all(
+            params.votingStrategies.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? (await config.generateParams(config.params))[0]
+                : '0x'
+            }))
+          ),
           votingStrategiesMetadata: metadataUris,
           proposalValidationStrategy: {
             addr: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
-              ? params.validationStrategy.generateParams(
-                  params.validationStrategy.params
+              ? (
+                  await params.validationStrategy.generateParams(
+                    params.validationStrategy.params
+                  )
                 )[0]
               : '0x'
           },
@@ -707,12 +717,14 @@ export function createActions(
             authenticatorsToRemove: space.authenticators.filter(
               (authenticator, index) => authenticatorsToRemove.includes(index)
             ),
-            votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-              addr: config.address,
-              params: config.generateParams
-                ? config.generateParams(config.params)[0]
-                : '0x'
-            })),
+            votingStrategiesToAdd: await Promise.all(
+              votingStrategiesToAdd.map(async config => ({
+                addr: config.address,
+                params: config.generateParams
+                  ? (await config.generateParams(config.params))[0]
+                  : '0x'
+              }))
+            ),
             votingStrategiesToRemove: votingStrategiesToRemove.map(
               index => space.strategies_indices[index]
             ),
@@ -720,8 +732,10 @@ export function createActions(
             proposalValidationStrategy: {
               addr: validationStrategy.address,
               params: validationStrategy.generateParams
-                ? validationStrategy.generateParams(
-                    validationStrategy.params
+                ? (
+                    await validationStrategy.generateParams(
+                      validationStrategy.params
+                    )
                   )[0]
                 : '0x'
             },
@@ -737,6 +751,9 @@ export function createActions(
       );
     },
     updateSettingsRaw: () => {
+      throw new Error('Not implemented');
+    },
+    createSpaceRaw: () => {
       throw new Error('Not implemented');
     },
     deleteSpace: () => {

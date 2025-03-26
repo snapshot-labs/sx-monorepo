@@ -7,7 +7,16 @@ import ProxyFactory from './abis/ProxyFactory.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
 
-type NetworkID = 'eth' | 'sep' | 'oeth' | 'matic' | 'arb1' | 'base';
+type NetworkID =
+  | 'eth'
+  | 'sep'
+  | 'oeth'
+  | 'matic'
+  | 'arb1'
+  | 'base'
+  | 'mnt'
+  | 'ape'
+  | 'curtis';
 
 const START_BLOCKS: Record<NetworkID, number> = {
   eth: 18962278,
@@ -15,7 +24,10 @@ const START_BLOCKS: Record<NetworkID, number> = {
   oeth: 118359200,
   matic: 50858232,
   arb1: 157825417,
-  base: 23524251
+  base: 23524251,
+  mnt: 75662182,
+  ape: 12100384,
+  curtis: 16682282
 };
 
 export type FullConfig = {

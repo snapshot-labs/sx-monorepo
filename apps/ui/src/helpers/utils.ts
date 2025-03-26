@@ -13,7 +13,7 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
-import { VotingPowerItem } from '@/stores/votingPowers';
+import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
@@ -374,8 +374,7 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId])
-      throw new Error(err.message);
+    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId]) throw err;
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',
@@ -487,10 +486,17 @@ export function getCacheHash(value?: string) {
 }
 
 export function getStampUrl(
-  type: 'avatar' | 'user-cover' | 'space' | 'space-cover' | 'token',
+  type:
+    | 'avatar'
+    | 'user-cover'
+    | 'space'
+    | 'space-cover'
+    | 'space-logo'
+    | 'token',
   id: string,
   size: number | { width: number; height: number },
-  hash?: string
+  hash?: string,
+  cropped?: boolean
 ) {
   let sizeParam = '';
   if (typeof size === 'number') {
@@ -500,8 +506,9 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
+  const cropParam = cropped === false ? `&fit=inside` : '';
 
-  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
 
 export async function imageUpload(file: File) {
@@ -643,4 +650,33 @@ export function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const g = parseInt(hex.substring(2, 4), 16);
   const b = parseInt(hex.substring(4, 6), 16);
   return { r, g, b };
+}
+
+export function getRandomHexColor(): string {
+  return `#${Math.floor(Math.random() * 16777215)
+    .toString(16)
+    .padStart(6, '0')}`.toUpperCase();
+}
+
+/**
+ * Concat a list of strings with the connector if needed,
+ * using the oxford comma rule.
+ * e.g.
+ * - ['a', 'b', 'c'] => 'a, b, and c'
+ * - ['a', 'b'] => 'a and b'
+ * - ['a'] => 'a'
+ */
+export function prettyConcat(options: string[], connector = 'or') {
+  const uniqOptions = Array.from(new Set(options));
+
+  return uniqOptions.length > 1
+    ? `${uniqOptions.slice(0, -1).join(', ')}${uniqOptions.length > 2 ? ',' : ''} ${connector} ${uniqOptions.slice(-1)}`
+    : uniqOptions[0];
+}
+
+export function isUserAbortError(e: any) {
+  return (
+    ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
+    ['User abort', 'User rejected the request.'].includes(e.message)
+  );
 }

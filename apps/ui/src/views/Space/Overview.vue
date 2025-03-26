@@ -12,13 +12,22 @@ const props = defineProps<{ space: Space }>();
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 
-const isOffchainSpace = offchainNetworks.includes(props.space.network);
+const isOffchainSpace = computed(() =>
+  offchainNetworks.includes(props.space.network)
+);
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
-const { data, isPending } = useProposalsSummaryQuery(
-  props.space.network,
-  props.space.id
+const { data, isPending, isError } = useProposalsSummaryQuery(
+  toRef(() => props.space.network),
+  toRef(() => props.space.id)
+);
+
+const showChildren = computed(
+  () =>
+    !isWhiteLabel.value &&
+    !!props.space.children.length &&
+    props.space.children.every(child => child.name)
 );
 
 watchEffect(() => setTitle(props.space.name));
@@ -52,13 +61,11 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <div class="px-4">
       <div class="mb-4 relative">
-        <AppLink :to="{ name: 'space-overview' }">
-          <SpaceAvatar
-            :space="space"
-            :size="90"
-            class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
-          />
-        </AppLink>
+        <SpaceAvatar
+          :space="space"
+          :size="90"
+          class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
+        />
         <div class="flex items-center">
           <h1 v-text="space.name" />
           <UiBadgeVerified
@@ -87,7 +94,7 @@ watchEffect(() => setTitle(props.space.name));
               followers
             </div>
           </template>
-          <template v-if="!isWhiteLabel && space.parent">
+          <template v-if="!isWhiteLabel && space.parent?.name">
             <div>·</div>
             <AppLink
               :to="{
@@ -125,7 +132,8 @@ watchEffect(() => setTitle(props.space.name));
         </div>
       </div>
     </div>
-    <template v-if="!isWhiteLabel && space.children.length">
+    <OnboardingSpace :space="space" />
+    <template v-if="showChildren">
       <UiLabel :label="'Sub-spaces'" />
       <UiScrollerHorizontal gradient="md">
         <div class="px-4 py-3 flex gap-3 min-w-max">
@@ -142,6 +150,7 @@ watchEffect(() => setTitle(props.space.name));
     <div>
       <ProposalsList
         title="Proposals"
+        :is-error="isError"
         :loading="isPending"
         :limit="PROPOSALS_SUMMARY_LIMIT - 1"
         :proposals="data ?? []"

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const { toggleSkin, currentMode } = useUserSkin();
+const { toggleTheme, currentTheme } = useTheme();
 </script>
 
 <template>
   <div
-    class="p-4 lg:px-6 flex justify-center items-center absolute z-10 left-0 right-0"
+    class="p-4 lg:px-6 flex justify-center items-center absolute z-10 left-0 right-0 max-w-maximum mx-auto"
   >
     <div class="grow">
       <AppLink
@@ -22,8 +22,14 @@ const { toggleSkin, currentMode } = useUserSkin();
       </AppLink>
     </div>
     <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
-      <li><AppLink to="/#features">Features</AppLink></li>
-      <li><AppLink to="/#ecosystem">Ecosystem</AppLink></li>
+      <li>
+        <router-link :to="{ name: 'site-landing', hash: '#features' }">
+          Features
+        </router-link>
+      </li>
+      <li>
+        <router-link :to="{ name: 'site-ecosystem' }">Ecosystem</router-link>
+      </li>
       <li>
         <a href="https://docs.snapshot.box" target="_blank">
           Developers
@@ -38,8 +44,8 @@ const { toggleSkin, currentMode } = useUserSkin();
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">
-      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
-        <IH-sun v-if="currentMode === 'dark'" class="inline-block" />
+      <UiButton class="!px-0 w-[46px]" @click="toggleTheme">
+        <IH-sun v-if="currentTheme === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
       <UiButton :to="{ name: 'my-home' }" class="primary">

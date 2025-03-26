@@ -94,9 +94,13 @@
   font-weight: 700;
   src: url('./assets/fonts/Stolzl-Medium.woff2') format('woff2');
 }
-
+html {
+  scrollbar-gutter: stable;
+}
 body {
-  @apply font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  @apply overflow-y-scroll font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  scrollbar-gutter: stable;
+
 }
 
 .font-display {
@@ -306,6 +310,13 @@ input:placeholder-shown {
     }
   }
 }
+
+.s-form > .s-base:last-child, .s-input-pb-0 .s-base {
+    .s-input, &.s-error {
+      @apply mb-0;
+    }
+}
+
 
 .s-error {
   @apply mb-2;

@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "codegen"],
+      "dependsOn": ["^build", "codegen", "api#codegen"],
       "outputs": ["dist/**", "dist.cjs/**"]
     },
     "lint": {},
@@ -22,8 +22,17 @@
       "dependsOn": ["codegen", "^build"]
     },
     "codegen": {
-      "outputs": [".checkpoint/**", "generated/**"],
-      "inputs": ["**/*.graphql", "**/*.gql"]
+      "outputs": [
+        ".checkpoint/**",
+        "generated/**",
+        "src/networks/common/graphqlApi/gql/**"
+      ],
+      "inputs": [
+        "**/*.graphql",
+        "**/*.gql",
+        "codegen.ts",
+        "src/networks/common/graphqlApi/queries.ts"
+      ]
     }
   }
 }

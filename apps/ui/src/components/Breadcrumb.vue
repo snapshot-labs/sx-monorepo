@@ -1,13 +1,23 @@
 <script setup lang="ts">
+import { getCacheHash, getUrl } from '@/helpers/utils';
+import { offchainNetworks } from '@/networks';
+import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID } from '@/types';
+
+const SPACE_LOGO_WIDTH = 190;
+const SPACE_LOGO_HEIGHT = 38;
 
 defineOptions({ inheritAttrs: false });
 
 const route = useRoute();
-const spacesStore = useSpacesStore();
-const { isWhiteLabel } = useWhiteLabel();
+const { isWhiteLabel, skinSettings } = useWhiteLabel();
+const { logo } = useSkin();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
+const { data: spaceData } = useSpaceQuery({
+  networkId: networkId,
+  spaceId: spaceAddress
+});
 
 const showSpace = computed(
   () =>
@@ -25,8 +35,38 @@ const space = computed(() => {
     return null;
   }
 
-  return spacesStore.spacesMap.get(`${networkId.value}:${spaceAddress.value}`);
+  return spaceData.value;
 });
+
+const previewLogoUrl = computed(() => {
+  if (
+    !isWhiteLabel.value ||
+    !logo.value ||
+    logo.value === skinSettings.value?.logo
+  )
+    return;
+  return getUrl(logo.value);
+});
+
+const onchainLogoUrl = computed(() => {
+  if (
+    !space.value ||
+    offchainNetworks.includes(space.value.network) ||
+    !skinSettings.value?.logo
+  )
+    return;
+  return getUrl(skinSettings.value?.logo);
+});
+
+const directUrlLogo = computed(() => {
+  return previewLogoUrl.value || onchainLogoUrl.value;
+});
+
+const hasWhiteLabelLogo = computed(
+  () => isWhiteLabel.value && skinSettings.value?.logo
+);
+
+const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
 </script>
 
 <template>
@@ -38,13 +78,32 @@ const space = computed(() => {
     class="flex item-center space-x-2.5 truncate text-[24px]"
     v-bind="$attrs"
   >
-    <div class="shrink-0">
-      <SpaceAvatar
-        :space="{ ...space, network: networkId as NetworkID }"
-        :size="36"
-        class="!rounded-[4px]"
-      />
-    </div>
-    <span class="truncate" v-text="space.name" />
+    <img
+      v-if="directUrlLogo"
+      :src="directUrlLogo"
+      :style="`max-width:${SPACE_LOGO_WIDTH}px; max-height:${SPACE_LOGO_HEIGHT}px;`"
+      :alt="space.name"
+    />
+    <UiStamp
+      v-else-if="hasWhiteLabelLogo"
+      :id="space.id"
+      :cropped="false"
+      type="space-logo"
+      :width="SPACE_LOGO_WIDTH"
+      :height="SPACE_LOGO_HEIGHT"
+      class="rounded-none border-none"
+      :style="`max-width:${SPACE_LOGO_WIDTH}px; max-height:${SPACE_LOGO_HEIGHT}px;`"
+      :cb="cb"
+    />
+    <template v-else>
+      <div class="shrink-0">
+        <SpaceAvatar
+          :space="{ ...space, network: networkId as NetworkID }"
+          :size="36"
+          class="!rounded-[4px]"
+        />
+      </div>
+      <span class="truncate" v-text="space.name" />
+    </template>
   </AppLink>
 </template>

@@ -8,6 +8,7 @@ import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
@@ -31,6 +32,8 @@ const props = defineProps<{
   space: Space;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
 const { proposals, createDraft } = useEditor();
@@ -45,8 +48,6 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const { get: getPropositionPower, fetch: fetchPropositionPower } =
-  usePropositionPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
@@ -56,9 +57,11 @@ const {
   loaded: networksLoaded
 } = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
+const { isWhiteLabel } = useWhiteLabel();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
+const { modalAccountOpen } = useModal();
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
@@ -171,6 +174,16 @@ const formErrors = computed(() => {
     }
   );
 });
+const isSubmitButtonLoading = computed(() => {
+  if (web3.value.authLoading) return true;
+  if (!web3.value.account) return false;
+
+  return (
+    sending.value ||
+    (!propositionPower.value && !isPropositionPowerError.value) ||
+    isPropositionPowerPending.value
+  );
+});
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
     !props.space.turbo &&
@@ -212,8 +225,6 @@ const proposalLimitReached = computed(() => {
   );
 });
 
-const propositionPower = computed(() => getPropositionPower(props.space));
-
 const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
 
 const defaultVotingDelay = computed(() =>
@@ -241,6 +252,13 @@ const proposalMaxEnd = computed(() => {
   );
 });
 
+const {
+  data: propositionPower,
+  isPending: isPropositionPowerPending,
+  isError: isPropositionPowerError,
+  refetch: fetchPropositionPower
+} = usePropositionPowerQuery(toRef(props, 'space'));
+
 const unsupportedProposalNetworks = computed(() => {
   if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
 
@@ -265,6 +283,11 @@ async function handleProposeClick() {
 
   if (props.space.terms && !termsStore.areAccepted(props.space)) {
     modalOpenTerms.value = true;
+    return;
+  }
+
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
     return;
   }
 
@@ -342,6 +365,8 @@ async function handleProposeClick() {
     } else {
       router.push({ name: 'space-proposals' });
     }
+  } catch (e) {
+    console.error(e);
   } finally {
     sending.value = false;
   }
@@ -382,16 +407,10 @@ function handleTransactionAccept() {
   reset();
 }
 
-function handleFetchPropositionPower() {
-  fetchPropositionPower(props.space);
-}
-
 watch(
   [() => web3.value.account, () => web3.value.authLoading],
   ([account, authLoading]) => {
     if (!account || authLoading) return;
-
-    handleFetchPropositionPower();
   },
   { immediate: true }
 );
@@ -440,44 +459,51 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal">
-    <UiTopnav class="gap-2 px-4">
-      <UiButton
-        :to="{ name: 'space-overview', params: { space: spaceKey } }"
-        class="w-[46px] !px-0 mr-2 shrink-0"
-      >
-        <IH-arrow-narrow-left />
-      </UiButton>
-      <h4
-        class="grow truncate"
-        v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
-      />
-      <IndicatorPendingTransactions />
-      <UiTooltip title="Drafts">
-        <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-          <IH-collection class="inline-block" />
+  <div v-if="proposal" class="h-full">
+    <UiTopnav
+      :class="{ 'maximum:border-l': isWhiteLabel }"
+      class="maximum:border-r"
+    >
+      <div class="flex items-center gap-3 shrink truncate">
+        <UiButton
+          :to="{ name: 'space-overview', params: { space: spaceKey } }"
+          class="w-[46px] !px-0 ml-4 shrink-0"
+        >
+          <IH-arrow-narrow-left />
         </UiButton>
-      </UiTooltip>
-      <UiButton
-        class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-        :loading="
-          !!web3.account &&
-          (sending ||
-            !propositionPower ||
-            propositionPower?.status === 'loading')
-        "
-        :disabled="!canSubmit"
-        @click="handleProposeClick"
-      >
-        <span
-          class="hidden md:inline-block"
-          v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+        <h4
+          class="grow truncate"
+          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
         />
-        <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-      </UiButton>
+      </div>
+      <div class="flex gap-2 items-center">
+        <IndicatorPendingTransactions />
+        <UiTooltip title="Drafts">
+          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+            <IH-collection class="inline-block" />
+          </UiButton>
+        </UiTooltip>
+        <UiButton
+          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          :loading="isSubmitButtonLoading"
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
+        >
+          <span
+            class="hidden md:inline-block"
+            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
+      </div>
     </UiTopnav>
-    <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
-      <div class="flex-1 grow min-w-0">
+    <div
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
+    >
+      <div
+        class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
+        v-bind="$attrs"
+      >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
             v-if="
@@ -488,37 +514,51 @@ watchEffect(() => {
             type="error"
             class="mb-4"
           >
-            <div>
-              You cannot create proposals. This space is configured with
-              non-premium networks (<template
-                v-for="(n, i) in unsupportedProposalNetworks"
-                :key="n.key"
-              >
-                <b>{{ n.name }}</b>
-                <template
-                  v-if="
-                    unsupportedProposalNetworks.length > 1 &&
-                    i < unsupportedProposalNetworks.length - 1
-                  "
-                  >,
-                </template> </template
-              >). Change to a
-              <AppLink
-                to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
-                >premium network
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
-              or upgrade networks to continue.
-            </div>
+            You cannot create proposals. This space is configured with
+            non-premium networks (<template
+              v-for="(n, i) in unsupportedProposalNetworks"
+              :key="n.key"
+            >
+              <b>{{ n.name }}</b>
+              <template
+                v-if="
+                  unsupportedProposalNetworks.length > 1 &&
+                  i < unsupportedProposalNetworks.length - 1
+                "
+                >,
+              </template> </template
+            >). Change to a
+            <AppLink
+              to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              class="font-semibold text-rose-500"
+              >premium network
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </AppLink>
+            or
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="font-semibold text-rose-500"
+            >
+              upgrade your space
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </a>
+            to continue.
           </UiAlert>
           <template v-else>
-            <MessageVotingPower
-              v-if="propositionPower"
-              class="mb-4"
-              :voting-power="propositionPower"
-              action="propose"
-              @fetch-voting-power="handleFetchPropositionPower"
-            />
+            <template v-if="!isPropositionPowerPending">
+              <MessageErrorFetchPower
+                v-if="isPropositionPowerError || !propositionPower"
+                class="mb-4"
+                :type="'proposition'"
+                @fetch="fetchPropositionPower"
+              />
+              <MessagePropositionPower
+                v-else-if="propositionPower && !propositionPower.canPropose"
+                class="mb-4"
+                :proposition-power="propositionPower"
+              />
+            </template>
             <UiAlert
               v-if="
                 propositionPower &&
@@ -573,6 +613,7 @@ watchEffect(() => {
             v-model="proposal.title"
             :definition="TITLE_DEFINITION"
             :error="formErrors.title"
+            :required="true"
           />
           <div class="flex space-x-3">
             <button type="button" @click="previewEnabled = false">
@@ -617,18 +658,13 @@ watchEffect(() => {
               >.
             </template>
           </UiComposer>
-          <div class="s-base mb-5">
-            <UiInputString
-              :key="proposalKey || ''"
-              v-model="proposal.discussion"
-              :definition="DISCUSSION_DEFINITION"
-              :error="formErrors.discussion"
-            />
-            <UiLinkPreview
-              :key="proposalKey || ''"
-              :url="proposal.discussion"
-            />
-          </div>
+          <UiInputString
+            :key="proposalKey || ''"
+            v-model="proposal.discussion"
+            :definition="DISCUSSION_DEFINITION"
+            :error="formErrors.discussion"
+          />
+          <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
           <div
             v-if="
               network &&
@@ -636,7 +672,7 @@ watchEffect(() => {
               strategiesWithTreasuries.length > 0
             "
           >
-            <h4 class="eyebrow mb-2">Execution</h4>
+            <h4 class="eyebrow mb-2 mt-4">Execution</h4>
             <EditorExecution
               v-for="execution in editorExecutions"
               :key="execution.address"
@@ -658,12 +694,8 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix
-        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6']"
-        :top="72"
-        :bottom="64"
-      >
-        <div class="flex flex-col p-4 space-y-4">
+      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+        <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
             :voting-types="

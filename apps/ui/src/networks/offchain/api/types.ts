@@ -79,7 +79,7 @@ export type ApiSpace = {
   flagged: boolean;
   domain: string | null;
   skin: string | null;
-  skinSettings: SkinSettings | null;
+  skinSettings: SkinSettings;
   template: string | null;
   guidelines: string | null;
   categories: string[];
@@ -105,7 +105,9 @@ export type ApiProposal = {
     network: string;
     admins: string[];
     moderators: string[];
+    members: string[];
     symbol: string;
+    labels: SpaceMetadataLabel[];
     terms: string;
   };
   type: VoteType;
@@ -154,6 +156,7 @@ export type ApiStrategy = {
   author: string;
   version: string;
   spacesCount: number;
+  verifiedSpacesCount: number;
   examples: any;
   schema: any;
 };

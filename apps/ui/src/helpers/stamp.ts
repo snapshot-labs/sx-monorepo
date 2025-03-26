@@ -1,6 +1,11 @@
+import { ChainId } from '@/types';
 import { formatAddress } from './utils';
 
 const resolvedAddresses = new Map<string, string | null>();
+
+const STAMP_URL = 'https://stamp.fyi';
+
+const SKIP_LIST = ['shawnpetersisastupidnigger.eth'];
 
 export async function getNames(
   addresses: string[]
@@ -16,7 +21,7 @@ export async function getNames(
     let data: string[] = [];
 
     if (unresolvedAddresses.length > 0) {
-      const res = await fetch('https://stamp.fyi', {
+      const res = await fetch(STAMP_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -34,10 +39,13 @@ export async function getNames(
     }
 
     const entries: any = Object.entries(inputMapping)
-      .map(([address, formatted]) => [
-        address,
-        resolvedAddresses.get(formatted) || null
-      ])
+      .map(([address, formatted]) => {
+        let name = resolvedAddresses.get(formatted);
+        if (name && SKIP_LIST.includes(name)) {
+          name = null;
+        }
+        return [address, name];
+      })
       .filter(([, name]) => name);
 
     return Object.fromEntries(entries);
@@ -45,4 +53,27 @@ export async function getNames(
     console.error('Failed to resolve names', e);
     return {};
   }
+}
+
+export async function getENSNames(
+  address: string,
+  chaindId: ChainId
+): Promise<string[]> {
+  const res = await fetch(STAMP_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      method: 'lookup_domains',
+      params: formatAddress(address),
+      network: chaindId
+    })
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Failed to get domains');
+  }
+
+  return (await res.json()).result;
 }

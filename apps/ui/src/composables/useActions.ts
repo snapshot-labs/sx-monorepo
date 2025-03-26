@@ -1,6 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
+import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
@@ -40,12 +41,7 @@ export function useActions() {
       try {
         return await fn(...args);
       } catch (e) {
-        const isUserAbortError =
-          e.code === 4001 ||
-          e.message === 'User rejected the request.' ||
-          e.code === 'ACTION_REJECTED';
-
-        if (!isUserAbortError) {
+        if (!isUserAbortError(e)) {
           uiStore.addNotification(
             'error',
             'Something went wrong. Please try again later.'
@@ -271,6 +267,29 @@ export function useActions() {
     console.log('Receipt', receipt);
 
     return receipt;
+  }
+
+  async function createSpaceRaw(
+    networkId: NetworkID,
+    id: string,
+    settings: string
+  ) {
+    if (!auth.value) {
+      await forceLogin();
+      return null;
+    }
+
+    const network = getNetwork(networkId);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
+
+    return wrapPromise(
+      networkId,
+      network.actions.createSpaceRaw(auth.value.provider, id, settings)
+    );
   }
 
   async function vote(
@@ -680,7 +699,7 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
       return false;
     }
 
@@ -706,7 +725,7 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
       return false;
     }
 
@@ -757,6 +776,7 @@ export function useActions() {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
     createSpace: wrapWithErrors(createSpace),
+    createSpaceRaw: wrapWithErrors(createSpaceRaw),
     vote: wrapWithErrors(vote),
     propose: wrapWithErrors(propose),
     updateProposal: wrapWithErrors(updateProposal),

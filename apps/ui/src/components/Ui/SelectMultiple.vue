@@ -14,6 +14,7 @@ const model = defineModel<T[]>({ required: true });
 
 const props = defineProps<{
   error?: string;
+  required?: boolean;
   definition: DefinitionWithMultipleOptions<T> & {
     maxItems?: number;
   };
@@ -69,6 +70,7 @@ watch(model, () => {
     :definition="definition"
     :error="error"
     :dirty="dirty"
+    :required="required"
     class="relative"
   >
     <Listbox v-slot="{ open }" v-model="inputValue" multiple as="div">

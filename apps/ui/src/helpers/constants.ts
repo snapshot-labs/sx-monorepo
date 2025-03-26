@@ -10,13 +10,16 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
+export const UNIFIED_API_URL = 'https://api.snapshot.box';
+export const UNIFIED_API_TESTNET_URL = 'https://testnet-api.snapshot.box';
+
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
 export const TURBO_URL =
   'https://docs.snapshot.box/user-guides/spaces/turbo-plan';
 
 export const VERIFIED_URL =
-  'https://docs.snapshot.box/user-guides/spaces/get-verified';
+  'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
@@ -27,6 +30,9 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   matic: 137,
   base: 8453,
   arb1: 42161,
+  mnt: 5000,
+  ape: 33139,
+  curtis: 33111,
   sep: 11155111,
   // Starknet
   sn: '0x534e5f4d41494e',
@@ -36,17 +42,25 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
 export const COINGECKO_ASSET_PLATFORMS = {
   1: 'ethereum',
   10: 'optimistic-ethereum',
+  100: 'xdai',
   137: 'polygon-pos',
+  5000: 'mantle',
   8453: 'base',
-  42161: 'arbitrum-one'
+  42161: 'arbitrum-one',
+  33139: 'ethereum',
+  33111: 'apechain'
 };
 
 export const COINGECKO_BASE_ASSETS = {
   1: 'ethereum',
   10: 'ethereum',
+  100: 'xdai',
   137: 'matic-network',
+  5000: 'mantle',
   8453: 'ethereum',
-  42161: 'ethereum'
+  42161: 'ethereum',
+  33139: 'apecoin',
+  33111: 'apecoin'
 };
 
 export const MAX_SYMBOL_LENGTH = 12;
@@ -78,6 +92,7 @@ export const SUPPORTED_VOTING_TYPES: VoteType[] = [
   'single-choice',
   'approval',
   'ranked-choice',
+  'copeland',
   'weighted',
   'quadratic'
 ] as const;
@@ -117,6 +132,12 @@ export const VOTING_TYPES_INFO: Record<
     label: 'Quadratic voting',
     description:
       'Each voter may spread voting power across any number of choices. Results are calculated quadratically.'
+  },
+  copeland: {
+    label: 'Copeland voting',
+    description:
+      'Voters can rank multiple choices. Results are calculated by Copeland method.',
+    isBeta: true
   }
 };
 
@@ -143,7 +164,6 @@ export const VALIDATION_TYPES_INFO: Record<
   | 'only-members'
   | 'basic'
   | 'passport-gated'
-  | 'arbitrum'
   | 'karma-eas-attestation',
   { label: string; description: string }
 > = {
@@ -165,11 +185,6 @@ export const VALIDATION_TYPES_INFO: Record<
     description:
       'Protect your space from spam by requiring users to have a Gitcoin Passport to create a proposal.'
   },
-  arbitrum: {
-    label: 'Arbitrum DAO votable supply',
-    description:
-      'Use with erc20-votes to validate by percentage of votable supply.'
-  },
   'karma-eas-attestation': {
     label: 'Karma EAS Attestation',
     description: 'Use EAS attest.sh to determine if user can create a proposal.'
@@ -177,3 +192,5 @@ export const VALIDATION_TYPES_INFO: Record<
 };
 
 export const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
+
+export const RECENT_CONNECTOR = 'recent-connector';

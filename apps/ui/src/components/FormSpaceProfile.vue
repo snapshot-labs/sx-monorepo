@@ -74,8 +74,7 @@ const votingPowerDefinition = computed(() => ({
       type: 'string',
       title: 'Voting power symbol',
       examples: ['e.g. VP'],
-      maxLength: isOffchainNetwork.value ? 16 : MAX_SYMBOL_LENGTH,
-      minLength: isOffchainNetwork.value ? 1 : undefined
+      maxLength: isOffchainNetwork.value ? 16 : MAX_SYMBOL_LENGTH
     }
   }
 }));
@@ -153,7 +152,7 @@ onMounted(() => {
 
 <template>
   <UiInputStampCover v-model="(form as any).cover" :space="space" />
-  <div class="s-box p-4 mt-[-80px] max-w-[640px]">
+  <div class="s-box px-4 mt-[-56px] max-w-[640px]">
     <UiInputStamp
       v-model="(form as any).avatar"
       :definition="{

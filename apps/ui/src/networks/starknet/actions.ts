@@ -188,7 +188,7 @@ export function createActions(
           proposalValidationStrategy: {
             addr: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
-              ? params.validationStrategy.generateParams(
+              ? await params.validationStrategy.generateParams(
                   params.validationStrategy.params
                 )
               : []
@@ -197,12 +197,14 @@ export function createActions(
           metadataUri: `ipfs://${pinned.cid}`,
           daoUri: '',
           authenticators: params.authenticators.map(config => config.address),
-          votingStrategies: params.votingStrategies.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)
-              : []
-          })),
+          votingStrategies: await Promise.all(
+            params.votingStrategies.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? await config.generateParams(config.params)
+                : []
+            }))
+          ),
           votingStrategiesMetadata: metadataUris
         }
       });
@@ -278,6 +280,11 @@ export function createActions(
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
+          const params =
+            space.voting_power_validation_strategy_strategies_params[
+              strategy.paramsIndex
+            ];
+
           const metadata = await parseStrategyMetadata(
             space.voting_power_validation_strategies_parsed_metadata[
               strategy.index
@@ -286,6 +293,7 @@ export function createActions(
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -457,12 +465,14 @@ export function createActions(
             strategy.index
           );
 
+          const params = proposal.strategies_params[strategy.paramsIndex];
           const metadata = await parseStrategyMetadata(
             proposal.space.strategies_parsed_metadata[metadataIndex].payload
           );
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -627,12 +637,14 @@ export function createActions(
           authenticatorsToRemove: space.authenticators.filter(
             (authenticator, index) => authenticatorsToRemove.includes(index)
           ),
-          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)
-              : []
-          })),
+          votingStrategiesToAdd: await Promise.all(
+            votingStrategiesToAdd.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? await config.generateParams(config.params)
+                : []
+            }))
+          ),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
             index => space.strategies_indices[index]
           ),
@@ -640,7 +652,9 @@ export function createActions(
           proposalValidationStrategy: {
             addr: validationStrategy.address,
             params: validationStrategy.generateParams
-              ? validationStrategy.generateParams(validationStrategy.params)
+              ? await validationStrategy.generateParams(
+                  validationStrategy.params
+                )
               : []
           },
           proposalValidationStrategyMetadataUri,
@@ -796,6 +810,9 @@ export function createActions(
     updateUser: () => {},
     updateStatement: () => {},
     updateSettingsRaw: () => {
+      throw new Error('Not implemented');
+    },
+    createSpaceRaw: () => {
       throw new Error('Not implemented');
     },
     deleteSpace: () => {

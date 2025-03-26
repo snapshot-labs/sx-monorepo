@@ -161,7 +161,7 @@ export const updateStatementTypes = {
   ]
 };
 
-export const updateSpaceTypes = {
+export const createSpaceTypes = {
   Space: [
     { name: 'from', type: 'address' },
     { name: 'space', type: 'string' },
@@ -169,6 +169,8 @@ export const updateSpaceTypes = {
     { name: 'settings', type: 'string' }
   ]
 };
+
+export const updateSpaceTypes = createSpaceTypes;
 
 export const deleteSpaceTypes = {
   DeleteSpace: [

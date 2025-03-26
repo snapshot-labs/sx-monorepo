@@ -5,15 +5,18 @@ export default {
 </script>
 
 <script setup lang="ts">
+import { getRandomHexColor } from '@/helpers/utils';
+
 const props = defineProps<{
   loading?: boolean;
   error?: string;
+  required?: boolean;
   definition: any;
 }>();
 
 const model = defineModel<string>();
 
-const { currentMode } = useUserSkin();
+const { currentTheme } = useTheme();
 
 const dirty = ref(false);
 
@@ -30,19 +33,24 @@ const inputValue = computed({
   }
 });
 
-const backgroundColor = computed(() => {
-  const color = inputValue.value;
-  return /^#[0-9A-F]{6}$/i.test(color)
-    ? color
-    : currentMode.value === 'dark'
-      ? '#000000'
-      : '#FFFFFF';
+const shadowColor = computed({
+  get() {
+    if (inputValue.value && isColorValid(inputValue.value)) {
+      return inputValue.value;
+    }
+    return currentTheme.value === 'dark' ? '#000000' : '#FFFFFF';
+  },
+  set(newValue: string) {
+    model.value = newValue.toUpperCase();
+  }
 });
 
-function generateRandomColor() {
-  model.value = `#${Math.floor(Math.random() * 16777215)
-    .toString(16)
-    .padStart(6, '0')}`.toUpperCase();
+function isColorValid(color: string): boolean {
+  return /^#[0-9A-F]{6}$/i.test(color);
+}
+
+function setRandomColor() {
+  model.value = getRandomHexColor();
 }
 
 watch(model, () => {
@@ -56,12 +64,6 @@ debouncedWatch(
   },
   { debounce: 1000 }
 );
-
-onMounted(() => {
-  if (!model.value) {
-    generateRandomColor();
-  }
-});
 
 function validateAndConvertColor(color: string): string {
   if (!color) return color;
@@ -94,12 +96,14 @@ function validateAndConvertColor(color: string): string {
     :loading="loading"
     :error="error"
     :dirty="dirty"
+    :required="required"
     :input-value-length="inputValue?.length"
   >
     <div class="flex">
-      <div
-        class="absolute size-[18px] mt-[30px] ml-3 rounded border border-skin-text border-opacity-20"
-        :style="{ backgroundColor: backgroundColor }"
+      <input
+        v-model="shadowColor"
+        type="color"
+        class="absolute appearance-none cursor-pointer size-[18px] mt-[30px] ml-3 rounded border border-skin-text border-opacity-20 padding-0 margin-0"
       />
       <input
         :id="id"
@@ -109,9 +113,31 @@ function validateAndConvertColor(color: string): string {
         v-bind="$attrs"
         :placeholder="definition.examples && definition.examples[0]"
       />
-      <button class="absolute right-3 mt-[20px]" @click="generateRandomColor">
+      <button
+        v-if="definition.showControls"
+        title="Generate random color"
+        class="absolute right-3 mt-[20px]"
+        @click="setRandomColor"
+      >
         <IH-refresh class="text-skin-link" />
       </button>
     </div>
   </UiWrapperInput>
 </template>
+
+<style scoped>
+::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+::-webkit-color-swatch {
+  border: 0;
+  border-radius: 0;
+}
+
+::-moz-color-swatch,
+::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+</style>

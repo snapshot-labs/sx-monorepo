@@ -20,7 +20,7 @@ const availableNetworks = enabledReadWriteNetworks.map(id => {
 
 <template>
   <UiContainerSettings :title="title" :description="description">
-    <div class="grid grid-cols-auto gap-3 mb-3">
+    <div class="grid grid-cols-auto gap-3">
       <button
         v-for="network in availableNetworks"
         :key="network.id"

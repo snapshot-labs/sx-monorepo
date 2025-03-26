@@ -9,7 +9,7 @@ import {
   handleExecutionStrategy,
   longStringToText,
   registerProposal,
-  updateProposaValidationStrategy
+  updateProposalValidationStrategy
 } from './utils';
 import {
   Leaderboard,
@@ -97,7 +97,7 @@ export function createWriters(config: FullConfig) {
     space.created = block?.timestamp ?? getCurrentTimestamp();
     space.tx = tx.transaction_hash;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.proposal_validation_strategy.address,
       event.proposal_validation_strategy.params,
@@ -376,7 +376,7 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.proposal_validation_strategy.address,
       event.proposal_validation_strategy.params,
