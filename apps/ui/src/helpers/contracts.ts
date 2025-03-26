@@ -12,12 +12,14 @@ export async function getTokensMetadata(chainId: number, tokens: string[]) {
     multi.call(`${token}.decimals`, token, 'decimals');
   });
 
-  const result = await multi.execute();
+  const result = await multi.execute({
+    allowFailure: true
+  });
 
   return tokens.map(token => ({
     address: token,
     name: result[token].name,
     symbol: result[token].symbol,
-    decimals: result[token].decimals
+    decimals: result[token].decimals ?? 0
   }));
 }
