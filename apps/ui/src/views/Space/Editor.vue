@@ -560,7 +560,7 @@ watchEffect(() => {
               />
             </template>
             <UiAlert
-              v-if="
+              v-else-if="
                 propositionPower &&
                 ['default', 'flagged'].includes(spaceTypeForProposalLimit) &&
                 proposalLimitReached
