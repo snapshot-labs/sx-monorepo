@@ -126,9 +126,8 @@ export function useWalletEns(networkId: NetworkID) {
   }
 
   async function attachCustomName(name: string): Promise<boolean> {
-    const resolvedAddress = (await getAddresses([name], network.value.chainId))[
-      name
-    ];
+    const resolvedAddress =
+      (await getAddresses([name], network.value.chainId))[name] || '';
 
     if (!compareAddresses(resolvedAddress, web3.value.account)) {
       return false;

@@ -23,6 +23,7 @@ const {
 } = useWalletEns(props.networkId);
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
+const { addNotification } = useUiStore();
 
 const isModalEnsNameOpen = ref(false);
 
@@ -40,12 +41,17 @@ const isTestnet = computed(() => {
   return getNetwork(props.networkId).name.includes('testnet');
 });
 
-function attachEnsName(name: string) {
+function handleAttachEnsName(name: string) {
   isModalEnsNameOpen.value = false;
 
   if (validNames.value.find(n => n.name === name)) {
     spaceId.value = name;
     emit('select');
+  } else if (!invalidNames.value.find(n => n.name === name)) {
+    addNotification(
+      'error',
+      `The name ${name} is not available for space creation`
+    );
   }
 }
 
@@ -190,7 +196,7 @@ function handleSelect(value: string) {
       :open="isModalEnsNameOpen"
       :account="web3.account"
       :network-id="networkId"
-      @attach="attachEnsName"
+      @attach="handleAttachEnsName"
       @close="isModalEnsNameOpen = false"
     />
   </teleport>
