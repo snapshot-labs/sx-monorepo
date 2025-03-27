@@ -545,35 +545,44 @@ watchEffect(() => {
             </a>
             to continue.
           </UiAlert>
-          <UiAlert
-            v-else-if="spaceTypeForProposalLimit === 'flagged'"
-            type="error"
-            class="mb-4"
-          >
-            <span
-              >Please verify your space to publish more proposals.
-              <a
-                :href="VERIFIED_URL"
-                target="_blank"
-                class="text-rose-500 dark:text-neutral-100 font-semibold"
-                >Verify space</a
-              >.</span
-            >
-          </UiAlert>
           <template v-else>
-            <template v-if="!isPropositionPowerPending">
-              <MessageErrorFetchPower
-                v-if="isPropositionPowerError || !propositionPower"
-                class="mb-4"
-                :type="'proposition'"
-                @fetch="fetchPropositionPower"
-              />
-              <MessagePropositionPower
-                v-else-if="propositionPower && !propositionPower.canPropose"
-                class="mb-4"
-                :proposition-power="propositionPower"
-              />
-            </template>
+            <MessageErrorFetchPower
+              v-if="
+                !isPropositionPowerPending &&
+                (isPropositionPowerError || !propositionPower)
+              "
+              class="mb-4"
+              :type="'proposition'"
+              @fetch="fetchPropositionPower"
+            />
+            <MessagePropositionPower
+              v-else-if="
+                !isPropositionPowerPending &&
+                propositionPower &&
+                !propositionPower.canPropose
+              "
+              class="mb-4"
+              :proposition-power="propositionPower"
+            />
+            <UiAlert
+              v-else-if="
+                propositionPower &&
+                ['default', 'flagged'].includes(spaceTypeForProposalLimit) &&
+                proposalLimitReached
+              "
+              type="error"
+              class="mb-4"
+            >
+              <span
+                >Please verify your space to publish more proposals.
+                <a
+                  :href="VERIFIED_URL"
+                  target="_blank"
+                  class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >Verify space</a
+                >.</span
+              >
+            </UiAlert>
             <UiAlert
               v-else-if="
                 propositionPower &&
