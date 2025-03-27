@@ -1,4 +1,4 @@
-import { getAddress, getENSNames } from '@/helpers/stamp';
+import { getAddresses, getENSNames } from '@/helpers/stamp';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { getSpaces } from '@/queries/spaces';
@@ -126,7 +126,9 @@ export function useWalletEns(networkId: NetworkID) {
   }
 
   async function attachCustomName(name: string): Promise<boolean> {
-    const resolvedAddress = await getAddress(name, network.value.chainId);
+    const resolvedAddress = (await getAddresses([name], network.value.chainId))[
+      name
+    ];
 
     if (!compareAddresses(resolvedAddress, web3.value.account)) {
       return false;
