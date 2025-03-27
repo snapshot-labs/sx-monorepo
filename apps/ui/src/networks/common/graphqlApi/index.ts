@@ -188,20 +188,14 @@ function processExecutions(
   proposal: ApiProposal,
   executionNetworkId: NetworkID
 ): ProposalExecution[] {
-  // NOTE: This is unstable, meaning that if executors_strategies or treasuries
-  // are modified in the future it will affect pass proposals.
-  // We should persist those values on proposal directly so it's stable.
-  // Right now we can't really update subgraphs because of TheGraph issue.
   if (!proposal.metadata?.execution) return [];
 
   const transactions = formatExecution(proposal.metadata?.execution);
   if (transactions.length === 0) return [];
 
-  const match = proposal.space.metadata?.executors_strategies.find(
-    strategy => strategy.address === proposal.execution_strategy
-  );
+  const match = proposal.execution_strategy_details;
 
-  const treasuries = proposal.space.metadata?.treasuries.map(treasury =>
+  const treasuries = proposal.treasuries.map(treasury =>
     formatMetadataTreasury(treasury)
   );
 

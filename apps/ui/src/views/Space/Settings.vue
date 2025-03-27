@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
@@ -26,6 +26,7 @@ const {
   validationStrategy,
   votingStrategies,
   proposalValidation,
+  executionStrategies,
   guidelines,
   template,
   quorumType,
@@ -63,6 +64,7 @@ const hasAdvancedErrors = ref(false);
 
 const executeFn = ref(save);
 const saving = ref(false);
+const customStrategyModalOpen = ref(false);
 
 type Tab = {
   id:
@@ -165,21 +167,6 @@ const activeTab: Ref<Tab['id']> = computed(() => {
   return 'profile';
 });
 const network = computed(() => getNetwork(props.space.network));
-
-const executionStrategies = computed(() => {
-  return props.space.executors.map((executor, i) => {
-    return {
-      id: executor,
-      address: executor,
-      name:
-        network.value.constants.EXECUTORS[executor] ||
-        network.value.constants.EXECUTORS[props.space.executors_types[i]] ||
-        props.space.executors_types[i],
-      params: {},
-      paramsDefinition: {}
-    };
-  });
-});
 
 const isTicketValid = computed(() => {
   return !(
@@ -285,6 +272,23 @@ function handleSpaceDelete() {
 
     return null;
   };
+}
+
+function addCustomStrategy(strategy: { address: string; type: string }) {
+  customStrategyModalOpen.value = false;
+
+  executionStrategies.value = [
+    ...executionStrategies.value,
+    {
+      id: crypto.randomUUID(),
+      address: strategy.address,
+      type: strategy.type,
+      generateSummary: () => strategy.type,
+      name: 'Custom strategy',
+      params: {},
+      paramsDefinition: {}
+    }
+  ];
 }
 
 function handleTabFocus(event: FocusEvent) {
@@ -452,6 +456,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             :network-id="space.network"
             :strategy="strategy"
           />
+          <UiButton
+            v-if="evmNetworks.includes(space.network)"
+            @click="customStrategyModalOpen = true"
+          >
+            Add custom strategy
+          </UiButton>
         </div>
       </UiContainerSettings>
       <FormStrategies
@@ -570,6 +580,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     </div>
   </UiToolbarBottom>
   <teleport to="#modal">
+    <ModalCustomStrategy
+      :open="customStrategyModalOpen"
+      :network-id="space.network"
+      :chain-id="network.chainId"
+      @close="customStrategyModalOpen = false"
+      @save="addCustomStrategy"
+    />
     <ModalTransactionProgress
       :open="saving && !isOffchainNetwork"
       :chain-id="network.chainId"
