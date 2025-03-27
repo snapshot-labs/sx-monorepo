@@ -577,7 +577,7 @@ watchEffect(() => {
                 </span>
               </UiAlert>
             </template>
-            <template v-if="!isPropositionPowerPending">
+            <template v-else-if="!isPropositionPowerPending">
               <MessageErrorFetchPower
                 v-if="isPropositionPowerError || !propositionPower"
                 class="mb-4"
