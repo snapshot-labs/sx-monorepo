@@ -155,9 +155,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   // Onchain properties
   const authenticators = ref([] as StrategyConfig[]);
   const validationStrategy = ref(null as StrategyConfig | null);
-  const executionStrategies = ref([] as StrategyConfig[]);
   const votingStrategies = ref([] as StrategyConfig[]);
-  const initialExecutionStrategiesObjectHash = ref(null as string | null);
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
@@ -283,25 +281,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       },
       ...strategy
     };
-  }
-
-  async function getInitialExecutionStrategies(
-    executors: string[],
-    executorTypes: string[]
-  ) {
-    return executors.map((executor, i) => {
-      return {
-        id: executor,
-        address: executor,
-        type: executorTypes[i],
-        name:
-          network.value.constants.EXECUTORS[executor] ||
-          network.value.constants.EXECUTORS[executorTypes[i]] ||
-          executorTypes[i],
-        params: {},
-        paramsDefinition: {}
-      };
-    });
   }
 
   async function hasStrategyChanged(
@@ -689,7 +668,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       strategiesToAdd,
       strategiesToRemove,
       validationStrategy.value,
-      executionStrategies.value,
       votingDelay.value,
       minVotingPeriod.value,
       maxVotingPeriod.value
@@ -734,11 +712,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.voting_power_validation_strategies_parsed_metadata
     );
 
-    const executionStrategiesValue = await getInitialExecutionStrategies(
-      space.value.executors,
-      space.value.executors_types
-    );
-
     controller.value = force
       ? await network.value.helpers.getSpaceController(space.value)
       : initialController.value;
@@ -756,10 +729,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy.value = validationStrategyValue;
     initialValidationStrategyObjectHash.value = objectHash(
       validationStrategyValue
-    );
-    executionStrategies.value = executionStrategiesValue;
-    initialExecutionStrategiesObjectHash.value = objectHash(
-      executionStrategiesValue
     );
 
     if (offchainNetworks.includes(space.value.network)) {
@@ -814,9 +783,6 @@ export function useSpaceSettings(space: Ref<Space>) {
       const validationStrategyValue = validationStrategy.value;
       const initialValidationStrategyObjectHashValue =
         initialValidationStrategyObjectHash.value;
-      const executionStrategiesValue = executionStrategies.value;
-      const initialExecutionStrategiesObjectHashValue =
-        initialExecutionStrategiesObjectHash.value;
       const proposalValidationValue = proposalValidation.value;
       const guidelinesValue = guidelines.value;
       const templateValue = template.value;
@@ -1009,13 +975,6 @@ export function useSpaceSettings(space: Ref<Space>) {
         if (hasValidationStrategyChanged) {
           return true;
         }
-
-        const hasExecutionStrategiesChanged =
-          objectHash(executionStrategiesValue) !==
-          initialExecutionStrategiesObjectHashValue;
-        if (hasExecutionStrategiesChanged) {
-          return true;
-        }
       }
     },
     false,
@@ -1041,7 +1000,6 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy,
     votingStrategies,
     proposalValidation,
-    executionStrategies,
     guidelines,
     template,
     quorumType,

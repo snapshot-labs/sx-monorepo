@@ -44,13 +44,6 @@ export function getExecutionData(
     );
   }
 
-  if (input?.transactions) {
-    return createAvatarExecutor().getExecutionData(
-      executorAddress,
-      input.transactions
-    );
-  }
-
   throw new Error(
     `Not enough data to create execution for executor ${executorAddress}`
   );

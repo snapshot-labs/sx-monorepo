@@ -8,18 +8,13 @@ import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecut
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
-import {
-  convertChoice,
-  handleCustomExecutionStrategy,
-  updateProposalValidationStrategy
-} from './utils';
+import { convertChoice, updateProposalValidationStrategy } from './utils';
 import {
   ExecutionHash,
   ExecutionStrategy,
   Leaderboard,
   Proposal,
   Space,
-  SpaceMetadataItem,
   StarknetL1Execution,
   User,
   Vote
@@ -30,18 +25,6 @@ import {
   handleVoteMetadata
 } from '../common/ipfs';
 import { dropIpfs, getCurrentTimestamp } from '../common/utils';
-
-/**
- * List of execution strategies type that are known and we expect them to be deployed via factory.
- * Other execution strategies will be treated as custom execution and will be resolved once
- * they are added to space.
- */
-const KNOWN_EXECUTION_STRATEGIES = [
-  'SimpleQuorumAvatar',
-  'SimpleQuorumTimelock',
-  'Axiom',
-  'Isokratia'
-];
 
 const EMPTY_EXECUTION_HASH =
   '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
@@ -195,12 +178,7 @@ export function createWriters(config: FullConfig) {
     }
   };
 
-  const handleSpaceCreated: evm.Writer = async ({
-    block,
-    blockNumber,
-    tx,
-    event
-  }) => {
+  const handleSpaceCreated: evm.Writer = async ({ block, tx, event }) => {
     console.log('Handle space created');
 
     if (!event) return;
@@ -243,33 +221,13 @@ export function createWriters(config: FullConfig) {
       config
     );
 
-    let spaceMetadataItem: SpaceMetadataItem | undefined;
     try {
       const metadataUri = event.args.input.metadataURI;
-      spaceMetadataItem = await handleSpaceMetadata(
-        space.id,
-        metadataUri,
-        config
-      );
+      await handleSpaceMetadata(space.id, metadataUri, config);
 
       space.metadata = dropIpfs(metadataUri);
     } catch (e) {
       console.log('failed to parse space metadata', e);
-    }
-
-    if (spaceMetadataItem) {
-      for (const [i, executor] of spaceMetadataItem.executors.entries()) {
-        const type = spaceMetadataItem.executors_types[i];
-
-        if (type && !KNOWN_EXECUTION_STRATEGIES.includes(type)) {
-          await handleCustomExecutionStrategy(
-            executor,
-            blockNumber,
-            provider,
-            config
-          );
-        }
-      }
     }
 
     try {
@@ -286,25 +244,16 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handleMetadataUriUpdated: evm.Writer = async ({
-    blockNumber,
-    rawEvent,
-    event
-  }) => {
+  const handleMetadataUriUpdated: evm.Writer = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     console.log('Handle space metadata uri updated');
 
     const spaceId = getAddress(rawEvent.address);
 
-    let spaceMetadataItem: SpaceMetadataItem | undefined;
     try {
       const metadataUri = event.args.newMetadataURI;
-      spaceMetadataItem = await handleSpaceMetadata(
-        spaceId,
-        metadataUri,
-        config
-      );
+      await handleSpaceMetadata(spaceId, metadataUri, config);
 
       const space = await Space.loadEntity(spaceId, config.indexerName);
       if (!space) return;
@@ -314,21 +263,6 @@ export function createWriters(config: FullConfig) {
       await space.save();
     } catch (e) {
       console.log('failed to update space metadata', e);
-    }
-
-    if (spaceMetadataItem) {
-      for (const [i, executor] of spaceMetadataItem.executors.entries()) {
-        const type = spaceMetadataItem.executors_types[i];
-
-        if (type && !KNOWN_EXECUTION_STRATEGIES.includes(type)) {
-          await handleCustomExecutionStrategy(
-            executor,
-            blockNumber,
-            provider,
-            config
-          );
-        }
-      }
     }
   };
 
@@ -567,10 +501,6 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    const spaceMetadataItem = space.metadata
-      ? await SpaceMetadataItem.loadEntity(space.metadata, config.indexerName)
-      : null;
-
     const proposalId = event.args.proposalId.toNumber();
     const author = getAddress(event.args.author);
     const created = block?.timestamp ?? getCurrentTimestamp();
@@ -605,7 +535,6 @@ export function createWriters(config: FullConfig) {
     proposal.veto_tx = null;
     proposal.vote_count = 0;
 
-    proposal.treasuries = spaceMetadataItem?.treasuries ?? [];
     proposal.execution_strategy = getAddress(
       event.args.proposal.executionStrategy
     );
@@ -619,7 +548,6 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy,
       config.indexerName
     );
-
     if (executionStrategy) {
       proposal.quorum = BigInt(executionStrategy.quorum);
       proposal.timelock_veto_guardian =
@@ -629,11 +557,6 @@ export function createWriters(config: FullConfig) {
         executionStrategy.axiom_snapshot_address;
       proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot;
       proposal.execution_strategy_type = executionStrategy.type;
-
-      // Find matching strategy and persist it on space object
-      // We use this on UI to properly display execution with treasury
-      // information.
-      proposal.execution_strategy_details = executionStrategy.id;
     } else {
       proposal.quorum = 0n;
       proposal.timelock_veto_guardian = null;

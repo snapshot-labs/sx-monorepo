@@ -1,11 +1,8 @@
 import { defaultAbiCoder } from '@ethersproject/abi';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
-import { Contract } from '@ethersproject/contracts';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import IExecutionStrategy from './abis/IExecutionStrategy.json';
 import { FullConfig } from './config';
-import { ExecutionStrategy, Space } from '../../.checkpoint/models';
+import { Space } from '../../.checkpoint/models';
 import { handleVotingPowerValidationMetadata } from '../common/ipfs';
 
 /**
@@ -71,36 +68,4 @@ export async function updateProposalValidationStrategy(
       space.voting_power_validation_strategy_strategies_params = [];
     }
   }
-}
-
-export async function handleCustomExecutionStrategy(
-  address: string,
-  blockNumber: number,
-  provider: JsonRpcProvider,
-  config: FullConfig
-) {
-  const contract = new Contract(address, IExecutionStrategy, provider);
-
-  const overrides = {
-    blockTag: blockNumber
-  };
-
-  const type = await contract.getStrategyType(overrides);
-
-  let executionStrategy = await ExecutionStrategy.loadEntity(
-    address,
-    config.indexerName
-  );
-
-  if (executionStrategy) return;
-
-  executionStrategy = new ExecutionStrategy(address, config.indexerName);
-  executionStrategy.address = address;
-  executionStrategy.type = type;
-  executionStrategy.quorum = '0';
-  executionStrategy.treasury_chain = config.chainId;
-  executionStrategy.treasury = getAddress(address);
-  executionStrategy.timelock_delay = 0n;
-
-  await executionStrategy.save();
 }
