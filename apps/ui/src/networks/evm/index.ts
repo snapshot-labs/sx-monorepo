@@ -96,7 +96,7 @@ export const METADATA: Record<string, Metadata> = {
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
-    apiUrl: import.meta.env.VITE_EVM_SEPOLIA_API ?? UNIFIED_API_TESTNET_URL,
+    apiUrl: UNIFIED_API_TESTNET_URL,
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816

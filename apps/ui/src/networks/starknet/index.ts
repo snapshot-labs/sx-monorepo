@@ -44,8 +44,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'sep',
     rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl:
-      import.meta.env.VITE_STARKNET_SEPOLIA_API ?? UNIFIED_API_TESTNET_URL,
+    apiUrl: UNIFIED_API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   }
