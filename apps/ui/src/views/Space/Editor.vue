@@ -546,66 +546,50 @@ watchEffect(() => {
             to continue.
           </UiAlert>
           <template v-else>
-            <MessageErrorFetchPower
-              v-if="
-                !isPropositionPowerPending &&
-                (isPropositionPowerError || !propositionPower)
-              "
-              class="mb-4"
-              :type="'proposition'"
-              @fetch="fetchPropositionPower"
-            />
-            <MessagePropositionPower
-              v-else-if="
-                !isPropositionPowerPending &&
-                propositionPower &&
-                !propositionPower.canPropose
-              "
-              class="mb-4"
-              :proposition-power="propositionPower"
-            />
-            <UiAlert
-              v-else-if="
-                propositionPower &&
-                ['default', 'flagged'].includes(spaceTypeForProposalLimit) &&
-                proposalLimitReached
-              "
-              type="error"
-              class="mb-4"
-            >
-              <span
-                >Please verify your space to publish more proposals.
-                <a
-                  :href="VERIFIED_URL"
-                  target="_blank"
-                  class="text-rose-500 dark:text-neutral-100 font-semibold"
-                  >Verify space</a
-                >.</span
-              >
-            </UiAlert>
-            <UiAlert
-              v-else-if="
-                propositionPower &&
-                spaceTypeForProposalLimit !== 'turbo' &&
-                proposalLimitReached
-              "
-              type="error"
-              class="mb-4"
-            >
-              <span>
-                You can publish up to
-                {{ limits['space.verified.proposal_limit_per_day'] }}
-                proposals per day and
-                {{ limits['space.verified.proposal_limit_per_month'] }}
-                proposals per month.
-                <a
-                  :href="TURBO_URL"
-                  target="_blank"
-                  class="text-rose-500 dark:text-neutral-100 font-semibold"
-                  >Increase limit</a
-                >.
-              </span>
-            </UiAlert>
+            <template v-if="proposalLimitReached">
+              <UiAlert type="error" class="mb-4">
+                <span
+                  v-if="
+                    ['default', 'flagged'].includes(spaceTypeForProposalLimit)
+                  "
+                >
+                  Please verify your space to publish more proposals.
+                  <a
+                    :href="VERIFIED_URL"
+                    target="_blank"
+                    class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >
+                    Verify space </a
+                  >.</span
+                >
+                <span v-else-if="spaceTypeForProposalLimit !== 'turbo'">
+                  You can publish up to
+                  {{ limits['space.verified.proposal_limit_per_day'] }}
+                  proposals per day and
+                  {{ limits['space.verified.proposal_limit_per_month'] }}
+                  proposals per month.
+                  <a
+                    :href="TURBO_URL"
+                    target="_blank"
+                    class="text-rose-500 dark:text-neutral-100 font-semibold"
+                    >Increase limit</a
+                  >.
+                </span>
+              </UiAlert>
+            </template>
+            <template v-if="!isPropositionPowerPending">
+              <MessageErrorFetchPower
+                v-if="isPropositionPowerError || !propositionPower"
+                class="mb-4"
+                :type="'proposition'"
+                @fetch="fetchPropositionPower"
+              />
+              <MessagePropositionPower
+                v-else-if="propositionPower && !propositionPower.canPropose"
+                class="mb-4"
+                :proposition-power="propositionPower"
+              />
+            </template>
           </template>
           <div v-if="guidelines">
             <h4 class="mb-2 eyebrow">Guidelines</h4>
