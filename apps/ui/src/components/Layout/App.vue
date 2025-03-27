@@ -22,6 +22,7 @@ const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
+const { setTheme } = useTheme();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
@@ -134,7 +135,7 @@ watch(isSwiping, () => {
 watch(
   isWhiteLabel,
   isWhiteLabel => {
-    if (!isWhiteLabel) {
+    if (!isWhiteLabel || !skinSettings.value) {
       setAppName(APP_NAME);
       return;
     }
@@ -150,6 +151,7 @@ watch(
 
     setFavicon(faviconUrl);
     setAppName(whiteLabelSpace.value.name);
+    setTheme(skinSettings.value.theme);
     setSkin(skinSettings.value);
   },
   { immediate: true }
