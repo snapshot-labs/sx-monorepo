@@ -62,6 +62,8 @@ async function getDNSOwner(domain: string): Promise<string> {
     }
   );
 
+  if (!response.ok) throw new Error('Failed to fetch DNS Owner');
+
   const data = await response.json();
   // Error list: https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6
   if (data.Status === 3) return EMPTY_ADDRESS;
