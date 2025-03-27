@@ -359,7 +359,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
       >
         <div
-          class="w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
+          class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
         >
           <span class="truncate">Delegatee</span>
         </div>
@@ -383,7 +383,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </button>
         <button
           type="button"
-          class="w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
+          class="w-[120px] md:w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -433,7 +433,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               class="flex w-full space-x-3"
             >
               <div
-                class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
+                class="flex grow sm:grow-0 sm:shrink-0 items-center w-[120px] xs:w-[190px] py-3 gap-x-3 leading-[22px] truncate"
               >
                 <UiStamp :id="delegate.user" :size="32" />
                 <div class="flex flex-col truncate">
@@ -471,7 +471,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
               </div>
               <div
-                class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
+                class="w-[120px] md:w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
               >
                 <h4 class="text-skin-link truncate">
                   {{ _vp(Number(delegate.delegatedVotes)) }}

@@ -22,7 +22,8 @@ const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
-const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
+const { setTheme } = useTheme();
+const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
@@ -110,7 +111,7 @@ onMounted(async () => {
 
 watch(scrollDisabled, val => {
   const el = document.body;
-  el.classList[val ? 'add' : 'remove']('overflow-hidden');
+  el.classList[val ? 'add' : 'remove']('overflow-y-hidden');
 });
 
 watch(isSwiping, () => {
@@ -134,7 +135,7 @@ watch(isSwiping, () => {
 watch(
   isWhiteLabel,
   isWhiteLabel => {
-    if (!isWhiteLabel) {
+    if (!isWhiteLabel || !skinSettings.value) {
       setAppName(APP_NAME);
       return;
     }
@@ -150,7 +151,8 @@ watch(
 
     setFavicon(faviconUrl);
     setAppName(whiteLabelSpace.value.name);
-    setSkin(whiteLabelSpace.value.additionalRawData?.skinSettings);
+    setTheme(skinSettings.value.theme);
+    setSkin(skinSettings.value);
   },
   { immediate: true }
 );
@@ -196,6 +198,7 @@ router.afterEach(() => {
             v-if="hasSwipeableContent"
             type="button"
             class="text-skin-link lg:hidden ml-4"
+            :class="{ hidden: uiStore.sideMenuOpen }"
             @click="uiStore.toggleSidebar"
           >
             <IH-menu-alt-2 />
@@ -218,7 +221,7 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0 mt-[72px]">
+        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
           <router-view class="h-full pb-10" />
         </div>
         <div

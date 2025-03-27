@@ -147,6 +147,12 @@ function handleSelect(value: string) {
               </div>
             </div>
           </UiSelector>
+          <UiMessage
+            v-if="!validNames.length && !invalidNames.length"
+            type="danger"
+          >
+            No more ENS names available for space creation found.
+          </UiMessage>
         </div>
         <UiMessage v-else type="danger">
           No ENS names found for the current wallet.

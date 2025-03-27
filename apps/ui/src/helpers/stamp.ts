@@ -1,34 +1,55 @@
+import { ensNormalize } from '@ethersproject/hash';
 import { ChainId } from '@/types';
 import { formatAddress } from './utils';
 
 const resolvedAddresses = new Map<string, string | null>();
+const resolvedNames = new Map<string, string | null>();
 
 const STAMP_URL = 'https://stamp.fyi';
 
 const SKIP_LIST = ['shawnpetersisastupidnigger.eth'];
 
-export async function getAddress(
-  name: string,
+export async function getAddresses(
+  names: string[],
   chainId: ChainId
-): Promise<string> {
+): Promise<Record<string, string>> {
   try {
-    const res = await fetch(STAMP_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        method: 'resolve_names',
-        params: [name],
-        network: chainId
-      })
-    });
-    const data = (await res.json()).result;
+    const inputMapping = Object.fromEntries(
+      names.map(name => [name, ensNormalize(name)])
+    );
+    const resolvedNamesKeys = Array.from(resolvedNames.keys());
+    const unresolvedNames = Object.values(inputMapping).filter(
+      name => !resolvedNamesKeys.includes(name)
+    );
+    let data: string[] = [];
 
-    return data[name] || '';
+    if (unresolvedNames.length > 0) {
+      const res = await fetch(STAMP_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          method: 'resolve_names',
+          params: unresolvedNames,
+          network: chainId
+        })
+      });
+      data = (await res.json()).result;
+
+      unresolvedNames.forEach((formatted: string) => {
+        resolvedNames.set(formatted, data[formatted]);
+      });
+    }
+
+    const entries: any = Object.entries(inputMapping)
+      .map(([name, formatted]) => [name, resolvedNames.get(formatted)])
+      .filter(([, address]) => address);
+
+    return Object.fromEntries(entries);
   } catch (e) {
-    console.error('Failed to resolve names', e);
-    return '';
+    console.error('Failed to lookup addresses', e);
+    return {};
   }
 }
 
