@@ -37,9 +37,10 @@ const loading = ref(false);
 const form = ref({
   name: ''
 });
-const invalidDomain = ref(false);
+const domainValidationError = ref({});
 
 const formErrors = computed(() => {
+  domainValidationError.value = {};
   const validator = getValidator(DEFINITION);
   return validator.validate(form.value, { skipEmptyOptionalFields: true });
 });
@@ -57,7 +58,9 @@ async function handleSubmit() {
     form.value.name = ensNormalize(form.value.name);
 
     if (!(await attachCustomName(form.value.name))) {
-      invalidDomain.value = true;
+      domainValidationError.value = {
+        name: 'The given domain does not resolve to your address'
+      };
       return;
     }
 
@@ -72,7 +75,7 @@ watch(
   open => {
     if (!open) {
       form.value.name = '';
-      invalidDomain.value = false;
+      domainValidationError.value = {};
     }
   }
 );
@@ -84,10 +87,11 @@ watch(
       <h3>Attach custom domain</h3>
     </template>
     <div class="s-box p-4 space-y-3">
-      <UiAlert v-if="invalidDomain" type="error">
-        The given domain does not resolve to your address.
-      </UiAlert>
-      <UiForm v-model="form" :definition="DEFINITION" :error="formErrors" />
+      <UiForm
+        v-model="form"
+        :definition="DEFINITION"
+        :error="{ ...formErrors, ...domainValidationError }"
+      />
     </div>
     <template #footer>
       <UiButton
