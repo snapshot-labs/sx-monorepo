@@ -6,7 +6,10 @@
   "scripts": {
     "lint": "eslint . --ext .ts",
     "build": "tsc",
+    "migrate": "yarn knex migrate:latest",
+    "predev": "yarn migrate",
     "dev": "nodemon src/index.ts",
+    "prestart": "yarn migrate",
     "start": "node dist/src/index.js"
   },
   "eslintConfig": {
