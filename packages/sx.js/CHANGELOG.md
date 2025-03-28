@@ -1,5 +1,11 @@
 # @snapshot-labs/sx
 
+## 0.1.8
+
+### Patch Changes
+
+- 9f5c784: add Apechain and Curtis networks
+
 ## 0.1.7
 
 ### Patch Changes
