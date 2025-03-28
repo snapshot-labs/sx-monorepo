@@ -1,9 +1,9 @@
 import { Signer } from '@ethersproject/abstract-signer';
-import { isAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
-import { call, multicall } from '@/helpers/call';
-import { getProvider } from '@/helpers/provider';
+import { call, multicall } from './call';
+import { getProvider } from './provider';
 
 export type ENSChainId = 1 | 11155111;
 
@@ -41,6 +41,45 @@ const ENS_CONTRACTS: ENSContracts = {
   }
 };
 
+const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+
+const MUTED_OFFCHAIN_RESOLVER_ERRORS = [
+  // mute error from coinbase, when the subdomain is not found
+  // most other resolvers just return an empty address
+  'response not found during CCIP fetch',
+  // mute error from missing offchain resolver (mostly for sepolia)
+  'UNSUPPORTED_OPERATION'
+];
+
+// see https://docs.ens.domains/registry/dns#gasless-import
+async function getDNSOwner(domain: string): Promise<string> {
+  const response = await fetch(
+    `https://cloudflare-dns.com/dns-query?name=${domain}&type=TXT`,
+    {
+      headers: {
+        accept: 'application/dns-json'
+      }
+    }
+  );
+
+  if (!response.ok) throw new Error('Failed to fetch DNS Owner');
+
+  const data = await response.json();
+  // Error list: https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6
+  if (data.Status === 3) return EMPTY_ADDRESS;
+  if (data.Status !== 0) throw new Error('Failed to fetch DNS Owner');
+
+  const ownerRecord = data.Answer?.find((record: any) =>
+    record.data.includes('ENS1')
+  );
+
+  if (!ownerRecord) return EMPTY_ADDRESS;
+
+  return getAddress(
+    ownerRecord.data.replace(new RegExp('"', 'g'), '').split(' ').pop()
+  );
+}
+
 async function deepResolve(
   chainId: ENSChainId,
   node: string,
@@ -75,7 +114,7 @@ export async function resolveName(name: string, chainId: ENSChainId) {
 
   const address: string = await deepResolve(chainId, node, 'addr', [node]);
 
-  if (address === '0x0000000000000000000000000000000000000000') return null;
+  if (address === EMPTY_ADDRESS) return null;
 
   return address;
 }
@@ -133,7 +172,7 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   const provider = getProvider(chainId);
   const ensHash = namehash(name);
 
-  const owner = await call(
+  let owner = await call(
     provider,
     ENS_CONTRACTS.registryAbi,
     [ENS_CONTRACTS.registry, 'owner', [ensHash]],
@@ -141,6 +180,28 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
       blockTag: 'latest'
     }
   );
+
+  if (!name.endsWith('.eth') && owner === EMPTY_ADDRESS) {
+    try {
+      const resolvedAddress = await provider.resolveName(ensNormalize(name));
+      const nameTokens = name.split('.');
+
+      if (nameTokens.length > 2) {
+        owner = resolvedAddress || EMPTY_ADDRESS;
+      } else if (nameTokens.length === 2 && resolvedAddress) {
+        owner = await getDNSOwner(name);
+      }
+    } catch (e: any) {
+      if (
+        MUTED_OFFCHAIN_RESOLVER_ERRORS.every(
+          error => !e.message.includes(error)
+        )
+      ) {
+        throw e;
+      }
+      owner = EMPTY_ADDRESS;
+    }
+  }
 
   if (owner !== ENS_CONTRACTS.nameWrappers[chainId]) return owner;
 
