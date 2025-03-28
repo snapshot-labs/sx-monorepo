@@ -288,22 +288,22 @@ export function createConstants(
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length);
 
-        const requestId = await generateMerkleTree(config.Meta.eip712ChainId, {
-          entries
-        });
+        const requestId = await generateMerkleTree(
+          'stark',
+          config.Meta.eip712ChainId,
+          {
+            entries
+          }
+        );
 
         await sleep(500);
 
         while (true) {
-          try {
-            const root = await getMerkleRoot(config.Meta.eip712ChainId, {
-              requestId
-            });
+          const root = await getMerkleRoot('stark', config.Meta.eip712ChainId, {
+            requestId
+          });
 
-            if (root) return [root];
-          } catch {
-            console.log('request not ready yet');
-          }
+          if (root) return [root];
 
           await sleep(5000);
         }
