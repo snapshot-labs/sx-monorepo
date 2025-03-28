@@ -15,7 +15,10 @@ const jsonRpcRequestSchema = z.object({
     'finalizeProposal',
     'execute',
     'executeQueuedProposal',
-    'executeStarknetProposal'
+    'executeStarknetProposal',
+    'generateMerkleTree',
+    'getMerkleRoot',
+    'getMerkleProof'
   ]),
   params: z.any()
 });

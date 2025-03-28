@@ -88,7 +88,7 @@ export async function getDataByMessageHash(hash: string) {
     .first();
 }
 
-export async function saveRequest(id: string, chainId: string) {
+export async function saveRequest(id: string, chainId: string | number) {
   await knex(MERKLETREE_REQUESTS).insert({
     id,
     chainId
@@ -97,9 +97,9 @@ export async function saveRequest(id: string, chainId: string) {
 
 export async function saveMerkleTree(
   id: string,
-  chainId: string,
+  chainId: string | number,
   root: string,
-  tree: string[]
+  tree: unknown
 ) {
   return knex.transaction(async trx => {
     await trx(MERKLETREES)

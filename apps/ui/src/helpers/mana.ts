@@ -47,19 +47,21 @@ export async function executionCall(
 }
 
 export async function generateMerkleTree(
+  network: 'eth' | 'stark',
   chainId: number | string,
   params: {
     entries: string[];
   }
 ): Promise<string> {
-  return rpcCall(`stark_rpc/${chainId}`, 'generateMerkleTree', params);
+  return rpcCall(`${network}_rpc/${chainId}`, 'generateMerkleTree', params);
 }
 
 export async function getMerkleRoot(
+  network: 'eth' | 'stark',
   chainId: number | string,
   params: {
     requestId: string;
   }
 ): Promise<string> {
-  return rpcCall(`stark_rpc/${chainId}`, 'getMerkleRoot', params);
+  return rpcCall(`${network}_rpc/${chainId}`, 'getMerkleRoot', params);
 }

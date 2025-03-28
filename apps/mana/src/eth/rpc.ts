@@ -1,3 +1,4 @@
+import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import {
   clients,
   evmApe,
@@ -14,6 +15,7 @@ import {
 import fetch from 'cross-fetch';
 import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
+import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
 
 export const NETWORKS = new Map<number, EvmNetworkConfig>([
@@ -178,11 +180,80 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
+  async function generateTree(requestId: string, entries: string[]) {
+    const whitelist = entries.map(entry => {
+      const [address, votingPower] = entry.split(':');
+      if (!address || !votingPower) throw new Error('Invalid entry');
+
+      return [address, votingPower] as [string, string];
+    });
+
+    const merkleTree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
+
+    const root = merkleTree.root;
+    if (!root) throw new Error('Merkle tree not generated');
+
+    await db.saveMerkleTree(requestId, chainId, root, merkleTree.dump());
+  }
+
+  async function generateMerkleTree(id: number, params: any, res: Response) {
+    try {
+      const { entries } = params;
+
+      const requestId = crypto.randomUUID();
+
+      await db.saveRequest(requestId, chainId);
+
+      // NOTE: no await here as we want to execute it in the background
+      generateTree(requestId, entries);
+
+      return rpcSuccess(res, requestId, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
+  async function getMerkleRoot(id: number, params: any, res: Response) {
+    try {
+      const { requestId } = params;
+
+      const request = await db.getMerkleTreeRequest(requestId);
+      if (!request) throw new Error('Request not found');
+
+      return rpcSuccess(res, request.root, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
+  async function getMerkleProof(id: number, params: any, res: Response) {
+    try {
+      const { root, index } = params;
+
+      const result = await db.getMerkleTree(root);
+      if (!result) throw new Error('Merkle tree not generated');
+
+      const merkleTree = StandardMerkleTree.load(result.tree);
+
+      const proof = merkleTree.getProof(index);
+
+      return rpcSuccess(res, proof, id);
+    } catch (e) {
+      console.log('Failed', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
   return {
     send,
     finalizeProposal,
     execute,
     executeQueuedProposal,
-    executeStarknetProposal
+    executeStarknetProposal,
+    generateMerkleTree,
+    getMerkleRoot,
+    getMerkleProof
   };
 };
