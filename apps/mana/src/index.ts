@@ -2,7 +2,6 @@ import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
-import { createTables } from './db';
 import ethRpc from './eth';
 import starkRpc from './stark';
 import {
@@ -30,8 +29,6 @@ app.get('/', (req, res) =>
 );
 
 async function start() {
-  await createTables();
-
   registeredTransactionsLoop();
   registeredProposalsLoop();
 
