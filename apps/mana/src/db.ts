@@ -88,11 +88,17 @@ export async function getDataByMessageHash(hash: string) {
     .first();
 }
 
-export async function saveMerkleTree(id: string, root: string, tree: string[]) {
+export async function saveMerkleTree(
+  id: string,
+  chainId: string,
+  root: string,
+  tree: string[]
+) {
   return knex.transaction(async trx => {
     await trx(MERKLETREES)
       .insert({
         id: root,
+        chainId,
         tree: JSON.stringify(tree)
       })
       .onConflict()
@@ -100,6 +106,7 @@ export async function saveMerkleTree(id: string, root: string, tree: string[]) {
 
     await trx(MERKLETREE_REQUESTS).insert({
       id,
+      chainId,
       processed: true,
       root
     });

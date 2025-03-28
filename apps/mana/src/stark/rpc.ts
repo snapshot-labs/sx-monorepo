@@ -156,7 +156,7 @@ export const createNetworkHandler = (chainId: string) => {
     const root = tree[0];
     if (!root) throw new Error('Merkle tree not generated');
 
-    await db.saveMerkleTree(requestId, root, tree);
+    await db.saveMerkleTree(requestId, chainId, root, tree);
   }
 
   async function generateMerkleTree(id: number, params: any, res: Response) {
