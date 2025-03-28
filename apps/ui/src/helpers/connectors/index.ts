@@ -1,6 +1,7 @@
 import argentx from './argentx';
 import coinbase from './coinbase';
 import gnosis from './gnosis';
+import guest from './guest';
 import injected from './injected';
 import sequence from './sequence';
 import unicorn from './unicorn';
@@ -13,5 +14,6 @@ export default {
   sequence,
   coinbase,
   gnosis,
-  unicorn
+  unicorn,
+  guest
 };
