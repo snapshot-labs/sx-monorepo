@@ -208,10 +208,8 @@ const spaceType = computed(() => {
 const spaceTypeForProposalLimit = computed(() => {
   if (lists.value['space.ecosystem.list'].includes(props.space.id))
     return 'ecosystem';
-  if (props.space.turbo) return 'turbo';
-  if (props.space.verified) return 'verified';
   if (props.space.additionalRawData?.flagged) return 'flagged';
-  return 'default';
+  return spaceType.value;
 });
 
 const proposalLimitReached = computed(() => {
