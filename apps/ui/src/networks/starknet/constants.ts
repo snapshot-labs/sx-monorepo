@@ -295,15 +295,11 @@ export function createConstants(
         await sleep(500);
 
         while (true) {
-          try {
-            const root = await getMerkleRoot(config.Meta.eip712ChainId, {
-              requestId
-            });
+          const root = await getMerkleRoot(config.Meta.eip712ChainId, {
+            requestId
+          });
 
-            if (root) return [root];
-          } catch {
-            console.log('request not ready yet');
-          }
+          if (root) return [root];
 
           await sleep(5000);
         }
