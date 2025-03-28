@@ -116,15 +116,12 @@ type Proposal {
   snapshot: Int!
   execution_time: Int!
   execution_strategy: String!
-  # Note: in the future move this field to execution_strategy
-  execution_strategy_details: ExecutionStrategy
   execution_strategy_type: String!
   execution_destination: String
   timelock_veto_guardian: String
   timelock_delay: BigInt
   axiom_snapshot_address: String
   axiom_snapshot_slot: BigInt
-  treasuries: [String!]!
   strategies_indices: [Int!]!
   # Deprecated
   strategies_indicies: [Int!]!

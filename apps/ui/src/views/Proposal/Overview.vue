@@ -505,7 +505,6 @@ onBeforeUnmount(() => destroyAudio());
             .
           </UiAlert>
           <ProposalExecutionsList
-            :network-id="proposal.network"
             :proposal="proposal"
             :executions="proposal.executions"
           />

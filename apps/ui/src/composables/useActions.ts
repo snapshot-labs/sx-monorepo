@@ -553,7 +553,6 @@ export function useActions() {
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
     validationStrategy: StrategyConfig,
-    executionStrategies: StrategyConfig[],
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
@@ -582,7 +581,6 @@ export function useActions() {
         votingStrategiesToAdd,
         votingStrategiesToRemove,
         validationStrategy,
-        executionStrategies,
         votingDelay !== null
           ? getCurrentFromDuration(space.network, votingDelay)
           : null,

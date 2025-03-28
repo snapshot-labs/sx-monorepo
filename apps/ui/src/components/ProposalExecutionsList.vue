@@ -4,16 +4,12 @@ import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { buildBatchFile } from '@/helpers/safe/ build';
 import { getExecutionName } from '@/helpers/ui';
 import { shorten, toBigIntOrNumber } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
-import { NetworkID, Proposal, ProposalExecution } from '@/types';
+import { Proposal, ProposalExecution } from '@/types';
 
-const props = defineProps<{
-  networkId: NetworkID;
+defineProps<{
   proposal: Proposal;
   executions: ProposalExecution[];
 }>();
-
-const network = computed(() => getNetwork(props.networkId));
 
 function downloadExecution(execution: ProposalExecution) {
   if (!execution.chainId) return;
@@ -73,7 +69,10 @@ function downloadExecution(execution: ProposalExecution) {
         />
         <div
           class="text-skin-text text-[17px] truncate"
-          v-text="getExecutionName(proposal.network, execution.strategyType)"
+          v-text="
+            getExecutionName(proposal.network, execution.strategyType) ||
+            shorten(execution.safeAddress)
+          "
         />
       </div>
     </a>
@@ -107,8 +106,7 @@ function downloadExecution(execution: ProposalExecution) {
           proposal.quorum &&
         toBigIntOrNumber(proposal.scores[0]) >
           toBigIntOrNumber(proposal.scores[1]) &&
-        proposal.has_execution_window_opened &&
-        network.helpers.isExecutorActionsSupported(execution.strategyType)
+        proposal.has_execution_window_opened
       "
       :proposal="proposal"
       :execution="execution"

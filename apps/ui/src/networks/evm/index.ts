@@ -124,10 +124,8 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       constants.RELAYER_AUTHENTICATORS[authenticator],
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
-    isExecutorSupported: (executorType: string) =>
-      executorType !== 'ReadOnlyExecution',
-    isExecutorActionsSupported: (executorType: string) =>
-      constants.SUPPORTED_EXECUTORS[executorType],
+    isExecutorSupported: (executor: string) =>
+      constants.SUPPORTED_EXECUTORS[executor],
     pin,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: (txId: string) => provider.getTransaction(txId),

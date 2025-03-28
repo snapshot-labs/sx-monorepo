@@ -29,19 +29,16 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const provider = getProvider(l1ChainId);
   const api = createApi(hubUrl, networkId, constants);
 
-  const isExecutorSupported = (executorType: string) => {
-    if (executorType === 'oSnap') return true;
-    if (executorType === 'ReadOnlyExecution') return true;
-    return false;
-  };
-
   const helpers = {
     isAuthenticatorSupported: () => true,
     isAuthenticatorContractSupported: () => false,
     getRelayerAuthenticatorType: () => null,
     isStrategySupported: () => true,
-    isExecutorSupported: isExecutorSupported,
-    isExecutorActionsSupported: isExecutorSupported,
+    isExecutorSupported: (executorType: string) => {
+      if (executorType === 'oSnap') return true;
+      if (executorType === 'ReadOnlyExecution') return true;
+      return false;
+    },
     pin: pinPineapple,
     getSpaceController: async (space: Space) =>
       getSpaceController(space.id, l1ChainId),

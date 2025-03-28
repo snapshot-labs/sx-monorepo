@@ -104,6 +104,17 @@ gql(`
         avatar
         labels
         voting_power_symbol
+        treasuries
+        executors
+        executors_types
+        executors_strategies {
+          id
+          address
+          destination_address
+          type
+          treasury_chain
+          treasury
+        }
       }
       strategies_parsed_metadata {
         index
@@ -143,17 +154,8 @@ gql(`
     scores_total
     execution_time
     execution_strategy
-    execution_strategy_details {
-      id
-      address
-      destination_address
-      type
-      treasury_chain
-      treasury
-    }
     execution_strategy_type
     execution_destination
-    treasuries
     timelock_veto_guardian
     strategies_indices
     strategies
