@@ -48,10 +48,14 @@ export function useWalletEns(networkId: NetworkID) {
   const isRefreshing = ref(false);
   const hasError = ref(false);
 
-  const names = computed(() => [
-    ...Object.values(ensNames.value.get(web3.value.account) || {}),
-    ...Object.values(customEnsNames.value.get(web3.value.account) || {})
-  ]);
+  const names = computed(() =>
+    Array.from(
+      new Set([
+        ...Object.values(ensNames.value.get(web3.value.account) || {}),
+        ...Object.values(customEnsNames.value.get(web3.value.account) || {})
+      ])
+    )
+  );
 
   const network = computed(() => getNetwork(networkId));
 
