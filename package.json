@@ -8,16 +8,25 @@
   },
   "scripts": {
     "dev": "turbo run dev --filter=!mana --filter=!api --filter=!api-subgraph",
-    "dev:full": "./scripts/dev-full.sh",
+    "dev:interactive": "ts-node ./scripts/dev-interactive.ts",
     "build": "turbo run build",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
-    "lint": "turbo run lint",
+    "lint": "turbo run lint lint:scripts",
+    "lint:scripts": "eslint scripts/ --ext .ts",
     "typecheck": "turbo run typecheck",
     "release": "yarn build && changeset publish"
   },
+  "eslintConfig": {
+    "extends": "@snapshot-labs"
+  },
+  "prettier": "@snapshot-labs/prettier-config",
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
+    "@inquirer/prompts": "^7.4.0",
+    "@snapshot-labs/eslint-config": "^0.1.0-beta.20",
+    "@snapshot-labs/prettier-config": "^0.1.0-beta.19",
+    "ts-node": "^10.9.2",
     "turbo": "^2.4.0"
   },
   "engines": {
