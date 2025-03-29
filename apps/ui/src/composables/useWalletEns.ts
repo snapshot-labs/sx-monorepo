@@ -1,4 +1,5 @@
-import { getENSNames } from '@/helpers/stamp';
+import { getAddresses, getENSNames } from '@/helpers/stamp';
+import { compareAddresses } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { getSpaces } from '@/queries/spaces';
 import { NetworkID } from '@/types';
@@ -11,6 +12,7 @@ const MAX_ENS_NAME_LENGTH = 64;
 const DEFAULT_STATUS = 'AVAILABLE';
 
 const ensNames = ref<Map<string, ENSNames>>(new Map());
+const customEnsNames = ref<Map<string, ENSNames>>(new Map());
 const checkedDeletedSpaceIds = new Map<string, boolean>();
 
 async function fetchDeletedSpaces(networkId: NetworkID, ids: string[]) {
@@ -46,7 +48,14 @@ export function useWalletEns(networkId: NetworkID) {
   const isRefreshing = ref(false);
   const hasError = ref(false);
 
-  const names = computed(() => ensNames.value.get(web3.value.account));
+  const names = computed(() =>
+    Array.from(
+      new Set([
+        ...Object.values(ensNames.value.get(web3.value.account) || {}),
+        ...Object.values(customEnsNames.value.get(web3.value.account) || {})
+      ])
+    )
+  );
 
   const network = computed(() => getNetwork(networkId));
 
@@ -98,7 +107,7 @@ export function useWalletEns(networkId: NetworkID) {
     await validateUsedNames(records);
     await validateDeletedSpaces(records);
 
-    ensNames.value.set(web3.value.account, records);
+    return records;
   }
 
   async function load(silent = false) {
@@ -106,9 +115,10 @@ export function useWalletEns(networkId: NetworkID) {
     isLoading.value = true;
 
     try {
-      await validateNames(
+      const records = await validateNames(
         await getENSNames(web3.value.account, network.value.chainId)
       );
+      ensNames.value.set(web3.value.account, records);
       hasError.value = false;
     } catch (e) {
       console.error(e);
@@ -117,6 +127,20 @@ export function useWalletEns(networkId: NetworkID) {
       isRefreshing.value = false;
       isLoading.value = false;
     }
+  }
+
+  async function attachCustomName(name: string): Promise<boolean> {
+    const resolvedAddress =
+      (await getAddresses([name], network.value.chainId))[name] || '';
+
+    if (!compareAddresses(resolvedAddress, web3.value.account)) {
+      return false;
+    }
+
+    const records = await validateNames([name]);
+    customEnsNames.value.set(web3.value.account, records);
+
+    return true;
   }
 
   function refresh() {
@@ -143,6 +167,7 @@ export function useWalletEns(networkId: NetworkID) {
     isLoading,
     hasError,
     names,
+    attachCustomName,
     load,
     refresh
   };
