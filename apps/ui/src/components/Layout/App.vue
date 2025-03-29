@@ -165,72 +165,63 @@ router.afterEach(() => {
 <template>
   <div
     ref="el"
-    class="min-h-screen"
+    class="min-h-screen flex flex-col"
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div
-      v-else
-      class="flex min-h-screen maximum:border-r"
-      :class="{ 'maximum:border-l': isWhiteLabel }"
-    >
-      <AppBottomNav
-        v-if="web3.account && !isWhiteLabel"
-        :class="[
-          `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
-          { 'app-bottom-nav-open': uiStore.sideMenuOpen }
-        ]"
-      />
+    <div v-else class="flex flex-auto">
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex app-sidebar fixed inset-y-0`,
-          { '!flex app-sidebar-open': uiStore.sideMenuOpen }
+          `hidden lg:flex flex-none border-r`,
+          { '!flex': uiStore.sideMenuOpen }
         ]"
       />
-      <AppTopnav
-        :has-app-nav="hasAppNav"
-        :class="{ hidden: !hasTopNav, 'maximum:border-l': isWhiteLabel }"
-        class="maximum:border-r"
-      >
-        <template #toggle-sidebar-button>
-          <button
-            v-if="hasSwipeableContent"
-            type="button"
-            class="text-skin-link lg:hidden ml-4"
-            :class="{ hidden: uiStore.sideMenuOpen }"
-            @click="uiStore.toggleSidebar"
-          >
-            <IH-menu-alt-2 />
-          </button>
-        </template>
-      </AppTopnav>
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+          'hidden lg:flex border-r flex-none',
           {
-            '!block app-nav-open': uiStore.sideMenuOpen
+            '!flex': uiStore.sideMenuOpen
           }
         ]"
       />
-      <button
-        v-if="uiStore.sideMenuOpen"
-        type="button"
-        class="backdrop"
-        @click="uiStore.sideMenuOpen = false"
-      />
-      <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
-          <router-view class="h-full pb-10" />
-        </div>
-        <div
-          v-if="hasPlaceHolderSidebar"
-          class="app-placeholder-sidebar hidden xl:block"
+      <div class="flex flex-col flex-auto maximum:border-r relative">
+        <UiBackdrop
+          v-if="uiStore.sideMenuOpen"
+          @click="uiStore.sideMenuOpen = false"
         />
-      </main>
+        <AppTopnav :has-app-nav="hasAppNav" :class="{ hidden: !hasTopNav }">
+          <template #toggle-sidebar-button>
+            <button
+              v-if="hasSwipeableContent"
+              type="button"
+              class="text-skin-link lg:hidden"
+              :class="{ hidden: uiStore.sideMenuOpen }"
+              @click="uiStore.toggleSidebar"
+            >
+              <IH-menu-alt-2 />
+            </button>
+          </template>
+        </AppTopnav>
+        <main
+          :class="[
+            'relative flex-auto',
+            { 'xl:border-r xl:mr-[240px]': hasPlaceHolderSidebar }
+          ]"
+        >
+          <router-view class="h-full pb-10" />
+        </main>
+      </div>
     </div>
-    <AppNotifications />
+    <div class="sticky bottom-0 inset-x-0 z-[101] flex flex-col flex-none">
+      <div class="relative">
+        <AppNotifications />
+      </div>
+      <AppBottomNav
+        v-if="web3.account && !isWhiteLabel && uiStore.sideMenuOpen"
+      />
+    </div>
     <ModalConfirmSafe
       v-if="uiStore.safeModal !== null"
       :open="uiStore.safeModal !== null"
@@ -252,103 +243,3 @@ router.afterEach(() => {
     />
   </div>
 </template>
-
-<style lang="scss" scoped>
-$sidebarWidth: 72px;
-$mobileMenuHeight: 72px;
-$navWidth: 240px;
-$placeholderSidebarWidth: 240px;
-
-.app-sidebar {
-  @apply w-[#{$sidebarWidth}];
-
-  @media (max-width: 1011px) {
-    &-open {
-      & ~ :deep(*) {
-        @apply translate-x-[#{$sidebarWidth}];
-
-        .app-toolbar-bottom {
-          @apply hidden;
-        }
-      }
-
-      &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
-        @apply translate-x-[#{$sidebarWidth + $navWidth}];
-      }
-    }
-  }
-}
-
-.app-nav {
-  @apply w-[#{$navWidth}];
-
-  @media (max-width: 1011px) {
-    &-open {
-      & ~ :deep(*) {
-        @apply translate-x-[#{$navWidth}];
-
-        .app-toolbar-bottom {
-          @apply hidden;
-        }
-      }
-    }
-  }
-}
-
-.app-bottom-nav {
-  height: $mobileMenuHeight;
-
-  @media (max-width: 767px) {
-    &-open {
-      @apply grid;
-
-      & ~ .backdrop,
-      & ~ .app-nav-open,
-      & ~ .app-sidebar-open {
-        @apply bottom-[#{$mobileMenuHeight}];
-      }
-    }
-  }
-}
-
-.app-placeholder-sidebar {
-  @apply w-[#{$placeholderSidebarWidth}];
-
-  &::before {
-    @apply block fixed border-l top-[72px] bottom-0 w-[#{$placeholderSidebarWidth}];
-
-    content: '';
-  }
-}
-
-@media (screen(lg)) {
-  .app-sidebar {
-    & ~ :deep(main),
-    & ~ .backdrop,
-    & ~ :deep(header.fixed > div),
-    & ~ :deep(main header.fixed > div),
-    & ~ :deep(.app-nav) {
-      @apply ml-[#{$sidebarWidth}];
-    }
-
-    &:has(~ .app-nav) ~ .app-nav {
-      & ~ :deep(main),
-      & ~ .backdrop,
-      & ~ :deep(header.fixed > div),
-      & ~ :deep(main header.fixed > div),
-      & ~ :deep(.app-nav) {
-        @apply ml-[#{$sidebarWidth + $navWidth}];
-      }
-    }
-  }
-
-  .app-nav ~ :deep(*) {
-    @apply ml-[#{$navWidth}];
-  }
-}
-
-.backdrop {
-  @apply fixed inset-0 z-[99];
-  @apply bg-[black]/40 #{!important};
-}
-</style>

@@ -190,21 +190,28 @@ const navigationItems = computed(() =>
 </script>
 
 <template>
-  <div class="border-r bg-skin-bg py-4">
-    <AppLink
-      v-for="(item, key) in navigationItems"
-      :key="key"
-      :to="item.link"
-      class="px-4 py-1.5 space-x-2 flex items-center"
-      :class="item.active ? 'text-skin-link' : 'text-skin-text'"
-    >
-      <component :is="item.icon" class="inline-block"></component>
-      <span class="grow" v-text="item.name" />
-      <span
-        v-if="item.count"
-        class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-        v-text="item.count"
-      />
-    </AppLink>
+  <div>
+    <div class="w-[240px] sticky inset-y-0 space-y-4">
+      <div class="border-b h-[72px] flex items-center px-4">
+        <Breadcrumb />
+      </div>
+      <div>
+        <AppLink
+          v-for="(item, key) in navigationItems"
+          :key="key"
+          :to="item.link"
+          class="px-4 py-1.5 space-x-2 flex items-center"
+          :class="item.active ? 'text-skin-link' : 'text-skin-text'"
+        >
+          <component :is="item.icon" class="inline-block"></component>
+          <span class="grow" v-text="item.name" />
+          <span
+            v-if="item.count"
+            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
+            v-text="item.count"
+          />
+        </AppLink>
+      </div>
+    </div>
   </div>
 </template>

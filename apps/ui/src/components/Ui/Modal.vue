@@ -36,9 +36,9 @@ watch(open, val => {
 
 <template>
   <transition name="fade">
-    <div v-if="open" class="modal mx-auto">
-      <div class="backdrop" @click="closeable ? $emit('close') : null" />
-      <div class="shell overflow-hidden relative rounded-none md:rounded-lg">
+    <div v-if="open" class="modal">
+      <UiBackdrop @click="closeable ? $emit('close') : null" />
+      <div class="shell">
         <div v-if="$slots.header" class="border-b py-3 text-center">
           <slot name="header" />
         </div>
@@ -61,62 +61,16 @@ watch(open, val => {
   </transition>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .modal {
-  position: fixed;
-  display: flex;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  align-items: center;
-  justify-content: center;
-  z-index: 51;
-
-  .backdrop {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 99;
-    background: rgba(0, 0, 0, 0.4);
-  }
+  @apply absolute flex items-center justify-center mx-auto inset-0 z-[51];
 
   .shell {
-    border: 1px solid rgba(var(--border));
-    background-color: rgba(var(--bg));
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    max-width: 440px;
-    overflow-y: auto !important;
-    max-height: calc(100vh - 120px);
-    display: flex;
-    flex-direction: column;
-    z-index: 999;
-    margin: 0 auto;
-    width: 100%;
+    @apply relative bg-skin-bg md:border md:rounded-lg shadow-lg px-0 my-0 mx-auto flex flex-col z-[999] md:max-w-[440px] max-w-full max-h-full min-h-full w-full md:max-h-[calc(100vh-120px)] md:min-h-0;
+  }
 
-    @media (max-width: 767px) {
-      border: 0;
-      width: 100% !important;
-      max-width: 100% !important;
-      max-height: 100% !important;
-      min-height: 100% !important;
-      margin-bottom: 0 !important;
-
-      .modal-body {
-        max-height: 100% !important;
-      }
-    }
-
-    .modal-body {
-      max-height: 420px;
-      flex: auto;
-      text-align: initial;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
+  &-body {
+    @apply max-h-[420px] md:max-w-full flex-auto overflow-y-auto overflow-x-hidden;
   }
 }
 </style>

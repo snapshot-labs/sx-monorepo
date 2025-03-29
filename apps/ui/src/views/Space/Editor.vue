@@ -458,14 +458,11 @@ watchEffect(() => {
 </script>
 <template>
   <div v-if="proposal" class="h-full">
-    <UiTopnav
-      :class="{ 'maximum:border-l': isWhiteLabel }"
-      class="maximum:border-r"
-    >
+    <UiTopnav>
       <div class="flex items-center gap-3 shrink truncate">
         <UiButton
           :to="{ name: 'space-overview', params: { space: spaceKey } }"
-          class="w-[46px] !px-0 ml-4 shrink-0"
+          class="w-[46px] !px-0 shrink-0"
         >
           <IH-arrow-narrow-left />
         </UiButton>
@@ -495,9 +492,7 @@ watchEffect(() => {
         </UiButton>
       </div>
     </UiTopnav>
-    <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
-    >
+    <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
       <div
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
         v-bind="$attrs"

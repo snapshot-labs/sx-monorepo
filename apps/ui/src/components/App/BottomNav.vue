@@ -32,20 +32,20 @@ const menu = [
 </script>
 
 <template>
-  <nav class="bg-skin-bg border-t text-xs">
-    <div class="flex gap-2 px-3 justify-center">
-      <AppLink
-        v-for="(item, i) in menu"
-        :key="i"
-        :to="item.link"
-        class="inline-flex flex-col text-center gap-1 truncate justify-center w-[25%] max-w-[120px]"
-        :class="
-          route.name === item.link.name ? 'text-skin-link' : 'text-skin-text'
-        "
-      >
-        <component :is="item.icon" class="mx-auto" />
-        <span class="truncate" v-text="item.label" />
-      </AppLink>
-    </div>
+  <nav
+    class="bg-skin-bg border-t text-xs h-[72px] flex gap-2 px-3 justify-center"
+  >
+    <AppLink
+      v-for="(item, i) in menu"
+      :key="i"
+      :to="item.link"
+      class="flex flex-col text-center justify-center w-[25%] max-w-[120px] gap-1 truncate"
+      :class="
+        route.name === item.link.name ? 'text-skin-link' : 'text-skin-text'
+      "
+    >
+      <component :is="item.icon" class="mx-auto" />
+      <span class="truncate" v-text="item.label" />
+    </AppLink>
   </nav>
 </template>
