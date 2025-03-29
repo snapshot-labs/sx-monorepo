@@ -270,9 +270,8 @@ async function handleSettingsSave() {
 }
 
 function handleControllerSave(value: string) {
-  if (!isController.value) return;
+  if (!isOwner.value) return;
   controller.value = value;
-
   saving.value = true;
   executeFn.value = saveController;
 }
@@ -571,7 +570,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </UiToolbarBottom>
   <teleport to="#modal">
     <ModalTransactionProgress
-      :open="saving && !isOffchainNetwork"
+      :open="saving && (!isOffchainNetwork || executeFn === saveController)"
       :chain-id="network.chainId"
       :messages="{
         approveTitle: 'Confirm your changes',
@@ -581,6 +580,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       :execute="executeFn"
       @confirmed="reloadSpaceAndReset"
       @close="saving = false"
+      @cancelled="saving = false"
     />
   </teleport>
 </template>
