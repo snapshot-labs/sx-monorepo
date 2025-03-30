@@ -169,7 +169,11 @@ router.afterEach(() => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else class="flex flex-auto">
+    <div
+      v-else
+      class="flex flex-auto maximum:border-r"
+      :class="{ 'maximum:border-l ': isWhiteLabel }"
+    >
       <AppSidebar
         v-if="hasSidebar"
         :class="[
@@ -186,7 +190,7 @@ router.afterEach(() => {
           }
         ]"
       />
-      <div class="flex flex-col flex-auto maximum:border-r relative">
+      <div class="flex flex-col flex-auto relative">
         <UiBackdrop
           v-if="uiStore.sideMenuOpen"
           @click="uiStore.sideMenuOpen = false"
