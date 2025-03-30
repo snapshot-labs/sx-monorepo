@@ -196,7 +196,7 @@ router.afterEach(() => {
             <button
               v-if="hasSwipeableContent"
               type="button"
-              class="text-skin-link lg:hidden"
+              class="text-skin-link lg:hidden shrink-0"
               :class="{ hidden: uiStore.sideMenuOpen }"
               @click="uiStore.toggleSidebar"
             >

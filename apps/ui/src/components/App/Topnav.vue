@@ -93,33 +93,32 @@ onUnmounted(() => {
 <template>
   <UiTopnav v-bind="$attrs">
     <slot name="toggle-sidebar-button" />
-    <Breadcrumb v-if="!searchConfig && !hasAppNav" />
+    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="flex-1" />
     <form
       v-if="searchConfig"
-      id="search-form"
-      class="flex flex-1 py-3 h-full"
+      id="search-form group"
+      class="flex-1 group"
       @submit="handleSearchSubmit"
     >
-      <label class="flex items-center w-full space-x-2.5">
-        <IH-search class="shrink-0" />
+      <label class="flex items-center space-x-2.5">
+        <IH-search class="shrink-0 group-focus-within:text-skin-link" />
         <input
           ref="searchInput"
           v-model.trim="searchValue"
           type="text"
           :placeholder="searchConfig.placeholder"
-          class="bg-transparent text-skin-link text-[19px] w-full"
+          class="bg-transparent text-skin-link text-[19px] flex-1"
         />
       </label>
     </form>
-    <div></div>
-    <div class="flex space-x-2 shrink-0">
+    <div class="flex gap-x-2 shrink-0">
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
-        class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+        class="!px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
         @click="modalAccountOpen = true"
       >
-        <span v-if="web3.account" class="sm:flex items-center space-x-2">
+        <span v-if="web3.account" class="sm:flex items-center gap-x-2">
           <UiStamp :id="user.id" :size="18" :cb="cb" />
           <span
             class="hidden sm:block truncate max-w-[120px]"
@@ -151,9 +150,3 @@ onUnmounted(() => {
     />
   </teleport>
 </template>
-
-<style lang="scss" scoped>
-#search-form:focus-within svg {
-  color: rgba(var(--link));
-}
-</style>
