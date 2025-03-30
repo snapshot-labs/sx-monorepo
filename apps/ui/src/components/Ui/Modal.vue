@@ -16,16 +16,13 @@ const props = withDefaults(
 const { open } = toRefs(props);
 const { modalOpen } = useModal();
 
-function handleKeyboardEvent(ev: KeyboardEvent) {
-  if (ev.code === 'Escape') emit('close');
+function handleClose() {
+  if (props.closeable) {
+    emit('close');
+  }
 }
 
-onMounted(() => {
-  document.addEventListener('keyup', handleKeyboardEvent);
-});
-
 onBeforeUnmount(() => {
-  document.removeEventListener('keyup', handleKeyboardEvent);
   modalOpen.value = false;
 });
 
@@ -37,7 +34,7 @@ watch(open, val => {
 <template>
   <transition name="fade">
     <div v-if="open" class="modal">
-      <UiBackdrop @click="closeable ? $emit('close') : null" />
+      <UiBackdrop @close="handleClose" />
       <div class="shell">
         <div v-if="$slots.header" class="border-b py-3 text-center">
           <slot name="header" />

@@ -193,7 +193,7 @@ router.afterEach(() => {
       <div class="flex flex-col flex-auto relative">
         <UiBackdrop
           v-if="uiStore.sideMenuOpen"
-          @click="uiStore.sideMenuOpen = false"
+          @close="uiStore.sideMenuOpen = false"
         />
         <AppTopnav :has-app-nav="hasAppNav" :class="{ hidden: !hasTopNav }">
           <template #toggle-sidebar-button>
