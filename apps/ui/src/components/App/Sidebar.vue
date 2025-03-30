@@ -1,12 +1,18 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
 
+defineProps<{
+  bottom?: number;
+}>();
+
 const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>
   <div>
-    <div class="w-[72px] flex flex-col text-center sticky top-0 h-full">
+    <div
+      :class="`w-[72px] flex flex-col text-center sticky top-0 max-h-[calc(100vh-${bottom || 0}px)]`"
+    >
       <AppLink :to="{ name: 'my-home' }" class="h-[72px] block">
         <IC-zap class="inline-block my-[18px] size-[40px] text-skin-link" />
       </AppLink>

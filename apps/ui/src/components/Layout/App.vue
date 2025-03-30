@@ -178,17 +178,19 @@ router.afterEach(() => {
         v-if="hasSidebar"
         :class="[
           `hidden lg:flex flex-col border-r flex-none`,
-          { '!flex max-h-[calc(100vh-72px)]': uiStore.sideMenuOpen }
+          { '!flex': uiStore.sideMenuOpen }
         ]"
+        :bottom="uiStore.sideMenuOpen ? 72 : 0"
       />
       <AppNav
         v-if="hasAppNav"
         :class="[
           'hidden lg:flex flex-col border-r flex-none',
           {
-            '!flex max-h-[calc(100vh-72px)]': uiStore.sideMenuOpen
+            '!flex': uiStore.sideMenuOpen
           }
         ]"
+        :bottom="uiStore.sideMenuOpen ? 72 : 0"
       />
       <div class="flex flex-col flex-auto relative">
         <UiBackdrop

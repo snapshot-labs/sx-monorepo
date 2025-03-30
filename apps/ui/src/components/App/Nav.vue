@@ -26,6 +26,10 @@ type NavigationItem = {
   active?: boolean;
 };
 
+defineProps<{
+  bottom?: number;
+}>();
+
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
@@ -191,11 +195,15 @@ const navigationItems = computed(() =>
 
 <template>
   <div>
-    <div class="w-[240px] sticky top-0 h-full flex flex-col">
+    <div
+      :class="`w-[240px] sticky top-0 flex flex-col max-h-[calc(100vh-${bottom || 0}px)]`"
+    >
       <div class="border-b h-[72px] flex items-center px-4 shrink-0">
         <Breadcrumb />
       </div>
-      <div class="no-scrollbar overscroll-contain overflow-auto py-4">
+      <div
+        class="no-scrollbar overscroll-contain overflow-auto py-4 max-h-[calc(100vh-72px)]"
+      >
         <AppLink
           v-for="(item, key) in navigationItems"
           :key="key"
