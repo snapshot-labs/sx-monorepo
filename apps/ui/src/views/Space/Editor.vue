@@ -457,7 +457,7 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal" class="h-full">
+  <div v-if="proposal" class="flex flex-col h-full">
     <UiTopnav>
       <div class="flex items-center gap-3 shrink truncate">
         <UiButton
@@ -492,9 +492,9 @@ watchEffect(() => {
         </UiButton>
       </div>
     </UiTopnav>
-    <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
+    <div class="flex items-stretch md:flex-row flex-col flex-1">
       <div
-        class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
+        class="flex-1 min-w-0 border-r-0 md:border-r max-md:pb-0"
         v-bind="$attrs"
       >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
@@ -676,7 +676,7 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+      <Affix class="shrink-0 md:w-[340px] h-0 md:h-full" :top="72" :bottom="64">
         <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
