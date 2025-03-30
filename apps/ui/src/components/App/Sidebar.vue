@@ -5,7 +5,7 @@ const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>
-  <div class="flex-col w-[72px]">
+  <div class="w-[72px]">
     <div class="flex flex-col text-center sticky inset-y-0">
       <AppLink :to="{ name: 'my-home' }" class="h-[72px] block">
         <IC-zap class="inline-block my-[18px] size-[40px] text-skin-link" />

@@ -177,14 +177,14 @@ router.afterEach(() => {
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex flex-none border-r`,
+          `hidden lg:flex flex-col border-r flex-none`,
           { '!flex': uiStore.sideMenuOpen }
         ]"
       />
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'hidden lg:flex border-r flex-none',
+          'hidden lg:flex flex-col border-r flex-none',
           {
             '!flex': uiStore.sideMenuOpen
           }
