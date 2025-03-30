@@ -93,11 +93,11 @@ onUnmounted(() => {
 <template>
   <UiTopnav v-bind="$attrs">
     <slot name="toggle-sidebar-button" />
-    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="flex-1" />
+    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="flex-auto" />
     <form
       v-if="searchConfig"
       id="search-form group"
-      class="flex-1 group"
+      class="flex-auto group"
       @submit="handleSearchSubmit"
     >
       <label class="flex items-center space-x-2.5">
@@ -107,7 +107,7 @@ onUnmounted(() => {
           v-model.trim="searchValue"
           type="text"
           :placeholder="searchConfig.placeholder"
-          class="bg-transparent text-skin-link text-[19px] flex-1"
+          class="bg-transparent text-skin-link text-[19px] flex-auto"
         />
       </label>
     </form>

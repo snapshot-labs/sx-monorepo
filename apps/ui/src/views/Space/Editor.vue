@@ -458,7 +458,7 @@ watchEffect(() => {
 </script>
 <template>
   <div v-if="proposal" class="flex flex-col h-full">
-    <UiTopnav>
+    <UiTopnav class="justify-between">
       <div class="flex items-center gap-3 shrink truncate">
         <UiButton
           :to="{ name: 'space-overview', params: { space: spaceKey } }"
