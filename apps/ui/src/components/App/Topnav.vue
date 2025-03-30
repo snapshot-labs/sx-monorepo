@@ -93,11 +93,11 @@ onUnmounted(() => {
 <template>
   <UiTopnav v-bind="$attrs">
     <slot name="toggle-sidebar-button" />
-    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="flex-auto" />
+    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="grow-[20]" />
     <form
       v-if="searchConfig"
       id="search-form group"
-      class="flex-auto group"
+      class="grow-[20] group"
       @submit="handleSearchSubmit"
     >
       <label class="flex items-center space-x-2.5">
@@ -111,7 +111,7 @@ onUnmounted(() => {
         />
       </label>
     </form>
-    <div class="flex gap-x-2 shrink-0">
+    <div class="flex gap-x-2 grow shrink-0 justify-end">
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
