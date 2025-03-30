@@ -178,7 +178,7 @@ router.afterEach(() => {
         v-if="hasSidebar"
         :class="[
           `hidden lg:flex flex-col border-r flex-none`,
-          { '!flex': uiStore.sideMenuOpen }
+          { '!flex max-h-[calc(100vh-72px)]': uiStore.sideMenuOpen }
         ]"
       />
       <AppNav
@@ -186,7 +186,7 @@ router.afterEach(() => {
         :class="[
           'hidden lg:flex flex-col border-r flex-none',
           {
-            '!flex': uiStore.sideMenuOpen
+            '!flex max-h-[calc(100vh-72px)]': uiStore.sideMenuOpen
           }
         ]"
       />

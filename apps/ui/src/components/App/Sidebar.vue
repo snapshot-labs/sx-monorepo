@@ -5,14 +5,11 @@ const followedSpacesStore = useFollowedSpacesStore();
 </script>
 
 <template>
-  <div class="w-[72px]">
-    <div class="flex flex-col text-center sticky inset-y-0">
+  <div>
+    <div class="w-[72px] flex flex-col text-center sticky top-0 h-full">
       <AppLink :to="{ name: 'my-home' }" class="h-[72px] block">
         <IC-zap class="inline-block my-[18px] size-[40px] text-skin-link" />
       </AppLink>
-      <div
-        class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10"
-      />
       <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
       <draggable
         v-else
@@ -22,7 +19,7 @@ const followedSpacesStore = useFollowedSpacesStore();
         :touch-start-threshold="35"
         :item-key="i => i"
         v-bind="{ animation: 200 }"
-        class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3"
+        class="space-y-3 p-2 no-scrollbar overscroll-contain overflow-auto pb-3 max-h-[calc(100vh-72px)]"
       >
         <template #item="{ element }">
           <AppLink
@@ -43,6 +40,9 @@ const followedSpacesStore = useFollowedSpacesStore();
           </AppLink>
         </template>
       </draggable>
+      <div
+        class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-full absolute"
+      />
     </div>
   </div>
 </template>
