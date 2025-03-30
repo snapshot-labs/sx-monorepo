@@ -216,6 +216,7 @@ router.afterEach(() => {
     </div>
     <div class="sticky bottom-0 inset-x-0 z-[101] flex flex-col flex-none">
       <div class="relative">
+        <UiBottomMenuFloating :show-about="!isWhiteLabel" />
         <AppNotifications />
       </div>
       <AppBottomNav
