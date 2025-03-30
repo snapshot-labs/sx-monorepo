@@ -60,7 +60,7 @@ watch(open, val => {
 
 <style lang="scss" scoped>
 .modal {
-  @apply absolute flex items-center justify-center mx-auto inset-0 z-[51];
+  @apply fixed flex items-center justify-center mx-auto inset-0 z-[102];
 
   .shell {
     @apply relative bg-skin-bg md:border md:rounded-lg shadow-lg px-0 my-0 mx-auto flex flex-col z-[999] md:max-w-[440px] max-w-full max-h-full min-h-full w-full md:max-h-[calc(100vh-120px)] md:min-h-0;
