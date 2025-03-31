@@ -96,7 +96,6 @@ onUnmounted(() => {
     <Breadcrumb v-if="!searchConfig && !hasAppNav" class="grow-[20]" />
     <form
       v-if="searchConfig"
-      id="search-form group"
       class="grow-[20] group"
       @submit="handleSearchSubmit"
     >
@@ -107,7 +106,7 @@ onUnmounted(() => {
           v-model.trim="searchValue"
           type="text"
           :placeholder="searchConfig.placeholder"
-          class="bg-transparent text-skin-link text-[19px] flex-auto"
+          class="bg-transparent text-skin-link text-[19px] w-full"
         />
       </label>
     </form>
