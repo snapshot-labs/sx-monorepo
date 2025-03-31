@@ -57,7 +57,6 @@ const {
   loaded: networksLoaded
 } = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
-const { isWhiteLabel } = useWhiteLabel();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);

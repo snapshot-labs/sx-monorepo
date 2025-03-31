@@ -17,9 +17,8 @@ const { open } = toRefs(props);
 const { modalOpen } = useModal();
 
 function handleClose() {
-  if (props.closeable) {
-    emit('close');
-  }
+  if (!props.closeable) return;
+  emit('close');
 }
 
 onBeforeUnmount(() => {

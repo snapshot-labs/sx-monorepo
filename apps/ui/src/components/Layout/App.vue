@@ -212,7 +212,7 @@ router.afterEach(() => {
         </AppTopnav>
         <main
           :class="[
-            'relative flex-auto',
+            'flex-auto',
             { 'xl:border-r xl:mr-[240px]': hasPlaceHolderSidebar }
           ]"
         >
