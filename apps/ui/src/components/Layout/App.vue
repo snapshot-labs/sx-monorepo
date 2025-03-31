@@ -212,11 +212,13 @@ router.afterEach(() => {
         </AppTopnav>
         <main
           :class="[
-            'flex-auto',
+            'flex-auto flex',
             { 'xl:border-r xl:mr-[240px]': hasPlaceHolderSidebar }
           ]"
         >
-          <router-view class="h-full pb-10" />
+          <div class="flex-auto w-0">
+            <router-view class="h-full pb-10" />
+          </div>
         </main>
       </div>
     </div>
