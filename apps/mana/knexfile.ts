@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import fs from 'fs';
 import { ConnectionString } from 'connection-string';
-import { Knex } from 'knex';
+// This is a workaround for Node v23.
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import { type Knex } from 'knex';
 
 const connectionConfig = new ConnectionString(process.env.DATABASE_URL);
 if (
