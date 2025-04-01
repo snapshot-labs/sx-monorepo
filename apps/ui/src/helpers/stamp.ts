@@ -103,7 +103,7 @@ export async function getNames(
 
 export async function getENSNames(
   address: string,
-  chainId: ChainId
+  chainIds: ChainId[]
 ): Promise<string[]> {
   const res = await fetch(STAMP_URL, {
     method: 'POST',
@@ -113,7 +113,7 @@ export async function getENSNames(
     body: JSON.stringify({
       method: 'lookup_domains',
       params: formatAddress(address),
-      network: chainId
+      network: chainIds
     })
   });
 
