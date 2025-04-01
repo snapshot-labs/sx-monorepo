@@ -112,7 +112,7 @@ export function createConfig(indexerName: NetworkID): FullConfig {
             fn: 'handleVotingDelayUpdated'
           },
           {
-            name: 'OwnershipTransferred(indexed address,indexed address)',
+            name: 'OwnershipTransferred(address,address)',
             fn: 'handleOwnershipTransferred'
           },
           {
