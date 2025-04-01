@@ -10937,26 +10937,6 @@ kleur@^4.1.5:
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-4.1.5.tgz#95106101795f7050c6c650f350c683febddb1780"
   integrity sha512-o+NO+8WrRiQEE4/7nwRJhN1HWpVmJm511pBHUxPLtp0BUISzlBplORYSmTclCnJvQq2tKu/sgl3xVpkc7ZWuQQ==
 
-knex@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/knex/-/knex-2.5.1.tgz#a6c6b449866cf4229f070c17411f23871ba52ef9"
-  integrity sha512-z78DgGKUr4SE/6cm7ku+jHvFT0X97aERh/f0MUKAKgFnwCYBEW4TFBqtHWFYiJFid7fMrtpZ/gxJthvz5mEByA==
-  dependencies:
-    colorette "2.0.19"
-    commander "^10.0.0"
-    debug "4.3.4"
-    escalade "^3.1.1"
-    esm "^3.2.25"
-    get-package-type "^0.1.0"
-    getopts "2.3.0"
-    interpret "^2.2.0"
-    lodash "^4.17.21"
-    pg-connection-string "2.6.1"
-    rechoir "^0.8.0"
-    resolve-from "^5.0.0"
-    tarn "^3.0.2"
-    tildify "2.0.0"
-
 knex@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/knex/-/knex-3.1.0.tgz#b6ddd5b5ad26a6315234a5b09ec38dc4a370bd8c"
@@ -12647,11 +12627,6 @@ pg-cloudflare@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/pg-cloudflare/-/pg-cloudflare-1.1.1.tgz#e6d5833015b170e23ae819e8c5d7eaedb472ca98"
   integrity sha512-xWPagP/4B6BgFO+EKz3JONXv3YDgvkbVrGw2mTo3D6tVDQRh1e7cqVGvyR3BE+eQgAvx1XhW/iEASj4/jCWl3Q==
-
-pg-connection-string@2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-2.6.1.tgz#78c23c21a35dd116f48e12e23c0965e8d9e2cbfb"
-  integrity sha512-w6ZzNu6oMmIzEAYVw+RLK0+nqHPt8K3ZnknKi+g48Ak2pr3dtljJW3o+D/n2zzCG07Zoe9VOX3aiKpj+BN0pjg==
 
 pg-connection-string@2.6.2, pg-connection-string@^2.6.2:
   version "2.6.2"
