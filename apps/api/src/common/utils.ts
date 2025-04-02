@@ -1,6 +1,24 @@
 import { faker } from '@faker-js/faker';
 import fetch from 'cross-fetch';
 import { hash } from 'starknet';
+import { Counter } from '../../.checkpoint/models';
+
+const COUNTER_ID = 'global_counter';
+
+export async function updateCounter(
+  indexerName: string,
+  value: 'space_count' | 'proposal_count' | 'vote_count',
+  increment: number
+) {
+  let counter = await Counter.loadEntity(COUNTER_ID, indexerName);
+  if (!counter) {
+    counter = new Counter(COUNTER_ID, indexerName);
+  }
+
+  counter[value] = counter[value] + increment;
+
+  await counter.save();
+}
 
 export function getUrl(uri: string, gateway = 'pineapple.fyi') {
   const ipfsGateway = `https://${gateway}`;

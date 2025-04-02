@@ -29,7 +29,7 @@ import {
   handleStrategiesMetadata,
   handleVoteMetadata
 } from '../common/ipfs';
-import { dropIpfs, getCurrentTimestamp } from '../common/utils';
+import { dropIpfs, getCurrentTimestamp, updateCounter } from '../common/utils';
 
 /**
  * List of execution strategies type that are known and we expect them to be deployed via factory.
@@ -282,6 +282,8 @@ export function createWriters(config: FullConfig) {
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
+
+    await updateCounter(config.indexerName, 'space_count', 1);
 
     await space.save();
   };
@@ -693,7 +695,11 @@ export function createWriters(config: FullConfig) {
     if (leaderboardItem.proposal_count === 1) space.proposer_count += 1;
     space.proposal_count += 1;
 
-    await Promise.all([proposal.save(), space.save()]);
+    await Promise.all([
+      updateCounter(config.indexerName, 'proposal_count', 1),
+      proposal.save(),
+      space.save()
+    ]);
   };
 
   const handleProposalCancelled: evm.Writer = async ({ rawEvent, event }) => {
@@ -714,7 +720,11 @@ export function createWriters(config: FullConfig) {
     space.proposal_count -= 1;
     space.vote_count -= proposal.vote_count;
 
-    await Promise.all([proposal.save(), space.save()]);
+    await Promise.all([
+      updateCounter(config.indexerName, 'proposal_count', -1),
+      proposal.save(),
+      space.save()
+    ]);
   };
 
   const handleProposalUpdated: evm.Writer = async ({
@@ -897,6 +907,8 @@ export function createWriters(config: FullConfig) {
 
     leaderboardItem.vote_count += 1;
     await leaderboardItem.save();
+
+    await updateCounter(config.indexerName, 'vote_count', 1);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (space) {
