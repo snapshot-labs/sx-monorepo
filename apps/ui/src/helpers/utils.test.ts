@@ -5,6 +5,7 @@ import {
   _vp,
   createErc1155Metadata,
   formatAddress,
+  getSpaceController,
   getStampUrl,
   uniqBy
 } from './utils';
@@ -266,6 +267,36 @@ describe('utils', () => {
       ).toBe(
         'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64&cb=1234'
       );
+    });
+  });
+
+  describe.only('getSpaceController', () => {
+    it('should return the space controller address for a shib name on mainnet', async () => {
+      const spaceId = 'boorger.shib';
+      const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for an ENS name on mainnet', async () => {
+      const spaceId = 'ens.eth';
+      const expectedController = '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for a shib name on testnet', async () => {
+      const spaceId = 'renato.shib';
+      const expectedController = '0x2E7cC63800e77BB8c662c45Ef33D1cCc23861532';
+      const controller = await getSpaceController(spaceId, 's-tn');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for an ENS name on testnet', async () => {
+      const spaceId = 'ens.eth';
+      const expectedController = '0x179A862703a4adfb29896552DF9e307980D19285';
+      const controller = await getSpaceController(spaceId, 's-tn');
+      expect(controller).toBe(expectedController);
     });
   });
 });
