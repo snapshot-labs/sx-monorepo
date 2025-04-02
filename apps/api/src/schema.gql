@@ -194,7 +194,7 @@ type Leaderboard {
   vote_count: Int!
 }
 
-type Counter {
+type Network {
   id: String!
   space_count: Int!
   proposal_count: Int!
