@@ -124,10 +124,7 @@ export async function handleStrategiesMetadata(
     if (!metadataUri) continue;
 
     const index = startingIndex + i;
-    const uniqueId = `${spaceId}/${index}/${dropIpfs(metadataUri)}`;
-
-    const exists = await type.loadEntity(uniqueId, config.indexerName);
-    if (exists) continue;
+    const uniqueId = crypto.randomUUID();
 
     const strategiesParsedMetadataItem = new type(uniqueId, config.indexerName);
     strategiesParsedMetadataItem.space = spaceId;
