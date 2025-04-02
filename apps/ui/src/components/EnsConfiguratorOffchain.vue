@@ -41,6 +41,12 @@ const isTestnet = computed(() => {
   return getNetwork(props.networkId).name.includes('testnet');
 });
 
+const ensUrl = computed(() =>
+  isTestnet.value
+    ? 'https://sepolia.app.ens.domains'
+    : 'https://app.ens.domains'
+);
+
 function handleAttachEnsName(name: string) {
   isModalEnsNameOpen.value = false;
 
@@ -163,7 +169,7 @@ function handleSelect(value: string) {
         <UiMessage v-else type="danger">
           No ENS names found for the current wallet.
         </UiMessage>
-        <AppLink to="https://app.ens.domains" class="inline-block">
+        <AppLink :to="ensUrl" class="inline-block">
           Register a new ENS name
           <IH-arrow-sm-right class="-rotate-45 inline" /> </AppLink
         >, or
