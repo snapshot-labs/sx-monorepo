@@ -41,7 +41,7 @@ const isTestnet = computed(() => {
   return getNetwork(props.networkId).name.includes('testnet');
 });
 
-const ENS_URL = computed(() =>
+const ensUrl = computed(() =>
   isTestnet.value
     ? 'https://sepolia.app.ens.domains'
     : 'https://app.ens.domains'
