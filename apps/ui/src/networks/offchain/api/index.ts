@@ -332,6 +332,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
+    isInvalid: false,
     author: {
       id: proposal.author,
       address_type: 1,
