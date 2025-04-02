@@ -270,7 +270,7 @@ describe('utils', () => {
     });
   });
 
-  describe.only('getSpaceController', () => {
+  describe('getSpaceController', () => {
     it('should return the space controller address for a shib name on mainnet', async () => {
       const spaceId = 'boorger.shib';
       const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
