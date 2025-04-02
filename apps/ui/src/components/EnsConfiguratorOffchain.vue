@@ -169,7 +169,7 @@ function handleSelect(value: string) {
         <UiMessage v-else type="danger">
           No ENS names found for the current wallet.
         </UiMessage>
-        <AppLink :to="ENS_URL" class="inline-block">
+        <AppLink :to="ensUrl" class="inline-block">
           Register a new ENS name
           <IH-arrow-sm-right class="-rotate-45 inline" /> </AppLink
         >, or
