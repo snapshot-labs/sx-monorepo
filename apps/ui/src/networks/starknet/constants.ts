@@ -477,7 +477,8 @@ export function createConstants(
         !(
           [
             config.Strategies.EVMSlotValue,
-            config.Strategies.OZVotesStorageProof
+            config.Strategies.OZVotesStorageProof,
+            config.Strategies.OZVotesTrace208StorageProof
           ] as string[]
         ).includes(strategy.address)
     );
