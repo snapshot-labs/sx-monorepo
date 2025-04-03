@@ -13,8 +13,10 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
+import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
+import { getSpaceController as getShibariumSpaceController } from '@/helpers/shibarium';
 import { VotingPowerItem } from '@/queries/votingPower';
-import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
+import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -679,4 +681,23 @@ export function isUserAbortError(e: any) {
     ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
     ['User abort', 'User rejected the request.'].includes(e.message)
   );
+}
+
+export function getSpaceController(id: string, network: NetworkID) {
+  const chainMapping = {
+    ens: {
+      s: 1,
+      's-tn': 11155111
+    },
+    shibarium: {
+      s: 109,
+      's-tn': 157
+    }
+  };
+
+  if (id.endsWith('.shib')) {
+    return getShibariumSpaceController(id, chainMapping.shibarium[network]);
+  }
+
+  return getEnsSpaceController(id, chainMapping.ens[network]);
 }
