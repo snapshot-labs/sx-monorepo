@@ -4,6 +4,7 @@ import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call, multicall } from './call';
 import { getProvider } from './provider';
+import { getAddresses } from './stamp';
 
 export type ENSChainId = 1 | 11155111;
 
@@ -45,14 +46,6 @@ const ENS_CONTRACTS: ENSContracts = {
 };
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
-
-const MUTED_OFFCHAIN_RESOLVER_ERRORS = [
-  // mute error from coinbase, when the subdomain is not found
-  // most other resolvers just return an empty address
-  'response not found during CCIP fetch',
-  // mute error from missing offchain resolver (mostly for sepolia)
-  'UNSUPPORTED_OPERATION'
-];
 
 // see https://docs.ens.domains/registry/dns#gasless-import
 async function getDNSOwner(domain: string): Promise<string> {
@@ -185,24 +178,13 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   );
 
   if (!name.endsWith('.eth') && owner === EMPTY_ADDRESS) {
-    try {
-      const resolvedAddress = await provider.resolveName(ensNormalize(name));
-      const nameTokens = name.split('.');
+    const resolvedAddress = (await getAddresses([name], chainId))[name];
+    const nameTokens = name.split('.');
 
-      if (nameTokens.length > 2) {
-        owner = resolvedAddress || EMPTY_ADDRESS;
-      } else if (nameTokens.length === 2 && resolvedAddress) {
-        owner = await getDNSOwner(name);
-      }
-    } catch (e: any) {
-      if (
-        MUTED_OFFCHAIN_RESOLVER_ERRORS.every(
-          error => !e.message.includes(error)
-        )
-      ) {
-        throw e;
-      }
-      owner = EMPTY_ADDRESS;
+    if (nameTokens.length > 2) {
+      owner = resolvedAddress || EMPTY_ADDRESS;
+    } else if (nameTokens.length === 2 && resolvedAddress) {
+      owner = await getDNSOwner(name);
     }
   }
 
