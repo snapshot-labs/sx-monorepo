@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
+import { EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
   _rt,
@@ -285,6 +286,18 @@ onBeforeUnmount(() => destroyAudio());
       <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
         This proposal might contain scams, offensive material, or be malicious
         in nature. Please proceed with caution.
+      </UiAlert>
+      <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
+        <template v-if="proposal.execution_strategy === EMPTY_ADDRESS">
+          This proposal is invalid and was not created correctly. We cannot
+          display its details.
+        </template>
+        <template v-else>
+          This proposal is invalid and was not created correctly. We cannot
+          display its details, and it <strong>includes execution</strong>. This
+          might mean possible malicious behavior. We strongly advise you to
+          reject this proposal.
+        </template>
       </UiAlert>
 
       <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">

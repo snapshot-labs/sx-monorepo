@@ -241,6 +241,10 @@ export type Proposal = {
   proposal_id: number | string;
   network: NetworkID;
   execution_network: NetworkID;
+  /**
+   * If proposal is invalid it means that it was not created correctly.
+   */
+  isInvalid: boolean;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';

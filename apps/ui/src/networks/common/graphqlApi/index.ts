@@ -3,7 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS } from '@/helpers/constants';
+import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
@@ -81,13 +81,11 @@ function isSpaceWithMetadata(space: ApiSpace): space is ApiSpaceWithMetadata {
   );
 }
 
-function isProposalWithMetadata(
+function isProposalWithSpaceMetadata(
   proposal: ApiProposal
 ): proposal is ApiProposalWithMetadata {
   return (
-    !!proposal.metadata &&
-    !!proposal.space.metadata &&
-    !!proposal.space.strategies_parsed_metadata
+    !!proposal.space.metadata && !!proposal.space.strategies_parsed_metadata
   );
 }
 
@@ -162,7 +160,10 @@ function processStrategiesMetadata(
 ) {
   if (parsedMetadata.length === 0) return [];
 
-  const maxIndex = Math.max(...parsedMetadata.map(metadata => metadata.index));
+  // Those values are default sorted by block_range so newest entries are at the end
+  // To find *current* maxIndex we can just look at the last item.
+  // In the past there could be more strategies so we can't check for max index among all entries.
+  const maxIndex = parsedMetadata[parsedMetadata.length - 1].index;
 
   const metadataMap = Object.fromEntries(
     parsedMetadata.map(metadata => [
@@ -303,6 +304,7 @@ function formatProposal(
 
   return {
     ...proposal,
+    isInvalid: proposal.metadata === null,
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,
@@ -324,14 +326,14 @@ function formatProposal(
       address_type: getAddressType(proposal.author),
       role: null
     },
-    metadata_uri: proposal.metadata.id,
+    metadata_uri: proposal.metadata?.id ?? '',
     type: 'basic',
-    choices: proposal.metadata.choices,
-    labels: proposal.metadata.labels,
+    choices: proposal.metadata?.choices ?? BASIC_CHOICES,
+    labels: proposal.metadata?.labels ?? [],
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    title: proposal.metadata.title ?? '',
-    body: proposal.metadata.body ?? '',
-    discussion: proposal.metadata.discussion ?? '',
+    title: proposal.metadata?.title ?? `Proposal #${proposal.proposal_id}`,
+    body: proposal.metadata?.body ?? '',
+    discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
@@ -501,9 +503,10 @@ export function createApi(
       searchQuery = ''
     ): Promise<Proposal[]> => {
       const _filters: ProposalsFilter = clone(filters || {});
-      const metadataFilters: Record<string, any> = {
-        title_contains_nocase: searchQuery
-      };
+
+      const metadataFilters: Record<string, any> = {};
+      if (searchQuery) metadataFilters.title_contains_nocase = searchQuery;
+
       const state = _filters.state;
 
       if (state === 'active') {
@@ -531,7 +534,9 @@ export function createApi(
           where: {
             space_in: spaceIds,
             cancelled: false,
-            metadata_: metadataFilters,
+            metadata_: Object.keys(metadataFilters).length
+              ? metadataFilters
+              : undefined,
             ..._filters
           }
         }
@@ -553,7 +558,7 @@ export function createApi(
       }
 
       return data.proposals
-        .filter(proposal => isProposalWithMetadata(proposal))
+        .filter(proposal => isProposalWithSpaceMetadata(proposal))
         .map(proposal =>
           formatProposal(proposal, networkId, current, opts.baseNetworkId)
         );
@@ -583,7 +588,7 @@ export function createApi(
         highlightResult?.data.sxproposal
       );
 
-      if (!isProposalWithMetadata(data.proposal)) return null;
+      if (!isProposalWithSpaceMetadata(data.proposal)) return null;
       return formatProposal(
         data.proposal,
         networkId,

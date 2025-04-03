@@ -3,7 +3,9 @@ import { getAddress, isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call, multicall } from './call';
+import { EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
+import { getAddresses } from './stamp';
 
 export type ENSChainId = 1 | 11155111;
 
@@ -33,23 +35,16 @@ const ENS_CONTRACTS: ENSContracts = {
       '0x231b0Ee14048e9dCcD1d247744d114a4EB5E8E63',
       '0x4976fb03C32e5B8cfe2b6cCB31c09Ba78EBaBa41'
     ],
-    11155111: ['0x8FADE66B79cC9f707aB26799354482EB93a5B7dD']
+    11155111: [
+      '0x8FADE66B79cC9f707aB26799354482EB93a5B7dD',
+      '0x8948458626811dd0c23EB25Cc74291247077cC51'
+    ]
   },
   nameWrappers: {
     1: '0xD4416b13d2b3a9aBae7AcD5D6C2BbDBE25686401',
     11155111: '0x0635513f179D50A207757E05759CbD106d7dFcE8'
   }
 };
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
-
-const MUTED_OFFCHAIN_RESOLVER_ERRORS = [
-  // mute error from coinbase, when the subdomain is not found
-  // most other resolvers just return an empty address
-  'response not found during CCIP fetch',
-  // mute error from missing offchain resolver (mostly for sepolia)
-  'UNSUPPORTED_OPERATION'
-];
 
 // see https://docs.ens.domains/registry/dns#gasless-import
 async function getDNSOwner(domain: string): Promise<string> {
@@ -182,24 +177,13 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
   );
 
   if (!name.endsWith('.eth') && owner === EMPTY_ADDRESS) {
-    try {
-      const resolvedAddress = await provider.resolveName(ensNormalize(name));
-      const nameTokens = name.split('.');
+    const resolvedAddress = (await getAddresses([name], chainId))[name];
+    const nameTokens = name.split('.');
 
-      if (nameTokens.length > 2) {
-        owner = resolvedAddress || EMPTY_ADDRESS;
-      } else if (nameTokens.length === 2 && resolvedAddress) {
-        owner = await getDNSOwner(name);
-      }
-    } catch (e: any) {
-      if (
-        MUTED_OFFCHAIN_RESOLVER_ERRORS.every(
-          error => !e.message.includes(error)
-        )
-      ) {
-        throw e;
-      }
-      owner = EMPTY_ADDRESS;
+    if (nameTokens.length > 2) {
+      owner = resolvedAddress || EMPTY_ADDRESS;
+    } else if (nameTokens.length === 2 && resolvedAddress) {
+      owner = await getDNSOwner(name);
     }
   }
 
