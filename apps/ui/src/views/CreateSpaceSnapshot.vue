@@ -208,7 +208,7 @@ watch(
   <UiStepper
     :steps="STEPS"
     :submitting="sending"
-    class="max-w-[50rem] mx-auto px-4 lg:pt-5 gap-y-8 gap-x-5"
+    class="lg:max-w-[50rem] max-w-[592px] mx-auto px-4 lg:pt-5 gap-x-5"
     @submit="handleSubmit"
   >
     <template #content="{ currentStep, goToNext }">

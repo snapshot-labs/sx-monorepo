@@ -39,25 +39,27 @@ function goToStep(stepName: string) {
 
 <template>
   <div class="flex flex-col lg:flex-row lg:items-start">
-    <div
-      class="flex z-40 top-[72px] inset-x-0 p-3 border-b bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-x-auto"
-    >
-      <button
-        v-for="(step, stepName) in steps"
-        :key="stepName"
-        type="button"
-        class="px-3 py-1 flex items-center gap-2 text-skin-link rounded whitespace-nowrap hover:bg-skin-hover-bg"
-        :class="{
-          'bg-skin-active-bg': stepper.isCurrent(stepName)
-        }"
-        @click="goToStep(stepName)"
+    <div class="absolute inset-x-0 lg:static">
+      <div
+        class="flex p-3 border-b bg-skin-bg lg:p-0 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-x-auto"
       >
-        <IH-check v-if="!step.isValid()" :class="'opacity-20'" />
-        <IS-check v-if="step.isValid()" class="text-skin-success" />
-        {{ step.title }}
-      </button>
+        <button
+          v-for="(step, stepName) in steps"
+          :key="stepName"
+          type="button"
+          class="px-3 py-1 flex items-center gap-2 text-skin-link rounded whitespace-nowrap hover:bg-skin-hover-bg"
+          :class="{
+            'bg-skin-active-bg': stepper.isCurrent(stepName)
+          }"
+          @click="goToStep(stepName)"
+        >
+          <IH-check v-if="!step.isValid()" :class="'opacity-20'" />
+          <IS-check v-if="step.isValid()" class="text-skin-success" />
+          {{ step.title }}
+        </button>
+      </div>
     </div>
-    <div class="flex-1 space-y-4">
+    <div class="flex-1 space-y-4 mt-[72px] lg:mt-0 pt-4 lg:pt-0">
       <slot
         name="content"
         :current-step="currentStep"
