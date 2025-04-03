@@ -293,17 +293,10 @@ onBeforeUnmount(() => destroyAudio());
           display its details.
         </template>
         <template v-else>
-          <strong>Danger!</strong>
-
-          <div>
-            This proposal is invalid and was not created correctly. We cannot
-            display its details, and it <strong>includes execution</strong>.
-          </div>
-
-          <div>
-            This might mean possible malicious behavior. We strongly advise you
-            to reject this proposal.
-          </div>
+          This proposal is invalid and was not created correctly. We cannot
+          display its details, and it <strong>includes execution</strong>. This
+          might mean possible malicious behavior. We strongly advise you to
+          reject this proposal.
         </template>
       </UiAlert>
 
