@@ -66,7 +66,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
           <UiTooltip v-if="proposal.isInvalid" title="This proposal is invalid">
-            <IH-exclamation-circle
+            <IH-exclamation
               class="inline-block text-skin-danger shrink-0 relative bottom-0.5"
             />
           </UiTooltip>
