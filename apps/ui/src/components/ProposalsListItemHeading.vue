@@ -65,11 +65,11 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             class="text-[21px] inline [overflow-wrap:anywhere] min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
-          <span
-            v-if="proposal.isInvalid"
-            class="rounded truncate font-bold text-sm whitespace-nowrap px-1 py-1 bg-rose-100 border-rose-300 text-rose-500 dark:bg-rose-700 dark:border-rose-700 dark:text-neutral-100"
-            v-text="'FLAGGED'"
-          />
+          <UiTooltip v-if="proposal.isInvalid" title="This proposal is invalid">
+            <IH-exclamation-circle
+              class="inline-block text-skin-danger shrink-0 relative bottom-0.5"
+            />
+          </UiTooltip>
           <ProposalLabels
             v-if="proposal.space?.labels && proposal.labels.length"
             :space-id="`${proposal.network}:${proposal.space.id}`"
