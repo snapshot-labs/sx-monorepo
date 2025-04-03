@@ -3,6 +3,7 @@ import { getAddress, isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call, multicall } from './call';
+import { EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
 import { getAddresses } from './stamp';
 
@@ -44,8 +45,6 @@ const ENS_CONTRACTS: ENSContracts = {
     11155111: '0x0635513f179D50A207757E05759CbD106d7dFcE8'
   }
 };
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 // see https://docs.ens.domains/registry/dns#gasless-import
 async function getDNSOwner(domain: string): Promise<string> {

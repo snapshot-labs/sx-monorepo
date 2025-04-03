@@ -24,6 +24,7 @@ export const TURBO_URL =
 export const VERIFIED_URL =
   'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 
+export const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 
 export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
