@@ -162,7 +162,10 @@ function processStrategiesMetadata(
 ) {
   if (parsedMetadata.length === 0) return [];
 
-  const maxIndex = Math.max(...parsedMetadata.map(metadata => metadata.index));
+  // Those values are default sorted by block_range so newest entries are at the end
+  // To find *current* maxIndex we can just look at the last item.
+  // In the past there could be more strategies so we can't check for max index among all entries.
+  const maxIndex = parsedMetadata[parsedMetadata.length - 1].index;
 
   const metadataMap = Object.fromEntries(
     parsedMetadata.map(metadata => [
