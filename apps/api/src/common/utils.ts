@@ -1,6 +1,22 @@
 import { faker } from '@faker-js/faker';
 import fetch from 'cross-fetch';
 import { hash } from 'starknet';
+import { Network } from '../../.checkpoint/models';
+
+export async function updateCounter(
+  indexerName: string,
+  value: 'space_count' | 'proposal_count' | 'vote_count',
+  increment: number
+) {
+  let counter = await Network.loadEntity(indexerName, indexerName);
+  if (!counter) {
+    counter = new Network(indexerName, indexerName);
+  }
+
+  counter[value] = counter[value] + increment;
+
+  await counter.save();
+}
 
 export function getUrl(uri: string, gateway = 'pineapple.fyi') {
   const ipfsGateway = `https://${gateway}`;

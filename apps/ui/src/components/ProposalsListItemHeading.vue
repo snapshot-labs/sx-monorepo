@@ -65,6 +65,11 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             class="text-[21px] inline [overflow-wrap:anywhere] min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
+          <UiTooltip v-if="proposal.isInvalid" title="This proposal is invalid">
+            <IH-exclamation
+              class="inline-block text-skin-danger shrink-0 relative bottom-0.5"
+            />
+          </UiTooltip>
           <ProposalLabels
             v-if="proposal.space?.labels && proposal.labels.length"
             :space-id="`${proposal.network}:${proposal.space.id}`"

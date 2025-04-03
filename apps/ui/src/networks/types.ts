@@ -286,6 +286,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
     validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
@@ -393,7 +394,18 @@ export type NetworkHelpers = {
     authenticator: string
   ): 'evm' | 'evm-tx' | 'starknet' | null;
   isStrategySupported(strategy: string): boolean;
-  isExecutorSupported(executor: string): boolean;
+  /**
+   * Checks if the executor type is supported.
+   * If supported executor can be used to create proposal execution.
+   * @param executorType executor type
+   */
+  isExecutorSupported(executorType: string): boolean;
+  /**
+   * Checks if the executor actions are supported.
+   * If supported UI will show execution actions for the executor.
+   * @param executorType executor type
+   */
+  isExecutorActionsSupported(executorType: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   getSpaceController(space: Space): Promise<string>;
   getTransaction(txId: string): Promise<any>;

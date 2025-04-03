@@ -22,7 +22,6 @@ export type ApiSpaceWithMetadata = ApiSpace & {
   >[];
 };
 export type ApiProposalWithMetadata = ApiProposal & {
-  metadata: NonNullable<ApiProposal['metadata']>;
   space: NonNullable<ApiProposal['space']> & {
     metadata: NonNullable<ApiSpace['metadata']>;
     strategies_parsed_metadata: RequiredProperty<
