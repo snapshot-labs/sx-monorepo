@@ -1,6 +1,6 @@
-export type ShibariumChainId = '109' | '157';
+import { EMPTY_ADDRESS } from './constants';
 
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+export type ShibariumChainId = '109' | '157';
 
 export async function getSpaceController(
   name: string,
