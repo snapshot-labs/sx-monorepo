@@ -26,6 +26,10 @@ type NavigationItem = {
   active?: boolean;
 };
 
+defineProps<{
+  bottom?: number;
+}>();
+
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
@@ -190,21 +194,32 @@ const navigationItems = computed(() =>
 </script>
 
 <template>
-  <div class="border-r bg-skin-bg py-4">
-    <AppLink
-      v-for="(item, key) in navigationItems"
-      :key="key"
-      :to="item.link"
-      class="px-4 py-1.5 space-x-2 flex items-center"
-      :class="item.active ? 'text-skin-link' : 'text-skin-text'"
+  <div>
+    <div
+      :class="`w-[240px] sticky top-0 flex flex-col max-h-[calc(100vh-${bottom || 0}px)]`"
     >
-      <component :is="item.icon" class="inline-block"></component>
-      <span class="grow" v-text="item.name" />
-      <span
-        v-if="item.count"
-        class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-        v-text="item.count"
-      />
-    </AppLink>
+      <div class="border-b h-[72px] flex items-center px-4 shrink-0">
+        <Breadcrumb />
+      </div>
+      <div
+        class="no-scrollbar overscroll-contain overflow-auto py-4 max-h-[calc(100vh-72px)]"
+      >
+        <AppLink
+          v-for="(item, key) in navigationItems"
+          :key="key"
+          :to="item.link"
+          class="px-4 py-1.5 space-x-2 flex items-center"
+          :class="item.active ? 'text-skin-link' : 'text-skin-text'"
+        >
+          <component :is="item.icon" />
+          <span class="grow" v-text="item.name" />
+          <span
+            v-if="item.count"
+            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
+            v-text="item.count"
+          />
+        </AppLink>
+      </div>
+    </div>
   </div>
 </template>
