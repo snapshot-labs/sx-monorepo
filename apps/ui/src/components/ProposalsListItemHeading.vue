@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
-import { _n, getProposalId, shortenAddress } from '@/helpers/utils';
+import { _n, _tt, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -127,7 +127,14 @@ const hasVoted = computed(
         {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
-      <TimeRelative v-slot="{ relativeTime }" :time="props.proposal.max_end">
+      <button
+        v-if="proposal.state === 'pending'"
+        type="button"
+        class="text-skin-text"
+        @click="modalOpenTimeline = true"
+        v-text="'Start in ' + _tt(proposal.start)"
+      />
+      <TimeRelative v-else v-slot="{ relativeTime }" :time="props.proposal.max_end">
         <button
           type="button"
           class="text-skin-text"

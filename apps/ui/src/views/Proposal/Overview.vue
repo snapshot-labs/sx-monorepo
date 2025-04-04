@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { EVM_EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
+  _tt,
   compareAddresses,
   getProposalId,
   getUrl,
@@ -142,6 +143,10 @@ const votingTime = computed(() => {
 
   const current = getCurrent(props.proposal.network);
   if (!current) return null;
+
+  if (props.proposal.state === 'pending') {
+    return `Start in ${_tt(props.proposal.start)}`;
+  }
 
   const hasEnded = props.proposal.max_end <= current;
 

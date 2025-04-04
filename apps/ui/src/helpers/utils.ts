@@ -290,6 +290,15 @@ export function _rt(time: number) {
   }
 }
 
+export function _tt(number) {
+  try {
+    return dayjs().to(number * 1000, true);
+  } catch (e) {
+    console.log(e);
+    return '';
+  }
+}
+
 export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
   const definition = {
     $async: true,
