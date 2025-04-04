@@ -43,6 +43,7 @@ const {
   init: initAudio,
   destroy: destroyAudio
 } = useAudio();
+const { isDownloadingVotes, downloadVotes } = useReportDownload();
 
 const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
@@ -277,6 +278,28 @@ async function handleAiSpeechClick() {
   }
 }
 
+async function handleDownloadVotes() {
+  if (!props.proposal) return;
+
+  try {
+    await downloadVotes(props.proposal.proposal_id);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      if (e.message === 'PENDING_GENERATION') {
+        return uiStore.addNotification(
+          'success',
+          'Your report is currently being generated. It may take a few minutes. Please check back shortly.'
+        );
+      }
+
+      uiStore.addNotification(
+        'error',
+        "We're having trouble connecting to the server responsible for downloads"
+      );
+    }
+  }
+}
+
 onBeforeUnmount(() => destroyAudio());
 </script>
 
@@ -409,6 +432,32 @@ onBeforeUnmount(() => destroyAudio());
                 >
                   <IH-document-duplicate :width="16" />
                   Duplicate proposal
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="
+                  proposal.network === 's' &&
+                  proposal.completed &&
+                  ['passed', 'rejected', 'executed', 'closed'].includes(
+                    proposal.state
+                  )
+                "
+                v-slot="{ active }"
+              >
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleDownloadVotes"
+                >
+                  <template v-if="isDownloadingVotes">
+                    <UiLoading :size="18" />
+                    Downloading votes
+                  </template>
+                  <template v-else>
+                    <IS-arrow-down-tray />
+                    Download votes
+                  </template>
                 </button>
               </UiDropdownItem>
               <UiDropdownItem v-if="editable" v-slot="{ active }">
