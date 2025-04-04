@@ -27,8 +27,14 @@ describe('EthereumTx', () => {
     testConfig = await setup(provider, signer);
     spaceAddress = testConfig.spaceAddress;
 
-    ethTxClient = new EthereumTx({ networkConfig: testConfig.networkConfig });
-    ethSigClient = new EthereumSig({ networkConfig: testConfig.networkConfig });
+    const clientOpts = {
+      networkConfig: testConfig.networkConfig,
+      whitelistServerUrl: 'https://wls.snapshot.box',
+      manaUrl: 'https://mana.box'
+    };
+
+    ethTxClient = new EthereumTx(clientOpts);
+    ethSigClient = new EthereumSig(clientOpts);
   });
 
   describe('vanilla authenticator', () => {

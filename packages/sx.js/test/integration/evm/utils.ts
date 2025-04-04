@@ -191,7 +191,10 @@ export async function setup(
     }
   } as const;
 
-  const ethTxClient = new EthereumTx({ networkConfig });
+  const ethTxClient = new EthereumTx({
+    networkConfig,
+    whitelistServerUrl: 'https://wls.snapshot.box'
+  });
   const spaceAddress = await ethTxClient.predictSpaceAddress({
     signer,
     saltNonce: precomputedSpaceSalt

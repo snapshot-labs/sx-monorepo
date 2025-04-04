@@ -4,6 +4,7 @@ import {
 } from '@ethersproject/abstract-signer';
 import { ContractInterface } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
+import { EvmNetworkConfig } from '../../types';
 
 enum Choice {
   Against = 0,
@@ -25,6 +26,16 @@ export type StrategyConfig = {
   index: number;
   address: string;
   metadata?: Record<string, any>;
+};
+
+export type ClientOpts = {
+  networkConfig: EvmNetworkConfig;
+  whitelistServerUrl: string;
+};
+
+export type ClientConfig = {
+  networkConfig: EvmNetworkConfig;
+  whitelistServerUrl: string;
 };
 
 export type Propose = {
@@ -73,7 +84,8 @@ export type Strategy = {
     strategyConfig: StrategyConfig,
     signerAddress: string,
     metadata: Record<string, any> | null,
-    data: Propose | Vote
+    data: Propose | Vote,
+    clientConfig: ClientConfig
   ): Promise<string>;
   getVotingPower(
     strategyAddress: string,
