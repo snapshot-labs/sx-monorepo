@@ -43,8 +43,11 @@ watch(
     <div
       class="flex flex-col space-y-3 px-4 py-5 text-center items-center text-skin-text"
     >
-      <div v-if="showIcon" class="bg-skin-success rounded-full p-[12px]">
-        <IS-check :width="28" :height="28" class="text-skin-bg" />
+      <div
+        v-if="showIcon"
+        class="bg-skin-success text-skin-heading rounded-full p-[12px]"
+      >
+        <IS-check :width="28" :height="28" />
       </div>
 
       <div class="flex flex-col space-y-1 leading-6">
