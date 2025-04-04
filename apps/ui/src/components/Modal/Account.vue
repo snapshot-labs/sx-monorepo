@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { getCacheHash } from '@/helpers/utils';
+import { starknetNetworks } from '@/networks';
+import {
+  EVM_CONNECTORS,
+  STARKNET_CONNECTORS
+} from '@/networks/common/constants';
 import { Connector } from '@/networks/types';
 
 const props = defineProps<{
@@ -11,10 +16,11 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const { open } = toRefs(props);
 const { web3, logout } = useWeb3();
 const usersStore = useUsersStore();
+const { space: whiteLabelSpace } = useWhiteLabel();
 
+const { open } = toRefs(props);
 const step: Ref<'connect' | null> = ref(null);
 
 const user = computed(
@@ -30,6 +36,16 @@ const cb = computed(() => getCacheHash(user.value.avatar));
 const isLoggedOut = computed(
   () => !web3.value.account || step.value === 'connect'
 );
+
+const supportedConnectorType = computed(() => {
+  if (
+    !whiteLabelSpace.value ||
+    starknetNetworks.includes(whiteLabelSpace.value.network)
+  )
+    return Array.from(new Set(EVM_CONNECTORS.concat(STARKNET_CONNECTORS)));
+
+  return EVM_CONNECTORS;
+});
 
 async function handleLogout() {
   await logout();
@@ -47,6 +63,7 @@ watch(open, () => (step.value = null));
     <div class="m-4 flex flex-col gap-2">
       <Connectors
         v-if="isLoggedOut"
+        :supported-connectors="supportedConnectorType"
         @click="(connector: Connector) => emit('login', connector)"
       />
       <template v-else>
