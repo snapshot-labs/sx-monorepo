@@ -25,7 +25,12 @@ describe('merkleWhitelist', () => {
   };
 
   const merkleWhitelist = createMerkleWhitelistStrategy();
-  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
+  const config = {
+    starkProvider,
+    ethUrl,
+    networkConfig: starknetSepolia,
+    manaUrl: ''
+  };
 
   it('should return type', () => {
     expect(merkleWhitelist.type).toBe('whitelist');

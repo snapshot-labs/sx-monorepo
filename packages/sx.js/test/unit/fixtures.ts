@@ -8,7 +8,8 @@ const proposeData = {
     {
       index: 1,
       address:
-        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
+        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a',
+      params: '0x'
     }
   ],
   executionStrategy: {
@@ -26,9 +27,11 @@ const voteData = {
     {
       index: 1,
       address:
-        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
+        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a',
+      params: '0x'
     }
   ],
+  metadataUri: '',
   proposal: 3,
   choice: 1
 };

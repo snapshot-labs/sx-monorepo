@@ -11,7 +11,12 @@ describe('ozVotesStorageProof', () => {
   const ozVotesStorageProofStrategy = createOzVotesStorageProofStrategy({
     trace: 224
   });
-  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
+  const config = {
+    starkProvider,
+    ethUrl,
+    networkConfig: starknetSepolia,
+    manaUrl: ''
+  };
 
   it('should return type', () => {
     expect(ozVotesStorageProofStrategy.type).toBe('ozVotesStorageProof');
@@ -24,6 +29,7 @@ describe('ozVotesStorageProof', () => {
         '0x06AbD599AB530c5b3bc603111Bdd20d77890Db330402dC870Fc9866f50eD6d2A',
         '0x1b3cbb267de6d0f30ddf521cd385a2e11836f0c5ba6f7b2224cf77a6ed86acf',
         0,
+        '0x',
         null,
         proposeEnvelope,
         config

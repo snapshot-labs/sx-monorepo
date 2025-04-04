@@ -34,7 +34,12 @@ describe('erc20VotesStrategy', () => {
   });
 
   const erc20VotesStrategy = createErc20VotesStrategy();
-  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
+  const config = {
+    starkProvider,
+    ethUrl,
+    networkConfig: starknetSepolia,
+    manaUrl: ''
+  };
 
   it('should return type', () => {
     expect(erc20VotesStrategy.type).toBe('erc20Votes');
@@ -46,6 +51,7 @@ describe('erc20VotesStrategy', () => {
       '0x0679a64fb03683f0aea697da37e2b62549f5d527aadd7fa06f7cb4a0dd8f7f58',
       '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
       0,
+      '0x',
       null,
       proposeEnvelope,
       config
@@ -61,6 +67,7 @@ describe('erc20VotesStrategy', () => {
         '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
         '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
         0,
+        '0x',
         null,
         proposeEnvelope,
         config

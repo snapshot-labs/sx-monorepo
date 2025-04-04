@@ -14,8 +14,9 @@ describe('EthereumSig', () => {
 
   const client = new EthereumSig({
     starkProvider,
-    ethUrl: 'https://rpc.brovider.xyz/5',
-    networkConfig: starknetSepolia
+    networkConfig: starknetSepolia,
+    manaUrl: 'https://mana.box',
+    ethUrl: 'https://rpc.brovider.xyz/5'
   });
 
   beforeAll(() => {
@@ -39,7 +40,8 @@ describe('EthereumSig', () => {
         strategies: [
           {
             address: MerkleWhitelist,
-            index: 0
+            index: 0,
+            params: '0x'
           }
         ],
         executionStrategy: {
@@ -82,7 +84,8 @@ describe('EthereumSig', () => {
         strategies: [
           {
             address: MerkleWhitelist,
-            index: 0
+            index: 0,
+            params: '0x'
           }
         ],
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',

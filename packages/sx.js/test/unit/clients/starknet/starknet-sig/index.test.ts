@@ -13,9 +13,9 @@ describe('StarknetSig', () => {
 
   const client = new StarknetSig({
     starkProvider,
+    networkConfig: starknetSepolia,
     ethUrl: 'https://rpc.brovider.xyz/5',
-    manaUrl: 'http://localhost:3001',
-    networkConfig: starknetSepolia
+    manaUrl: 'https://mana.box'
   });
 
   beforeAll(() => {
@@ -39,7 +39,8 @@ describe('StarknetSig', () => {
         strategies: [
           {
             address: MerkleWhitelist,
-            index: 0
+            index: 0,
+            params: '0x'
           }
         ],
         executionStrategy: {
@@ -82,7 +83,8 @@ describe('StarknetSig', () => {
         strategies: [
           {
             address: MerkleWhitelist,
-            index: 0
+            index: 0,
+            params: '0x'
           }
         ],
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca',
