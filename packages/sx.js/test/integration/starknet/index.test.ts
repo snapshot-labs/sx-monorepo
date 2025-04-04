@@ -83,7 +83,8 @@ describe('sx-starknet', () => {
       starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig,
-      manaUrl: 'http://localhost:3000'
+      whitelistServerUrl: 'https://wls.snapshot.box',
+      manaUrl: 'https://mana.box'
     };
 
     client = new StarknetTx(clientOpts);

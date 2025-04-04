@@ -22,6 +22,7 @@ import {
   verifyNetwork,
   verifyStarknetNetwork
 } from '@/helpers/utils';
+import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   EVM_CONNECTORS,
   STARKNET_CONNECTORS
@@ -84,7 +85,8 @@ export function createActions(
     starkProvider,
     manaUrl: MANA_URL,
     ethUrl,
-    networkConfig
+    networkConfig,
+    whitelistServerUrl: WHITELIST_SERVER_URL
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({

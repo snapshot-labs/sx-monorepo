@@ -15,7 +15,7 @@ describe('EthereumTx', () => {
     starkProvider,
     networkConfig: starknetSepolia,
     ethUrl,
-    manaUrl: 'https://mana.box'
+    whitelistServerUrl: 'https://wls.snapshot.box'
   });
 
   const { EthTx } = starknetNetworks['sn-sep'].Authenticators;

@@ -15,8 +15,8 @@ describe('EthereumSig', () => {
   const client = new EthereumSig({
     starkProvider,
     networkConfig: starknetSepolia,
-    manaUrl: 'https://mana.box',
-    ethUrl: 'https://rpc.brovider.xyz/5'
+    ethUrl: 'https://rpc.brovider.xyz/5',
+    whitelistServerUrl: 'https://wls.snapshot.box'
   });
 
   beforeAll(() => {

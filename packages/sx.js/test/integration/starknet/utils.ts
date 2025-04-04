@@ -326,9 +326,9 @@ export async function setup({
 
   const client = new StarknetTx({
     starkProvider: starknetProvider,
-    ethUrl: 'https://rpc.brovider.xyz/5',
     networkConfig,
-    manaUrl: 'https://mana.pizza'
+    ethUrl: 'https://rpc.brovider.xyz/5',
+    whitelistServerUrl: 'https://wls.snapshot.box'
   });
 
   const { address } = await client.deploySpace({

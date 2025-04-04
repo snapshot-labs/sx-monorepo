@@ -88,6 +88,12 @@ export async function getDataByMessageHash(hash: string) {
     .first();
 }
 
+export async function saveRequest(id: string) {
+  await knex(MERKLETREE_REQUESTS).insert({
+    id
+  });
+}
+
 export async function saveMerkleTree(id: string, root: string, tree: string[]) {
   return knex.transaction(async trx => {
     await trx(MERKLETREES)
@@ -98,11 +104,13 @@ export async function saveMerkleTree(id: string, root: string, tree: string[]) {
       .onConflict()
       .ignore();
 
-    await trx(MERKLETREE_REQUESTS).insert({
-      id,
-      processed: true,
-      root
-    });
+    await trx(MERKLETREE_REQUESTS)
+      .update({
+        processed: true,
+        updated_at: knex.fn.now(),
+        root
+      })
+      .where({ id });
   });
 }
 

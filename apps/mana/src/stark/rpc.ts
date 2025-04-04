@@ -165,6 +165,8 @@ export const createNetworkHandler = (chainId: string) => {
 
       const requestId = crypto.randomUUID();
 
+      await db.saveRequest(requestId);
+
       // NOTE: no await here as we want to execute it in the background
       generateTree(requestId, entries);
 
@@ -180,7 +182,7 @@ export const createNetworkHandler = (chainId: string) => {
       const { requestId } = params;
 
       const request = await db.getMerkleTreeRequest(requestId);
-      if (!request) throw new Error('Request not ready yet');
+      if (!request) throw new Error('Request not found');
 
       return rpcSuccess(res, request.root, id);
     } catch (e) {
