@@ -90,7 +90,7 @@ describe('sx-starknet', () => {
     ethSigClient = new EthereumSig(clientOpts);
     ethTxClient = new EthereumTx(clientOpts);
     starkSigClient = new StarknetSig(clientOpts);
-  });
+  }, 60_000);
 
   describe('vanilla authenticator', () => {
     it('StarknetTx.propose()', async () => {
