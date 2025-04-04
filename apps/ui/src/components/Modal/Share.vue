@@ -45,7 +45,7 @@ watch(
     >
       <div
         v-if="showIcon"
-        class="bg-skin-success text-skin-heading rounded-full p-[12px]"
+        class="bg-skin-success text-white rounded-full p-[12px]"
       >
         <IS-check :width="28" :height="28" />
       </div>
