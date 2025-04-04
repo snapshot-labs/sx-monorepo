@@ -48,7 +48,6 @@
     "@ethersproject/wallet": "^5.7.0",
     "@headlessui-float/vue": "^0.15.0",
     "@headlessui/vue": "^1.7.23",
-    "@openzeppelin/merkle-tree": "^1.0.5",
     "@reown/appkit": "^1.6.8",
     "@safe-global/safe-apps-provider": "^0.17.1",
     "@safe-global/safe-apps-sdk": "^8.0.0",
