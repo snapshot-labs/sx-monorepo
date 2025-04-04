@@ -42,6 +42,7 @@ export function useActions() {
         return await fn(...args);
       } catch (e) {
         if (!isUserAbortError(e)) {
+          console.error(e);
           uiStore.addNotification(
             'error',
             'Something went wrong. Please try again later.'
