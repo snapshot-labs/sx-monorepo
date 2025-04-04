@@ -15,7 +15,8 @@ describe('StarknetSig', () => {
     starkProvider,
     networkConfig: starknetSepolia,
     ethUrl: 'https://rpc.brovider.xyz/5',
-    manaUrl: 'https://mana.box'
+    manaUrl: 'https://mana.box',
+    whitelistServerUrl: 'https://wls.snapshot.box'
   });
 
   beforeAll(() => {

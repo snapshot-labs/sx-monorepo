@@ -15,7 +15,7 @@ describe('ozVotesStorageProof', () => {
     starkProvider,
     ethUrl,
     networkConfig: starknetSepolia,
-    manaUrl: ''
+    whitelistServerUrl: 'https://wls.snapshot.box'
   };
 
   it('should return type', () => {
