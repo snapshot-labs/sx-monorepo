@@ -93,10 +93,10 @@ onUnmounted(() => {
 <template>
   <UiTopnav v-bind="$attrs">
     <slot name="toggle-sidebar-button" />
-    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="grow-[20]" />
+    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="grow-[50]" />
     <form
       v-if="searchConfig"
-      class="grow-[20] group"
+      class="grow-[50] group"
       @submit="handleSearchSubmit"
     >
       <label class="flex items-center space-x-2.5">
