@@ -4,6 +4,7 @@ import { EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
   _rt,
+  _tt,
   compareAddresses,
   getProposalId,
   getUrl,
@@ -114,6 +115,10 @@ const votingTime = computed(() => {
 
   const current = getCurrent(props.proposal.network);
   if (!current) return null;
+
+  if (props.proposal.state === 'pending') {
+    return `Start in ${_tt(getTsFromCurrent(props.proposal.network, props.proposal.start))}`;
+  }
 
   const time = _rt(
     getTsFromCurrent(props.proposal.network, props.proposal.max_end)
