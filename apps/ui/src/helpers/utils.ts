@@ -258,6 +258,15 @@ export function _rt(number) {
   }
 }
 
+export function _tt(number) {
+  try {
+    return dayjs().to(number * 1000, true);
+  } catch (e) {
+    console.log(e);
+    return '';
+  }
+}
+
 export function abiToDefinition(abi, chainId?: ChainId) {
   const definition = {
     $async: true,
