@@ -25,6 +25,7 @@ export type IndexedConfig = {
 export type StrategyConfig = {
   index: number;
   address: string;
+  params: string;
   metadata?: Record<string, any>;
 };
 
