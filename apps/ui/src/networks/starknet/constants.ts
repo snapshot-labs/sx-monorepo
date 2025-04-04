@@ -286,7 +286,8 @@ export function createConstants(
       generateParams: async (params: Record<string, any>) => {
         const entries = params.whitelist
           .split(/[\n,]/)
-          .filter((s: string) => s.trim().length);
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length);
 
         const requestId = await generateMerkleTree({
           network: 'starknet',

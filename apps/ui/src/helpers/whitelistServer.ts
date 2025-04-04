@@ -21,7 +21,7 @@ async function rpcCall(method: string, params: any) {
 }
 
 export async function generateMerkleTree(params: {
-  network: 'starknet';
+  network: 'starknet' | 'evm';
   entries: string[];
 }): Promise<string> {
   return rpcCall('generateMerkleTree', params);

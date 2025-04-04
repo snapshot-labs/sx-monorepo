@@ -12,10 +12,11 @@ import {
   voteTypes
 } from './types';
 import { getStrategiesWithParams } from '../../../strategies/evm';
-import { EvmNetworkConfig } from '../../../types';
 import { bytesToHex } from '../../../utils/bytes';
 import { SplitUint256 } from '../../../utils/split-uint256';
 import {
+  ClientConfig,
+  ClientOpts,
   EIP712ProposeMessage,
   EIP712UpdateProposalMessage,
   EIP712VoteMessage,
@@ -26,18 +27,11 @@ import {
   Vote
 } from '../types';
 
-type EthereumSigClientOpts = {
-  networkConfig: EvmNetworkConfig;
-  manaUrl?: string;
-};
-
 export class EthereumSig {
-  manaUrl: string;
-  networkConfig: EvmNetworkConfig;
+  config: ClientConfig & { manaUrl: string };
 
-  constructor(opts: EthereumSigClientOpts) {
-    this.networkConfig = opts?.networkConfig;
-    this.manaUrl = opts?.manaUrl || 'https://mana.box';
+  constructor(opts: ClientOpts & { manaUrl: string }) {
+    this.config = opts;
   }
 
   generateSalt() {
@@ -59,7 +53,7 @@ export class EthereumSig {
 
     const domain = {
       ...baseDomain,
-      chainId: this.networkConfig.eip712ChainId,
+      chainId: this.config.networkConfig.eip712ChainId,
       verifyingContract
     };
 
@@ -90,7 +84,7 @@ export class EthereumSig {
     };
 
     const res = await fetch(
-      `${this.manaUrl}/eth_rpc/${this.networkConfig.eip712ChainId}`,
+      `${this.config.manaUrl}/eth_rpc/${this.config.networkConfig.eip712ChainId}`,
       body
     );
     const json = await res.json();
@@ -112,7 +106,7 @@ export class EthereumSig {
       data.strategies,
       author,
       data,
-      this.networkConfig
+      this.config
     );
 
     const abiCoder = new AbiCoder();
@@ -186,7 +180,7 @@ export class EthereumSig {
       data.strategies,
       voter,
       data,
-      this.networkConfig
+      this.config
     );
 
     const message: EIP712VoteMessage = {

@@ -34,7 +34,10 @@ export const createNetworkHandler = (chainId: number) => {
 
   const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
 
-  const client = new clients.EvmEthereumTx({ networkConfig });
+  const client = new clients.EvmEthereumTx({
+    networkConfig,
+    whitelistServerUrl: 'https://wls.snapshot.box'
+  });
   const l1ExecutorClient = new clients.L1Executor();
 
   async function send(id: number, params: any, res: Response) {
