@@ -45,7 +45,6 @@ const {
 } = useAudio();
 const { isDownloadingVotes, downloadVotes } = useReportDownload();
 
-const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const flagging = ref(false);
 const cancelling = ref(false);
@@ -574,14 +573,19 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <div>
-        <button
-          type="button"
+        <router-link
           class="text-skin-text"
-          @click="modalOpenVotes = true"
+          :to="{
+            name: 'space-proposal-votes',
+            params: {
+              proposal: proposal.proposal_id,
+              space: `${proposal.network}:${proposal.space.id}`
+            }
+          }"
         >
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </button>
+        </router-link>
         ·
         <button
           type="button"
@@ -594,12 +598,6 @@ onBeforeUnmount(() => destroyAudio());
     </div>
   </UiContainer>
   <teleport to="#modal">
-    <ModalVotes
-      v-if="proposal"
-      :open="modalOpenVotes"
-      :proposal="proposal"
-      @close="modalOpenVotes = false"
-    />
     <ModalTimeline
       v-if="proposal"
       :open="modalOpenTimeline"
