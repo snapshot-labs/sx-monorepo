@@ -17,7 +17,6 @@ const route = useRoute();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
-const uiStore = useUiStore();
 const termsStore = useTermsStore();
 
 const modalOpenVote = ref(false);
