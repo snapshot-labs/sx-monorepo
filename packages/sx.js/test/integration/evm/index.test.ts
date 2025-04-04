@@ -312,13 +312,18 @@ describe('EthereumTx', () => {
       }
     ];
 
-    it('should propose with avatar', async () => {
-      const { executionParams } = getExecutionData(
-        'SimpleQuorumAvatar',
-        testConfig.avatarExecutionStrategy,
-        { transactions }
-      );
+    const { executionParams } = getExecutionData(
+      'SimpleQuorumAvatar',
+      testConfig.avatarExecutionStrategy,
+      { transactions }
+    );
 
+    const executionStrategyParams = executionParams[0];
+    if (!executionStrategyParams) {
+      throw new Error('No execution strategy params found');
+    }
+
+    it('should propose with avatar', async () => {
       const envelope = {
         data: {
           space: spaceAddress,
@@ -326,7 +331,7 @@ describe('EthereumTx', () => {
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           executionStrategy: {
             addr: testConfig.avatarExecutionStrategy,
-            params: executionParams[0]
+            params: executionStrategyParams
           },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -359,17 +364,11 @@ describe('EthereumTx', () => {
     });
 
     it('should execute', async () => {
-      const { executionParams } = getExecutionData(
-        'SimpleQuorumAvatar',
-        testConfig.avatarExecutionStrategy,
-        { transactions }
-      );
-
       const res = await ethTxClient.execute({
         signer,
         space: spaceAddress,
         proposal: 7,
-        executionParams: executionParams[0]
+        executionParams: executionStrategyParams
       });
       expect(res.hash).toBeDefined();
     });
@@ -386,13 +385,18 @@ describe('EthereumTx', () => {
       }
     ];
 
-    it('should propose with avatar', async () => {
-      const { executionParams } = getExecutionData(
-        'SimpleQuorumTimelock',
-        testConfig.timelockExecutionStrategy,
-        { transactions }
-      );
+    const { executor, executionParams } = getExecutionData(
+      'SimpleQuorumTimelock',
+      testConfig.timelockExecutionStrategy,
+      { transactions }
+    );
 
+    const executionStrategyParams = executionParams[0];
+    if (!executionStrategyParams) {
+      throw new Error('No execution strategy params found');
+    }
+
+    it('should propose with avatar', async () => {
       const envelope = {
         data: {
           space: spaceAddress,
@@ -400,7 +404,7 @@ describe('EthereumTx', () => {
           strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
           executionStrategy: {
             addr: testConfig.timelockExecutionStrategy,
-            params: executionParams[0]
+            params: executionStrategyParams
           },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -433,32 +437,20 @@ describe('EthereumTx', () => {
     });
 
     it('should execute', async () => {
-      const { executionParams } = getExecutionData(
-        'SimpleQuorumTimelock',
-        testConfig.timelockExecutionStrategy,
-        { transactions }
-      );
-
       const res = await ethTxClient.execute({
         signer,
         space: spaceAddress,
         proposal: 8,
-        executionParams: executionParams[0]
+        executionParams: executionStrategyParams
       });
       expect(res.hash).toBeDefined();
     });
 
     it('should execute queued proposal', async () => {
-      const { executor, executionParams } = getExecutionData(
-        'SimpleQuorumTimelock',
-        testConfig.timelockExecutionStrategy,
-        { transactions }
-      );
-
       const res = await ethTxClient.executeQueuedProposal({
         signer,
         executionStrategy: executor,
-        executionParams: executionParams[0]
+        executionParams: executionStrategyParams
       });
       expect(res.hash).toBeDefined();
     });

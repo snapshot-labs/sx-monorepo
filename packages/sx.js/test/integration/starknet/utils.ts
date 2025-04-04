@@ -64,8 +64,11 @@ export type TestConfig = {
   vanillaProposalValidationStrategy: string;
   propositionPowerProposalValidationStrategy: string;
   vanillaVotingStrategy: string;
+  vanillaVotingStrategyParams: string;
   merkleWhitelistVotingStrategy: string;
+  merkleWhitelistVotingStrategyParams: string;
   erc20VotesVotingStrategy: string;
+  erc20VotesVotingStrategyParams: string;
   merkleWhitelistStrategyMetadata: {
     tree: {
       type: AddressType;
@@ -410,8 +413,11 @@ export async function setup({
     vanillaProposalValidationStrategy,
     propositionPowerProposalValidationStrategy,
     vanillaVotingStrategy,
+    vanillaVotingStrategyParams: '0x0',
     merkleWhitelistVotingStrategy,
+    merkleWhitelistVotingStrategyParams: merkleTreeRoot,
     erc20VotesVotingStrategy,
+    erc20VotesVotingStrategyParams: erc20VotesToken,
     merkleWhitelistStrategyMetadata,
     l1AvatarExecutionStrategyContract,
     safeContract,
@@ -446,6 +452,12 @@ export async function setupL1ExecutionStrategy(
     GnosisSafeProxyFactoryContract.abi,
     signer
   );
+
+  if (!gnosisSafeProxyFactoryContract.callStatic.createProxy) {
+    throw new Error(
+      'GnosisSafeProxyFactoryContract does not have createProxy method'
+    );
+  }
 
   const template = await gnosisSafeProxyFactoryContract.callStatic.createProxy(
     singleton,

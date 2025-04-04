@@ -5,6 +5,5 @@
     "moduleResolution": "NodeNext",
     "outDir": "./dist.cjs"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"]
 }
