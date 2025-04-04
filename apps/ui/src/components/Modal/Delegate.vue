@@ -257,8 +257,8 @@ watchEffect(async () => {
       class="m-4"
       type="danger"
     >
-      Please connect with a
-      {{ auth.connector.type === 'argentx' ? 'EVM' : 'Starknet' }} wallet.
+      Please connect with
+      {{ auth.connector.type === 'argentx' ? 'an EVM' : 'a Starknet' }} wallet.
     </UiMessage>
     <UiMessage
       v-else-if="isInvalidSelectedDelegation"
