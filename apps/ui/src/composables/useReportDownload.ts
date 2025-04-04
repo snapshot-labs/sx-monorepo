@@ -17,7 +17,7 @@ export function useReportDownload() {
     a.remove();
   }
 
-  async function downloadVotes(proposalId: string) {
+  async function downloadVotes(proposalId: string | number) {
     isDownloadingVotes.value = true;
 
     try {
