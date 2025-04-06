@@ -22,8 +22,7 @@ const controllerDefinition = computed(() => ({
   type: 'string',
   format: 'ens-or-address',
   chainId: props.chainId,
-  title: 'Controller',
-  examples: ['Address or ENS']
+  title: 'Controller'
 }));
 
 const formValidator = computed(() =>

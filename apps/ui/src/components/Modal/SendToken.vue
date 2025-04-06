@@ -81,8 +81,7 @@ const recipientDefinition = computed(() => ({
   type: 'string',
   format: 'ens-or-address',
   chainId: props.network,
-  title: 'Recipient',
-  examples: ['Address or ENS']
+  title: 'Recipient'
 }));
 
 const amountDefinition = computed(() => ({

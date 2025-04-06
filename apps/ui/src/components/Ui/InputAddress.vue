@@ -39,12 +39,19 @@ const emit = defineEmits<{
   (e: 'pick', path: string);
 }>();
 
+const isStarknetChainId = computed(() => {
+  return (
+    typeof props.definition?.chainId === 'string' &&
+    props.definition?.chainId in STARKNET_NETWORKS
+  );
+});
+
 const networkDetails = computed<NetworkDetails | null>(() => {
   const chainId = props.definition?.chainId;
 
   if (!chainId) return null;
 
-  if (typeof chainId === 'string' && chainId in STARKNET_NETWORKS) {
+  if (isStarknetChainId.value) {
     return STARKNET_NETWORKS[chainId];
   } else if (chainId in snapshotJsNetworks) {
     const network = snapshotJsNetworks[chainId];
@@ -55,6 +62,20 @@ const networkDetails = computed<NetworkDetails | null>(() => {
   }
 
   return null;
+});
+
+const definition = computed(() => {
+  const definition = props.definition;
+  if (!definition) return null;
+
+  return {
+    ...definition,
+    examples: definition.examples ?? [
+      !isStarknetChainId.value && definition.format === 'ens-or-address'
+        ? 'Address or ENS'
+        : '0x0000....'
+    ]
+  };
 });
 </script>
 
@@ -76,7 +97,7 @@ const networkDetails = computed<NetworkDetails | null>(() => {
       />
     </UiTooltip>
     <UiInputString
-      :definition="props.definition"
+      :definition="definition"
       :required="required"
       v-bind="$attrs as any"
       class="!pr-7"
