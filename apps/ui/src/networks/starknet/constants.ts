@@ -3,7 +3,7 @@ import { clients, starknetNetworks } from '@snapshot-labs/sx';
 import { CallData, uint256 } from 'starknet';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { pinPineapple } from '@/helpers/pin';
-import { getUrl, shorten, sleep, verifyNetwork } from '@/helpers/utils';
+import { _n, getUrl, shorten, sleep, verifyNetwork } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { EVM_CONNECTORS } from '../common/constants';
@@ -281,7 +281,7 @@ export function createConstants(
                 .split(/[\n,]/)
                 .filter((s: string) => s.trim().length).length;
 
-        return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
+        return `(${_n(length)} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: async (params: Record<string, any>) => {
         const entries = params.whitelist
