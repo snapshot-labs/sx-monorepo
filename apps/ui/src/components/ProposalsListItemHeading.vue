@@ -132,7 +132,7 @@ const hasVoted = computed(
         type="button"
         class="text-skin-text"
         @click="modalOpenTimeline = true"
-        v-text="'Start in ' + _tt(proposal.start)"
+        v-text="'starts in ' + _tt(proposal.start)"
       />
       <TimeRelative v-else v-slot="{ relativeTime }" :time="props.proposal.max_end">
         <button
