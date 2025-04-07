@@ -162,6 +162,7 @@ watch(
     if (open) return;
 
     isTermsAccepted.value = false;
+    showPicker.value = false;
     selectedTokenAddress.value = '';
     form.value = clone(FORM);
   }
