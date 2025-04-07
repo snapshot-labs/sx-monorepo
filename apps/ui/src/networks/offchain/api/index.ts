@@ -86,6 +86,7 @@ function getProposalState(
     if (proposal.type !== 'basic') {
       return 'closed';
     }
+
     const currentQuorum = getProposalCurrentQuorum(networkId, {
       scores: proposal.scores,
       scores_total: proposal.scores_total,
