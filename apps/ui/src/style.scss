@@ -67,6 +67,10 @@
   --success-active: rgba(87, 179, 117, 0.12);
 }
 
+* {
+	scrollbar-color: rgba(var(--text), 0.5) rgb(var(--border)) !important;
+}
+
 @font-face {
   font-family: 'Calibre';
   src: url('./assets/fonts/Calibre-Medium-Custom.woff2') format('woff2');
