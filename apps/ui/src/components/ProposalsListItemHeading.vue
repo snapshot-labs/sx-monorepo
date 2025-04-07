@@ -138,7 +138,7 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
         @click="modalOpenTimeline = true"
         v-text="
           proposal.state === 'pending'
-            ? 'Start in ' +
+            ? 'starts in ' +
               _tt(getTsFromCurrent(proposal.network, proposal.start))
             : _rt(getTsFromCurrent(proposal.network, proposal.max_end))
         "
