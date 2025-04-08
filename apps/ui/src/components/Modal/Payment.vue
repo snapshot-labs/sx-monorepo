@@ -110,7 +110,7 @@ const canSubmit = computed(
 );
 
 const totalAmount = computed(() => {
-  return props.amount * Number(form.value.quantity);
+  return Number((props.amount * Number(form.value.quantity)).toFixed(2));
 });
 
 const formErrors = computed(() => {
