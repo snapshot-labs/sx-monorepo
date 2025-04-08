@@ -293,17 +293,6 @@ input:placeholder-shown {
   background-image: url('@/assets/shapes-dark.svg');
 }
 
-
-.lines {
-  background-repeat: repeat;
-  background-position: top left;
-  background-image: url('@/assets/lines-light.svg');
-}
-
-.dark .lines {
-  background-image: url('@/assets/lines-dark.svg');
-}
-
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
