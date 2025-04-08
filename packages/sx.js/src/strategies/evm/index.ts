@@ -62,7 +62,7 @@ export async function getStrategiesWithParams(
           index: strategyConfig.index,
           params
         };
-      } catch (e) {
+      } catch {
         return null;
       }
     })

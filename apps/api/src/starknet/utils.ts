@@ -29,7 +29,7 @@ const encodersAbi = new CallData(EncodersAbi);
 export function toAddress(bn: any) {
   try {
     return getAddress(BigNumber.from(bn).toHexString());
-  } catch (e) {
+  } catch {
     return bn;
   }
 }

@@ -247,7 +247,7 @@ async function handleSettingsSave() {
     try {
       await save();
       reloadSpaceAndReset();
-    } catch (e) {
+    } catch {
     } finally {
       saving.value = false;
     }

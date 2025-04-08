@@ -25,7 +25,7 @@ const { x, y } = useDraggable(sliderEl, {
   },
   onEnd: () => {
     dragging.value = false;
-    if (sliderOutOfBound) {
+    if (sliderOutOfBound.value) {
       skipNextDragTick.value = true;
     }
   }

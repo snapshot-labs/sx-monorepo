@@ -4,11 +4,11 @@ import express from 'express';
 import { PORT } from './constants';
 import ethRpc from './eth';
 import starkRpc from './stark';
+import pkg from '../package.json';
 import {
   registeredProposalsLoop,
   registeredTransactionsLoop
 } from './stark/registered';
-import pkg from '../package.json';
 
 const app = express();
 

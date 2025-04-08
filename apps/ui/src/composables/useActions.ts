@@ -149,7 +149,10 @@ export function useActions() {
           'success',
           'Your vote is pending! waiting for other signers'
         );
-      hash && uiStore.addPendingTransaction(hash, network.chainId);
+
+      if (hash) {
+        uiStore.addPendingTransaction(hash, network.chainId);
+      }
     } else {
       hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);

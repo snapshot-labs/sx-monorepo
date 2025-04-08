@@ -12,7 +12,7 @@ export function getExecutionName(networkId: NetworkID, strategyType: string) {
     if (name) return `${network.constants.EXECUTORS[strategyType]} execution`;
 
     return 'Custom execution';
-  } catch (e) {
+  } catch {
     return null;
   }
 }
