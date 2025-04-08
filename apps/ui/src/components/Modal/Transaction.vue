@@ -311,7 +311,6 @@ watchEffect(async () => {
           :definition="{
             type: 'string',
             title: 'Contract address',
-            examples: ['Address or ENS'],
             chainId: props.network
           }"
           @pick="handlePickerClick('to')"

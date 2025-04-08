@@ -37,9 +37,8 @@ const formErrors = ref({} as Record<string, any>);
 const delegateDefinition = computed(() => ({
   type: 'string',
   format: 'ens-or-address',
-  chainId: props.delegation?.chainId ?? undefined,
-  title: 'Delegatee',
-  examples: ['Address or ENS']
+  chainId: selectedDelegation.value?.chainId ?? undefined,
+  title: 'Delegatee'
 }));
 
 const formValidator = computed(() =>
