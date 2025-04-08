@@ -163,7 +163,7 @@ export function useExecutionActions(
       } else if (data.executionTransactionHash) {
         try {
           executionTx.value = data.executionTransactionHash;
-        } catch (e) {
+        } catch {
           message.value =
             'Proposal has been executed but execution details are not available.';
         }

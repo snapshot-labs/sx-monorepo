@@ -59,6 +59,8 @@ const canSeeSettings = computed(() => {
 
     return admins.includes(web3.value.account.toLowerCase());
   }
+
+  return false;
 });
 
 const navigationConfig = computed<

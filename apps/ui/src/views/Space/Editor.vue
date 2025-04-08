@@ -226,7 +226,7 @@ const proposalLimitReached = computed(() => {
 const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
 
 const defaultVotingDelay = computed(() =>
-  isOffchainSpace ? DEFAULT_VOTING_DELAY : 0
+  isOffchainSpace.value ? DEFAULT_VOTING_DELAY : 0
 );
 
 const proposalStart = computed(

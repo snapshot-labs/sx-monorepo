@@ -58,7 +58,7 @@ async function loadUserMetadata(userId: string) {
     userMetadata.following_count = userStats.following_count;
     userMetadata.loading = false;
     userMetadata.loaded = true;
-  } catch (e) {
+  } catch {
     userMetadata.loading = false;
   }
 }
