@@ -60,13 +60,13 @@
   },
   "devDependencies": {
     "@ethersproject/units": "^5.7.0",
-    "@snapshot-labs/eslint-config": "^0.1.0-beta.20",
+    "@snapshot-labs/eslint-config": "^0.1.0-beta.21",
     "@snapshot-labs/prettier-config": "^0.1.0-beta.19",
     "@types/bn.js": "^5.1.1",
     "@types/elliptic": "^6.4.14",
     "@types/node": "^18.11.9",
     "@types/randombytes": "^2.0.3",
-    "eslint": "^8.53.0",
+    "eslint": "^8.57.0",
     "prettier": "^3.1.0",
     "typescript": "^5.5.4",
     "vitest": "^1.2.2"

@@ -98,7 +98,7 @@ async function fetchCustomToken(address) {
       value: 0
     };
     isSearchValueValidToken.value = true;
-  } catch (e) {
+  } catch {
     isSearchValueValidToken.value = false;
   } finally {
     customTokenLoading.value = false;

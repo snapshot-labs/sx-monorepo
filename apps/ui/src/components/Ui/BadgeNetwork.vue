@@ -44,7 +44,7 @@ const networkData = computed<NetworkData | null>(() => {
         name: network.name,
         avatar: network.logo
       };
-    } catch (e) {
+    } catch {
       return null;
     }
   }

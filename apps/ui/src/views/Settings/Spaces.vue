@@ -27,7 +27,9 @@ const { data, isPending } = useExploreSpacesQuery({
 
 const loading = computed(
   () =>
-    !loaded || (web3.value.account && isPending.value) || web3.value.authLoading
+    !loaded.value ||
+    (web3.value.account && isPending.value) ||
+    web3.value.authLoading
 );
 
 watch(protocol, value => {

@@ -52,7 +52,7 @@ export const SPACES_DISCUSSIONS = {
   's:apecoin.eth': 'https://forum.apecoin.com/c/active-proposals/72',
   'sn:0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4':
     'https://community.starknet.io/c/governance/15',
-  's:aave.eth': 'https://governance.aave.com/c/governance/4',
+  's:aavedao.eth': 'https://governance.aave.com/c/governance/4',
   's:opcollective.eth': 'https://gov.optimism.io/c/technical-proposals/47',
   's:shutterdao0x36.eth':
     'https://shutternetwork.discourse.group/c/shutter-dao/14',

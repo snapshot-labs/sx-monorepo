@@ -122,7 +122,7 @@ function formatExecution(execution: string): Transaction[] {
     const result = JSON.parse(execution);
 
     return Array.isArray(result) ? result : [];
-  } catch (e) {
+  } catch {
     console.log('Failed to parse execution');
     return [];
   }

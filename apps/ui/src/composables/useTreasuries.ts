@@ -27,7 +27,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
               treasury.chainId as number,
               treasury.address
             );
-          } catch (e) {
+          } catch {
             return false;
           }
         })

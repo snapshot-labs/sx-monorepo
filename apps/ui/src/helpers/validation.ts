@@ -22,7 +22,7 @@ addFormats(ajv);
 export const addressValidator = (value: string) => {
   try {
     return !!validateAndParseAddress(value);
-  } catch (e) {
+  } catch {
     return isAddress(value);
   }
 };
@@ -38,7 +38,7 @@ const validateType = (type: string, value: string) => {
     const iface = new Interface([`function test(${type})`]);
     iface.encodeFunctionData('test', [value]);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -116,7 +116,7 @@ ajv.addFormat('ens-or-address', {
       if (resolved?.address) return true;
 
       return !!validateAndParseAddress(value);
-    } catch (e) {
+    } catch {
       return isAddress(value);
     }
   }
