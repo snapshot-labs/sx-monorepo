@@ -21,7 +21,7 @@ export function useAi<T extends 'summary' | 'speech'>(
         ? fetchSummary()
         : fetchSpeech())) as ContentType;
       state.value.errored = false;
-    } catch (e) {
+    } catch {
       state.value.errored = true;
     } finally {
       state.value.loading = false;

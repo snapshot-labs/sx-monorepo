@@ -581,7 +581,7 @@ export function createWriters(config: FullConfig) {
           },
           config
         );
-      } catch (e) {
+      } catch {
         console.log('failed to register proposal');
       }
     }

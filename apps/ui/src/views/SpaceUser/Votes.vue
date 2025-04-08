@@ -28,7 +28,7 @@ async function loadVotes() {
         limit: VOTES_LIMIT
       }
     );
-  } catch (e) {
+  } catch {
     failed.value = true;
   }
 }

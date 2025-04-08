@@ -85,7 +85,7 @@ export function useWeb3() {
       }
 
       return await registerConnector(connector);
-    } catch (e) {
+    } catch {
       reset();
     } finally {
       state.authLoading = false;
@@ -211,7 +211,7 @@ export function useWeb3() {
 
     try {
       connector.provider.removeAllListeners();
-    } catch (e: any) {}
+    } catch {}
   }
 
   return {
