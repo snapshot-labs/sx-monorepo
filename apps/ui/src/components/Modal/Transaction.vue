@@ -212,7 +212,7 @@ watch(abiStr, value => {
     new Interface(abi);
     form.abi = abi;
     showAbiInput.value = false;
-  } catch (e) {
+  } catch {
     console.log('Invalid abi', value);
   }
 });

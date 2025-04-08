@@ -1,9 +1,9 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { starknetNetworks } from '@snapshot-labs/sx';
 import { validateAndParseAddress } from 'starknet';
+import { DEFAULT_INFURA_API_KEY } from '../config';
 import spaceAbi from './abis/space.json';
 import spaceFactoryAbi from './abis/spaceFactory.json';
-import { DEFAULT_INFURA_API_KEY } from '../config';
 
 const snNetworkNodeUrl =
   process.env.NETWORK_NODE_URL_SN ||
