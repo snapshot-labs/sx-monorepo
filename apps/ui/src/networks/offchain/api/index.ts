@@ -83,6 +83,10 @@ function getProposalState(
   proposal: ApiProposal
 ): ProposalState {
   if (proposal.state === 'closed') {
+    if (proposal.type !== 'basic') {
+      return 'closed';
+    }
+
     const currentQuorum = getProposalCurrentQuorum(networkId, {
       scores: proposal.scores,
       scores_total: proposal.scores_total,
@@ -95,10 +99,6 @@ function getProposalState(
 
     if (currentQuorum < proposal.quorum) {
       return 'rejected';
-    }
-
-    if (proposal.type !== 'basic') {
-      return 'closed';
     }
 
     return proposal.scores[0] > proposal.scores[1] ? 'passed' : 'rejected';

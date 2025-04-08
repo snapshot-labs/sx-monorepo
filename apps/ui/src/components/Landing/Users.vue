@@ -38,7 +38,7 @@ const ORGS = [
   'shapeshiftdao.eth',
   'instadapp-gov.eth',
   'bitdao.eth',
-  'aave.eth',
+  'aavedao.eth',
   'cvx.eth',
   '1inch.eth',
   'cabindao.eth',
