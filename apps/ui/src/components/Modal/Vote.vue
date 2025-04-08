@@ -247,7 +247,10 @@ watchEffect(async () => {
         approveTitle: 'Confirm vote'
       }"
       :execute="voteFn"
-      @confirmed="handleConfirmed"
+      @confirmed="
+        handleConfirmed;
+        modalTransactionOpen = false;
+      "
       @cancelled="handleCancelled"
       @close="modalTransactionOpen = false"
     />

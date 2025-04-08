@@ -47,6 +47,7 @@ const { isPending, assetsMap } = useBalances({
 const searchInput: Ref<HTMLElement | null> = ref(null);
 const selectedTokenAddress = ref<string>('');
 const showPicker = ref(false);
+const hidden = ref(false);
 const searchValue = ref('');
 const modalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
@@ -126,7 +127,7 @@ function handleSubmit() {
 
   startPaymentProcess();
 
-  emit('close');
+  hidden.value = true;
   modalTransactionProgressOpen.value = true;
 }
 
@@ -163,6 +164,7 @@ watch(
 
     isTermsAccepted.value = false;
     showPicker.value = false;
+    hidden.value = false;
     selectedTokenAddress.value = '';
     form.value = clone(FORM);
   }
@@ -170,7 +172,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="emit('close')">
+  <UiModal :open="open" :class="{ hidden }" @close="emit('close')">
     <template #header>
       <h3>Payment</h3>
       <template v-if="showPicker">
@@ -277,8 +279,15 @@ watch(
     "
     :chain-id="network"
     :messages="currentStep.messages"
-    @close="modalTransactionProgressOpen = false"
+    @close="
+      modalTransactionProgressOpen = false;
+      emit('close');
+    "
     @confirmed="moveToNextStep"
+    @cancelled="
+      hidden = false;
+      modalTransactionProgressOpen = false;
+    "
   >
     <template #successTitle>
       <h4 class="font-semibold text-skin-heading text-lg">

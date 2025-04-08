@@ -85,7 +85,6 @@ async function handleExecute() {
       emit('confirmed', txId.value);
     } else {
       emit('confirmed', null);
-      emit('close');
     }
   } catch (e) {
     if (isUserAbortError(e)) {
