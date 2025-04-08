@@ -33,7 +33,7 @@ const FEATURES = [
   {
     name: 'Enhanced visibility',
     icon: ICStatusOnline,
-    about: 'Increase your space’s ranking to reach a larger audience.'
+    about: "Increase your space's ranking to reach a larger audience."
   },
   {
     name: 'Delegates dashboard',
