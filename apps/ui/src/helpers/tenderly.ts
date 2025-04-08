@@ -36,7 +36,7 @@ export async function simulate(
     return !data.simulation_results.find(
       result => result.transaction.status === false
     );
-  } catch (e) {
+  } catch {
     return false;
   }
 }

@@ -74,7 +74,7 @@ const offchainProposal = computed<boolean>(() =>
 
 const canSubmit = computed<boolean>(
   () =>
-    formValidated &&
+    formValidated.value &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
     !!votingPower.value?.canVote
@@ -88,7 +88,7 @@ async function handleSubmit() {
     try {
       await voteFn();
       handleConfirmed();
-    } catch (e) {
+    } catch {
     } finally {
       loading.value = false;
     }
