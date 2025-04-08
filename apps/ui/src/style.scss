@@ -68,7 +68,7 @@
 }
 
 * {
-	scrollbar-color: rgba(var(--text), 0.5) rgb(var(--border)) !important;
+	scrollbar-color: rgba(var(--text), 0.5) rgba(var(--border), 0.25) !important;
 }
 
 @font-face {
