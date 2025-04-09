@@ -45,7 +45,7 @@ const connectorModalConnectors = ref([] as ConnectorType[]);
 const delegateDefinition = computed(() => ({
   type: 'string',
   format: 'ens-or-address',
-  chainId: props.delegation?.chainId ?? undefined,
+  chainId: selectedDelegation.value?.chainId ?? undefined,
   title: 'Delegatee',
   examples: ['Address or ENS']
 }));
