@@ -121,7 +121,7 @@ const features = computed<Feature[]>(() => {
           class="eyebrow inline-block text-skin-bg bg-skin-link rounded-full px-2"
           >Snapshot Pro</span
         >
-        <h1>
+        <h1 class="pb-4">
           Level up your governance<br />
           with exclusive features
         </h1>
