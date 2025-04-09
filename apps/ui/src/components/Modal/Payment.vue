@@ -13,14 +13,18 @@ const FORM = {
 const props = withDefaults(
   defineProps<{
     open: boolean;
-    amount: number;
+    unitPrice: number;
     tokens: Token[];
     network: ChainId;
     barcodePayload: BarcodePayload;
+    calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string | false;
   }>(),
   {
-    quantityLabel: 'Quantity'
+    quantityLabel: 'Quantity',
+    calculator: (unitPrice: number, quantity: number) => {
+      return Number((unitPrice * quantity).toFixed(2));
+    }
   }
 );
 
@@ -112,7 +116,7 @@ const canSubmit = computed(
 );
 
 const totalAmount = computed(() => {
-  return Number((props.amount * Number(form.value.quantity)).toFixed(2));
+  return props.calculator(props.unitPrice, Number(form.value.quantity));
 });
 
 const formErrors = computed(() => {
