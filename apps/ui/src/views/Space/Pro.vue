@@ -32,7 +32,7 @@ const USERS = [
 
 const TIER_PLAN: TierPlan[] = ['basic', 'pro'] as const;
 
-const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT'] as const;
+const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT', 'SNUSDC'] as const;
 
 const PRO_MONTHLY_PRICES: Record<
   ChainId,
