@@ -192,7 +192,7 @@ export function jsonParse(input, fallback?) {
   }
   try {
     return JSON.parse(input);
-  } catch (e) {
+  } catch {
     return fallback || {};
   }
 }

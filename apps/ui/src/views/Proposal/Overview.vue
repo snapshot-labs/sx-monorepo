@@ -274,7 +274,7 @@ async function handleAiSpeechClick() {
 
     await initAudio(aiSpeechContent.value);
     playAudio();
-  } catch (e) {
+  } catch {
     uiStore.addNotification(
       'error',
       'Failed to listen proposal, please try again later.'

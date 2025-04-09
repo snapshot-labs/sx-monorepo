@@ -126,7 +126,7 @@ export async function getEnsTextRecord(
 
   try {
     ensHash = namehash(ensNormalize(ens));
-  } catch (e: any) {
+  } catch {
     return null;
   }
 

@@ -41,7 +41,7 @@ async function update(val: string) {
 
       previewIconResolved.value = image.ok;
     }
-  } catch (e) {
+  } catch {
   } finally {
     previewLoading.value = false;
   }
