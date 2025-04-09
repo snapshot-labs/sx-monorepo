@@ -227,11 +227,7 @@ const features = computed<Feature[]>(() => {
                 :key="type"
                 class="w-[120px] text-center"
               >
-                {{
-                  typeof feature[type] === 'number'
-                    ? _n(feature[type])
-                    : feature[type]
-                }}
+                {{ _n(feature[type]) }}
               </div>
             </div>
           </div>
