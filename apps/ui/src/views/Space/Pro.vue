@@ -359,14 +359,8 @@ const features = computed<Feature[]>(() => {
     >
       <template #summary="{ quantity }">
         <div class="flex justify-between">
-          <div>
-            {{ subscriptionLength === 'yearly' ? 'Annual' : 'Monthly' }} plan
-          </div>
-          <ICPro class="h-[15px] w-auto inline text-skin-heading" />
-        </div>
-        <div class="flex justify-between">
           <div>End date</div>
-          <div>
+          <div class="text-skin-heading">
             {{
               dayjs(new Date())
                 .add(

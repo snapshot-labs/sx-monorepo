@@ -204,7 +204,7 @@ watch(
       :search-value="searchValue"
       @pick="handleTokenPick"
     />
-    <div v-else class="s-box p-4 pb-[10px] space-y-3">
+    <div v-else class="s-box p-4 space-y-3">
       <div class="s-base">
         <div class="s-label" v-text="'Token *'" />
         <button
@@ -230,34 +230,34 @@ watch(
         :definition="definition.properties.quantity"
         :error="formErrors.quantity"
       />
-    </div>
-    <template v-if="!showPicker" #footer>
-      <div
-        class="border rounded-lg mb-4 text-[16px] bg-skin-input-bg p-3 py-2.5"
-      >
-        <div class="flex justify-between">
-          You will pay
-          <div class="flex items-center gap-1">
-            <UiStamp
-              :id="`eip155:${network}:${currentToken.contractAddress}`"
-              :size="18"
-              type="token"
-            />
-            {{ _n(totalAmount) }} {{ currentToken.symbol }}
+      <div class="space-y-[14px] pt-3">
+        <div
+          class="border rounded-lg text-[16px] bg-skin-input-bg p-3 py-2.5 space-y-1"
+        >
+          <div class="flex justify-between">
+            You will pay
+            <div class="flex items-center gap-1 text-skin-heading">
+              <UiStamp
+                :id="`eip155:${network}:${currentToken.contractAddress}`"
+                :size="18"
+                type="token"
+              />
+              {{ _n(totalAmount) }} {{ currentToken.symbol }}
+            </div>
           </div>
-        </div>
-        <div v-if="$slots.summary">
-          <div class="border-t mt-[14px] pt-[14px] space-y-1 leading-5">
+          <div v-if="$slots.summary">
             <slot name="summary" :quantity="form.quantity" />
           </div>
         </div>
+        <UiCheckbox v-model="isTermsAccepted" class="text-start">
+          <div class="text-skin-text leading-[22px] top-[-1px] relative">
+            Before confirming, please read and agree to the
+            <AppLink :to="{ name: 'site-terms' }">Terms of service</AppLink>.
+          </div>
+        </UiCheckbox>
       </div>
-      <UiCheckbox v-model="isTermsAccepted" class="mb-3 text-start">
-        <div class="text-skin-text leading-[22px] top-[-1px] relative">
-          Before confirming, please read and agree to the
-          <AppLink :to="{ name: 'site-terms' }">Terms of service</AppLink>.
-        </div>
-      </UiCheckbox>
+    </div>
+    <template v-if="!showPicker" #footer>
       <UiButton
         class="w-full"
         primary
