@@ -2,13 +2,14 @@
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
 const props = defineProps<
-  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw }
+  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; external?: boolean }
 >();
 
 const { isWhiteLabel } = useWhiteLabel();
+const router = useRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
-  return typeof to === 'string' && to.startsWith('http');
+  return (typeof to === 'string' && to.startsWith('http')) || props.external;
 }
 
 function normalize(to: RouteLocationRaw) {
@@ -35,10 +36,22 @@ function normalize(to: RouteLocationRaw) {
 
   return to;
 }
+
+function normalizeExternalize(to: RouteLocationRaw | string): string {
+  if (typeof to === 'string') {
+    return to;
+  }
+
+  return new URL(router.resolve(to).href, window.location.origin).href;
+}
 </script>
 
 <template>
-  <a v-if="isExternalLink(props.to)" :href="props.to" target="_blank">
+  <a
+    v-if="isExternalLink(props.to)"
+    :href="normalizeExternalize(props.to)"
+    target="_blank"
+  >
     <slot />
   </a>
   <router-link v-else-if="props.to" :to="normalize(props.to)">
