@@ -6,7 +6,6 @@ import { getNetwork, metadataNetwork } from '@/networks';
 import { Connector } from '@/networks/types';
 import { ChainId, Space } from '@/types';
 import ICAnnotation from '~icons/heroicons-outline/annotation';
-import ICCheck from '~icons/heroicons-outline/check';
 import ICFlag from '~icons/heroicons-outline/flag';
 import ICGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IClightningBolt from '~icons/heroicons-outline/lightning-bolt';
@@ -303,22 +302,7 @@ const features = computed<Feature[]>(() => {
                 :key="type"
                 class="w-[120px] text-center"
               >
-                <component
-                  :is="feature[type]"
-                  v-if="typeof feature[type] === 'object'"
-                  class="mx-auto text-skin-text"
-                />
-                <ICCheck
-                  v-else-if="feature[type] === true"
-                  class="mx-auto text-skin-success"
-                />
-                <template v-else>
-                  {{
-                    typeof feature[type] === 'number'
-                      ? _n(feature[type])
-                      : feature[type]
-                  }}
-                </template>
+                {{ _n(feature[type]) }}
               </div>
             </div>
           </div>
