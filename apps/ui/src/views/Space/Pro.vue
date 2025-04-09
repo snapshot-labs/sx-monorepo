@@ -234,7 +234,7 @@ const features = computed<Feature[]>(() => {
         </a>
       </div>
       <UiButton class="primary" @click="handleTurboClick">
-        Upgrade {{ space.name }}
+        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
       </UiButton>
     </div>
 
@@ -329,7 +329,7 @@ const features = computed<Feature[]>(() => {
     <div class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4">
       <h2 class="text-[32px]">Get started today</h2>
       <UiButton class="primary" @click="handleTurboClick">
-        Upgrade {{ space.name }}
+        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
       </UiButton>
     </div>
 
