@@ -330,7 +330,7 @@ const features = computed<Feature[]>(() => {
       </AppLink>
     </div>
     <ModalPayment
-      v-if="auth && isCurrentConnectorSupported"
+      v-if="auth && isCurrentConnectorSupported && modalPaymentOpen"
       :open="modalPaymentOpen"
       :tokens="tokens"
       :network="paymentNetwork"

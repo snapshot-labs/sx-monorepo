@@ -37,10 +37,12 @@ const {
 } = usePaymentFactory(props.network);
 const { isPending, assetsMap } = useBalances({
   treasury: toRef(() => {
-    return {
-      chainId: props.network,
-      address: web3.value.account
-    };
+    return web3.value.account
+      ? {
+          chainId: props.network,
+          address: web3.value.account
+        }
+      : null;
   })
 });
 
