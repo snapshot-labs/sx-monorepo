@@ -255,7 +255,7 @@ watch(
       <UiCheckbox v-model="isTermsAccepted" class="mb-3 text-start">
         <div class="text-skin-text leading-[22px] top-[-1px] relative">
           Before confirming, please read and agree to the
-          <AppLink :to="{ name: 'site-terms' }">Terms of service </AppLink>.
+          <AppLink :to="{ name: 'site-terms' }">Terms of service</AppLink>.
         </div>
       </UiCheckbox>
       <UiButton
