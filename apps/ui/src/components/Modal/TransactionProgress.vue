@@ -118,12 +118,15 @@ watch(
       </div>
       <div
         v-if="step === 'success'"
-        class="bg-skin-success rounded-full p-[12px]"
+        class="bg-skin-success text-white rounded-full p-[12px]"
       >
-        <IS-check :width="28" :height="28" class="text-skin-bg" />
+        <IS-check :width="28" :height="28" />
       </div>
-      <div v-if="step === 'fail'" class="bg-skin-danger rounded-full p-[12px]">
-        <IS-x-mark :width="28" :height="28" class="text-skin-bg" />
+      <div
+        v-if="step === 'fail'"
+        class="bg-skin-danger text-white rounded-full p-[12px]"
+      >
+        <IS-x-mark :width="28" :height="28" />
       </div>
       <div class="flex flex-col space-y-1 leading-6">
         <slot

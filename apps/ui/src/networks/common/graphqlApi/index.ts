@@ -3,7 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS } from '@/helpers/constants';
+import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
@@ -81,13 +81,11 @@ function isSpaceWithMetadata(space: ApiSpace): space is ApiSpaceWithMetadata {
   );
 }
 
-function isProposalWithMetadata(
+function isProposalWithSpaceMetadata(
   proposal: ApiProposal
 ): proposal is ApiProposalWithMetadata {
   return (
-    !!proposal.metadata &&
-    !!proposal.space.metadata &&
-    !!proposal.space.strategies_parsed_metadata
+    !!proposal.space.metadata && !!proposal.space.strategies_parsed_metadata
   );
 }
 
@@ -124,7 +122,7 @@ function formatExecution(execution: string): Transaction[] {
     const result = JSON.parse(execution);
 
     return Array.isArray(result) ? result : [];
-  } catch (e) {
+  } catch {
     console.log('Failed to parse execution');
     return [];
   }
@@ -162,7 +160,10 @@ function processStrategiesMetadata(
 ) {
   if (parsedMetadata.length === 0) return [];
 
-  const maxIndex = Math.max(...parsedMetadata.map(metadata => metadata.index));
+  // Those values are default sorted by block_range so newest entries are at the end
+  // To find *current* maxIndex we can just look at the last item.
+  // In the past there could be more strategies so we can't check for max index among all entries.
+  const maxIndex = parsedMetadata[parsedMetadata.length - 1].index;
 
   const metadataMap = Object.fromEntries(
     parsedMetadata.map(metadata => [
@@ -188,20 +189,14 @@ function processExecutions(
   proposal: ApiProposal,
   executionNetworkId: NetworkID
 ): ProposalExecution[] {
-  // NOTE: This is unstable, meaning that if executors_strategies or treasuries
-  // are modified in the future it will affect pass proposals.
-  // We should persist those values on proposal directly so it's stable.
-  // Right now we can't really update subgraphs because of TheGraph issue.
   if (!proposal.metadata?.execution) return [];
 
   const transactions = formatExecution(proposal.metadata?.execution);
   if (transactions.length === 0) return [];
 
-  const match = proposal.space.metadata?.executors_strategies.find(
-    strategy => strategy.address === proposal.execution_strategy
-  );
+  const match = proposal.execution_strategy_details;
 
-  const treasuries = proposal.space.metadata?.treasuries.map(treasury =>
+  const treasuries = proposal.treasuries.map(treasury =>
     formatMetadataTreasury(treasury)
   );
 
@@ -229,12 +224,11 @@ function processExecutions(
 
 function formatSpace(
   space: ApiSpaceWithMetadata,
-  networkId: NetworkID,
   constants: NetworkConstants
 ): Space {
   return {
     ...space,
-    network: networkId,
+    network: space._indexer as NetworkID,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
     cover: space.metadata.cover,
@@ -310,6 +304,7 @@ function formatProposal(
 
   return {
     ...proposal,
+    isInvalid: proposal.metadata === null,
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,
@@ -331,14 +326,14 @@ function formatProposal(
       address_type: getAddressType(proposal.author),
       role: null
     },
-    metadata_uri: proposal.metadata.id,
+    metadata_uri: proposal.metadata?.id ?? '',
     type: 'basic',
-    choices: proposal.metadata.choices,
-    labels: proposal.metadata.labels,
+    choices: proposal.metadata?.choices ?? BASIC_CHOICES,
+    labels: proposal.metadata?.labels ?? [],
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    title: proposal.metadata.title ?? '',
-    body: proposal.metadata.body ?? '',
-    discussion: proposal.metadata.discussion ?? '',
+    title: proposal.metadata?.title ?? `Proposal #${proposal.proposal_id}`,
+    body: proposal.metadata?.body ?? '',
+    discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
@@ -420,6 +415,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: VOTES_QUERY,
         variables: {
+          indexer: networkId,
           first: limit,
           skip,
           orderBy,
@@ -489,12 +485,7 @@ export function createApi(
     ): Promise<{ [key: string]: Vote }> => {
       const { data } = await apollo.query({
         query: USER_VOTES_QUERY,
-        variables: {
-          spaceIds,
-          voter,
-          first: limit,
-          skip
-        }
+        variables: { indexer: networkId, spaceIds, voter, first: limit, skip }
       });
 
       return Object.fromEntries(
@@ -512,9 +503,10 @@ export function createApi(
       searchQuery = ''
     ): Promise<Proposal[]> => {
       const _filters: ProposalsFilter = clone(filters || {});
-      const metadataFilters: Record<string, any> = {
-        title_contains_nocase: searchQuery
-      };
+
+      const metadataFilters: Record<string, any> = {};
+      if (searchQuery) metadataFilters.title_contains_nocase = searchQuery;
+
       const state = _filters.state;
 
       if (state === 'active') {
@@ -542,7 +534,9 @@ export function createApi(
           where: {
             space_in: spaceIds,
             cancelled: false,
-            metadata_: metadataFilters,
+            metadata_: Object.keys(metadataFilters).length
+              ? metadataFilters
+              : undefined,
             ..._filters
           }
         }
@@ -564,7 +558,7 @@ export function createApi(
       }
 
       return data.proposals
-        .filter(proposal => isProposalWithMetadata(proposal))
+        .filter(proposal => isProposalWithSpaceMetadata(proposal))
         .map(proposal =>
           formatProposal(proposal, networkId, current, opts.baseNetworkId)
         );
@@ -594,7 +588,7 @@ export function createApi(
         highlightResult?.data.sxproposal
       );
 
-      if (!isProposalWithMetadata(data.proposal)) return null;
+      if (!isProposalWithSpaceMetadata(data.proposal)) return null;
       return formatProposal(
         data.proposal,
         networkId,
@@ -611,6 +605,12 @@ export function createApi(
       if (_filter.searchQuery) {
         _filter.metadata_ = { name_contains_nocase: _filter.searchQuery };
       }
+
+      let indexer;
+      if (_filter?.network && _filter.network !== 'all') {
+        indexer = _filter.network;
+      }
+
       delete _filter.searchQuery;
       delete _filter.category;
       delete _filter.network;
@@ -618,6 +618,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: SPACES_QUERY,
         variables: {
+          indexer,
           first: limit,
           skip,
           where: {
@@ -644,13 +645,13 @@ export function createApi(
 
       return data.spaces
         .filter(space => isSpaceWithMetadata(space))
-        .map(space => formatSpace(space, networkId, constants));
+        .map(space => formatSpace(space, constants));
     },
     loadSpace: async (id: string): Promise<Space | null> => {
       const [{ data }, highlightResult] = await Promise.all([
         apollo.query({
           query: SPACE_QUERY,
-          variables: { id }
+          variables: { indexer: networkId, id }
         }),
         highlightApolloClient
           ?.query({
@@ -668,13 +669,13 @@ export function createApi(
       );
 
       if (!isSpaceWithMetadata(data.space)) return null;
-      return formatSpace(data.space, networkId, constants);
+      return formatSpace(data.space, constants);
     },
     loadUser: async (id: string): Promise<User | null> => {
       const [{ data }, highlightResult] = await Promise.all([
         apollo.query({
           query: USER_QUERY,
-          variables: { id }
+          variables: { indexer: networkId, id }
         }),
         highlightApolloClient
           ?.query({
@@ -693,6 +694,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: LEADERBOARD_QUERY,
         variables: {
+          indexer: networkId,
           first: 1000,
           skip: 0,
           orderBy: 'proposal_count',
@@ -728,6 +730,7 @@ export function createApi(
       const { data } = await apollo.query({
         query: LEADERBOARD_QUERY,
         variables: {
+          indexer: networkId,
           first: limit,
           skip,
           orderBy,

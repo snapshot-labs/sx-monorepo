@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
+import { EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
   _rt,
@@ -42,8 +43,8 @@ const {
   init: initAudio,
   destroy: destroyAudio
 } = useAudio();
+const { isDownloadingVotes, downloadVotes } = useReportDownload();
 
-const modalOpenVotes = ref(false);
 const modalOpenTimeline = ref(false);
 const flagging = ref(false);
 const cancelling = ref(false);
@@ -268,11 +269,33 @@ async function handleAiSpeechClick() {
 
     await initAudio(aiSpeechContent.value);
     playAudio();
-  } catch (e) {
+  } catch {
     uiStore.addNotification(
       'error',
       'Failed to listen proposal, please try again later.'
     );
+  }
+}
+
+async function handleDownloadVotes() {
+  if (!props.proposal) return;
+
+  try {
+    await downloadVotes(props.proposal.proposal_id);
+  } catch (e: unknown) {
+    if (e instanceof Error) {
+      if (e.message === 'PENDING_GENERATION') {
+        return uiStore.addNotification(
+          'success',
+          'Your report is currently being generated. It may take a few minutes. Please check back shortly.'
+        );
+      }
+
+      uiStore.addNotification(
+        'error',
+        "We're having trouble connecting to the server responsible for downloads"
+      );
+    }
   }
 }
 
@@ -285,6 +308,18 @@ onBeforeUnmount(() => destroyAudio());
       <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
         This proposal might contain scams, offensive material, or be malicious
         in nature. Please proceed with caution.
+      </UiAlert>
+      <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
+        <template v-if="proposal.execution_strategy === EMPTY_ADDRESS">
+          This proposal is invalid and was not created correctly. We cannot
+          display its details.
+        </template>
+        <template v-else>
+          This proposal is invalid and was not created correctly. We cannot
+          display its details, and it <strong>includes execution</strong>. This
+          might mean possible malicious behavior. We strongly advise you to
+          reject this proposal.
+        </template>
       </UiAlert>
 
       <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
@@ -398,6 +433,32 @@ onBeforeUnmount(() => destroyAudio());
                   Duplicate proposal
                 </button>
               </UiDropdownItem>
+              <UiDropdownItem
+                v-if="
+                  proposal.network === 's' &&
+                  proposal.completed &&
+                  ['passed', 'rejected', 'executed', 'closed'].includes(
+                    proposal.state
+                  )
+                "
+                v-slot="{ active }"
+              >
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="handleDownloadVotes"
+                >
+                  <template v-if="isDownloadingVotes">
+                    <UiLoading :size="18" />
+                    Downloading votes
+                  </template>
+                  <template v-else>
+                    <IS-arrow-down-tray />
+                    Download votes
+                  </template>
+                </button>
+              </UiDropdownItem>
               <UiDropdownItem v-if="editable" v-slot="{ active }">
                 <button
                   type="button"
@@ -505,20 +566,26 @@ onBeforeUnmount(() => destroyAudio());
             .
           </UiAlert>
           <ProposalExecutionsList
+            :network-id="proposal.network"
             :proposal="proposal"
             :executions="proposal.executions"
           />
         </div>
       </div>
       <div>
-        <button
-          type="button"
+        <router-link
           class="text-skin-text"
-          @click="modalOpenVotes = true"
+          :to="{
+            name: 'space-proposal-votes',
+            params: {
+              proposal: proposal.proposal_id,
+              space: `${proposal.network}:${proposal.space.id}`
+            }
+          }"
         >
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </button>
+        </router-link>
         ·
         <button
           type="button"
@@ -531,12 +598,6 @@ onBeforeUnmount(() => destroyAudio());
     </div>
   </UiContainer>
   <teleport to="#modal">
-    <ModalVotes
-      v-if="proposal"
-      :open="modalOpenVotes"
-      :proposal="proposal"
-      @close="modalOpenVotes = false"
-    />
     <ModalTimeline
       v-if="proposal"
       :open="modalOpenTimeline"

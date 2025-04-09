@@ -65,6 +65,11 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             class="text-[21px] inline [overflow-wrap:anywhere] min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
+          <UiTooltip v-if="proposal.isInvalid" title="This proposal is invalid">
+            <IH-exclamation
+              class="inline-block text-skin-danger shrink-0 relative bottom-0.5"
+            />
+          </UiTooltip>
           <ProposalLabels
             v-if="proposal.space?.labels && proposal.labels.length"
             :space-id="`${proposal.network}:${proposal.space.id}`"
@@ -107,8 +112,20 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
     </div>
     <span>
       <template v-if="proposal.vote_count">
-        · {{ _n(proposal.vote_count, 'compact') }}
-        {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        ·
+        <router-link
+          class="text-skin-text"
+          :to="{
+            name: 'space-proposal-votes',
+            params: {
+              proposal: proposal.proposal_id,
+              space: `${proposal.network}:${proposal.space.id}`
+            }
+          }"
+        >
+          {{ _n(proposal.vote_count, 'compact') }}
+          {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        </router-link>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
         · {{ formatQuorum(totalProgress) }}

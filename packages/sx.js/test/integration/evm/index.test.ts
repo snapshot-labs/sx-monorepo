@@ -27,8 +27,14 @@ describe('EthereumTx', () => {
     testConfig = await setup(provider, signer);
     spaceAddress = testConfig.spaceAddress;
 
-    ethTxClient = new EthereumTx({ networkConfig: testConfig.networkConfig });
-    ethSigClient = new EthereumSig({ networkConfig: testConfig.networkConfig });
+    const clientOpts = {
+      networkConfig: testConfig.networkConfig,
+      whitelistServerUrl: 'https://wls.snapshot.box',
+      manaUrl: 'https://mana.box'
+    };
+
+    ethTxClient = new EthereumTx(clientOpts);
+    ethSigClient = new EthereumSig(clientOpts);
   });
 
   describe('vanilla authenticator', () => {
@@ -37,7 +43,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.vanillaExecutionStrategy,
             params: '0x00'
@@ -58,7 +70,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           proposal: 1,
           choice: 0,
           metadataUri: ''
@@ -79,7 +97,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.ethTxAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.vanillaExecutionStrategy,
             params: '0x00'
@@ -100,7 +124,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.ethTxAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           proposal: 2,
           choice: 0,
           metadataUri: ''
@@ -122,7 +152,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.ethSigAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.vanillaExecutionStrategy,
             params: '0x00'
@@ -144,7 +180,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.ethSigAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           proposal: 3,
           choice: 0,
           metadataUri: ''
@@ -167,7 +209,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.vanillaExecutionStrategy,
             params: '0x00'
@@ -188,7 +236,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 1, address: testConfig.compVotingStrategy }],
+          strategies: [
+            {
+              index: 1,
+              address: testConfig.compVotingStrategy,
+              params: testConfig.compVotingStrategyParams
+            }
+          ],
           proposal: 4,
           choice: 0,
           metadataUri: ''
@@ -211,7 +265,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.vanillaExecutionStrategy,
             params: '0x00'
@@ -232,7 +292,13 @@ describe('EthereumTx', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 2, address: testConfig.ozVotesVotingStrategy }],
+          strategies: [
+            {
+              index: 2,
+              address: testConfig.ozVotesVotingStrategy,
+              params: testConfig.ozVotesVotingStrategyParams
+            }
+          ],
           proposal: 5,
           choice: 0,
           metadataUri: ''
@@ -257,6 +323,7 @@ describe('EthereumTx', () => {
             {
               index: 3,
               address: testConfig.merkleWhitelistVotingStrategy,
+              params: testConfig.merkleWhitelistVotingStrategyParams,
               metadata: testConfig.merkleWhitelistStrategyMetadata
             }
           ],
@@ -284,6 +351,7 @@ describe('EthereumTx', () => {
             {
               index: 3,
               address: testConfig.merkleWhitelistVotingStrategy,
+              params: testConfig.merkleWhitelistVotingStrategyParams,
               metadata: testConfig.merkleWhitelistStrategyMetadata
             }
           ],
@@ -312,21 +380,37 @@ describe('EthereumTx', () => {
       }
     ];
 
-    it('should propose with avatar', async () => {
+    let executionStrategyParams: string | undefined;
+
+    beforeAll(() => {
       const { executionParams } = getExecutionData(
         'SimpleQuorumAvatar',
         testConfig.avatarExecutionStrategy,
         { transactions }
       );
 
+      executionStrategyParams = executionParams[0];
+    });
+
+    it('should propose with avatar', async () => {
+      if (!executionStrategyParams) {
+        throw new Error('No execution strategy params found');
+      }
+
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.avatarExecutionStrategy,
-            params: executionParams[0]
+            params: executionStrategyParams
           },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -340,11 +424,21 @@ describe('EthereumTx', () => {
     });
 
     it('should vote via authenticator', async () => {
+      if (!executionStrategyParams) {
+        throw new Error('No execution strategy params found');
+      }
+
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           proposal: 7,
           choice: 1,
           metadataUri: ''
@@ -359,17 +453,15 @@ describe('EthereumTx', () => {
     });
 
     it('should execute', async () => {
-      const { executionParams } = getExecutionData(
-        'SimpleQuorumAvatar',
-        testConfig.avatarExecutionStrategy,
-        { transactions }
-      );
+      if (!executionStrategyParams) {
+        throw new Error('No execution strategy params found');
+      }
 
       const res = await ethTxClient.execute({
         signer,
         space: spaceAddress,
         proposal: 7,
-        executionParams: executionParams[0]
+        executionParams: executionStrategyParams
       });
       expect(res.hash).toBeDefined();
     });
@@ -386,21 +478,37 @@ describe('EthereumTx', () => {
       }
     ];
 
-    it('should propose with avatar', async () => {
+    let executionStrategyParams: string | undefined;
+
+    beforeAll(() => {
       const { executionParams } = getExecutionData(
         'SimpleQuorumTimelock',
         testConfig.timelockExecutionStrategy,
         { transactions }
       );
 
+      executionStrategyParams = executionParams[0];
+    });
+
+    it('should propose with avatar', async () => {
+      if (!executionStrategyParams) {
+        throw new Error('No execution strategy params found');
+      }
+
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.timelockExecutionStrategy,
-            params: executionParams[0]
+            params: executionStrategyParams
           },
           metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
         }
@@ -414,11 +522,21 @@ describe('EthereumTx', () => {
     });
 
     it('should vote via authenticator', async () => {
+      if (!executionStrategyParams) {
+        throw new Error('No execution strategy params found');
+      }
+
       const envelope = {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           proposal: 8,
           choice: 1,
           metadataUri: ''
@@ -433,23 +551,25 @@ describe('EthereumTx', () => {
     });
 
     it('should execute', async () => {
-      const { executionParams } = getExecutionData(
-        'SimpleQuorumTimelock',
-        testConfig.timelockExecutionStrategy,
-        { transactions }
-      );
+      if (!executionStrategyParams) {
+        throw new Error('No execution strategy params found');
+      }
 
       const res = await ethTxClient.execute({
         signer,
         space: spaceAddress,
         proposal: 8,
-        executionParams: executionParams[0]
+        executionParams: executionStrategyParams
       });
       expect(res.hash).toBeDefined();
     });
 
     it('should execute queued proposal', async () => {
-      const { executor, executionParams } = getExecutionData(
+      if (!executionStrategyParams) {
+        throw new Error('No execution strategy params found');
+      }
+
+      const { executor } = getExecutionData(
         'SimpleQuorumTimelock',
         testConfig.timelockExecutionStrategy,
         { transactions }
@@ -458,7 +578,7 @@ describe('EthereumTx', () => {
       const res = await ethTxClient.executeQueuedProposal({
         signer,
         executionStrategy: executor,
-        executionParams: executionParams[0]
+        executionParams: executionStrategyParams
       });
       expect(res.hash).toBeDefined();
     });

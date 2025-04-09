@@ -46,25 +46,22 @@ export default function createMerkleWhitelistStrategy(): Strategy {
 
       let proof: string[] = [];
       try {
-        const res = await fetch(
-          `${clientConfig.manaUrl}/stark_rpc/${clientConfig.networkConfig.eip712ChainId}`,
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json'
+        const res = await fetch(clientConfig.whitelistServerUrl, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'getMerkleProof',
+            params: {
+              root: params,
+              index: voterIndex
             },
-            body: JSON.stringify({
-              jsonrpc: '2.0',
-              method: 'getMerkleProof',
-              params: {
-                root: params,
-                index: voterIndex
-              },
-              id: null
-            })
-          }
-        );
+            id: null
+          })
+        });
 
         const data = await res.json();
         if (!data.result) throw new Error('Merkle proof not found');

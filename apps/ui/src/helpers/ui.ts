@@ -7,8 +7,12 @@ export function getExecutionName(networkId: NetworkID, strategyType: string) {
     if (strategyType === 'oSnap') return 'oSnap execution';
 
     const network = getNetwork(networkId);
-    return `${network.constants.EXECUTORS[strategyType]} execution`;
-  } catch (e) {
+
+    const name = network.constants.EXECUTORS[strategyType];
+    if (name) return `${network.constants.EXECUTORS[strategyType]} execution`;
+
+    return 'Custom execution';
+  } catch {
     return null;
   }
 }

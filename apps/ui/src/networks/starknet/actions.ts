@@ -22,6 +22,7 @@ import {
   verifyNetwork,
   verifyStarknetNetwork
 } from '@/helpers/utils';
+import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   EVM_CONNECTORS,
   STARKNET_CONNECTORS
@@ -84,7 +85,8 @@ export function createActions(
     starkProvider,
     manaUrl: MANA_URL,
     ethUrl,
-    networkConfig
+    networkConfig,
+    whitelistServerUrl: WHITELIST_SERVER_URL
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
@@ -603,6 +605,7 @@ export function createActions(
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
       validationStrategy: StrategyConfig,
+      executionStrategies: StrategyConfig[],
       votingDelay: number | null,
       minVotingDuration: number | null,
       maxVotingDuration: number | null
@@ -611,8 +614,12 @@ export function createActions(
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
-          execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types,
+          execution_strategies: executionStrategies.map(
+            config => config.address
+          ),
+          execution_strategies_types: executionStrategies.map(
+            config => config.type
+          ),
           execution_destinations: space.executors_destinations
         })
       );

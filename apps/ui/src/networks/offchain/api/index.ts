@@ -83,6 +83,10 @@ function getProposalState(
   proposal: ApiProposal
 ): ProposalState {
   if (proposal.state === 'closed') {
+    if (proposal.type !== 'basic') {
+      return 'closed';
+    }
+
     const currentQuorum = getProposalCurrentQuorum(networkId, {
       scores: proposal.scores,
       scores_total: proposal.scores_total,
@@ -95,10 +99,6 @@ function getProposalState(
 
     if (currentQuorum < proposal.quorum) {
       return 'rejected';
-    }
-
-    if (proposal.type !== 'basic') {
-      return 'closed';
     }
 
     return proposal.scores[0] > proposal.scores[1] ? 'passed' : 'rejected';
@@ -193,6 +193,7 @@ function formatSpace(
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
     private: space.private,
+    flagged: space.flagged,
     domain: space.domain,
     skin: space.skin,
     skinSettings: formatSkinSettings(space.skinSettings),
@@ -331,6 +332,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
+    isInvalid: false,
     author: {
       id: proposal.author,
       address_type: 1,

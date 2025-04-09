@@ -192,7 +192,7 @@ export function jsonParse(input, fallback?) {
   }
   try {
     return JSON.parse(input);
-  } catch (e) {
+  } catch {
     return fallback || {};
   }
 }
@@ -658,11 +658,19 @@ export function getRandomHexColor(): string {
     .padStart(6, '0')}`.toUpperCase();
 }
 
+/**
+ * Concat a list of strings with the connector if needed,
+ * using the oxford comma rule.
+ * e.g.
+ * - ['a', 'b', 'c'] => 'a, b, and c'
+ * - ['a', 'b'] => 'a and b'
+ * - ['a'] => 'a'
+ */
 export function prettyConcat(options: string[], connector = 'or') {
   const uniqOptions = Array.from(new Set(options));
 
   return uniqOptions.length > 1
-    ? `${uniqOptions.slice(0, -1).join(', ')} ${connector} ${uniqOptions.slice(-1)}`
+    ? `${uniqOptions.slice(0, -1).join(', ')}${uniqOptions.length > 2 ? ',' : ''} ${connector} ${uniqOptions.slice(-1)}`
     : uniqOptions[0];
 }
 

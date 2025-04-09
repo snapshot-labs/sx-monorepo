@@ -45,21 +45,3 @@ export async function executionCall(
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);
 }
-
-export async function generateMerkleTree(
-  chainId: number | string,
-  params: {
-    entries: string[];
-  }
-): Promise<string> {
-  return rpcCall(`stark_rpc/${chainId}`, 'generateMerkleTree', params);
-}
-
-export async function getMerkleRoot(
-  chainId: number | string,
-  params: {
-    requestId: string;
-  }
-): Promise<string> {
-  return rpcCall(`stark_rpc/${chainId}`, 'getMerkleRoot', params);
-}

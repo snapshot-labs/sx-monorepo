@@ -1,6 +1,12 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
-import { Strategy, StrategyConfig } from '../../clients/evm/types';
+import {
+  ClientConfig,
+  Propose,
+  Strategy,
+  StrategyConfig,
+  Vote
+} from '../../clients/evm/types';
 
 type Entry = {
   address: string;
@@ -27,20 +33,56 @@ export default function createMerkleWhitelist(): Strategy {
       call: 'propose' | 'vote',
       strategyConfig: StrategyConfig,
       signerAddress: string,
-      metadata: Record<string, any> | null
+      metadata: Record<string, any> | null,
+      data: Propose | Vote,
+      clientConfig: ClientConfig
     ): Promise<string> {
       const tree: Entry[] = metadata?.tree;
 
       if (!tree) throw new Error('Invalid metadata. Missing tree');
 
+      const voterIndex = tree.findIndex(
+        entry => entry.address.toLowerCase() === signerAddress.toLowerCase()
+      );
+
+      if (voterIndex === -1) {
+        throw new Error('Signer is not in whitelist');
+      }
+
       const whitelist = tree.map(
         entry => [entry.address, BigInt(entry.votingPower)] as [string, bigint]
       );
-      const merkleTree = StandardMerkleTree.of(whitelist, [
-        'address',
-        'uint96'
-      ]);
-      const proof = getProofForVoter(merkleTree, signerAddress);
+
+      let proof: { index: number; proof: string[] } | null = null;
+      try {
+        const res = await fetch(clientConfig.whitelistServerUrl, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'getMerkleProof',
+            params: {
+              root: strategyConfig.params,
+              index: voterIndex
+            },
+            id: null
+          })
+        });
+        const data = await res.json();
+        if (!data.result) throw new Error('Merkle proof not found');
+
+        proof = { index: voterIndex, proof: data.result };
+      } catch {
+        const merkleTree = StandardMerkleTree.of(whitelist, [
+          'address',
+          'uint96'
+        ]);
+
+        proof = getProofForVoter(merkleTree, signerAddress);
+      }
 
       if (!proof) throw new Error('Signer is not in whitelist');
 

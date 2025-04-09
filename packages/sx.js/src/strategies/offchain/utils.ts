@@ -23,7 +23,7 @@ export async function fetchScoreApi(
     if (body.error) throw new Error(body.error.message);
 
     return body.result;
-  } catch (e) {
+  } catch {
     throw new Error('Failed to fetch score API');
   }
 }
