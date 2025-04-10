@@ -50,11 +50,9 @@ const { isPending, assetsMap } = useBalances({
   })
 });
 
-const searchInput: Ref<HTMLElement | null> = ref(null);
 const selectedTokenAddress = ref<string>('');
 const showPicker = ref(false);
 const hidden = ref(false);
-const searchValue = ref('');
 const modalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
 const form = ref(clone(FORM));
@@ -137,17 +135,6 @@ function handleSubmit() {
   modalTransactionProgressOpen.value = true;
 }
 
-function handlePickerClick() {
-  showPicker.value = true;
-  searchValue.value = '';
-
-  nextTick(() => {
-    if (searchInput.value) {
-      searchInput.value.focus();
-    }
-  });
-}
-
 function handleTokenPick(address: string) {
   selectedTokenAddress.value = address;
   showPicker.value = false;
@@ -189,16 +176,6 @@ watch(
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            :placeholder="'Search name or paste address'"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
       </template>
     </template>
     <PickerToken
@@ -207,7 +184,7 @@ watch(
       :address="web3.account"
       :network="network"
       :loading="isPending"
-      :search-value="searchValue"
+      :search-value="''"
       @pick="handleTokenPick"
     />
     <div v-else class="s-box p-4 space-y-3">
@@ -216,7 +193,7 @@ watch(
         <button
           type="button"
           class="s-input text-left h-[61px]"
-          @click="handlePickerClick()"
+          @click="showPicker = true"
         >
           <div class="flex items-center">
             <UiStamp
