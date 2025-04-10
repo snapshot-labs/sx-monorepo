@@ -32,7 +32,7 @@ export const TOKENS: Record<ChainId, Token[]> = {
       symbol: 'USDT'
     },
     {
-      contractAddress: '0x8EC1409bF214893aEA175C9C00c711593277F1C3',
+      contractAddress: '0x8ec1409bf214893aea175c9c00c711593277f1c3',
       decimals: 6,
       symbol: 'SNUSDC'
     }
