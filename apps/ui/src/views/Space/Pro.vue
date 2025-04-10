@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import dayjs from 'dayjs';
+import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
-import { Space } from '@/types';
+import { getNetwork, metadataNetwork } from '@/networks';
+import { Connector } from '@/networks/types';
+import { ChainId, Space } from '@/types';
 import ICAnnotation from '~icons/heroicons-outline/annotation';
 import ICFlag from '~icons/heroicons-outline/flag';
 import ICGlobeAlt from '~icons/heroicons-outline/globe-alt';
@@ -27,6 +31,19 @@ const USERS = [
 ];
 
 const TIER_PLAN: TierPlan[] = ['basic', 'pro'] as const;
+
+const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT', 'SNUSDC'] as const;
+
+const PRO_MONTHLY_PRICES: Record<
+  ChainId,
+  Record<SubscriptionLength, number>
+> = {
+  1: {
+    yearly: 500,
+    monthly: 600
+  },
+  11155111: { yearly: 0.15, monthly: 0.2 }
+} as const;
 
 const FEATURES = [
   {
@@ -78,8 +95,56 @@ const FEATURES = [
 defineProps<{ space: Space }>();
 
 const { limits } = useSettings();
+const { login, auth } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const modalPaymentOpen = ref(false);
+const modalConnectorOpen = ref(false);
+
+const paymentNetwork = computed(() => {
+  return metadataNetwork === 's' ? 1 : 11155111;
+});
+
+const prices = computed(() => {
+  return PRO_MONTHLY_PRICES[paymentNetwork.value];
+});
+
+const tokens = computed(() => {
+  return TOKENS[paymentNetwork.value].filter(t => {
+    return ACCEPTED_TOKENS_SYMBOL.includes(t.symbol);
+  });
+});
+
+const supportedConnectors = computed(() => {
+  const network = getNetwork(metadataNetwork);
+  return network.managerConnectors;
+});
+
+const isCurrentConnectorSupported = computed(() => {
+  return (
+    auth.value && supportedConnectors.value.includes(auth.value.connector.type)
+  );
+});
+
+async function handleConnectorPick(connector: Connector) {
+  modalConnectorOpen.value = false;
+  await login(connector);
+  if (auth.value) {
+    modalPaymentOpen.value = true;
+  }
+}
+async function handleTurboClick() {
+  if (!auth.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
+  if (!isCurrentConnectorSupported.value) {
+    modalConnectorOpen.value = true;
+    return;
+  }
+  modalPaymentOpen.value = true;
+}
 
 const features = computed<Feature[]>(() => {
   return [
@@ -110,6 +175,20 @@ const features = computed<Feature[]>(() => {
     }
   ];
 });
+
+function calculator(amount: number, quantity: number) {
+  if (subscriptionLength.value === 'yearly')
+    return Number((amount * quantity).toFixed(2));
+
+  const monthsCount = quantity % 12;
+  const yearsCount = Math.floor(quantity / 12);
+  const monthlyPrice = prices.value.monthly;
+  const yearlyPrice = prices.value.yearly * 12;
+
+  return Number(
+    (monthlyPrice * monthsCount + yearlyPrice * yearsCount).toFixed(2)
+  );
+}
 </script>
 
 <template>
@@ -136,7 +215,7 @@ const features = computed<Feature[]>(() => {
         >
           <h3 class="flex-1">Pay monthly</h3>
           <div class="flex items-center space-x-1">
-            <h2>$600</h2>
+            <h2>${{ PRO_MONTHLY_PRICES[paymentNetwork].monthly }}</h2>
             <span class="text-sm text-skin-text">/ month</span>
           </div>
         </a>
@@ -149,17 +228,27 @@ const features = computed<Feature[]>(() => {
             <h3>Pay yearly</h3>
             <div>
               <div class="bg-skin-border text-sm rounded-full px-2">
-                Save $1,200
+                Save ${{
+                  _n(
+                    (
+                      (PRO_MONTHLY_PRICES[paymentNetwork].monthly -
+                        PRO_MONTHLY_PRICES[paymentNetwork].yearly) *
+                      12
+                    ).toFixed(0)
+                  )
+                }}
               </div>
             </div>
           </div>
-          <div class="flex items-center space-x-1 flex-wrap">
-            <h2>$500</h2>
+          <div class="flex items-center space-x-1">
+            <h2>${{ PRO_MONTHLY_PRICES[paymentNetwork].yearly }}</h2>
             <span class="text-sm text-skin-text">/ month</span>
           </div>
         </a>
       </div>
-      <UiButton class="primary">Upgrade {{ space.name }}</UiButton>
+      <UiButton class="primary" @click="handleTurboClick">
+        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
+      </UiButton>
     </div>
 
     <div class="space-y-4 mx-4 flex flex-col items-center">
@@ -237,7 +326,9 @@ const features = computed<Feature[]>(() => {
 
     <div class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4">
       <h2 class="text-[32px]">Get started today</h2>
-      <UiButton class="primary">Upgrade {{ space.name }}</UiButton>
+      <UiButton class="primary" @click="handleTurboClick">
+        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
+      </UiButton>
     </div>
 
     <div class="px-4">
@@ -252,5 +343,43 @@ const features = computed<Feature[]>(() => {
         </h2>
       </AppLink>
     </div>
+    <ModalPayment
+      v-if="auth && isCurrentConnectorSupported && modalPaymentOpen"
+      :open="modalPaymentOpen"
+      :tokens="tokens"
+      :calculator="calculator"
+      :network="paymentNetwork"
+      :quantity-label="subscriptionLength === 'yearly' ? 'Years' : 'Months'"
+      :unit-price="
+        prices[subscriptionLength] * (subscriptionLength === 'yearly' ? 12 : 1)
+      "
+      :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
+      @close="modalPaymentOpen = false"
+    >
+      <template #summary="{ quantity }">
+        <div class="flex justify-between">
+          <div>End date</div>
+          <div class="text-skin-heading">
+            {{
+              dayjs(new Date())
+                .add(
+                  quantity,
+                  subscriptionLength === 'yearly' ? 'year' : 'month'
+                )
+                .format('D MMM YYYY')
+            }}
+            ({{ quantity }}
+            {{ subscriptionLength === 'yearly' ? 'year' : 'month'
+            }}{{ quantity > 1 ? 's' : '' }})
+          </div>
+        </div>
+      </template>
+    </ModalPayment>
+    <ModalConnector
+      :open="modalConnectorOpen"
+      :supported-connectors="supportedConnectors"
+      @pick="handleConnectorPick"
+      @close="modalConnectorOpen = false"
+    />
   </div>
 </template>

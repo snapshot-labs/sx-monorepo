@@ -49,6 +49,8 @@ watch(model, () => {
       :class="{ '!text-skin-text': disabled }"
       v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
+      :min="definition.minimum"
+      :max="definition.maximum"
     />
   </UiWrapperInput>
 </template>
