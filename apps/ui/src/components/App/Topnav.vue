@@ -9,7 +9,6 @@ defineProps<{
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
-const uiStore = useUiStore();
 const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
 const { login, web3 } = useWeb3();
@@ -93,29 +92,15 @@ onUnmounted(() => {
 
 <template>
   <UiTopnav v-bind="$attrs">
-    <div
-      class="flex items-center h-full truncate"
-      :class="{
-        'lg:border-r lg:pr-4 lg:w-[240px] shrink-0': hasAppNav,
-        'border-r pr-4 w-[240px]': hasAppNav && uiStore.sideMenuOpen
-      }"
-    >
-      <slot name="toggle-sidebar-button" />
-      <Breadcrumb
-        :class="[
-          'ml-4',
-          { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
-        ]"
-      />
-    </div>
+    <slot name="toggle-sidebar-button" />
+    <Breadcrumb v-if="!searchConfig && !hasAppNav" class="grow-[50]" />
     <form
       v-if="searchConfig"
-      id="search-form"
-      class="flex flex-1 py-3 h-full"
+      class="grow-[50] group"
       @submit="handleSearchSubmit"
     >
-      <label class="flex items-center w-full space-x-2.5">
-        <IH-search class="shrink-0" />
+      <label class="flex items-center space-x-2.5">
+        <IH-search class="shrink-0 group-focus-within:text-skin-link" />
         <input
           ref="searchInput"
           v-model.trim="searchValue"
@@ -125,15 +110,14 @@ onUnmounted(() => {
         />
       </label>
     </form>
-
-    <div class="flex space-x-2 shrink-0">
+    <div class="flex gap-x-2 grow shrink-0 justify-end">
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
-        class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+        class="!px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
         @click="modalAccountOpen = true"
       >
-        <span v-if="web3.account" class="sm:flex items-center space-x-2">
+        <span v-if="web3.account" class="sm:flex items-center gap-x-2">
           <UiStamp :id="user.id" :size="18" :cb="cb" />
           <span
             class="hidden sm:block truncate max-w-[120px]"
@@ -165,9 +149,3 @@ onUnmounted(() => {
     />
   </teleport>
 </template>
-
-<style lang="scss" scoped>
-#search-form:focus-within svg {
-  color: rgba(var(--link));
-}
-</style>
