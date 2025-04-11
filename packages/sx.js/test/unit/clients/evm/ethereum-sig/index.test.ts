@@ -15,7 +15,9 @@ describe('EthereumSig', () => {
     provider
   );
   const ethSigClient = new EthereumSig({
-    networkConfig: evmSepolia
+    networkConfig: evmSepolia,
+    whitelistServerUrl: 'https://wls.snapshot.box',
+    manaUrl: 'https://mana.box'
   });
 
   beforeAll(() => {
@@ -33,7 +35,11 @@ describe('EthereumSig', () => {
         space,
         authenticator,
         strategies: [
-          { index: 0, address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202' }
+          {
+            index: 0,
+            address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202',
+            params: '0x00'
+          }
         ],
         executionStrategy: { addr: executor, params: '0x00' },
         metadataUri: 'ipfs://QmNrm6xKuib1THtWkiN5CKtBEerQCDpUtmgDqiaU2xDmca'
@@ -65,7 +71,11 @@ describe('EthereumSig', () => {
         space,
         authenticator,
         strategies: [
-          { index: 0, address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202' }
+          {
+            index: 0,
+            address: '0xC1245C5DCa7885C73E32294140F1e5d30688c202',
+            params: '0x00'
+          }
         ],
         proposal: 1,
         choice: 1,

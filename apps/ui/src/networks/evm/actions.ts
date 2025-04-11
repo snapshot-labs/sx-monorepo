@@ -23,6 +23,7 @@ import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import {
   buildMetadata,
@@ -79,9 +80,14 @@ export function createActions(
     managerConnectors: EVM_CONNECTORS
   });
 
-  const client = new clients.EvmEthereumTx({ networkConfig });
-  const ethSigClient = new clients.EvmEthereumSig({
+  const clientOpts = {
     networkConfig,
+    whitelistServerUrl: WHITELIST_SERVER_URL
+  };
+
+  const client = new clients.EvmEthereumTx(clientOpts);
+  const ethSigClient = new clients.EvmEthereumSig({
+    ...clientOpts,
     manaUrl: MANA_URL
   });
 
@@ -284,6 +290,11 @@ export function createActions(
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
+          const params =
+            space.voting_power_validation_strategy_strategies_params[
+              strategy.paramsIndex
+            ];
+
           const metadata = await parseStrategyMetadata(
             space.voting_power_validation_strategies_parsed_metadata[
               strategy.index
@@ -292,6 +303,7 @@ export function createActions(
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -463,12 +475,14 @@ export function createActions(
             strategy.index
           );
 
+          const params = proposal.strategies_params[strategy.paramsIndex];
           const metadata = await parseStrategyMetadata(
             proposal.space.strategies_parsed_metadata[metadataIndex].payload
           );
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -646,19 +660,22 @@ export function createActions(
       );
     },
     getDelegatee: async (
-      web3: any,
       delegation: SpaceMetadataDelegation,
       delegator: string
     ) => {
       const { contractAddress } = delegation;
-      if (!contractAddress) return null;
-      if (!isAddress(delegator)) return null;
+      if (!contractAddress || !delegation.chainId || !isAddress(delegator))
+        return null;
 
-      const multi = new Multicaller(chainId.toString(), provider, [
-        'function decimals() view returns (uint8)',
-        'function balanceOf(address account) view returns (uint256)',
-        'function delegates(address) view returns (address)'
-      ]);
+      const multi = new Multicaller(
+        delegation.chainId.toString(),
+        getProvider(delegation.chainId as number),
+        [
+          'function decimals() view returns (uint8)',
+          'function balanceOf(address account) view returns (uint256)',
+          'function delegates(address) view returns (address)'
+        ]
+      );
       multi.call('decimals', contractAddress, 'decimals');
       multi.call('balanceOf', contractAddress, 'balanceOf', [delegator]);
       multi.call('delegatee', contractAddress, 'delegates', [delegator]);

@@ -3,8 +3,13 @@ import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
 import { clone, getUrl } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import {
+  EVM_CONNECTORS,
+  STARKNET_CONNECTORS
+} from '@/networks/common/constants';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
-import { Space, SpaceMetadataDelegation } from '@/types';
+import { Connector, ConnectorType } from '@/networks/types';
+import { ChainId, Space, SpaceMetadataDelegation } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   delegatee: '',
@@ -23,6 +28,7 @@ const emit = defineEmits<{
 }>();
 
 const { delegate } = useActions();
+const { auth, login } = useWeb3();
 
 const form: {
   delegatee: string;
@@ -33,11 +39,13 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const sending = ref(false);
 const formErrors = ref({} as Record<string, any>);
+const connectorModalOpen = ref(false);
+const connectorModalConnectors = ref([] as ConnectorType[]);
 
 const delegateDefinition = computed(() => ({
   type: 'string',
   format: 'ens-or-address',
-  chainId: props.delegation?.chainId ?? undefined,
+  chainId: selectedDelegation.value?.chainId ?? undefined,
   title: 'Delegatee',
   examples: ['Address or ENS']
 }));
@@ -59,17 +67,25 @@ const isInvalidSelectedDelegation = computed(
 );
 
 const selectedDelegation = computed<SpaceMetadataDelegation | undefined>(() => {
-  return props.delegation || validDelegations.value[form.selectedIndex];
+  return (
+    props.delegation || validSelectableDelegations.value[form.selectedIndex]
+  );
 });
 
 const validDelegations = computed(() => {
   return props.space.delegations.filter(isValidDelegation);
 });
 
+const validSelectableDelegations = computed(() => {
+  return validDelegations.value.filter(delegation => {
+    return auth.value ? isDelegationSupportedByUser(delegation) : true;
+  });
+});
+
 const spaceDelegationsOptions = computed<
   { id: number; name: string; icon: VNode }[]
 >(() => {
-  return validDelegations.value.map((d, i) => {
+  return validSelectableDelegations.value.map((d, i) => {
     const network = getNetworkDetails(d.chainId as string);
 
     return {
@@ -83,6 +99,28 @@ const spaceDelegationsOptions = computed<
     };
   });
 });
+
+function delegationConnectors(
+  delegation: SpaceMetadataDelegation
+): ConnectorType[] {
+  if (!delegation.chainId) return [];
+
+  const starknetChainIds: ChainId[] = Object.values(
+    STARKNET_NETWORK_METADATA
+  ).map(network => network.chainId);
+
+  return starknetChainIds.includes(delegation.chainId)
+    ? STARKNET_CONNECTORS
+    : EVM_CONNECTORS;
+}
+
+function isDelegationSupportedByUser(
+  delegation?: SpaceMetadataDelegation
+): boolean {
+  if (!auth.value?.connector || !delegation?.chainId) return false;
+
+  return delegationConnectors(delegation).includes(auth.value.connector.type);
+}
 
 function isValidDelegation(delegation?: SpaceMetadataDelegation): boolean {
   return !!(
@@ -112,7 +150,11 @@ function getNetworkDetails(chainId: number | string) {
 }
 
 async function handleSubmit() {
-  if (!selectedDelegation.value) return;
+  if (
+    !selectedDelegation.value ||
+    (auth.value && !isDelegationSupportedByUser(selectedDelegation.value))
+  )
+    return;
 
   if (
     !selectedDelegation.value.apiType ||
@@ -138,6 +180,20 @@ async function handleSubmit() {
   } finally {
     sending.value = false;
   }
+}
+
+function handleWalletChangeClick() {
+  emit('close');
+  connectorModalConnectors.value = delegationConnectors(
+    selectedDelegation.value || validDelegations.value[0]
+  );
+  connectorModalOpen.value = true;
+}
+
+function handleConnectorPick(connector: Connector) {
+  connectorModalOpen.value = false;
+  connectorModalConnectors.value = [];
+  login(connector);
 }
 
 watch(
@@ -197,6 +253,14 @@ watchEffect(async () => {
       />
     </template>
     <UiMessage
+      v-else-if="auth && !isDelegationSupportedByUser(selectedDelegation)"
+      class="m-4"
+      type="danger"
+    >
+      Please connect with
+      {{ auth.connector.type === 'argentx' ? 'an EVM' : 'a Starknet' }} wallet.
+    </UiMessage>
+    <UiMessage
       v-else-if="isInvalidSelectedDelegation"
       class="m-4"
       type="danger"
@@ -205,7 +269,7 @@ watchEffect(async () => {
     </UiMessage>
     <div v-else class="s-box p-4">
       <Combobox
-        v-if="!delegation && validDelegations.length > 1"
+        v-if="!delegation && validSelectableDelegations.length > 1"
         v-model="form.selectedIndex"
         :definition="{
           type: ['number'],
@@ -225,7 +289,14 @@ watchEffect(async () => {
     </div>
     <template v-if="!showPicker" #footer>
       <UiButton
-        v-if="isInvalidSelectedDelegation"
+        v-if="auth && !isDelegationSupportedByUser(selectedDelegation)"
+        class="w-full"
+        @click="handleWalletChangeClick"
+      >
+        Change wallet
+      </UiButton>
+      <UiButton
+        v-else-if="isInvalidSelectedDelegation"
         class="w-full"
         @click="emit('close')"
       >
@@ -236,11 +307,20 @@ watchEffect(async () => {
         primary
         class="w-full"
         :loading="sending"
-        :disabled="Object.keys(formErrors).length > 0"
+        :disabled="
+          Object.keys(formErrors).length > 0 ||
+          (!!auth && !isDelegationSupportedByUser(selectedDelegation))
+        "
         @click="handleSubmit"
       >
         Confirm
       </UiButton>
     </template>
   </UiModal>
+  <ModalConnector
+    :open="connectorModalOpen"
+    :supported-connectors="connectorModalConnectors"
+    @close="connectorModalOpen = false"
+    @pick="handleConnectorPick"
+  />
 </template>

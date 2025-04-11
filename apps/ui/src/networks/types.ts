@@ -301,7 +301,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     chainIdOverride?: ChainId
   );
   getDelegatee(
-    web3: Web3Provider,
     delegation: SpaceMetadataDelegation,
     delegator: string
   ): Promise<{ address: string; balance: bigint; decimals: number } | null>;

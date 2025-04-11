@@ -290,6 +290,11 @@ export const populateExecuteTx = async (
   overrides?: any
 ) => {
   const signatureBytes = buildSignatureBytes(signatures);
+
+  if (!safe.populateTransaction.execTransaction) {
+    throw new Error('Contract does not have execTransaction method');
+  }
+
   return safe.populateTransaction.execTransaction(
     safeTx.to,
     safeTx.value,

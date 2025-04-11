@@ -79,28 +79,19 @@ describe('sx-starknet', () => {
 
     spaceAddress = testConfig.spaceAddress;
 
-    client = new StarknetTx({
-      starkProvider: starkProvider as any,
-      ethUrl,
-      networkConfig: testConfig.networkConfig
-    });
-    ethSigClient = new EthereumSig({
-      starkProvider: starkProvider as any,
-      ethUrl,
-      networkConfig: testConfig.networkConfig
-    });
-    ethTxClient = new EthereumTx({
-      starkProvider: starkProvider as any,
-      ethUrl,
-      networkConfig: testConfig.networkConfig
-    });
-    starkSigClient = new StarknetSig({
+    const clientOpts = {
       starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig,
-      manaUrl: 'http://localhost:3000'
-    });
-  }, 500_000);
+      whitelistServerUrl: 'https://wls.snapshot.box',
+      manaUrl: 'https://mana.box'
+    };
+
+    client = new StarknetTx(clientOpts);
+    ethSigClient = new EthereumSig(clientOpts);
+    ethTxClient = new EthereumTx(clientOpts);
+    starkSigClient = new StarknetSig(clientOpts);
+  }, 60_000);
 
   describe('vanilla authenticator', () => {
     it('StarknetTx.propose()', async () => {
@@ -114,7 +105,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           executionStrategy: {
@@ -144,7 +136,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           proposal: 1,
@@ -170,7 +163,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         executionStrategy: {
@@ -197,7 +191,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         proposal: 2,
@@ -224,7 +219,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         executionStrategy: {
@@ -257,7 +253,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         proposal: 3,
@@ -290,7 +287,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         executionStrategy: {
@@ -317,7 +315,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         proposal: 4,
@@ -348,7 +347,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           executionStrategy: {
@@ -378,7 +378,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           proposal: 5,
@@ -409,6 +410,7 @@ describe('sx-starknet', () => {
             {
               index: 1,
               address: testConfig.merkleWhitelistVotingStrategy,
+              params: testConfig.merkleWhitelistVotingStrategyParams,
               metadata: testConfig.merkleWhitelistStrategyMetadata
             }
           ],
@@ -440,6 +442,7 @@ describe('sx-starknet', () => {
             {
               index: 1,
               address: testConfig.merkleWhitelistVotingStrategy,
+              params: testConfig.merkleWhitelistVotingStrategyParams,
               metadata: testConfig.merkleWhitelistStrategyMetadata
             }
           ],
@@ -470,7 +473,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 2,
-              address: testConfig.erc20VotesVotingStrategy
+              address: testConfig.erc20VotesVotingStrategy,
+              params: testConfig.erc20VotesVotingStrategyParams
             }
           ],
           executionStrategy: {
@@ -500,7 +504,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 2,
-              address: testConfig.erc20VotesVotingStrategy
+              address: testConfig.erc20VotesVotingStrategy,
+              params: testConfig.erc20VotesVotingStrategyParams
             }
           ],
           proposal: 7,
@@ -545,7 +550,13 @@ describe('sx-starknet', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.ethRelayerExecutionStrategy,
             params: executionParams
@@ -567,7 +578,13 @@ describe('sx-starknet', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           proposal: 8,
           choice: 1,
           metadataUri: ''
@@ -621,7 +638,13 @@ describe('sx-starknet', () => {
         }
       );
 
-      const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
+      const [, executionHashLower, executionHashUpper] = executionParams;
+
+      if (!executionHashLower || !executionHashUpper) {
+        throw new Error('Invalid execution hash');
+      }
+
+      const executionHash = `${executionHashUpper}${executionHashLower.slice(2)}`;
 
       const proposal = {
         startTimestamp: message_payload[3],

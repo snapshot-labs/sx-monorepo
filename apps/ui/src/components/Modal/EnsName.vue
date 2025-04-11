@@ -40,6 +40,7 @@ const form = ref({
 const domainValidationError = ref({});
 
 const formErrors = computed(() => {
+  // eslint-disable-next-line vue/no-side-effects-in-computed-properties
   domainValidationError.value = {};
   const validator = getValidator(DEFINITION);
   return validator.validate(form.value, { skipEmptyOptionalFields: true });

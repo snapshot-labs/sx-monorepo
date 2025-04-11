@@ -42,6 +42,7 @@ export function useActions() {
         return await fn(...args);
       } catch (e) {
         if (!isUserAbortError(e)) {
+          console.error(e);
           uiStore.addNotification(
             'error',
             'Something went wrong. Please try again later.'
@@ -148,7 +149,10 @@ export function useActions() {
           'success',
           'Your vote is pending! waiting for other signers'
         );
-      hash && uiStore.addPendingTransaction(hash, network.chainId);
+
+      if (hash) {
+        uiStore.addPendingTransaction(hash, network.chainId);
+      }
     } else {
       hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
@@ -675,11 +679,7 @@ export function useActions() {
     const actionNetwork = getDelegationNetwork(delegation.chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
-    return network.actions.getDelegatee(
-      auth.value.provider,
-      delegation,
-      delegator
-    );
+    return network.actions.getDelegatee(delegation, delegator);
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {

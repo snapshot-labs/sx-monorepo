@@ -112,8 +112,20 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
     </div>
     <span>
       <template v-if="proposal.vote_count">
-        · {{ _n(proposal.vote_count, 'compact') }}
-        {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        ·
+        <router-link
+          class="text-skin-text"
+          :to="{
+            name: 'space-proposal-votes',
+            params: {
+              proposal: proposal.proposal_id,
+              space: `${proposal.network}:${proposal.space.id}`
+            }
+          }"
+        >
+          {{ _n(proposal.vote_count, 'compact') }}
+          {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        </router-link>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
         · {{ formatQuorum(totalProgress) }}

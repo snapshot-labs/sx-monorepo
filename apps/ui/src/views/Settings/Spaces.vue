@@ -17,7 +17,6 @@ const route = useRoute();
 const router = useRouter();
 const { web3 } = useWeb3();
 
-const loaded = ref(false);
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 
 const { data, isPending } = useExploreSpacesQuery({
@@ -26,8 +25,7 @@ const { data, isPending } = useExploreSpacesQuery({
 });
 
 const loading = computed(
-  () =>
-    !loaded || (web3.value.account && isPending.value) || web3.value.authLoading
+  () => (web3.value.account && isPending.value) || web3.value.authLoading
 );
 
 watch(protocol, value => {

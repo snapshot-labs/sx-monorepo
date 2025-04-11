@@ -86,7 +86,7 @@ async function run() {
     }
 
     runTurboWithFilters(answer);
-  } catch (e) {
+  } catch {
     process.exit(1);
   }
 }
