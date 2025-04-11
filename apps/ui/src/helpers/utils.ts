@@ -17,7 +17,8 @@ import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { getSpaceController as getShibariumSpaceController } from '@/helpers/shibarium';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
-import { MAX_SYMBOL_LENGTH } from './constants';
+import { EMPTY_ADDRESS, MAX_SYMBOL_LENGTH } from './constants';
+import { getOwner } from './stamp';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
 import ICDiscord from '~icons/c/discord';
@@ -683,7 +684,7 @@ export function isUserAbortError(e: any) {
   );
 }
 
-export function getSpaceController(id: string, network: NetworkID) {
+export async function getSpaceController(id: string, network: NetworkID) {
   const chainMapping = {
     ens: {
       s: 1,
@@ -696,7 +697,9 @@ export function getSpaceController(id: string, network: NetworkID) {
   };
 
   if (id.endsWith('.shib')) {
-    return getShibariumSpaceController(id, chainMapping.shibarium[network]);
+    const owner = await getOwner(id, chainMapping.shibarium[network]);
+
+    return owner || EMPTY_ADDRESS;
   }
 
   return getEnsSpaceController(id, chainMapping.ens[network]);
