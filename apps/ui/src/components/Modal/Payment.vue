@@ -275,8 +275,14 @@ watch(
     "
   >
     <template #successTitle>
-      <h4 class="font-semibold text-skin-heading text-lg">
-        Upgraded to <ICPro class="w-[44px] inline" />
+      <h4
+        class="font-semibold text-skin-heading text-lg flex flex-col items-center gap-2 mb-3"
+      >
+        Upgraded to
+        <span
+          class="eyebrow inline-block text-skin-bg bg-skin-link rounded-full px-2"
+          >Snapshot Pro</span
+        >
       </h4>
     </template>
     <template #successSubtitle>Thank you for your subscription!</template>
