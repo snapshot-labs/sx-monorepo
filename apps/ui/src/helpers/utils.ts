@@ -14,7 +14,6 @@ import {
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
-import { getSpaceController as getShibariumSpaceController } from '@/helpers/shibarium';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
 import { EMPTY_ADDRESS, MAX_SYMBOL_LENGTH } from './constants';
