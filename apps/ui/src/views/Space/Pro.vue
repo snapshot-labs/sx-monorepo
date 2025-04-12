@@ -42,7 +42,7 @@ const PRO_MONTHLY_PRICES: Record<
     yearly: 500,
     monthly: 600
   },
-  11155111: { yearly: 0.15, monthly: 0.2 }
+  11155111: { yearly: 500, monthly: 600 }
 } as const;
 
 const FEATURES = [
