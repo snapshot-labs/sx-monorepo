@@ -181,8 +181,10 @@ function calculator(amount: number, quantity: number) {
     return Number((amount * quantity).toFixed(2));
 
   return Number(
-    quantity * (quantity >= 12 ? prices.value.yearly : prices.value.monthly)
-  ).toFixed(2);
+    (
+      quantity * (quantity >= 12 ? prices.value.yearly : prices.value.monthly)
+    ).toFixed(2)
+  );
 }
 </script>
 
