@@ -372,6 +372,20 @@ function calculator(amount: number, quantity: number) {
           </div>
         </div>
       </template>
+      <template #transactionModalSuccessTitle>
+        <h4
+          class="font-semibold text-skin-heading text-lg flex flex-col items-center gap-2 mb-3"
+        >
+          Upgraded to
+          <span
+            class="eyebrow inline-block text-skin-bg bg-skin-link rounded-full px-2"
+            >Snapshot Pro</span
+          >
+        </h4>
+      </template>
+      <template #transactionModalSuccessSubtitle>
+        Thank you for your subscription!
+      </template>
     </ModalPayment>
     <ModalConnector
       :open="modalConnectorOpen"
