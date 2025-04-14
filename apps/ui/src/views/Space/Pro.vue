@@ -180,14 +180,9 @@ function calculator(amount: number, quantity: number) {
   if (subscriptionLength.value === 'yearly')
     return Number((amount * quantity).toFixed(2));
 
-  const monthsCount = quantity % 12;
-  const yearsCount = Math.floor(quantity / 12);
-  const monthlyPrice = prices.value.monthly;
-  const yearlyPrice = prices.value.yearly * 12;
-
   return Number(
-    (monthlyPrice * monthsCount + yearlyPrice * yearsCount).toFixed(2)
-  );
+    quantity * (quantity >= 12 ? prices.value.yearly : prices.value.monthly)
+  ).toFixed(2);
 }
 </script>
 
