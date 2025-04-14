@@ -348,7 +348,10 @@ function calculator(amount: number, quantity: number) {
       :unit-price="
         prices[subscriptionLength] * (subscriptionLength === 'yearly' ? 12 : 1)
       "
-      :barcode-payload="{ type: 'turbo', params: { space: space.id } }"
+      :barcode-payload="{
+        type: 'turbo',
+        params: { space: `${space.network}:${space.id}` }
+      }"
       @close="modalPaymentOpen = false"
     >
       <template #summary="{ quantity }">
