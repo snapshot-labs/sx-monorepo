@@ -16,7 +16,8 @@ export const CONNECTORS: ConnectorType[] = [
   'walletconnect',
   'coinbase',
   'gnosis',
-  'sequence'
+  'sequence',
+  'guest'
 ];
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];
