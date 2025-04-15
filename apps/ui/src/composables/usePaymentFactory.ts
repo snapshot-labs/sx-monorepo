@@ -39,7 +39,6 @@ export default function usePaymentFactory(network: ChainId) {
   const uiStore = useUiStore();
 
   const { hasApproved, approve, pay } = usePayment(network);
-  const currentStepMessages = ref({});
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
@@ -56,9 +55,6 @@ export default function usePaymentFactory(network: ChainId) {
         const result = await hasApproved(token, amount);
 
         if (result === undefined) {
-          currentStepMessages.value = {
-            failTitle: 'Wallet not found'
-          };
           throw new Error('wallet not found');
         }
 
@@ -96,15 +92,7 @@ export default function usePaymentFactory(network: ChainId) {
     }
   });
 
-  const currentStep = computed<Step>(() => {
-    return {
-      ...STEPS.value[currentStepId.value],
-      messages: {
-        ...STEPS.value[currentStepId.value].messages,
-        ...currentStepMessages.value
-      }
-    };
-  });
+  const currentStep = computed<Step>(() => STEPS.value[currentStepId.value]);
 
   const isLastStep = computed<boolean>(() => {
     return currentStepId.value === Object.keys(STEPS.value).pop();
@@ -114,7 +102,6 @@ export default function usePaymentFactory(network: ChainId) {
     const nextStep = currentStep.value.nextStep();
 
     if (nextStep) {
-      currentStepMessages.value = {};
       currentStepId.value = nextStep;
       return true;
     }
@@ -135,7 +122,6 @@ export default function usePaymentFactory(network: ChainId) {
   function start() {
     currentStepId.value = FIRST_STEP;
     stepExecuteResults.value.clear();
-    currentStepMessages.value = {};
   }
 
   return { start, goToNextStep, isLastStep, currentStep };
