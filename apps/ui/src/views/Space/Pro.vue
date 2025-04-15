@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
-import { getNetwork, metadataNetwork } from '@/networks';
+import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { Connector } from '@/networks/types';
 import { ChainId, Space } from '@/types';
 import ICAnnotation from '~icons/heroicons-outline/annotation';
@@ -92,8 +92,9 @@ const FEATURES = [
   }
 ];
 
-defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space }>();
 
+const router = useRouter();
 const { limits } = useSettings();
 const { login, auth } = useWeb3();
 const { modalAccountOpen } = useModal();
@@ -186,6 +187,18 @@ function calculator(amount: number, quantity: number) {
     ).toFixed(2)
   );
 }
+
+onMounted(() => {
+  if (offchainNetworks.includes(props.space.network)) return;
+
+  router.push({
+    name: 'space-overview',
+    params: {
+      network: props.space.network,
+      id: props.space.id
+    }
+  });
+});
 </script>
 
 <template>
