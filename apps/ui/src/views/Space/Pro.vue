@@ -4,7 +4,7 @@ import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { Connector } from '@/networks/types';
-import { ChainId, Space } from '@/types';
+import { Space } from '@/types';
 import ICAnnotation from '~icons/heroicons-outline/annotation';
 import ICFlag from '~icons/heroicons-outline/flag';
 import ICGlobeAlt from '~icons/heroicons-outline/globe-alt';
@@ -34,15 +34,9 @@ const TIER_PLAN: TierPlan[] = ['basic', 'pro'] as const;
 
 const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT', 'SNUSDC'] as const;
 
-const PRO_MONTHLY_PRICES: Record<
-  ChainId,
-  Record<SubscriptionLength, number>
-> = {
-  1: {
-    yearly: 500,
-    monthly: 600
-  },
-  11155111: { yearly: 500, monthly: 600 }
+const PRO_MONTHLY_PRICES: Record<SubscriptionLength, number> = {
+  yearly: 500,
+  monthly: 600
 } as const;
 
 const FEATURES = [
@@ -105,10 +99,6 @@ const modalConnectorOpen = ref(false);
 
 const paymentNetwork = computed(() => {
   return metadataNetwork === 's' ? 1 : 11155111;
-});
-
-const prices = computed(() => {
-  return PRO_MONTHLY_PRICES[paymentNetwork.value];
 });
 
 const tokens = computed(() => {
@@ -183,7 +173,8 @@ function calculator(amount: number, quantity: number) {
 
   return Number(
     (
-      quantity * (quantity >= 12 ? prices.value.yearly : prices.value.monthly)
+      quantity *
+      (quantity >= 12 ? PRO_MONTHLY_PRICES.yearly : PRO_MONTHLY_PRICES.monthly)
     ).toFixed(2)
   );
 }
@@ -225,7 +216,7 @@ onMounted(() => {
         >
           <h3 class="flex-1">Pay monthly</h3>
           <div class="flex items-center space-x-1">
-            <h2>${{ PRO_MONTHLY_PRICES[paymentNetwork].monthly }}</h2>
+            <h2>${{ PRO_MONTHLY_PRICES.monthly }}</h2>
             <span class="text-sm text-skin-text">/ month</span>
           </div>
         </a>
@@ -241,8 +232,7 @@ onMounted(() => {
                 Save ${{
                   _n(
                     (
-                      (PRO_MONTHLY_PRICES[paymentNetwork].monthly -
-                        PRO_MONTHLY_PRICES[paymentNetwork].yearly) *
+                      (PRO_MONTHLY_PRICES.monthly - PRO_MONTHLY_PRICES.yearly) *
                       12
                     ).toFixed(0)
                   )
@@ -251,7 +241,7 @@ onMounted(() => {
             </div>
           </div>
           <div class="flex items-center space-x-1">
-            <h2>${{ PRO_MONTHLY_PRICES[paymentNetwork].yearly }}</h2>
+            <h2>${{ PRO_MONTHLY_PRICES.yearly }}</h2>
             <span class="text-sm text-skin-text">/ month</span>
           </div>
         </a>
@@ -361,7 +351,8 @@ onMounted(() => {
       :network="paymentNetwork"
       :quantity-label="subscriptionLength === 'yearly' ? 'Years' : 'Months'"
       :unit-price="
-        prices[subscriptionLength] * (subscriptionLength === 'yearly' ? 12 : 1)
+        PRO_MONTHLY_PRICES[subscriptionLength] *
+        (subscriptionLength === 'yearly' ? 12 : 1)
       "
       :barcode-payload="{
         type: 'turbo',
