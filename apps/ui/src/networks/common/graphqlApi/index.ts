@@ -228,6 +228,7 @@ function formatSpace(
 ): Space {
   return {
     ...space,
+    turbo_expiration: 0,
     network: space._indexer as NetworkID,
     name: space.metadata.name,
     avatar: space.metadata.avatar,

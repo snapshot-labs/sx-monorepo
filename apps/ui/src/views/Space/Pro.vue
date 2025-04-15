@@ -374,7 +374,11 @@ onMounted(() => {
           <div>End date</div>
           <div class="text-skin-heading">
             {{
-              dayjs(new Date())
+              dayjs(
+                space.turbo_expiration
+                  ? space.turbo_expiration * 1e3
+                  : new Date()
+              )
                 .add(
                   quantity,
                   subscriptionLength === 'yearly' ? 'year' : 'month'
