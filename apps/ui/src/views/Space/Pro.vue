@@ -35,8 +35,8 @@ const TIER_PLAN: TierPlan[] = ['basic', 'pro'] as const;
 const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT', 'SNUSDC'] as const;
 
 const PRO_MONTHLY_PRICES: Record<SubscriptionLength, number> = {
-  yearly: 500,
-  monthly: 600
+  monthly: 600,
+  yearly: 500
 } as const;
 
 const FEATURES = [
@@ -91,25 +91,21 @@ const props = defineProps<{ space: Space }>();
 const router = useRouter();
 const { limits } = useSettings();
 const { login, auth } = useWeb3();
-const { modalAccountOpen } = useModal();
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
 const modalPaymentOpen = ref(false);
 const modalConnectorOpen = ref(false);
 
-const paymentNetwork = computed(() => {
-  return metadataNetwork === 's' ? 1 : 11155111;
-});
+const paymentNetwork = computed(() => (metadataNetwork === 's' ? 1 : 11155111));
 
 const tokens = computed(() => {
-  return TOKENS[paymentNetwork.value].filter(t => {
-    return ACCEPTED_TOKENS_SYMBOL.includes(t.symbol);
-  });
+  return TOKENS[paymentNetwork.value].filter(t =>
+    ACCEPTED_TOKENS_SYMBOL.includes(t.symbol)
+  );
 });
 
 const supportedConnectors = computed(() => {
-  const network = getNetwork(metadataNetwork);
-  return network.managerConnectors;
+  return getNetwork(metadataNetwork).managerConnectors;
 });
 
 const isCurrentConnectorSupported = computed(() => {
@@ -117,25 +113,6 @@ const isCurrentConnectorSupported = computed(() => {
     auth.value && supportedConnectors.value.includes(auth.value.connector.type)
   );
 });
-
-async function handleConnectorPick(connector: Connector) {
-  modalConnectorOpen.value = false;
-  await login(connector);
-  if (auth.value) {
-    modalPaymentOpen.value = true;
-  }
-}
-async function handleTurboClick() {
-  if (!auth.value) {
-    modalAccountOpen.value = true;
-    return;
-  }
-  if (!isCurrentConnectorSupported.value) {
-    modalConnectorOpen.value = true;
-    return;
-  }
-  modalPaymentOpen.value = true;
-}
 
 const features = computed<Feature[]>(() => {
   return [
@@ -167,7 +144,7 @@ const features = computed<Feature[]>(() => {
   ];
 });
 
-function calculator(amount: number, quantity: number) {
+function calculator(amount: number, quantity: number): number {
   if (subscriptionLength.value === 'yearly')
     return Number((amount * quantity).toFixed(2));
 
@@ -177,6 +154,22 @@ function calculator(amount: number, quantity: number) {
       (quantity >= 12 ? PRO_MONTHLY_PRICES.yearly : PRO_MONTHLY_PRICES.monthly)
     ).toFixed(2)
   );
+}
+
+async function handleConnectorPick(connector: Connector) {
+  modalConnectorOpen.value = false;
+  await login(connector);
+  if (auth.value) {
+    modalPaymentOpen.value = true;
+  }
+}
+async function handleTurboClick() {
+  if (!auth.value || !isCurrentConnectorSupported.value) {
+    modalConnectorOpen.value = true;
+    return;
+  }
+
+  modalPaymentOpen.value = true;
 }
 
 onMounted(() => {
@@ -209,25 +202,18 @@ onMounted(() => {
 
     <div class="mx-4 space-y-4 flex flex-col items-center">
       <div class="max-w-[480px] w-full space-y-3">
-        <a
-          class="border rounded-lg px-4 py-3 flex gap-2 justify-between"
-          :class="subscriptionLength === 'monthly' && 'border-skin-link'"
-          @click="subscriptionLength = 'monthly'"
-        >
-          <h3 class="flex-1">Pay monthly</h3>
-          <div class="flex items-center space-x-1">
-            <h2>${{ PRO_MONTHLY_PRICES.monthly }}</h2>
-            <span class="text-sm text-skin-text">/ month</span>
-          </div>
-        </a>
-        <a
-          class="border rounded-lg px-4 py-3 flex gap-2 justify-between"
-          :class="subscriptionLength === 'yearly' && 'border-skin-link'"
-          @click="subscriptionLength = 'yearly'"
+        <button
+          v-for="plan in Object.keys(PRO_MONTHLY_PRICES)"
+          :key="plan"
+          :class="[
+            'border rounded-lg px-4 py-3 flex gap-2 justify-between w-full',
+            { 'border-skin-link': subscriptionLength === plan }
+          ]"
+          @click="subscriptionLength = plan as SubscriptionLength"
         >
           <div class="flex flex-1 items-center gap-x-2 flex-wrap">
-            <h3>Pay yearly</h3>
-            <div>
+            <h3 class="text-start">Pay {{ plan }}</h3>
+            <div v-if="plan === 'yearly'">
               <div class="bg-skin-border text-sm rounded-full px-2">
                 Save ${{
                   _n(
@@ -240,11 +226,11 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div class="flex items-center space-x-1">
-            <h2>${{ PRO_MONTHLY_PRICES.yearly }}</h2>
+          <div class="flex items-center justify-end space-x-1 flex-wrap">
+            <h2>${{ PRO_MONTHLY_PRICES[plan] }}</h2>
             <span class="text-sm text-skin-text">/ month</span>
           </div>
-        </a>
+        </button>
       </div>
       <UiButton class="primary" @click="handleTurboClick">
         {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
@@ -259,7 +245,7 @@ onMounted(() => {
           :id="`s:${user}`"
           :key="i"
           :size="48"
-          class="!bg-skin-bg rounded-lg inline-block"
+          class="!bg-skin-bg rounded-lg"
           type="space"
         />
       </div>
@@ -280,8 +266,8 @@ onMounted(() => {
             :is="feature.icon"
             class="text-skin-link inline-block size-[24px] mb-3"
           />
-          <h4 class="text-skin-link text-[21px] mb-1">{{ feature.name }}</h4>
-          <div>{{ feature.about }}</div>
+          <h4 class="text-skin-link text-[21px] mb-1" v-text="feature.name" />
+          <div v-text="feature.about" />
         </div>
       </div>
     </div>
@@ -292,33 +278,30 @@ onMounted(() => {
         Take your governance to the max
       </h2>
       <div class="border rounded-lg mx-auto max-w-[640px]">
-        <div>
+        <div
+          class="flex rounded-t-lg border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm"
+        >
+          <div class="flex-1 min-w-[70px]" />
           <div
-            class="flex rounded-t-lg border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm"
+            v-for="tier in TIER_PLAN"
+            :key="tier"
+            class="eyebrow w-[120px] text-center"
+            v-text="tier"
+          />
+        </div>
+        <div class="py-2">
+          <div
+            v-for="(feature, i) in features"
+            :key="i"
+            class="flex mx-4 text-skin-heading py-2 leading-5 items-center"
           >
-            <div class="flex-1" />
+            <div class="flex-1 min-w-[70px]" v-text="feature.title" />
             <div
-              v-for="tier in TIER_PLAN"
-              :key="tier"
-              class="eyebrow w-[120px] text-center"
-              v-text="tier"
+              v-for="type in TIER_PLAN"
+              :key="type"
+              class="w-[120px] text-center"
+              v-text="_n(feature[type])"
             />
-          </div>
-          <div class="py-2">
-            <div
-              v-for="(feature, i) in features"
-              :key="i"
-              class="flex mx-4 text-skin-heading py-2 leading-5 items-center"
-            >
-              <div class="flex-1" v-text="feature.title" />
-              <div
-                v-for="type in TIER_PLAN"
-                :key="type"
-                class="w-[120px] text-center"
-              >
-                {{ _n(feature[type]) }}
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -343,6 +326,7 @@ onMounted(() => {
         </h2>
       </AppLink>
     </div>
+
     <ModalPayment
       v-if="auth && isCurrentConnectorSupported && modalPaymentOpen"
       :open="modalPaymentOpen"
