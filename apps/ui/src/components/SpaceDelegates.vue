@@ -565,7 +565,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :chain-id="delegation.chainId"
         :execute="undelegateFn"
         @confirmed="
-          handleUndelegateConfirmed;
+          handleUndelegateConfirmed();
           isUndelegating = false;
         "
         @close="isUndelegating = false"

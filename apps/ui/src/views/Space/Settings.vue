@@ -596,7 +596,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       }"
       :execute="executeFn"
       @confirmed="
-        reloadSpaceAndReset;
+        reloadSpaceAndReset();
         saving = false;
       "
       @close="saving = false"
