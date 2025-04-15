@@ -232,7 +232,11 @@ onMounted(() => {
           </div>
         </button>
       </div>
-      <UiButton class="primary" @click="handleTurboClick">
+      <UiButton
+        class="primary"
+        :disabled="space.network !== metadataNetwork"
+        @click="handleTurboClick"
+      >
         {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
       </UiButton>
     </div>
@@ -309,7 +313,11 @@ onMounted(() => {
 
     <div class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4">
       <h2 class="text-[32px]">Get started today</h2>
-      <UiButton class="primary" @click="handleTurboClick">
+      <UiButton
+        class="primary"
+        :disabled="space.network !== metadataNetwork"
+        @click="handleTurboClick"
+      >
         {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
       </UiButton>
     </div>
