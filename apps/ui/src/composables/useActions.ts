@@ -679,11 +679,7 @@ export function useActions() {
     const actionNetwork = getDelegationNetwork(delegation.chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
-    return network.actions.getDelegatee(
-      auth.value.provider,
-      delegation,
-      delegator
-    );
+    return network.actions.getDelegatee(delegation, delegator);
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {

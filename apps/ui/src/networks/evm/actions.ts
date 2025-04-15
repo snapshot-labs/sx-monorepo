@@ -660,19 +660,22 @@ export function createActions(
       );
     },
     getDelegatee: async (
-      web3: any,
       delegation: SpaceMetadataDelegation,
       delegator: string
     ) => {
       const { contractAddress } = delegation;
-      if (!contractAddress) return null;
-      if (!isAddress(delegator)) return null;
+      if (!contractAddress || !delegation.chainId || !isAddress(delegator))
+        return null;
 
-      const multi = new Multicaller(chainId.toString(), provider, [
-        'function decimals() view returns (uint8)',
-        'function balanceOf(address account) view returns (uint256)',
-        'function delegates(address) view returns (address)'
-      ]);
+      const multi = new Multicaller(
+        delegation.chainId.toString(),
+        getProvider(delegation.chainId as number),
+        [
+          'function decimals() view returns (uint8)',
+          'function balanceOf(address account) view returns (uint256)',
+          'function delegates(address) view returns (address)'
+        ]
+      );
       multi.call('decimals', contractAddress, 'decimals');
       multi.call('balanceOf', contractAddress, 'balanceOf', [delegator]);
       multi.call('delegatee', contractAddress, 'delegates', [delegator]);

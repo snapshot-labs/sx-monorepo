@@ -154,16 +154,23 @@ function formatLabels(labels: string[]) {
   });
 }
 
+function getValidationStrategyStrategiesIndices(
+  strategies: string[],
+  parsedMetadata: ApiStrategyParsedMetadata[]
+) {
+  // Those values are default sorted by block_range so newest entries are at the end
+  const maxIndex = Math.max(
+    ...parsedMetadata.slice(-strategies.length).map(metadata => metadata.index)
+  );
+
+  return Array.from(Array(maxIndex + 1).keys());
+}
+
 function processStrategiesMetadata(
   parsedMetadata: ApiStrategyParsedMetadata[],
-  strategiesIndicies?: number[]
+  strategiesIndices: number[]
 ) {
   if (parsedMetadata.length === 0) return [];
-
-  // Those values are default sorted by block_range so newest entries are at the end
-  // To find *current* maxIndex we can just look at the last item.
-  // In the past there could be more strategies so we can't check for max index among all entries.
-  const maxIndex = parsedMetadata[parsedMetadata.length - 1].index;
 
   const metadataMap = Object.fromEntries(
     parsedMetadata.map(metadata => [
@@ -180,9 +187,7 @@ function processStrategiesMetadata(
     ])
   );
 
-  strategiesIndicies =
-    strategiesIndicies || Array.from(Array(maxIndex + 1).keys());
-  return strategiesIndicies.map(index => metadataMap[index]) || [];
+  return strategiesIndices.map(index => metadataMap[index]) || [];
 }
 
 function processExecutions(
@@ -278,7 +283,11 @@ function formatSpace(
     executors_strategies: space.metadata.executors_strategies,
     voting_power_validation_strategies_parsed_metadata:
       processStrategiesMetadata(
-        space.voting_power_validation_strategies_parsed_metadata
+        space.voting_power_validation_strategies_parsed_metadata,
+        getValidationStrategyStrategiesIndices(
+          space.voting_power_validation_strategy_strategies,
+          space.voting_power_validation_strategies_parsed_metadata
+        )
       ),
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,

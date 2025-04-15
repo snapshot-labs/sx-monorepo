@@ -717,7 +717,6 @@ export function createActions(
       return account.execute(calls);
     },
     getDelegatee: async (
-      web3: any,
       delegation: SpaceMetadataDelegation,
       delegator: string
     ) => {
