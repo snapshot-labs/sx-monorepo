@@ -18,7 +18,7 @@ const props = withDefaults(
     network: ChainId;
     barcodePayload: BarcodePayload;
     calculator?: (unitPrice: number, quantity: number) => number;
-    quantityLabel?: string | false;
+    quantityLabel?: string;
   }>(),
   {
     quantityLabel: 'Quantity',
@@ -32,7 +32,7 @@ const emit = defineEmits<{
   (e: 'close');
 }>();
 
-const { web3 } = useWeb3();
+const { auth } = useWeb3();
 const {
   start: startPaymentProcess,
   goToNextStep,
@@ -41,10 +41,10 @@ const {
 } = usePaymentFactory(props.network);
 const { isPending, assetsMap } = useBalances({
   treasury: toRef(() => {
-    return web3.value.account
+    return auth.value
       ? {
           chainId: props.network,
-          address: web3.value.account
+          address: auth.value.account
         }
       : null;
   })
@@ -108,7 +108,7 @@ const canSubmit = computed(
   () =>
     isTermsAccepted.value &&
     !isPending.value &&
-    web3.value.account &&
+    auth.value?.account &&
     !isInsufficientBalance.value &&
     formValid.value
 );
@@ -126,6 +126,16 @@ const formValid = computed(() => {
   return Object.keys(formErrors.value).length === 0;
 });
 
+async function moveToNextStep() {
+  if (isLastStep.value) return;
+
+  modalTransactionProgressOpen.value = false;
+
+  if (await goToNextStep()) {
+    modalTransactionProgressOpen.value = true;
+  }
+}
+
 function handleSubmit() {
   if (!canSubmit.value) return;
 
@@ -138,16 +148,6 @@ function handleSubmit() {
 function handleTokenPick(address: string) {
   selectedTokenAddress.value = address;
   showPicker.value = false;
-}
-
-async function moveToNextStep() {
-  if (isLastStep.value) return;
-
-  modalTransactionProgressOpen.value = false;
-
-  if (await goToNextStep()) {
-    modalTransactionProgressOpen.value = true;
-  }
 }
 
 watch(
@@ -181,7 +181,7 @@ watch(
     <PickerToken
       v-if="showPicker"
       :assets="filteredAssets"
-      :address="web3.account"
+      :address="auth?.account || ''"
       :network="network"
       :loading="isPending"
       :search-value="''"
@@ -288,13 +288,3 @@ watch(
     </template>
   </ModalTransactionProgress>
 </template>
-
-<style lang="scss" scoped>
-.pill-switcher {
-  @apply flex border rounded-full p-1 items-center leading-[22px] bg-skin-bg;
-
-  button {
-    @apply grow justify-center rounded-full py-1 flex items-center px-2 gap-1 text-skin-link;
-  }
-}
-</style>
