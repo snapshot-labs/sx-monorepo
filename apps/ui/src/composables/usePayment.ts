@@ -11,7 +11,7 @@ export type Token = {
 };
 
 const PAYMENT_CONTRACT_ADDRESSES: Record<ChainId, string> = {
-  1: '',
+  1: '0xE40BfEB5a3014c9b98597088cA71eccdc27Ca410',
   11155111: '0xE40BfEB5a3014c9b98597088cA71eccdc27Ca410'
 } as const;
 
