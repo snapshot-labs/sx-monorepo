@@ -3,7 +3,7 @@
   "AvatarExecutionStrategyImplementation": "0xecE4f6b01a2d7FF5A9765cA44162D453fC455e42",
   "CompTimelockCompatibleExecutionStrategyImplementation": "0x91086017D5eAEc4BeEc86ac770b5eE672e4Be589",
   "CompVotingStrategy": "0x0c2De612982Efd102803161fc7C74CcA15Db932c",
-  "EthSigAuthenticator": "0x5f9B7D78c9a37a439D78f801E0E339C6E711e260",
+  "EthSigAuthenticator": "0x95CF9B585fDb12DeB78002B5643dFF8fe67a496D",
   "EthTxAuthenticator": "0xBA06E6cCb877C332181A6867c05c8b746A21Aed1",
   "MerkleWhitelistVotingStrategy": "0x34f0AfFF5A739bBf3E285615F50e40ddAaf2A829",
   "OZVotesVotingStrategy": "0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe",
