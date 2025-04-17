@@ -12,16 +12,16 @@ type Delegatee = {
   name?: string;
 };
 
-const FETCH_DELEGATEE_FN = {
-  'governor-subgraph': fetchGovernorSubgraphDelegatee,
-  'delegate-registry': fetchDelegateRegistryDelegatee
+const FETCH_DELEGATEES_FN = {
+  'governor-subgraph': fetchGovernorSubgraphDelegatees,
+  'delegate-registry': fetchDelegateRegistryDelegatees
 } as const;
 
-async function fetchGovernorSubgraphDelegatee(
+async function fetchGovernorSubgraphDelegatees(
   account: string,
   delegation: SpaceMetadataDelegation,
   space: Space
-): Promise<Delegatee | null> {
+): Promise<Delegatee[]> {
   const { getDelegatee } = useActions();
   const { getDelegates } = useDelegates(
     delegation as RequiredProperty<typeof delegation>,
@@ -30,7 +30,7 @@ async function fetchGovernorSubgraphDelegatee(
 
   const delegateeData = await getDelegatee(delegation, account);
 
-  if (!delegateeData) return null;
+  if (!delegateeData) return [];
 
   const [names, [apiDelegate]] = await Promise.all([
     getNames([delegateeData.address]),
@@ -46,22 +46,25 @@ async function fetchGovernorSubgraphDelegatee(
     })
   ]);
 
-  return {
-    id: delegateeData.address,
-    balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
-    share:
-      apiDelegate && apiDelegate.delegatedVotesRaw !== '0'
-        ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
-        : 1,
-    name: names[delegateeData.address]
-  };
+  return [
+    {
+      id: delegateeData.address,
+      balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
+      share:
+        apiDelegate && apiDelegate.delegatedVotesRaw !== '0'
+          ? Number(delegateeData.balance) /
+            Number(apiDelegate.delegatedVotesRaw)
+          : 1,
+      name: names[delegateeData.address]
+    }
+  ];
 }
 
-async function fetchDelegateRegistryDelegatee(
+async function fetchDelegateRegistryDelegatees(
   account: string,
   delegation: SpaceMetadataDelegation,
   space: Space
-): Promise<Delegatee | null> {
+): Promise<Delegatee[]> {
   const { getDelegates, getDelegation } = useDelegates(
     delegation as RequiredProperty<typeof delegation>,
     space
@@ -70,7 +73,7 @@ async function fetchDelegateRegistryDelegatee(
 
   const accountDelegation = await getDelegation(account);
 
-  if (!accountDelegation) return null;
+  if (!accountDelegation) return [];
 
   const [names, votingPowers, [apiDelegate]] = await Promise.all([
     getNames([accountDelegation.delegate]),
@@ -104,12 +107,14 @@ async function fetchDelegateRegistryDelegatee(
     0
   );
 
-  return {
-    id: accountDelegation.delegate,
-    balance,
-    share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
-    name: names[accountDelegation.delegate]
-  };
+  return [
+    {
+      id: accountDelegation.delegate,
+      balance,
+      share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
+      name: names[accountDelegation.delegate]
+    }
+  ];
 }
 
 export function useDelegateesQuery(
@@ -124,8 +129,8 @@ export function useDelegateesQuery(
       account
     ],
     queryFn: () =>
-      FETCH_DELEGATEE_FN[
-        toValue(delegation).apiType as keyof typeof FETCH_DELEGATEE_FN
+      FETCH_DELEGATEES_FN[
+        toValue(delegation).apiType as keyof typeof FETCH_DELEGATEES_FN
       ](toValue(account), toValue(delegation), toValue(space)),
     enabled:
       !!toValue(account) &&

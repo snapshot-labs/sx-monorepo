@@ -45,7 +45,7 @@ const {
   sortBy
 );
 
-const { data: delegatee } = useDelegateesQuery(
+const { data: delegatees } = useDelegateesQuery(
   toRef(() => web3.value.account),
   toRef(props, 'space'),
   toRef(props, 'delegation')
@@ -74,8 +74,8 @@ function handleSortChange(
 function handleDelegateToggle(newDelegatee?: string) {
   if (
     newDelegatee &&
-    delegatee.value &&
-    compareAddresses(newDelegatee, delegatee.value.id)
+    delegatees.value?.[0] &&
+    compareAddresses(newDelegatee, delegatees.value[0].id)
   ) {
     isUndelegating.value = true;
     return;
@@ -166,10 +166,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </UiTooltip>
     </div>
 
-    <div v-if="delegatee" class="mb-3">
+    <div v-if="delegatees?.length" class="mb-3">
       <UiLabel label="Delegating to" />
       <div class="w-full truncate px-4">
-        <div class="flex w-full space-x-3 truncate border-b py-3">
+        <div
+          v-for="delegatee in delegatees"
+          :key="delegatee.id"
+          class="flex w-full space-x-3 truncate border-b py-3"
+        >
           <AppLink
             :to="{
               name: 'space-user-statement',
@@ -374,8 +378,8 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     >
                       <template
                         v-if="
-                          delegatee &&
-                          compareAddresses(delegate.user, delegatee.id)
+                          delegatees?.[0] &&
+                          compareAddresses(delegate.user, delegatees[0].id)
                         "
                       >
                         <IH-user-remove />
