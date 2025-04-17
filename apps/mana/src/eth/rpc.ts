@@ -48,6 +48,8 @@ export const createNetworkHandler = (chainId: number) => {
 
       const signer = getWallet(params.envelope.data.space);
 
+      console.log('params', JSON.stringify(params));
+
       console.time('Send');
       console.log('Types', types);
       console.log('Message', data);
