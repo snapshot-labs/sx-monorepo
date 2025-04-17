@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { useInfiniteQuery, useQueryClient } from '@tanstack/vue-query';
+import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { useDelegateesQuery } from '@/queries/delegatees';
-import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
+import { useDelegatesQuery } from '@/queries/delegates';
+import { Space, SpaceMetadataDelegation } from '@/types';
 
 const props = defineProps<{
   space: Space;
@@ -24,10 +25,6 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-asc'
 );
 const { setTitle } = useTitle();
-const { getDelegates } = useDelegates(
-  props.delegation as RequiredProperty<typeof props.delegation>,
-  props.space
-);
 const { web3 } = useWeb3();
 const actions = useActions();
 const queryClient = useQueryClient();
@@ -42,30 +39,11 @@ const {
   isPending,
   isFetchingNextPage,
   isError
-} = useInfiniteQuery({
-  initialPageParam: 0,
-  queryKey: ['delegates', props.delegation.contractAddress, sortBy],
-  queryFn: ({ pageParam }) => {
-    const [orderBy, orderDirection] = sortBy.value.split('-');
-
-    return getDelegates({
-      orderBy,
-      orderDirection,
-      first: 40,
-      skip: pageParam
-    });
-  },
-  getNextPageParam: (lastPage, pages) => {
-    if (lastPage.length < 40) return null;
-
-    return pages.length * 40;
-  },
-  retry: (failureCount, error) => {
-    if (error?.message.includes('Row not found')) return false;
-
-    return failureCount < 3;
-  }
-});
+} = useDelegatesQuery(
+  toRef(props, 'delegation'),
+  toRef(props, 'space'),
+  sortBy
+);
 
 const { data: delegatee } = useDelegateesQuery(
   toRef(() => web3.value.account),
