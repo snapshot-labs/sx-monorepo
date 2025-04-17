@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import dayjs from 'dayjs';
 import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
@@ -91,6 +92,7 @@ const props = defineProps<{ space: Space }>();
 const router = useRouter();
 const { limits } = useSettings();
 const { login, auth } = useWeb3();
+const queryClient = useQueryClient();
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
 const modalPaymentOpen = ref(false);
@@ -170,6 +172,12 @@ async function handleTurboClick() {
   }
 
   modalPaymentOpen.value = true;
+}
+
+async function handlePaymentConfirmed() {
+  await queryClient.invalidateQueries({
+    queryKey: ['spaces', 'detail', `${props.space.network}:${props.space.id}`]
+  });
 }
 
 onMounted(() => {
@@ -351,6 +359,7 @@ onMounted(() => {
         params: { space: `${space.network}:${space.id}` }
       }"
       @close="modalPaymentOpen = false"
+      @confirmed="handlePaymentConfirmed"
     >
       <template #summary="{ quantity }">
         <div class="flex justify-between">

@@ -30,6 +30,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'close');
+  (e: 'confirmed');
 }>();
 
 const { auth } = useWeb3();
@@ -127,7 +128,10 @@ const formValid = computed(() => {
 });
 
 async function moveToNextStep() {
-  if (isLastStep.value) return;
+  if (isLastStep.value) {
+    emit('confirmed');
+    return;
+  }
 
   modalTransactionProgressOpen.value = false;
 
