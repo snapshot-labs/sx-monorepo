@@ -14,7 +14,8 @@ type Delegatee = {
 
 const FETCH_DELEGATEES_FN = {
   'governor-subgraph': fetchGovernorSubgraphDelegatees,
-  'delegate-registry': fetchDelegateRegistryDelegatees
+  'delegate-registry': fetchDelegateRegistryDelegatees,
+  'split-delegation': fetchSplitDelegationDelegatees
 } as const;
 
 async function fetchGovernorSubgraphDelegatees(
@@ -115,6 +116,70 @@ async function fetchDelegateRegistryDelegatees(
       name: names[accountDelegation.delegate]
     }
   ];
+}
+
+async function getSplitDelegationDelegatee(space: Space, address: string) {
+  const splitDelegationStrategy = space.strategies_params.find(
+    strategy => strategy.name === 'split-delegation'
+  );
+
+  if (!splitDelegationStrategy) {
+    return {};
+  }
+
+  const response = await fetch(
+    `${splitDelegationStrategy.params.backendUrl}/api/v1/${space.id}/pin/${address}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        strategy: splitDelegationStrategy
+      })
+    }
+  );
+
+  return response.json();
+}
+
+async function fetchSplitDelegationDelegatees(
+  account: string,
+  delegation: SpaceMetadataDelegation,
+  space: Space
+): Promise<Delegatee[]> {
+  const splitDelegationStrategy = space.strategies_params.find(
+    strategy => strategy.name === 'split-delegation'
+  );
+
+  const response = await fetch(
+    `${delegation.apiUrl}/api/v1/${space.id}/pin/${account}`,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        strategy: splitDelegationStrategy
+      })
+    }
+  );
+
+  const body = await response.json();
+
+  const delegateesAddresses = body.delegateTree.map(({ delegate }) => delegate);
+
+  const [names, ...delegatees] = await Promise.all([
+    getNames(delegateesAddresses),
+    ...delegateesAddresses.map(delegate =>
+      getSplitDelegationDelegatee(space, delegate)
+    )
+  ]);
+
+  return body.delegateTree.map(({ delegate, delegatedPower }, i) => {
+    const vpPercentFromDelegator = delegatedPower / delegatees[i].votingPower;
+    return {
+      id: delegate,
+      balance: delegatees[i].votingPower,
+      share:
+        vpPercentFromDelegator * (delegatees[i].percentOfVotingPower / 10000),
+      name: names[delegate]
+    };
+  });
 }
 
 export function useDelegateesQuery(
