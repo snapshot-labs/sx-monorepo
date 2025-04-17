@@ -121,7 +121,7 @@ export function useDelegateesQuery(
     queryKey: [
       'delegatees',
       () => toValue(delegation).contractAddress,
-      () => toValue(account)
+      account
     ],
     queryFn: () =>
       FETCH_DELEGATEE_FN[
