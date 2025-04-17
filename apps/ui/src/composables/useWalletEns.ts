@@ -10,6 +10,10 @@ type ENSNames = Record<ENSName['name'], ENSName>;
 
 const MAX_ENS_NAME_LENGTH = 64;
 const DEFAULT_STATUS = 'AVAILABLE';
+const LOOKUP_CHAIN_IDS = {
+  s: ['1', '109'],
+  's-tn': ['11155111', '157']
+};
 
 const ensNames = ref<Map<string, ENSNames>>(new Map());
 const customEnsNames = ref<Map<string, ENSNames>>(new Map());
@@ -116,7 +120,7 @@ export function useWalletEns(networkId: NetworkID) {
 
     try {
       const records = await validateNames(
-        await getENSNames(web3.value.account, network.value.chainId)
+        await getENSNames(web3.value.account, LOOKUP_CHAIN_IDS[networkId])
       );
       ensNames.value.set(web3.value.account, records);
       hasError.value = false;
