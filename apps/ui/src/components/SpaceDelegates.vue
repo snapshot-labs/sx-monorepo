@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
-import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { useDelegateesQuery } from '@/queries/delegatees';
 import { useDelegatesQuery } from '@/queries/delegates';
 import { Space, SpaceMetadataDelegation } from '@/types';
@@ -128,22 +127,6 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <IH-exclamation-circle class="shrink-0" />
     <span>Invalid delegation settings.</span>
   </div>
-  <UiMessage
-    v-if="delegation.apiType === 'split-delegation'"
-    :type="'info'"
-    class="m-4"
-  >
-    This space uses the split-delegation feature, which is currently not
-    supported on the new interface. You can view the delegates dashboard on the
-    <a
-      :href="`${SNAPSHOT_URLS[props.space.network]}/#/${props.space.id}/delegates`"
-      target="_blank"
-      class="inline-flex items-center font-bold"
-    >
-      previous interface
-      <IH-arrow-sm-right class="inline-block -rotate-45" /></a
-    >.
-  </UiMessage>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <UiButton

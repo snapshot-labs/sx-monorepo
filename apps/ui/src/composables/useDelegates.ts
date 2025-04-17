@@ -175,6 +175,10 @@ export function useDelegates(
   async function getDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
+    if (delegation.apiType === 'split-delegation') {
+      return [];
+    }
+
     const where = {
       tokenHoldersRepresentedAmount_gte: 0,
       governance: delegation.contractAddress.toLowerCase(),
