@@ -129,20 +129,13 @@ watch(
         <IS-x-mark :width="28" :height="28" />
       </div>
       <div class="flex flex-col space-y-1 leading-6">
-        <slot
-          v-if="$slots.successTitle && step === 'success'"
-          name="successTitle"
-        />
-        <h4
-          v-else
-          class="font-semibold text-skin-heading text-lg"
-          v-text="text.title"
-        />
-        <slot
-          v-if="$slots.successSubtitle && step === 'success'"
-          name="successSubtitle"
-        />
-        <div v-else v-text="text.subtitle" />
+        <slot name="headerContent" :step="step" :text="text">
+          <h4
+            class="font-semibold text-skin-heading text-lg"
+            v-text="text.title"
+          />
+          <div v-text="text.subtitle" />
+        </slot>
       </div>
     </div>
     <slot id="content" :step="step" :tx-id="txId" />

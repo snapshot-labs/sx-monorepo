@@ -278,17 +278,24 @@ watch(
       isModalTransactionProgressOpen = false;
     "
   >
-    <template #successTitle>
-      <slot name="transactionModalSuccessTitle">
+    <template #headerContent="{ step, text }">
+      <template v-if="step === 'success'">
+        <slot name="transactionModalSuccessTitle">
+          <h4
+            class="font-semibold text-skin-heading text-lg flex flex-col items-center gap-2 mb-3"
+          >
+            Payment successful
+          </h4>
+          <slot name="transactionModalSuccessSubtitle" />
+        </slot>
+      </template>
+      <template v-else>
         <h4
-          class="font-semibold text-skin-heading text-lg flex flex-col items-center gap-2 mb-3"
-        >
-          Payment successful
-        </h4>
-      </slot>
-    </template>
-    <template #successSubtitle>
-      <slot name="transactionModalSuccessSubtitle" />
+          class="font-semibold text-skin-heading text-lg"
+          v-text="text.title"
+        />
+        <div v-text="text.subtitle" />
+      </template>
     </template>
   </ModalTransactionProgress>
 </template>
