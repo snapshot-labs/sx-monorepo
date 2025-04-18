@@ -59,7 +59,7 @@ export default function usePayment(network: ChainId) {
   const { auth } = useWeb3();
   const { modalAccountOpen } = useModal();
 
-  async function hasApproved(
+  async function getIsApproved(
     token: Token,
     amount: number
   ): Promise<boolean | undefined> {
@@ -126,7 +126,7 @@ export default function usePayment(network: ChainId) {
   }
 
   return {
-    hasApproved,
+    getIsApproved,
     approve,
     pay
   };

@@ -38,7 +38,7 @@ async function getBarcode(contents: BarcodePayload): Promise<string> {
 export default function usePaymentFactory(network: ChainId) {
   const uiStore = useUiStore();
 
-  const { hasApproved, approve, pay } = usePayment(network);
+  const { getIsApproved, approve, pay } = usePayment(network);
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
@@ -52,7 +52,7 @@ export default function usePaymentFactory(network: ChainId) {
       nextStep: () =>
         stepExecuteResults.value.get('check_approval') ? 'pay' : 'approve',
       execute: async (token, amount) => {
-        const result = await hasApproved(token, amount);
+        const result = await getIsApproved(token, amount);
 
         if (result === undefined) {
           throw new Error('wallet not found');

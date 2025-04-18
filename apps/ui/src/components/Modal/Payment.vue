@@ -53,8 +53,8 @@ const { isPending, assetsMap } = useBalances({
 
 const selectedTokenAddress = ref<string>('');
 const showPicker = ref(false);
-const hidden = ref(false);
-const modalTransactionProgressOpen = ref(false);
+const isHidden = ref(false);
+const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
 const form = ref(clone(FORM));
 
@@ -133,10 +133,10 @@ async function moveToNextStep() {
     return;
   }
 
-  modalTransactionProgressOpen.value = false;
+  isModalTransactionProgressOpen.value = false;
 
   if (await goToNextStep()) {
-    modalTransactionProgressOpen.value = true;
+    isModalTransactionProgressOpen.value = true;
   }
 }
 
@@ -145,8 +145,8 @@ function handleSubmit() {
 
   startPaymentProcess();
 
-  hidden.value = true;
-  modalTransactionProgressOpen.value = true;
+  isHidden.value = true;
+  isModalTransactionProgressOpen.value = true;
 }
 
 function handleTokenPick(address: string) {
@@ -161,7 +161,7 @@ watch(
 
     isTermsAccepted.value = false;
     showPicker.value = false;
-    hidden.value = false;
+    isHidden.value = false;
     selectedTokenAddress.value = '';
     form.value = clone(FORM);
   }
@@ -169,7 +169,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" :class="{ hidden }" @close="emit('close')">
+  <UiModal :open="open" :class="{ hidden: isHidden }" @close="emit('close')">
     <template #header>
       <h3>Payment</h3>
       <template v-if="showPicker">
@@ -239,7 +239,7 @@ watch(
         <UiCheckbox v-model="isTermsAccepted" class="text-start">
           <div class="text-skin-text leading-[22px] top-[-1px] relative">
             Before confirming, please read and agree to the
-            <AppLink external :to="{ name: 'site-terms' }" @click.stop
+            <AppLink is-external :to="{ name: 'site-terms' }" @click.stop
               >Terms of service</AppLink
             >.
           </div>
@@ -262,20 +262,20 @@ watch(
     </template>
   </UiModal>
   <ModalTransactionProgress
-    :open="modalTransactionProgressOpen"
+    :open="isModalTransactionProgressOpen"
     :execute="
       () => currentStep.execute(currentToken, totalAmount, barcodePayload)
     "
     :chain-id="network"
     :messages="currentStep.messages"
     @close="
-      modalTransactionProgressOpen = false;
+      isModalTransactionProgressOpen = false;
       emit('close');
     "
     @confirmed="moveToNextStep"
     @cancelled="
-      hidden = false;
-      modalTransactionProgressOpen = false;
+      isHidden = false;
+      isModalTransactionProgressOpen = false;
     "
   >
     <template #successTitle>

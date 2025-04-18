@@ -2,14 +2,14 @@
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
 const props = defineProps<
-  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; external?: boolean }
+  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; isExternal?: boolean }
 >();
 
 const { isWhiteLabel } = useWhiteLabel();
 const router = useRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
-  return (typeof to === 'string' && to.startsWith('http')) || props.external;
+  return (typeof to === 'string' && to.startsWith('http')) || props.isExternal;
 }
 
 function normalize(to: RouteLocationRaw) {
