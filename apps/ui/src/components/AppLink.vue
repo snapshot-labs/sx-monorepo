@@ -42,7 +42,7 @@ function normalizeExternalize(to: RouteLocationRaw | string): string {
     return to;
   }
 
-  return new URL(router.resolve(to).href, window.location.origin).href;
+  return router.resolve(to).href;
 }
 </script>
 
