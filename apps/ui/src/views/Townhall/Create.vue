@@ -51,7 +51,7 @@ async function handleSubmit() {
 
     const id = res.events.find(event => event.key === 'new_discussion').data.id;
 
-    await router.push({ name: 'pulse-discussion', params: { id } });
+    await router.push({ name: 'townhall-discussion', params: { id } });
   } catch (e) {
     addNotification('error', e.message);
   }

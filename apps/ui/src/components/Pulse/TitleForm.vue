@@ -17,7 +17,7 @@ const EXAMPLES = [
 ];
 
 function handleSubmit() {
-  router.push({ name: 'pulse-create', query: { title: title.value } });
+  router.push({ name: 'townhall-create', query: { title: title.value } });
 }
 </script>
 

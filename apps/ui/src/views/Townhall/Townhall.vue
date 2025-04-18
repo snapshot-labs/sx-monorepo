@@ -1,13 +1,7 @@
 <script setup lang="ts">
-const title = ref('');
+const { setTitle } = useTitle();
 
-const statement = {
-  id: 1,
-  text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-  agree: 90,
-  disagree: 1,
-  pass: 0
-};
+watchEffect(() => setTitle('Townhall'));
 </script>
 
 <template>
@@ -38,7 +32,7 @@ const statement = {
               eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
               enim ad minim veniam.
               <div>
-                <router-link :to="{ name: 'pulse-create' }">
+                <router-link :to="{ name: 'townhall-create' }">
                   Get started
                 </router-link>
               </div>
@@ -49,7 +43,7 @@ const statement = {
               class="absolute left-0 right-0 bottom-0 top-0 z-10 bg-gradient-to-r from-transparent to-skin-bg"
             />
             <div class="-mr-[600px] mt-6">
-              <PulseTitleForm />
+              <div class="bg-skin-border h-[200px] w-[340px] rounded-lg" />
             </div>
           </div>
         </div>
@@ -70,7 +64,7 @@ const statement = {
               enim ad minim veniam.
               <div>
                 <router-link
-                  :to="{ name: 'pulse-discussion', params: { id: 1 } }"
+                  :to="{ name: 'townhall-discussion', params: { id: 1 } }"
                 >
                   Try demo discussion
                 </router-link>
@@ -82,7 +76,7 @@ const statement = {
               class="absolute left-0 right-0 bottom-0 top-0 z-10 bg-gradient-to-l from-skin-bg to-transparent"
             />
             <div class="-mr-[180px] mt-6">
-              <PulseStatements :statements="[]" class="text-left" />
+              <div class="bg-skin-border h-[200px] w-[340px] rounded-lg" />
             </div>
           </div>
         </div>
@@ -103,7 +97,7 @@ const statement = {
               enim ad minim veniam.
               <div>
                 <router-link
-                  :to="{ name: 'pulse-discussion', params: { id: 1 } }"
+                  :to="{ name: 'townhall-discussion', params: { id: 1 } }"
                 >
                   See example discussion
                 </router-link>
@@ -115,7 +109,7 @@ const statement = {
               class="absolute left-0 right-0 bottom-0 top-0 z-10 bg-gradient-to-r from-transparent to-skin-bg"
             />
             <div class="-mr-[140px] mt-6">
-              <PulseStatementItem :statement="statement" class="text-left" />
+              <div class="bg-skin-border h-[200px] w-[340px] rounded-lg" />
             </div>
           </div>
         </div>

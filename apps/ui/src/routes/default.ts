@@ -9,15 +9,15 @@ import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
-import Pulse from '@/views/Pulse.vue';
-import PulseCreate from '@/views/PulseCreate.vue';
-import PulseDiscussion from '@/views/PulseDiscussion.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
 import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
+import TownhallCreate from '@/views/Townhall/Create.vue';
+import TownhallDiscussion from '@/views/Townhall/Discussion.vue';
+import Townhall from '@/views/Townhall/Townhall.vue';
 import User from '@/views/User.vue';
 import { spaceChildrenRoutes } from './common';
 
@@ -42,19 +42,19 @@ export default [
     children: spaceChildrenRoutes
   },
   {
-    path: '/pulse',
-    name: 'pulse',
-    component: Pulse
+    path: '/townhall',
+    name: 'townhall',
+    component: Townhall
   },
   {
-    path: '/pulse/create',
-    name: 'pulse-create',
-    component: PulseCreate
+    path: '/townhall/create',
+    name: 'townhall-create',
+    component: TownhallCreate
   },
   {
-    path: '/pulse/:id',
-    name: 'pulse-discussion',
-    component: PulseDiscussion
+    path: '/townhall/:id',
+    name: 'townhall-discussion',
+    component: TownhallDiscussion
   },
   {
     path: '/create',
