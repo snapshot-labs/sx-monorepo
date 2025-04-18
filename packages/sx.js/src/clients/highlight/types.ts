@@ -6,8 +6,7 @@ export const domain = {
 export const aliasTypes = {
   Alias: [
     { name: 'from', type: 'address' },
-    { name: 'alias', type: 'address' },
-    { name: 'salt', type: 'uint256' }
+    { name: 'alias', type: 'address' }
   ]
 };
 
