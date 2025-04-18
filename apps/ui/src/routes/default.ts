@@ -15,6 +15,9 @@ import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
 import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
+import TownhallCreate from '@/views/Townhall/Create.vue';
+import TownhallDiscussion from '@/views/Townhall/Discussion.vue';
+import Townhall from '@/views/Townhall/Townhall.vue';
 import User from '@/views/User.vue';
 import { spaceChildrenRoutes } from './common';
 
@@ -38,7 +41,21 @@ export default [
     component: Space,
     children: spaceChildrenRoutes
   },
-
+  {
+    path: '/townhall',
+    name: 'townhall',
+    component: Townhall
+  },
+  {
+    path: '/townhall/create',
+    name: 'townhall-create',
+    component: TownhallCreate
+  },
+  {
+    path: '/townhall/:id',
+    name: 'townhall-discussion',
+    component: TownhallDiscussion
+  },
   {
     path: '/create',
     redirect: { name: 'create-space-snapshot' }

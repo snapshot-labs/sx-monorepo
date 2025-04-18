@@ -273,6 +273,21 @@ input:placeholder-shown {
   background-image: url('@/assets/blocks-dark.svg');
 }
 
+@font-face {
+  font-family: 'Salin';
+  src: url('./assets/fonts/Salin-Black.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+.mono-display {
+  font-size: 64px;
+  font-family: 'Salin', monospace;
+  text-transform: uppercase;
+  font-weight: 700;
+  line-height: 1.1em;
+}
+
 .blocks-x {
   background-repeat: repeat-x;
   background-position: top center;
