@@ -3,6 +3,7 @@ import {
   ReceiptTx,
   constants as starknetConstants
 } from 'starknet';
+import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -32,7 +33,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'eth',
     rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl: 'https://api.snapshot.box',
+    apiUrl: UNIFIED_API_URL,
     explorerUrl: 'https://starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   },
@@ -43,9 +44,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'sep',
     rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
     ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl:
-      import.meta.env.VITE_STARKNET_SEPOLIA_API ??
-      'https://testnet-api.snapshot.box',
+    apiUrl: UNIFIED_API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   }
@@ -83,6 +82,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) =>
+      constants.SUPPORTED_EXECUTORS[executor],
+    isExecutorActionsSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
     pin: pinPineapple,
     getSpaceController: async (space: Space) => space.controller,

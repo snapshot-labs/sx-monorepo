@@ -76,6 +76,7 @@ export type ApiSpace = {
   terms: string;
   // properties used for settings
   private: boolean;
+  flagged: boolean;
   domain: string | null;
   skin: string | null;
   skinSettings: SkinSettings;
@@ -106,6 +107,7 @@ export type ApiProposal = {
     moderators: string[];
     members: string[];
     symbol: string;
+    labels: SpaceMetadataLabel[];
     terms: string;
   };
   type: VoteType;

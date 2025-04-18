@@ -14,6 +14,8 @@ const baseNetwork = createEvmNetwork('base');
 const mantleNetwork = createEvmNetwork('mnt');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
+const apeNetwork = createEvmNetwork('ape');
+const curtisNetwork = createEvmNetwork('curtis');
 const sepoliaNetwork = createEvmNetwork('sep');
 
 export const enabledNetworks: NetworkID[] = import.meta.env
@@ -28,6 +30,8 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'base',
       'mnt',
       'oeth',
+      'ape',
+      'curtis',
       'sep',
       'sn',
       'sn-sep'
@@ -40,6 +44,8 @@ export const evmNetworks: NetworkID[] = [
   'mnt',
   'base',
   'oeth',
+  'ape',
+  'curtis',
   'sep'
 ];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
@@ -60,6 +66,8 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'mnt') return mantleNetwork;
   if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
+  if (id === 'ape') return apeNetwork;
+  if (id === 'curtis') return curtisNetwork;
   if (id === 'sep') return sepoliaNetwork;
   if (id === 'sn') return starknetNetwork;
   if (id === 'sn-sep') return starknetSepoliaNetwork;
@@ -87,22 +95,24 @@ export const supportsNullCurrent = (networkID: NetworkID) => {
   return !evmNetworks.includes(networkID);
 };
 
-export const DEFAULT_SPACES_LIMIT = 1000;
-
 export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
   {
     snapshot: {
       key: 'snapshot',
       label: 'Snapshot',
+      apiNetwork: metadataNetwork,
       networks: [metadataNetwork],
       limit: 18
     },
     'snapshot-x': {
       key: 'snapshot-x',
       label: 'Snapshot X',
+      apiNetwork:
+        enabledNetworks.find(network => !offchainNetworks.includes(network)) ||
+        'eth',
       networks: enabledNetworks.filter(
         network => !offchainNetworks.includes(network)
       ),
-      limit: DEFAULT_SPACES_LIMIT
+      limit: 18
     }
   };

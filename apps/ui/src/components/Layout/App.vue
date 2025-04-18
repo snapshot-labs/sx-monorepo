@@ -1,12 +1,9 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { Skin } from '@/composables/useUserSkin';
 import { APP_NAME } from '@/helpers/constants';
 import {
-  clone,
   getCacheHash,
   getStampUrl,
-  hexToRgb,
   whiteLabelAwareParams
 } from '@/helpers/utils';
 import { Transaction } from '@/types';
@@ -24,8 +21,9 @@ const router = useRouter();
 const uiStore = useUiStore();
 const { modalOpen } = useModal();
 const { init, setAppName, app } = useApp();
-const { DEFAULT_SKIN, setSkin } = useUserSkin();
-const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
+const { setSkin } = useSkin();
+const { setTheme } = useTheme();
+const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
@@ -46,7 +44,6 @@ const {
   transaction,
   reset
 } = useWalletConnectTransaction();
-const { css } = useStyleTag('', { id: 'skin' });
 
 provide('web3', web3);
 
@@ -77,25 +74,6 @@ const hasPlaceHolderSidebar = computed(
 
 const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
-});
-
-const skinVariables = computed(() => {
-  if (!whiteLabelSpace.value?.additionalRawData?.skinSettings) return {};
-
-  const colors = clone(whiteLabelSpace.value?.additionalRawData?.skinSettings);
-
-  const result = Object.entries(colors).reduce((acc, [colorName, hex]) => {
-    if (!hex || !colorName.includes('_color')) return acc;
-
-    const rgb = hexToRgb(hex.slice(1));
-    acc[`--${colorName.replace('_color', '')}`] = `${rgb.r},${rgb.g},${rgb.b}`;
-    return acc;
-  }, {});
-
-  if (result['--content']) {
-    result['--content'] = `rgb(${result['--content']})`;
-  }
-  return result;
 });
 
 async function handleTransactionAccept() {
@@ -136,7 +114,7 @@ onMounted(async () => {
 
 watch(scrollDisabled, val => {
   const el = document.body;
-  el.classList[val ? 'add' : 'remove']('overflow-hidden');
+  el.classList[val ? 'add' : 'remove']('overflow-y-hidden');
 });
 
 watch(isSwiping, () => {
@@ -160,7 +138,7 @@ watch(isSwiping, () => {
 watch(
   isWhiteLabel,
   isWhiteLabel => {
-    if (!isWhiteLabel) {
+    if (!isWhiteLabel || !skinSettings.value) {
       setAppName(APP_NAME);
       return;
     }
@@ -173,18 +151,11 @@ watch(
       16,
       getCacheHash(whiteLabelSpace.value.avatar)
     );
+
     setFavicon(faviconUrl);
-
     setAppName(whiteLabelSpace.value.name);
-
-    css.value = `:root { ${Object.entries(skinVariables.value)
-      .map(([key, val]) => `${key}:${val}`)
-      .join(';')};  }`;
-
-    setSkin(
-      (whiteLabelSpace.value.additionalRawData?.skinSettings?.theme as Skin) ||
-        DEFAULT_SKIN
-    );
+    setTheme(skinSettings.value.theme);
+    setSkin(skinSettings.value);
   },
   { immediate: true }
 );
@@ -201,7 +172,11 @@ router.afterEach(() => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else :class="['flex min-h-screen']">
+    <div
+      v-else
+      class="flex min-h-screen maximum:border-r"
+      :class="{ 'maximum:border-l': isWhiteLabel }"
+    >
       <AppBottomNav
         v-if="web3.account && !isWhiteLabel"
         :class="[
@@ -216,12 +191,17 @@ router.afterEach(() => {
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
-      <AppTopnav :has-app-nav="hasAppNav" :class="{ hidden: !hasTopNav }">
+      <AppTopnav
+        :has-app-nav="hasAppNav"
+        :class="{ hidden: !hasTopNav, 'maximum:border-l': isWhiteLabel }"
+        class="maximum:border-r"
+      >
         <template #toggle-sidebar-button>
           <button
             v-if="hasSwipeableContent"
             type="button"
             class="text-skin-link lg:hidden ml-4"
+            :class="{ hidden: uiStore.sideMenuOpen }"
             @click="uiStore.toggleSidebar"
           >
             <IH-menu-alt-2 />
@@ -244,8 +224,8 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0 mt-[72px]">
-          <router-view class="h-full pb-6" />
+        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
+          <router-view class="h-full pb-10" />
         </div>
         <div
           v-if="hasPlaceHolderSidebar"
@@ -338,15 +318,9 @@ $placeholderSidebarWidth: 240px;
   @apply w-[#{$placeholderSidebarWidth}];
 
   &::before {
-    @apply block fixed border-l top-[72px] bottom-0 right-0 w-[#{$placeholderSidebarWidth}];
+    @apply block fixed border-l top-[72px] bottom-0 w-[#{$placeholderSidebarWidth}];
 
     content: '';
-  }
-}
-
-@media (screen(xl)) {
-  main > div:has(+ .app-placeholder-sidebar) :deep(.app-toolbar-bottom) {
-    @apply right-[#{$placeholderSidebarWidth}];
   }
 }
 
@@ -354,9 +328,8 @@ $placeholderSidebarWidth: 240px;
   .app-sidebar {
     & ~ :deep(main),
     & ~ .backdrop,
-    & ~ :deep(header.fixed),
-    & ~ :deep(main header.fixed),
-    & ~ :deep(main .app-toolbar-bottom),
+    & ~ :deep(header.fixed > div),
+    & ~ :deep(main header.fixed > div),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
     }
@@ -364,9 +337,8 @@ $placeholderSidebarWidth: 240px;
     &:has(~ .app-nav) ~ .app-nav {
       & ~ :deep(main),
       & ~ .backdrop,
-      & ~ :deep(header.fixed),
-      & ~ :deep(main header.fixed),
-      & ~ :deep(main .app-toolbar-bottom),
+      & ~ :deep(header.fixed > div),
+      & ~ :deep(main header.fixed > div),
       & ~ :deep(.app-nav) {
         @apply ml-[#{$sidebarWidth + $navWidth}];
       }

@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { Space } from '@/types';
+import { SpaceMetadataLabel } from '@/types';
 
 const props = withDefaults(
   defineProps<{
-    space: Space;
+    spaceId: string;
     labels: string[];
+    spaceLabels?: SpaceMetadataLabel[];
     inline?: boolean;
     withLink?: boolean;
   }>(),
@@ -15,10 +16,10 @@ const props = withDefaults(
 );
 
 const validLabels = computed(() => {
-  if (!props.space.labels?.length || !props.labels?.length) return [];
+  if (!props.spaceLabels?.length || !props.labels?.length) return [];
 
   return props.labels
-    .map(label => props.space.labels?.find(l => l.id === label))
+    .map(label => props.spaceLabels?.find(l => l.id === label))
     .filter(l => l !== undefined);
 });
 </script>
@@ -33,7 +34,7 @@ const validLabels = computed(() => {
         withLink
           ? {
               name: 'space-proposals',
-              params: { space: `${space.network}:${space.id}` },
+              params: { space: spaceId },
               query: { labels: label.id }
             }
           : undefined
@@ -56,7 +57,7 @@ const validLabels = computed(() => {
             withLink
               ? {
                   name: 'space-proposals',
-                  params: { space: `${space.network}:${space.id}` },
+                  params: { space: spaceId },
                   query: { labels: label.id }
                 }
               : undefined

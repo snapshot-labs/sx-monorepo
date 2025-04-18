@@ -14,9 +14,10 @@ export const EXECUTORS = {};
 export const CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
-  'walletlink',
+  'coinbase',
   'gnosis',
-  'sequence'
+  'sequence',
+  'guest'
 ];
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];
@@ -29,6 +30,7 @@ export const EDITOR_VOTING_TYPES: VoteType[] = [
   'single-choice',
   'approval',
   'ranked-choice',
+  'copeland',
   'weighted',
   'quadratic'
 ];

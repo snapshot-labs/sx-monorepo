@@ -55,11 +55,13 @@ yarn typecheck
 
 ## Running local services
 
-You can run all local services (api, subgraph-api, mana, ui) with single command assuming you have all necessary environment variables set up.
+You can run all local services (api, mana, ui) with single command assuming you have all necessary environment variables set up.
 Local APIs will only be used for Ethereum Sepolia and Starknet Sepolia.
 
+This command will allow you to select which services you want to run.
+
 ```
-yarn dev:full
+yarn dev:interactive
 ```
 
 ### Setup
@@ -75,11 +77,11 @@ In `apps/mana/.env` you need to fill in following empty variables:
 
 ### Getting it running faster
 
-If you run `yarn dev:full` it will take long time to sync all the blocks for the first time. To mitigate it you can just change starting block
+If you run `yarn dev:interactive` it will take long time to sync all the blocks for the first time. To mitigate it you can just change starting block
 for indexing here:
 
-- https://github.com/snapshot-labs/sx-monorepo/blob/0f767b8c69d6986d06c70eb4a1ed7cb33e235b5a/apps/api/src/overrrides.ts#L50 (for Starknet)
-- https://github.com/snapshot-labs/sx-monorepo/blob/0f767b8c69d6986d06c70eb4a1ed7cb33e235b5a/apps/subgraph-api/networks.json#L12-L21 (for Ethereum)
+- https://github.com/snapshot-labs/sx-monorepo/blob/daad48dbd2aa775e47334d0697cb84477c1d3427/apps/api/src/starknet/config.ts#L40 (for Starknet)
+- https://github.com/snapshot-labs/sx-monorepo/blob/9f5c78468c72e0ddd51578bdd984cc9da19f119a/apps/api/src/evm/config.ts#L23 (for Ethereum)
 
 If you do that make sure to create a new space, because spaces created before the new starting block you picked won't be available.
 
@@ -91,3 +93,7 @@ is to execute `yarn changeset`, specify package you updated, version bump per [s
 Then commit generated files in your PR.
 
 Once merged changesets actions will create PR that can be used to release and publish those packages.
+
+## Development docs
+
+- [Using `vue-query` to fetch data](./docs/vue-query.md)

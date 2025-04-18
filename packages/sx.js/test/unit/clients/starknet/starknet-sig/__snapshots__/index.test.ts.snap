@@ -16,6 +16,7 @@ exports[`StarknetSig > should create propose envelope 1`] = `
       {
         "address": "0x13bcbe7318fb8aa219d264dcf5916feb873e596389ba93d923f9a23378cb743",
         "index": 0,
+        "params": "0x",
       },
     ],
   },
@@ -238,6 +239,7 @@ exports[`StarknetSig > should create vote envelope 1`] = `
       {
         "address": "0x13bcbe7318fb8aa219d264dcf5916feb873e596389ba93d923f9a23378cb743",
         "index": 0,
+        "params": "0x",
       },
     ],
   },

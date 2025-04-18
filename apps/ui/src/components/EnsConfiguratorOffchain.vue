@@ -23,6 +23,9 @@ const {
 } = useWalletEns(props.networkId);
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
+const { addNotification } = useUiStore();
+
+const isModalEnsNameOpen = ref(false);
 
 const validNames = computed(() => {
   return Object.values(names.value || {}).filter(d => d.status === 'AVAILABLE');
@@ -37,6 +40,26 @@ const invalidNames = computed(() => {
 const isTestnet = computed(() => {
   return getNetwork(props.networkId).name.includes('testnet');
 });
+
+const ensUrl = computed(() =>
+  isTestnet.value
+    ? 'https://sepolia.app.ens.domains'
+    : 'https://app.ens.domains'
+);
+
+function handleAttachEnsName(name: string) {
+  isModalEnsNameOpen.value = false;
+
+  if (validNames.value.find(n => n.name === name)) {
+    spaceId.value = name;
+    emit('select');
+  } else if (!invalidNames.value.find(n => n.name === name)) {
+    addNotification(
+      'error',
+      `The name ${name} is not available for space creation`
+    );
+  }
+}
 
 function handleSelect(value: string) {
   spaceId.value = value;
@@ -136,20 +159,29 @@ function handleSelect(value: string) {
               </div>
             </div>
           </UiSelector>
+          <UiMessage
+            v-if="!validNames.length && !invalidNames.length"
+            type="danger"
+          >
+            No more ENS names available for space creation found.
+          </UiMessage>
         </div>
         <UiMessage v-else type="danger">
           No ENS names found for the current wallet.
         </UiMessage>
-        <AppLink to="https://app.ens.domains" class="inline-block">
+        <AppLink :to="ensUrl" class="inline-block">
           Register a new ENS name
-          <IH-arrow-sm-right class="-rotate-45 inline" />
-        </AppLink>
+          <IH-arrow-sm-right class="-rotate-45 inline" /> </AppLink
+        >, or
+        <button class="text-skin-link" @click="isModalEnsNameOpen = true">
+          attach a custom domain</button
+        >.
       </div>
       <div class="space-y-3">
         <h4 class="eyebrow">Controller</h4>
         <UiMessage type="info">
-          Your space controller will be set to the ENS name owner. Any changes
-          to the ENS name ownership will also change the controller.</UiMessage
+          By default, the ENS domain’s controller is its owner. You can change
+          it later in your space setting.</UiMessage
         >
         <FormSpaceController
           :controller="web3.account"
@@ -165,4 +197,13 @@ function handleSelect(value: string) {
       in order to see your ENS names
     </UiMessage>
   </div>
+  <teleport to="#modal">
+    <ModalEnsName
+      :open="isModalEnsNameOpen"
+      :account="web3.account"
+      :network-id="networkId"
+      @attach="handleAttachEnsName"
+      @close="isModalEnsNameOpen = false"
+    />
+  </teleport>
 </template>

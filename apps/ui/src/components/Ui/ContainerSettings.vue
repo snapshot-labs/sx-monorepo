@@ -6,7 +6,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="mb-4">
+  <div class="max-w-[592px]">
     <h3
       v-if="title"
       :class="{

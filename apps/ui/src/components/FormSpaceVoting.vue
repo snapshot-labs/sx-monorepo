@@ -62,6 +62,7 @@ const isSelectPrivacyModalOpen = ref(false);
 const isSelectValidationModalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.space.network));
+
 const isOffchainNetwork = computed(() =>
   offchainNetworks.includes(props.space.network)
 );

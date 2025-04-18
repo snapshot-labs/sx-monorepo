@@ -7,6 +7,7 @@
       "outputs": ["dist/**", "dist.cjs/**"]
     },
     "lint": {},
+    "//#lint:scripts": {},
     "typecheck": {
       "dependsOn": ["^build"]
     },
@@ -19,15 +20,16 @@
     "dev": {
       "cache": false,
       "persistent": true,
-      "dependsOn": ["codegen", "^build"]
+      "dependsOn": ["codegen", "^build"],
+      "passThroughEnv": ["ENABLED_NETWORKS", "INFURA_API_KEY"]
     },
     "codegen": {
-      "outputs": [
-        ".checkpoint/**",
-        "generated/**",
-        "src/networks/common/graphqlApi/gql/**"
-      ],
-      "inputs": ["**/*.graphql", "**/*.gql", "codegen.ts"]
+      "outputs": [".checkpoint/**", "src/networks/common/graphqlApi/gql/**"],
+      "inputs": [
+        "**/*.gql",
+        "codegen.ts",
+        "src/networks/common/graphqlApi/queries.ts"
+      ]
     }
   }
 }

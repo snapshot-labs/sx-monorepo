@@ -18,7 +18,7 @@ const isOffchainSpace = computed(() =>
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
-const { data, isPending } = useProposalsSummaryQuery(
+const { data, isPending, isError } = useProposalsSummaryQuery(
   toRef(() => props.space.network),
   toRef(() => props.space.id)
 );
@@ -61,13 +61,11 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <div class="px-4">
       <div class="mb-4 relative">
-        <AppLink :to="{ name: 'space-overview' }">
-          <SpaceAvatar
-            :space="space"
-            :size="90"
-            class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
-          />
-        </AppLink>
+        <SpaceAvatar
+          :space="space"
+          :size="90"
+          class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
+        />
         <div class="flex items-center">
           <h1 v-text="space.name" />
           <UiBadgeVerified
@@ -152,6 +150,7 @@ watchEffect(() => setTitle(props.space.name));
     <div>
       <ProposalsList
         title="Proposals"
+        :is-error="isError"
         :loading="isPending"
         :limit="PROPOSALS_SUMMARY_LIMIT - 1"
         :proposals="data ?? []"

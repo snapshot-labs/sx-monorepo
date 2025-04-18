@@ -1,5 +1,17 @@
 # @snapshot-labs/sx
 
+## 0.1.7
+
+### Patch Changes
+
+- 7bfd971: Add privacy option to proposal and update-proposal
+- 2add7c2: add space creation support to OffchainEthereumSig
+- f08f273: Add new voting type copeland
+- 5ebcc3c: add flagProposal method to offchain EthereumSig client
+- 88a6f85: fetch merkletree proof from Mana https://github.com/snapshot-labs/sx-monorepo/pull/1176
+- 5bcc748: encrypt only shutter votes
+- 302cd7a: add Mantle network support
+
 ## 0.1.6
 
 ### Patch Changes

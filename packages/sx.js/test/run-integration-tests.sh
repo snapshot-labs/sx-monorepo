@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 PIDS=()
 
 function start_node() {

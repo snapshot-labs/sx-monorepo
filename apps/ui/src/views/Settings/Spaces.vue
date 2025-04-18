@@ -17,7 +17,6 @@ const route = useRoute();
 const router = useRouter();
 const { web3 } = useWeb3();
 
-const loaded = ref(false);
 const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
 
 const { data, isPending } = useExploreSpacesQuery({
@@ -26,8 +25,7 @@ const { data, isPending } = useExploreSpacesQuery({
 });
 
 const loading = computed(
-  () =>
-    !loaded || (web3.value.account && isPending.value) || web3.value.authLoading
+  () => (web3.value.account && isPending.value) || web3.value.authLoading
 );
 
 watch(protocol, value => {
@@ -76,7 +74,7 @@ watch(
       v-else-if="data?.pages.flat().length"
       class="!max-w-screen-md pt-5"
     >
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         <SpacesListItem
           v-for="space in data?.pages.flat()"
           :key="space.id"

@@ -5,6 +5,7 @@ import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Proposal } from '@/types';
 
 const REASON_DEFINITION = {
@@ -29,11 +30,21 @@ const emit = defineEmits<{
 const queryClient = useQueryClient();
 const { vote } = useActions();
 const { web3 } = useWeb3();
-const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { loadVotes, votes } = useAccount();
 const route = useRoute();
+const {
+  data: votingPower,
+  isPending: isVotingPowerPending,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'proposal'),
+  toRef(props, 'open')
+);
 
 const loading = ref(false);
+const hidden = ref(false);
 const form = ref<Record<string, string>>({ reason: '' });
 const formErrors = ref({} as Record<string, any>);
 const formValidated = ref(false);
@@ -53,10 +64,6 @@ const formValidator = getValidator({
   }
 });
 
-const votingPower = computed(() =>
-  getVotingPower(props.proposal.space, props.proposal)
-);
-
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
@@ -67,7 +74,7 @@ const offchainProposal = computed<boolean>(() =>
 
 const canSubmit = computed<boolean>(
   () =>
-    formValidated &&
+    formValidated.value &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
     !!votingPower.value?.canVote
@@ -81,12 +88,12 @@ async function handleSubmit() {
     try {
       await voteFn();
       handleConfirmed();
+    } catch {
     } finally {
       loading.value = false;
     }
   } else {
-    emit('close');
-    loading.value = false;
+    hidden.value = true;
     modalTransactionOpen.value = true;
   }
 }
@@ -108,12 +115,13 @@ async function handleConfirmed(tx?: string | null) {
   modalTransactionOpen.value = false;
   if (tx) {
     txId.value = tx;
-    modalShareOpen.value = true;
   }
 
   emit('voted');
   emit('close');
 
+  modalShareOpen.value = true;
+  hidden.value = false;
   loading.value = false;
 
   // TODO: Quick fix only for offchain proposals, need a more complete solution for onchain proposals
@@ -129,8 +137,10 @@ async function handleConfirmed(tx?: string | null) {
   }
 }
 
-function handleFetchVotingPower() {
-  fetchVotingPower(props.proposal.space, props.proposal);
+function handleCancelled() {
+  modalTransactionOpen.value = false;
+  loading.value = false;
+  hidden.value = false;
 }
 
 watch(
@@ -143,8 +153,6 @@ watch(
       form.value.reason = '';
       await loadVotes(props.proposal.network, [props.proposal.space.id]);
     }
-
-    handleFetchVotingPower();
 
     form.value.reason =
       votes.value[`${props.proposal.network}:${props.proposal.id}`]?.reason ||
@@ -164,15 +172,15 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" :class="{ hidden }" @close="$emit('close')">
     <template #header>
       <h3>Cast your vote</h3>
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
       <MessageErrorFetchPower
-        v-if="votingPower?.status === 'error'"
+        v-if="isVotingPowerError"
         type="voting"
-        @fetch="handleFetchVotingPower"
+        @fetch="fetchVotingPower"
       />
       <MessageVotingPower
         v-else-if="votingPower && !votingPower.canVote"
@@ -192,16 +200,11 @@ watchEffect(async () => {
           </div>
         </dd>
         <dt class="text-sm leading-5 mt-3">Voting power</dt>
-        <dd v-if="!votingPower || votingPower.status === 'loading'">
+        <dd v-if="isVotingPowerPending">
           <UiLoading />
         </dd>
         <dd
-          v-else-if="votingPower.status === 'success'"
-          class="font-semibold text-skin-heading text-[20px] leading-6"
-          v-text="formattedVotingPower"
-        />
-        <dd
-          v-else-if="votingPower.status === 'error'"
+          v-else-if="votingPower"
           class="font-semibold text-skin-heading text-[20px] leading-6"
           v-text="formattedVotingPower"
         />
@@ -245,6 +248,7 @@ watchEffect(async () => {
       }"
       :execute="voteFn"
       @confirmed="handleConfirmed"
+      @cancelled="handleCancelled"
       @close="modalTransactionOpen = false"
     />
     <ModalShare

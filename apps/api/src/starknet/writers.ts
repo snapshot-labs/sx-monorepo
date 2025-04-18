@@ -9,12 +9,14 @@ import {
   handleExecutionStrategy,
   longStringToText,
   registerProposal,
-  updateProposaValidationStrategy
+  updateProposalValidationStrategy
 } from './utils';
 import {
+  ExecutionStrategy,
   Leaderboard,
   Proposal,
   Space,
+  SpaceMetadataItem,
   User,
   Vote
 } from '../../.checkpoint/models';
@@ -23,7 +25,7 @@ import {
   handleStrategiesMetadata,
   handleVoteMetadata
 } from '../common/ipfs';
-import { dropIpfs, getCurrentTimestamp } from '../common/utils';
+import { dropIpfs, getCurrentTimestamp, updateCounter } from '../common/utils';
 
 type Strategy = {
   address: string;
@@ -97,7 +99,7 @@ export function createWriters(config: FullConfig) {
     space.created = block?.timestamp ?? getCurrentTimestamp();
     space.tx = tx.transaction_hash;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.proposal_validation_strategy.address,
       event.proposal_validation_strategy.params,
@@ -127,6 +129,8 @@ export function createWriters(config: FullConfig) {
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
+
+    await updateCounter(config.indexerName, 'space_count', 1);
 
     await space.save();
   };
@@ -376,7 +380,7 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    await updateProposaValidationStrategy(
+    await updateProposalValidationStrategy(
       space,
       event.proposal_validation_strategy.address,
       event.proposal_validation_strategy.params,
@@ -474,6 +478,38 @@ export function createWriters(config: FullConfig) {
         executionStrategy.executionStrategyType;
       proposal.execution_destination = executionStrategy.destinationAddress;
       proposal.quorum = executionStrategy.quorum;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      // Current way of persisting it isn't great, because we need to fetch every strategy
+      // for space and compare it with execution strategy address.
+      // In the future we should find way to optimize it for example by adding where lookup
+      // via ORM
+      if (space.metadata) {
+        const spaceMetadata = await SpaceMetadataItem.loadEntity(
+          space.metadata,
+          config.indexerName
+        );
+
+        if (spaceMetadata) {
+          proposal.treasuries = spaceMetadata.treasuries;
+
+          const strategies = await Promise.all(
+            spaceMetadata.executors_strategies.map(id =>
+              ExecutionStrategy.loadEntity(id, config.indexerName)
+            )
+          );
+
+          const matchingStrategy = strategies.find(
+            strategy => strategy?.address === proposal.execution_strategy
+          );
+
+          if (matchingStrategy) {
+            proposal.execution_strategy_details = matchingStrategy.id;
+          }
+        }
+      }
     }
 
     try {
@@ -545,12 +581,16 @@ export function createWriters(config: FullConfig) {
           },
           config
         );
-      } catch (e) {
+      } catch {
         console.log('failed to register proposal');
       }
     }
 
-    await Promise.all([proposal.save(), space.save()]);
+    await Promise.all([
+      updateCounter(config.indexerName, 'proposal_count', 1),
+      proposal.save(),
+      space.save()
+    ]);
   };
 
   const handleCancel: starknet.Writer = async ({ rawEvent, event }) => {
@@ -571,7 +611,11 @@ export function createWriters(config: FullConfig) {
     space.proposal_count -= 1;
     space.vote_count -= proposal.vote_count;
 
-    await Promise.all([proposal.save(), space.save()]);
+    await Promise.all([
+      updateCounter(config.indexerName, 'proposal_count', -1),
+      proposal.save(),
+      space.save()
+    ]);
   };
 
   const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
@@ -699,6 +743,8 @@ export function createWriters(config: FullConfig) {
 
     leaderboardItem.vote_count += 1;
     await leaderboardItem.save();
+
+    await updateCounter(config.indexerName, 'vote_count', 1);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (space) {

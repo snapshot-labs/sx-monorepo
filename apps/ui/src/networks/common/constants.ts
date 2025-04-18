@@ -3,11 +3,12 @@ import { ConnectorType } from '@/networks/types';
 export const EVM_CONNECTORS: ConnectorType[] = [
   'injected',
   'walletconnect',
-  'walletlink',
+  'coinbase',
   'gnosis',
   'sequence',
-  'unicorn'
+  'unicorn',
+  'guest'
 ];
 
-export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx'];
+export const STARKNET_CONNECTORS: ConnectorType[] = ['argentx', 'guest'];
 export const EDITOR_APP_NAME = 'snapshot-v2';

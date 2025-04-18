@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
+
+defineOptions({ inheritAttrs: false });
 
 const router = useRouter();
 const route = useRoute();
@@ -24,6 +26,7 @@ const {
   validationStrategy,
   votingStrategies,
   proposalValidation,
+  executionStrategies,
   guidelines,
   template,
   quorumType,
@@ -51,6 +54,9 @@ const { invalidateController } = useSpaceController(toRef(props, 'space'));
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
 
+const el = ref(null);
+const { height: bottomToolbarHeight } = useElementSize(el);
+
 const isAdvancedFormResolved = ref(false);
 const hasVotingErrors = ref(false);
 const hasProposalErrors = ref(false);
@@ -58,6 +64,7 @@ const hasAdvancedErrors = ref(false);
 
 const executeFn = ref(save);
 const saving = ref(false);
+const customStrategyModalOpen = ref(false);
 
 type Tab = {
   id:
@@ -161,21 +168,6 @@ const activeTab: Ref<Tab['id']> = computed(() => {
 });
 const network = computed(() => getNetwork(props.space.network));
 
-const executionStrategies = computed(() => {
-  return props.space.executors.map((executor, i) => {
-    return {
-      id: executor,
-      address: executor,
-      name:
-        network.value.constants.EXECUTORS[executor] ||
-        network.value.constants.EXECUTORS[props.space.executors_types[i]] ||
-        props.space.executors_types[i],
-      params: {},
-      paramsDefinition: {}
-    };
-  });
-});
-
 const isTicketValid = computed(() => {
   return !(
     strategies.value.some(s => s.address === 'ticket') &&
@@ -184,8 +176,11 @@ const isTicketValid = computed(() => {
 });
 
 const error = computed(() => {
+  if (loading.value) {
+    return null;
+  }
   if (Object.values(formErrors.value).length > 0) {
-    return 'Some settings are invalid';
+    return 'Space settings are invalid';
   }
 
   if (!isOffchainNetwork.value) {
@@ -221,6 +216,15 @@ const error = computed(() => {
   return null;
 });
 
+const showToolbar = computed(() => {
+  return (
+    (isModified.value &&
+      isAdvancedFormResolved.value &&
+      canModifySettings.value) ||
+    error.value
+  );
+});
+
 function isValidTab(param: string | string[]): param is Tab['id'] {
   if (Array.isArray(param)) return false;
   return tabs.value.map(tab => tab.id).includes(param as any);
@@ -236,15 +240,25 @@ async function reloadSpaceAndReset() {
   await reset({ force: true });
 }
 
-function handleSettingsSave() {
+async function handleSettingsSave() {
   saving.value = true;
-  executeFn.value = save;
+
+  if (isOffchainNetwork.value) {
+    try {
+      await save();
+      reloadSpaceAndReset();
+    } catch {
+    } finally {
+      saving.value = false;
+    }
+  } else {
+    executeFn.value = save;
+  }
 }
 
 function handleControllerSave(value: string) {
-  if (!isController.value) return;
+  if (!isOwner.value) return;
   controller.value = value;
-
   saving.value = true;
   executeFn.value = saveController;
 }
@@ -257,6 +271,23 @@ function handleSpaceDelete() {
 
     return null;
   };
+}
+
+function addCustomStrategy(strategy: { address: string; type: string }) {
+  customStrategyModalOpen.value = false;
+
+  executionStrategies.value = [
+    ...executionStrategies.value,
+    {
+      id: crypto.randomUUID(),
+      address: strategy.address,
+      type: strategy.type,
+      generateSummary: () => strategy.type,
+      name: 'Custom strategy',
+      params: {},
+      paramsDefinition: {}
+    }
+  ];
 }
 
 function handleTabFocus(event: FocusEvent) {
@@ -286,37 +317,39 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <div>
-    <UiScrollerHorizontal
-      class="sticky top-[72px] z-40"
-      with-buttons
-      gradient="xxl"
-    >
-      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <AppLink
-          v-for="tab in tabs.filter(tab => tab.visible)"
-          :key="tab.id"
-          :to="{
-            name: 'space-settings',
-            params: { space: route.params.space, tab: tab.id }
-          }"
-          type="button"
-          class="scroll-mx-8"
-          @focus="handleTabFocus"
-        >
-          <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-        </AppLink>
-      </div>
-    </UiScrollerHorizontal>
+  <UiScrollerHorizontal
+    class="sticky z-40 top-[72px]"
+    with-buttons
+    gradient="xxl"
+  >
+    <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+      <AppLink
+        v-for="tab in tabs.filter(tab => tab.visible)"
+        :key="tab.id"
+        :to="{
+          name: 'space-settings',
+          params: { space: route.params.space, tab: tab.id }
+        }"
+        type="button"
+        class="scroll-mx-8"
+        @focus="handleTabFocus"
+      >
+        <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
+      </AppLink>
+    </div>
+  </UiScrollerHorizontal>
+  <div
+    v-bind="$attrs"
+    class="!h-auto"
+    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 114}px)`"
+  >
     <div v-if="loading" class="p-4">
       <UiLoading />
     </div>
     <div
       v-else
-      class="space-y-4 pb-[100px]"
-      :class="{
-        'mx-4 max-w-[592px]': activeTab !== 'profile'
-      }"
+      class="flex-grow"
+      :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
     >
       <div v-show="activeTab === 'profile'">
         <FormSpaceProfile
@@ -422,6 +455,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             :network-id="space.network"
             :strategy="strategy"
           />
+          <UiButton
+            v-if="evmNetworks.includes(space.network)"
+            @click="customStrategyModalOpen = true"
+          >
+            Add custom strategy
+          </UiButton>
         </div>
       </UiContainerSettings>
       <FormStrategies
@@ -466,6 +505,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         v-show="activeTab === 'whitelabel'"
         title="Whitelabel"
         description="Customize the appearance of your space to match your brand."
+        class="max-w-full"
       >
         <FormSpaceWhitelabel
           v-model:custom-domain="customDomain"
@@ -498,60 +538,66 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         description="The controller is the account able to change the space settings and cancel pending proposals."
       >
         <UiMessage
-          v-if="isOffchainNetwork && isOwner"
+          v-if="isOffchainNetwork && isController && !isOwner"
           type="danger"
           class="mb-3"
         >
-          The controller is the owner of the ENS name. To change the controller,
-          you need to change the owner of the ENS name.
+          Controller can only be edited by the ENS owner
         </UiMessage>
         <FormSpaceController
           :controller="controller"
           :network="network"
-          :disabled="!isController || isOffchainNetwork"
+          :disabled="!isOwner"
           @save="handleControllerSave"
         />
       </UiContainerSettings>
-      <UiToolbarBottom
-        v-if="
-          (isModified && isAdvancedFormResolved && canModifySettings) || error
-        "
-        class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
-      >
-        <h4
-          class="leading-7 font-medium truncate mb-2 xs:mb-0"
-          :class="{ 'text-skin-danger': error }"
-        >
-          {{ error || 'You have unsaved changes' }}
-        </h4>
-        <div class="flex space-x-3">
-          <button type="reset" class="text-skin-heading" @click="reset()">
-            Reset
-          </button>
-          <UiButton
-            v-if="!error"
-            :loading="saving"
-            primary
-            @click="handleSettingsSave"
-          >
-            Save
-          </UiButton>
-        </div>
-      </UiToolbarBottom>
     </div>
-    <teleport to="#modal">
-      <ModalTransactionProgress
-        :open="saving"
-        :chain-id="network.chainId"
-        :messages="{
-          approveTitle: 'Confirm your changes',
-          successTitle: 'Done!',
-          successSubtitle: 'Your changes were successfully saved'
-        }"
-        :execute="executeFn"
-        @confirmed="reloadSpaceAndReset"
-        @close="saving = false"
-      />
-    </teleport>
   </div>
+  <UiToolbarBottom v-if="showToolbar" ref="el">
+    <div
+      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+    >
+      <h4
+        class="leading-7 font-medium truncate mb-2 xs:mb-0"
+        :class="{ 'text-skin-danger': error }"
+      >
+        {{ error || 'You have unsaved changes' }}
+      </h4>
+      <div class="flex space-x-3">
+        <button type="reset" class="text-skin-heading" @click="reset()">
+          Reset
+        </button>
+        <UiButton
+          v-if="!error"
+          :loading="saving"
+          primary
+          @click="handleSettingsSave"
+        >
+          Save
+        </UiButton>
+      </div>
+    </div>
+  </UiToolbarBottom>
+  <teleport to="#modal">
+    <ModalCustomStrategy
+      :open="customStrategyModalOpen"
+      :network-id="space.network"
+      :chain-id="network.chainId"
+      @close="customStrategyModalOpen = false"
+      @save="addCustomStrategy"
+    />
+    <ModalTransactionProgress
+      :open="saving && (!isOffchainNetwork || executeFn === saveController)"
+      :chain-id="network.chainId"
+      :messages="{
+        approveTitle: 'Confirm your changes',
+        successTitle: 'Done!',
+        successSubtitle: 'Your changes were successfully saved'
+      }"
+      :execute="executeFn"
+      @confirmed="reloadSpaceAndReset"
+      @close="saving = false"
+      @cancelled="saving = false"
+    />
+  </teleport>
 </template>

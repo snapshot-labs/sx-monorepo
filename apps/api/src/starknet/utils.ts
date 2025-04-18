@@ -29,7 +29,7 @@ const encodersAbi = new CallData(EncodersAbi);
 export function toAddress(bn: any) {
   try {
     return getAddress(BigNumber.from(bn).toHexString());
-  } catch (e) {
+  } catch {
     return bn;
   }
 }
@@ -147,7 +147,7 @@ export async function handleExecutionStrategy(
   }
 }
 
-export async function updateProposaValidationStrategy(
+export async function updateProposalValidationStrategy(
   space: Space,
   validationStrategyAddress: string,
   validationStrategyParams: string[],

@@ -85,7 +85,7 @@ export function useWeb3() {
       }
 
       return await registerConnector(connector);
-    } catch (e) {
+    } catch {
       reset();
     } finally {
       state.authLoading = false;
@@ -199,7 +199,11 @@ export function useWeb3() {
       });
     }
 
-    // provider.on('disconnect', async () => {});
+    if (connector.type === 'walletconnect') {
+      connector.provider.on('disconnect', async () => {
+        logout();
+      });
+    }
   }
 
   function removeConnectorEvents(connector: Connector) {
@@ -207,7 +211,7 @@ export function useWeb3() {
 
     try {
       connector.provider.removeAllListeners();
-    } catch (e: any) {}
+    } catch {}
   }
 
   return {

@@ -37,12 +37,13 @@ const balancesTreasury = computed(() => {
     address: treasury.value.wallet
   };
 });
-const { isPending, isSuccess, assets } = useBalances({
+const { isPending, isSuccess, isError, assets } = useBalances({
   treasury: balancesTreasury
 });
 const {
   isPending: isNftsPending,
   isSuccess: isNftsSuccess,
+  isError: isNftsError,
   nfts
 } = useNfts({
   treasury: balancesTreasury
@@ -273,6 +274,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <IH-exclamation-circle class="inline-block shrink-0" />
             <span>There are no tokens in treasury.</span>
           </div>
+          <div
+            v-else-if="isError"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+          >
+            <IH-exclamation-circle class="inline-block shrink-0" />
+            <span>Failed to load treasury tokens.</span>
+          </div>
           <a
             v-for="(asset, i) in assets"
             v-else
@@ -370,6 +378,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           >
             <IH-exclamation-circle class="inline-block shrink-0" />
             <span>There are no NFTs in treasury.</span>
+          </div>
+          <div
+            v-else-if="isNftsError"
+            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+          >
+            <IH-exclamation-circle class="inline-block shrink-0" />
+            <span>Failed to load treasury NFTs.</span>
           </div>
           <UiLoading v-if="isNftsPending" class="px-4 py-3 block" />
           <div

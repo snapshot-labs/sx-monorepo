@@ -32,6 +32,8 @@ const props = defineProps<{
   space: Space;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
 const { proposals, createDraft } = useEditor();
@@ -55,6 +57,7 @@ const {
   loaded: networksLoaded
 } = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
+const { isWhiteLabel } = useWhiteLabel();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -196,14 +199,21 @@ const canSubmit = computed(() => {
     ? propositionPower.value?.canPropose
     : !web3.value.authLoading;
 });
-const spaceType = computed(() =>
-  props.space.turbo ? 'turbo' : props.space.verified ? 'verified' : 'default'
-);
+const spaceType = computed(() => {
+  if (props.space.turbo) return 'turbo';
+  if (props.space.verified) return 'verified';
+  return 'default';
+});
+
+const spaceTypeForProposalLimit = computed(() => {
+  if (lists.value['space.ecosystem.list'].includes(props.space.id))
+    return 'ecosystem';
+  if (props.space.additionalRawData?.flagged) return 'flagged';
+  return spaceType.value;
+});
 
 const proposalLimitReached = computed(() => {
-  const type = lists.value['space.ecosystem.list'].includes(props.space.id)
-    ? 'ecosystem'
-    : spaceType.value;
+  const type = spaceTypeForProposalLimit.value;
 
   return (
     (props.space.proposal_count_1d || 0) >=
@@ -216,7 +226,7 @@ const proposalLimitReached = computed(() => {
 const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
 
 const defaultVotingDelay = computed(() =>
-  isOffchainSpace ? DEFAULT_VOTING_DELAY : 0
+  isOffchainSpace.value ? DEFAULT_VOTING_DELAY : 0
 );
 
 const proposalStart = computed(
@@ -353,6 +363,8 @@ async function handleProposeClick() {
     } else {
       router.push({ name: 'space-proposals' });
     }
+  } catch (e) {
+    console.error(e);
   } finally {
     sending.value = false;
   }
@@ -445,39 +457,51 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal">
-    <UiTopnav class="gap-2 px-4">
-      <UiButton
-        :to="{ name: 'space-overview', params: { space: spaceKey } }"
-        class="w-[46px] !px-0 mr-2 shrink-0"
-      >
-        <IH-arrow-narrow-left />
-      </UiButton>
-      <h4
-        class="grow truncate"
-        v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
-      />
-      <IndicatorPendingTransactions />
-      <UiTooltip title="Drafts">
-        <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-          <IH-collection class="inline-block" />
+  <div v-if="proposal" class="h-full">
+    <UiTopnav
+      :class="{ 'maximum:border-l': isWhiteLabel }"
+      class="maximum:border-r"
+    >
+      <div class="flex items-center gap-3 shrink truncate">
+        <UiButton
+          :to="{ name: 'space-overview', params: { space: spaceKey } }"
+          class="w-[46px] !px-0 ml-4 shrink-0"
+        >
+          <IH-arrow-narrow-left />
         </UiButton>
-      </UiTooltip>
-      <UiButton
-        class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-        :loading="isSubmitButtonLoading"
-        :disabled="!canSubmit"
-        @click="handleProposeClick"
-      >
-        <span
-          class="hidden md:inline-block"
-          v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+        <h4
+          class="grow truncate"
+          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
         />
-        <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-      </UiButton>
+      </div>
+      <div class="flex gap-2 items-center">
+        <IndicatorPendingTransactions />
+        <UiTooltip title="Drafts">
+          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
+            <IH-collection class="inline-block" />
+          </UiButton>
+        </UiTooltip>
+        <UiButton
+          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          :loading="isSubmitButtonLoading"
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
+        >
+          <span
+            class="hidden md:inline-block"
+            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
+      </div>
     </UiTopnav>
-    <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
-      <div class="flex-1 grow min-w-0">
+    <div
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
+    >
+      <div
+        class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
+        v-bind="$attrs"
+      >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
             v-if="
@@ -504,13 +528,54 @@ watchEffect(() => {
             >). Change to a
             <AppLink
               to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              class="font-semibold text-rose-500"
               >premium network
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
-            or upgrade networks to continue.
+            or
+            <a
+              :href="TURBO_URL"
+              target="_blank"
+              class="font-semibold text-rose-500"
+            >
+              upgrade your space
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </a>
+            to continue.
           </UiAlert>
           <template v-else>
-            <template v-if="!isPropositionPowerPending">
+            <template v-if="proposalLimitReached">
+              <UiAlert type="error" class="mb-4">
+                <span
+                  v-if="
+                    ['default', 'flagged'].includes(spaceTypeForProposalLimit)
+                  "
+                >
+                  Please verify your space to publish more proposals.
+                  <a
+                    :href="VERIFIED_URL"
+                    target="_blank"
+                    class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >
+                    Verify space </a
+                  >.</span
+                >
+                <span v-else-if="spaceTypeForProposalLimit !== 'turbo'">
+                  You can publish up to
+                  {{ limits['space.verified.proposal_limit_per_day'] }}
+                  proposals per day and
+                  {{ limits['space.verified.proposal_limit_per_month'] }}
+                  proposals per month.
+                  <a
+                    :href="TURBO_URL"
+                    target="_blank"
+                    class="text-rose-500 dark:text-neutral-100 font-semibold"
+                    >Increase limit</a
+                  >.
+                </span>
+              </UiAlert>
+            </template>
+            <template v-else-if="!isPropositionPowerPending">
               <MessageErrorFetchPower
                 v-if="isPropositionPowerError || !propositionPower"
                 class="mb-4"
@@ -523,48 +588,6 @@ watchEffect(() => {
                 :proposition-power="propositionPower"
               />
             </template>
-            <UiAlert
-              v-if="
-                propositionPower &&
-                spaceType === 'default' &&
-                proposalLimitReached
-              "
-              type="error"
-              class="mb-4"
-            >
-              <span
-                >Please verify your space to publish more proposals.
-                <a
-                  :href="VERIFIED_URL"
-                  target="_blank"
-                  class="text-rose-500 dark:text-neutral-100 font-semibold"
-                  >Verify space</a
-                >.</span
-              >
-            </UiAlert>
-            <UiAlert
-              v-else-if="
-                propositionPower &&
-                spaceType !== 'turbo' &&
-                proposalLimitReached
-              "
-              type="error"
-              class="mb-4"
-            >
-              <span>
-                You can publish up to
-                {{ limits['space.verified.proposal_limit_per_day'] }}
-                proposals per day and
-                {{ limits['space.verified.proposal_limit_per_month'] }}
-                proposals per month.
-                <a
-                  :href="TURBO_URL"
-                  target="_blank"
-                  class="text-rose-500 dark:text-neutral-100 font-semibold"
-                  >Increase limit</a
-                >.
-              </span>
-            </UiAlert>
           </template>
           <div v-if="guidelines">
             <h4 class="mb-2 eyebrow">Guidelines</h4>
@@ -622,18 +645,13 @@ watchEffect(() => {
               >.
             </template>
           </UiComposer>
-          <div class="s-base mb-5">
-            <UiInputString
-              :key="proposalKey || ''"
-              v-model="proposal.discussion"
-              :definition="DISCUSSION_DEFINITION"
-              :error="formErrors.discussion"
-            />
-            <UiLinkPreview
-              :key="proposalKey || ''"
-              :url="proposal.discussion"
-            />
-          </div>
+          <UiInputString
+            :key="proposalKey || ''"
+            v-model="proposal.discussion"
+            :definition="DISCUSSION_DEFINITION"
+            :error="formErrors.discussion"
+          />
+          <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
           <div
             v-if="
               network &&
@@ -641,7 +659,7 @@ watchEffect(() => {
               strategiesWithTreasuries.length > 0
             "
           >
-            <h4 class="eyebrow mb-2">Execution</h4>
+            <h4 class="eyebrow mb-2 mt-4">Execution</h4>
             <EditorExecution
               v-for="execution in editorExecutions"
               :key="execution.address"
@@ -663,12 +681,8 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix
-        :class="['shrink-0 md:w-[340px] border-l-0 md:border-l -mb-6']"
-        :top="72"
-        :bottom="64"
-      >
-        <div class="flex flex-col p-4 space-y-4">
+      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+        <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
             :voting-types="

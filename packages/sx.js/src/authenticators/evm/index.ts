@@ -19,8 +19,8 @@ export function getAuthenticator(
     return createEthTxAuthenticator();
   }
 
-  if (authenticator.type === 'ethSig') {
-    return createEthSigAuthenticator();
+  if (authenticator.type === 'ethSig' || authenticator.type === 'ethSigV2') {
+    return createEthSigAuthenticator(authenticator.type);
   }
 
   return null;

@@ -81,14 +81,14 @@ export type ClientOpts = {
   ethUrl: string;
   starkProvider: RpcProvider;
   networkConfig: NetworkConfig;
-  manaUrl: string;
+  whitelistServerUrl: string;
 };
 
 export type ClientConfig = {
   ethUrl: string;
   starkProvider: RpcProvider;
   networkConfig: NetworkConfig;
-  manaUrl: string;
+  whitelistServerUrl: string;
 };
 
 // TODO: normalize with EVM

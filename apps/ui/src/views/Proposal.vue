@@ -4,20 +4,20 @@ import { HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
+import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Space } from '@/types';
 
 const props = defineProps<{
   space: Space;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 const route = useRoute();
-const { get: getVotingPower, fetch: fetchVotingPower } = useVotingPower();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
-const uiStore = useUiStore();
 const termsStore = useTermsStore();
-const { isDownloadingVotes, downloadVotes } = useReportDownload();
 
 const modalOpenVote = ref(false);
 const modalOpenTerms = ref(false);
@@ -35,16 +35,22 @@ const { data: proposal, isPending } = useProposalQuery(
   id
 );
 
+const {
+  data: votingPower,
+  error: votingPowerError,
+  isPending: isVotingPowerPending,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(() => proposal.value),
+  toRef(() => ['active', 'pending'].includes(proposal.value?.state || ''))
+);
+
 const discussion = computed(() => {
   if (!proposal.value) return null;
 
   return sanitizeUrl(proposal.value.discussion);
-});
-
-const votingPower = computed(() => {
-  if (!proposal.value) return;
-
-  return getVotingPower(props.space, proposal.value);
 });
 
 const votingPowerDecimals = computed(() => {
@@ -63,7 +69,7 @@ const currentVote = computed(
     votes.value[`${proposal.value.network}:${proposal.value.id}`]
 );
 
-const withoutBottomPadding = computed(
+const withoutContentInBottom = computed(
   () => 'space-proposal-votes' === String(route.name)
 );
 
@@ -83,28 +89,6 @@ async function handleVoteClick(choice: Choice) {
   modalOpenVote.value = true;
 }
 
-async function handleDownloadVotes() {
-  if (!proposal.value) return;
-
-  try {
-    await downloadVotes(proposal.value.id);
-  } catch (e: unknown) {
-    if (e instanceof Error) {
-      if (e.message === 'PENDING_GENERATION') {
-        return uiStore.addNotification(
-          'success',
-          'Your report is currently being generated. It may take a few minutes. Please check back shortly.'
-        );
-      }
-
-      uiStore.addNotification(
-        'error',
-        "We're having trouble connecting to the server responsible for downloads"
-      );
-    }
-  }
-}
-
 function handleAcceptTerms() {
   termsStore.accept(props.space);
   handleVoteClick(selectedChoice.value!);
@@ -114,22 +98,6 @@ async function handleVoteSubmitted() {
   selectedChoice.value = null;
   editMode.value = false;
 }
-
-function handleFetchVotingPower() {
-  if (!proposal.value) return;
-
-  fetchVotingPower(props.space, proposal.value);
-}
-
-watch(
-  [proposal, () => web3.value.account, () => web3.value.authLoading],
-  ([proposal, account, authLoading]) => {
-    if (authLoading || !proposal || !account) return;
-
-    handleFetchVotingPower();
-  },
-  { immediate: true }
-);
 
 watch(
   [id, proposal],
@@ -167,11 +135,14 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex items-stretch md:flex-row flex-col w-full md:h-full !pb-0">
+  <div class="flex items-stretch md:flex-row flex-col w-full h-full">
     <UiLoading v-if="isPending" class="ml-4 mt-3" />
     <template v-else-if="proposal">
       <div
-        :class="['flex-1 grow min-w-0', { '!pb-0': withoutBottomPadding }]"
+        :class="[
+          'flex-1 grow min-w-0',
+          { 'max-md:pb-0': !withoutContentInBottom }
+        ]"
         v-bind="$attrs"
       >
         <UiScrollerHorizontal
@@ -267,7 +238,7 @@ watchEffect(() => {
         ]"
       >
         <Affix :top="72" :bottom="64">
-          <div class="flex flex-col space-y-4 p-4">
+          <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
                 !proposal.cancelled &&
@@ -290,26 +261,19 @@ watchEffect(() => {
               </h4>
               <div class="space-y-2">
                 <IndicatorVotingPower
-                  v-if="web3.account && (!currentVote || editMode)"
+                  v-if="!currentVote || editMode"
                   v-slot="votingPowerProps"
                   :network-id="proposal.network"
                   :voting-power="votingPower"
-                  class="mb-2 flex items-center"
-                  @fetch-voting-power="handleFetchVotingPower"
+                  :is-loading="isVotingPowerPending"
+                  :is-error="isVotingPowerError"
+                  @fetch="fetchVotingPower"
                 >
-                  <div
-                    v-if="
-                      votingPower?.error &&
-                      votingPower.error.details === 'NOT_READY_YET' &&
-                      ['evmSlotValue', 'ozVotesStorageProof'].includes(
-                        votingPower.error.source
-                      )
-                    "
-                  >
-                    <span class="inline-flex align-top h-[27px] items-center">
-                      <IH-exclamation-circle class="mr-1" />
-                    </span>
-                    Please allow few minutes for the voting power to be
+                  <div v-if="votingPowerError?.message === 'NOT_READY_YET'">
+                    <IH-exclamation-circle
+                      class="mr-1 -mt-1 inline-block h-[27px]"
+                    />
+                    Please allow a few minutes for the voting power to be
                     collected from Ethereum.
                   </div>
                   <div v-else class="flex gap-1.5 items-center">
@@ -317,13 +281,15 @@ watchEffect(() => {
                     <button
                       type="button"
                       class="truncate"
+                      :disabled="isVotingPowerPending"
+                      :class="{
+                        'cursor-not-allowed': isVotingPowerPending
+                      }"
                       @click="votingPowerProps.onClick"
                     >
-                      <UiLoading
-                        v-if="!votingPower || votingPower.status === 'loading'"
-                      />
+                      <UiLoading v-if="isVotingPowerPending" />
                       <IH-exclamation
-                        v-else-if="votingPower.status === 'error'"
+                        v-else-if="isVotingPowerError"
                         class="inline-block text-rose-500"
                       />
                       <span
@@ -332,16 +298,14 @@ watchEffect(() => {
                         v-text="getFormattedVotingPower(votingPower)"
                       />
                     </button>
-                    <a
+                    <AppLink
                       v-if="
-                        votingPower?.status === 'success' &&
-                        votingPower.votingPowers.every(v => v.value === 0n)
+                        votingPower?.votingPowers?.every(v => v.value === 0n)
                       "
-                      :href="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
-                      target="_blank"
+                      :to="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
                     >
                       <IH-question-mark-circle />
-                    </a>
+                    </AppLink>
                   </div>
                 </IndicatorVotingPower>
                 <ProposalVote
@@ -368,7 +332,9 @@ watchEffect(() => {
                     @vote="handleVoteClick"
                   />
                   <ProposalVoteRankedChoice
-                    v-else-if="proposal.type === 'ranked-choice'"
+                    v-else-if="
+                      ['ranked-choice', 'copeland'].includes(proposal.type)
+                    "
                     :proposal="proposal"
                     :default-choice="currentVote?.choice"
                     @vote="handleVoteClick"
@@ -394,26 +360,6 @@ watchEffect(() => {
                 :proposal="proposal"
                 :decimals="votingPowerDecimals"
               />
-              <button
-                v-if="
-                  proposal.network === 's' &&
-                  proposal.completed &&
-                  ['passed', 'rejected', 'executed', 'closed'].includes(
-                    proposal.state
-                  )
-                "
-                class="mt-2.5 inline-flex items-center gap-2 hover:text-skin-link"
-                @click="handleDownloadVotes"
-              >
-                <template v-if="isDownloadingVotes">
-                  <UiLoading :size="18" />
-                  Downloading votes
-                </template>
-                <template v-else>
-                  <IS-arrow-down-tray />
-                  Download votes
-                </template>
-              </button>
             </div>
             <div v-if="space.labels?.length && proposal.labels?.length">
               <h4 class="mb-2.5 eyebrow flex items-center gap-2">
@@ -421,8 +367,9 @@ watchEffect(() => {
                 Labels
               </h4>
               <ProposalLabels
+                :space-id="`${space.network}:${space.id}`"
+                :space-labels="space.labels"
                 :labels="proposal.labels"
-                :space="space"
                 with-link
               />
             </div>

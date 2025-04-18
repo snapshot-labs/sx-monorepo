@@ -1,10 +1,10 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
-import { StandardMerkleTree } from '@openzeppelin/merkle-tree';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import { PinFunction } from '@/helpers/pin';
-import { getUrl, shorten } from '@/helpers/utils';
+import { getUrl, shorten, sleep } from '@/helpers/utils';
+import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
 import { StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
@@ -23,11 +23,13 @@ export function createConstants(
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
   const SUPPORTED_AUTHENTICATORS = {
+    [config.Authenticators.EthSigV2]: true,
     [config.Authenticators.EthSig]: true,
     [config.Authenticators.EthTx]: true
   };
 
   const CONTRACT_SUPPORTED_AUTHENTICATORS = {
+    [config.Authenticators.EthSigV2]: true,
     [config.Authenticators.EthTx]: true
   };
 
@@ -46,11 +48,13 @@ export function createConstants(
   };
 
   const RELAYER_AUTHENTICATORS = {
-    [config.Authenticators.EthSig]: 'evm'
+    [config.Authenticators.EthSig]: 'evm',
+    [config.Authenticators.EthSigV2]: 'evm'
   } as const;
 
   const AUTHS = {
-    [config.Authenticators.EthSig]: 'Ethereum signature',
+    [config.Authenticators.EthSig]: 'Ethereum signature (deprecated)',
+    [config.Authenticators.EthSigV2]: 'Ethereum signature',
     [config.Authenticators.EthTx]: 'Ethereum transaction'
   };
 
@@ -82,7 +86,17 @@ export function createConstants(
       paramsDefinition: null
     },
     {
+      // Deprecated because of missing EIP-1271 support, superseded by EthSigV2
       address: config.Authenticators.EthSig,
+      name: 'Ethereum signature (deprecated)',
+      deprecated: true,
+      about:
+        'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
+      icon: IHPencil,
+      paramsDefinition: null
+    },
+    {
+      address: config.Authenticators.EthSigV2,
       name: 'Ethereum signature',
       about:
         'Will authenticate a user based on an EIP-712 message signed by an Ethereum private key.',
@@ -225,19 +239,30 @@ export function createConstants(
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: async (params: Record<string, any>) => {
-        const whitelist = params.whitelist
+        const entries = params.whitelist
           .split(/[\n,]/)
-          .filter((s: string) => s.trim().length)
-          .map((item: string) => {
-            const [address, votingPower] = item.split(':').map(s => s.trim());
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length);
 
-            return [address, BigInt(votingPower)];
+        const requestId = await generateMerkleTree({
+          network: 'evm',
+          entries
+        });
+
+        await sleep(500);
+
+        while (true) {
+          const root = await getMerkleRoot({
+            requestId
           });
 
-        const tree = StandardMerkleTree.of(whitelist, ['address', 'uint96']);
+          if (root) {
+            const abiCoder = new AbiCoder();
+            return [abiCoder.encode(['bytes32'], [root])];
+          }
 
-        const abiCoder = new AbiCoder();
-        return [abiCoder.encode(['bytes32'], [tree.root])];
+          await sleep(5000);
+        }
       },
       generateMetadata: async (params: Record<string, any>) => {
         const tree = params.whitelist

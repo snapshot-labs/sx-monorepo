@@ -30,7 +30,7 @@ const strategiesLimit = computed(() => {
 
 <template>
   <h4 class="eyebrow mb-2 font-medium">Strategies</h4>
-  <div class="s-box mb-4">
+  <div class="s-box">
     <UiSelectorNetwork
       v-model="snapshotChainId"
       :definition="{
@@ -47,6 +47,7 @@ const strategiesLimit = computed(() => {
   <UiContainerSettings
     :title="`Select up to ${strategiesLimit} strategies`"
     description="(Voting power is cumulative)"
+    class="!mx-0"
   >
     <UiMessage
       v-if="!isTicketValid"

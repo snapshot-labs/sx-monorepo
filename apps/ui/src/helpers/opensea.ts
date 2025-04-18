@@ -26,6 +26,8 @@ export const SUPPORTED_CHAIN_IDS = [
   1329, // Sei
   8217, // Klaytn
   8453, // Base
+  33111, // Curtis
+  33139, // Apechain
   42161, // Arbitrum
   42170, // Arbitrum Nova
   43114, // Avalanche
@@ -40,6 +42,8 @@ const NETWORKS: Record<(typeof SUPPORTED_CHAIN_IDS)[number], ChainItem> = {
   1329: { name: 'sei', isTestnet: false },
   8217: { name: 'klaytn', isTestnet: false },
   8453: { name: 'base', isTestnet: false },
+  33111: { name: 'ape_curtis', isTestnet: true },
+  33139: { name: 'ape_chain', isTestnet: false },
   42161: { name: 'arbitrum', isTestnet: false },
   42170: { name: 'arbitrum_nova', isTestnet: false },
   43114: { name: 'avalanche', isTestnet: false },

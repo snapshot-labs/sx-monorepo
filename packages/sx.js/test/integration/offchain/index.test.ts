@@ -1,8 +1,8 @@
 import { Wallet } from '@ethersproject/wallet';
 import { describe, expect, it } from 'vitest';
-import encryptedVote from './fixtures/encrypted-vote.json';
-import proposal from './fixtures/proposal.json';
-import vote from './fixtures/vote.json';
+import encryptedVote from './fixtures/encrypted-vote';
+import proposal from './fixtures/proposal';
+import vote from './fixtures/vote';
 import { EthereumSig } from '../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli, offchainMainnet } from '../../../src/offchainNetworks';
 

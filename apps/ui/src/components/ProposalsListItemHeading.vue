@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
-import { useSpaceQuery } from '@/queries/spaces';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -20,10 +19,6 @@ const props = withDefaults(
 
 const { getTsFromCurrent } = useMetaStore();
 const { votes } = useAccount();
-const { data: space } = useSpaceQuery({
-  networkId: toRef(() => props.proposal.network),
-  spaceId: toRef(() => props.proposal.space.id)
-});
 
 const modalOpenTimeline = ref(false);
 
@@ -70,10 +65,16 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             class="text-[21px] inline [overflow-wrap:anywhere] min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
+          <UiTooltip v-if="proposal.isInvalid" title="This proposal is invalid">
+            <IH-exclamation
+              class="inline-block text-skin-danger shrink-0 relative bottom-0.5"
+            />
+          </UiTooltip>
           <ProposalLabels
-            v-if="space?.labels && proposal.labels.length"
+            v-if="proposal.space?.labels && proposal.labels.length"
+            :space-id="`${proposal.network}:${proposal.space.id}`"
+            :space-labels="proposal.space.labels"
             :labels="proposal.labels"
-            :space="space"
             inline
             with-link
           />
@@ -111,8 +112,20 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
     </div>
     <span>
       <template v-if="proposal.vote_count">
-        · {{ _n(proposal.vote_count, 'compact') }}
-        {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        ·
+        <router-link
+          class="text-skin-text"
+          :to="{
+            name: 'space-proposal-votes',
+            params: {
+              proposal: proposal.proposal_id,
+              space: `${proposal.network}:${proposal.space.id}`
+            }
+          }"
+        >
+          {{ _n(proposal.vote_count, 'compact') }}
+          {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        </router-link>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
         · {{ formatQuorum(totalProgress) }}

@@ -89,6 +89,7 @@ const SPACE_FRAGMENT = gql`
     # needed for settings
     terms
     private
+    flagged
     domain
     skin
     skinSettings {
@@ -131,6 +132,12 @@ const PROPOSAL_FRAGMENT = gql`
       moderators
       members
       symbol
+      labels {
+        id
+        name
+        description
+        color
+      }
       terms
     }
     type

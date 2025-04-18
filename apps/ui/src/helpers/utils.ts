@@ -13,7 +13,7 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
-import { VotingPowerItem } from '@/stores/votingPowers';
+import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
 import { MAX_SYMBOL_LENGTH } from './constants';
 import pkg from '@/../package.json';
@@ -192,7 +192,7 @@ export function jsonParse(input, fallback?) {
   }
   try {
     return JSON.parse(input);
-  } catch (e) {
+  } catch {
     return fallback || {};
   }
 }
@@ -374,8 +374,7 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId])
-      throw new Error(err.message);
+    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId]) throw err;
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',
@@ -496,7 +495,8 @@ export function getStampUrl(
     | 'token',
   id: string,
   size: number | { width: number; height: number },
-  hash?: string
+  hash?: string,
+  cropped?: boolean
 ) {
   let sizeParam = '';
   if (typeof size === 'number') {
@@ -506,8 +506,9 @@ export function getStampUrl(
   }
 
   const cacheParam = hash ? `&cb=${hash}` : '';
+  const cropParam = cropped === false ? `&fit=inside` : '';
 
-  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}`;
+  return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
 
 export async function imageUpload(file: File) {
@@ -657,10 +658,25 @@ export function getRandomHexColor(): string {
     .padStart(6, '0')}`.toUpperCase();
 }
 
+/**
+ * Concat a list of strings with the connector if needed,
+ * using the oxford comma rule.
+ * e.g.
+ * - ['a', 'b', 'c'] => 'a, b, and c'
+ * - ['a', 'b'] => 'a and b'
+ * - ['a'] => 'a'
+ */
 export function prettyConcat(options: string[], connector = 'or') {
   const uniqOptions = Array.from(new Set(options));
 
   return uniqOptions.length > 1
-    ? `${uniqOptions.slice(0, -1).join(', ')} ${connector} ${uniqOptions.slice(-1)}`
+    ? `${uniqOptions.slice(0, -1).join(', ')}${uniqOptions.length > 2 ? ',' : ''} ${connector} ${uniqOptions.slice(-1)}`
     : uniqOptions[0];
+}
+
+export function isUserAbortError(e: any) {
+  return (
+    ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
+    ['User abort', 'User rejected the request.'].includes(e.message)
+  );
 }

@@ -40,10 +40,11 @@ export type ConnectorType =
   | 'argentx'
   | 'injected'
   | 'walletconnect'
-  | 'walletlink'
+  | 'coinbase'
   | 'gnosis'
   | 'sequence'
-  | 'unicorn';
+  | 'unicorn'
+  | 'guest';
 export type Connector = {
   id: string;
   type: ConnectorType;
@@ -53,6 +54,7 @@ export type Connector = {
   };
   options: any;
   provider: any;
+  autoConnectOnly: boolean;
   connect: () => void;
   autoConnect: () => void;
   disconnect: () => void;
@@ -75,6 +77,10 @@ export type GeneratedMetadata =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  /**
+   * Deprecated strategy can still be used but can't be added to new spaces.
+   */
+  deprecated?: boolean;
   about?: string;
   author?: string;
   version?: string;
@@ -280,6 +286,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
     validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
@@ -294,7 +301,6 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     chainIdOverride?: ChainId
   );
   getDelegatee(
-    web3: Web3Provider,
     delegation: SpaceMetadataDelegation,
     delegator: string
   ): Promise<{ address: string; balance: bigint; decimals: number } | null>;
@@ -387,7 +393,18 @@ export type NetworkHelpers = {
     authenticator: string
   ): 'evm' | 'evm-tx' | 'starknet' | null;
   isStrategySupported(strategy: string): boolean;
-  isExecutorSupported(executor: string): boolean;
+  /**
+   * Checks if the executor type is supported.
+   * If supported executor can be used to create proposal execution.
+   * @param executorType executor type
+   */
+  isExecutorSupported(executorType: string): boolean;
+  /**
+   * Checks if the executor actions are supported.
+   * If supported UI will show execution actions for the executor.
+   * @param executorType executor type
+   */
+  isExecutorActionsSupported(executorType: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   getSpaceController(space: Space): Promise<string>;
   getTransaction(txId: string): Promise<any>;
@@ -430,6 +447,7 @@ export type ExplorePageProtocol = 'snapshot' | 'snapshot-x';
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
+  apiNetwork: NetworkID;
   networks: NetworkID[];
   limit: number;
 };

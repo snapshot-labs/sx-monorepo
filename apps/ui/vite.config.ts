@@ -1,7 +1,7 @@
 import path from 'path';
 import inject from '@rollup/plugin-inject';
 import vue from '@vitejs/plugin-vue';
-import visualizer from 'rollup-plugin-visualizer';
+import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
 import { FileSystemIconLoader } from 'unplugin-icons/loaders';
 import IconsResolver from 'unplugin-icons/resolver';

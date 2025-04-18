@@ -1,7 +1,9 @@
 import {
   clients,
+  evmApe,
   evmArbitrum,
   evmBase,
+  evmCurtis,
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
@@ -21,6 +23,8 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [5000, evmMantle],
   [42161, evmArbitrum],
   [1, evmMainnet],
+  [33139, evmApe],
+  [33111, evmCurtis],
   [11155111, evmSepolia]
 ]);
 
@@ -30,7 +34,10 @@ export const createNetworkHandler = (chainId: number) => {
 
   const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
 
-  const client = new clients.EvmEthereumTx({ networkConfig });
+  const client = new clients.EvmEthereumTx({
+    networkConfig,
+    whitelistServerUrl: 'https://wls.snapshot.box'
+  });
   const l1ExecutorClient = new clients.L1Executor();
 
   async function send(id: number, params: any, res: Response) {
@@ -40,6 +47,8 @@ export const createNetworkHandler = (chainId: number) => {
       let receipt;
 
       const signer = getWallet(params.envelope.data.space);
+
+      console.log('params', JSON.stringify(params));
 
       console.time('Send');
       console.log('Types', types);
