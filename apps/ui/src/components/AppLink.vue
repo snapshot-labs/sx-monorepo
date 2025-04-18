@@ -37,7 +37,7 @@ function normalize(to: RouteLocationRaw) {
   return to;
 }
 
-function normalizeExternalize(to: RouteLocationRaw | string): string {
+function resolveToUrl(to: RouteLocationRaw | string): string {
   if (typeof to === 'string') {
     return to;
   }
@@ -49,7 +49,7 @@ function normalizeExternalize(to: RouteLocationRaw | string): string {
 <template>
   <a
     v-if="isExternalLink(props.to)"
-    :href="normalizeExternalize(props.to)"
+    :href="resolveToUrl(props.to)"
     target="_blank"
   >
     <slot />
