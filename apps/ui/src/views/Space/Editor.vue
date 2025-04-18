@@ -57,7 +57,6 @@ const {
   loaded: networksLoaded
 } = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
-const { isWhiteLabel } = useWhiteLabel();
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -457,15 +456,12 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <div v-if="proposal" class="h-full">
-    <UiTopnav
-      :class="{ 'maximum:border-l': isWhiteLabel }"
-      class="maximum:border-r"
-    >
+  <div v-if="proposal" class="flex flex-col h-full">
+    <UiTopnav class="justify-between">
       <div class="flex items-center gap-3 shrink truncate">
         <UiButton
           :to="{ name: 'space-overview', params: { space: spaceKey } }"
-          class="w-[46px] !px-0 ml-4 shrink-0"
+          class="w-[46px] !px-0 shrink-0"
         >
           <IH-arrow-narrow-left />
         </UiButton>
@@ -495,11 +491,9 @@ watchEffect(() => {
         </UiButton>
       </div>
     </UiTopnav>
-    <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
-    >
+    <div class="flex items-stretch md:flex-row flex-col flex-1">
       <div
-        class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
+        class="flex-1 min-w-0 border-r-0 md:border-r max-md:pb-0"
         v-bind="$attrs"
       >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
@@ -681,7 +675,7 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+      <Affix class="shrink-0 md:w-[340px]" :top="72" :bottom="64">
         <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
