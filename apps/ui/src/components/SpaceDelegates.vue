@@ -137,6 +137,8 @@ function handleUndelegateConfirmed() {
       web3.value.account
     ]
   });
+
+  isUndelegating.value = false;
 }
 
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
@@ -460,10 +462,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :open="isUndelegating"
         :chain-id="delegation.chainId"
         :execute="undelegateFn"
-        @confirmed="
-          handleUndelegateConfirmed();
-          isUndelegating = false;
-        "
+        @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"
         @cancelled="isUndelegating = false"
       />
