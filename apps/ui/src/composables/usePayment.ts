@@ -1,5 +1,6 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
+import { MaybeRefOrGetter } from 'vue';
 import { abis } from '@/helpers/abis';
 import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
@@ -55,7 +56,7 @@ function getWeiAmount(token: Token, amount: number): BigNumber {
   return BigNumber.from(amount * 10 ** token.decimals);
 }
 
-export default function usePayment(network: ChainId) {
+export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
   const { auth } = useWeb3();
   const { modalAccountOpen } = useModal();
 
@@ -68,7 +69,7 @@ export default function usePayment(network: ChainId) {
       return;
     }
 
-    await verifyNetwork(auth.value.provider, Number(network));
+    await verifyNetwork(auth.value.provider, Number(toValue(network)));
 
     const signer = auth.value.provider.getSigner();
     const tokenContract = new Contract(
@@ -78,7 +79,7 @@ export default function usePayment(network: ChainId) {
     );
     const allowance = await tokenContract.allowance(
       signer.getAddress(),
-      PAYMENT_CONTRACT_ADDRESSES[network]
+      PAYMENT_CONTRACT_ADDRESSES[toValue(network)]
     );
 
     return BigNumber.from(allowance).gte(getWeiAmount(token, amount));
@@ -90,7 +91,7 @@ export default function usePayment(network: ChainId) {
       return;
     }
 
-    await verifyNetwork(auth.value.provider, Number(network));
+    await verifyNetwork(auth.value.provider, Number(toValue(network)));
 
     const tokenContract = new Contract(
       token.contractAddress,
@@ -99,7 +100,7 @@ export default function usePayment(network: ChainId) {
     );
 
     return tokenContract.approve(
-      PAYMENT_CONTRACT_ADDRESSES[network],
+      PAYMENT_CONTRACT_ADDRESSES[toValue(network)],
       getWeiAmount(token, amount)
     );
   }
@@ -110,10 +111,10 @@ export default function usePayment(network: ChainId) {
       return;
     }
 
-    await verifyNetwork(auth.value.provider, Number(network));
+    await verifyNetwork(auth.value.provider, Number(toValue(network)));
 
     const paymentContract = new Contract(
-      PAYMENT_CONTRACT_ADDRESSES[network],
+      PAYMENT_CONTRACT_ADDRESSES[toValue(network)],
       PAYMENT_CONTRACT_ABI,
       auth.value.provider.getSigner()
     );

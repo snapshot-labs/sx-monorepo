@@ -39,7 +39,7 @@ const {
   goToNextStep,
   isLastStep,
   currentStep
-} = usePaymentFactory(props.network);
+} = usePaymentFactory(toRef(props, 'network'));
 const { isPending, assetsMap } = useBalances({
   treasury: toRef(() => {
     return auth.value

@@ -1,3 +1,4 @@
+import { MaybeRefOrGetter } from 'vue';
 import { pinPineapple } from '@/helpers/pin';
 import { ChainId } from '@/types';
 import { Token } from './usePayment';
@@ -35,7 +36,7 @@ async function getBarcode(contents: BarcodePayload): Promise<string> {
   return `ipfs://${receipt.cid}`;
 }
 
-export default function usePaymentFactory(network: ChainId) {
+export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
   const uiStore = useUiStore();
 
   const { getIsApproved, approve, pay } = usePayment(network);
@@ -70,7 +71,7 @@ export default function usePaymentFactory(network: ChainId) {
       },
       nextStep: () => 'check_approval',
       execute: async (token, amount) =>
-        wrapPromise(approve(token, amount), network)
+        wrapPromise(approve(token, amount), toValue(network))
     },
     pay: {
       messages: {
@@ -86,7 +87,7 @@ export default function usePaymentFactory(network: ChainId) {
 
         return wrapPromise(
           pay(token, amount, await getBarcode(payload)),
-          network
+          toValue(network)
         );
       }
     }
