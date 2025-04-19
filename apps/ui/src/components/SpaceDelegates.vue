@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
-import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { useDelegateesQuery } from '@/queries/delegatees';
 import { useDelegatesQuery } from '@/queries/delegates';
 import { Space, SpaceMetadataDelegation } from '@/types';
@@ -45,7 +44,7 @@ const {
   sortBy
 );
 
-const { data: delegatee } = useDelegateesQuery(
+const { data: delegatees } = useDelegateesQuery(
   toRef(() => web3.value.account),
   toRef(props, 'space'),
   toRef(props, 'delegation')
@@ -74,8 +73,8 @@ function handleSortChange(
 function handleDelegateToggle(newDelegatee?: string) {
   if (
     newDelegatee &&
-    delegatee.value &&
-    compareAddresses(newDelegatee, delegatee.value.id)
+    delegatees.value?.[0] &&
+    compareAddresses(newDelegatee, delegatees.value[0].id)
   ) {
     isUndelegating.value = true;
     return;
@@ -130,22 +129,6 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <IH-exclamation-circle class="shrink-0" />
     <span>Invalid delegation settings.</span>
   </div>
-  <UiMessage
-    v-if="delegation.apiType === 'split-delegation'"
-    :type="'info'"
-    class="m-4"
-  >
-    This space uses the split-delegation feature, which is currently not
-    supported on the new interface. You can view the delegates dashboard on the
-    <a
-      :href="`${SNAPSHOT_URLS[props.space.network]}/#/${props.space.id}/delegates`"
-      target="_blank"
-      class="inline-flex items-center font-bold"
-    >
-      previous interface
-      <IH-arrow-sm-right class="inline-block -rotate-45" /></a
-    >.
-  </UiMessage>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <UiButton
@@ -168,10 +151,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </UiTooltip>
     </div>
 
-    <div v-if="delegatee" class="mb-3">
+    <div v-if="delegatees?.length" class="mb-3">
       <UiLabel label="Delegating to" />
       <div class="w-full truncate px-4">
-        <div class="flex w-full space-x-3 truncate border-b py-3">
+        <div
+          v-for="delegatee in delegatees"
+          :key="delegatee.id"
+          class="flex w-full space-x-3 truncate border-b py-3"
+        >
           <AppLink
             :to="{
               name: 'space-user-statement',
@@ -376,8 +363,8 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     >
                       <template
                         v-if="
-                          delegatee &&
-                          compareAddresses(delegate.user, delegatee.id)
+                          delegatees?.[0] &&
+                          compareAddresses(delegate.user, delegatees[0].id)
                         "
                       >
                         <IH-user-remove />

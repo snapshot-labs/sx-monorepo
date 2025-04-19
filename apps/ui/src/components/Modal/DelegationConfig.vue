@@ -46,10 +46,11 @@ const definition = computed(() => {
         : {}),
       apiType: {
         type: ['string', 'null'],
-        enum: [null, 'governor-subgraph'],
+        enum: [null, 'governor-subgraph', 'split-delegation'],
         options: [
           { id: null, name: 'No delegation API' },
-          { id: 'governor-subgraph', name: 'ERC-20 Votes' }
+          { id: 'governor-subgraph', name: 'ERC-20 Votes' },
+          { id: 'split-delegation', name: 'Split delegation' }
         ],
         title: 'Delegation type',
         nullable: true
