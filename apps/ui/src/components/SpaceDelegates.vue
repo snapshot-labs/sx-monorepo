@@ -2,7 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, clone, compareAddresses, shorten } from '@/helpers/utils';
 import { useDelegateesQuery } from '@/queries/delegatees';
 import { useDelegatesQuery } from '@/queries/delegates';
 import { Space, SpaceMetadataDelegation } from '@/types';
@@ -13,7 +13,9 @@ const props = defineProps<{
 }>();
 
 const delegateModalOpen = ref(false);
-const delegateModalState = ref<{ delegatee: string } | null>(null);
+const delegateModalState = ref<{
+  delegatees?: { id: string; share: number }[];
+} | null>(null);
 const isUndelegating = ref(false);
 const undelegateFn = ref(undelegate);
 const sortBy = ref(
@@ -44,11 +46,15 @@ const {
   sortBy
 );
 
-const { data: delegatees } = useDelegateesQuery(
+const { data: delegatees, isPending: isDelegateePending } = useDelegateesQuery(
   toRef(() => web3.value.account),
   toRef(props, 'space'),
   toRef(props, 'delegation')
 );
+
+const isUpdatableDelegation = computed(() => {
+  return props.delegation.apiType === 'split-delegation';
+});
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
   if (props.delegation.chainId) {
@@ -56,6 +62,12 @@ function getExplorerUrl(address: string, type: 'address' | 'token') {
   } else {
     return null;
   }
+}
+
+function hasDelegatedTo(delegatee: string): boolean {
+  return (
+    delegatees.value?.some(d => compareAddresses(d.id, delegatee)) || false
+  );
 }
 
 function handleSortChange(
@@ -71,16 +83,31 @@ function handleSortChange(
 }
 
 function handleDelegateToggle(newDelegatee?: string) {
-  if (
-    newDelegatee &&
-    delegatees.value?.[0] &&
-    compareAddresses(newDelegatee, delegatees.value[0].id)
-  ) {
+  if (newDelegatee && hasDelegatedTo(newDelegatee)) {
     isUndelegating.value = true;
     return;
   }
 
-  delegateModalState.value = newDelegatee ? { delegatee: newDelegatee } : null;
+  delegateModalState.value = {
+    delegatees: [{ id: newDelegatee || '', share: 100 }]
+  };
+  delegateModalOpen.value = true;
+}
+
+function handleUpdateDelegatesClick(newDelegatee?: string) {
+  const newDelegatees: { id: string; share: number }[] = clone(
+    delegatees.value || []
+  );
+
+  if (newDelegatee && !hasDelegatedTo(newDelegatee)) {
+    const totalShares = newDelegatees.reduce((sum, d) => sum + d.share, 0);
+    const remainingAvailableShare = 100 - totalShares;
+    newDelegatees.push({ id: newDelegatee, share: remainingAvailableShare });
+  }
+
+  delegateModalState.value = {
+    delegatees: newDelegatees
+  };
   delegateModalOpen.value = true;
 }
 
@@ -116,6 +143,10 @@ function handleUndelegateConfirmed() {
   });
 }
 
+function handleUndelegateClick() {
+  isUndelegating.value = true;
+}
+
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
@@ -142,8 +173,19 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         Edit my statement
       </UiButton>
       <div class="flex-auto" />
-      <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="handleDelegateToggle()">
+      <UiTooltip
+        :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
+      >
+        <UiButton
+          class="!px-0 w-[46px]"
+          :disabled="isDelegateePending"
+          :loading="isDelegateePending"
+          @click="
+            isUpdatableDelegation
+              ? handleUpdateDelegatesClick()
+              : handleDelegateToggle()
+          "
+        >
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
@@ -185,7 +227,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 {{ _vp(delegatee.balance) }}
                 {{ space.voting_power_symbol }}
               </h4>
-              <div class="text-[17px]" v-text="_p(delegatee.share)" />
+              <div
+                class="text-[17px]"
+                v-text="_p(delegatee.delegatedVotePercentage)"
+              />
             </div>
           </AppLink>
           <div class="flex items-center justify-center">
@@ -201,10 +246,20 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     type="button"
                     class="flex items-center gap-2"
                     :class="{ 'opacity-80': active }"
-                    @click="isUndelegating = true"
+                    @click="
+                      isUpdatableDelegation
+                        ? handleUpdateDelegatesClick()
+                        : handleUndelegateClick()
+                    "
                   >
-                    <IH-user-remove />
-                    Undelegate
+                    <template v-if="isUpdatableDelegation">
+                      <IH-pencil />
+                      Edit delegation
+                    </template>
+                    <template v-else>
+                      <IH-user-remove />
+                      Undelegate
+                    </template>
                   </button>
                 </UiDropdownItem>
               </template>
@@ -357,16 +412,21 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       type="button"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
-                      @click="handleDelegateToggle(delegate.user)"
+                      @click="
+                        isUpdatableDelegation
+                          ? handleUpdateDelegatesClick(delegate.user)
+                          : handleDelegateToggle(delegate.user)
+                      "
                     >
-                      <template
-                        v-if="
-                          delegatees?.[0] &&
-                          compareAddresses(delegate.user, delegatees[0].id)
-                        "
-                      >
-                        <IH-user-remove />
-                        Undelegate
+                      <template v-if="hasDelegatedTo(delegate.user)">
+                        <template v-if="isUpdatableDelegation">
+                          <IH-pencil />
+                          Edit delegation
+                        </template>
+                        <template v-else>
+                          <IH-user-remove />
+                          Undelegate
+                        </template>
                       </template>
                       <template v-else>
                         <IH-user-add />

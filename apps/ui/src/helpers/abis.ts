@@ -20,5 +20,9 @@ export const abis = {
   ],
   erc1155: [
     'function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes data)'
+  ],
+  splitDelegation: [
+    'function clearDelegation(string context)',
+    'function setDelegation(string context, tuple(bytes32 delegate, uint256 ratio)[] delegation, uint256 expirationTimestamp)'
   ]
 };

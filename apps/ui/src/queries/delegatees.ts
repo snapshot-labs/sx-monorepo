@@ -8,6 +8,7 @@ import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 type Delegatee = {
   id: string;
   balance: number;
+  delegatedVotePercentage: number;
   share: number;
   name?: string;
 };
@@ -51,12 +52,13 @@ async function fetchGovernorSubgraphDelegatees(
     {
       id: delegateeData.address,
       balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
-      share:
+      delegatedVotePercentage:
         apiDelegate && apiDelegate.delegatedVotesRaw !== '0'
           ? Number(delegateeData.balance) /
             Number(apiDelegate.delegatedVotesRaw)
           : 1,
-      name: names[delegateeData.address]
+      name: names[delegateeData.address],
+      share: 100
     }
   ];
 }
@@ -112,8 +114,11 @@ async function fetchDelegateRegistryDelegatees(
     {
       id: accountDelegation.delegate,
       balance,
-      share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
-      name: names[accountDelegation.delegate]
+      delegatedVotePercentage: apiDelegate
+        ? balance / Number(apiDelegate.delegatedVotes)
+        : 1,
+      name: names[accountDelegation.delegate],
+      share: 100
     }
   ];
 }
@@ -170,14 +175,15 @@ async function fetchSplitDelegationDelegatees(
     )
   ]);
 
-  return body.delegateTree.map(({ delegate, delegatedPower }, i) => {
+  return body.delegateTree.map(({ delegate, delegatedPower, weight }, i) => {
     const vpPercentFromDelegator = delegatedPower / delegatees[i].votingPower;
     return {
       id: delegate,
       balance: delegatees[i].votingPower,
-      share:
+      delegatedVotePercentage:
         vpPercentFromDelegator * (delegatees[i].percentOfVotingPower / 10000),
-      name: names[delegate]
+      name: names[delegate],
+      share: weight / 100
     };
   });
 }
