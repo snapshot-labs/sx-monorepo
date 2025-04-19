@@ -5,6 +5,7 @@ const SPACE_FRAGMENT = gql`
     id
     verified
     turbo
+    turboExpiration
     admins
     members
     name

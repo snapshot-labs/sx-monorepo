@@ -216,6 +216,7 @@ function formatSpace(
     network: networkId,
     verified: space.verified,
     turbo: space.turbo,
+    turbo_expiration: space.turboExpiration,
     controller: '',
     snapshot_chain_id: parseInt(space.network),
     name: space.name || '',
