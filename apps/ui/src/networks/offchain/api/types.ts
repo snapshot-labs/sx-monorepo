@@ -23,6 +23,7 @@ export type ApiSpace = {
   id: string;
   verified: boolean;
   turbo: boolean;
+  turboExpiration: number;
   admins: string[];
   members: string[];
   name: string | null;
