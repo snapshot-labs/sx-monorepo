@@ -1,12 +1,9 @@
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import express from 'express';
 import z from 'zod';
-import {
-  DEFAULT_INDEX,
-  getEthereumWallet,
-  SPACES_INDICES
-} from './dependencies';
+import { DEFAULT_INDEX, getEthereumWallet } from './dependencies';
 import { createNetworkHandler, NETWORKS } from './rpc';
-import { rpcError } from '../utils';
+import { indexWithAddress, rpcError } from '../utils';
 
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
@@ -46,16 +43,23 @@ router.get('/relayers', (req, res) => {
   const mnemonic = process.env.ETH_MNEMONIC || '';
 
   const defaultRelayer = getEthereumWallet(mnemonic, DEFAULT_INDEX).address;
-  const relayers = Object.fromEntries(
-    Array.from(SPACES_INDICES).map(([spaceAddress, index]) => {
-      const { address } = getEthereumWallet(mnemonic, index);
-      return [spaceAddress, address];
-    })
-  );
 
   res.json({
-    default: defaultRelayer,
-    ...relayers
+    default: defaultRelayer
+  });
+});
+
+router.get('/relayer/:space', async (req, res) => {
+  const { space } = req.params;
+  if (!space) return rpcError(res, 400, 'Missing address parameter', 0);
+
+  const mnemonic = process.env.ETH_MNEMONIC || '';
+  const normalizedSpaceAddress = space.toLowerCase();
+  const index = indexWithAddress(normalizedSpaceAddress);
+  const { address } = getEthereumWallet(mnemonic, index);
+
+  res.json({
+    address
   });
 });
 

@@ -1,13 +1,10 @@
 import express from 'express';
+import { validateAndParseAddress } from 'starknet';
 import z from 'zod';
-import {
-  DEFAULT_INDEX,
-  getStarknetAccount,
-  SPACES_INDICES
-} from './dependencies';
+import { DEFAULT_INDEX, getStarknetAccount } from './dependencies';
 import { NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
-import { rpcError } from '../utils';
+import { indexWithAddress, rpcError } from '../utils';
 
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
@@ -50,17 +47,21 @@ router.get('/relayers', (req, res) => {
   const mnemonic = process.env.STARKNET_MNEMONIC || '';
 
   const defaultRelayer = getStarknetAccount(mnemonic, DEFAULT_INDEX).address;
-  const relayers = Object.fromEntries(
-    Array.from(SPACES_INDICES).map(([spaceAddress, index]) => {
-      const { address } = getStarknetAccount(mnemonic, index);
-      return [spaceAddress, address];
-    })
-  );
-
   res.json({
-    default: defaultRelayer,
-    ...relayers
+    default: defaultRelayer
   });
+});
+
+router.get('/relayer/:space', (req, res) => {
+  const mnemonic = process.env.STARKNET_MNEMONIC || '';
+  const { space } = req.params;
+  if (!space) return rpcError(res, 400, 'Missing address parameter', 0);
+
+  const normalizedSpaceAddress = validateAndParseAddress(space);
+  const index = indexWithAddress(normalizedSpaceAddress);
+  const { address } = getStarknetAccount(mnemonic, index);
+
+  res.json({ address });
 });
 
 export default router;

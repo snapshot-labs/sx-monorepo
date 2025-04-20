@@ -2,6 +2,7 @@ import * as bip32 from '@scure/bip32';
 import * as bip39 from '@scure/bip39';
 import {
   Account,
+  CallData,
   constants,
   ec,
   hash,
@@ -9,9 +10,10 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { NonceManager } from './nonce-manager';
+import { indexWithAddress } from '../utils';
 
 const basePath = "m/44'/9004'/0'/0";
-const contractAXclassHash =
+export const contractAXclassHash =
   '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
 const NODE_URLS = new Map<string, string | undefined>([
@@ -47,33 +49,65 @@ export function getStarknetAccount(mnemonic: string, index: number) {
     0
   );
 
-  return { address, privateKey: `0x${privateKey}` };
+  return { address, privateKey: `0x${privateKey}`, starkKeyPubAX };
 }
 
 export const DEFAULT_INDEX = 1;
-export const SPACES_INDICES = new Map([
-  ['0x040e337fb53973b08343ce983369c1d9e6249ba011e929347288e4d8b590d048', 2],
-  ['0x07c251045154318a2376a3bb65be47d3c90df1740d8e35c9b9d943aa3f240e50', 3], // Nostra
-  ['0x0395989740c1d6ecc0cba880dd22e87cc209fdb6b8dc2794e9a399c4b2c34d94', 3] // Nostra (test)
-]);
 
 export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
   const accounts = new Map<
     number,
-    { account: Account; nonceManager: NonceManager }
+    {
+      account: Account;
+      nonceManager: NonceManager;
+      deploy: () => Promise<void>;
+    }
   >();
 
   return (spaceAddress: string) => {
     const normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
-    const index = SPACES_INDICES.get(normalizedSpaceAddress) || DEFAULT_INDEX;
+    const index = indexWithAddress(normalizedSpaceAddress);
 
     if (!accounts.has(index)) {
-      const { address, privateKey } = getStarknetAccount(mnemonic, index);
+      const { address, privateKey, starkKeyPubAX } = getStarknetAccount(
+        mnemonic,
+        index
+      );
 
       const account = new Account(provider, address, privateKey);
       const nonceManager = new NonceManager(account);
 
-      accounts.set(index, { account, nonceManager });
+      const deploy = async () => {
+        // check if account is already deployed
+        let accountDeployed = false;
+        try {
+          const accountState = await provider.getClassAt(address);
+          accountDeployed = accountState.abi !== null;
+        } catch (e: any) {
+          if (e.message.includes('Contract not found')) {
+            accountDeployed = false;
+          } else {
+            console.error('Error fetching account state', e);
+            throw e;
+          }
+        }
+
+        console.log('Account deployed', accountDeployed);
+        if (!accountDeployed) {
+          const AXConstructorCallData = CallData.compile({
+            owner: starkKeyPubAX,
+            guardian: '0'
+          });
+          const deployResponse = await account.deployAccount({
+            classHash: contractAXclassHash,
+            constructorCalldata: AXConstructorCallData,
+            contractAddress: address,
+            addressSalt: starkKeyPubAX
+          });
+          await provider.waitForTransaction(deployResponse.transaction_hash);
+        }
+      };
+      accounts.set(index, { account, nonceManager, deploy });
     }
 
     return accounts.get(index)!;
