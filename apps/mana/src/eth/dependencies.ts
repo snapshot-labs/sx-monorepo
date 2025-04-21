@@ -1,7 +1,6 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { indexWithAddress } from '../utils';
-import { NETWORKS } from './rpc';
 
 export const DEFAULT_INDEX = 0;
 

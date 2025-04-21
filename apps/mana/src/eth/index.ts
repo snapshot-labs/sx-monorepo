@@ -1,4 +1,3 @@
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import express from 'express';
 import z from 'zod';
 import { DEFAULT_INDEX, getEthereumWallet } from './dependencies';
