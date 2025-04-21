@@ -55,6 +55,7 @@ const formErrors = ref({} as Record<string, any>);
 const connectorModalOpen = ref(false);
 const connectorModalConnectors = ref([] as ConnectorType[]);
 const delegateesRef: Ref<any[]> = ref([]);
+const sharesRef: Ref<any[]> = ref([]);
 const isModalDateTimeOpen = ref(false);
 const isHidden = ref(false);
 
@@ -297,6 +298,23 @@ const handleDistributeSharesEvenlyClick = () => {
   });
 };
 
+const handleSharePressEnter = (index: number) => {
+  if (!form.delegatees[index + 1]) return handleAddDelegatee();
+
+  nextTick(() => delegateesRef.value[index + 1].focus());
+};
+
+const handleAddressPressEnter = (index: number) => {
+  nextTick(() => sharesRef.value[index].focus());
+};
+
+const handleAddressPressDelete = (index: number, force = false) => {
+  if (form.delegatees[index].id && !force) return;
+
+  form.delegatees.splice(index, 1);
+  nextTick(() => delegateesRef.value[index - 1].focus());
+};
+
 watch(
   () => props.open,
   () => {
@@ -414,7 +432,7 @@ watchEffect(async () => {
                   class="!p-0 !border-0 !h-[auto] !bg-transparent"
                   @click="handleDistributeSharesEvenlyClick"
                 >
-                  <IH-code-bracket-square class="text-skin-text" />
+                  <IH-bars-3 class="text-skin-text" />
                 </UiButton>
               </UiTooltip>
               <UiTooltip title="Clear all delegates">
@@ -437,7 +455,7 @@ watchEffect(async () => {
               {{ formErrors.global }}
             </UiAlert>
             <div class="space-y-2">
-              <UiMessage v-if="isClearingDelegation">
+              <UiMessage v-if="isClearingDelegation" type="info">
                 All delegates removed
               </UiMessage>
               <div
@@ -458,6 +476,8 @@ watchEffect(async () => {
                       :placeholder="delegateAddressDefinition.examples?.[0]"
                       type="text"
                       class="w-full bg-transparent h-[40px] py-[10px] text-skin-heading"
+                      @keyup.enter="handleAddressPressEnter(index)"
+                      @keydown.delete="handleAddressPressDelete(index)"
                     />
                     <button
                       type="button"
@@ -476,16 +496,19 @@ watchEffect(async () => {
                         formErrors.delegatees?.[index]?.share
                     }"
                   >
-                    <UiInputNumber
+                    <input
+                      :ref="el => (sharesRef[index] = el)"
                       v-model.trim="delegatee.share"
+                      type="number"
                       :definition="delegateShareDefinition"
                       class="w-full bg-transparent h-[40px] text-skin-heading text-right !p-0 !m-0"
+                      @keyup.enter="handleSharePressEnter(index)"
                     />
                     %
                   </div>
                   <UiButton
                     class="!border-0 !h-[40px] !w-[20px] !px-0 !text-skin-text shrink-0"
-                    @click="form.delegatees.splice(index, 1)"
+                    @click="handleAddressPressDelete(index, true)"
                   >
                     <IH-trash />
                   </UiButton>
@@ -504,7 +527,7 @@ watchEffect(async () => {
               class="w-full flex items-center justify-center space-x-1"
               @click="handleAddDelegatee"
             >
-              <IH-plus />
+              <IH-plus-sm />
               Add delegate
             </UiButton>
           </div>
@@ -532,18 +555,28 @@ watchEffect(async () => {
           </button>
         </div>
 
-        <Combobox
-          v-model="form.chainId"
-          :definition="{
-            type: 'number',
-            title: 'Preferred delegation network',
-            tooltip:
-              'Voting power will be aggregated from all networks, regardless of the delegation network',
-            examples: ['Select network'],
-            enum: availableNetworks.map(c => c.id),
-            options: availableNetworks
-          }"
-        />
+        <div class="space-y-2.5">
+          <h4 class="eyebrow flex items-center gap-1">
+            Delegation network
+            <UiTooltip
+              title="Voting power will be aggregated from all networks, regardless of the delegation network"
+              class="text-skin-text"
+            >
+              <IH-exclamation-circle />
+            </UiTooltip>
+          </h4>
+          <Combobox
+            v-model="form.chainId"
+            :definition="{
+              type: 'number',
+              title: 'Network',
+              tooltip: '',
+              examples: ['Select network'],
+              enum: availableNetworks.map(c => c.id),
+              options: availableNetworks
+            }"
+          />
+        </div>
       </div>
       <template v-else>
         <UiInputAddress

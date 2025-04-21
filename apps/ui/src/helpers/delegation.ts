@@ -4,7 +4,7 @@ import { enabledNetworks, evmNetworks } from '@/networks';
 import { METADATA } from '@/networks/starknet';
 import { ChainId, NetworkID, Space } from '@/types';
 import { abis } from './abis';
-import { verifyNetwork } from './utils';
+import { compareAddresses, verifyNetwork } from './utils';
 
 export function getDelegationNetwork(chainId: ChainId) {
   // NOTE: any EVM network can be used for delegation on EVMs (it will switch chainId as needed).
@@ -42,26 +42,28 @@ export async function splitDelegate(
     return;
   }
 
+  const { provider, account } = auth.value;
+
   await verifyNetwork(auth.value.provider, Number(toValue(chainId)));
 
   // Assign the remaining shares to the self
   const remainingShares = Math.floor(100 - shares.reduce((a, b) => a + b, 0));
   if (remainingShares > 0) {
-    const selfIndex = delegatees.findIndex(
-      address => address === auth.value.account
+    const selfIndex = delegatees.findIndex(address =>
+      compareAddresses(address, account)
     );
     if (selfIndex !== -1) {
       delegatees.splice(selfIndex, 1);
       shares.splice(selfIndex, 1);
     }
     shares.push(remainingShares);
-    delegatees.push(auth.value.account);
+    delegatees.push(account);
   }
 
   const contract = new Contract(
     contractAddress,
     abis.splitDelegation,
-    auth.value.provider.getSigner()
+    provider.getSigner()
   );
 
   const delegations = delegatees
