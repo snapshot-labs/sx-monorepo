@@ -606,7 +606,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         successSubtitle: 'Your changes were successfully saved'
       }"
       :execute="executeFn"
-      @confirmed="reloadSpaceAndReset"
+      @confirmed="
+        reloadSpaceAndReset();
+        saving = false;
+      "
       @close="saving = false"
       @cancelled="saving = false"
     />

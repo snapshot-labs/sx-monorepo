@@ -141,6 +141,8 @@ function handleUndelegateConfirmed() {
       web3.value.account
     ]
   });
+
+  isUndelegating.value = false;
 }
 
 function handleUndelegateClick() {
