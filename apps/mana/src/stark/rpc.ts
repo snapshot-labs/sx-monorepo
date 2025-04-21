@@ -17,14 +17,14 @@ export const createNetworkHandler = (chainId: string) => {
       const { address, primaryType, message } = signatureData;
       let receipt;
 
-      const { account, nonceManager, deploy } = getAccount(data.space);
+      const { account, nonceManager, deployAccount } = getAccount(data.space);
 
       console.time('Send');
       console.log('Type', primaryType);
       console.log('Address', address);
       console.log('Message', message);
 
-      await deploy();
+      await deployAccount();
 
       try {
         await nonceManager.acquire();

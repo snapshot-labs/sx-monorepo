@@ -54,6 +54,33 @@ export async function executionCall(
   return rpcCall(`${network}_rpc/${chainId}`, method, params);
 }
 
+async function fetchGasBalance(
+  provider: Provider | RpcProvider,
+  address: string,
+  isStarknet: boolean
+): Promise<number> {
+  let balance;
+
+  if (isStarknet) {
+    const starknetProvider = provider as RpcProvider;
+    const token =
+      '0x049D36570D4e46f48e99674bd3fcc84644DdD6b96F7C741B1562B82f9e004dC7';
+
+    const balanceResponse = await starknetProvider.callContract({
+      contractAddress: token,
+      entrypoint: 'balanceOf',
+      calldata: [address]
+    });
+
+    balance = Number(balanceResponse[0]);
+  } else {
+    const evmProvider = provider as Provider;
+    balance = await evmProvider.getBalance(address);
+  }
+
+  return parseFloat(balance.toString()) / 1e18;
+}
+
 export async function getRelayerInfo(
   space: string,
   network: NetworkID,
@@ -74,23 +101,7 @@ export async function getRelayerInfo(
       return null;
     }
 
-    let balance;
-    if (isStarknet) {
-      const starknetProvider = provider as RpcProvider;
-      const token =
-        '0x049D36570D4e46f48e99674bd3fcc84644DdD6b96F7C741B1562B82f9e004dC7';
-      const balanceResponse = await starknetProvider.callContract({
-        contractAddress: token,
-        entrypoint: 'balanceOf',
-        calldata: [data.address]
-      });
-      balance = Number(balanceResponse[0]);
-    } else {
-      const evmProvider = provider as Provider;
-      balance = await evmProvider.getBalance(data.address);
-    }
-
-    data.balance = parseFloat(balance.toString()) / 1e18;
+    data.balance = await fetchGasBalance(provider, data.address, isStarknet);
     data.ticker = METADATA[network]?.ticker || 'ETH';
     data.hasMinimumBalance = data.balance >= MINIMUM_RELAYER_BALANCE;
 

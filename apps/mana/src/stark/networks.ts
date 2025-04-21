@@ -22,7 +22,7 @@ const clientsMap = new Map<
     getAccount: (spaceAddress: string) => {
       account: Account;
       nonceManager: NonceManager;
-      deploy: () => Promise<void>;
+      deployAccount: () => Promise<void>;
     };
   }
 >();
