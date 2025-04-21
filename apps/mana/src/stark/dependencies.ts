@@ -52,8 +52,6 @@ export function getStarknetAccount(mnemonic: string, index: number) {
   return { address, privateKey: `0x${privateKey}`, starkKeyPubAX };
 }
 
-export const DEFAULT_INDEX = 1;
-
 export async function isAccountDeployed(
   provider: RpcProvider,
   address: string

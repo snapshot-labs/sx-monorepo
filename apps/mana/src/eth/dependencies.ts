@@ -2,8 +2,6 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { indexWithAddress } from '../utils';
 
-export const DEFAULT_INDEX = 0;
-
 export function getEthereumWallet(mnemonic: string, index: number) {
   const path = `m/44'/60'/0'/0/${index}`;
   return Wallet.fromMnemonic(mnemonic, path);

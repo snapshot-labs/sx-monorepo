@@ -1,7 +1,7 @@
 import express from 'express';
 import { validateAndParseAddress } from 'starknet';
 import z from 'zod';
-import { DEFAULT_INDEX, getStarknetAccount } from './dependencies';
+import { getStarknetAccount } from './dependencies';
 import { NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
 import { indexWithAddress, rpcError } from '../utils';
@@ -41,15 +41,6 @@ router.post('/:chainId', (req, res) => {
   if (!handler) return rpcError(res, 404, new Error('Unsupported chainId'), id);
 
   handler[method](id, params, res);
-});
-
-router.get('/relayers', (req, res) => {
-  const mnemonic = process.env.STARKNET_MNEMONIC || '';
-
-  const defaultRelayer = getStarknetAccount(mnemonic, DEFAULT_INDEX).address;
-  res.json({
-    default: defaultRelayer
-  });
 });
 
 router.get('/relayer/:space', (req, res) => {

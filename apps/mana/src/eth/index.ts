@@ -1,6 +1,6 @@
 import express from 'express';
 import z from 'zod';
-import { DEFAULT_INDEX, getEthereumWallet } from './dependencies';
+import { getEthereumWallet } from './dependencies';
 import { createNetworkHandler, NETWORKS } from './rpc';
 import { indexWithAddress, rpcError } from '../utils';
 
@@ -36,16 +36,6 @@ router.post('/:chainId?', (req, res) => {
   if (!handler) return rpcError(res, 404, new Error('Unsupported chainId'), id);
 
   handler[method](id, params, res);
-});
-
-router.get('/relayers', (req, res) => {
-  const mnemonic = process.env.ETH_MNEMONIC || '';
-
-  const defaultRelayer = getEthereumWallet(mnemonic, DEFAULT_INDEX).address;
-
-  res.json({
-    default: defaultRelayer
-  });
 });
 
 router.get('/relayer/:space', async (req, res) => {
