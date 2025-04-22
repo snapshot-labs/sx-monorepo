@@ -270,7 +270,7 @@ export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
   };
 
   abi.inputs.forEach((input, i) => {
-    const inputName = input.name ?? `input${i + 1}`;
+    const inputName = input.name ?? `Input ${i + 1}`;
 
     definition.properties[inputName] = {};
     definition.required.push(inputName);

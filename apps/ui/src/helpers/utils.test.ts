@@ -307,18 +307,18 @@ describe('utils', () => {
             chainId: 1,
             examples: ['0x0000…'],
             format: 'ens-or-address',
-            title: 'input1 (address)',
+            title: 'Input 1 (address)',
             type: 'string'
           },
           input2: {
             chainId: 1,
             examples: ['0x0000…'],
             format: 'ens-or-address',
-            title: 'input2 (address)',
+            title: 'Input 2 (address)',
             type: 'string'
           }
         },
-        required: ['input1', 'input2'],
+        required: ['Input 1', 'Input 2'],
         title: 'allowance',
         type: 'object'
       });
