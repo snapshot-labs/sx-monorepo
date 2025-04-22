@@ -303,14 +303,14 @@ describe('utils', () => {
         $async: true,
         additionalProperties: false,
         properties: {
-          input1: {
+          'Input 1': {
             chainId: 1,
             examples: ['0x0000…'],
             format: 'ens-or-address',
             title: 'Input 1 (address)',
             type: 'string'
           },
-          input2: {
+          'Input 2': {
             chainId: 1,
             examples: ['0x0000…'],
             format: 'ens-or-address',
