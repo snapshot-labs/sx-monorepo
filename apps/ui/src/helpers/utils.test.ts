@@ -1,8 +1,10 @@
+import { Interface } from '@ethersproject/abi';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   _d,
   _rt,
   _vp,
+  abiToDefinition,
   createErc1155Metadata,
   formatAddress,
   getStampUrl,
@@ -266,6 +268,60 @@ describe('utils', () => {
       ).toBe(
         'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64&cb=1234'
       );
+    });
+  });
+
+  describe('abiToDefinition', () => {
+    it('should use placeholder input names if none are provided', () => {
+      const abi = [
+        'constructor(address _pool, address _lptoken, address _booster)',
+        'event Approval(address indexed owner, address indexed spender, uint256 value)',
+        'event Transfer(address indexed from, address indexed to, uint256 value)',
+        'function allowance(address, address) pure returns (uint256)',
+        'function approve(address, uint256) pure returns (bool)',
+        'function balanceOf(address account) view returns (uint256)',
+        'function booster() view returns (address)',
+        'function contractType() view returns (bytes32)',
+        'function curveToken() view returns (address)',
+        'function decimals() view returns (uint8)',
+        'function getPhantomTokenInfo() view returns (address, address)',
+        'function name() view returns (string)',
+        'function pool() view returns (address)',
+        'function symbol() view returns (string)',
+        'function totalSupply() view returns (uint256)',
+        'function transfer(address, uint256) pure returns (bool)',
+        'function transferFrom(address, address, uint256) pure returns (bool)',
+        'function underlying() view returns (address)',
+        'function version() view returns (uint256)'
+      ];
+
+      const iface = new Interface(abi);
+
+      const definition = abiToDefinition(iface.getFunction('allowance'), 1);
+
+      expect(definition).toEqual({
+        $async: true,
+        additionalProperties: false,
+        properties: {
+          input1: {
+            chainId: 1,
+            examples: ['0x0000…'],
+            format: 'ens-or-address',
+            title: 'input1 (address)',
+            type: 'string'
+          },
+          input2: {
+            chainId: 1,
+            examples: ['0x0000…'],
+            format: 'ens-or-address',
+            title: 'input2 (address)',
+            type: 'string'
+          }
+        },
+        required: ['input1', 'input2'],
+        title: 'allowance',
+        type: 'object'
+      });
     });
   });
 });
