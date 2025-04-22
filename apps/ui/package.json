@@ -68,7 +68,6 @@
     "ajv-errors": "^3.0.0",
     "ajv-formats": "^2.1.1",
     "autolinker": "^3.11.0",
-    "bluebird": "^3.7.2",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.10",
     "electron": "^26.2.3",
