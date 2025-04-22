@@ -185,9 +185,8 @@ watch(
           >
             <template #item="{ element: tx, index: i }">
               <TransactionsListItem :tx="tx" :chain-id="treasury.network">
-                <template #left>
+                <template v-if="model.length > 1" #left>
                   <div
-                    v-if="model.length > 1"
                     class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
