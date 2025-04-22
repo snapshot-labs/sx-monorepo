@@ -93,6 +93,13 @@ onUnmounted(() => {
 
 <template>
   <UiTopnav v-bind="$attrs">
+    <router-link
+      v-if="route.name.startsWith('townhall')"
+      :to="{ name: 'townhall' }"
+      class="ml-4 text-skin-link text-[22px]"
+    >
+      Townhall
+    </router-link>
     <div
       class="flex items-center h-full truncate"
       :class="{

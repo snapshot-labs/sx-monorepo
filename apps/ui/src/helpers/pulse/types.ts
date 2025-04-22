@@ -6,6 +6,7 @@ export interface Discussion {
   statement_count: number;
   vote_count: number;
   created: number;
+  closed: boolean;
   statements: Statement[];
 }
 

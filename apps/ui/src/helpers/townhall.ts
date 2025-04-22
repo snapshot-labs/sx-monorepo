@@ -31,6 +31,7 @@ const DISCUSSION_QUERY = gql`
       statement_count
       vote_count
       created
+      closed
       statements {
         id
         body

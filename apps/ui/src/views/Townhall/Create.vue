@@ -30,7 +30,8 @@ const STRATEGY_DEFINITION = {
   enum: ['ACTIVE', 'INACTIVE'],
   options: [
     { id: 'anyone', name: 'Anyone' },
-    { id: 'snapshot', name: 'Snapshot users' },
+    { id: 'whitelist', name: 'Whitelist' },
+    { id: 'eth', name: 'ETH holder' },
     { id: 'hats-protocol', name: 'Hats protocol role(s)' },
     { id: 'zupass', name: 'Zupass holder' }
   ],

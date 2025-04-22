@@ -11,6 +11,10 @@ export function useTownhall() {
     });
   }
 
+  async function sendCloseDiscussion(discussion: number) {
+    return send('close_discussion', { discussion });
+  }
+
   async function sendStatement(discussion: number, statement: string) {
     return send('statement', {
       author: web3.value.account,
@@ -58,6 +62,7 @@ export function useTownhall() {
 
   return {
     sendDiscussion,
+    sendCloseDiscussion,
     sendStatement,
     sendHideStatement,
     sendPinStatement,
