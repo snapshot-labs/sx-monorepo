@@ -7,6 +7,8 @@ import { useDelegateesQuery } from '@/queries/delegatees';
 import { useDelegatesQuery } from '@/queries/delegates';
 import { Space, SpaceMetadataDelegation } from '@/types';
 
+type SortType = 'delegatedVotes' | 'tokenHoldersRepresentedAmount';
+
 const props = defineProps<{
   space: Space;
   delegation: SpaceMetadataDelegation;
@@ -56,6 +58,13 @@ const isUpdatableDelegation = computed(() => {
   return props.delegation.apiType === 'split-delegation';
 });
 
+function isSortingDisabled(type: SortType) {
+  return (
+    props.delegation.apiType === 'split-delegation' &&
+    sortBy.value.includes(type)
+  );
+}
+
 function getExplorerUrl(address: string, type: 'address' | 'token') {
   if (props.delegation.chainId) {
     return getGenericExplorerUrl(props.delegation.chainId, address, type);
@@ -70,9 +79,7 @@ function hasDelegatedTo(delegatee: string): boolean {
   );
 }
 
-function handleSortChange(
-  type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
-) {
+function handleSortChange(type: SortType) {
   if (sortBy.value.startsWith(type)) {
     sortBy.value = sortBy.value.endsWith('desc')
       ? `${type}-asc`
@@ -282,6 +289,12 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <button
           type="button"
           class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
+          :class="{
+            'hover:text-skin-text': isSortingDisabled(
+              'tokenHoldersRepresentedAmount'
+            )
+          }"
+          :disabled="isSortingDisabled('tokenHoldersRepresentedAmount')"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span class="truncate">Delegators</span>
@@ -297,6 +310,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <button
           type="button"
           class="w-[120px] md:w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
+          :class="{
+            'hover:text-skin-text': isSortingDisabled('delegatedVotes')
+          }"
+          :disabled="isSortingDisabled('delegatedVotes')"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
