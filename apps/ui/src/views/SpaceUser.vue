@@ -27,7 +27,7 @@ const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{
-  delegatees: { id: string; share: number }[];
+  delegatees: { id: string }[];
 } | null>(null);
 
 // const delegatesCount = ref(0);
@@ -131,7 +131,7 @@ async function loadUserActivity() {
 // }
 
 function handleDelegateClick() {
-  delegateModalState.value = { delegatees: [{ id: userId.value, share: 100 }] };
+  delegateModalState.value = { delegatees: [{ id: userId.value }] };
   delegateModalOpen.value = true;
 }
 

@@ -189,7 +189,7 @@ async function fetchSplitDelegationDelegatees(
 }
 
 export function useDelegateesQuery(
-  account: MaybeRefOrGetter<string>,
+  account: MaybeRefOrGetter<string | undefined>,
   space: MaybeRefOrGetter<Space>,
   delegation: MaybeRefOrGetter<SpaceMetadataDelegation>
 ) {
@@ -202,7 +202,7 @@ export function useDelegateesQuery(
     queryFn: () =>
       FETCH_DELEGATEES_FN[
         toValue(delegation).apiType as keyof typeof FETCH_DELEGATEES_FN
-      ](toValue(account), toValue(delegation), toValue(space)),
+      ](toValue(account) || '', toValue(delegation), toValue(space)),
     enabled:
       !!toValue(account) &&
       !!toValue(delegation).chainId &&

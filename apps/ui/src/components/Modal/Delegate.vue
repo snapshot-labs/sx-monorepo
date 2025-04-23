@@ -10,11 +10,12 @@ import {
 } from '@/networks/common/constants';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { Connector, ConnectorType } from '@/networks/types';
+import { useDelegateesQuery } from '@/queries/delegatees';
 import { ChainId, Space, SpaceMetadataDelegation } from '@/types';
 
 type Delegatee = {
   id: string;
-  share: number;
+  share?: number;
 };
 
 const SUPPORTED_CHAIN_IDS = [1, 100];
@@ -30,7 +31,12 @@ const props = defineProps<{
   open: boolean;
   space: Space;
   delegation?: SpaceMetadataDelegation;
-  initialState?: any;
+  initialState?: {
+    delegatees: Delegatee[];
+    selectedIndex?: number;
+    expirationDate?: number;
+    chainId?: ChainId;
+  };
 }>();
 
 const emit = defineEmits<{
@@ -41,7 +47,7 @@ const { delegate } = useActions();
 const { auth, login } = useWeb3();
 
 const form: {
-  delegatees: Delegatee[];
+  delegatees: Required<Delegatee>[];
   selectedIndex: number;
   expirationDate: number;
   chainId: ChainId;
@@ -58,6 +64,28 @@ const delegateesRef: Ref<any[]> = ref([]);
 const sharesRef: Ref<any[]> = ref([]);
 const isModalDateTimeOpen = ref(false);
 const isHidden = ref(false);
+
+const validDelegations = computed(() => {
+  return props.space.delegations.filter(isValidDelegation);
+});
+
+const validSelectableDelegations = computed(() => {
+  return validDelegations.value.filter(delegation => {
+    return auth.value ? isDelegationSupportedByUser(delegation) : true;
+  });
+});
+
+const selectedDelegation = computed<SpaceMetadataDelegation>(() => {
+  return (
+    props.delegation || validSelectableDelegations.value[form.selectedIndex]
+  );
+});
+
+const { data: delegatees, isPending: isPendingDelegatees } = useDelegateesQuery(
+  toRef(() => auth.value?.account),
+  toRef(props, 'space'),
+  selectedDelegation
+);
 
 const delegateAddressDefinition = computed(() => ({
   type: 'string',
@@ -124,22 +152,6 @@ const formValidator = computed(() =>
 const isInvalidSelectedDelegation = computed(
   () => !isValidDelegation(selectedDelegation.value)
 );
-
-const selectedDelegation = computed<SpaceMetadataDelegation | undefined>(() => {
-  return (
-    props.delegation || validSelectableDelegations.value[form.selectedIndex]
-  );
-});
-
-const validDelegations = computed(() => {
-  return props.space.delegations.filter(isValidDelegation);
-});
-
-const validSelectableDelegations = computed(() => {
-  return validDelegations.value.filter(delegation => {
-    return auth.value ? isDelegationSupportedByUser(delegation) : true;
-  });
-});
 
 const spaceDelegationsOptions = computed<
   { id: number; name: string; icon: VNode }[]
@@ -292,9 +304,9 @@ function handleAddDelegatee() {
 }
 
 const handleDistributeSharesEvenlyClick = () => {
-  const share = Math.floor(100 / form.delegatees.length);
+  const evenShare = 100 / form.delegatees.length;
   form.delegatees.forEach(delegatee => {
-    delegatee.share = share;
+    delegatee.share = evenShare;
   });
 };
 
@@ -315,29 +327,56 @@ const handleAddressPressDelete = (index: number, force = false) => {
   nextTick(() => delegateesRef.value[index - 1].focus());
 };
 
-watch(
-  () => props.open,
-  () => {
-    const defaultExpirationDate = new Date();
-    defaultExpirationDate.setFullYear(defaultExpirationDate.getFullYear() + 1);
+watch([delegatees, () => props.open], () => {
+  if (isPendingDelegatees.value) return;
 
-    if (props.initialState) {
-      form.delegatees = props.initialState.delegatees.length
-        ? clone(props.initialState.delegatees)
-        : clone(DEFAULT_FORM_STATE.delegatees);
-      form.selectedIndex =
-        props.initialState.selectedIndex || DEFAULT_FORM_STATE.selectedIndex;
-      form.expirationDate =
-        props.initialState.expirationDate || defaultExpirationDate.getTime();
-      form.chainId = props.initialState.chainId || DEFAULT_FORM_STATE.chainId;
-    } else {
-      form.delegatees = clone(DEFAULT_FORM_STATE.delegatees);
-      form.selectedIndex = DEFAULT_FORM_STATE.selectedIndex;
-      form.expirationDate = defaultExpirationDate.getTime();
-      form.chainId = DEFAULT_FORM_STATE.chainId;
-    }
+  if (delegatees.value?.length) {
+    form.delegatees.concat(
+      delegatees.value.map(delegatee => ({
+        id: delegatee.id,
+        share: delegatee.share
+      }))
+    );
   }
-);
+});
+
+watch([() => props.open, delegatees], () => {
+  if (!props.open) return;
+
+  const defaultExpirationDate = new Date();
+  defaultExpirationDate.setFullYear(defaultExpirationDate.getFullYear() + 1);
+
+  form.delegatees = clone(
+    props.initialState?.delegatees || DEFAULT_FORM_STATE.delegatees
+  ).map(delegatee => ({
+    id: delegatee.id,
+    share: delegatee.share ?? 100
+  }));
+  form.selectedIndex =
+    props.initialState?.selectedIndex ?? DEFAULT_FORM_STATE.selectedIndex;
+  form.expirationDate =
+    props.initialState?.expirationDate ?? defaultExpirationDate.getTime();
+  form.chainId = props.initialState?.chainId ?? DEFAULT_FORM_STATE.chainId;
+
+  if (
+    delegatees.value?.length &&
+    selectedDelegation.value.apiType === 'split-delegation'
+  ) {
+    const remainingShares =
+      100 - delegatees.value.reduce((a, b) => a + b.share, 0);
+    const formDelegatees = form.delegatees.filter(
+      delegatee => !delegatees.value.some(d => d.id === delegatee.id)
+    );
+
+    form.delegatees = [
+      ...clone(delegatees.value),
+      ...formDelegatees.map(delegatee => ({
+        id: delegatee.id,
+        share: remainingShares / formDelegatees.length
+      }))
+    ].filter(d => d.id);
+  }
+});
 
 watchEffect(async () => {
   formValidated.value = false;
@@ -422,161 +461,167 @@ watchEffect(async () => {
           options: spaceDelegationsOptions
         }"
       />
-      <div v-if="delegation?.apiType === 'split-delegation'" class="space-y-4">
-        <div>
-          <div class="flex justify-between">
-            <h4 class="eyebrow">Delegates</h4>
-            <div class="flex space-x-2">
-              <UiTooltip title="Distribute shares evenly">
-                <UiButton
-                  class="!p-0 !border-0 !h-[auto] !bg-transparent"
-                  @click="handleDistributeSharesEvenlyClick"
-                >
-                  <IH-bars-3 class="text-skin-text" />
-                </UiButton>
-              </UiTooltip>
-              <UiTooltip title="Clear all delegates">
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                  <IH-archive-box-x-mark
-                    class="text-skin-text"
-                    @click="form.delegatees.splice(0, form.delegatees.length)"
-                  />
-                </UiButton>
-              </UiTooltip>
-            </div>
-          </div>
-          <div class="mb-2.5 leading-5">
-            Delegate your voting power to multiple addresses. Any unallocated
-            power (100% - any delegations) will remain with you.
-          </div>
-
-          <div class="space-y-3">
-            <UiAlert v-if="formErrors.global" type="error">
-              {{ formErrors.global }}
-            </UiAlert>
-            <div class="space-y-2">
-              <UiMessage v-if="isClearingDelegation" type="info">
-                All delegates removed
-              </UiMessage>
-              <div
-                v-for="(delegatee, index) in form.delegatees"
-                :key="index"
-                class="space-x-2"
-              >
-                <div class="flex items-center gap-2">
-                  <div
-                    class="grow rounded-lg bg-skin-border px-2.5 border flex items-center gap-2"
-                    :class="{
-                      'border-skin-danger': formErrors.delegatees?.[index]?.id
-                    }"
-                  >
-                    <input
-                      :ref="el => (delegateesRef[index] = el)"
-                      v-model.trim="delegatee.id"
-                      :placeholder="delegateAddressDefinition.examples?.[0]"
-                      type="text"
-                      class="w-full bg-transparent h-[40px] py-[10px] text-skin-heading"
-                      @keyup.enter="handleAddressPressEnter(index)"
-                      @keydown.delete="handleAddressPressDelete(index)"
-                    />
-                    <button
-                      type="button"
-                      @click="
-                        pickerIndex = index;
-                        showPicker = true;
-                      "
-                    >
-                      <IH-identification />
-                    </button>
-                  </div>
-                  <div
-                    class="shrink-0 w-[80px] rounded-lg bg-skin-border flex items-center px-2.5 gap-1 border"
-                    :class="{
-                      'border-skin-danger':
-                        formErrors.delegatees?.[index]?.share
-                    }"
-                  >
-                    <input
-                      :ref="el => (sharesRef[index] = el)"
-                      v-model.trim="delegatee.share"
-                      type="number"
-                      :definition="delegateShareDefinition"
-                      class="w-full bg-transparent h-[40px] text-skin-heading text-right !p-0 !m-0"
-                      @keyup.enter="handleSharePressEnter(index)"
-                    />
-                    %
-                  </div>
+      <div
+        v-if="selectedDelegation.apiType === 'split-delegation'"
+        class="space-y-4"
+      >
+        <UiLoading v-if="isPendingDelegatees"></UiLoading>
+        <template v-else>
+          <div>
+            <div class="flex justify-between">
+              <h4 class="eyebrow">Delegates</h4>
+              <div class="flex space-x-2">
+                <UiTooltip title="Distribute shares evenly">
                   <UiButton
-                    class="!border-0 !h-[40px] !w-[20px] !px-0 !text-skin-text shrink-0"
-                    @click="handleAddressPressDelete(index, true)"
+                    class="!p-0 !border-0 !h-[auto] !bg-transparent"
+                    @click="handleDistributeSharesEvenlyClick"
                   >
-                    <IH-trash />
+                    <IH-bars-3 class="text-skin-text" />
                   </UiButton>
-                </div>
-                <span
-                  v-if="formErrors.delegatees?.[index]"
-                  class="text-skin-danger"
-                  >{{
-                    formErrors.delegatees?.[index]?.id ||
-                    formErrors.delegatees?.[index]?.share
-                  }}</span
-                >
+                </UiTooltip>
+                <UiTooltip title="Clear all delegates">
+                  <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                    <IH-archive-box-x-mark
+                      class="text-skin-text"
+                      @click="form.delegatees.splice(0, form.delegatees.length)"
+                    />
+                  </UiButton>
+                </UiTooltip>
               </div>
             </div>
-            <UiButton
-              class="w-full flex items-center justify-center space-x-1"
-              @click="handleAddDelegatee"
-            >
-              <IH-plus-sm />
-              Add delegate
-            </UiButton>
+            <div class="mb-2.5 leading-5">
+              Delegate your voting power to multiple addresses. Any unallocated
+              power (100% - any delegations) will remain with you.
+            </div>
+
+            <div class="space-y-3">
+              <UiAlert v-if="formErrors.global" type="error">
+                {{ formErrors.global }}
+              </UiAlert>
+              <div class="space-y-2">
+                <UiMessage v-if="isClearingDelegation" type="info">
+                  All delegates removed
+                </UiMessage>
+                <div
+                  v-for="(delegatee, index) in form.delegatees"
+                  :key="index"
+                  class="space-x-2"
+                >
+                  <div class="flex items-center gap-2">
+                    <div
+                      class="grow rounded-lg bg-skin-border px-2.5 border flex items-center gap-2"
+                      :class="{
+                        'border-skin-danger': formErrors.delegatees?.[index]?.id
+                      }"
+                    >
+                      <input
+                        :ref="el => (delegateesRef[index] = el)"
+                        v-model.trim="delegatee.id"
+                        :placeholder="delegateAddressDefinition.examples?.[0]"
+                        type="text"
+                        class="w-full bg-transparent h-[40px] py-[10px] text-skin-heading"
+                        @keyup.enter="handleAddressPressEnter(index)"
+                        @keydown.delete="handleAddressPressDelete(index)"
+                      />
+                      <button
+                        type="button"
+                        @click="
+                          pickerIndex = index;
+                          showPicker = true;
+                        "
+                      >
+                        <IH-identification />
+                      </button>
+                    </div>
+                    <div
+                      class="shrink-0 w-[80px] rounded-lg bg-skin-border flex items-center px-2.5 gap-1 border"
+                      :class="{
+                        'border-skin-danger':
+                          formErrors.delegatees?.[index]?.share
+                      }"
+                    >
+                      <input
+                        :ref="el => (sharesRef[index] = el)"
+                        v-model.trim="delegatee.share"
+                        type="number"
+                        :definition="delegateShareDefinition"
+                        class="w-full bg-transparent h-[40px] text-skin-heading text-right !p-0 !m-0"
+                        @keyup.enter="handleSharePressEnter(index)"
+                      />
+                      %
+                    </div>
+                    <UiButton
+                      class="!border-0 !h-[40px] !w-[20px] !px-0 !text-skin-text shrink-0"
+                      @click="handleAddressPressDelete(index, true)"
+                    >
+                      <IH-trash />
+                    </UiButton>
+                  </div>
+                  <span
+                    v-if="formErrors.delegatees?.[index]"
+                    class="text-skin-danger"
+                    >{{
+                      formErrors.delegatees?.[index]?.id ||
+                      formErrors.delegatees?.[index]?.share
+                    }}</span
+                  >
+                </div>
+              </div>
+              <UiButton
+                class="w-full flex items-center justify-center space-x-1"
+                @click="handleAddDelegatee"
+              >
+                <IH-plus-sm />
+                Add delegate
+              </UiButton>
+            </div>
           </div>
-        </div>
 
-        <div class="space-y-1">
-          <h4 class="eyebrow flex items-center gap-1">
-            Expiration date
-            <UiTooltip
-              title="All delegations will be cleared after the expiration date"
-              class="text-skin-text"
+          <div class="space-y-1">
+            <h4 class="eyebrow flex items-center gap-1">
+              Expiration date
+              <UiTooltip
+                title="All delegations will be cleared after the expiration date"
+                class="text-skin-text"
+              >
+                <IH-exclamation-circle />
+              </UiTooltip>
+            </h4>
+            <button
+              class="flex items-center gap-2"
+              @click="
+                isModalDateTimeOpen = true;
+                isHidden = true;
+              "
             >
-              <IH-exclamation-circle />
-            </UiTooltip>
-          </h4>
-          <button
-            class="flex items-center gap-2"
-            @click="
-              isModalDateTimeOpen = true;
-              isHidden = true;
-            "
-          >
-            {{ _t(form.expirationDate / 1000) }}
-            <IH-pencil class="size-[16px]" />
-          </button>
-        </div>
+              {{ _t(form.expirationDate / 1000) }}
+              <IH-pencil class="size-[16px]" />
+            </button>
+          </div>
 
-        <div class="space-y-2.5">
-          <h4 class="eyebrow flex items-center gap-1">
-            Delegation network
-            <UiTooltip
-              title="Voting power will be aggregated from all networks, regardless of the delegation network"
-              class="text-skin-text"
-            >
-              <IH-exclamation-circle />
-            </UiTooltip>
-          </h4>
-          <Combobox
-            v-model="form.chainId"
-            :definition="{
-              type: 'number',
-              title: 'Network',
-              tooltip: '',
-              examples: ['Select network'],
-              enum: availableNetworks.map(c => c.id),
-              options: availableNetworks
-            }"
-          />
-        </div>
+          <div class="space-y-2.5">
+            <h4 class="eyebrow flex items-center gap-1">
+              Delegation network
+              <UiTooltip
+                title="Voting power will be aggregated from all networks, regardless of the delegation network"
+                class="text-skin-text"
+              >
+                <IH-exclamation-circle />
+              </UiTooltip>
+            </h4>
+            <Combobox
+              v-model="form.chainId"
+              :definition="{
+                type: 'number',
+                title: 'Network',
+                tooltip: '',
+                examples: ['Select network'],
+                enum: availableNetworks.map(c => c.id),
+                options: availableNetworks
+              }"
+            />
+          </div>
+        </template>
       </div>
       <template v-else>
         <UiInputAddress

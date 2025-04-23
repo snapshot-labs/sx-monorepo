@@ -2,7 +2,7 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { _n, _p, _vp, clone, compareAddresses, shorten } from '@/helpers/utils';
+import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
 import { useDelegateesQuery } from '@/queries/delegatees';
 import { useDelegatesQuery } from '@/queries/delegates';
 import { Space, SpaceMetadataDelegation } from '@/types';
@@ -14,7 +14,7 @@ const props = defineProps<{
 
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{
-  delegatees?: { id: string; share: number }[];
+  delegatees?: { id: string }[];
 } | null>(null);
 const isUndelegating = ref(false);
 const undelegateFn = ref(undelegate);
@@ -46,7 +46,7 @@ const {
   sortBy
 );
 
-const { data: delegatees, isPending: isDelegateePending } = useDelegateesQuery(
+const { data: delegatees } = useDelegateesQuery(
   toRef(() => web3.value.account),
   toRef(props, 'space'),
   toRef(props, 'delegation')
@@ -89,25 +89,22 @@ function handleDelegateToggle(newDelegatee?: string) {
   }
 
   delegateModalState.value = {
-    delegatees: [{ id: newDelegatee || '', share: 100 }]
+    delegatees: [{ id: newDelegatee || '' }]
   };
   delegateModalOpen.value = true;
 }
 
 function handleUpdateDelegatesClick(newDelegatee?: string) {
-  const newDelegatees: { id: string; share: number }[] = clone(
-    delegatees.value || []
-  );
-
   if (newDelegatee && !hasDelegatedTo(newDelegatee)) {
-    const totalShares = newDelegatees.reduce((sum, d) => sum + d.share, 0);
-    const remainingAvailableShare = 100 - totalShares;
-    newDelegatees.push({ id: newDelegatee, share: remainingAvailableShare });
+    delegateModalState.value = {
+      delegatees: [{ id: newDelegatee || '' }]
+    };
+  } else {
+    delegateModalState.value = {
+      delegatees: [{ id: '' }]
+    };
   }
 
-  delegateModalState.value = {
-    delegatees: newDelegatees
-  };
   delegateModalOpen.value = true;
 }
 
@@ -180,8 +177,6 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       >
         <UiButton
           class="!px-0 w-[46px]"
-          :disabled="isDelegateePending"
-          :loading="isDelegateePending"
           @click="
             isUpdatableDelegation
               ? handleUpdateDelegatesClick()
