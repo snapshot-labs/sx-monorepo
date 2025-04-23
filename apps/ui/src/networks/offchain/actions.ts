@@ -395,7 +395,8 @@ export function createActions(
 
       return highlightClient.setAlias({
         signer: web3.getSigner(),
-        data: { from: address, alias, salt: getSalt() }
+        data: { from: address, alias },
+        salt: getSalt()
       });
     },
     async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {

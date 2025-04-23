@@ -1,11 +1,12 @@
 import {
   Signer,
+  TypedDataDomain,
   TypedDataField,
   TypedDataSigner
 } from '@ethersproject/abstract-signer';
-import { ALIASES_ADDRESS, encodeSetAlias } from './abis';
 import { aliasTypes, domain as baseDomain, Envelope, SetAlias } from './types';
 
+const ALIASES_ADDRESS = '0x0000000000000000000000000000000000000001';
 export class HighlightEthereumSigClient {
   private highlightUrl: string;
 
@@ -13,31 +14,46 @@ export class HighlightEthereumSigClient {
     this.highlightUrl = highlightUrl;
   }
 
-  public async sign(
+  public async getDomain(
     signer: Signer & TypedDataSigner,
-    chainId: number,
     salt: bigint,
-    types: Record<string, TypedDataField[]>,
-    message: Record<string, any>
-  ) {
+    to: string
+  ): Promise<Required<TypedDataDomain>> {
+    const chainId = await signer.getChainId();
+
     const domain = {
       ...baseDomain,
       chainId,
-      salt: `0x${salt.toString(16)}`
+      salt: `0x${salt.toString(16)}`,
+      verifyingContract: to
     };
 
+    return domain;
+  }
+
+  public async sign(
+    signer: Signer & TypedDataSigner,
+    domain: Required<TypedDataDomain>,
+    types: Record<string, TypedDataField[]>,
+    message: Record<string, any>
+  ) {
     return signer._signTypedData(domain, types, message);
   }
 
   public async send(envelope: Envelope) {
-    const { from, to, data } = envelope;
+    const { domain, message, entrypoint, signer, signature } = envelope;
 
     const payload = {
-      method: 'hl_postJoint',
+      method: 'hl_postMessage',
       params: {
-        from,
-        to,
-        data
+        domain: {
+          ...domain,
+          salt: domain.salt.toString()
+        },
+        message,
+        entrypoint,
+        signer,
+        signature
       }
     };
 
@@ -67,27 +83,30 @@ export class HighlightEthereumSigClient {
 
   public async setAlias({
     signer,
-    data
+    data,
+    salt
   }: {
     signer: Signer & TypedDataSigner;
     data: SetAlias;
+    salt: bigint;
   }): Promise<Envelope> {
-    const chainId = await signer.getChainId();
-    const signature = await this.sign(
-      signer,
-      chainId,
-      data.salt,
-      aliasTypes,
-      data
-    );
+    const domain = await this.getDomain(signer, salt, ALIASES_ADDRESS);
 
-    console.log('signature', signature);
+    const { alias, from } = data;
+    const message = {
+      from,
+      alias
+    };
+
+    const signature = await this.sign(signer, domain, aliasTypes, message);
 
     return {
       type: 'HIGHLIGHT_ENVELOPE',
-      from: data.from,
-      to: ALIASES_ADDRESS,
-      data: encodeSetAlias(chainId, data.salt, data.from, data.alias, signature)
+      domain,
+      message,
+      entrypoint: 'setAlias',
+      signer: await signer.getAddress(),
+      signature
     };
   }
 }

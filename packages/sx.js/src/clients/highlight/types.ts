@@ -1,3 +1,5 @@
+import { TypedDataDomain } from '@ethersproject/abstract-signer';
+
 export const domain = {
   name: 'highlight',
   version: '0.1.0'
@@ -12,13 +14,14 @@ export const aliasTypes = {
 
 export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
-  from: string;
-  to: string;
-  data: string;
+  domain: Required<TypedDataDomain>;
+  message: Record<string, unknown>;
+  entrypoint: string;
+  signer: string;
+  signature: string;
 };
 
 export type SetAlias = {
   from: string;
   alias: string;
-  salt: bigint;
 };
