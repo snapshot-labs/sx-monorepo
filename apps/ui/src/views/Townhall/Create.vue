@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { sleep } from '@/helpers/utils';
+
 const route = useRoute();
 const router = useRouter();
 const { sendDiscussion } = useTownhall();
@@ -51,6 +53,9 @@ async function handleSubmit() {
 
     const id = res.result.events.find(event => event.key === 'new_discussion')
       .data[0];
+
+    // Check if it exists on API instead
+    await sleep(1000);
 
     await router.push({ name: 'townhall-discussion', params: { id } });
   } catch (e) {
