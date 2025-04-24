@@ -82,7 +82,7 @@ export function createStrategyPicker({
     strategiesIndicies,
     isContract,
     connectorType,
-    ignoreRelayer = true
+    ignoreRelayer
   }: {
     authenticators: string[];
     strategies: string[];
