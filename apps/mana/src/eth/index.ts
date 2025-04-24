@@ -38,7 +38,7 @@ router.post('/:chainId?', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayer/:space', async (req, res) => {
+router.get('/relayers/spaces/:space', async (req, res) => {
   const { space } = req.params;
   if (!space) return rpcError(res, 400, 'Missing address parameter', 0);
 

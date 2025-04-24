@@ -43,7 +43,7 @@ router.post('/:chainId', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayer/:space', (req, res) => {
+router.get('/relayers/spaces/:space', (req, res) => {
   const mnemonic = process.env.STARKNET_MNEMONIC || '';
   const { space } = req.params;
   if (!space) return rpcError(res, 400, 'Missing address parameter', 0);
