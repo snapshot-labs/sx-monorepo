@@ -4,7 +4,6 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import { CHAIN_IDS } from '@/helpers/constants';
-import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { parseOSnapTransaction } from '@/helpers/osnap';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
@@ -511,18 +510,6 @@ export function createApi(
     }
   });
 
-  const highlightApolloClient = new ApolloClient({
-    link: createHttpLink({ uri: HIGHLIGHT_URL }),
-    cache: new InMemoryCache({
-      addTypename: false
-    }),
-    defaultOptions: {
-      query: {
-        fetchPolicy: 'no-cache'
-      }
-    }
-  });
-
   return {
     apiUrl: uri,
     loadProposalVotes: async (
@@ -826,7 +813,7 @@ export function createApi(
     ): Promise<Alias | null> => {
       const {
         data: { aliases }
-      }: { data: { aliases: Alias[] } } = await highlightApolloClient.query({
+      }: { data: { aliases: Alias[] } } = await apollo.query({
         query: ALIASES_QUERY,
         variables: {
           address,

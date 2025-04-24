@@ -49,7 +49,8 @@ async function handleSubmit() {
   try {
     const res = await sendDiscussion(title.value, body.value);
 
-    const id = res.events.find(event => event.key === 'new_discussion').data.id;
+    const id = res.result.events.find(event => event.key === 'new_discussion')
+      .data[0];
 
     await router.push({ name: 'townhall-discussion', params: { id } });
   } catch (e) {

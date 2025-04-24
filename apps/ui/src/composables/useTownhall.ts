@@ -1,40 +1,132 @@
-import { client } from '@/helpers/kbyte';
-
-const { web3 } = useWeb3();
+import { Web3Provider } from '@ethersproject/providers';
+import { clients } from '@snapshot-labs/sx';
+import { HIGHLIGHT_URL } from '@/helpers/highlight';
 
 export function useTownhall() {
+  const { auth } = useWeb3();
+
+  // TODO: here we should resovle alias locally, separate from regular aliases
+  // const alias = useAlias();
+
+  const highlightClient = new clients.HighlightEthereumSigClient(
+    `${HIGHLIGHT_URL}/highlight`
+  );
+
+  function getSalt() {
+    const buffer = new Uint8Array(32);
+    crypto.getRandomValues(buffer);
+
+    return BigInt(
+      `0x${buffer.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')}`
+    );
+  }
+
+  // async function setAlias(web3: Web3Provider, alias: string) {
+  //   const signer = web3.getSigner();
+  //   const address = await signer.getAddress();
+
+  //   return highlightClient.setAlias({
+  //     signer: web3.getSigner(),
+  //     data: { from: address, alias },
+  //     salt: getSalt()
+  //   });
+  // }
+
+  async function wrapPromise(promise: Promise<any>) {
+    const envelope = await promise;
+
+    const receipt = await highlightClient.send(envelope);
+
+    console.log('receipt', receipt);
+
+    return receipt;
+  }
+
+  async function getAliasSigner(provider: Web3Provider) {
+    return provider.getSigner();
+    // return alias.getAliasWallet(address =>
+    //   wrapPromise(setAlias(provider, address))
+    // );
+  }
+
   async function sendDiscussion(title: string, body: string) {
-    return send('discussion', {
-      author: web3.value.account,
-      title,
-      body
-    });
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.createDiscussion({
+        signer,
+        data: { title, body },
+        salt: getSalt()
+      })
+    );
   }
 
   async function sendCloseDiscussion(discussion: number) {
-    return send('close_discussion', { discussion });
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.closeDiscussion({
+        signer,
+        data: { discussion },
+        salt: getSalt()
+      })
+    );
   }
 
   async function sendStatement(discussion: number, statement: string) {
-    return send('statement', {
-      author: web3.value.account,
-      discussion,
-      statement
-    });
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.createStatement({
+        signer,
+        data: { discussion, statement },
+        salt: getSalt()
+      })
+    );
   }
 
   async function sendHideStatement(discussion: number, statement: number) {
-    return send('hide_statement', {
-      discussion,
-      statement
-    });
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.hideStatement({
+        signer,
+        data: { discussion, statement },
+        salt: getSalt()
+      })
+    );
   }
 
   async function sendPinStatement(discussion: number, statement: number) {
-    return send('pin_statement', {
-      discussion,
-      statement
-    });
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.pinStatement({
+        signer,
+        data: { discussion, statement },
+        salt: getSalt()
+      })
+    );
   }
 
   async function sendVote(
@@ -42,22 +134,19 @@ export function useTownhall() {
     statement: number,
     choice: 1 | 2 | 3
   ) {
-    return send('vote', {
-      voter: web3.value.account,
-      discussion,
-      statement,
-      choice
-    });
-  }
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
 
-  async function send(type: string, payload: any) {
-    return await client.requestAsync('broadcast', {
-      from: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
-      alias: '0xeF8305E140ac520225DAf050e2f71d5fBcC543e7',
-      type,
-      sig: '0xf0e14ebfa7f08ee13811725e8171465f710decd56a1e4c67cffa99e2e51acf742ef326836affeb4c8c110e89818895acc24cb0893f4bae47eddbbd57138c6ca41b',
-      payload
-    });
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.vote({
+        signer,
+        data: { discussion, statement, choice },
+        salt: getSalt()
+      })
+    );
   }
 
   return {

@@ -9,7 +9,6 @@ import {
   OffchainNetworkConfig
 } from '@snapshot-labs/sx';
 import { setEnsTextRecord } from '@/helpers/ens';
-import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import {
   getModuleAddressForTreasury,
@@ -60,15 +59,6 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
   5: offchainGoerli
 };
 
-function getSalt() {
-  const buffer = new Uint8Array(32);
-  crypto.getRandomValues(buffer);
-
-  return BigInt(
-    `0x${buffer.reduce((acc, val) => acc + val.toString(16).padStart(2, '0'), '')}`
-  );
-}
-
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
@@ -79,10 +69,6 @@ export function createActions(
   const client = new clients.OffchainEthereumSig({
     networkConfig
   });
-
-  const highlightClient = new clients.HighlightEthereumSigClient(
-    `${HIGHLIGHT_URL}/highlight`
-  );
 
   async function getPlugins(executions: ExecutionInfo[] | null) {
     const plugins = {} as {
@@ -291,13 +277,7 @@ export function createActions(
         data
       });
     },
-    send: (envelope: any) => {
-      if (envelope.type === 'HIGHLIGHT_ENVELOPE') {
-        return highlightClient.send(envelope);
-      }
-
-      return client.send(envelope);
-    },
+    send: (envelope: any) => client.send(envelope),
     getVotingPower: async (
       spaceId: string,
       strategiesNames: string[],
@@ -390,13 +370,9 @@ export function createActions(
       });
     },
     async setAlias(web3: Web3Provider, alias: string) {
-      const signer = web3.getSigner();
-      const address = await signer.getAddress();
-
-      return highlightClient.setAlias({
+      return client.setAlias({
         signer: web3.getSigner(),
-        data: { from: address, alias },
-        salt: getSalt()
+        data: { alias }
       });
     },
     async updateUser(web3: Web3Provider | Wallet, user: User, from?: string) {

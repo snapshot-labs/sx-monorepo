@@ -12,6 +12,53 @@ export const aliasTypes = {
   ]
 };
 
+export const discussionTypes = {
+  Discussion: [
+    { name: 'title', type: 'string' },
+    { name: 'body', type: 'string' }
+  ]
+};
+
+export const closeDiscussionTypes = {
+  CloseDiscussion: [{ name: 'discussion', type: 'int' }]
+};
+
+export const statementTypes = {
+  Statement: [
+    { name: 'discussion', type: 'int' },
+    { name: 'statement', type: 'string' }
+  ]
+};
+
+export const hideStatementTypes = {
+  HideStatement: [
+    { name: 'discussion', type: 'int' },
+    { name: 'statement', type: 'int' }
+  ]
+};
+
+export const pinStatementTypes = {
+  PinStatement: [
+    { name: 'discussion', type: 'int' },
+    { name: 'statement', type: 'int' }
+  ]
+};
+
+export const unpinStatementTypes = {
+  UnpinStatement: [
+    { name: 'discussion', type: 'int' },
+    { name: 'statement', type: 'int' }
+  ]
+};
+
+export const voteTypes = {
+  Vote: [
+    { name: 'discussion', type: 'int' },
+    { name: 'statement', type: 'int' },
+    { name: 'choice', type: 'int' }
+  ]
+};
+
 export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
   domain: Required<TypedDataDomain>;
@@ -24,4 +71,31 @@ export type Envelope = {
 export type SetAlias = {
   from: string;
   alias: string;
+};
+
+export type CreateDiscussion = {
+  title: string;
+  body: string;
+};
+
+export type CloseDiscussion = {
+  discussion: number;
+};
+
+export type CreateStatement = {
+  discussion: number;
+  statement: string;
+};
+
+export type HideStatement = {
+  discussion: number;
+  statement: number;
+};
+export type PinStatement = HideStatement;
+export type UnpinStatement = HideStatement;
+
+export type Vote = {
+  discussion: number;
+  statement: number;
+  choice: number;
 };
