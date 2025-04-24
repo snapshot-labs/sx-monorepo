@@ -2,19 +2,8 @@ import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { Statement, Vote } from '@/helpers/pulse';
 
-interface NewStatementEvent {
-  id: number;
-  author: string;
-  discussion: number;
-  body: string;
-}
-
-interface NewVoteEvent {
-  voter: string;
-  discussion: number;
-  statement: number;
-  choice: number;
-}
+type NewStatementEvent = [number, string, number, string];
+type NewVoteEvent = [string, number, number, number];
 
 const client = new ApolloClient({
   uri: 'http://localhost:3000',
@@ -91,9 +80,11 @@ export async function getVotes(discussion: string, voter: string) {
 }
 
 export function newStatementEventToEntry(event: NewStatementEvent): Statement {
+  const [id, , discussion, body] = event;
+
   return {
-    ...event,
-    id: `${event.discussion}/${event.id}`,
+    body,
+    id: `${discussion}/${id}`,
     vote_count: 0,
     scores_1: 0,
     scores_2: 0,
@@ -101,20 +92,23 @@ export function newStatementEventToEntry(event: NewStatementEvent): Statement {
     pinned: false,
     hidden: false,
     created: 0,
-    discussion_id: event.discussion,
-    statement_id: event.id,
-    discussion: { id: event.discussion }
+    discussion_id: discussion,
+    statement_id: id,
+    discussion: { id: discussion }
   };
 }
 
 export function newVoteEventToEntry(event: NewVoteEvent): Vote {
+  const [voter, discussion, statement, choice] = event;
+
   return {
-    ...event,
-    id: `${event.discussion}/${event.statement}/${event.voter}`,
+    id: `${discussion}/${statement}/${voter}`,
     created: 0,
-    discussion_id: event.discussion,
-    statement_id: event.statement,
-    discussion: { id: event.discussion },
-    statement: { id: event.statement }
+    discussion_id: discussion,
+    statement_id: statement,
+    discussion: { id: discussion },
+    statement: { id: statement },
+    voter,
+    choice
   };
 }
