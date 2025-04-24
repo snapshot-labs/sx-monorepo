@@ -4,7 +4,7 @@ import { Switch, SwitchGroup, SwitchLabel } from '@headlessui/vue';
 const enabled = defineModel<boolean>({ required: true });
 
 defineProps<{
-  title: string;
+  title?: string;
 }>();
 </script>
 
@@ -19,7 +19,8 @@ defineProps<{
         <IC-switch-enabled v-if="enabled" class="text-skin-bg" />
       </Switch>
       <SwitchLabel class="leading-[18px]">
-        {{ title }}
+        <template v-if="title">{{ title }}</template>
+        <slot v-else />
       </SwitchLabel>
     </div>
   </SwitchGroup>

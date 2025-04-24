@@ -92,10 +92,14 @@ export async function multicall3(
   return results.flat().map((call, i) => {
     const [success, returnData] = call;
 
-    const decoded = success
-      ? itf.decodeFunctionResult(calls[i][1], returnData)
-      : null;
-
-    return [success, decoded];
+    try {
+      const decoded = success
+        ? itf.decodeFunctionResult(calls[i][1], returnData)
+        : null;
+      return [success, decoded];
+    } catch (e) {
+      console.error(e);
+      return [false, null];
+    }
   });
 }

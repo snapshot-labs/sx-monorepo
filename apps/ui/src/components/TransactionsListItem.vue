@@ -154,7 +154,7 @@ const parsedTitle = computedAsync(
 <template>
   <div class="w-full border-b last:border-b-0">
     <div class="w-full px-4 py-3 gap-2 flex items-center">
-      <div class="shrink-0">
+      <div v-if="$slots.left" class="shrink-0">
         <slot name="left" />
       </div>
       <button
