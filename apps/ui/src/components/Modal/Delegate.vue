@@ -192,6 +192,10 @@ const isClearingDelegation = computed(() => {
   return props.initialState?.delegatees.length && form.delegatees.length === 0;
 });
 
+const validFormDelegatees = computed(() => {
+  return form.delegatees.filter(delegatee => !!delegatee.id);
+});
+
 function delegationConnectors(
   delegation: SpaceMetadataDelegation
 ): ConnectorType[] {
@@ -254,26 +258,27 @@ async function handleSubmit() {
   }
 
   try {
-    const newDelegatees = form.delegatees.map(d => d.id);
-    const newShares = form.delegatees.map(d => d.share);
+    const newDelegatees = validFormDelegatees.value.map(d => d.id);
+    const newShares = validFormDelegatees.value.map(d => d.share);
     const self = auth.value.account;
 
     if (selectedDelegation.value.apiType === 'split-delegation') {
+      const selfIndex = newDelegatees.findIndex(address =>
+        compareAddresses(address, self)
+      );
+      if (selfIndex !== -1) {
+        newDelegatees.splice(selfIndex, 1);
+        newShares.splice(selfIndex, 1);
+      }
+
       // Assign the remaining shares to self
       const remainingShares =
         100 -
-        form.delegatees
+        validFormDelegatees.value
           .filter(({ id }) => !compareAddresses(id, self))
           .map(({ share }) => share)
           .reduce((a, b) => a + b, 0);
-      if (remainingShares > 0) {
-        const selfIndex = newDelegatees.findIndex(address =>
-          compareAddresses(address, self)
-        );
-        if (selfIndex !== -1) {
-          newDelegatees.splice(selfIndex, 1);
-          newShares.splice(selfIndex, 1);
-        }
+      if (remainingShares > 0 && remainingShares < 100) {
         newShares.push(remainingShares);
         newDelegatees.push(self);
       }
@@ -325,8 +330,10 @@ function handleAddDelegatee() {
 }
 
 const handleDistributeSharesEvenlyClick = () => {
-  const evenShare = 100 / form.delegatees.length;
+  const evenShare = 100 / validFormDelegatees.value.length;
   form.delegatees.forEach(delegatee => {
+    if (!delegatee.id) return;
+
     delegatee.share = evenShare;
   });
 };
@@ -393,14 +400,14 @@ watchEffect(async () => {
   formErrors.value = await formValidator.value.validateAsync(form);
 
   if (
-    form.delegatees
+    validFormDelegatees.value
       .map(delegatee => delegatee.share)
       .reduce((a, b) => a + b, 0) > 100
   ) {
     formErrors.value.global = 'Shares must add up to 100%';
   }
 
-  const nonEmptyAddresses = form.delegatees.map(d => d.id).filter(Boolean);
+  const nonEmptyAddresses = validFormDelegatees.value.map(d => d.id);
   if (new Set(nonEmptyAddresses).size !== nonEmptyAddresses.length) {
     formErrors.value.global = 'Duplicate addresses are not allowed';
   }
