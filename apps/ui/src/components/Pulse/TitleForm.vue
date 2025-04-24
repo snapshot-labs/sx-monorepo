@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import router from '@/routes';
-
+const router = useRouter();
 const title = ref('');
 
 const TITLE_DEFINITION = {

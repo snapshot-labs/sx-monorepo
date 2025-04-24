@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import router from '@/routes';
-
 const route = useRoute();
+const router = useRouter();
 const { sendDiscussion } = useTownhall();
 const { addNotification } = useUiStore();
 
