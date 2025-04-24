@@ -29,8 +29,10 @@ const offchainToStarknetIds: Record<string, NetworkID> = {
 const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
+  const network = getNetwork(metadataNetwork);
+
   const uiStore = useUiStore();
-  const alias = useAlias();
+  const alias = useAlias('aliases', network.api.loadAlias);
   const { auth } = useWeb3();
   const { addPendingVote } = useAccount();
   const { getCurrentFromDuration } = useMetaStore();

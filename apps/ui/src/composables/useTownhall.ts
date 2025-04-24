@@ -1,12 +1,41 @@
+import {
+  ApolloClient,
+  createHttpLink,
+  InMemoryCache
+} from '@apollo/client/core';
 import { Web3Provider } from '@ethersproject/providers';
 import { clients } from '@snapshot-labs/sx';
+import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
+import { Alias } from '@/types';
+
+export const ALIASES_QUERY = gql`
+  query Aliases($address: String!, $alias: String!, $created_gt: Int) {
+    aliases(
+      where: { address: $address, alias: $alias, created_gt: $created_gt }
+    ) {
+      address
+      alias
+    }
+  }
+`;
 
 export function useTownhall() {
   const { auth } = useWeb3();
 
-  // TODO: here we should resovle alias locally, separate from regular aliases
-  // const alias = useAlias();
+  const alias = useAlias('townhall-aliases', loadAlias);
+
+  const apollo = new ApolloClient({
+    link: createHttpLink({ uri: HIGHLIGHT_URL }),
+    cache: new InMemoryCache({
+      addTypename: false
+    }),
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'no-cache'
+      }
+    }
+  });
 
   const highlightClient = new clients.HighlightEthereumSigClient(
     `${HIGHLIGHT_URL}/highlight`
@@ -21,16 +50,35 @@ export function useTownhall() {
     );
   }
 
-  // async function setAlias(web3: Web3Provider, alias: string) {
-  //   const signer = web3.getSigner();
-  //   const address = await signer.getAddress();
+  async function loadAlias(
+    address: string,
+    aliasAddress: string,
+    created_gt: number
+  ) {
+    const {
+      data: { aliases }
+    }: { data: { aliases: Alias[] } } = await apollo.query({
+      query: ALIASES_QUERY,
+      variables: {
+        address,
+        alias: aliasAddress,
+        created_gt
+      }
+    });
 
-  //   return highlightClient.setAlias({
-  //     signer: web3.getSigner(),
-  //     data: { from: address, alias },
-  //     salt: getSalt()
-  //   });
-  // }
+    return aliases?.[0] ?? null;
+  }
+
+  async function setAlias(web3: Web3Provider, alias: string) {
+    const signer = web3.getSigner();
+    const address = await signer.getAddress();
+
+    return highlightClient.setAlias({
+      signer: web3.getSigner(),
+      data: { from: address, alias },
+      salt: getSalt()
+    });
+  }
 
   async function wrapPromise(promise: Promise<any>) {
     const envelope = await promise;
@@ -43,10 +91,9 @@ export function useTownhall() {
   }
 
   async function getAliasSigner(provider: Web3Provider) {
-    return provider.getSigner();
-    // return alias.getAliasWallet(address =>
-    //   wrapPromise(setAlias(provider, address))
-    // );
+    return alias.getAliasWallet(address =>
+      wrapPromise(setAlias(provider, address))
+    );
   }
 
   async function sendDiscussion(title: string, body: string) {
