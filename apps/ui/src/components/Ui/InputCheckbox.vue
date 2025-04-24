@@ -27,6 +27,12 @@ const inputValue = computed({
   }
 });
 
+onMounted(() => {
+  if (model.value === undefined && !dirty.value) {
+    model.value = props.definition.default ?? false;
+  }
+});
+
 watch(model, () => {
   dirty.value = true;
 });
@@ -34,11 +40,11 @@ watch(model, () => {
 
 <template>
   <UiWrapperInput
+    v-slot="{ id }"
     :definition="definition"
     :error="error"
     :dirty="dirty"
-    :required="required"
   >
-    <input v-model="inputValue" type="checkbox" />
+    <input :id="id" v-model="inputValue" type="checkbox" class="mt-[7px]" />
   </UiWrapperInput>
 </template>

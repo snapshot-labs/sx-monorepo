@@ -122,7 +122,7 @@ export async function createSendNftTransaction({
 export async function createContractCallTransaction({
   form
 }): Promise<ContractCallTransaction> {
-  const args: any[] = Object.values(form.args);
+  let args: any[] = Object.values(form.args);
 
   let recipientAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);
@@ -133,6 +133,11 @@ export async function createContractCallTransaction({
   const methodAbi = iface.functions[form.method];
 
   if (methodAbi) {
+    // Send in same order as the ABI
+    args = methodAbi.inputs.map(({ name }) => {
+      return form.args[name];
+    });
+
     await Promise.all(
       methodAbi.inputs.map(async (input, i) => {
         if (input.type === 'address') {
