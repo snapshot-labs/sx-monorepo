@@ -377,6 +377,9 @@ input:placeholder-shown {
 
   .s-label {
     @apply absolute px-3 mt-1 text-[17px];
+    &:has(+ input[type="checkbox"]) {
+      @apply px-0 m-0 ml-3.5;
+    }
   }
 
   .s-input {

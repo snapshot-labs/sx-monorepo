@@ -1,5 +1,10 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
+import dayjs from 'dayjs';
+import { TOKENS } from '@/composables/usePayment';
 import { _n } from '@/helpers/utils';
+import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { Connector } from '@/networks/types';
 import { Space } from '@/types';
 import ICAnnotation from '~icons/heroicons-outline/annotation';
 import ICFlag from '~icons/heroicons-outline/flag';
@@ -27,6 +32,13 @@ const USERS = [
 ];
 
 const TIER_PLAN: TierPlan[] = ['basic', 'pro'] as const;
+
+const ACCEPTED_TOKENS_SYMBOL: string[] = ['USDC', 'USDT', 'SNUSDC'] as const;
+
+const PRO_MONTHLY_PRICES: Record<SubscriptionLength, number> = {
+  monthly: 600,
+  yearly: 500
+} as const;
 
 const FEATURES = [
   {
@@ -75,11 +87,34 @@ const FEATURES = [
   }
 ];
 
-defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space }>();
 
+const router = useRouter();
 const { limits } = useSettings();
+const { login, auth } = useWeb3();
+const queryClient = useQueryClient();
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const modalPaymentOpen = ref(false);
+const modalConnectorOpen = ref(false);
+
+const paymentNetwork = computed(() => (metadataNetwork === 's' ? 1 : 11155111));
+
+const tokens = computed(() => {
+  return TOKENS[paymentNetwork.value].filter(t =>
+    ACCEPTED_TOKENS_SYMBOL.includes(t.symbol)
+  );
+});
+
+const supportedConnectors = computed(() => {
+  return getNetwork(metadataNetwork).managerConnectors;
+});
+
+const isCurrentConnectorSupported = computed(() => {
+  return (
+    auth.value && supportedConnectors.value.includes(auth.value.connector.type)
+  );
+});
 
 const features = computed<Feature[]>(() => {
   return [
@@ -110,6 +145,52 @@ const features = computed<Feature[]>(() => {
     }
   ];
 });
+
+function calculator(amount: number, quantity: number): number {
+  if (subscriptionLength.value === 'yearly')
+    return Number((amount * quantity).toFixed(2));
+
+  return Number(
+    (
+      quantity *
+      (quantity >= 12 ? PRO_MONTHLY_PRICES.yearly : PRO_MONTHLY_PRICES.monthly)
+    ).toFixed(2)
+  );
+}
+
+async function handleConnectorPick(connector: Connector) {
+  modalConnectorOpen.value = false;
+  await login(connector);
+  if (auth.value) {
+    modalPaymentOpen.value = true;
+  }
+}
+async function handleTurboClick() {
+  if (!auth.value || !isCurrentConnectorSupported.value) {
+    modalConnectorOpen.value = true;
+    return;
+  }
+
+  modalPaymentOpen.value = true;
+}
+
+async function handlePaymentConfirmed() {
+  await queryClient.invalidateQueries({
+    queryKey: ['spaces', 'detail', `${props.space.network}:${props.space.id}`]
+  });
+}
+
+onMounted(() => {
+  if (offchainNetworks.includes(props.space.network)) return;
+
+  router.push({
+    name: 'space-overview',
+    params: {
+      network: props.space.network,
+      id: props.space.id
+    }
+  });
+});
 </script>
 
 <template>
@@ -129,37 +210,43 @@ const features = computed<Feature[]>(() => {
 
     <div class="mx-4 space-y-4 flex flex-col items-center">
       <div class="max-w-[480px] w-full space-y-3">
-        <a
-          class="border rounded-lg px-4 py-3 flex gap-2 justify-between"
-          :class="subscriptionLength === 'monthly' && 'border-skin-link'"
-          @click="subscriptionLength = 'monthly'"
-        >
-          <h3 class="flex-1">Pay monthly</h3>
-          <div class="flex items-center space-x-1">
-            <h2>$600</h2>
-            <span class="text-sm text-skin-text">/ month</span>
-          </div>
-        </a>
-        <a
-          class="border rounded-lg px-4 py-3 flex gap-2 justify-between"
-          :class="subscriptionLength === 'yearly' && 'border-skin-link'"
-          @click="subscriptionLength = 'yearly'"
+        <button
+          v-for="plan in Object.keys(PRO_MONTHLY_PRICES)"
+          :key="plan"
+          :class="[
+            'border rounded-lg px-4 py-3 flex gap-2 justify-between w-full',
+            { 'border-skin-link': subscriptionLength === plan }
+          ]"
+          @click="subscriptionLength = plan as SubscriptionLength"
         >
           <div class="flex flex-1 items-center gap-x-2 flex-wrap">
-            <h3>Pay yearly</h3>
-            <div>
+            <h3 class="text-start">Pay {{ plan }}</h3>
+            <div v-if="plan === 'yearly'">
               <div class="bg-skin-border text-sm rounded-full px-2">
-                Save $1,200
+                Save ${{
+                  _n(
+                    (
+                      (PRO_MONTHLY_PRICES.monthly - PRO_MONTHLY_PRICES.yearly) *
+                      12
+                    ).toFixed(0)
+                  )
+                }}
               </div>
             </div>
           </div>
-          <div class="flex items-center space-x-1 flex-wrap">
-            <h2>$500</h2>
+          <div class="flex items-center justify-end space-x-1 flex-wrap">
+            <h2>${{ PRO_MONTHLY_PRICES[plan] }}</h2>
             <span class="text-sm text-skin-text">/ month</span>
           </div>
-        </a>
+        </button>
       </div>
-      <UiButton class="primary">Upgrade {{ space.name }}</UiButton>
+      <UiButton
+        class="primary"
+        :disabled="space.network !== metadataNetwork"
+        @click="handleTurboClick"
+      >
+        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
+      </UiButton>
     </div>
 
     <div class="space-y-4 mx-4 flex flex-col items-center">
@@ -170,7 +257,7 @@ const features = computed<Feature[]>(() => {
           :id="`s:${user}`"
           :key="i"
           :size="48"
-          class="!bg-skin-bg rounded-lg inline-block"
+          class="!bg-skin-bg rounded-lg"
           type="space"
         />
       </div>
@@ -191,8 +278,8 @@ const features = computed<Feature[]>(() => {
             :is="feature.icon"
             class="text-skin-link inline-block size-[24px] mb-3"
           />
-          <h4 class="text-skin-link text-[21px] mb-1">{{ feature.name }}</h4>
-          <div>{{ feature.about }}</div>
+          <h4 class="text-skin-link text-[21px] mb-1" v-text="feature.name" />
+          <div v-text="feature.about" />
         </div>
       </div>
     </div>
@@ -203,33 +290,30 @@ const features = computed<Feature[]>(() => {
         Take your governance to the max
       </h2>
       <div class="border rounded-lg mx-auto max-w-[640px]">
-        <div>
+        <div
+          class="flex rounded-t-lg border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm"
+        >
+          <div class="flex-1 min-w-[70px]" />
           <div
-            class="flex rounded-t-lg border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm"
+            v-for="tier in TIER_PLAN"
+            :key="tier"
+            class="eyebrow w-[120px] text-center"
+            v-text="tier"
+          />
+        </div>
+        <div class="py-2">
+          <div
+            v-for="(feature, i) in features"
+            :key="i"
+            class="flex mx-4 text-skin-heading py-2 leading-5 items-center"
           >
-            <div class="flex-1" />
+            <div class="flex-1 min-w-[70px]" v-text="feature.title" />
             <div
-              v-for="tier in TIER_PLAN"
-              :key="tier"
-              class="eyebrow w-[120px] text-center"
-              v-text="tier"
+              v-for="type in TIER_PLAN"
+              :key="type"
+              class="w-[120px] text-center"
+              v-text="_n(feature[type])"
             />
-          </div>
-          <div class="py-2">
-            <div
-              v-for="(feature, i) in features"
-              :key="i"
-              class="flex mx-4 text-skin-heading py-2 leading-5 items-center"
-            >
-              <div class="flex-1" v-text="feature.title" />
-              <div
-                v-for="type in TIER_PLAN"
-                :key="type"
-                class="w-[120px] text-center"
-              >
-                {{ _n(feature[type]) }}
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -237,7 +321,13 @@ const features = computed<Feature[]>(() => {
 
     <div class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4">
       <h2 class="text-[32px]">Get started today</h2>
-      <UiButton class="primary">Upgrade {{ space.name }}</UiButton>
+      <UiButton
+        class="primary"
+        :disabled="space.network !== metadataNetwork"
+        @click="handleTurboClick"
+      >
+        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
+      </UiButton>
     </div>
 
     <div class="px-4">
@@ -252,5 +342,67 @@ const features = computed<Feature[]>(() => {
         </h2>
       </AppLink>
     </div>
+
+    <ModalPayment
+      v-if="auth && isCurrentConnectorSupported && modalPaymentOpen"
+      :open="modalPaymentOpen"
+      :tokens="tokens"
+      :calculator="calculator"
+      :network="paymentNetwork"
+      :quantity-label="subscriptionLength === 'yearly' ? 'Years' : 'Months'"
+      :unit-price="
+        PRO_MONTHLY_PRICES[subscriptionLength] *
+        (subscriptionLength === 'yearly' ? 12 : 1)
+      "
+      :barcode-payload="{
+        type: 'turbo',
+        params: { space: `${space.network}:${space.id}` }
+      }"
+      @close="modalPaymentOpen = false"
+      @confirmed="handlePaymentConfirmed"
+    >
+      <template #summary="{ quantity }">
+        <div class="flex justify-between">
+          <div>End date</div>
+          <div class="text-skin-heading">
+            {{
+              dayjs(
+                space.turbo_expiration
+                  ? space.turbo_expiration * 1e3
+                  : new Date()
+              )
+                .add(
+                  quantity,
+                  subscriptionLength === 'yearly' ? 'year' : 'month'
+                )
+                .format('D MMM YYYY')
+            }}
+            ({{ quantity }}
+            {{ subscriptionLength === 'yearly' ? 'year' : 'month'
+            }}{{ quantity > 1 ? 's' : '' }})
+          </div>
+        </div>
+      </template>
+      <template #transactionModalSuccessTitle>
+        <h4
+          class="font-semibold text-skin-heading text-lg flex flex-col items-center gap-2 mb-3"
+        >
+          Upgraded to
+          <span
+            class="eyebrow inline-block text-skin-bg bg-skin-link rounded-full px-2"
+            >Snapshot Pro</span
+          >
+        </h4>
+      </template>
+      <template #transactionModalSuccessSubtitle>
+        Thank you for your subscription!
+      </template>
+    </ModalPayment>
+    <ModalConnector
+      :open="modalConnectorOpen"
+      :supported-connectors="supportedConnectors"
+      @pick="handleConnectorPick"
+      @close="modalConnectorOpen = false"
+    />
   </div>
 </template>

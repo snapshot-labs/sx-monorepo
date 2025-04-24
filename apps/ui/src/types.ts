@@ -170,6 +170,7 @@ export type Space = {
   network: NetworkID;
   verified: boolean;
   turbo: boolean;
+  turbo_expiration: number;
   snapshot_chain_id?: number;
   name: string;
   avatar: string;
