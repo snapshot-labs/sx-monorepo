@@ -1,4 +1,5 @@
 import { isAddress } from '@ethersproject/address';
+import { hexZeroPad } from '@ethersproject/bytes';
 import { Contract } from '@ethersproject/contracts';
 import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
@@ -600,9 +601,10 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegationType: DelegationType,
-      delegatee: string,
+      delegatees: string[],
       delegationContract: string,
-      chainIdOverride?: ChainId
+      chainIdOverride?: ChainId,
+      delegateesMetadata?: Record<string, any>
     ) => {
       if (typeof chainIdOverride === 'string') {
         throw new Error('Chain ID must be a number for EVM networks');
@@ -619,7 +621,8 @@ export function createActions(
       };
 
       if (delegationType === 'governor-subgraph') {
-        delegatee = delegatee ?? '0x0000000000000000000000000000000000000000';
+        const delegatee =
+          delegatees[0] ?? '0x0000000000000000000000000000000000000000';
 
         contractParams = {
           address: delegationContract,
@@ -628,11 +631,11 @@ export function createActions(
           abi: ['function delegate(address delegatee)']
         };
       } else if (delegationType == 'delegate-registry') {
-        if (delegatee) {
+        if (delegatees[0]) {
           contractParams = {
             address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
             functionName: 'setDelegate',
-            functionParams: [formatBytes32String(space.id), delegatee],
+            functionParams: [formatBytes32String(space.id), delegatees[0]],
             abi: ['function setDelegate(bytes32 id, address delegate)']
           };
         } else {
@@ -641,6 +644,47 @@ export function createActions(
             functionName: 'clearDelegate',
             functionParams: [formatBytes32String(space.id)],
             abi: ['function clearDelegate(bytes32 id)']
+          };
+        }
+      } else if (delegationType === 'split-delegation') {
+        if (!delegateesMetadata?.expirationDate) {
+          throw new Error('Expiration is required for split delegation');
+        }
+
+        if (
+          !delegateesMetadata?.shares ||
+          delegateesMetadata.shares.length !== delegatees.length
+        ) {
+          throw new Error('Shares are required for split delegation');
+        }
+
+        if (delegatees.length) {
+          const delegations = delegatees
+            .map((address, index) => ({
+              delegate: hexZeroPad(address, 32),
+              ratio: delegateesMetadata.shares[index]
+            }))
+            .sort((a, b) => {
+              return BigInt(a.delegate) < BigInt(b.delegate) ? -1 : 1;
+            });
+          contractParams = {
+            address: delegationContract,
+            functionName: 'setDelegation',
+            functionParams: [
+              space.id,
+              delegations,
+              delegateesMetadata.expirationDate
+            ],
+            abi: [
+              'function setDelegation(string context, tuple(bytes32 delegate, uint256 ratio)[] delegation, uint256 expirationTimestamp)'
+            ]
+          };
+        } else {
+          contractParams = {
+            address: delegationContract,
+            functionName: 'clearDelegation',
+            functionParams: [space.id],
+            abi: ['function clearDelegation(string context)']
           };
         }
       } else {

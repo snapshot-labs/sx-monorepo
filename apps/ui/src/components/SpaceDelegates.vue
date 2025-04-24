@@ -127,7 +127,7 @@ async function undelegate() {
   return actions.delegate(
     props.space,
     props.delegation.apiType,
-    null,
+    [],
     props.delegation.contractAddress,
     props.delegation.chainId
   );

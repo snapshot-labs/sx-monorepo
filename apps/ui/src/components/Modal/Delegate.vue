@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
-import { splitDelegate } from '@/helpers/delegation';
-import { _t, clone, getUrl } from '@/helpers/utils';
+import { _t, clone, compareAddresses, getUrl } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import {
   EVM_CONNECTORS,
@@ -18,13 +17,13 @@ type Delegatee = {
   share?: number;
 };
 
-const SUPPORTED_CHAIN_IDS = [1, 100];
+const SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS = [1, 100];
 
 const DEFAULT_FORM_STATE = {
   delegatees: [{ id: '', share: 0 }],
   selectedIndex: 0,
   expirationDate: 0,
-  chainId: SUPPORTED_CHAIN_IDS[0]
+  chainId: null
 };
 
 const props = defineProps<{
@@ -50,7 +49,7 @@ const form: {
   delegatees: Required<Delegatee>[];
   selectedIndex: number;
   expirationDate: number;
-  chainId: ChainId;
+  chainId?: null | ChainId;
 } = reactive(clone(DEFAULT_FORM_STATE));
 const formValidated = ref(false);
 const showPicker = ref(false);
@@ -174,7 +173,9 @@ const spaceDelegationsOptions = computed<
 const availableNetworks = computed(() => {
   return Object.entries(networks)
     .filter(([, network]) => {
-      return SUPPORTED_CHAIN_IDS.includes(network.chainId);
+      return selectedDelegation.value.apiType === 'split-delegation'
+        ? SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS.includes(network.chainId)
+        : selectedDelegation.value.chainId === network.chainId;
     })
     .map(([, network]) => ({
       id: network.chainId,
@@ -238,6 +239,7 @@ function getNetworkDetails(chainId: number | string) {
 
 async function handleSubmit() {
   if (
+    !auth.value ||
     !selectedDelegation.value ||
     (auth.value && !isDelegationSupportedByUser(selectedDelegation.value))
   )
@@ -252,24 +254,43 @@ async function handleSubmit() {
   }
 
   try {
+    const newDelegatees = form.delegatees.map(d => d.id);
+    const newShares = form.delegatees.map(d => d.share);
+    const self = auth.value.account;
+
     if (selectedDelegation.value.apiType === 'split-delegation') {
-      splitDelegate(
-        props.space,
-        selectedDelegation.value.contractAddress,
-        form.chainId,
-        form.delegatees.map(delegatee => delegatee.id),
-        form.delegatees.map(delegatee => delegatee.share),
-        form.expirationDate
-      );
-    } else {
-      await delegate(
-        props.space,
-        selectedDelegation.value.apiType,
-        form.delegatees[0].id,
-        selectedDelegation.value.contractAddress,
-        selectedDelegation.value.chainId
-      );
+      // Assign the remaining shares to self
+      const remainingShares =
+        100 -
+        form.delegatees
+          .filter(({ id }) => !compareAddresses(id, self))
+          .map(({ share }) => share)
+          .reduce((a, b) => a + b, 0);
+      if (remainingShares > 0) {
+        const selfIndex = newDelegatees.findIndex(address =>
+          compareAddresses(address, self)
+        );
+        if (selfIndex !== -1) {
+          newDelegatees.splice(selfIndex, 1);
+          newShares.splice(selfIndex, 1);
+        }
+        newShares.push(remainingShares);
+        newDelegatees.push(self);
+      }
     }
+
+    await delegate(
+      props.space,
+      selectedDelegation.value.apiType,
+      newDelegatees,
+      selectedDelegation.value.contractAddress,
+      form.chainId || selectedDelegation.value.chainId,
+      {
+        shares: newShares,
+        expirationDate: form.expirationDate
+      }
+    );
+
     emit('close');
   } catch (e) {
     console.log('delegation failed', e);
@@ -324,21 +345,8 @@ const handleAddressPressDelete = (index: number, force = false) => {
   if (form.delegatees[index].id && !force) return;
 
   form.delegatees.splice(index, 1);
-  nextTick(() => delegateesRef.value[index - 1].focus());
+  nextTick(() => delegateesRef.value[index - 1]?.focus());
 };
-
-watch([delegatees, () => props.open], () => {
-  if (isPendingDelegatees.value) return;
-
-  if (delegatees.value?.length) {
-    form.delegatees.concat(
-      delegatees.value.map(delegatee => ({
-        id: delegatee.id,
-        share: delegatee.share
-      }))
-    );
-  }
-});
 
 watch([() => props.open, delegatees], () => {
   if (!props.open) return;
@@ -356,7 +364,8 @@ watch([() => props.open, delegatees], () => {
     props.initialState?.selectedIndex ?? DEFAULT_FORM_STATE.selectedIndex;
   form.expirationDate =
     props.initialState?.expirationDate ?? defaultExpirationDate.getTime();
-  form.chainId = props.initialState?.chainId ?? DEFAULT_FORM_STATE.chainId;
+  form.chainId =
+    props.initialState?.chainId ?? selectedDelegation.value.chainId;
 
   if (
     delegatees.value?.length &&

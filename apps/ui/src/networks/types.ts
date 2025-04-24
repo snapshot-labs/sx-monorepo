@@ -296,9 +296,10 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     space: Space,
     networkId: NetworkID,
     delegationType: DelegationType,
-    delegatee: string | null,
+    delegatees: string[],
     delegationContract: string,
-    chainIdOverride?: ChainId
+    chainIdOverride?: ChainId,
+    delegateesMetadata?: Record<string, any>
   );
   getDelegatee(
     delegation: SpaceMetadataDelegation,
