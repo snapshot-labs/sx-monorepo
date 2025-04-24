@@ -259,7 +259,7 @@ async function handleSubmit() {
 
   try {
     const newDelegatees = validFormDelegatees.value.map(d => d.id);
-    const newShares = validFormDelegatees.value.map(d => d.share);
+    const newShares = validFormDelegatees.value.map(d => Math.floor(d.share));
     const self = auth.value.account;
 
     if (selectedDelegation.value.apiType === 'split-delegation') {
@@ -276,7 +276,7 @@ async function handleSubmit() {
         100 -
         validFormDelegatees.value
           .filter(({ id }) => !compareAddresses(id, self))
-          .map(({ share }) => share)
+          .map(({ share }) => Math.floor(share))
           .reduce((a, b) => a + b, 0);
       if (remainingShares > 0 && remainingShares < 100) {
         newShares.push(remainingShares);
