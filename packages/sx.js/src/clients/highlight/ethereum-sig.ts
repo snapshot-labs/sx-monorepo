@@ -44,7 +44,7 @@ export class HighlightEthereumSigClient {
     const domain = {
       ...baseDomain,
       chainId,
-      salt: `0x${salt.toString(16)}`,
+      salt: `0x${salt.toString(16).padStart(64, '0')}`,
       verifyingContract: to
     };
 
