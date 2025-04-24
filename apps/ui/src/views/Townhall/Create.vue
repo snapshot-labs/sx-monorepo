@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getDiscussion } from '@/helpers/townhall';
 import { sleep } from '@/helpers/utils';
 
 const route = useRoute();
@@ -54,8 +55,19 @@ async function handleSubmit() {
     const id = res.result.events.find(event => event.key === 'new_discussion')
       .data[0];
 
-    // Check if it exists on API instead
-    await sleep(1000);
+    while (true) {
+      try {
+        await getDiscussion(id.toString());
+        break;
+      } catch (e: unknown) {
+        if (e instanceof Error && e.message.includes('Row not found')) {
+          await sleep(500);
+          continue;
+        }
+
+        throw e;
+      }
+    }
 
     await router.push({ name: 'townhall-discussion', params: { id } });
   } catch (e) {
