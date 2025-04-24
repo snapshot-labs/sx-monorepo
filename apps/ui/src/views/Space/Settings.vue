@@ -175,13 +175,6 @@ const isTicketValid = computed(() => {
   );
 });
 
-const isMissingSplitDelegationStrategy = computed(() => {
-  return (
-    form.value.delegations[0]?.apiType === 'split-delegation' &&
-    !strategies.value.some(s => s.address === 'split-delegation')
-  );
-});
-
 const error = computed(() => {
   if (loading.value) {
     return null;
@@ -205,10 +198,6 @@ const error = computed(() => {
 
     if (!isTicketValid.value) {
       return 'Strategies are invalid';
-    }
-
-    if (isMissingSplitDelegationStrategy.value) {
-      return 'A strategy using "split-delegation" is required';
     }
 
     if (hasProposalErrors.value) {

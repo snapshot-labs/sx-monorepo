@@ -187,16 +187,16 @@ export function useDelegates(
   ): Promise<Delegate[]> {
     const orderBy =
       filter.orderBy === 'tokenHoldersRepresentedAmount' ? 'count' : 'power';
-    const splitDelStrategy = space.strategies_params.find(
+    const splitDelegationStrategy = space.strategies_params.find(
       strategy => strategy.name === 'split-delegation'
     );
 
     const response = await fetch(
-      `${space.delegations[0]?.apiUrl}/api/v1/${space.id}/pin/top-delegates?by=${orderBy}&limit=${filter.first}&offset=${filter.skip}`,
+      `${delegation.apiUrl}/api/v1/${space.id}/pin/top-delegates?by=${orderBy}&limit=${filter.first}&offset=${filter.skip}`,
       {
         method: 'POST',
         body: JSON.stringify({
-          strategy: splitDelStrategy
+          strategy: splitDelegationStrategy
         })
       }
     );

@@ -123,17 +123,21 @@ async function fetchDelegateRegistryDelegatees(
   ];
 }
 
-async function getSplitDelegationDelegatee(space: Space, address: string) {
+async function getSplitDelegationDelegatee(
+  space: Space,
+  delegation: SpaceMetadataDelegation,
+  address: string
+): Promise<{ votingPower: number; percentOfVotingPower: number }> {
   const splitDelegationStrategy = space.strategies_params.find(
     strategy => strategy.name === 'split-delegation'
   );
 
   if (!splitDelegationStrategy) {
-    return {};
+    return { votingPower: 0, percentOfVotingPower: 0 };
   }
 
   const response = await fetch(
-    `${splitDelegationStrategy.params.backendUrl}/api/v1/${space.id}/pin/${address}`,
+    `${delegation.apiUrl}/api/v1/${space.id}/pin/${address}`,
     {
       method: 'POST',
       body: JSON.stringify({
@@ -154,6 +158,10 @@ async function fetchSplitDelegationDelegatees(
     strategy => strategy.name === 'split-delegation'
   );
 
+  if (!splitDelegationStrategy) {
+    return [];
+  }
+
   const response = await fetch(
     `${delegation.apiUrl}/api/v1/${space.id}/pin/${account}`,
     {
@@ -171,7 +179,7 @@ async function fetchSplitDelegationDelegatees(
   const [names, ...delegatees] = await Promise.all([
     getNames(delegateesAddresses),
     ...delegateesAddresses.map(delegate =>
-      getSplitDelegationDelegatee(space, delegate)
+      getSplitDelegationDelegatee(space, delegation, delegate)
     )
   ]);
 
