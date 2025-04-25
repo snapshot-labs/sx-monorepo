@@ -75,7 +75,10 @@ const navigation = computed(() => [
 const hasOnlyInvalidDelegations = computed(() => {
   if (!props.space.delegations.length) return true;
 
-  return props.space.delegations.every(delegation => !delegation.apiUrl);
+  return props.space.delegations.every(
+    delegation =>
+      !delegation.chainId || !delegation.apiUrl || !delegation.apiType
+  );
 });
 
 async function loadUserActivity() {
