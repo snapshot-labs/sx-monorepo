@@ -30,13 +30,7 @@ const BODY_DEFINITION = {
 const STRATEGY_DEFINITION = {
   type: 'string',
   enum: ['ACTIVE', 'INACTIVE'],
-  options: [
-    { id: 'anyone', name: 'Anyone' },
-    { id: 'whitelist', name: 'Whitelist' },
-    { id: 'eth', name: 'ETH holder' },
-    { id: 'hats-protocol', name: 'Hats protocol role(s)' },
-    { id: 'zupass', name: 'Zupass holder' }
-  ],
+  options: [{ id: 'anyone', name: 'Anyone' }],
   title: 'Who can participate?'
 };
 
@@ -102,7 +96,11 @@ async function handleSubmit() {
         <UiComposer v-model="body" :definition="BODY_DEFINITION" />
       </div>
       <div>
-        <UiSelect v-model="strategy" :definition="STRATEGY_DEFINITION" />
+        <UiSelect
+          v-model="strategy"
+          disabled
+          :definition="STRATEGY_DEFINITION"
+        />
       </div>
       <UiButton
         class="primary flex items-center space-x-1"
