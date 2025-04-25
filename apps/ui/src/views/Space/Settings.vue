@@ -540,6 +540,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         title="Controller"
         description="The controller is the account able to change the space settings and cancel pending proposals."
       >
+        <UiMessage v-if="space.id.endsWith('.shib')" type="danger" class="mb-3">
+          Controller edition is not available for .shib spaces, and is locked to
+          the name's owner
+        </UiMessage>
         <UiMessage
           v-if="isOffchainNetwork && isController && !isOwner"
           type="danger"
@@ -550,7 +554,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         <FormSpaceController
           :controller="controller"
           :network="network"
-          :disabled="!isOwner"
+          :disabled="!isOwner || space.id.endsWith('.shib')"
           @save="handleControllerSave"
         />
       </UiContainerSettings>
