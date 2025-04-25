@@ -144,7 +144,7 @@ const STATEMENT_DEFINITION = {
   format: 'long',
   title: 'Statement',
   minLength: 1,
-  maxLength: 256
+  maxLength: 200
 };
 
 async function handleSubmit() {
