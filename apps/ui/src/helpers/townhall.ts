@@ -1,12 +1,13 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import gql from 'graphql-tag';
+import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { Statement, Vote } from '@/helpers/pulse';
 
 type NewStatementEvent = [number, string, number, string];
 type NewVoteEvent = [string, number, number, number];
 
 const client = new ApolloClient({
-  uri: 'http://localhost:3000',
+  uri: HIGHLIGHT_URL,
   cache: new InMemoryCache({ addTypename: false }),
   defaultOptions: {
     query: {
