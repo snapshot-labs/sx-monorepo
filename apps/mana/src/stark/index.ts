@@ -1,10 +1,10 @@
 import express from 'express';
 import { validateAndParseAddress } from 'starknet';
 import z from 'zod';
-import { getStarknetAccount } from './dependencies';
+import { generateSpaceStarknetWallet } from './dependencies';
 import { NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
-import { indexWithAddress, rpcError } from '../utils';
+import { rpcError } from '../utils';
 
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
@@ -44,13 +44,11 @@ router.post('/:chainId', (req, res) => {
 });
 
 router.get('/relayers/spaces/:space', (req, res) => {
-  const mnemonic = process.env.STARKNET_MNEMONIC || '';
   const { space } = req.params;
   if (!space) return rpcError(res, 400, 'Missing address parameter', 0);
 
   const normalizedSpaceAddress = validateAndParseAddress(space);
-  const index = indexWithAddress(normalizedSpaceAddress);
-  const { address } = getStarknetAccount(mnemonic, index);
+  const { address } = generateSpaceStarknetWallet(normalizedSpaceAddress);
 
   res.json({ address });
 });

@@ -1,8 +1,8 @@
 import express from 'express';
 import z from 'zod';
-import { getEthereumWallet } from './dependencies';
+import { generateSpaceEVMWallet } from './dependencies';
 import { createNetworkHandler, NETWORKS } from './rpc';
-import { indexWithAddress, rpcError } from '../utils';
+import { rpcError } from '../utils';
 
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
@@ -39,16 +39,12 @@ router.post('/:chainId?', (req, res) => {
 });
 
 router.get('/relayers/spaces/:space', async (req, res) => {
-  const { space } = req.params;
-  if (!space) return rpcError(res, 400, 'Missing address parameter', 0);
+  const normalizedSpaceAddress = req.params.space.toLowerCase();
 
-  const mnemonic = process.env.ETH_MNEMONIC || '';
-  const normalizedSpaceAddress = space.toLowerCase();
-  const index = indexWithAddress(normalizedSpaceAddress);
-  const { address } = getEthereumWallet(mnemonic, index);
+  const wallet = generateSpaceEVMWallet(normalizedSpaceAddress);
 
   res.json({
-    address
+    address: wallet.address
   });
 });
 

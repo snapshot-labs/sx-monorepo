@@ -1,10 +1,14 @@
+import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { indexWithAddress } from '../utils';
 
-export function getEthereumWallet(mnemonic: string, index: number) {
-  const path = `m/44'/60'/0'/0/${index}`;
-  return Wallet.fromMnemonic(mnemonic, path);
+const MNEMONIC = process.env.ETH_MNEMONIC || '';
+
+export function generateSpaceEVMWallet(spaceAddress: string) {
+  // Combine the space address and mnemonic to create a unique seed
+  const seed = `${spaceAddress}:${MNEMONIC}`;
+  const privateKey = keccak256(Buffer.from(seed));
+  return new Wallet(privateKey);
 }
 
 export const createWalletProxy = (mnemonic: string, chainId: number) => {
@@ -18,8 +22,7 @@ export const createWalletProxy = (mnemonic: string, chainId: number) => {
     const normalizedSpaceAddress = spaceAddress.toLowerCase();
 
     if (!signers.has(normalizedSpaceAddress)) {
-      const index = indexWithAddress(normalizedSpaceAddress);
-      const wallet = getEthereumWallet(mnemonic, index);
+      const wallet = generateSpaceEVMWallet(normalizedSpaceAddress);
       signers.set(normalizedSpaceAddress, wallet.connect(provider));
     }
 

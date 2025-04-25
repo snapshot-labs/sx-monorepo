@@ -12,6 +12,8 @@ import {
 import { NonceManager } from './nonce-manager';
 import { indexWithAddress } from '../utils';
 
+const MNEMONIC = process.env.STARKNET_MNEMONIC || '';
+
 const basePath = "m/44'/9004'/0'/0";
 const contractAXclassHash =
   '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
@@ -30,16 +32,12 @@ export function getProvider(chainId: string) {
   return new RpcProvider({ nodeUrl: NODE_URLS.get(chainId) });
 }
 
-export function getStarknetAccount(mnemonic: string, index: number) {
-  const masterSeed = bip39.mnemonicToSeedSync(mnemonic);
-  const hdKey1 =
-    bip32.HDKey.fromMasterSeed(masterSeed).derive("m/44'/60'/0'/0/0");
-  const hdKey2 = bip32.HDKey.fromMasterSeed(hdKey1.privateKey!);
-
-  const path = `${basePath}/${index}`;
-  const starknetHdKey = hdKey2.derive(path);
-
-  const privateKey = ec.starkCurve.grindKey(starknetHdKey.privateKey!);
+export function generateSpaceStarknetWallet(spaceAddress: string) {
+  // Create a deterministic seed from the space address and mnemonic
+  const combinedSeed = `${spaceAddress}:${MNEMONIC}`;
+  const hashedSeed = hash.starknetKeccak(combinedSeed);
+  const hashedSeedHex = hashedSeed.toString(16).padStart(64, '0');
+  const privateKey = ec.starkCurve.grindKey(`0x${hashedSeedHex}`);
   const starkKeyPubAX = ec.starkCurve.getStarkKey(privateKey);
 
   const address = hash.calculateContractAddressFromHash(
@@ -85,7 +83,7 @@ export async function deployContract(
 
 export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
   const accounts = new Map<
-    number,
+    string,
     {
       account: Account;
       nonceManager: NonceManager;
@@ -95,12 +93,11 @@ export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
 
   return (spaceAddress: string) => {
     const normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
-    const index = indexWithAddress(normalizedSpaceAddress);
 
-    if (!accounts.has(index)) {
-      const { address, privateKey, starkKeyPubAX } = getStarknetAccount(
-        mnemonic,
-        index
+    if (!accounts.has(normalizedSpaceAddress)) {
+      // Use the deterministic account derivation instead of index-based
+      const { address, privateKey, starkKeyPubAX } = generateSpaceStarknetWallet(
+        normalizedSpaceAddress
       );
 
       const account = new Account(provider, address, privateKey);
@@ -113,9 +110,13 @@ export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
           await deployContract(account, provider, starkKeyPubAX, address);
         }
       };
-      accounts.set(index, { account, nonceManager, deployAccount });
+      accounts.set(normalizedSpaceAddress, {
+        account,
+        nonceManager,
+        deployAccount
+      });
     }
 
-    return accounts.get(index)!;
+    return accounts.get(normalizedSpaceAddress)!;
   };
 }
