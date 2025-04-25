@@ -7,7 +7,12 @@ type NewVoteEvent = [string, number, number, number];
 
 const client = new ApolloClient({
   uri: 'http://localhost:3000',
-  cache: new InMemoryCache({ addTypename: false })
+  cache: new InMemoryCache({ addTypename: false }),
+  defaultOptions: {
+    query: {
+      fetchPolicy: 'no-cache'
+    }
+  }
 });
 
 const DISCUSSION_QUERY = gql`
