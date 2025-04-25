@@ -8,6 +8,7 @@ import {
 } from '@/networks/common/constants';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { Connector, ConnectorType } from '@/networks/types';
+import { useDelegateesQuery } from '@/queries/delegatees';
 import { ChainId, Space, SpaceMetadataDelegation } from '@/types';
 import FormBasicDelegation from '../FormBasicDelegation.vue';
 
@@ -16,17 +17,21 @@ type Delegatee = {
   share?: number;
 };
 
+type ValidSpaceMetadataDelegation = {
+  [P in keyof SpaceMetadataDelegation]: NonNullable<SpaceMetadataDelegation[P]>;
+};
+
 const DEFAULT_FORM_STATE = {
-  delegatees: [{ id: '', share: 0 }],
+  delegatees: [{ id: '', share: 100 }],
   expirationDate: 0,
-  chainId: null
+  chainId: 1
 };
 
 const props = defineProps<{
   open: boolean;
   space: Space;
   delegation?: SpaceMetadataDelegation;
-  initialState?: {
+  initialState: {
     delegatees: Delegatee[];
   };
 }>();
@@ -41,7 +46,7 @@ const { auth, login } = useWeb3();
 const form: {
   delegatees: Required<Delegatee>[];
   expirationDate: number;
-  chainId?: null | ChainId;
+  chainId: ChainId;
 } = reactive(clone(DEFAULT_FORM_STATE));
 const isFormValidated = ref(false);
 const isFormValid = ref(false);
@@ -54,39 +59,45 @@ const searchValue = ref('');
 const connectorModalConnectors = ref([] as ConnectorType[]);
 const selectedDelegationIndex = ref(0);
 
-const validDelegations = computed<NonNullable<SpaceMetadataDelegation>[]>(
-  () => {
-    return props.space.delegations.filter(isValidDelegation);
+const delegations = computed<ValidSpaceMetadataDelegation[]>(() => {
+  return props.space.delegations.filter(
+    isValidDelegation
+  ) as ValidSpaceMetadataDelegation[];
+});
+
+const delegationsSupportedByCurrentWallet = computed(() => {
+  return delegations.value.filter(isDelegationSupportedByConnectedWallet);
+});
+
+const selectedDelegation = computed<ValidSpaceMetadataDelegation | null>(() => {
+  if (props.delegation) {
+    return isValidDelegation(props.delegation)
+      ? (props.delegation as ValidSpaceMetadataDelegation)
+      : null;
   }
-);
 
-const validSelectableDelegations = computed(() => {
-  if (!auth.value) return validDelegations.value;
-
-  return validDelegations.value.filter(isDelegationSupportedByConnectedWallet);
+  return delegations.value[selectedDelegationIndex.value] || null;
 });
 
-const selectedDelegation = computed<SpaceMetadataDelegation>(() => {
-  return (
-    props.delegation ||
-    validSelectableDelegations.value[selectedDelegationIndex.value]
-  );
+const isSelectedDelegationSupportingMultipleDelegates = computed(() => {
+  return selectedDelegation.value?.apiType === 'split-delegation';
 });
 
-const selectedValidDelegation = computed(() => {
-  return isValidDelegation(selectedDelegation.value)
-    ? (selectedDelegation.value as NonNullable<SpaceMetadataDelegation>)
-    : null;
-});
-
-const isInvalidSelectedDelegation = computed(
-  () => !isValidDelegation(selectedDelegation.value)
+const {
+  data: delegatees,
+  isPending: isPendingDelegatees,
+  isError: isDelegateesError,
+  refetch: fetchDelegatees
+} = useDelegateesQuery(
+  () => auth.value?.account || '',
+  toRef(props, 'space'),
+  () => selectedDelegation.value
 );
 
 const spaceDelegationsOptions = computed<
   { id: number; name: string; icon: VNode }[]
 >(() => {
-  return validSelectableDelegations.value.map((d, i) => {
+  return delegationsSupportedByCurrentWallet.value.map((d, i) => {
     const network = getNetworkDetails(d.chainId as string);
 
     return {
@@ -101,19 +112,9 @@ const spaceDelegationsOptions = computed<
   });
 });
 
-const isClearingDelegation = computed(() => {
-  return props.initialState?.delegatees.length && form.delegatees.length === 0;
-});
-
-const validFormDelegatees = computed(() => {
-  return form.delegatees.filter(delegatee => !!delegatee.id);
-});
-
 function delegationConnectors(
-  delegation: SpaceMetadataDelegation
+  delegation: ValidSpaceMetadataDelegation
 ): ConnectorType[] {
-  if (!delegation.chainId) return [];
-
   const starknetChainIds: ChainId[] = Object.values(
     STARKNET_NETWORK_METADATA
   ).map(network => network.chainId);
@@ -124,9 +125,9 @@ function delegationConnectors(
 }
 
 function isDelegationSupportedByConnectedWallet(
-  delegation?: SpaceMetadataDelegation
+  delegation: ValidSpaceMetadataDelegation | null
 ): boolean {
-  if (!auth.value?.connector || !delegation?.chainId) return false;
+  if (!auth.value?.connector || !delegation) return false;
 
   return delegationConnectors(delegation).includes(auth.value.connector.type);
 }
@@ -163,17 +164,15 @@ async function handleSubmit() {
   )
     return;
 
-  if (
-    !selectedDelegation.value.apiType ||
-    !selectedDelegation.value.contractAddress ||
-    !selectedDelegation.value.chainId
-  ) {
-    return;
-  }
-
   try {
-    const newDelegatees = validFormDelegatees.value.map(d => d.id);
-    const newShares = validFormDelegatees.value.map(d => Math.floor(d.share));
+    isSending.value = true;
+
+    const validFormDelegatees = form.delegatees.filter(
+      delegatee => !!delegatee.id
+    );
+
+    const newDelegatees = validFormDelegatees.map(d => d.id);
+    const newShares = validFormDelegatees.map(d => Math.floor(d.share));
     const self = auth.value.account;
 
     if (selectedDelegation.value.apiType === 'split-delegation') {
@@ -188,7 +187,7 @@ async function handleSubmit() {
       // Assign the remaining shares to self
       const remainingShares =
         100 -
-        validFormDelegatees.value
+        validFormDelegatees
           .filter(({ id }) => !compareAddresses(id, self))
           .map(({ share }) => Math.floor(share))
           .reduce((a, b) => a + b, 0);
@@ -203,7 +202,7 @@ async function handleSubmit() {
       selectedDelegation.value.apiType,
       newDelegatees,
       selectedDelegation.value.contractAddress,
-      form.chainId || selectedDelegation.value.chainId,
+      form.chainId,
       {
         shares: newShares,
         expirationDate: form.expirationDate
@@ -218,10 +217,40 @@ async function handleSubmit() {
   }
 }
 
+function prefillExistingDelegatees() {
+  if (!delegatees.value?.length) return;
+
+  if (
+    !isSelectedDelegationSupportingMultipleDelegates.value &&
+    form.delegatees[0].id
+  ) {
+    return;
+  }
+
+  const remainingShares =
+    100 - delegatees.value.reduce((a, b) => a + b.share, 0);
+  const formDelegatees = form.delegatees.filter(
+    delegatee => !delegatees.value.some(d => d.id === delegatee.id)
+  );
+
+  form.delegatees = [
+    ...clone(delegatees.value),
+    ...formDelegatees.map(delegatee => ({
+      id: delegatee.id,
+      share: remainingShares / formDelegatees.length
+    }))
+  ]
+    .filter(d => d.id)
+    .map(delegatee => ({
+      id: delegatee.id,
+      share: delegatee.share ?? 100
+    }));
+}
+
 function handleWalletChangeClick() {
   emit('close');
   connectorModalConnectors.value = delegationConnectors(
-    selectedDelegation.value || validDelegations.value[0]
+    selectedDelegation.value as ValidSpaceMetadataDelegation
   );
   isConnectorModalOpen.value = true;
 }
@@ -237,6 +266,20 @@ function handlePickerClick(index = 0) {
   isPickerShown.value = true;
 }
 
+watch(delegatees, () => {
+  prefillExistingDelegatees();
+});
+
+watch(auth, () => {
+  form.delegatees = clone(
+    props.initialState?.delegatees || DEFAULT_FORM_STATE.delegatees
+  ).map(delegatee => ({
+    id: delegatee.id,
+    share: delegatee.share ?? 100
+  }));
+  prefillExistingDelegatees();
+});
+
 watch(
   () => props.open,
   () => {
@@ -249,6 +292,9 @@ watch(
       share: delegatee.share ?? 100
     }));
     form.expirationDate = DEFAULT_FORM_STATE.expirationDate;
+    form.chainId = props.delegation?.chainId || DEFAULT_FORM_STATE.chainId;
+
+    prefillExistingDelegatees();
   }
 );
 </script>
@@ -287,22 +333,23 @@ watch(
         "
       />
     </template>
+    <UiMessage v-else-if="!auth" class="m-4" type="danger">
+      Please login first
+    </UiMessage>
     <UiMessage
-      v-else-if="
-        auth && !isDelegationSupportedByConnectedWallet(selectedDelegation)
-      "
+      v-else-if="!isDelegationSupportedByConnectedWallet(selectedDelegation)"
       class="m-4"
       type="danger"
     >
       Please connect with
       {{ auth.connector.type === 'argentx' ? 'an EVM' : 'a Starknet' }} wallet.
     </UiMessage>
-    <UiMessage v-else-if="!selectedValidDelegation" class="m-4" type="danger">
+    <UiMessage v-else-if="!selectedDelegation" class="m-4" type="danger">
       Invalid delegation
     </UiMessage>
     <div v-else class="s-box p-4 space-y-[14px]">
       <Combobox
-        v-if="!delegation && validSelectableDelegations.length > 1"
+        v-if="!delegation && delegationsSupportedByCurrentWallet.length > 1"
         v-model="selectedDelegationIndex"
         class="!mb-0"
         :definition="{
@@ -313,38 +360,47 @@ watch(
           options: spaceDelegationsOptions
         }"
       />
-      <FormSplitDelegation
-        v-if="selectedValidDelegation.apiType === 'split-delegation'"
-        v-model:is-form-validated="isFormValidated"
-        v-model:is-form-valid="isFormValid"
-        v-model:form="form"
-        v-model:is-hidden="isHidden"
-        :space="props.space"
-        :delegation="selectedValidDelegation"
-        :account="auth?.account"
-        @pick="handlePickerClick"
-      />
-      <FormBasicDelegation
-        v-else
-        v-model:is-form-validated="isFormValidated"
-        v-model:is-form-valid="isFormValid"
-        v-model:delegatee="form.delegatees[0].id"
-        :chain-id="selectedValidDelegation.chainId"
-        @pick="handlePickerClick"
-      />
+      <UiLoading v-if="isPendingDelegatees" class="inline-block" />
+      <div v-else-if="isDelegateesError" class="space-y-3">
+        <UiAlert type="error">
+          Error loading delegates data. Please try again.
+        </UiAlert>
+        <UiButton
+          type="button"
+          class="flex w-full items-center gap-2 justify-center"
+          @click="fetchDelegatees"
+        >
+          <IH-refresh />Retry
+        </UiButton>
+      </div>
+      <template v-else>
+        <FormSplitDelegation
+          v-if="isSelectedDelegationSupportingMultipleDelegates"
+          v-model:is-form-validated="isFormValidated"
+          v-model:is-form-valid="isFormValid"
+          v-model:form="form"
+          v-model:is-hidden="isHidden"
+          @pick="handlePickerClick"
+        />
+        <FormBasicDelegation
+          v-else
+          v-model:is-form-validated="isFormValidated"
+          v-model:is-form-valid="isFormValid"
+          v-model:form="form"
+          @pick="handlePickerClick"
+        />
+      </template>
     </div>
-    <template v-if="!isPickerShown" #footer>
+    <template v-if="!isPickerShown && auth" #footer>
       <UiButton
-        v-if="
-          auth && !isDelegationSupportedByConnectedWallet(selectedDelegation)
-        "
+        v-if="!isDelegationSupportedByConnectedWallet(selectedDelegation)"
         class="w-full"
         @click="handleWalletChangeClick"
       >
         Change wallet
       </UiButton>
       <UiButton
-        v-else-if="isInvalidSelectedDelegation"
+        v-else-if="!selectedDelegation"
         class="w-full"
         @click="emit('close')"
       >
@@ -355,14 +411,10 @@ watch(
         :loading="isSending"
         primary
         class="w-full"
-        :disabled="
-          !isFormValid ||
-          (!!auth &&
-            !isDelegationSupportedByConnectedWallet(selectedDelegation))
-        "
+        :disabled="isPendingDelegatees || !isFormValid || !isFormValidated"
         @click="handleSubmit"
       >
-        {{ isClearingDelegation ? 'Clear delegates' : 'Confirm' }}
+        {{ !form.delegatees.length ? 'Clear delegates' : 'Confirm' }}
       </UiButton>
     </template>
   </UiModal>

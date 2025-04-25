@@ -2,7 +2,14 @@
 import { getValidator } from '@/helpers/validation';
 import { ChainId } from '@/types';
 
-const delegatee = defineModel<string>('delegatee', {
+type Delegatee = {
+  id: string;
+};
+
+const form = defineModel<{
+  delegatees: Delegatee[];
+  chainId: ChainId;
+}>('form', {
   required: true
 });
 const isFormValidated = defineModel<boolean>('isFormValidated', {
@@ -12,10 +19,6 @@ const isFormValid = defineModel<boolean>('isFormValid', {
   required: true
 });
 
-const props = defineProps<{
-  chainId: ChainId;
-}>();
-
 const emit = defineEmits<{ (e: 'pick'): void }>();
 
 const formErrors = ref({} as Record<string, any>);
@@ -23,7 +26,7 @@ const formErrors = ref({} as Record<string, any>);
 const delegateDefinition = computed(() => ({
   type: 'string',
   format: 'ens-or-address',
-  chainId: props.chainId,
+  chainId: form.value.chainId,
   title: 'Delegatee',
   examples: ['Address or ENS']
 }));
@@ -43,18 +46,18 @@ const formValidator = computed(() =>
 watchEffect(async () => {
   isFormValidated.value = false;
   formErrors.value = await formValidator.value.validateAsync({
-    delegatee: delegatee.value
+    delegatee: form.value.delegatees[0].id
   });
   isFormValidated.value = true;
-  isFormValid.value = Object.keys(formErrors.value).length === 0;
+  isFormValid.value = !Object.keys(formErrors.value).length;
 });
 </script>
 
 <template>
   <UiInputAddress
-    v-model="delegatee"
+    v-model="form.delegatees[0].id"
     :definition="delegateDefinition"
-    :error="formErrors.delegatee"
+    :error="formErrors.delegatees?.[0]?.id"
     :required="true"
     @pick="emit('pick')"
   />

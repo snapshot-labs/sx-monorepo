@@ -678,14 +678,14 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegationType: DelegationType,
-      delegatee: string | null,
+      delegatees: string[],
       delegationContract: string
     ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       const { account }: { account: Account } = web3.provider;
 
-      delegatee = delegatee ?? '0x0';
+      const delegatee = delegatees[0] ?? '0x0';
 
       let calls: AllowArray<Call> = {
         contractAddress: delegationContract,

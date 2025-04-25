@@ -75,6 +75,14 @@ const BASIC_DELEGATION_STRATEGIES = [
 
 const SPLIT_DELEGATION_STRATEGIES = ['split-delegation'];
 
+const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
+  name: 'Split Delegation',
+  apiType: 'split-delegation',
+  apiUrl: 'https://delegate-api.gnosisguild.org',
+  contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
+  chainId: 1
+};
+
 const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
   s: 'https://delegate-registry-api.snapshot.box',
   's-tn': 'https://testnet-delegate-registry-api.snapshot.box'
@@ -472,16 +480,9 @@ function formatDelegations(
   );
   if (
     splitDelegationStrategy &&
-    (!space.delegationPortal ||
-      space.delegationPortal.delegationType !== 'split-delegation')
+    space.delegationPortal?.delegationType !== SPLIT_DELEGATION_DATA.apiType
   ) {
-    delegations.push({
-      name: 'Split Delegation',
-      apiType: 'split-delegation',
-      apiUrl: 'https://delegate-api.gnosisguild.org',
-      contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
-      chainId: 1
-    });
+    delegations.push(SPLIT_DELEGATION_DATA);
   }
 
   return delegations;

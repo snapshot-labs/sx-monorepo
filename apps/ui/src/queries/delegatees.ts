@@ -123,17 +123,21 @@ async function fetchDelegateRegistryDelegatees(
   ];
 }
 
+function getSplitDelegationStrategy(space: Space) {
+  return space.strategies_params.find(
+    strategy => strategy.name === 'split-delegation'
+  );
+}
+
 async function getSplitDelegationDelegatee(
   space: Space,
   delegation: SpaceMetadataDelegation,
   address: string
 ): Promise<{ votingPower: number; percentOfVotingPower: number }> {
-  const splitDelegationStrategy = space.strategies_params.find(
-    strategy => strategy.name === 'split-delegation'
-  );
+  const splitDelegationStrategy = getSplitDelegationStrategy(space);
 
   if (!splitDelegationStrategy) {
-    return { votingPower: 0, percentOfVotingPower: 0 };
+    throw new Error('Split delegation strategy not found');
   }
 
   const response = await fetch(
@@ -146,6 +150,10 @@ async function getSplitDelegationDelegatee(
     }
   );
 
+  if (!response.ok) {
+    throw new Error('Failed to fetch delegatee info');
+  }
+
   return response.json();
 }
 
@@ -154,9 +162,7 @@ async function fetchSplitDelegationDelegatees(
   delegation: SpaceMetadataDelegation,
   space: Space
 ): Promise<Delegatee[]> {
-  const splitDelegationStrategy = space.strategies_params.find(
-    strategy => strategy.name === 'split-delegation'
-  );
+  const splitDelegationStrategy = getSplitDelegationStrategy(space);
 
   if (!splitDelegationStrategy) {
     return [];
@@ -172,18 +178,25 @@ async function fetchSplitDelegationDelegatees(
     }
   );
 
+  if (!response.ok) {
+    throw new Error('Failed to fetch delegatees');
+  }
+
   const body = await response.json();
 
-  const delegateesAddresses = body.delegateTree.map(({ delegate }) => delegate);
+  const delegateesAddresses: string[] = body.delegateTree.map(
+    ({ delegate }) => delegate
+  );
 
   const [names, ...delegatees] = await Promise.all([
     getNames(delegateesAddresses),
-    ...delegateesAddresses.map(delegate =>
-      getSplitDelegationDelegatee(space, delegation, delegate)
+    ...delegateesAddresses.map(delegateAddress =>
+      getSplitDelegationDelegatee(space, delegation, delegateAddress)
     )
   ]);
 
   return body.delegateTree.map(({ delegate, delegatedPower, weight }, i) => {
+    // delegatee's voting power ratio coming from the current account
     const vpPercentFromDelegator = delegatedPower / delegatees[i].votingPower;
     return {
       id: delegate,
@@ -197,23 +210,24 @@ async function fetchSplitDelegationDelegatees(
 }
 
 export function useDelegateesQuery(
-  account: MaybeRefOrGetter<string | undefined>,
+  account: MaybeRefOrGetter<string>,
   space: MaybeRefOrGetter<Space>,
-  delegation: MaybeRefOrGetter<SpaceMetadataDelegation>
+  delegation: MaybeRefOrGetter<SpaceMetadataDelegation | null>
 ) {
   return useQuery({
     queryKey: [
       'delegatees',
-      () => toValue(delegation).contractAddress,
+      () => toValue(delegation)?.contractAddress,
       account
     ],
     queryFn: () =>
       FETCH_DELEGATEES_FN[
-        toValue(delegation).apiType as keyof typeof FETCH_DELEGATEES_FN
-      ](toValue(account) || '', toValue(delegation), toValue(space)),
+        toValue(delegation)!.apiType as keyof typeof FETCH_DELEGATEES_FN
+      ](toValue(account), toValue(delegation)!, toValue(space)),
     enabled:
       !!toValue(account) &&
-      !!toValue(delegation).chainId &&
-      !!toValue(delegation).apiType
+      !!toValue(delegation)?.chainId &&
+      !!toValue(delegation)?.apiType &&
+      !!toValue(delegation)?.apiUrl
   });
 }

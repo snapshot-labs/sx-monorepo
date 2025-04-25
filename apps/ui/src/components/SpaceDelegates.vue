@@ -16,8 +16,10 @@ const props = defineProps<{
 
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{
-  delegatees?: { id: string }[];
-} | null>(null);
+  delegatees: { id: string }[];
+}>({
+  delegatees: []
+});
 const isUndelegating = ref(false);
 const undelegateFn = ref(undelegate);
 const sortBy = ref(
@@ -31,6 +33,7 @@ const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const actions = useActions();
 const queryClient = useQueryClient();
+const { modalAccountOpen } = useModal();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 
@@ -90,28 +93,27 @@ function handleSortChange(type: SortType) {
 }
 
 function handleDelegateToggle(newDelegatee?: string) {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   if (newDelegatee && hasDelegatedTo(newDelegatee)) {
     isUndelegating.value = true;
     return;
   }
 
-  delegateModalState.value = {
-    delegatees: [{ id: newDelegatee || '' }]
-  };
+  delegateModalState.value.delegatees[0] = { id: newDelegatee || '' };
   delegateModalOpen.value = true;
 }
 
 function handleUpdateDelegatesClick(newDelegatee?: string) {
-  if (newDelegatee && !hasDelegatedTo(newDelegatee)) {
-    delegateModalState.value = {
-      delegatees: [{ id: newDelegatee || '' }]
-    };
-  } else {
-    delegateModalState.value = {
-      delegatees: [{ id: '' }]
-    };
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
   }
 
+  delegateModalState.value.delegatees[0] = { id: newDelegatee || '' };
   delegateModalOpen.value = true;
 }
 

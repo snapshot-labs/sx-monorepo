@@ -651,11 +651,8 @@ export function createActions(
           throw new Error('Expiration is required for split delegation');
         }
 
-        if (
-          !delegateesMetadata?.shares ||
-          delegateesMetadata.shares.length !== delegatees.length
-        ) {
-          throw new Error('Shares are required for split delegation');
+        if (delegateesMetadata?.shares?.length !== delegatees.length) {
+          throw new Error('Matching shares are required for split delegation');
         }
 
         if (delegatees.length) {

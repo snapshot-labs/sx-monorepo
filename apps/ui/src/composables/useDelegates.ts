@@ -201,6 +201,10 @@ export function useDelegates(
       }
     );
 
+    if (!response.ok) {
+      throw new Error('Failed to fetch split delegation delegates');
+    }
+
     const body = await response.json();
 
     return formatDelegates({

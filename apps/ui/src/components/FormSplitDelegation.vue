@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { _t, clone, getUrl } from '@/helpers/utils';
+import dayjs from 'dayjs';
+import { _t, getUrl } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { useDelegateesQuery } from '@/queries/delegatees';
-import { ChainId, Space, SpaceMetadataDelegation } from '@/types';
+import { ChainId } from '@/types';
 
 type Delegatee = {
   id: string;
-  share?: number;
+  share: number;
 };
 
 // Delegation supports both following chains:
@@ -25,8 +25,7 @@ const DELEGATEE_SHARE_DEFINITION = {
   type: 'number',
   examples: ['10'],
   minimum: 0,
-  maximum: 100,
-  default: 0
+  maximum: 100
 };
 
 const expirationDateDefinition = {
@@ -52,7 +51,7 @@ const DELEGATEE_DEFINITION = {
 };
 
 const form = defineModel<{
-  delegatees: Required<Delegatee>[];
+  delegatees: Delegatee[];
   expirationDate: number;
   chainId: ChainId;
 }>('form', {
@@ -68,12 +67,6 @@ const isHidden = defineModel<boolean>('isHidden', {
   required: true
 });
 
-const props = defineProps<{
-  space: Space;
-  delegation: SpaceMetadataDelegation;
-  account?: string;
-}>();
-
 const emit = defineEmits<{
   (e: 'pick', index: number): void;
 }>();
@@ -82,17 +75,6 @@ const isModalDateTimeOpen = ref(false);
 const delegateesRef: Ref<any[]> = ref([]);
 const sharesRef: Ref<any[]> = ref([]);
 const formErrors = ref({} as Record<string, any>);
-
-const {
-  data: delegatees,
-  isPending: isPendingDelegatees,
-  isError: isDelegateesError,
-  refetch: fetchDelegatees
-} = useDelegateesQuery(
-  toRef(props, 'account'),
-  toRef(props, 'space'),
-  toRef(props, 'delegation')
-);
 
 const availableNetworks = computed(() => {
   return Object.entries(networks)
@@ -138,9 +120,9 @@ const formValidator = computed(() =>
   })
 );
 
-const nonEmptyFormDelegatees = computed(() => {
-  return form.value.delegatees.filter(delegatee => !!delegatee.id);
-});
+const nonEmptyFormDelegatees = computed(() =>
+  form.value.delegatees.filter(delegatee => !!delegatee.id)
+);
 
 function openDateTimeModal() {
   isModalDateTimeOpen.value = true;
@@ -161,9 +143,7 @@ const handleDistributeSharesEvenlyClick = () => {
   // Always use integer shares, any leftover will be delegated to self
   const evenShare = Math.floor(100 / nonEmptyFormDelegatees.value.length);
   form.value.delegatees.forEach(delegatee => {
-    if (!delegatee.id) return;
-
-    delegatee.share = evenShare;
+    delegatee.share = delegatee.id ? evenShare : 0;
   });
 };
 
@@ -192,82 +172,59 @@ const handleAddressPressDelete = (index: number, force = false) => {
   nextTick(() => delegateesRef.value[index - 1]?.focus());
 };
 
-function prefillExistingDelegatees() {
-  if (!delegatees.value?.length) return;
-
-  const remainingShares =
-    100 - delegatees.value.reduce((a, b) => a + b.share, 0);
-  const formDelegatees = form.value.delegatees.filter(
-    delegatee => !delegatees.value.some(d => d.id === delegatee.id)
-  );
-
-  form.value.delegatees = [
-    ...clone(delegatees.value),
-    ...formDelegatees.map(delegatee => ({
-      id: delegatee.id,
-      share: remainingShares / formDelegatees.length
-    }))
-  ]
-    .filter(d => d.id)
-    .map(delegatee => ({
-      id: delegatee.id,
-      share: delegatee.share ?? 100
-    }));
-}
-
 watchEffect(async () => {
   isFormValidated.value = false;
   formErrors.value = await formValidator.value.validateAsync(form.value);
 
-  // Validate sum of all shares adds up to 100%
+  // Validate sum of all shares from non-empty rows adds up to 100%
   if (
     nonEmptyFormDelegatees.value
       .map(delegatee => delegatee.share)
       .reduce((a, b) => a + b, 0) > 100
   ) {
+    formErrors.value.delegatees ||= [];
     form.value.delegatees.forEach((delegatee, index) => {
-      if (delegatee.id) {
-        formErrors.value.delegatees ||= [];
-        formErrors.value.delegatees[index] = {
-          ...formErrors.value.delegatees[index],
-          share: 'Total share must add up to 100%'
-        };
-      }
+      if (!delegatee.id) return;
+
+      formErrors.value.delegatees[index] = {
+        share: 'Total share must add up to 100%',
+        ...formErrors.value.delegatees[index]
+      };
     });
   }
 
   // Validate no duplicate addresses
   const nonEmptyAddresses = nonEmptyFormDelegatees.value.map(d => d.id);
   if (new Set(nonEmptyAddresses).size !== nonEmptyAddresses.length) {
+    formErrors.value.delegatees ||= [];
     form.value.delegatees.forEach((delegatee, index, self) => {
-      if (index !== self.findIndex(d => d.id === delegatee.id)) {
-        formErrors.value.delegatees ||= [];
-        formErrors.value.delegatees[index] = {
-          ...formErrors.value.delegatees[index],
-          id: 'Duplicate address not allowed.'
-        };
-      }
+      if (!delegatee.id) return;
+      if (index === self.findIndex(d => d.id === delegatee.id)) return;
+
+      formErrors.value.delegatees[index] = {
+        id: 'Duplicate address not allowed.',
+        ...formErrors.value.delegatees[index]
+      };
     });
   }
 
   isFormValidated.value = true;
-  isFormValid.value = Object.keys(formErrors.value).length === 0;
-});
-
-watch(delegatees, () => {
-  prefillExistingDelegatees();
+  isFormValid.value =
+    Object.keys(formErrors.value).length === 0 &&
+    // form with only empty rows is not valid
+    !(
+      form.value.delegatees.length > 0 &&
+      nonEmptyFormDelegatees.value.length === 0
+    );
 });
 
 onMounted(() => {
-  form.value.chainId = SUPPORTED_CHAIN_IDS.includes(form.value.chainId)
-    ? form.value.chainId
-    : SUPPORTED_CHAIN_IDS[0];
+  form.value.chainId =
+    form.value.chainId && SUPPORTED_CHAIN_IDS.includes(form.value.chainId)
+      ? form.value.chainId
+      : SUPPORTED_CHAIN_IDS[0];
 
-  const defaultExpirationDate = new Date();
-  defaultExpirationDate.setFullYear(defaultExpirationDate.getFullYear() + 1);
-  form.value.expirationDate ||= defaultExpirationDate.getTime();
-
-  prefillExistingDelegatees();
+  form.value.expirationDate ||= dayjs().add(1, 'year').valueOf();
 });
 </script>
 
@@ -282,18 +239,13 @@ onMounted(() => {
               title="Distribute shares evenly"
               class="flex items-center"
             >
-              <button
-                type="button"
-                :disabled="isPendingDelegatees"
-                @click="handleDistributeSharesEvenlyClick"
-              >
+              <button type="button" @click="handleDistributeSharesEvenlyClick">
                 <IH-bars-3 />
               </button>
             </UiTooltip>
             <UiTooltip title="Clear all delegates" class="flex items-center">
               <button
                 type="button"
-                :disabled="isPendingDelegatees"
                 @click="form.delegatees.splice(0, form.delegatees.length)"
               >
                 <IH-archive-box-x-mark />
@@ -306,24 +258,17 @@ onMounted(() => {
           power (100% - any delegations) will remain with you.
         </div>
       </div>
-      <UiLoading v-if="isPendingDelegatees" class="inline-block" />
-      <div v-else-if="isDelegateesError" class="space-y-3">
-        <UiAlert type="error">
-          Error loading delegates data. Please try again.
-        </UiAlert>
-        <UiButton
-          type="button"
-          class="flex w-full items-center gap-2 justify-center"
-          @click="fetchDelegatees"
-        >
-          <IH-refresh />Retry
-        </UiButton>
-      </div>
-      <div v-else class="space-y-3">
+      <div class="space-y-3">
         <div class="space-y-2">
-          <UiMessage v-if="!form.delegatees.length" type="info">
+          <div
+            v-if="!form.delegatees.length"
+            class="border border-dashed border-skin-border py-3 rounded text-skin-text text-center"
+          >
             All delegates removed
-          </UiMessage>
+            <div class="text-[16px]">
+              Submitting the form will clear all existing delegates.
+            </div>
+          </div>
           <div
             v-for="(delegatee, index) in form.delegatees"
             :key="index"
