@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getDiscussion } from '@/helpers/townhall';
+import { getDiscussion } from '@/helpers/townhall/api';
 import { sleep } from '@/helpers/utils';
 
 const route = useRoute();

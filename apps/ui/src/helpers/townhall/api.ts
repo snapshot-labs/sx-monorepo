@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
-import { Statement, Vote } from '@/helpers/pulse';
+import { Statement, Vote } from '@/helpers/townhall/types';
 
 type NewStatementEvent = [number, string, number, string];
 type NewVoteEvent = [string, number, number, number];

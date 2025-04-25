@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { client } from '@/helpers/kbyte';
-import { Discussion, Statement, Vote } from '@/helpers/pulse';
 import {
   getDiscussion,
   getVotes,
   newStatementEventToEntry,
   newVoteEventToEntry
-} from '@/helpers/townhall';
+} from '@/helpers/townhall/api';
+import { Discussion, Statement, Vote } from '@/helpers/townhall/types';
 import { _n, clone } from '@/helpers/utils';
 
 const route = useRoute();
@@ -277,7 +277,7 @@ function toggleAdminView() {
                 {{ _n(pendingStatements.length) }}
               </div>
             </h4>
-            <PulseStatements
+            <TownhallStatements
               :discussion="discussion"
               :statements="pendingStatements"
             />
@@ -335,7 +335,7 @@ function toggleAdminView() {
               </div>
             </div>
             <div class="space-y-3">
-              <PulseStatementItem
+              <TownhallStatementItem
                 v-for="(s, i) in results"
                 :key="i"
                 :discussion="discussion"
