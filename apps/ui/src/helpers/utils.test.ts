@@ -288,8 +288,8 @@ describe('utils', () => {
     });
 
     it('should return the space controller address for a shib name on testnet', async () => {
-      const spaceId = 'renato.shib';
-      const expectedController = '0x2E7cC63800e77BB8c662c45Ef33D1cCc23861532';
+      const spaceId = 'snapshot-test-unclaimed.shib';
+      const expectedController = '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3';
       const controller = await getSpaceController(spaceId, 's-tn');
       expect(controller).toBe(expectedController);
     });
