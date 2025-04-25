@@ -56,14 +56,6 @@ const searchConfig = computed(() => {
   return null;
 });
 
-const isTownhallRoute = computed(() => {
-  if (typeof route.name === 'string') {
-    return route.name.startsWith('townhall');
-  }
-
-  return false;
-});
-
 async function handleLogin(connector: Connector) {
   resetAccountModal();
   loading.value = true;
@@ -101,13 +93,6 @@ onUnmounted(() => {
 
 <template>
   <UiTopnav v-bind="$attrs">
-    <router-link
-      v-if="isTownhallRoute"
-      :to="{ name: 'townhall' }"
-      class="ml-4 text-skin-link text-[22px]"
-    >
-      Townhall
-    </router-link>
     <div
       class="flex items-center h-full truncate"
       :class="{
