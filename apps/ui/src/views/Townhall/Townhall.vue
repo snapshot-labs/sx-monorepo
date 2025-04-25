@@ -16,7 +16,7 @@ watchEffect(() => setTitle('Townhall'));
       </UiContainer>
     </div>
     <UiContainer class="!max-w-[940px] space-y-9 mb-10 text-center">
-      <PulseTitleForm class="-mt-8 text-left !max-w-[710px]" />
+      <TownhallTitleForm class="-mt-8 text-left !max-w-[710px]" />
 
       <div class="relative overflow-hidden">
         <div class="grid grid-cols-9 gap-4">

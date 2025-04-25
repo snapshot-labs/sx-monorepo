@@ -1,4 +1,5 @@
 import kbyte from 'kbyte';
+import { HIGHLIGHT_WS } from '@/helpers/highlight';
 
 Object.getOwnPropertyNames(kbyte.Client.prototype)
   .filter(
@@ -17,8 +18,6 @@ Object.getOwnPropertyNames(kbyte.Client.prototype)
     };
   });
 
-export const client = new kbyte.Client(
-  import.meta.env.VITE_PULSE_API || 'ws://localhost:3000'
-);
+export const client = new kbyte.Client(HIGHLIGHT_WS);
 
 setInterval(() => client.request('heartbeat', null), 10e3);

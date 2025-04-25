@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Discussion, Statement } from '@/helpers/pulse';
+import { Discussion, Statement } from '@/helpers/townhall/types';
 import { _n, _p } from '@/helpers/utils';
 
 const props = defineProps<{

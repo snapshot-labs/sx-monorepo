@@ -3,8 +3,11 @@ import { Client } from '@snapshot-labs/highlight';
 
 const WALLET_PRIVATE_KEY = Wallet.createRandom().privateKey;
 
-const HIGHLIGHT_URL =
-  import.meta.env.VITE_HIGHLIGHT_URL || 'http://localhost:3000';
+export const HIGHLIGHT_URL =
+  import.meta.env.VITE_HIGHLIGHT_URL || 'https://livenet.highlight.box';
+
+export const HIGHLIGHT_WS =
+  import.meta.env.VITE_HIGHLIGHT_WS || 'wss://livenet.highlight.box';
 
 const signer = new Wallet(WALLET_PRIVATE_KEY);
 
