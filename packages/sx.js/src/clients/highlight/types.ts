@@ -6,7 +6,7 @@ export const domain = {
 };
 
 export const aliasTypes = {
-  Alias: [
+  SetAlias: [
     { name: 'from', type: 'address' },
     { name: 'alias', type: 'address' }
   ]
@@ -63,7 +63,7 @@ export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
   domain: Required<TypedDataDomain>;
   message: Record<string, unknown>;
-  entrypoint: string;
+  primaryType: string;
   signer: string;
   signature: string;
 };

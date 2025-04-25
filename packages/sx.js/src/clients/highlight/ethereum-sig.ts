@@ -61,7 +61,7 @@ export class HighlightEthereumSigClient {
   }
 
   public async send(envelope: Envelope) {
-    const { domain, message, entrypoint, signer, signature } = envelope;
+    const { domain, message, primaryType, signer, signature } = envelope;
 
     const payload = {
       method: 'hl_postMessage',
@@ -71,7 +71,7 @@ export class HighlightEthereumSigClient {
           salt: domain.salt.toString()
         },
         message,
-        entrypoint,
+        primaryType,
         signer,
         signature
       }
@@ -124,7 +124,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'setAlias',
+      primaryType: 'SetAlias',
       signer: await signer.getAddress(),
       signature
     };
@@ -153,7 +153,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'discussion',
+      primaryType: 'Discussion',
       signer: await signer.getAddress(),
       signature
     };
@@ -186,7 +186,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'close_discussion',
+      primaryType: 'CloseDiscussion',
       signer: await signer.getAddress(),
       signature
     };
@@ -215,7 +215,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'statement',
+      primaryType: 'Statement',
       signer: await signer.getAddress(),
       signature
     };
@@ -249,7 +249,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'hide_statement',
+      primaryType: 'HideStatement',
       signer: await signer.getAddress(),
       signature
     };
@@ -283,7 +283,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'pin_statement',
+      primaryType: 'PinStatement',
       signer: await signer.getAddress(),
       signature
     };
@@ -317,7 +317,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'unpin_statement',
+      primaryType: 'UnpinStatement',
       signer: await signer.getAddress(),
       signature
     };
@@ -347,7 +347,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      entrypoint: 'vote',
+      primaryType: 'Vote',
       signer: await signer.getAddress(),
       signature
     };
