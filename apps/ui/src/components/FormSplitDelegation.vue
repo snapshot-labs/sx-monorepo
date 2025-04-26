@@ -16,7 +16,7 @@ const SUPPORTED_CHAIN_IDS: ChainId[] = [1, 100];
 
 const DELEGATEE_ADDRESS_DEFINITION = {
   type: 'string',
-  format: 'address',
+  format: 'ethChecksumAddress',
   title: 'Delegatee',
   examples: ['Address']
 };

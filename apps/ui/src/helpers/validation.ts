@@ -1,5 +1,5 @@
 import { Interface } from '@ethersproject/abi';
-import { isAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
@@ -118,6 +118,18 @@ ajv.addFormat('ens-or-address', {
       return !!validateAndParseAddress(value);
     } catch {
       return isAddress(value);
+    }
+  }
+});
+
+ajv.addFormat('ethChecksumAddress', {
+  validate: (value: string) => {
+    if (!value) return false;
+
+    try {
+      return getAddress(value) === value;
+    } catch {
+      return false;
     }
   }
 });
@@ -272,6 +284,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'address':
       case 'ethAddress':
         return 'Must be a valid address.';
+      case 'ethChecksumAddress':
+        return 'Must be a valid checksum address.';
       case 'address[]':
       case 'ethAddress[]':
         return 'Must be comma separated list of valid addresses.';
