@@ -83,7 +83,12 @@ const delegateesRef: Ref<any[]> = ref([]);
 const sharesRef: Ref<any[]> = ref([]);
 const formErrors = ref({} as Record<string, any>);
 
-const { data: delegatees, isPending: isPendingDelegatees } = useDelegateesQuery(
+const {
+  data: delegatees,
+  isPending: isPendingDelegatees,
+  isError: isDelegateesError,
+  refetch: fetchDelegatees
+} = useDelegateesQuery(
   toRef(props, 'account'),
   toRef(props, 'space'),
   toRef(props, 'delegation')
@@ -302,6 +307,18 @@ onMounted(() => {
         </div>
       </div>
       <UiLoading v-if="isPendingDelegatees" class="inline-block" />
+      <div v-else-if="isDelegateesError" class="space-y-3">
+        <UiAlert type="error">
+          Error loading delegates data. Please try again.
+        </UiAlert>
+        <UiButton
+          type="button"
+          class="flex w-full items-center gap-2 justify-center"
+          @click="fetchDelegatees"
+        >
+          <IH-refresh />Retry
+        </UiButton>
+      </div>
       <div v-else class="space-y-3">
         <div class="space-y-2">
           <UiMessage v-if="!form.delegatees.length" type="info">
