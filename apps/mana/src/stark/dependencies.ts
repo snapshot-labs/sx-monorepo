@@ -1,5 +1,3 @@
-import * as bip32 from '@scure/bip32';
-import * as bip39 from '@scure/bip39';
 import {
   Account,
   CallData,
@@ -10,11 +8,9 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { NonceManager } from './nonce-manager';
-import { indexWithAddress } from '../utils';
 
 const MNEMONIC = process.env.STARKNET_MNEMONIC || '';
 
-const basePath = "m/44'/9004'/0'/0";
 const contractAXclassHash =
   '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
 
@@ -96,9 +92,8 @@ export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
 
     if (!accounts.has(normalizedSpaceAddress)) {
       // Use the deterministic account derivation instead of index-based
-      const { address, privateKey, starkKeyPubAX } = generateSpaceStarknetWallet(
-        normalizedSpaceAddress
-      );
+      const { address, privateKey, starkKeyPubAX } =
+        generateSpaceStarknetWallet(normalizedSpaceAddress);
 
       const account = new Account(provider, address, privateKey);
       const nonceManager = new NonceManager(account);
