@@ -234,11 +234,11 @@ function prefillExistingDelegatees() {
   );
 
   form.delegatees = [
-    ...clone(delegatees.value),
     ...formDelegatees.map(delegatee => ({
       id: delegatee.id,
       share: remainingShares / formDelegatees.length
-    }))
+    })),
+    ...clone(delegatees.value)
   ]
     .filter(d => d.id)
     .map(delegatee => ({
