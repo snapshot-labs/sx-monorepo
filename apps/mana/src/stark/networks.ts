@@ -33,7 +33,7 @@ export function getClient(chainId: string) {
 
   const provider = getProvider(chainId);
   const getAccount = createAccountProxy(
-    process.env.STARKNET_MNEMONIC || '',
+    process.env.WALLET_SECRET || '',
     provider
   );
 

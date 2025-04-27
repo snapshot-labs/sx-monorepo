@@ -2,16 +2,16 @@ import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 
-const MNEMONIC = process.env.ETH_MNEMONIC || '';
+const WALLET_SECRET = process.env.WALLET_SECRET || '';
 
 export function generateSpaceEVMWallet(spaceAddress: string) {
-  // Combine the space address and mnemonic to create a unique seed
-  const seed = `${spaceAddress}:${MNEMONIC}`;
+  // Combine the space address and wallet secret to create a unique seed
+  const seed = `${spaceAddress}:${WALLET_SECRET}`;
   const privateKey = keccak256(Buffer.from(seed));
   return new Wallet(privateKey);
 }
 
-export const createWalletProxy = (mnemonic: string, chainId: number) => {
+export const createWalletProxy = (chainId: number) => {
   const signers = new Map<string, Wallet>();
   const provider = new StaticJsonRpcProvider(
     `https://rpc.snapshot.org/${chainId}`,

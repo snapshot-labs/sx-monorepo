@@ -32,7 +32,7 @@ export const createNetworkHandler = (chainId: number) => {
   const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
+  const getWallet = createWalletProxy(chainId);
 
   const client = new clients.EvmEthereumTx({
     networkConfig,

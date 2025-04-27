@@ -9,7 +9,7 @@ import {
 } from 'starknet';
 import { NonceManager } from './nonce-manager';
 
-const MNEMONIC = process.env.STARKNET_MNEMONIC || '';
+const WALLET_SECRET = process.env.WALLET_SECRET || '';
 
 const contractAXclassHash =
   '0x1a736d6ed154502257f02b1ccdf4d9d1089f80811cd6acad48e6b6a9d1f2003';
@@ -30,7 +30,7 @@ export function getProvider(chainId: string) {
 
 export function generateSpaceStarknetWallet(spaceAddress: string) {
   // Create a deterministic seed from the space address and mnemonic
-  const combinedSeed = `${spaceAddress}:${MNEMONIC}`;
+  const combinedSeed = `${spaceAddress}:${WALLET_SECRET}`;
   const hashedSeed = hash.starknetKeccak(combinedSeed);
   const hashedSeedHex = hashedSeed.toString(16).padStart(64, '0');
   const privateKey = ec.starkCurve.grindKey(`0x${hashedSeedHex}`);
