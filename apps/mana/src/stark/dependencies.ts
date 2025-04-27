@@ -29,7 +29,7 @@ export function getProvider(chainId: string) {
 }
 
 export function generateSpaceStarknetWallet(spaceAddress: string) {
-  // Create a deterministic seed from the space address and mnemonic
+  // Create a deterministic seed from the space address and secret
   const combinedSeed = `${spaceAddress}:${WALLET_SECRET}`;
   const hashedSeed = hash.starknetKeccak(combinedSeed);
   const hashedSeedHex = hashedSeed.toString(16).padStart(64, '0');
@@ -77,7 +77,7 @@ export async function deployContract(
   await provider.waitForTransaction(deployResponse.transaction_hash);
 }
 
-export function createAccountProxy(mnemonic: string, provider: RpcProvider) {
+export function createAccountProxy(provider: RpcProvider) {
   const accounts = new Map<
     string,
     {

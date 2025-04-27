@@ -32,10 +32,7 @@ export function getClient(chainId: string) {
   if (cached) return cached;
 
   const provider = getProvider(chainId);
-  const getAccount = createAccountProxy(
-    process.env.WALLET_SECRET || '',
-    provider
-  );
+  const getAccount = createAccountProxy(provider);
 
   const ethUrl = ETH_NODE_URLS.get(chainId);
   if (!ethUrl)
