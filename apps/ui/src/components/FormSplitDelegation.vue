@@ -232,27 +232,7 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="space-y-3">
       <div class="space-y-1">
-        <div class="flex justify-between items-center">
-          <h4 class="eyebrow">Delegates</h4>
-          <div class="flex gap-2">
-            <UiTooltip
-              title="Distribute shares evenly"
-              class="flex items-center"
-            >
-              <button type="button" @click="handleDistributeSharesEvenlyClick">
-                <IH-bars-3 />
-              </button>
-            </UiTooltip>
-            <UiTooltip title="Clear all delegates" class="flex items-center">
-              <button
-                type="button"
-                @click="form.delegatees.splice(0, form.delegatees.length)"
-              >
-                <IH-archive-box-x-mark />
-              </button>
-            </UiTooltip>
-          </div>
-        </div>
+        <h4 class="eyebrow">Delegates</h4>
         <div class="leading-6">
           Delegate your voting power with several addresses. Any power you don't
           delegate stays with you.
@@ -267,6 +247,29 @@ onMounted(() => {
             All delegates removed
             <div class="text-[16px]">
               Submitting the form will clear all existing delegates.
+            </div>
+          </div>
+          <div v-else>
+            <div class="flex justify-end gap-2">
+              <UiTooltip
+                title="Distribute shares evenly"
+                class="flex items-center"
+              >
+                <button
+                  type="button"
+                  @click="handleDistributeSharesEvenlyClick"
+                >
+                  <IH-bars-3 />
+                </button>
+              </UiTooltip>
+              <UiTooltip title="Clear all delegates" class="flex items-center">
+                <button
+                  type="button"
+                  @click="form.delegatees.splice(0, form.delegatees.length)"
+                >
+                  <IH-archive-box-x-mark />
+                </button>
+              </UiTooltip>
             </div>
           </div>
           <div
