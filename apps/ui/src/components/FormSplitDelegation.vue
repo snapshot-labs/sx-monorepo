@@ -253,9 +253,9 @@ onMounted(() => {
             </UiTooltip>
           </div>
         </div>
-        <div class="leading-5 text-[16px]">
-          Delegate your voting power to multiple addresses. Any unallocated
-          power (100% - any delegations) will remain with you.
+        <div class="leading-5">
+          Delegate your voting power with several addresses. Any power you don't
+          delegate stays with you.
         </div>
       </div>
       <div class="space-y-3">
