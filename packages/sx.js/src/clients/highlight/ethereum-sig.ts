@@ -5,28 +5,22 @@ import {
   TypedDataSigner
 } from '@ethersproject/abstract-signer';
 import {
-  aliasTypes,
-  domain as baseDomain,
+  ALIASES_CONFIG,
+  HIGHLIGHT_DOMAIN,
+  TOWNHALL_CONFIG
+} from '@snapshot-labs/highlight-constants';
+import {
   CloseDiscussion,
-  closeDiscussionTypes,
   CreateDiscussion,
   CreateStatement,
-  discussionTypes,
   Envelope,
   HideStatement,
-  hideStatementTypes,
   PinStatement,
-  pinStatementTypes,
   SetAlias,
-  statementTypes,
   UnpinStatement,
-  unpinStatementTypes,
-  Vote,
-  voteTypes
+  Vote
 } from './types';
 
-const ALIASES_ADDRESS = '0x0000000000000000000000000000000000000001';
-const TOWNHALL_ADDRESS = '0x0000000000000000000000000000000000000002';
 export class HighlightEthereumSigClient {
   private highlightUrl: string;
 
@@ -42,7 +36,7 @@ export class HighlightEthereumSigClient {
     const chainId = await signer.getChainId();
 
     const domain = {
-      ...baseDomain,
+      ...HIGHLIGHT_DOMAIN,
       chainId,
       salt: `0x${salt.toString(16).padStart(64, '0')}`,
       verifyingContract: to
@@ -110,7 +104,7 @@ export class HighlightEthereumSigClient {
     data: SetAlias;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, ALIASES_ADDRESS);
+    const domain = await this.getDomain(signer, salt, ALIASES_CONFIG.address);
 
     const { alias, from } = data;
     const message = {
@@ -118,7 +112,12 @@ export class HighlightEthereumSigClient {
       alias
     };
 
-    const signature = await this.sign(signer, domain, aliasTypes, message);
+    const signature = await this.sign(
+      signer,
+      domain,
+      ALIASES_CONFIG.types.setAlias,
+      message
+    );
 
     return {
       type: 'HIGHLIGHT_ENVELOPE',
@@ -139,7 +138,7 @@ export class HighlightEthereumSigClient {
     data: CreateDiscussion;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, TOWNHALL_ADDRESS);
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
     const { title, body } = data;
     const message = {
@@ -147,7 +146,12 @@ export class HighlightEthereumSigClient {
       body
     };
 
-    const signature = await this.sign(signer, domain, discussionTypes, message);
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.createDiscussion,
+      message
+    );
 
     return {
       type: 'HIGHLIGHT_ENVELOPE',
@@ -168,7 +172,7 @@ export class HighlightEthereumSigClient {
     data: CloseDiscussion;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, TOWNHALL_ADDRESS);
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
     const { discussion } = data;
     const message = {
@@ -178,7 +182,7 @@ export class HighlightEthereumSigClient {
     const signature = await this.sign(
       signer,
       domain,
-      closeDiscussionTypes,
+      TOWNHALL_CONFIG.types.closeDiscussion,
       message
     );
 
@@ -201,7 +205,7 @@ export class HighlightEthereumSigClient {
     data: CreateStatement;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, TOWNHALL_ADDRESS);
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
     const { discussion, statement } = data;
     const message = {
@@ -209,7 +213,12 @@ export class HighlightEthereumSigClient {
       statement
     };
 
-    const signature = await this.sign(signer, domain, statementTypes, message);
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.createStatement,
+      message
+    );
 
     return {
       type: 'HIGHLIGHT_ENVELOPE',
@@ -230,7 +239,7 @@ export class HighlightEthereumSigClient {
     data: HideStatement;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, TOWNHALL_ADDRESS);
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
     const { discussion, statement } = data;
     const message = {
@@ -241,7 +250,7 @@ export class HighlightEthereumSigClient {
     const signature = await this.sign(
       signer,
       domain,
-      hideStatementTypes,
+      TOWNHALL_CONFIG.types.hideStatement,
       message
     );
 
@@ -264,7 +273,7 @@ export class HighlightEthereumSigClient {
     data: PinStatement;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, TOWNHALL_ADDRESS);
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
     const { discussion, statement } = data;
     const message = {
@@ -275,7 +284,7 @@ export class HighlightEthereumSigClient {
     const signature = await this.sign(
       signer,
       domain,
-      pinStatementTypes,
+      TOWNHALL_CONFIG.types.pinStatement,
       message
     );
 
@@ -298,7 +307,7 @@ export class HighlightEthereumSigClient {
     data: UnpinStatement;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, TOWNHALL_ADDRESS);
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
     const { discussion, statement } = data;
     const message = {
@@ -309,7 +318,7 @@ export class HighlightEthereumSigClient {
     const signature = await this.sign(
       signer,
       domain,
-      unpinStatementTypes,
+      TOWNHALL_CONFIG.types.unpinStatement,
       message
     );
 
@@ -332,7 +341,7 @@ export class HighlightEthereumSigClient {
     data: Vote;
     salt: bigint;
   }): Promise<Envelope> {
-    const domain = await this.getDomain(signer, salt, TOWNHALL_ADDRESS);
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
     const { discussion, statement, choice } = data;
     const message = {
@@ -341,7 +350,12 @@ export class HighlightEthereumSigClient {
       choice
     };
 
-    const signature = await this.sign(signer, domain, voteTypes, message);
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.vote,
+      message
+    );
 
     return {
       type: 'HIGHLIGHT_ENVELOPE',
