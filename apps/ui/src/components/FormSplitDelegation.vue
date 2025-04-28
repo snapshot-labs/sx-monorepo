@@ -230,7 +230,7 @@ onMounted(() => {
 
 <template>
   <div class="space-y-4">
-    <div class="space-y-2.5">
+    <div class="space-y-3">
       <div class="space-y-1">
         <div class="flex justify-between items-center">
           <h4 class="eyebrow">Delegates</h4>
@@ -253,7 +253,7 @@ onMounted(() => {
             </UiTooltip>
           </div>
         </div>
-        <div class="leading-5">
+        <div class="leading-6">
           Delegate your voting power with several addresses. Any power you don't
           delegate stays with you.
         </div>
