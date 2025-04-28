@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { Response } from 'express';
 
 export function rpcSuccess(res: Response, result: any, id: number) {
