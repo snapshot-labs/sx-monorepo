@@ -1,11 +1,13 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import {
+  ALIASES_CONFIG,
+  HIGHLIGHT_DOMAIN
+} from '@snapshot-labs/highlight-constants';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AGENTS_MAP } from '../../src/agents';
-import { SET_ALIAS_TYPES } from '../../src/agents/aliases';
 import { MemoryAdapter } from '../../src/highlight/adapter/memory';
 import Highlight from '../../src/highlight/highlight';
-import { BASE_DOMAIN } from '../../src/highlight/signatures';
 import { PostMessageRequest } from '../../src/highlight/types';
 
 const CHAIN_ID = '11155111';
@@ -36,7 +38,7 @@ async function createRequest(
   const signer = await wallet.getAddress();
 
   const domain = {
-    ...BASE_DOMAIN,
+    ...HIGHLIGHT_DOMAIN,
     chainId,
     salt,
     verifyingContract: ALIASES_ADDRESS
@@ -44,7 +46,11 @@ async function createRequest(
 
   const signature = opts.useFakeSignature
     ? FAKE_SIGNATURE
-    : await wallet._signTypedData(domain, SET_ALIAS_TYPES, message);
+    : await wallet._signTypedData(
+        domain,
+        ALIASES_CONFIG.types.setAlias,
+        message
+      );
 
   return {
     domain,

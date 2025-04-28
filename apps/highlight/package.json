@@ -24,6 +24,7 @@
     "@ethersproject/providers": "^5.8.0",
     "@ethersproject/wallet": "^5.8.0",
     "@snapshot-labs/checkpoint": "^0.1.0-beta.57",
+    "@snapshot-labs/highlight-constants": "^0.1.0",
     "async-lock": "^1.4.0",
     "change-case": "^4.1.2",
     "connection-string": "^1.0.1",

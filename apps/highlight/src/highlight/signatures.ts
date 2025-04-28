@@ -32,11 +32,6 @@ const ERC1271_ABI_OLD = [
 const ERC1271_MAGIC_VALUE = '0x1626ba7e';
 const ERC1271_MAGIC_VALUE_OLD = '0x20c13b0b';
 
-export const BASE_DOMAIN = {
-  name: 'highlight',
-  version: '0.1.0'
-};
-
 function isEqual(a: string, b: string): boolean {
   return a.toLowerCase() === b.toLowerCase();
 }

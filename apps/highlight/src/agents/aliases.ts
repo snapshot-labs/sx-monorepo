@@ -1,24 +1,13 @@
+import { ALIASES_CONFIG } from '@snapshot-labs/highlight-constants';
 import Agent from '../highlight/agent';
 import Process from '../highlight/process';
 import { Domain } from '../highlight/types';
-
-export const SET_ALIAS_TYPES = {
-  SetAlias: [
-    { name: 'from', type: 'address' },
-    { name: 'alias', type: 'address' }
-  ]
-};
 
 export default class Aliases extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
 
-    this.addEntrypoint({
-      SetAlias: [
-        { name: 'from', type: 'address' },
-        { name: 'alias', type: 'address' }
-      ]
-    });
+    this.addEntrypoint(ALIASES_CONFIG.types.setAlias);
   }
 
   async setAlias(

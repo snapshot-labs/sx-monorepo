@@ -1,6 +1,6 @@
+import { ALIASES_CONFIG } from '@snapshot-labs/highlight-constants';
 import { describe, expect, it } from 'vitest';
 import { verifyEcdsaSignature, verifyEip1271Signature } from './signatures';
-import { SET_ALIAS_TYPES } from '../agents/aliases';
 
 function createDomain(chainId: number, salt: string) {
   return {
@@ -27,7 +27,7 @@ describe('ECDSA', () => {
     const result = await verifyEcdsaSignature(
       createDomain(11155111, salt),
       message.from,
-      SET_ALIAS_TYPES,
+      ALIASES_CONFIG.types.setAlias,
       message,
       signature
     );
@@ -49,7 +49,7 @@ describe('ECDSA', () => {
     const result = await verifyEcdsaSignature(
       createDomain(11155111, salt),
       message.from,
-      SET_ALIAS_TYPES,
+      ALIASES_CONFIG.types.setAlias,
       message,
       signature
     );
@@ -73,7 +73,7 @@ describe('eip1271', () => {
     const result = await verifyEip1271Signature(
       createDomain(11155111, salt),
       message.from,
-      SET_ALIAS_TYPES,
+      ALIASES_CONFIG.types.setAlias,
       message,
       signature
     );
@@ -95,7 +95,7 @@ describe('eip1271', () => {
     const result = await verifyEip1271Signature(
       createDomain(11155111, salt),
       message.from,
-      SET_ALIAS_TYPES,
+      ALIASES_CONFIG.types.setAlias,
       message,
       signature
     );

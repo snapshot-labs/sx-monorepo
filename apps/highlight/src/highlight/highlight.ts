@@ -1,9 +1,10 @@
 import { EventEmitter } from 'stream';
+import { HIGHLIGHT_DOMAIN } from '@snapshot-labs/highlight-constants';
 import AsyncLock from 'async-lock';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';
 import Process from './process';
-import { BASE_DOMAIN, verifySignature } from './signatures';
+import { verifySignature } from './signatures';
 import {
   Event,
   GetUnitReceiptRequest,
@@ -97,7 +98,7 @@ export default class Highlight extends EventEmitter {
     }
 
     const verifyingDomain = {
-      ...BASE_DOMAIN,
+      ...HIGHLIGHT_DOMAIN,
       chainId: domain.chainId,
       salt: domain.salt.toString(),
       verifyingContract: domain.verifyingContract

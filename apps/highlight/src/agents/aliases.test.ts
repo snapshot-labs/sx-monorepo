@@ -1,10 +1,13 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import {
+  ALIASES_CONFIG,
+  HIGHLIGHT_DOMAIN
+} from '@snapshot-labs/highlight-constants';
 import { expect, it } from 'vitest';
 import Aliases from './aliases';
 import { MemoryAdapter } from '../highlight/adapter/memory';
 import Process from '../highlight/process';
-import { BASE_DOMAIN } from '../highlight/signatures';
 
 const CHAIN_ID = '11155111';
 
@@ -34,9 +37,9 @@ it('should create alias', async () => {
   const from = await wallet.getAddress();
 
   const domain = {
-    ...BASE_DOMAIN,
+    ...HIGHLIGHT_DOMAIN,
     chainId: CHAIN_ID,
-    verifyingContract: '0x0000000000000000000000000000000000000001',
+    verifyingContract: ALIASES_CONFIG.address,
     salt: getSalt()
   };
 
@@ -65,9 +68,9 @@ it('should throw if tries to creates alias for non-signer', async () => {
   const from = await wallet.getAddress();
 
   const domain = {
-    ...BASE_DOMAIN,
+    ...HIGHLIGHT_DOMAIN,
     chainId: CHAIN_ID,
-    verifyingContract: '0x0000000000000000000000000000000000000001',
+    verifyingContract: ALIASES_CONFIG.address,
     salt: getSalt()
   };
 
@@ -88,9 +91,9 @@ it('should throw if alias is reused', async () => {
   const from = await wallet.getAddress();
 
   const domain = {
-    ...BASE_DOMAIN,
+    ...HIGHLIGHT_DOMAIN,
     chainId: CHAIN_ID,
-    verifyingContract: '0x0000000000000000000000000000000000000001',
+    verifyingContract: ALIASES_CONFIG.address,
     salt: getSalt()
   };
 

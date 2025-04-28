@@ -1,64 +1,18 @@
+import { TOWNHALL_CONFIG } from '@snapshot-labs/highlight-constants';
 import Agent from '../highlight/agent';
 import Process from '../highlight/process';
-
-export const DISCUSSION_TYPES = {
-  Discussion: [
-    { name: 'title', type: 'string' },
-    { name: 'body', type: 'string' }
-  ]
-};
-
-export const CLOSE_DISCUSSION_TYPES = {
-  CloseDiscussion: [{ name: 'discussion', type: 'uint64' }]
-};
-
-export const STATEMENT_TYPES = {
-  Statement: [
-    { name: 'discussion', type: 'uint64' },
-    { name: 'statement', type: 'string' }
-  ]
-};
-
-export const HIDE_STATEMENT_TYPES = {
-  HideStatement: [
-    { name: 'discussion', type: 'uint64' },
-    { name: 'statement', type: 'int' }
-  ]
-};
-
-export const PIN_STATEMENT_TYPES = {
-  PinStatement: [
-    { name: 'discussion', type: 'uint64' },
-    { name: 'statement', type: 'uint64' }
-  ]
-};
-
-export const UNPIN_STATEMENT_TYPES = {
-  UnpinStatement: [
-    { name: 'discussion', type: 'uint64' },
-    { name: 'statement', type: 'uint64' }
-  ]
-};
-
-export const VOTE_TYPES = {
-  Vote: [
-    { name: 'discussion', type: 'uint64' },
-    { name: 'statement', type: 'uint64' },
-    { name: 'choice', type: 'uint64' }
-  ]
-};
 
 export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
 
-    this.addEntrypoint(DISCUSSION_TYPES);
-    this.addEntrypoint(CLOSE_DISCUSSION_TYPES);
-    this.addEntrypoint(STATEMENT_TYPES);
-    this.addEntrypoint(HIDE_STATEMENT_TYPES);
-    this.addEntrypoint(PIN_STATEMENT_TYPES);
-    this.addEntrypoint(UNPIN_STATEMENT_TYPES);
-    this.addEntrypoint(VOTE_TYPES);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createDiscussion);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.closeDiscussion);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createStatement);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.hideStatement);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.pinStatement);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.unpinStatement);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.vote);
   }
 
   getAuthor(signer: string) {
