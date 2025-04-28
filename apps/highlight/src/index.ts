@@ -9,7 +9,7 @@ import Highlight from './highlight/highlight';
 import { Event } from './highlight/types';
 import createRpc from './rpc';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 const DATABASE_URL = process.env.DATABASE_URL || '';
 
 async function run() {
