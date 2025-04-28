@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
-import { Discussion, Statement, Vote } from '@/helpers/townhall/types';
+import { Statement, Vote } from '@/helpers/townhall/types';
+import { gql } from './gql';
 
 type NewStatementEvent = [number, string, number, string];
 type NewVoteEvent = [string, number, number, number];
@@ -16,7 +16,56 @@ const client = new ApolloClient({
   }
 });
 
-const DISCUSSIONS_QUERY = gql`
+gql(`
+  fragment statementFields on Statement {
+    id
+    body
+    author
+    scores_1
+    scores_2
+    scores_3
+    vote_count
+    pinned
+    hidden
+    created
+    discussion_id
+    statement_id
+    discussion {
+      id
+    }
+  }
+
+  fragment discussionFields on Discussion {
+    id
+    title
+    body
+    author
+    statement_count
+    vote_count
+    created
+    closed
+    statements {
+      ...statementFields
+    }
+  }
+
+  fragment voteFields on Vote {
+    id
+    voter
+    choice
+    created
+    discussion_id
+    statement_id
+    discussion {
+      id
+    }
+    statement {
+      id
+    }
+  }
+`);
+
+const DISCUSSIONS_QUERY = gql(`
   query Discussions {
     discussions(first: 10, orderBy: created, orderDirection: desc) {
       id
@@ -29,60 +78,25 @@ const DISCUSSIONS_QUERY = gql`
       closed
     }
   }
-`;
+`);
 
-const DISCUSSION_QUERY = gql`
+const DISCUSSION_QUERY = gql(`
   query Discussion($id: String!) {
     discussion(id: $id) {
-      id
-      title
-      body
-      author
-      statement_count
-      vote_count
-      created
-      closed
-      statements {
-        id
-        body
-        author
-        scores_1
-        scores_2
-        scores_3
-        vote_count
-        pinned
-        hidden
-        created
-        discussion_id
-        statement_id
-        discussion {
-          id
-        }
-      }
+      ...discussionFields
     }
   }
-`;
+`);
 
-const VOTES_QUERY = gql`
+const VOTES_QUERY = gql(`
   query Votes($discussion: String!, $voter: String!) {
     votes(where: { discussion: $discussion, voter: $voter }) {
-      id
-      voter
-      choice
-      created
-      discussion_id
-      statement_id
-      discussion {
-        id
-      }
-      statement {
-        id
-      }
+      ...voteFields
     }
   }
-`;
+`);
 
-export async function getDiscussions(): Promise<Discussion[]> {
+export async function getDiscussions() {
   const { data } = await client.query({
     query: DISCUSSIONS_QUERY
   });
@@ -109,11 +123,12 @@ export async function getVotes(discussion: string, voter: string) {
 }
 
 export function newStatementEventToEntry(event: NewStatementEvent): Statement {
-  const [id, , discussion, body] = event;
+  const [id, author, discussion, body] = event;
 
   return {
-    body,
     id: `${discussion}/${id}`,
+    author,
+    body,
     vote_count: 0,
     scores_1: 0,
     scores_2: 0,
@@ -123,7 +138,7 @@ export function newStatementEventToEntry(event: NewStatementEvent): Statement {
     created: 0,
     discussion_id: discussion,
     statement_id: id,
-    discussion: { id: discussion }
+    discussion: { id: String(discussion) }
   };
 }
 
@@ -135,8 +150,8 @@ export function newVoteEventToEntry(event: NewVoteEvent): Vote {
     created: 0,
     discussion_id: discussion,
     statement_id: statement,
-    discussion: { id: discussion },
-    statement: { id: statement },
+    discussion: { id: String(discussion) },
+    statement: { id: String(statement) },
     voter,
     choice
   };
