@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
-import { Statement, Vote } from '@/helpers/townhall/types';
+import { Discussion, Statement, Vote } from '@/helpers/townhall/types';
 
 type NewStatementEvent = [number, string, number, string];
 type NewVoteEvent = [string, number, number, number];
@@ -15,6 +15,21 @@ const client = new ApolloClient({
     }
   }
 });
+
+const DISCUSSIONS_QUERY = gql`
+  query Discussions {
+    discussions(first: 10, orderBy: created, orderDirection: desc) {
+      id
+      title
+      body
+      author
+      statement_count
+      vote_count
+      created
+      closed
+    }
+  }
+`;
 
 const DISCUSSION_QUERY = gql`
   query Discussion($id: String!) {
@@ -66,6 +81,14 @@ const VOTES_QUERY = gql`
     }
   }
 `;
+
+export async function getDiscussions(): Promise<Discussion[]> {
+  const { data } = await client.query({
+    query: DISCUSSIONS_QUERY
+  });
+
+  return data.discussions;
+}
 
 export async function getDiscussion(id: string) {
   const { data } = await client.query({
