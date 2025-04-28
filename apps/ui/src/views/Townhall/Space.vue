@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { getDiscussions } from '@/helpers/townhall/api';
+import { Discussion } from '@/helpers/townhall/types';
 import { _n } from '@/helpers/utils';
 
 const { setTitle } = useTitle();
 
 const loading = ref(false);
 const loaded = ref(false);
-const discussions = ref([]);
+const discussions = ref([] as Discussion[]);
 
 onMounted(async () => {
   loading.value = true;
