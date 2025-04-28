@@ -16,6 +16,21 @@ const client = new ApolloClient({
   }
 });
 
+const DISCUSSIONS_QUERY = gql`
+  query Discussions {
+    discussions(first: 10, orderBy: created, orderDirection: desc) {
+      id
+      title
+      body
+      author
+      statement_count
+      vote_count
+      created
+      closed
+    }
+  }
+`;
+
 const DISCUSSION_QUERY = gql`
   query Discussion($id: String!) {
     discussion(id: $id) {
@@ -66,6 +81,14 @@ const VOTES_QUERY = gql`
     }
   }
 `;
+
+export async function getDiscussions() {
+  const { data } = await client.query({
+    query: DISCUSSIONS_QUERY
+  });
+
+  return data.discussions;
+}
 
 export async function getDiscussion(id: string) {
   const { data } = await client.query({

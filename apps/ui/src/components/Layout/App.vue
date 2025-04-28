@@ -66,6 +66,7 @@ const hasPlaceHolderSidebar = computed(
       'create-space-snapshot',
       'create-space-snapshot-x',
       'townhall',
+      'townhall-space',
       'townhall-create',
       'townhall-discussion'
     ].includes(String(route.matched[0]?.name)) &&
