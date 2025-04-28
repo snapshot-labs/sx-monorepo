@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
-import { Statement, Vote } from '@/helpers/townhall/types';
+import { Discussion, Statement, Vote } from '@/helpers/townhall/types';
 
 type NewStatementEvent = [number, string, number, string];
 type NewVoteEvent = [string, number, number, number];
@@ -82,7 +82,7 @@ const VOTES_QUERY = gql`
   }
 `;
 
-export async function getDiscussions() {
+export async function getDiscussions(): Promise<Discussion[]> {
   const { data } = await client.query({
     query: DISCUSSIONS_QUERY
   });

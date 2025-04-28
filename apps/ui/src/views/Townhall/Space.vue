@@ -1,21 +1,17 @@
 <script setup lang="ts">
+import { useQuery } from '@tanstack/vue-query';
 import { getDiscussions } from '@/helpers/townhall/api';
-import { Discussion } from '@/helpers/townhall/types';
 import { _n } from '@/helpers/utils';
 
 const { setTitle } = useTitle();
 
-const loading = ref(false);
-const loaded = ref(false);
-const discussions = ref([] as Discussion[]);
-
-onMounted(async () => {
-  loading.value = true;
-
-  discussions.value = await getDiscussions();
-
-  loaded.value = true;
-  loading.value = false;
+const {
+  data: discussions,
+  isPending,
+  isError
+} = useQuery({
+  queryKey: ['townhall', 'discussions', 'list'],
+  queryFn: getDiscussions
 });
 
 watchEffect(() => setTitle('Ethereum Open Agora'));
@@ -47,16 +43,23 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
     <UiContainer class="!max-w-[960px]">
       <div class="eyebrow mb-2.5 text-skin-link">Latest discussions</div>
       <div class="md:border-x border-y md:rounded-lg md:mx-0 -mx-4">
-        <div v-if="loading" class="my-3 mx-4">
-          <UiLoading v-if="loading" />
+        <div v-if="isPending" class="my-3 mx-4">
+          <UiLoading />
         </div>
         <div v-else>
           <div
-            v-if="!discussions.length"
+            v-if="isError"
             class="px-4 py-3 flex items-center text-skin-link gap-2"
           >
             <IH-exclamation-circle />
-            <span v-text="'There are no discussion here.'" />
+            <span v-text="'Failed to load discussions.'" />
+          </div>
+          <div
+            v-if="discussions?.length === 0"
+            class="px-4 py-3 flex items-center text-skin-link gap-2"
+          >
+            <IH-exclamation-circle />
+            <span v-text="'There are no discussions here.'" />
           </div>
           <router-link
             v-for="(discussion, i) in discussions"
