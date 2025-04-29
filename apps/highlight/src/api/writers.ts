@@ -54,6 +54,12 @@ const NewRoleEventData = z.tuple([
   z.string(), // description
   z.string() // color
 ]);
+const EditRoleEventData = NewRoleEventData;
+
+const DeleteRoleEventData = z.tuple([
+  z.string(), // spaceId
+  z.string() // id
+]);
 
 export function createWriters(indexerName: string) {
   const handleSetAlias: Writer = async ({ unit, payload }) => {
@@ -246,6 +252,34 @@ export function createWriters(indexerName: string) {
     await role.save();
   };
 
+  const handleEditRole: Writer = async ({ payload }) => {
+    const [spaceId, id, name, description, color] = EditRoleEventData.parse(
+      payload.data
+    );
+
+    console.log('Handle edit role', spaceId, id, name, description, color);
+
+    const role = await Role.loadEntity(id, indexerName);
+    if (!role) return;
+
+    role.space = spaceId;
+    role.name = name;
+    role.description = description;
+    role.color = color;
+    await role.save();
+  };
+
+  const handleDeleteRole: Writer = async ({ payload }) => {
+    const [spaceId, id] = DeleteRoleEventData.parse(payload.data);
+
+    console.log('Handle delete role', spaceId, id);
+
+    const role = await Role.loadEntity(id, indexerName);
+    if (!role) return;
+
+    await role.delete();
+  };
+
   return {
     // aliases
     handleSetAlias,
@@ -257,6 +291,8 @@ export function createWriters(indexerName: string) {
     handleUnpinStatement,
     handleHideStatement,
     handleNewVote,
-    handleNewRole
+    handleNewRole,
+    handleEditRole,
+    handleDeleteRole
   };
 }

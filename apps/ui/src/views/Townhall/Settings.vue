@@ -5,11 +5,12 @@ import { SpaceMetadataLabel } from '@/types';
 
 const { setTitle } = useTitle();
 const route = useRoute();
-const { sendCreateRole } = useTownhall();
+const { sendCreateRole, sendEditRole, sendDeleteRole } = useTownhall();
 const { addNotification } = useUiStore();
 const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
+const activeLabelId = ref<string | null>(null);
 const spaceId = computed(() => route.params.space as string);
 
 const {
@@ -22,6 +23,11 @@ const {
     return getRoles(spaceId.value);
   }
 });
+
+function setModalStatus(open: boolean = false, roleId: string | null = null) {
+  modalOpen.value = open;
+  activeLabelId.value = roleId;
+}
 
 async function handleAddRole(config: SpaceMetadataLabel) {
   modalOpen.value = false;
@@ -39,6 +45,43 @@ async function handleAddRole(config: SpaceMetadataLabel) {
       ['townhall', 'roles', spaceId.value, 'list'],
       (old = []) => {
         return [...old, { ...config }];
+      }
+    );
+  } catch (e) {
+    addNotification('error', e.message);
+  }
+}
+
+async function handleEditRole(config: SpaceMetadataLabel) {
+  modalOpen.value = false;
+
+  try {
+    await sendEditRole(
+      spaceId.value,
+      config.id,
+      config.name,
+      config.description,
+      config.color
+    );
+
+    queryClient.setQueryData<SpaceMetadataLabel[]>(
+      ['townhall', 'roles', spaceId.value, 'list'],
+      (old = []) =>
+        old.map(role => (role.id === config.id ? { ...config } : role))
+    );
+  } catch (e) {
+    addNotification('error', e.message);
+  }
+}
+
+async function handleDeleteRole(id: string) {
+  try {
+    await sendDeleteRole(spaceId.value, id);
+
+    queryClient.setQueryData<SpaceMetadataLabel[]>(
+      ['townhall', 'roles', spaceId.value, 'list'],
+      (old = []) => {
+        return old.filter(role => role.id !== id);
       }
     );
   } catch (e) {
@@ -90,6 +133,17 @@ setTitle('Ethereum Open Agora');
               <div v-if="role.description" class="w-full">
                 <div class="truncate" v-text="role.description" />
               </div>
+              <div class="flex gap-3 items-center h-[24px]">
+                <button
+                  type="button"
+                  @click="() => setModalStatus(true, role.id)"
+                >
+                  <IH-pencil />
+                </button>
+                <button type="button" @click="() => handleDeleteRole(role.id)">
+                  <IH-trash />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -105,8 +159,13 @@ setTitle('Ethereum Open Agora');
     <teleport to="#modal">
       <ModalLabelConfig
         :open="modalOpen"
-        @add="handleAddRole"
-        @close="modalOpen = false"
+        :initial-state="(roles || []).find(l => l.id === activeLabelId)"
+        @add="
+          config => {
+            activeLabelId ? handleEditRole(config) : handleAddRole(config);
+          }
+        "
+        @close="setModalStatus(false)"
       />
     </teleport>
   </div>

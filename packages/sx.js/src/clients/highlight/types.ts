@@ -49,3 +49,10 @@ export type CreateRole = {
   description: string;
   color: string;
 };
+
+export type EditRole = CreateRole;
+
+export type DeleteRole = {
+  space: string;
+  id: string;
+};

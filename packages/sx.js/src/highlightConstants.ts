@@ -67,6 +67,21 @@ export const TOWNHALL_CONFIG = {
         { name: 'description', type: 'string' },
         { name: 'color', type: 'string' }
       ]
+    },
+    editRole: {
+      EditRole: [
+        { name: 'space', type: 'string' },
+        { name: 'id', type: 'string' },
+        { name: 'name', type: 'string' },
+        { name: 'description', type: 'string' },
+        { name: 'color', type: 'string' }
+      ]
+    },
+    deleteRole: {
+      DeleteRole: [
+        { name: 'space', type: 'string' },
+        { name: 'id', type: 'string' }
+      ]
     }
   }
 };

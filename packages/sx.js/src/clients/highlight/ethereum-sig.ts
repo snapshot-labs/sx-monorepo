@@ -9,6 +9,8 @@ import {
   CreateDiscussion,
   CreateRole,
   CreateStatement,
+  DeleteRole,
+  EditRole,
   Envelope,
   HideStatement,
   PinStatement,
@@ -401,6 +403,77 @@ export class HighlightEthereumSigClient {
       domain,
       message,
       primaryType: 'CreateRole',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async editRole({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: EditRole;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, id, name, description, color } = data;
+    const message = {
+      space,
+      id,
+      name,
+      description,
+      color
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.editRole,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'EditRole',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async deleteRole({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: DeleteRole;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, id } = data;
+    const message = {
+      space,
+      id
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.deleteRole,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'DeleteRole',
       signer: await signer.getAddress(),
       signature
     };
