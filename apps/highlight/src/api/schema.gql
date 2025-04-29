@@ -1,0 +1,49 @@
+scalar Text
+
+type Alias {
+  id: String!
+  address: String!
+  alias: String!
+  created: Int!
+}
+
+type Discussion {
+  id: String!
+  title: String!
+  body: Text
+  author: String!
+  statement_count: Int!
+  vote_count: Int!
+  created: Int!
+  closed: Boolean!
+  statements: [Statement!]! @derivedFrom(field: "discussion")
+  votes: [Vote!]! @derivedFrom(field: "discussion")
+}
+
+type Statement {
+  id: String!
+  body: Text!
+  author: String!
+  scores_1: Int!
+  scores_2: Int!
+  scores_3: Int!
+  vote_count: Int!
+  pinned: Boolean!
+  hidden: Boolean!
+  created: Int!
+  discussion_id: Int!
+  statement_id: Int!
+  discussion: Discussion!
+  votes: [Vote!]! @derivedFrom(field: "statement")
+}
+
+type Vote {
+  id: String!
+  voter: String!
+  choice: Int!
+  created: Int!
+  discussion_id: Int!
+  statement_id: Int!
+  discussion: Discussion!
+  statement: Statement!
+}

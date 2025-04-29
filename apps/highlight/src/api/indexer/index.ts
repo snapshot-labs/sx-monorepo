@@ -1,0 +1,1 @@
+export { HighlightIndexer } from './indexer';
