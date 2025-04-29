@@ -5,11 +5,6 @@ import {
   TypedDataSigner
 } from '@ethersproject/abstract-signer';
 import {
-  ALIASES_CONFIG,
-  HIGHLIGHT_DOMAIN,
-  TOWNHALL_CONFIG
-} from '@snapshot-labs/highlight-constants';
-import {
   CloseDiscussion,
   CreateDiscussion,
   CreateStatement,
@@ -20,6 +15,11 @@ import {
   UnpinStatement,
   Vote
 } from './types';
+import {
+  ALIASES_CONFIG,
+  HIGHLIGHT_DOMAIN,
+  TOWNHALL_CONFIG
+} from '../../highlightConstants';
 
 export class HighlightEthereumSigClient {
   private highlightUrl: string;

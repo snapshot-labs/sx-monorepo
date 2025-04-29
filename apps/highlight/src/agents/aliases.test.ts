@@ -1,9 +1,6 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import {
-  ALIASES_CONFIG,
-  HIGHLIGHT_DOMAIN
-} from '@snapshot-labs/highlight-constants';
+import { ALIASES_CONFIG, HIGHLIGHT_DOMAIN } from '@snapshot-labs/sx';
 import { expect, it } from 'vitest';
 import Aliases from './aliases';
 import { MemoryAdapter } from '../highlight/adapter/memory';

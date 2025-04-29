@@ -1,7 +1,4 @@
-import {
-  ALIASES_CONFIG,
-  TOWNHALL_CONFIG
-} from '@snapshot-labs/highlight-constants';
+import { ALIASES_CONFIG, TOWNHALL_CONFIG } from '@snapshot-labs/sx';
 import Aliases from './aliases';
 import Townhall from './townhall';
 import Process from '../highlight/process';

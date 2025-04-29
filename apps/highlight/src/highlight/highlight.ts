@@ -1,5 +1,5 @@
 import { EventEmitter } from 'stream';
-import { HIGHLIGHT_DOMAIN } from '@snapshot-labs/highlight-constants';
+import { HIGHLIGHT_DOMAIN } from '@snapshot-labs/sx';
 import AsyncLock from 'async-lock';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';

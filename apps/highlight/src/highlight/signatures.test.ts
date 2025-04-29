@@ -1,4 +1,4 @@
-import { ALIASES_CONFIG } from '@snapshot-labs/highlight-constants';
+import { ALIASES_CONFIG } from '@snapshot-labs/sx';
 import { describe, expect, it } from 'vitest';
 import { verifyEcdsaSignature, verifyEip1271Signature } from './signatures';
 

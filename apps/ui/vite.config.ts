@@ -61,7 +61,7 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: ['@snapshot-labs/sx', '@snapshot-labs/highlight-constants'],
+    exclude: ['@snapshot-labs/sx'],
     esbuildOptions: {
       target
     }

@@ -1,4 +1,4 @@
-import { ALIASES_CONFIG } from '@snapshot-labs/highlight-constants';
+import { ALIASES_CONFIG } from '@snapshot-labs/sx';
 import Agent from '../highlight/agent';
 import Process from '../highlight/process';
 import { Domain } from '../highlight/types';
