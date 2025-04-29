@@ -141,7 +141,7 @@ const bodyDefinition = computed(() => ({
 const choicesDefinition = computed(() => ({
   type: 'array',
   title: 'Choices',
-  minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
+  minItems: offchainNetworks.includes(props.space.network) ? 1 : 3,
   maxItems: limits.value[`space.${spaceType.value}.choices_limit`],
   items: [{ type: 'string', minLength: 1, maxLength: 32 }],
   additionalItems: { type: 'string', maxLength: 32 }
