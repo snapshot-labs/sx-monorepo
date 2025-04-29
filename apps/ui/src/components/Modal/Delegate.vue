@@ -190,7 +190,7 @@ async function handleSubmit() {
           .filter(({ id }) => !compareAddresses(id, self))
           .map(({ share }) => Math.floor(share))
           .reduce((a, b) => a + b, 0);
-      if (remainingShares > 0 && remainingShares < 100) {
+      if (remainingShares > 0) {
         newShares.push(remainingShares);
         newDelegatees.push(self);
       }
