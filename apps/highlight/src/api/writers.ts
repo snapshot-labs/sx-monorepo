@@ -12,7 +12,8 @@ const NewDiscussionEventData = z.tuple([
   z.number(), // id
   z.string(), // author
   z.string(), // title
-  z.string() // body
+  z.string(), // body
+  z.string() // discussionUrl
 ]);
 
 const CloseDiscussionEventData = z.tuple([
@@ -53,9 +54,8 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewDiscussion: Writer = async ({ unit, payload }) => {
-    const [id, author, title, body] = NewDiscussionEventData.parse(
-      payload.data
-    );
+    const [id, author, title, body, discussionUrl] =
+      NewDiscussionEventData.parse(payload.data);
 
     console.log('Handle new discussion', id, author, title, body);
 
@@ -63,6 +63,7 @@ export function createWriters(indexerName: string) {
     discussion.author = author;
     discussion.title = title;
     discussion.body = body;
+    discussion.discussion_url = discussionUrl;
     discussion.statement_count = 0;
     discussion.vote_count = 0;
     discussion.created = unit.timestamp;

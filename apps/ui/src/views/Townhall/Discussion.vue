@@ -267,6 +267,23 @@ function toggleAdminView() {
             class="pb-4"
           />
 
+          <div v-if="discussion.discussion_url">
+            <h4 class="mb-3 eyebrow flex items-center gap-2">
+              <IH-chat-alt />
+              <span>Discussion</span>
+            </h4>
+            <a
+              :href="discussion.discussion_url"
+              target="_blank"
+              class="block mb-5"
+            >
+              <UiLinkPreview
+                :url="discussion.discussion_url"
+                :show-default="true"
+              />
+            </a>
+          </div>
+
           <div v-if="!discussion.closed && pendingStatements.length > 0">
             <h4 class="mb-3 eyebrow flex items-center gap-2">
               <IH-eye />

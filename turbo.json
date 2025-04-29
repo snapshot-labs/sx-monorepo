@@ -24,11 +24,16 @@
       "passThroughEnv": ["ENABLED_NETWORKS", "INFURA_API_KEY"]
     },
     "codegen": {
-      "outputs": [".checkpoint/**", "src/networks/common/graphqlApi/gql/**"],
+      "outputs": [
+        ".checkpoint/**",
+        "src/networks/common/graphqlApi/gql/**",
+        "src/helpers/townhall/gql/**"
+      ],
       "inputs": [
         "**/*.gql",
         "codegen.ts",
-        "src/networks/common/graphqlApi/queries.ts"
+        "src/networks/common/graphqlApi/queries.ts",
+        "src/helpers/townhall/api.ts"
       ]
     }
   }

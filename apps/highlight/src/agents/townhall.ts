@@ -20,14 +20,18 @@ export default class Townhall extends Agent {
   }
 
   async discussion(
-    { title, body }: { title: string; body: string },
+    {
+      title,
+      body,
+      discussionUrl
+    }: { title: string; body: string; discussionUrl: string },
     { signer }: { signer: string }
   ) {
     const id: number = (await this.get('discussions:id')) || 1;
 
     const author = await this.getAuthor(signer);
     this.write('discussions:id', id + 1);
-    this.emit('new_discussion', [id, author, title, body]);
+    this.emit('new_discussion', [id, author, title, body, discussionUrl]);
   }
 
   async closeDiscussion({ discussion }: { discussion: number }) {

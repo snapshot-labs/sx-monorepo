@@ -10,7 +10,8 @@ type Alias {
 type Discussion {
   id: String!
   title: String!
-  body: Text
+  body: Text!
+  discussion_url: String!
   author: String!
   statement_count: Int!
   vote_count: Int!
