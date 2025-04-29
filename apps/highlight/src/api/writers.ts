@@ -243,7 +243,7 @@ export function createWriters(indexerName: string) {
 
     console.log('Handle new role', spaceId, id, name, description, color);
 
-    const role = new Role(id, indexerName);
+    const role = new Role(id.toString(), indexerName);
     role.space = spaceId;
     role.name = name;
     role.description = description;
@@ -259,7 +259,7 @@ export function createWriters(indexerName: string) {
 
     console.log('Handle edit role', spaceId, id, name, description, color);
 
-    const role = await Role.loadEntity(id, indexerName);
+    const role = await Role.loadEntity(id.toString(), indexerName);
     if (!role) return;
 
     role.space = spaceId;
@@ -274,7 +274,7 @@ export function createWriters(indexerName: string) {
 
     console.log('Handle delete role', spaceId, id);
 
-    const role = await Role.loadEntity(id, indexerName);
+    const role = await Role.loadEntity(id.toString(), indexerName);
     if (!role) return;
 
     await role.delete();

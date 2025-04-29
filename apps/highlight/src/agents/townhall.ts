@@ -124,18 +124,19 @@ export default class Townhall extends Agent {
 
   async createRole({
     space,
-    id,
     name,
     description,
     color
   }: {
     space: string;
-    id: string;
     name: string;
     description: string;
     color: string;
   }) {
-    this.emit('new_role', [space, id, name, description, color]);
+    const id: number = (await this.get(`roles:id`)) ?? 0;
+    this.write(`roles:id`, id + 1);
+
+    this.emit('new_role', [space, String(id), name, description, color]);
   }
 
   async editRole({

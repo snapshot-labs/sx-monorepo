@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { getRoles } from '@/helpers/townhall/api';
+import { Role } from '@/helpers/townhall/types';
 import { SpaceMetadataLabel } from '@/types';
 
 const { setTitle } = useTitle();
@@ -33,18 +34,27 @@ async function handleAddRole(config: SpaceMetadataLabel) {
   modalOpen.value = false;
 
   try {
-    await sendCreateRole(
+    const res = await sendCreateRole(
       spaceId.value,
-      config.id,
       config.name,
       config.description,
       config.color
     );
 
-    queryClient.setQueryData<SpaceMetadataLabel[]>(
+    const newRoles: Role[] = res.result.events
+      .filter(event => event.key === 'new_role')
+      .map(event => ({
+        space: event.data[0],
+        id: event.data[1],
+        name: event.data[2],
+        description: event.data[3],
+        color: event.data[4]
+      }));
+
+    queryClient.setQueryData<Role[]>(
       ['townhall', 'roles', spaceId.value, 'list'],
       (old = []) => {
-        return [...old, { ...config }];
+        return [...old, ...newRoles];
       }
     );
   } catch (e) {
@@ -53,21 +63,35 @@ async function handleAddRole(config: SpaceMetadataLabel) {
 }
 
 async function handleEditRole(config: SpaceMetadataLabel) {
+  if (!activeLabelId.value) {
+    return;
+  }
+
   modalOpen.value = false;
 
   try {
     await sendEditRole(
       spaceId.value,
-      config.id,
+      activeLabelId.value,
       config.name,
       config.description,
       config.color
     );
 
-    queryClient.setQueryData<SpaceMetadataLabel[]>(
+    queryClient.setQueryData<Role[]>(
       ['townhall', 'roles', spaceId.value, 'list'],
       (old = []) =>
-        old.map(role => (role.id === config.id ? { ...config } : role))
+        old.map(role =>
+          role.id === activeLabelId.value
+            ? {
+                space: spaceId.value,
+                id: activeLabelId.value,
+                name: config.name,
+                description: config.description,
+                color: config.color
+              }
+            : role
+        )
     );
   } catch (e) {
     addNotification('error', e.message);
@@ -78,11 +102,9 @@ async function handleDeleteRole(id: string) {
   try {
     await sendDeleteRole(spaceId.value, id);
 
-    queryClient.setQueryData<SpaceMetadataLabel[]>(
+    queryClient.setQueryData<Role[]>(
       ['townhall', 'roles', spaceId.value, 'list'],
-      (old = []) => {
-        return old.filter(role => role.id !== id);
-      }
+      (old = []) => old.filter(role => role.id !== id)
     );
   } catch (e) {
     addNotification('error', e.message);
@@ -121,7 +143,7 @@ setTitle('Ethereum Open Agora');
             class="py-3 mx-4 block border-b last:border-b-0"
           >
             <div
-              class="flex flex-wrap md:flex-nowrap items-center gap-x-3 gap-y-1 truncate"
+              class="flex flex-wrap md:flex-nowrap items-center justify-between gap-x-3 gap-y-1 truncate"
             >
               <div class="md:min-w-max min-w-0">
                 <UiProposalLabel

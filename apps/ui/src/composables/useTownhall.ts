@@ -202,7 +202,6 @@ export function useTownhall() {
 
   async function sendCreateRole(
     space: string,
-    id: string,
     name: string,
     description: string,
     color: string
@@ -216,7 +215,7 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createRole({
         signer,
-        data: { space, id, name, description, color },
+        data: { space, name, description, color },
         salt: getSalt()
       })
     );

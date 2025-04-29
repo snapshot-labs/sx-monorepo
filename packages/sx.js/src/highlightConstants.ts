@@ -62,7 +62,6 @@ export const TOWNHALL_CONFIG = {
     createRole: {
       CreateRole: [
         { name: 'space', type: 'string' },
-        { name: 'id', type: 'string' },
         { name: 'name', type: 'string' },
         { name: 'description', type: 'string' },
         { name: 'color', type: 'string' }
@@ -71,7 +70,7 @@ export const TOWNHALL_CONFIG = {
     editRole: {
       EditRole: [
         { name: 'space', type: 'string' },
-        { name: 'id', type: 'string' },
+        { name: 'id', type: 'uint64' },
         { name: 'name', type: 'string' },
         { name: 'description', type: 'string' },
         { name: 'color', type: 'string' }
@@ -80,7 +79,7 @@ export const TOWNHALL_CONFIG = {
     deleteRole: {
       DeleteRole: [
         { name: 'space', type: 'string' },
-        { name: 'id', type: 'string' }
+        { name: 'id', type: 'uint64' }
       ]
     }
   }
