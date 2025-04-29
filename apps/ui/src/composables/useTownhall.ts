@@ -96,7 +96,11 @@ export function useTownhall() {
     );
   }
 
-  async function sendDiscussion(title: string, body: string) {
+  async function sendDiscussion(
+    title: string,
+    body: string,
+    discussionUrl: string
+  ) {
     if (!auth.value) {
       throw new Error('Not authenticated');
     }
@@ -106,7 +110,7 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createDiscussion({
         signer,
-        data: { title, body },
+        data: { title, body, discussionUrl },
         salt: getSalt()
       })
     );

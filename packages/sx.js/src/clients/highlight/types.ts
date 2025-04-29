@@ -17,6 +17,7 @@ export type SetAlias = {
 export type CreateDiscussion = {
   title: string;
   body: string;
+  discussionUrl: string;
 };
 
 export type CloseDiscussion = {

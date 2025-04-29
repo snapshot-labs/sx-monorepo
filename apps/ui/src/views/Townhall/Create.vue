@@ -9,6 +9,7 @@ const { addNotification } = useUiStore();
 
 const title = ref(route.query.title as string);
 const body = ref('');
+const discussion = ref('');
 const strategy = ref('anyone');
 const submitLoading = ref(false);
 
@@ -25,6 +26,14 @@ const BODY_DEFINITION = {
   title: 'Context',
   maxLength: 10e3,
   examples: ['Add more context…']
+};
+
+const DISCUSSION_DEFINITION = {
+  type: 'string',
+  format: 'uri',
+  title: 'Discussion',
+  maxLength: 256,
+  examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
 const STRATEGY_DEFINITION = {
@@ -44,7 +53,7 @@ async function handleSubmit() {
   submitLoading.value = true;
 
   try {
-    const res = await sendDiscussion(title.value, body.value);
+    const res = await sendDiscussion(title.value, body.value, discussion.value);
 
     const id = res.result.events.find(event => event.key === 'new_discussion')
       .data[0];
@@ -95,6 +104,8 @@ async function handleSubmit() {
       <div class="s-base">
         <UiComposer v-model="body" :definition="BODY_DEFINITION" />
       </div>
+      <UiInputString v-model="discussion" :definition="DISCUSSION_DEFINITION" />
+      <UiLinkPreview :url="discussion" />
       <div>
         <UiSelect
           v-model="strategy"

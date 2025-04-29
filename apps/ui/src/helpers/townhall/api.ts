@@ -39,6 +39,7 @@ gql(`
     id
     title
     body
+    discussion_url
     author
     statement_count
     vote_count

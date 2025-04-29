@@ -140,10 +140,11 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { title, body } = data;
+    const { title, body, discussionUrl } = data;
     const message = {
       title,
-      body
+      body,
+      discussionUrl
     };
 
     const signature = await this.sign(

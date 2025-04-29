@@ -21,7 +21,8 @@ export const TOWNHALL_CONFIG = {
     createDiscussion: {
       Discussion: [
         { name: 'title', type: 'string' },
-        { name: 'body', type: 'string' }
+        { name: 'body', type: 'string' },
+        { name: 'discussionUrl', type: 'string' }
       ]
     },
     closeDiscussion: {
