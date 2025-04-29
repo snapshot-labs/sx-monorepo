@@ -159,8 +159,7 @@ async function handleSubmit() {
   if (
     !auth.value ||
     !selectedDelegation.value ||
-    (auth.value &&
-      !isDelegationSupportedByConnectedWallet(selectedDelegation.value))
+    !isDelegationSupportedByConnectedWallet(selectedDelegation.value)
   )
     return;
 
