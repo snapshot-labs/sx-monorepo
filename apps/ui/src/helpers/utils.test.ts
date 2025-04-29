@@ -1,10 +1,13 @@
+import { Interface } from '@ethersproject/abi';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   _d,
   _rt,
   _vp,
+  abiToDefinition,
   createErc1155Metadata,
   formatAddress,
+  getSpaceController,
   getStampUrl,
   uniqBy
 } from './utils';
@@ -266,6 +269,90 @@ describe('utils', () => {
       ).toBe(
         'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64&cb=1234'
       );
+    });
+  });
+
+  describe('getSpaceController', () => {
+    it('should return the space controller address for a shib name on mainnet', async () => {
+      const spaceId = 'boorger.shib';
+      const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for an ENS name on mainnet', async () => {
+      const spaceId = 'ens.eth';
+      const expectedController = '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for a shib name on testnet', async () => {
+      const spaceId = 'snapshot-test-unclaimed.shib';
+      const expectedController = '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3';
+      const controller = await getSpaceController(spaceId, 's-tn');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for an ENS name on testnet', async () => {
+      const spaceId = 'ens.eth';
+      const expectedController = '0x179A862703a4adfb29896552DF9e307980D19285';
+      const controller = await getSpaceController(spaceId, 's-tn');
+      expect(controller).toBe(expectedController);
+    });
+  });
+
+  describe('abiToDefinition', () => {
+    it('should use placeholder input names if none are provided', () => {
+      const abi = [
+        'constructor(address _pool, address _lptoken, address _booster)',
+        'event Approval(address indexed owner, address indexed spender, uint256 value)',
+        'event Transfer(address indexed from, address indexed to, uint256 value)',
+        'function allowance(address, address) pure returns (uint256)',
+        'function approve(address, uint256) pure returns (bool)',
+        'function balanceOf(address account) view returns (uint256)',
+        'function booster() view returns (address)',
+        'function contractType() view returns (bytes32)',
+        'function curveToken() view returns (address)',
+        'function decimals() view returns (uint8)',
+        'function getPhantomTokenInfo() view returns (address, address)',
+        'function name() view returns (string)',
+        'function pool() view returns (address)',
+        'function symbol() view returns (string)',
+        'function totalSupply() view returns (uint256)',
+        'function transfer(address, uint256) pure returns (bool)',
+        'function transferFrom(address, address, uint256) pure returns (bool)',
+        'function underlying() view returns (address)',
+        'function version() view returns (uint256)'
+      ];
+
+      const iface = new Interface(abi);
+
+      const definition = abiToDefinition(iface.getFunction('allowance'), 1);
+
+      expect(definition).toEqual({
+        $async: true,
+        additionalProperties: false,
+        properties: {
+          'Input 1': {
+            chainId: 1,
+            examples: ['0x0000…'],
+            format: 'ens-or-address',
+            title: 'Input 1 (address)',
+            type: 'string'
+          },
+          'Input 2': {
+            chainId: 1,
+            examples: ['0x0000…'],
+            format: 'ens-or-address',
+            title: 'Input 2 (address)',
+            type: 'string'
+          }
+        },
+        required: ['Input 1', 'Input 2'],
+        title: 'allowance',
+        type: 'object'
+      });
     });
   });
 });

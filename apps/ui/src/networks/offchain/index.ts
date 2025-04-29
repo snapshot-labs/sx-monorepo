@@ -1,7 +1,7 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { getSpaceController } from '@/helpers/ens';
 import { pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
+import { getSpaceController } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -44,7 +44,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     isExecutorActionsSupported: isExecutorSupported,
     pin: pinPineapple,
     getSpaceController: async (space: Space) =>
-      getSpaceController(space.id, l1ChainId),
+      getSpaceController(space.id, networkId),
     getTransaction: () => {
       throw new Error('Not implemented');
     },

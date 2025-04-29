@@ -1,4 +1,5 @@
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
+import { FunctionFragment } from '@ethersproject/abi';
 import { getAddress, isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
@@ -13,9 +14,11 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
+import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
-import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
-import { MAX_SYMBOL_LENGTH } from './constants';
+import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
+import { EMPTY_ADDRESS, MAX_SYMBOL_LENGTH } from './constants';
+import { getOwner } from './stamp';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
 import ICDiscord from '~icons/c/discord';
@@ -258,7 +261,7 @@ export function _rt(number) {
   }
 }
 
-export function abiToDefinition(abi, chainId?: ChainId) {
+export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
   const definition = {
     $async: true,
     title: abi.name,
@@ -267,36 +270,39 @@ export function abiToDefinition(abi, chainId?: ChainId) {
     additionalProperties: false,
     properties: {}
   };
-  abi.inputs.forEach(input => {
-    definition.properties[input.name] = {};
-    definition.required.push(input.name);
+
+  abi.inputs.forEach((input, i) => {
+    const inputName = input.name ?? `Input ${i + 1}`;
+
+    definition.properties[inputName] = {};
+    definition.required.push(inputName);
     let type = 'string';
     if (input.type === 'bool') type = 'boolean';
     if (input.type === 'uint256') {
-      definition.properties[input.name].format = 'uint256';
-      definition.properties[input.name].examples = ['0'];
+      definition.properties[inputName].format = 'uint256';
+      definition.properties[inputName].examples = ['0'];
     }
     if (input.type === 'int256') {
-      definition.properties[input.name].format = 'int256';
-      definition.properties[input.name].examples = ['0'];
+      definition.properties[inputName].format = 'int256';
+      definition.properties[inputName].examples = ['0'];
     }
     if (input.type === 'bytes') {
-      definition.properties[input.name].format = 'bytes';
-      definition.properties[input.name].examples = ['0x0000…'];
+      definition.properties[inputName].format = 'bytes';
+      definition.properties[inputName].examples = ['0x0000…'];
     }
     if (input.type === 'address') {
-      definition.properties[input.name].format = 'ens-or-address';
-      definition.properties[input.name].examples = ['0x0000…'];
+      definition.properties[inputName].format = 'ens-or-address';
+      definition.properties[inputName].examples = ['0x0000…'];
       if (chainId) {
-        definition.properties[input.name].chainId = chainId;
+        definition.properties[inputName].chainId = chainId;
       }
     }
     if (input.type.endsWith('[]')) {
-      definition.properties[input.name].format = input.type;
-      definition.properties[input.name].examples = ['0x0, 0x1'];
+      definition.properties[inputName].format = input.type;
+      definition.properties[inputName].examples = ['0x0, 0x1'];
     }
-    definition.properties[input.name].type = type;
-    definition.properties[input.name].title = `${input.name} (${input.type})`;
+    definition.properties[inputName].type = type;
+    definition.properties[inputName].title = `${inputName} (${input.type})`;
   });
   return definition;
 }
@@ -679,4 +685,25 @@ export function isUserAbortError(e: any) {
     ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
     ['User abort', 'User rejected the request.'].includes(e.message)
   );
+}
+
+export async function getSpaceController(id: string, network: NetworkID) {
+  const chainMapping = {
+    ens: {
+      s: 1,
+      's-tn': 11155111
+    },
+    shibarium: {
+      s: 109,
+      's-tn': 157
+    }
+  };
+
+  if (id.endsWith('.shib')) {
+    const owner = await getOwner(id, chainMapping.shibarium[network]);
+
+    return owner || EMPTY_ADDRESS;
+  }
+
+  return getEnsSpaceController(id, chainMapping.ens[network]);
 }
