@@ -13,6 +13,7 @@ export default class Townhall extends Agent {
     this.addEntrypoint(TOWNHALL_CONFIG.types.pinStatement);
     this.addEntrypoint(TOWNHALL_CONFIG.types.unpinStatement);
     this.addEntrypoint(TOWNHALL_CONFIG.types.vote);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createRole);
   }
 
   getAuthor(signer: string) {
@@ -117,5 +118,21 @@ export default class Townhall extends Agent {
 
     this.write(`discussion:${discussion}:voter:${author}`, votes);
     this.emit('new_vote', [author, discussion, statement, choice]);
+  }
+
+  async createRole({
+    space,
+    id,
+    name,
+    description,
+    color
+  }: {
+    space: string;
+    id: string;
+    name: string;
+    description: string;
+    color: string;
+  }) {
+    this.emit('new_role', [space, id, name, description, color]);
   }
 }

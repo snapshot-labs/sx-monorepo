@@ -200,12 +200,35 @@ export function useTownhall() {
     );
   }
 
+  async function sendCreateRole(
+    space: string,
+    id: string,
+    name: string,
+    description: string,
+    color: string
+  ) {
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.createRole({
+        signer,
+        data: { space, id, name, description, color },
+        salt: getSalt()
+      })
+    );
+  }
+
   return {
     sendDiscussion,
     sendCloseDiscussion,
     sendStatement,
     sendHideStatement,
     sendPinStatement,
-    sendVote
+    sendVote,
+    sendCreateRole
   };
 }

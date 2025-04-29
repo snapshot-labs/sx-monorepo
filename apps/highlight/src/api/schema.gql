@@ -48,3 +48,12 @@ type Vote {
   discussion: Discussion!
   statement: Statement!
 }
+
+type Role {
+  id: String!
+  space: String!
+  name: String!
+  description: String!
+  color: String!
+  created: Int!
+}

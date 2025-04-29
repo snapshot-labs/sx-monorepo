@@ -17,6 +17,7 @@ import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
 import TownhallCreate from '@/views/Townhall/Create.vue';
 import TownhallDiscussion from '@/views/Townhall/Discussion.vue';
+import TownhallSettings from '@/views/Townhall/Settings.vue';
 import TownhallSpace from '@/views/Townhall/Space.vue';
 import Townhall from '@/views/Townhall/Townhall.vue';
 import User from '@/views/User.vue';
@@ -56,6 +57,11 @@ export default [
     path: '/townhall/:space/create',
     name: 'townhall-create',
     component: TownhallCreate
+  },
+  {
+    path: '/townhall/:space/settings',
+    name: 'townhall-settings',
+    component: TownhallSettings
   },
   {
     path: '/townhall/:space/:id',

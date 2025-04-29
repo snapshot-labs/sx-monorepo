@@ -7,6 +7,7 @@ import {
 import {
   CloseDiscussion,
   CreateDiscussion,
+  CreateRole,
   CreateStatement,
   Envelope,
   HideStatement,
@@ -363,6 +364,43 @@ export class HighlightEthereumSigClient {
       domain,
       message,
       primaryType: 'Vote',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async createRole({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: CreateRole;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, id, name, description, color } = data;
+    const message = {
+      space,
+      id,
+      name,
+      description,
+      color
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.createRole,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'CreateRole',
       signer: await signer.getAddress(),
       signature
     };

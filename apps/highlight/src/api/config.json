@@ -42,6 +42,10 @@
         {
           "name": "new_vote",
           "fn": "handleNewVote"
+        },
+        {
+          "name": "new_role",
+          "fn": "handleNewRole"
         }
       ]
     }
