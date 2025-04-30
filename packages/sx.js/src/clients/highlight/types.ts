@@ -41,3 +41,17 @@ export type Vote = {
   statement: number;
   choice: number;
 };
+
+export type CreateRole = {
+  space: string;
+  name: string;
+  description: string;
+  color: string;
+};
+
+export type EditRole = CreateRole & { id: string };
+
+export type DeleteRole = {
+  space: string;
+  id: string;
+};

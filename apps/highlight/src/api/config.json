@@ -42,6 +42,18 @@
         {
           "name": "new_vote",
           "fn": "handleNewVote"
+        },
+        {
+          "name": "new_role",
+          "fn": "handleNewRole"
+        },
+        {
+          "name": "edit_role",
+          "fn": "handleEditRole"
+        },
+        {
+          "name": "delete_role",
+          "fn": "handleDeleteRole"
         }
       ]
     }

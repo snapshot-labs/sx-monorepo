@@ -13,6 +13,9 @@ export default class Townhall extends Agent {
     this.addEntrypoint(TOWNHALL_CONFIG.types.pinStatement);
     this.addEntrypoint(TOWNHALL_CONFIG.types.unpinStatement);
     this.addEntrypoint(TOWNHALL_CONFIG.types.vote);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createRole);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.editRole);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.deleteRole);
   }
 
   getAuthor(signer: string) {
@@ -117,5 +120,42 @@ export default class Townhall extends Agent {
 
     this.write(`discussion:${discussion}:voter:${author}`, votes);
     this.emit('new_vote', [author, discussion, statement, choice]);
+  }
+
+  async createRole({
+    space,
+    name,
+    description,
+    color
+  }: {
+    space: string;
+    name: string;
+    description: string;
+    color: string;
+  }) {
+    const id: number = (await this.get(`roles:id`)) ?? 0;
+    this.write(`roles:id`, id + 1);
+
+    this.emit('new_role', [space, String(id), name, description, color]);
+  }
+
+  async editRole({
+    space,
+    id,
+    name,
+    description,
+    color
+  }: {
+    space: string;
+    id: string;
+    name: string;
+    description: string;
+    color: string;
+  }) {
+    this.emit('edit_role', [space, id, name, description, color]);
+  }
+
+  async deleteRole({ space, id }: { space: string; id: string }) {
+    this.emit('delete_role', [space, id]);
   }
 }

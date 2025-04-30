@@ -3,10 +3,16 @@ import { clone, getRandomHexColor } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { SpaceMetadataLabel } from '@/types';
 
-const props = defineProps<{
-  open: boolean;
-  initialState?: SpaceMetadataLabel;
-}>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    initialState?: SpaceMetadataLabel;
+    itemType?: 'label' | 'role';
+  }>(),
+  {
+    itemType: 'label'
+  }
+);
 
 const emit = defineEmits<{
   (e: 'add', config: SpaceMetadataLabel);
@@ -17,7 +23,7 @@ const form = ref(
   props.initialState ? clone(props.initialState) : clone(generateDefaultState())
 );
 
-const definition = {
+const definition = computed(() => ({
   type: 'object',
   title: 'Space',
   additionalProperties: false,
@@ -25,7 +31,7 @@ const definition = {
   properties: {
     name: {
       type: 'string',
-      title: 'Label name',
+      title: props.itemType === 'label' ? 'Label name' : 'Role name',
       minLength: 1,
       maxLength: 32,
       examples: ['council']
@@ -34,7 +40,7 @@ const definition = {
       type: 'string',
       title: 'Description',
       maxLength: 100,
-      examples: ['Explain about label']
+      examples: [`Explain about ${props.itemType}`]
     },
     color: {
       type: 'string',
@@ -44,10 +50,10 @@ const definition = {
       showControls: true
     }
   }
-};
+}));
 
 const formErrors = computed(() => {
-  const validator = getValidator(definition);
+  const validator = getValidator(definition.value);
   return validator.validate(form.value, { skipEmptyOptionalFields: true });
 });
 
@@ -79,11 +85,11 @@ watch(
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="initialState ? 'Edit label' : 'Add label'" />
+      <h3 v-text="initialState ? `Edit ${itemType}` : `Add ${itemType}`" />
     </template>
     <div class="flex items-center max-w-md gap-3 pt-4 px-4">
       <UiProposalLabel
-        :label="form.name || 'label preview'"
+        :label="form.name || `${itemType} preview`"
         :color="form.color"
       />
       <div class="truncate">

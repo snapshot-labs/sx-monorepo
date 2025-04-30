@@ -1,6 +1,12 @@
 import { z } from 'zod';
 import { Writer } from './indexer/types';
-import { Alias, Discussion, Statement, Vote } from '../../.checkpoint/models';
+import {
+  Alias,
+  Discussion,
+  Role,
+  Statement,
+  Vote
+} from '../../.checkpoint/models';
 
 const SetAliasEventData = z.tuple([
   z.string(), // from
@@ -39,6 +45,20 @@ const NewVoteEventData = z.tuple([
   z.number(), // discussionId
   z.number(), // statementId
   z.union([z.literal(1), z.literal(2), z.literal(3)]) // choice
+]);
+
+const NewRoleEventData = z.tuple([
+  z.string(), // spaceId
+  z.string(), // id
+  z.string(), // name
+  z.string(), // description
+  z.string() // color
+]);
+const EditRoleEventData = NewRoleEventData;
+
+const DeleteRoleEventData = z.tuple([
+  z.string(), // spaceId
+  z.string() // id
 ]);
 
 export function createWriters(indexerName: string) {
@@ -216,6 +236,50 @@ export function createWriters(indexerName: string) {
     }
   };
 
+  const handleNewRole: Writer = async ({ unit, payload }) => {
+    const [spaceId, id, name, description, color] = NewRoleEventData.parse(
+      payload.data
+    );
+
+    console.log('Handle new role', spaceId, id, name, description, color);
+
+    const role = new Role(id.toString(), indexerName);
+    role.space = spaceId;
+    role.name = name;
+    role.description = description;
+    role.color = color;
+    role.created = unit.timestamp;
+    await role.save();
+  };
+
+  const handleEditRole: Writer = async ({ payload }) => {
+    const [spaceId, id, name, description, color] = EditRoleEventData.parse(
+      payload.data
+    );
+
+    console.log('Handle edit role', spaceId, id, name, description, color);
+
+    const role = await Role.loadEntity(id.toString(), indexerName);
+    if (!role) return;
+
+    role.space = spaceId;
+    role.name = name;
+    role.description = description;
+    role.color = color;
+    await role.save();
+  };
+
+  const handleDeleteRole: Writer = async ({ payload }) => {
+    const [spaceId, id] = DeleteRoleEventData.parse(payload.data);
+
+    console.log('Handle delete role', spaceId, id);
+
+    const role = await Role.loadEntity(id.toString(), indexerName);
+    if (!role) return;
+
+    await role.delete();
+  };
+
   return {
     // aliases
     handleSetAlias,
@@ -226,6 +290,9 @@ export function createWriters(indexerName: string) {
     handlePinStatement,
     handleUnpinStatement,
     handleHideStatement,
-    handleNewVote
+    handleNewVote,
+    handleNewRole,
+    handleEditRole,
+    handleDeleteRole
   };
 }

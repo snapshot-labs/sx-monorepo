@@ -1,5 +1,6 @@
 import {
   DiscussionFieldsFragment,
+  RoleFieldsFragment,
   StatementFieldsFragment,
   VoteFieldsFragment
 } from './gql/graphql';
@@ -7,3 +8,4 @@ import {
 export type Discussion = DiscussionFieldsFragment;
 export type Statement = StatementFieldsFragment;
 export type Vote = VoteFieldsFragment;
+export type Role = RoleFieldsFragment;

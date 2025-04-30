@@ -64,6 +64,14 @@ gql(`
       id
     }
   }
+
+  fragment roleFields on Role {
+    id
+    space
+    name
+    description
+    color
+  }
 `);
 
 const DISCUSSIONS_QUERY = gql(`
@@ -97,6 +105,14 @@ const VOTES_QUERY = gql(`
   }
 `);
 
+const ROLES_QUERY = gql(`
+  query Roles($space: String!) {
+    roles(where: { space: $space }) {
+      ...roleFields
+    }
+  }
+`);
+
 export async function getDiscussions() {
   const { data } = await client.query({
     query: DISCUSSIONS_QUERY
@@ -121,6 +137,15 @@ export async function getVotes(discussion: string, voter: string) {
   });
 
   return data.votes;
+}
+
+export async function getRoles(spaceId: string) {
+  const { data } = await client.query({
+    query: ROLES_QUERY,
+    variables: { space: spaceId }
+  });
+
+  return data.roles;
 }
 
 export function newStatementEventToEntry(event: NewStatementEvent): Statement {
