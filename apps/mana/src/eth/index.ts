@@ -4,6 +4,7 @@ import { generateSpaceEVMWallet } from './dependencies';
 import { createNetworkHandler, NETWORK_IDS } from './rpc';
 import { rpcError } from '../utils';
 
+const validNetworkIds = Array.from(NETWORK_IDS.values());
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
   method: z.enum([
@@ -38,17 +39,17 @@ router.post('/:chainId?', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayers/:networkId/spaces/:space', async (req, res) => {
-  if (!req.params.networkId || !req.params.space)
-    return rpcError(res, 400, 'Missing chainId or space parameter', 0);
+router.get('/relayers/spaces/:space', async (req, res) => {
+  const spaceArray = req.params.space.split(':');
+  if (spaceArray.length !== 2 || !spaceArray[0] || !spaceArray[1])
+    return rpcError(res, 400, 'Missing space parameter or invalid format', 0);
 
-  const normalizedSpaceAddress = req.params.space.toLowerCase();
-  const networkId = req.params.networkId;
-  const validNetworkIds = Array.from(NETWORK_IDS.values());
+  const [networkId, spaceAddress] = spaceArray;
 
   if (!validNetworkIds.includes(networkId))
-    return rpcError(res, 400, 'Unsupported networkId', 0);
+    return rpcError(res, 400, 'Invalid networkId', 0);
 
+  const normalizedSpaceAddress = spaceAddress.toLowerCase();
   const wallet = generateSpaceEVMWallet(networkId, normalizedSpaceAddress);
 
   res.json({

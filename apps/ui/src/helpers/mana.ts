@@ -96,7 +96,7 @@ export async function getRelayerInfo(
     const networkType = isStarknet ? 'stark' : 'eth';
 
     const res = await fetch(
-      `${MANA_URL}/${networkType}_rpc/relayers/spaces/${space}`
+      `${MANA_URL}/${networkType}_rpc/relayers/spaces/${network}:${space}`
     );
     const data = await res.json();
     if (!data.address) {

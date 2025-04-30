@@ -6,6 +6,7 @@ import { NETWORK_IDS, NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
 import { rpcError } from '../utils';
 
+const validNetworkIds = Array.from(NETWORK_IDS.values());
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
   method: z.enum([
@@ -43,16 +44,22 @@ router.post('/:chainId', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayers/:networkId/spaces/:space', (req, res) => {
-  if (!req.params.networkId || !req.params.space)
-    return rpcError(res, 400, 'Missing chainId or space parameter', 0);
+router.get('/relayers/spaces/:space', (req, res) => {
+  const spaceArray = req.params.space.split(':');
+  if (spaceArray.length !== 2 || !spaceArray[0] || !spaceArray[1])
+    return rpcError(res, 400, 'Missing space parameter or invalid format', 0);
 
-  const normalizedSpaceAddress = validateAndParseAddress(req.params.space);
-  const networkId = req.params.networkId;
-  const validNetworkIds = Array.from(NETWORK_IDS.values());
+  const [networkId, spaceAddress] = spaceArray;
 
   if (!validNetworkIds.includes(networkId))
-    return rpcError(res, 400, 'Unsupported networkId', 0);
+    return rpcError(res, 400, 'Invalid networkId', 0);
+
+  let normalizedSpaceAddress;
+  try {
+    normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
+  } catch {
+    return rpcError(res, 400, 'Invalid space address', 0);
+  }
 
   const { address } = generateSpaceStarknetWallet(
     networkId,
