@@ -1,20 +1,38 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import { Role } from '@/helpers/townhall/types';
-import { useRolesQuery } from '@/queries/townhall';
+import {
+  useRoleMutation,
+  useRolesQuery,
+  useUserRolesQuery
+} from '@/queries/townhall';
 import { SpaceMetadataLabel } from '@/types';
 
 const { setTitle } = useTitle();
 const route = useRoute();
 const { sendCreateRole, sendEditRole, sendDeleteRole } = useTownhall();
 const { addNotification } = useUiStore();
+const { web3 } = useWeb3();
 const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
 const spaceId = computed(() => route.params.space as string);
+const userSpaceRoles = computed(() => {
+  return userRoles.value?.filter(role => role.space === spaceId.value) ?? [];
+});
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
+const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
+const {
+  isPending: isMutatingRole,
+  variables,
+  mutate
+} = useRoleMutation(toRef(() => web3.value.account));
+
+function getIsRoleClaimed(roleId: string) {
+  return userSpaceRoles.value.some(role => role.id === roleId);
+}
 
 function setModalStatus(open: boolean = false, roleId: string | null = null) {
   modalOpen.value = open;
@@ -134,28 +152,67 @@ setTitle('Ethereum Open Agora');
             class="py-3 mx-4 block border-b last:border-b-0"
           >
             <div
-              class="flex flex-wrap md:flex-nowrap items-center justify-between gap-x-3 gap-y-1 truncate"
+              class="flex flex-nowrap items-center justify-between gap-x-3 gap-y-1 truncate"
             >
-              <div class="md:min-w-max min-w-0">
+              <div class="md:min-w-max min-w-0 flex-shrink-0">
                 <UiProposalLabel
                   :label="role.name || 'label preview'"
                   :color="role.color"
                   class="w-full"
                 />
               </div>
-              <div v-if="role.description" class="w-full">
-                <div class="truncate" v-text="role.description" />
-              </div>
-              <div class="flex gap-3 items-center h-[24px]">
-                <button
-                  type="button"
-                  @click="() => setModalStatus(true, role.id)"
-                >
-                  <IH-pencil />
-                </button>
-                <button type="button" @click="() => handleDeleteRole(role.id)">
-                  <IH-trash />
-                </button>
+              <div
+                v-if="role.description"
+                class="w-full truncate"
+                v-text="role.description"
+              />
+              <div class="flex items-center gap-3">
+                <div class="flex gap-3 items-center">
+                  <UiButton
+                    :loading="variables?.role.id === role.id && isMutatingRole"
+                    @click="
+                      mutate({
+                        role,
+                        isRevoking: getIsRoleClaimed(role.id)
+                      })
+                    "
+                  >
+                    {{ getIsRoleClaimed(role.id) ? 'Revoke' : 'Claim' }}
+                  </UiButton>
+                </div>
+                <UiDropdown class="flex gap-3 items-center h-[24px]">
+                  <template #button>
+                    <UiButton class="!p-0 !border-0 !h-auto">
+                      <IH-dots-vertical
+                        class="text-skin-text inline-block size-[22px]"
+                      />
+                    </UiButton>
+                  </template>
+                  <template #items>
+                    <UiDropdownItem v-slot="{ active }">
+                      <button
+                        type="button"
+                        class="flex items-center gap-2"
+                        :class="{ 'opacity-80': active }"
+                        @click="() => setModalStatus(true, role.id)"
+                      >
+                        <IH-pencil :width="16" />
+                        Edit role
+                      </button>
+                    </UiDropdownItem>
+                    <UiDropdownItem v-slot="{ active }">
+                      <button
+                        type="button"
+                        class="flex items-center gap-2"
+                        :class="{ 'opacity-80': active }"
+                        @click="() => handleDeleteRole(role.id)"
+                      >
+                        <IH-trash :width="16" />
+                        Delete role
+                      </button>
+                    </UiDropdownItem>
+                  </template>
+                </UiDropdown>
               </div>
             </div>
           </div>
