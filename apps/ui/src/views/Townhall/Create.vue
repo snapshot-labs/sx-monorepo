@@ -43,12 +43,6 @@ const STRATEGY_DEFINITION = {
   title: 'Who can participate?'
 };
 
-const EXAMPLES = [
-  "What features you'd like to see?",
-  // 'What should be our main KPI?',
-  'Who are the best delegates?'
-];
-
 async function handleSubmit() {
   submitLoading.value = true;
 
@@ -73,7 +67,7 @@ async function handleSubmit() {
       }
     }
 
-    await router.push({ name: 'townhall-discussion', params: { id } });
+    await router.push({ name: 'townhall-topic', params: { id } });
   } catch (e) {
     addNotification('error', e.message);
   } finally {
@@ -91,16 +85,6 @@ async function handleSubmit() {
           :definition="TITLE_DEFINITION"
           :required="true"
         />
-        <div class="space-x-2">
-          e.g.
-          <a
-            v-for="(example, i) in EXAMPLES"
-            :key="i"
-            class="inline-block border text-skin-link text-[15px] rounded-full bg-skin-bg px-2"
-            @click="title = example"
-            v-text="example"
-          />
-        </div>
       </div>
       <div class="s-base">
         <UiComposer v-model="body" :definition="BODY_DEFINITION" />

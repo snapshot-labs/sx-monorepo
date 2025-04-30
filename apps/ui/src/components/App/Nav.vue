@@ -38,7 +38,11 @@ const { data: spaceData } = useSpaceQuery({
 });
 const { web3 } = useWeb3();
 
-const currentRouteName = computed(() => String(route.matched[0]?.name));
+const currentRouteName = computed(() =>
+  route.params.space === 's:ethereum'
+    ? 'townhall'
+    : String(route.matched[0]?.name)
+);
 const space = computed(() => {
   if (currentRouteName.value === 'space' && resolved.value) {
     return spaceData.value ?? null;
@@ -142,8 +146,19 @@ const navigationConfig = computed<
       icon: IHBell,
       hidden: !web3.value.account
     }
+  },
+  townhall: {
+    topics: {
+      name: 'Home',
+      icon: IHHome
+    },
+    roles: {
+      name: 'Roles',
+      icon: IHUsers
+    }
   }
 }));
+
 const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
   () => {
     return {
@@ -168,6 +183,7 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
     };
   }
 );
+
 const navigationItems = computed(() =>
   Object.fromEntries(
     Object.entries({
@@ -175,6 +191,7 @@ const navigationItems = computed(() =>
       ...shortcuts.value[currentRouteName.value]
     })
       .map(([key, item]): [string, NavigationItem] => {
+        console.log(currentRouteName.value);
         return [
           key,
           {
