@@ -180,6 +180,7 @@ setTitle('Ethereum Open Agora');
     </UiContainer>
     <teleport to="#modal">
       <ModalLabelConfig
+        item-type="role"
         :open="modalOpen"
         :initial-state="(roles || []).find(l => l.id === activeLabelId)"
         @add="
