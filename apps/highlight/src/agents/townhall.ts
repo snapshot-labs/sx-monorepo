@@ -20,7 +20,7 @@ export default class Townhall extends Agent {
     this.addEntrypoint(TOWNHALL_CONFIG.types.revokeRole);
   }
 
-  getAuthor(signer: string) {
+  getSigner(signer: string) {
     return this.get(`aliases:${signer}`, 'aliases') ?? signer;
   }
 
@@ -34,7 +34,7 @@ export default class Townhall extends Agent {
   ) {
     const id: number = (await this.get('discussions:id')) || 1;
 
-    const author = await this.getAuthor(signer);
+    const author = await this.getSigner(signer);
     this.write('discussions:id', id + 1);
     this.emit('new_discussion', [id, author, title, body, discussionUrl]);
   }
@@ -58,7 +58,7 @@ export default class Townhall extends Agent {
     const id: number =
       (await this.get(`discussion:${discussion}:statements:id`)) || 1;
 
-    const author = await this.getAuthor(signer);
+    const author = await this.getSigner(signer);
 
     this.write(`discussion:${discussion}:statements:id`, id + 1);
     this.emit('new_statement', [id, author, discussion, body]);
@@ -112,7 +112,7 @@ export default class Townhall extends Agent {
     },
     { signer }: { signer: string }
   ) {
-    const author = await this.getAuthor(signer);
+    const author = await this.getSigner(signer);
 
     const votes: number[] =
       (await this.get(`discussion:${discussion}:voter:${author}`)) || [];
@@ -165,7 +165,7 @@ export default class Townhall extends Agent {
     { space, id }: { space: string; id: string },
     { signer }: { signer: string }
   ) {
-    const user = await this.getAuthor(signer);
+    const user = await this.getSigner(signer);
 
     this.emit('claim_role', [space, id, user]);
   }
@@ -174,7 +174,7 @@ export default class Townhall extends Agent {
     { space, id }: { space: string; id: string },
     { signer }: { signer: string }
   ) {
-    const user = await this.getAuthor(signer);
+    const user = await this.getSigner(signer);
 
     this.emit('revoke_role', [space, id, user]);
   }
