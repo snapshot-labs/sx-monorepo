@@ -81,6 +81,18 @@ export const TOWNHALL_CONFIG = {
         { name: 'space', type: 'string' },
         { name: 'id', type: 'uint64' }
       ]
+    },
+    claimRole: {
+      ClaimRole: [
+        { name: 'space', type: 'string' },
+        { name: 'id', type: 'uint64' }
+      ]
+    },
+    revokeRole: {
+      RevokeRole: [
+        { name: 'space', type: 'string' },
+        { name: 'id', type: 'uint64' }
+      ]
     }
   }
 };

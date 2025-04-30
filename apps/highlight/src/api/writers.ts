@@ -5,6 +5,8 @@ import {
   Discussion,
   Role,
   Statement,
+  User,
+  UserRole,
   Vote
 } from '../../.checkpoint/models';
 
@@ -60,6 +62,13 @@ const DeleteRoleEventData = z.tuple([
   z.string(), // spaceId
   z.string() // id
 ]);
+
+const ClaimRoleEventData = z.tuple([
+  z.string(), // spaceId
+  z.string(), // id
+  z.string() // address
+]);
+const RevokeRoleEventData = ClaimRoleEventData;
 
 export function createWriters(indexerName: string) {
   const handleSetAlias: Writer = async ({ unit, payload }) => {
@@ -277,7 +286,50 @@ export function createWriters(indexerName: string) {
     const role = await Role.loadEntity(id.toString(), indexerName);
     if (!role) return;
 
-    await role.delete();
+    role.deleted = true;
+
+    await role.save();
+  };
+
+  const handleClaimRole: Writer = async ({ payload }) => {
+    const [spaceId, id, userAddress] = ClaimRoleEventData.parse(payload.data);
+
+    console.log('Handle claim role', spaceId, id, userAddress);
+
+    let user = await User.loadEntity(userAddress, indexerName);
+    if (!user) user = new User(userAddress, indexerName);
+    await user.save();
+
+    let userRole = await UserRole.loadEntity(
+      `${spaceId}:${id}:${userAddress}`,
+      indexerName
+    );
+
+    if (!userRole) {
+      userRole = new UserRole(`${spaceId}:${id}:${userAddress}`, indexerName);
+      userRole.user = userAddress;
+      userRole.role = id;
+      await userRole.save();
+    }
+  };
+
+  const handleRevokeRole: Writer = async ({ payload }) => {
+    const [spaceId, id, userAddress] = RevokeRoleEventData.parse(payload.data);
+
+    console.log('Handle revoke role', spaceId, id, userAddress);
+
+    let user = await User.loadEntity(userAddress, indexerName);
+    if (!user) user = new User(userAddress, indexerName);
+    await user.save();
+
+    const userRole = await UserRole.loadEntity(
+      `${spaceId}:${id}:${userAddress}`,
+      indexerName
+    );
+
+    if (userRole) {
+      await userRole.delete();
+    }
   };
 
   return {
@@ -293,6 +345,8 @@ export function createWriters(indexerName: string) {
     handleNewVote,
     handleNewRole,
     handleEditRole,
-    handleDeleteRole
+    handleDeleteRole,
+    handleClaimRole,
+    handleRevokeRole
   };
 }

@@ -157,9 +157,9 @@ async function handleSubmit() {
     statementInput.value = '';
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    submitLoading.value = false;
   }
-
-  submitLoading.value = false;
 }
 
 async function handleCloseDiscussion() {
@@ -170,9 +170,9 @@ async function handleCloseDiscussion() {
     addNotification('success', 'Discussion closed successfully');
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    closeDiscussionLoading.value = false;
   }
-
-  closeDiscussionLoading.value = false;
 }
 
 function toggleAdminView() {

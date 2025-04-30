@@ -22,6 +22,7 @@ export const ALIASES_QUERY = gql`
 
 export function useTownhall() {
   const { auth } = useWeb3();
+  const { modalAccountOpen } = useModal();
 
   const alias = useAlias('townhall-aliases', loadAlias);
 
@@ -102,7 +103,8 @@ export function useTownhall() {
     discussionUrl: string
   ) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -118,7 +120,8 @@ export function useTownhall() {
 
   async function sendCloseDiscussion(discussion: number) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -134,7 +137,8 @@ export function useTownhall() {
 
   async function sendStatement(discussion: number, statement: string) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -150,7 +154,8 @@ export function useTownhall() {
 
   async function sendHideStatement(discussion: number, statement: number) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -166,7 +171,8 @@ export function useTownhall() {
 
   async function sendPinStatement(discussion: number, statement: number) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -186,7 +192,8 @@ export function useTownhall() {
     choice: 1 | 2 | 3
   ) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -207,7 +214,8 @@ export function useTownhall() {
     color: string
   ) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -229,7 +237,8 @@ export function useTownhall() {
     color: string
   ) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
@@ -245,13 +254,48 @@ export function useTownhall() {
 
   async function sendDeleteRole(space: string, id: string) {
     if (!auth.value) {
-      throw new Error('Not authenticated');
+      modalAccountOpen.value = true;
+      return null;
     }
 
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
       highlightClient.deleteRole({
+        signer,
+        data: { space, id },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendClaimRole(space: string, id: string) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.claimRole({
+        signer,
+        data: { space, id },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendRevokeRole(space: string, id: string) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.revokeRole({
         signer,
         data: { space, id },
         salt: getSalt()
@@ -268,6 +312,8 @@ export function useTownhall() {
     sendVote,
     sendCreateRole,
     sendEditRole,
-    sendDeleteRole
+    sendDeleteRole,
+    sendClaimRole,
+    sendRevokeRole
   };
 }

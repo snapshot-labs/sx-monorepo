@@ -5,6 +5,7 @@ import {
   TypedDataSigner
 } from '@ethersproject/abstract-signer';
 import {
+  ClaimRole,
   CloseDiscussion,
   CreateDiscussion,
   CreateRole,
@@ -14,6 +15,7 @@ import {
   Envelope,
   HideStatement,
   PinStatement,
+  RevokeRole,
   SetAlias,
   UnpinStatement,
   Vote
@@ -473,6 +475,74 @@ export class HighlightEthereumSigClient {
       domain,
       message,
       primaryType: 'DeleteRole',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async claimRole({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: ClaimRole;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, id } = data;
+    const message = {
+      space,
+      id
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.claimRole,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'ClaimRole',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async revokeRole({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: RevokeRole;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, id } = data;
+    const message = {
+      space,
+      id
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.revokeRole,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'RevokeRole',
       signer: await signer.getAddress(),
       signature
     };
