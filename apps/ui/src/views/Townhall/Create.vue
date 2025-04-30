@@ -54,6 +54,7 @@ async function handleSubmit() {
 
   try {
     const res = await sendDiscussion(title.value, body.value, discussion.value);
+    if (!res) return;
 
     const id = res.result.events.find(event => event.key === 'new_discussion')
       .data[0];

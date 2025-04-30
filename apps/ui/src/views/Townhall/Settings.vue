@@ -49,6 +49,7 @@ async function handleAddRole(config: SpaceMetadataLabel) {
       config.description,
       config.color
     );
+    if (!res) return;
 
     const newRoles: Role[] = res.result.events
       .filter(event => event.key === 'new_role')
@@ -79,13 +80,14 @@ async function handleEditRole(config: SpaceMetadataLabel) {
   modalOpen.value = false;
 
   try {
-    await sendEditRole(
+    const res = await sendEditRole(
       spaceId.value,
       activeLabelId.value,
       config.name,
       config.description,
       config.color
     );
+    if (!res) return;
 
     queryClient.setQueryData<Role[]>(
       ['townhall', 'roles', spaceId.value, 'list'],
@@ -109,7 +111,8 @@ async function handleEditRole(config: SpaceMetadataLabel) {
 
 async function handleDeleteRole(id: string) {
   try {
-    await sendDeleteRole(spaceId.value, id);
+    const res = await sendDeleteRole(spaceId.value, id);
+    if (!res) return;
 
     queryClient.setQueryData<Role[]>(
       ['townhall', 'roles', spaceId.value, 'list'],

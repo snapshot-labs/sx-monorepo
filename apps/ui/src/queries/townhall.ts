@@ -33,7 +33,9 @@ export function useRoleMutation(user: MaybeRefOrGetter<string>) {
         ? sendRevokeRole(role.space, role.id)
         : sendClaimRole(role.space, role.id);
     },
-    onSuccess: async (_, { role, isRevoking }) => {
+    onSuccess: async (data, { role, isRevoking }) => {
+      if (!data) return;
+
       queryClient.setQueryData<Role[]>(
         ['townhall', 'userRoles', user, 'list'],
         (old = []) =>
