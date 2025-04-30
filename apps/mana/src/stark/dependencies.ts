@@ -7,6 +7,7 @@ import {
   RpcProvider,
   validateAndParseAddress
 } from 'starknet';
+import { NETWORK_IDS } from './networks';
 import { NonceManager } from './nonce-manager';
 
 const WALLET_SECRET = process.env.WALLET_SECRET || '';
@@ -28,9 +29,12 @@ export function getProvider(chainId: string) {
   return new RpcProvider({ nodeUrl: NODE_URLS.get(chainId) });
 }
 
-export function generateSpaceStarknetWallet(spaceAddress: string) {
+export function generateSpaceStarknetWallet(
+  networkId: string,
+  spaceAddress: string
+) {
   // Create a deterministic seed from the space address and secret
-  const combinedSeed = `${spaceAddress}:${WALLET_SECRET}`;
+  const combinedSeed = `${networkId}:${spaceAddress}:${WALLET_SECRET}`;
   const hashedSeed = hash.starknetKeccak(combinedSeed);
   const hashedSeedHex = hashedSeed.toString(16).padStart(64, '0');
   const privateKey = ec.starkCurve.grindKey(`0x${hashedSeedHex}`);
@@ -77,7 +81,7 @@ export async function deployContract(
   await provider.waitForTransaction(deployResponse.transaction_hash);
 }
 
-export function createAccountProxy(provider: RpcProvider) {
+export function createAccountProxy(chainId: string, provider: RpcProvider) {
   const accounts = new Map<
     string,
     {
@@ -91,9 +95,11 @@ export function createAccountProxy(provider: RpcProvider) {
     const normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
 
     if (!accounts.has(normalizedSpaceAddress)) {
+      const networkId = NETWORK_IDS.get(chainId);
+      if (!networkId) throw new Error(`Unsupported chainId ${chainId}`);
       // Use the deterministic account derivation instead of index-based
       const { address, privateKey, starkKeyPubAX } =
-        generateSpaceStarknetWallet(normalizedSpaceAddress);
+        generateSpaceStarknetWallet(networkId, normalizedSpaceAddress);
 
       const account = new Account(provider, address, privateKey);
       const nonceManager = new NonceManager(account);

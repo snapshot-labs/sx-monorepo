@@ -1,7 +1,7 @@
 import express from 'express';
 import z from 'zod';
 import { generateSpaceEVMWallet } from './dependencies';
-import { createNetworkHandler, NETWORKS } from './rpc';
+import { createNetworkHandler, NETWORK_IDS } from './rpc';
 import { rpcError } from '../utils';
 
 const jsonRpcRequestSchema = z.object({
@@ -17,7 +17,7 @@ const jsonRpcRequestSchema = z.object({
 });
 
 const handlers = Object.fromEntries(
-  Array.from(NETWORKS.keys()).map(chainId => [
+  Array.from(NETWORK_IDS.keys()).map(chainId => [
     chainId,
     createNetworkHandler(chainId)
   ])
@@ -38,10 +38,18 @@ router.post('/:chainId?', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayers/spaces/:space', async (req, res) => {
-  const normalizedSpaceAddress = req.params.space.toLowerCase();
+router.get('/relayers/:networkId/spaces/:space', async (req, res) => {
+  if (!req.params.networkId || !req.params.space)
+    return rpcError(res, 400, 'Missing chainId or space parameter', 0);
 
-  const wallet = generateSpaceEVMWallet(normalizedSpaceAddress);
+  const normalizedSpaceAddress = req.params.space.toLowerCase();
+  const networkId = req.params.networkId;
+  const validNetworkIds = Array.from(NETWORK_IDS.values());
+
+  if (!validNetworkIds.includes(networkId))
+    return rpcError(res, 400, 'Unsupported networkId', 0);
+
+  const wallet = generateSpaceEVMWallet(networkId, normalizedSpaceAddress);
 
   res.json({
     address: wallet.address

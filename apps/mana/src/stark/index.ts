@@ -2,7 +2,7 @@ import express from 'express';
 import { validateAndParseAddress } from 'starknet';
 import z from 'zod';
 import { generateSpaceStarknetWallet } from './dependencies';
-import { NETWORKS } from './networks';
+import { NETWORK_IDS, NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
 import { rpcError } from '../utils';
 
@@ -43,12 +43,21 @@ router.post('/:chainId', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayers/spaces/:space', (req, res) => {
-  const { space } = req.params;
-  if (!space) return rpcError(res, 400, 'Missing address parameter', 0);
+router.get('/relayers/:networkId/spaces/:space', (req, res) => {
+  if (!req.params.networkId || !req.params.space)
+    return rpcError(res, 400, 'Missing chainId or space parameter', 0);
 
-  const normalizedSpaceAddress = validateAndParseAddress(space);
-  const { address } = generateSpaceStarknetWallet(normalizedSpaceAddress);
+  const normalizedSpaceAddress = validateAndParseAddress(req.params.space);
+  const networkId = req.params.networkId;
+  const validNetworkIds = Array.from(NETWORK_IDS.values());
+
+  if (!validNetworkIds.includes(networkId))
+    return rpcError(res, 400, 'Unsupported networkId', 0);
+
+  const { address } = generateSpaceStarknetWallet(
+    networkId,
+    normalizedSpaceAddress
+  );
 
   res.json({ address });
 });

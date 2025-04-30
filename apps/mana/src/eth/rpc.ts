@@ -7,6 +7,7 @@ import {
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
+  evmNetworks,
   evmOptimism,
   evmPolygon,
   evmSepolia
@@ -27,6 +28,13 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [33111, evmCurtis],
   [11155111, evmSepolia]
 ]);
+
+export const NETWORK_IDS = new Map<number, string>(
+  Object.entries(evmNetworks).map(([networkId, config]) => [
+    config.Meta.eip712ChainId,
+    networkId
+  ])
+);
 
 export const createNetworkHandler = (chainId: number) => {
   const networkConfig = NETWORKS.get(chainId);
