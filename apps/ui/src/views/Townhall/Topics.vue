@@ -19,30 +19,16 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
 
 <template>
   <div>
-    <div class="py-8">
-      <UiContainer class="!max-w-[960px] relative">
-        <img
-          class="absolute right-0 -top-2 max-w-[440px] z-0"
-          src="https://ethereum.org/_next/image/?url=%2Fcontent%2Fcontributing%2Ftranslation-program%2Fenterprise-eth.png&w=1920&q=75"
-        />
-        <div class="relative z-10">
-          <div class="eyebrow mb-4">Open Agora</div>
-          <h1 class="font-display text-[54px] mb-4">
-            Ethereum's<br />Gathering Space
-          </h1>
-          <div class="flex space-x-2">
-            <router-link
-              :to="{ name: 'townhall-create', params: { space: 'ethereum' } }"
-            >
-              <UiButton primary>Start a discussion</UiButton>
-            </router-link>
-          </div>
-        </div>
-      </UiContainer>
+    <div class="flex justify-end p-4">
+      <router-link
+        :to="{ name: 'townhall-create', params: { space: 'ethereum' } }"
+      >
+        <UiButton primary>New topic</UiButton>
+      </router-link>
     </div>
-    <UiContainer class="!max-w-[960px]">
-      <div class="eyebrow mb-2.5 text-skin-link">Latest discussions</div>
-      <div class="md:border-x border-y md:rounded-lg md:mx-0 -mx-4">
+    <div>
+      <UiLabel label="Latest topics" sticky />
+      <div>
         <div v-if="isPending" class="my-3 mx-4">
           <UiLoading />
         </div>
@@ -65,10 +51,10 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
             v-for="(discussion, i) in discussions"
             :key="i"
             :to="{
-              name: 'townhall-discussion',
+              name: 'townhall-topic',
               params: { space: 'ethereum', id: discussion.id }
             }"
-            class="py-3 mx-4 block border-b last:border-b-0"
+            class="py-3 mx-4 block border-b"
           >
             <div class="mb-1 flex">
               <ProposalIconStatus
@@ -81,11 +67,11 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
             <div class="text-skin-text">
               <UiStamp :id="discussion.author" :size="20" class="mr-2.5" />
               <IH-annotation class="inline-block mr-0.5" />
-              {{ _n(discussion.statement_count) }} statements
+              {{ _n(discussion.statement_count) }} replies
             </div>
           </router-link>
         </div>
       </div>
-    </UiContainer>
+    </div>
   </div>
 </template>

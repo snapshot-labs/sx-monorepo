@@ -42,10 +42,6 @@ const user = computed(
 );
 const cb = computed(() => getCacheHash(user.value.avatar));
 
-const isTownhallRoute = computed(
-  () => typeof route.name === 'string' && route.name.startsWith('townhall')
-);
-
 const searchConfig = computed(() => {
   const rootName = route.matched[0]?.name || '';
   const subRootName = route.matched[1]?.name || '';
@@ -107,13 +103,6 @@ onUnmounted(() => resetAccountModal());
           { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
         ]"
       />
-    </div>
-    <div v-if="isTownhallRoute" class="flex-1 text-skin-link text-[22px]">
-      <router-link
-        :to="{ name: 'townhall-space', params: { space: 'ethereum' } }"
-      >
-        Ethereum: Open Agora
-      </router-link>
     </div>
     <form
       v-if="searchConfig"

@@ -123,14 +123,17 @@ async function handleDeleteRole(id: string) {
   }
 }
 
-setTitle('Ethereum Open Agora');
+setTitle('Roles');
 </script>
 
 <template>
   <div>
-    <UiContainer class="!max-w-[960px] py-4">
-      <div class="eyebrow mb-2.5 text-skin-link">Roles</div>
-      <div class="md:border-x border-y md:rounded-lg md:mx-0 -mx-4">
+    <div class="flex justify-end p-4">
+      <UiButton primary @click="modalOpen = true">Add role</UiButton>
+    </div>
+    <div>
+      <UiLabel label="Roles" sticky />
+      <div>
         <div v-if="isPending" class="my-3 mx-4">
           <UiLoading />
         </div>
@@ -152,7 +155,7 @@ setTitle('Ethereum Open Agora');
           <div
             v-for="role in roles"
             :key="role.id"
-            class="py-3 mx-4 block border-b last:border-b-0"
+            class="py-2.5 mx-4 block border-b"
           >
             <div
               class="flex flex-nowrap items-center justify-between gap-x-3 gap-y-1 truncate"
@@ -173,6 +176,10 @@ setTitle('Ethereum Open Agora');
                 <div class="flex gap-3 items-center">
                   <UiButton
                     :loading="variables?.role.id === role.id && isMutatingRole"
+                    :class="{
+                      'hover:border-skin-danger hover:!text-skin-danger':
+                        getIsRoleClaimed(role.id)
+                    }"
                     @click="
                       mutate({
                         role,
@@ -221,14 +228,7 @@ setTitle('Ethereum Open Agora');
           </div>
         </div>
       </div>
-      <UiButton
-        class="w-full flex items-center justify-center gap-1 mt-4"
-        @click="modalOpen = true"
-      >
-        <IH-plus class="shrink-0 size-[16px]" />
-        Add role
-      </UiButton>
-    </UiContainer>
+    </div>
     <teleport to="#modal">
       <ModalLabelConfig
         item-type="role"
