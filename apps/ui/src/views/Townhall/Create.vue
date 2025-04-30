@@ -76,9 +76,9 @@ async function handleSubmit() {
     await router.push({ name: 'townhall-discussion', params: { id } });
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    submitLoading.value = false;
   }
-
-  submitLoading.value = false;
 }
 </script>
 

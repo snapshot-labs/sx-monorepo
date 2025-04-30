@@ -19,9 +19,9 @@ async function handleHideStatement(statement: number) {
     await sendHideStatement(parseInt(props.discussion.id), statement);
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    loading.value = false;
   }
-
-  loading.value = false;
 }
 
 async function handlePinStatement(statement: number) {
@@ -31,9 +31,9 @@ async function handlePinStatement(statement: number) {
     await sendPinStatement(parseInt(props.discussion.id), statement);
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    loading.value = false;
   }
-
-  loading.value = false;
 }
 
 async function handleVote(
@@ -47,9 +47,9 @@ async function handleVote(
     await sendVote(discussion, statement, choice);
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    loading.value = false;
   }
-
-  loading.value = false;
 }
 </script>
 
