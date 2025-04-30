@@ -107,8 +107,20 @@ const VOTES_QUERY = gql(`
 
 const ROLES_QUERY = gql(`
   query Roles($space: String!) {
-    roles(where: { space: $space }) {
+    roles(where: { space: $space, deleted: false }, orderBy: id, orderDirection: asc) {
       ...roleFields
+    }
+  }
+`);
+
+const USER_ROLES_QUERY = gql(`
+  query UserRoles($user: String!) {
+    user(id: $user) {
+      roles {
+        role {
+          ...roleFields
+        }
+      }
     }
   }
 `);
@@ -146,6 +158,15 @@ export async function getRoles(spaceId: string) {
   });
 
   return data.roles;
+}
+
+export async function getUserRoles(user: string) {
+  const { data } = await client.query({
+    query: USER_ROLES_QUERY,
+    variables: { user }
+  });
+
+  return data.user?.roles.map(role => role.role) ?? [];
 }
 
 export function newStatementEventToEntry(event: NewStatementEvent): Statement {

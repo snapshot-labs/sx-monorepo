@@ -55,3 +55,5 @@ export type DeleteRole = {
   space: string;
   id: string;
 };
+export type ClaimRole = DeleteRole;
+export type RevokeRole = ClaimRole;

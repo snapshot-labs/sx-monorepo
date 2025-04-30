@@ -259,6 +259,38 @@ export function useTownhall() {
     );
   }
 
+  async function sendClaimRole(space: string, id: string) {
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.claimRole({
+        signer,
+        data: { space, id },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendRevokeRole(space: string, id: string) {
+    if (!auth.value) {
+      throw new Error('Not authenticated');
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.revokeRole({
+        signer,
+        data: { space, id },
+        salt: getSalt()
+      })
+    );
+  }
+
   return {
     sendDiscussion,
     sendCloseDiscussion,
@@ -268,6 +300,8 @@ export function useTownhall() {
     sendVote,
     sendCreateRole,
     sendEditRole,
-    sendDeleteRole
+    sendDeleteRole,
+    sendClaimRole,
+    sendRevokeRole
   };
 }

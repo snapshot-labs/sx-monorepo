@@ -16,6 +16,8 @@ export default class Townhall extends Agent {
     this.addEntrypoint(TOWNHALL_CONFIG.types.createRole);
     this.addEntrypoint(TOWNHALL_CONFIG.types.editRole);
     this.addEntrypoint(TOWNHALL_CONFIG.types.deleteRole);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.claimRole);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.revokeRole);
   }
 
   getAuthor(signer: string) {
@@ -157,5 +159,23 @@ export default class Townhall extends Agent {
 
   async deleteRole({ space, id }: { space: string; id: string }) {
     this.emit('delete_role', [space, id]);
+  }
+
+  async claimRole(
+    { space, id }: { space: string; id: string },
+    { signer }: { signer: string }
+  ) {
+    const user = await this.getAuthor(signer);
+
+    this.emit('claim_role', [space, id, user]);
+  }
+
+  async revokeRole(
+    { space, id }: { space: string; id: string },
+    { signer }: { signer: string }
+  ) {
+    const user = await this.getAuthor(signer);
+
+    this.emit('revoke_role', [space, id, user]);
   }
 }

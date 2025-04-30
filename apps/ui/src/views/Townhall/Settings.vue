@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { getRoles } from '@/helpers/townhall/api';
+import { useQueryClient } from '@tanstack/vue-query';
 import { Role } from '@/helpers/townhall/types';
+import { useRolesQuery } from '@/queries/townhall';
 import { SpaceMetadataLabel } from '@/types';
 
 const { setTitle } = useTitle();
@@ -14,16 +14,7 @@ const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
 const spaceId = computed(() => route.params.space as string);
 
-const {
-  data: roles,
-  isPending,
-  isError
-} = useQuery({
-  queryKey: ['townhall', 'roles', spaceId, 'list'],
-  queryFn: () => {
-    return getRoles(spaceId.value);
-  }
-});
+const { data: roles, isPending, isError } = useRolesQuery(spaceId);
 
 function setModalStatus(open: boolean = false, roleId: string | null = null) {
   modalOpen.value = open;

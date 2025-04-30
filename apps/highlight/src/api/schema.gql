@@ -55,5 +55,23 @@ type Role {
   name: String!
   description: String!
   color: String!
+  # Workaround as we can't cascade delete yet
+  deleted: Boolean!
   created: Int!
+}
+
+type User {
+  id: String!
+  roles: [UserRole!]! @derivedFrom(field: "user")
+}
+
+# Would be good to drop those entities if role is deleted in automated way.
+# This would require change in Checkpoint
+# For now we use soft-deletes to workaround it.
+# Ultimate solution would be to add annotation like cascadeDelete
+# eg. role: Role! @cascadeDelete
+type UserRole {
+  id: String!
+  user: User!
+  role: Role!
 }

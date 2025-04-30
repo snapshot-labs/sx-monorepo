@@ -54,6 +54,14 @@
         {
           "name": "delete_role",
           "fn": "handleDeleteRole"
+        },
+        {
+          "name": "claim_role",
+          "fn": "handleClaimRole"
+        },
+        {
+          "name": "revoke_role",
+          "fn": "handleRevokeRole"
         }
       ]
     }
