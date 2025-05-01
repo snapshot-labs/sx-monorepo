@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { TURBO_URL } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
 import { SkinSettings, Space } from '@/types';
 
@@ -127,7 +126,7 @@ onMounted(() => {
   <UiMessage
     v-if="isDisabled"
     type="info"
-    :learn-more-link="TURBO_URL"
+    :learn-more-link="{ name: 'space-pro' }"
     class="mb-4 max-w-[592px]"
   >
     Whitelabel features are only available for Turbo subscribers.
