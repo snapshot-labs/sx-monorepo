@@ -542,7 +542,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           the name's owner
         </UiMessage>
         <UiMessage
-          v-if="isOffchainNetwork && isController && !isOwner"
+          v-else-if="isOffchainNetwork && isController && !isOwner"
           type="danger"
           class="mb-3"
         >
