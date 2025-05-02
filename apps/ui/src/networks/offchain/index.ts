@@ -35,13 +35,17 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     return false;
   };
 
+  const isExecutorActionsSupported = (executorType: string) => {
+    return executorType === 'oSnap';
+  };
+
   const helpers = {
     isAuthenticatorSupported: () => true,
     isAuthenticatorContractSupported: () => false,
     getRelayerAuthenticatorType: () => null,
     isStrategySupported: () => true,
     isExecutorSupported: isExecutorSupported,
-    isExecutorActionsSupported: isExecutorSupported,
+    isExecutorActionsSupported: isExecutorActionsSupported,
     pin: pinPineapple,
     getSpaceController: async (space: Space) =>
       getSpaceController(space.id, networkId),
