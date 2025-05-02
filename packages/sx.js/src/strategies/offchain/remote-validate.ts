@@ -16,7 +16,8 @@ export default function createRemoteValidateStrategy(type: string): Strategy {
         space: spaceId,
         network: snapshotInfo.chainId?.toString() || '',
         snapshot: snapshotInfo.at ?? 'latest',
-        params: params[0]
+        params: params[0],
+        delegation: false
       });
 
       return [isValid ? 1n : 0n];
