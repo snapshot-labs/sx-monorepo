@@ -36,7 +36,7 @@ defineOptions({ inheritAttrs: false });
 
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
-const { proposals, createDraft } = useEditor();
+const { proposals, createDraft, refreshDrafts } = useEditor();
 const route = useRoute();
 const router = useRouter();
 const { propose, updateProposal } = useActions();
@@ -434,6 +434,13 @@ watch(proposalData, () => {
 
   proposal.value.updatedAt = Date.now();
 });
+
+watch(
+  () => props.space,
+  async () => {
+    await refreshDrafts();
+  }
+);
 
 watchEffect(() => {
   if (!proposal.value) return;
