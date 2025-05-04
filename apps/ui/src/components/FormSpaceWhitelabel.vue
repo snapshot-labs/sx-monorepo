@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { TURBO_URL } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
 import { SkinSettings, Space } from '@/types';
 
@@ -127,10 +126,10 @@ onMounted(() => {
   <UiMessage
     v-if="isDisabled"
     type="info"
-    :learn-more-link="TURBO_URL"
+    :learn-more-link="{ name: 'space-pro' }"
     class="mb-4 max-w-[592px]"
   >
-    Whitelabel features are only available for Turbo subscribers.
+    Whitelabel features are only available for Snapshot Pro spaces.
   </UiMessage>
   <div class="flex flex-col items-stretch md:flex-row md:h-full gap-4">
     <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">
