@@ -68,9 +68,7 @@ const skinSettings = defineModel<SkinSettings>('skinSettings', {
   required: true
 });
 
-const props = defineProps<{
-  space: Space;
-}>();
+const props = defineProps<{ space: Space }>();
 
 const emit = defineEmits<{
   (e: 'errors', value: any);
@@ -102,6 +100,7 @@ const formErrors = computed(() => {
   );
   return errors;
 });
+
 const isDisabled = computed(
   () => !props.space.turbo && !props.space.additionalRawData?.domain
 );
@@ -117,9 +116,7 @@ const previewUrl = computed(
 
 watch(formErrors, value => emit('errors', value));
 
-onMounted(() => {
-  emit('errors', formErrors.value);
-});
+onMounted(() => emit('errors', formErrors.value));
 </script>
 
 <template>
@@ -129,7 +126,7 @@ onMounted(() => {
     :learn-more-link="{ name: 'space-pro' }"
     class="mb-4 max-w-[592px]"
   >
-    Whitelabel features are only available for Snapshot Pro spaces.
+    Upgrade your space to access whitelabel features.
   </UiMessage>
   <div class="flex flex-col items-stretch md:flex-row md:h-full gap-4">
     <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">
@@ -138,7 +135,7 @@ onMounted(() => {
         <UiMessage
           type="info"
           class="mb-3"
-          :learn-more-link="'https://docs.snapshot.box/spaces/add-custom-domain'"
+          learn-more-link="https://help.snapshot.box/en/articles/11201771-how-to-add-a-custom-domain"
         >
           To set up a custom domain, you need to create a CNAME record pointing
           to "cname.snapshot.box" with your DNS provider or registrar.
