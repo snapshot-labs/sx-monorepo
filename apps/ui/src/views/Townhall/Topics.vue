@@ -2,6 +2,9 @@
 import { useQuery } from '@tanstack/vue-query';
 import { getDiscussions } from '@/helpers/townhall/api';
 import { _n } from '@/helpers/utils';
+import { Space } from '@/types';
+
+defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 
@@ -21,7 +24,10 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
   <div>
     <div class="flex justify-end p-4">
       <router-link
-        :to="{ name: 'space-townhall-create', params: { space: 'ethereum' } }"
+        :to="{
+          name: 'space-townhall-create',
+          params: { space: `${space.network}:${space.id}` }
+        }"
       >
         <UiButton primary>New topic</UiButton>
       </router-link>
@@ -52,7 +58,10 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
             :key="i"
             :to="{
               name: 'space-townhall-topic',
-              params: { space: 'ethereum', id: discussion.id }
+              params: {
+                space: `${space.network}:${space.id}`,
+                id: discussion.id
+              }
             }"
             class="py-3 mx-4 block border-b"
           >
