@@ -63,7 +63,9 @@ const canSeeSettings = computed(() => {
   return false;
 });
 
-const isTownhallSpace = computed(() => space.value?.id === 'ethpoll.eth');
+const isTownhallSpace = computed(
+  () => route?.params?.space === 's:ethpoll.eth'
+);
 
 const navigationConfig = computed<
   Record<string, Record<string, NavigationItem>>
