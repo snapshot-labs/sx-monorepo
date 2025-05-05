@@ -89,9 +89,20 @@ watch(
     </template>
     <div class="flex items-center max-w-md gap-3 pt-4 px-4">
       <UiProposalLabel
+        v-if="itemType === 'label'"
         :label="form.name || `${itemType} preview`"
         :color="form.color"
       />
+      <div
+        v-else
+        class="md:min-w-max min-w-0 flex-shrink-0 items-center flex space-x-2"
+      >
+        <div
+          class="size-[10px] rounded-full"
+          :style="{ background: form.color }"
+        />
+        <h4 v-text="form.name || 'Preview'" />
+      </div>
       <div class="truncate">
         {{ form.description || 'This is a description preview' }}
       </div>

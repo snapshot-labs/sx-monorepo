@@ -21,7 +21,7 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
   <div>
     <div class="flex justify-end p-4">
       <router-link
-        :to="{ name: 'townhall-create', params: { space: 'ethereum' } }"
+        :to="{ name: 'space-townhall-create', params: { space: 'ethereum' } }"
       >
         <UiButton primary>New topic</UiButton>
       </router-link>
@@ -51,7 +51,7 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
             v-for="(discussion, i) in discussions"
             :key="i"
             :to="{
-              name: 'townhall-topic',
+              name: 'space-townhall-topic',
               params: { space: 'ethereum', id: discussion.id }
             }"
             class="py-3 mx-4 block border-b"

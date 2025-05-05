@@ -9,7 +9,6 @@ import {
 import { SpaceMetadataLabel } from '@/types';
 
 const { setTitle } = useTitle();
-const route = useRoute();
 const { sendCreateRole, sendEditRole, sendDeleteRole } = useTownhall();
 const { addNotification } = useUiStore();
 const { web3 } = useWeb3();
@@ -17,7 +16,7 @@ const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
-const spaceId = computed(() => route.params.space as string);
+const spaceId = ref('1');
 const userSpaceRoles = computed(() => {
   return userRoles.value?.filter(role => role.space === spaceId.value) ?? [];
 });
@@ -160,12 +159,14 @@ setTitle('Roles');
             <div
               class="flex flex-nowrap items-center justify-between gap-x-3 gap-y-1 truncate"
             >
-              <div class="md:min-w-max min-w-0 flex-shrink-0">
-                <UiProposalLabel
-                  :label="role.name || 'label preview'"
-                  :color="role.color"
-                  class="w-full"
+              <div
+                class="md:min-w-max min-w-0 flex-shrink-0 items-center flex space-x-2"
+              >
+                <div
+                  class="size-[10px] rounded-full"
+                  :style="{ background: role.color }"
                 />
+                <h4 v-text="role.name" />
               </div>
               <div
                 v-if="role.description"

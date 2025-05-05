@@ -38,11 +38,7 @@ const { data: spaceData } = useSpaceQuery({
 });
 const { web3 } = useWeb3();
 
-const currentRouteName = computed(() =>
-  route.params.space === 's:ethereum'
-    ? 'townhall'
-    : String(route.matched[0]?.name)
-);
+const currentRouteName = computed(() => String(route.matched[0]?.name));
 const space = computed(() => {
   if (currentRouteName.value === 'space' && resolved.value) {
     return spaceData.value ?? null;
@@ -67,6 +63,8 @@ const canSeeSettings = computed(() => {
   return false;
 });
 
+const isTownhallSpace = computed(() => space.value?.id === 'ethpoll.eth');
+
 const navigationConfig = computed<
   Record<string, Record<string, NavigationItem>>
 >(() => ({
@@ -75,14 +73,34 @@ const navigationConfig = computed<
       name: 'Overview',
       icon: IHGlobeAlt
     },
-    proposals: {
-      name: 'Proposals',
-      icon: IHNewspaper
-    },
-    leaderboard: {
-      name: 'Leaderboard',
-      icon: IHUserGroup
-    },
+    ...(!isTownhallSpace.value
+      ? {
+          proposals: {
+            name: 'Proposals',
+            icon: IHNewspaper
+          }
+        }
+      : undefined),
+    ...(isTownhallSpace.value
+      ? {
+          'townhall-topics': {
+            name: 'Discussions',
+            icon: IHAnnotation
+          },
+          'townhall-roles': {
+            name: 'Roles',
+            icon: IHUsers
+          }
+        }
+      : undefined),
+    ...(!isTownhallSpace.value
+      ? {
+          leaderboard: {
+            name: 'Leaderboard',
+            icon: IHUserGroup
+          }
+        }
+      : undefined),
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
           delegates: {

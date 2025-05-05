@@ -67,7 +67,7 @@ async function handleSubmit() {
       }
     }
 
-    await router.push({ name: 'townhall-topic', params: { id } });
+    await router.push({ name: 'space-townhall-topic', params: { id } });
   } catch (e) {
     addNotification('error', e.message);
   } finally {
