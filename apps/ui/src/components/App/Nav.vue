@@ -28,7 +28,7 @@ type NavigationItem = {
 
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
-const { isWhiteLabel } = useWhiteLabel();
+const { isWhiteLabel, space: whitelabelSpace } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
@@ -64,7 +64,11 @@ const canSeeSettings = computed(() => {
 });
 
 const isTownhallSpace = computed(
-  () => route?.params?.space === 's:ethpoll.eth'
+  () =>
+    route?.params?.space === 's:ethpoll.eth' ||
+    (isWhiteLabel.value &&
+      whitelabelSpace.value?.id === 'ethpoll.eth' &&
+      whitelabelSpace.value?.network === 's')
 );
 
 const navigationConfig = computed<
