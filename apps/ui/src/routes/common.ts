@@ -103,22 +103,22 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
   { path: 'pro', name: 'space-pro', component: SpacePro },
   {
     path: 'townhall',
-    name: 'townhall-topics',
+    name: 'space-townhall-topics',
     component: TownhallTopics
   },
   {
     path: 'townhall/create',
-    name: 'townhall-create',
+    name: 'space-townhall-create',
     component: TownhallCreate
   },
   {
     path: 'townhall/roles',
-    name: 'townhall-roles',
+    name: 'space-townhall-roles',
     component: TownhallRoles
   },
   {
     path: 'townhall/:id',
-    name: 'townhall-topic',
+    name: 'space-townhall-topic',
     component: TownhallTopic
   }
 ];
