@@ -13,6 +13,7 @@ import Contacts from '@/views/Settings/Contacts.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
+import SpacePro from '@/views/Space/Pro.vue';
 import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
 import User from '@/views/User.vue';
@@ -27,6 +28,7 @@ export default [
       { path: '/about', name: 'site-landing', component: Landing },
       { path: '/network', name: 'site-network', component: Network },
       { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
+      { path: '/pro', name: 'site-pro', component: SpacePro },
       { path: '/ecosystem/:app', name: 'site-app', component: App },
       { path: '/terms-of-use', name: 'site-terms', component: Terms },
       { path: '/privacy-policy', name: 'site-policy', component: Policy }

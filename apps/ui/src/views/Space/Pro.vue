@@ -87,7 +87,7 @@ const FEATURES = [
   }
 ];
 
-const props = defineProps<{ space: Space }>();
+const props = defineProps<{ space?: Space }>();
 
 const router = useRouter();
 const { limits } = useSettings();
@@ -175,13 +175,15 @@ async function handleTurboClick() {
 }
 
 async function handlePaymentConfirmed() {
+  if (!props.space) return;
+
   await queryClient.invalidateQueries({
     queryKey: ['spaces', 'detail', `${props.space.network}:${props.space.id}`]
   });
 }
 
 onMounted(() => {
-  if (offchainNetworks.includes(props.space.network)) return;
+  if (!props.space || offchainNetworks.includes(props.space.network)) return;
 
   router.push({
     name: 'space-overview',
@@ -194,7 +196,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-10">
+  <div class="space-y-10" :class="{ 'pt-[94px]': !space }">
     <div class="shapes px-4 py-8 bg-skin-border/40 flex items-center">
       <div class="text-center w-full space-y-4">
         <span
@@ -215,8 +217,9 @@ onMounted(() => {
           :key="plan"
           :class="[
             'border rounded-lg px-4 py-3 flex gap-2 justify-between w-full',
-            { 'border-skin-link': subscriptionLength === plan }
+            { 'border-skin-link': subscriptionLength === plan && space }
           ]"
+          :disabled="!space"
           @click="subscriptionLength = plan as SubscriptionLength"
         >
           <div class="flex flex-1 items-center gap-x-2 flex-wrap">
@@ -241,6 +244,7 @@ onMounted(() => {
         </button>
       </div>
       <UiButton
+        v-if="space"
         class="primary"
         :disabled="space.network !== metadataNetwork"
         @click="handleTurboClick"
@@ -319,7 +323,10 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4">
+    <div
+      v-if="space"
+      class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4"
+    >
       <h2 class="text-[32px]">Get started today</h2>
       <UiButton
         class="primary"
@@ -344,7 +351,7 @@ onMounted(() => {
     </div>
 
     <ModalPayment
-      v-if="auth && isCurrentConnectorSupported && modalPaymentOpen"
+      v-if="space && auth && isCurrentConnectorSupported && modalPaymentOpen"
       :open="modalPaymentOpen"
       :tokens="tokens"
       :calculator="calculator"
