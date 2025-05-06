@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { RouteLocationRaw } from 'vue-router';
+
 defineProps<{
   type: 'info' | 'danger';
-  learnMoreLink?: string;
+  learnMoreLink?: string | RouteLocationRaw;
 }>();
 </script>
 
@@ -15,15 +17,7 @@ defineProps<{
     <IH-information-circle class="float-left mr-1" />
     <div class="leading-5">
       <slot />
-      <a
-        v-if="learnMoreLink"
-        :href="learnMoreLink"
-        target="_blank"
-        class="flex items-center text-skin-link mt-1 gap-1 w-fit"
-      >
-        Learn more
-        <IH-arrow-sm-right class="-rotate-45" />
-      </a>
+      <AppLink v-if="learnMoreLink" :to="learnMoreLink">Learn more</AppLink>
     </div>
   </div>
 </template>

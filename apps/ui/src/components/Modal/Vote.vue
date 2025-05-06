@@ -133,6 +133,9 @@ async function handleConfirmed(tx?: string | null) {
         props.proposal.proposal_id.toString()
       )
     });
+    queryClient.invalidateQueries({
+      queryKey: ['votes', props.proposal.proposal_id.toString(), 'list']
+    });
     await loadVotes(props.proposal.network, [props.proposal.space.id]);
   }
 }
