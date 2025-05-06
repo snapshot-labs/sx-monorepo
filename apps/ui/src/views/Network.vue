@@ -77,7 +77,7 @@ function toggleQuestion(id) {
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
-              1 Turbo space
+              1 Snapshot Pro space
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />

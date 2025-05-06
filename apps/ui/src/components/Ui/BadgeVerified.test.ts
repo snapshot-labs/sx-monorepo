@@ -23,7 +23,7 @@ it('should use verified color if only verified', () => {
   expect(wrapper.element.children[0].classList.toString()).toBe(VERIFIED_CLASS);
 });
 
-it('should use turbo color if both verified and turbo', () => {
+it('should use pro color if both verified and pro', () => {
   const wrapper = mount(BadgeVerified, {
     props: {
       verified: true,
