@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import { Result } from '@/helpers/townhall/api';
 import { Discussion, Statement } from '@/helpers/townhall/types';
 import { _n, _p } from '@/helpers/utils';
 
 const props = defineProps<{
   discussion: Discussion;
   statement: Statement;
+  results: Result[];
 }>();
 
 const { web3 } = useWeb3();
@@ -13,12 +15,28 @@ const { addNotification } = useUiStore();
 
 const loading = ref(false);
 
+const statementResults = computed(() => {
+  return props.results.filter(
+    result => result.statement_id === props.statement.statement_id
+  );
+});
+
+const voteCount = computed(() =>
+  statementResults.value.reduce((acc, result) => acc + result.vote_count, 0)
+);
+
 const choice = computed(() => {
-  const { scores_1, scores_2, scores_3 } = props.statement;
-  const scores = [scores_1, scores_2, scores_3];
+  const scores = [getChoiceResult(1), getChoiceResult(2), getChoiceResult(3)];
 
   return scores.indexOf(Math.max(...scores)) + 1;
 });
+
+function getChoiceResult(choice: 1 | 2 | 3) {
+  return (
+    statementResults.value.find(result => result.choice === choice)
+      ?.vote_count ?? 0
+  );
+}
 
 async function handleHideStatement(statement: number) {
   loading.value = true;
@@ -83,7 +101,7 @@ async function handlePinStatement(statement: number) {
     </div>
     <div class="flex text-[17px] items-center gap-2.5">
       <div
-        v-if="statement.vote_count > 0"
+        v-if="statementResults.length > 0"
         :class="{
           'bg-skin-success/10 border-skin-success': choice === 1,
           'bg-skin-danger/10 border-skin-danger': choice === 2,
@@ -93,18 +111,18 @@ async function handlePinStatement(statement: number) {
       >
         <div v-if="choice === 1">
           <IH-check class="inline-block text-skin-success" />
-          {{ _p(statement.scores_1 / statement.vote_count, 1) }} agree
+          {{ _p(getChoiceResult(choice) / voteCount, 1) }} agree
         </div>
         <div v-else-if="choice === 2">
           <IH-x class="inline-block text-skin-danger" />
-          {{ _p(statement.scores_2 / statement.vote_count, 1) }} disagree
+          {{ _p(getChoiceResult(choice) / voteCount, 1) }} disagree
         </div>
         <div v-else-if="choice === 3">
           <IH-minus-sm class="inline-block text-skin-text" />
-          {{ _p(statement.scores_3 / statement.vote_count, 1) }} pass
+          {{ _p(getChoiceResult(choice) / voteCount, 1) }} pass
         </div>
       </div>
-      <div class="flex-1" v-text="`${_n(statement.vote_count)} votes`" />
+      <div class="flex-1" v-text="`${_n(voteCount)} votes`" />
       <div class="justify-end" v-text="`#${statement.statement_id}`" />
       <IC-pin v-if="statement.pinned" class="w-[16px] h-[16px]" />
     </div>

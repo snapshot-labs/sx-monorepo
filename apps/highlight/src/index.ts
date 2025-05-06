@@ -29,6 +29,33 @@ async function run() {
   app.use(cors({ maxAge: 86400 }));
 
   app.use('/highlight', rpc);
+
+  app.get(
+    '/townhall/discussions/:discussionId/results_by_role/:roleId',
+    async (req, res) => {
+      const { knex } = checkpoint.getBaseContext();
+
+      const { discussionId, roleId } = req.params;
+
+      let query = knex('votes')
+        .select('votes.statement_id', 'choice')
+        .countDistinct('votes.voter', { as: 'vote_count' })
+        .whereRaw('upper_inf(votes.block_range)')
+        .where('discussion_id', discussionId);
+
+      if (roleId !== 'any') {
+        query = query
+          .join('userroles', 'userroles.user', 'votes.voter')
+          .join('roles', 'roles.id', 'userroles.role')
+          .whereRaw('upper_inf(userroles.block_range)')
+          .where('roles.id', roleId);
+      }
+
+      const result = await query.groupBy('votes.statement_id', 'choice');
+
+      res.json({ result });
+    }
+  );
   app.use('/', checkpoint.graphql);
 
   const server = app.listen(PORT, () =>

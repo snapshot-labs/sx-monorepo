@@ -1,21 +1,31 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import { client } from '@/helpers/kbyte';
 import {
   getDiscussion,
   getVotes,
   newStatementEventToEntry,
-  newVoteEventToEntry
+  newVoteEventToEntry,
+  Result
 } from '@/helpers/townhall/api';
 import { Discussion, Statement, Vote } from '@/helpers/townhall/types';
 import { _n, clone } from '@/helpers/utils';
+import {
+  useResultsByRoleQuery,
+  useRolesQuery,
+  useUserRolesQuery
+} from '@/queries/townhall';
 
+const queryClient = useQueryClient();
 const route = useRoute();
 const { web3 } = useWeb3();
 const { addNotification } = useUiStore();
 const { sendStatement, sendCloseDiscussion } = useTownhall();
 
 const id = parseInt(route.params.id as string);
+const spaceId = computed(() => route.params.space as string);
 
+const roleFilter = ref('any');
 const discussion = ref<Discussion | null>(null);
 const statements = ref<Statement[]>([]);
 const votes = ref<Vote[]>([]);
@@ -26,19 +36,36 @@ const closeDiscussionLoading = ref(false);
 const statementInput = ref('');
 const view = ref('');
 
+const {
+  data: roles,
+  isPending: isRolesPending,
+  isError: isRolesError
+} = useRolesQuery(spaceId);
+const {
+  data: resultsByRole,
+  isPending: isResultsPending,
+  isError: isResultsError
+} = useResultsByRoleQuery({ discussionId: id, roleId: roleFilter });
+const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
+
 const pendingStatements: ComputedRef<Statement[]> = computed(() =>
   statements.value.filter(
     s => !votes.value.find(v => v.statement_id === s.statement_id)
   )
 );
+
 const results: ComputedRef<Statement[]> = computed(() =>
   clone(statements.value)
     .filter(s => !s.hidden)
-    .sort((a, b) => b.vote_count - a.vote_count)
+    .sort(
+      (a, b) =>
+        getStatementVoteCount(b.statement_id) -
+        getStatementVoteCount(a.statement_id)
+    )
     .sort((a, b) => Number(b.pinned) - Number(a.pinned))
 );
 
-client.subscribe(([subject, body]) => {
+client.subscribe(async ([subject, body]) => {
   if (subject === 'justsaying') {
     const event = body.body;
 
@@ -92,27 +119,56 @@ client.subscribe(([subject, body]) => {
       case 'new_vote':
         const vote = newVoteEventToEntry(event);
 
-        if (vote.discussion_id === id) {
-          if (vote.voter === web3.value.account) {
-            votes.value = [...votes.value, vote];
-          }
+        if (vote.discussion_id !== id) {
+          return;
+        }
 
-          const statementIndex = statements.value.findIndex(
-            s => s.statement_id === vote.statement_id
+        if (vote.voter === web3.value.account) {
+          votes.value.push(vote);
+
+          queryClient.setQueryData<Result[]>(
+            ['townhall', 'discussionResults', id, roleFilter.value, 'list'],
+            oldData => {
+              if (
+                roleFilter.value !== 'any' &&
+                !userRoles.value?.some(role => role.id === roleFilter.value)
+              ) {
+                return oldData;
+              }
+
+              const updatedData = clone(oldData ?? []);
+              const existingResult = updatedData.find(
+                r =>
+                  r.statement_id === vote.statement_id &&
+                  r.choice === vote.choice
+              );
+
+              if (existingResult) {
+                existingResult.vote_count += 1;
+              } else {
+                updatedData.push({
+                  statement_id: vote.statement_id,
+                  choice: vote.choice,
+                  vote_count: 1
+                });
+              }
+
+              return updatedData;
+            }
           );
-          const statement = clone(statements.value[statementIndex]);
-          statement.vote_count += 1;
-          statement[`scores_${vote.choice}`] += 1;
-
-          const statementsClone = clone(statements.value);
-          statementsClone[statementIndex] = statement;
-          statements.value = statementsClone;
         }
 
         break;
     }
   }
 });
+
+function getStatementVoteCount(statementId: number) {
+  return (
+    resultsByRole.value?.find(r => r.statement_id === statementId)
+      ?.vote_count ?? 0
+  );
+}
 
 onMounted(async () => {
   loading.value = true;
@@ -182,8 +238,15 @@ function toggleAdminView() {
 
 <template>
   <div class="mb-6">
-    <div v-if="loading" class="my-4">
+    <div v-if="loading || isRolesPending || isResultsPending" class="my-4">
       <UiLoading class="p-4" />
+    </div>
+    <div
+      v-else-if="isRolesError || isResultsError"
+      class="px-4 py-3 flex items-center text-skin-link gap-2"
+    >
+      <IH-exclamation-circle />
+      <span v-text="'Failed to load discussion.'" />
     </div>
     <div v-else-if="loaded && discussion">
       <div class="border-b bg-skin-border/10 pb-3 pt-7 mb-6">
@@ -345,11 +408,19 @@ function toggleAdminView() {
                   {{ _n(results.length) }}
                 </div>
               </h4>
-              <div>
-                Sort by:
-                <span class="text-skin-link">newest</span>
-                <IH-arrow-sm-down class="inline-block ml-2" />
-              </div>
+              <UiSelectDropdown
+                v-model="roleFilter"
+                title="Role"
+                gap="12"
+                placement="start"
+                :items="[
+                  { key: 'any', label: 'Any role' },
+                  ...(roles || []).map(role => ({
+                    key: role.id,
+                    label: role.name
+                  }))
+                ]"
+              />
             </div>
             <div class="space-y-3">
               <TownhallStatementItem
@@ -357,6 +428,7 @@ function toggleAdminView() {
                 :key="i"
                 :discussion="discussion"
                 :statement="s"
+                :results="resultsByRole ?? []"
               />
             </div>
           </div>

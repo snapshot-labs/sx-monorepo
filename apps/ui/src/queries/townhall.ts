@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
-import { getRoles, getUserRoles } from '@/helpers/townhall/api';
+import {
+  getResultsByRole,
+  getRoles,
+  getUserRoles
+} from '@/helpers/townhall/api';
 import { Role } from '@/helpers/townhall/types';
 
 export function useRolesQuery(spaceId: MaybeRefOrGetter<string>) {
@@ -19,6 +23,21 @@ export function useUserRolesQuery(user: MaybeRefOrGetter<string>) {
       return getUserRoles(toValue(user));
     },
     enabled: () => !!toValue(user)
+  });
+}
+
+export function useResultsByRoleQuery({
+  discussionId,
+  roleId
+}: {
+  discussionId: MaybeRefOrGetter<number>;
+  roleId: MaybeRefOrGetter<string>;
+}) {
+  return useQuery({
+    queryKey: ['townhall', 'discussionResults', discussionId, roleId, 'list'],
+    queryFn: () => {
+      return getResultsByRole(toValue(discussionId), toValue(roleId));
+    }
   });
 }
 

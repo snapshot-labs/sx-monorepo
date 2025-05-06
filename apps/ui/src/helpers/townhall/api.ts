@@ -6,6 +6,12 @@ import { gql } from './gql';
 type NewStatementEvent = [number, string, number, string];
 type NewVoteEvent = [string, number, number, number];
 
+export type Result = {
+  statement_id: number;
+  choice: number;
+  vote_count: number;
+};
+
 const client = new ApolloClient({
   uri: HIGHLIGHT_URL,
   cache: new InMemoryCache({ addTypename: false }),
@@ -167,6 +173,23 @@ export async function getUserRoles(user: string) {
   });
 
   return data.user?.roles.map(role => role.role) ?? [];
+}
+
+export async function getResultsByRole(
+  discussionId: number,
+  roleId: string
+): Promise<Result[]> {
+  const res = await fetch(
+    `${HIGHLIGHT_URL}/townhall/discussions/${discussionId}/results_by_role/${roleId}`
+  );
+
+  const { error, result } = await res.json();
+  if (error) throw new Error('RPC call failed');
+
+  return result.map(r => ({
+    ...r,
+    vote_count: Number(r.vote_count)
+  }));
 }
 
 export function newStatementEventToEntry(event: NewStatementEvent): Statement {
