@@ -1,15 +1,22 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import { client } from '@/helpers/kbyte';
 import {
   getDiscussion,
   getVotes,
   newStatementEventToEntry,
-  newVoteEventToEntry
+  newVoteEventToEntry,
+  Result
 } from '@/helpers/townhall/api';
 import { Discussion, Statement, Vote } from '@/helpers/townhall/types';
-import { _n, clone, sleep } from '@/helpers/utils';
-import { useResultsByRoleQuery, useRolesQuery } from '@/queries/townhall';
+import { _n, clone } from '@/helpers/utils';
+import {
+  useResultsByRoleQuery,
+  useRolesQuery,
+  useUserRolesQuery
+} from '@/queries/townhall';
 
+const queryClient = useQueryClient();
 const route = useRoute();
 const { web3 } = useWeb3();
 const { addNotification } = useUiStore();
@@ -37,9 +44,9 @@ const {
 const {
   data: resultsByRole,
   isPending: isResultsPending,
-  isError: isResultsError,
-  refetch: refetchResults
+  isError: isResultsError
 } = useResultsByRoleQuery({ discussionId: id, roleId: roleFilter });
+const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
 
 const pendingStatements: ComputedRef<Statement[]> = computed(() =>
   statements.value.filter(
@@ -117,15 +124,39 @@ client.subscribe(async ([subject, body]) => {
         }
 
         if (vote.voter === web3.value.account) {
-          votes.value = [...votes.value, vote];
-        }
+          votes.value.push(vote);
 
-        // NOTE: This is a temporary workaround, we wait for Checkpoint to index the vote.
-        // Right now we use WebSockets so we receive all votes (not only our own), but here we don't know
-        // roles of all voters so we can't update the resultsByRole.
-        // Once we remove WebSockets and use optimistic updates for our own actions we can optimistically update the resultsByRole as well.
-        await sleep(2500);
-        refetchResults();
+          queryClient.setQueryData<Result[]>(
+            ['townhall', 'discussionResults', id, roleFilter.value, 'list'],
+            oldData => {
+              if (
+                roleFilter.value !== 'any' &&
+                !userRoles.value?.some(role => role.id === roleFilter.value)
+              ) {
+                return oldData;
+              }
+
+              const updatedData = clone(oldData ?? []);
+              const existingResult = updatedData.find(
+                r =>
+                  r.statement_id === vote.statement_id &&
+                  r.choice === vote.choice
+              );
+
+              if (existingResult) {
+                existingResult.vote_count += 1;
+              } else {
+                updatedData.push({
+                  statement_id: vote.statement_id,
+                  choice: vote.choice,
+                  vote_count: 1
+                });
+              }
+
+              return updatedData;
+            }
+          );
+        }
 
         break;
     }
