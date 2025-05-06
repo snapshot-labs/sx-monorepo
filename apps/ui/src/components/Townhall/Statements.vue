@@ -1,40 +1,24 @@
 <script setup lang="ts">
 import { Discussion, Statement } from '@/helpers/townhall/types';
+import { useSetStatementVisibilityMutation } from '@/queries/townhall';
 
 const props = defineProps<{
+  spaceId: string;
+  discussionId: number;
   discussion: Discussion;
   statements: Statement[];
 }>();
 
 const { web3 } = useWeb3();
-const { sendVote, sendHideStatement, sendPinStatement } = useTownhall();
+const { sendVote } = useTownhall();
 const { addNotification } = useUiStore();
 
 const loading = ref(false);
 
-async function handleHideStatement(statement: number) {
-  loading.value = true;
-
-  try {
-    await sendHideStatement(parseInt(props.discussion.id), statement);
-  } catch (e) {
-    addNotification('error', e.message);
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function handlePinStatement(statement: number) {
-  loading.value = true;
-
-  try {
-    await sendPinStatement(parseInt(props.discussion.id), statement);
-  } catch (e) {
-    addNotification('error', e.message);
-  } finally {
-    loading.value = false;
-  }
-}
+const { mutate: setStatementVisibility } = useSetStatementVisibilityMutation({
+  spaceId: toRef(props, 'spaceId'),
+  discussionId: toRef(props, 'discussionId')
+});
 
 async function handleVote(
   discussion: number,
@@ -72,7 +56,12 @@ async function handleVote(
                   type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
-                  @click="handlePinStatement(statements[0].statement_id)"
+                  @click="
+                    setStatementVisibility({
+                      statementId: statements[0].statement_id,
+                      visibility: 'pin'
+                    })
+                  "
                 >
                   <IC-pin class="w-[16px] h-[16px]" />
                   {{ statements[0].pinned ? 'Unpin' : 'Pin' }} statement
@@ -84,7 +73,12 @@ async function handleVote(
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
                   :disabled="loading"
-                  @click="handleHideStatement(statements[0].statement_id)"
+                  @click="
+                    setStatementVisibility({
+                      statementId: statements[0].statement_id,
+                      visibility: 'hide'
+                    })
+                  "
                 >
                   <IH-flag :width="16" />
                   Hide statement

@@ -2,18 +2,21 @@
 import { Result } from '@/helpers/townhall/api';
 import { Discussion, Statement } from '@/helpers/townhall/types';
 import { _n, _p } from '@/helpers/utils';
+import { useSetStatementVisibilityMutation } from '@/queries/townhall';
 
 const props = defineProps<{
+  spaceId: string;
+  discussionId: number;
   discussion: Discussion;
   statement: Statement;
   results: Result[];
 }>();
 
 const { web3 } = useWeb3();
-const { sendHideStatement, sendPinStatement } = useTownhall();
-const { addNotification } = useUiStore();
-
-const loading = ref(false);
+const { mutate: setStatementVisibility } = useSetStatementVisibilityMutation({
+  spaceId: toRef(props, 'spaceId'),
+  discussionId: toRef(props, 'discussionId')
+});
 
 const statementResults = computed(() => {
   return props.results.filter(
@@ -37,30 +40,6 @@ function getChoiceResult(choice: 1 | 2 | 3) {
       ?.vote_count ?? 0
   );
 }
-
-async function handleHideStatement(statement: number) {
-  loading.value = true;
-
-  try {
-    await sendHideStatement(props.statement.discussion_id, statement);
-  } catch (e) {
-    addNotification('error', e.message);
-  }
-
-  loading.value = false;
-}
-
-async function handlePinStatement(statement: number) {
-  loading.value = true;
-
-  try {
-    await sendPinStatement(props.statement.discussion_id, statement);
-  } catch (e) {
-    addNotification('error', e.message);
-  }
-
-  loading.value = false;
-}
 </script>
 
 <template>
@@ -79,7 +58,12 @@ async function handlePinStatement(statement: number) {
               type="button"
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
-              @click="handlePinStatement(statement.statement_id)"
+              @click="
+                setStatementVisibility({
+                  statementId: statement.statement_id,
+                  visibility: 'pin'
+                })
+              "
             >
               <IC-pin class="w-[16px] h-[16px]" />
               {{ statement.pinned ? 'Unpin' : 'Pin' }} statement
@@ -90,7 +74,12 @@ async function handlePinStatement(statement: number) {
               type="button"
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
-              @click="handleHideStatement(statement.statement_id)"
+              @click="
+                setStatementVisibility({
+                  statementId: statement.statement_id,
+                  visibility: 'hide'
+                })
+              "
             >
               <IH-flag :width="16" />
               Hide statement
