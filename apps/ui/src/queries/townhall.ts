@@ -1,13 +1,53 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient
+} from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   getDiscussion,
   getResultsByRole,
   getRoles,
   getUserRoles,
-  newStatementEventToEntry
+  getVotes,
+  newStatementEventToEntry,
+  newVoteEventToEntry,
+  Result
 } from '@/helpers/townhall/api';
-import { Discussion, Role } from '@/helpers/townhall/types';
+import { Discussion, Role, Vote } from '@/helpers/townhall/types';
+
+function addVoteToRoleResults({
+  queryClient,
+  discussionId,
+  roleId,
+  vote
+}: {
+  queryClient: QueryClient;
+  discussionId: number;
+  roleId: string;
+  vote: Vote;
+}) {
+  queryClient.setQueryData<Result[]>(
+    ['townhall', 'discussionResults', { discussionId, roleId }, 'list'],
+    oldData => {
+      const updatedData = structuredClone(oldData ?? []);
+      const existingResult = updatedData.find(
+        r => r.statement_id === vote.statement_id && r.choice === vote.choice
+      );
+      if (existingResult) {
+        existingResult.vote_count += 1;
+      } else {
+        updatedData.push({
+          statement_id: vote.statement_id,
+          choice: vote.choice,
+          vote_count: 1
+        });
+      }
+      return updatedData;
+    }
+  );
+}
 
 export function useDiscussionQuery({
   spaceId,
@@ -29,6 +69,24 @@ export function useDiscussionQuery({
 
       return discussion;
     }
+  });
+}
+
+export function useUserVotesQuery({
+  spaceId,
+  discussionId,
+  user
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+  discussionId: MaybeRefOrGetter<number>;
+  user: MaybeRefOrGetter<string>;
+}) {
+  return useQuery({
+    queryKey: ['townhall', 'votes', 'list', { spaceId, discussionId, user }],
+    queryFn: async () => {
+      return getVotes(toValue(discussionId).toString(), toValue(user));
+    },
+    enabled: () => !!toValue(user)
   });
 }
 
@@ -71,7 +129,8 @@ export function useResultsByRoleQuery({
   });
 }
 
-export function useRoleMutation(user: MaybeRefOrGetter<string>) {
+export function useRoleMutation() {
+  const { web3 } = useWeb3();
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
   const { sendClaimRole, sendRevokeRole } = useTownhall();
@@ -86,7 +145,7 @@ export function useRoleMutation(user: MaybeRefOrGetter<string>) {
       if (!data) return;
 
       queryClient.setQueryData<Role[]>(
-        ['townhall', 'userRoles', user, 'list'],
+        ['townhall', 'userRoles', web3.value.account, 'list'],
         (old = []) =>
           isRevoking ? old.filter(r => r.id !== role.id) : [...old, role]
       );
@@ -236,6 +295,65 @@ export function useSetStatementVisibilityMutation({
           };
         }
       );
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useVoteMutation({
+  spaceId,
+  discussionId,
+  userRoles
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+  discussionId: MaybeRefOrGetter<number>;
+  userRoles: MaybeRefOrGetter<Role[] | undefined>;
+}) {
+  const { web3 } = useWeb3();
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendVote } = useTownhall();
+
+  return useMutation({
+    mutationFn: ({
+      statementId,
+      choice
+    }: {
+      statementId: number;
+      choice: 1 | 2 | 3;
+    }) => {
+      return sendVote(toValue(discussionId), statementId, choice);
+    },
+    onSuccess: async data => {
+      if (!data) return;
+
+      const { data: event } = data.result.events.find(
+        event => event.key === 'new_vote'
+      );
+
+      const vote = newVoteEventToEntry(event);
+
+      queryClient.setQueryData<Vote[]>(
+        [
+          'townhall',
+          'votes',
+          'list',
+          { spaceId, discussionId, user: web3.value.account }
+        ],
+        (old = []) => [...old, vote]
+      );
+
+      const roles = ['any', ...(toValue(userRoles) ?? []).map(role => role.id)];
+      roles.forEach(role => {
+        addVoteToRoleResults({
+          queryClient,
+          discussionId: toValue(discussionId),
+          roleId: role,
+          vote
+        });
+      });
     },
     onError: error => {
       addNotification('error', error.message);

@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import { useQueryClient } from '@tanstack/vue-query';
-import { client } from '@/helpers/kbyte';
-import { getVotes, newVoteEventToEntry, Result } from '@/helpers/townhall/api';
-import { Statement, Vote } from '@/helpers/townhall/types';
+import { Statement } from '@/helpers/townhall/types';
 import { _n, clone } from '@/helpers/utils';
 import {
   useCloseDiscussionMutation,
@@ -10,10 +7,9 @@ import {
   useDiscussionQuery,
   useResultsByRoleQuery,
   useRolesQuery,
-  useUserRolesQuery
+  useUserVotesQuery
 } from '@/queries/townhall';
 
-const queryClient = useQueryClient();
 const route = useRoute();
 const { web3 } = useWeb3();
 
@@ -21,7 +17,6 @@ const id = computed(() => Number(route.params.id));
 const spaceId = computed(() => route.params.space as string);
 
 const roleFilter = ref('any');
-const votes = ref<Vote[]>([]);
 const statementInput = ref('');
 const view = ref('');
 
@@ -40,7 +35,15 @@ const {
   isPending: isResultsPending,
   isError: isResultsError
 } = useResultsByRoleQuery({ discussionId: id, roleId: roleFilter });
-const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
+const {
+  data: userVotes,
+  isPending: isUserVotesPending,
+  isError: isUserVotesError
+} = useUserVotesQuery({
+  spaceId,
+  discussionId: id,
+  user: toRef(() => web3.value.account)
+});
 const { mutate: createStatement, isPending: isCreateStatementPending } =
   useCreateStatementMutation({
     spaceId,
@@ -54,7 +57,7 @@ const { mutate: closeDiscussion, isPending: isCloseDicussionPending } =
 
 const pendingStatements: ComputedRef<Statement[]> = computed(() =>
   (discussion.value?.statements ?? []).filter(
-    s => !votes.value.find(v => v.statement_id === s.statement_id)
+    s => !(userVotes.value ?? []).find(v => v.statement_id === s.statement_id)
   )
 );
 
@@ -69,86 +72,12 @@ const results: ComputedRef<Statement[]> = computed(() =>
     .sort((a, b) => Number(b.pinned) - Number(a.pinned))
 );
 
-client.subscribe(async ([subject, body]) => {
-  if (subject === 'justsaying') {
-    const event = body.body;
-
-    console.log(body.subject);
-
-    switch (body.subject) {
-      case 'new_vote':
-        const vote = newVoteEventToEntry(event);
-
-        if (vote.discussion_id !== id.value) {
-          return;
-        }
-
-        if (vote.voter === web3.value.account) {
-          votes.value.push(vote);
-
-          queryClient.setQueryData<Result[]>(
-            [
-              'townhall',
-              'discussionResults',
-              { discussionId: id, roleId: roleFilter.value },
-              'list'
-            ],
-            oldData => {
-              if (
-                roleFilter.value !== 'any' &&
-                !userRoles.value?.some(role => role.id === roleFilter.value)
-              ) {
-                return oldData;
-              }
-
-              const updatedData = clone(oldData ?? []);
-              const existingResult = updatedData.find(
-                r =>
-                  r.statement_id === vote.statement_id &&
-                  r.choice === vote.choice
-              );
-
-              if (existingResult) {
-                existingResult.vote_count += 1;
-              } else {
-                updatedData.push({
-                  statement_id: vote.statement_id,
-                  choice: vote.choice,
-                  vote_count: 1
-                });
-              }
-
-              return updatedData;
-            }
-          );
-        }
-
-        break;
-    }
-  }
-});
-
 function getStatementVoteCount(statementId: number) {
   return (
     resultsByRole.value?.find(r => r.statement_id === statementId)
       ?.vote_count ?? 0
   );
 }
-
-onMounted(async () => {
-  client.requestAsync('subscribe', id.value);
-
-  const voter = web3.value.account;
-  votes.value = voter ? await getVotes(id.value.toString(), voter) : [];
-});
-
-watch(
-  () => web3.value.account,
-  async () => {
-    const voter = web3.value.account;
-    votes.value = voter ? await getVotes(id.value.toString(), voter) : [];
-  }
-);
 
 const STATEMENT_DEFINITION = {
   type: 'string',
@@ -165,11 +94,16 @@ function toggleAdminView() {
 
 <template>
   <div class="mb-6">
-    <div v-if="isPending || isRolesPending || isResultsPending" class="my-4">
+    <div
+      v-if="
+        isPending || isRolesPending || isUserVotesPending || isResultsPending
+      "
+      class="my-4"
+    >
       <UiLoading class="p-4" />
     </div>
     <div
-      v-else-if="isError || isRolesError || isResultsError"
+      v-else-if="isError || isRolesError || isUserVotesError || isResultsError"
       class="px-4 py-3 flex items-center text-skin-link gap-2"
     >
       <IH-exclamation-circle />

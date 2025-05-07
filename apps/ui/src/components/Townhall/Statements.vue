@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { Discussion, Statement } from '@/helpers/townhall/types';
-import { useSetStatementVisibilityMutation } from '@/queries/townhall';
+import {
+  useSetStatementVisibilityMutation,
+  useUserRolesQuery,
+  useVoteMutation
+} from '@/queries/townhall';
 
 const props = defineProps<{
   spaceId: string;
@@ -10,38 +14,27 @@ const props = defineProps<{
 }>();
 
 const { web3 } = useWeb3();
-const { sendVote } = useTownhall();
-const { addNotification } = useUiStore();
 
-const loading = ref(false);
-
-const { mutate: setStatementVisibility } = useSetStatementVisibilityMutation({
+const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
+const { mutate: vote, isPending: isVotePending } = useVoteMutation({
+  spaceId: toRef(props, 'spaceId'),
+  discussionId: toRef(props, 'discussionId'),
+  userRoles
+});
+const {
+  mutate: setStatementVisibility,
+  isPending: isSetStatementVisibiltyPending
+} = useSetStatementVisibilityMutation({
   spaceId: toRef(props, 'spaceId'),
   discussionId: toRef(props, 'discussionId')
 });
-
-async function handleVote(
-  discussion: number,
-  statement: number,
-  choice: 1 | 2 | 3
-) {
-  loading.value = true;
-
-  try {
-    await sendVote(discussion, statement, choice);
-  } catch (e) {
-    addNotification('error', e.message);
-  } finally {
-    loading.value = false;
-  }
-}
 </script>
 
 <template>
   <div v-if="statements[0]">
     <div class="border rounded-md p-4 min-h-[220px] flex flex-col">
       <div class="text-lg text-skin-link flex-auto">
-        <UiLoading v-if="loading" />
+        <UiLoading v-if="isVotePending" />
         <div v-else class="flex">
           <div class="flex-1 mb-4" v-text="statements[0].body" />
           <UiDropdown v-if="web3.account && discussion.author === web3.account">
@@ -72,7 +65,7 @@ async function handleVote(
                   type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
-                  :disabled="loading"
+                  :disabled="isSetStatementVisibiltyPending"
                   @click="
                     setStatementVisibility({
                       statementId: statements[0].statement_id,
@@ -90,43 +83,25 @@ async function handleVote(
       </div>
       <div class="items-end space-x-2 grid grid-cols-3">
         <UiButton
-          :disabled="loading"
+          :disabled="isVotePending"
           class="!border-skin-success !text-skin-success space-x-1"
-          @click="
-            handleVote(
-              statements[0].discussion_id,
-              statements[0].statement_id,
-              1
-            )
-          "
+          @click="vote({ statementId: statements[0].statement_id, choice: 1 })"
         >
           <IH-check class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Agree'" />
         </UiButton>
         <UiButton
-          :disabled="loading"
+          :disabled="isVotePending"
           class="!border-skin-danger !text-skin-danger space-x-1"
-          @click="
-            handleVote(
-              statements[0].discussion_id,
-              statements[0].statement_id,
-              2
-            )
-          "
+          @click="vote({ statementId: statements[0].statement_id, choice: 2 })"
         >
           <IH-x class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Disagree'" />
         </UiButton>
         <UiButton
-          :disabled="loading"
+          :disabled="isVotePending"
           class="!border-skin-text !text-skin-text space-x-1"
-          @click="
-            handleVote(
-              statements[0].discussion_id,
-              statements[0].statement_id,
-              3
-            )
-          "
+          @click="vote({ statementId: statements[0].statement_id, choice: 3 })"
         >
           <IH-minus-sm class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Pass'" />
