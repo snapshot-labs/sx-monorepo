@@ -1,12 +1,10 @@
 import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
-import { Server } from 'ws';
 import { AGENTS_MAP } from './agents';
 import createCheckpoint from './api';
 import { RedisAdapter } from './highlight/adapter/redis';
 import Highlight from './highlight/highlight';
-import { Event } from './highlight/types';
 import createRpc from './rpc';
 
 const PORT = process.env.PORT || 3002;
@@ -58,28 +56,7 @@ async function run() {
   );
   app.use('/', checkpoint.graphql);
 
-  const server = app.listen(PORT, () =>
-    console.log(`Listening at http://localhost:${PORT}`)
-  );
-
-  const wss = new Server({ server });
-
-  highlight.on('events', (events: Event[]) => {
-    for (const event of events) {
-      wss.clients.forEach(ws => {
-        try {
-          ws.send(
-            JSON.stringify([
-              'justsaying',
-              { subject: event.key, body: event.data }
-            ])
-          );
-        } catch (e) {
-          console.log(e);
-        }
-      });
-    }
-  });
+  app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
 }
 
 run();

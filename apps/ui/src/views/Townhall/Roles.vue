@@ -23,11 +23,7 @@ const userSpaceRoles = computed(() => {
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
 const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
-const {
-  isPending: isMutatingRole,
-  variables,
-  mutate
-} = useRoleMutation(toRef(() => web3.value.account));
+const { isPending: isMutatingRole, variables, mutate } = useRoleMutation();
 
 function getIsRoleClaimed(roleId: string) {
   return userSpaceRoles.value.some(role => role.id === roleId);

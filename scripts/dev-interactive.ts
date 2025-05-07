@@ -26,8 +26,7 @@ const SERVICES: Record<ServiceType, Service> = {
   },
   highlight: {
     env: {
-      VITE_HIGHLIGHT_URL: 'http://localhost:3002',
-      VITE_HIGHLIGHT_WS: 'ws://localhost:3002'
+      VITE_HIGHLIGHT_URL: 'http://localhost:3002'
     }
   }
 };
