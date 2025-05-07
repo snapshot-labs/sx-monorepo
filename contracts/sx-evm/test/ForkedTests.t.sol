@@ -47,7 +47,7 @@ contract ForkedTest is SpaceTest, SigUtils {
     function setUp() public virtual override {
         super.setUp();
 
-        string memory SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
+        string memory SEPOLIA_RPC_URL = "https://rpc.brovider.xyz/11155111";
         sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
 
         (voter2, key2) = makeAddrAndKey("Voter 2 Key");
@@ -164,7 +164,7 @@ contract ForkedTest is SpaceTest, SigUtils {
     function testFork_VoteAndProposeWithCompToken() public {
         vm.selectFork(sepoliaFork);
 
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             AUTHOR_KEY,

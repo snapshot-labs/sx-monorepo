@@ -154,7 +154,7 @@ contract GasSnapshotsTest is SpaceTest, SigUtils {
     }
 
     function testVoteAndProposeWithCompToken() public {
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             AUTHOR_KEY,

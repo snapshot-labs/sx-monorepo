@@ -52,7 +52,7 @@ contract VoteTest is SpaceTest {
     function testVoteVotingPeriodHasEnded() public {
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
         vm.expectRevert(abi.encodeWithSelector(VotingPeriodHasEnded.selector));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
     }
@@ -79,7 +79,7 @@ contract VoteTest is SpaceTest {
         vm.expectRevert(abi.encodeWithSelector(VotingPeriodHasNotStarted.selector));
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
 
-        vm.roll(block.number + space.votingDelay());
+        vm.roll(vm.getBlockNumber() + space.votingDelay());
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
     }
 

@@ -17,7 +17,7 @@ contract SimpleQuorumTest is SpaceTest {
 
         uint256 proposalId = _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
-        vm.warp(block.timestamp + space.minVotingDuration());
+        vm.warp(vm.getBlockTimestamp() + space.minVotingDuration());
 
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI); // 1
 

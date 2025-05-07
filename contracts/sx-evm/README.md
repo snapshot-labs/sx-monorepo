@@ -76,7 +76,7 @@ $ forge test
 Get a test coverage report:
 
 ```sh
-$ forge coverage
+$ forge coverage --ir-minimum
 ```
 
 ### Deployment

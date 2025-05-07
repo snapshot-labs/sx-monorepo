@@ -115,7 +115,7 @@ contract EmergencyQuorumTest is SpaceTest {
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI); // 1
 
-        vm.roll(block.number + minVotingDuration);
+        vm.roll(vm.getBlockNumber() + minVotingDuration);
 
         vm.expectEmit(true, true, true, true);
         emit ProposalExecuted(proposalId);
@@ -131,7 +131,7 @@ contract EmergencyQuorumTest is SpaceTest {
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI); // 1
 
-        vm.roll(block.number + maxVotingDuration);
+        vm.roll(vm.getBlockNumber() + maxVotingDuration);
 
         vm.expectEmit(true, true, true, true);
         emit ProposalExecuted(proposalId);
@@ -156,7 +156,7 @@ contract EmergencyQuorumTest is SpaceTest {
         space.execute(proposalId, emergencyStrategy.params);
 
         // Now forward to `maxEndTimestamp`, the proposal should be finalized and `Rejected`.
-        vm.roll(block.number + maxVotingDuration);
+        vm.roll(vm.getBlockNumber() + maxVotingDuration);
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, uint8(ProposalStatus.Rejected)));
         space.execute(proposalId, emergencyStrategy.params);
@@ -175,7 +175,7 @@ contract EmergencyQuorumTest is SpaceTest {
             abi.encode(userVotingStrategies)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI); // emergencyQuorum reached
-        vm.roll(block.number + maxVotingDuration);
+        vm.roll(vm.getBlockNumber() + maxVotingDuration);
 
         vm.expectEmit(true, true, true, true);
         emit ProposalExecuted(proposalId);
@@ -224,7 +224,7 @@ contract EmergencyQuorumTest is SpaceTest {
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI); // 1
 
-        vm.roll(block.number + minVotingDuration);
+        vm.roll(vm.getBlockNumber() + minVotingDuration);
 
         space.execute(proposalId, emergencyStrategy.params);
 
@@ -290,7 +290,7 @@ contract EmergencyQuorumTest is SpaceTest {
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI); // 1
 
         // Warp to the minimum voting duration
-        vm.warp(block.timestamp + minVotingDuration);
+        vm.warp(vm.getBlockTimestamp() + minVotingDuration);
 
         // The proposal should not be executed because the new emergency quorum hasn't been reached yet.
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.VotingPeriod));

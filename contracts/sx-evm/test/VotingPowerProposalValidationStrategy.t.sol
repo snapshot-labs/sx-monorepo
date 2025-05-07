@@ -24,7 +24,7 @@ contract PropositionPowerProposalValidationTest is SpaceTest {
         compToken.mint(author, 100);
         vm.prank(author);
         compToken.delegate(author);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
 
         Strategy memory compVotingStrategy = Strategy(
             address(new CompVotingStrategy()),
@@ -65,7 +65,7 @@ contract PropositionPowerProposalValidationTest is SpaceTest {
     function testProposeInsufficientVotingPower() public {
         vm.prank(author);
         compToken.burn(author, 1); // Voting power of the author is now 99 when the proposal threshold is 100
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         vm.expectRevert(FailedToPassProposalValidation.selector);
         _createProposal(author, proposalMetadataURI, executionStrategy, abi.encode(userPropositionPowerStrategies));
     }

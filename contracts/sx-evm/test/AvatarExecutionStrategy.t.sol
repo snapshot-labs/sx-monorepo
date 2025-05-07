@@ -47,7 +47,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
 
         vm.expectEmit(true, true, true, true);
         emit ProposalExecuted(proposalId);
@@ -67,7 +67,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             Strategy(address(avatarExecutionStrategy), abi.encode(transactions)),
             new bytes(0)
         );
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
 
         vm.expectRevert(abi.encodeWithSelector(InvalidProposalStatus.selector, ProposalStatus.Rejected));
         space.execute(proposalId, abi.encode(transactions));
@@ -83,7 +83,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
 
         transactions[0] = MetaTransaction(recipient, 2, "", Enum.Operation.Call, 0);
 
@@ -102,7 +102,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
 
         vm.expectRevert(ExecutionFailed.selector);
         space.execute(proposalId, abi.encode(transactions));
@@ -126,7 +126,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
 
         assertEq(recipient.balance, 0); // sanity check
         assertEq(avatar.isModuleEnabled(address(0xbeef)), false); // sanity check
@@ -153,7 +153,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
 
         vm.expectRevert(ExecutionFailed.selector);
         space.execute(proposalId, abi.encode(transactions));
@@ -246,7 +246,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
             new bytes(0)
         );
         _vote(author, proposalId, Choice.For, userVotingStrategies, voteMetadataURI);
-        vm.roll(block.number + space.maxVotingDuration());
+        vm.roll(vm.getBlockNumber() + space.maxVotingDuration());
 
         vm.expectRevert(InvalidSpace.selector);
         space.execute(proposalId, abi.encode(transactions));

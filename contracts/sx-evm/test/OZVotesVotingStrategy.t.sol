@@ -23,7 +23,7 @@ contract OZVotesVotingStrategyTest is Test {
         erc20VotesToken.mint(user, 1);
         // Must delegate to self to activate checkpoints
         erc20VotesToken.delegate(user);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         assertEq(
             ozVotesVotingStrategy.getVotingPower(
                 uint32(block.number),
@@ -38,7 +38,7 @@ contract OZVotesVotingStrategyTest is Test {
     function testGetZeroVotingPower() public {
         erc20VotesToken.mint(user, 1);
         // No delegation, so voting power is zero
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         assertEq(
             ozVotesVotingStrategy.getVotingPower(
                 uint32(block.number),
@@ -53,7 +53,7 @@ contract OZVotesVotingStrategyTest is Test {
     function testGetVotingPowerInvalidToken() public {
         erc20VotesToken.mint(user, 1);
         erc20VotesToken.delegate(user);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         vm.expectRevert();
         // Token address is set to zero
         ozVotesVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(0)), "");
@@ -62,7 +62,7 @@ contract OZVotesVotingStrategyTest is Test {
     function testGetVotingPowerInvalidParamsArray() public {
         erc20VotesToken.mint(user, 1);
         erc20VotesToken.delegate(user);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         vm.expectRevert(InvalidByteArray.selector);
         // Params array is too short
         ozVotesVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked("1234"), "");

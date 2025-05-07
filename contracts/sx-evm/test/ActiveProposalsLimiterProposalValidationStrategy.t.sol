@@ -65,7 +65,7 @@ contract ActiveProposalsLimterTest is SpaceTest {
         // max * 2 so we would revert if `cooldown` is not respected
         for (uint256 i = 0; i < maxActive * 2; i++) {
             _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
-            vm.warp(block.timestamp + cooldown);
+            vm.warp(vm.getBlockTimestamp() + cooldown);
         }
     }
 
@@ -110,19 +110,19 @@ contract ActiveProposalsLimterTest is SpaceTest {
         }
 
         // Advance until half of cooldown
-        vm.warp(block.timestamp + cooldown / 2);
+        vm.warp(vm.getBlockTimestamp() + cooldown / 2);
 
         // Should still fail
         vm.expectRevert(FailedToPassProposalValidation.selector);
         _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         // Advance until ALMOST full cooldown has elapsed
-        vm.warp(block.timestamp + cooldown / 2 - 1);
+        vm.warp(vm.getBlockTimestamp() + cooldown / 2 - 1);
         vm.expectRevert(FailedToPassProposalValidation.selector);
         _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));
 
         // Advance until full cooldown has elapsed
-        vm.warp(block.timestamp + 1);
+        vm.warp(vm.getBlockTimestamp() + 1);
         // We should be able to create `maxActive` proposals now
         for (uint256 i = 0; i < maxActive; i++) {
             _createProposal(author, proposalMetadataURI, executionStrategy, new bytes(0));

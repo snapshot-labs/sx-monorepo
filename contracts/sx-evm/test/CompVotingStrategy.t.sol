@@ -23,7 +23,7 @@ contract CompVotingStrategyTest is Test {
         compToken.mint(user, 1);
         // Must delegate to self to activate checkpoints
         compToken.delegate(user);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         assertEq(
             compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(compToken)), ""),
             1
@@ -33,7 +33,7 @@ contract CompVotingStrategyTest is Test {
     function testGetZeroVotingPower() public {
         compToken.mint(user, 1);
         // No delegation, so voting power is zero
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         assertEq(
             compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(compToken)), ""),
             0
@@ -43,7 +43,7 @@ contract CompVotingStrategyTest is Test {
     function testGetVotingPowerInvalidToken() public {
         compToken.mint(user, 1);
         compToken.delegate(user);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         vm.expectRevert();
         // Token address is set to zero
         compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked(address(0)), "");
@@ -52,7 +52,7 @@ contract CompVotingStrategyTest is Test {
     function testGetVotingPowerInvalidParamsArray() public {
         compToken.mint(user, 1);
         compToken.delegate(user);
-        vm.roll(block.number + 1);
+        vm.roll(vm.getBlockNumber() + 1);
         vm.expectRevert(InvalidByteArray.selector);
         // Params array is too short
         compVotingStrategy.getVotingPower(uint32(block.number), user, abi.encodePacked("1234"), "");
