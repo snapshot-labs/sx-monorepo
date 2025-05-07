@@ -17,6 +17,8 @@ import {
 } from '@/helpers/townhall/api';
 import { Discussion, Role, Vote } from '@/helpers/townhall/types';
 
+const DEFAULT_STALE_TIME = 1000 * 5;
+
 function addVoteToRoleResults({
   queryClient,
   discussionId,
@@ -68,7 +70,8 @@ export function useDiscussionQuery({
         .sort((a, b) => Number(b.pinned) - Number(a.pinned));
 
       return discussion;
-    }
+    },
+    staleTime: DEFAULT_STALE_TIME
   });
 }
 
@@ -86,7 +89,8 @@ export function useUserVotesQuery({
     queryFn: async () => {
       return getVotes(toValue(discussionId).toString(), toValue(user));
     },
-    enabled: () => !!toValue(user)
+    enabled: () => !!toValue(user),
+    staleTime: DEFAULT_STALE_TIME
   });
 }
 
@@ -110,7 +114,8 @@ export function useUserRolesQuery(user: MaybeRefOrGetter<string>) {
 
       return failureCount < 3;
     },
-    enabled: () => !!toValue(user)
+    enabled: () => !!toValue(user),
+    staleTime: DEFAULT_STALE_TIME
   });
 }
 
@@ -130,7 +135,8 @@ export function useResultsByRoleQuery({
     ],
     queryFn: () => {
       return getResultsByRole(toValue(discussionId), toValue(roleId));
-    }
+    },
+    staleTime: DEFAULT_STALE_TIME
   });
 }
 
