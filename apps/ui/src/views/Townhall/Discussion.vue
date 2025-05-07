@@ -1,41 +1,30 @@
 <script setup lang="ts">
-import { useQueryClient } from '@tanstack/vue-query';
-import { client } from '@/helpers/kbyte';
-import {
-  getDiscussion,
-  getVotes,
-  newStatementEventToEntry,
-  newVoteEventToEntry,
-  Result
-} from '@/helpers/townhall/api';
-import { Discussion, Statement, Vote } from '@/helpers/townhall/types';
+import { Statement } from '@/helpers/townhall/types';
 import { _n, clone } from '@/helpers/utils';
 import {
+  useCloseDiscussionMutation,
+  useCreateStatementMutation,
+  useDiscussionQuery,
   useResultsByRoleQuery,
   useRolesQuery,
-  useUserRolesQuery
+  useUserVotesQuery
 } from '@/queries/townhall';
 
-const queryClient = useQueryClient();
 const route = useRoute();
 const { web3 } = useWeb3();
-const { addNotification } = useUiStore();
-const { sendStatement, sendCloseDiscussion } = useTownhall();
 
-const id = parseInt(route.params.id as string);
+const id = computed(() => Number(route.params.id));
 const spaceId = computed(() => route.params.space as string);
 
 const roleFilter = ref('any');
-const discussion = ref<Discussion | null>(null);
-const statements = ref<Statement[]>([]);
-const votes = ref<Vote[]>([]);
-const loading = ref(false);
-const loaded = ref(false);
-const submitLoading = ref(false);
-const closeDiscussionLoading = ref(false);
 const statementInput = ref('');
 const view = ref('');
 
+const {
+  data: discussion,
+  isPending,
+  isError
+} = useDiscussionQuery({ spaceId, discussionId: id });
 const {
   data: roles,
   isPending: isRolesPending,
@@ -46,16 +35,34 @@ const {
   isPending: isResultsPending,
   isError: isResultsError
 } = useResultsByRoleQuery({ discussionId: id, roleId: roleFilter });
-const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
+const {
+  data: userVotes,
+  isPending: isUserVotesPending,
+  isError: isUserVotesError
+} = useUserVotesQuery({
+  spaceId,
+  discussionId: id,
+  user: toRef(() => web3.value.account)
+});
+const { mutate: createStatement, isPending: isCreateStatementPending } =
+  useCreateStatementMutation({
+    spaceId,
+    discussionId: id
+  });
+const { mutate: closeDiscussion, isPending: isCloseDicussionPending } =
+  useCloseDiscussionMutation({
+    spaceId,
+    discussionId: id
+  });
 
 const pendingStatements: ComputedRef<Statement[]> = computed(() =>
-  statements.value.filter(
-    s => !votes.value.find(v => v.statement_id === s.statement_id)
+  (discussion.value?.statements ?? []).filter(
+    s => !(userVotes.value ?? []).find(v => v.statement_id === s.statement_id)
   )
 );
 
 const results: ComputedRef<Statement[]> = computed(() =>
-  clone(statements.value)
+  clone(discussion.value?.statements ?? [])
     .filter(s => !s.hidden)
     .sort(
       (a, b) =>
@@ -65,135 +72,12 @@ const results: ComputedRef<Statement[]> = computed(() =>
     .sort((a, b) => Number(b.pinned) - Number(a.pinned))
 );
 
-client.subscribe(async ([subject, body]) => {
-  if (subject === 'justsaying') {
-    const event = body.body;
-
-    console.log(body.subject);
-
-    switch (body.subject) {
-      case 'new_statement':
-        const statement = newStatementEventToEntry(event);
-
-        if (statement.discussion_id === id) {
-          statements.value = [...statements.value, statement];
-        }
-
-        break;
-      case 'hide_statement':
-        if (event.discussion === id) {
-          const statementIndex = statements.value.findIndex(
-            s => s.statement_id === event.statement
-          );
-
-          if (statementIndex !== -1) {
-            statements.value = clone(
-              statements.value.filter((_, i) => i !== statementIndex)
-            );
-          }
-        }
-
-        break;
-      case 'pin_statement':
-        if (event.discussion === id) {
-          const statementIndex = statements.value.findIndex(
-            s => s.statement_id === event.statement
-          );
-
-          if (statementIndex !== -1) {
-            const statementsClone = clone(statements.value);
-            statementsClone[statementIndex].pinned = true;
-            statements.value = statementsClone;
-          }
-        }
-
-        break;
-      case 'close_discussion':
-        if (event.discussion === id && discussion.value) {
-          const discussionClone = clone(discussion.value);
-          discussionClone.closed = true;
-          discussion.value = discussionClone;
-        }
-
-        break;
-      case 'new_vote':
-        const vote = newVoteEventToEntry(event);
-
-        if (vote.discussion_id !== id) {
-          return;
-        }
-
-        if (vote.voter === web3.value.account) {
-          votes.value.push(vote);
-
-          queryClient.setQueryData<Result[]>(
-            ['townhall', 'discussionResults', id, roleFilter.value, 'list'],
-            oldData => {
-              if (
-                roleFilter.value !== 'any' &&
-                !userRoles.value?.some(role => role.id === roleFilter.value)
-              ) {
-                return oldData;
-              }
-
-              const updatedData = clone(oldData ?? []);
-              const existingResult = updatedData.find(
-                r =>
-                  r.statement_id === vote.statement_id &&
-                  r.choice === vote.choice
-              );
-
-              if (existingResult) {
-                existingResult.vote_count += 1;
-              } else {
-                updatedData.push({
-                  statement_id: vote.statement_id,
-                  choice: vote.choice,
-                  vote_count: 1
-                });
-              }
-
-              return updatedData;
-            }
-          );
-        }
-
-        break;
-    }
-  }
-});
-
 function getStatementVoteCount(statementId: number) {
   return (
     resultsByRole.value?.find(r => r.statement_id === statementId)
       ?.vote_count ?? 0
   );
 }
-
-onMounted(async () => {
-  loading.value = true;
-
-  discussion.value = await getDiscussion(id.toString());
-  statements.value = (discussion?.value?.statements || [])
-    .filter(s => !s.hidden)
-    .sort(() => 0.5 - Math.random())
-    .sort((a, b) => Number(b.pinned) - Number(a.pinned));
-  client.requestAsync('subscribe', id);
-
-  const voter = web3.value.account;
-  votes.value = voter ? await getVotes(id.toString(), voter) : [];
-
-  loading.value = false;
-  loaded.value = true;
-});
-
-watch(
-  () => web3.value.account,
-  async () => {
-    const voter = web3.value.account;
-    votes.value = voter ? await getVotes(id.toString(), voter) : [];
-  }
-);
 
 const STATEMENT_DEFINITION = {
   type: 'string',
@@ -203,34 +87,6 @@ const STATEMENT_DEFINITION = {
   maxLength: 200
 };
 
-async function handleSubmit() {
-  submitLoading.value = true;
-
-  try {
-    await sendStatement(id, statementInput.value);
-    addNotification('success', 'Statement published successfully');
-
-    statementInput.value = '';
-  } catch (e) {
-    addNotification('error', e.message);
-  } finally {
-    submitLoading.value = false;
-  }
-}
-
-async function handleCloseDiscussion() {
-  closeDiscussionLoading.value = true;
-
-  try {
-    await sendCloseDiscussion(id);
-    addNotification('success', 'Discussion closed successfully');
-  } catch (e) {
-    addNotification('error', e.message);
-  } finally {
-    closeDiscussionLoading.value = false;
-  }
-}
-
 function toggleAdminView() {
   view.value = !view.value ? 'admin' : '';
 }
@@ -238,17 +94,22 @@ function toggleAdminView() {
 
 <template>
   <div class="mb-6">
-    <div v-if="loading || isRolesPending || isResultsPending" class="my-4">
+    <div
+      v-if="
+        isPending || isRolesPending || isUserVotesPending || isResultsPending
+      "
+      class="my-4"
+    >
       <UiLoading class="p-4" />
     </div>
     <div
-      v-else-if="isRolesError || isResultsError"
+      v-else-if="isError || isRolesError || isUserVotesError || isResultsError"
       class="px-4 py-3 flex items-center text-skin-link gap-2"
     >
       <IH-exclamation-circle />
       <span v-text="'Failed to load discussion.'" />
     </div>
-    <div v-else-if="loaded && discussion">
+    <div v-else-if="discussion">
       <div class="border-b bg-skin-border/10 pb-3 pt-7 mb-6">
         <UiContainer class="!max-w-[740px]">
           <h1 class="leading-[1.1em] mb-4" v-text="discussion.title" />
@@ -315,8 +176,8 @@ function toggleAdminView() {
             </h4>
             <UiButton
               v-if="!discussion.closed"
-              :loading="closeDiscussionLoading"
-              @click="handleCloseDiscussion"
+              :loading="isCloseDicussionPending"
+              @click="closeDiscussion"
               >Close discussion</UiButton
             >
             <div v-else>The discussion is closed.</div>
@@ -358,6 +219,8 @@ function toggleAdminView() {
               </div>
             </h4>
             <TownhallStatements
+              :space-id="spaceId"
+              :discussion-id="id"
               :discussion="discussion"
               :statements="pendingStatements"
             />
@@ -380,15 +243,20 @@ function toggleAdminView() {
                 v-model="statementInput"
                 :definition="STATEMENT_DEFINITION"
                 :required="true"
-                :disabled="submitLoading"
+                :disabled="isCreateStatementPending"
               />
               <div>
                 <UiButton
                   class="primary items-center flex space-x-1"
                   :disabled="
-                    submitLoading || !statementInput.trim() || !web3.account
+                    isCreateStatementPending ||
+                    !statementInput.trim() ||
+                    !web3.account
                   "
-                  @click="handleSubmit"
+                  @click="
+                    createStatement(statementInput);
+                    statementInput = '';
+                  "
                 >
                   <div>Publish</div>
                   <IH-paper-airplane class="rotate-90 relative left-[2px]" />
@@ -426,6 +294,8 @@ function toggleAdminView() {
               <TownhallStatementItem
                 v-for="(s, i) in results"
                 :key="i"
+                :space-id="spaceId"
+                :discussion-id="id"
                 :discussion="discussion"
                 :statement="s"
                 :results="resultsByRole ?? []"
