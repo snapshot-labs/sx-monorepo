@@ -10,6 +10,12 @@ import {
   registeredTransactionsLoop
 } from './stark/registered';
 
+// Validate that WALLET_SECRET is defined
+if (!process.env.WALLET_SECRET) {
+  console.error('Error: WALLET_SECRET environment variable is required');
+  process.exit(1);
+}
+
 const app = express();
 
 const commit = process.env.COMMIT_HASH || '';

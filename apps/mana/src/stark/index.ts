@@ -1,14 +1,12 @@
 import express from 'express';
+import { validateAndParseAddress } from 'starknet';
 import z from 'zod';
-import {
-  DEFAULT_INDEX,
-  getStarknetAccount,
-  SPACES_INDICES
-} from './dependencies';
-import { NETWORKS } from './networks';
+import { generateSpaceStarknetWallet } from './dependencies';
+import { NETWORK_IDS, NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
 import { rpcError } from '../utils';
 
+const validNetworkIds = Array.from(NETWORK_IDS.values());
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
   method: z.enum([
@@ -46,21 +44,29 @@ router.post('/:chainId', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayers', (req, res) => {
-  const mnemonic = process.env.STARKNET_MNEMONIC || '';
+router.get('/relayers/spaces/:space', (req, res) => {
+  const spaceArray = req.params.space.split(':');
+  if (spaceArray.length !== 2 || !spaceArray[0] || !spaceArray[1])
+    return rpcError(res, 400, 'Missing space parameter or invalid format', 0);
 
-  const defaultRelayer = getStarknetAccount(mnemonic, DEFAULT_INDEX).address;
-  const relayers = Object.fromEntries(
-    Array.from(SPACES_INDICES).map(([spaceAddress, index]) => {
-      const { address } = getStarknetAccount(mnemonic, index);
-      return [spaceAddress, address];
-    })
+  const [networkId, spaceAddress] = spaceArray;
+
+  if (!validNetworkIds.includes(networkId))
+    return rpcError(res, 400, 'Invalid networkId', 0);
+
+  let normalizedSpaceAddress;
+  try {
+    normalizedSpaceAddress = validateAndParseAddress(spaceAddress);
+  } catch {
+    return rpcError(res, 400, 'Invalid space address', 0);
+  }
+
+  const { address } = generateSpaceStarknetWallet(
+    networkId,
+    normalizedSpaceAddress
   );
 
-  res.json({
-    default: defaultRelayer,
-    ...relayers
-  });
+  res.json({ address });
 });
 
 export default router;

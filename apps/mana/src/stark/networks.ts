@@ -2,6 +2,7 @@ import {
   clients,
   NetworkConfig,
   starknetMainnet,
+  starknetNetworks,
   starknetSepolia
 } from '@snapshot-labs/sx';
 import { Account, constants, RpcProvider } from 'starknet';
@@ -13,6 +14,13 @@ export const NETWORKS = new Map<string, NetworkConfig>([
   [constants.StarknetChainId.SN_SEPOLIA, starknetSepolia]
 ]);
 
+export const NETWORK_IDS = new Map<string, string>(
+  Object.entries(starknetNetworks).map(([networkId, config]) => [
+    config.Meta.eip712ChainId,
+    networkId
+  ])
+);
+
 const clientsMap = new Map<
   string,
   {
@@ -22,6 +30,7 @@ const clientsMap = new Map<
     getAccount: (spaceAddress: string) => {
       account: Account;
       nonceManager: NonceManager;
+      deployAccount: () => Promise<void>;
     };
   }
 >();
@@ -31,10 +40,7 @@ export function getClient(chainId: string) {
   if (cached) return cached;
 
   const provider = getProvider(chainId);
-  const getAccount = createAccountProxy(
-    process.env.STARKNET_MNEMONIC || '',
-    provider
-  );
+  const getAccount = createAccountProxy(chainId, provider);
 
   const ethUrl = ETH_NODE_URLS.get(chainId);
   if (!ethUrl)

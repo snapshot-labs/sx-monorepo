@@ -18,7 +18,7 @@ import {
 } from '@snapshot-labs/sx';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
-import { executionCall, MANA_URL } from '@/helpers/mana';
+import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
@@ -260,6 +260,8 @@ export function createActions(
 
       const isContract = await getIsContract(account, connectorType);
 
+      const relayer = await getRelayerInfo(space.id, space.network, provider);
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
@@ -267,7 +269,8 @@ export function createActions(
           strategiesIndicies:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       let selectedExecutionStrategy;
@@ -370,13 +373,16 @@ export function createActions(
 
       const isContract = await getIsContract(account, connectorType);
 
+      const relayer = await getRelayerInfo(space.id, space.network, provider);
+
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
         strategiesIndicies:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
-        isContract
+        isContract,
+        ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
       let selectedExecutionStrategy;
@@ -460,13 +466,20 @@ export function createActions(
 
       const isContract = await getIsContract(account, connectorType);
 
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        provider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
           strategiesIndicies: proposal.strategies_indices,
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       const strategiesWithMetadata = await Promise.all(

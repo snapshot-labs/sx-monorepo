@@ -4,6 +4,7 @@ import {
   constants as starknetConstants
 } from 'starknet';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { getRelayerInfo } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -88,6 +89,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     pin: pinPineapple,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: txId => provider.getTransactionReceipt(txId),
+    getRelayerInfo: (space: string, network: NetworkID) =>
+      getRelayerInfo(space, network, provider),
     waitForTransaction: txId => {
       let retries = 0;
 
