@@ -414,7 +414,7 @@ contract Space is ISpace, Initializable, IERC4824, UUPSUpgradeable, OwnableUpgra
         uint32 blockNumber,
         IndexedStrategy[] calldata userStrategies,
         uint256 allowedStrategies
-    ) internal returns (uint256) {
+    ) internal view returns (uint256) {
         // Ensure there are no duplicates to avoid an attack where people double count a strategy.
         userStrategies.assertNoDuplicateIndicesCalldata();
 

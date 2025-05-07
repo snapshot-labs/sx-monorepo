@@ -121,7 +121,7 @@ contract ExecuteTest is SpaceTest {
         space.execute(proposalId, executionStrategy.params);
     }
 
-    function testGetStrategyType() external {
+    function testGetStrategyType() external view {
         assertEq(vanillaExecutionStrategy.getStrategyType(), "SimpleQuorumVanilla");
     }
 }

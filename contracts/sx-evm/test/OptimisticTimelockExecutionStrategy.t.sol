@@ -47,7 +47,7 @@ abstract contract OptimisticTimelockExecutionStrategyTest is SpaceTest {
 
     OptimisticTimelockExecutionStrategy public timelockExecutionStrategy;
 
-    address public vetoGuardian = address(0);
+    address public emptyVetoGuardian = address(0);
     address public recipient = address(0xc0ffee);
 
     function testQueueingFromUnauthorizedSpace() external {
@@ -506,16 +506,16 @@ abstract contract OptimisticTimelockExecutionStrategyTest is SpaceTest {
         assertEq(erc1155.balanceOf(author, 1), 1);
     }
 
-    function testCheckViewFunctions() public {
+    function testCheckViewFunctions() public view {
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC721Receiver).interfaceId));
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC1155Receiver).interfaceId));
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC165).interfaceId));
         assertEq(timelockExecutionStrategy.getStrategyType(), "OptimisticQuorumTimelock");
     }
 
-    function testSetUp() public {
+    function testSetUp() public view {
         assertEq(timelockExecutionStrategy.owner(), owner);
-        assertEq(timelockExecutionStrategy.vetoGuardian(), vetoGuardian);
+        assertEq(timelockExecutionStrategy.vetoGuardian(), emptyVetoGuardian);
         assertEq(timelockExecutionStrategy.quorum(), quorum);
         assertEq(timelockExecutionStrategy.timelockDelay(), 1000);
         assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), TRUE);
@@ -536,7 +536,7 @@ contract OptimisticTimelockExecutionStrategyTestProxy is OptimisticTimelockExecu
                     address(masterExecutionStrategy),
                     abi.encodeWithSelector(
                         OptimisticTimelockExecutionStrategy.setUp.selector,
-                        abi.encode(owner, vetoGuardian, spaces, 1000, quorum)
+                        abi.encode(owner, emptyVetoGuardian, spaces, 1000, quorum)
                     )
                 )
             )

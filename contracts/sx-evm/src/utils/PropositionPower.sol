@@ -22,7 +22,7 @@ abstract contract PropositionPower {
         uint256 proposalThreshold,
         Strategy[] memory allowedStrategies,
         IndexedStrategy[] memory userStrategies
-    ) internal returns (bool) {
+    ) internal view returns (bool) {
         uint256 votingPower = _getCumulativePower(author, uint32(block.number), userStrategies, allowedStrategies);
         return (votingPower >= proposalThreshold);
     }
@@ -33,7 +33,7 @@ abstract contract PropositionPower {
         uint32 blockNumber,
         IndexedStrategy[] memory userStrategies,
         Strategy[] memory allowedStrategies
-    ) internal returns (uint256) {
+    ) internal view returns (uint256) {
         // Ensure there are no duplicates to avoid an attack where people double count a strategy.
         userStrategies.assertNoDuplicateIndicesMemory();
 

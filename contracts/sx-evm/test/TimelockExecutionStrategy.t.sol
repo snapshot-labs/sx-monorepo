@@ -44,7 +44,7 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
 
     TimelockExecutionStrategy public timelockExecutionStrategy;
 
-    address public vetoGuardian = address(0);
+    address public emptyVetoGuardian = address(0);
     address public recipient = address(0xc0ffee);
 
     function testQueueingFromUnauthorizedSpace() external {
@@ -501,16 +501,16 @@ abstract contract TimelockExecutionStrategyTest is SpaceTest {
         assertEq(erc1155.balanceOf(author, 1), 1);
     }
 
-    function testCheckViewFunctions() public {
+    function testCheckViewFunctions() public view {
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC721Receiver).interfaceId));
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC1155Receiver).interfaceId));
         assertTrue(timelockExecutionStrategy.supportsInterface(type(IERC165).interfaceId));
         assertEq(timelockExecutionStrategy.getStrategyType(), "SimpleQuorumTimelock");
     }
 
-    function testSetUp() public {
+    function testSetUp() public view {
         assertEq(timelockExecutionStrategy.owner(), owner);
-        assertEq(timelockExecutionStrategy.vetoGuardian(), vetoGuardian);
+        assertEq(timelockExecutionStrategy.vetoGuardian(), emptyVetoGuardian);
         assertEq(timelockExecutionStrategy.quorum(), quorum);
         assertEq(timelockExecutionStrategy.timelockDelay(), 1000);
         assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), TRUE);
@@ -523,7 +523,6 @@ contract TimelockExecutionStrategyTestProxy is TimelockExecutionStrategyTest {
 
         address[] memory spaces = new address[](1);
         spaces[0] = address(space);
-        address[] memory emptyArray = new address[](1);
         TimelockExecutionStrategy masterExecutionStrategy = new TimelockExecutionStrategy();
 
         timelockExecutionStrategy = TimelockExecutionStrategy(
@@ -532,7 +531,7 @@ contract TimelockExecutionStrategyTestProxy is TimelockExecutionStrategyTest {
                     address(masterExecutionStrategy),
                     abi.encodeWithSelector(
                         TimelockExecutionStrategy.setUp.selector,
-                        abi.encode(owner, vetoGuardian, spaces, 1000, quorum)
+                        abi.encode(owner, emptyVetoGuardian, spaces, 1000, quorum)
                     )
                 )
             )

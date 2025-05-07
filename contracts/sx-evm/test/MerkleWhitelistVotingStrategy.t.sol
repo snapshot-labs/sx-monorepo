@@ -17,7 +17,7 @@ contract MerkleWhitelistVotingStrategyTest is Test {
         merkleLib = new Merkle();
     }
 
-    function testMerkleWhitelistVotingPower() public {
+    function testMerkleWhitelistVotingPower() public view {
         MerkleWhitelistVotingStrategy.Member[] memory members = new MerkleWhitelistVotingStrategy.Member[](4);
         members[0] = MerkleWhitelistVotingStrategy.Member(address(3), 33);
         members[1] = MerkleWhitelistVotingStrategy.Member(address(1), 11);
@@ -122,7 +122,7 @@ contract MerkleWhitelistVotingStrategyTest is Test {
         );
     }
 
-    function testLargeMerkleWhitelist() public {
+    function testLargeMerkleWhitelist() public view {
         uint256 numMembers = 100;
         MerkleWhitelistVotingStrategy.Member[] memory members = new MerkleWhitelistVotingStrategy.Member[](numMembers);
         for (uint256 i = 0; i < numMembers; i++) {

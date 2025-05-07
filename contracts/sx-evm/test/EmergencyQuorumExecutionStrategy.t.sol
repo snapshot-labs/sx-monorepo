@@ -24,12 +24,12 @@ contract EmergencyQuorumExec is EmergencyQuorumExecutionStrategy {
     }
 
     function execute(
-        uint256 proposalId,
+        uint256 /* proposalId */,
         Proposal memory proposal,
         uint256 votesFor,
         uint256 votesAgainst,
         uint256 votesAbstain,
-        bytes memory payload
+        bytes memory /* payload */
     ) external override {
         ProposalStatus proposalStatus = getProposalStatus(proposal, votesFor, votesAgainst, votesAbstain);
         if ((proposalStatus != ProposalStatus.Accepted) && (proposalStatus != ProposalStatus.VotingPeriodAccepted)) {
@@ -232,7 +232,7 @@ contract EmergencyQuorumTest is SpaceTest {
         space.execute(proposalId, emergencyStrategy.params);
     }
 
-    function testGetStrategyType() public {
+    function testGetStrategyType() public view {
         assertEq(emergency.getStrategyType(), "EmergencyQuorumExecution");
     }
 

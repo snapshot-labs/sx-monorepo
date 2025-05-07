@@ -11,7 +11,7 @@ contract VanillaVotingStrategyTest is Test {
         vanillaVotingStrategy = new VanillaVotingStrategy();
     }
 
-    function testGetVotingPower() public {
+    function testGetVotingPower() public view {
         // The voting power should always be 1.
         assertEq(vanillaVotingStrategy.getVotingPower(0, address(0), "", ""), 1);
     }

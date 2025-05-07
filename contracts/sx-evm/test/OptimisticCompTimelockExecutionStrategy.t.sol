@@ -47,7 +47,7 @@ abstract contract OptimisticCompTimelockExecutionStrategyTest is SpaceTest {
     OptimisticCompTimelockCompatibleExecutionStrategy public timelockExecutionStrategy;
     CompTimelock public timelock = new CompTimelock(address(this), 1000);
 
-    address public vetoGuardian = address(0);
+    address public emptyVetoGuardian = address(0);
     address public recipient = address(0xc0ffee);
 
     function finishSetUp() public {
@@ -504,7 +504,7 @@ abstract contract OptimisticCompTimelockExecutionStrategyTest is SpaceTest {
         assertEq(erc721.ownerOf(1), address(author));
     }
 
-    function testViewFunctions() public {
+    function testViewFunctions() public view {
         assertEq(timelockExecutionStrategy.getStrategyType(), "CompTimelockCompatibleOptimisticQuorum");
     }
 
@@ -513,14 +513,14 @@ abstract contract OptimisticCompTimelockExecutionStrategyTest is SpaceTest {
         spaces[0] = address(space);
         timelockExecutionStrategy = new OptimisticCompTimelockCompatibleExecutionStrategy(
             owner,
-            vetoGuardian,
+            emptyVetoGuardian,
             spaces,
             quorum,
             address(timelock)
         );
 
         assertEq(timelockExecutionStrategy.owner(), owner);
-        assertEq(timelockExecutionStrategy.vetoGuardian(), vetoGuardian);
+        assertEq(timelockExecutionStrategy.vetoGuardian(), emptyVetoGuardian);
         assertEq(timelockExecutionStrategy.quorum(), quorum);
         assertEq(address(timelockExecutionStrategy.timelock()), address(timelock));
         assertEq(timelockExecutionStrategy.isSpaceEnabled(address(space)), TRUE);
@@ -536,7 +536,7 @@ contract OptimisticCompTimelockExecutionStrategyTestDirect is OptimisticCompTime
 
         timelockExecutionStrategy = new OptimisticCompTimelockCompatibleExecutionStrategy(
             owner,
-            vetoGuardian,
+            emptyVetoGuardian,
             spaces,
             quorum,
             address(timelock)
@@ -569,7 +569,7 @@ contract OptimisticCompTimelockExecutionStrategyTestProxy is OptimisticCompTimel
                     address(masterExecutionStrategy),
                     abi.encodeWithSelector(
                         OptimisticCompTimelockCompatibleExecutionStrategy.setUp.selector,
-                        abi.encode(owner, vetoGuardian, spaces, quorum, address(timelock))
+                        abi.encode(owner, emptyVetoGuardian, spaces, quorum, address(timelock))
                     )
                 )
             )

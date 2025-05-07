@@ -10,7 +10,7 @@ contract VanillaProposalValidationStrategy is IProposalValidationStrategy {
         address, // author,
         bytes calldata, // params,
         bytes calldata // userParams
-    ) external override returns (bool) {
+    ) external pure override returns (bool) {
         return true;
     }
 }

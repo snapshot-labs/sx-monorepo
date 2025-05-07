@@ -266,7 +266,7 @@ abstract contract AvatarExecutionStrategyTest is SpaceTest {
         avatarExecutionStrategy.disableSpace(address(space));
     }
 
-    function testGetStrategyType() external {
+    function testGetStrategyType() external view {
         assertEq(avatarExecutionStrategy.getStrategyType(), "SimpleQuorumAvatar");
     }
 }

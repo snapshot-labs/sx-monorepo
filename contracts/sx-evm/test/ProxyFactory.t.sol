@@ -208,24 +208,8 @@ contract SpaceFactoryTest is Test, IProxyFactoryEvents, IProxyFactoryErrors, ISp
         );
     }
 
-    function testPredictProxyAddress() public {
+    function testPredictProxyAddress() public view {
         uint256 saltNonce = 0;
-        bytes memory initializer = abi.encodeWithSelector(
-            Space.initialize.selector,
-            InitializeCalldata(
-                owner,
-                votingDelay,
-                minVotingDuration,
-                maxVotingDuration,
-                proposalValidationStrategy,
-                proposalValidationStrategyMetadataURI,
-                daoURI,
-                metadataURI,
-                votingStrategies,
-                votingStrategyMetadataURIs,
-                authenticators
-            )
-        );
         bytes32 salt = keccak256(abi.encodePacked(address(this), saltNonce));
         // Checking predictProxyAddress in the factory returns the same address as the helper in this test
         assertEq(
