@@ -105,6 +105,11 @@ export function useUserRolesQuery(user: MaybeRefOrGetter<string>) {
     queryFn: () => {
       return getUserRoles(toValue(user));
     },
+    retry: (failureCount, error) => {
+      if (error?.message.includes('Row not found')) return false;
+
+      return failureCount < 3;
+    },
     enabled: () => !!toValue(user)
   });
 }
