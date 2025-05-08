@@ -14,8 +14,9 @@ export default function createRemoteVpStrategy(): Strategy {
         address: voterAddress,
         space: spaceId,
         strategies: params,
-        network: snapshotInfo.chainId,
-        snapshot: snapshotInfo.at ?? 'latest'
+        network: snapshotInfo.chainId?.toString() || '',
+        snapshot: snapshotInfo.at ?? 'latest',
+        delegation: false
       });
 
       return result.vp_by_strategy.map((vp: number, i: number) => {
