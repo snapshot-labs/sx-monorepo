@@ -21,7 +21,9 @@ import {
 } from '@/helpers/townhall/api';
 import { Discussion, Role, Vote } from '@/helpers/townhall/types';
 
-const TOPICS_LIMIT = 20;
+export const TOPICS_LIMIT = 20;
+export const TOPICS_SUMMARY_LIMIT = 6;
+
 const DEFAULT_STALE_TIME = 1000 * 5;
 
 function addVoteToRoleResults({
@@ -89,12 +91,32 @@ export function useTopicsQuery({
     queryFn: async ({ pageParam = 0 }) => {
       return getDiscussions({ limit: TOPICS_LIMIT, skip: pageParam });
     },
-    staleTime: DEFAULT_STALE_TIME,
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < TOPICS_LIMIT) return null;
 
       return pages.length * TOPICS_LIMIT;
-    }
+    },
+    staleTime: DEFAULT_STALE_TIME
+  });
+}
+
+export function useTopicsSummaryQuery({
+  spaceId,
+  enabled = true
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+  enabled?: MaybeRefOrGetter<boolean>;
+}) {
+  return useQuery({
+    queryKey: ['townhall', 'discussions', 'summary', { spaceId }],
+    queryFn: async () => {
+      return getDiscussions({
+        skip: 0,
+        limit: TOPICS_SUMMARY_LIMIT
+      });
+    },
+    staleTime: DEFAULT_STALE_TIME,
+    enabled: () => toValue(enabled)
   });
 }
 

@@ -6,6 +6,10 @@ import {
   PROPOSALS_SUMMARY_LIMIT,
   useProposalsSummaryQuery
 } from '@/queries/proposals';
+import {
+  TOPICS_SUMMARY_LIMIT,
+  useTopicsSummaryQuery
+} from '@/queries/townhall';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space; townhallSpace?: TownhallSpace }>();
@@ -23,8 +27,17 @@ const socials = computed(() => getSocialNetworksLink(props.space));
 
 const { data, isPending, isError } = useProposalsSummaryQuery(
   toRef(() => props.space.network),
-  toRef(() => props.space.id)
+  toRef(() => props.space.id),
+  toRef(() => spaceType.value === 'proposalsSpace')
 );
+const {
+  data: topics,
+  isPending: isTopicsPending,
+  isError: isTopicsError
+} = useTopicsSummaryQuery({
+  spaceId: toRef(() => props.space.id),
+  enabled: computed(() => spaceType.value === 'discussionsSpace')
+});
 
 const showChildren = computed(
   () =>
@@ -162,6 +175,7 @@ watchEffect(() => setTitle(props.space.name));
     </template>
     <div>
       <ProposalsList
+        v-if="spaceType === 'proposalsSpace'"
         title="Proposals"
         :is-error="isError"
         :loading="isPending"
@@ -169,6 +183,18 @@ watchEffect(() => setTitle(props.space.name));
         :proposals="data ?? []"
         :route="{
           name: 'space-proposals',
+          linkTitle: 'See more'
+        }"
+      />
+      <TownhallTopicsList
+        v-else-if="spaceType === 'discussionsSpace'"
+        title="Latest topics"
+        :is-error="isTopicsError"
+        :is-loading="isTopicsPending"
+        :limit="TOPICS_SUMMARY_LIMIT - 1"
+        :topics="topics ?? []"
+        :route="{
+          name: 'space-townhall-topics',
           linkTitle: 'See more'
         }"
       />

@@ -9,6 +9,10 @@ const props = defineProps<{
   isLoadingMore?: boolean;
   topics: Discussion[];
   limit?: number | 'off';
+  route?: {
+    name: string;
+    linkTitle: string;
+  };
 }>();
 
 const emit = defineEmits<{
@@ -71,6 +75,13 @@ const currentLimit = computed(() => {
         <IH-exclamation-circle class="shrink-0" />
         <span v-text="'There are no topics here.'" />
       </div>
+      <AppLink
+        v-else-if="route && topics.length > currentLimit"
+        :to="{ name: route.name }"
+        class="px-4 py-2 block"
+      >
+        {{ route.linkTitle }}
+      </AppLink>
     </div>
   </div>
 </template>
