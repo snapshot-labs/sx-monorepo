@@ -28,10 +28,11 @@ type NavigationItem = {
 
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
-const { isWhiteLabel, space: whitelabelSpace } = useWhiteLabel();
+const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
+const spaceType = useSpaceType(param);
 const { data: spaceData } = useSpaceQuery({
   networkId: networkId,
   spaceId: address
@@ -63,14 +64,6 @@ const canSeeSettings = computed(() => {
   return false;
 });
 
-const isTownhallSpace = computed(
-  () =>
-    route?.params?.space === 's:ethpoll.eth' ||
-    (isWhiteLabel.value &&
-      whitelabelSpace.value?.id === 'ethpoll.eth' &&
-      whitelabelSpace.value?.network === 's')
-);
-
 const navigationConfig = computed<
   Record<string, Record<string, NavigationItem>>
 >(() => ({
@@ -79,15 +72,19 @@ const navigationConfig = computed<
       name: 'Overview',
       icon: IHGlobeAlt
     },
-    ...(!isTownhallSpace.value
+    ...(spaceType.value === 'proposalsSpace'
       ? {
           proposals: {
             name: 'Proposals',
             icon: IHNewspaper
+          },
+          leaderboard: {
+            name: 'Leaderboard',
+            icon: IHUserGroup
           }
         }
       : undefined),
-    ...(isTownhallSpace.value
+    ...(spaceType.value === 'discussionsSpace'
       ? {
           'townhall-topics': {
             name: 'Discussions',
@@ -96,14 +93,6 @@ const navigationConfig = computed<
           'townhall-roles': {
             name: 'Roles',
             icon: IHUsers
-          }
-        }
-      : undefined),
-    ...(!isTownhallSpace.value
-      ? {
-          leaderboard: {
-            name: 'Leaderboard',
-            icon: IHUserGroup
           }
         }
       : undefined),
