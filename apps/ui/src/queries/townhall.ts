@@ -5,10 +5,12 @@ import {
   useQueryClient
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
+import { SpaceType } from '@/composables/useSpaceType';
 import {
   getDiscussion,
   getResultsByRole,
   getRoles,
+  getSpace,
   getUserRoles,
   getVotes,
   newStatementEventToEntry,
@@ -49,6 +51,28 @@ function addVoteToRoleResults({
       return updatedData;
     }
   );
+}
+
+export function useSpaceQuery({
+  spaceId,
+  spaceType
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+  spaceType: MaybeRefOrGetter<SpaceType>;
+}) {
+  return useQuery({
+    queryKey: ['townhall', 'spaces', 'detail', { spaceId }],
+    queryFn: async () => {
+      return getSpace(toValue(spaceId));
+    },
+    retry: (failureCount, error) => {
+      if (error?.message.includes('Row not found')) return false;
+
+      return failureCount < 3;
+    },
+    enabled: () => toValue(spaceType) === 'discussionsSpace',
+    staleTime: DEFAULT_STALE_TIME
+  });
 }
 
 export function useDiscussionQuery({

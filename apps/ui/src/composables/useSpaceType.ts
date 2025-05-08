@@ -1,6 +1,6 @@
 import { MaybeRefOrGetter } from 'vue';
 
-type SpaceType = 'proposalsSpace' | 'discussionsSpace';
+export type SpaceType = 'proposalsSpace' | 'discussionsSpace';
 
 export function useSpaceType(spaceParam: MaybeRefOrGetter<string>) {
   const { isWhiteLabel, space: whitelabelSpace } = useWhiteLabel();

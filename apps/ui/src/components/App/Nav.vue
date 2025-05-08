@@ -204,7 +204,6 @@ const navigationItems = computed(() =>
       ...shortcuts.value[currentRouteName.value]
     })
       .map(([key, item]): [string, NavigationItem] => {
-        console.log(currentRouteName.value);
         return [
           key,
           {
