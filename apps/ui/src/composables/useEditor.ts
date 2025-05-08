@@ -218,10 +218,6 @@ export function useEditor() {
     lsSet('proposals', removeEmpty(proposals));
   });
 
-  onMounted(async () => {
-    await refreshDrafts();
-  });
-
   return {
     proposals,
     drafts,
