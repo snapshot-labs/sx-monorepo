@@ -51,7 +51,7 @@ const {
   sortBy
 );
 
-const { data: delegatees } = useDelegateesQuery(
+const { data: delegatees, isPending: isPendingDelegatees } = useDelegateesQuery(
   toRef(() => web3.value.account),
   toRef(props, 'space'),
   toRef(props, 'delegation')
@@ -197,9 +197,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </UiTooltip>
     </div>
 
-    <div v-if="delegatees?.length" class="mb-3">
+    <div class="mb-3">
       <UiLabel label="Delegating to" />
-      <div class="w-full truncate px-4">
+      <UiLoading v-if="isPendingDelegatees" class="px-4 py-3 block" />
+      <div v-else-if="delegatees?.length" class="w-full truncate px-4">
         <div
           v-for="delegatee in delegatees"
           :key="delegatee.id"
@@ -271,6 +272,15 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               </template>
             </UiDropdown>
           </div>
+        </div>
+      </div>
+      <div v-else class="flex space-x-2 border-b py-3 mx-4">
+        <IH-exclamation-circle class="shrink-0 mt-[5px]" />
+        <div>
+          You are not delegating your voting power yet.
+          <span v-if="isUpdatableDelegation">
+            If you just delegated, it may take up to 5 minutes to show up.
+          </span>
         </div>
       </div>
     </div>
