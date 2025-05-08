@@ -18,7 +18,7 @@ const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
 const spaceId = ref('1');
 const userSpaceRoles = computed(() => {
-  return userRoles.value?.filter(role => role.space === spaceId.value) ?? [];
+  return userRoles.value?.filter(role => role.space.id === spaceId.value) ?? [];
 });
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
@@ -90,7 +90,7 @@ async function handleEditRole(config: SpaceMetadataLabel) {
         old.map(role =>
           role.id === activeLabelId.value
             ? {
-                space: spaceId.value,
+                space: { id: spaceId.value },
                 id: activeLabelId.value,
                 name: config.name,
                 description: config.description,

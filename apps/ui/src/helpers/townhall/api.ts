@@ -73,7 +73,9 @@ gql(`
 
   fragment roleFields on Role {
     id
-    space
+    space {
+      id
+    }
     name
     description
     color

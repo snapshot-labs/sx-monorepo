@@ -1,5 +1,11 @@
 scalar Text
 
+type Space {
+  id: String!
+  discussion_count: Int!
+  vote_count: Int!
+}
+
 type Alias {
   id: String!
   address: String!
@@ -17,6 +23,7 @@ type Discussion {
   vote_count: Int!
   created: Int!
   closed: Boolean!
+  space: Space!
   statements: [Statement!]! @derivedFrom(field: "discussion")
   votes: [Vote!]! @derivedFrom(field: "discussion")
 }
@@ -51,7 +58,7 @@ type Vote {
 
 type Role {
   id: String!
-  space: String!
+  space: Space!
   name: String!
   description: String!
   color: String!

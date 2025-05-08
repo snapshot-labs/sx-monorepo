@@ -149,8 +149,8 @@ export function useRoleMutation() {
   return useMutation({
     mutationFn: ({ role, isRevoking }: { role: Role; isRevoking: boolean }) => {
       return isRevoking
-        ? sendRevokeRole(role.space, role.id)
-        : sendClaimRole(role.space, role.id);
+        ? sendRevokeRole(role.space.id, role.id)
+        : sendClaimRole(role.space.id, role.id);
     },
     onSuccess: (data, { role, isRevoking }) => {
       if (!data) return;
