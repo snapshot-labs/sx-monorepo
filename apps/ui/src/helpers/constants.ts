@@ -18,9 +18,6 @@ export const UNIFIED_API_TESTNET_URL =
 
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
-export const TURBO_URL =
-  'https://docs.snapshot.box/user-guides/spaces/turbo-plan';
-
 export const VERIFIED_URL =
   'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 
