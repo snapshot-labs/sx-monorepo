@@ -97,16 +97,9 @@ const SPACE_QUERY = gql(`
 `);
 
 const DISCUSSIONS_QUERY = gql(`
-  query Discussions {
-    discussions(first: 10, orderBy: created, orderDirection: desc) {
-      id
-      title
-      body
-      author
-      statement_count
-      vote_count
-      created
-      closed
+  query Discussions($limit: Int!, $skip: Int!) {
+    discussions(first: $limit, skip: $skip, orderBy: created, orderDirection: desc) {
+      ...discussionFields
     }
   }
 `);
@@ -156,9 +149,16 @@ export async function getSpace(spaceId: string) {
   return data.space;
 }
 
-export async function getDiscussions() {
+export async function getDiscussions({
+  limit,
+  skip
+}: {
+  limit: number;
+  skip: number;
+}) {
   const { data } = await client.query({
-    query: DISCUSSIONS_QUERY
+    query: DISCUSSIONS_QUERY,
+    variables: { limit, skip }
   });
 
   return data.discussions;

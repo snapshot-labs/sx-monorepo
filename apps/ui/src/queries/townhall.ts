@@ -1,5 +1,6 @@
 import {
   QueryClient,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient
@@ -8,6 +9,7 @@ import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useSpaceType';
 import {
   getDiscussion,
+  getDiscussions,
   getResultsByRole,
   getRoles,
   getSpace,
@@ -19,6 +21,7 @@ import {
 } from '@/helpers/townhall/api';
 import { Discussion, Role, Vote } from '@/helpers/townhall/types';
 
+const TOPICS_LIMIT = 20;
 const DEFAULT_STALE_TIME = 1000 * 5;
 
 function addVoteToRoleResults({
@@ -72,6 +75,26 @@ export function useSpaceQuery({
     },
     enabled: () => toValue(spaceType) === 'discussionsSpace',
     staleTime: DEFAULT_STALE_TIME
+  });
+}
+
+export function useTopicsQuery({
+  spaceId
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: ['townhall', 'discussions', 'list', { spaceId }],
+    queryFn: async ({ pageParam = 0 }) => {
+      return getDiscussions({ limit: TOPICS_LIMIT, skip: pageParam });
+    },
+    staleTime: DEFAULT_STALE_TIME,
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < TOPICS_LIMIT) return null;
+
+      return pages.length * TOPICS_LIMIT;
+    }
   });
 }
 
