@@ -14,7 +14,7 @@ const route = useRoute();
 const { web3 } = useWeb3();
 
 const id = computed(() => Number(route.params.id));
-const spaceId = computed(() => route.params.space as string);
+const spaceId = '1';
 
 const roleFilter = ref('any');
 const statementInput = ref('');
@@ -285,7 +285,8 @@ function toggleAdminView() {
                   { key: 'any', label: 'Any role' },
                   ...(roles || []).map(role => ({
                     key: role.id,
-                    label: role.name
+                    label: role.name,
+                    indicatorStyle: { background: role.color }
                   }))
                 ]"
               />
