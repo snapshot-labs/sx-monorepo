@@ -90,9 +90,12 @@ const FEATURES = [
 const props = defineProps<{ space: Space }>();
 
 const router = useRouter();
+const route = useRoute();
 const { limits } = useSettings();
 const { login, auth } = useWeb3();
 const queryClient = useQueryClient();
+
+const referral: string = route.query.ref as string;
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
 const modalPaymentOpen = ref(false);
@@ -356,7 +359,10 @@ onMounted(() => {
       "
       :barcode-payload="{
         type: 'turbo',
-        params: { space: `${space.network}:${space.id}` }
+        ref: referral || undefined,
+        params: {
+          space: `${space.network}:${space.id}`
+        }
       }"
       @close="modalPaymentOpen = false"
       @confirmed="handlePaymentConfirmed"
