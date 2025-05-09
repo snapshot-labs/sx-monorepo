@@ -36,13 +36,6 @@ const DISCUSSION_DEFINITION = {
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
-const STRATEGY_DEFINITION = {
-  type: 'string',
-  enum: ['ACTIVE', 'INACTIVE'],
-  options: [{ id: 'anyone', name: 'Anyone' }],
-  title: 'Who can participate?'
-};
-
 async function handleSubmit() {
   submitLoading.value = true;
 
@@ -91,13 +84,6 @@ async function handleSubmit() {
       </div>
       <UiInputString v-model="discussion" :definition="DISCUSSION_DEFINITION" />
       <UiLinkPreview :url="discussion" />
-      <div>
-        <UiSelect
-          v-model="strategy"
-          disabled
-          :definition="STRATEGY_DEFINITION"
-        />
-      </div>
       <UiButton
         class="primary flex items-center space-x-1"
         :disabled="submitLoading"
