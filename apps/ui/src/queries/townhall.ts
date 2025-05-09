@@ -1,14 +1,18 @@
 import {
   QueryClient,
+  useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
+import { SpaceType } from '@/composables/useSpaceType';
 import {
   getDiscussion,
+  getDiscussions,
   getResultsByRole,
   getRoles,
+  getSpace,
   getUserRoles,
   getVotes,
   newStatementEventToEntry,
@@ -16,6 +20,9 @@ import {
   Result
 } from '@/helpers/townhall/api';
 import { Discussion, Role, Vote } from '@/helpers/townhall/types';
+
+export const TOPICS_LIMIT = 20;
+export const TOPICS_SUMMARY_LIMIT = 6;
 
 const DEFAULT_STALE_TIME = 1000 * 5;
 
@@ -49,6 +56,68 @@ function addVoteToRoleResults({
       return updatedData;
     }
   );
+}
+
+export function useSpaceQuery({
+  spaceId,
+  spaceType
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+  spaceType: MaybeRefOrGetter<SpaceType>;
+}) {
+  return useQuery({
+    queryKey: ['townhall', 'spaces', 'detail', { spaceId }],
+    queryFn: async () => {
+      return getSpace(toValue(spaceId));
+    },
+    retry: (failureCount, error) => {
+      if (error?.message.includes('Row not found')) return false;
+
+      return failureCount < 3;
+    },
+    enabled: () => toValue(spaceType) === 'discussionsSpace',
+    staleTime: DEFAULT_STALE_TIME
+  });
+}
+
+export function useTopicsQuery({
+  spaceId
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: ['townhall', 'discussions', 'list', { spaceId }],
+    queryFn: async ({ pageParam = 0 }) => {
+      return getDiscussions({ limit: TOPICS_LIMIT, skip: pageParam });
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < TOPICS_LIMIT) return null;
+
+      return pages.length * TOPICS_LIMIT;
+    },
+    staleTime: DEFAULT_STALE_TIME
+  });
+}
+
+export function useTopicsSummaryQuery({
+  spaceId,
+  enabled = true
+}: {
+  spaceId: MaybeRefOrGetter<string>;
+  enabled?: MaybeRefOrGetter<boolean>;
+}) {
+  return useQuery({
+    queryKey: ['townhall', 'discussions', 'summary', { spaceId }],
+    queryFn: async () => {
+      return getDiscussions({
+        skip: 0,
+        limit: TOPICS_SUMMARY_LIMIT
+      });
+    },
+    staleTime: DEFAULT_STALE_TIME,
+    enabled: () => toValue(enabled)
+  });
 }
 
 export function useDiscussionQuery({
@@ -149,8 +218,8 @@ export function useRoleMutation() {
   return useMutation({
     mutationFn: ({ role, isRevoking }: { role: Role; isRevoking: boolean }) => {
       return isRevoking
-        ? sendRevokeRole(role.space, role.id)
-        : sendClaimRole(role.space, role.id);
+        ? sendRevokeRole(role.space.id, role.id)
+        : sendClaimRole(role.space.id, role.id);
     },
     onSuccess: (data, { role, isRevoking }) => {
       if (!data) return;

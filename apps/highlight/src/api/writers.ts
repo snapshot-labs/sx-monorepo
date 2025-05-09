@@ -4,11 +4,16 @@ import {
   Alias,
   Discussion,
   Role,
+  Space,
   Statement,
   User,
   UserRole,
   Vote
 } from '../../.checkpoint/models';
+
+// NOTE: Right now we are do not have notion of spaces in Highlight
+// We just create a default space for entities
+const DEFAULT_SPACE_ID = '1';
 
 const SetAliasEventData = z.tuple([
   z.string(), // from
@@ -89,6 +94,7 @@ export function createWriters(indexerName: string) {
     console.log('Handle new discussion', id, author, title, body);
 
     const discussion = new Discussion(id.toString(), indexerName);
+    discussion.space = DEFAULT_SPACE_ID;
     discussion.author = author;
     discussion.title = title;
     discussion.body = body;
@@ -97,7 +103,13 @@ export function createWriters(indexerName: string) {
     discussion.vote_count = 0;
     discussion.created = unit.timestamp;
 
-    await discussion.save();
+    let space = await Space.loadEntity(DEFAULT_SPACE_ID, indexerName);
+    if (!space) {
+      space = new Space(DEFAULT_SPACE_ID, indexerName);
+    }
+    space.discussion_count += 1;
+
+    await Promise.all([discussion.save(), space.save()]);
   };
 
   const handleCloseDiscussion: Writer = async ({ payload }) => {
@@ -243,6 +255,14 @@ export function createWriters(indexerName: string) {
       await discussion.save();
       await statement.save();
     }
+
+    let space = await Space.loadEntity(DEFAULT_SPACE_ID, indexerName);
+    if (!space) {
+      space = new Space(DEFAULT_SPACE_ID, indexerName);
+    }
+    space.vote_count += 1;
+
+    await space.save();
   };
 
   const handleNewRole: Writer = async ({ unit, payload }) => {

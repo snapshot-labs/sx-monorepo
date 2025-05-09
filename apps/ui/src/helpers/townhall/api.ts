@@ -23,6 +23,12 @@ const client = new ApolloClient({
 });
 
 gql(`
+  fragment spaceFields on Space {
+    id
+    vote_count
+    discussion_count
+  }
+
   fragment statementFields on Statement {
     id
     body
@@ -73,24 +79,27 @@ gql(`
 
   fragment roleFields on Role {
     id
-    space
+    space {
+      id
+    }
     name
     description
     color
   }
 `);
 
+const SPACE_QUERY = gql(`
+  query Space($id: String!) {
+    space(id: $id) {
+      ...spaceFields
+    }
+  }
+`);
+
 const DISCUSSIONS_QUERY = gql(`
-  query Discussions {
-    discussions(first: 10, orderBy: created, orderDirection: desc) {
-      id
-      title
-      body
-      author
-      statement_count
-      vote_count
-      created
-      closed
+  query Discussions($limit: Int!, $skip: Int!) {
+    discussions(first: $limit, skip: $skip, orderBy: created, orderDirection: desc) {
+      ...discussionFields
     }
   }
 `);
@@ -131,9 +140,25 @@ const USER_ROLES_QUERY = gql(`
   }
 `);
 
-export async function getDiscussions() {
+export async function getSpace(spaceId: string) {
   const { data } = await client.query({
-    query: DISCUSSIONS_QUERY
+    query: SPACE_QUERY,
+    variables: { id: spaceId }
+  });
+
+  return data.space;
+}
+
+export async function getDiscussions({
+  limit,
+  skip
+}: {
+  limit: number;
+  skip: number;
+}) {
+  const { data } = await client.query({
+    query: DISCUSSIONS_QUERY,
+    variables: { limit, skip }
   });
 
   return data.discussions;

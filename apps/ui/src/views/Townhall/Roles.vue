@@ -6,10 +6,11 @@ import {
   useRolesQuery,
   useUserRolesQuery
 } from '@/queries/townhall';
-import { SpaceMetadataLabel } from '@/types';
+import { Space, SpaceMetadataLabel } from '@/types';
+
+const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const route = useRoute();
 const { sendCreateRole, sendEditRole, sendDeleteRole } = useTownhall();
 const { addNotification } = useUiStore();
 const { web3 } = useWeb3();
@@ -17,9 +18,9 @@ const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
-const spaceId = computed(() => route.params.space as string);
+const spaceId = ref('1');
 const userSpaceRoles = computed(() => {
-  return userRoles.value?.filter(role => role.space === spaceId.value) ?? [];
+  return userRoles.value?.filter(role => role.space.id === spaceId.value) ?? [];
 });
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
@@ -91,7 +92,7 @@ async function handleEditRole(config: SpaceMetadataLabel) {
         old.map(role =>
           role.id === activeLabelId.value
             ? {
-                space: spaceId.value,
+                space: { id: spaceId.value },
                 id: activeLabelId.value,
                 name: config.name,
                 description: config.description,
@@ -119,14 +120,17 @@ async function handleDeleteRole(id: string) {
   }
 }
 
-setTitle('Ethereum Open Agora');
+watchEffect(() => setTitle(`Roles - ${props.space.name}`));
 </script>
 
 <template>
   <div>
-    <UiContainer class="!max-w-[960px] py-4">
-      <div class="eyebrow mb-2.5 text-skin-link">Roles</div>
-      <div class="md:border-x border-y md:rounded-lg md:mx-0 -mx-4">
+    <div class="flex justify-end p-4">
+      <UiButton primary @click="modalOpen = true">Add role</UiButton>
+    </div>
+    <div>
+      <UiLabel label="Roles" sticky />
+      <div>
         <div v-if="isPending" class="my-3 mx-4">
           <UiLoading />
         </div>
@@ -148,17 +152,19 @@ setTitle('Ethereum Open Agora');
           <div
             v-for="role in roles"
             :key="role.id"
-            class="py-3 mx-4 block border-b last:border-b-0"
+            class="py-2.5 mx-4 block border-b"
           >
             <div
               class="flex flex-nowrap items-center justify-between gap-x-3 gap-y-1 truncate"
             >
-              <div class="md:min-w-max min-w-0 flex-shrink-0">
-                <UiProposalLabel
-                  :label="role.name || 'label preview'"
-                  :color="role.color"
-                  class="w-full"
+              <div
+                class="md:min-w-max min-w-0 flex-shrink-0 items-center flex space-x-2"
+              >
+                <div
+                  class="size-[10px] rounded-full"
+                  :style="{ background: role.color }"
                 />
+                <h4 v-text="role.name" />
               </div>
               <div
                 v-if="role.description"
@@ -169,6 +175,10 @@ setTitle('Ethereum Open Agora');
                 <div class="flex gap-3 items-center">
                   <UiButton
                     :loading="variables?.role.id === role.id && isMutatingRole"
+                    :class="{
+                      'hover:border-skin-danger hover:!text-skin-danger':
+                        getIsRoleClaimed(role.id)
+                    }"
                     @click="
                       mutate({
                         role,
@@ -217,14 +227,7 @@ setTitle('Ethereum Open Agora');
           </div>
         </div>
       </div>
-      <UiButton
-        class="w-full flex items-center justify-center gap-1 mt-4"
-        @click="modalOpen = true"
-      >
-        <IH-plus class="shrink-0 size-[16px]" />
-        Add role
-      </UiButton>
-    </UiContainer>
+    </div>
     <teleport to="#modal">
       <ModalLabelConfig
         item-type="role"

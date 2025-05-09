@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Statement } from '@/helpers/townhall/types';
-import { _n, clone } from '@/helpers/utils';
+import { _n, clone, shortenAddress } from '@/helpers/utils';
 import {
   useCloseDiscussionMutation,
   useCreateStatementMutation,
@@ -12,9 +12,10 @@ import {
 
 const route = useRoute();
 const { web3 } = useWeb3();
+const { setTitle } = useTitle();
 
 const id = computed(() => Number(route.params.id));
-const spaceId = computed(() => route.params.space as string);
+const spaceId = '1';
 
 const roleFilter = ref('any');
 const statementInput = ref('');
@@ -90,10 +91,12 @@ const STATEMENT_DEFINITION = {
 function toggleAdminView() {
   view.value = !view.value ? 'admin' : '';
 }
+
+watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
 </script>
 
 <template>
-  <div class="mb-6">
+  <div>
     <div
       v-if="
         isPending || isRolesPending || isUserVotesPending || isResultsPending
@@ -110,44 +113,35 @@ function toggleAdminView() {
       <span v-text="'Failed to load discussion.'" />
     </div>
     <div v-else-if="discussion">
-      <div class="border-b bg-skin-border/10 pb-3 pt-7 mb-6">
-        <UiContainer class="!max-w-[740px]">
-          <h1 class="leading-[1.1em] mb-4" v-text="discussion.title" />
-          <div class="flex">
-            <div class="flex-1">
-              <div
-                v-if="!discussion.closed"
-                class="bg-skin-success inline-block rounded-full pl-2 pr-[10px] pb-0.5 text-white mb-2"
-              >
-                <IS-status-online
-                  class="text-white inline-block size-[17px] mb-[1px]"
-                />
-                Active
-              </div>
-              <div
-                v-else
-                class="bg-skin-link inline-block rounded-full pl-2 pr-[10px] pb-0.5 text-skin-bg mb-2"
-              >
-                <IS-minus-circle
-                  class="text-skin-bg inline-block size-[17px] mb-[1px]"
-                />
-                Closed
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <a>
-                <IH-share class="text-skin-text inline-block size-[22px]" />
-              </a>
-              <a
-                v-if="web3.account && web3.account === discussion.author"
-                @click="toggleAdminView"
-              >
-                <IH-cog class="text-skin-text inline-block size-[22px]" />
-              </a>
-            </div>
+      <UiContainer class="!max-w-[740px] space-y-4 pt-6 pb-4">
+        <h1 class="leading-[1.1em]" v-text="discussion.title" />
+        <div v-if="discussion.closed" class="items-center gap-1 flex">
+          <IS-lock-closed class="text-skin-text" />
+          <span v-text="'Topic closed'" />
+        </div>
+        <div class="flex">
+          <div class="text-[17px] flex gap-2 items-center flex-1">
+            <UiStamp :id="discussion.author" :size="20" />
+            {{ shortenAddress(discussion.author) }}
           </div>
-        </UiContainer>
-      </div>
+          <div class="flex gap-2">
+            <a>
+              <IH-share class="text-skin-text inline-block size-[22px]" />
+            </a>
+            <a
+              v-if="web3.account && web3.account === discussion.author"
+              @click="toggleAdminView"
+            >
+              <IH-cog class="text-skin-text inline-block size-[22px]" />
+            </a>
+          </div>
+        </div>
+        <UiMarkdown
+          v-if="discussion.body"
+          :body="discussion.body"
+          class="pb-4"
+        />
+      </UiContainer>
 
       <UiContainer class="!max-w-[740px] s-box space-y-4">
         <template v-if="view === 'admin'">
@@ -185,12 +179,6 @@ function toggleAdminView() {
         </template>
 
         <template v-else>
-          <UiMarkdown
-            v-if="discussion.body"
-            :body="discussion.body"
-            class="pb-4"
-          />
-
           <div v-if="discussion.discussion_url">
             <h4 class="mb-3 eyebrow flex items-center gap-2">
               <IH-chat-alt />
@@ -269,7 +257,7 @@ function toggleAdminView() {
             <div class="mb-3 flex">
               <h4 class="eyebrow flex items-center gap-2 flex-1">
                 <IH-chart-square-bar />
-                Results
+                Statements
                 <div
                   class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
                 >
@@ -285,7 +273,8 @@ function toggleAdminView() {
                   { key: 'any', label: 'Any role' },
                   ...(roles || []).map(role => ({
                     key: role.id,
-                    label: role.name
+                    label: role.name,
+                    indicatorStyle: { background: role.color }
                   }))
                 ]"
               />
