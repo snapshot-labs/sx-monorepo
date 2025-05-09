@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Result } from '@/helpers/townhall/api';
 import { Discussion, Statement } from '@/helpers/townhall/types';
-import { _n, _p, shortenAddress } from '@/helpers/utils';
+import { _n, _p, _rt, shortenAddress } from '@/helpers/utils';
 import { useSetStatementVisibilityMutation } from '@/queries/townhall';
 
 const props = defineProps<{
@@ -46,11 +46,13 @@ function getChoiceResult(choice: 1 | 2 | 3) {
   <div class="p-4 border rounded-md text-md space-y-3">
     <div class="flex">
       <div class="flex-1">
-        <div class="text-[17px] flex gap-2 items-center mb-2">
+        <div class="text-[17px] flex gap-2 items-center mb-3">
           <UiStamp :id="statement.author" :size="20" />
           {{ shortenAddress(statement.author) }}
+          <span>·</span>
+          {{ _rt(statement.created) }}
         </div>
-        <div class="text-skin-link">{{ statement.body }}</div>
+        <div class="text-skin-link mb-1">{{ statement.body }}</div>
       </div>
       <UiDropdown v-if="web3.account && discussion.author === web3.account">
         <template #button>

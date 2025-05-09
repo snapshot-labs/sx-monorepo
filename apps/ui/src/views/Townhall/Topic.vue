@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Statement } from '@/helpers/townhall/types';
-import { _n, clone, shortenAddress } from '@/helpers/utils';
+import { _n, _rt, clone, shortenAddress } from '@/helpers/utils';
 import {
   useCloseDiscussionMutation,
   useCreateStatementMutation,
@@ -123,6 +123,8 @@ watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
           <div class="text-[17px] flex gap-2 items-center flex-1">
             <UiStamp :id="discussion.author" :size="20" />
             {{ shortenAddress(discussion.author) }}
+            <span>·</span>
+            {{ _rt(discussion.created) }}
           </div>
           <div class="flex gap-2">
             <a>
