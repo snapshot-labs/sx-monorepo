@@ -36,7 +36,7 @@ const {
       <div class="text-lg text-skin-link flex-auto">
         <UiLoading v-if="isVotePending" />
         <div v-else class="flex">
-          <div class="flex-1 mb-4" v-text="statements[0].body" />
+          <div class="flex-1 mr-3 mb-4" v-text="statements[0].body" />
           <UiDropdown v-if="web3.account && discussion.author === web3.account">
             <template #button>
               <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
