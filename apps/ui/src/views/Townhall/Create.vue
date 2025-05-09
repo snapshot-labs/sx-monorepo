@@ -10,7 +10,6 @@ const { addNotification } = useUiStore();
 const title = ref(route.query.title as string);
 const body = ref('');
 const discussion = ref('');
-const strategy = ref('anyone');
 const submitLoading = ref(false);
 
 const TITLE_DEFINITION = {

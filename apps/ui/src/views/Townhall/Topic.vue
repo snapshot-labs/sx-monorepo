@@ -19,7 +19,6 @@ const spaceId = '1';
 
 const roleFilter = ref('any');
 const statementInput = ref('');
-const view = ref('');
 
 const {
   data: discussion,
@@ -88,10 +87,6 @@ const STATEMENT_DEFINITION = {
   maxLength: 200
 };
 
-function toggleAdminView() {
-  view.value = !view.value ? 'admin' : '';
-}
-
 watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
 </script>
 
@@ -119,24 +114,44 @@ watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
           <IS-lock-closed class="text-skin-text" />
           <span v-text="'Topic closed'" />
         </div>
-        <div class="flex">
-          <div class="text-[17px] flex gap-2 items-center flex-1">
+        <div class="flex justify-between">
+          <div class="text-[17px] flex gap-2 items-center">
             <UiStamp :id="discussion.author" :size="20" />
             {{ shortenAddress(discussion.author) }}
             <span>·</span>
             {{ _rt(discussion.created) }}
           </div>
-          <div class="flex gap-2">
-            <a>
-              <IH-share class="text-skin-text inline-block size-[22px]" />
-            </a>
-            <a
-              v-if="web3.account && web3.account === discussion.author"
-              @click="toggleAdminView"
-            >
-              <IH-cog class="text-skin-text inline-block size-[22px]" />
-            </a>
-          </div>
+          <UiDropdown
+            v-if="
+              web3.account &&
+              discussion.author === web3.account &&
+              !discussion.closed
+            "
+          >
+            <template #button>
+              <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <IH-dots-horizontal class="text-skin-link" />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="closeDiscussion()"
+                >
+                  <template v-if="isCloseDicussionPending">
+                    <UiLoading :size="18" />
+                  </template>
+                  <template v-else>
+                    <IS-lock-closed class="w-[16px] h-[16px]" />
+                  </template>
+                  Close topic
+                </button>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </div>
         <UiMarkdown
           v-if="discussion.body"
@@ -146,154 +161,118 @@ watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
       </UiContainer>
 
       <UiContainer class="!max-w-[740px] s-box space-y-4">
-        <template v-if="view === 'admin'">
-          <div>
-            <h4 class="mb-3 eyebrow flex items-center gap-2">
-              <IH-chart-bar />
-              Insights
-            </h4>
-            <div>
-              Statements: <b>{{ _n(discussion.statement_count) }}</b>
-            </div>
-            <div>
-              Votes: <b>{{ _n(discussion.vote_count) }}</b>
-            </div>
-            <div v-if="discussion.vote_count">
-              Avg. vote per statement:
-              <b>{{
-                _n(discussion.vote_count / discussion.statement_count)
-              }}</b>
-            </div>
-          </div>
-          <div>
-            <h4 class="mb-3 eyebrow flex items-center gap-2">
-              <IH-cog />
-              Admin
-            </h4>
-            <UiButton
-              v-if="!discussion.closed"
-              :loading="isCloseDicussionPending"
-              @click="closeDiscussion"
-              >Close discussion</UiButton
-            >
-            <div v-else>The discussion is closed.</div>
-          </div>
-        </template>
+        <div v-if="discussion.discussion_url">
+          <h4 class="mb-3 eyebrow flex items-center gap-2">
+            <IH-chat-alt />
+            <span>Discussion</span>
+          </h4>
+          <a
+            :href="discussion.discussion_url"
+            target="_blank"
+            class="block mb-5"
+          >
+            <UiLinkPreview
+              :url="discussion.discussion_url"
+              :show-default="true"
+            />
+          </a>
+        </div>
 
-        <template v-else>
-          <div v-if="discussion.discussion_url">
-            <h4 class="mb-3 eyebrow flex items-center gap-2">
-              <IH-chat-alt />
-              <span>Discussion</span>
-            </h4>
-            <a
-              :href="discussion.discussion_url"
-              target="_blank"
-              class="block mb-5"
+        <div v-if="!discussion.closed && pendingStatements.length > 0">
+          <h4 class="mb-3 eyebrow flex items-center gap-2">
+            <IH-eye />
+            Pending statement(s)
+            <div
+              class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
             >
-              <UiLinkPreview
-                :url="discussion.discussion_url"
-                :show-default="true"
+              {{ _n(pendingStatements.length) }}
+            </div>
+          </h4>
+          <TownhallStatements
+            :space-id="spaceId"
+            :discussion-id="id"
+            :discussion="discussion"
+            :statements="pendingStatements"
+          />
+        </div>
+
+        <div v-if="!discussion.closed">
+          <h4 class="mb-3 eyebrow flex items-center gap-2">
+            <IH-pencil />
+            Add a statement
+          </h4>
+          <div class="p-4 border rounded-md">
+            <div class="mb-3">
+              <IH-light-bulb
+                class="inline-block align-middle relative -top-0.5"
               />
-            </a>
+              Share one clear, concise idea or opinion, so everyone can easily
+              understand and vote.
+            </div>
+            <UiTextarea
+              v-model="statementInput"
+              :definition="STATEMENT_DEFINITION"
+              :required="true"
+              :disabled="isCreateStatementPending"
+            />
+            <div>
+              <UiButton
+                class="primary items-center flex space-x-1"
+                :disabled="
+                  isCreateStatementPending ||
+                  !statementInput.trim() ||
+                  !web3.account
+                "
+                @click="
+                  createStatement(statementInput);
+                  statementInput = '';
+                "
+              >
+                <div>Publish</div>
+                <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+              </UiButton>
+            </div>
           </div>
+        </div>
 
-          <div v-if="!discussion.closed && pendingStatements.length > 0">
-            <h4 class="mb-3 eyebrow flex items-center gap-2">
-              <IH-eye />
-              Pending statement(s)
+        <div v-if="results.length > 0">
+          <div class="mb-3 flex">
+            <h4 class="eyebrow flex items-center gap-2 flex-1">
+              <IH-chart-square-bar />
+              Statements
               <div
                 class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
               >
-                {{ _n(pendingStatements.length) }}
+                {{ _n(results.length) }}
               </div>
             </h4>
-            <TownhallStatements
+            <UiSelectDropdown
+              v-model="roleFilter"
+              title="Role"
+              gap="12"
+              placement="start"
+              :items="[
+                { key: 'any', label: 'Any role' },
+                ...(roles || []).map(role => ({
+                  key: role.id,
+                  label: role.name,
+                  indicatorStyle: { background: role.color }
+                }))
+              ]"
+            />
+          </div>
+          <div class="space-y-3">
+            <TownhallStatementItem
+              v-for="(s, i) in results"
+              :key="i"
               :space-id="spaceId"
               :discussion-id="id"
               :discussion="discussion"
-              :statements="pendingStatements"
+              :statement="s"
+              :results="resultsByRole ?? []"
             />
           </div>
-
-          <div v-if="!discussion.closed">
-            <h4 class="mb-3 eyebrow flex items-center gap-2">
-              <IH-pencil />
-              Add a statement
-            </h4>
-            <div class="p-4 border rounded-md">
-              <div class="mb-3">
-                <IH-light-bulb
-                  class="inline-block align-middle relative -top-0.5"
-                />
-                Share one clear, concise idea or opinion, so everyone can easily
-                understand and vote.
-              </div>
-              <UiTextarea
-                v-model="statementInput"
-                :definition="STATEMENT_DEFINITION"
-                :required="true"
-                :disabled="isCreateStatementPending"
-              />
-              <div>
-                <UiButton
-                  class="primary items-center flex space-x-1"
-                  :disabled="
-                    isCreateStatementPending ||
-                    !statementInput.trim() ||
-                    !web3.account
-                  "
-                  @click="
-                    createStatement(statementInput);
-                    statementInput = '';
-                  "
-                >
-                  <div>Publish</div>
-                  <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-                </UiButton>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="results.length > 0">
-            <div class="mb-3 flex">
-              <h4 class="eyebrow flex items-center gap-2 flex-1">
-                <IH-chart-square-bar />
-                Statements
-                <div
-                  class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
-                >
-                  {{ _n(results.length) }}
-                </div>
-              </h4>
-              <UiSelectDropdown
-                v-model="roleFilter"
-                title="Role"
-                gap="12"
-                placement="start"
-                :items="[
-                  { key: 'any', label: 'Any role' },
-                  ...(roles || []).map(role => ({
-                    key: role.id,
-                    label: role.name,
-                    indicatorStyle: { background: role.color }
-                  }))
-                ]"
-              />
-            </div>
-            <div class="space-y-3">
-              <TownhallStatementItem
-                v-for="(s, i) in results"
-                :key="i"
-                :space-id="spaceId"
-                :discussion-id="id"
-                :discussion="discussion"
-                :statement="s"
-                :results="resultsByRole ?? []"
-              />
-            </div>
-          </div>
-        </template>
+        </div>
       </UiContainer>
     </div>
   </div>
