@@ -52,7 +52,12 @@ const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 const hasAppNav = computed(
   () =>
     ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+    ![
+      'space-editor',
+      'space-proposal',
+      'space-townhall-topic',
+      'space-townhall-create'
+    ].includes(String(route.matched[1]?.name))
 );
 
 const hasSidebar = computed(() => !isWhiteLabel.value);
@@ -66,7 +71,12 @@ const hasPlaceHolderSidebar = computed(
       'create-space-snapshot',
       'create-space-snapshot-x'
     ].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+    ![
+      'space-editor',
+      'space-proposal',
+      'space-townhall-create',
+      'space-townhall-topic'
+    ].includes(String(route.matched[1]?.name))
 );
 
 const hasTopNav = computed(() => {
