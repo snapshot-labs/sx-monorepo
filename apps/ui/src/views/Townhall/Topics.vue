@@ -23,7 +23,7 @@ async function handleEndReached() {
   fetchNextPage();
 }
 
-watchEffect(() => setTitle('Ethereum Open Agora'));
+watchEffect(() => setTitle(`Topics - ${props.space.name}`));
 </script>
 
 <template>
@@ -39,7 +39,7 @@ watchEffect(() => setTitle('Ethereum Open Agora'));
       </router-link>
     </div>
     <div>
-      <UiLabel label="Latest topics" sticky />
+      <UiLabel label="Topics" sticky />
       <TownhallTopicsList
         limit="off"
         :is-error="isError"

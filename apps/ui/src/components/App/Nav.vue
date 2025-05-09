@@ -87,7 +87,7 @@ const navigationConfig = computed<
     ...(spaceType.value === 'discussionsSpace'
       ? {
           'townhall-topics': {
-            name: 'Discussions',
+            name: 'Townhall',
             icon: IHAnnotation
           },
           'townhall-roles': {

@@ -53,12 +53,8 @@ const currentLimit = computed(() => {
           }"
           class="py-3 mx-4 block border-b"
         >
-          <div class="mb-1 flex">
-            <ProposalIconStatus
-              size="17"
-              :state="topic.closed ? 'closed' : 'active'"
-              class="top-1 mr-2"
-            />
+          <div class="mb-1 items-center gap-1 flex">
+            <IS-lock-closed v-if="topic.closed" class="text-skin-text" />
             <h4 class="text-[21px] leading-6" v-text="topic.title" />
           </div>
           <div class="text-skin-text">

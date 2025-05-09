@@ -6,7 +6,9 @@ import {
   useRolesQuery,
   useUserRolesQuery
 } from '@/queries/townhall';
-import { SpaceMetadataLabel } from '@/types';
+import { Space, SpaceMetadataLabel } from '@/types';
+
+const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { sendCreateRole, sendEditRole, sendDeleteRole } = useTownhall();
@@ -118,7 +120,7 @@ async function handleDeleteRole(id: string) {
   }
 }
 
-setTitle('Roles');
+watchEffect(() => setTitle(`Roles - ${props.space.name}`));
 </script>
 
 <template>
