@@ -48,7 +48,8 @@ const {
   {
     state,
     labels
-  }
+  },
+  toRef(() => (route.query.q as string) || '')
 );
 
 function handleClearLabelsFilter(close: () => void) {
