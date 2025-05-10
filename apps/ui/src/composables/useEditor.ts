@@ -31,6 +31,9 @@ const processedProposals = Object.fromEntries(
 const proposals = reactive<Drafts>(processedProposals as Drafts);
 const spaceVoteTypes = new Map<string, VoteType[]>();
 const spacePrivacies = new Map<string, Privacy[]>();
+const spaceDelays = new Map<string, number>();
+const spaceMinPeriods = new Map<string, number>();
+const spaceMaxPeriods = new Map<string, number>();
 const spaceTemplate = new Map<string, string>();
 
 function generateId() {
@@ -137,7 +140,7 @@ export function useEditor() {
     return template;
   }
 
-  async function setSpacesVoteTypeAndPrivacy(spaceIds: string[]) {
+  async function setSpacesMeta(spaceIds: string[]) {
     await fetchSpacesAndStore(spaceIds);
 
     for (const id of spaceIds) {
@@ -155,6 +158,9 @@ export function useEditor() {
         id,
         space.privacy === 'any' ? ['none', 'shutter'] : [space.privacy]
       );
+      spaceDelays.set(id, space.voting_delay);
+      spaceMinPeriods.set(id, space.min_voting_period);
+      spaceMaxPeriods.set(id, space.max_voting_period);
     }
   }
 
@@ -163,7 +169,7 @@ export function useEditor() {
     payload?: Partial<Draft> & { proposalId?: number | string },
     draftKey?: string
   ) {
-    await setSpacesVoteTypeAndPrivacy([spaceId]);
+    await setSpacesMeta([spaceId]);
 
     const type = payload?.type || spaceVoteTypes.get(spaceId)![0];
     const privacy: Privacy =
@@ -199,7 +205,7 @@ export function useEditor() {
   async function refreshDrafts() {
     const ids = Object.keys(proposals).map(getSpaceId);
 
-    await setSpacesVoteTypeAndPrivacy(Array.from(new Set(ids)));
+    await setSpacesMeta(Array.from(new Set(ids)));
 
     for (const [id, proposal] of Object.entries(proposals)) {
       const allowedTypes = spaceVoteTypes.get(getSpaceId(id))!;
@@ -210,6 +216,29 @@ export function useEditor() {
       const allowedPrivacies = spacePrivacies.get(getSpaceId(id))!;
       if (!allowedPrivacies.includes(proposal.privacy)) {
         proposal.privacy = allowedPrivacies[0];
+      }
+
+      const unixTimestamp = Date.now() / 1000;
+
+      if (proposal.start) {
+        proposal.start = Math.max(
+          proposal.start,
+          unixTimestamp + (spaceDelays.get(getSpaceId(id)) || 0)
+        );
+      }
+
+      if (proposal.min_end) {
+        proposal.min_end = Math.max(
+          proposal.min_end,
+          unixTimestamp + (spaceMinPeriods.get(getSpaceId(id)) || 0)
+        );
+      }
+
+      if (proposal.max_end) {
+        proposal.max_end = Math.max(
+          proposal.max_end,
+          unixTimestamp + (spaceMaxPeriods.get(getSpaceId(id)) || 0)
+        );
       }
     }
   }
