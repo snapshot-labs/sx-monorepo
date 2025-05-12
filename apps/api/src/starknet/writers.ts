@@ -1,5 +1,5 @@
 import { starknet } from '@snapshot-labs/checkpoint';
-import { validateAndParseAddress } from 'starknet';
+import { hash, validateAndParseAddress } from 'starknet';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
 import {
@@ -639,6 +639,13 @@ export function createWriters(config: FullConfig) {
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
+
+    proposal.execution_strategy = validateAndParseAddress(
+      event.execution_strategy.address
+    );
+    proposal.execution_hash = hash.computeHashOnElements(
+      event.execution_strategy.params
+    );
 
     const executionStrategy = await handleExecutionStrategy(
       event.execution_strategy,
