@@ -514,7 +514,14 @@ export function createWriters(config: FullConfig) {
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
-      await handleProposalMetadata(metadataUri, config);
+      await handleProposalMetadata(
+        'starknet',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
 
       proposal.metadata = dropIpfs(metadataUri);
     } catch (e) {
@@ -630,15 +637,6 @@ export function createWriters(config: FullConfig) {
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    try {
-      await handleProposalMetadata(metadataUri, config);
-
-      proposal.metadata = dropIpfs(metadataUri);
-      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
-    } catch (e) {
-      console.log('failed to update proposal metadata', e);
-    }
-
     const executionStrategy = await handleExecutionStrategy(
       event.execution_strategy,
       event.payload,
@@ -648,6 +646,22 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
       proposal.quorum = executionStrategy.quorum;
+    }
+
+    try {
+      await handleProposalMetadata(
+        'starknet',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
+
+      proposal.metadata = dropIpfs(metadataUri);
+      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
+    } catch (e) {
+      console.log('failed to update proposal metadata', e);
     }
 
     await proposal.save();
