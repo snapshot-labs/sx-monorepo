@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker';
 import { getExecutionData } from '@snapshot-labs/sx';
 import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import fetch from 'cross-fetch';
+import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { Network } from '../../.checkpoint/models';
 
@@ -97,5 +98,5 @@ export function getExecutionHash({
     return keccak256(data.executionParams[0]);
   }
 
-  return hash.computeHashOnElements(data.executionParams);
+  return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
 }
