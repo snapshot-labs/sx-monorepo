@@ -648,7 +648,7 @@ export function createWriters(config: FullConfig) {
     );
 
     const executionStrategy = await handleExecutionStrategy(
-      event.execution_strategy,
+      event.execution_strategy.address,
       event.payload,
       config
     );
