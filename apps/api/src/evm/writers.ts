@@ -769,6 +769,11 @@ export function createWriters(config: FullConfig) {
         executionStrategy.axiom_snapshot_address;
       proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot;
       proposal.execution_strategy_type = executionStrategy.type;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      proposal.execution_strategy_details = executionStrategy.id;
     } else {
       proposal.quorum = 0n;
       proposal.timelock_veto_guardian = null;

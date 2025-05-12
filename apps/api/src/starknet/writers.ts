@@ -637,6 +637,9 @@ export function createWriters(config: FullConfig) {
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+    if (!space) return;
+
     const executionStrategy = await handleExecutionStrategy(
       event.execution_strategy,
       event.payload,
@@ -646,6 +649,38 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
       proposal.quorum = executionStrategy.quorum;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      // Current way of persisting it isn't great, because we need to fetch every strategy
+      // for space and compare it with execution strategy address.
+      // In the future we should find way to optimize it for example by adding where lookup
+      // via ORM
+      if (space.metadata) {
+        const spaceMetadata = await SpaceMetadataItem.loadEntity(
+          space.metadata,
+          config.indexerName
+        );
+
+        if (spaceMetadata) {
+          proposal.treasuries = spaceMetadata.treasuries;
+
+          const strategies = await Promise.all(
+            spaceMetadata.executors_strategies.map(id =>
+              ExecutionStrategy.loadEntity(id, config.indexerName)
+            )
+          );
+
+          const matchingStrategy = strategies.find(
+            strategy => strategy?.address === proposal.execution_strategy
+          );
+
+          if (matchingStrategy) {
+            proposal.execution_strategy_details = matchingStrategy.id;
+          }
+        }
+      }
     }
 
     try {
