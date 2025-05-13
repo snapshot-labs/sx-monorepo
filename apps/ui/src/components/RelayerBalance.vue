@@ -1,39 +1,40 @@
 <script setup lang="ts">
+import { useQuery } from '@tanstack/vue-query';
 import { _n, shorten } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { Space } from '@/types';
+
+type RelayerInfo = {
+  address: string;
+  balance: number;
+  ticker: string;
+  hasMinimumBalance: boolean;
+};
 
 const props = defineProps<{
   space: Space;
   network: Network;
 }>();
 
-const isLoading = ref(true);
-const error = ref(false);
-const relayerInfo = ref<{
-  address: string;
-  balance: number;
-  ticker: string;
-  hasMinimumBalance: boolean;
-} | null>(null);
-
-onMounted(async () => {
-  try {
-    isLoading.value = true;
-    error.value = false;
-
-    const info = await props.network.helpers.getRelayerInfo(
+const {
+  data: relayerInfo,
+  isPending,
+  isError
+} = useQuery({
+  queryKey: [
+    'relayerBalance',
+    () => ({
+      spaceId: props.space.id,
+      networkId: props.space.network
+    })
+  ],
+  queryFn: async () => {
+    return props.network.helpers.getRelayerInfo(
       props.space.id,
       props.space.network
-    );
-
-    relayerInfo.value = info;
-  } catch (e) {
-    console.error('Failed to fetch relayer balance:', e);
-    error.value = true;
-  } finally {
-    isLoading.value = false;
-  }
+    ) as Promise<RelayerInfo>;
+  },
+  staleTime: Infinity
 });
 </script>
 
@@ -43,11 +44,11 @@ onMounted(async () => {
     <div
       class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
     >
-      <div v-if="isLoading" class="flex flex-col">
+      <div v-if="isPending" class="flex flex-col">
         <UiLoading class="text-skin-text" :size="16" :loading="true" />
       </div>
       <div
-        v-else-if="error || !relayerInfo"
+        v-else-if="isError || !relayerInfo"
         class="flex items-center text-skin-link space-x-2"
       >
         <IH-exclamation-circle class="inline-block shrink-0" />
