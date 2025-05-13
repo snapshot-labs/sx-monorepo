@@ -196,6 +196,13 @@ async function handleSubmit() {
         newDelegatees.push(self);
       }
 
+      newShares.forEach((share, index) => {
+        if (share === 0) {
+          newShares.splice(index, 1);
+          newDelegatees.splice(index, 1);
+        }
+      });
+
       newDelegatees.forEach((address, index) => {
         newDelegatees[index] = getAddress(address);
       });
