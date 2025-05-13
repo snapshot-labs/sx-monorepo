@@ -33,7 +33,6 @@ export default [
       { path: '/privacy-policy', name: 'site-policy', component: Policy }
     ]
   },
-  { path: '/pro', name: 'pro', component: SpacePro },
   {
     path: '/:space',
     name: 'space',
@@ -80,7 +79,8 @@ export default [
         name: 'my-notifications',
         component: Notifications
       },
-      { path: '/profile/:user', name: 'user', component: User }
+      { path: '/profile/:user', name: 'user', component: User },
+      { path: '/pro', name: 'pro', component: SpacePro }
     ]
   }
 ];
