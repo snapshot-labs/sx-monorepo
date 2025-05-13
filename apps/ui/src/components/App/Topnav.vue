@@ -19,7 +19,7 @@ const { isWhiteLabel } = useWhiteLabel();
 const SEARCH_CONFIG = {
   space: {
     defaultRoute: 'space-proposals',
-    searchRoute: 'space-search',
+    searchRoute: 'space-proposals',
     placeholder: 'Search for a proposal',
     exclude: ['space-editor', 'space-proposal']
   },
