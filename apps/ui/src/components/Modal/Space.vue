@@ -53,13 +53,13 @@ watch(
         />
       </div>
     </template>
-    <div class="p-4">
-      <UiLoading v-if="isPending" />
+    <div>
+      <UiLoading v-if="isPending" class="inline-block p-4" />
       <template v-else-if="data">
         <UiContainerInfiniteScroll
           v-if="data.pages.flat().length"
           :loading-more="isFetchingNextPage"
-          class="justify-center max-w-screen-md mx-auto space-y-3"
+          class="justify-center max-w-screen-md mx-auto"
           @end-reached="handleEndReached"
         >
           <button
@@ -67,7 +67,7 @@ watch(
             :key="space.id"
             type="button"
             :space="space"
-            class="flex items-center space-x-3 truncate p-[20px] border rounded-md w-full"
+            class="flex items-center space-x-3 truncate px-4 py-3 border-b w-full"
             @click="$emit('pick', space)"
           >
             <div class="shrink-0">
@@ -83,7 +83,7 @@ watch(
             </div>
           </button>
         </UiContainerInfiniteScroll>
-        <div v-else class="flex items-center space-x-2">
+        <div v-else class="flex items-center space-x-2 m-4">
           <IH-exclamation-circle class="inline-block shrink-0" />
           <span>No results found for your search</span>
         </div>
