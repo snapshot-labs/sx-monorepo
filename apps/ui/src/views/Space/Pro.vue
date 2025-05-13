@@ -95,7 +95,9 @@ const { login, auth } = useWeb3();
 const queryClient = useQueryClient();
 
 const subscriptionLength = ref<SubscriptionLength>('yearly');
+const selectedSpace = ref<Space | null>(props.space || null);
 const modalPaymentOpen = ref(false);
+const modalSpaceOpen = ref(false);
 const modalConnectorOpen = ref(false);
 
 const paymentNetwork = computed(() => (metadataNetwork === 's' ? 1 : 11155111));
@@ -171,25 +173,49 @@ async function handleTurboClick() {
     return;
   }
 
+  if (!selectedSpace.value) {
+    modalSpaceOpen.value = true;
+    return;
+  }
+
+  modalPaymentOpen.value = true;
+}
+
+function handlePickSpace(space: Space) {
+  selectedSpace.value = space;
+  modalSpaceOpen.value = false;
   modalPaymentOpen.value = true;
 }
 
 async function handlePaymentConfirmed() {
-  if (!props.space) return;
+  if (!selectedSpace.value) return;
 
   await queryClient.invalidateQueries({
-    queryKey: ['spaces', 'detail', `${props.space.network}:${props.space.id}`]
+    queryKey: [
+      'spaces',
+      'detail',
+      `${selectedSpace.value.network}:${selectedSpace.value.id}`
+    ]
   });
 }
 
+function handleModalPaymentClose() {
+  modalPaymentOpen.value = false;
+  selectedSpace.value = props.space || null;
+}
+
 onMounted(() => {
-  if (!props.space || offchainNetworks.includes(props.space.network)) return;
+  if (
+    !selectedSpace.value ||
+    offchainNetworks.includes(selectedSpace.value.network)
+  )
+    return;
 
   router.push({
     name: 'space-overview',
     params: {
-      network: props.space.network,
-      id: props.space.id
+      network: selectedSpace.value.network,
+      id: selectedSpace.value.id
     }
   });
 });
@@ -217,9 +243,8 @@ onMounted(() => {
           :key="plan"
           :class="[
             'border rounded-lg px-4 py-3 flex gap-2 justify-between w-full',
-            { 'border-skin-link': subscriptionLength === plan && space }
+            { 'border-skin-link': subscriptionLength === plan }
           ]"
-          :disabled="!space"
           @click="subscriptionLength = plan as SubscriptionLength"
         >
           <div class="flex flex-1 items-center gap-x-2 flex-wrap">
@@ -244,12 +269,11 @@ onMounted(() => {
         </button>
       </div>
       <UiButton
-        v-if="space"
         class="primary"
-        :disabled="space.network !== metadataNetwork"
+        :disabled="space && space.network !== metadataNetwork"
         @click="handleTurboClick"
       >
-        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
+        {{ space?.turbo ? 'Extend' : 'Upgrade' }} {{ space?.name || 'space' }}
       </UiButton>
     </div>
 
@@ -323,17 +347,14 @@ onMounted(() => {
       </div>
     </div>
 
-    <div
-      v-if="space"
-      class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4"
-    >
+    <div class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4">
       <h2 class="text-[32px]">Get started today</h2>
       <UiButton
         class="primary"
-        :disabled="space.network !== metadataNetwork"
+        :disabled="space && space.network !== metadataNetwork"
         @click="handleTurboClick"
       >
-        {{ space.turbo ? 'Extend' : 'Upgrade' }} {{ space.name }}
+        {{ space?.turbo ? 'Extend' : 'Upgrade' }} {{ space?.name || 'space' }}
       </UiButton>
     </div>
 
@@ -351,7 +372,9 @@ onMounted(() => {
     </div>
 
     <ModalPayment
-      v-if="space && auth && isCurrentConnectorSupported && modalPaymentOpen"
+      v-if="
+        selectedSpace && auth && isCurrentConnectorSupported && modalPaymentOpen
+      "
       :open="modalPaymentOpen"
       :tokens="tokens"
       :calculator="calculator"
@@ -363,9 +386,9 @@ onMounted(() => {
       "
       :barcode-payload="{
         type: 'turbo',
-        params: { space: `${space.network}:${space.id}` }
+        params: { space: `${selectedSpace.network}:${selectedSpace.id}` }
       }"
-      @close="modalPaymentOpen = false"
+      @close="handleModalPaymentClose"
       @confirmed="handlePaymentConfirmed"
     >
       <template #summary="{ quantity }">
@@ -374,8 +397,8 @@ onMounted(() => {
           <div class="text-skin-heading">
             {{
               dayjs(
-                space.turbo_expiration
-                  ? space.turbo_expiration * 1e3
+                selectedSpace.turbo_expiration
+                  ? selectedSpace.turbo_expiration * 1e3
                   : new Date()
               )
                 .add(
@@ -405,6 +428,11 @@ onMounted(() => {
         Thank you for your subscription!
       </template>
     </ModalPayment>
+    <ModalSpace
+      :open="modalSpaceOpen"
+      @close="modalSpaceOpen = false"
+      @pick="handlePickSpace"
+    />
     <ModalConnector
       :open="modalConnectorOpen"
       :supported-connectors="supportedConnectors"
