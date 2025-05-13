@@ -225,7 +225,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-10" :class="{ 'pt-[94px]': !selectedSpace }">
+  <div class="space-y-10">
     <div class="shapes px-4 py-8 bg-skin-border/40 flex items-center">
       <div class="text-center w-full space-y-4">
         <span

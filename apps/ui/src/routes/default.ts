@@ -28,12 +28,12 @@ export default [
       { path: '/about', name: 'site-landing', component: Landing },
       { path: '/network', name: 'site-network', component: Network },
       { path: '/ecosystem', name: 'site-ecosystem', component: Ecosystem },
-      { path: '/pro', name: 'site-pro', component: SpacePro },
       { path: '/ecosystem/:app', name: 'site-app', component: App },
       { path: '/terms-of-use', name: 'site-terms', component: Terms },
       { path: '/privacy-policy', name: 'site-policy', component: Policy }
     ]
   },
+  { path: '/pro', name: 'pro', component: SpacePro },
   {
     path: '/:space',
     name: 'space',
