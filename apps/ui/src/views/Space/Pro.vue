@@ -225,7 +225,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-10" :class="{ 'pt-[94px]': !space }">
+  <div class="space-y-10" :class="{ 'pt-[94px]': !selectedSpace }">
     <div class="shapes px-4 py-8 bg-skin-border/40 flex items-center">
       <div class="text-center w-full space-y-4">
         <span
@@ -273,10 +273,11 @@ onMounted(() => {
       </div>
       <UiButton
         class="primary"
-        :disabled="space && space.network !== metadataNetwork"
+        :disabled="!!selectedSpace && selectedSpace.network !== metadataNetwork"
         @click="handleTurboClick"
       >
-        {{ space?.turbo ? 'Extend' : 'Upgrade' }} {{ space?.name || 'space' }}
+        {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
+        {{ selectedSpace?.name || 'space' }}
       </UiButton>
     </div>
 
@@ -354,10 +355,11 @@ onMounted(() => {
       <h2 class="text-[32px]">Get started today</h2>
       <UiButton
         class="primary"
-        :disabled="space && space.network !== metadataNetwork"
+        :disabled="!!selectedSpace && selectedSpace.network !== metadataNetwork"
         @click="handleTurboClick"
       >
-        {{ space?.turbo ? 'Extend' : 'Upgrade' }} {{ space?.name || 'space' }}
+        {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
+        {{ selectedSpace?.name || 'space' }}
       </UiButton>
     </div>
 
