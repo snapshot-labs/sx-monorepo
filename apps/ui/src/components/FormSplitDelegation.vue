@@ -16,7 +16,7 @@ const SUPPORTED_CHAIN_IDS: ChainId[] = [1, 100];
 
 const DELEGATEE_ADDRESS_DEFINITION = {
   type: 'string',
-  format: 'ethChecksumAddress',
+  format: 'ethAddress',
   title: 'Delegatee',
   examples: ['Address']
 };
@@ -42,7 +42,7 @@ const DELEGATEE_DEFINITION = {
   properties: {
     id: {
       anyOf: [DELEGATEE_ADDRESS_DEFINITION, { const: '' }],
-      errorMessage: 'Must be a valid checksum address'
+      errorMessage: 'Must be a valid ethereum address'
     },
     share: DELEGATEE_SHARE_DEFINITION
   },

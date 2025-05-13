@@ -1,5 +1,5 @@
 import { Interface } from '@ethersproject/abi';
-import { getAddress, isAddress } from '@ethersproject/address';
+import { isAddress } from '@ethersproject/address';
 import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
@@ -118,18 +118,6 @@ ajv.addFormat('ens-or-address', {
       return !!validateAndParseAddress(value);
     } catch {
       return isAddress(value);
-    }
-  }
-});
-
-ajv.addFormat('ethChecksumAddress', {
-  validate: (value: string) => {
-    if (!value) return false;
-
-    try {
-      return getAddress(value) === value;
-    } catch {
-      return false;
     }
   }
 });

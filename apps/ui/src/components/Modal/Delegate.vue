@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getAddress } from '@ethersproject/address';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
 import { clone, compareAddresses, getUrl } from '@/helpers/utils';
@@ -194,6 +195,10 @@ async function handleSubmit() {
         newShares.push(remainingShares);
         newDelegatees.push(self);
       }
+
+      newDelegatees.forEach((address, index) => {
+        newDelegatees[index] = getAddress(address);
+      });
     }
 
     await delegate(
