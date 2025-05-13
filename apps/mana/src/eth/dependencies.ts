@@ -5,7 +5,7 @@ import { NETWORK_IDS } from './rpc';
 
 const WALLET_SECRET = process.env.WALLET_SECRET || '';
 
-export function generateSpaceEVMWallet(
+export function generateSpaceEvmWallet(
   networkId: string,
   spaceAddress: string
 ) {
@@ -28,7 +28,7 @@ export const createWalletProxy = (chainId: number) => {
     if (!signers.has(normalizedSpaceAddress)) {
       const networkId = NETWORK_IDS.get(chainId);
       if (!networkId) throw new Error(`Unsupported chainId ${chainId}`);
-      const wallet = generateSpaceEVMWallet(networkId, normalizedSpaceAddress);
+      const wallet = generateSpaceEvmWallet(networkId, normalizedSpaceAddress);
       signers.set(normalizedSpaceAddress, wallet.connect(provider));
     }
 

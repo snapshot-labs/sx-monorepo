@@ -17,7 +17,7 @@ import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
-export const NETWORKS = new Map<number, EvmNetworkConfig>([
+const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [137, evmPolygon],
   [8453, evmBase],

@@ -1,6 +1,6 @@
 import express from 'express';
 import z from 'zod';
-import { generateSpaceEVMWallet } from './dependencies';
+import { generateSpaceEvmWallet } from './dependencies';
 import { createNetworkHandler, NETWORK_IDS } from './rpc';
 import { rpcError } from '../utils';
 
@@ -50,7 +50,7 @@ router.get('/relayers/spaces/:space', async (req, res) => {
     return rpcError(res, 400, 'Invalid networkId', 0);
 
   const normalizedSpaceAddress = spaceAddress.toLowerCase();
-  const wallet = generateSpaceEVMWallet(networkId, normalizedSpaceAddress);
+  const wallet = generateSpaceEvmWallet(networkId, normalizedSpaceAddress);
 
   res.json({
     address: wallet.address
