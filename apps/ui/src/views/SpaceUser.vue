@@ -26,7 +26,9 @@ const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const delegateModalOpen = ref(false);
-const delegateModalState = ref<{ delegatee: string } | null>(null);
+const delegateModalState = ref<{
+  delegatees: { id: string }[];
+}>({ delegatees: [] });
 
 // const delegatesCount = ref(0);
 
@@ -75,7 +77,7 @@ const hasOnlyInvalidDelegations = computed(() => {
 
   return props.space.delegations.every(
     delegation =>
-      !delegation.apiUrl || delegation.apiType === 'split-delegation'
+      !delegation.chainId || !delegation.apiUrl || !delegation.apiType
   );
 });
 
@@ -132,7 +134,7 @@ async function loadUserActivity() {
 // }
 
 function handleDelegateClick() {
-  delegateModalState.value = { delegatee: userId.value };
+  delegateModalState.value.delegatees[0] = { id: userId.value };
   delegateModalOpen.value = true;
 }
 

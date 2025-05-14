@@ -64,7 +64,7 @@ import {
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
-const DELEGATION_STRATEGIES = [
+const BASIC_DELEGATION_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
   'delegation-with-cap',
@@ -72,6 +72,16 @@ const DELEGATION_STRATEGIES = [
   'with-delegation',
   'erc20-balance-of-with-delegation'
 ];
+
+const SPLIT_DELEGATION_STRATEGIES = ['split-delegation'];
+
+const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
+  name: 'Split Delegation',
+  apiType: 'split-delegation',
+  apiUrl: 'https://delegate-api.gnosisguild.org',
+  contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
+  chainId: 1
+};
 
 const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
   s: 'https://delegate-registry-api.snapshot.box',
@@ -427,8 +437,8 @@ function formatDelegations(
 ): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
-  const spaceDelegationStrategy = space.strategies.find(strategy =>
-    DELEGATION_STRATEGIES.includes(strategy.name)
+  const basicDelegationStrategy = space.strategies.find(strategy =>
+    BASIC_DELEGATION_STRATEGIES.includes(strategy.name)
   );
 
   if (space.delegationPortal) {
@@ -450,7 +460,7 @@ function formatDelegations(
     });
   }
 
-  if (spaceDelegationStrategy) {
+  if (basicDelegationStrategy) {
     const chainId = parseInt(space.network, 10);
 
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
@@ -463,6 +473,16 @@ function formatDelegations(
         chainId
       });
     }
+  }
+
+  const splitDelegationStrategy = space.strategies.find(strategy =>
+    SPLIT_DELEGATION_STRATEGIES.includes(strategy.name)
+  );
+  if (
+    splitDelegationStrategy &&
+    space.delegationPortal?.delegationType !== SPLIT_DELEGATION_DATA.apiType
+  ) {
+    delegations.push(SPLIT_DELEGATION_DATA);
   }
 
   return delegations;

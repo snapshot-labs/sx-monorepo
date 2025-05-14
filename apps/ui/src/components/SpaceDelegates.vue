@@ -3,10 +3,11 @@ import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
-import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { useDelegateesQuery } from '@/queries/delegatees';
 import { useDelegatesQuery } from '@/queries/delegates';
 import { Space, SpaceMetadataDelegation } from '@/types';
+
+type SortType = 'delegatedVotes' | 'tokenHoldersRepresentedAmount';
 
 const props = defineProps<{
   space: Space;
@@ -14,7 +15,11 @@ const props = defineProps<{
 }>();
 
 const delegateModalOpen = ref(false);
-const delegateModalState = ref<{ delegatee: string } | null>(null);
+const delegateModalState = ref<{
+  delegatees: { id: string }[];
+}>({
+  delegatees: []
+});
 const isUndelegating = ref(false);
 const undelegateFn = ref(undelegate);
 const sortBy = ref(
@@ -28,6 +33,7 @@ const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const actions = useActions();
 const queryClient = useQueryClient();
+const { modalAccountOpen } = useModal();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 
@@ -45,11 +51,22 @@ const {
   sortBy
 );
 
-const { data: delegatee } = useDelegateesQuery(
+const { data: delegatees, isPending: isPendingDelegatees } = useDelegateesQuery(
   toRef(() => web3.value.account),
   toRef(props, 'space'),
   toRef(props, 'delegation')
 );
+
+const isUpdatableDelegation = computed(() => {
+  return props.delegation.apiType === 'split-delegation';
+});
+
+function getIsSortingDisabled(type: SortType) {
+  return (
+    props.delegation.apiType === 'split-delegation' &&
+    sortBy.value.includes(type)
+  );
+}
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
   if (props.delegation.chainId) {
@@ -59,9 +76,13 @@ function getExplorerUrl(address: string, type: 'address' | 'token') {
   }
 }
 
-function handleSortChange(
-  type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
-) {
+function getHasDelegatedTo(delegatee: string): boolean {
+  return (
+    delegatees.value?.some(d => compareAddresses(d.id, delegatee)) || false
+  );
+}
+
+function handleSortChange(type: SortType) {
   if (sortBy.value.startsWith(type)) {
     sortBy.value = sortBy.value.endsWith('desc')
       ? `${type}-asc`
@@ -72,16 +93,27 @@ function handleSortChange(
 }
 
 function handleDelegateToggle(newDelegatee?: string) {
-  if (
-    newDelegatee &&
-    delegatee.value &&
-    compareAddresses(newDelegatee, delegatee.value.id)
-  ) {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
+  if (newDelegatee && getHasDelegatedTo(newDelegatee)) {
     isUndelegating.value = true;
     return;
   }
 
-  delegateModalState.value = newDelegatee ? { delegatee: newDelegatee } : null;
+  delegateModalState.value.delegatees[0] = { id: newDelegatee || '' };
+  delegateModalOpen.value = true;
+}
+
+function handleUpdateDelegatesClick(newDelegatee?: string) {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
+  delegateModalState.value.delegatees[0] = { id: newDelegatee || '' };
   delegateModalOpen.value = true;
 }
 
@@ -97,7 +129,7 @@ async function undelegate() {
   return actions.delegate(
     props.space,
     props.delegation.apiType,
-    null,
+    [],
     props.delegation.contractAddress,
     props.delegation.chainId
   );
@@ -119,6 +151,10 @@ function handleUndelegateConfirmed() {
   isUndelegating.value = false;
 }
 
+function handleUndelegateClick() {
+  isUndelegating.value = true;
+}
+
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
@@ -130,22 +166,6 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <IH-exclamation-circle class="shrink-0" />
     <span>Invalid delegation settings.</span>
   </div>
-  <UiMessage
-    v-if="delegation.apiType === 'split-delegation'"
-    :type="'info'"
-    class="m-4"
-  >
-    This space uses the split-delegation feature, which is currently not
-    supported on the new interface. You can view the delegates dashboard on the
-    <a
-      :href="`${SNAPSHOT_URLS[props.space.network]}/#/${props.space.id}/delegates`"
-      target="_blank"
-      class="inline-flex items-center font-bold"
-    >
-      previous interface
-      <IH-arrow-sm-right class="inline-block -rotate-45" /></a
-    >.
-  </UiMessage>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <UiButton
@@ -161,17 +181,31 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         Edit my statement
       </UiButton>
       <div class="flex-auto" />
-      <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="handleDelegateToggle()">
+      <UiTooltip
+        :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
+      >
+        <UiButton
+          class="!px-0 w-[46px]"
+          @click="
+            isUpdatableDelegation
+              ? handleUpdateDelegatesClick()
+              : handleDelegateToggle()
+          "
+        >
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
     </div>
 
-    <div v-if="delegatee" class="mb-3">
+    <div class="mb-3">
       <UiLabel label="Delegating to" />
-      <div class="w-full truncate px-4">
-        <div class="flex w-full space-x-3 truncate border-b py-3">
+      <UiLoading v-if="isPendingDelegatees" class="px-4 py-3 block" />
+      <div v-else-if="delegatees?.length" class="w-full truncate px-4">
+        <div
+          v-for="delegatee in delegatees"
+          :key="delegatee.id"
+          class="flex w-full space-x-3 truncate border-b py-3"
+        >
           <AppLink
             :to="{
               name: 'space-user-statement',
@@ -200,7 +234,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 {{ _vp(delegatee.balance) }}
                 {{ space.voting_power_symbol }}
               </h4>
-              <div class="text-[17px]" v-text="_p(delegatee.share)" />
+              <div
+                class="text-[17px]"
+                v-text="_p(delegatee.delegatedVotePercentage)"
+              />
             </div>
           </AppLink>
           <div class="flex items-center justify-center">
@@ -216,15 +253,34 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     type="button"
                     class="flex items-center gap-2"
                     :class="{ 'opacity-80': active }"
-                    @click="isUndelegating = true"
+                    @click="
+                      isUpdatableDelegation
+                        ? handleUpdateDelegatesClick()
+                        : handleUndelegateClick()
+                    "
                   >
-                    <IH-user-remove />
-                    Undelegate
+                    <template v-if="isUpdatableDelegation">
+                      <IH-pencil />
+                      Edit delegation
+                    </template>
+                    <template v-else>
+                      <IH-user-remove />
+                      Undelegate
+                    </template>
                   </button>
                 </UiDropdownItem>
               </template>
             </UiDropdown>
           </div>
+        </div>
+      </div>
+      <div v-else class="flex space-x-2 border-b py-3 mx-4">
+        <IH-exclamation-circle class="shrink-0 mt-[5px]" />
+        <div>
+          You are not delegating your voting power yet.
+          <span v-if="isUpdatableDelegation">
+            If you just delegated, it may take up to 5 minutes to show up.
+          </span>
         </div>
       </div>
     </div>
@@ -245,6 +301,12 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <button
           type="button"
           class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
+          :class="{
+            'hover:text-skin-text': getIsSortingDisabled(
+              'tokenHoldersRepresentedAmount'
+            )
+          }"
+          :disabled="getIsSortingDisabled('tokenHoldersRepresentedAmount')"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span class="truncate">Delegators</span>
@@ -260,6 +322,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <button
           type="button"
           class="w-[120px] md:w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
+          :class="{
+            'hover:text-skin-text': getIsSortingDisabled('delegatedVotes')
+          }"
+          :disabled="getIsSortingDisabled('delegatedVotes')"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -372,16 +438,21 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       type="button"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
-                      @click="handleDelegateToggle(delegate.user)"
+                      @click="
+                        isUpdatableDelegation
+                          ? handleUpdateDelegatesClick(delegate.user)
+                          : handleDelegateToggle(delegate.user)
+                      "
                     >
-                      <template
-                        v-if="
-                          delegatee &&
-                          compareAddresses(delegate.user, delegatee.id)
-                        "
-                      >
-                        <IH-user-remove />
-                        Undelegate
+                      <template v-if="getHasDelegatedTo(delegate.user)">
+                        <template v-if="isUpdatableDelegation">
+                          <IH-pencil />
+                          Edit delegation
+                        </template>
+                        <template v-else>
+                          <IH-user-remove />
+                          Undelegate
+                        </template>
                       </template>
                       <template v-else>
                         <IH-user-add />
