@@ -7,6 +7,7 @@ import {
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
+  evmNetworks,
   evmOptimism,
   evmPolygon,
   evmSepolia
@@ -16,7 +17,7 @@ import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 
-export const NETWORKS = new Map<number, EvmNetworkConfig>([
+const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [137, evmPolygon],
   [8453, evmBase],
@@ -28,11 +29,18 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [11155111, evmSepolia]
 ]);
 
+export const NETWORK_IDS = new Map<number, string>(
+  Object.entries(evmNetworks).map(([networkId, config]) => [
+    config.Meta.eip712ChainId,
+    networkId
+  ])
+);
+
 export const createNetworkHandler = (chainId: number) => {
   const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
+  const getWallet = createWalletProxy(chainId);
 
   const client = new clients.EvmEthereumTx({
     networkConfig,
