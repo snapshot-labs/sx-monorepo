@@ -47,17 +47,6 @@ const formValidator = computed(() =>
   })
 );
 
-const networkDefinition = computed(() => {
-  return {
-    type: 'number',
-    title: 'Network',
-    tooltip: '',
-    examples: ['Select network'],
-    enum: availableNetworks.value.map(c => c.id),
-    options: availableNetworks.value
-  };
-});
-
 const availableNetworks = computed(() => {
   return Object.entries(networks)
     .filter(([, network]) => props.chainIds.includes(network.chainId))
@@ -70,6 +59,17 @@ const availableNetworks = computed(() => {
         class: 'rounded-full'
       })
     }));
+});
+
+const networkDefinition = computed(() => {
+  return {
+    type: 'number',
+    title: 'Network',
+    tooltip: '',
+    examples: ['Select network'],
+    enum: availableNetworks.value.map(c => c.id),
+    options: availableNetworks.value
+  };
 });
 
 watchEffect(async () => {
