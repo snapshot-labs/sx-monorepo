@@ -61,7 +61,7 @@ const isUpdatableDelegation = computed(() => {
   return props.delegation.apiType === 'split-delegation';
 });
 
-function isSortingDisabled(type: SortType) {
+function getIsSortingDisabled(type: SortType) {
   return (
     props.delegation.apiType === 'split-delegation' &&
     sortBy.value.includes(type)
@@ -76,7 +76,7 @@ function getExplorerUrl(address: string, type: 'address' | 'token') {
   }
 }
 
-function hasDelegatedTo(delegatee: string): boolean {
+function getHasDelegatedTo(delegatee: string): boolean {
   return (
     delegatees.value?.some(d => compareAddresses(d.id, delegatee)) || false
   );
@@ -98,7 +98,7 @@ function handleDelegateToggle(newDelegatee?: string) {
     return;
   }
 
-  if (newDelegatee && hasDelegatedTo(newDelegatee)) {
+  if (newDelegatee && getHasDelegatedTo(newDelegatee)) {
     isUndelegating.value = true;
     return;
   }
@@ -302,11 +302,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           type="button"
           class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
           :class="{
-            'hover:text-skin-text': isSortingDisabled(
+            'hover:text-skin-text': getIsSortingDisabled(
               'tokenHoldersRepresentedAmount'
             )
           }"
-          :disabled="isSortingDisabled('tokenHoldersRepresentedAmount')"
+          :disabled="getIsSortingDisabled('tokenHoldersRepresentedAmount')"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span class="truncate">Delegators</span>
@@ -323,9 +323,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           type="button"
           class="w-[120px] md:w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
           :class="{
-            'hover:text-skin-text': isSortingDisabled('delegatedVotes')
+            'hover:text-skin-text': getIsSortingDisabled('delegatedVotes')
           }"
-          :disabled="isSortingDisabled('delegatedVotes')"
+          :disabled="getIsSortingDisabled('delegatedVotes')"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -444,7 +444,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                           : handleDelegateToggle(delegate.user)
                       "
                     >
-                      <template v-if="hasDelegatedTo(delegate.user)">
+                      <template v-if="getHasDelegatedTo(delegate.user)">
                         <template v-if="isUpdatableDelegation">
                           <IH-pencil />
                           Edit delegation
