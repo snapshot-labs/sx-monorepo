@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { getUrl } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { ChainId } from '@/types';
 
@@ -18,6 +20,8 @@ const isFormValidated = defineModel<boolean>('isFormValidated', {
 const isFormValid = defineModel<boolean>('isFormValid', {
   required: true
 });
+
+const props = defineProps<{ chainIds: ChainId[] }>();
 
 const emit = defineEmits<{ (e: 'pick'): void }>();
 
@@ -43,6 +47,31 @@ const formValidator = computed(() =>
   })
 );
 
+const networkDefinition = computed(() => {
+  return {
+    type: 'number',
+    title: 'Network',
+    tooltip: '',
+    examples: ['Select network'],
+    enum: availableNetworks.value.map(c => c.id),
+    options: availableNetworks.value
+  };
+});
+
+const availableNetworks = computed(() => {
+  return Object.entries(networks)
+    .filter(([, network]) => props.chainIds.includes(network.chainId))
+    .map(([, network]) => ({
+      id: network.chainId,
+      name: network.name,
+      icon: h('img', {
+        src: getUrl(network.logo),
+        alt: network.name,
+        class: 'rounded-full'
+      })
+    }));
+});
+
 watchEffect(async () => {
   isFormValidated.value = false;
   formErrors.value = await formValidator.value.validateAsync({
@@ -60,5 +89,10 @@ watchEffect(async () => {
     :error="formErrors.delegatees?.[0]?.id"
     :required="true"
     @pick="emit('pick')"
+  />
+  <Combobox
+    v-if="availableNetworks.length > 1"
+    v-model="form.chainId"
+    :definition="networkDefinition"
   />
 </template>
