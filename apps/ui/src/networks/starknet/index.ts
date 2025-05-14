@@ -32,7 +32,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseChainId: 1,
     baseNetworkId: 'eth',
     rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    ethRpcUrl: 'https://rpc.snapshot.org/1',
     apiUrl: UNIFIED_API_URL,
     explorerUrl: 'https://starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
@@ -43,7 +43,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseChainId: 11155111,
     baseNetworkId: 'sep',
     rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    ethRpcUrl: 'https://rpc.snapshot.org/11155111',
     apiUrl: UNIFIED_API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
