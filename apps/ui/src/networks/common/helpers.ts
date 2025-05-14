@@ -81,13 +81,15 @@ export function createStrategyPicker({
     strategies,
     strategiesIndicies,
     isContract,
-    connectorType
+    connectorType,
+    ignoreRelayer
   }: {
     authenticators: string[];
     strategies: string[];
     strategiesIndicies: number[];
     isContract: boolean;
     connectorType: ConnectorType;
+    ignoreRelayer?: boolean;
   }) {
     const authenticatorsInfo = [...authenticators]
       .filter(authenticator =>
@@ -139,7 +141,12 @@ export function createStrategyPicker({
           relayerType,
           connectors
         };
-      });
+      })
+      .filter(authenticator =>
+        ignoreRelayer && authenticator.relayerType
+          ? !['evm', 'starknet'].includes(authenticator.relayerType)
+          : true
+      );
 
     const authenticatorInfo = authenticatorsInfo.find(({ connectors }) =>
       connectors.includes(connectorType)

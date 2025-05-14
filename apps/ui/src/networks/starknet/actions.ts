@@ -14,7 +14,7 @@ import {
   constants as starknetConstants,
   uint256
 } from 'starknet';
-import { executionCall, MANA_URL } from '@/helpers/mana';
+import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import {
@@ -246,6 +246,12 @@ export function createActions(
 
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        space.id,
+        space.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
@@ -253,7 +259,8 @@ export function createActions(
           strategiesIndicies:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -359,13 +366,20 @@ export function createActions(
 
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        space.id,
+        space.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
         strategiesIndicies:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
-        isContract
+        isContract,
+        ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -446,13 +460,20 @@ export function createActions(
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
           strategiesIndicies: proposal.strategies_indices,
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {

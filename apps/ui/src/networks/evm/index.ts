@@ -1,5 +1,6 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { getRelayerInfo } from '@/helpers/mana';
 import { pinGraph, pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
@@ -130,6 +131,8 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_EXECUTORS[executorType],
     pin,
     getSpaceController: async (space: Space) => space.controller,
+    getRelayerInfo: (space: string, network: NetworkID) =>
+      getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
