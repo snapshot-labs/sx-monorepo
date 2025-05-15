@@ -371,6 +371,7 @@ export type NetworkApi = {
     Record<ChainId, { spaces_count: number; premium: boolean }>
   >;
   loadSettings(): Promise<Setting[]>;
+  loadLastIndexedBlock(): Promise<number | null>;
 };
 
 export type NetworkConstants = {

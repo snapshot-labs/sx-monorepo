@@ -1,12 +1,23 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getNetwork } from '@/networks';
+import { METADATA } from '@/networks/evm';
 import { METADATA as STARKNET_NETWORKS_METADATA } from '@/networks/starknet';
 import { ChainId, NetworkID } from '@/types';
 import { getProvider } from './provider';
 
 function getStarknetNetworkId(chainId: ChainId): NetworkID {
   const network = Object.entries(STARKNET_NETWORKS_METADATA).find(
+    ([, metadata]) => metadata.chainId === chainId
+  );
+
+  if (!network) throw new Error(`ChainId ${chainId} not found`);
+
+  return network[0] as NetworkID;
+}
+
+function getEvmNetworkId(chainId: ChainId): NetworkID {
+  const network = Object.entries(METADATA).find(
     ([, metadata]) => metadata.chainId === chainId
   );
 
@@ -48,8 +59,13 @@ export function waitForTransaction(txId: string, chainId: ChainId) {
   const isEvmNetwork = typeof chainId === 'number';
 
   if (isEvmNetwork) {
-    const provider = getProvider(chainId);
-    return provider.waitForTransaction(txId);
+    try {
+      const networkId = getEvmNetworkId(chainId);
+      return getNetwork(networkId).helpers.waitForTransaction(txId);
+    } catch {
+      const provider = getProvider(chainId);
+      return provider.waitForTransaction(txId);
+    }
   }
 
   const networkId = getStarknetNetworkId(chainId);

@@ -9,6 +9,7 @@ import { createActions } from './actions';
 import { createConstants } from './constants';
 import { EVM_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { waitForIndexing } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -134,7 +135,11 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     getRelayerInfo: (space: string, network: NetworkID) =>
       getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
-    waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForTransaction: async (txId: string) =>
+      waitForIndexing(
+        await provider.waitForTransaction(txId),
+        api.loadLastIndexedBlock
+      ),
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
         const timer = setInterval(async () => {

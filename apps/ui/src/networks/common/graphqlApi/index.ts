@@ -41,6 +41,7 @@ import {
   mixinHighlightVotes
 } from './highlight';
 import {
+  LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
@@ -782,6 +783,15 @@ export function createApi(
     },
     loadSettings: async () => {
       return [];
+    },
+    async loadLastIndexedBlock(): Promise<number | null> {
+      const { data } = await apollo.query({
+        query: LAST_INDEXED_BLOCK_QUERY,
+        variables: {
+          indexer: networkId
+        }
+      });
+      return data._metadata?.value ? Number(data._metadata.value) : null;
     }
   };
 }
