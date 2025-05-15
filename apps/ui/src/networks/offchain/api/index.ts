@@ -204,6 +204,7 @@ function formatSpace(
     type: 'offchain',
     private: space.private,
     flagged: space.flagged,
+    flagCode: space.flagCode,
     domain: space.domain,
     skin: space.skin,
     skinSettings: formatSkinSettings(space.skinSettings),
@@ -409,7 +410,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     execution_tx: null,
     veto_tx: null,
     privacy: proposal.privacy || 'none',
-    flagged: proposal.flagged
+    flagged: proposal.flagged,
+    flag_code: proposal.flagCode
   };
 }
 

@@ -91,6 +91,7 @@ const SPACE_FRAGMENT = gql`
     terms
     private
     flagged
+    flagCode
     domain
     skin
     skinSettings {
@@ -168,6 +169,7 @@ const PROPOSAL_FRAGMENT = gql`
     privacy
     plugins
     flagged
+    flagCode
   }
 `;
 

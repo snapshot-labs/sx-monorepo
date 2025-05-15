@@ -195,3 +195,8 @@ export const VALIDATION_TYPES_INFO: Record<
 export const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
 
 export const RECENT_CONNECTOR = 'recent-connector';
+
+export const FLAGS = {
+  MALICIOUS: 1,
+  DMCA: 2
+};
