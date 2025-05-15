@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { getGenericExplorerUrl, waitForTransaction } from '@/helpers/generic';
-import { isUserAbortError, sleep } from '@/helpers/utils';
+import { isUserAbortError } from '@/helpers/utils';
 import { ChainId } from '@/types';
-
-const API_DELAY = 10000;
 
 type Messages = {
   approveTitle?: string;
@@ -78,8 +76,7 @@ async function handleExecute() {
 
     if (txId.value) {
       step.value = 'confirming';
-      await waitForTransaction(txId.value, props.chainId);
-      await sleep(API_DELAY);
+      await waitForTransaction(txId.value, props.chainId, true);
 
       step.value = 'success';
       emit('confirmed', txId.value);

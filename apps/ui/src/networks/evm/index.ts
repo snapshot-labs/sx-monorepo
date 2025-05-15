@@ -135,6 +135,50 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      let blockNumber: number | undefined;
+      const interval = 2000;
+      const maxRetries = Math.floor(timeout / interval);
+      let retries = 0;
+
+      return new Promise((resolve, reject) => {
+        const timer = setInterval(async () => {
+          try {
+            if (!blockNumber) {
+              blockNumber = (await provider.getTransaction(txId)).blockNumber;
+            }
+
+            if (!blockNumber) {
+              throw new Error('Invalid transaction block number');
+            }
+
+            const lastIndexedBlockNumber = await api.loadLastIndexedBlock();
+
+            if (!lastIndexedBlockNumber) {
+              throw new Error('Invalid indexer block number');
+            }
+
+            if (blockNumber <= lastIndexedBlockNumber || retries > maxRetries) {
+              clearInterval(timer);
+              return resolve(true);
+            }
+
+            throw new Error('Transaction not indexed yet');
+          } catch {
+            if (retries > maxRetries) {
+              clearInterval(timer);
+              reject(false);
+            }
+
+            retries++;
+            return;
+          }
+        }, interval);
+      });
+    },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
         const timer = setInterval(async () => {

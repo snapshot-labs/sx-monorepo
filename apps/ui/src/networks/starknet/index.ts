@@ -1,7 +1,8 @@
 import {
   LibraryError,
   ReceiptTx,
-  constants as starknetConstants
+  constants as starknetConstants,
+  TransactionReceipt
 } from 'starknet';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
@@ -91,7 +92,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     getTransaction: txId => provider.getTransactionReceipt(txId),
     getRelayerInfo: (space: string, network: NetworkID) =>
       getRelayerInfo(space, network, provider),
-    waitForTransaction: txId => {
+    waitForTransaction: async txId => {
       let retries = 0;
 
       return new Promise((resolve, reject) => {
@@ -124,6 +125,54 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
           clearInterval(timer);
         }, 2000);
+      });
+    },
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      const interval = 2000;
+      const maxRetries = Math.floor(timeout / interval);
+      let retries = 0;
+      let blockNumber: number | undefined;
+
+      return new Promise((resolve, reject) => {
+        const timer = setInterval(async () => {
+          try {
+            if (!blockNumber) {
+              blockNumber = (
+                (await provider.getTransactionReceipt(
+                  txId
+                )) as TransactionReceipt
+              ).block_number;
+            }
+
+            if (!blockNumber) {
+              throw new Error('Block number not ready yet');
+            }
+
+            const lastIndexedBlockNumber = await api.loadLastIndexedBlock();
+
+            if (!lastIndexedBlockNumber) {
+              throw new Error('Invalid indexer block number');
+            }
+
+            if (blockNumber <= lastIndexedBlockNumber || retries > maxRetries) {
+              clearInterval(timer);
+              return resolve(true);
+            }
+
+            throw new Error('Transaction not indexed yet');
+          } catch {
+            if (retries > maxRetries) {
+              clearInterval(timer);
+              reject(false);
+            }
+
+            retries++;
+            return;
+          }
+        }, interval);
       });
     },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
