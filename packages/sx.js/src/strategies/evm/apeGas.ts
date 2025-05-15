@@ -100,14 +100,18 @@ export default function createApeGasStrategy(): Strategy {
         provider
       );
 
-      const votingPower = await apeGasVotingStrategyContract.getVotingPower(
-        block,
-        voterAddress,
-        params,
-        userParams
-      );
+      try {
+        const votingPower = await apeGasVotingStrategyContract.getVotingPower(
+          block,
+          voterAddress,
+          params,
+          userParams
+        );
 
-      return BigInt(votingPower.toString());
+        return BigInt(votingPower.toString());
+      } catch {
+        return BigInt(0);
+      }
     }
   };
 }
