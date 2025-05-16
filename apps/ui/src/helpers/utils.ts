@@ -252,9 +252,9 @@ export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   }
 }
 
-export function _rt(number) {
+export function _rt(time: number) {
   try {
-    return dayjs(number * 1000).fromNow(false);
+    return dayjs(time * 1000).fromNow(false);
   } catch (e) {
     console.log(e);
     return '';

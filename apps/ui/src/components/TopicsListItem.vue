@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Topic } from '@/helpers/discourse';
-import { _n, _rt } from '@/helpers/utils';
+import { _n } from '@/helpers/utils';
 
 defineProps<{ topic: Topic }>();
 </script>
@@ -45,7 +45,9 @@ defineProps<{ topic: Topic }>();
             v-text="topic.latest_poster.name || topic.latest_poster.username"
           />
         </div>
-        <span> · {{ _rt(topic.updated) }}</span>
+        <TimeRelative v-slot="{ relativeTime }" :time="topic.updated">
+          <span> · {{ relativeTime }}</span>
+        </TimeRelative>
         <span> · {{ _n(topic.posts_count) }} replies</span>
       </div>
     </div>

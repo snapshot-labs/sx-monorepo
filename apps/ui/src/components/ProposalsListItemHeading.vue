@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
-import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
+import { _n, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -132,12 +132,17 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
         {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
-      <button
-        type="button"
-        class="text-skin-text"
-        @click="modalOpenTimeline = true"
-        v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"
-      />
+      <TimeRelative
+        v-slot="{ relativeTime }"
+        :time="getTsFromCurrent(props.proposal.network, props.proposal.max_end)"
+      >
+        <button
+          type="button"
+          class="text-skin-text"
+          @click="modalOpenTimeline = true"
+          v-text="relativeTime"
+        />
+      </TimeRelative>
     </span>
   </div>
   <teleport to="#modal">
