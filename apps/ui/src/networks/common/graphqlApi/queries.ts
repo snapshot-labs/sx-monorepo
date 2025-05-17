@@ -299,3 +299,11 @@ export const LEADERBOARD_QUERY = gql(`
     }
   }
 `);
+
+export const LAST_INDEXED_BLOCK_QUERY = gql(`
+  query _Metadata($indexer: String!) {
+    _metadata(indexer: $indexer, id: "last_indexed_block") {
+      value
+    }
+  }
+`);

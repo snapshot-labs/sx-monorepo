@@ -1,7 +1,8 @@
 import {
   LibraryError,
   ReceiptTx,
-  constants as starknetConstants
+  constants as starknetConstants,
+  TransactionReceipt
 } from 'starknet';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
@@ -13,6 +14,7 @@ import { createConstants } from './constants';
 import { createProvider } from './provider';
 import { STARKNET_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { waitForIndexing } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -91,10 +93,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     getTransaction: txId => provider.getTransactionReceipt(txId),
     getRelayerInfo: (space: string, network: NetworkID) =>
       getRelayerInfo(space, network, provider),
-    waitForTransaction: txId => {
+    waitForTransaction: async txId => {
       let retries = 0;
 
-      return new Promise((resolve, reject) => {
+      const transaction = await new Promise((resolve, reject) => {
         const timer = setInterval(async () => {
           let tx: Awaited<ReturnType<typeof provider.getTransactionReceipt>>;
           try {
@@ -125,6 +127,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
           clearInterval(timer);
         }, 2000);
       });
+
+      return waitForIndexing(transaction, api.loadLastIndexedBlock);
     },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {

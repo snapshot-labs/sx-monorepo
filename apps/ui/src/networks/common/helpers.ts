@@ -177,3 +177,41 @@ export function createStrategyPicker({
     };
   };
 }
+
+export function waitForIndexing<
+  T extends { blockNumber?: number; block_number?: number }
+>(tx: T, loadLastIndexedBlockFn: () => Promise<number | null>): Promise<T> {
+  let retries = 0;
+  const maxRetries = 5;
+  return new Promise((resolve, reject) => {
+    const timer = setInterval(async () => {
+      try {
+        const lastIndexedBlockNumber = await loadLastIndexedBlockFn();
+
+        if (!lastIndexedBlockNumber) {
+          throw new Error('Invalid block number');
+        }
+
+        if (
+          (tx.blockNumber || tx.block_number || Number.MAX_SAFE_INTEGER) <=
+            lastIndexedBlockNumber ||
+          retries > maxRetries
+        ) {
+          return resolve(tx);
+        }
+
+        throw new Error('Transaction not indexed yet');
+      } catch {
+        if (retries > maxRetries) {
+          clearInterval(timer);
+          reject();
+        }
+
+        retries++;
+        return;
+      }
+
+      clearInterval(timer);
+    }, 2000);
+  });
+}
