@@ -2,6 +2,7 @@
 import { getAddress } from '@ethersproject/address';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
+import { DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
 import { clone, compareAddresses, getUrl } from '@/helpers/utils';
 import {
   EVM_CONNECTORS,
@@ -21,6 +22,13 @@ type Delegatee = {
 type ValidSpaceMetadataDelegation = {
   [P in keyof SpaceMetadataDelegation]: NonNullable<SpaceMetadataDelegation[P]>;
 };
+
+const SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS = [1, 100];
+// chain ids from https://github.com/snapshot-labs/snapshot-subgraph
+const DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS = [
+  1, 42161, 8453, 84532, 81457, 56, 250, 100, 59144, 5000, 137, 10, 146,
+  11155111
+];
 
 const DEFAULT_FORM_STATE = {
   delegatees: [{ id: '', share: 100 }],
@@ -111,6 +119,39 @@ const spaceDelegationsOptions = computed<
       })
     };
   });
+});
+
+const chainIds = computed(() => {
+  if (isSelectedDelegationSupportingMultipleDelegates.value) {
+    return SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS;
+  } else {
+    const delegateRegistryStrategies = props.space.strategies_params.filter(
+      (_, index) =>
+        DELEGATE_REGISTRY_STRATEGIES.includes(props.space.strategies[index])
+    );
+
+    if (!delegateRegistryStrategies.length) {
+      return [form.chainId];
+    }
+
+    const chainIds = delegateRegistryStrategies
+      .flatMap(params => {
+        return [
+          params.network,
+          ...params.params?.strategies?.flatMap(p => [
+            p.network,
+            p.params?.network
+          ])
+        ];
+      })
+      .filter(Boolean)
+      .map(Number)
+      .filter(chainId =>
+        DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId)
+      );
+
+    return Array.from(new Set(chainIds));
+  }
 });
 
 function delegationConnectors(
@@ -391,6 +432,7 @@ watch(
           v-model:is-form-valid="isFormValid"
           v-model:form="form"
           v-model:is-hidden="isHidden"
+          :chain-ids="chainIds"
           @pick="handlePickerClick"
         />
         <FormBasicDelegation
@@ -398,6 +440,7 @@ watch(
           v-model:is-form-validated="isFormValidated"
           v-model:is-form-valid="isFormValid"
           v-model:form="form"
+          :chain-ids="chainIds"
           @pick="handlePickerClick"
         />
       </template>
