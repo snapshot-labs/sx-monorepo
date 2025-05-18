@@ -19,10 +19,12 @@ const props = withDefaults(
     open: boolean;
     chainId: ChainId;
     messages?: Messages;
+    waitForIndex?: boolean;
     execute: () => Promise<string | null>;
   }>(),
   {
-    messages: () => ({})
+    messages: () => ({}),
+    waitForIndex: true
   }
 );
 
@@ -76,7 +78,7 @@ async function handleExecute() {
 
     if (txId.value) {
       step.value = 'confirming';
-      await waitForTransaction(txId.value, props.chainId, true);
+      await waitForTransaction(txId.value, props.chainId, props.waitForIndex);
 
       step.value = 'success';
       emit('confirmed', txId.value);

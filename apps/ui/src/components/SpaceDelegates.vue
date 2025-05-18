@@ -511,6 +511,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :open="isUndelegating"
         :chain-id="delegation.chainId"
         :execute="undelegateFn"
+        :wait-for-index="false"
         @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"
         @cancelled="isUndelegating = false"
