@@ -99,7 +99,10 @@ onMounted(async () => {
             v-if="message.role === 'user'"
             class="py-2 inline-block leading-6 px-3 bg-skin-border/60 rounded-[22px] ml-6"
           >
-            <UiMarkdown :body="message.content" class="!text-[18px]" />
+            <UiMarkdown
+              :body="message.content as string"
+              class="!text-[18px]"
+            />
           </div>
           <div
             v-if="message.role === 'assistant'"
