@@ -268,7 +268,6 @@ watch(
     "
     :chain-id="network"
     :messages="currentStep.messages"
-    :wait-for-index="false"
     @close="
       isModalTransactionProgressOpen = false;
       emit('close');

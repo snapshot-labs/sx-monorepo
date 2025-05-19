@@ -24,7 +24,7 @@ const props = withDefaults(
   }>(),
   {
     messages: () => ({}),
-    waitForIndex: true
+    waitForIndex: false
   }
 );
 
