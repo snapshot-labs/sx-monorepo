@@ -1,7 +1,7 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getNetwork } from '@/networks';
-import { METADATA } from '@/networks/evm';
+import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm';
 import { METADATA as STARKNET_NETWORKS_METADATA } from '@/networks/starknet';
 import { ChainId, NetworkID } from '@/types';
 import { getProvider } from './provider';
@@ -17,7 +17,7 @@ function getStarknetNetworkId(chainId: ChainId): NetworkID {
 }
 
 function getEvmNetworkId(chainId: ChainId): NetworkID {
-  const network = Object.entries(METADATA).find(
+  const network = Object.entries(EVM_NETWORKS_METADATA).find(
     ([, metadata]) => metadata.chainId === chainId
   );
 
