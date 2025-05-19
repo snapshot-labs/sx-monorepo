@@ -92,7 +92,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     getTransaction: txId => provider.getTransactionReceipt(txId),
     getRelayerInfo: (space: string, network: NetworkID) =>
       getRelayerInfo(space, network, provider),
-    waitForTransaction: async txId => {
+    waitForTransaction: txId => {
       let retries = 0;
 
       return new Promise((resolve, reject) => {
