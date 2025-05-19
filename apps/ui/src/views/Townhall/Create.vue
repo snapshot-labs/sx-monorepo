@@ -21,14 +21,14 @@ const TITLE_DEFINITION = {
   type: 'string',
   title: 'Ask an open question',
   minLength: 1,
-  maxLength: 256
+  maxLength: 100
 };
 
 const BODY_DEFINITION = {
   type: 'string',
   format: 'long',
   title: 'Context',
-  maxLength: 10e3,
+  maxLength: 1e3,
   examples: ['Add more context…']
 };
 
@@ -36,7 +36,7 @@ const DISCUSSION_DEFINITION = {
   type: 'string',
   format: 'uri',
   title: 'Discussion',
-  maxLength: 256,
+  maxLength: 200,
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
