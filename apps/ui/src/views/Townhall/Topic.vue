@@ -124,12 +124,7 @@ watchEffect(() => {
 
 <template>
   <div>
-    <div
-      v-if="
-        isPending || isRolesPending || isUserVotesPending || isResultsPending
-      "
-      class="my-4"
-    >
+    <div v-if="isPending || isResultsPending" class="py-4">
       <UiLoading class="p-4" />
     </div>
     <div
