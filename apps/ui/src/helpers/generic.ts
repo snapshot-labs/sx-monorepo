@@ -78,7 +78,11 @@ export async function waitForTransaction(
   const tx = await network.helpers.waitForTransaction(txId);
 
   if (waitForIndexing) {
-    await network.helpers.waitForIndexing(txId);
+    try {
+      await network.helpers.waitForIndexing(txId);
+    } catch (e) {
+      console.error('Timeout while waiting for API indexing', e);
+    }
   }
 
   return tx;

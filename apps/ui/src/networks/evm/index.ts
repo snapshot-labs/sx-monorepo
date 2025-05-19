@@ -161,16 +161,19 @@ export function createEvmNetwork(networkId: NetworkID): Network {
               throw new Error('Invalid indexer block number');
             }
 
-            if (blockNumber <= lastIndexedBlockNumber || retries > maxRetries) {
+            if (blockNumber <= lastIndexedBlockNumber) {
               clearInterval(timer);
               return resolve(true);
+            } else if (retries > maxRetries) {
+              clearInterval(timer);
+              return reject(new Error('Transaction not indexed yet'));
             }
 
             throw new Error('Transaction not indexed yet');
           } catch {
             if (retries > maxRetries) {
               clearInterval(timer);
-              reject(false);
+              return reject(false);
             }
 
             retries++;
