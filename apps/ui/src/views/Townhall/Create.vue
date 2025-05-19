@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { getDiscussion } from '@/helpers/townhall/api';
 import { sleep } from '@/helpers/utils';
+import { Space } from '@/types';
+
+const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const router = useRouter();
 const { sendDiscussion } = useTownhall();
 const { addNotification } = useUiStore();
+const { setTitle } = useTitle();
+const { setContext, setVars, openChatbot } = useChatbot();
 
 const title = ref(route.query.title as string);
 const body = ref('');
@@ -66,6 +71,32 @@ async function handleSubmit() {
     submitLoading.value = false;
   }
 }
+
+watchEffect(() => {
+  setTitle(`New topic - ${props.space.name}`);
+  setContext({
+    purpose:
+      'This is where you create a new Topic - often an open question for consensus-driven discussion, similar to Pol.is. Your Topic will invite others to share their perspectives and find common ground.',
+    data: {
+      space: {
+        id: props.space.id,
+        name: props.space.name,
+        about: props.space.about
+      }
+    },
+    inputs: {
+      title: {
+        value: title.value,
+        definition: TITLE_DEFINITION
+      },
+      body: {
+        value: body.value,
+        definition: BODY_DEFINITION
+      }
+    }
+  });
+  setVars({ title, body });
+});
 </script>
 
 <template>
@@ -83,14 +114,25 @@ async function handleSubmit() {
       </div>
       <UiInputString v-model="discussion" :definition="DISCUSSION_DEFINITION" />
       <UiLinkPreview :url="discussion" />
-      <UiButton
-        class="primary flex items-center space-x-1"
-        :disabled="submitLoading"
-        @click="handleSubmit"
-      >
-        <div>Publish</div>
-        <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-      </UiButton>
+      <div class="flex gap-2.5 items-center">
+        <UiButton
+          class="primary flex items-center space-x-1"
+          :disabled="submitLoading"
+          @click="handleSubmit"
+        >
+          <div>Publish</div>
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
+        <div v-if="title?.length > 10">
+          <a
+            class="flex items-center gap-1.5"
+            @click="openChatbot('Improve writing')"
+          >
+            <IH-sparkles />
+            Improve writing
+          </a>
+        </div>
+      </div>
     </UiContainer>
   </div>
 </template>

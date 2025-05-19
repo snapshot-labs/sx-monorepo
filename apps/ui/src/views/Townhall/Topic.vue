@@ -9,16 +9,20 @@ import {
   useRolesQuery,
   useUserVotesQuery
 } from '@/queries/townhall';
+import { Space } from '@/types';
+
+const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
+const { setContext, setVars, openChatbot } = useChatbot();
 
 const id = computed(() => Number(route.params.id));
 const spaceId = '1';
 
 const roleFilter = ref('any');
-const statementInput = ref('');
+const statement = ref('');
 
 const {
   data: discussion,
@@ -87,7 +91,35 @@ const STATEMENT_DEFINITION = {
   maxLength: 200
 };
 
-watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
+watchEffect(() => {
+  if (!discussion.value) return;
+
+  setTitle(discussion.value ? discussion?.value.title : '');
+  setContext({
+    purpose:
+      'This is a topic page where you can add statements (ideas, feedback, opinions) for consensus-driven discussion. Each statement should express one clear, concise idea.',
+    data: {
+      topic: {
+        id: discussion.value.id,
+        title: discussion.value.title,
+        body: discussion.value.body,
+        vote_count: discussion.value.vote_count
+      },
+      space: {
+        id: props.space.id,
+        name: props.space.name,
+        about: props.space.about
+      }
+    },
+    inputs: {
+      statement: {
+        value: statement.value,
+        definition: STATEMENT_DEFINITION
+      }
+    }
+  });
+  setVars({ statement });
+});
 </script>
 
 <template>
@@ -182,11 +214,11 @@ watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
           <h4 class="mb-3 eyebrow flex items-center gap-2">
             <IH-eye />
             Pending statement(s)
-            <div
+            <span
               class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
             >
               {{ _n(pendingStatements.length) }}
-            </div>
+            </span>
           </h4>
           <TownhallStatements
             :space-id="spaceId"
@@ -210,27 +242,34 @@ watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
               understand and vote.
             </div>
             <UiTextarea
-              v-model="statementInput"
+              v-model="statement"
               :definition="STATEMENT_DEFINITION"
               :required="true"
               :disabled="isCreateStatementPending"
             />
-            <div>
+            <div class="flex gap-2.5 items-center">
               <UiButton
                 class="primary items-center flex space-x-1"
                 :disabled="
-                  isCreateStatementPending ||
-                  !statementInput.trim() ||
-                  !web3.account
+                  isCreateStatementPending || !statement.trim() || !web3.account
                 "
                 @click="
-                  createStatement(statementInput);
-                  statementInput = '';
+                  createStatement(statement);
+                  statement = '';
                 "
               >
                 <div>Publish</div>
                 <IH-paper-airplane class="rotate-90 relative left-[2px]" />
               </UiButton>
+              <div>
+                <a
+                  class="flex items-center gap-1.5"
+                  @click="openChatbot('Suggest statement')"
+                >
+                  <IH-sparkles />
+                  Suggest statement
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -240,11 +279,11 @@ watchEffect(() => setTitle(discussion.value ? discussion?.value.title : ''));
             <h4 class="eyebrow flex items-center gap-2 flex-1">
               <IH-chart-square-bar />
               Statements
-              <div
+              <span
                 class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
               >
                 {{ _n(results.length) }}
-              </div>
+              </span>
             </h4>
             <UiSelectDropdown
               v-model="roleFilter"
