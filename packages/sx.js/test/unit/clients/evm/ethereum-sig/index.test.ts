@@ -17,7 +17,8 @@ describe('EthereumSig', () => {
   const ethSigClient = new EthereumSig({
     networkConfig: evmSepolia,
     whitelistServerUrl: 'https://wls.snapshot.box',
-    manaUrl: 'https://mana.box'
+    manaUrl: 'https://mana.box',
+    provider
   });
 
   beforeAll(() => {
