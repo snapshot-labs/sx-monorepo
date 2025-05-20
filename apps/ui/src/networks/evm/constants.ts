@@ -22,6 +22,10 @@ export function createConstants(
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
+  const HERODORUS_CONTRACT = '0xfaf1fc1c0b03Ef7E4074C209D254895A7193aE8b';
+  const DELEGATION_REGISTRY_CONTRACT =
+    '0x4392Df98aF7D3896d975BB45480Ba828Cdd6466E';
+
   const SUPPORTED_AUTHENTICATORS = {
     [config.Authenticators.EthSigV2]: true,
     [config.Authenticators.EthSig]: true,
@@ -463,9 +467,20 @@ export function createConstants(
             icon: IHCode,
             generateSummary: (params: Record<string, any>) =>
               `(${shorten(params.delegationId)})`,
-            generateParams: async () => [
-              '0x0000000000000000000000007e22bdfe6f4337790805513872d9a4034f7d8a2d'
-            ],
+            generateParams: async (params: Record<string, any>) => {
+              const abiCoder = new AbiCoder();
+
+              return [
+                abiCoder.encode(
+                  ['address', 'bytes32', 'address'],
+                  [
+                    HERODORUS_CONTRACT,
+                    params.delegationId,
+                    DELEGATION_REGISTRY_CONTRACT
+                  ]
+                )
+              ];
+            },
             generateMetadata: async (params: Record<string, any>) => {
               const pinned = await pin({ delegationId: params.delegationId });
 
