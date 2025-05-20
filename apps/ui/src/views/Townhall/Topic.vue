@@ -21,29 +21,22 @@ const { setContext, setVars, openChatbot } = useChatbot();
 const id = computed(() => Number(route.params.id));
 const spaceId = '1';
 
-const roleFilter = ref('any');
-const statement = ref('');
+const roleFilter: Ref<string> = ref('any');
+const sortBy: Ref<string> = ref('agree');
+const statement: Ref<string> = ref('');
 
 const {
   data: discussion,
   isPending,
   isError
 } = useDiscussionQuery({ spaceId, discussionId: id });
-const {
-  data: roles,
-  isPending: isRolesPending,
-  isError: isRolesError
-} = useRolesQuery(spaceId);
+const { data: roles, isError: isRolesError } = useRolesQuery(spaceId);
 const {
   data: resultsByRole,
   isPending: isResultsPending,
   isError: isResultsError
 } = useResultsByRoleQuery({ discussionId: id, roleId: roleFilter });
-const {
-  data: userVotes,
-  isPending: isUserVotesPending,
-  isError: isUserVotesError
-} = useUserVotesQuery({
+const { data: userVotes, isError: isUserVotesError } = useUserVotesQuery({
   spaceId,
   discussionId: id,
   user: toRef(() => web3.value.account)
@@ -67,12 +60,18 @@ const pendingStatements: ComputedRef<Statement[]> = computed(() =>
 
 const results: ComputedRef<Statement[]> = computed(() =>
   clone(discussion.value?.statements ?? [])
-    .filter(s => !s.hidden)
-    .sort(
-      (a, b) =>
-        getStatementVoteCount(b.statement_id) -
-        getStatementVoteCount(a.statement_id)
-    )
+    .filter(s => !s.hidden && getStatementVoteCount(s.statement_id) > 0)
+    .sort((a, b) => {
+      if (sortBy.value === 'agree')
+        return b.scores_1 / b.vote_count - a.scores_1 / a.vote_count;
+
+      if (sortBy.value === 'disagree')
+        return b.scores_2 / b.vote_count - a.scores_2 / a.vote_count;
+
+      if (sortBy.value === 'recent') return b.created - a.created;
+
+      return b.vote_count - a.vote_count;
+    })
     .sort((a, b) => Number(b.pinned) - Number(a.pinned))
 );
 
@@ -93,6 +92,10 @@ const STATEMENT_DEFINITION = {
 
 watchEffect(() => {
   if (!discussion.value) return;
+
+  if (roleFilter.value !== 'any') {
+    sortBy.value = 'recent';
+  }
 
   setTitle(discussion.value ? discussion?.value.title : '');
   setContext({
@@ -135,7 +138,7 @@ watchEffect(() => {
       <span v-text="'Failed to load discussion.'" />
     </div>
     <div v-else-if="discussion">
-      <UiContainer class="!max-w-[740px] space-y-4 pt-6 pb-4">
+      <UiContainer class="!max-w-[760px] space-y-4 pt-6 pb-4">
         <h1 class="leading-[1.1em]" v-text="discussion.title" />
         <div v-if="discussion.closed" class="items-center gap-1 flex">
           <IS-lock-closed class="text-skin-text" />
@@ -187,7 +190,7 @@ watchEffect(() => {
         />
       </UiContainer>
 
-      <UiContainer class="!max-w-[740px] s-box space-y-4">
+      <UiContainer class="!max-w-[760px] s-box space-y-4">
         <div v-if="discussion.discussion_url">
           <h4 class="mb-3 eyebrow flex items-center gap-2">
             <IH-chat-alt />
@@ -269,7 +272,7 @@ watchEffect(() => {
           </div>
         </div>
 
-        <div v-if="results.length > 0">
+        <div>
           <div class="mb-3 flex">
             <h4 class="eyebrow flex items-center gap-2 flex-1">
               <IH-chart-square-bar />
@@ -280,22 +283,41 @@ watchEffect(() => {
                 {{ _n(results.length) }}
               </span>
             </h4>
-            <UiSelectDropdown
-              v-model="roleFilter"
-              title="Role"
-              gap="12"
-              placement="start"
-              :items="[
-                { key: 'any', label: 'Any role' },
-                ...(roles || []).map(role => ({
-                  key: role.id,
-                  label: role.name,
-                  indicatorStyle: { background: role.color }
-                }))
-              ]"
-            />
+            <div class="flex gap-2">
+              <UiSelectDropdown
+                v-model="roleFilter"
+                title="Role"
+                gap="12"
+                placement="start"
+                :items="[
+                  { key: 'any', label: 'Any role' },
+                  ...(roles || []).map(role => ({
+                    key: role.id,
+                    label: role.name,
+                    indicatorStyle: { background: role.color }
+                  }))
+                ]"
+              />
+              <UiSelectDropdown
+                v-model="sortBy"
+                :disabled="roleFilter !== 'any'"
+                title="Sort by"
+                gap="12"
+                placement="start"
+                :items="[
+                  { key: 'agree', label: '% agreed' },
+                  { key: 'disagree', label: '% disagreed' },
+                  { key: 'votes', label: 'Number of votes' },
+                  { key: 'recent', label: 'Most recent' }
+                ]"
+              />
+            </div>
           </div>
           <div class="space-y-3">
+            <div v-if="results.length === 0" class="flex gap-2 items-center">
+              <IH-exclamation-circle class="inline-block shrink-0" />
+              <span>There is no statement here.</span>
+            </div>
             <TownhallStatementItem
               v-for="(s, i) in results"
               :key="i"
