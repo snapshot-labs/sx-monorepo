@@ -22,7 +22,7 @@ const id = computed(() => Number(route.params.id));
 const spaceId = '1';
 
 const roleFilter: Ref<string> = ref('any');
-const sortBy: Ref<string> = ref('agree');
+const sortBy: Ref<'agree' | 'disagree' | 'votes' | 'recent'> = ref('agree');
 const statement: Ref<string> = ref('');
 
 const {
