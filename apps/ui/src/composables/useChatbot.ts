@@ -83,7 +83,7 @@ export function useChatbot(options?: Record<string, any>) {
       },
       body: JSON.stringify({
         prompt: newPrompt,
-        context: context.value
+        context: { ...context.value, messages: history.value }
       })
     });
     const { messages } = await res.json();
