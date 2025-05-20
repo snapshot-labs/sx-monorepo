@@ -1,13 +1,26 @@
+import { defaultAbiCoder } from '@ethersproject/abi';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { describe, expect, it } from 'vitest';
 import createApeGasStrategy from '../../../../src/strategies/evm/apeGas';
 
+const HERODORUS_CONTRACT = '0xfaf1fc1c0b03Ef7E4074C209D254895A7193aE8b';
+const VIEW_ID =
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
+const DELEGATION_REGISTRY_CONTRACT =
+  '0x4392Df98aF7D3896d975BB45480Ba828Cdd6466E';
+
 describe('apeGas', () => {
+  const metadata = {
+    delegationId: VIEW_ID
+  };
+
   const apeGasStrategy = createApeGasStrategy();
 
   const provider = new JsonRpcProvider('https://rpc.brovider.xyz/33111');
-  const params =
-    '0x0000000000000000000000007e22bdfe6f4337790805513872d9a4034f7d8a2d';
+  const params = defaultAbiCoder.encode(
+    ['address', 'bytes32', 'address'],
+    [HERODORUS_CONTRACT, VIEW_ID, DELEGATION_REGISTRY_CONTRACT]
+  );
 
   it('should return type', () => {
     expect(apeGasStrategy.type).toBe('apeGas');
@@ -17,16 +30,17 @@ describe('apeGas', () => {
     const useParams = await apeGasStrategy.getParams(
       'vote',
       { index: 0, address: '0x0', params },
-      '0xfede39f346c1c65d07f2fa476d5f4727a0d7dc43',
-      null,
+      '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      metadata,
       {
-        space: '0x0',
+        space: '0xf6238F73A87D390CB00b2B380D2B777E13Fe2725',
         authenticator: '0x0',
         strategies: [],
-        executionStrategy: { addr: '0x0', params: '' },
-        metadataUri: '0x0'
+        proposal: 5,
+        choice: 1,
+        metadataUri: ''
       },
-      { networkConfig: {} as any, whitelistServerUrl: '' }
+      { networkConfig: {} as any, whitelistServerUrl: '', provider }
     );
 
     expect(useParams).toBe(
@@ -38,12 +52,38 @@ describe('apeGas', () => {
     const votingPower = await apeGasStrategy.getVotingPower(
       '0x2F9e24e272D343C1f833eE7F3C6d6ABC689b0102',
       '0xfede39f346c1c65d07f2fa476d5f4727a0d7dc43',
-      null,
+      metadata,
       17399780,
       params,
       provider
     );
 
     expect(votingPower.toString()).toEqual('88286408897695207163335');
+  });
+
+  it('should compute live voting power for user with delegated APE gas at null block', async () => {
+    const votingPower = await apeGasStrategy.getVotingPower(
+      '0x2F9e24e272D343C1f833eE7F3C6d6ABC689b0102',
+      '0xc4Af7180FD4BBC1E5A3e10eB82801Ab6238eB1C5',
+      metadata,
+      null,
+      params,
+      provider
+    );
+
+    expect(votingPower > 500000000000000n).toBe(true);
+  });
+
+  it('should throw when requesting unknown block', () => {
+    expect(
+      apeGasStrategy.getVotingPower(
+        '0x2F9e24e272D343C1f833eE7F3C6d6ABC689b0102',
+        '0xfede39f346c1c65d07f2fa476d5f4727a0d7dc43',
+        metadata,
+        50000,
+        params,
+        provider
+      )
+    ).rejects.toThrow('Block is not cached');
   });
 });
