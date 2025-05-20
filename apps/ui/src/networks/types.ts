@@ -296,9 +296,10 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     space: Space,
     networkId: NetworkID,
     delegationType: DelegationType,
-    delegatee: string | null,
+    delegatees: string[],
     delegationContract: string,
-    chainIdOverride?: ChainId
+    chainIdOverride?: ChainId,
+    delegateesMetadata?: Record<string, any>
   );
   getDelegatee(
     delegation: SpaceMetadataDelegation,
@@ -407,6 +408,7 @@ export type NetworkHelpers = {
   isExecutorActionsSupported(executorType: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   getSpaceController(space: Space): Promise<string>;
+  getRelayerInfo(space: string, network: NetworkID): Promise<any>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;

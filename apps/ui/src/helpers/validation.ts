@@ -272,6 +272,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'address':
       case 'ethAddress':
         return 'Must be a valid address.';
+      case 'ethChecksumAddress':
+        return 'Must be a valid checksum address.';
       case 'address[]':
       case 'ethAddress[]':
         return 'Must be comma separated list of valid addresses.';

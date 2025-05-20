@@ -1,13 +1,10 @@
 import express from 'express';
 import z from 'zod';
-import {
-  DEFAULT_INDEX,
-  getEthereumWallet,
-  SPACES_INDICES
-} from './dependencies';
-import { createNetworkHandler, NETWORKS } from './rpc';
+import { generateSpaceEvmWallet } from './dependencies';
+import { createNetworkHandler, NETWORK_IDS } from './rpc';
 import { rpcError } from '../utils';
 
+const validNetworkIds = Array.from(NETWORK_IDS.values());
 const jsonRpcRequestSchema = z.object({
   id: z.any(),
   method: z.enum([
@@ -21,7 +18,7 @@ const jsonRpcRequestSchema = z.object({
 });
 
 const handlers = Object.fromEntries(
-  Array.from(NETWORKS.keys()).map(chainId => [
+  Array.from(NETWORK_IDS.keys()).map(chainId => [
     chainId,
     createNetworkHandler(chainId)
   ])
@@ -42,20 +39,21 @@ router.post('/:chainId?', (req, res) => {
   handler[method](id, params, res);
 });
 
-router.get('/relayers', (req, res) => {
-  const mnemonic = process.env.ETH_MNEMONIC || '';
+router.get('/relayers/spaces/:space', async (req, res) => {
+  const spaceArray = req.params.space.split(':');
+  if (spaceArray.length !== 2 || !spaceArray[0] || !spaceArray[1])
+    return rpcError(res, 400, 'Missing space parameter or invalid format', 0);
 
-  const defaultRelayer = getEthereumWallet(mnemonic, DEFAULT_INDEX).address;
-  const relayers = Object.fromEntries(
-    Array.from(SPACES_INDICES).map(([spaceAddress, index]) => {
-      const { address } = getEthereumWallet(mnemonic, index);
-      return [spaceAddress, address];
-    })
-  );
+  const [networkId, spaceAddress] = spaceArray;
+
+  if (!validNetworkIds.includes(networkId))
+    return rpcError(res, 400, 'Invalid networkId', 0);
+
+  const normalizedSpaceAddress = spaceAddress.toLowerCase();
+  const wallet = generateSpaceEvmWallet(networkId, normalizedSpaceAddress);
 
   res.json({
-    default: defaultRelayer,
-    ...relayers
+    address: wallet.address
   });
 });
 

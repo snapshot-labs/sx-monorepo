@@ -1,16 +1,13 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { starknetNetworks } from '@snapshot-labs/sx';
 import { validateAndParseAddress } from 'starknet';
-import { DEFAULT_INFURA_API_KEY } from '../config';
 import spaceAbi from './abis/space.json';
 import spaceFactoryAbi from './abis/spaceFactory.json';
 
 const snNetworkNodeUrl =
-  process.env.NETWORK_NODE_URL_SN ||
-  `https://starknet-mainnet.infura.io/v3/${DEFAULT_INFURA_API_KEY}`;
+  process.env.NETWORK_NODE_URL_SN || 'https://rpc.snapshot.org/sn';
 const snSepNetworkNodeUrl =
-  process.env.NETWORK_NODE_URL_SN_SEP ||
-  `https://starknet-sepolia.infura.io/v3/${DEFAULT_INFURA_API_KEY}`;
+  process.env.NETWORK_NODE_URL_SN_SEP || 'https://rpc.snapshot.org/sn-sep';
 const manaRpcUrl = process.env.VITE_MANA_URL || 'https://mana.box';
 
 export type FullConfig = {
