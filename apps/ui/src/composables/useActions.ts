@@ -45,7 +45,7 @@ export function useActions() {
           console.error(e);
           uiStore.addNotification(
             'error',
-            'Something went wrong. Please try again later.'
+            e || 'Something went wrong. Please try again later.'
           );
         }
 
