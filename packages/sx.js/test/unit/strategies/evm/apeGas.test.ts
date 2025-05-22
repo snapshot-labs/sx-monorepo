@@ -74,6 +74,19 @@ describe('apeGas', () => {
     expect(votingPower > 500000000000000n).toBe(true);
   });
 
+  it('should return 0 live voting power for user that delegates gas to someone at null block', async () => {
+    const votingPower = await apeGasStrategy.getVotingPower(
+      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+      '0xa40839f84CF98Ee6F4fdB84c1bB1a448e7835EfE',
+      metadata,
+      null,
+      params,
+      provider
+    );
+
+    expect(votingPower.toString()).toBe('0');
+  });
+
   it('should throw when requesting unknown block', () => {
     expect(
       apeGasStrategy.getVotingPower(
