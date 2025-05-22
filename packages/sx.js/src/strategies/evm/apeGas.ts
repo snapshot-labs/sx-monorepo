@@ -116,13 +116,24 @@ export default function createApeGasStrategy(): Strategy {
           metadata.delegationId
         );
 
-        if (delegation !== '0x0000000000000000000000000000000000000000') {
-          return BigInt(0);
+        let totalVP = 0n;
+        if (delegation === '0x0000000000000000000000000000000000000000') {
+          const balance = await provider.getBalance(voterAddress);
+          totalVP += balance.toBigInt();
         }
 
-        // TODO: this should handle delegators of voterAddress (recursive)
-        const balance = await provider.getBalance(voterAddress);
-        return balance.toBigInt();
+        const delegators = await delegateRegistryContract.getDelegators(
+          voterAddress,
+          metadata.delegationId
+        );
+
+        // TODO: Use multicall to get all balances in one call
+        for (const delegator of delegators) {
+          const balance = await provider.getBalance(delegator);
+          totalVP += balance.toBigInt();
+        }
+
+        return totalVP;
       }
 
       const userParams = await getUserParams({
