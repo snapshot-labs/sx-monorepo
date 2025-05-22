@@ -6,3 +6,4 @@ forge-gas-snapshot/=lib/forge-gas-snapshot/src
 @zodiac/=lib/zodiac/contracts/
 @gnosis.pm/safe-contracts=lib/safe-contracts
 @murky/=lib/murky/src
+@herodotus-evm-v2/=lib/herodotus-evm-v2/src

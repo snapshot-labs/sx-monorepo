@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.18;
+pragma solidity ^0.8.18;
 
 /// @title EIP-4824 Common Interfaces for DAOs
 /// @notice See https://eips.ethereum.org/EIPS/eip-4824
