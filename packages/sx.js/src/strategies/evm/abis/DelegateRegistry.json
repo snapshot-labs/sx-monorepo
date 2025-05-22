@@ -1,0 +1,12 @@
+[
+  "event ClearDelegate(address indexed delegator, bytes32 indexed id, address indexed delegate)",
+  "event SetDelegate(address indexed delegator, bytes32 indexed id, address indexed delegate)",
+  "function clearDelegate(bytes32 id)",
+  "function counter(bytes32 id) view returns (uint256 count)",
+  "function delegation(address delegator, bytes32 id) view returns (address delegate)",
+  "function delegatorAt(address delegate, bytes32 id, uint256 index) view returns (address)",
+  "function delegatorCount(address delegate, bytes32 id) view returns (uint256)",
+  "function getDelegators(address delegate, bytes32 id) view returns (address[])",
+  "function isDelegator(address delegate, bytes32 id, address delegator) view returns (bool)",
+  "function setDelegate(bytes32 id, address delegate)"
+]

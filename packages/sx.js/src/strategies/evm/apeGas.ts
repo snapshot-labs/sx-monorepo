@@ -2,6 +2,7 @@ import { defaultAbiCoder } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
 import ApeGasVotingStrategy from './abis/ApeGasVotingStrategy.json';
+import DelegateRegistryAbi from './abis/DelegateRegistry.json';
 import SpaceAbi from '../../clients/evm/ethereum-tx/abis/Space.json';
 import {
   ClientConfig,
@@ -94,15 +95,34 @@ export default function createApeGasStrategy(): Strategy {
       params: string,
       provider: Provider
     ): Promise<bigint> {
-      if (block === null) {
-        // TODO: Handle delegations
-
-        const balance = await provider.getBalance(voterAddress);
-        return balance.toBigInt();
-      }
-
       if (!metadata) {
         throw new Error('Invalid metadata.');
+      }
+
+      if (block === null) {
+        const [, , delegateRegistry] = defaultAbiCoder.decode(
+          ['address', 'bytes32', 'address'],
+          params
+        );
+
+        const delegateRegistryContract = new Contract(
+          delegateRegistry,
+          DelegateRegistryAbi,
+          provider
+        );
+
+        const delegation = await delegateRegistryContract.delegation(
+          voterAddress,
+          metadata.delegationId
+        );
+
+        if (delegation !== '0x0000000000000000000000000000000000000000') {
+          return BigInt(0);
+        }
+
+        // TODO: this should handle delegators of voterAddress (recursive)
+        const balance = await provider.getBalance(voterAddress);
+        return balance.toBigInt();
       }
 
       const userParams = await getUserParams({
