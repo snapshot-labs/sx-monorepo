@@ -7,7 +7,7 @@ const HERODORUS_CONTRACT = '0xfaf1fc1c0b03Ef7E4074C209D254895A7193aE8b';
 const VIEW_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 const DELEGATION_REGISTRY_CONTRACT =
-  '0x4392Df98aF7D3896d975BB45480Ba828Cdd6466E';
+  '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
 
 describe('apeGas', () => {
   const metadata = {
@@ -30,7 +30,7 @@ describe('apeGas', () => {
     const useParams = await apeGasStrategy.getParams(
       'vote',
       { index: 0, address: '0x0', params },
-      '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+      '0x537f1896541d28F4c70116EEa602b1B34Da95163',
       metadata,
       {
         space: '0xf6238F73A87D390CB00b2B380D2B777E13Fe2725',
@@ -50,20 +50,20 @@ describe('apeGas', () => {
 
   it('should compute voting power for user with delegated APE gas at specific timestamp', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
-      '0x2F9e24e272D343C1f833eE7F3C6d6ABC689b0102',
-      '0xfede39f346c1c65d07f2fa476d5f4727a0d7dc43',
+      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+      '0x537f1896541d28F4c70116EEa602b1B34Da95163',
       metadata,
-      17399780,
+      17799012,
       params,
       provider
     );
 
-    expect(votingPower.toString()).toEqual('88286408897695207163335');
+    expect(votingPower.toString()).toEqual('810189384982620106');
   });
 
   it('should compute live voting power for user with delegated APE gas at null block', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
-      '0x2F9e24e272D343C1f833eE7F3C6d6ABC689b0102',
+      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
       '0xc4Af7180FD4BBC1E5A3e10eB82801Ab6238eB1C5',
       metadata,
       null,
@@ -77,7 +77,7 @@ describe('apeGas', () => {
   it('should throw when requesting unknown block', () => {
     expect(
       apeGasStrategy.getVotingPower(
-        '0x2F9e24e272D343C1f833eE7F3C6d6ABC689b0102',
+        '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
         '0xfede39f346c1c65d07f2fa476d5f4727a0d7dc43',
         metadata,
         50000,
