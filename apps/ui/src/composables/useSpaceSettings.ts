@@ -348,7 +348,14 @@ export function useSpaceSettings(space: Ref<Space>) {
     const formattedParams = params.map(param =>
       param === '0x' ? param : `0x${BigInt(param).toString(16)}`
     );
-    return objectHash(formattedParams) !== objectHash(previousParams);
+
+    // NOTE: This is a workaround for ApeGas - in this case it needs to be zero-padded,
+    // otherwise it will revert
+    const formattedPreviousParams = previousParams.map(param =>
+      param === '0x' ? param : `0x${BigInt(param).toString(16)}`
+    );
+
+    return objectHash(formattedParams) !== objectHash(formattedPreviousParams);
   }
 
   async function processChanges(

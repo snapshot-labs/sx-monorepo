@@ -83,7 +83,8 @@ export function createActions(
 
   const clientOpts = {
     networkConfig,
-    whitelistServerUrl: WHITELIST_SERVER_URL
+    whitelistServerUrl: WHITELIST_SERVER_URL,
+    provider
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);

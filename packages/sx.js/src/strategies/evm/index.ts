@@ -1,3 +1,4 @@
+import createApeGasStrategy from './apeGas';
 import createCompStrategy from './comp';
 import createMerkleWhitelist from './merkleWhitelist';
 import createOzVotesStrategy from './ozVotes';
@@ -33,6 +34,10 @@ export function getStrategy(
 
   if (strategy.type === 'whitelist') {
     return createMerkleWhitelist();
+  }
+
+  if (strategy.type === 'apeGas') {
+    return createApeGasStrategy();
   }
 
   return null;
