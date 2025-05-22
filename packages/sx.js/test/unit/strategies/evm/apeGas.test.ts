@@ -9,6 +9,11 @@ const VIEW_ID =
 const DELEGATION_REGISTRY_CONTRACT =
   '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
 
+// Live VP setup
+// 0xc4Af7180FD4BBC1E5A3e10eB82801Ab6238eB1C5 has 0.05 APE, doesn't delegate to anyone
+// 0xa40839f84CF98Ee6F4fdB84c1bB1a448e7835EfE has 0.05 APE, delegates to 0xC7Ca2aC1Ae120eBa3aB42a8BF4cb071895641ceF
+// 0xC7Ca2aC1Ae120eBa3aB42a8BF4cb071895641ceF has 0.1 APE, gets 0.05 APE from 0xa40839f84CF98Ee6F4fdB84c1bB1a448e7835EfE
+
 describe('apeGas', () => {
   const metadata = {
     delegationId: VIEW_ID
@@ -61,7 +66,7 @@ describe('apeGas', () => {
     expect(votingPower.toString()).toEqual('810189384982620106');
   });
 
-  it('should compute live voting power for user with delegated APE gas at null block', async () => {
+  it('should compute live voting power for user with own APE gas at null block', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
       '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
       '0xc4Af7180FD4BBC1E5A3e10eB82801Ab6238eB1C5',
@@ -72,6 +77,21 @@ describe('apeGas', () => {
     );
 
     expect(votingPower > 500000000000000n).toBe(true);
+    expect(votingPower < 550000000000000n).toBe(true);
+  });
+
+  it('should compute live voting power for user that receives delegated gas at null block', async () => {
+    const votingPower = await apeGasStrategy.getVotingPower(
+      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+      '0xC7Ca2aC1Ae120eBa3aB42a8BF4cb071895641ceF',
+      metadata,
+      null,
+      params,
+      provider
+    );
+
+    expect(votingPower > 149999267997822587n).toBe(true);
+    expect(votingPower < 155000000000000000n).toBe(true);
   });
 
   it('should return 0 live voting power for user that delegates gas to someone at null block', async () => {
