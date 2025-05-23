@@ -371,6 +371,7 @@ export type NetworkApi = {
     Record<ChainId, { spaces_count: number; premium: boolean }>
   >;
   loadSettings(): Promise<Setting[]>;
+  loadLastIndexedBlock(): Promise<number | null>;
 };
 
 export type NetworkConstants = {
@@ -411,6 +412,7 @@ export type NetworkHelpers = {
   getRelayerInfo(space: string, network: NetworkID): Promise<any>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
+  waitForIndexing(txId: string, timeout?: number): Promise<boolean>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(
     id: string,

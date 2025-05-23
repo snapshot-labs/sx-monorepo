@@ -250,6 +250,7 @@ watchEffect(async () => {
         approveTitle: 'Confirm vote'
       }"
       :execute="voteFn"
+      :wait-for-index="!offchainProposal"
       @confirmed="handleConfirmed"
       @cancelled="handleCancelled"
       @close="modalTransactionOpen = false"

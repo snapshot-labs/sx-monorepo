@@ -602,6 +602,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         successSubtitle: 'Your changes were successfully saved'
       }"
       :execute="executeFn"
+      :wait-for-index="!isOffchainNetwork"
       @confirmed="
         reloadSpaceAndReset();
         saving = false;
