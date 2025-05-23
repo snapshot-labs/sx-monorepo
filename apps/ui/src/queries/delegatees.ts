@@ -196,14 +196,17 @@ async function fetchSplitDelegationDelegatees(
   ]);
 
   return body.delegateTree.map(({ delegate, delegatedPower, weight }, i) => {
+    // simple cross multiplication to get the absolute VP percentage of the delegated VP
+    const delegatedVpPercentage = delegatees[i].votingPower
+      ? (delegatedPower * delegatees[i].percentOfVotingPower) /
+        delegatees[i].votingPower /
+        10000
+      : 0;
+
     return {
       id: delegate,
       balance: delegatedPower,
-      delegatedVotePercentage: delegatees[i].votingPower
-        ? (delegatedPower * delegatees[i].percentOfVotingPower) /
-          delegatees[i].votingPower /
-          10000
-        : 0,
+      delegatedVotePercentage: delegatedVpPercentage,
       name: names[delegate],
       share: weight / 100
     };
