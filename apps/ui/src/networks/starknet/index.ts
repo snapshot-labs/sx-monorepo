@@ -1,8 +1,7 @@
 import {
   LibraryError,
   ReceiptTx,
-  constants as starknetConstants,
-  TransactionReceipt
+  constants as starknetConstants
 } from 'starknet';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
@@ -137,10 +136,15 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
         timeout,
         getLastIndexedBlockNumber: api.loadLastIndexedBlock,
         getTransactionBlockNumber: async (txId: string) => {
-          const transaction = await provider.getTransaction(txId);
-          return (
-            (transaction as unknown as TransactionReceipt).block_number ?? null
-          );
+          const transaction = await provider.getTransactionReceipt(txId);
+          if (
+            'block_number' in transaction &&
+            typeof transaction.block_number === 'number'
+          ) {
+            return transaction.block_number;
+          }
+
+          return null;
         }
       });
     },
