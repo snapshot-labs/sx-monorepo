@@ -29,11 +29,7 @@ function handleVoteTypeSelected(type: VoteType) {
 }
 
 function updateChoices(currentType: VoteType, previousType: VoteType) {
-  if (previousType === 'basic') {
-    proposal.value.choices = Array(2).fill('');
-  }
-
-  if (currentType) {
+  if (currentType === 'basic' || previousType === 'basic') {
     proposal.value.choices = [...BASIC_CHOICES];
   }
 }
