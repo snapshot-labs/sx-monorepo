@@ -46,11 +46,7 @@ function isOnchainPendingProposal(proposal: Proposal): boolean {
 function getProposalSnapshot(proposal?: Proposal | null): Snapshot {
   if (!proposal) return null;
 
-  const snapshot = isOnchainPendingProposal(proposal)
-    ? null
-    : proposal.snapshot;
-
-  return snapshot || null;
+  return isOnchainPendingProposal(proposal) ? null : proposal.snapshot;
 }
 
 async function getVotingPower(
