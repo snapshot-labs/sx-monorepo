@@ -228,7 +228,7 @@ export function useDelegateesQuery(
       FETCH_DELEGATEES_FN[
         toValue(delegation)!.apiType as keyof typeof FETCH_DELEGATEES_FN
       ](toValue(account), toValue(delegation)!, toValue(space)),
-    enabled:
+    enabled: () =>
       !!toValue(account) &&
       !!toValue(delegation)?.chainId &&
       !!toValue(delegation)?.apiType &&
