@@ -10,10 +10,6 @@ type Delegatee = {
   share: number;
 };
 
-// Delegation supports both following chains:
-// Ethereum (1), Gnosis (100)
-const SUPPORTED_CHAIN_IDS: ChainId[] = [1, 100];
-
 const DELEGATEE_ADDRESS_DEFINITION = {
   type: 'string',
   format: 'ethAddress',
@@ -67,6 +63,10 @@ const isHidden = defineModel<boolean>('isHidden', {
   required: true
 });
 
+const props = defineProps<{
+  chainIds: ChainId[];
+}>();
+
 const emit = defineEmits<{
   (e: 'pick', index: number): void;
 }>();
@@ -78,7 +78,7 @@ const formErrors = ref({} as Record<string, any>);
 
 const availableNetworks = computed(() => {
   return Object.entries(networks)
-    .filter(([, network]) => SUPPORTED_CHAIN_IDS.includes(network.chainId))
+    .filter(([, network]) => props.chainIds.includes(network.chainId))
     .map(([, network]) => ({
       id: network.chainId,
       name: network.name,
@@ -220,9 +220,9 @@ watchEffect(async () => {
 
 onMounted(() => {
   form.value.chainId =
-    form.value.chainId && SUPPORTED_CHAIN_IDS.includes(form.value.chainId)
+    form.value.chainId && props.chainIds.includes(form.value.chainId)
       ? form.value.chainId
-      : SUPPORTED_CHAIN_IDS[0];
+      : props.chainIds[0];
 
   form.value.expirationDate ||= dayjs().add(1, 'year').valueOf();
 });
