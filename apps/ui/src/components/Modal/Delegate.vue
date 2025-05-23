@@ -124,34 +124,32 @@ const spaceDelegationsOptions = computed<
 const chainIds = computed(() => {
   if (isSelectedDelegationSupportingMultipleDelegates.value) {
     return SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS;
-  } else {
-    const delegateRegistryStrategies = props.space.strategies_params.filter(
-      (_, index) =>
-        DELEGATE_REGISTRY_STRATEGIES.includes(props.space.strategies[index])
-    );
-
-    if (!delegateRegistryStrategies.length) {
-      return [form.chainId];
-    }
-
-    const chainIds = delegateRegistryStrategies
-      .flatMap(params => {
-        return [
-          params.network,
-          ...params.params?.strategies?.flatMap(p => [
-            p.network,
-            p.params?.network
-          ])
-        ];
-      })
-      .filter(Boolean)
-      .map(Number)
-      .filter(chainId =>
-        DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId)
-      );
-
-    return Array.from(new Set(chainIds));
   }
+
+  const delegateRegistryStrategies = props.space.strategies_params.filter(
+    (_, index) =>
+      DELEGATE_REGISTRY_STRATEGIES.includes(props.space.strategies[index])
+  );
+
+  if (!delegateRegistryStrategies.length) {
+    return [form.chainId];
+  }
+
+  const chainIds = delegateRegistryStrategies
+    .flatMap(params => {
+      return [
+        params.network,
+        ...params.params?.strategies?.flatMap(p => [
+          p.network,
+          p.params?.network
+        ])
+      ];
+    })
+    .filter(Boolean)
+    .map(Number)
+    .filter(chainId => DELEGATE_REGISTRY_SUPPORTED_CHAIN_IDS.includes(chainId));
+
+  return Array.from(new Set(chainIds));
 });
 
 function delegationConnectors(
