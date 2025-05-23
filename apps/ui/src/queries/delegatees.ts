@@ -1,4 +1,4 @@
-import { getAddress } from '@ethersproject/address';
+import { getAddress, isAddress } from '@ethersproject/address';
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getNames } from '@/helpers/stamp';
@@ -162,6 +162,10 @@ async function fetchSplitDelegationDelegatees(
   delegation: SpaceMetadataDelegation,
   space: Space
 ): Promise<Delegatee[]> {
+  if (!isAddress(account)) {
+    return [];
+  }
+
   const splitDelegationStrategy = getSplitDelegationStrategy(space);
 
   if (!splitDelegationStrategy) {
@@ -224,7 +228,7 @@ export function useDelegateesQuery(
       FETCH_DELEGATEES_FN[
         toValue(delegation)!.apiType as keyof typeof FETCH_DELEGATEES_FN
       ](toValue(account), toValue(delegation)!, toValue(space)),
-    enabled:
+    enabled: () =>
       !!toValue(account) &&
       !!toValue(delegation)?.chainId &&
       !!toValue(delegation)?.apiType &&
