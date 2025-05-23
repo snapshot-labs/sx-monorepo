@@ -1,9 +1,9 @@
 import { utils } from '@snapshot-labs/sx';
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
-import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { VotingPower } from '@/networks/types';
-import { NetworkID, Proposal, Space } from '@/types';
+import { Proposal, Space } from '@/types';
 
 export type VotingPowerItem = {
   votingPowers: VotingPower[];
@@ -50,13 +50,7 @@ function getProposalSnapshot(proposal?: Proposal | null): Snapshot {
     ? null
     : proposal.snapshot;
 
-  return snapshot || getLatestBlock(proposal.network);
-}
-
-function getLatestBlock(network: NetworkID): Snapshot {
-  const { getCurrent } = useMetaStore();
-
-  return supportsNullCurrent(network) ? null : getCurrent(network) || 0;
+  return snapshot || null;
 }
 
 async function getVotingPower(
@@ -104,13 +98,13 @@ export function useSpaceVotingPowerQuery(
   return useQuery({
     queryKey: VOTING_POWER_KEYS.space(
       toRef(() => toValue(account)),
-      toRef(() => getLatestBlock(toValue(space).network)),
+      null,
       toRef(() => toValue(space).id)
     ),
     queryFn: async () => {
       const spaceValue = toValue(space);
 
-      return getVotingPower(getLatestBlock(spaceValue.network), spaceValue, [
+      return getVotingPower(null, spaceValue, [
         spaceValue.strategies,
         spaceValue.strategies_params,
         spaceValue.strategies_parsed_metadata

@@ -13,14 +13,14 @@ export default function createCompStrategy(): Strategy {
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null,
-      block: number,
+      block: number | null,
       params: string,
       provider: Provider
     ): Promise<bigint> {
       const compContract = new Contract(params, ICompAbi, provider);
 
       const votingPower = await compContract.getCurrentVotes(voterAddress, {
-        blockTag: block
+        blockTag: block ?? 'latest'
       });
 
       return BigInt(votingPower.toString());
