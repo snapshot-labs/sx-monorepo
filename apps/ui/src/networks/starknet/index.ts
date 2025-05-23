@@ -14,6 +14,7 @@ import { createConstants } from './constants';
 import { createProvider } from './provider';
 import { STARKNET_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -131,51 +132,16 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       txId: string,
       timeout = 10000
     ): Promise<boolean> => {
-      const interval = 2000;
-      const maxRetries = Math.floor(timeout / interval);
-      let retries = 0;
-      let blockNumber: number | undefined;
-
-      return new Promise((resolve, reject) => {
-        const timer = setInterval(async () => {
-          try {
-            if (!blockNumber) {
-              blockNumber = (
-                (await provider.getTransactionReceipt(
-                  txId
-                )) as TransactionReceipt
-              ).block_number;
-            }
-
-            if (!blockNumber) {
-              throw new Error('Block number not ready yet');
-            }
-
-            const lastIndexedBlockNumber = await api.loadLastIndexedBlock();
-
-            if (!lastIndexedBlockNumber) {
-              throw new Error('Invalid indexer block number');
-            }
-
-            if (blockNumber <= lastIndexedBlockNumber) {
-              clearInterval(timer);
-              return resolve(true);
-            } else if (retries > maxRetries) {
-              clearInterval(timer);
-              return reject(new Error('Transaction not indexed yet'));
-            }
-
-            throw new Error('Transaction not indexed yet');
-          } catch {
-            if (retries > maxRetries) {
-              clearInterval(timer);
-              return reject(false);
-            }
-
-            retries++;
-            return;
-          }
-        }, interval);
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransaction(txId);
+          return (
+            (transaction as unknown as TransactionReceipt).block_number ?? null
+          );
+        }
       });
     },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>

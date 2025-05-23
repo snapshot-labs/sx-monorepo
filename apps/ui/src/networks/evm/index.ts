@@ -9,6 +9,7 @@ import { createActions } from './actions';
 import { createConstants } from './constants';
 import { EVM_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -139,47 +140,14 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       txId: string,
       timeout = 10000
     ): Promise<boolean> => {
-      let blockNumber: number | undefined;
-      const interval = 2000;
-      const maxRetries = Math.floor(timeout / interval);
-      let retries = 0;
-
-      return new Promise((resolve, reject) => {
-        const timer = setInterval(async () => {
-          try {
-            if (!blockNumber) {
-              blockNumber = (await provider.getTransaction(txId)).blockNumber;
-            }
-
-            if (!blockNumber) {
-              throw new Error('Invalid transaction block number');
-            }
-
-            const lastIndexedBlockNumber = await api.loadLastIndexedBlock();
-
-            if (!lastIndexedBlockNumber) {
-              throw new Error('Invalid indexer block number');
-            }
-
-            if (blockNumber <= lastIndexedBlockNumber) {
-              clearInterval(timer);
-              return resolve(true);
-            } else if (retries > maxRetries) {
-              clearInterval(timer);
-              return reject(new Error('Transaction not indexed yet'));
-            }
-
-            throw new Error('Transaction not indexed yet');
-          } catch {
-            if (retries > maxRetries) {
-              clearInterval(timer);
-              return reject(false);
-            }
-
-            retries++;
-            return;
-          }
-        }, interval);
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransaction(txId);
+          return transaction.blockNumber ?? null;
+        }
       });
     },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
