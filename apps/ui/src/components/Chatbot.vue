@@ -72,7 +72,6 @@ onMounted(async () => {
           <IH-x />
         </button>
         <div class="px-4 py-3 border-b">
-          <h3 v-if="!showContext" v-text="'Ask AI'" />
           <a
             v-if="showContext"
             class="inline-flex gap-2 items-center"
@@ -81,6 +80,10 @@ onMounted(async () => {
             <IH-arrow-sm-left />
             <h3 v-text="'Context'" />
           </a>
+          <div v-else class="flex items-center gap-2">
+            <IH-sparkles />
+            <h3 v-text="'Ask AI'" />
+          </div>
         </div>
       </div>
 
@@ -111,29 +114,29 @@ onMounted(async () => {
             <template v-for="(chunk, i2) in message.content" :key="i2">
               <UiMarkdown
                 v-if="chunk.type === 'text'"
-                :body="chunk.content"
+                :body="chunk.value"
                 class="!text-[18px]"
               />
 
               <div
                 v-if="chunk.type === 'input'"
                 class="px-3 py-2.5 border bg-skin-bg rounded-lg hover:border-skin-link leading-6 cursor-pointer"
-                @click="handleInsert(chunk.id, chunk.content)"
+                @click="handleInsert(chunk.id, chunk.value)"
               >
                 <span
                   class="bg-skin-border text-skin-link text-sm rounded-full px-1.5 py-0.5 mr-1.5"
                   v-text="chunk.id"
                 />
-                {{ chunk.content }}
+                {{ chunk.value }}
               </div>
 
               <a
                 v-if="chunk.type === 'link'"
-                :href="chunk.content"
+                :href="chunk.value"
                 target="_blank"
                 class="border px-3 py-2.5 inline-block rounded-lg"
               >
-                {{ chunk.content }}
+                {{ chunk.value }}
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </a>
             </template>
