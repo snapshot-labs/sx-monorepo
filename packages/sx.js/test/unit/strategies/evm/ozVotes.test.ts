@@ -11,9 +11,31 @@ describe('ozVotes', () => {
   beforeAll(() => {
     vi.mock('@ethersproject/contracts', () => ({
       Contract: class {
-        async getVotes(voterAddress: string) {
-          if (voterAddress === '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70')
-            return '10000021';
+        async getVotes(
+          voterAddress: string,
+          { blockTag }: { blockTag: number | string }
+        ) {
+          if (
+            voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe' &&
+            blockTag === 8388733
+          ) {
+            return '1000000000000000000';
+          }
+
+          if (
+            voterAddress === '0x000000000000000000000000000000000000dead' &&
+            blockTag === 8388733
+          ) {
+            return '0';
+          }
+
+          if (
+            voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe' &&
+            blockTag === 'latest'
+          ) {
+            return '3000000000000000000';
+          }
+
           return '0';
         }
       }
@@ -32,14 +54,14 @@ describe('ozVotes', () => {
     it('should compute voting power for user with delegated tokens at specific timestamp', async () => {
       const votingPower = await ozVotesStrategy.getVotingPower(
         '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe',
-        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe',
         null,
-        9343895,
+        8388733,
         params,
         provider
       );
 
-      expect(votingPower.toString()).toEqual('10000021');
+      expect(votingPower.toString()).toEqual('1000000000000000000');
     });
 
     it('should compute voting power for user without delegated tokens', async () => {
@@ -47,12 +69,25 @@ describe('ozVotes', () => {
         '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe',
         '0x000000000000000000000000000000000000dead',
         null,
-        9343895,
+        8388733,
         params,
         provider
       );
 
       expect(votingPower.toString()).toEqual('0');
+    });
+
+    it('should compute voting power for user with delegated tokens at null block', async () => {
+      const votingPower = await ozVotesStrategy.getVotingPower(
+        '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe',
+        '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe',
+        null,
+        null,
+        params,
+        provider
+      );
+
+      expect(votingPower.toString()).toEqual('3000000000000000000');
     });
   });
 });

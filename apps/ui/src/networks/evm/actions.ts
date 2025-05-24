@@ -846,9 +846,6 @@ export function createActions(
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
-      if (snapshotInfo.at === null)
-        throw new Error('EVM requires block number to be defined');
-
       const cumulativeDecimals = Math.max(
         ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
       );

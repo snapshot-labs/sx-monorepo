@@ -13,14 +13,14 @@ export default function createOzVotesStrategy(): Strategy {
       strategyAddress: string,
       voterAddress: string,
       metadata: Record<string, any> | null,
-      block: number,
+      block: number | null,
       params: string,
       provider: Provider
     ): Promise<bigint> {
       const votesContract = new Contract(params, IVotes, provider);
 
       const votingPower = await votesContract.getVotes(voterAddress, {
-        blockTag: block
+        blockTag: block ?? 'latest'
       });
 
       return BigInt(votingPower.toString());

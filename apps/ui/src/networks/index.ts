@@ -86,15 +86,6 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
   id => !getNetwork(id).readOnly
 );
 
-/**
- * supportsNullCurrent return true if the network supports null current to be used for computing current voting power
- * @param networkId Network ID
- * @returns boolean true if the network supports null current
- */
-export const supportsNullCurrent = (networkID: NetworkID) => {
-  return !evmNetworks.includes(networkID);
-};
-
 export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
   {
     snapshot: {

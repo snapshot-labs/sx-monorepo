@@ -7,7 +7,7 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork } from '@/networks';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { Space, UserActivity } from '@/types';
 
@@ -15,7 +15,6 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const usersStore = useUsersStore();
-const { getCurrent } = useMetaStore();
 const { isWhiteLabel } = useWhiteLabel();
 
 const userActivity = ref<UserActivity>({
@@ -148,9 +147,7 @@ async function getVotingPower() {
       props.space.strategies_parsed_metadata,
       userId.value,
       {
-        at: supportsNullCurrent(props.space.network)
-          ? null
-          : getCurrent(props.space.network) || 0,
+        at: null,
         chainId: props.space.snapshot_chain_id
       }
     );

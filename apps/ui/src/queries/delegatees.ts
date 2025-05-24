@@ -2,7 +2,7 @@ import { getAddress, isAddress } from '@ethersproject/address';
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getNames } from '@/helpers/stamp';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork } from '@/networks';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
 
 type Delegatee = {
@@ -72,7 +72,6 @@ async function fetchDelegateRegistryDelegatees(
     delegation as RequiredProperty<typeof delegation>,
     space
   );
-  const { getCurrent } = useMetaStore();
 
   const accountDelegation = await getDelegation(account);
 
@@ -87,9 +86,7 @@ async function fetchDelegateRegistryDelegatees(
       space.strategies_parsed_metadata,
       account,
       {
-        at: supportsNullCurrent(space.network)
-          ? null
-          : getCurrent(space.network) || 0,
+        at: null,
         chainId: space.snapshot_chain_id
       }
     ),

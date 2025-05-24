@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { compareAddresses } from '@/helpers/utils';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork } from '@/networks';
 import { VotingPower } from '@/networks/types';
-import { NetworkID, Space } from '@/types';
+import { Space } from '@/types';
 
 type Strategy = {
   name: string;
@@ -19,11 +19,6 @@ export type PropositionPowerItem = {
 };
 
 const { web3 } = useWeb3();
-
-function getLatestBlock(network: NetworkID): number | null {
-  const { getCurrent } = useMetaStore();
-  return supportsNullCurrent(network) ? null : getCurrent(network) ?? 0;
-}
 
 function getIsSpaceMember(space: Space, account: string): boolean {
   return [
@@ -89,16 +84,14 @@ async function getPropositionPower(space: Space, block: number | null) {
 }
 
 export function usePropositionPowerQuery(space: MaybeRefOrGetter<Space>) {
-  const block = computed(() => getLatestBlock(toValue(space).network));
-
   return useQuery({
     queryKey: [
       'propositionPower',
       () => web3.value.account,
       () => toValue(space).id,
-      block
+      null
     ],
-    queryFn: async () => getPropositionPower(toValue(space), block.value),
+    queryFn: async () => getPropositionPower(toValue(space), null),
     enabled: () => !!web3.value.account && !web3.value.authLoading,
     staleTime: 60 * 1000
   });
