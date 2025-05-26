@@ -2,7 +2,12 @@ import { Web3Provider } from '@ethersproject/providers';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { isUserAbortError } from '@/helpers/utils';
-import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
+import {
+  getNetwork,
+  getReadWriteNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
@@ -308,11 +313,16 @@ export function useActions() {
     }
 
     const network = getNetwork(proposal.network);
+    const signer =
+      auth.value.connector.type === 'argentx' &&
+      offchainNetworks.includes(proposal.network)
+        ? await getAliasSigner(auth.value)
+        : auth.value.provider;
 
     const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
-        await getAliasSigner(auth.value),
+        signer,
         auth.value.connector.type,
         auth.value.account,
         proposal,
@@ -352,11 +362,16 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
+    const signer =
+      auth.value.connector.type === 'argentx' &&
+      offchainNetworks.includes(space.network)
+        ? await getAliasSigner(auth.value)
+        : auth.value.provider;
 
     const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
-        await getAliasSigner(auth.value),
+        signer,
         auth.value.connector.type,
         auth.value.account,
         space,
@@ -400,11 +415,16 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
+    const signer =
+      auth.value.connector.type === 'argentx' &&
+      offchainNetworks.includes(space.network)
+        ? await getAliasSigner(auth.value)
+        : auth.value.provider;
 
     await wrapPromise(
       space.network,
       network.actions.updateProposal(
-        await getAliasSigner(auth.value),
+        signer,
         auth.value.connector.type,
         auth.value.account,
         space,
@@ -459,11 +479,16 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer =
+      auth.value.connector.type === 'argentx' &&
+      offchainNetworks.includes(proposal.network)
+        ? await getAliasSigner(auth.value)
+        : auth.value.provider;
 
     await wrapPromise(
       proposal.network,
       network.actions.cancelProposal(
-        await getAliasSigner(auth.value),
+        signer,
         auth.value.connector.type,
         proposal,
         auth.value.account
