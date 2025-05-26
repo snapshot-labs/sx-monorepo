@@ -190,6 +190,16 @@ export function useActions() {
     );
   }
 
+  async function getOptionalAliasSigner(
+    auth: { connector: Connector; provider: Web3Provider },
+    networkId: NetworkID
+  ) {
+    return auth.connector.type === 'argentx' &&
+      offchainNetworks.includes(networkId)
+      ? await getAliasSigner(auth)
+      : auth.provider;
+  }
+
   async function predictSpaceAddress(
     networkId: NetworkID,
     salt: string
@@ -313,11 +323,7 @@ export function useActions() {
     }
 
     const network = getNetwork(proposal.network);
-    const signer =
-      auth.value.connector.type === 'argentx' &&
-      offchainNetworks.includes(proposal.network)
-        ? await getAliasSigner(auth.value)
-        : auth.value.provider;
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     const txHash = await wrapPromise(
       proposal.network,
@@ -362,11 +368,7 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
-    const signer =
-      auth.value.connector.type === 'argentx' &&
-      offchainNetworks.includes(space.network)
-        ? await getAliasSigner(auth.value)
-        : auth.value.provider;
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     const txHash = await wrapPromise(
       space.network,
@@ -415,11 +417,7 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
-    const signer =
-      auth.value.connector.type === 'argentx' &&
-      offchainNetworks.includes(space.network)
-        ? await getAliasSigner(auth.value)
-        : auth.value.provider;
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     await wrapPromise(
       space.network,
@@ -479,11 +477,7 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
-    const signer =
-      auth.value.connector.type === 'argentx' &&
-      offchainNetworks.includes(proposal.network)
-        ? await getAliasSigner(auth.value)
-        : auth.value.provider;
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
