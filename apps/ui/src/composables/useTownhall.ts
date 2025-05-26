@@ -303,6 +303,23 @@ export function useTownhall() {
     );
   }
 
+  async function sendAddCategory(parent: number, name: string, about: string) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.addCategory({
+        signer,
+        data: { parent, name, about },
+        salt: getSalt()
+      })
+    );
+  }
+
   return {
     sendDiscussion,
     sendCloseDiscussion,
@@ -314,6 +331,7 @@ export function useTownhall() {
     sendEditRole,
     sendDeleteRole,
     sendClaimRole,
-    sendRevokeRole
+    sendRevokeRole,
+    sendAddCategory
   };
 }

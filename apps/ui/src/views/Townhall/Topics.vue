@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { useTopicsQuery } from '@/queries/townhall';
 import { Space } from '@/types';
+import ModalCategoryConfig from '@/components/Modal/CategoryConfig.vue';
+import { useTownhall } from '@/composables/useTownhall';
+import { useUiStore } from '@/stores/ui';
+const { sendAddCategory } = useTownhall();
+const { addNotification } = useUiStore();
+
+const modalOpen = ref(false);
 
 const props = defineProps<{ space: Space }>();
 
@@ -23,12 +30,41 @@ async function handleEndReached() {
   fetchNextPage();
 }
 
+async function handleAddCategory(data: { name: string; description: string }) {
+  modalOpen.value = false;
+  try {
+    await sendAddCategory(0, data.name, data.description);
+  } catch (e) {
+    addNotification('error', (e as Error).message);
+  }
+}
+
 watchEffect(() => setTitle(`Topics - ${props.space.name}`));
 </script>
 
 <template>
   <div>
-    <div class="flex justify-end p-4">
+    <div class="flex justify-end items-center gap-2 p-4">
+      <UiDropdown>
+        <template #button>
+          <UiButton class="!p-0 !border-0 !h-auto">
+            <IH-dots-vertical class="text-skin-text inline-block size-[22px]" />
+          </UiButton>
+        </template>
+        <template #items>
+          <UiDropdownItem v-slot="{ active }">
+            <button
+              type="button"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+              @click="modalOpen = true"
+            >
+              <IH-plus :width="16" />
+              Add a category
+            </button>
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
       <router-link
         :to="{
           name: 'space-townhall-create',
@@ -49,5 +85,12 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
         @end-reached="handleEndReached"
       />
     </div>
+    <teleport to="#modal">
+      <ModalCategoryConfig
+        :open="modalOpen"
+        @add="handleAddCategory"
+        @close="modalOpen = false"
+      />
+    </teleport>
   </div>
 </template>
