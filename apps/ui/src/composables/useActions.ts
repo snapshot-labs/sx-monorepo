@@ -312,7 +312,7 @@ export function useActions() {
     const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
-        auth.value.provider,
+        await getAliasSigner(auth.value),
         auth.value.connector.type,
         auth.value.account,
         proposal,
@@ -356,7 +356,7 @@ export function useActions() {
     const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
-        auth.value.provider,
+        await getAliasSigner(auth.value),
         auth.value.connector.type,
         auth.value.account,
         space,
@@ -404,7 +404,7 @@ export function useActions() {
     await wrapPromise(
       space.network,
       network.actions.updateProposal(
-        auth.value.provider,
+        await getAliasSigner(auth.value),
         auth.value.connector.type,
         auth.value.account,
         space,
@@ -463,9 +463,10 @@ export function useActions() {
     await wrapPromise(
       proposal.network,
       network.actions.cancelProposal(
-        auth.value.provider,
+        await getAliasSigner(auth.value),
         auth.value.connector.type,
-        proposal
+        proposal,
+        auth.value.account
       )
     );
 
