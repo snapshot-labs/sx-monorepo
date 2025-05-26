@@ -62,6 +62,10 @@
         {
           "name": "revoke_role",
           "fn": "handleRevokeRole"
+        },
+        {
+          "name": "new_category",
+          "fn": "handleNewCategory"
         }
       ]
     }

@@ -18,6 +18,7 @@ export type CreateDiscussion = {
   title: string;
   body: string;
   discussionUrl: string;
+  category: number;
 };
 
 export type CloseDiscussion = {
@@ -57,3 +58,9 @@ export type DeleteRole = {
 };
 export type ClaimRole = DeleteRole;
 export type RevokeRole = ClaimRole;
+
+export type AddCategory = {
+  parent: number;
+  name: string;
+  about: string;
+};

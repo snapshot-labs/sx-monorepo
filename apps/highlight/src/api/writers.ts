@@ -4,6 +4,7 @@ import {
   Alias,
   Discussion,
   Role,
+  Category,
   Space,
   Statement,
   User,
@@ -74,6 +75,13 @@ const ClaimRoleEventData = z.tuple([
   z.string() // address
 ]);
 const RevokeRoleEventData = ClaimRoleEventData;
+
+const NewCategoryEventData = z.tuple([
+  z.number(), // parent
+  z.string(), // id
+  z.string(), // name
+  z.string() // about
+]);
 
 export function createWriters(indexerName: string) {
   const handleSetAlias: Writer = async ({ unit, payload }) => {
@@ -352,6 +360,19 @@ export function createWriters(indexerName: string) {
     }
   };
 
+  const handleNewCategory: Writer = async ({ unit, payload }) => {
+    const [parent, id, name, about] = NewCategoryEventData.parse(payload.data);
+    console.log('Handle new category', parent, id, name, about);
+
+    const category = new Category(id.toString(), indexerName);
+    category.parent_id = parent;
+    category.name = name;
+    category.about = about;
+    category.created = unit.timestamp;
+
+    await category.save();
+  };
+
   return {
     // aliases
     handleSetAlias,
@@ -367,6 +388,7 @@ export function createWriters(indexerName: string) {
     handleEditRole,
     handleDeleteRole,
     handleClaimRole,
-    handleRevokeRole
+    handleRevokeRole,
+    handleNewCategory
   };
 }

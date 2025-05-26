@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { useTopicsQuery } from '@/queries/townhall';
+import { useTopicsQuery, useCategoriesQuery } from '@/queries/townhall';
 import { Space } from '@/types';
+import ModalCategoryConfig from '@/components/Modal/CategoryConfig.vue';
+import { useTownhall } from '@/composables/useTownhall';
+import { useUiStore } from '@/stores/ui';
+const { sendAddCategory } = useTownhall();
+const { addNotification } = useUiStore();
+
+const modalOpen = ref(false);
 
 const props = defineProps<{ space: Space }>();
 
@@ -17,10 +24,22 @@ const {
   spaceId: toRef(() => props.space.id)
 });
 
+const { data: categories, isPending: catLoading, isError: catError } =
+  useCategoriesQuery();
+
 async function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
+}
+
+async function handleAddCategory(data: { name: string; description: string }) {
+  modalOpen.value = false;
+  try {
+    await sendAddCategory(0, data.name, data.description);
+  } catch (e) {
+    addNotification('error', (e as Error).message);
+  }
 }
 
 watchEffect(() => setTitle(`Topics - ${props.space.name}`));
@@ -28,7 +47,27 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
 
 <template>
   <div>
-    <div class="flex justify-end p-4">
+    <div class="flex justify-end items-center gap-2 p-4">
+      <UiDropdown>
+        <template #button>
+          <UiButton class="!p-0 !border-0 !h-auto">
+            <IH-dots-vertical class="text-skin-text inline-block size-[22px]" />
+          </UiButton>
+        </template>
+        <template #items>
+          <UiDropdownItem v-slot="{ active }">
+            <button
+              type="button"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+              @click="modalOpen = true"
+            >
+              <IH-plus :width="16" />
+              Add a category
+            </button>
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
       <router-link
         :to="{
           name: 'space-townhall-create',
@@ -37,9 +76,39 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       >
         <UiButton primary>New topic</UiButton>
       </router-link>
+  </div>
+  <div class="pb-2">
+    <UiLabel label="Categories" sticky />
+    <div v-if="catLoading" class="px-4 py-3">
+      <UiLoading />
     </div>
-    <div>
-      <UiLabel label="Topics" sticky />
+    <div
+      v-else-if="catError"
+      class="px-4 py-3 flex items-center text-skin-link gap-2"
+    >
+      <IH-exclamation-circle />
+      <span>Failed to load categories.</span>
+    </div>
+    <div v-else>
+      <div
+        v-for="cat in categories"
+        :key="cat.id"
+        class="px-4 py-2 flex items-center gap-2 border-b last:border-b-0"
+      >
+        <IH-folder :width="16" />
+        <span class="truncate" v-text="cat.name" />
+      </div>
+      <div
+        v-if="!categories?.length"
+        class="px-4 py-3 flex items-center text-skin-link gap-2"
+      >
+        <IH-exclamation-circle />
+        <span>There are no categories here.</span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <UiLabel label="Topics" sticky />
       <TownhallTopicsList
         limit="off"
         :is-error="isError"
@@ -49,5 +118,12 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
         @end-reached="handleEndReached"
       />
     </div>
+    <teleport to="#modal">
+      <ModalCategoryConfig
+        :open="modalOpen"
+        @add="handleAddCategory"
+        @close="modalOpen = false"
+      />
+    </teleport>
   </div>
 </template>

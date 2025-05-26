@@ -18,7 +18,8 @@ import {
   RevokeRole,
   SetAlias,
   UnpinStatement,
-  Vote
+  Vote,
+  AddCategory
 } from './types';
 import {
   ALIASES_CONFIG,
@@ -145,11 +146,12 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { title, body, discussionUrl } = data;
+    const { title, body, discussionUrl, category } = data;
     const message = {
       title,
       body,
-      discussionUrl
+      discussionUrl,
+      category
     };
 
     const signature = await this.sign(
@@ -543,6 +545,41 @@ export class HighlightEthereumSigClient {
       domain,
       message,
       primaryType: 'RevokeRole',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async addCategory({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: AddCategory;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { parent, name, about } = data;
+    const message = {
+      parent,
+      name,
+      about
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.addCategory,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'AddCategory',
       signer: await signer.getAddress(),
       signature
     };

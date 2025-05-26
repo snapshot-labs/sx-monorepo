@@ -140,6 +140,18 @@ const USER_ROLES_QUERY = gql(`
   }
 `);
 
+const CATEGORIES_QUERY = gql(`
+  query Categories {
+    categories(orderBy: created, orderDirection: desc) {
+      id
+      parent_id
+      name
+      about
+      created
+    }
+  }
+`);
+
 export async function getSpace(spaceId: string) {
   const { data } = await client.query({
     query: SPACE_QUERY,
@@ -189,6 +201,14 @@ export async function getRoles(spaceId: string) {
   });
 
   return data.roles;
+}
+
+export async function getCategories() {
+  const { data } = await client.query({
+    query: CATEGORIES_QUERY
+  });
+
+  return data.categories;
 }
 
 export async function getUserRoles(user: string) {

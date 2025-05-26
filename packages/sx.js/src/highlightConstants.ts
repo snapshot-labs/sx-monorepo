@@ -22,7 +22,8 @@ export const TOWNHALL_CONFIG = {
       Discussion: [
         { name: 'title', type: 'string' },
         { name: 'body', type: 'string' },
-        { name: 'discussionUrl', type: 'string' }
+        { name: 'discussionUrl', type: 'string' },
+        { name: 'category', type: 'uint64' }
       ]
     },
     closeDiscussion: {
@@ -92,6 +93,13 @@ export const TOWNHALL_CONFIG = {
       RevokeRole: [
         { name: 'space', type: 'string' },
         { name: 'id', type: 'uint64' }
+      ]
+    },
+    addCategory: {
+      AddCategory: [
+        { name: 'parent', type: 'uint64' },
+        { name: 'name', type: 'string' },
+        { name: 'about', type: 'string' }
       ]
     }
   }

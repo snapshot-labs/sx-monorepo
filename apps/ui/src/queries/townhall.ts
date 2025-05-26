@@ -12,6 +12,7 @@ import {
   getDiscussions,
   getResultsByRole,
   getRoles,
+  getCategories,
   getSpace,
   getUserRoles,
   getVotes,
@@ -168,6 +169,15 @@ export function useRolesQuery(spaceId: MaybeRefOrGetter<string>) {
     queryKey: ['townhall', 'roles', spaceId, 'list'],
     queryFn: () => {
       return getRoles(toValue(spaceId));
+    }
+  });
+}
+
+export function useCategoriesQuery() {
+  return useQuery({
+    queryKey: ['townhall', 'categories', 'list'],
+    queryFn: () => {
+      return getCategories();
     }
   });
 }

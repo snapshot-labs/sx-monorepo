@@ -18,6 +18,7 @@ export default class Townhall extends Agent {
     this.addEntrypoint(TOWNHALL_CONFIG.types.deleteRole);
     this.addEntrypoint(TOWNHALL_CONFIG.types.claimRole);
     this.addEntrypoint(TOWNHALL_CONFIG.types.revokeRole);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.addCategory);
   }
 
   getSigner(signer: string) {
@@ -28,15 +29,16 @@ export default class Townhall extends Agent {
     {
       title,
       body,
-      discussionUrl
-    }: { title: string; body: string; discussionUrl: string },
+      discussionUrl,
+      category
+    }: { title: string; body: string; discussionUrl: string; category: number },
     { signer }: { signer: string }
   ) {
     const id: number = (await this.get('discussions:id')) || 1;
 
     const author = await this.getSigner(signer);
     this.write('discussions:id', id + 1);
-    this.emit('new_discussion', [id, author, title, body, discussionUrl]);
+    this.emit('new_discussion', [id, author, title, body, discussionUrl, category]);
   }
 
   async closeDiscussion({ discussion }: { discussion: number }) {
@@ -177,5 +179,20 @@ export default class Townhall extends Agent {
     const user = await this.getSigner(signer);
 
     this.emit('revoke_role', [space, id, user]);
+  }
+
+  async addCategory({
+    parent,
+    name,
+    about
+  }: {
+    parent: number;
+    name: string;
+    about: string;
+  }) {
+    const id: number = (await this.get('categories:id')) ?? 0;
+    this.write('categories:id', id + 1);
+
+    this.emit('new_category', [parent, String(id), name, about]);
   }
 }

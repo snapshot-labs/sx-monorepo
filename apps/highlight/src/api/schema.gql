@@ -82,3 +82,11 @@ type UserRole {
   user: User!
   role: Role!
 }
+
+type Category {
+  id: String!
+  parent_id: Int!
+  name: String!
+  about: String!
+  created: Int!
+}
