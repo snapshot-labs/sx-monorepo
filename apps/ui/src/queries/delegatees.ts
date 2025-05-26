@@ -198,7 +198,7 @@ async function fetchSplitDelegationDelegatees(
   ]);
 
   return body.delegateTree.map(({ delegate, delegatedPower, weight }, i) => {
-    // Calculate what percentage of the delegatee's total voting power 
+    // Calculate what percentage of the delegatee's total voting power
     // comes from the current user's delegation using cross-multiplication
     const delegatedVpPercentage = delegatees[i].votingPower
       ? (delegatedPower * delegatees[i].percentOfVotingPower) /
