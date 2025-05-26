@@ -13,6 +13,8 @@ type Delegatee = {
   name?: string;
 };
 
+const PERCENT_DIVISOR = 10000;
+
 const FETCH_DELEGATEES_FN = {
   'governor-subgraph': fetchGovernorSubgraphDelegatees,
   'delegate-registry': fetchDelegateRegistryDelegatees,
@@ -196,11 +198,12 @@ async function fetchSplitDelegationDelegatees(
   ]);
 
   return body.delegateTree.map(({ delegate, delegatedPower, weight }, i) => {
-    // simple cross multiplication to get the absolute VP percentage of the delegated VP
+    // Calculate what percentage of the delegatee's total voting power 
+    // comes from the current user's delegation using cross-multiplication
     const delegatedVpPercentage = delegatees[i].votingPower
       ? (delegatedPower * delegatees[i].percentOfVotingPower) /
         delegatees[i].votingPower /
-        10000
+        PERCENT_DIVISOR
       : 0;
 
     return {
