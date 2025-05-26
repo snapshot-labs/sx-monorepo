@@ -142,9 +142,10 @@ export function createActions(
     ) {
       if (
         space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
-        // await verifyNetwork(web3, space.snapshot_chain_id);
+        await verifyNetwork(web3, space.snapshot_chain_id);
       }
 
       const provider = getProvider(space.snapshot_chain_id as number);
@@ -189,9 +190,10 @@ export function createActions(
     ) {
       if (
         space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
-        // await verifyNetwork(web3, space.snapshot_chain_id);
+        await verifyNetwork(web3, space.snapshot_chain_id);
       }
 
       const plugins = await getPlugins(executions);
@@ -239,9 +241,10 @@ export function createActions(
     ) {
       if (
         proposal.space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
-        // await verifyNetwork(web3, proposal.space.snapshot_chain_id);
+        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
       return client.cancel({
@@ -264,9 +267,10 @@ export function createActions(
     ): Promise<any> {
       if (
         proposal.space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
-        // await verifyNetwork(web3, proposal.space.snapshot_chain_id);
+        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
       const data = {
