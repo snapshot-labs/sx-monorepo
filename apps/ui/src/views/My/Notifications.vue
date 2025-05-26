@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { _rt } from '@/helpers/utils';
-
 const notificationsStore = useNotificationsStore();
 const { modalAccountWithoutDismissOpen } = useModal();
 const { web3 } = useWeb3();
@@ -60,7 +58,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
               {{ notification.proposal.space.name }}
             </AppLink>
             proposal has {{ notification.type }}
-            {{ _rt(notification.timestamp) }}
+            <TimeRelative :time="notification.timestamp" />
             <AppLink
               :to="{
                 name: 'space-proposal-overview',

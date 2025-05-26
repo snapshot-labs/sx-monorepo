@@ -197,7 +197,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </UiTooltip>
     </div>
 
-    <div class="mb-3">
+    <div v-if="web3.account" class="mb-3">
       <UiLabel label="Delegating to" />
       <UiLoading v-if="isPendingDelegatees" class="px-4 py-3 block" />
       <div v-else-if="delegatees?.length" class="w-full truncate px-4">
