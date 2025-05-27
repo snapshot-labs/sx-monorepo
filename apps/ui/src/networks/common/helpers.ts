@@ -195,7 +195,7 @@ export function awaitIndexedOnApi({
   let retries = 0;
 
   return new Promise((resolve, reject) => {
-    const timer = setInterval(async () => {
+    const checkTransaction = async () => {
       try {
         if (!blockNumber) {
           blockNumber = await getTransactionBlockNumber(txId);
@@ -212,23 +212,24 @@ export function awaitIndexedOnApi({
         }
 
         if (blockNumber <= lastIndexedBlockNumber) {
-          clearInterval(timer);
           return resolve(true);
-        } else if (retries > maxRetries) {
-          clearInterval(timer);
+        }
+
+        if (retries > maxRetries) {
           return reject(new Error('Transaction not indexed yet'));
         }
 
         throw new Error('Transaction not indexed yet');
       } catch {
         if (retries > maxRetries) {
-          clearInterval(timer);
-          return reject(false);
+          return reject(new Error('Timeout waiting for indexing'));
         }
 
         retries++;
-        return;
+        setTimeout(checkTransaction, interval);
       }
-    }, interval);
+    };
+
+    setTimeout(checkTransaction, interval);
   });
 }
