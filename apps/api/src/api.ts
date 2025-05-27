@@ -14,9 +14,8 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 export async function startApiServer(checkpoint: Checkpoint) {
   const app = express();
   const httpServer = http.createServer(app);
-  console.log('--- STARTING ---\n\n');
 
-  app.get('/api/latest-proposals', async (req, res) => {
+  app.get('/latest-proposals', async (req, res) => {
     console.log('Fetching latest proposals');
     try {
       const space = req.query.space as string | undefined;
@@ -24,7 +23,7 @@ export async function startApiServer(checkpoint: Checkpoint) {
 
       const graphqlQuery = {
         query: `
-          query Proposals($where: ProposalWhere, $orderBy: String, $orderDirection: String, $first: Int) {
+          query Proposals($where: Proposal_filter, $orderBy: Proposal_orderBy, $orderDirection: OrderDirection, $first: Int) {
             proposals(
               where: $where
               orderBy: $orderBy
@@ -32,7 +31,12 @@ export async function startApiServer(checkpoint: Checkpoint) {
               first: $first
             ) {
               id
-              space
+              space {
+                id
+                metadata {
+                  name
+                }
+              }
               proposal_id
               created
             }
@@ -41,7 +45,7 @@ export async function startApiServer(checkpoint: Checkpoint) {
         variables: {
           where: {
             created_gte: thirtyMinutesAgo,
-            ...(space ? { space } : {})
+            ...(space ? { space: space } : {})
           },
           orderBy: 'created',
           orderDirection: 'desc',
