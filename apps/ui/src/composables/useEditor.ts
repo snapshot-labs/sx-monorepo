@@ -215,7 +215,7 @@ export function useEditor() {
       const allowedPrivacies = spacePrivacies.get(spaceId);
 
       if (!allowedTypes || !allowedPrivacies) {
-        console.warn(`Missing space settings for space ID: ${spaceId}`);
+        removeDraft(id);
         continue;
       }
 
