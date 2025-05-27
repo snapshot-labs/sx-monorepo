@@ -431,7 +431,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       treasuries: space.treasuries,
       labels: space.labels || [],
       delegations: space.delegations.filter(
-        delegation => delegation.apiType !== 'delegate-registry'
+        delegation =>
+          !['delegate-registry', 'split-delegation'].includes(
+            delegation.apiType || ''
+          )
       )
     };
   }
