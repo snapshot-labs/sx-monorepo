@@ -214,7 +214,7 @@ export function useEditor() {
       const allowedTypes = spaceVoteTypes.get(spaceId);
       const allowedPrivacies = spacePrivacies.get(spaceId);
 
-      if (!allowedTypes || !allowedPrivacies) {
+      if (!allowedTypes?.length || !allowedPrivacies?.length) {
         removeDraft(id);
         continue;
       }
