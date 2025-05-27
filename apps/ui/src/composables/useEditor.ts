@@ -199,6 +199,8 @@ export function useEditor() {
   async function refreshDrafts() {
     const ids = Object.keys(proposals).map(getSpaceId);
 
+    if (!ids.length) return;
+
     await setSpacesVoteTypeAndPrivacy(Array.from(new Set(ids)));
 
     for (const [id, proposal] of Object.entries(proposals)) {
