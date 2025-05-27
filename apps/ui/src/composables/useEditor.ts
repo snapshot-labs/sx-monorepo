@@ -165,9 +165,15 @@ export function useEditor() {
   ) {
     await setSpacesVoteTypeAndPrivacy([spaceId]);
 
-    const type = payload?.type || spaceVoteTypes.get(spaceId)![0];
-    const privacy: Privacy =
-      payload?.privacy || spacePrivacies.get(spaceId)![0];
+    const allowedTypes = spaceVoteTypes.get(spaceId);
+    const allowedPrivacies = spacePrivacies.get(spaceId);
+
+    if (!allowedTypes?.length || !allowedPrivacies?.length) {
+      throw new Error(`Missing space settings for space ID: ${spaceId}`);
+    }
+
+    const type = payload?.type || allowedTypes[0];
+    const privacy: Privacy = payload?.privacy || allowedPrivacies[0];
     const choices = type === 'basic' ? clone(BASIC_CHOICES) : Array(2).fill('');
 
     const id = draftKey ?? generateId();
