@@ -202,12 +202,19 @@ export function useEditor() {
     await setSpacesVoteTypeAndPrivacy(Array.from(new Set(ids)));
 
     for (const [id, proposal] of Object.entries(proposals)) {
-      const allowedTypes = spaceVoteTypes.get(getSpaceId(id))!;
+      const spaceId = getSpaceId(id);
+      const allowedTypes = spaceVoteTypes.get(spaceId);
+      const allowedPrivacies = spacePrivacies.get(spaceId);
+
+      if (!allowedTypes || !allowedPrivacies) {
+        console.warn(`Missing space settings for space ID: ${spaceId}`);
+        continue;
+      }
+
       if (!allowedTypes.includes(proposal.type)) {
         proposal.type = allowedTypes[0];
       }
 
-      const allowedPrivacies = spacePrivacies.get(getSpaceId(id))!;
       if (!allowedPrivacies.includes(proposal.privacy)) {
         proposal.privacy = allowedPrivacies[0];
       }
