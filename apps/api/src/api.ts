@@ -6,8 +6,8 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import Checkpoint, { createGetLoader } from '@snapshot-labs/checkpoint';
 import cors from 'cors';
+import fetch from 'cross-fetch';
 import express from 'express';
-import { Proposal } from '../.checkpoint/models';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -16,42 +16,51 @@ export async function startApiServer(checkpoint: Checkpoint) {
   const httpServer = http.createServer(app);
   console.log('--- STARTING ---\n\n');
 
-  app.get('/api/newest-proposals', async (req, res) => {
-    console.log('Fetching newest proposals');
-
+  app.get('/api/latest-proposals', async (req, res) => {
+    console.log('Fetching latest proposals');
     try {
-      const space = req.query.space as string;
-
+      const space = req.query.space as string | undefined;
       const thirtyMinutesAgo = Math.floor(Date.now() / 1000) - 30 * 60;
 
-      // Get all proposals from the last 30 minutes
-      const proposals = await Promise.all(
-        Array.from({ length: 100 }, async (_, i) => {
-          const proposalId = `${space || 'all'}/${i}`;
-          const proposal = await Proposal.loadEntity(proposalId, 'starknet');
-          if (proposal && proposal.created >= thirtyMinutesAgo) {
-            return proposal;
+      const graphqlQuery = {
+        query: `
+          query Proposals($where: ProposalWhere, $orderBy: String, $orderDirection: String, $first: Int) {
+            proposals(
+              where: $where
+              orderBy: $orderBy
+              orderDirection: $orderDirection
+              first: $first
+            ) {
+              id
+              space
+              proposal_id
+              created
+            }
           }
-          return null;
-        })
-      );
+        `,
+        variables: {
+          where: {
+            created_gte: thirtyMinutesAgo,
+            ...(space ? { space } : {})
+          },
+          orderBy: 'created',
+          orderDirection: 'desc',
+          first: 1000
+        }
+      };
 
-      // Filter out null values and proposals from other spaces if space parameter is provided
-      const validProposals = proposals.filter(
-        (proposal): proposal is Proposal =>
-          proposal !== null && (!space || proposal.space === space)
-      );
+      const response = await fetch('http://localhost:3000/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(graphqlQuery)
+      });
 
-      console.log(`Found ${validProposals.length} valid proposals`);
+      const { data, errors } = await response.json();
+      if (errors) {
+        throw new Error(JSON.stringify(errors));
+      }
 
-      res.json(
-        validProposals.map(proposal => ({
-          id: proposal.id,
-          space: proposal.space,
-          proposal_id: proposal.proposal_id,
-          created: proposal.created
-        }))
-      );
+      res.json(data.proposals);
     } catch (error) {
       console.error('Error fetching proposals:', error);
       res.status(500).json({ error: 'Internal server error' });
