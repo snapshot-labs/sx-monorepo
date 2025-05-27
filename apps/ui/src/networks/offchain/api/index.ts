@@ -3,7 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS } from '@/helpers/constants';
+import { CHAIN_IDS, DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
@@ -63,15 +63,6 @@ import {
 } from './types';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
-
-const BASIC_DELEGATION_STRATEGIES = [
-  'delegation',
-  'erc20-balance-of-delegation',
-  'delegation-with-cap',
-  'delegation-with-overrides',
-  'with-delegation',
-  'erc20-balance-of-with-delegation'
-];
 
 const SPLIT_DELEGATION_STRATEGIES = ['split-delegation'];
 
@@ -438,7 +429,7 @@ function formatDelegations(
   const delegations: SpaceMetadataDelegation[] = [];
 
   const basicDelegationStrategy = space.strategies.find(strategy =>
-    BASIC_DELEGATION_STRATEGIES.includes(strategy.name)
+    DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
   );
 
   if (space.delegationPortal) {
