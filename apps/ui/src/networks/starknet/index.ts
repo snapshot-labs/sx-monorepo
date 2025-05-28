@@ -13,6 +13,7 @@ import { createConstants } from './constants';
 import { createProvider } from './provider';
 import { STARKNET_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -124,6 +125,27 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
           clearInterval(timer);
         }, 2000);
+      });
+    },
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransactionReceipt(txId);
+          if (
+            'block_number' in transaction &&
+            typeof transaction.block_number === 'number'
+          ) {
+            return transaction.block_number;
+          }
+
+          return null;
+        }
       });
     },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
