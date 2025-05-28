@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { EMPTY_ADDRESS } from '@/helpers/constants';
+import { EMPTY_ADDRESS, HELPDESK_URL } from '@/helpers/constants';
 import {
   _n,
   compareAddresses,
@@ -304,9 +304,14 @@ onBeforeUnmount(() => destroyAudio());
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
     <div>
-      <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
+      <UiAlert v-if="proposal.flag_code === 1" type="error" class="mb-3">
         This proposal might contain scams, offensive material, or be malicious
         in nature. Please proceed with caution.
+      </UiAlert>
+      <UiAlert v-else-if="proposal.flag_code === 2" type="error" class="mb-3">
+        This content has been removed in response to a DMCA request. If you have
+        any questions or believe this was an error, please
+        <AppLink :to="HELPDESK_URL">contact us</AppLink>.
       </UiAlert>
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
         <template v-if="proposal.execution_strategy === EMPTY_ADDRESS">
