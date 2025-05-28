@@ -647,9 +647,10 @@ export function useActions() {
   async function delegate(
     space: Space,
     delegationType: DelegationType,
-    delegatee: string | null,
+    delegatees: string[],
     delegationContract: string,
-    chainId: ChainId
+    chainId: ChainId,
+    delegateesMetadata?: Record<string, any>
   ) {
     if (!auth.value) {
       await forceLogin();
@@ -666,9 +667,10 @@ export function useActions() {
         space,
         actionNetwork,
         delegationType,
-        delegatee,
+        delegatees,
         delegationContract,
-        chainId
+        chainId,
+        delegateesMetadata
       ),
       { chainId }
     );

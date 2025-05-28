@@ -195,3 +195,12 @@ export const VALIDATION_TYPES_INFO: Record<
 export const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
 
 export const RECENT_CONNECTOR = 'recent-connector';
+
+export const DELEGATE_REGISTRY_STRATEGIES = [
+  'delegation',
+  'erc20-balance-of-delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides',
+  'with-delegation',
+  'erc20-balance-of-with-delegation'
+];

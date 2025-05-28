@@ -3,8 +3,14 @@ import { pinPineapple } from '@/helpers/pin';
 import { ChainId } from '@/types';
 import { Token } from './usePayment';
 
-export type BarcodePayload = { type: string; params: Record<string, any> };
+export type BarcodePayload = {
+  type: string;
+  ref: string | undefined;
+  params: Record<string, any>;
+};
+
 type StepId = 'check_approval' | 'approve' | 'pay';
+
 type Step = {
   messages: {
     approveTitle: string;

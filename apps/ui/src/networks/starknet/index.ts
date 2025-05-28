@@ -4,6 +4,7 @@ import {
   constants as starknetConstants
 } from 'starknet';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { getRelayerInfo } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -32,7 +33,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseChainId: 1,
     baseNetworkId: 'eth',
     rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    ethRpcUrl: 'https://rpc.snapshot.org/1',
     apiUrl: UNIFIED_API_URL,
     explorerUrl: 'https://starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
@@ -43,7 +44,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseChainId: 11155111,
     baseNetworkId: 'sep',
     rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    ethRpcUrl: 'https://rpc.snapshot.org/11155111',
     apiUrl: UNIFIED_API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
@@ -88,6 +89,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     pin: pinPineapple,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: txId => provider.getTransactionReceipt(txId),
+    getRelayerInfo: (space: string, network: NetworkID) =>
+      getRelayerInfo(space, network, provider),
     waitForTransaction: txId => {
       let retries = 0;
 

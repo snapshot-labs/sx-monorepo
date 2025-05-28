@@ -72,7 +72,7 @@ In `apps/api` and `apps/mana` copy `.env.example` to `.env` files.
 
 In `apps/mana/.env` you need to fill in following empty variables:
 
-- `STARKNET_MNEMONIC` and `ETH_MNEMONIC` - if you want to use it as relayer.
+- `WALLET_SECRET` - if you want to use it as relayer (used for both Starknet and Ethereum wallets).
 - `HERODOTUS_API_KEY` and `HERODOTUS_LEGACY_API_KEY` - if you want to use L1<->L2 messaging (voting with strategies that use L1 proofs)
 
 ### Getting it running faster
