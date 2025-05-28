@@ -917,6 +917,7 @@ export function createApi(
       });
 
       return options;
-    }
+    },
+    loadLastIndexedBlock: async () => null
   };
 }
