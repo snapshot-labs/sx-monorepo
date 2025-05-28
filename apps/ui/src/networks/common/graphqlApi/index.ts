@@ -257,7 +257,7 @@ function formatSpace(
       const { name, api_type, api_url, contract, chain_id } =
         JSON.parse(delegation);
 
-      if (contract.includes(':')) {
+      if (contract?.includes(':')) {
         // NOTE: Legacy format
         const [network, address] = contract.split(':');
 
@@ -274,7 +274,7 @@ function formatSpace(
         name: name,
         apiType: api_type,
         apiUrl: api_url,
-        contractAddress: contract,
+        contractAddress: contract ?? null,
         chainId: chain_id
       };
     }),
