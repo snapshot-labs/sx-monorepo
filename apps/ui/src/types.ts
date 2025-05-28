@@ -60,6 +60,7 @@ export type VoteTypeInfo = {
 
 export type DelegationType =
   | 'governor-subgraph'
+  | 'apechain-delegate-registry'
   // From v1
   | 'delegate-registry'
   | 'split-delegation';
