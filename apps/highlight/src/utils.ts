@@ -46,7 +46,5 @@ export function rpcError(
 }
 
 export async function sleep(ms: number) {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms);
-  });
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

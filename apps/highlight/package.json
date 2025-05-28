@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate -o ./src/api/overrides.json -s ./src/api/schema.gql",
-    "lint": "eslint src/ --ext .ts",
+    "lint": "eslint src/ --ext .ts --fix",
     "test": "vitest",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
