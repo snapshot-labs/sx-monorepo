@@ -279,7 +279,7 @@ function formatSpace(
         name: name,
         apiType: api_type,
         apiUrl: api_url,
-        contractAddress: contract,
+        contractAddress: contract ?? null,
         chainId: chain_id
       };
     }),

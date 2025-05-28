@@ -644,19 +644,32 @@ export function createActions(
           functionParams: [delegatee],
           abi: ['function delegate(address delegatee)']
         };
-      } else if (delegationType == 'delegate-registry') {
+      } else if (
+        delegationType === 'delegate-registry' ||
+        delegationType === 'apechain-delegate-registry'
+      ) {
+        const contractAddress =
+          delegationType === 'delegate-registry'
+            ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
+            : '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
+
+        const encodedSpace =
+          delegationType === 'delegate-registry'
+            ? formatBytes32String(space.id)
+            : hexZeroPad(space.id, 32).toLocaleLowerCase();
+
         if (delegatees[0]) {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'setDelegate',
-            functionParams: [formatBytes32String(space.id), delegatees[0]],
+            functionParams: [encodedSpace, delegatees[0]],
             abi: ['function setDelegate(bytes32 id, address delegate)']
           };
         } else {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'clearDelegate',
-            functionParams: [formatBytes32String(space.id)],
+            functionParams: [encodedSpace],
             abi: ['function clearDelegate(bytes32 id)']
           };
         }

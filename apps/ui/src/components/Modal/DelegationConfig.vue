@@ -46,10 +46,14 @@ const definition = computed(() => {
         : {}),
       apiType: {
         type: ['string', 'null'],
-        enum: [null, 'governor-subgraph'],
+        enum: [null, 'governor-subgraph', 'apechain-delegate-registry'],
         options: [
           { id: null, name: 'No delegation API' },
-          { id: 'governor-subgraph', name: 'ERC-20 Votes' }
+          { id: 'governor-subgraph', name: 'ERC-20 Votes' },
+          {
+            id: 'apechain-delegate-registry',
+            name: 'ApeChain Delegate Registry'
+          }
         ],
         title: 'Delegation type',
         nullable: true
@@ -72,7 +76,8 @@ const definition = computed(() => {
               title: 'Delegation contract network',
               nullable: true
             },
-            ...(form.value.chainId !== null
+            ...(form.value.chainId !== null &&
+            form.value.apiType !== 'apechain-delegate-registry'
               ? {
                   contractAddress: {
                     type: 'string',
