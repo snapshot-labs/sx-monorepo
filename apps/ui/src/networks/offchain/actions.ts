@@ -122,7 +122,7 @@ export function createActions(
 
   return {
     async propose(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
@@ -142,6 +142,7 @@ export function createActions(
     ) {
       if (
         space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
         await verifyNetwork(web3, space.snapshot_chain_id);
@@ -163,13 +164,17 @@ export function createActions(
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
-        timestamp: created
+        timestamp: created,
+        from: account
       };
 
-      return client.propose({ signer: web3.getSigner(), data });
+      return client.propose({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     async updateProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
@@ -185,6 +190,7 @@ export function createActions(
     ) {
       if (
         space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
         await verifyNetwork(web3, space.snapshot_chain_id);
@@ -202,10 +208,14 @@ export function createActions(
         choices,
         privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
-        plugins: JSON.stringify(plugins)
+        plugins: JSON.stringify(plugins),
+        from: account
       };
 
-      return client.updateProposal({ signer: web3.getSigner(), data });
+      return client.updateProposal({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     async flagProposal(web3: Web3Provider, proposal: Proposal) {
       if (
@@ -224,27 +234,30 @@ export function createActions(
       });
     },
     async cancelProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
-      proposal: Proposal
+      proposal: Proposal,
+      from?: string
     ) {
       if (
         proposal.space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
         await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
       return client.cancel({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from
         }
       });
     },
     async vote(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
@@ -254,6 +267,7 @@ export function createActions(
     ): Promise<any> {
       if (
         proposal.space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
         await verifyNetwork(web3, proposal.space.snapshot_chain_id);
@@ -269,11 +283,12 @@ export function createActions(
         metadataUri: '',
         privacy: proposal.privacy,
         reason,
-        app: app || EDITOR_APP_NAME
+        app: app || EDITOR_APP_NAME,
+        from: account
       };
 
       return client.vote({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data
       });
     },

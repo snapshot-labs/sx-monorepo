@@ -79,6 +79,10 @@ ajv.addFormat('bytes', {
   validate: bytesValidator
 });
 
+ajv.addFormat('address[]', {
+  validate: getArrayValidator(addressValidator)
+});
+
 ajv.addFormat('ethAddress[]', {
   validate: getArrayValidator(ethAddressValidator)
 });
