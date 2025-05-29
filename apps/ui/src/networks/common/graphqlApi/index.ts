@@ -3,7 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import { BASIC_CHOICES, CHAIN_IDS, EMPTY_ADDRESS } from '@/helpers/constants';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
@@ -41,6 +41,7 @@ import {
   mixinHighlightVotes
 } from './highlight';
 import {
+  LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
@@ -314,7 +315,10 @@ function formatProposal(
 
   return {
     ...proposal,
-    isInvalid: proposal.metadata === null,
+    isInvalid:
+      proposal.metadata === null ||
+      (proposal.metadata.execution === null &&
+        proposal.execution_strategy !== EMPTY_ADDRESS),
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,
@@ -782,6 +786,15 @@ export function createApi(
     },
     loadSettings: async () => {
       return [];
+    },
+    async loadLastIndexedBlock(): Promise<number | null> {
+      const { data } = await apollo.query({
+        query: LAST_INDEXED_BLOCK_QUERY,
+        variables: {
+          indexer: networkId
+        }
+      });
+      return data._metadata?.value ? Number(data._metadata.value) : null;
     }
   };
 }
