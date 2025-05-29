@@ -3,7 +3,7 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import { BASIC_CHOICES, CHAIN_IDS, EMPTY_ADDRESS } from '@/helpers/constants';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
@@ -315,7 +315,10 @@ function formatProposal(
 
   return {
     ...proposal,
-    isInvalid: proposal.metadata === null,
+    isInvalid:
+      proposal.metadata === null ||
+      (proposal.metadata.execution === null &&
+        proposal.execution_strategy !== EMPTY_ADDRESS),
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,

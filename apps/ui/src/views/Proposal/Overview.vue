@@ -316,8 +316,8 @@ onBeforeUnmount(() => destroyAudio());
         <template v-else>
           This proposal is invalid and was not created correctly. We cannot
           display its details, and it <strong>includes execution</strong>. This
-          might mean possible malicious behavior. We strongly advise you to
-          reject this proposal.
+          might mean possible malicious behavior. We strongly advise you to vote
+          against this proposal.
         </template>
       </UiAlert>
 
