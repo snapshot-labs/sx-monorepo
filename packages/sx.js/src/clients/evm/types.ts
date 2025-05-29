@@ -32,11 +32,13 @@ export type StrategyConfig = {
 export type ClientOpts = {
   networkConfig: EvmNetworkConfig;
   whitelistServerUrl: string;
+  provider: Provider;
 };
 
 export type ClientConfig = {
   networkConfig: EvmNetworkConfig;
   whitelistServerUrl: string;
+  provider: Provider;
 };
 
 export type Propose = {

@@ -22,6 +22,10 @@ export function createConstants(
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
+  const HERODORUS_CONTRACT = '0xfaf1fc1c0b03Ef7E4074C209D254895A7193aE8b';
+  const DELEGATION_REGISTRY_CONTRACT =
+    '0x4392Df98aF7D3896d975BB45480Ba828Cdd6466E';
+
   const SUPPORTED_AUTHENTICATORS = {
     [config.Authenticators.EthSigV2]: true,
     [config.Authenticators.EthSig]: true,
@@ -37,7 +41,8 @@ export function createConstants(
     [config.Strategies.Vanilla]: true,
     [config.Strategies.Comp]: true,
     [config.Strategies.OZVotes]: true,
-    [config.Strategies.Whitelist]: true
+    [config.Strategies.Whitelist]: true,
+    [config.Strategies.ApeGas]: true
   };
 
   const SUPPORTED_EXECUTORS = {
@@ -66,7 +71,8 @@ export function createConstants(
     [config.Strategies.Vanilla]: 'Vanilla',
     [config.Strategies.Comp]: 'ERC-20 Votes Comp (EIP-5805)',
     [config.Strategies.OZVotes]: 'ERC-20 Votes (EIP-5805)',
-    [config.Strategies.Whitelist]: 'Merkle whitelist'
+    [config.Strategies.Whitelist]: 'Merkle whitelist',
+    [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
   };
 
   const EXECUTORS = {
@@ -450,10 +456,95 @@ export function createConstants(
           }
         }
       }
-    }
+    },
+    ...(config.Strategies.ApeGas
+      ? [
+          {
+            address: config.Strategies.ApeGas,
+            name: 'ApeChain Delegated Gas',
+            about:
+              'A strategy that allows delegated balances of APE gas token to be used as voting power.',
+            icon: IHCode,
+            generateSummary: (params: Record<string, any>) =>
+              `(${shorten(params.delegationId)})`,
+            generateParams: async (params: Record<string, any>) => {
+              const abiCoder = new AbiCoder();
+
+              return [
+                abiCoder.encode(
+                  ['address', 'bytes32', 'address'],
+                  [
+                    HERODORUS_CONTRACT,
+                    params.delegationId,
+                    DELEGATION_REGISTRY_CONTRACT
+                  ]
+                )
+              ];
+            },
+            generateMetadata: async (params: Record<string, any>) => {
+              const pinned = await pin({ delegationId: params.delegationId });
+
+              return {
+                name: 'ApeChain Delegated Gas',
+                properties: {
+                  decimals: 18,
+                  symbol: params.symbol,
+                  payload: `ipfs://${pinned.cid}`
+                }
+              };
+            },
+            parseParams: async (
+              params: string,
+              metadata: StrategyParsedMetadata | null
+            ) => {
+              if (!metadata) throw new Error('Missing metadata');
+              if (!metadata.payload) {
+                throw new Error('Missing metadata payload');
+              }
+
+              const metadataUrl = getUrl(metadata.payload);
+              if (!metadataUrl) {
+                throw new Error('Invalid metadata URL');
+              }
+
+              const res = await fetch(metadataUrl);
+              const { delegationId } = await res.json();
+
+              return {
+                delegationId,
+                symbol: metadata.symbol
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['delegationId', 'symbol'],
+              properties: {
+                delegationId: {
+                  type: 'string',
+                  format: 'bytes',
+                  title: 'Delegation ID',
+                  examples: ['e.g. 0x01']
+                },
+                symbol: {
+                  type: 'string',
+                  maxLength: MAX_SYMBOL_LENGTH,
+                  title: 'Symbol',
+                  examples: ['e.g. UNI']
+                }
+              }
+            }
+          }
+        ]
+      : [])
   ];
 
-  const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = EDITOR_VOTING_STRATEGIES;
+  const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES =
+    EDITOR_VOTING_STRATEGIES.filter(
+      strategy =>
+        !([config.Strategies.ApeGas] as string[]).includes(strategy.address)
+    );
 
   const EDITOR_EXECUTION_STRATEGIES = [
     {
