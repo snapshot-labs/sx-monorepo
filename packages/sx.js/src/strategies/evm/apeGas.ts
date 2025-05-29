@@ -1,7 +1,8 @@
-import { defaultAbiCoder } from '@ethersproject/abi';
+import { defaultAbiCoder, Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
 import DelegateRegistryAbi from './abis/DelegateRegistry.json';
+import Multicall3Abi from './abis/Multicall3.json';
 import SpaceAbi from '../../clients/evm/ethereum-tx/abis/Space.json';
 import {
   ClientConfig,
@@ -13,6 +14,83 @@ import {
 import { VotingPowerDetailsError } from '../../utils/errors';
 
 const API_URL = 'https://apevote.api.herodotus.cloud';
+const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
+
+async function getCurrentDelegatedVotingPower({
+  provider,
+  delegateRegistry,
+  delegationId,
+  voterAddress
+}: {
+  provider: Provider;
+  delegateRegistry: string;
+  delegationId: string;
+  voterAddress: string;
+}) {
+  const delegateRegistryInterface = new Interface(DelegateRegistryAbi);
+  const multicall = new Contract(MULTICALL3_ADDRESS, Multicall3Abi, provider);
+
+  const calls = [
+    {
+      target: delegateRegistry,
+      allowFailure: false,
+      callData: delegateRegistryInterface.encodeFunctionData('delegation', [
+        voterAddress,
+        delegationId
+      ])
+    },
+    {
+      target: delegateRegistry,
+      allowFailure: false,
+      callData: delegateRegistryInterface.encodeFunctionData('getDelegators', [
+        voterAddress,
+        delegationId
+      ])
+    }
+  ];
+
+  const [delegationResult, getDelegatorsResult]: {
+    returnData: string;
+  }[] = await multicall.aggregate3(calls);
+
+  if (!delegationResult || !getDelegatorsResult) {
+    throw new Error('Missing data from DelegateRegistry');
+  }
+
+  const delegators: string[] = [];
+  delegators.push(
+    ...delegateRegistryInterface.decodeFunctionResult(
+      'getDelegators',
+      getDelegatorsResult.returnData
+    )[0]
+  );
+
+  const delegation = delegateRegistryInterface.decodeFunctionResult(
+    'delegation',
+    delegationResult.returnData
+  )[0];
+
+  if (delegation === '0x0000000000000000000000000000000000000000') {
+    delegators.push(voterAddress);
+  }
+
+  if (delegators.length === 0) return 0n;
+
+  const results: { returnData: string }[] = await multicall.aggregate3(
+    delegators.map(delegator => ({
+      target: MULTICALL3_ADDRESS,
+      allowFailure: false,
+      callData: multicall.interface.encodeFunctionData('getEthBalance', [
+        delegator
+      ])
+    }))
+  );
+
+  return results.reduce(
+    (acc, result) => (acc += BigInt(result.returnData)),
+    0n
+  );
+}
 
 async function getProofData({
   viewId,
@@ -106,35 +184,12 @@ export default function createApeGasStrategy(): Strategy {
           params
         );
 
-        const delegateRegistryContract = new Contract(
+        return getCurrentDelegatedVotingPower({
+          provider,
           delegateRegistry,
-          DelegateRegistryAbi,
-          provider
-        );
-
-        const delegation = await delegateRegistryContract.delegation(
-          voterAddress,
-          metadata.delegationId
-        );
-
-        let totalVP = 0n;
-        if (delegation === '0x0000000000000000000000000000000000000000') {
-          const balance = await provider.getBalance(voterAddress);
-          totalVP += balance.toBigInt();
-        }
-
-        const delegators = await delegateRegistryContract.getDelegators(
-          voterAddress,
-          metadata.delegationId
-        );
-
-        // TODO: Use multicall to get all balances in one call
-        for (const delegator of delegators) {
-          const balance = await provider.getBalance(delegator);
-          totalVP += balance.toBigInt();
-        }
-
-        return totalVP;
+          delegationId: metadata.delegationId,
+          voterAddress
+        });
       }
 
       const proofData = await getProofData({
