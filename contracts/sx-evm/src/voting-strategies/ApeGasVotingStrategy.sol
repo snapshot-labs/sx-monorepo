@@ -68,7 +68,6 @@ contract ApeGasVotingStrategy is IVotingStrategy {
         return herodotusContract.computeVotingPower(votingTrieParameters, l3BlockNumber, id, delegateRegistry);
     }
 
-    /// @title Mapping of L1 block numbers to L3 block numbers
     /// @notice Maps an L1 block number to an L3 block number
     /// @notice Uses the satellite contract of herodotus to convert the L1 block number to
     ///   its corresponding timestamp, and then uses that timestamp to get the corresponding L3 block number.
