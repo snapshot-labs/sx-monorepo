@@ -24,7 +24,7 @@ export function createConstants(
 
   const HERODORUS_CONTRACT = '0xfaf1fc1c0b03Ef7E4074C209D254895A7193aE8b';
   const DELEGATION_REGISTRY_CONTRACT =
-    '0x4392Df98aF7D3896d975BB45480Ba828Cdd6466E';
+    '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
 
   const SUPPORTED_AUTHENTICATORS = {
     [config.Authenticators.EthSigV2]: true,
