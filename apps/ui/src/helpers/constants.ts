@@ -200,3 +200,12 @@ export const FLAGS = {
   MALICIOUS: 1,
   DMCA: 2
 };
+
+export const DELEGATE_REGISTRY_STRATEGIES = [
+  'delegation',
+  'erc20-balance-of-delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides',
+  'with-delegation',
+  'erc20-balance-of-with-delegation'
+];

@@ -6,7 +6,7 @@ import {
   Topic
 } from '@/helpers/discourse';
 import turndownService from '@/helpers/turndownService';
-import { _rt, sanitizeUrl } from '@/helpers/utils';
+import { sanitizeUrl } from '@/helpers/utils';
 import { Proposal, Space } from '@/types';
 
 const props = defineProps<{ proposal?: Proposal; space?: Space }>();
@@ -106,10 +106,9 @@ onMounted(async () => {
           </a>
           <div class="flex flex-col leading-4 gap-1">
             <a :href="reply.user_url" target="_blank" v-text="reply.name" />
-            <span
-              class="text-skin-text text-sm"
-              v-text="_rt(reply.created_at)"
-            />
+            <TimeRelative v-slot="{ relativeTime }" :time="reply.created_at">
+              <span class="text-skin-text text-sm" v-text="relativeTime" />
+            </TimeRelative>
           </div>
         </div>
         <UiMarkdown

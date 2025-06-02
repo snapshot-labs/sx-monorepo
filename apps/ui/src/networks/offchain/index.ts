@@ -54,6 +54,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
       throw new Error('Not implemented');
     },
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async () => true,
     waitForSpace: () => {
       throw new Error('Not implemented');
     },

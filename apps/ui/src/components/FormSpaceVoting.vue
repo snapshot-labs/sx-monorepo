@@ -34,9 +34,6 @@ const privacy = defineModel<SpacePrivacy>('privacy', {
 const voteValidation = defineModel<Validation>('voteValidation', {
   required: true
 });
-const ignoreAbstainVotes = defineModel<boolean>('ignoreAbstainVotes', {
-  required: true
-});
 
 const props = defineProps<{
   snapshotChainId: ChainId;
@@ -286,10 +283,6 @@ watchEffect(() => {
           <IH-chevron-down />
         </button>
       </UiWrapperInput>
-      <UiSwitch
-        v-model="ignoreAbstainVotes"
-        title="Ignore abstain votes in basic voting results"
-      />
     </div>
   </div>
   <teleport to="#modal">

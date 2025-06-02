@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
-  _rt,
   compareAddresses,
   getProposalId,
   getUrl,
@@ -109,19 +108,19 @@ const proposalMetadataUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
+const endTime = useRelativeTime(() => {
+  return getTsFromCurrent(props.proposal.network, props.proposal.max_end);
+});
+
 const votingTime = computed(() => {
   if (!props.proposal) return null;
 
   const current = getCurrent(props.proposal.network);
   if (!current) return null;
 
-  const time = _rt(
-    getTsFromCurrent(props.proposal.network, props.proposal.max_end)
-  );
-
   const hasEnded = props.proposal.max_end <= current;
 
-  return hasEnded ? `Ended ${time}` : time;
+  return hasEnded ? `Ended ${endTime.value}` : endTime.value;
 });
 
 async function handleEditClick() {
@@ -313,8 +312,8 @@ onBeforeUnmount(() => destroyAudio());
         <template v-else>
           This proposal is invalid and was not created correctly. We cannot
           display its details, and it <strong>includes execution</strong>. This
-          might mean possible malicious behavior. We strongly advise you to
-          reject this proposal.
+          might mean possible malicious behavior. We strongly advise you to vote
+          against this proposal.
         </template>
       </UiAlert>
 
@@ -356,7 +355,9 @@ onBeforeUnmount(() => destroyAudio());
               >
                 {{ proposal.space.name }}
               </AppLink>
-              <span> · {{ _rt(proposal.created) }}</span>
+              <TimeRelative v-slot="{ relativeTime }" :time="proposal.created">
+                <span> · {{ relativeTime }}</span>
+              </TimeRelative>
               <span> · {{ getProposalId(proposal) }}</span>
             </span>
           </div>

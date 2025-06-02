@@ -1,6 +1,7 @@
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
+import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
 import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
@@ -656,7 +657,14 @@ export function createWriters(config: FullConfig) {
 
     try {
       const metadataUri = event.args.metadataUri;
-      await handleProposalMetadata(metadataUri, config);
+      await handleProposalMetadata(
+        'evm',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
 
       proposal.metadata = dropIpfs(metadataUri);
     } catch (e) {
@@ -743,14 +751,10 @@ export function createWriters(config: FullConfig) {
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    try {
-      await handleProposalMetadata(metadataUri, config);
-
-      proposal.metadata = dropIpfs(metadataUri);
-      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
-    } catch (e) {
-      console.log('failed to update proposal metadata', e);
-    }
+    proposal.execution_strategy = getAddress(
+      event.args.newExecutionStrategy.addr
+    );
+    proposal.execution_hash = keccak256(event.args.newExecutionStrategy.params);
 
     const executionStrategy = await ExecutionStrategy.loadEntity(
       proposal.execution_strategy,
@@ -765,6 +769,11 @@ export function createWriters(config: FullConfig) {
         executionStrategy.axiom_snapshot_address;
       proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot;
       proposal.execution_strategy_type = executionStrategy.type;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      proposal.execution_strategy_details = executionStrategy.id;
     } else {
       proposal.quorum = 0n;
       proposal.timelock_veto_guardian = null;
@@ -788,6 +797,22 @@ export function createWriters(config: FullConfig) {
         executionHash.proposal_id = `${spaceId}/${proposalId}`;
         await executionHash.save();
       }
+    }
+
+    try {
+      await handleProposalMetadata(
+        'evm',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
+
+      proposal.metadata = dropIpfs(metadataUri);
+      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
+    } catch (e) {
+      console.log('failed to update proposal metadata', e);
     }
 
     await proposal.save();
