@@ -26,19 +26,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <UiAlert
-    v-if="item.flag_code === FLAGS.MALICIOUS && isHidden"
-    type="error"
-    class="mb-3"
-  >
-    <UiButton class="float-right ml-2" @click="isHidden = false">Show</UiButton>
-    This content might contain scams, offensive material, or be malicious in
-    nature. Please proceed with caution.
-  </UiAlert>
-  <UiAlert v-else-if="isDMCA" type="error" class="mb-3">
+  <UiAlert v-if="isDMCA" type="error" class="mb-3">
     This content has been removed in response to a DMCA request. If you have any
     questions or believe this was an error, please
     <AppLink :to="HELPDESK_URL">contact us</AppLink>.
+  </UiAlert>
+  <UiAlert v-else-if="item.flagged && isHidden" type="error" class="mb-3">
+    <UiButton class="float-right ml-2" @click="isHidden = false">Show</UiButton>
+    This content might contain scams, offensive material, or be malicious in
+    nature. Please proceed with caution.
   </UiAlert>
   <slot v-if="!isHidden" :title="processedTitle" :body="processedBody" />
 </template>
