@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { useSpaceQuery } from '@/queries/spaces';
+import { useSpaceQuery as useTownhallSpaceQuery } from '@/queries/townhall';
 
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
+const spaceType = useSpaceType(param);
 const { resolved, address, networkId } = useResolve(param);
 const { loadVotes } = useAccount();
 const { isWhiteLabel } = useWhiteLabel();
@@ -13,6 +15,12 @@ const { data: space, isPending } = useSpaceQuery({
   networkId,
   spaceId: address
 });
+
+const { data: townhallSpace, isPending: isTownhallSpacePending } =
+  useTownhallSpaceQuery({
+    spaceId: '1',
+    spaceType
+  });
 
 watch(
   [resolved, networkId, address, () => web3.value.account],
@@ -49,6 +57,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <UiLoading v-if="isPending" class="block p-4" />
-  <router-view v-else :space="space" />
+  <UiLoading
+    v-if="
+      isPending || (spaceType === 'discussionsSpace' && isTownhallSpacePending)
+    "
+    class="block p-4"
+  />
+  <router-view v-else :space="space" :townhall-space="townhallSpace" />
 </template>

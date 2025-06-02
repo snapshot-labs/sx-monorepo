@@ -2,20 +2,33 @@ services:
   postgres:
     image: postgres:15.4
     ports:
-      - "5432:5432"
+      - '5432:5432'
     command:
       [
-        "postgres",
-        "-cshared_preload_libraries=pg_stat_statements",
-        "-cmax_connections=200",
+        'postgres',
+        '-cshared_preload_libraries=pg_stat_statements',
+        '-cmax_connections=200'
       ]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+      POSTGRES_INITDB_ARGS: '-E UTF8 --locale=C'
     volumes:
       - ./initdb.d:/docker-entrypoint-initdb.d
       - pg:/var/lib/postgresql/data
+  redis:
+    image: redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - 6379:6379
+    volumes:
+      - redis:/data
+    restart: always
+    entrypoint: redis-server --appendonly yes
 volumes:
   pg:
+    driver: local
+  redis:
     driver: local

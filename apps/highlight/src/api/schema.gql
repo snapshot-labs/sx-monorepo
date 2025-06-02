@@ -1,0 +1,84 @@
+scalar Text
+
+type Space {
+  id: String!
+  discussion_count: Int!
+  vote_count: Int!
+}
+
+type Alias {
+  id: String!
+  address: String!
+  alias: String!
+  created: Int!
+}
+
+type Discussion {
+  id: String!
+  title: String!
+  body: Text!
+  discussion_url: String!
+  author: String!
+  statement_count: Int!
+  vote_count: Int!
+  created: Int!
+  closed: Boolean!
+  space: Space!
+  statements: [Statement!]! @derivedFrom(field: "discussion")
+  votes: [Vote!]! @derivedFrom(field: "discussion")
+}
+
+type Statement {
+  id: String!
+  body: Text!
+  author: String!
+  scores_1: Int!
+  scores_2: Int!
+  scores_3: Int!
+  vote_count: Int!
+  pinned: Boolean!
+  hidden: Boolean!
+  created: Int!
+  discussion_id: Int!
+  statement_id: Int!
+  discussion: Discussion!
+  votes: [Vote!]! @derivedFrom(field: "statement")
+}
+
+type Vote {
+  id: String!
+  voter: String!
+  choice: Int!
+  created: Int!
+  discussion_id: Int!
+  statement_id: Int!
+  discussion: Discussion!
+  statement: Statement!
+}
+
+type Role {
+  id: String!
+  space: Space!
+  name: String!
+  description: String!
+  color: String!
+  # Workaround as we can't cascade delete yet
+  deleted: Boolean!
+  created: Int!
+}
+
+type User {
+  id: String!
+  roles: [UserRole!]! @derivedFrom(field: "user")
+}
+
+# Would be good to drop those entities if role is deleted in automated way.
+# This would require change in Checkpoint
+# For now we use soft-deletes to workaround it.
+# Ultimate solution would be to add annotation like cascadeDelete
+# eg. role: Role! @cascadeDelete
+type UserRole {
+  id: String!
+  user: User!
+  role: Role!
+}

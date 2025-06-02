@@ -50,8 +50,20 @@ withDefaults(
   @apply rounded-full leading-[100%] border h-[46px] text-skin-link bg-skin-bg;
 
   &:disabled:deep() {
-    color: rgba(var(--border)) !important;
+    color: rgba(var(--border));
     cursor: not-allowed;
+  }
+
+  &.text-skin-danger:disabled {
+    color: rgba(var(--danger)) !important;
+  }
+
+  &.text-skin-success:disabled {
+    color: rgba(var(--success)) !important;
+  }
+
+  &.text-skin-text:disabled {
+    color: rgba(var(--text)) !important;
   }
 
   &.primary {
