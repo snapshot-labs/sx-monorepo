@@ -6,7 +6,7 @@ const props = defineProps<{
   item: Proposal;
 }>();
 
-const isHidden = ref(false);
+const isHidden = ref(props.item.flag_code === FLAGS.MALICIOUS);
 
 const isDMCA = computed(() => props.item.flag_code === FLAGS.DMCA);
 
@@ -18,10 +18,6 @@ const processedBody = computed(() => {
   return isDMCA.value
     ? '> This content has been removed due to a DMCA request.'
     : props.item.body;
-});
-
-onMounted(() => {
-  isHidden.value = props.item.flag_code === FLAGS.MALICIOUS;
 });
 </script>
 
