@@ -22,7 +22,13 @@ export function createConstants(
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
-  const HERODORUS_CONTRACT = '0xfaf1fc1c0b03Ef7E4074C209D254895A7193aE8b';
+  const HERODOTUS_L1_CHAINS = new Map<number, number>([
+    [33139, 1],
+    [33111, 11155111]
+  ]);
+  const HERODORUS_CONTRACT = '0xfda8190B613497c47695F54a512a092F1216fA47';
+  const HERODOTUS_SATELLITE_CONTRACT =
+    '0xc9854fd6034fbc41B65b454919a48a5a9b342fa8';
   const DELEGATION_REGISTRY_CONTRACT =
     '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
 
@@ -472,9 +478,19 @@ export function createConstants(
 
               return [
                 abiCoder.encode(
-                  ['address', 'bytes32', 'address'],
                   [
+                    'uint256',
+                    'uint256',
+                    'address',
+                    'address',
+                    'bytes32',
+                    'address'
+                  ],
+                  [
+                    HERODOTUS_L1_CHAINS.get(config.Meta.eip712ChainId) ?? 1,
+                    config.Meta.eip712ChainId,
                     HERODORUS_CONTRACT,
+                    HERODOTUS_SATELLITE_CONTRACT,
                     params.delegationId,
                     DELEGATION_REGISTRY_CONTRACT
                   ]

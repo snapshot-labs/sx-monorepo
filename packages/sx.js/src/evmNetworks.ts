@@ -135,7 +135,7 @@ export const evmNetworks = {
   ape: createStandardConfig(33139),
   curtis: createStandardConfig(33111, {
     strategies: {
-      ApeGas: '0x2F9e24e272D343C1f833eE7F3C6d6ABC689b0102'
+      ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
   })
 } as const;

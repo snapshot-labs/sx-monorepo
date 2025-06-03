@@ -179,8 +179,8 @@ export default function createApeGasStrategy(): Strategy {
       }
 
       if (block === null) {
-        const [, , delegateRegistry] = defaultAbiCoder.decode(
-          ['address', 'bytes32', 'address'],
+        const [, , , , , delegateRegistry] = defaultAbiCoder.decode(
+          ['uint256', 'uint256', 'address', 'address', 'bytes32', 'address'],
           params
         );
 
