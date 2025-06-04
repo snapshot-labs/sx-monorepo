@@ -3,6 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
 import ethRpc from './eth';
+import { registeredApeGasProposalsLoop } from './eth/registered';
 import starkRpc from './stark';
 import pkg from '../package.json';
 import {
@@ -37,6 +38,7 @@ app.get('/', (req, res) =>
 async function start() {
   registeredTransactionsLoop();
   registeredProposalsLoop();
+  registeredApeGasProposalsLoop();
 
   app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
 }

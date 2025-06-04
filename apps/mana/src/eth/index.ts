@@ -12,7 +12,8 @@ const jsonRpcRequestSchema = z.object({
     'finalizeProposal',
     'execute',
     'executeQueuedProposal',
-    'executeStarknetProposal'
+    'executeStarknetProposal',
+    'registerApeGasProposal'
   ]),
   params: z.any()
 });
