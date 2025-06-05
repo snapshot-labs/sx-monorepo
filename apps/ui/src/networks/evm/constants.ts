@@ -539,7 +539,7 @@ export function createConstants(
               properties: {
                 delegationId: {
                   type: 'string',
-                  format: 'bytes',
+                  format: 'bytes32',
                   title: 'Delegation ID',
                   examples: ['e.g. 0x01']
                 },
