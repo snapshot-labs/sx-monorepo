@@ -1,6 +1,7 @@
 import { defaultAbiCoder, Interface } from '@ethersproject/abi';
 import { Contract } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
+import ApeGasVotingStrategy from './abis/ApeGasVotingStrategy.json';
 import DelegateRegistryAbi from './abis/DelegateRegistry.json';
 import Multicall3Abi from './abis/Multicall3.json';
 import SpaceAbi from '../../clients/evm/ethereum-tx/abis/Space.json';
@@ -92,7 +93,7 @@ async function getCurrentDelegatedVotingPower({
   );
 }
 
-async function getProofData({
+async function getUserParams({
   viewId,
   blockNumber,
   voterAddress
@@ -114,7 +115,20 @@ async function getProofData({
     );
   }
 
-  return data;
+  return defaultAbiCoder.encode(
+    [
+      'tuple(bytes, address, bool, uint256, tuple(uint256, uint256, uint256)[])'
+    ],
+    [
+      [
+        `0x${data.account_proof}`,
+        data.address,
+        data.has_delegated,
+        data.voting_power,
+        data.trie_proof
+      ]
+    ]
+  );
 }
 
 export default function createApeGasStrategy(): Strategy {
@@ -145,26 +159,11 @@ export default function createApeGasStrategy(): Strategy {
 
       const { startBlockNumber } = await spaceContract.proposals(proposal);
 
-      const proofData = await getProofData({
+      return getUserParams({
         viewId: metadata.delegationId,
         blockNumber: startBlockNumber,
         voterAddress: signerAddress
       });
-
-      return defaultAbiCoder.encode(
-        [
-          'tuple(bytes, address, bool, uint256, tuple(uint256, uint256, uint256)[])'
-        ],
-        [
-          [
-            `0x${proofData.account_proof}`,
-            proofData.address,
-            proofData.has_delegated,
-            proofData.voting_power,
-            proofData.trie_proof
-          ]
-        ]
-      );
     },
     async getVotingPower(
       strategyAddress: string,
@@ -192,13 +191,30 @@ export default function createApeGasStrategy(): Strategy {
         });
       }
 
-      const proofData = await getProofData({
+      const userParams = await getUserParams({
         viewId: metadata.delegationId,
         blockNumber: block,
         voterAddress
       });
 
-      return BigInt(proofData.voting_power);
+      const apeGasVotingStrategyContract = new Contract(
+        strategyAddress,
+        ApeGasVotingStrategy,
+        provider
+      );
+
+      try {
+        const votingPower = await apeGasVotingStrategyContract.getVotingPower(
+          block,
+          voterAddress,
+          params,
+          userParams
+        );
+
+        return BigInt(votingPower.toString());
+      } catch {
+        return BigInt(0);
+      }
     }
   };
 }
