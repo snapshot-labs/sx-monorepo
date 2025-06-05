@@ -66,20 +66,20 @@ describe('apeGas', () => {
 
   it('should compute voting power for user with delegated APE gas at specific timestamp', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
-      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+      '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
       '0x537f1896541d28F4c70116EEa602b1B34Da95163',
       metadata,
-      8445525,
+      8482198,
       params,
       provider
     );
 
-    expect(votingPower.toString()).toEqual('661498808915500510');
+    expect(votingPower.toString()).toEqual('1652112965448993573');
   });
 
   it('should compute live voting power for user with own APE gas at null block', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
-      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+      '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
       '0xc4Af7180FD4BBC1E5A3e10eB82801Ab6238eB1C5',
       metadata,
       null,
@@ -93,7 +93,7 @@ describe('apeGas', () => {
 
   it('should compute live voting power for user that receives delegated gas at null block', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
-      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+      '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
       '0xC7Ca2aC1Ae120eBa3aB42a8BF4cb071895641ceF',
       metadata,
       null,
@@ -107,7 +107,7 @@ describe('apeGas', () => {
 
   it('should return 0 live voting power for user that delegates gas to someone at null block', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
-      '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+      '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
       '0xa40839f84CF98Ee6F4fdB84c1bB1a448e7835EfE',
       metadata,
       null,
@@ -121,7 +121,7 @@ describe('apeGas', () => {
   it('should throw when requesting unknown block', () => {
     expect(
       apeGasStrategy.getVotingPower(
-        '0xF798ef55aB67fB0b69b036B09a928Cd5E51124d0',
+        '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
         '0xfede39f346c1c65d07f2fa476d5f4727a0d7dc43',
         metadata,
         50000,
