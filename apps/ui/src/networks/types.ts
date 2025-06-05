@@ -163,7 +163,7 @@ export type ReadOnlyNetworkActions = {
     snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
   propose(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
@@ -182,7 +182,7 @@ export type ReadOnlyNetworkActions = {
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
@@ -198,12 +198,13 @@ export type ReadOnlyNetworkActions = {
   ): Promise<any>;
   flagProposal(web3: Web3Provider, proposal: Proposal);
   cancelProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
-    proposal: Proposal
+    proposal: Proposal,
+    from?: string
   );
   vote(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     proposal: Proposal,
