@@ -303,11 +303,7 @@ onBeforeUnmount(() => destroyAudio());
 
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
-    <div>
-      <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
-        This proposal might contain scams, offensive material, or be malicious
-        in nature. Please proceed with caution.
-      </UiAlert>
+    <ContentFlagable v-slot="{ title, body }" :item="proposal">
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
         <template v-if="proposal.execution_strategy === EMPTY_ADDRESS">
           This proposal is invalid and was not created correctly. We cannot
@@ -322,7 +318,7 @@ onBeforeUnmount(() => destroyAudio());
       </UiAlert>
 
       <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
-        {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
+        {{ title || `Proposal #${proposal.proposal_id}` }}
       </h1>
 
       <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
@@ -369,6 +365,7 @@ onBeforeUnmount(() => destroyAudio());
         <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
+              !proposal.flagged &&
               offchainNetworks.includes(props.proposal.network) &&
               props.proposal.body.length > 500
             "
@@ -388,6 +385,7 @@ onBeforeUnmount(() => destroyAudio());
           </UiTooltip>
           <UiTooltip
             v-if="
+              !proposal.flagged &&
               offchainNetworks.includes(props.proposal.network) &&
               props.proposal.body.length > 0 &&
               props.proposal.body.length < 4096
@@ -528,7 +526,7 @@ onBeforeUnmount(() => destroyAudio());
           AI can be inaccurate or misleading.
         </div>
       </div>
-      <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
+      <UiMarkdown v-if="body" class="mb-4" :body="body" />
       <div v-if="discussion">
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-chat-alt />
@@ -596,7 +594,7 @@ onBeforeUnmount(() => destroyAudio());
         />
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
-    </div>
+    </ContentFlagable>
   </UiContainer>
   <teleport to="#modal">
     <ModalTimeline
