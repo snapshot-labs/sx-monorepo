@@ -88,8 +88,7 @@ export function createConfig(indexerName: NetworkID): FullConfig {
       masterAxiom: network.ExecutionStrategies.Axiom,
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower,
-      // TODO: replace with network property in PR that implements strategy
-      apeGasStrategy: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
+      apeGasStrategy: network.Strategies.ApeGas ?? null
     },
     network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
     sources,

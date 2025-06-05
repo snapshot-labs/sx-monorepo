@@ -79,7 +79,7 @@ async function getVotingPower(
     if (
       e instanceof utils.errors.VotingPowerDetailsError &&
       e.details === 'NOT_READY_YET' &&
-      ['evmSlotValue', 'ozVotesStorageProof'].includes(e.source)
+      ['evmSlotValue', 'ozVotesStorageProof', 'apeGas'].includes(e.source)
     ) {
       throw new Error('NOT_READY_YET');
     }
