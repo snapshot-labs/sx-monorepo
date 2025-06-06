@@ -126,6 +126,12 @@ const socialAccountsDefinition = computed(() => {
         examples: ['X (Twitter) handle'],
         maxLength: 15
       },
+      farcaster: {
+        type: 'string',
+        title: 'Farcaster',
+        examples: ['Farcaster handle'],
+        maxLength: 256
+      },
       ...(isOffchainNetwork.value ? offchainProperties : onchainProperties)
     }
   };

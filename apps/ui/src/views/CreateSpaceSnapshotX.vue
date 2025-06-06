@@ -59,6 +59,7 @@ const metadataForm: SpaceMetadata = reactive(
     externalUrl: '',
     twitter: '',
     github: '',
+    farcaster: '',
     discord: '',
     terms: '',
     votingPowerSymbol: '',

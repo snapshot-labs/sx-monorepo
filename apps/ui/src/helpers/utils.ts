@@ -450,6 +450,7 @@ export function createErc1155Metadata(
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
+      farcaster: metadata.farcaster,
       treasuries: metadata.treasuries.map(treasury => ({
         name: treasury.name,
         chain_id: treasury.chainId,
