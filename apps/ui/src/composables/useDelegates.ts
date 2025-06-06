@@ -3,7 +3,6 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { hexZeroPad } from '@ethersproject/bytes';
 import gql from 'graphql-tag';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork, metadataNetwork as metadataNetworkId } from '@/networks';
@@ -260,11 +259,13 @@ export function useDelegates(
   async function getApeChainDelegationDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
-    const encodedSpaceId = hexZeroPad(space.id, 32).toLocaleLowerCase();
+    const CUSTOM_GOVERNANCES = {
+      33111: 'curtis'
+    };
 
     const where = {
       tokenHoldersRepresentedAmount_gte: 0,
-      governance: `${space.network}:${encodedSpaceId}`,
+      governance: `${CUSTOM_GOVERNANCES[delegation.chainId]}:${delegation.contractAddress}`,
       ...filter.where
     };
 
@@ -319,7 +320,7 @@ export function useDelegates(
       query,
       variables: {
         space: isApeChainDelegateRegistry
-          ? hexZeroPad(space.id, 32).toLocaleLowerCase()
+          ? delegation.contractAddress
           : space.id,
         delegator
       }
