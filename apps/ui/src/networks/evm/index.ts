@@ -1,5 +1,6 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { getRelayerInfo } from '@/helpers/mana';
 import { pinGraph, pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { Network } from '@/networks/types';
@@ -8,6 +9,7 @@ import { createActions } from './actions';
 import { createConstants } from './constants';
 import { EVM_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -130,8 +132,24 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_EXECUTORS[executorType],
     pin,
     getSpaceController: async (space: Space) => space.controller,
+    getRelayerInfo: (space: string, network: NetworkID) =>
+      getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransaction(txId);
+          return transaction.blockNumber ?? null;
+        }
+      });
+    },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
         const timer = setInterval(async () => {

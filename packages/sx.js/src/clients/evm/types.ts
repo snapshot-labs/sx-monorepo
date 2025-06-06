@@ -92,7 +92,7 @@ export type Strategy = {
     strategyAddress: string,
     voterAddress: string,
     metadata: Record<string, any> | null,
-    block: number,
+    block: number | null,
     params: string,
     provider: Provider
   ): Promise<bigint>;

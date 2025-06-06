@@ -49,10 +49,12 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     pin: pinPineapple,
     getSpaceController: async (space: Space) =>
       getSpaceController(space.id, networkId),
+    getRelayerInfo: () => Promise.resolve(null),
     getTransaction: () => {
       throw new Error('Not implemented');
     },
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async () => true,
     waitForSpace: () => {
       throw new Error('Not implemented');
     },

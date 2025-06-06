@@ -81,13 +81,15 @@ export function createStrategyPicker({
     strategies,
     strategiesIndicies,
     isContract,
-    connectorType
+    connectorType,
+    ignoreRelayer
   }: {
     authenticators: string[];
     strategies: string[];
     strategiesIndicies: number[];
     isContract: boolean;
     connectorType: ConnectorType;
+    ignoreRelayer?: boolean;
   }) {
     const authenticatorsInfo = [...authenticators]
       .filter(authenticator =>
@@ -139,7 +141,12 @@ export function createStrategyPicker({
           relayerType,
           connectors
         };
-      });
+      })
+      .filter(authenticator =>
+        ignoreRelayer && authenticator.relayerType
+          ? !['evm', 'starknet'].includes(authenticator.relayerType)
+          : true
+      );
 
     const authenticatorInfo = authenticatorsInfo.find(({ connectors }) =>
       connectors.includes(connectorType)
@@ -169,4 +176,60 @@ export function createStrategyPicker({
       strategies: selectedStrategies
     };
   };
+}
+
+export function awaitIndexedOnApi({
+  txId,
+  getLastIndexedBlockNumber,
+  getTransactionBlockNumber,
+  timeout
+}: {
+  txId: string;
+  getLastIndexedBlockNumber: () => Promise<number | null>;
+  getTransactionBlockNumber: (txId: string) => Promise<number | null>;
+  timeout: number;
+}): Promise<boolean> {
+  let blockNumber: number | null = null;
+  const interval = 2000;
+  const maxRetries = Math.floor(timeout / interval);
+  let retries = 0;
+
+  return new Promise((resolve, reject) => {
+    const checkTransaction = async () => {
+      try {
+        if (!blockNumber) {
+          blockNumber = await getTransactionBlockNumber(txId);
+        }
+
+        if (!blockNumber) {
+          throw new Error('Invalid transaction block number');
+        }
+
+        const lastIndexedBlockNumber = await getLastIndexedBlockNumber();
+
+        if (!lastIndexedBlockNumber) {
+          throw new Error('Invalid indexer block number');
+        }
+
+        if (blockNumber <= lastIndexedBlockNumber) {
+          return resolve(true);
+        }
+
+        if (retries > maxRetries) {
+          return reject(new Error('Transaction not indexed yet'));
+        }
+
+        throw new Error('Transaction not indexed yet');
+      } catch {
+        if (retries > maxRetries) {
+          return reject(new Error('Timeout waiting for indexing'));
+        }
+
+        retries++;
+        setTimeout(checkTransaction, interval);
+      }
+    };
+
+    setTimeout(checkTransaction, interval);
+  });
 }

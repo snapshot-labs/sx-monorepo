@@ -1,7 +1,13 @@
+import { keccak256 } from '@ethersproject/keccak256';
 import { faker } from '@faker-js/faker';
+import { getExecutionData } from '@snapshot-labs/sx';
+import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
 import fetch from 'cross-fetch';
+import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { Network } from '../../.checkpoint/models';
+
+type ExecutionType = Parameters<typeof getExecutionData>[0];
 
 export async function updateCounter(
   indexerName: string,
@@ -58,4 +64,39 @@ export async function getJSON(uri: string) {
   if (!url) throw new Error('Invalid URI');
 
   return fetch(url).then(res => res.json());
+}
+
+export function getExecutionHash({
+  type,
+  executionType,
+  executionDestination,
+  transactions
+}: {
+  type: 'starknet' | 'evm';
+  executionType: string;
+  executionDestination: string | null;
+  transactions: MetaTransaction[];
+}) {
+  const data = getExecutionData(
+    executionType as ExecutionType,
+    '0x0000000000000000000000000000000000000000',
+    {
+      transactions: transactions.map(tx => ({
+        ...tx,
+        operation: 0,
+        salt: BigInt(tx.salt)
+      })),
+      destination: executionDestination ?? undefined
+    }
+  );
+
+  if (type === 'evm') {
+    if (!data.executionParams[0]) {
+      return null;
+    }
+
+    return keccak256(data.executionParams[0]);
+  }
+
+  return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
 }

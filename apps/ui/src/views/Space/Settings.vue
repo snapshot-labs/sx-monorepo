@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
+import RelayerBalance from '@/components/RelayerBalance.vue';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -463,15 +464,17 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           </UiButton>
         </div>
       </UiContainerSettings>
-      <FormStrategies
-        v-if="activeTab === 'authenticators'"
-        v-model="authenticators"
-        unique
-        :network-id="space.network"
-        :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
-        title="Authenticators"
-        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
-      />
+      <UiContainerSettings v-if="activeTab === 'authenticators'">
+        <FormStrategies
+          v-model="authenticators"
+          unique
+          :network-id="space.network"
+          :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
+          title="Authenticators"
+          description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+        />
+        <RelayerBalance :space="space" :network="network" />
+      </UiContainerSettings>
       <UiContainerSettings
         v-if="activeTab === 'treasuries'"
         title="Treasuries"
@@ -599,6 +602,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         successSubtitle: 'Your changes were successfully saved'
       }"
       :execute="executeFn"
+      :wait-for-index="!isOffchainNetwork"
       @confirmed="
         reloadSpaceAndReset();
         saving = false;

@@ -3,7 +3,7 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { TURBO_URL, VERIFIED_URL } from '@/helpers/constants';
+import { VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
@@ -536,18 +536,17 @@ watchEffect(() => {
             <AppLink
               to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
               class="font-semibold text-rose-500"
-              >premium network
+            >
+              premium network
               <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
             or
-            <a
-              :href="TURBO_URL"
-              target="_blank"
+            <AppLink
+              :to="{ name: 'space-pro' }"
               class="font-semibold text-rose-500"
             >
               upgrade your space
-              <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
+            </AppLink>
             to continue.
           </UiAlert>
           <template v-else>
@@ -573,11 +572,10 @@ watchEffect(() => {
                   proposals per day and
                   {{ limits['space.verified.proposal_limit_per_month'] }}
                   proposals per month.
-                  <a
-                    :href="TURBO_URL"
-                    target="_blank"
+                  <AppLink
+                    :to="{ name: 'space-pro' }"
                     class="text-rose-500 dark:text-neutral-100 font-semibold"
-                    >Increase limit</a
+                    >Increase limit</AppLink
                   >.
                 </span>
               </UiAlert>
@@ -644,11 +642,10 @@ watchEffect(() => {
               "
               #error-suffix
             >
-              <a
-                :href="TURBO_URL"
-                target="_blank"
+              <AppLink
+                :to="{ name: 'space-pro' }"
                 class="ml-1 text-skin-danger font-semibold"
-                >Increase limit</a
+                >Increase limit</AppLink
               >.
             </template>
           </UiComposer>
@@ -709,11 +706,10 @@ watchEffect(() => {
             "
           >
             <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
-              <a
-                :href="TURBO_URL"
-                target="_blank"
+              <AppLink
+                :to="{ name: 'space-pro' }"
                 class="ml-1 text-skin-danger font-semibold"
-                >Increase limit</a
+                >Increase limit</AppLink
               >.
             </template>
           </EditorChoices>

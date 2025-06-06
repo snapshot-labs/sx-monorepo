@@ -18,9 +18,6 @@ export const UNIFIED_API_TESTNET_URL =
 
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
-export const TURBO_URL =
-  'https://docs.snapshot.box/user-guides/spaces/turbo-plan';
-
 export const VERIFIED_URL =
   'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 
@@ -198,3 +195,12 @@ export const VALIDATION_TYPES_INFO: Record<
 export const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
 
 export const RECENT_CONNECTOR = 'recent-connector';
+
+export const DELEGATE_REGISTRY_STRATEGIES = [
+  'delegation',
+  'erc20-balance-of-delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides',
+  'with-delegation',
+  'erc20-balance-of-with-delegation'
+];
