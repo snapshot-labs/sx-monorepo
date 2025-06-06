@@ -167,13 +167,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <span>Invalid delegation settings.</span>
   </div>
   <template v-else>
-    <div
-      v-if="
-        delegation.contractAddress ||
-        delegation.apiType === 'apechain-delegate-registry'
-      "
-      class="p-4 space-x-2 flex"
-    >
+    <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <UiButton
         v-if="web3.account"
         :to="{

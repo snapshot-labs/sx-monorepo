@@ -653,23 +653,23 @@ export function createActions(
             ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
             : '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
 
-        const encodedSpace =
+        const delegationId =
           delegationType === 'delegate-registry'
             ? formatBytes32String(space.id)
-            : hexZeroPad(space.id, 32).toLocaleLowerCase();
+            : delegationContract;
 
         if (delegatees[0]) {
           contractParams = {
             address: contractAddress,
             functionName: 'setDelegate',
-            functionParams: [encodedSpace, delegatees[0]],
+            functionParams: [delegationId, delegatees[0]],
             abi: ['function setDelegate(bytes32 id, address delegate)']
           };
         } else {
           contractParams = {
             address: contractAddress,
             functionName: 'clearDelegate',
-            functionParams: [encodedSpace],
+            functionParams: [delegationId],
             abi: ['function clearDelegate(bytes32 id)']
           };
         }

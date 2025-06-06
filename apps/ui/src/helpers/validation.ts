@@ -261,6 +261,7 @@ ajv.addFormat('network', {
 });
 ajv.addKeyword('networkId');
 ajv.addKeyword('networksListKind');
+ajv.addKeyword('networksFilter');
 ajv.addKeyword('chainId');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
