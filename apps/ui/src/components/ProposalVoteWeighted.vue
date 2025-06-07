@@ -57,10 +57,7 @@ watch(
           '!border-skin-link': selectedChoices[i + 1] > 0
         }"
       >
-        <div class="grow truncate text-skin-link">
-          {{ choice }}
-        </div>
-
+        <UiSliding class="grow truncate text-skin-link">{{ choice }}</UiSliding>
         <div class="flex gap-1 items-center">
           <UiButton
             :disabled="!selectedChoices[i + 1]"

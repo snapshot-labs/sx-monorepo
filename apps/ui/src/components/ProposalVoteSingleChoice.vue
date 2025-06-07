@@ -25,7 +25,7 @@ const selectedChoice = ref<number | null>(
         :class="{ 'border-skin-text': selectedChoice === index + 1 }"
         @click="selectedChoice = index + 1"
       >
-        <div class="grow truncate">{{ choice }}</div>
+        <UiSliding class="grow truncate">{{ choice }}</UiSliding>
         <IH-check v-if="selectedChoice === index + 1" class="shrink-0" />
       </UiButton>
     </div>
