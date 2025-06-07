@@ -1,75 +1,49 @@
 <script setup lang="ts">
-const containerRef = ref<HTMLElement>();
+const container = ref<HTMLElement>();
+const content = ref<HTMLElement>();
 
-const checkOverflow = async () => {
-  await nextTick();
-  if (containerRef.value) {
-    const container = containerRef.value;
-    const content = container.querySelector(
-      '.slide-text-content'
-    ) as HTMLElement;
+function handleOverflow() {
+  if (!container.value || !content.value) return;
 
-    if (content) {
-      const containerWidth = container.getBoundingClientRect().width;
-      const contentWidth = content.scrollWidth;
+  const overflow = content.value.scrollWidth - container.value.clientWidth;
 
-      if (contentWidth > containerWidth) {
-        const translateDistance = contentWidth - containerWidth;
-        const slideDuration = translateDistance / 50;
-        const totalDuration = slideDuration * 2.5;
-
-        container.style.setProperty(
-          '--translate-distance',
-          `-${translateDistance}px`
-        );
-        container.style.setProperty(
-          '--animation-duration',
-          `${totalDuration}s`
-        );
-        container.classList.add('can-slide');
-      } else {
-        container.classList.remove('can-slide');
-      }
-    }
+  if (overflow > 0) {
+    container.value.style.setProperty('--distance', `-${overflow}px`);
+    container.value.style.setProperty('--duration', `${overflow / 20}s`);
+    container.value.classList.add('slide');
+  } else {
+    container.value.classList.remove('slide');
   }
-};
+}
 
-onMounted(() => checkOverflow());
+onMounted(handleOverflow);
 </script>
 
 <template>
   <span
-    ref="containerRef"
-    class="slide-text-container overflow-hidden item-center flex"
-    @mouseenter="checkOverflow"
+    ref="container"
+    class="container flex items-center overflow-hidden"
+    @mouseenter="handleOverflow"
   >
-    <span class="slide-text-content">
-      <slot />
-    </span>
+    <span ref="content" class="content"><slot /></span>
   </span>
 </template>
 
-<style lang="scss" scoped>
-@keyframes slide-and-return {
-  0% {
-    transform: translateX(0);
-  }
+<style scoped>
+@keyframes slide {
   50% {
-    transform: translateX(var(--translate-distance));
-  }
-  50% {
-    transform: translateX(var(--translate-distance));
-  }
-  100% {
-    transform: translateX(0);
+    transform: translateX(var(--distance));
   }
 }
 
-.slide-text-container.can-slide:hover .slide-text-content {
-  animation: slide-and-return var(--animation-duration) linear;
+.slide:hover .content {
+  animation: slide var(--duration) linear;
 }
 
-.slide-text-container:not(:hover) .slide-text-content {
-  @apply text-ellipsis overflow-hidden w-full;
+.container:not(:hover) .content {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 </style>
