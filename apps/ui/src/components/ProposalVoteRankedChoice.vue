@@ -35,13 +35,12 @@ const selectedChoices = ref<RankedChoice>(
         <UiButton
           class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
         >
-          <IC-drag class="text-skin-text" />
-
-          <div class="grow truncate">
+          <IC-drag class="text-skin-text shrink-0" />
+          <UiSliding class="grow truncate">
             {{ proposal.choices[element - 1] }}
-          </div>
+          </UiSliding>
           <div
-            class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block"
+            class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block shrink-0"
           >
             #{{ index + 1 }}
           </div>

@@ -37,9 +37,7 @@ function toggleSelectedChoice(choice: number) {
         :class="{ 'border-skin-text': selectedChoices.includes(index + 1) }"
         @click="toggleSelectedChoice(index + 1)"
       >
-        <div class="grow truncate">
-          {{ choice }}
-        </div>
+        <UiSliding class="grow truncate">{{ choice }}</UiSliding>
         <IH-check v-if="selectedChoices.includes(index + 1)" class="shrink-0" />
       </UiButton>
     </div>
