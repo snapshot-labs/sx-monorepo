@@ -23,6 +23,7 @@ export const VERIFIED_URL =
 
 export const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+export const EIP7702_DELEGATION_INDICATOR = '0xef0100';
 
 export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   // EVM
