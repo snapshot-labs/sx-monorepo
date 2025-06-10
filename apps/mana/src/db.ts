@@ -144,6 +144,15 @@ export async function updateApeGasProposal(
     .where({ id });
 }
 
-export async function getApeGasProposalsToProcess() {
-  return knex(APEGAS_PROPOSALS).select('*').where({ processed: false });
+export async function getApeGasProposalsToProcess({
+  chainId,
+  maxSnapshot
+}: {
+  chainId: number;
+  maxSnapshot: number;
+}) {
+  return knex(APEGAS_PROPOSALS)
+    .select('*')
+    .where({ chainId, processed: false })
+    .andWhere('snapshot', '<=', maxSnapshot);
 }
