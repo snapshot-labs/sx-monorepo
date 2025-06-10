@@ -541,7 +541,9 @@ export function createConstants(
                   type: 'string',
                   format: 'bytes32',
                   title: 'Delegation ID',
-                  examples: ['e.g. 0x01']
+                  examples: [
+                    'e.g. 0x0000000000000000000000000000000000000000000000000000000000000001'
+                  ]
                 },
                 symbol: {
                   type: 'string',
