@@ -439,8 +439,7 @@ watch(
   () => props.space,
   async () => {
     await refreshDrafts();
-  },
-  { immediate: true }
+  }
 );
 
 watchEffect(() => {

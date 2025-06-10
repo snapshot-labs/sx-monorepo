@@ -604,7 +604,7 @@ export function autoLinkText(text: string) {
 export function getSocialNetworksLink(data: any) {
   return [
     { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
-    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
+    { key: 'twitter', icon: ICX, urlFormat: 'https://x.com/$' },
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
     {
       key: 'coingecko',

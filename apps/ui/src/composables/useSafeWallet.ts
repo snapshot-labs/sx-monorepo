@@ -1,5 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { computedAsync, useMemoize } from '@vueuse/core';
+import { getIsContract } from '@/helpers/contracts';
 import { getProvider } from '@/helpers/provider';
 import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
@@ -7,9 +8,9 @@ import { NetworkID } from '@/types';
 const getSafeVersion = useMemoize(
   async (networkKey: string, account: string) => {
     const provider = getProvider(Number(networkKey));
-    const code = await provider.getCode(account);
 
-    if (code === '0x') return undefined;
+    const isContract = await getIsContract(provider, account);
+    if (!isContract) return undefined;
 
     const abi = ['function VERSION() view returns (string)'];
     const contract = new Contract(account, abi, provider);
