@@ -23,10 +23,10 @@ When you create spaces, proposals and take part in organization’s governance, 
 ## Communication and contact forms etc.
 When you contact us by email, telephone, chat, letter, or other means of communication, we collect the data exchanged between you and us for the purposes of communicating with you and provide our services to you, in particular, to respond to your enquiries. By providing us with this information, you acknowledge that we use your personal information in accordance with this Privacy Notice.
 
-If you communicate with us via our accounts on third party platforms like Discord, GitHub, or Twitter your data will also be processed according to the privacy policies of the respective platform.
+If you communicate with us via our accounts on third party platforms like Discord, GitHub, or X your data will also be processed according to the privacy policies of the respective platform.
 For further information on the purpose and scope of the data processing of Discord please see here: https://discord.com/privacy.
 For further information on the purpose and scope of the data processing of GitHub please see here: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement.
-For further information on the purpose and scope of the data processing of Twitter please see here: https://twitter.com/en/privacy.
+For further information on the purpose and scope of the data processing of X please see here: https://x.com/en/privacy.
 
 ## Newsletters
 If you subscribe to our newsletter, we process the information provided by you (e.g. contact details) in order to provide you with our newsletter. You may cancel your subscription at any time by using the option to unsubscribe contained in the newsletter or by sending us an email to the address mentioned above.
@@ -35,7 +35,7 @@ If you subscribe to our newsletter, we process the information provided by you (
 Our website may contain third-party offerings. Please note that when you use such link, your data such as IP address, personal browser settings etc., are transmitted to these third parties. We have no control over, do not review and cannot be responsible for these third-party websites or their content. Please be aware that the terms of this Privacy Notice do not apply to these third-party websites or their content, or any collection of your data after you click on links to such third-party websites. We encourage you to read the privacy policies of every website you visit. Any links to third-party websites or locations are for your convenience and do not signify our endorsement of such third parties or their products, content, or websites.
 
 ## Plugins and our presence on social media platforms
-We do not use plugins on our website. If our website contains icons from other third-party providers (e.g. Discord, GitHub, Twitter), we only use these for passive linking to the pages of the respective providers.
+We do not use plugins on our website. If our website contains icons from other third-party providers (e.g. Discord, GitHub, X), we only use these for passive linking to the pages of the respective providers.
 Please find further information on the purpose and scope of data collection and processing by the social media providers in their respective privacy policies. This also applies with regard to our own presence on social media providers (e.g. LinkedIn).
 
 ## Providing Services and performance of a contract

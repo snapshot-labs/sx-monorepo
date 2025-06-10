@@ -282,7 +282,7 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'abi':
         return 'Must be a valid ABI.';
       case 'twitter-handle':
-        return 'Must be a valid Twitter handle.';
+        return 'Must be a valid X handle.';
       case 'github-handle':
         return 'Must be a valid GitHub handle.';
       case 'discord-handle':
