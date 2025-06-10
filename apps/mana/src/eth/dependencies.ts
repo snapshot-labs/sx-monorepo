@@ -22,16 +22,22 @@ export const createWalletProxy = (chainId: number) => {
     chainId
   );
 
-  return (spaceAddress: string) => {
-    const normalizedSpaceAddress = spaceAddress.toLowerCase();
+  return {
+    provider,
+    getWallet: (spaceAddress: string) => {
+      const normalizedSpaceAddress = spaceAddress.toLowerCase();
 
-    if (!signers.has(normalizedSpaceAddress)) {
-      const networkId = NETWORK_IDS.get(chainId);
-      if (!networkId) throw new Error(`Unsupported chainId ${chainId}`);
-      const wallet = generateSpaceEvmWallet(networkId, normalizedSpaceAddress);
-      signers.set(normalizedSpaceAddress, wallet.connect(provider));
+      if (!signers.has(normalizedSpaceAddress)) {
+        const networkId = NETWORK_IDS.get(chainId);
+        if (!networkId) throw new Error(`Unsupported chainId ${chainId}`);
+        const wallet = generateSpaceEvmWallet(
+          networkId,
+          normalizedSpaceAddress
+        );
+        signers.set(normalizedSpaceAddress, wallet.connect(provider));
+      }
+
+      return signers.get(normalizedSpaceAddress) as Wallet;
     }
-
-    return signers.get(normalizedSpaceAddress) as Wallet;
   };
 };

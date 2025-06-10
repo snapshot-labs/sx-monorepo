@@ -4,7 +4,9 @@ import { EvmNetworkConfig } from './types';
 type AdditionalProperties = {
   maxPriorityFeePerGas?: BigNumberish;
   authenticators?: Record<string, string>;
-  strategies?: Record<string, string>;
+  strategies?: {
+    ApeGas?: string;
+  };
   executionStrategies?: {
     Axiom?: string;
     Isokratia?: string;
@@ -82,7 +84,14 @@ function createEvmConfig(
     },
     [network.Strategies.Whitelist]: {
       type: 'whitelist'
-    }
+    },
+    ...(network.Strategies.ApeGas
+      ? {
+          [network.Strategies.ApeGas]: {
+            type: 'apeGas' as const
+          }
+        }
+      : {})
   } as const;
 
   const executionStrategiesImplementations = {
@@ -124,7 +133,11 @@ export const evmNetworks = {
     maxPriorityFeePerGas: 0
   }),
   ape: createStandardConfig(33139),
-  curtis: createStandardConfig(33111)
+  curtis: createStandardConfig(33111, {
+    strategies: {
+      ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
+    }
+  })
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');
