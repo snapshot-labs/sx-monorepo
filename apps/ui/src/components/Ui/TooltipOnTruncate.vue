@@ -15,16 +15,7 @@ const checkTruncation = () => {
   isTruncated.value = wrapper.value.scrollWidth > wrapper.value.clientWidth;
 };
 
-const debounce = (func: () => void, wait: number) => {
-  let timeout: NodeJS.Timeout;
-  return () => {
-    clearTimeout(timeout);
-    timeout = setTimeout(func, wait);
-  };
-};
-
-// Debounce with 16ms delay (~60fps) to prevent excessive calculations during animations/resizes
-const debouncedCheckTruncation = debounce(checkTruncation, 16);
+const debouncedCheckTruncation = useDebounceFn(checkTruncation, 300);
 
 let resizeObserver: ResizeObserver | null = null;
 
