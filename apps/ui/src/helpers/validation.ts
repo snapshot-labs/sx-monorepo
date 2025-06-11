@@ -292,8 +292,6 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be a valid GitHub handle.';
       case 'discord-handle':
         return 'Must be a valid Discord handle or invite code.';
-      case 'farcaster-handle':
-        return 'Must be a valid Farcaster handle.';
       case 'coingecko-handle':
         return 'Must be a valid CoinGecko handle.';
       case 'uint256':
