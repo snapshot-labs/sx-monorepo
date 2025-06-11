@@ -51,7 +51,7 @@ async function handleAddRole(config: SpaceMetadataLabel) {
     const newRoles: Role[] = res.result.events
       .filter(event => event.key === 'new_role')
       .map(event => ({
-        space: event.data[0],
+        space: { id: event.data[0] },
         id: event.data[1],
         name: event.data[2],
         description: event.data[3],
