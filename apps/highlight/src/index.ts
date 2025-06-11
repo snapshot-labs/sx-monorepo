@@ -49,9 +49,14 @@ async function run() {
           .where('roles.id', roleId);
       }
 
-      const result = await query.groupBy('votes.post_id', 'choice');
+      try {
+        const result = await query.groupBy('votes.post_id', 'choice');
 
-      res.json({ result });
+        return res.json({ result });
+      } catch (e) {
+        console.error('Error fetching results by role:', e);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
     }
   );
   app.use('/', checkpoint.graphql);
