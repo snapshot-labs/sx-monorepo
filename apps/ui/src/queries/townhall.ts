@@ -320,7 +320,7 @@ export function useSetPostVisibilityMutation({
 }) {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
-  const { sendPinPost, sendHidePost } = useTownhall();
+  const { sendPinPost, sendUnpinPost, sendHidePost } = useTownhall();
 
   return useMutation({
     mutationFn: ({
@@ -328,10 +328,14 @@ export function useSetPostVisibilityMutation({
       visibility
     }: {
       postId: number;
-      visibility: 'pin' | 'hide';
+      visibility: 'pin' | 'unpin' | 'hide';
     }) => {
       if (visibility === 'pin') {
         return sendPinPost(toValue(topicId), postId);
+      }
+
+      if (visibility === 'unpin') {
+        return sendUnpinPost(toValue(topicId), postId);
       }
 
       if (visibility === 'hide') {
@@ -355,6 +359,13 @@ export function useSetPostVisibilityMutation({
                 return {
                   ...post,
                   pinned: true
+                };
+              }
+
+              if (visibility === 'unpin') {
+                return {
+                  ...post,
+                  pinned: false
                 };
               }
 

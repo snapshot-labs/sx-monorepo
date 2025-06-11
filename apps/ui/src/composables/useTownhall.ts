@@ -182,6 +182,23 @@ export function useTownhall() {
     );
   }
 
+  async function sendUnpinPost(topic: number, post: number) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.unpinPost({
+        signer,
+        data: { topic, post },
+        salt: getSalt()
+      })
+    );
+  }
+
   async function sendVote(topic: number, post: number, choice: 1 | 2 | 3) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -301,6 +318,7 @@ export function useTownhall() {
     sendPost,
     sendHidePost,
     sendPinPost,
+    sendUnpinPost,
     sendVote,
     sendCreateRole,
     sendEditRole,

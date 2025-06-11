@@ -50,7 +50,7 @@ const { mutate: setPostVisibility, isPending: isSetPostVisibilityPending } =
                   @click="
                     setPostVisibility({
                       postId: posts[0].post_id,
-                      visibility: 'pin'
+                      visibility: posts[0].pinned ? 'unpin' : 'pin'
                     })
                   "
                 >

@@ -66,7 +66,7 @@ function getChoiceResult(choice: 1 | 2 | 3) {
               @click="
                 setPostVisibility({
                   postId: post.post_id,
-                  visibility: 'pin'
+                  visibility: post.pinned ? 'unpin' : 'pin'
                 })
               "
             >
