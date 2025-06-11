@@ -4,6 +4,15 @@ export const REGISTERED_TRANSACTIONS = 'registered_transactions';
 export const REGISTERED_PROPOSALS = 'registered_proposals';
 export const MERKLETREE_REQUESTS = 'merkletree_requests';
 export const MERKLETREES = 'merkletrees';
+export const APEGAS_PROPOSALS = 'apegas_proposals';
+
+export type ApeGasProposal = {
+  chainId: number;
+  viewId: number;
+  snapshot: number;
+  herodotusId?: string | null;
+  processed?: boolean;
+};
 
 export async function registerTransaction(
   network: string,
@@ -120,4 +129,21 @@ export async function getMerkleTreeRequest(id: string) {
 
 export async function getMerkleTree(id: string) {
   return knex(MERKLETREES).select('*').where({ id }).first();
+}
+
+export async function saveApeGasProposal(proposal: ApeGasProposal) {
+  return knex(APEGAS_PROPOSALS).insert(proposal).onConflict().ignore();
+}
+
+export async function updateApeGasProposal(
+  id: string,
+  proposal: Partial<ApeGasProposal>
+) {
+  return knex(APEGAS_PROPOSALS)
+    .update({ updated_at: knex.fn.now(), ...proposal })
+    .where({ id });
+}
+
+export async function getApeGasProposalsToProcess() {
+  return knex(APEGAS_PROPOSALS).select('*').where({ processed: false });
 }

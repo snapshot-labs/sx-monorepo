@@ -17,6 +17,7 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
+import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
@@ -83,7 +84,8 @@ export function createActions(
 
   const clientOpts = {
     networkConfig,
-    whitelistServerUrl: WHITELIST_SERVER_URL
+    whitelistServerUrl: WHITELIST_SERVER_URL,
+    provider
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
@@ -102,8 +104,7 @@ export function createActions(
       return true;
     }
 
-    const code = await provider.getCode(address);
-    return code !== '0x';
+    return _getIsContract(provider, address);
   };
 
   /**

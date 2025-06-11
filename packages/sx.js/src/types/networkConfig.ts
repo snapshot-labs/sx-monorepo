@@ -44,6 +44,10 @@ export type OzVotesStrategyConfig = {
   type: 'ozVotes';
 };
 
+export type ApeGasStrategyConfig = {
+  type: 'apeGas';
+};
+
 export type Erc20VotesStrategyConfig = {
   type: 'erc20Votes';
 };
@@ -88,6 +92,7 @@ export type NetworkConfig = {
       | VanillaStrategyConfig
       | CompStrategyConfig
       | OzVotesStrategyConfig
+      | ApeGasStrategyConfig
       | Erc20VotesStrategyConfig
       | WhitelistStrategyConfig
       | EvmSlotValueStrategyConfig

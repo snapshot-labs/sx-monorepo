@@ -1,3 +1,4 @@
+import { defaultAbiCoder } from '@ethersproject/abi';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
@@ -12,6 +13,7 @@ import { handleSpaceMetadata } from './ipfs';
 import {
   convertChoice,
   handleCustomExecutionStrategy,
+  registerApeGasProposal,
   updateProposalValidationStrategy
 } from './utils';
 import {
@@ -702,6 +704,38 @@ export function createWriters(config: FullConfig) {
 
     if (leaderboardItem.proposal_count === 1) space.proposer_count += 1;
     space.proposal_count += 1;
+
+    const apeGasStrategyAddress = config.overrides.apeGasStrategy;
+    const apeGasStrategiesIndices = apeGasStrategyAddress
+      ? space.strategies
+          .map((strategy, i) => [strategy, i] as const)
+          .filter(
+            ([strategy]) => strategy === getAddress(apeGasStrategyAddress)
+          )
+      : [];
+
+    for (const [, i] of apeGasStrategiesIndices) {
+      const params = space.strategies_params[i];
+      if (!params) continue;
+
+      try {
+        const [, , , , viewId] = defaultAbiCoder.decode(
+          ['uint256', 'uint256', 'address', 'address', 'bytes32', 'address'],
+          params
+        );
+
+        await registerApeGasProposal(
+          {
+            viewId,
+            snapshot: proposal.snapshot
+          },
+          config
+        );
+      } catch (e) {
+        console.log('failed to decode ape gas strategy params', e);
+        continue;
+      }
+    }
 
     await Promise.all([
       updateCounter(config.indexerName, 'proposal_count', 1),

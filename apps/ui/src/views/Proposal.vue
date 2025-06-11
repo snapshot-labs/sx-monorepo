@@ -277,7 +277,7 @@ watchEffect(() => {
                       class="mr-1 -mt-1 inline-block h-[27px]"
                     />
                     Please allow a few minutes for the voting power to be
-                    collected from Ethereum.
+                    computed.
                   </div>
                   <div v-else class="flex gap-1.5 items-center">
                     <span class="shrink-0">Voting power:</span>
