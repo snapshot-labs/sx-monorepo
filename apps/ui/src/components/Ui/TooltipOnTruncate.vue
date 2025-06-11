@@ -3,50 +3,33 @@ const props = defineProps<{
   content?: string;
 }>();
 
-const wrapper = ref<HTMLElement | null>(null);
+const wrapperRef = ref<HTMLElement | null>(null);
 const isTruncated = ref(false);
 
 const tooltipContent = computed(() => {
-  return props.content || wrapper.value?.textContent || '';
+  return props.content || wrapperRef.value?.textContent || '';
 });
 
 const checkTruncation = () => {
-  if (!wrapper.value) return;
-  isTruncated.value = wrapper.value.scrollWidth > wrapper.value.clientWidth;
+  if (!wrapperRef.value) return;
+  isTruncated.value =
+    wrapperRef.value.scrollWidth > wrapperRef.value.clientWidth;
 };
 
-const debouncedCheckTruncation = useDebounceFn(checkTruncation, 300);
+const debouncedCheckTruncation = useDebounceFn(checkTruncation, 50);
 
-let resizeObserver: ResizeObserver | null = null;
-
-const setupResizeObserver = (element: HTMLElement) => {
-  if (resizeObserver) {
-    resizeObserver.disconnect();
-  }
-
-  if (window.ResizeObserver) {
-    resizeObserver = new ResizeObserver(debouncedCheckTruncation);
-    resizeObserver.observe(element);
-  }
-};
+useResizeObserver(wrapperRef, debouncedCheckTruncation);
 
 watchEffect(() => {
-  if (wrapper.value) {
+  if (wrapperRef.value) {
     checkTruncation();
-    setupResizeObserver(wrapper.value);
-  }
-});
-
-onBeforeUnmount(() => {
-  if (resizeObserver) {
-    resizeObserver.disconnect();
   }
 });
 </script>
 
 <template>
   <div
-    ref="wrapper"
+    ref="wrapperRef"
     v-tippy="{
       content: isTruncated ? tooltipContent : null
     }"
