@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { Discussion, Statement } from '@/helpers/townhall/types';
+import { Post, Topic } from '@/helpers/townhall/types';
 import {
-  useSetStatementVisibilityMutation,
+  useSetPostVisibilityMutation,
   useUserRolesQuery,
   useVoteMutation
 } from '@/queries/townhall';
 
 const props = defineProps<{
   spaceId: string;
-  discussionId: number;
-  discussion: Discussion;
-  statements: Statement[];
+  topicId: number;
+  topic: Topic;
+  posts: Post[];
 }>();
 
 const { web3 } = useWeb3();
@@ -18,26 +18,24 @@ const { web3 } = useWeb3();
 const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
 const { mutate: vote, isPending: isVotePending } = useVoteMutation({
   spaceId: toRef(props, 'spaceId'),
-  discussionId: toRef(props, 'discussionId'),
+  topicId: toRef(props, 'topicId'),
   userRoles
 });
-const {
-  mutate: setStatementVisibility,
-  isPending: isSetStatementVisibiltyPending
-} = useSetStatementVisibilityMutation({
-  spaceId: toRef(props, 'spaceId'),
-  discussionId: toRef(props, 'discussionId')
-});
+const { mutate: setPostVisibility, isPending: isSetPostVisibilityPending } =
+  useSetPostVisibilityMutation({
+    spaceId: toRef(props, 'spaceId'),
+    topicId: toRef(props, 'topicId')
+  });
 </script>
 
 <template>
-  <div v-if="statements[0]">
+  <div v-if="posts[0]">
     <div class="border rounded-md p-4 min-h-[220px] flex flex-col">
       <div class="text-lg text-skin-link flex-auto">
         <UiLoading v-if="isVotePending" />
         <div v-else class="flex">
-          <div class="flex-1 mr-3 mb-4" v-text="statements[0].body" />
-          <UiDropdown v-if="web3.account && discussion.author === web3.account">
+          <div class="flex-1 mr-3 mb-4" v-text="posts[0].body" />
+          <UiDropdown v-if="web3.account && topic.author === web3.account">
             <template #button>
               <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
                 <IH-dots-horizontal class="text-skin-link" />
@@ -50,14 +48,14 @@ const {
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
                   @click="
-                    setStatementVisibility({
-                      statementId: statements[0].statement_id,
+                    setPostVisibility({
+                      postId: posts[0].post_id,
                       visibility: 'pin'
                     })
                   "
                 >
                   <IC-pin class="w-[16px] h-[16px]" />
-                  {{ statements[0].pinned ? 'Unpin' : 'Pin' }} statement
+                  {{ posts[0].pinned ? 'Unpin' : 'Pin' }} statement
                 </button>
               </UiDropdownItem>
               <UiDropdownItem v-slot="{ active }">
@@ -65,10 +63,10 @@ const {
                   type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
-                  :disabled="isSetStatementVisibiltyPending"
+                  :disabled="isSetPostVisibilityPending"
                   @click="
-                    setStatementVisibility({
-                      statementId: statements[0].statement_id,
+                    setPostVisibility({
+                      postId: posts[0].post_id,
                       visibility: 'hide'
                     })
                   "
@@ -85,7 +83,7 @@ const {
         <UiButton
           :disabled="isVotePending"
           class="!border-skin-success !text-skin-success space-x-1"
-          @click="vote({ statementId: statements[0].statement_id, choice: 1 })"
+          @click="vote({ postId: posts[0].post_id, choice: 1 })"
         >
           <IH-check class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Agree'" />
@@ -93,7 +91,7 @@ const {
         <UiButton
           :disabled="isVotePending"
           class="!border-skin-danger !text-skin-danger space-x-1"
-          @click="vote({ statementId: statements[0].statement_id, choice: 2 })"
+          @click="vote({ postId: posts[0].post_id, choice: 2 })"
         >
           <IH-x class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Disagree'" />
@@ -101,7 +99,7 @@ const {
         <UiButton
           :disabled="isVotePending"
           class="!border-skin-text !text-skin-text space-x-1"
-          @click="vote({ statementId: statements[0].statement_id, choice: 3 })"
+          @click="vote({ postId: posts[0].post_id, choice: 3 })"
         >
           <IH-minus-sm class="inline-block" />
           <span class="hidden sm:inline-block" v-text="'Pass'" />
@@ -109,11 +107,11 @@ const {
       </div>
     </div>
     <div class="h-4">
-      <div v-if="statements[1]" class="mx-1">
+      <div v-if="posts[1]" class="mx-1">
         <div class="border border-t-0 rounded-b-md h-2" />
-        <div v-if="statements[2]" class="mx-1">
+        <div v-if="posts[2]" class="mx-1">
           <div class="border border-t-0 rounded-b-md h-2" />
-          <div v-if="statements[3]" class="mx-1">
+          <div v-if="posts[3]" class="mx-1">
             <div class="border border-t-0 rounded-b-md h-2" />
           </div>
         </div>

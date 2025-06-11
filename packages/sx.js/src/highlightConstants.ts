@@ -18,44 +18,44 @@ export const ALIASES_CONFIG = {
 export const TOWNHALL_CONFIG = {
   address: '0x0000000000000000000000000000000000000002',
   types: {
-    createDiscussion: {
-      Discussion: [
+    createTopic: {
+      Topic: [
         { name: 'title', type: 'string' },
         { name: 'body', type: 'string' },
         { name: 'discussionUrl', type: 'string' }
       ]
     },
-    closeDiscussion: {
-      CloseDiscussion: [{ name: 'discussion', type: 'uint64' }]
+    closeTopic: {
+      CloseTopic: [{ name: 'topic', type: 'uint64' }]
     },
-    createStatement: {
-      Statement: [
-        { name: 'discussion', type: 'uint64' },
-        { name: 'statement', type: 'string' }
+    createPost: {
+      Post: [
+        { name: 'topic', type: 'uint64' },
+        { name: 'body', type: 'string' }
       ]
     },
-    hideStatement: {
-      HideStatement: [
-        { name: 'discussion', type: 'uint64' },
-        { name: 'statement', type: 'int' }
+    hidePost: {
+      HidePost: [
+        { name: 'topic', type: 'uint64' },
+        { name: 'post', type: 'int' }
       ]
     },
-    pinStatement: {
-      PinStatement: [
-        { name: 'discussion', type: 'uint64' },
-        { name: 'statement', type: 'uint64' }
+    pinPost: {
+      PinPost: [
+        { name: 'topic', type: 'uint64' },
+        { name: 'post', type: 'uint64' }
       ]
     },
-    unpinStatement: {
-      UnpinStatement: [
-        { name: 'discussion', type: 'uint64' },
-        { name: 'statement', type: 'uint64' }
+    unpinPost: {
+      UnpinPost: [
+        { name: 'topic', type: 'uint64' },
+        { name: 'post', type: 'uint64' }
       ]
     },
     vote: {
       Vote: [
-        { name: 'discussion', type: 'uint64' },
-        { name: 'statement', type: 'uint64' },
+        { name: 'topic', type: 'uint64' },
+        { name: 'post', type: 'uint64' },
         { name: 'choice', type: 'uint64' }
       ]
     },

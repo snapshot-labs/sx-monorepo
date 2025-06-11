@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Statement } from '@/helpers/townhall/types';
+import { Post } from '@/helpers/townhall/types';
 import { _n, _rt, clone, shortenAddress } from '@/helpers/utils';
 import {
-  useCloseDiscussionMutation,
-  useCreateStatementMutation,
-  useDiscussionQuery,
+  useCloseTopicMutation,
+  useCreatePostMutation,
   useResultsByRoleQuery,
   useRolesQuery,
+  useTopicQuery,
   useUserVotesQuery
 } from '@/queries/townhall';
 import { Space } from '@/types';
@@ -23,44 +23,44 @@ const spaceId = '1';
 
 const roleFilter: Ref<string> = ref('any');
 const sortBy: Ref<'agree' | 'disagree' | 'votes' | 'recent'> = ref('agree');
-const statement: Ref<string> = ref('');
+const body: Ref<string> = ref('');
 
 const {
-  data: discussion,
+  data: topic,
   isPending,
   isError
-} = useDiscussionQuery({ spaceId, discussionId: id });
+} = useTopicQuery({ spaceId, topicId: id });
 const { data: roles, isError: isRolesError } = useRolesQuery(spaceId);
 const {
   data: resultsByRole,
   isPending: isResultsPending,
   isError: isResultsError
-} = useResultsByRoleQuery({ discussionId: id, roleId: roleFilter });
+} = useResultsByRoleQuery({ topicId: id, roleId: roleFilter });
 const { data: userVotes, isError: isUserVotesError } = useUserVotesQuery({
   spaceId,
-  discussionId: id,
+  topicId: id,
   user: toRef(() => web3.value.account)
 });
-const { mutate: createStatement, isPending: isCreateStatementPending } =
-  useCreateStatementMutation({
+const { mutate: createPost, isPending: isCreatePostPending } =
+  useCreatePostMutation({
     spaceId,
-    discussionId: id
+    topicId: id
   });
-const { mutate: closeDiscussion, isPending: isCloseDicussionPending } =
-  useCloseDiscussionMutation({
+const { mutate: closeTopic, isPending: isCloseTopicPending } =
+  useCloseTopicMutation({
     spaceId,
-    discussionId: id
+    topicId: id
   });
 
-const pendingStatements: ComputedRef<Statement[]> = computed(() =>
-  (discussion.value?.statements ?? []).filter(
-    s => !(userVotes.value ?? []).find(v => v.statement_id === s.statement_id)
+const pendingPosts: ComputedRef<Post[]> = computed(() =>
+  (topic.value?.posts ?? []).filter(
+    s => !(userVotes.value ?? []).find(v => v.post_id === s.post_id)
   )
 );
 
-const results: ComputedRef<Statement[]> = computed(() =>
-  clone(discussion.value?.statements ?? [])
-    .filter(s => !s.hidden && getStatementVoteCount(s.statement_id) > 0)
+const results: ComputedRef<Post[]> = computed(() =>
+  clone(topic.value?.posts ?? [])
+    .filter(s => !s.hidden && getPostVoteCount(s.post_id) > 0)
     .sort((a, b) => {
       if (sortBy.value === 'agree')
         return b.scores_1 / b.vote_count - a.scores_1 / a.vote_count;
@@ -75,38 +75,35 @@ const results: ComputedRef<Statement[]> = computed(() =>
     .sort((a, b) => Number(b.pinned) - Number(a.pinned))
 );
 
-function getStatementVoteCount(statementId: number) {
-  return (
-    resultsByRole.value?.find(r => r.statement_id === statementId)
-      ?.vote_count ?? 0
-  );
+function getPostVoteCount(postId: number) {
+  return resultsByRole.value?.find(r => r.post_id === postId)?.vote_count ?? 0;
 }
 
-const STATEMENT_DEFINITION = {
+const BODY_DEFINITION = {
   type: 'string',
   format: 'long',
-  title: 'Statement',
+  title: 'Body',
   minLength: 1,
   maxLength: 200
 };
 
 watchEffect(() => {
-  if (!discussion.value) return;
+  if (!topic.value) return;
 
   if (roleFilter.value !== 'any') {
     sortBy.value = 'recent';
   }
 
-  setTitle(discussion.value ? discussion?.value.title : '');
+  setTitle(topic.value ? topic?.value.title : '');
   setContext({
     purpose:
-      'This is a topic page where you can add statements (ideas, feedback, opinions) for consensus-driven discussion. Each statement should express one clear, concise idea.',
+      'This is a topic page where you can add posts (ideas, feedback, opinions) for consensus-driven discussion. Each post should express one clear, concise idea.',
     data: {
       topic: {
-        id: discussion.value.id,
-        title: discussion.value.title,
-        body: discussion.value.body,
-        vote_count: discussion.value.vote_count
+        id: topic.value.id,
+        title: topic.value.title,
+        body: topic.value.body,
+        vote_count: topic.value.vote_count
       },
       space: {
         id: props.space.id,
@@ -115,13 +112,13 @@ watchEffect(() => {
       }
     },
     inputs: {
-      statement: {
-        value: statement.value,
-        definition: STATEMENT_DEFINITION
+      body: {
+        value: body.value,
+        definition: BODY_DEFINITION
       }
     }
   });
-  setVars({ statement });
+  setVars({ body });
 });
 </script>
 
@@ -137,25 +134,23 @@ watchEffect(() => {
       <IH-exclamation-circle />
       <span v-text="'Failed to load discussion.'" />
     </div>
-    <div v-else-if="discussion">
+    <div v-else-if="topic">
       <UiContainer class="!max-w-[760px] space-y-4 pt-6 pb-4">
-        <h1 class="leading-[1.1em]" v-text="discussion.title" />
-        <div v-if="discussion.closed" class="items-center gap-1 flex">
+        <h1 class="leading-[1.1em]" v-text="topic.title" />
+        <div v-if="topic.closed" class="items-center gap-1 flex">
           <IS-lock-closed class="text-skin-text" />
           <span v-text="'Topic closed'" />
         </div>
         <div class="flex justify-between">
           <div class="text-[17px] flex gap-2 items-center">
-            <UiStamp :id="discussion.author" :size="20" />
-            {{ shortenAddress(discussion.author) }}
+            <UiStamp :id="topic.author" :size="20" />
+            {{ shortenAddress(topic.author) }}
             <span>·</span>
-            {{ _rt(discussion.created) }}
+            {{ _rt(topic.created) }}
           </div>
           <UiDropdown
             v-if="
-              web3.account &&
-              discussion.author === web3.account &&
-              !discussion.closed
+              web3.account && topic.author === web3.account && !topic.closed
             "
           >
             <template #button>
@@ -169,9 +164,9 @@ watchEffect(() => {
                   type="button"
                   class="flex items-center gap-2"
                   :class="{ 'opacity-80': active }"
-                  @click="closeDiscussion()"
+                  @click="closeTopic()"
                 >
-                  <template v-if="isCloseDicussionPending">
+                  <template v-if="isCloseTopicPending">
                     <UiLoading :size="18" />
                   </template>
                   <template v-else>
@@ -183,53 +178,42 @@ watchEffect(() => {
             </template>
           </UiDropdown>
         </div>
-        <UiMarkdown
-          v-if="discussion.body"
-          :body="discussion.body"
-          class="pb-4"
-        />
+        <UiMarkdown v-if="topic.body" :body="topic.body" class="pb-4" />
       </UiContainer>
 
       <UiContainer class="!max-w-[760px] s-box space-y-4">
-        <div v-if="discussion.discussion_url">
+        <div v-if="topic.discussion_url">
           <h4 class="mb-3 eyebrow flex items-center gap-2">
             <IH-chat-alt />
             <span>Discussion</span>
           </h4>
-          <a
-            :href="discussion.discussion_url"
-            target="_blank"
-            class="block mb-5"
-          >
-            <UiLinkPreview
-              :url="discussion.discussion_url"
-              :show-default="true"
-            />
+          <a :href="topic.discussion_url" target="_blank" class="block mb-5">
+            <UiLinkPreview :url="topic.discussion_url" :show-default="true" />
           </a>
         </div>
 
-        <div v-if="!discussion.closed && pendingStatements.length > 0">
+        <div v-if="!topic.closed && pendingPosts.length > 0">
           <h4 class="mb-3 eyebrow flex items-center gap-2">
             <IH-eye />
-            Pending statement(s)
+            Pending post(s)
             <span
               class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
             >
-              {{ _n(pendingStatements.length) }}
+              {{ _n(pendingPosts.length) }}
             </span>
           </h4>
-          <TownhallStatements
+          <TownhallPosts
             :space-id="spaceId"
-            :discussion-id="id"
-            :discussion="discussion"
-            :statements="pendingStatements"
+            :topic-id="id"
+            :topic="topic"
+            :posts="pendingPosts"
           />
         </div>
 
-        <div v-if="!discussion.closed">
+        <div v-if="!topic.closed">
           <h4 class="mb-3 eyebrow flex items-center gap-2">
             <IH-pencil />
-            Add a statement
+            Add a post
           </h4>
           <div class="p-4 border rounded-md">
             <div class="mb-3">
@@ -240,20 +224,18 @@ watchEffect(() => {
               understand and vote.
             </div>
             <UiTextarea
-              v-model="statement"
-              :definition="STATEMENT_DEFINITION"
+              v-model="body"
+              :definition="BODY_DEFINITION"
               :required="true"
-              :disabled="isCreateStatementPending"
+              :disabled="isCreatePostPending"
             />
             <div class="flex gap-2.5 items-center">
               <UiButton
                 class="primary items-center flex space-x-1"
-                :disabled="
-                  isCreateStatementPending || !statement.trim() || !web3.account
-                "
+                :disabled="isCreatePostPending || !body.trim() || !web3.account"
                 @click="
-                  createStatement(statement);
-                  statement = '';
+                  createPost(body);
+                  body = '';
                 "
               >
                 <div>Publish</div>
@@ -262,10 +244,10 @@ watchEffect(() => {
               <div>
                 <a
                   class="flex items-center gap-1.5"
-                  @click="openChatbot('Suggest statement')"
+                  @click="openChatbot('Suggest post')"
                 >
                   <IH-sparkles />
-                  Suggest statement
+                  Suggest post
                 </a>
               </div>
             </div>
@@ -276,7 +258,7 @@ watchEffect(() => {
           <div class="mb-3 flex">
             <h4 class="eyebrow flex items-center gap-2 flex-1">
               <IH-chart-square-bar />
-              Statements
+              Posts
               <span
                 class="text-skin-link font-normal inline-block bg-skin-border text-[13px] rounded-full px-1.5"
               >
@@ -316,15 +298,15 @@ watchEffect(() => {
           <div class="space-y-3">
             <div v-if="results.length === 0" class="flex gap-2 items-center">
               <IH-exclamation-circle class="inline-block shrink-0" />
-              <span>There is no statement here.</span>
+              <span>There are no posts here.</span>
             </div>
-            <TownhallStatementItem
+            <TownhallPostItem
               v-for="(s, i) in results"
               :key="i"
               :space-id="spaceId"
-              :discussion-id="id"
-              :discussion="discussion"
-              :statement="s"
+              :topic-id="id"
+              :topic="topic"
+              :post="s"
               :results="resultsByRole ?? []"
             />
           </div>

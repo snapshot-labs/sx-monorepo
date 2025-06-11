@@ -16,28 +16,28 @@
       "start": 1,
       "events": [
         {
-          "name": "new_discussion",
-          "fn": "handleNewDiscussion"
+          "name": "new_topic",
+          "fn": "handleNewTopic"
         },
         {
-          "name": "close_discussion",
-          "fn": "handleCloseDiscussion"
+          "name": "close_topic",
+          "fn": "handleCloseTopic"
         },
         {
-          "name": "new_statement",
-          "fn": "handleNewStatement"
+          "name": "new_post",
+          "fn": "handleNewPost"
         },
         {
-          "name": "pin_statement",
-          "fn": "handlePinStatement"
+          "name": "pin_post",
+          "fn": "handlePinPost"
         },
         {
-          "name": "unpin_statement",
-          "fn": "handleUnpinStatement"
+          "name": "unpin_post",
+          "fn": "handleUnpinPost"
         },
         {
-          "name": "hide_statement",
-          "fn": "handleHideStatement"
+          "name": "hide_post",
+          "fn": "handleHidePost"
         },
         {
           "name": "new_vote",

@@ -6,12 +6,12 @@ export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
 
-    this.addEntrypoint(TOWNHALL_CONFIG.types.createDiscussion);
-    this.addEntrypoint(TOWNHALL_CONFIG.types.closeDiscussion);
-    this.addEntrypoint(TOWNHALL_CONFIG.types.createStatement);
-    this.addEntrypoint(TOWNHALL_CONFIG.types.hideStatement);
-    this.addEntrypoint(TOWNHALL_CONFIG.types.pinStatement);
-    this.addEntrypoint(TOWNHALL_CONFIG.types.unpinStatement);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createTopic);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.closeTopic);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createPost);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.hidePost);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.pinPost);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.unpinPost);
     this.addEntrypoint(TOWNHALL_CONFIG.types.vote);
     this.addEntrypoint(TOWNHALL_CONFIG.types.createRole);
     this.addEntrypoint(TOWNHALL_CONFIG.types.editRole);
@@ -24,7 +24,7 @@ export default class Townhall extends Agent {
     return this.get(`aliases:${signer}`, 'aliases') ?? signer;
   }
 
-  async discussion(
+  async topic(
     {
       title,
       body,
@@ -32,82 +32,63 @@ export default class Townhall extends Agent {
     }: { title: string; body: string; discussionUrl: string },
     { signer }: { signer: string }
   ) {
-    const id: number = (await this.get('discussions:id')) || 1;
+    const id: number = (await this.get('topics:id')) || 1;
 
     const author = await this.getSigner(signer);
-    this.write('discussions:id', id + 1);
-    this.emit('new_discussion', [id, author, title, body, discussionUrl]);
+    this.write('topics:id', id + 1);
+    this.emit('new_topic', [id, author, title, body, discussionUrl]);
   }
 
-  async closeDiscussion({ discussion }: { discussion: number }) {
-    this.emit('close_discussion', [discussion]);
+  async closeTopic({ topic }: { topic: number }) {
+    this.emit('close_topic', [topic]);
   }
 
-  async statement(
+  async post(
     {
-      discussion,
-      statement: body
+      topic,
+      body
     }: {
-      discussion: number;
-      statement: string;
+      topic: number;
+      body: string;
     },
     { signer }: { signer: string }
   ) {
-    // @TODO: reject the statement if it was already proposed
+    // @TODO: reject the post if it was already proposed
 
-    const id: number =
-      (await this.get(`discussion:${discussion}:statements:id`)) || 1;
+    const id: number = (await this.get(`topic:${topic}:posts:id`)) || 1;
 
     const author = await this.getSigner(signer);
 
-    this.write(`discussion:${discussion}:statements:id`, id + 1);
-    this.emit('new_statement', [id, author, discussion, body]);
+    this.write(`topic:${topic}:posts:id`, id + 1);
+    this.emit('new_post', [id, author, topic, body]);
   }
 
-  async hideStatement({
-    discussion,
-    statement
-  }: {
-    discussion: number;
-    statement: number;
-  }) {
-    // @TODO: reject if not the author of the discussion
+  async hidePost({ topic, post }: { topic: number; post: number }) {
+    // @TODO: reject if not the author of the topic
 
-    this.emit('hide_statement', [discussion, statement]);
+    this.emit('hide_post', [topic, post]);
   }
 
-  async pinStatement({
-    discussion,
-    statement
-  }: {
-    discussion: number;
-    statement: number;
-  }) {
-    // @TODO: reject if not the author of the discussion
+  async pinPost({ topic, post }: { topic: number; post: number }) {
+    // @TODO: reject if not the author of the topic
 
-    this.emit('pin_statement', [discussion, statement]);
+    this.emit('pin_post', [topic, post]);
   }
 
-  async unpinStatement({
-    discussion,
-    statement
-  }: {
-    discussion: number;
-    statement: number;
-  }) {
-    // @TODO: reject if not the author of the discussion
+  async unpinPost({ topic, post }: { topic: number; post: number }) {
+    // @TODO: reject if not the author of the topic
 
-    this.emit('unpin_statement', [discussion, statement]);
+    this.emit('unpin_post', [topic, post]);
   }
 
   async vote(
     {
-      discussion,
-      statement,
+      topic,
+      post,
       choice
     }: {
-      discussion: number;
-      statement: number;
+      topic: number;
+      post: number;
       choice: number;
     },
     { signer }: { signer: string }
@@ -115,13 +96,13 @@ export default class Townhall extends Agent {
     const author = await this.getSigner(signer);
 
     const votes: number[] =
-      (await this.get(`discussion:${discussion}:voter:${author}`)) || [];
+      (await this.get(`topic:${topic}:voter:${author}`)) || [];
 
-    this.assert(!votes.includes(statement), 'already voted');
-    votes.push(statement);
+    this.assert(!votes.includes(post), 'already voted');
+    votes.push(post);
 
-    this.write(`discussion:${discussion}:voter:${author}`, votes);
-    this.emit('new_vote', [author, discussion, statement, choice]);
+    this.write(`topic:${topic}:voter:${author}`, votes);
+    this.emit('new_vote', [author, topic, post, choice]);
   }
 
   async createRole({

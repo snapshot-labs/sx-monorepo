@@ -1,31 +1,29 @@
 <script setup lang="ts">
 import { Result } from '@/helpers/townhall/api';
-import { Discussion, Statement } from '@/helpers/townhall/types';
+import { Post, Topic } from '@/helpers/townhall/types';
 import { _n, _p, _rt, shortenAddress } from '@/helpers/utils';
-import { useSetStatementVisibilityMutation } from '@/queries/townhall';
+import { useSetPostVisibilityMutation } from '@/queries/townhall';
 
 const props = defineProps<{
   spaceId: string;
-  discussionId: number;
-  discussion: Discussion;
-  statement: Statement;
+  topicId: number;
+  topic: Topic;
+  post: Post;
   results: Result[];
 }>();
 
 const { web3 } = useWeb3();
-const { mutate: setStatementVisibility } = useSetStatementVisibilityMutation({
+const { mutate: setPostVisibility } = useSetPostVisibilityMutation({
   spaceId: toRef(props, 'spaceId'),
-  discussionId: toRef(props, 'discussionId')
+  topicId: toRef(props, 'topicId')
 });
 
-const statementResults = computed(() => {
-  return props.results.filter(
-    result => result.statement_id === props.statement.statement_id
-  );
+const postResults = computed(() => {
+  return props.results.filter(result => result.post_id === props.post.post_id);
 });
 
 const voteCount = computed(() =>
-  statementResults.value.reduce((acc, result) => acc + result.vote_count, 0)
+  postResults.value.reduce((acc, result) => acc + result.vote_count, 0)
 );
 
 const choice = computed(() => {
@@ -36,8 +34,7 @@ const choice = computed(() => {
 
 function getChoiceResult(choice: 1 | 2 | 3) {
   return (
-    statementResults.value.find(result => result.choice === choice)
-      ?.vote_count ?? 0
+    postResults.value.find(result => result.choice === choice)?.vote_count ?? 0
   );
 }
 </script>
@@ -47,14 +44,14 @@ function getChoiceResult(choice: 1 | 2 | 3) {
     <div class="flex">
       <div class="flex-1">
         <div class="text-[17px] flex gap-2 items-center mb-3">
-          <UiStamp :id="statement.author" :size="20" />
-          {{ shortenAddress(statement.author) }}
+          <UiStamp :id="post.author" :size="20" />
+          {{ shortenAddress(post.author) }}
           <span>·</span>
-          {{ _rt(statement.created) }}
+          {{ _rt(post.created) }}
         </div>
-        <div class="text-skin-link mb-1">{{ statement.body }}</div>
+        <div class="text-skin-link mb-1">{{ post.body }}</div>
       </div>
-      <UiDropdown v-if="web3.account && discussion.author === web3.account">
+      <UiDropdown v-if="web3.account && topic.author === web3.account">
         <template #button>
           <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
             <IH-dots-horizontal class="text-skin-link" />
@@ -67,14 +64,14 @@ function getChoiceResult(choice: 1 | 2 | 3) {
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
               @click="
-                setStatementVisibility({
-                  statementId: statement.statement_id,
+                setPostVisibility({
+                  postId: post.post_id,
                   visibility: 'pin'
                 })
               "
             >
               <IC-pin class="w-[16px] h-[16px]" />
-              {{ statement.pinned ? 'Unpin' : 'Pin' }} statement
+              {{ post.pinned ? 'Unpin' : 'Pin' }} post
             </button>
           </UiDropdownItem>
           <UiDropdownItem v-slot="{ active }">
@@ -83,14 +80,14 @@ function getChoiceResult(choice: 1 | 2 | 3) {
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
               @click="
-                setStatementVisibility({
-                  statementId: statement.statement_id,
+                setPostVisibility({
+                  postId: post.post_id,
                   visibility: 'hide'
                 })
               "
             >
               <IH-flag :width="16" />
-              Hide statement
+              Hide post
             </button>
           </UiDropdownItem>
         </template>
@@ -98,7 +95,7 @@ function getChoiceResult(choice: 1 | 2 | 3) {
     </div>
     <div class="flex text-[17px] items-center gap-2.5">
       <div
-        v-if="statementResults.length > 0"
+        v-if="postResults.length > 0"
         :class="{
           'bg-skin-success/10 border-skin-success': choice === 1,
           'bg-skin-danger/10 border-skin-danger': choice === 2,
@@ -120,8 +117,8 @@ function getChoiceResult(choice: 1 | 2 | 3) {
         </div>
       </div>
       <div class="flex-1" v-text="`${_n(voteCount)} votes`" />
-      <div class="justify-end" v-text="`#${statement.statement_id}`" />
-      <IC-pin v-if="statement.pinned" class="w-[16px] h-[16px]" />
+      <div class="justify-end" v-text="`#${post.post_id}`" />
+      <IC-pin v-if="post.pinned" class="w-[16px] h-[16px]" />
     </div>
   </div>
 </template>

@@ -2,10 +2,10 @@ import { z } from 'zod';
 import { Writer } from './indexer/types';
 import {
   Alias,
-  Discussion,
+  Post,
   Role,
   Space,
-  Statement,
+  Topic,
   User,
   UserRole,
   Vote
@@ -21,7 +21,7 @@ const SetAliasEventData = z.tuple([
   z.string() // salt
 ]);
 
-const NewDiscussionEventData = z.tuple([
+const NewTopicEventData = z.tuple([
   z.number(), // id
   z.string(), // author
   z.string(), // title
@@ -29,28 +29,28 @@ const NewDiscussionEventData = z.tuple([
   z.string() // discussionUrl
 ]);
 
-const CloseDiscussionEventData = z.tuple([
+const CloseTopicEventData = z.tuple([
   z.number() // id
 ]);
 
-const NewStatementEventData = z.tuple([
+const NewPostEventData = z.tuple([
   z.number(), // id
   z.string(), // author
-  z.number(), // discussionId
+  z.number(), // topicId
   z.string() // body
 ]);
 
-const PinStatementEventData = z.tuple([
-  z.number(), // discussionId
-  z.number() // statementId
+const PinPostEventData = z.tuple([
+  z.number(), // topicId
+  z.number() // postId
 ]);
-const UnpinStatementEventData = PinStatementEventData;
-const HideStatementEventData = PinStatementEventData;
+const UnpinPostEventData = PinPostEventData;
+const HidePostEventData = PinPostEventData;
 
 const NewVoteEventData = z.tuple([
   z.string(), // voter
-  z.number(), // discussionId
-  z.number(), // statementId
+  z.number(), // topicId
+  z.number(), // postId
   z.union([z.literal(1), z.literal(2), z.literal(3)]) // choice
 ]);
 
@@ -87,173 +87,145 @@ export function createWriters(indexerName: string) {
     await alias.save();
   };
 
-  const handleNewDiscussion: Writer = async ({ unit, payload }) => {
-    const [id, author, title, body, discussionUrl] =
-      NewDiscussionEventData.parse(payload.data);
+  const handleNewTopic: Writer = async ({ unit, payload }) => {
+    const [id, author, title, body, discussionUrl] = NewTopicEventData.parse(
+      payload.data
+    );
 
-    console.log('Handle new discussion', id, author, title, body);
+    console.log('Handle new topic', id, author, title, body);
 
-    const discussion = new Discussion(id.toString(), indexerName);
-    discussion.space = DEFAULT_SPACE_ID;
-    discussion.author = author;
-    discussion.title = title;
-    discussion.body = body;
-    discussion.discussion_url = discussionUrl;
-    discussion.statement_count = 0;
-    discussion.vote_count = 0;
-    discussion.created = unit.timestamp;
+    const topic = new Topic(id.toString(), indexerName);
+    topic.space = DEFAULT_SPACE_ID;
+    topic.author = author;
+    topic.title = title;
+    topic.body = body;
+    topic.discussion_url = discussionUrl;
+    topic.post_count = 0;
+    topic.vote_count = 0;
+    topic.created = unit.timestamp;
 
     let space = await Space.loadEntity(DEFAULT_SPACE_ID, indexerName);
     if (!space) {
       space = new Space(DEFAULT_SPACE_ID, indexerName);
     }
-    space.discussion_count += 1;
+    space.topic_count += 1;
 
-    await Promise.all([discussion.save(), space.save()]);
+    await Promise.all([topic.save(), space.save()]);
   };
 
-  const handleCloseDiscussion: Writer = async ({ payload }) => {
-    const [discussionId] = CloseDiscussionEventData.parse(payload.data);
+  const handleCloseTopic: Writer = async ({ payload }) => {
+    const [topicId] = CloseTopicEventData.parse(payload.data);
 
-    console.log('Handle close discussion', discussionId);
+    console.log('Handle close topic', topicId);
 
-    const discussion = await Discussion.loadEntity(
-      discussionId.toString(),
-      indexerName
-    );
+    const topic = await Topic.loadEntity(topicId.toString(), indexerName);
 
-    if (discussion) {
-      discussion.closed = true;
+    if (topic) {
+      topic.closed = true;
 
-      await discussion.save();
+      await topic.save();
     }
   };
 
-  const handleNewStatement: Writer = async ({ unit, payload }) => {
-    const [id, author, discussionId, body] = NewStatementEventData.parse(
-      payload.data
-    );
+  const handleNewPost: Writer = async ({ unit, payload }) => {
+    const [id, author, topicId, body] = NewPostEventData.parse(payload.data);
 
-    console.log('Handle new statement', id, author, discussionId, body);
+    console.log('Handle new post', id, author, topicId, body);
 
-    const statement = new Statement(`${discussionId}/${id}`, indexerName);
-    statement.author = author;
-    statement.body = body;
-    statement.vote_count = 0;
-    statement.scores_1 = 0;
-    statement.scores_2 = 0;
-    statement.scores_3 = 0;
-    statement.created = unit.timestamp;
-    statement.statement_id = id;
-    statement.discussion_id = discussionId;
-    statement.discussion = discussionId.toString();
+    const post = new Post(`${topicId}/${id}`, indexerName);
+    post.author = author;
+    post.body = body;
+    post.vote_count = 0;
+    post.scores_1 = 0;
+    post.scores_2 = 0;
+    post.scores_3 = 0;
+    post.created = unit.timestamp;
+    post.post_id = id;
+    post.topic_id = topicId;
+    post.topic = topicId.toString();
 
-    await statement.save();
+    await post.save();
 
-    const discussion = await Discussion.loadEntity(
-      discussionId.toString(),
-      indexerName
-    );
+    const topic = await Topic.loadEntity(topicId.toString(), indexerName);
 
-    if (discussion) {
-      discussion.statement_count += 1;
+    if (topic) {
+      topic.post_count += 1;
 
-      await discussion.save();
+      await topic.save();
     }
   };
 
-  const handlePinStatement: Writer = async ({ payload }) => {
-    const [discussionId, statementId] = PinStatementEventData.parse(
-      payload.data
-    );
+  const handlePinPost: Writer = async ({ payload }) => {
+    const [topicId, postId] = PinPostEventData.parse(payload.data);
 
-    console.log('Handle pin statement vote', discussionId, statementId);
+    console.log('Handle pin post vote', topicId, postId);
 
-    const statement = await Statement.loadEntity(
-      `${discussionId}/${statementId}`,
-      indexerName
-    );
+    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
 
-    if (statement) {
-      statement.pinned = true;
+    if (post) {
+      post.pinned = true;
 
-      await statement.save();
+      await post.save();
     }
   };
 
-  const handleUnpinStatement: Writer = async ({ payload }) => {
-    const [discussionId, statementId] = UnpinStatementEventData.parse(
-      payload.data
-    );
+  const handleUnpinPost: Writer = async ({ payload }) => {
+    const [topicId, postId] = UnpinPostEventData.parse(payload.data);
 
-    console.log('Handle unpin statement', discussionId, statementId);
+    console.log('Handle unpin post', topicId, postId);
 
-    const statement = await Statement.loadEntity(
-      `${discussionId}/${statementId}`,
-      indexerName
-    );
+    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
 
-    if (statement) {
-      statement.pinned = false;
+    if (post) {
+      post.pinned = false;
 
-      await statement.save();
+      await post.save();
     }
   };
 
-  const handleHideStatement: Writer = async ({ payload }) => {
-    const [discussionId, statementId] = HideStatementEventData.parse(
-      payload.data
-    );
+  const handleHidePost: Writer = async ({ payload }) => {
+    const [topicId, postId] = HidePostEventData.parse(payload.data);
 
-    console.log('Handle hide statement vote', discussionId, statementId);
+    console.log('Handle hide post vote', topicId, postId);
 
-    const statement = await Statement.loadEntity(
-      `${discussionId}/${statementId}`,
-      indexerName
-    );
+    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
 
-    if (statement) {
-      statement.hidden = true;
+    if (post) {
+      post.hidden = true;
 
-      await statement.save();
+      await post.save();
     }
   };
 
   const handleNewVote: Writer = async ({ unit, payload }) => {
-    const [voter, discussionId, statementId, choice] = NewVoteEventData.parse(
+    const [voter, topicId, postId, choice] = NewVoteEventData.parse(
       payload.data
     );
 
-    console.log('Handle new vote', voter, discussionId, statementId, choice);
+    console.log('Handle new vote', voter, topicId, postId, choice);
 
-    const id = `${discussionId}/${statementId}/${voter}`;
+    const id = `${topicId}/${postId}/${voter}`;
     const vote = new Vote(id, indexerName);
     vote.voter = voter;
     vote.choice = choice;
     vote.created = unit.timestamp;
-    vote.discussion_id = discussionId;
-    vote.statement_id = statementId;
-    vote.discussion = discussionId.toString();
-    vote.statement = statementId.toString();
+    vote.topic_id = topicId;
+    vote.post_id = postId;
+    vote.topic = topicId.toString();
+    vote.post = postId.toString();
 
     await vote.save();
 
-    const discussion = await Discussion.loadEntity(
-      discussionId.toString(),
-      indexerName
-    );
-    const statement = await Statement.loadEntity(
-      `${discussionId}/${statementId}`,
-      indexerName
-    );
+    const topic = await Topic.loadEntity(topicId.toString(), indexerName);
+    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
 
-    if (discussion && statement) {
-      discussion.vote_count += 1;
-      statement.vote_count += 1;
-      statement[`scores_${choice}`] += 1;
+    if (topic && post) {
+      topic.vote_count += 1;
+      post.vote_count += 1;
+      post[`scores_${choice}`] += 1;
 
-      await discussion.save();
-      await statement.save();
+      await topic.save();
+      await post.save();
     }
 
     let space = await Space.loadEntity(DEFAULT_SPACE_ID, indexerName);
@@ -356,12 +328,12 @@ export function createWriters(indexerName: string) {
     // aliases
     handleSetAlias,
     // townhall
-    handleNewDiscussion,
-    handleCloseDiscussion,
-    handleNewStatement,
-    handlePinStatement,
-    handleUnpinStatement,
-    handleHideStatement,
+    handleNewTopic,
+    handleCloseTopic,
+    handleNewPost,
+    handlePinPost,
+    handleUnpinPost,
+    handleHidePost,
     handleNewVote,
     handleNewRole,
     handleEditRole,

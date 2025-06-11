@@ -29,17 +29,17 @@ async function run() {
   app.use('/highlight', rpc);
 
   app.get(
-    '/townhall/discussions/:discussionId/results_by_role/:roleId',
+    '/townhall/topics/:topicId/results_by_role/:roleId',
     async (req, res) => {
       const { knex } = checkpoint.getBaseContext();
 
-      const { discussionId, roleId } = req.params;
+      const { topicId, roleId } = req.params;
 
       let query = knex('votes')
-        .select('votes.statement_id', 'choice')
+        .select('votes.post_id', 'choice')
         .countDistinct('votes.voter', { as: 'vote_count' })
         .whereRaw('upper_inf(votes.block_range)')
-        .where('discussion_id', discussionId);
+        .where('topic_id', topicId);
 
       if (roleId !== 'any') {
         query = query
@@ -49,7 +49,7 @@ async function run() {
           .where('roles.id', roleId);
       }
 
-      const result = await query.groupBy('votes.statement_id', 'choice');
+      const result = await query.groupBy('votes.post_id', 'choice');
 
       res.json({ result });
     }
