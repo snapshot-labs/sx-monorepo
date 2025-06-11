@@ -6,19 +6,9 @@ const props = defineProps<{
   item: Proposal;
 }>();
 
-const isHidden = ref(props.item.flag_code === FLAGS.MALICIOUS);
+const isHidden = ref(props.item.flagged);
 
 const isDMCA = computed(() => props.item.flag_code === FLAGS.DMCA);
-
-const processedTitle = computed(() => {
-  return isDMCA.value ? '' : props.item.title;
-});
-
-const processedBody = computed(() => {
-  return isDMCA.value
-    ? '> This content has been removed due to a DMCA request.'
-    : props.item.body;
-});
 </script>
 
 <template>
@@ -32,5 +22,5 @@ const processedBody = computed(() => {
     This content might contain scams, offensive material, or be malicious in
     nature. Please proceed with caution.
   </UiAlert>
-  <slot v-if="!isHidden" :title="processedTitle" :body="processedBody" />
+  <slot v-if="!isHidden" />
 </template>

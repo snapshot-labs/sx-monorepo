@@ -303,7 +303,7 @@ onBeforeUnmount(() => destroyAudio());
 
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
-    <ContentFlagable v-slot="{ title, body }" :item="proposal">
+    <ContentFlagable :item="proposal">
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
         <template v-if="proposal.execution_strategy === EMPTY_ADDRESS">
           This proposal is invalid and was not created correctly. We cannot
@@ -318,7 +318,7 @@ onBeforeUnmount(() => destroyAudio());
       </UiAlert>
 
       <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
-        {{ title || `Proposal #${proposal.proposal_id}` }}
+        {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>
 
       <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
@@ -526,7 +526,7 @@ onBeforeUnmount(() => destroyAudio());
           AI can be inaccurate or misleading.
         </div>
       </div>
-      <UiMarkdown v-if="body" class="mb-4" :body="body" />
+      <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
       <div v-if="discussion">
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-chat-alt />
