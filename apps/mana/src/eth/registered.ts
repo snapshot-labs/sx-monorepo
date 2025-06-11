@@ -54,23 +54,19 @@ export async function processApeGasProposals(chainId: number) {
     `Processing ape gas proposals for chain ${chainId} at block ${currentL1BlockNumber}`
   );
 
-  while (true) {
-    const proposals = await db.getApeGasProposalsToProcess({
-      chainId,
-      maxSnapshot: currentL1BlockNumber
-    });
+  const proposals = await db.getApeGasProposalsToProcess({
+    chainId,
+    maxSnapshot: currentL1BlockNumber
+  });
 
-    console.log('processing', proposals.length, 'ape gas proposals');
+  console.log('processing', proposals.length, 'ape gas proposals');
 
-    for (const proposal of proposals) {
-      try {
-        await processApeGasProposal(proposal);
-      } catch (e) {
-        console.log('error', e);
-      }
+  for (const proposal of proposals) {
+    try {
+      await processApeGasProposal(proposal);
+    } catch (e) {
+      console.log('error', e);
     }
-
-    await sleep(INTERVAL);
   }
 }
 
