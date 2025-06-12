@@ -5,7 +5,7 @@ import { _n, _p, _rt, shortenAddress } from '@/helpers/utils';
 import { useSetPostVisibilityMutation } from '@/queries/townhall';
 
 const props = defineProps<{
-  spaceId: string;
+  spaceId: number;
   topicId: number;
   topic: Topic;
   post: Post;

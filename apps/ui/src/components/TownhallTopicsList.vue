@@ -48,7 +48,7 @@ const currentLimit = computed(() => {
           :to="{
             name: 'space-townhall-topic',
             params: {
-              id: topic.id
+              id: topic.topic_id
             }
           }"
           class="py-3 mx-4 block border-b"

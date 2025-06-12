@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { Role } from '@/helpers/townhall/types';
+import { Role, Space as TownhallSpace } from '@/helpers/townhall/types';
 import {
   useRoleMutation,
   useRolesQuery,
@@ -8,7 +8,7 @@ import {
 } from '@/queries/townhall';
 import { Space, SpaceMetadataLabel } from '@/types';
 
-const props = defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const { setTitle } = useTitle();
 const { sendCreateRole, sendEditRole, sendDeleteRole } = useTownhall();
@@ -18,17 +18,21 @@ const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
-const spaceId = ref('1');
-const userSpaceRoles = computed(() => {
-  return userRoles.value?.filter(role => role.space.id === spaceId.value) ?? [];
-});
+const spaceId = computed(() => props.townhallSpace.space_id);
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
-const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
-const { isPending: isMutatingRole, variables, mutate } = useRoleMutation();
+const { data: userRoles } = useUserRolesQuery({
+  spaceId: spaceId,
+  user: toRef(() => web3.value.account)
+});
+const {
+  isPending: isMutatingRole,
+  variables,
+  mutate
+} = useRoleMutation({ spaceId });
 
 function getIsRoleClaimed(roleId: string) {
-  return userSpaceRoles.value.some(role => role.id === roleId);
+  return (userRoles.value ?? []).some(role => role.id === roleId);
 }
 
 function setModalStatus(open: boolean = false, roleId: string | null = null) {
@@ -51,7 +55,7 @@ async function handleAddRole(config: SpaceMetadataLabel) {
     const newRoles: Role[] = res.result.events
       .filter(event => event.key === 'new_role')
       .map(event => ({
-        space: { id: event.data[0] },
+        space: { id: event.data[0].toString(), space_id: event.data[0] },
         id: event.data[1],
         name: event.data[2],
         description: event.data[3],
@@ -92,7 +96,10 @@ async function handleEditRole(config: SpaceMetadataLabel) {
         old.map(role =>
           role.id === activeLabelId.value
             ? {
-                space: { id: spaceId.value },
+                space: {
+                  id: spaceId.value.toString(),
+                  space_id: spaceId.value
+                },
                 id: activeLabelId.value,
                 name: config.name,
                 description: config.description,

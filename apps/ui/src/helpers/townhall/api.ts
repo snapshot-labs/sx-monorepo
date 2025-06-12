@@ -3,8 +3,8 @@ import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { Post, Vote } from '@/helpers/townhall/types';
 import { gql } from './gql';
 
-type NewPostEvent = [number, string, number, string];
-type NewVoteEvent = [string, number, number, number];
+type NewPostEvent = [string, number, number, string, string];
+type NewVoteEvent = [string, number, number, string, number];
 
 export type Result = {
   post_id: number;
@@ -25,6 +25,7 @@ const client = new ApolloClient({
 gql(`
   fragment spaceFields on Space {
     id
+    space_id
     vote_count
     topic_count
   }
@@ -57,6 +58,7 @@ gql(`
     vote_count
     created
     closed
+    topic_id
     posts {
       ...postFields
     }
@@ -81,6 +83,7 @@ gql(`
     id
     space {
       id
+      space_id
     }
     name
     description
@@ -97,8 +100,8 @@ const SPACE_QUERY = gql(`
 `);
 
 const TOPICS_QUERY = gql(`
-  query Topics($limit: Int!, $skip: Int!) {
-    topics(first: $limit, skip: $skip, orderBy: created, orderDirection: desc) {
+  query Topics($spaceId: String!, $limit: Int!, $skip: Int!) {
+    topics(first: $limit, skip: $skip, orderBy: created, orderDirection: desc, where: { space: $spaceId }) {
       ...topicFields
     }
   }
@@ -140,72 +143,79 @@ const USER_ROLES_QUERY = gql(`
   }
 `);
 
-export async function getSpace(spaceId: string) {
+export async function getSpace(spaceId: number) {
   const { data } = await client.query({
     query: SPACE_QUERY,
-    variables: { id: spaceId }
+    variables: { id: spaceId.toString() }
   });
 
   return data.space;
 }
 
 export async function getTopics({
+  spaceId,
   limit,
   skip
 }: {
+  spaceId: number;
   limit: number;
   skip: number;
 }) {
   const { data } = await client.query({
     query: TOPICS_QUERY,
-    variables: { limit, skip }
+    variables: { spaceId: spaceId.toString(), limit, skip }
   });
 
   return data.topics;
 }
 
-export async function getTopic(id: string) {
+export async function getTopic(spaceId: number, topicId: number) {
   const { data } = await client.query({
     query: TOPIC_QUERY,
-    variables: { id }
+    variables: { id: `${spaceId}/${topicId}` }
   });
 
   return data.topic;
 }
 
-export async function getVotes(topic: string, voter: string) {
+export async function getVotes(
+  spaceId: number,
+  topicId: number,
+  voter: string
+) {
   const { data } = await client.query({
     query: VOTES_QUERY,
-    variables: { topic, voter }
+    variables: { topic: `${spaceId}/${topicId}`, voter }
   });
 
   return data.votes;
 }
 
-export async function getRoles(spaceId: string) {
+export async function getRoles(spaceId: number) {
   const { data } = await client.query({
     query: ROLES_QUERY,
-    variables: { space: spaceId }
+    variables: { space: spaceId.toString() }
   });
 
   return data.roles;
 }
 
-export async function getUserRoles(user: string) {
+export async function getUserRoles(spaceId: number, user: string) {
   const { data } = await client.query({
     query: USER_ROLES_QUERY,
-    variables: { user }
+    variables: { user: `${spaceId}/${user}` }
   });
 
   return data.user?.roles.map(role => role.role) ?? [];
 }
 
 export async function getResultsByRole(
+  spaceId: number,
   topicId: number,
   roleId: string
 ): Promise<Result[]> {
   const res = await fetch(
-    `${HIGHLIGHT_URL}/townhall/topics/${topicId}/results_by_role/${roleId}`
+    `${HIGHLIGHT_URL}/townhall/spaces/${spaceId}/topics/${topicId}/results_by_role/${roleId}`
   );
 
   const { error, result } = await res.json();
@@ -218,7 +228,7 @@ export async function getResultsByRole(
 }
 
 export function newPostEventToEntry(event: NewPostEvent): Post {
-  const [id, author, topicId, body] = event;
+  const [, topicId, id, author, body] = event;
 
   return {
     id: `${topicId}/${id}`,
@@ -230,7 +240,7 @@ export function newPostEventToEntry(event: NewPostEvent): Post {
     scores_3: 0,
     pinned: false,
     hidden: false,
-    created: 0,
+    created: Math.floor(Date.now() / 1000),
     topic_id: topicId,
     post_id: id,
     topic: { id: String(topicId) }
@@ -238,11 +248,11 @@ export function newPostEventToEntry(event: NewPostEvent): Post {
 }
 
 export function newVoteEventToEntry(event: NewVoteEvent): Vote {
-  const [voter, topicId, postId, choice] = event;
+  const [, topicId, postId, voter, choice] = event;
 
   return {
     id: `${topicId}/${postId}/${voter}`,
-    created: 0,
+    created: Math.floor(Date.now() / 1000),
     topic_id: topicId,
     post_id: postId,
     topic: { id: String(topicId) },
