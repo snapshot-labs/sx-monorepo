@@ -241,18 +241,17 @@ export function createConstants(
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
       link: `${HELPDESK_URL}/en/articles/9839118-whitelist-voting-strategy`,
       generateSummary: (params: Record<string, any>) => {
-        const length =
-          params.whitelist.trim().length === 0
-            ? 0
-            : params.whitelist
-                .split(/[\n,]/)
-                .filter((s: string) => s.trim().length).length;
+        const length = !params.whitelist?.trim().length
+          ? 0
+          : params.whitelist
+              .split(/[\n,]/)
+              .filter((s: string) => s.trim().length).length;
 
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: async (params: Record<string, any>) => {
         const entries = params.whitelist
-          .split(/[\n,]/)
+          ?.split(/[\n,]/)
           .map((s: string) => s.trim())
           .filter((s: string) => s.length);
 
