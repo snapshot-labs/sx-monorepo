@@ -52,6 +52,7 @@ type SpaceMetadataItem {
   github: String!
   twitter: String!
   discord: String!
+  farcaster: String!
   voting_power_symbol: String!
   wallet: String!
   executors: [String!]!
