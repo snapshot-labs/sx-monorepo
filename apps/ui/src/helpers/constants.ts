@@ -21,7 +21,9 @@ export const HELPDESK_URL = 'https://help.snapshot.box';
 export const VERIFIED_URL =
   'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 
-export const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const EVM_EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const STARKNET_EMPTY_ADDRESS =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
 export const EIP7702_DELEGATION_INDICATOR = '0xef0100';
 
