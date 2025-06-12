@@ -14,31 +14,31 @@ export type SetAlias = {
   alias: string;
 };
 
-export type CreateDiscussion = {
+export type CreateTopic = {
   title: string;
   body: string;
   discussionUrl: string;
 };
 
-export type CloseDiscussion = {
-  discussion: number;
+export type CloseTopic = {
+  topic: number;
 };
 
-export type CreateStatement = {
-  discussion: number;
-  statement: string;
+export type CreatePost = {
+  topic: number;
+  body: string;
 };
 
-export type HideStatement = {
-  discussion: number;
-  statement: number;
+export type HidePost = {
+  topic: number;
+  post: number;
 };
-export type PinStatement = HideStatement;
-export type UnpinStatement = HideStatement;
+export type PinPost = HidePost;
+export type UnpinPost = HidePost;
 
 export type Vote = {
-  discussion: number;
-  statement: number;
+  topic: number;
+  post: number;
   choice: number;
 };
 

@@ -2,7 +2,7 @@ scalar Text
 
 type Space {
   id: String!
-  discussion_count: Int!
+  topic_count: Int!
   vote_count: Int!
 }
 
@@ -13,22 +13,22 @@ type Alias {
   created: Int!
 }
 
-type Discussion {
+type Topic {
   id: String!
   title: String!
   body: Text!
   discussion_url: String!
   author: String!
-  statement_count: Int!
+  post_count: Int!
   vote_count: Int!
   created: Int!
   closed: Boolean!
   space: Space!
-  statements: [Statement!]! @derivedFrom(field: "discussion")
-  votes: [Vote!]! @derivedFrom(field: "discussion")
+  posts: [Post!]! @derivedFrom(field: "topic")
+  votes: [Vote!]! @derivedFrom(field: "topic")
 }
 
-type Statement {
+type Post {
   id: String!
   body: Text!
   author: String!
@@ -39,10 +39,10 @@ type Statement {
   pinned: Boolean!
   hidden: Boolean!
   created: Int!
-  discussion_id: Int!
-  statement_id: Int!
-  discussion: Discussion!
-  votes: [Vote!]! @derivedFrom(field: "statement")
+  topic_id: Int!
+  post_id: Int!
+  topic: Topic!
+  votes: [Vote!]! @derivedFrom(field: "post")
 }
 
 type Vote {
@@ -50,10 +50,10 @@ type Vote {
   voter: String!
   choice: Int!
   created: Int!
-  discussion_id: Int!
-  statement_id: Int!
-  discussion: Discussion!
-  statement: Statement!
+  topic_id: Int!
+  post_id: Int!
+  topic: Topic!
+  post: Post!
 }
 
 type Role {

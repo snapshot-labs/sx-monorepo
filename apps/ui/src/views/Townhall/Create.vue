@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getDiscussion } from '@/helpers/townhall/api';
+import { getTopic } from '@/helpers/townhall/api';
 import { sleep } from '@/helpers/utils';
 import { Space } from '@/types';
 
@@ -7,7 +7,7 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const router = useRouter();
-const { sendDiscussion } = useTownhall();
+const { sendTopic } = useTownhall();
 const { addNotification } = useUiStore();
 const { setTitle } = useTitle();
 const { setContext, setVars, openChatbot } = useChatbot();
@@ -44,15 +44,15 @@ async function handleSubmit() {
   submitLoading.value = true;
 
   try {
-    const res = await sendDiscussion(title.value, body.value, discussion.value);
+    const res = await sendTopic(title.value, body.value, discussion.value);
     if (!res) return;
 
-    const id = res.result.events.find(event => event.key === 'new_discussion')
+    const id = res.result.events.find(event => event.key === 'new_topic')
       .data[0];
 
     while (true) {
       try {
-        await getDiscussion(id.toString());
+        await getTopic(id.toString());
         break;
       } catch (e: unknown) {
         if (e instanceof Error && e.message.includes('Row not found')) {

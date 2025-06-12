@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Discussion } from '@/helpers/townhall/types';
+import { Topic } from '@/helpers/townhall/types';
 import { _n } from '@/helpers/utils';
 
 const props = defineProps<{
@@ -7,7 +7,7 @@ const props = defineProps<{
   isError?: boolean;
   isLoading?: boolean;
   isLoadingMore?: boolean;
-  topics: Discussion[];
+  topics: Topic[];
   limit?: number | 'off';
   route?: {
     name: string;
@@ -60,7 +60,7 @@ const currentLimit = computed(() => {
           <div class="text-skin-text">
             <UiStamp :id="topic.author" :size="20" class="mr-2.5" />
             <IH-annotation class="inline-block mr-0.5" />
-            {{ _n(topic.statement_count) }} replies
+            {{ _n(topic.post_count) }} replies
           </div>
         </router-link>
       </UiContainerInfiniteScroll>

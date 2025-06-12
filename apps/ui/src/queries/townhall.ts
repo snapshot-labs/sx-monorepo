@@ -8,18 +8,18 @@ import {
 import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useSpaceType';
 import {
-  getDiscussion,
-  getDiscussions,
   getResultsByRole,
   getRoles,
   getSpace,
+  getTopic,
+  getTopics,
   getUserRoles,
   getVotes,
-  newStatementEventToEntry,
+  newPostEventToEntry,
   newVoteEventToEntry,
   Result
 } from '@/helpers/townhall/api';
-import { Discussion, Role, Vote } from '@/helpers/townhall/types';
+import { Role, Topic, Vote } from '@/helpers/townhall/types';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
@@ -28,27 +28,27 @@ const DEFAULT_STALE_TIME = 1000 * 5;
 
 function addVoteToRoleResults({
   queryClient,
-  discussionId,
+  topicId,
   roleId,
   vote
 }: {
   queryClient: QueryClient;
-  discussionId: number;
+  topicId: number;
   roleId: string;
   vote: Vote;
 }) {
   queryClient.setQueryData<Result[]>(
-    ['townhall', 'discussionResults', { discussionId, roleId }, 'list'],
+    ['townhall', 'topicResults', { topicId, roleId }, 'list'],
     oldData => {
       const updatedData = structuredClone(oldData ?? []);
       const existingResult = updatedData.find(
-        r => r.statement_id === vote.statement_id && r.choice === vote.choice
+        r => r.post_id === vote.post_id && r.choice === vote.choice
       );
       if (existingResult) {
         existingResult.vote_count += 1;
       } else {
         updatedData.push({
-          statement_id: vote.statement_id,
+          post_id: vote.post_id,
           choice: vote.choice,
           vote_count: 1
         });
@@ -87,9 +87,9 @@ export function useTopicsQuery({
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: ['townhall', 'discussions', 'list', { spaceId }],
+    queryKey: ['townhall', 'topics', 'list', { spaceId }],
     queryFn: async ({ pageParam = 0 }) => {
-      return getDiscussions({ limit: TOPICS_LIMIT, skip: pageParam });
+      return getTopics({ limit: TOPICS_LIMIT, skip: pageParam });
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < TOPICS_LIMIT) return null;
@@ -108,9 +108,9 @@ export function useTopicsSummaryQuery({
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
-    queryKey: ['townhall', 'discussions', 'summary', { spaceId }],
+    queryKey: ['townhall', 'topics', 'summary', { spaceId }],
     queryFn: async () => {
-      return getDiscussions({
+      return getTopics({
         skip: 0,
         limit: TOPICS_SUMMARY_LIMIT
       });
@@ -120,25 +120,25 @@ export function useTopicsSummaryQuery({
   });
 }
 
-export function useDiscussionQuery({
+export function useTopicQuery({
   spaceId,
-  discussionId
+  topicId
 }: {
   spaceId: MaybeRefOrGetter<string>;
-  discussionId: MaybeRefOrGetter<number>;
+  topicId: MaybeRefOrGetter<number>;
 }) {
   return useQuery({
-    queryKey: ['townhall', 'discussions', 'detail', { spaceId, discussionId }],
+    queryKey: ['townhall', 'topics', 'detail', { spaceId, topicId }],
     queryFn: async () => {
-      const discussion = await getDiscussion(toValue(discussionId).toString());
-      if (!discussion) return null;
+      const topic = await getTopic(toValue(topicId).toString());
+      if (!topic) return null;
 
-      discussion.statements = discussion.statements
+      topic.posts = topic.posts
         .filter(s => !s.hidden)
         .sort(() => 0.5 - Math.random())
         .sort((a, b) => Number(b.pinned) - Number(a.pinned));
 
-      return discussion;
+      return topic;
     },
     staleTime: DEFAULT_STALE_TIME
   });
@@ -146,17 +146,17 @@ export function useDiscussionQuery({
 
 export function useUserVotesQuery({
   spaceId,
-  discussionId,
+  topicId,
   user
 }: {
   spaceId: MaybeRefOrGetter<string>;
-  discussionId: MaybeRefOrGetter<number>;
+  topicId: MaybeRefOrGetter<number>;
   user: MaybeRefOrGetter<string>;
 }) {
   return useQuery({
-    queryKey: ['townhall', 'votes', 'list', { spaceId, discussionId, user }],
+    queryKey: ['townhall', 'votes', 'list', { spaceId, topicId, user }],
     queryFn: async () => {
-      return getVotes(toValue(discussionId).toString(), toValue(user));
+      return getVotes(toValue(topicId).toString(), toValue(user));
     },
     enabled: () => !!toValue(user),
     staleTime: DEFAULT_STALE_TIME
@@ -189,21 +189,16 @@ export function useUserRolesQuery(user: MaybeRefOrGetter<string>) {
 }
 
 export function useResultsByRoleQuery({
-  discussionId,
+  topicId,
   roleId
 }: {
-  discussionId: MaybeRefOrGetter<number>;
+  topicId: MaybeRefOrGetter<number>;
   roleId: MaybeRefOrGetter<string>;
 }) {
   return useQuery({
-    queryKey: [
-      'townhall',
-      'discussionResults',
-      { discussionId, roleId },
-      'list'
-    ],
+    queryKey: ['townhall', 'topicResults', { topicId, roleId }, 'list'],
     queryFn: () => {
-      return getResultsByRole(toValue(discussionId), toValue(roleId));
+      return getResultsByRole(toValue(topicId), toValue(roleId));
     },
     staleTime: DEFAULT_STALE_TIME
   });
@@ -236,24 +231,24 @@ export function useRoleMutation() {
   });
 }
 
-export function useCloseDiscussionMutation({
+export function useCloseTopicMutation({
   spaceId,
-  discussionId
+  topicId
 }: {
   spaceId: MaybeRefOrGetter<string>;
-  discussionId: MaybeRefOrGetter<number>;
+  topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
-  const { sendCloseDiscussion } = useTownhall();
+  const { sendCloseTopic } = useTownhall();
 
   return useMutation({
     mutationFn: () => {
-      return sendCloseDiscussion(toValue(discussionId));
+      return sendCloseTopic(toValue(topicId));
     },
     onSuccess: () => {
-      queryClient.setQueryData<Discussion>(
-        ['townhall', 'discussions', 'detail', { spaceId, discussionId }],
+      queryClient.setQueryData<Topic>(
+        ['townhall', 'topics', 'detail', { spaceId, topicId }],
         old => {
           if (!old) return old;
 
@@ -264,7 +259,7 @@ export function useCloseDiscussionMutation({
         }
       );
 
-      addNotification('success', 'Discussion closed successfully');
+      addNotification('success', 'Topic closed successfully');
     },
     onError: error => {
       addNotification('error', error.message);
@@ -272,43 +267,43 @@ export function useCloseDiscussionMutation({
   });
 }
 
-export function useCreateStatementMutation({
+export function useCreatePostMutation({
   spaceId,
-  discussionId
+  topicId
 }: {
   spaceId: MaybeRefOrGetter<string>;
-  discussionId: MaybeRefOrGetter<number>;
+  topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
-  const { sendStatement } = useTownhall();
+  const { sendPost } = useTownhall();
 
   return useMutation({
-    mutationFn: (statement: string) => {
-      return sendStatement(toValue(discussionId), statement);
+    mutationFn: (body: string) => {
+      return sendPost(toValue(topicId), body);
     },
     onSuccess: async data => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
-        event => event.key === 'new_statement'
+        event => event.key === 'new_post'
       );
 
-      const statement = newStatementEventToEntry(eventData);
+      const post = newPostEventToEntry(eventData);
 
-      queryClient.setQueryData<Discussion>(
-        ['townhall', 'discussions', 'detail', { spaceId, discussionId }],
+      queryClient.setQueryData<Topic>(
+        ['townhall', 'topics', 'detail', { spaceId, topicId }],
         old => {
           if (!old) return old;
 
           return {
             ...old,
-            statements: [...old.statements, statement]
+            posts: [...old.posts, post]
           };
         }
       );
 
-      addNotification('success', 'Statement published successfully');
+      addNotification('success', 'Post published successfully');
     },
     onError: error => {
       addNotification('error', error.message);
@@ -316,61 +311,72 @@ export function useCreateStatementMutation({
   });
 }
 
-export function useSetStatementVisibilityMutation({
+export function useSetPostVisibilityMutation({
   spaceId,
-  discussionId
+  topicId
 }: {
   spaceId: MaybeRefOrGetter<string>;
-  discussionId: MaybeRefOrGetter<number>;
+  topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
-  const { sendPinStatement, sendHideStatement } = useTownhall();
+  const { sendPinPost, sendUnpinPost, sendHidePost } = useTownhall();
 
   return useMutation({
     mutationFn: ({
-      statementId,
+      postId,
       visibility
     }: {
-      statementId: number;
-      visibility: 'pin' | 'hide';
+      postId: number;
+      visibility: 'pin' | 'unpin' | 'hide';
     }) => {
       if (visibility === 'pin') {
-        return sendPinStatement(toValue(discussionId), statementId);
+        return sendPinPost(toValue(topicId), postId);
+      }
+
+      if (visibility === 'unpin') {
+        return sendUnpinPost(toValue(topicId), postId);
       }
 
       if (visibility === 'hide') {
-        return sendHideStatement(toValue(discussionId), statementId);
+        return sendHidePost(toValue(topicId), postId);
       }
 
       throw new Error('Invalid visibility type');
     },
-    onSuccess: async (_, { statementId, visibility }) => {
-      queryClient.setQueryData<Discussion>(
-        ['townhall', 'discussions', 'detail', { spaceId, discussionId }],
+    onSuccess: async (_, { postId, visibility }) => {
+      queryClient.setQueryData<Topic>(
+        ['townhall', 'topics', 'detail', { spaceId, topicId }],
         old => {
           if (!old) return old;
 
           return {
             ...old,
-            statements: old.statements.map(statement => {
-              if (statement.statement_id !== statementId) return statement;
+            posts: old.posts.map(post => {
+              if (post.post_id !== postId) return post;
 
               if (visibility === 'pin') {
                 return {
-                  ...statement,
+                  ...post,
                   pinned: true
+                };
+              }
+
+              if (visibility === 'unpin') {
+                return {
+                  ...post,
+                  pinned: false
                 };
               }
 
               if (visibility === 'hide') {
                 return {
-                  ...statement,
+                  ...post,
                   hidden: true
                 };
               }
 
-              return statement;
+              return post;
             })
           };
         }
@@ -384,11 +390,11 @@ export function useSetStatementVisibilityMutation({
 
 export function useVoteMutation({
   spaceId,
-  discussionId,
+  topicId,
   userRoles
 }: {
   spaceId: MaybeRefOrGetter<string>;
-  discussionId: MaybeRefOrGetter<number>;
+  topicId: MaybeRefOrGetter<number>;
   userRoles: MaybeRefOrGetter<Role[] | undefined>;
 }) {
   const { web3 } = useWeb3();
@@ -397,14 +403,8 @@ export function useVoteMutation({
   const { sendVote } = useTownhall();
 
   return useMutation({
-    mutationFn: ({
-      statementId,
-      choice
-    }: {
-      statementId: number;
-      choice: 1 | 2 | 3;
-    }) => {
-      return sendVote(toValue(discussionId), statementId, choice);
+    mutationFn: ({ postId, choice }: { postId: number; choice: 1 | 2 | 3 }) => {
+      return sendVote(toValue(topicId), postId, choice);
     },
     onSuccess: async data => {
       if (!data) return;
@@ -420,7 +420,7 @@ export function useVoteMutation({
           'townhall',
           'votes',
           'list',
-          { spaceId, discussionId, user: web3.value.account }
+          { spaceId, topicId, user: web3.value.account }
         ],
         (old = []) => [...old, vote]
       );
@@ -429,7 +429,7 @@ export function useVoteMutation({
       roles.forEach(role => {
         addVoteToRoleResults({
           queryClient,
-          discussionId: toValue(discussionId),
+          topicId: toValue(topicId),
           roleId: role,
           vote
         });

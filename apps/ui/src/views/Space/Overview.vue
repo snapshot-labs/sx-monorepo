@@ -107,7 +107,7 @@ watchEffect(() => setTitle(props.space.name));
           </template>
           <div v-if="spaceType === 'discussionsSpace'">
             <b class="text-skin-link">{{
-              _n(townhallSpace?.discussion_count || 0)
+              _n(townhallSpace?.topic_count || 0)
             }}</b>
             discussions
           </div>

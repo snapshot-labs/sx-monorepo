@@ -97,11 +97,7 @@ export function useTownhall() {
     );
   }
 
-  async function sendDiscussion(
-    title: string,
-    body: string,
-    discussionUrl: string
-  ) {
+  async function sendTopic(title: string, body: string, discussionUrl: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -110,7 +106,7 @@ export function useTownhall() {
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
-      highlightClient.createDiscussion({
+      highlightClient.createTopic({
         signer,
         data: { title, body, discussionUrl },
         salt: getSalt()
@@ -118,7 +114,7 @@ export function useTownhall() {
     );
   }
 
-  async function sendCloseDiscussion(discussion: number) {
+  async function sendCloseTopic(topic: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -127,15 +123,15 @@ export function useTownhall() {
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
-      highlightClient.closeDiscussion({
+      highlightClient.closeTopic({
         signer,
-        data: { discussion },
+        data: { topic },
         salt: getSalt()
       })
     );
   }
 
-  async function sendStatement(discussion: number, statement: string) {
+  async function sendPost(topic: number, body: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -144,15 +140,15 @@ export function useTownhall() {
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
-      highlightClient.createStatement({
+      highlightClient.createPost({
         signer,
-        data: { discussion, statement },
+        data: { topic, body },
         salt: getSalt()
       })
     );
   }
 
-  async function sendHideStatement(discussion: number, statement: number) {
+  async function sendHidePost(topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -161,15 +157,15 @@ export function useTownhall() {
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
-      highlightClient.hideStatement({
+      highlightClient.hidePost({
         signer,
-        data: { discussion, statement },
+        data: { topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendPinStatement(discussion: number, statement: number) {
+  async function sendPinPost(topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -178,19 +174,32 @@ export function useTownhall() {
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
-      highlightClient.pinStatement({
+      highlightClient.pinPost({
         signer,
-        data: { discussion, statement },
+        data: { topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendVote(
-    discussion: number,
-    statement: number,
-    choice: 1 | 2 | 3
-  ) {
+  async function sendUnpinPost(topic: number, post: number) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.unpinPost({
+        signer,
+        data: { topic, post },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendVote(topic: number, post: number, choice: 1 | 2 | 3) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -201,7 +210,7 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.vote({
         signer,
-        data: { discussion, statement, choice },
+        data: { topic, post, choice },
         salt: getSalt()
       })
     );
@@ -304,11 +313,12 @@ export function useTownhall() {
   }
 
   return {
-    sendDiscussion,
-    sendCloseDiscussion,
-    sendStatement,
-    sendHideStatement,
-    sendPinStatement,
+    sendTopic,
+    sendCloseTopic,
+    sendPost,
+    sendHidePost,
+    sendPinPost,
+    sendUnpinPost,
     sendVote,
     sendCreateRole,
     sendEditRole,

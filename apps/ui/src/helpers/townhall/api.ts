@@ -1,13 +1,13 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
-import { Statement, Vote } from '@/helpers/townhall/types';
+import { Post, Vote } from '@/helpers/townhall/types';
 import { gql } from './gql';
 
-type NewStatementEvent = [number, string, number, string];
+type NewPostEvent = [number, string, number, string];
 type NewVoteEvent = [string, number, number, number];
 
 export type Result = {
-  statement_id: number;
+  post_id: number;
   choice: number;
   vote_count: number;
 };
@@ -26,10 +26,10 @@ gql(`
   fragment spaceFields on Space {
     id
     vote_count
-    discussion_count
+    topic_count
   }
 
-  fragment statementFields on Statement {
+  fragment postFields on Post {
     id
     body
     author
@@ -40,25 +40,25 @@ gql(`
     pinned
     hidden
     created
-    discussion_id
-    statement_id
-    discussion {
+    topic_id
+    post_id
+    topic {
       id
     }
   }
 
-  fragment discussionFields on Discussion {
+  fragment topicFields on Topic {
     id
     title
     body
     discussion_url
     author
-    statement_count
+    post_count
     vote_count
     created
     closed
-    statements {
-      ...statementFields
+    posts {
+      ...postFields
     }
   }
 
@@ -67,12 +67,12 @@ gql(`
     voter
     choice
     created
-    discussion_id
-    statement_id
-    discussion {
+    topic_id
+    post_id
+    topic {
       id
     }
-    statement {
+    post {
       id
     }
   }
@@ -96,25 +96,25 @@ const SPACE_QUERY = gql(`
   }
 `);
 
-const DISCUSSIONS_QUERY = gql(`
-  query Discussions($limit: Int!, $skip: Int!) {
-    discussions(first: $limit, skip: $skip, orderBy: created, orderDirection: desc) {
-      ...discussionFields
+const TOPICS_QUERY = gql(`
+  query Topics($limit: Int!, $skip: Int!) {
+    topics(first: $limit, skip: $skip, orderBy: created, orderDirection: desc) {
+      ...topicFields
     }
   }
 `);
 
-const DISCUSSION_QUERY = gql(`
-  query Discussion($id: String!) {
-    discussion(id: $id) {
-      ...discussionFields
+const TOPIC_QUERY = gql(`
+  query Topic($id: String!) {
+    topic(id: $id) {
+      ...topicFields
     }
   }
 `);
 
 const VOTES_QUERY = gql(`
-  query Votes($discussion: String!, $voter: String!) {
-    votes(where: { discussion: $discussion, voter: $voter }) {
+  query Votes($topic: String!, $voter: String!) {
+    votes(where: { topic: $topic, voter: $voter }) {
       ...voteFields
     }
   }
@@ -149,7 +149,7 @@ export async function getSpace(spaceId: string) {
   return data.space;
 }
 
-export async function getDiscussions({
+export async function getTopics({
   limit,
   skip
 }: {
@@ -157,26 +157,26 @@ export async function getDiscussions({
   skip: number;
 }) {
   const { data } = await client.query({
-    query: DISCUSSIONS_QUERY,
+    query: TOPICS_QUERY,
     variables: { limit, skip }
   });
 
-  return data.discussions;
+  return data.topics;
 }
 
-export async function getDiscussion(id: string) {
+export async function getTopic(id: string) {
   const { data } = await client.query({
-    query: DISCUSSION_QUERY,
+    query: TOPIC_QUERY,
     variables: { id }
   });
 
-  return data.discussion;
+  return data.topic;
 }
 
-export async function getVotes(discussion: string, voter: string) {
+export async function getVotes(topic: string, voter: string) {
   const { data } = await client.query({
     query: VOTES_QUERY,
-    variables: { discussion, voter }
+    variables: { topic, voter }
   });
 
   return data.votes;
@@ -201,11 +201,11 @@ export async function getUserRoles(user: string) {
 }
 
 export async function getResultsByRole(
-  discussionId: number,
+  topicId: number,
   roleId: string
 ): Promise<Result[]> {
   const res = await fetch(
-    `${HIGHLIGHT_URL}/townhall/discussions/${discussionId}/results_by_role/${roleId}`
+    `${HIGHLIGHT_URL}/townhall/topics/${topicId}/results_by_role/${roleId}`
   );
 
   const { error, result } = await res.json();
@@ -217,11 +217,11 @@ export async function getResultsByRole(
   }));
 }
 
-export function newStatementEventToEntry(event: NewStatementEvent): Statement {
-  const [id, author, discussion, body] = event;
+export function newPostEventToEntry(event: NewPostEvent): Post {
+  const [id, author, topicId, body] = event;
 
   return {
-    id: `${discussion}/${id}`,
+    id: `${topicId}/${id}`,
     author,
     body,
     vote_count: 0,
@@ -231,22 +231,22 @@ export function newStatementEventToEntry(event: NewStatementEvent): Statement {
     pinned: false,
     hidden: false,
     created: 0,
-    discussion_id: discussion,
-    statement_id: id,
-    discussion: { id: String(discussion) }
+    topic_id: topicId,
+    post_id: id,
+    topic: { id: String(topicId) }
   };
 }
 
 export function newVoteEventToEntry(event: NewVoteEvent): Vote {
-  const [voter, discussion, statement, choice] = event;
+  const [voter, topicId, postId, choice] = event;
 
   return {
-    id: `${discussion}/${statement}/${voter}`,
+    id: `${topicId}/${postId}/${voter}`,
     created: 0,
-    discussion_id: discussion,
-    statement_id: statement,
-    discussion: { id: String(discussion) },
-    statement: { id: String(statement) },
+    topic_id: topicId,
+    post_id: postId,
+    topic: { id: String(topicId) },
+    post: { id: String(postId) },
     voter,
     choice
   };

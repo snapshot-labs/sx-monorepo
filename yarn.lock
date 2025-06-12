@@ -4515,7 +4515,7 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.6.0.tgz#3c7c9c46e678feefe7a2e5bb609d3dbd665ffb3f"
   integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
 
-"@snapshot-labs/checkpoint@^0.1.0-beta.59":
+"@snapshot-labs/checkpoint@^0.1.0-beta.58", "@snapshot-labs/checkpoint@^0.1.0-beta.59":
   version "0.1.0-beta.59"
   resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.59.tgz#e1ba3acf223a0875e32d0f88c01b311539f340e0"
   integrity sha512-1Tdd4rZxxW4PiCE8x9iU9GJdT+W1Vjh6rmHtekzJO9nbQlJYfNpLiWM1f2uNVGmVB6VuqCjX35/Pg3wg63IZ6A==

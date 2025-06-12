@@ -6,18 +6,18 @@ import {
 } from '@ethersproject/abstract-signer';
 import {
   ClaimRole,
-  CloseDiscussion,
-  CreateDiscussion,
+  CloseTopic,
+  CreatePost,
   CreateRole,
-  CreateStatement,
+  CreateTopic,
   DeleteRole,
   EditRole,
   Envelope,
-  HideStatement,
-  PinStatement,
+  HidePost,
+  PinPost,
   RevokeRole,
   SetAlias,
-  UnpinStatement,
+  UnpinPost,
   Vote
 } from './types';
 import {
@@ -134,13 +134,13 @@ export class HighlightEthereumSigClient {
     };
   }
 
-  public async createDiscussion({
+  public async createTopic({
     signer,
     data,
     salt
   }: {
     signer: Signer & TypedDataSigner;
-    data: CreateDiscussion;
+    data: CreateTopic;
     salt: bigint;
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
@@ -155,7 +155,7 @@ export class HighlightEthereumSigClient {
     const signature = await this.sign(
       signer,
       domain,
-      TOWNHALL_CONFIG.types.createDiscussion,
+      TOWNHALL_CONFIG.types.createTopic,
       message
     );
 
@@ -163,32 +163,32 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      primaryType: 'Discussion',
+      primaryType: 'Topic',
       signer: await signer.getAddress(),
       signature
     };
   }
 
-  public async closeDiscussion({
+  public async closeTopic({
     signer,
     data,
     salt
   }: {
     signer: Signer & TypedDataSigner;
-    data: CloseDiscussion;
+    data: CloseTopic;
     salt: bigint;
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { discussion } = data;
+    const { topic } = data;
     const message = {
-      discussion
+      topic
     };
 
     const signature = await this.sign(
       signer,
       domain,
-      TOWNHALL_CONFIG.types.closeDiscussion,
+      TOWNHALL_CONFIG.types.closeTopic,
       message
     );
 
@@ -196,33 +196,33 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      primaryType: 'CloseDiscussion',
+      primaryType: 'CloseTopic',
       signer: await signer.getAddress(),
       signature
     };
   }
 
-  public async createStatement({
+  public async createPost({
     signer,
     data,
     salt
   }: {
     signer: Signer & TypedDataSigner;
-    data: CreateStatement;
+    data: CreatePost;
     salt: bigint;
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { discussion, statement } = data;
+    const { topic, body } = data;
     const message = {
-      discussion,
-      statement
+      topic,
+      body
     };
 
     const signature = await this.sign(
       signer,
       domain,
-      TOWNHALL_CONFIG.types.createStatement,
+      TOWNHALL_CONFIG.types.createPost,
       message
     );
 
@@ -230,33 +230,33 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      primaryType: 'Statement',
+      primaryType: 'Post',
       signer: await signer.getAddress(),
       signature
     };
   }
 
-  public async hideStatement({
+  public async hidePost({
     signer,
     data,
     salt
   }: {
     signer: Signer & TypedDataSigner;
-    data: HideStatement;
+    data: HidePost;
     salt: bigint;
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { discussion, statement } = data;
+    const { topic, post } = data;
     const message = {
-      discussion,
-      statement
+      topic,
+      post
     };
 
     const signature = await this.sign(
       signer,
       domain,
-      TOWNHALL_CONFIG.types.hideStatement,
+      TOWNHALL_CONFIG.types.hidePost,
       message
     );
 
@@ -264,33 +264,33 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      primaryType: 'HideStatement',
+      primaryType: 'HidePost',
       signer: await signer.getAddress(),
       signature
     };
   }
 
-  public async pinStatement({
+  public async pinPost({
     signer,
     data,
     salt
   }: {
     signer: Signer & TypedDataSigner;
-    data: PinStatement;
+    data: PinPost;
     salt: bigint;
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { discussion, statement } = data;
+    const { topic, post } = data;
     const message = {
-      discussion,
-      statement
+      topic,
+      post
     };
 
     const signature = await this.sign(
       signer,
       domain,
-      TOWNHALL_CONFIG.types.pinStatement,
+      TOWNHALL_CONFIG.types.pinPost,
       message
     );
 
@@ -298,33 +298,33 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      primaryType: 'PinStatement',
+      primaryType: 'PinPost',
       signer: await signer.getAddress(),
       signature
     };
   }
 
-  public async unpinStatement({
+  public async unpinPost({
     signer,
     data,
     salt
   }: {
     signer: Signer & TypedDataSigner;
-    data: UnpinStatement;
+    data: UnpinPost;
     salt: bigint;
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { discussion, statement } = data;
+    const { topic, post } = data;
     const message = {
-      discussion,
-      statement
+      topic,
+      post
     };
 
     const signature = await this.sign(
       signer,
       domain,
-      TOWNHALL_CONFIG.types.unpinStatement,
+      TOWNHALL_CONFIG.types.unpinPost,
       message
     );
 
@@ -332,7 +332,7 @@ export class HighlightEthereumSigClient {
       type: 'HIGHLIGHT_ENVELOPE',
       domain,
       message,
-      primaryType: 'UnpinStatement',
+      primaryType: 'UnpinPost',
       signer: await signer.getAddress(),
       signature
     };
@@ -349,10 +349,10 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { discussion, statement, choice } = data;
+    const { topic, post, choice } = data;
     const message = {
-      discussion,
-      statement,
+      topic,
+      post,
       choice
     };
 
