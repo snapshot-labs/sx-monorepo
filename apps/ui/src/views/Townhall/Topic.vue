@@ -124,7 +124,7 @@ watchEffect(() => {
 
 <template>
   <div>
-    <div v-if="isPending || isResultsPending" class="py-4">
+    <div v-if="isPending" class="py-4">
       <UiLoading class="p-4" />
     </div>
     <div
@@ -296,7 +296,13 @@ watchEffect(() => {
             </div>
           </div>
           <div class="space-y-3">
-            <div v-if="results.length === 0" class="flex gap-2 items-center">
+            <div v-if="isResultsPending">
+              <UiLoading class="p-4" />
+            </div>
+            <div
+              v-else-if="results.length === 0"
+              class="flex gap-2 items-center"
+            >
               <IH-exclamation-circle class="inline-block shrink-0" />
               <span>There are no posts here.</span>
             </div>
