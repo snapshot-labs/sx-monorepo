@@ -18,7 +18,7 @@ const SetAliasEventData = z.tuple([
 ]);
 
 const NewTopicEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.number(), // id
   z.string(), // author
   z.string(), // title
@@ -27,12 +27,12 @@ const NewTopicEventData = z.tuple([
 ]);
 
 const CloseTopicEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.number() // id
 ]);
 
 const NewPostEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.number(), // topicId
   z.number(), // id
   z.string(), // author
@@ -40,7 +40,7 @@ const NewPostEventData = z.tuple([
 ]);
 
 const PinPostEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.number(), // topicId
   z.number() // postId
 ]);
@@ -48,7 +48,7 @@ const UnpinPostEventData = PinPostEventData;
 const HidePostEventData = PinPostEventData;
 
 const NewVoteEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.number(), // topicId
   z.number(), // postId
   z.string(), // voter
@@ -56,7 +56,7 @@ const NewVoteEventData = z.tuple([
 ]);
 
 const NewRoleEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.string(), // id
   z.string(), // name
   z.string(), // description
@@ -65,12 +65,12 @@ const NewRoleEventData = z.tuple([
 const EditRoleEventData = NewRoleEventData;
 
 const DeleteRoleEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.string() // id
 ]);
 
 const ClaimRoleEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.string(), // id
   z.string() // address
 ]);
@@ -94,9 +94,10 @@ export function createWriters(indexerName: string) {
 
     console.log('Handle new topic', spaceId, id, author, title, body);
 
+    const spaceEntityId = spaceId.toString();
     const topic = new Topic(`${spaceId}/${id}`, indexerName);
     topic.topic_id = id;
-    topic.space = spaceId;
+    topic.space = spaceEntityId;
     topic.author = author;
     topic.title = title;
     topic.body = body;
@@ -105,9 +106,9 @@ export function createWriters(indexerName: string) {
     topic.vote_count = 0;
     topic.created = unit.timestamp;
 
-    let space = await Space.loadEntity(spaceId, indexerName);
+    let space = await Space.loadEntity(spaceEntityId, indexerName);
     if (!space) {
-      space = new Space(spaceId, indexerName);
+      space = new Space(spaceEntityId, indexerName);
     }
     space.topic_count += 1;
 
@@ -145,7 +146,7 @@ export function createWriters(indexerName: string) {
     post.created = unit.timestamp;
     post.post_id = id;
     post.topic_id = topicId;
-    post.space = spaceId;
+    post.space = spaceId.toString();
     post.topic = `${spaceId}/${topicId}`;
 
     await post.save();
@@ -217,6 +218,7 @@ export function createWriters(indexerName: string) {
 
     console.log('Handle new vote', spaceId, voter, topicId, postId, choice);
 
+    const spaceEntityId = spaceId.toString();
     const id = `${spaceId}/${topicId}/${postId}/${voter}`;
     const vote = new Vote(id, indexerName);
     vote.voter = voter;
@@ -224,7 +226,7 @@ export function createWriters(indexerName: string) {
     vote.created = unit.timestamp;
     vote.topic_id = topicId;
     vote.post_id = postId;
-    vote.space = spaceId;
+    vote.space = spaceEntityId;
     vote.topic = `${spaceId}/${topicId}`;
     vote.post = `${spaceId}/${topicId}/${postId}`;
 
@@ -245,9 +247,9 @@ export function createWriters(indexerName: string) {
       await post.save();
     }
 
-    let space = await Space.loadEntity(spaceId, indexerName);
+    let space = await Space.loadEntity(spaceEntityId, indexerName);
     if (!space) {
-      space = new Space(spaceId, indexerName);
+      space = new Space(spaceEntityId, indexerName);
     }
     space.vote_count += 1;
 
@@ -262,7 +264,7 @@ export function createWriters(indexerName: string) {
     console.log('Handle new role', spaceId, id, name, description, color);
 
     const role = new Role(id.toString(), indexerName);
-    role.space = spaceId;
+    role.space = spaceId.toString();
     role.name = name;
     role.description = description;
     role.color = color;
@@ -280,7 +282,7 @@ export function createWriters(indexerName: string) {
     const role = await Role.loadEntity(id.toString(), indexerName);
     if (!role) return;
 
-    role.space = spaceId;
+    role.space = spaceId.toString();
     role.name = name;
     role.description = description;
     role.color = color;

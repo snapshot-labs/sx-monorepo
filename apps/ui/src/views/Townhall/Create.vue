@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { getTopic } from '@/helpers/townhall/api';
+import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { sleep } from '@/helpers/utils';
 import { Space } from '@/types';
 
-const props = defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const route = useRoute();
 const router = useRouter();
@@ -45,7 +46,7 @@ async function handleSubmit() {
 
   try {
     const res = await sendTopic(
-      props.space.id,
+      props.townhallSpace.space_id,
       title.value,
       body.value,
       discussion.value

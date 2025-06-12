@@ -5,7 +5,7 @@ import { useSpaceQuery as useTownhallSpaceQuery } from '@/queries/townhall';
 
 const { setFavicon } = useFavicon();
 const { param } = useRouteParser('space');
-const spaceType = useSpaceType(param);
+const { spaceType, townhallSpaceId } = useTownhallSpace(param);
 const { resolved, address, networkId } = useResolve(param);
 const { loadVotes } = useAccount();
 const { isWhiteLabel } = useWhiteLabel();
@@ -18,7 +18,7 @@ const { data: space, isPending } = useSpaceQuery({
 
 const { data: townhallSpace, isPending: isTownhallSpacePending } =
   useTownhallSpaceQuery({
-    spaceId: address,
+    spaceId: townhallSpaceId,
     spaceType
   });
 

@@ -25,6 +25,7 @@ const client = new ApolloClient({
 gql(`
   fragment spaceFields on Space {
     id
+    space_id
     vote_count
     topic_count
   }
@@ -82,6 +83,7 @@ gql(`
     id
     space {
       id
+      space_id
     }
     name
     description
@@ -141,10 +143,10 @@ const USER_ROLES_QUERY = gql(`
   }
 `);
 
-export async function getSpace(spaceId: string) {
+export async function getSpace(spaceId: number) {
   const { data } = await client.query({
     query: SPACE_QUERY,
-    variables: { id: spaceId }
+    variables: { id: spaceId.toString() }
   });
 
   return data.space;
@@ -155,19 +157,19 @@ export async function getTopics({
   limit,
   skip
 }: {
-  spaceId: string;
+  spaceId: number;
   limit: number;
   skip: number;
 }) {
   const { data } = await client.query({
     query: TOPICS_QUERY,
-    variables: { spaceId, limit, skip }
+    variables: { spaceId: spaceId.toString(), limit, skip }
   });
 
   return data.topics;
 }
 
-export async function getTopic(spaceId: string, topicId: number) {
+export async function getTopic(spaceId: number, topicId: number) {
   const { data } = await client.query({
     query: TOPIC_QUERY,
     variables: { id: `${spaceId}/${topicId}` }
@@ -177,7 +179,7 @@ export async function getTopic(spaceId: string, topicId: number) {
 }
 
 export async function getVotes(
-  spaceId: string,
+  spaceId: number,
   topicId: number,
   voter: string
 ) {
@@ -189,16 +191,16 @@ export async function getVotes(
   return data.votes;
 }
 
-export async function getRoles(spaceId: string) {
+export async function getRoles(spaceId: number) {
   const { data } = await client.query({
     query: ROLES_QUERY,
-    variables: { space: spaceId }
+    variables: { space: spaceId.toString() }
   });
 
   return data.roles;
 }
 
-export async function getUserRoles(spaceId: string, user: string) {
+export async function getUserRoles(spaceId: number, user: string) {
   const { data } = await client.query({
     query: USER_ROLES_QUERY,
     variables: { user: `${spaceId}/${user}` }
@@ -208,7 +210,7 @@ export async function getUserRoles(spaceId: string, user: string) {
 }
 
 export async function getResultsByRole(
-  spaceId: string,
+  spaceId: number,
   topicId: number,
   roleId: string
 ): Promise<Result[]> {

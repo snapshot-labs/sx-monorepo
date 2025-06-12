@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
-import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
@@ -32,7 +31,7 @@ const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
-const spaceType = useSpaceType(param);
+const { spaceType } = useTownhallSpace(param);
 const { data: spaceData } = useSpaceQuery({
   networkId: networkId,
   spaceId: address

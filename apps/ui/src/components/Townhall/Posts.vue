@@ -7,7 +7,7 @@ import {
 } from '@/queries/townhall';
 
 const props = defineProps<{
-  spaceId: string;
+  spaceId: number;
   topicId: number;
   topic: Topic;
   posts: Post[];

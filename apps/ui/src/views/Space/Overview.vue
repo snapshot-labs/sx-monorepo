@@ -15,7 +15,7 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space; townhallSpace?: TownhallSpace }>();
 
 const { param } = useRouteParser('space');
-const spaceType = useSpaceType(param);
+const { spaceType, townhallSpaceId } = useTownhallSpace(param);
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 
@@ -35,7 +35,7 @@ const {
   isPending: isTopicsPending,
   isError: isTopicsError
 } = useTopicsSummaryQuery({
-  spaceId: toRef(() => props.space.id),
+  spaceId: toRef(() => townhallSpaceId.value!),
   enabled: computed(() => spaceType.value === 'discussionsSpace')
 });
 

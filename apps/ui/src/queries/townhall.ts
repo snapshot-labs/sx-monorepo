@@ -7,7 +7,7 @@ import {
   useQueryClient
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
-import { SpaceType } from '@/composables/useSpaceType';
+import { SpaceType } from '@/composables/useTownhallSpace';
 import {
   getResultsByRole,
   getRoles,
@@ -35,7 +35,7 @@ function addVoteToRoleResults({
   vote
 }: {
   queryClient: QueryClient;
-  spaceId: string;
+  spaceId: number;
   topicId: number;
   roleId: string;
   vote: Vote;
@@ -65,7 +65,7 @@ export function useSpaceQuery({
   spaceId,
   spaceType
 }: {
-  spaceId: MaybeRefOrGetter<string | null>;
+  spaceId: MaybeRefOrGetter<number | null>;
   spaceType: MaybeRefOrGetter<SpaceType>;
 }) {
   const queryFn = computed(() => {
@@ -96,7 +96,7 @@ export function useSpaceQuery({
 export function useTopicsQuery({
   spaceId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
@@ -121,7 +121,7 @@ export function useTopicsSummaryQuery({
   spaceId,
   enabled = true
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
@@ -142,7 +142,7 @@ export function useTopicQuery({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   return useQuery({
@@ -167,7 +167,7 @@ export function useUserVotesQuery({
   topicId,
   user
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
   user: MaybeRefOrGetter<string>;
 }) {
@@ -181,7 +181,7 @@ export function useUserVotesQuery({
   });
 }
 
-export function useRolesQuery(spaceId: MaybeRefOrGetter<string>) {
+export function useRolesQuery(spaceId: MaybeRefOrGetter<number>) {
   return useQuery({
     queryKey: ['townhall', 'roles', spaceId, 'list'],
     queryFn: () => {
@@ -194,7 +194,7 @@ export function useUserRolesQuery({
   spaceId,
   user
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   user: MaybeRefOrGetter<string>;
 }) {
   return useQuery({
@@ -217,7 +217,7 @@ export function useResultsByRoleQuery({
   topicId,
   roleId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
   roleId: MaybeRefOrGetter<string>;
 }) {
@@ -242,7 +242,7 @@ export function useResultsByRoleQuery({
 export function useRoleMutation({
   spaceId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
 }) {
   const { web3 } = useWeb3();
   const queryClient = useQueryClient();
@@ -252,8 +252,8 @@ export function useRoleMutation({
   return useMutation({
     mutationFn: ({ role, isRevoking }: { role: Role; isRevoking: boolean }) => {
       return isRevoking
-        ? sendRevokeRole(role.space.id, role.id)
-        : sendClaimRole(role.space.id, role.id);
+        ? sendRevokeRole(role.space.space_id, role.id)
+        : sendClaimRole(role.space.space_id, role.id);
     },
     onSuccess: (data, { role, isRevoking }) => {
       if (!data) return;
@@ -279,7 +279,7 @@ export function useCloseTopicMutation({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
@@ -315,7 +315,7 @@ export function useCreatePostMutation({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
@@ -359,7 +359,7 @@ export function useSetPostVisibilityMutation({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
@@ -437,7 +437,7 @@ export function useVoteMutation({
   topicId,
   userRoles
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
   userRoles: MaybeRefOrGetter<Role[] | undefined>;
 }) {

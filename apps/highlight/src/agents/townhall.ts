@@ -30,7 +30,7 @@ export default class Townhall extends Agent {
       title,
       body,
       discussionUrl
-    }: { space: string; title: string; body: string; discussionUrl: string },
+    }: { space: number; title: string; body: string; discussionUrl: string },
     { signer }: { signer: string }
   ) {
     const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
@@ -50,7 +50,7 @@ export default class Townhall extends Agent {
       topic,
       body
     }: {
-      space: string;
+      space: number;
       topic: number;
       body: string;
     },
@@ -72,7 +72,7 @@ export default class Townhall extends Agent {
     topic,
     post
   }: {
-    space: string;
+    space: number;
     topic: number;
     post: number;
   }) {
@@ -86,7 +86,7 @@ export default class Townhall extends Agent {
     topic,
     post
   }: {
-    space: string;
+    space: number;
     topic: number;
     post: number;
   }) {
@@ -100,7 +100,7 @@ export default class Townhall extends Agent {
     topic,
     post
   }: {
-    space: string;
+    space: number;
     topic: number;
     post: number;
   }) {
@@ -116,7 +116,7 @@ export default class Townhall extends Agent {
       post,
       choice
     }: {
-      space: string;
+      space: number;
       topic: number;
       post: number;
       choice: number;
@@ -141,7 +141,7 @@ export default class Townhall extends Agent {
     description,
     color
   }: {
-    space: string;
+    space: number;
     name: string;
     description: string;
     color: string;
@@ -159,7 +159,7 @@ export default class Townhall extends Agent {
     description,
     color
   }: {
-    space: string;
+    space: number;
     id: string;
     name: string;
     description: string;
@@ -168,12 +168,12 @@ export default class Townhall extends Agent {
     this.emit('edit_role', [space, id, name, description, color]);
   }
 
-  async deleteRole({ space, id }: { space: string; id: string }) {
+  async deleteRole({ space, id }: { space: number; id: string }) {
     this.emit('delete_role', [space, id]);
   }
 
   async claimRole(
-    { space, id }: { space: string; id: string },
+    { space, id }: { space: number; id: string },
     { signer }: { signer: string }
   ) {
     const user = await this.getSigner(signer);
@@ -182,7 +182,7 @@ export default class Townhall extends Agent {
   }
 
   async revokeRole(
-    { space, id }: { space: string; id: string },
+    { space, id }: { space: number; id: string },
     { signer }: { signer: string }
   ) {
     const user = await this.getSigner(signer);
