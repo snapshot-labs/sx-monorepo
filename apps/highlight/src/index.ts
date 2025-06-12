@@ -29,21 +29,23 @@ async function run() {
   app.use('/highlight', rpc);
 
   app.get(
-    '/townhall/topics/:topicId/results_by_role/:roleId',
+    '/townhall/spaces/:spaceId/topics/:topicId/results_by_role/:roleId',
     async (req, res) => {
       const { knex } = checkpoint.getBaseContext();
 
-      const { topicId, roleId } = req.params;
+      const { spaceId, topicId, roleId } = req.params;
 
       let query = knex('votes')
         .select('votes.post_id', 'choice')
         .countDistinct('votes.voter', { as: 'vote_count' })
         .whereRaw('upper_inf(votes.block_range)')
-        .where('topic_id', topicId);
+        .where('topic', `${spaceId}/${topicId}`);
 
       if (roleId !== 'any') {
         query = query
-          .join('userroles', 'userroles.user', 'votes.voter')
+          .joinRaw(
+            "JOIN userroles ON userroles.user = CONCAT(votes.space, '/', votes.voter)"
+          )
           .join('roles', 'roles.id', 'userroles.role')
           .whereRaw('upper_inf(userroles.block_range)')
           .where('roles.id', roleId);

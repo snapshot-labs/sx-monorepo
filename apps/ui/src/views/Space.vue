@@ -18,7 +18,7 @@ const { data: space, isPending } = useSpaceQuery({
 
 const { data: townhallSpace, isPending: isTownhallSpacePending } =
   useTownhallSpaceQuery({
-    spaceId: '1',
+    spaceId: address,
     spaceType
   });
 

@@ -20,40 +20,49 @@ export const TOWNHALL_CONFIG = {
   types: {
     createTopic: {
       Topic: [
+        { name: 'space', type: 'string' },
         { name: 'title', type: 'string' },
         { name: 'body', type: 'string' },
         { name: 'discussionUrl', type: 'string' }
       ]
     },
     closeTopic: {
-      CloseTopic: [{ name: 'topic', type: 'uint64' }]
+      CloseTopic: [
+        { name: 'space', type: 'string' },
+        { name: 'topic', type: 'uint64' }
+      ]
     },
     createPost: {
       Post: [
+        { name: 'space', type: 'string' },
         { name: 'topic', type: 'uint64' },
         { name: 'body', type: 'string' }
       ]
     },
     hidePost: {
       HidePost: [
+        { name: 'space', type: 'string' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'int' }
       ]
     },
     pinPost: {
       PinPost: [
+        { name: 'space', type: 'string' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'uint64' }
       ]
     },
     unpinPost: {
       UnpinPost: [
+        { name: 'space', type: 'string' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'uint64' }
       ]
     },
     vote: {
       Vote: [
+        { name: 'space', type: 'string' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'uint64' },
         { name: 'choice', type: 'uint64' }

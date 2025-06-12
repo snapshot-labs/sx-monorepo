@@ -44,15 +44,21 @@ async function handleSubmit() {
   submitLoading.value = true;
 
   try {
-    const res = await sendTopic(title.value, body.value, discussion.value);
+    const res = await sendTopic(
+      props.space.id,
+      title.value,
+      body.value,
+      discussion.value
+    );
     if (!res) return;
 
-    const id = res.result.events.find(event => event.key === 'new_topic')
-      .data[0];
+    const [spaceId, topicId] = res.result.events.find(
+      event => event.key === 'new_topic'
+    ).data;
 
     while (true) {
       try {
-        await getTopic(id.toString());
+        await getTopic(spaceId, topicId);
         break;
       } catch (e: unknown) {
         if (e instanceof Error && e.message.includes('Row not found')) {
@@ -64,7 +70,10 @@ async function handleSubmit() {
       }
     }
 
-    await router.push({ name: 'space-townhall-topic', params: { id } });
+    await router.push({
+      name: 'space-townhall-topic',
+      params: { id: topicId }
+    });
   } catch (e) {
     addNotification('error', e.message);
   } finally {

@@ -97,7 +97,12 @@ export function useTownhall() {
     );
   }
 
-  async function sendTopic(title: string, body: string, discussionUrl: string) {
+  async function sendTopic(
+    space: string,
+    title: string,
+    body: string,
+    discussionUrl: string
+  ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -108,13 +113,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createTopic({
         signer,
-        data: { title, body, discussionUrl },
+        data: { space, title, body, discussionUrl },
         salt: getSalt()
       })
     );
   }
 
-  async function sendCloseTopic(topic: number) {
+  async function sendCloseTopic(space: string, topic: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -125,13 +130,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.closeTopic({
         signer,
-        data: { topic },
+        data: { space, topic },
         salt: getSalt()
       })
     );
   }
 
-  async function sendPost(topic: number, body: string) {
+  async function sendPost(space: string, topic: number, body: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -142,13 +147,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createPost({
         signer,
-        data: { topic, body },
+        data: { space, topic, body },
         salt: getSalt()
       })
     );
   }
 
-  async function sendHidePost(topic: number, post: number) {
+  async function sendHidePost(space: string, topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -159,13 +164,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.hidePost({
         signer,
-        data: { topic, post },
+        data: { space, topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendPinPost(topic: number, post: number) {
+  async function sendPinPost(space: string, topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -176,13 +181,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.pinPost({
         signer,
-        data: { topic, post },
+        data: { space, topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendUnpinPost(topic: number, post: number) {
+  async function sendUnpinPost(space: string, topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -193,13 +198,18 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.unpinPost({
         signer,
-        data: { topic, post },
+        data: { space, topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendVote(topic: number, post: number, choice: 1 | 2 | 3) {
+  async function sendVote(
+    space: string,
+    topic: number,
+    post: number,
+    choice: 1 | 2 | 3
+  ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -210,7 +220,7 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.vote({
         signer,
-        data: { topic, post, choice },
+        data: { space, topic, post, choice },
         salt: getSalt()
       })
     );

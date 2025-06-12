@@ -15,21 +15,25 @@ export type SetAlias = {
 };
 
 export type CreateTopic = {
+  space: string;
   title: string;
   body: string;
   discussionUrl: string;
 };
 
 export type CloseTopic = {
+  space: string;
   topic: number;
 };
 
 export type CreatePost = {
+  space: string;
   topic: number;
   body: string;
 };
 
 export type HidePost = {
+  space: string;
   topic: number;
   post: number;
 };
@@ -37,6 +41,7 @@ export type PinPost = HidePost;
 export type UnpinPost = HidePost;
 
 export type Vote = {
+  space: string;
   topic: number;
   post: number;
   choice: number;

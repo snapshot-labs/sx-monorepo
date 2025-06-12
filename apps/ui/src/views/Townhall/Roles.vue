@@ -18,17 +18,21 @@ const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
-const spaceId = ref('1');
-const userSpaceRoles = computed(() => {
-  return userRoles.value?.filter(role => role.space.id === spaceId.value) ?? [];
-});
+const spaceId = computed(() => props.space.id);
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
-const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
-const { isPending: isMutatingRole, variables, mutate } = useRoleMutation();
+const { data: userRoles } = useUserRolesQuery({
+  spaceId: spaceId,
+  user: toRef(() => web3.value.account)
+});
+const {
+  isPending: isMutatingRole,
+  variables,
+  mutate
+} = useRoleMutation({ spaceId: toRef(() => props.space.id) });
 
 function getIsRoleClaimed(roleId: string) {
-  return userSpaceRoles.value.some(role => role.id === roleId);
+  return (userRoles.value ?? []).some(role => role.id === roleId);
 }
 
 function setModalStatus(open: boolean = false, roleId: string | null = null) {

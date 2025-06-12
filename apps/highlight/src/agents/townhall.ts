@@ -26,28 +26,31 @@ export default class Townhall extends Agent {
 
   async topic(
     {
+      space,
       title,
       body,
       discussionUrl
-    }: { title: string; body: string; discussionUrl: string },
+    }: { space: string; title: string; body: string; discussionUrl: string },
     { signer }: { signer: string }
   ) {
-    const id: number = (await this.get('topics:id')) || 1;
+    const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
 
     const author = await this.getSigner(signer);
-    this.write('topics:id', id + 1);
-    this.emit('new_topic', [id, author, title, body, discussionUrl]);
+    this.write(`space:${space}:topics:id`, id + 1);
+    this.emit('new_topic', [space, id, author, title, body, discussionUrl]);
   }
 
-  async closeTopic({ topic }: { topic: number }) {
-    this.emit('close_topic', [topic]);
+  async closeTopic({ space, topic }: { space: string; topic: number }) {
+    this.emit('close_topic', [space, topic]);
   }
 
   async post(
     {
+      space,
       topic,
       body
     }: {
+      space: string;
       topic: number;
       body: string;
     },
@@ -55,38 +58,65 @@ export default class Townhall extends Agent {
   ) {
     // @TODO: reject the post if it was already proposed
 
-    const id: number = (await this.get(`topic:${topic}:posts:id`)) || 1;
+    const id: number =
+      (await this.get(`space:${space}:topic:${topic}:posts:id`)) || 1;
 
     const author = await this.getSigner(signer);
 
-    this.write(`topic:${topic}:posts:id`, id + 1);
-    this.emit('new_post', [id, author, topic, body]);
+    this.write(`space:${space}:topic:${topic}:posts:id`, id + 1);
+    this.emit('new_post', [space, topic, id, author, body]);
   }
 
-  async hidePost({ topic, post }: { topic: number; post: number }) {
+  async hidePost({
+    space,
+    topic,
+    post
+  }: {
+    space: string;
+    topic: number;
+    post: number;
+  }) {
     // @TODO: reject if not the author of the topic
 
-    this.emit('hide_post', [topic, post]);
+    this.emit('hide_post', [space, topic, post]);
   }
 
-  async pinPost({ topic, post }: { topic: number; post: number }) {
+  async pinPost({
+    space,
+    topic,
+    post
+  }: {
+    space: string;
+    topic: number;
+    post: number;
+  }) {
     // @TODO: reject if not the author of the topic
 
-    this.emit('pin_post', [topic, post]);
+    this.emit('pin_post', [space, topic, post]);
   }
 
-  async unpinPost({ topic, post }: { topic: number; post: number }) {
+  async unpinPost({
+    space,
+    topic,
+    post
+  }: {
+    space: string;
+    topic: number;
+    post: number;
+  }) {
     // @TODO: reject if not the author of the topic
 
-    this.emit('unpin_post', [topic, post]);
+    this.emit('unpin_post', [space, topic, post]);
   }
 
   async vote(
     {
+      space,
       topic,
       post,
       choice
     }: {
+      space: string;
       topic: number;
       post: number;
       choice: number;
@@ -96,13 +126,13 @@ export default class Townhall extends Agent {
     const author = await this.getSigner(signer);
 
     const votes: number[] =
-      (await this.get(`topic:${topic}:voter:${author}`)) || [];
+      (await this.get(`space:${space}:topic:${topic}:voter:${author}`)) || [];
 
     this.assert(!votes.includes(post), 'already voted');
     votes.push(post);
 
-    this.write(`topic:${topic}:voter:${author}`, votes);
-    this.emit('new_vote', [author, topic, post, choice]);
+    this.write(`space:${space}:topic:${topic}:voter:${author}`, votes);
+    this.emit('new_vote', [space, topic, post, author, choice]);
   }
 
   async createRole({

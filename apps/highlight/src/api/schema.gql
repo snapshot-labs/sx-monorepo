@@ -24,6 +24,7 @@ type Topic {
   created: Int!
   closed: Boolean!
   space: Space!
+  topic_id: Int!
   posts: [Post!]! @derivedFrom(field: "topic")
   votes: [Vote!]! @derivedFrom(field: "topic")
 }
@@ -41,6 +42,7 @@ type Post {
   created: Int!
   topic_id: Int!
   post_id: Int!
+  space: Space!
   topic: Topic!
   votes: [Vote!]! @derivedFrom(field: "post")
 }
@@ -52,6 +54,7 @@ type Vote {
   created: Int!
   topic_id: Int!
   post_id: Int!
+  space: Space!
   topic: Topic!
   post: Post!
 }
