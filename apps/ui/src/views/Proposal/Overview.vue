@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { EMPTY_ADDRESS } from '@/helpers/constants';
+import { EVM_EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
   compareAddresses,
@@ -309,7 +309,7 @@ onBeforeUnmount(() => destroyAudio());
         in nature. Please proceed with caution.
       </UiAlert>
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
-        <template v-if="proposal.execution_strategy === EMPTY_ADDRESS">
+        <template v-if="proposal.execution_strategy === EVM_EMPTY_ADDRESS">
           This proposal is invalid and was not created correctly. We cannot
           display its details.
         </template>
