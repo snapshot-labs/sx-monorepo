@@ -36,10 +36,7 @@ const selectedChoices = ref<RankedChoice>(
           class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
         >
           <IC-drag class="text-skin-text" />
-
-          <div class="grow truncate">
-            {{ proposal.choices[element - 1] }}
-          </div>
+          <UiTooltipOnTruncate :content="proposal.choices[element - 1]" />
           <div
             class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block"
           >
