@@ -269,11 +269,7 @@ export function useDelegateesQuery(
   delegation: MaybeRefOrGetter<SpaceMetadataDelegation | null>
 ) {
   return useQuery({
-    queryKey: [
-      'delegatees',
-      () => toValue(delegation)?.contractAddress,
-      account
-    ],
+    queryKey: ['delegatees', delegation, account],
     queryFn: () =>
       FETCH_DELEGATEES_FN[
         toValue(delegation)!.apiType as keyof typeof FETCH_DELEGATEES_FN
