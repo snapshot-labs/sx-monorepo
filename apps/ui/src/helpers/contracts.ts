@@ -1,6 +1,17 @@
+import { Provider } from '@ethersproject/providers';
 import { abis } from './abis';
+import { EIP7702_DELEGATION_INDICATOR } from './constants';
 import Multicaller from './multicaller';
 import { getProvider } from './provider';
+
+export async function getIsContract(provider: Provider, address: string) {
+  const code = await provider.getCode(address);
+
+  if (code === '0x') return false;
+  if (code.startsWith(EIP7702_DELEGATION_INDICATOR)) return false;
+
+  return true;
+}
 
 export async function getTokensMetadata(chainId: number, tokens: string[]) {
   const provider = getProvider(chainId);

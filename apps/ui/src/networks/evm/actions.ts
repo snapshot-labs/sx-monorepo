@@ -17,6 +17,8 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
+import { APE_GAS_REGISTRIES } from '@/helpers/constants';
+import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
@@ -83,7 +85,8 @@ export function createActions(
 
   const clientOpts = {
     networkConfig,
-    whitelistServerUrl: WHITELIST_SERVER_URL
+    whitelistServerUrl: WHITELIST_SERVER_URL,
+    provider
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
@@ -102,8 +105,7 @@ export function createActions(
       return true;
     }
 
-    const code = await provider.getCode(address);
-    return code !== '0x';
+    return _getIsContract(provider, address);
   };
 
   /**
@@ -643,19 +645,32 @@ export function createActions(
           functionParams: [delegatee],
           abi: ['function delegate(address delegatee)']
         };
-      } else if (delegationType == 'delegate-registry') {
+      } else if (
+        delegationType === 'delegate-registry' ||
+        delegationType === 'apechain-delegate-registry'
+      ) {
+        const contractAddress =
+          delegationType === 'delegate-registry'
+            ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
+            : APE_GAS_REGISTRIES[currentChainId];
+
+        const delegationId =
+          delegationType === 'delegate-registry'
+            ? formatBytes32String(space.id)
+            : delegationContract;
+
         if (delegatees[0]) {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'setDelegate',
-            functionParams: [formatBytes32String(space.id), delegatees[0]],
+            functionParams: [delegationId, delegatees[0]],
             abi: ['function setDelegate(bytes32 id, address delegate)']
           };
         } else {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'clearDelegate',
-            functionParams: [formatBytes32String(space.id)],
+            functionParams: [delegationId],
             abi: ['function clearDelegate(bytes32 id)']
           };
         }
@@ -846,9 +861,6 @@ export function createActions(
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
-      if (snapshotInfo.at === null)
-        throw new Error('EVM requires block number to be defined');
-
       const cumulativeDecimals = Math.max(
         ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
       );

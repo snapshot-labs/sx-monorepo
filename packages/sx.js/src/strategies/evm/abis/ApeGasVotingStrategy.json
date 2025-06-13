@@ -1,0 +1,4 @@
+[
+  "error InvalidVoter()",
+  "function getVotingPower(uint32 blockNumber, address voter, bytes params, bytes userParams) view returns (uint256)"
+]

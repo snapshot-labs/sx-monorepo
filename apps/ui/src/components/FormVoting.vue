@@ -50,9 +50,9 @@ const definition = computed(() => {
           : 'Min. voting duration',
         ...(isOffchainNetwork.value
           ? {
-              maximum: 15552000,
+              maximum: 31622400,
               errorMessage: {
-                maximum: 'Period must be less than 180 days'
+                maximum: 'Period must be less than a year'
               }
             }
           : {})

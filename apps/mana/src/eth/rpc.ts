@@ -15,6 +15,7 @@ import {
 import fetch from 'cross-fetch';
 import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
+import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
 
 const NETWORKS = new Map<number, EvmNetworkConfig>([
@@ -40,11 +41,12 @@ export const createNetworkHandler = (chainId: number) => {
   const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const getWallet = createWalletProxy(chainId);
+  const { provider, getWallet } = createWalletProxy(chainId);
 
   const client = new clients.EvmEthereumTx({
     networkConfig,
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    whitelistServerUrl: 'https://wls.snapshot.box',
+    provider
   });
   const l1ExecutorClient = new clients.L1Executor();
 
@@ -191,11 +193,37 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
+  async function registerApeGasProposal(
+    id: number,
+    params: any,
+    res: Response
+  ) {
+    try {
+      const { viewId, snapshot } = params;
+
+      if (!viewId || !snapshot) {
+        return rpcError(res, 400, 'Missing viewId or snapshot', id);
+      }
+
+      await db.saveApeGasProposal({
+        chainId,
+        viewId,
+        snapshot
+      });
+
+      return rpcSuccess(res, 'success', id);
+    } catch (e) {
+      console.log('Error registering ApeGas proposal:', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
   return {
     send,
     finalizeProposal,
     execute,
     executeQueuedProposal,
-    executeStarknetProposal
+    executeStarknetProposal,
+    registerApeGasProposal
   };
 };

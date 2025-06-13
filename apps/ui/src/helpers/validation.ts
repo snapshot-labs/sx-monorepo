@@ -44,6 +44,7 @@ const validateType = (type: string, value: string) => {
 };
 
 const bytesValidator = (value: string) => validateType('bytes', value);
+const bytes32Validator = (value: string) => validateType('bytes32', value);
 const uint256Validator = (value: string) => validateType('uint256', value);
 const int256Validator = (value: string) => validateType('int256', value);
 
@@ -77,6 +78,10 @@ ajv.addFormat('int256', {
 
 ajv.addFormat('bytes', {
   validate: bytesValidator
+});
+
+ajv.addFormat('bytes32', {
+  validate: bytes32Validator
 });
 
 ajv.addFormat('address[]', {
@@ -260,6 +265,7 @@ ajv.addFormat('network', {
 });
 ajv.addKeyword('networkId');
 ajv.addKeyword('networksListKind');
+ajv.addKeyword('networksFilter');
 ajv.addKeyword('chainId');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
@@ -286,7 +292,7 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'abi':
         return 'Must be a valid ABI.';
       case 'twitter-handle':
-        return 'Must be a valid Twitter handle.';
+        return 'Must be a valid X handle.';
       case 'github-handle':
         return 'Must be a valid GitHub handle.';
       case 'discord-handle':
