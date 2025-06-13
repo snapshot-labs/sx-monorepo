@@ -52,6 +52,10 @@ const DELEGATION_SUBGRAPHS = {
   '146': 'https://subgrapher.snapshot.org/delegation/146',
   '250': 'https://subgrapher.snapshot.org/delegation/250',
   '8453': 'https://subgrapher.snapshot.org/delegation/8453',
+  '33139':
+    'https://api.goldsky.com/api/public/project_cmb7myliieemg01v8928cd8rs/subgraphs/snapshot-apechain/0.0.1/gn',
+  '33111':
+    'https://api.goldsky.com/api/public/project_cmb7myliieemg01v8928cd8rs/subgraphs/snapshot-curtis/0.0.1/gn',
   '42161': 'https://subgrapher.snapshot.org/delegation/42161',
   '59144': 'https://subgrapher.snapshot.org/delegation/59144',
   '81457': 'https://subgrapher.snapshot.org/delegation/81457',
@@ -84,6 +88,18 @@ const DELEGATES_QUERY = gql`
     governance(id: $governance) {
       delegatedVotes
       totalDelegates
+    }
+  }
+`;
+
+const DELEGATIONS_RAW_QUERY = gql`
+  query ($space: String, $delegator: String!) {
+    delegations(
+      first: $first
+      where: { space_raw: $space, delegator: $delegator }
+    ) {
+      id
+      delegate
     }
   }
 `;
@@ -242,6 +258,28 @@ export function useDelegates(
     return formatDelegates(data);
   }
 
+  async function getApeChainDelegationDelegates(
+    filter: DelegatesQueryFilter
+  ): Promise<Delegate[]> {
+    const CUSTOM_GOVERNANCES = {
+      33139: 'apechain',
+      33111: 'curtis'
+    };
+
+    const where = {
+      tokenHoldersRepresentedAmount_gte: 0,
+      governance: `${CUSTOM_GOVERNANCES[delegation.chainId]}:${delegation.contractAddress}`,
+      ...filter.where
+    };
+
+    const { data } = await apollo.query({
+      query: DELEGATES_QUERY,
+      variables: { ...filter, governance: where.governance, where }
+    });
+
+    return formatDelegates(data);
+  }
+
   async function getDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
@@ -249,11 +287,18 @@ export function useDelegates(
       return getSplitDelegationDelegates(filter);
     }
 
+    if (delegation.apiType === 'apechain-delegate-registry') {
+      return getApeChainDelegationDelegates(filter);
+    }
+
     return getCompoundDelegationDelegates(filter);
   }
 
   async function getDelegation(delegator: string) {
-    if (delegation.apiType !== 'delegate-registry') {
+    if (
+      delegation.apiType !== 'delegate-registry' &&
+      delegation.apiType !== 'apechain-delegate-registry'
+    ) {
       throw new Error('getDelegation is only supported for delegate-registry');
     }
 
@@ -267,9 +312,21 @@ export function useDelegates(
       cache: new InMemoryCache()
     });
 
+    const isApeChainDelegateRegistry =
+      delegation.apiType === 'apechain-delegate-registry';
+
+    const query = isApeChainDelegateRegistry
+      ? DELEGATIONS_RAW_QUERY
+      : DELEGATIONS_QUERY;
+
     const { data } = await client.query({
-      query: DELEGATIONS_QUERY,
-      variables: { space: space.id, delegator }
+      query,
+      variables: {
+        space: isApeChainDelegateRegistry
+          ? delegation.contractAddress
+          : space.id,
+        delegator
+      }
     });
 
     return data.delegations[0] ?? null;
