@@ -52,8 +52,10 @@ const DELEGATION_SUBGRAPHS = {
   '146': 'https://subgrapher.snapshot.org/delegation/146',
   '250': 'https://subgrapher.snapshot.org/delegation/250',
   '8453': 'https://subgrapher.snapshot.org/delegation/8453',
+  '33139':
+    'https://api.goldsky.com/api/public/project_cmb7myliieemg01v8928cd8rs/subgraphs/snapshot-apechain/0.0.1/gn',
   '33111':
-    'https://api.goldsky.com/api/public/project_cmb7mtyozekvj01q7bo0bcirq/subgraphs/sekhmet-snapshot-subgraph-curtis/0.0.2/gn',
+    'https://api.goldsky.com/api/public/project_cmb7myliieemg01v8928cd8rs/subgraphs/snapshot-curtis/0.0.1/gn',
   '42161': 'https://subgrapher.snapshot.org/delegation/42161',
   '59144': 'https://subgrapher.snapshot.org/delegation/59144',
   '81457': 'https://subgrapher.snapshot.org/delegation/81457',
@@ -260,6 +262,7 @@ export function useDelegates(
     filter: DelegatesQueryFilter
   ): Promise<Delegate[]> {
     const CUSTOM_GOVERNANCES = {
+      33139: 'apechain',
       33111: 'curtis'
     };
 

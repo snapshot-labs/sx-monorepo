@@ -17,6 +17,7 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
+import { APE_GAS_REGISTRIES } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
@@ -651,7 +652,7 @@ export function createActions(
         const contractAddress =
           delegationType === 'delegate-registry'
             ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
-            : '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
+            : APE_GAS_REGISTRIES[currentChainId];
 
         const delegationId =
           delegationType === 'delegate-registry'

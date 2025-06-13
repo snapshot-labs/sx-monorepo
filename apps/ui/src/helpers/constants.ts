@@ -67,6 +67,11 @@ export const COINGECKO_BASE_ASSETS = {
   33111: 'apecoin'
 };
 
+export const APE_GAS_REGISTRIES = {
+  33139: '0x2f9e24e272d343c1f833ee7f3c6d6abc689b0102',
+  33111: '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202'
+};
+
 export const MAX_SYMBOL_LENGTH = 12;
 
 export const SPACE_CATEGORIES = [
