@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DELEGATION_TYPES_NAMES } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { offchainNetworks } from '@/networks';
@@ -82,10 +83,13 @@ const definition = computed(() => {
         enum: [null, 'governor-subgraph', 'apechain-delegate-registry'],
         options: [
           { id: null, name: 'No delegation API' },
-          { id: 'governor-subgraph', name: 'ERC-20 Votes' },
+          {
+            id: 'governor-subgraph',
+            name: DELEGATION_TYPES_NAMES['governor-subgraph']
+          },
           {
             id: 'apechain-delegate-registry',
-            name: 'ApeChain Delegate Registry'
+            name: DELEGATION_TYPES_NAMES['apechain-delegate-registry']
           }
         ],
         title: 'Delegation type',
@@ -133,8 +137,8 @@ const formValid = computed(() => {
 
 async function handleSubmit() {
   const config = clone(form.value);
-  if (offchainNetworks.includes(props.networkId)) {
-    config.name = 'ERC-20 Votes';
+  if (offchainNetworks.includes(props.networkId) && config.apiType) {
+    config.name = DELEGATION_TYPES_NAMES[config.apiType];
   }
 
   emit('add', config);
