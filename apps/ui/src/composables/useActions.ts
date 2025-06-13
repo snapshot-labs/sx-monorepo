@@ -190,6 +190,8 @@ export function useActions() {
     );
   }
 
+  // Returns an alias signer if the connector is a Starknet wallet and the network is offchain,
+  // otherwise returns the original provider.
   async function getOptionalAliasSigner(
     auth: { connector: Connector; provider: Web3Provider },
     networkId: NetworkID
