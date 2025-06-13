@@ -3,7 +3,7 @@ import * as db from '../db';
 import { sleep } from '../utils';
 import { createWalletProxy } from './dependencies';
 
-const APE_GAS_CHAIN_IDS = [33111];
+const APE_GAS_CHAIN_IDS = [33139, 33111];
 const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
 const HERODOTUS_API_URL = 'https://apevote.api.herodotus.cloud/votes';
 const INTERVAL = 15_000;
