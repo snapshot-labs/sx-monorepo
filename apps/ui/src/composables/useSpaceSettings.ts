@@ -32,6 +32,7 @@ export type OffchainSpaceSettings = {
   website: string;
   twitter: string;
   github: string;
+  farcaster: string;
   coingecko: string;
   parent: string | null;
   children: string[];
@@ -73,6 +74,7 @@ const DEFAULT_FORM_STATE: Form = {
   twitter: '',
   github: '',
   discord: '',
+  farcaster: '',
   coingecko: '',
   votingPowerSymbol: '',
   treasuries: [],
@@ -432,6 +434,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       externalUrl: space.external_url,
       github: space.github,
       discord: space.discord,
+      farcaster: space.farcaster,
       coingecko: space.coingecko || '',
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
@@ -583,6 +586,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       website: form.value.externalUrl ?? space.value.external_url,
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
+      farcaster: form.value.farcaster ?? space.value.farcaster,
       coingecko: form.value.coingecko ?? space.value.coingecko,
       parent: parent.value,
       children: children.value,

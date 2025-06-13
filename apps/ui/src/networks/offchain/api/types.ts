@@ -34,6 +34,7 @@ export type ApiSpace = {
   website: string | null;
   twitter: string | null;
   github: string | null;
+  farcaster: string | null;
   coingecko: string | null;
   symbol: string;
   activeProposals: number;

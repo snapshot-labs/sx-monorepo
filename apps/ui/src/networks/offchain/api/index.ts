@@ -232,6 +232,7 @@ function formatSpace(
     github: space.github || '',
     twitter: space.twitter || '',
     discord: '',
+    farcaster: space.farcaster || '',
     coingecko: space.coingecko || '',
     proposal_count_1d: space.proposalsCount1d,
     proposal_count_30d: space.proposalsCount30d,
