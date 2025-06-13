@@ -18,12 +18,12 @@ exports[`EthereumSig > should create cancelProposal envelope 1`] = `
       "space": "test.eth",
       "timestamp": 1705795200,
     },
-    "signature": "0xe358de8e39c6c0cc9df929892e61806371e6539199a2b0781b9100700760067334024ca8cd5f86f1cb16fc93e76602989618eeacebf1fafbc1acad882d14b4d61c",
+    "signature": "0x4269fbcb1f8ec9f716402267a6c23172660c46d07759ffe3a1a45e1e7f697d3c7ca553243db96ba4d5ee94b62ab4561bc07c0ada2a3bc651d2be1d5f64d9d8d41c",
     "types": {
       "CancelProposal": [
         {
           "name": "from",
-          "type": "address",
+          "type": "string",
         },
         {
           "name": "space",
@@ -95,12 +95,12 @@ exports[`EthereumSig > should create propose envelope 1`] = `
       "title": "Creation test",
       "type": "basic",
     },
-    "signature": "0xe81b52d78bc4087b9a9964bb2736c5eab1b650b5c11c4c29e60e17749383d5164faaa32af92c8cbb827efe2a1195541242080fab8d81f3e5b9c40f3523c50d221c",
+    "signature": "0x5ba9d0555e3d82bdcf559a041d2807fb7004db902f2a18f68ac54e03eedc3bc9350940cf50d558fe0e873665efcb52bacbb4d9b3a5a01f5ae7cf164af205143d1c",
     "types": {
       "Proposal": [
         {
           "name": "from",
-          "type": "address",
+          "type": "string",
         },
         {
           "name": "space",
@@ -216,12 +216,12 @@ exports[`EthereumSig > should create propose envelope with shutter 1`] = `
       "title": "Creation test",
       "type": "basic",
     },
-    "signature": "0x810f135b210282a6933fd86850f7b36c031aaaf9cc580d339f9fba94efbf9ea564c9d612e9de87397dbf45ce97697bfa00b35d327beb78b77d042e13fec5806d1b",
+    "signature": "0xf9d24c7574aeff0a160824a5d5bcc777890cdbe1eb91e048bdb44370b44facbd0c21bd6d4894e37b2561a1576f3f2f3a0050a84546557f53863761133d59582e1b",
     "types": {
       "Proposal": [
         {
           "name": "from",
-          "type": "address",
+          "type": "string",
         },
         {
           "name": "space",
@@ -314,12 +314,12 @@ exports[`EthereumSig > should create vote envelope 1`] = `
       "space": "wan-test.eth",
       "timestamp": 1705795200,
     },
-    "signature": "0x92df2e1de71e2f0cdf04d7fd5d028fe0d38b990aa896ad677c4627bfd303cd386b17ad4c403dade15f2508b5fa444d2e8b4b1bed8ca63d341006a4d5d2e64bac1b",
+    "signature": "0x8ebb390031f1c0b1ca907b8d3d3a7058a7bc0054e93f49d1ab33b853c065f54624a448b6610936f6b47cc44e833a7e969140c48cb18358c035df5dad9b19925b1c",
     "types": {
       "Vote": [
         {
           "name": "from",
-          "type": "address",
+          "type": "string",
         },
         {
           "name": "space",
