@@ -236,8 +236,8 @@ export function createActions(
     async cancelProposal(
       web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
-      proposal: Proposal,
-      from?: string
+      account: string,
+      proposal: Proposal
     ) {
       if (
         proposal.space.snapshot_chain_id &&
@@ -252,7 +252,7 @@ export function createActions(
         data: {
           proposal: proposal.proposal_id as string,
           space: proposal.space.id,
-          from
+          from: account
         }
       });
     },

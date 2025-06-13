@@ -200,8 +200,8 @@ export type ReadOnlyNetworkActions = {
   cancelProposal(
     web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
-    proposal: Proposal,
-    from?: string
+    account: string,
+    proposal: Proposal
   );
   vote(
     web3: Web3Provider | Wallet,

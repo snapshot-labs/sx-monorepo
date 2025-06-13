@@ -484,8 +484,8 @@ export function useActions() {
       network.actions.cancelProposal(
         signer,
         auth.value.connector.type,
-        proposal,
-        auth.value.account
+        auth.value.account,
+        proposal
       )
     );
 

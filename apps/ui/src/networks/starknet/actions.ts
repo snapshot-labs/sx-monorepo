@@ -440,6 +440,7 @@ export function createActions(
     cancelProposal: async (
       web3: any,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) => {
       await verifyStarknetNetwork(web3, chainId);
