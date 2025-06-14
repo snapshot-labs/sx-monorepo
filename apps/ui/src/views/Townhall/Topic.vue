@@ -241,15 +241,14 @@ watchEffect(() => {
                 <div>Publish</div>
                 <IH-paper-airplane class="rotate-90 relative left-[2px]" />
               </UiButton>
-              <div>
-                <a
-                  class="flex items-center gap-1.5"
-                  @click="openChatbot('Suggest post')"
-                >
-                  <IH-sparkles />
-                  Suggest post
-                </a>
-              </div>
+
+              <button
+                class="text-skin-link flex items-center gap-1.5"
+                @click="openChatbot('Suggest post')"
+              >
+                <IH-sparkles />
+                Suggest post
+              </button>
             </div>
           </div>
         </div>
