@@ -17,6 +17,10 @@ import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
 import Topic from '@/views/Topic.vue';
+import TownhallCreate from '@/views/Townhall/Create.vue';
+import TownhallRoles from '@/views/Townhall/Roles.vue';
+import TownhallTopic from '@/views/Townhall/Topic.vue';
+import TownhallTopics from '@/views/Townhall/Topics.vue';
 
 export const spaceChildrenRoutes: RouteRecordRaw[] = [
   {
@@ -94,5 +98,25 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
       { path: 'votes', name: 'space-user-votes', component: SpaceUserVotes }
     ]
   },
-  { path: 'pro', name: 'space-pro', component: SpacePro }
+  { path: 'pro', name: 'space-pro', component: SpacePro },
+  {
+    path: 'townhall',
+    name: 'space-townhall-topics',
+    component: TownhallTopics
+  },
+  {
+    path: 'townhall/create',
+    name: 'space-townhall-create',
+    component: TownhallCreate
+  },
+  {
+    path: 'townhall/roles',
+    name: 'space-townhall-roles',
+    component: TownhallRoles
+  },
+  {
+    path: 'townhall/:id',
+    name: 'space-townhall-topic',
+    component: TownhallTopic
+  }
 ];

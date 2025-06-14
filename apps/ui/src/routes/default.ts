@@ -39,7 +39,6 @@ export default [
     component: Space,
     children: spaceChildrenRoutes
   },
-
   {
     path: '/create',
     redirect: { name: 'create-space-snapshot' }
