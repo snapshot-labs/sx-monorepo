@@ -72,14 +72,14 @@ onMounted(async () => {
           <IH-x />
         </button>
         <div class="px-4 py-3 border-b">
-          <a
+          <button
             v-if="showContext"
             class="inline-flex gap-2 items-center"
             @click="toggleContext"
           >
             <IH-arrow-sm-left />
             <h3 v-text="'Context'" />
-          </a>
+          </button>
           <div v-else class="flex items-center gap-2">
             <IH-sparkles />
             <h3 v-text="'Ask AI'" />
@@ -118,9 +118,9 @@ onMounted(async () => {
                 class="!text-[18px]"
               />
 
-              <div
+              <button
                 v-if="chunk.type === 'input'"
-                class="px-3 py-2.5 border bg-skin-bg rounded-lg hover:border-skin-link leading-6 cursor-pointer"
+                class="px-3 py-2.5 border bg-skin-bg rounded-lg hover:border-skin-link leading-6 cursor-pointer text-left"
                 @click="handleInsert(chunk.id, chunk.value)"
               >
                 <span
@@ -128,7 +128,7 @@ onMounted(async () => {
                   v-text="chunk.id"
                 />
                 {{ chunk.value }}
-              </div>
+              </button>
 
               <a
                 v-if="chunk.type === 'link'"
@@ -223,12 +223,12 @@ onMounted(async () => {
             @keydown.enter="handleEnterKey"
           />
           <div class="p-2.5 pt-0 flex justify-between text-sm items-center">
-            <a
-              class="inline-block bg-skin-bg rounded-lg border px-2"
+            <button
+              class="inline-block bg-skin-bg rounded-lg border px-2 text-skin-link"
               @click="toggleContext"
             >
               Context
-            </a>
+            </button>
           </div>
         </div>
       </div>

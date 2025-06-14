@@ -29,14 +29,15 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
 <template>
   <div>
     <div class="flex justify-end p-4">
-      <router-link
+      <UiButton
         :to="{
           name: 'space-townhall-create',
           params: { space: `${space.network}:${space.id}` }
         }"
+        primary
       >
-        <UiButton primary>New topic</UiButton>
-      </router-link>
+        New topic
+      </UiButton>
     </div>
     <div>
       <UiLabel label="Topics" sticky />
