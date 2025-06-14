@@ -53,9 +53,9 @@ const { mutate: closeTopic, isPending: isCloseTopicPending } =
   });
 
 const pendingPosts: ComputedRef<Post[]> = computed(() =>
-  (topic.value?.posts ?? []).filter(
-    s => !(userVotes.value ?? []).find(v => v.post_id === s.post_id)
-  )
+  (topic.value?.posts ?? [])
+    .filter(s => !(userVotes.value ?? []).find(v => v.post_id === s.post_id))
+    .sort(() => 0.5 - Math.random())
 );
 
 const results: ComputedRef<Post[]> = computed(() =>

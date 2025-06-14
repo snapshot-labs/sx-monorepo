@@ -135,7 +135,6 @@ export function useTopicQuery({
 
       topic.posts = topic.posts
         .filter(s => !s.hidden)
-        .sort(() => 0.5 - Math.random())
         .sort((a, b) => Number(b.pinned) - Number(a.pinned));
 
       return topic;
