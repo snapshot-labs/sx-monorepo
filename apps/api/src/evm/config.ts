@@ -90,7 +90,7 @@ export function createConfig(indexerName: NetworkID): FullConfig {
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower,
       apeGasStrategy: network.Strategies.ApeGas ?? null,
-      apeGasStrategyDelay: 2 * 60 * 5 // 2 hours, with 5 blocks per minute
+      apeGasStrategyDelay: 20 * 5 // 20 minutes, with 5 blocks per minute
     },
     network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
     sources,
