@@ -52,7 +52,7 @@ export const COINGECKO_ASSET_PLATFORMS = {
   5000: 'mantle',
   8453: 'base',
   42161: 'arbitrum-one',
-  33139: 'ethereum',
+  33139: 'apechain',
   33111: 'apechain'
 };
 
