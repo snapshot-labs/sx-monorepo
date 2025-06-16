@@ -42,7 +42,8 @@ describe('apeGas', () => {
     expect(apeGasStrategy.type).toBe('apeGas');
   });
 
-  it('should return params', async () => {
+  // NOTE: skipped because Herodotus API lost Curtis support
+  it.skip('should return params', async () => {
     const useParams = await apeGasStrategy.getParams(
       'vote',
       { index: 0, address: '0x0', params },
@@ -64,7 +65,8 @@ describe('apeGas', () => {
     );
   });
 
-  it('should compute voting power for user with delegated APE gas at specific timestamp', async () => {
+  // NOTE: skipped because Herodotus API lost Curtis support
+  it.skip('should compute voting power for user with delegated APE gas at specific timestamp', async () => {
     const votingPower = await apeGasStrategy.getVotingPower(
       '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
       '0x537f1896541d28F4c70116EEa602b1B34Da95163',
