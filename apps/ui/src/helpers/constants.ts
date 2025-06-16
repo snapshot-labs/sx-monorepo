@@ -68,9 +68,26 @@ export const COINGECKO_BASE_ASSETS = {
   33111: 'apecoin'
 };
 
-export const APE_GAS_REGISTRIES = {
-  33139: '0x2f9e24e272d343c1f833ee7f3c6d6abc689b0102',
-  33111: '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202'
+type ApeGasConfig = {
+  l1ChainId: number;
+  herodotusContract: string;
+  herodotusSatelliteContract: string;
+  registryContract: string;
+};
+
+export const APE_GAS_CONFIGS: Record<number, ApeGasConfig> = {
+  33139: {
+    l1ChainId: 1,
+    herodotusContract: '0x182696cc5ec88C3E0Cad05E5221B75Ac7f5C4BaF',
+    herodotusSatelliteContract: '0x82F29Af756036132Ec188FFbB48447895a8D339e',
+    registryContract: '0x2f9e24e272d343c1f833ee7f3c6d6abc689b0102'
+  },
+  33111: {
+    l1ChainId: 11155111,
+    herodotusContract: '0xfda8190B613497c47695F54a512a092F1216fA47',
+    herodotusSatelliteContract: '0xc9854fd6034fbc41B65b454919a48a5a9b342fa8',
+    registryContract: '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202'
+  }
 };
 
 export const MAX_SYMBOL_LENGTH = 12;

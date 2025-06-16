@@ -716,7 +716,7 @@ export function createWriters(config: FullConfig) {
 
     if (apeGasStrategiesIndices.length) {
       proposal.start += config.overrides.apeGasStrategyDelay;
-      proposal.min_end = Math.max(proposal.start, proposal.max_end);
+      proposal.min_end = Math.max(proposal.start, proposal.min_end);
     }
 
     for (const [, i] of apeGasStrategiesIndices) {
