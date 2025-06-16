@@ -78,8 +78,8 @@ type ApeGasConfig = {
 export const APE_GAS_CONFIGS: Record<number, ApeGasConfig> = {
   33139: {
     l1ChainId: 1,
-    herodotusContract: 'TODO',
-    herodotusSatelliteContract: 'TODO',
+    herodotusContract: '0x182696cc5ec88C3E0Cad05E5221B75Ac7f5C4BaF',
+    herodotusSatelliteContract: '0x82F29Af756036132Ec188FFbB48447895a8D339e',
     registryContract: '0x2f9e24e272d343c1f833ee7f3c6d6abc689b0102'
   },
   33111: {
