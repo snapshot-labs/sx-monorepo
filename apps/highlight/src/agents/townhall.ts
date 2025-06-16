@@ -40,7 +40,7 @@ export default class Townhall extends Agent {
     this.emit('new_topic', [space, id, author, title, body, discussionUrl]);
   }
 
-  async closeTopic({ space, topic }: { space: string; topic: number }) {
+  async closeTopic({ space, topic }: { space: number; topic: number }) {
     this.emit('close_topic', [space, topic]);
   }
 
