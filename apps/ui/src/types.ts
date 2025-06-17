@@ -101,6 +101,7 @@ export type SpaceMetadata = {
   twitter: string;
   github: string;
   discord: string;
+  farcaster: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
   labels: SpaceMetadataLabel[];
@@ -184,6 +185,7 @@ export type Space = {
   twitter: string;
   github: string;
   discord: string;
+  farcaster: string;
   coingecko?: string;
   terms: string;
   privacy: SpacePrivacy;

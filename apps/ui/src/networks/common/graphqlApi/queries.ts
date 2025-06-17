@@ -33,6 +33,7 @@ gql(`
       github
       twitter
       discord
+      farcaster
       voting_power_symbol
       treasuries
       labels

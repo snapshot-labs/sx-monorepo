@@ -249,6 +249,7 @@ function formatSpace(
     github: space.metadata.github,
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
+    farcaster: space.metadata.farcaster,
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
