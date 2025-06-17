@@ -39,6 +39,11 @@ async function handleFileChange(e: Event) {
   try {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) throw new Error('File not found');
+
+    if (file.size > 1048576) {
+      throw new Error('File size must be less than 1 MB');
+    }
+
     isUploadingImage.value = true;
 
     const image = await imageUpload(file);
@@ -47,8 +52,16 @@ async function handleFileChange(e: Event) {
     model.value = image.url;
     isUploadingImage.value = false;
   } catch (e) {
-    uiStore.addNotification('error', 'Failed to upload image.');
+    uiStore.addNotification(
+      'error',
+      e instanceof Error ? e.message : 'Failed to upload image.'
+    );
 
+    console.error('Failed to upload image', e);
+
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
     console.error('Failed to upload image', e);
     isUploadingImage.value = false;
   }
