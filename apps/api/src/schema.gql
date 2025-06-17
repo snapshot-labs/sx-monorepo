@@ -5,6 +5,7 @@ scalar BigDecimalVP
 
 type Space {
   id: String!
+  link: String!
   verified: Boolean!
   turbo: Boolean!
   metadata: SpaceMetadataItem
@@ -106,6 +107,7 @@ type ExecutionHash {
 
 type Proposal {
   id: String!
+  link: String!
   proposal_id: Int!
   space: Space!
   author: User!

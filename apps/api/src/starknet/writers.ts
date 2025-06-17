@@ -25,7 +25,13 @@ import {
   handleStrategiesMetadata,
   handleVoteMetadata
 } from '../common/ipfs';
-import { dropIpfs, getCurrentTimestamp, updateCounter } from '../common/utils';
+import {
+  dropIpfs,
+  getCurrentTimestamp,
+  getProposalLink,
+  getSpaceLink,
+  updateCounter
+} from '../common/utils';
 
 type Strategy = {
   address: string;
@@ -72,6 +78,10 @@ export function createWriters(config: FullConfig) {
     const id = validateAndParseAddress(event.space);
 
     const space = new Space(id, config.indexerName);
+    space.link = getSpaceLink({
+      networkId: config.indexerName,
+      spaceId: id
+    });
     space.verified = config.overrides.verifiedSpaces.includes(id);
     space.turbo = false;
     space.metadata = null;
@@ -428,6 +438,11 @@ export function createWriters(config: FullConfig) {
       `${spaceId}/${proposalId}`,
       config.indexerName
     );
+    proposal.link = getProposalLink({
+      networkId: config.indexerName,
+      spaceId,
+      proposalId
+    });
     proposal.proposal_id = proposalId;
     proposal.space = spaceId;
     proposal.author = author.address;

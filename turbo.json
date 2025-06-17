@@ -21,7 +21,7 @@
       "cache": false,
       "persistent": true,
       "dependsOn": ["codegen", "^build"],
-      "passThroughEnv": ["ENABLED_NETWORKS", "INFURA_API_KEY", "VITE_MANA_URL"]
+      "passThroughEnv": ["UI_URL", "ENABLED_NETWORKS", "INFURA_API_KEY", "VITE_MANA_URL"]
     },
     "codegen": {
       "outputs": [".checkpoint/**", "src/networks/common/graphqlApi/gql/**"],

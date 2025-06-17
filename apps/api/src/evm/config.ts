@@ -8,7 +8,7 @@ import ProxyFactory from './abis/ProxyFactory.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
 
-type NetworkID =
+export type NetworkID =
   | 'eth'
   | 'sep'
   | 'oeth'
