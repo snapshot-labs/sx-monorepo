@@ -1,5 +1,5 @@
 import { starknet } from '@snapshot-labs/checkpoint';
-import { validateAndParseAddress } from 'starknet';
+import { hash, validateAndParseAddress } from 'starknet';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
 import {
@@ -514,7 +514,14 @@ export function createWriters(config: FullConfig) {
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
-      await handleProposalMetadata(metadataUri, config);
+      await handleProposalMetadata(
+        'starknet',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
 
       proposal.metadata = dropIpfs(metadataUri);
     } catch (e) {
@@ -630,17 +637,18 @@ export function createWriters(config: FullConfig) {
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    try {
-      await handleProposalMetadata(metadataUri, config);
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+    if (!space) return;
 
-      proposal.metadata = dropIpfs(metadataUri);
-      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
-    } catch (e) {
-      console.log('failed to update proposal metadata', e);
-    }
+    proposal.execution_strategy = validateAndParseAddress(
+      event.execution_strategy.address
+    );
+    proposal.execution_hash = hash.computeHashOnElements(
+      event.execution_strategy.params
+    );
 
     const executionStrategy = await handleExecutionStrategy(
-      event.execution_strategy,
+      event.execution_strategy.address,
       event.payload,
       config
     );
@@ -648,6 +656,54 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
       proposal.quorum = executionStrategy.quorum;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      // Current way of persisting it isn't great, because we need to fetch every strategy
+      // for space and compare it with execution strategy address.
+      // In the future we should find way to optimize it for example by adding where lookup
+      // via ORM
+      if (space.metadata) {
+        const spaceMetadata = await SpaceMetadataItem.loadEntity(
+          space.metadata,
+          config.indexerName
+        );
+
+        if (spaceMetadata) {
+          proposal.treasuries = spaceMetadata.treasuries;
+
+          const strategies = await Promise.all(
+            spaceMetadata.executors_strategies.map(id =>
+              ExecutionStrategy.loadEntity(id, config.indexerName)
+            )
+          );
+
+          const matchingStrategy = strategies.find(
+            strategy => strategy?.address === proposal.execution_strategy
+          );
+
+          if (matchingStrategy) {
+            proposal.execution_strategy_details = matchingStrategy.id;
+          }
+        }
+      }
+    }
+
+    try {
+      await handleProposalMetadata(
+        'starknet',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
+
+      proposal.metadata = dropIpfs(metadataUri);
+      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
+    } catch (e) {
+      console.log('failed to update proposal metadata', e);
     }
 
     await proposal.save();

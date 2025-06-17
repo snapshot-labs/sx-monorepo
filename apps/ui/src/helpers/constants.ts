@@ -1,5 +1,6 @@
 import {
   ChainId,
+  DelegationType,
   NetworkID,
   SpacePrivacy,
   VoteType,
@@ -21,8 +22,11 @@ export const HELPDESK_URL = 'https://help.snapshot.box';
 export const VERIFIED_URL =
   'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 
-export const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const EVM_EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
+export const STARKNET_EMPTY_ADDRESS =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
 export const ETH_CONTRACT = '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee';
+export const EIP7702_DELEGATION_INDICATOR = '0xef0100';
 
 export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   // EVM
@@ -48,7 +52,7 @@ export const COINGECKO_ASSET_PLATFORMS = {
   5000: 'mantle',
   8453: 'base',
   42161: 'arbitrum-one',
-  33139: 'ethereum',
+  33139: 'apechain',
   33111: 'apechain'
 };
 
@@ -62,6 +66,28 @@ export const COINGECKO_BASE_ASSETS = {
   42161: 'ethereum',
   33139: 'apecoin',
   33111: 'apecoin'
+};
+
+type ApeGasConfig = {
+  l1ChainId: number;
+  herodotusContract: string;
+  herodotusSatelliteContract: string;
+  registryContract: string;
+};
+
+export const APE_GAS_CONFIGS: Record<number, ApeGasConfig> = {
+  33139: {
+    l1ChainId: 1,
+    herodotusContract: '0x182696cc5ec88C3E0Cad05E5221B75Ac7f5C4BaF',
+    herodotusSatelliteContract: '0x82F29Af756036132Ec188FFbB48447895a8D339e',
+    registryContract: '0x2f9e24e272d343c1f833ee7f3c6d6abc689b0102'
+  },
+  33111: {
+    l1ChainId: 11155111,
+    herodotusContract: '0xfda8190B613497c47695F54a512a092F1216fA47',
+    herodotusSatelliteContract: '0xc9854fd6034fbc41B65b454919a48a5a9b342fa8',
+    registryContract: '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202'
+  }
 };
 
 export const MAX_SYMBOL_LENGTH = 12;
@@ -195,3 +221,19 @@ export const VALIDATION_TYPES_INFO: Record<
 export const LAST_USED_CONNECTOR_CACHE_KEY = 'connector';
 
 export const RECENT_CONNECTOR = 'recent-connector';
+
+export const DELEGATE_REGISTRY_STRATEGIES = [
+  'delegation',
+  'erc20-balance-of-delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides',
+  'with-delegation',
+  'erc20-balance-of-with-delegation'
+];
+
+export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
+  'delegate-registry': 'Delegat registry',
+  'apechain-delegate-registry': 'ApeChain Delegate Registry',
+  'split-delegation': 'Split Delegation',
+  'governor-subgraph': 'ERC-20 Votes'
+};

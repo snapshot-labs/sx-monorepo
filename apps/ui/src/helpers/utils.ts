@@ -17,7 +17,7 @@ import { RouteParamsRaw } from 'vue-router';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
-import { EMPTY_ADDRESS, MAX_SYMBOL_LENGTH } from './constants';
+import { EVM_EMPTY_ADDRESS, MAX_SYMBOL_LENGTH } from './constants';
 import { getOwner } from './stamp';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -603,7 +603,7 @@ export function autoLinkText(text: string) {
 export function getSocialNetworksLink(data: any) {
   return [
     { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
-    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
+    { key: 'twitter', icon: ICX, urlFormat: 'https://x.com/$' },
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
     {
       key: 'coingecko',
@@ -702,7 +702,7 @@ export async function getSpaceController(id: string, network: NetworkID) {
   if (id.endsWith('.shib')) {
     const owner = await getOwner(id, chainMapping.shibarium[network]);
 
-    return owner || EMPTY_ADDRESS;
+    return owner || EVM_EMPTY_ADDRESS;
   }
 
   return getEnsSpaceController(id, chainMapping.ens[network]);

@@ -3,7 +3,11 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS } from '@/helpers/constants';
+import {
+  CHAIN_IDS,
+  DELEGATE_REGISTRY_STRATEGIES,
+  DELEGATION_TYPES_NAMES
+} from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
@@ -63,15 +67,6 @@ import {
 } from './types';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
-
-const BASIC_DELEGATION_STRATEGIES = [
-  'delegation',
-  'erc20-balance-of-delegation',
-  'delegation-with-cap',
-  'delegation-with-overrides',
-  'with-delegation',
-  'erc20-balance-of-with-delegation'
-];
 
 const SPLIT_DELEGATION_STRATEGIES = ['split-delegation'];
 
@@ -438,14 +433,16 @@ function formatDelegations(
   const delegations: SpaceMetadataDelegation[] = [];
 
   const basicDelegationStrategy = space.strategies.find(strategy =>
-    BASIC_DELEGATION_STRATEGIES.includes(strategy.name)
+    DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
   );
 
   if (space.delegationPortal) {
-    const [apiType, name] =
+    const apiType =
       space.delegationPortal.delegationType === 'compound-governor'
-        ? (['governor-subgraph', 'ERC-20 Votes'] as const)
-        : [space.delegationPortal.delegationType, 'Split Delegation'];
+        ? 'governor-subgraph'
+        : space.delegationPortal.delegationType;
+
+    const name = DELEGATION_TYPES_NAMES[apiType];
 
     const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
       ? space.delegationPortal.delegationNetwork
@@ -466,7 +463,7 @@ function formatDelegations(
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
       delegations.push({
-        name: 'Delegate registry',
+        name: DELEGATION_TYPES_NAMES['delegate-registry'],
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,
@@ -926,6 +923,7 @@ export function createApi(
       });
 
       return options;
-    }
+    },
+    loadLastIndexedBlock: async () => null
   };
 }

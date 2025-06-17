@@ -104,3 +104,43 @@ export async function handleCustomExecutionStrategy(
 
   await executionStrategy.save();
 }
+
+export async function registerApeGasProposal(
+  {
+    viewId,
+    snapshot
+  }: {
+    viewId: string;
+    snapshot: number;
+  },
+  config: FullConfig
+) {
+  const res = await fetch(config.overrides.manaRpcUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 0,
+      method: 'registerApeGasProposal',
+      params: {
+        viewId,
+        snapshot
+      }
+    })
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Failed to register ApeGas proposal: ${res.status} ${res.statusText}`
+    );
+  }
+
+  const result = await res.json();
+  if (result.error) {
+    throw new Error(`Failed to register ApeGas proposal: ${result.error}`);
+  }
+
+  return result;
+}
