@@ -466,7 +466,7 @@ export function createWriters(config: FullConfig) {
     proposal.scores_2 = '0';
     proposal.scores_3 = '0';
     proposal.scores_total = '0';
-    proposal.quorum = 0n;
+    proposal.quorum = '0';
     proposal.strategies_indices = space.strategies_indices;
     // NOTE: deprecated
     proposal.strategies_indicies = proposal.strategies_indices;
@@ -492,7 +492,7 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
       proposal.execution_destination = executionStrategy.destinationAddress;
-      proposal.quorum = executionStrategy.quorum;
+      proposal.quorum = executionStrategy.quorum.toString();
 
       // Find matching strategy and persist it on space object
       // We use this on UI to properly display execution with treasury
@@ -670,7 +670,7 @@ export function createWriters(config: FullConfig) {
     if (executionStrategy) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
-      proposal.quorum = executionStrategy.quorum;
+      proposal.quorum = executionStrategy.quorum.toString();
 
       // Find matching strategy and persist it on space object
       // We use this on UI to properly display execution with treasury
