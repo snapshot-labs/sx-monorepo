@@ -20,7 +20,6 @@
     },
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "useUnknownInCatchVariables": false
   },
   "include": [
     "src/**/*.ts",
