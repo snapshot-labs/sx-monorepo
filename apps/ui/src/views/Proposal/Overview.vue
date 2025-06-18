@@ -281,7 +281,7 @@ async function handleDownloadVotes() {
 
   try {
     await downloadVotes(props.proposal.proposal_id);
-  } catch (e: unknown) {
+  } catch (e) {
     if (e instanceof Error) {
       if (e.message === 'PENDING_GENERATION') {
         return uiStore.addNotification(
