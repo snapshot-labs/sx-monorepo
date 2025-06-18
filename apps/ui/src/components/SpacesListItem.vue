@@ -5,12 +5,28 @@ import { RelatedSpace, Space } from '@/types';
 
 const props = defineProps<{ space: Space | RelatedSpace }>();
 const compositeSpaceId = `${props.space.network}:${props.space.id}`;
+
+const spaceRoute = computed(() => {
+  // For local spaces, use the spaceContractAddress
+  if (props.space.spaceContractAddress) {
+    return {
+      name: 'space-overview',
+      params: { space: props.space.spaceContractAddress }
+    };
+  }
+  // For API spaces, use the composite ID
+  const compositeSpaceId = `${props.space.network}:${props.space.id}`;
+  return {
+    name: 'space-overview',
+    params: { space: compositeSpaceId }
+  };
+});
 </script>
 
 <template>
   <AppLink
-    :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
     class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
+    :to="spaceRoute"
   >
     <div class="grow flex items-center">
       <UiBadgeNetwork
