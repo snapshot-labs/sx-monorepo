@@ -10,7 +10,7 @@ defineOptions({ inheritAttrs: false });
 
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
-const DEFAULT_PROTOCOL = 'snapshot';
+const DEFAULT_PROTOCOL = 'snapshot-x';
 const DEFAULT_NETWORK = 'all';
 const DEFAULT_CATEGORY = 'all';
 
