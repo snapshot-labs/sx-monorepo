@@ -1,7 +1,11 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
-import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import {
+  APE_GAS_CONFIGS,
+  HELPDESK_URL,
+  MAX_SYMBOL_LENGTH
+} from '@/helpers/constants';
 import { PinFunction } from '@/helpers/pin';
 import { getUrl, shorten, sleep } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
@@ -21,16 +25,6 @@ export function createConstants(
 ) {
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
-
-  const HERODOTUS_L1_CHAINS = new Map<number, number>([
-    [33139, 1],
-    [33111, 11155111]
-  ]);
-  const HERODORUS_CONTRACT = '0xfda8190B613497c47695F54a512a092F1216fA47';
-  const HERODOTUS_SATELLITE_CONTRACT =
-    '0xc9854fd6034fbc41B65b454919a48a5a9b342fa8';
-  const DELEGATION_REGISTRY_CONTRACT =
-    '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
 
   const SUPPORTED_AUTHENTICATORS = {
     [config.Authenticators.EthSigV2]: true,
@@ -474,6 +468,8 @@ export function createConstants(
             generateSummary: (params: Record<string, any>) =>
               `(${shorten(params.delegationId)})`,
             generateParams: async (params: Record<string, any>) => {
+              const apeGasConfig = APE_GAS_CONFIGS[config.Meta.eip712ChainId];
+
               const abiCoder = new AbiCoder();
 
               return [
@@ -487,12 +483,12 @@ export function createConstants(
                     'address'
                   ],
                   [
-                    HERODOTUS_L1_CHAINS.get(config.Meta.eip712ChainId) ?? 1,
+                    apeGasConfig.l1ChainId,
                     config.Meta.eip712ChainId,
-                    HERODORUS_CONTRACT,
-                    HERODOTUS_SATELLITE_CONTRACT,
+                    apeGasConfig.herodotusContract,
+                    apeGasConfig.herodotusSatelliteContract,
                     params.delegationId,
-                    DELEGATION_REGISTRY_CONTRACT
+                    apeGasConfig.registryContract
                   ]
                 )
               ];

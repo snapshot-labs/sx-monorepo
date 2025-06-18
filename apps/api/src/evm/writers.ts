@@ -32,7 +32,13 @@ import {
   handleStrategiesMetadata,
   handleVoteMetadata
 } from '../common/ipfs';
-import { dropIpfs, getCurrentTimestamp, updateCounter } from '../common/utils';
+import {
+  dropIpfs,
+  getCurrentTimestamp,
+  getProposalLink,
+  getSpaceLink,
+  updateCounter
+} from '../common/utils';
 
 /**
  * List of execution strategies type that are known and we expect them to be deployed via factory.
@@ -213,6 +219,10 @@ export function createWriters(config: FullConfig) {
     const id = getAddress(event.args.space);
 
     const space = new Space(id, config.indexerName);
+    space.link = getSpaceLink({
+      networkId: config.indexerName,
+      spaceId: id
+    });
     space.verified = false;
     space.turbo = false;
     space.metadata = null;
@@ -584,6 +594,11 @@ export function createWriters(config: FullConfig) {
       `${spaceId}/${proposalId}`,
       config.indexerName
     );
+    proposal.link = getProposalLink({
+      networkId: config.indexerName,
+      spaceId,
+      proposalId
+    });
     proposal.proposal_id = proposalId;
     proposal.space = spaceId;
     proposal.author = author;
@@ -649,12 +664,19 @@ export function createWriters(config: FullConfig) {
     proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
 
     if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
-      const executionHash = new ExecutionHash(
+      let executionHash = await ExecutionHash.loadEntity(
         proposal.execution_hash,
         config.indexerName
       );
-      executionHash.proposal_id = `${spaceId}/${proposalId}`;
-      await executionHash.save();
+
+      if (!executionHash) {
+        executionHash = new ExecutionHash(
+          proposal.execution_hash,
+          config.indexerName
+        );
+        executionHash.proposal_id = `${spaceId}/${proposalId}`;
+        await executionHash.save();
+      }
     }
 
     try {
@@ -713,6 +735,11 @@ export function createWriters(config: FullConfig) {
             ([strategy]) => strategy === getAddress(apeGasStrategyAddress)
           )
       : [];
+
+    if (apeGasStrategiesIndices.length) {
+      proposal.start += config.overrides.apeGasStrategyDelay;
+      proposal.min_end = Math.max(proposal.start, proposal.min_end);
+    }
 
     for (const [, i] of apeGasStrategiesIndices) {
       const params = space.strategies_params[i];

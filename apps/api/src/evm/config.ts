@@ -8,7 +8,7 @@ import ProxyFactory from './abis/ProxyFactory.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
 
-type NetworkID =
+export type NetworkID =
   | 'eth'
   | 'sep'
   | 'oeth'
@@ -42,6 +42,7 @@ export type FullConfig = {
     masterAxiom: string | null;
     propositionPowerValidationStrategyAddress: string;
     apeGasStrategy: string | null;
+    apeGasStrategyDelay: number;
   };
 } & CheckpointConfig;
 
@@ -88,7 +89,8 @@ export function createConfig(indexerName: NetworkID): FullConfig {
       masterAxiom: network.ExecutionStrategies.Axiom,
       propositionPowerValidationStrategyAddress:
         network.ProposalValidations.VotingPower,
-      apeGasStrategy: network.Strategies.ApeGas ?? null
+      apeGasStrategy: network.Strategies.ApeGas ?? null,
+      apeGasStrategyDelay: 20 * 5 // 20 minutes, with 5 blocks per minute
     },
     network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
     sources,

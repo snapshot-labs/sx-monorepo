@@ -17,6 +17,7 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
+import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
@@ -644,19 +645,32 @@ export function createActions(
           functionParams: [delegatee],
           abi: ['function delegate(address delegatee)']
         };
-      } else if (delegationType == 'delegate-registry') {
+      } else if (
+        delegationType === 'delegate-registry' ||
+        delegationType === 'apechain-delegate-registry'
+      ) {
+        const contractAddress =
+          delegationType === 'delegate-registry'
+            ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
+            : APE_GAS_CONFIGS[currentChainId].registryContract;
+
+        const delegationId =
+          delegationType === 'delegate-registry'
+            ? formatBytes32String(space.id)
+            : delegationContract;
+
         if (delegatees[0]) {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'setDelegate',
-            functionParams: [formatBytes32String(space.id), delegatees[0]],
+            functionParams: [delegationId, delegatees[0]],
             abi: ['function setDelegate(bytes32 id, address delegate)']
           };
         } else {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'clearDelegate',
-            functionParams: [formatBytes32String(space.id)],
+            functionParams: [delegationId],
             abi: ['function clearDelegate(bytes32 id)']
           };
         }

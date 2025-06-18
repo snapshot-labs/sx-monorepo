@@ -3,7 +3,11 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS, DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
+import {
+  CHAIN_IDS,
+  DELEGATE_REGISTRY_STRATEGIES,
+  DELEGATION_TYPES_NAMES
+} from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
@@ -228,6 +232,7 @@ function formatSpace(
     github: space.github || '',
     twitter: space.twitter || '',
     discord: '',
+    farcaster: space.farcaster || '',
     coingecko: space.coingecko || '',
     proposal_count_1d: space.proposalsCount1d,
     proposal_count_30d: space.proposalsCount30d,
@@ -433,10 +438,12 @@ function formatDelegations(
   );
 
   if (space.delegationPortal) {
-    const [apiType, name] =
+    const apiType =
       space.delegationPortal.delegationType === 'compound-governor'
-        ? (['governor-subgraph', 'ERC-20 Votes'] as const)
-        : [space.delegationPortal.delegationType, 'Split Delegation'];
+        ? 'governor-subgraph'
+        : space.delegationPortal.delegationType;
+
+    const name = DELEGATION_TYPES_NAMES[apiType];
 
     const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
       ? space.delegationPortal.delegationNetwork
@@ -457,7 +464,7 @@ function formatDelegations(
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
       delegations.push({
-        name: 'Delegate registry',
+        name: DELEGATION_TYPES_NAMES['delegate-registry'],
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,

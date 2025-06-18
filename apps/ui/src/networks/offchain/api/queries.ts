@@ -16,6 +16,7 @@ const SPACE_FRAGMENT = gql`
     website
     twitter
     github
+    farcaster
     coingecko
     symbol
     activeProposals

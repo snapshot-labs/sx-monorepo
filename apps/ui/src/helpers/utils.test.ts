@@ -68,6 +68,7 @@ describe('utils', () => {
         github: 'snapshot-labs',
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
+        farcaster: 'snapshot-labs',
         votingPowerSymbol: 'VOTE',
         treasuries: [
           {
@@ -106,6 +107,7 @@ describe('utils', () => {
           cover: '',
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
+          farcaster: 'snapshot-labs',
           discord: 'snapshot',
           treasuries: [
             {
