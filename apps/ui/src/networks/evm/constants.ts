@@ -242,7 +242,7 @@ export function createConstants(
       link: `${HELPDESK_URL}/en/articles/9839118-whitelist-voting-strategy`,
       generateSummary: (params: Record<string, any>) => {
         const length =
-          !params.whitelist || params.whitelist.trim().length === 0
+          params.whitelist.trim().length === 0
             ? 0
             : params.whitelist
                 .split(/[\n,]/)
@@ -251,7 +251,7 @@ export function createConstants(
         return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
       },
       generateParams: async (params: Record<string, any>) => {
-        const entries = (params.whitelist || '')
+        const entries = params.whitelist
           .split(/[\n,]/)
           .map((s: string) => s.trim())
           .filter((s: string) => s.length);
@@ -277,7 +277,7 @@ export function createConstants(
         }
       },
       generateMetadata: async (params: Record<string, any>) => {
-        const tree = (params.whitelist || '')
+        const tree = params.whitelist
           .split(/[\n,]/)
           .filter((s: string) => s.trim().length)
           .map((item: string) => {
@@ -329,7 +329,7 @@ export function createConstants(
         type: 'object',
         title: 'Params',
         additionalProperties: false,
-        required: [],
+        required: ['whitelist'],
         properties: {
           whitelist: {
             type: 'string',
