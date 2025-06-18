@@ -290,7 +290,7 @@ describe('utils', () => {
       );
     });
 
-    it('should return a genericm message for non-error objects', () => {
+    it('should return a generic message for non-error objects', () => {
       const testError = { message: 'Test error' };
 
       expect(getUserFacingErrorMessage(testError)).toBe(
