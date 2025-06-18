@@ -372,6 +372,7 @@ function formatProposal(
     privacy: 'none',
     quorum: +proposal.quorum,
     flagged: false,
+    flag_code: 0,
     completed: ['passed', 'executed', 'rejected'].includes(state)
   };
 }
