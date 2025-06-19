@@ -9,6 +9,7 @@ import {
 import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useTownhallSpace';
 import {
+  getCategories,
   getResultsByRole,
   getRoles,
   getSpace,
@@ -16,11 +17,12 @@ import {
   getTopics,
   getUserRoles,
   getVotes,
+  newCategoryEventToEntry,
   newPostEventToEntry,
   newVoteEventToEntry,
   Result
 } from '@/helpers/townhall/api';
-import { Role, Topic, Vote } from '@/helpers/townhall/types';
+import { Category, Role, Topic, Vote } from '@/helpers/townhall/types';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
@@ -88,6 +90,22 @@ export function useSpaceQuery({
       if (error?.message.includes('Row not found')) return false;
 
       return failureCount < 3;
+    },
+    staleTime: DEFAULT_STALE_TIME
+  });
+}
+
+export function useCategoriesQuery({
+  spaceId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+}) {
+  return useQuery({
+    queryKey: ['townhall', 'categories', 'list', { spaceId }],
+    queryFn: async () => {
+      return getCategories({
+        spaceId: toValue(spaceId)
+      });
     },
     staleTime: DEFAULT_STALE_TIME
   });
@@ -267,6 +285,144 @@ export function useRoleMutation({
         (old = []) =>
           isRevoking ? old.filter(r => r.id !== role.id) : [...old, role]
       );
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useCreateCategoryMutation({
+  spaceId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+}) {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendCreateCategory } = useTownhall();
+
+  return useMutation({
+    mutationFn: ({
+      name,
+      description,
+      parentCategoryId
+    }: {
+      name: string;
+      description: string;
+      parentCategoryId: number | null;
+    }) => {
+      return sendCreateCategory(
+        toValue(spaceId),
+        name,
+        description,
+        parentCategoryId
+      );
+    },
+    onSuccess: data => {
+      if (!data) return;
+
+      const { data: eventData } = data.result.events.find(
+        event => event.key === 'new_category'
+      );
+
+      const category = newCategoryEventToEntry(eventData);
+
+      queryClient.setQueryData<Category[]>(
+        ['townhall', 'categories', 'list', { spaceId }],
+        old => {
+          if (!old) return old;
+
+          return [...old, category];
+        }
+      );
+
+      addNotification('success', 'Category created successfully');
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useEditCategoryMutation({
+  spaceId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+}) {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendEditCategory } = useTownhall();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      name,
+      description,
+      parentCategoryId
+    }: {
+      id: number;
+      name: string;
+      description: string;
+      parentCategoryId: number | null;
+    }) => {
+      return sendEditCategory(
+        toValue(spaceId),
+        id,
+        name,
+        description,
+        parentCategoryId
+      );
+    },
+    onSuccess: data => {
+      if (!data) return;
+
+      const { data: eventData } = data.result.events.find(
+        event => event.key === 'edit_category'
+      );
+
+      const category = newCategoryEventToEntry(eventData);
+
+      queryClient.setQueryData<Category[]>(
+        ['townhall', 'categories', 'list', { spaceId }],
+        old => {
+          if (!old) return old;
+
+          return old.map(c => (c.id === category.id ? category : c));
+        }
+      );
+
+      addNotification('success', 'Category edited successfully');
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useDeleteCategoryMutation({
+  spaceId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+}) {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendDeleteCategory } = useTownhall();
+
+  return useMutation({
+    mutationFn: ({ id }: { id: number }) => {
+      return sendDeleteCategory(toValue(spaceId), id);
+    },
+    onSuccess: (data, { id }) => {
+      queryClient.setQueryData<Category[]>(
+        ['townhall', 'categories', 'list', { spaceId }],
+        old => {
+          if (!old) return old;
+
+          return old.filter(category => category.category_id !== id);
+        }
+      );
+
+      addNotification('success', 'Category deleted successfully');
     },
     onError: error => {
       addNotification('error', error.message);

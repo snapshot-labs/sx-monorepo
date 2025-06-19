@@ -97,6 +97,68 @@ export function useTownhall() {
     );
   }
 
+  async function sendCreateCategory(
+    space: number,
+    name: string,
+    description: string,
+    parentCategoryId: number | null
+  ) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.createCategory({
+        signer,
+        data: { space, name, description, parentCategoryId },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendEditCategory(
+    space: number,
+    id: number,
+    name: string,
+    description: string,
+    parentCategoryId: number | null
+  ) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.editCategory({
+        signer,
+        data: { space, id, name, description, parentCategoryId },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendDeleteCategory(space: number, id: number) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.deleteCategory({
+        signer,
+        data: { space, id },
+        salt: getSalt()
+      })
+    );
+  }
+
   async function sendTopic(
     space: number,
     title: string,
@@ -323,6 +385,9 @@ export function useTownhall() {
   }
 
   return {
+    sendCreateCategory,
+    sendEditCategory,
+    sendDeleteCategory,
     sendTopic,
     sendCloseTopic,
     sendPost,

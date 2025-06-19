@@ -7,6 +7,16 @@ type Space {
   vote_count: Int!
 }
 
+type Category {
+  id: String!
+  category_id: Int!
+  name: String!
+  description: String!
+  created: Int!
+  parent_category: Category
+  space: Space!
+}
+
 type Alias {
   id: String!
   address: String!
