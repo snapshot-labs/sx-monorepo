@@ -45,6 +45,7 @@ const DeleteCategoryEventData = z.tuple([
 const NewTopicEventData = z.tuple([
   z.number(), // spaceId
   z.number(), // id
+  z.number(), // category
   z.string(), // author
   z.string(), // title
   z.string(), // body
@@ -133,8 +134,7 @@ export function createWriters(indexerName: string) {
     category.space = spaceEntityId;
     category.name = name;
     category.description = description;
-    category.parent_category_id =
-      parentCategoryId > 0 ? parentCategoryId : null;
+    category.parent_category_id = parentCategoryId;
     category.created = unit.timestamp;
 
     await category.save();
@@ -173,13 +173,14 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewTopic: Writer = async ({ unit, payload }) => {
-    const [spaceId, id, author, title, body, discussionUrl] =
+    const [spaceId, id, category, author, title, body, discussionUrl] =
       NewTopicEventData.parse(payload.data);
 
     console.log('Handle new topic', spaceId, id, author, title, body);
 
     const spaceEntityId = spaceId.toString();
     const topic = new Topic(`${spaceId}/${id}`, indexerName);
+    topic.category_id = category;
     topic.topic_id = id;
     topic.space = spaceEntityId;
     topic.author = author;

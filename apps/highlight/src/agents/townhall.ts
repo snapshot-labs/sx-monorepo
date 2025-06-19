@@ -93,17 +93,32 @@ export default class Townhall extends Agent {
   async topic(
     {
       space,
+      category,
       title,
       body,
       discussionUrl
-    }: { space: number; title: string; body: string; discussionUrl: string },
+    }: {
+      space: number;
+      category: number;
+      title: string;
+      body: string;
+      discussionUrl: string;
+    },
     { signer }: { signer: string }
   ) {
     const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
 
     const author = await this.getSigner(signer);
     this.write(`space:${space}:topics:id`, id + 1);
-    this.emit('new_topic', [space, id, author, title, body, discussionUrl]);
+    this.emit('new_topic', [
+      space,
+      id,
+      category,
+      author,
+      title,
+      body,
+      discussionUrl
+    ]);
   }
 
   async closeTopic({ space, topic }: { space: number; topic: number }) {

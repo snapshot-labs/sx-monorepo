@@ -18,6 +18,17 @@ const body = ref('');
 const discussion = ref('');
 const submitLoading = ref(false);
 
+const categoryId = computed(() => {
+  const category = route.query.category;
+
+  if (typeof category === 'string') {
+    const parsed = Number(category);
+    return isNaN(parsed) ? null : parsed;
+  }
+
+  return null;
+});
+
 const TITLE_DEFINITION = {
   type: 'string',
   title: 'Ask an open question',
@@ -49,7 +60,8 @@ async function handleSubmit() {
       props.townhallSpace.space_id,
       title.value,
       body.value,
-      discussion.value
+      discussion.value,
+      categoryId.value
     );
     if (!res) return;
 
