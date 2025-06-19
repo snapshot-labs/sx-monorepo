@@ -57,9 +57,9 @@ async function handleAddRole(config: SpaceMetadataLabel) {
       .map(event => ({
         space: { id: event.data[0].toString(), space_id: event.data[0] },
         id: event.data[1],
-        name: event.data[2],
-        description: event.data[3],
-        color: event.data[4]
+        name: config.name,
+        description: config.description,
+        color: config.color
       }));
 
     queryClient.setQueryData<Role[]>(

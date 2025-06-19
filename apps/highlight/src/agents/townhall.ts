@@ -1,7 +1,6 @@
 import { TOWNHALL_CONFIG } from '@snapshot-labs/sx';
 import Agent from '../highlight/agent';
 import Process from '../highlight/process';
-import { getJSON } from '../utils';
 
 export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
@@ -32,17 +31,9 @@ export default class Townhall extends Agent {
     const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
 
     const author = await this.getSigner(signer);
-    const metadata: any = await getJSON(metadataUri);
 
     this.write(`space:${space}:topics:id`, id + 1);
-    this.emit('new_topic', [
-      space,
-      id,
-      author,
-      metadata.title || '',
-      metadata.body || '',
-      metadata.discussionUrl || ''
-    ]);
+    this.emit('new_topic', [space, id, author, metadataUri]);
   }
 
   async closeTopic({ space, topic }: { space: number; topic: number }) {
@@ -67,10 +58,9 @@ export default class Townhall extends Agent {
       (await this.get(`space:${space}:topic:${topic}:posts:id`)) || 1;
 
     const author = await this.getSigner(signer);
-    const metadata: any = await getJSON(metadataUri);
 
     this.write(`space:${space}:topic:${topic}:posts:id`, id + 1);
-    this.emit('new_post', [space, topic, id, author, metadata.body || '']);
+    this.emit('new_post', [space, topic, id, author, metadataUri]);
   }
 
   async hidePost({
@@ -151,15 +141,7 @@ export default class Townhall extends Agent {
     const id: number = (await this.get(`roles:id`)) ?? 0;
     this.write(`roles:id`, id + 1);
 
-    const metadata: any = await getJSON(metadataUri);
-
-    this.emit('new_role', [
-      space,
-      String(id),
-      metadata.name || '',
-      metadata.description || '',
-      metadata.color || ''
-    ]);
+    this.emit('new_role', [space, String(id), metadataUri]);
   }
 
   async editRole({
@@ -171,15 +153,7 @@ export default class Townhall extends Agent {
     id: string;
     metadataUri: string;
   }) {
-    const metadata: any = await getJSON(metadataUri);
-
-    this.emit('edit_role', [
-      space,
-      id,
-      metadata.name || '',
-      metadata.description || '',
-      metadata.color || ''
-    ]);
+    this.emit('edit_role', [space, id, metadataUri]);
   }
 
   async deleteRole({ space, id }: { space: number; id: string }) {
