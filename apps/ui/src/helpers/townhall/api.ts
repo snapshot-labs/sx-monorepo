@@ -36,6 +36,7 @@ gql(`
     category_id
     name
     description
+    parent_category_id
   }
 
   fragment postFields on Post {
@@ -107,8 +108,16 @@ const SPACE_QUERY = gql(`
   }
 `);
 
+const CATEGORY_QUERY = gql(`
+  query Category($id: String!) {
+    category(id: $id) {
+      ...categoryFields
+    }
+  }
+`);
+
 const CATEGORIES_QUERY = gql(`
-  query Categories($spaceId: String!, $parentCategoryId: Int) {
+  query Categories($spaceId: String!, $parentCategoryId: Int!) {
     categories(where: { space: $spaceId, parent_category_id: $parentCategoryId }, orderBy: created, orderDirection: asc) {
       ...categoryFields
     }
@@ -166,6 +175,23 @@ export async function getSpace(spaceId: number) {
   });
 
   return data.space;
+}
+
+export async function getCategory({
+  spaceId,
+  categoryId
+}: {
+  spaceId: number;
+  categoryId: number;
+}) {
+  const { data } = await client.query({
+    query: CATEGORY_QUERY,
+    variables: {
+      id: `${spaceId}/${categoryId}`
+    }
+  });
+
+  return data.category;
 }
 
 export async function getCategories({
@@ -269,13 +295,14 @@ export async function getResultsByRole(
 }
 
 export function newCategoryEventToEntry(event: NewCategoryEvent): Category {
-  const [spaceId, id, , name, description] = event;
+  const [spaceId, id, , name, description, parentCategoryId] = event;
 
   return {
     id: `${spaceId}/${id}`,
     category_id: id,
     name,
-    description
+    description,
+    parent_category_id: parentCategoryId
   };
 }
 

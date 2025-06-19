@@ -10,6 +10,7 @@ import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useTownhallSpace';
 import {
   getCategories,
+  getCategory,
   getResultsByRole,
   getRoles,
   getSpace,
@@ -95,6 +96,36 @@ export function useSpaceQuery({
   });
 }
 
+export function useCategoryQuery({
+  spaceId,
+  categoryId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
+}) {
+  const queryFn = computed(() => {
+    const spaceIdValue = toValue(spaceId);
+    const categoryIdValue = toValue(categoryId);
+
+    if (!spaceIdValue || !categoryIdValue) {
+      return skipToken;
+    }
+
+    return () => {
+      return getCategory({
+        spaceId: spaceIdValue,
+        categoryId: categoryIdValue
+      });
+    };
+  });
+
+  return useQuery({
+    queryKey: ['townhall', 'categories', 'detail', { spaceId, categoryId }],
+    queryFn,
+    staleTime: DEFAULT_STALE_TIME
+  });
+}
+
 export function useCategoriesQuery({
   spaceId,
   categoryId
@@ -102,13 +133,29 @@ export function useCategoriesQuery({
   spaceId: MaybeRefOrGetter<number>;
   categoryId: MaybeRefOrGetter<number | null>;
 }) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: ['townhall', 'categories', 'list', { spaceId, categoryId }],
     queryFn: async () => {
-      return getCategories({
+      const categories = await getCategories({
         spaceId: toValue(spaceId),
         parentCategoryId: toValue(categoryId)
       });
+
+      for (const category of categories) {
+        queryClient.setQueryData(
+          [
+            'townhall',
+            'categories',
+            'detail',
+            { spaceId, categoryId: category.category_id }
+          ],
+          category
+        );
+      }
+
+      return categories;
     },
     staleTime: DEFAULT_STALE_TIME
   });

@@ -2,6 +2,7 @@
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import {
   useCategoriesQuery,
+  useCategoryQuery,
   useDeleteCategoryMutation,
   useTopicsQuery
 } from '@/queries/townhall';
@@ -24,6 +25,10 @@ const categoryId = computed(() => {
   return null;
 });
 
+const { data: category } = useCategoryQuery({
+  spaceId,
+  categoryId
+});
 const { data: categories } = useCategoriesQuery({
   spaceId,
   categoryId
@@ -68,6 +73,21 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
 <template>
   <div>
     <div class="flex justify-end p-4 gap-2">
+      <div class="flex-auto">
+        <div v-if="category" class="flex items-center space-x-3">
+          <router-link
+            :to="{
+              name: 'space-townhall-topics',
+              query: { category: category.parent_category_id }
+            }"
+          >
+            <UiButton class="!px-0 w-[46px]">
+              <IH-arrow-narrow-left class="inline-block" />
+            </UiButton>
+          </router-link>
+          <h3>{{ category.name }}</h3>
+        </div>
+      </div>
       <UiTooltip title="New topic">
         <UiButton
           :to="{
@@ -113,63 +133,65 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       </UiDropdown>
     </div>
     <div>
-      <UiLabel label="Categories" sticky />
-      <router-link
-        v-for="(c, i) in categories"
-        :key="i"
-        :to="{
-          name: 'space-townhall-topics',
-          query: { category: c.category_id }
-        }"
-        class="flex justify-between items-center mx-4 py-3 border-b"
-      >
-        <div>
-          <div
-            class="w-[48px] h-[48px] bg-skin-border rounded-lg items-center justify-center flex mr-3"
-          >
-            <IH-folder class="inline-block" />
+      <template v-if="categories?.length">
+        <UiLabel label="Categories" sticky />
+        <router-link
+          v-for="(c, i) in categories"
+          :key="i"
+          :to="{
+            name: 'space-townhall-topics',
+            query: { category: c.category_id }
+          }"
+          class="flex justify-between items-center mx-4 py-3 border-b"
+        >
+          <div>
+            <div
+              class="w-[48px] h-[48px] bg-skin-border rounded-lg items-center justify-center flex mr-3"
+            >
+              <IH-folder class="inline-block" />
+            </div>
           </div>
-        </div>
-        <div class="flex-1">
-          <h3 class="text-skin-link" v-text="c.name" />
-          <div class="text-skin-text space-x-2">
-            {{ c.description }}
+          <div class="flex-1">
+            <h3 class="text-skin-link" v-text="c.name" />
+            <div class="text-skin-text space-x-2">
+              {{ c.description }}
+            </div>
           </div>
-        </div>
-        <UiDropdown class="flex gap-3 items-center h-[24px]">
-          <template #button>
-            <UiButton class="!p-0 !border-0 !h-auto">
-              <IH-dots-vertical
-                class="text-skin-text inline-block size-[22px]"
-              />
-            </UiButton>
-          </template>
-          <template #items>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                @click="setAddCategoryModalStatus(true, c.id)"
-              >
-                <IH-pencil :width="16" />
-                Edit category
-              </button>
-            </UiDropdownItem>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-                @click="() => deleteCategory({ id: c.category_id })"
-              >
-                <IH-trash :width="16" />
-                Delete category
-              </button>
-            </UiDropdownItem>
-          </template>
-        </UiDropdown>
-      </router-link>
+          <UiDropdown class="flex gap-3 items-center h-[24px]">
+            <template #button>
+              <UiButton class="!p-0 !border-0 !h-auto">
+                <IH-dots-vertical
+                  class="text-skin-text inline-block size-[22px]"
+                />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="setAddCategoryModalStatus(true, c.id)"
+                >
+                  <IH-pencil :width="16" />
+                  Edit category
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="() => deleteCategory({ id: c.category_id })"
+                >
+                  <IH-trash :width="16" />
+                  Delete category
+                </button>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+        </router-link>
+      </template>
       <UiLabel label="Topics" sticky />
       <TownhallTopicsList
         limit="off"
