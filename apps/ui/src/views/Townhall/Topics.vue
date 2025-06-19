@@ -41,7 +41,8 @@ const {
   isError,
   isFetchingNextPage
 } = useTopicsQuery({
-  spaceId: toRef(() => props.townhallSpace.space_id)
+  spaceId,
+  categoryId
 });
 
 const addCategoryModalOpen = ref(false);
@@ -71,7 +72,10 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
         <UiButton
           :to="{
             name: 'space-townhall-create',
-            params: { space: `${space.network}:${space.id}` }
+            params: { space: `${space.network}:${space.id}` },
+            query: {
+              category: categoryId
+            }
           }"
           class="!px-0 w-[46px]"
         >

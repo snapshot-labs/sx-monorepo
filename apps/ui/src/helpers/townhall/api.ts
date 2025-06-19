@@ -116,8 +116,8 @@ const CATEGORIES_QUERY = gql(`
 `);
 
 const TOPICS_QUERY = gql(`
-  query Topics($spaceId: String!, $limit: Int!, $skip: Int!) {
-    topics(first: $limit, skip: $skip, orderBy: created, orderDirection: desc, where: { space: $spaceId }) {
+  query Topics($spaceId: String!, $categoryId: Int!, $limit: Int!, $skip: Int!) {
+    topics(first: $limit, skip: $skip, orderBy: created, orderDirection: desc, where: { space: $spaceId, category_id: $categoryId }) {
       ...topicFields
     }
   }
@@ -177,7 +177,10 @@ export async function getCategories({
 }) {
   const { data } = await client.query({
     query: CATEGORIES_QUERY,
-    variables: { spaceId: spaceId.toString(), parentCategoryId }
+    variables: {
+      spaceId: spaceId.toString(),
+      parentCategoryId: parentCategoryId ?? 0
+    }
   });
 
   return data.categories;
@@ -185,16 +188,23 @@ export async function getCategories({
 
 export async function getTopics({
   spaceId,
+  categoryId,
   limit,
   skip
 }: {
   spaceId: number;
+  categoryId?: number | null;
   limit: number;
   skip: number;
 }) {
   const { data } = await client.query({
     query: TOPICS_QUERY,
-    variables: { spaceId: spaceId.toString(), limit, skip }
+    variables: {
+      spaceId: spaceId.toString(),
+      categoryId: categoryId ?? 0,
+      limit,
+      skip
+    }
   });
 
   return data.topics;

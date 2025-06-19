@@ -115,16 +115,19 @@ export function useCategoriesQuery({
 }
 
 export function useTopicsQuery({
-  spaceId
+  spaceId,
+  categoryId
 }: {
   spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: ['townhall', 'topics', 'list', { spaceId }],
+    queryKey: ['townhall', 'topics', 'list', { spaceId, categoryId }],
     queryFn: async ({ pageParam = 0 }) => {
       return getTopics({
         spaceId: toValue(spaceId),
+        categoryId: toValue(categoryId),
         limit: TOPICS_LIMIT,
         skip: pageParam
       });
