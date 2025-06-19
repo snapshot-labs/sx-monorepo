@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { useTopicsQuery } from '@/queries/townhall';
 import { Space } from '@/types';
 
-const props = defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const { setTitle } = useTitle();
 
@@ -14,7 +15,7 @@ const {
   isError,
   isFetchingNextPage
 } = useTopicsQuery({
-  spaceId: toRef(() => props.space.id)
+  spaceId: toRef(() => props.townhallSpace.space_id)
 });
 
 async function handleEndReached() {

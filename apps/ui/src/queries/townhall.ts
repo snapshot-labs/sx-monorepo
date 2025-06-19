@@ -1,12 +1,13 @@
 import {
   QueryClient,
+  skipToken,
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
-import { SpaceType } from '@/composables/useSpaceType';
+import { SpaceType } from '@/composables/useTownhallSpace';
 import {
   getResultsByRole,
   getRoles,
@@ -28,17 +29,19 @@ const DEFAULT_STALE_TIME = 1000 * 5;
 
 function addVoteToRoleResults({
   queryClient,
+  spaceId,
   topicId,
   roleId,
   vote
 }: {
   queryClient: QueryClient;
+  spaceId: number;
   topicId: number;
   roleId: string;
   vote: Vote;
 }) {
   queryClient.setQueryData<Result[]>(
-    ['townhall', 'topicResults', { topicId, roleId }, 'list'],
+    ['townhall', 'topicResults', { spaceId, topicId, roleId }, 'list'],
     oldData => {
       const updatedData = structuredClone(oldData ?? []);
       const existingResult = updatedData.find(
@@ -62,20 +65,30 @@ export function useSpaceQuery({
   spaceId,
   spaceType
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number | null>;
   spaceType: MaybeRefOrGetter<SpaceType>;
 }) {
+  const queryFn = computed(() => {
+    const spaceTypeValue = toValue(spaceType);
+    const spaceIdValue = toValue(spaceId);
+
+    if (spaceTypeValue !== 'discussionsSpace' || !spaceIdValue) {
+      return skipToken;
+    }
+
+    return () => {
+      return getSpace(spaceIdValue);
+    };
+  });
+
   return useQuery({
     queryKey: ['townhall', 'spaces', 'detail', { spaceId }],
-    queryFn: async () => {
-      return getSpace(toValue(spaceId));
-    },
+    queryFn,
     retry: (failureCount, error) => {
       if (error?.message.includes('Row not found')) return false;
 
       return failureCount < 3;
     },
-    enabled: () => toValue(spaceType) === 'discussionsSpace',
     staleTime: DEFAULT_STALE_TIME
   });
 }
@@ -83,13 +96,17 @@ export function useSpaceQuery({
 export function useTopicsQuery({
   spaceId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['townhall', 'topics', 'list', { spaceId }],
     queryFn: async ({ pageParam = 0 }) => {
-      return getTopics({ limit: TOPICS_LIMIT, skip: pageParam });
+      return getTopics({
+        spaceId: toValue(spaceId),
+        limit: TOPICS_LIMIT,
+        skip: pageParam
+      });
     },
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < TOPICS_LIMIT) return null;
@@ -104,13 +121,14 @@ export function useTopicsSummaryQuery({
   spaceId,
   enabled = true
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
     queryKey: ['townhall', 'topics', 'summary', { spaceId }],
     queryFn: async () => {
       return getTopics({
+        spaceId: toValue(spaceId),
         skip: 0,
         limit: TOPICS_SUMMARY_LIMIT
       });
@@ -124,13 +142,13 @@ export function useTopicQuery({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   return useQuery({
     queryKey: ['townhall', 'topics', 'detail', { spaceId, topicId }],
     queryFn: async () => {
-      const topic = await getTopic(toValue(topicId).toString());
+      const topic = await getTopic(toValue(spaceId), toValue(topicId));
       if (!topic) return null;
 
       topic.posts = topic.posts
@@ -148,21 +166,21 @@ export function useUserVotesQuery({
   topicId,
   user
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
   user: MaybeRefOrGetter<string>;
 }) {
   return useQuery({
     queryKey: ['townhall', 'votes', 'list', { spaceId, topicId, user }],
     queryFn: async () => {
-      return getVotes(toValue(topicId).toString(), toValue(user));
+      return getVotes(toValue(spaceId), toValue(topicId), toValue(user));
     },
     enabled: () => !!toValue(user),
     staleTime: DEFAULT_STALE_TIME
   });
 }
 
-export function useRolesQuery(spaceId: MaybeRefOrGetter<string>) {
+export function useRolesQuery(spaceId: MaybeRefOrGetter<number>) {
   return useQuery({
     queryKey: ['townhall', 'roles', spaceId, 'list'],
     queryFn: () => {
@@ -171,11 +189,17 @@ export function useRolesQuery(spaceId: MaybeRefOrGetter<string>) {
   });
 }
 
-export function useUserRolesQuery(user: MaybeRefOrGetter<string>) {
+export function useUserRolesQuery({
+  spaceId,
+  user
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+  user: MaybeRefOrGetter<string>;
+}) {
   return useQuery({
-    queryKey: ['townhall', 'userRoles', user, 'list'],
+    queryKey: ['townhall', 'userRoles', { spaceId, user }, 'list'],
     queryFn: () => {
-      return getUserRoles(toValue(user));
+      return getUserRoles(toValue(spaceId), toValue(user));
     },
     retry: (failureCount, error) => {
       if (error?.message.includes('Row not found')) return false;
@@ -188,22 +212,37 @@ export function useUserRolesQuery(user: MaybeRefOrGetter<string>) {
 }
 
 export function useResultsByRoleQuery({
+  spaceId,
   topicId,
   roleId
 }: {
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
   roleId: MaybeRefOrGetter<string>;
 }) {
   return useQuery({
-    queryKey: ['townhall', 'topicResults', { topicId, roleId }, 'list'],
+    queryKey: [
+      'townhall',
+      'topicResults',
+      { spaceId, topicId, roleId },
+      'list'
+    ],
     queryFn: () => {
-      return getResultsByRole(toValue(topicId), toValue(roleId));
+      return getResultsByRole(
+        toValue(spaceId),
+        toValue(topicId),
+        toValue(roleId)
+      );
     },
     staleTime: DEFAULT_STALE_TIME
   });
 }
 
-export function useRoleMutation() {
+export function useRoleMutation({
+  spaceId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+}) {
   const { web3 } = useWeb3();
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
@@ -212,14 +251,19 @@ export function useRoleMutation() {
   return useMutation({
     mutationFn: ({ role, isRevoking }: { role: Role; isRevoking: boolean }) => {
       return isRevoking
-        ? sendRevokeRole(role.space.id, role.id)
-        : sendClaimRole(role.space.id, role.id);
+        ? sendRevokeRole(role.space.space_id, role.id)
+        : sendClaimRole(role.space.space_id, role.id);
     },
     onSuccess: (data, { role, isRevoking }) => {
       if (!data) return;
 
       queryClient.setQueryData<Role[]>(
-        ['townhall', 'userRoles', web3.value.account, 'list'],
+        [
+          'townhall',
+          'userRoles',
+          { user: web3.value.account, spaceId: toValue(spaceId) },
+          'list'
+        ],
         (old = []) =>
           isRevoking ? old.filter(r => r.id !== role.id) : [...old, role]
       );
@@ -234,7 +278,7 @@ export function useCloseTopicMutation({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
@@ -243,7 +287,7 @@ export function useCloseTopicMutation({
 
   return useMutation({
     mutationFn: () => {
-      return sendCloseTopic(toValue(topicId));
+      return sendCloseTopic(toValue(spaceId), toValue(topicId));
     },
     onSuccess: () => {
       queryClient.setQueryData<Topic>(
@@ -270,7 +314,7 @@ export function useCreatePostMutation({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
@@ -279,7 +323,7 @@ export function useCreatePostMutation({
 
   return useMutation({
     mutationFn: (body: string) => {
-      return sendPost(toValue(topicId), body);
+      return sendPost(toValue(spaceId), toValue(topicId), body);
     },
     onSuccess: async data => {
       if (!data) return;
@@ -314,7 +358,7 @@ export function useSetPostVisibilityMutation({
   spaceId,
   topicId
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
 }) {
   const queryClient = useQueryClient();
@@ -330,15 +374,15 @@ export function useSetPostVisibilityMutation({
       visibility: 'pin' | 'unpin' | 'hide';
     }) => {
       if (visibility === 'pin') {
-        return sendPinPost(toValue(topicId), postId);
+        return sendPinPost(toValue(spaceId), toValue(topicId), postId);
       }
 
       if (visibility === 'unpin') {
-        return sendUnpinPost(toValue(topicId), postId);
+        return sendUnpinPost(toValue(spaceId), toValue(topicId), postId);
       }
 
       if (visibility === 'hide') {
-        return sendHidePost(toValue(topicId), postId);
+        return sendHidePost(toValue(spaceId), toValue(topicId), postId);
       }
 
       throw new Error('Invalid visibility type');
@@ -392,7 +436,7 @@ export function useVoteMutation({
   topicId,
   userRoles
 }: {
-  spaceId: MaybeRefOrGetter<string>;
+  spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
   userRoles: MaybeRefOrGetter<Role[] | undefined>;
 }) {
@@ -403,7 +447,7 @@ export function useVoteMutation({
 
   return useMutation({
     mutationFn: ({ postId, choice }: { postId: number; choice: 1 | 2 | 3 }) => {
-      return sendVote(toValue(topicId), postId, choice);
+      return sendVote(toValue(spaceId), toValue(topicId), postId, choice);
     },
     onSuccess: async data => {
       if (!data) return;
@@ -428,6 +472,7 @@ export function useVoteMutation({
       roles.forEach(role => {
         addVoteToRoleResults({
           queryClient,
+          spaceId: toValue(spaceId),
           topicId: toValue(topicId),
           roleId: role,
           vote

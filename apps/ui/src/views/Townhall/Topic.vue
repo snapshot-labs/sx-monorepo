@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Post } from '@/helpers/townhall/types';
+import { Post, Space as TownhallSpace } from '@/helpers/townhall/types';
 import { _n, _rt, clone, shortenAddress } from '@/helpers/utils';
 import {
   useCloseTopicMutation,
@@ -11,15 +11,15 @@ import {
 } from '@/queries/townhall';
 import { Space } from '@/types';
 
-const props = defineProps<{ space: Space }>();
+const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const route = useRoute();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
 const { setContext, setVars, openChatbot } = useChatbot();
 
+const spaceId = toRef(() => props.townhallSpace.space_id);
 const id = computed(() => Number(route.params.id));
-const spaceId = '1';
 
 const roleFilter: Ref<string> = ref('any');
 const sortBy: Ref<'agree' | 'disagree' | 'votes' | 'recent'> = ref('agree');
@@ -29,13 +29,20 @@ const {
   data: topic,
   isPending,
   isError
-} = useTopicQuery({ spaceId, topicId: id });
+} = useTopicQuery({
+  spaceId,
+  topicId: id
+});
 const { data: roles, isError: isRolesError } = useRolesQuery(spaceId);
 const {
   data: resultsByRole,
   isPending: isResultsPending,
   isError: isResultsError
-} = useResultsByRoleQuery({ topicId: id, roleId: roleFilter });
+} = useResultsByRoleQuery({
+  spaceId,
+  topicId: id,
+  roleId: roleFilter
+});
 const { data: userVotes, isError: isUserVotesError } = useUserVotesQuery({
   spaceId,
   topicId: id,
@@ -203,7 +210,7 @@ watchEffect(() => {
             </span>
           </h4>
           <TownhallPosts
-            :space-id="spaceId"
+            :space-id="townhallSpace.space_id"
             :topic-id="id"
             :topic="topic"
             :posts="pendingPosts"
@@ -308,7 +315,7 @@ watchEffect(() => {
             <TownhallPostItem
               v-for="(s, i) in results"
               :key="i"
-              :space-id="spaceId"
+              :space-id="townhallSpace.space_id"
               :topic-id="id"
               :topic="topic"
               :post="s"

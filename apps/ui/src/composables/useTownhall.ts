@@ -97,7 +97,12 @@ export function useTownhall() {
     );
   }
 
-  async function sendTopic(title: string, body: string, discussionUrl: string) {
+  async function sendTopic(
+    space: number,
+    title: string,
+    body: string,
+    discussionUrl: string
+  ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -108,13 +113,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createTopic({
         signer,
-        data: { title, body, discussionUrl },
+        data: { space, title, body, discussionUrl },
         salt: getSalt()
       })
     );
   }
 
-  async function sendCloseTopic(topic: number) {
+  async function sendCloseTopic(space: number, topic: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -125,13 +130,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.closeTopic({
         signer,
-        data: { topic },
+        data: { space, topic },
         salt: getSalt()
       })
     );
   }
 
-  async function sendPost(topic: number, body: string) {
+  async function sendPost(space: number, topic: number, body: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -142,13 +147,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createPost({
         signer,
-        data: { topic, body },
+        data: { space, topic, body },
         salt: getSalt()
       })
     );
   }
 
-  async function sendHidePost(topic: number, post: number) {
+  async function sendHidePost(space: number, topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -159,13 +164,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.hidePost({
         signer,
-        data: { topic, post },
+        data: { space, topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendPinPost(topic: number, post: number) {
+  async function sendPinPost(space: number, topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -176,13 +181,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.pinPost({
         signer,
-        data: { topic, post },
+        data: { space, topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendUnpinPost(topic: number, post: number) {
+  async function sendUnpinPost(space: number, topic: number, post: number) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -193,13 +198,18 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.unpinPost({
         signer,
-        data: { topic, post },
+        data: { space, topic, post },
         salt: getSalt()
       })
     );
   }
 
-  async function sendVote(topic: number, post: number, choice: 1 | 2 | 3) {
+  async function sendVote(
+    space: number,
+    topic: number,
+    post: number,
+    choice: 1 | 2 | 3
+  ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -210,14 +220,14 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.vote({
         signer,
-        data: { topic, post, choice },
+        data: { space, topic, post, choice },
         salt: getSalt()
       })
     );
   }
 
   async function sendCreateRole(
-    space: string,
+    space: number,
     name: string,
     description: string,
     color: string
@@ -239,7 +249,7 @@ export function useTownhall() {
   }
 
   async function sendEditRole(
-    space: string,
+    space: number,
     id: string,
     name: string,
     description: string,
@@ -261,7 +271,7 @@ export function useTownhall() {
     );
   }
 
-  async function sendDeleteRole(space: string, id: string) {
+  async function sendDeleteRole(space: number, id: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -278,7 +288,7 @@ export function useTownhall() {
     );
   }
 
-  async function sendClaimRole(space: string, id: string) {
+  async function sendClaimRole(space: number, id: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
@@ -295,7 +305,7 @@ export function useTownhall() {
     );
   }
 
-  async function sendRevokeRole(space: string, id: string) {
+  async function sendRevokeRole(space: number, id: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;

@@ -145,8 +145,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { title, body, discussionUrl } = data;
+    const { space, title, body, discussionUrl } = data;
     const message = {
+      space,
       title,
       body,
       discussionUrl
@@ -180,8 +181,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic } = data;
+    const { space, topic } = data;
     const message = {
+      space,
       topic
     };
 
@@ -213,8 +215,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, body } = data;
+    const { space, topic, body } = data;
     const message = {
+      space,
       topic,
       body
     };
@@ -247,8 +250,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post } = data;
+    const { space, topic, post } = data;
     const message = {
+      space,
       topic,
       post
     };
@@ -281,8 +285,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post } = data;
+    const { space, topic, post } = data;
     const message = {
+      space,
       topic,
       post
     };
@@ -315,8 +320,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post } = data;
+    const { space, topic, post } = data;
     const message = {
+      space,
       topic,
       post
     };
@@ -349,8 +355,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post, choice } = data;
+    const { space, topic, post, choice } = data;
     const message = {
+      space,
       topic,
       post,
       choice
