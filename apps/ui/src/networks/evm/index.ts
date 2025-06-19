@@ -188,6 +188,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'ape',
       'curtis'
     ].includes(networkId),
+    governanceConnectors: EVM_CONNECTORS,
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),
     api,

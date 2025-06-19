@@ -430,6 +430,10 @@ type BaseNetwork = {
   currentChainId: number;
   baseNetworkId?: NetworkID;
   supportsSimulation: boolean;
+  /**
+   * Connectors that can be used for governance (creating proposals, voting).
+   */
+  governanceConnectors: ConnectorType[];
   managerConnectors: ConnectorType[];
   api: NetworkApi;
   constants: NetworkConstants;
