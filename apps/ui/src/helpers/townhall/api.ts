@@ -108,8 +108,8 @@ const SPACE_QUERY = gql(`
 `);
 
 const CATEGORIES_QUERY = gql(`
-  query Categories($spaceId: String!) {
-    categories(where: { space: $spaceId }) {
+  query Categories($spaceId: String!, $parentCategoryId: Int) {
+    categories(where: { space: $spaceId, parent_category_id: $parentCategoryId }, orderBy: created, orderDirection: asc) {
       ...categoryFields
     }
   }
@@ -168,10 +168,16 @@ export async function getSpace(spaceId: number) {
   return data.space;
 }
 
-export async function getCategories({ spaceId }: { spaceId: number }) {
+export async function getCategories({
+  spaceId,
+  parentCategoryId
+}: {
+  spaceId: number;
+  parentCategoryId: number | null;
+}) {
   const { data } = await client.query({
     query: CATEGORIES_QUERY,
-    variables: { spaceId: spaceId.toString() }
+    variables: { spaceId: spaceId.toString(), parentCategoryId }
   });
 
   return data.categories;

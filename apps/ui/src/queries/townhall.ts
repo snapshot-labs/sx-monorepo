@@ -96,15 +96,18 @@ export function useSpaceQuery({
 }
 
 export function useCategoriesQuery({
-  spaceId
+  spaceId,
+  categoryId
 }: {
   spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
 }) {
   return useQuery({
-    queryKey: ['townhall', 'categories', 'list', { spaceId }],
+    queryKey: ['townhall', 'categories', 'list', { spaceId, categoryId }],
     queryFn: async () => {
       return getCategories({
-        spaceId: toValue(spaceId)
+        spaceId: toValue(spaceId),
+        parentCategoryId: toValue(categoryId)
       });
     },
     staleTime: DEFAULT_STALE_TIME
@@ -294,9 +297,11 @@ export function useRoleMutation({
 }
 
 export function useCreateCategoryMutation({
-  spaceId
+  spaceId,
+  categoryId
 }: {
   spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
 }) {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
@@ -305,18 +310,16 @@ export function useCreateCategoryMutation({
   return useMutation({
     mutationFn: ({
       name,
-      description,
-      parentCategoryId
+      description
     }: {
       name: string;
       description: string;
-      parentCategoryId: number | null;
     }) => {
       return sendCreateCategory(
         toValue(spaceId),
         name,
         description,
-        parentCategoryId
+        toValue(categoryId)
       );
     },
     onSuccess: data => {
@@ -329,7 +332,7 @@ export function useCreateCategoryMutation({
       const category = newCategoryEventToEntry(eventData);
 
       queryClient.setQueryData<Category[]>(
-        ['townhall', 'categories', 'list', { spaceId }],
+        ['townhall', 'categories', 'list', { spaceId, categoryId }],
         old => {
           if (!old) return old;
 
@@ -346,9 +349,11 @@ export function useCreateCategoryMutation({
 }
 
 export function useEditCategoryMutation({
-  spaceId
+  spaceId,
+  categoryId
 }: {
   spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
 }) {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
@@ -358,20 +363,18 @@ export function useEditCategoryMutation({
     mutationFn: ({
       id,
       name,
-      description,
-      parentCategoryId
+      description
     }: {
       id: number;
       name: string;
       description: string;
-      parentCategoryId: number | null;
     }) => {
       return sendEditCategory(
         toValue(spaceId),
         id,
         name,
         description,
-        parentCategoryId
+        toValue(categoryId)
       );
     },
     onSuccess: data => {
@@ -384,7 +387,7 @@ export function useEditCategoryMutation({
       const category = newCategoryEventToEntry(eventData);
 
       queryClient.setQueryData<Category[]>(
-        ['townhall', 'categories', 'list', { spaceId }],
+        ['townhall', 'categories', 'list', { spaceId, categoryId }],
         old => {
           if (!old) return old;
 
@@ -401,9 +404,11 @@ export function useEditCategoryMutation({
 }
 
 export function useDeleteCategoryMutation({
-  spaceId
+  spaceId,
+  categoryId
 }: {
   spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
 }) {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
@@ -415,7 +420,7 @@ export function useDeleteCategoryMutation({
     },
     onSuccess: (data, { id }) => {
       queryClient.setQueryData<Category[]>(
-        ['townhall', 'categories', 'list', { spaceId }],
+        ['townhall', 'categories', 'list', { spaceId, categoryId }],
         old => {
           if (!old) return old;
 

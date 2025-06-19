@@ -133,7 +133,8 @@ export function createWriters(indexerName: string) {
     category.space = spaceEntityId;
     category.name = name;
     category.description = description;
-    category.parent_category = `${spaceEntityId}/${parentCategoryId}`;
+    category.parent_category_id =
+      parentCategoryId > 0 ? parentCategoryId : null;
     category.created = unit.timestamp;
 
     await category.save();

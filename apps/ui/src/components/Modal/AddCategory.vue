@@ -8,6 +8,8 @@ import {
 } from '@/queries/townhall';
 
 const props = defineProps<{
+  spaceId: number;
+  categoryId: number | null;
   open: boolean;
   initialState?: Category;
 }>();
@@ -18,10 +20,12 @@ const emit = defineEmits<{
 
 const { mutate: createCategory, isPending: isCreating } =
   useCreateCategoryMutation({
-    spaceId: 1
+    spaceId: toRef(props, 'spaceId'),
+    categoryId: toRef(props, 'categoryId')
   });
 const { mutate: editCategory, isPending: isEditing } = useEditCategoryMutation({
-  spaceId: 1
+  spaceId: toRef(props, 'spaceId'),
+  categoryId: toRef(props, 'categoryId')
 });
 
 const form = ref(
@@ -74,8 +78,7 @@ async function handleSubmit() {
       {
         id: props.initialState.category_id,
         name: form.value.name,
-        description: form.value.description,
-        parentCategoryId: null
+        description: form.value.description
       },
       { onSuccess: () => emit('close') }
     );
@@ -84,8 +87,7 @@ async function handleSubmit() {
   createCategory(
     {
       name: form.value.name,
-      description: form.value.description,
-      parentCategoryId: null
+      description: form.value.description
     },
     { onSuccess: () => emit('close') }
   );

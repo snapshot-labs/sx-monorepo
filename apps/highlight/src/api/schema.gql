@@ -13,7 +13,7 @@ type Category {
   name: String!
   description: String!
   created: Int!
-  parent_category: Category
+  parent_category_id: Int
   space: Space!
 }
 
