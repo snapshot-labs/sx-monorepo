@@ -1,17 +1,23 @@
 import { isHexString } from '@ethersproject/bytes';
 import { getDefaultProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
-import { getNetwork, metadataNetwork } from '@/networks';
 import pkg from '../../package.json';
 
 const ALIAS_AVAILABILITY_PERIOD = 60 * 60 * 24 * 30; // 30 days
 const ALIAS_AVAILABILITY_BUFFER = 60 * 5; // 5 minutes
 
-const aliases = useStorage(`${pkg.name}.aliases`, {} as Record<string, string>);
+type GetAliasFn = (
+  address: string,
+  alias: string,
+  created_gt: number
+) => Promise<unknown>;
 
-const network = getNetwork(metadataNetwork);
+export function useAlias(storageKey: string, getAlias: GetAliasFn) {
+  const aliases = useStorage(
+    `${pkg.name}.${storageKey}`,
+    {} as Record<string, string>
+  );
 
-export function useAlias() {
   const provider = getDefaultProvider();
   const { web3 } = useWeb3();
 
@@ -35,7 +41,7 @@ export function useAlias() {
   async function getExistingAliasWallet(privateKey: string) {
     if (!isHexString(privateKey)) return null;
 
-    const registeredAlias = await network.api.loadAlias(
+    const registeredAlias = await getAlias(
       web3.value.account,
       new Wallet(privateKey, provider).address,
       Math.floor(Date.now() / 1000) -
