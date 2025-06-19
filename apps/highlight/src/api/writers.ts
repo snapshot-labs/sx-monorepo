@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { Writer } from './indexer/types';
 import {
   Alias,
+  Category,
   Post,
   Role,
   Space,
@@ -15,6 +16,30 @@ const SetAliasEventData = z.tuple([
   z.string(), // from
   z.string(), // to
   z.string() // salt
+]);
+
+const NewCategoryEventData = z.tuple([
+  z.number(), // spaceId
+  z.number(), // id
+  z.string(), // author
+  z.string(), // name
+  z.string(), // description
+  z.number() // parentCategoryId
+]);
+
+const EditCategoryEventData = z.tuple([
+  z.number(), // spaceId
+  z.number(), // id
+  z.string(), // author
+  z.string(), // name
+  z.string(), // description
+  z.number() // parentCategoryId
+]);
+
+const DeleteCategoryEventData = z.tuple([
+  z.number(), // spaceId
+  z.number(), // id
+  z.string() // author
 ]);
 
 const NewTopicEventData = z.tuple([
@@ -86,6 +111,64 @@ export function createWriters(indexerName: string) {
     alias.created = unit.timestamp;
 
     await alias.save();
+  };
+
+  const handleNewCategory: Writer = async ({ unit, payload }) => {
+    const [spaceId, id, author, name, description, parentCategoryId] =
+      NewCategoryEventData.parse(payload.data);
+
+    console.log(
+      'Handle new category',
+      spaceId,
+      id,
+      author,
+      name,
+      description,
+      parentCategoryId
+    );
+
+    const spaceEntityId = spaceId.toString();
+    const category = new Category(`${spaceId}/${id}`, indexerName);
+    category.category_id = id;
+    category.space = spaceEntityId;
+    category.name = name;
+    category.description = description;
+    category.parent_category = `${spaceEntityId}/${parentCategoryId}`;
+    category.created = unit.timestamp;
+
+    await category.save();
+  };
+
+  const handleEditCategory: Writer = async ({ payload }) => {
+    const [spaceId, id, author, name, description, parentCategoryId] =
+      EditCategoryEventData.parse(payload.data);
+
+    console.log(
+      'Handle edit category',
+      spaceId,
+      id,
+      author,
+      name,
+      description,
+      parentCategoryId
+    );
+
+    const category = await Category.loadEntity(`${spaceId}/${id}`, indexerName);
+    if (!category) return;
+
+    category.name = name;
+    category.description = description;
+
+    await category.save();
+  };
+
+  const handleDeleteCategory: Writer = async ({ payload }) => {
+    const [spaceId, id] = DeleteCategoryEventData.parse(payload.data);
+
+    const category = await Category.loadEntity(`${spaceId}/${id}`, indexerName);
+    if (!category) return;
+
+    await category.delete();
   };
 
   const handleNewTopic: Writer = async ({ unit, payload }) => {
@@ -341,6 +424,9 @@ export function createWriters(indexerName: string) {
     // aliases
     handleSetAlias,
     // townhall
+    handleNewCategory,
+    handleEditCategory,
+    handleDeleteCategory,
     handleNewTopic,
     handleCloseTopic,
     handleNewPost,

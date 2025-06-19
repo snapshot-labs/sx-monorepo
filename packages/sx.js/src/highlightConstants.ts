@@ -18,6 +18,29 @@ export const ALIASES_CONFIG = {
 export const TOWNHALL_CONFIG = {
   address: '0x0000000000000000000000000000000000000002',
   types: {
+    createCategory: {
+      CreateCategory: [
+        { name: 'space', type: 'uint64' },
+        { name: 'name', type: 'string' },
+        { name: 'description', type: 'string' },
+        { name: 'parentCategoryId', type: 'uint64' }
+      ]
+    },
+    editCategory: {
+      EditCategory: [
+        { name: 'space', type: 'uint64' },
+        { name: 'id', type: 'uint64' },
+        { name: 'name', type: 'string' },
+        { name: 'description', type: 'string' },
+        { name: 'parentCategoryId', type: 'uint64' }
+      ]
+    },
+    deleteCategory: {
+      DeleteCategory: [
+        { name: 'space', type: 'uint64' },
+        { name: 'id', type: 'uint64' }
+      ]
+    },
     createTopic: {
       Topic: [
         { name: 'space', type: 'uint64' },

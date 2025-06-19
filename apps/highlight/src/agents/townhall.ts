@@ -6,6 +6,9 @@ export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
 
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createCategory);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.editCategory);
+    this.addEntrypoint(TOWNHALL_CONFIG.types.deleteCategory);
     this.addEntrypoint(TOWNHALL_CONFIG.types.createTopic);
     this.addEntrypoint(TOWNHALL_CONFIG.types.closeTopic);
     this.addEntrypoint(TOWNHALL_CONFIG.types.createPost);
@@ -22,6 +25,69 @@ export default class Townhall extends Agent {
 
   getSigner(signer: string) {
     return this.get(`aliases:${signer}`, 'aliases') ?? signer;
+  }
+
+  async createCategory(
+    {
+      space,
+      name,
+      description,
+      parentCategoryId
+    }: {
+      space: number;
+      name: string;
+      description: string;
+      parentCategoryId: string | null;
+    },
+    { signer }: { signer: string }
+  ) {
+    const id: number = (await this.get(`space:${space}:categories:id`)) || 1;
+
+    const author = await this.getSigner(signer);
+    this.write(`space:${space}:categories:id`, id + 1);
+    this.emit('new_category', [
+      space,
+      id,
+      author,
+      name,
+      description,
+      parentCategoryId
+    ]);
+  }
+
+  async editCategory(
+    {
+      space,
+      id,
+      name,
+      description,
+      parentCategoryId
+    }: {
+      space: number;
+      id: number;
+      name: string;
+      description: string;
+      parentCategoryId: string | null;
+    },
+    { signer }: { signer: string }
+  ) {
+    const author = await this.getSigner(signer);
+    this.emit('edit_category', [
+      space,
+      id,
+      author,
+      name,
+      description,
+      parentCategoryId
+    ]);
+  }
+
+  async deleteCategory(
+    { space, id }: { space: number; id: number },
+    { signer }: { signer: string }
+  ) {
+    const author = await this.getSigner(signer);
+    this.emit('delete_category', [space, id, author]);
   }
 
   async topic(
