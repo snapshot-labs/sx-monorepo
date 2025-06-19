@@ -4,6 +4,7 @@ import {
   InMemoryCache
 } from '@apollo/client/core';
 import { Web3Provider } from '@ethersproject/providers';
+import { pin } from '@snapshot-labs/pineapple';
 import { clients } from '@snapshot-labs/sx';
 import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
@@ -97,18 +98,24 @@ export function useTownhall() {
     );
   }
 
-  async function sendTopic(title: string, body: string, discussionUrl: string) {
+  async function sendTopic(
+    space: number,
+    title: string,
+    body: string,
+    discussionUrl: string
+  ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
     }
 
+    const pinned = await pin({ title, body, discussionUrl });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
       highlightClient.createTopic({
         signer,
-        data: { title, body, discussionUrl },
+        data: { space, metadataUri: `ipfs://${pinned.cid}` },
         salt: getSalt()
       })
     );
@@ -131,18 +138,19 @@ export function useTownhall() {
     );
   }
 
-  async function sendPost(topic: number, body: string) {
+  async function sendPost(space: number, topic: number, body: string) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
     }
 
+    const pinned = await pin({ body });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
       highlightClient.createPost({
         signer,
-        data: { topic, body },
+        data: { space, topic, metadataUri: `ipfs://${pinned.cid}` },
         salt: getSalt()
       })
     );
@@ -227,12 +235,13 @@ export function useTownhall() {
       return null;
     }
 
+    const pinned = await pin({ name, description, color });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
       highlightClient.createRole({
         signer,
-        data: { space, name, description, color },
+        data: { space, metadataUri: `ipfs://${pinned.cid}` },
         salt: getSalt()
       })
     );
@@ -250,12 +259,13 @@ export function useTownhall() {
       return null;
     }
 
+    const pinned = await pin({ name, description, color });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
       highlightClient.editRole({
         signer,
-        data: { space, id, name, description, color },
+        data: { space, id, metadataUri: `ipfs://${pinned.cid}` },
         salt: getSalt()
       })
     );

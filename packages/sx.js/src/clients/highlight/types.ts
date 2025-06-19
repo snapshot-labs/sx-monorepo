@@ -15,9 +15,8 @@ export type SetAlias = {
 };
 
 export type CreateTopic = {
-  title: string;
-  body: string;
-  discussionUrl: string;
+  space: number;
+  metadataUri: string;
 };
 
 export type CloseTopic = {
@@ -25,8 +24,9 @@ export type CloseTopic = {
 };
 
 export type CreatePost = {
+  space: number;
   topic: number;
-  body: string;
+  metadataUri: string;
 };
 
 export type HidePost = {
@@ -43,10 +43,8 @@ export type Vote = {
 };
 
 export type CreateRole = {
-  space: string;
-  name: string;
-  description: string;
-  color: string;
+  space: number;
+  metadataUri: string;
 };
 
 export type EditRole = CreateRole & { id: string };

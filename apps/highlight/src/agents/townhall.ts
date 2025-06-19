@@ -1,6 +1,7 @@
 import { TOWNHALL_CONFIG } from '@snapshot-labs/sx';
 import Agent from '../highlight/agent';
 import Process from '../highlight/process';
+import { getJSON } from '../utils';
 
 export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
@@ -25,18 +26,23 @@ export default class Townhall extends Agent {
   }
 
   async topic(
-    {
-      title,
-      body,
-      discussionUrl
-    }: { title: string; body: string; discussionUrl: string },
+    { space, metadataUri }: { space: number; metadataUri: string },
     { signer }: { signer: string }
   ) {
     const id: number = (await this.get('topics:id')) || 1;
 
     const author = await this.getSigner(signer);
-    this.write('topics:id', id + 1);
-    this.emit('new_topic', [id, author, title, body, discussionUrl]);
+    const metadata: any = await getJSON(metadataUri);
+
+    this.write(`space:${space}:topics:id`, id + 1);
+    this.emit('new_topic', [
+      space,
+      id,
+      author,
+      metadata.title || '',
+      metadata.body || '',
+      metadata.discussionUrl || ''
+    ]);
   }
 
   async closeTopic({ topic }: { topic: number }) {
@@ -45,11 +51,13 @@ export default class Townhall extends Agent {
 
   async post(
     {
+      space,
       topic,
-      body
+      metadataUri
     }: {
+      space: number;
       topic: number;
-      body: string;
+      metadataUri: string;
     },
     { signer }: { signer: string }
   ) {
@@ -58,9 +66,10 @@ export default class Townhall extends Agent {
     const id: number = (await this.get(`topic:${topic}:posts:id`)) || 1;
 
     const author = await this.getSigner(signer);
+    const metadata: any = await getJSON(metadataUri);
 
-    this.write(`topic:${topic}:posts:id`, id + 1);
-    this.emit('new_post', [id, author, topic, body]);
+    this.write(`space:${space}:topic:${topic}:posts:id`, id + 1);
+    this.emit('new_post', [space, topic, id, author, metadata.body || '']);
   }
 
   async hidePost({ topic, post }: { topic: number; post: number }) {
@@ -107,35 +116,43 @@ export default class Townhall extends Agent {
 
   async createRole({
     space,
-    name,
-    description,
-    color
+    metadataUri
   }: {
-    space: string;
-    name: string;
-    description: string;
-    color: string;
+    space: number;
+    metadataUri: string;
   }) {
     const id: number = (await this.get(`roles:id`)) ?? 0;
     this.write(`roles:id`, id + 1);
 
-    this.emit('new_role', [space, String(id), name, description, color]);
+    const metadata: any = await getJSON(metadataUri);
+
+    this.emit('new_role', [
+      space,
+      String(id),
+      metadata.name || '',
+      metadata.description || '',
+      metadata.color || ''
+    ]);
   }
 
   async editRole({
     space,
     id,
-    name,
-    description,
-    color
+    metadataUri
   }: {
     space: string;
     id: string;
-    name: string;
-    description: string;
-    color: string;
+    metadataUri: string;
   }) {
-    this.emit('edit_role', [space, id, name, description, color]);
+    const metadata: any = await getJSON(metadataUri);
+
+    this.emit('edit_role', [
+      space,
+      id,
+      metadata.name || '',
+      metadata.description || '',
+      metadata.color || ''
+    ]);
   }
 
   async deleteRole({ space, id }: { space: string; id: string }) {

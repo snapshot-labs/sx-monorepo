@@ -20,9 +20,8 @@ export const TOWNHALL_CONFIG = {
   types: {
     createTopic: {
       Topic: [
-        { name: 'title', type: 'string' },
-        { name: 'body', type: 'string' },
-        { name: 'discussionUrl', type: 'string' }
+        { name: 'space', type: 'uint64' },
+        { name: 'metadataUri', type: 'string' }
       ]
     },
     closeTopic: {
@@ -31,7 +30,7 @@ export const TOWNHALL_CONFIG = {
     createPost: {
       Post: [
         { name: 'topic', type: 'uint64' },
-        { name: 'body', type: 'string' }
+        { name: 'metadataUri', type: 'string' }
       ]
     },
     hidePost: {
@@ -61,19 +60,15 @@ export const TOWNHALL_CONFIG = {
     },
     createRole: {
       CreateRole: [
-        { name: 'space', type: 'string' },
-        { name: 'name', type: 'string' },
-        { name: 'description', type: 'string' },
-        { name: 'color', type: 'string' }
+        { name: 'space', type: 'uint64' },
+        { name: 'metadataUri', type: 'string' }
       ]
     },
     editRole: {
       EditRole: [
         { name: 'space', type: 'string' },
         { name: 'id', type: 'uint64' },
-        { name: 'name', type: 'string' },
-        { name: 'description', type: 'string' },
-        { name: 'color', type: 'string' }
+        { name: 'metadataUri', type: 'string' }
       ]
     },
     deleteRole: {
