@@ -104,12 +104,6 @@ export function useTownhall() {
     body: string,
     discussionUrl: string
   ) {
-  async function sendTopic(
-    space: number,
-    title: string,
-    body: string,
-    discussionUrl: string
-  ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
