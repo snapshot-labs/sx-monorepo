@@ -380,7 +380,12 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId]) throw err;
+    if (
+      (err instanceof Error && 'code' in err && err.code !== 4902) ||
+      !ADDABLE_NETWORKS[chainId]
+    ) {
+      throw err;
+    }
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',
@@ -422,7 +427,10 @@ export async function verifyStarknetNetwork(
       }
     });
   } catch (e) {
-    if (!e.message.toLowerCase().includes('not implemented')) {
+    if (
+      e instanceof Error &&
+      !e.message.toLowerCase().includes('not implemented')
+    ) {
       throw new Error(e.message);
     }
   }
@@ -685,6 +693,13 @@ export function isUserAbortError(e: any) {
   return (
     ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
     ['User abort', 'User rejected the request.'].includes(e.message)
+  );
+}
+
+export function getUserFacingErrorMessage(e: unknown): string {
+  return (
+    (e instanceof Error && e.message) ||
+    'Something went wrong. Please try again later.'
   );
 }
 

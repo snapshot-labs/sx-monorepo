@@ -9,6 +9,7 @@ import {
   formatAddress,
   getSpaceController,
   getStampUrl,
+  getUserFacingErrorMessage,
   uniqBy
 } from './utils';
 
@@ -270,6 +271,30 @@ describe('utils', () => {
         )
       ).toBe(
         'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64&cb=1234'
+      );
+    });
+  });
+
+  describe('getUserFacingErrorMessage', () => {
+    it('should return error message if available', () => {
+      const testError = new Error('Test error');
+
+      expect(getUserFacingErrorMessage(testError)).toBe(testError.message);
+    });
+
+    it('should return a generic message for errors without a message', () => {
+      const testError = new Error();
+
+      expect(getUserFacingErrorMessage(testError)).toBe(
+        'Something went wrong. Please try again later.'
+      );
+    });
+
+    it('should return a generic message for non-error objects', () => {
+      const testError = { message: 'Test error' };
+
+      expect(getUserFacingErrorMessage(testError)).toBe(
+        'Something went wrong. Please try again later.'
       );
     });
   });

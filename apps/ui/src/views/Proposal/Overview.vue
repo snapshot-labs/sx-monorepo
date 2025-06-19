@@ -281,7 +281,7 @@ async function handleDownloadVotes() {
 
   try {
     await downloadVotes(props.proposal.proposal_id);
-  } catch (e: unknown) {
+  } catch (e) {
     if (e instanceof Error) {
       if (e.message === 'PENDING_GENERATION') {
         return uiStore.addNotification(
@@ -303,11 +303,7 @@ onBeforeUnmount(() => destroyAudio());
 
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
-    <div>
-      <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
-        This proposal might contain scams, offensive material, or be malicious
-        in nature. Please proceed with caution.
-      </UiAlert>
+    <ContentFlagable :item="proposal">
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
         <template v-if="proposal.execution_strategy === EVM_EMPTY_ADDRESS">
           This proposal is invalid and was not created correctly. We cannot
@@ -369,6 +365,7 @@ onBeforeUnmount(() => destroyAudio());
         <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
+              !proposal.flagged &&
               offchainNetworks.includes(props.proposal.network) &&
               props.proposal.body.length > 500
             "
@@ -388,6 +385,7 @@ onBeforeUnmount(() => destroyAudio());
           </UiTooltip>
           <UiTooltip
             v-if="
+              !proposal.flagged &&
               offchainNetworks.includes(props.proposal.network) &&
               props.proposal.body.length > 0 &&
               props.proposal.body.length < 4096
@@ -596,7 +594,7 @@ onBeforeUnmount(() => destroyAudio());
         />
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
-    </div>
+    </ContentFlagable>
   </UiContainer>
   <teleport to="#modal">
     <ModalTimeline
