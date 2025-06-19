@@ -10,11 +10,28 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const { setTitle } = useTitle();
+const route = useRoute();
 
 const spaceId = computed(() => props.townhallSpace.space_id);
+const categoryId = computed(() => {
+  const category = route.query.category;
 
-const { data: categories } = useCategoriesQuery({ spaceId });
-const { mutate: deleteCategory } = useDeleteCategoryMutation({ spaceId });
+  if (typeof category === 'string') {
+    const parsed = Number(category);
+    return isNaN(parsed) ? null : parsed;
+  }
+
+  return null;
+});
+
+const { data: categories } = useCategoriesQuery({
+  spaceId,
+  categoryId
+});
+const { mutate: deleteCategory } = useDeleteCategoryMutation({
+  spaceId,
+  categoryId
+});
 
 const {
   data: topics,
@@ -96,7 +113,10 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       <router-link
         v-for="(c, i) in categories"
         :key="i"
-        :to="{ name: 'space-discussions', params: { category: c.id } }"
+        :to="{
+          name: 'space-townhall-topics',
+          query: { category: c.category_id }
+        }"
         class="flex justify-between items-center mx-4 py-3 border-b"
       >
         <div>
@@ -158,6 +178,8 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
     </div>
     <teleport to="#modal">
       <ModalAddCategory
+        :space-id="spaceId"
+        :category-id="categoryId"
         :open="addCategoryModalOpen"
         :initial-state="(categories || []).find(l => l.id === activeCategoryId)"
         @close="setAddCategoryModalStatus(false)"
