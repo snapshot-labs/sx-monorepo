@@ -20,6 +20,7 @@ export type CreateTopic = {
 };
 
 export type CloseTopic = {
+  space: number;
   topic: number;
 };
 
@@ -30,6 +31,7 @@ export type CreatePost = {
 };
 
 export type HidePost = {
+  space: number;
   topic: number;
   post: number;
 };
@@ -37,6 +39,7 @@ export type PinPost = HidePost;
 export type UnpinPost = HidePost;
 
 export type Vote = {
+  space: number;
   topic: number;
   post: number;
   choice: number;
@@ -50,7 +53,7 @@ export type CreateRole = {
 export type EditRole = CreateRole & { id: string };
 
 export type DeleteRole = {
-  space: string;
+  space: number;
   id: string;
 };
 export type ClaimRole = DeleteRole;

@@ -7,7 +7,7 @@ import {
 } from '@/queries/townhall';
 
 const props = defineProps<{
-  spaceId: string;
+  spaceId: number;
   topicId: number;
   topic: Topic;
   posts: Post[];
@@ -15,7 +15,10 @@ const props = defineProps<{
 
 const { web3 } = useWeb3();
 
-const { data: userRoles } = useUserRolesQuery(toRef(() => web3.value.account));
+const { data: userRoles } = useUserRolesQuery({
+  spaceId: toRef(props, 'spaceId'),
+  user: toRef(() => web3.value.account)
+});
 const { mutate: vote, isPending: isVotePending } = useVoteMutation({
   spaceId: toRef(props, 'spaceId'),
   topicId: toRef(props, 'topicId'),

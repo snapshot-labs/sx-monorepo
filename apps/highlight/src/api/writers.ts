@@ -11,10 +11,6 @@ import {
   Vote
 } from '../../.checkpoint/models';
 
-// NOTE: Right now we are do not have notion of spaces in Highlight
-// We just create a default space for entities
-const DEFAULT_SPACE_ID = '1';
-
 const SetAliasEventData = z.tuple([
   z.string(), // from
   z.string(), // to
@@ -22,6 +18,7 @@ const SetAliasEventData = z.tuple([
 ]);
 
 const NewTopicEventData = z.tuple([
+  z.number(), // spaceId
   z.number(), // id
   z.string(), // author
   z.string(), // title
@@ -30,17 +27,20 @@ const NewTopicEventData = z.tuple([
 ]);
 
 const CloseTopicEventData = z.tuple([
+  z.number(), // spaceId
   z.number() // id
 ]);
 
 const NewPostEventData = z.tuple([
+  z.number(), // spaceId
+  z.number(), // topicId
   z.number(), // id
   z.string(), // author
-  z.number(), // topicId
   z.string() // body
 ]);
 
 const PinPostEventData = z.tuple([
+  z.number(), // spaceId
   z.number(), // topicId
   z.number() // postId
 ]);
@@ -48,14 +48,15 @@ const UnpinPostEventData = PinPostEventData;
 const HidePostEventData = PinPostEventData;
 
 const NewVoteEventData = z.tuple([
-  z.string(), // voter
+  z.number(), // spaceId
   z.number(), // topicId
   z.number(), // postId
+  z.string(), // voter
   z.union([z.literal(1), z.literal(2), z.literal(3)]) // choice
 ]);
 
 const NewRoleEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.string(), // id
   z.string(), // name
   z.string(), // description
@@ -64,12 +65,12 @@ const NewRoleEventData = z.tuple([
 const EditRoleEventData = NewRoleEventData;
 
 const DeleteRoleEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.string() // id
 ]);
 
 const ClaimRoleEventData = z.tuple([
-  z.string(), // spaceId
+  z.number(), // spaceId
   z.string(), // id
   z.string() // address
 ]);
@@ -79,7 +80,7 @@ export function createWriters(indexerName: string) {
   const handleSetAlias: Writer = async ({ unit, payload }) => {
     const [from, to] = SetAliasEventData.parse(payload.data);
 
-    const alias = new Alias(`${from}:${to}`, indexerName);
+    const alias = new Alias(`${from}/${to}`, indexerName);
     alias.address = from;
     alias.alias = to;
     alias.created = unit.timestamp;
@@ -88,14 +89,15 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewTopic: Writer = async ({ unit, payload }) => {
-    const [id, author, title, body, discussionUrl] = NewTopicEventData.parse(
-      payload.data
-    );
+    const [spaceId, id, author, title, body, discussionUrl] =
+      NewTopicEventData.parse(payload.data);
 
-    console.log('Handle new topic', id, author, title, body);
+    console.log('Handle new topic', spaceId, id, author, title, body);
 
-    const topic = new Topic(id.toString(), indexerName);
-    topic.space = DEFAULT_SPACE_ID;
+    const spaceEntityId = spaceId.toString();
+    const topic = new Topic(`${spaceId}/${id}`, indexerName);
+    topic.topic_id = id;
+    topic.space = spaceEntityId;
     topic.author = author;
     topic.title = title;
     topic.body = body;
@@ -104,9 +106,9 @@ export function createWriters(indexerName: string) {
     topic.vote_count = 0;
     topic.created = unit.timestamp;
 
-    let space = await Space.loadEntity(DEFAULT_SPACE_ID, indexerName);
+    let space = await Space.loadEntity(spaceEntityId, indexerName);
     if (!space) {
-      space = new Space(DEFAULT_SPACE_ID, indexerName);
+      space = new Space(spaceEntityId, indexerName);
     }
     space.topic_count += 1;
 
@@ -114,11 +116,11 @@ export function createWriters(indexerName: string) {
   };
 
   const handleCloseTopic: Writer = async ({ payload }) => {
-    const [topicId] = CloseTopicEventData.parse(payload.data);
+    const [spaceId, topicId] = CloseTopicEventData.parse(payload.data);
 
-    console.log('Handle close topic', topicId);
+    console.log('Handle close topic', spaceId, topicId);
 
-    const topic = await Topic.loadEntity(topicId.toString(), indexerName);
+    const topic = await Topic.loadEntity(`${spaceId}/${topicId}`, indexerName);
 
     if (topic) {
       topic.closed = true;
@@ -128,11 +130,13 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewPost: Writer = async ({ unit, payload }) => {
-    const [id, author, topicId, body] = NewPostEventData.parse(payload.data);
+    const [spaceId, topicId, id, author, body] = NewPostEventData.parse(
+      payload.data
+    );
 
-    console.log('Handle new post', id, author, topicId, body);
+    console.log('Handle new post', spaceId, id, author, topicId, body);
 
-    const post = new Post(`${topicId}/${id}`, indexerName);
+    const post = new Post(`${spaceId}/${topicId}/${id}`, indexerName);
     post.author = author;
     post.body = body;
     post.vote_count = 0;
@@ -142,11 +146,12 @@ export function createWriters(indexerName: string) {
     post.created = unit.timestamp;
     post.post_id = id;
     post.topic_id = topicId;
-    post.topic = topicId.toString();
+    post.space = spaceId.toString();
+    post.topic = `${spaceId}/${topicId}`;
 
     await post.save();
 
-    const topic = await Topic.loadEntity(topicId.toString(), indexerName);
+    const topic = await Topic.loadEntity(`${spaceId}/${topicId}`, indexerName);
 
     if (topic) {
       topic.post_count += 1;
@@ -156,11 +161,14 @@ export function createWriters(indexerName: string) {
   };
 
   const handlePinPost: Writer = async ({ payload }) => {
-    const [topicId, postId] = PinPostEventData.parse(payload.data);
+    const [spaceId, topicId, postId] = PinPostEventData.parse(payload.data);
 
-    console.log('Handle pin post vote', topicId, postId);
+    console.log('Handle pin post', spaceId, topicId, postId);
 
-    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
+    const post = await Post.loadEntity(
+      `${spaceId}/${topicId}/${postId}`,
+      indexerName
+    );
 
     if (post) {
       post.pinned = true;
@@ -170,11 +178,14 @@ export function createWriters(indexerName: string) {
   };
 
   const handleUnpinPost: Writer = async ({ payload }) => {
-    const [topicId, postId] = UnpinPostEventData.parse(payload.data);
+    const [spaceId, topicId, postId] = UnpinPostEventData.parse(payload.data);
 
-    console.log('Handle unpin post', topicId, postId);
+    console.log('Handle unpin post', spaceId, topicId, postId);
 
-    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
+    const post = await Post.loadEntity(
+      `${spaceId}/${topicId}/${postId}`,
+      indexerName
+    );
 
     if (post) {
       post.pinned = false;
@@ -184,11 +195,14 @@ export function createWriters(indexerName: string) {
   };
 
   const handleHidePost: Writer = async ({ payload }) => {
-    const [topicId, postId] = HidePostEventData.parse(payload.data);
+    const [spaceId, topicId, postId] = HidePostEventData.parse(payload.data);
 
-    console.log('Handle hide post vote', topicId, postId);
+    console.log('Handle hide post', spaceId, topicId, postId);
 
-    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
+    const post = await Post.loadEntity(
+      `${spaceId}/${topicId}/${postId}`,
+      indexerName
+    );
 
     if (post) {
       post.hidden = true;
@@ -198,26 +212,31 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewVote: Writer = async ({ unit, payload }) => {
-    const [voter, topicId, postId, choice] = NewVoteEventData.parse(
+    const [spaceId, topicId, postId, voter, choice] = NewVoteEventData.parse(
       payload.data
     );
 
-    console.log('Handle new vote', voter, topicId, postId, choice);
+    console.log('Handle new vote', spaceId, voter, topicId, postId, choice);
 
-    const id = `${topicId}/${postId}/${voter}`;
+    const spaceEntityId = spaceId.toString();
+    const id = `${spaceId}/${topicId}/${postId}/${voter}`;
     const vote = new Vote(id, indexerName);
     vote.voter = voter;
     vote.choice = choice;
     vote.created = unit.timestamp;
     vote.topic_id = topicId;
     vote.post_id = postId;
-    vote.topic = topicId.toString();
-    vote.post = postId.toString();
+    vote.space = spaceEntityId;
+    vote.topic = `${spaceId}/${topicId}`;
+    vote.post = `${spaceId}/${topicId}/${postId}`;
 
     await vote.save();
 
-    const topic = await Topic.loadEntity(topicId.toString(), indexerName);
-    const post = await Post.loadEntity(`${topicId}/${postId}`, indexerName);
+    const topic = await Topic.loadEntity(`${spaceId}/${topicId}`, indexerName);
+    const post = await Post.loadEntity(
+      `${spaceId}/${topicId}/${postId}`,
+      indexerName
+    );
 
     if (topic && post) {
       topic.vote_count += 1;
@@ -228,9 +247,9 @@ export function createWriters(indexerName: string) {
       await post.save();
     }
 
-    let space = await Space.loadEntity(DEFAULT_SPACE_ID, indexerName);
+    let space = await Space.loadEntity(spaceEntityId, indexerName);
     if (!space) {
-      space = new Space(DEFAULT_SPACE_ID, indexerName);
+      space = new Space(spaceEntityId, indexerName);
     }
     space.vote_count += 1;
 
@@ -245,7 +264,7 @@ export function createWriters(indexerName: string) {
     console.log('Handle new role', spaceId, id, name, description, color);
 
     const role = new Role(id.toString(), indexerName);
-    role.space = spaceId;
+    role.space = spaceId.toString();
     role.name = name;
     role.description = description;
     role.color = color;
@@ -263,7 +282,7 @@ export function createWriters(indexerName: string) {
     const role = await Role.loadEntity(id.toString(), indexerName);
     if (!role) return;
 
-    role.space = spaceId;
+    role.space = spaceId.toString();
     role.name = name;
     role.description = description;
     role.color = color;
@@ -288,18 +307,15 @@ export function createWriters(indexerName: string) {
 
     console.log('Handle claim role', spaceId, id, userAddress);
 
-    let user = await User.loadEntity(userAddress, indexerName);
-    if (!user) user = new User(userAddress, indexerName);
+    const userId = `${spaceId}/${userAddress}`;
+    let user = await User.loadEntity(userId, indexerName);
+    if (!user) user = new User(userId, indexerName);
     await user.save();
 
-    let userRole = await UserRole.loadEntity(
-      `${spaceId}:${id}:${userAddress}`,
-      indexerName
-    );
-
+    let userRole = await UserRole.loadEntity(`${userId}/${id}`, indexerName);
     if (!userRole) {
-      userRole = new UserRole(`${spaceId}:${id}:${userAddress}`, indexerName);
-      userRole.user = userAddress;
+      userRole = new UserRole(`${userId}/${id}`, indexerName);
+      userRole.user = userId;
       userRole.role = id;
       await userRole.save();
     }
@@ -310,15 +326,12 @@ export function createWriters(indexerName: string) {
 
     console.log('Handle revoke role', spaceId, id, userAddress);
 
-    let user = await User.loadEntity(userAddress, indexerName);
-    if (!user) user = new User(userAddress, indexerName);
+    const userId = `${spaceId}/${userAddress}`;
+    let user = await User.loadEntity(userId, indexerName);
+    if (!user) user = new User(userId, indexerName);
     await user.save();
 
-    const userRole = await UserRole.loadEntity(
-      `${spaceId}:${id}:${userAddress}`,
-      indexerName
-    );
-
+    const userRole = await UserRole.loadEntity(`${userId}/${id}`, indexerName);
     if (userRole) {
       await userRole.delete();
     }

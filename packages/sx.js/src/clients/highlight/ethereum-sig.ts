@@ -179,8 +179,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic } = data;
+    const { space, topic } = data;
     const message = {
+      space,
       topic
     };
 
@@ -214,6 +215,7 @@ export class HighlightEthereumSigClient {
 
     const { space, topic, metadataUri } = data;
     const message = {
+      space,
       topic,
       metadataUri
     };
@@ -246,8 +248,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post } = data;
+    const { space, topic, post } = data;
     const message = {
+      space,
       topic,
       post
     };
@@ -280,8 +283,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post } = data;
+    const { space, topic, post } = data;
     const message = {
+      space,
       topic,
       post
     };
@@ -314,8 +318,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post } = data;
+    const { space, topic, post } = data;
     const message = {
+      space,
       topic,
       post
     };
@@ -348,8 +353,9 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { topic, post, choice } = data;
+    const { space, topic, post, choice } = data;
     const message = {
+      space,
       topic,
       post,
       choice

@@ -25,34 +25,42 @@ export const TOWNHALL_CONFIG = {
       ]
     },
     closeTopic: {
-      CloseTopic: [{ name: 'topic', type: 'uint64' }]
+      CloseTopic: [
+        { name: 'space', type: 'uint64' },
+        { name: 'topic', type: 'uint64' }
+      ]
     },
     createPost: {
       Post: [
+        { name: 'space', type: 'uint64' },
         { name: 'topic', type: 'uint64' },
         { name: 'metadataUri', type: 'string' }
       ]
     },
     hidePost: {
       HidePost: [
+        { name: 'space', type: 'uint64' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'int' }
       ]
     },
     pinPost: {
       PinPost: [
+        { name: 'space', type: 'uint64' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'uint64' }
       ]
     },
     unpinPost: {
       UnpinPost: [
+        { name: 'space', type: 'uint64' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'uint64' }
       ]
     },
     vote: {
       Vote: [
+        { name: 'space', type: 'uint64' },
         { name: 'topic', type: 'uint64' },
         { name: 'post', type: 'uint64' },
         { name: 'choice', type: 'uint64' }
@@ -66,26 +74,26 @@ export const TOWNHALL_CONFIG = {
     },
     editRole: {
       EditRole: [
-        { name: 'space', type: 'string' },
+        { name: 'space', type: 'uint64' },
         { name: 'id', type: 'uint64' },
         { name: 'metadataUri', type: 'string' }
       ]
     },
     deleteRole: {
       DeleteRole: [
-        { name: 'space', type: 'string' },
+        { name: 'space', type: 'uint64' },
         { name: 'id', type: 'uint64' }
       ]
     },
     claimRole: {
       ClaimRole: [
-        { name: 'space', type: 'string' },
+        { name: 'space', type: 'uint64' },
         { name: 'id', type: 'uint64' }
       ]
     },
     revokeRole: {
       RevokeRole: [
-        { name: 'space', type: 'string' },
+        { name: 'space', type: 'uint64' },
         { name: 'id', type: 'uint64' }
       ]
     }
