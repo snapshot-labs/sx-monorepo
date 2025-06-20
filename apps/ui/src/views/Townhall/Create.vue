@@ -42,18 +42,19 @@ const DISCUSSION_DEFINITION = {
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
+const validator = getValidator({
+  type: 'object',
+  title: 'Topic',
+  additionalProperties: false,
+  required: ['title'],
+  properties: {
+    title: TITLE_DEFINITION,
+    body: BODY_DEFINITION,
+    discussion: DISCUSSION_DEFINITION
+  }
+});
+
 const formErrors = computed(() => {
-  const validator = getValidator({
-    type: 'object',
-    title: 'Topic',
-    additionalProperties: false,
-    required: ['title'],
-    properties: {
-      title: TITLE_DEFINITION,
-      body: BODY_DEFINITION,
-      discussion: DISCUSSION_DEFINITION
-    }
-  });
   return validator.validate(
     { title: title.value, body: body.value, discussion: discussion.value },
     { skipEmptyOptionalFields: true }
