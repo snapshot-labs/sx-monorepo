@@ -2,6 +2,7 @@
 import { getTopic } from '@/helpers/townhall/api';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { sleep } from '@/helpers/utils';
+import { getValidator } from '@/helpers/validation';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
@@ -41,7 +42,33 @@ const DISCUSSION_DEFINITION = {
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
+const formErrors = computed(() => {
+  const validator = getValidator({
+    type: 'object',
+    title: 'Topic',
+    additionalProperties: false,
+    required: ['title'],
+    properties: {
+      title: TITLE_DEFINITION,
+      body: BODY_DEFINITION,
+      discussion: DISCUSSION_DEFINITION
+    }
+  });
+  return validator.validate(
+    { title: title.value, body: body.value, discussion: discussion.value },
+    { skipEmptyOptionalFields: true }
+  );
+});
+
+const formValid = computed(() => {
+  return Object.keys(formErrors.value).length === 0;
+});
+
 async function handleSubmit() {
+  if (!formValid.value) {
+    return;
+  }
+
   submitLoading.value = true;
 
   try {
@@ -116,18 +143,27 @@ watchEffect(() => {
         <UiInputString
           v-model="title"
           :definition="TITLE_DEFINITION"
+          :error="formErrors.title"
           :required="true"
         />
       </div>
       <div class="s-base">
-        <UiComposer v-model="body" :definition="BODY_DEFINITION" />
+        <UiComposer
+          v-model="body"
+          :definition="BODY_DEFINITION"
+          :error="formErrors.body"
+        />
       </div>
-      <UiInputString v-model="discussion" :definition="DISCUSSION_DEFINITION" />
+      <UiInputString
+        v-model="discussion"
+        :definition="DISCUSSION_DEFINITION"
+        :error="formErrors.discussion"
+      />
       <UiLinkPreview :url="discussion" />
       <div class="flex gap-2.5 items-center">
         <UiButton
           class="primary flex items-center space-x-1"
-          :disabled="submitLoading"
+          :disabled="submitLoading || !formValid"
           @click="handleSubmit"
         >
           <div>Publish</div>
