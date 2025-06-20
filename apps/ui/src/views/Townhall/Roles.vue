@@ -244,7 +244,7 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
       <ModalLabelConfig
         item-type="role"
         :open="modalOpen"
-        :disabled="submitLoading"
+        :loading="submitLoading"
         :initial-state="(roles || []).find(l => l.id === activeLabelId)"
         @add="
           config => {

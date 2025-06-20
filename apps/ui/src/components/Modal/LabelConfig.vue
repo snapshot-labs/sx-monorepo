@@ -6,13 +6,13 @@ import { SpaceMetadataLabel } from '@/types';
 const props = withDefaults(
   defineProps<{
     open: boolean;
-    disabled?: boolean;
+    loading?: boolean;
     initialState?: SpaceMetadataLabel;
     itemType?: 'label' | 'role';
   }>(),
   {
     itemType: 'label',
-    disabled: false
+    loading: false
   }
 );
 
@@ -119,7 +119,8 @@ watch(
     <template #footer>
       <UiButton
         class="w-full"
-        :disabled="!formValid || disabled"
+        :disabled="!formValid || loading"
+        :loading="loading"
         @click="handleSubmit"
       >
         Confirm
