@@ -1,4 +1,4 @@
-import { imageUpload } from '@/helpers/utils';
+import { getUserFacingErrorMessage, imageUpload } from '@/helpers/utils';
 
 type Formatting = {
   prefix: string;
@@ -124,13 +124,11 @@ export function useMarkdownEditor(
   }
 
   async function uploadFile(file: File) {
-    if (!file.type.startsWith('image/')) return;
-
     uploading.value = true;
 
     try {
       const image = await imageUpload(file);
-      if (!image) throw new Error('Image not uploaded');
+      if (!image) throw new Error('Failed to upload image.');
 
       insertFormatting({
         prefix: `![${file.name}](${image.url})`,
@@ -139,7 +137,7 @@ export function useMarkdownEditor(
 
       editorRef.value?.focus();
     } catch (e) {
-      uiStore.addNotification('error', 'Failed to upload image.');
+      uiStore.addNotification('error', getUserFacingErrorMessage(e));
 
       console.error('Failed to upload image', e);
     } finally {
