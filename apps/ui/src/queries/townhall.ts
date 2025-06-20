@@ -325,14 +325,14 @@ export function useCreatePostMutation({
     mutationFn: (body: string) => {
       return sendPost(toValue(spaceId), toValue(topicId), body);
     },
-    onSuccess: async data => {
+    onSuccess: async (data, body) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
         event => event.key === 'new_post'
       );
 
-      const post = newPostEventToEntry(eventData);
+      const post = { ...newPostEventToEntry(eventData), body };
 
       queryClient.setQueryData<Topic>(
         ['townhall', 'topics', 'detail', { spaceId, topicId }],

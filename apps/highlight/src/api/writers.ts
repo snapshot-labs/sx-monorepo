@@ -10,6 +10,7 @@ import {
   UserRole,
   Vote
 } from '../../.checkpoint/models';
+import { getJSON } from '../utils';
 
 const SetAliasEventData = z.tuple([
   z.string(), // from
@@ -21,9 +22,7 @@ const NewTopicEventData = z.tuple([
   z.number(), // spaceId
   z.number(), // id
   z.string(), // author
-  z.string(), // title
-  z.string(), // body
-  z.string() // discussionUrl
+  z.string() // metadataUri
 ]);
 
 const CloseTopicEventData = z.tuple([
@@ -36,7 +35,7 @@ const NewPostEventData = z.tuple([
   z.number(), // topicId
   z.number(), // id
   z.string(), // author
-  z.string() // body
+  z.string() // metadataUri
 ]);
 
 const PinPostEventData = z.tuple([
@@ -58,9 +57,7 @@ const NewVoteEventData = z.tuple([
 const NewRoleEventData = z.tuple([
   z.number(), // spaceId
   z.string(), // id
-  z.string(), // name
-  z.string(), // description
-  z.string() // color
+  z.string() // metadataUri
 ]);
 const EditRoleEventData = NewRoleEventData;
 
@@ -89,19 +86,22 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewTopic: Writer = async ({ unit, payload }) => {
-    const [spaceId, id, author, title, body, discussionUrl] =
-      NewTopicEventData.parse(payload.data);
+    const [spaceId, id, author, metadataUri] = NewTopicEventData.parse(
+      payload.data
+    );
 
-    console.log('Handle new topic', spaceId, id, author, title, body);
+    console.log('Handle new topic', spaceId, id, author, metadataUri);
+
+    const metadata = await getJSON(metadataUri);
 
     const spaceEntityId = spaceId.toString();
     const topic = new Topic(`${spaceId}/${id}`, indexerName);
     topic.topic_id = id;
     topic.space = spaceEntityId;
     topic.author = author;
-    topic.title = title;
-    topic.body = body;
-    topic.discussion_url = discussionUrl;
+    topic.title = metadata.title || '';
+    topic.body = metadata.body || '';
+    topic.discussion_url = metadata.discussionUrl || '';
     topic.post_count = 0;
     topic.vote_count = 0;
     topic.created = unit.timestamp;
@@ -130,15 +130,17 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewPost: Writer = async ({ unit, payload }) => {
-    const [spaceId, topicId, id, author, body] = NewPostEventData.parse(
+    const [spaceId, topicId, id, author, metadataUri] = NewPostEventData.parse(
       payload.data
     );
 
-    console.log('Handle new post', spaceId, id, author, topicId, body);
+    console.log('Handle new post', spaceId, id, author, topicId, metadataUri);
+
+    const metadata = await getJSON(metadataUri);
 
     const post = new Post(`${spaceId}/${topicId}/${id}`, indexerName);
     post.author = author;
-    post.body = body;
+    post.body = metadata.body || '';
     post.vote_count = 0;
     post.scores_1 = 0;
     post.scores_2 = 0;
@@ -257,35 +259,35 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewRole: Writer = async ({ unit, payload }) => {
-    const [spaceId, id, name, description, color] = NewRoleEventData.parse(
-      payload.data
-    );
+    const [spaceId, id, metadataUri] = NewRoleEventData.parse(payload.data);
 
-    console.log('Handle new role', spaceId, id, name, description, color);
+    console.log('Handle new role', spaceId, id, metadataUri);
+
+    const metadata = await getJSON(metadataUri);
 
     const role = new Role(id.toString(), indexerName);
     role.space = spaceId.toString();
-    role.name = name;
-    role.description = description;
-    role.color = color;
+    role.name = metadata.name || '';
+    role.description = metadata.description || '';
+    role.color = metadata.color || '';
     role.created = unit.timestamp;
     await role.save();
   };
 
   const handleEditRole: Writer = async ({ payload }) => {
-    const [spaceId, id, name, description, color] = EditRoleEventData.parse(
-      payload.data
-    );
+    const [spaceId, id, metadataUri] = EditRoleEventData.parse(payload.data);
 
-    console.log('Handle edit role', spaceId, id, name, description, color);
+    console.log('Handle edit role', spaceId, id, metadataUri);
+
+    const metadata = await getJSON(metadataUri);
 
     const role = await Role.loadEntity(id.toString(), indexerName);
     if (!role) return;
 
     role.space = spaceId.toString();
-    role.name = name;
-    role.description = description;
-    role.color = color;
+    role.name = metadata.name || '';
+    role.description = metadata.description || '';
+    role.color = metadata.color || '';
     await role.save();
   };
 

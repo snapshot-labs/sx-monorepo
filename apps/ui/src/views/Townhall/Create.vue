@@ -126,8 +126,9 @@ watchEffect(() => {
       <UiLinkPreview :url="discussion" />
       <div class="flex gap-2.5 items-center">
         <UiButton
-          class="primary flex items-center space-x-1"
+          class="primary flex items-center justify-center space-x-1"
           :disabled="submitLoading"
+          :loading="submitLoading"
           @click="handleSubmit"
         >
           <div>Publish</div>

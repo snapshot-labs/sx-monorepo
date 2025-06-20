@@ -25,19 +25,15 @@ export default class Townhall extends Agent {
   }
 
   async topic(
-    {
-      space,
-      title,
-      body,
-      discussionUrl
-    }: { space: number; title: string; body: string; discussionUrl: string },
+    { space, metadataUri }: { space: number; metadataUri: string },
     { signer }: { signer: string }
   ) {
     const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
 
     const author = await this.getSigner(signer);
+
     this.write(`space:${space}:topics:id`, id + 1);
-    this.emit('new_topic', [space, id, author, title, body, discussionUrl]);
+    this.emit('new_topic', [space, id, author, metadataUri]);
   }
 
   async closeTopic({ space, topic }: { space: number; topic: number }) {
@@ -48,11 +44,11 @@ export default class Townhall extends Agent {
     {
       space,
       topic,
-      body
+      metadataUri
     }: {
       space: number;
       topic: number;
-      body: string;
+      metadataUri: string;
     },
     { signer }: { signer: string }
   ) {
@@ -64,7 +60,7 @@ export default class Townhall extends Agent {
     const author = await this.getSigner(signer);
 
     this.write(`space:${space}:topic:${topic}:posts:id`, id + 1);
-    this.emit('new_post', [space, topic, id, author, body]);
+    this.emit('new_post', [space, topic, id, author, metadataUri]);
   }
 
   async hidePost({
@@ -137,35 +133,27 @@ export default class Townhall extends Agent {
 
   async createRole({
     space,
-    name,
-    description,
-    color
+    metadataUri
   }: {
     space: number;
-    name: string;
-    description: string;
-    color: string;
+    metadataUri: string;
   }) {
     const id: number = (await this.get(`roles:id`)) ?? 0;
     this.write(`roles:id`, id + 1);
 
-    this.emit('new_role', [space, String(id), name, description, color]);
+    this.emit('new_role', [space, String(id), metadataUri]);
   }
 
   async editRole({
     space,
     id,
-    name,
-    description,
-    color
+    metadataUri
   }: {
     space: number;
     id: string;
-    name: string;
-    description: string;
-    color: string;
+    metadataUri: string;
   }) {
-    this.emit('edit_role', [space, id, name, description, color]);
+    this.emit('edit_role', [space, id, metadataUri]);
   }
 
   async deleteRole({ space, id }: { space: number; id: string }) {
