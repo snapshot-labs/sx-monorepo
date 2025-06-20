@@ -18,6 +18,7 @@ const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
+const submitLoading = ref(false);
 const spaceId = computed(() => props.townhallSpace.space_id);
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
@@ -41,9 +42,8 @@ function setModalStatus(open: boolean = false, roleId: string | null = null) {
 }
 
 async function handleAddRole(config: SpaceMetadataLabel) {
-  modalOpen.value = false;
-
   try {
+    submitLoading.value = true;
     const res = await sendCreateRole(
       spaceId.value,
       config.name,
@@ -68,8 +68,11 @@ async function handleAddRole(config: SpaceMetadataLabel) {
         return [...old, ...newRoles];
       }
     );
+    modalOpen.value = false;
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    submitLoading.value = false;
   }
 }
 
@@ -78,9 +81,8 @@ async function handleEditRole(config: SpaceMetadataLabel) {
     return;
   }
 
-  modalOpen.value = false;
-
   try {
+    submitLoading.value = true;
     const res = await sendEditRole(
       spaceId.value,
       activeLabelId.value,
@@ -108,8 +110,11 @@ async function handleEditRole(config: SpaceMetadataLabel) {
             : role
         )
     );
+    modalOpen.value = false;
   } catch (e) {
     addNotification('error', e.message);
+  } finally {
+    submitLoading.value = false;
   }
 }
 
@@ -239,6 +244,7 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
       <ModalLabelConfig
         item-type="role"
         :open="modalOpen"
+        :disabled="submitLoading"
         :initial-state="(roles || []).find(l => l.id === activeLabelId)"
         @add="
           config => {

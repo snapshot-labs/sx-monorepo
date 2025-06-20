@@ -6,11 +6,13 @@ import { SpaceMetadataLabel } from '@/types';
 const props = withDefaults(
   defineProps<{
     open: boolean;
+    disabled?: boolean;
     initialState?: SpaceMetadataLabel;
     itemType?: 'label' | 'role';
   }>(),
   {
-    itemType: 'label'
+    itemType: 'label',
+    disabled: false
   }
 );
 
@@ -115,7 +117,11 @@ watch(
       />
     </div>
     <template #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :disabled="!formValid || disabled"
+        @click="handleSubmit"
+      >
         Confirm
       </UiButton>
     </template>
