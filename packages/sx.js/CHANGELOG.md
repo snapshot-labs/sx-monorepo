@@ -1,5 +1,15 @@
 # @snapshot-labs/sx
 
+## 0.1.8
+
+### Patch Changes
+
+- 0bf0a22: use whitelist server to compute EVM merkleWhitelist proof
+- 4ada1f3: generate standard execution payload for any execution with transactions
+- 0bf0a22: require params to be included in EMV strategies for propose and vote
+- 9f5c784: add Apechain and Curtis networks
+- 7ae0363: use whitelistServer instead of mana for whitelist proofs
+
 ## 0.1.7
 
 ### Patch Changes
