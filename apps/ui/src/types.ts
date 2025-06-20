@@ -150,6 +150,7 @@ export type OffchainAdditionalRawData = {
   OffchainApiSpace,
   | 'private'
   | 'flagged'
+  | 'flagCode'
   | 'domain'
   | 'skin'
   | 'skinSettings'
@@ -310,6 +311,7 @@ export type Proposal = {
   state: ProposalState;
   privacy: Privacy;
   flagged: boolean;
+  flag_code: number;
 };
 
 export type UserProfile = {

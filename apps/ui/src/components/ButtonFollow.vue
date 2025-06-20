@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getUserFacingErrorMessage } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
@@ -53,7 +54,7 @@ async function handleClick() {
   try {
     await followedSpacesStore.toggleSpaceFollow(spaceIdComposite.value);
   } catch (error) {
-    uiStore.addNotification('error', error.message);
+    uiStore.addNotification('error', getUserFacingErrorMessage(error));
   }
 }
 </script>
