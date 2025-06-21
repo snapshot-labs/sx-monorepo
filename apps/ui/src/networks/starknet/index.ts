@@ -11,7 +11,7 @@ import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createConstants } from './constants';
 import { createProvider } from './provider';
-import { STARKNET_CONNECTORS } from '../common/constants';
+import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
 import { awaitIndexedOnApi } from '../common/helpers';
 
@@ -177,6 +177,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     currentChainId: baseChainId,
     baseNetworkId,
     supportsSimulation: true,
+    governanceConnectors: [...STARKNET_CONNECTORS, ...EVM_CONNECTORS],
     managerConnectors: STARKNET_CONNECTORS,
     actions: createActions(networkId, provider, helpers, {
       chainId,

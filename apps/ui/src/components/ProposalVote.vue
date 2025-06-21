@@ -15,6 +15,7 @@ defineEmits<{
   (e: 'enterEditMode');
 }>();
 
+const { auth } = useWeb3();
 const { votes, pendingVotes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
@@ -23,6 +24,15 @@ const { isInvalidNetwork } = useSafeWallet(
 );
 
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
+
+const isConnectorSupported = computed(() => {
+  const network = getNetwork(props.proposal.network);
+
+  return (
+    !auth.value ||
+    network.governanceConnectors.includes(auth.value.connector.type)
+  );
+});
 
 const isSupported = computed(() => {
   const network = getNetwork(props.proposal.network);
@@ -35,6 +45,7 @@ const isSupported = computed(() => {
   );
 
   return (
+    isConnectorSupported.value &&
     hasSupportedAuthenticator &&
     hasSupportedStrategies &&
     SUPPORTED_VOTING_TYPES.includes(props.proposal.type)
@@ -125,7 +136,10 @@ const isEditable = computed(() => {
   >
 
   <slot v-else-if="!isSupported" name="unsupported">
-    Voting for this proposal is not supported
+    <template v-if="!isConnectorSupported">
+      This space does not support your connected wallet
+    </template>
+    <template v-else>Voting for this proposal is not supported</template>
   </slot>
   <slot v-else-if="isInvalidNetwork" name="wrong-safe-network">
     Safe's network should be same as space's network
