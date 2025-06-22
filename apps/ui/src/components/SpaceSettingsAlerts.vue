@@ -40,7 +40,7 @@ const hasAlerts = computed(
 
 <template>
   <template v-if="activeTab === 'voting-strategies'">
-    <div v-if="isSpaceAdmin && hasAlerts" class="space-y-3" v-bind="$attrs">
+    <div v-if="isSpaceAdmin && hasAlerts" class="space-y-2" v-bind="$attrs">
       <UiAlert v-if="deprecatedStrategies.length" type="error">
         The {{ prettyConcat(deprecatedStrategies, 'and') }}
         {{ deprecatedStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
