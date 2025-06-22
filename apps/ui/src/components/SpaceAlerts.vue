@@ -19,7 +19,7 @@ const pendingTasks = computed(() => {
     alerts.value.has(SPACE_ALERTS.STRATEGIES_PRO_ONLY)
   ) {
     _alerts.push({
-      description: 'Voting strategies needs to be updated',
+      description: 'Voting strategies need to be updated',
       link: { name: 'space-settings', params: { tab: 'voting-strategies' } },
       type: 'error'
     });
