@@ -228,6 +228,11 @@ export const FLAGS = {
   DMCA: 2
 };
 
+export const SPACE_ALERTS = {
+  STRATEGIES_DEPRECATED: 1,
+  STRATEGIES_PRO_ONLY: 2
+};
+
 export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',

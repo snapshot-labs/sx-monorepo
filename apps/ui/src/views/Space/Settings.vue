@@ -352,6 +352,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       class="flex-grow"
       :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
     >
+      <SpaceSettingsAlerts
+        :space="space"
+        :active-tab="activeTab"
+        class="max-w-[592px] mb-4"
+      />
       <div v-show="activeTab === 'profile'">
         <FormSpaceProfile
           :id="space.id"
