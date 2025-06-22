@@ -23,6 +23,10 @@ const pendingTasks = computed(() => {
 
   return _alerts;
 });
+
+const isVisible = computed(() => {
+  return (isController.value || isAdmin.value) && pendingTasks.value.length > 0;
+});
 </script>
 
 <template>
