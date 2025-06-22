@@ -1,29 +1,10 @@
-import { SPACE_ALERTS } from '@/helpers/constants';
+import {
+  DEPRECATED_STRATEGIES,
+  OVERRIDING_STRATEGIES,
+  SPACE_ALERTS
+} from '@/helpers/constants';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
-
-const OVERRIDING_STRATEGIES: string[] = [
-  'aura-vlaura-vebal-with-overrides',
-  'balance-of-with-linear-vesting-power',
-  'balancer-delegation',
-  'cyberkongz',
-  'cyberkongz-v2',
-  'delegation',
-  'delegation-with-cap',
-  'delegation-with-overrides',
-  'erc20-balance-of-delegation',
-  'erc20-balance-of-fixed-total',
-  'erc20-balance-of-quadratic-delegation',
-  'erc20-votes-with-override',
-  'esd-delegation',
-  'ocean-dao-brightid',
-  'orbs-network-delegation',
-  'api-v2-override',
-  'rocketpool-node-operator-delegate-v8',
-  'eden-online-override'
-] as const;
-
-const DEPRECATED_STRATEGIES: string[] = ['multichain'] as const;
 
 export function useSpaceAlerts(space: Ref<Space>) {
   const isOffchainSpace = computed(() =>
@@ -34,7 +15,9 @@ export function useSpaceAlerts(space: Ref<Space>) {
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(
-      strategy => OVERRIDING_STRATEGIES.includes(strategy) && !space.value.turbo
+      strategy =>
+        (OVERRIDING_STRATEGIES as readonly string[]).includes(strategy) &&
+        !space.value.turbo
     );
   });
 
@@ -42,7 +25,7 @@ export function useSpaceAlerts(space: Ref<Space>) {
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(strategy =>
-      DEPRECATED_STRATEGIES.includes(strategy)
+      (DEPRECATED_STRATEGIES as readonly string[]).includes(strategy)
     );
   });
 

@@ -231,8 +231,30 @@ export const FLAGS = {
 export const SPACE_ALERTS = {
   STRATEGIES_DEPRECATED: 1,
   STRATEGIES_PRO_ONLY: 2
-};
+} as const;
 
+export const OVERRIDING_STRATEGIES = [
+  'aura-vlaura-vebal-with-overrides',
+  'balance-of-with-linear-vesting-power',
+  'balancer-delegation',
+  'cyberkongz',
+  'cyberkongz-v2',
+  'delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides',
+  'erc20-balance-of-delegation',
+  'erc20-balance-of-fixed-total',
+  'erc20-balance-of-quadratic-delegation',
+  'erc20-votes-with-override',
+  'esd-delegation',
+  'ocean-dao-brightid',
+  'orbs-network-delegation',
+  'api-v2-override',
+  'rocketpool-node-operator-delegate-v8',
+  'eden-online-override',
+  'split-delegation'
+] as const;
+export const DEPRECATED_STRATEGIES = ['multichain'] as const;
 export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
