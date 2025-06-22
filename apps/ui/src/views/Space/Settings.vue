@@ -226,6 +226,20 @@ const showToolbar = computed(() => {
   );
 });
 
+// Live space with minimum properties for alerts
+const alertSpace = computed(() => {
+  return {
+    ...props.space,
+    strategies: strategies.value.map(strategy => strategy.name),
+    strategies_params: strategies.value.map(strategy => ({
+      name: strategy.name,
+      params: strategy.params,
+      network: strategy.chainId?.toString() ?? snapshotChainId.value
+    })),
+    snapshot_chain_id: snapshotChainId.value
+  };
+});
+
 function isValidTab(param: string | string[]): param is Tab['id'] {
   if (Array.isArray(param)) return false;
   return tabs.value.map(tab => tab.id).includes(param as any);
@@ -353,7 +367,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
     >
       <SpaceSettingsAlerts
-        :space="space"
+        :space="alertSpace"
         :active-tab="activeTab"
         class="max-w-[592px] mb-4"
       />

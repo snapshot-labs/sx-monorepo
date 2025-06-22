@@ -34,7 +34,8 @@ const deprecatedStrategies = computed(
 const hasAlerts = computed(
   () =>
     unsupportedProOnlyStrategies.value.length > 0 ||
-    deprecatedStrategies.value.length > 0
+    deprecatedStrategies.value.length > 0 ||
+    unsupportedProOnlyNetworks.value.length > 0
 );
 </script>
 
