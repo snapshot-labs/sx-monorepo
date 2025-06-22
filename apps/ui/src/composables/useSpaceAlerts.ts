@@ -7,11 +7,17 @@ import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 export function useSpaceAlerts(space: Ref<Space>) {
+  const {
+    networks,
+    premiumChainIds,
+    loaded: networksLoaded
+  } = useOffchainNetworksList(space.value.network);
+
   const isOffchainSpace = computed(() =>
     offchainNetworks.includes(space.value.network)
   );
 
-  const unsupportedOverridingStrategies = computed(() => {
+  const unsupportedProOnlyStrategies = computed(() => {
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(
@@ -29,6 +35,32 @@ export function useSpaceAlerts(space: Ref<Space>) {
     );
   });
 
+  const unsupportedProOnlyNetworks = computed(() => {
+    if (
+      !space.value.snapshot_chain_id ||
+      !networksLoaded.value ||
+      space.value.turbo
+    )
+      return [];
+
+    const ids = new Set<number>([
+      space.value.snapshot_chain_id,
+      ...space.value.strategies_params.map(strategy =>
+        Number(strategy.network)
+      ),
+      ...space.value.strategies_params.flatMap(strategy =>
+        Array.isArray(strategy.params?.strategies)
+          ? strategy.params.strategies.map(param => Number(param.network))
+          : []
+      )
+    ]);
+
+    return Array.from(ids)
+      .filter(n => !premiumChainIds.value.has(n))
+      .map(chainId => networks.value.find(n => n.chainId === chainId))
+      .filter(network => !!network);
+  });
+
   const alerts = computed(() => {
     const alertsMap = new Map<number, Record<string, any>>();
 
@@ -38,9 +70,15 @@ export function useSpaceAlerts(space: Ref<Space>) {
       });
     }
 
-    if (unsupportedOverridingStrategies.value.length) {
+    if (unsupportedProOnlyStrategies.value.length) {
       alertsMap.set(SPACE_ALERTS.STRATEGIES_PRO_ONLY, {
-        strategies: unsupportedOverridingStrategies.value
+        strategies: unsupportedProOnlyStrategies.value
+      });
+    }
+
+    if (unsupportedProOnlyNetworks.value.length) {
+      alertsMap.set(SPACE_ALERTS.NETWORKS_PRO_ONLY, {
+        networks: unsupportedProOnlyNetworks.value
       });
     }
 

@@ -230,7 +230,8 @@ export const FLAGS = {
 
 export const SPACE_ALERTS = {
   STRATEGIES_DEPRECATED: 1,
-  STRATEGIES_PRO_ONLY: 2
+  STRATEGIES_PRO_ONLY: 2,
+  NETWORKS_PRO_ONLY: 3
 } as const;
 
 export const OVERRIDING_STRATEGIES = [

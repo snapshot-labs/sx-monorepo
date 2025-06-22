@@ -12,7 +12,8 @@ const pendingTasks = computed(() => {
 
   if (
     alerts.value.has(SPACE_ALERTS.STRATEGIES_DEPRECATED) ||
-    alerts.value.has(SPACE_ALERTS.STRATEGIES_PRO_ONLY)
+    alerts.value.has(SPACE_ALERTS.STRATEGIES_PRO_ONLY) ||
+    alerts.value.has(SPACE_ALERTS.NETWORKS_PRO_ONLY)
   ) {
     _alerts.push({
       description: 'Voting strategies need to be updated',
