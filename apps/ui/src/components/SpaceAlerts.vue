@@ -7,10 +7,6 @@ const props = defineProps<{ space: Space }>();
 const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
 const { alerts } = useSpaceAlerts(toRef(props, 'space'));
 
-const isVisible = computed(() => {
-  return (isController.value || isAdmin.value) && pendingTasks.value.length > 0;
-});
-
 const pendingTasks = computed(() => {
   const _alerts: Task[] = [];
 
