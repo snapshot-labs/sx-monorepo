@@ -39,7 +39,7 @@ const hasAlerts = computed(
         {{ deprecatedStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
         deprecated and no longer supported.
         <AppLink
-          to="https://help.snapshot.box/en/#TBD"
+          to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
           class="inline-flex items-center"
         >
           See migration guide
