@@ -132,8 +132,8 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
         </template>
       </UiDropdown>
     </div>
-    <div>
-      <template v-if="categories?.length">
+    <div class="space-y-3">
+      <div v-if="categories?.length">
         <UiLabel label="Categories" sticky />
         <router-link
           v-for="(c, i) in categories"
@@ -191,16 +191,18 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
             </template>
           </UiDropdown>
         </router-link>
-      </template>
-      <UiLabel label="Topics" sticky />
-      <TownhallTopicsList
-        limit="off"
-        :is-error="isError"
-        :is-loading="isPending"
-        :is-loading-more="isFetchingNextPage"
-        :topics="topics?.pages.flat() ?? []"
-        @end-reached="handleEndReached"
-      />
+      </div>
+      <div>
+        <UiLabel label="Topics" sticky />
+        <TownhallTopicsList
+          limit="off"
+          :is-error="isError"
+          :is-loading="isPending"
+          :is-loading-more="isFetchingNextPage"
+          :topics="topics?.pages.flat() ?? []"
+          @end-reached="handleEndReached"
+        />
+      </div>
     </div>
     <teleport to="#modal">
       <ModalAddCategory
