@@ -7,6 +7,8 @@ const model = defineModel<StrategyConfig[]>({ required: true });
 withDefaults(
   defineProps<{
     networkId: NetworkID;
+    spaceId: string;
+    votingPowerSymbol: string;
     limit?: number;
     unique?: boolean;
     title: string;
@@ -26,6 +28,8 @@ withDefaults(
     <StrategiesConfigurator
       :model-value="model"
       :network-id="networkId"
+      :space-id="spaceId"
+      :voting-power-symbol="votingPowerSymbol"
       :unique="unique"
       :available-strategies="availableStrategies"
       :default-params="defaultParams"

@@ -15,6 +15,10 @@ const props = defineProps<{
   hiddenStrategies?: string[];
 }>();
 
+const emit = defineEmits<{
+  (e: 'testStrategies', strategies: StrategyConfig[]): void;
+}>();
+
 const isStrategiesModalOpen = ref(false);
 const isEditStrategyModalOpen = ref(false);
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
@@ -96,6 +100,9 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
         :strategy="strategy"
         @edit-strategy="handleEditStrategy"
         @delete-strategy="handleRemoveStrategy"
+        @test-strategies="
+          (strategies: StrategyConfig[]) => emit('testStrategies', strategies)
+        "
       />
     </div>
     <UiButton

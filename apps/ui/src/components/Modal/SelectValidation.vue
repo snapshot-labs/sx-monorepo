@@ -18,7 +18,7 @@ import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { StrategyConfig } from '@/networks/types';
-import { ChainId, NetworkID, Space, Validation } from '@/types';
+import { ChainId, NetworkID, Validation } from '@/types';
 
 const SCORE_API_URL = 'https://score.snapshot.org/api/validations';
 const STRATEGIES_WITHOUT_PARAMS: ValidationDetails['key'][] = [
@@ -31,7 +31,8 @@ const props = withDefaults(
     open: boolean;
     networkId: NetworkID;
     defaultChainId: ChainId;
-    space?: Space;
+    spaceId: string;
+    votingPowerSymbol: string;
     type: 'voting' | 'proposal';
     current?: Validation;
     skipMenu?: boolean;
@@ -50,6 +51,8 @@ const selectedValidation = ref(null as ValidationDetails | null);
 const form = ref({} as Record<string, any>);
 const rawParams = ref('{}');
 const customStrategies = ref([] as StrategyConfig[]);
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 
 async function fetchValidations() {
   if (isLoading.value || validations.value.length) return;
@@ -228,6 +231,11 @@ function handleApply() {
   emit('close');
 }
 
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
+
 watch(
   () => props.open,
   async value => {
@@ -302,6 +310,7 @@ watch(
             allow-duplicates
             :network-id="networkId"
             :default-chain-id="defaultChainId"
+            @test-strategies="handleTestStrategies"
           >
             <template #empty>
               <div class="p-3 border border-dashed rounded-lg text-center">
@@ -356,4 +365,15 @@ watch(
       </UiButton>
     </template>
   </UiModal>
+  <teleport to="#modal">
+    <ModalTestStrategy
+      :open="isTestStrategiesModalOpen"
+      :network-id="networkId"
+      :chain-id="defaultChainId"
+      :space-id="spaceId"
+      :voting-power-symbol="votingPowerSymbol"
+      :strategies="testedStrategies"
+      @close="isTestStrategiesModalOpen = false"
+    />
+  </teleport>
 </template>

@@ -17,6 +17,9 @@ const props = defineProps<{
 
 const { limits } = useSettings();
 
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
+
 const strategiesLimit = computed(() => {
   const spaceType = props.space.turbo
     ? 'turbo'
@@ -26,6 +29,11 @@ const strategiesLimit = computed(() => {
 
   return limits.value[`space.${spaceType}.strategies_limit`];
 });
+
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
 </script>
 
 <template>
@@ -64,6 +72,20 @@ const strategiesLimit = computed(() => {
       :network-id="networkId"
       :default-chain-id="snapshotChainId"
       :limit="strategiesLimit"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
+      @test-strategies="handleTestStrategies"
     />
   </UiContainerSettings>
+  <teleport to="#modal">
+    <ModalTestStrategy
+      :open="isTestStrategiesModalOpen"
+      :network-id="networkId"
+      :chain-id="space.snapshot_chain_id"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
+      :strategies="testedStrategies"
+      @close="isTestStrategiesModalOpen = false"
+    />
+  </teleport>
 </template>

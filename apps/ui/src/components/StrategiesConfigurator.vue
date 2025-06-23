@@ -7,6 +7,8 @@ const model = defineModel<StrategyConfig[]>({ required: true });
 const props = withDefaults(
   defineProps<{
     networkId: NetworkID;
+    spaceId: string;
+    votingPowerSymbol: string;
     limit?: number;
     unique?: boolean;
     availableStrategies: StrategyTemplate[];
@@ -20,7 +22,9 @@ const props = withDefaults(
 );
 
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 const editStrategyModalOpen = ref(false);
+const isTestStrategiesModalOpen = ref(false);
 
 const limitReached = computed(() => model.value.length >= props.limit);
 const activeStrategiesMap = computed(() =>
@@ -74,6 +78,11 @@ function handleStrategySave(value: Record<string, any>) {
     };
   });
 }
+
+async function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
 </script>
 
 <template>
@@ -88,6 +97,7 @@ function handleStrategySave(value: Record<string, any>) {
         :strategy="strategy"
         @edit-strategy="editStrategy"
         @delete-strategy="removeStrategy"
+        @test-strategies="handleTestStrategies"
       />
     </div>
     <h4 class="eyebrow mb-2 font-medium">Available</h4>
@@ -104,6 +114,14 @@ function handleStrategySave(value: Record<string, any>) {
       />
     </div>
     <teleport to="#modal">
+      <ModalTestStrategy
+        :open="isTestStrategiesModalOpen"
+        :network-id="networkId"
+        :space-id="spaceId"
+        :voting-power-symbol="props.votingPowerSymbol"
+        :strategies="testedStrategies"
+        @close="isTestStrategiesModalOpen = false"
+      />
       <ModalEditStrategy
         v-if="editedStrategy"
         :open="editStrategyModalOpen"

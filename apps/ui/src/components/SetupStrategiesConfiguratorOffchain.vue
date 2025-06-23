@@ -20,7 +20,8 @@ const strategies = defineModel<StrategyConfig[]>({ required: true });
 const props = defineProps<{
   snapshotChainId: number;
   networkId: NetworkID;
-  space: { turbo: boolean; verified: boolean };
+  spaceId: string;
+  votingPowerSymbol: string;
 }>();
 
 const { limits } = useSettings();
@@ -29,6 +30,8 @@ const chainId = ref<number>(props.snapshotChainId);
 const isLoading = ref(false);
 const hasError = ref(false);
 const isEditStrategyModalOpen = ref(false);
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 
 const editStrategyModalStrategy: ComputedRef<StrategyConfig | undefined> =
   computed(() => {
@@ -84,6 +87,11 @@ function handleSaveStrategy(value: StrategyConfig['params'], chainId: ChainId) {
   isEditStrategyModalOpen.value = false;
 }
 
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
+
 function reset() {
   strategies.value = [];
 }
@@ -106,6 +114,7 @@ onMounted(() => {
         :default-chain-id="chainId"
         :hidden-strategies="['ticket']"
         :limit="limits['space.default.strategies_limit']"
+        @test-strategies="handleTestStrategies"
       >
         <template #empty>
           <div class="space-y-3">
@@ -126,6 +135,15 @@ onMounted(() => {
       </UiStrategiesConfiguratorOffchain>
     </div>
     <teleport to="#modal">
+      <ModalTestStrategy
+        :open="isTestStrategiesModalOpen"
+        :network-id="networkId"
+        :chain-id="snapshotChainId"
+        :space-id="spaceId"
+        :voting-power-symbol="votingPowerSymbol"
+        :strategies="testedStrategies"
+        @close="isTestStrategiesModalOpen = false"
+      />
       <ModalEditStrategy
         v-if="editStrategyModalStrategy"
         with-network-selector
