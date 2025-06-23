@@ -139,6 +139,66 @@ export function useSpaceQuery({
 
       if (!networkIdValue || !spaceIdValue) return null;
 
+      // LocalStorage logic: for fetching local spaces
+      const deployedContracts = JSON.parse(
+        localStorage.getItem('deployedContracts') || '[]'
+      );
+      const localSpace = deployedContracts.find(
+        (s: any) =>
+          s.spaceContractAddress?.toLowerCase() === spaceIdValue.toLowerCase()
+      );
+      if (localSpace) {
+        return {
+          ...localSpace,
+          id: localSpace.spaceContractAddress,
+          network: localSpace.network,
+          name: localSpace.name,
+          avatar: localSpace.avatar,
+          cover: localSpace.cover,
+          about: localSpace.description,
+          proposal_count: 0,
+          vote_count: 0,
+          children: [],
+          parent: null,
+          verified: false,
+          turbo: false,
+          turbo_expiration: 0,
+          external_url: '',
+          treasuries: [],
+          delegations: [],
+          twitter: '',
+          github: '',
+          discord: '',
+          farcaster: '',
+          terms: '',
+          privacy: localSpace.privacy || 'none',
+          voting_power_symbol: '',
+          active_proposals: null,
+          controller: localSpace.creatorAddress || '',
+          voting_delay: 0,
+          voting_types: localSpace.voting_types || [],
+          min_voting_period: 0,
+          max_voting_period: 0,
+          proposal_threshold: '',
+          validation_strategy: '',
+          validation_strategy_params: '',
+          voting_power_validation_strategy_strategies: [],
+          voting_power_validation_strategy_strategies_params: [],
+          voting_power_validation_strategies_parsed_metadata: [],
+          strategies_indices: [],
+          strategies: [],
+          strategies_params: [],
+          strategies_parsed_metadata: [],
+          authenticators: [],
+          executors: [],
+          executors_types: [],
+          executors_destinations: [],
+          executors_strategies: [],
+          template: null,
+          guidelines: null
+        };
+      }
+
       await metaStore.fetchBlock(networkIdValue);
       const network = getNetwork(networkIdValue);
 
