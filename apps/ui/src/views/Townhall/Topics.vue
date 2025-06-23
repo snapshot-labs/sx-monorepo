@@ -85,7 +85,7 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
               <IH-arrow-narrow-left class="inline-block" />
             </UiButton>
           </router-link>
-          <h3>{{ category.name }}</h3>
+          <h3 class="text-[21px]">{{ category.name }}</h3>
         </div>
       </div>
       <UiTooltip title="New topic">
@@ -152,7 +152,7 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
             </div>
           </div>
           <div class="flex-1">
-            <h3 class="text-skin-link" v-text="c.name" />
+            <h3 class="text-skin-link text-[21px]" v-text="c.name" />
             <div class="text-skin-text space-x-2">
               {{ c.description }}
             </div>
