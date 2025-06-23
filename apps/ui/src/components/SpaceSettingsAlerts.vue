@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SPACE_ALERTS } from '@/helpers/constants';
 import { prettyConcat } from '@/helpers/utils';
 import { Space } from '@/types';
 
@@ -10,22 +9,22 @@ const { alerts } = useSpaceAlerts(toRef(props, 'space'));
 const unsupportedProOnlyStrategies = computed(
   () =>
     alerts.value
-      .get(SPACE_ALERTS.STRATEGIES_PRO_ONLY)
-      ?.strategies.map(s => `"${s}"`) || []
+      .get('HAS_PRO_ONLY_STRATEGIES')
+      ?.strategies.map((s: string) => `"${s}"`) || []
 );
 
 const unsupportedProOnlyNetworks = computed(
   () =>
     alerts.value
-      .get(SPACE_ALERTS.NETWORKS_PRO_ONLY)
-      ?.networks.map(s => `"${s.name}"`) || []
+      .get('HAS_PRO_ONLY_NETWORKS')
+      ?.networks.map((s: any) => `"${s.name}"`) || []
 );
 
 const deprecatedStrategies = computed(
   () =>
     alerts.value
-      .get(SPACE_ALERTS.STRATEGIES_DEPRECATED)
-      ?.strategies.map(s => `"${s}"`) || []
+      .get('HAS_DEPRECATED_STRATEGIES')
+      ?.strategies.map((s: string) => `"${s}"`) || []
 );
 
 const hasVotingStrategiesAlerts = computed(

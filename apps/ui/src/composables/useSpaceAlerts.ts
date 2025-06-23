@@ -1,10 +1,14 @@
 import {
   DEPRECATED_STRATEGIES,
-  OVERRIDING_STRATEGIES,
-  SPACE_ALERTS
+  OVERRIDING_STRATEGIES
 } from '@/helpers/constants';
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
+
+type AlertType =
+  | 'HAS_DEPRECATED_STRATEGIES'
+  | 'HAS_PRO_ONLY_STRATEGIES'
+  | 'HAS_PRO_ONLY_NETWORKS';
 
 export function useSpaceAlerts(space: Ref<Space>) {
   const {
@@ -62,22 +66,22 @@ export function useSpaceAlerts(space: Ref<Space>) {
   });
 
   const alerts = computed(() => {
-    const alertsMap = new Map<number, Record<string, any>>();
+    const alertsMap = new Map<AlertType, Record<string, any>>();
 
     if (deprecatedStrategies.value.length) {
-      alertsMap.set(SPACE_ALERTS.STRATEGIES_DEPRECATED, {
+      alertsMap.set('HAS_DEPRECATED_STRATEGIES', {
         strategies: deprecatedStrategies.value
       });
     }
 
     if (unsupportedProOnlyStrategies.value.length) {
-      alertsMap.set(SPACE_ALERTS.STRATEGIES_PRO_ONLY, {
+      alertsMap.set('HAS_PRO_ONLY_STRATEGIES', {
         strategies: unsupportedProOnlyStrategies.value
       });
     }
 
     if (unsupportedProOnlyNetworks.value.length) {
-      alertsMap.set(SPACE_ALERTS.NETWORKS_PRO_ONLY, {
+      alertsMap.set('HAS_PRO_ONLY_NETWORKS', {
         networks: unsupportedProOnlyNetworks.value
       });
     }

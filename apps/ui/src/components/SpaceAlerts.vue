@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SPACE_ALERTS } from '@/helpers/constants';
 import { Space, Task } from '@/types';
 
 const props = defineProps<{ space: Space }>();
@@ -11,9 +10,9 @@ const pendingTasks = computed(() => {
   const _alerts: Task[] = [];
 
   if (
-    alerts.value.has(SPACE_ALERTS.STRATEGIES_DEPRECATED) ||
-    alerts.value.has(SPACE_ALERTS.STRATEGIES_PRO_ONLY) ||
-    alerts.value.has(SPACE_ALERTS.NETWORKS_PRO_ONLY)
+    alerts.value.has('HAS_DEPRECATED_STRATEGIES') ||
+    alerts.value.has('HAS_PRO_ONLY_STRATEGIES') ||
+    alerts.value.has('HAS_PRO_ONLY_NETWORKS')
   ) {
     _alerts.push({
       description: 'Voting strategies need to be updated',

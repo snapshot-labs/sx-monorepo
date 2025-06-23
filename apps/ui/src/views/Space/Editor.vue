@@ -3,7 +3,7 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { SPACE_ALERTS, VERIFIED_URL } from '@/helpers/constants';
+import { VERIFIED_URL } from '@/helpers/constants';
 import { _n, omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
@@ -63,9 +63,9 @@ const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
 const nonPremiumNetworksList = computed(() => {
-  const networks = alerts.value.get(SPACE_ALERTS.NETWORKS_PRO_ONLY)?.networks;
+  const networks = alerts.value.get('HAS_PRO_ONLY_NETWORKS')?.networks;
   if (!networks) return '';
-  const boldNames = networks.map(n => `<b>${n.name}</b>`);
+  const boldNames = networks.map((n: any) => `<b>${n.name}</b>`);
   return prettyConcat(boldNames, 'and');
 });
 
@@ -189,8 +189,7 @@ const isSubmitButtonLoading = computed(() => {
 });
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
-    alerts.value.has(SPACE_ALERTS.NETWORKS_PRO_ONLY) &&
-    !proposal.value?.proposalId;
+    alerts.value.has('HAS_PRO_ONLY_NETWORKS') && !proposal.value?.proposalId;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
   if (hasUnsupportedNetworks || hasFormErrors) {
