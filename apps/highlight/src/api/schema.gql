@@ -14,6 +14,7 @@ type Category {
   description: String!
   created: Int!
   parent_category_id: Int!
+  topic_count: Int!
   space: Space!
 }
 
@@ -27,6 +28,7 @@ type Alias {
 type Topic {
   id: String!
   category_id: Int!
+  category: Category!
   title: String!
   body: Text!
   discussion_url: String!

@@ -179,8 +179,10 @@ export function createWriters(indexerName: string) {
     console.log('Handle new topic', spaceId, id, author, title, body);
 
     const spaceEntityId = spaceId.toString();
+    const categoryEntityId = `${spaceId}/${category}`;
     const topic = new Topic(`${spaceId}/${id}`, indexerName);
     topic.category_id = category;
+    topic.category = categoryEntityId;
     topic.topic_id = id;
     topic.space = spaceEntityId;
     topic.author = author;
@@ -196,6 +198,15 @@ export function createWriters(indexerName: string) {
       space = new Space(spaceEntityId, indexerName);
     }
     space.topic_count += 1;
+
+    const categoryEntity = await Category.loadEntity(
+      categoryEntityId,
+      indexerName
+    );
+    if (categoryEntity) {
+      categoryEntity.topic_count += 1;
+      await categoryEntity.save();
+    }
 
     await Promise.all([topic.save(), space.save()]);
   };

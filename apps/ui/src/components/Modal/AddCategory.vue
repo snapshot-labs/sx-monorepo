@@ -68,6 +68,7 @@ function generateDefaultState(): Category {
     id: '1',
     category_id: 1,
     parent_category_id: 0,
+    topic_count: 0,
     name: '',
     description: ''
   };

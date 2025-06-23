@@ -153,9 +153,7 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
           </div>
           <div class="flex-1">
             <h3 class="text-skin-link text-[21px]" v-text="c.name" />
-            <div class="text-skin-text space-x-2">
-              {{ c.description }}
-            </div>
+            <div class="text-skin-text">{{ c.topic_count }} topic(s)</div>
           </div>
           <UiDropdown class="flex gap-3 items-center h-[24px]">
             <template #button>

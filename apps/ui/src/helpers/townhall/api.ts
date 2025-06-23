@@ -37,6 +37,7 @@ gql(`
     name
     description
     parent_category_id
+    topic_count
   }
 
   fragment postFields on Post {
@@ -302,7 +303,8 @@ export function newCategoryEventToEntry(event: NewCategoryEvent): Category {
     category_id: id,
     name,
     description,
-    parent_category_id: parentCategoryId
+    parent_category_id: parentCategoryId,
+    topic_count: 0
   };
 }
 
