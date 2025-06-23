@@ -69,6 +69,10 @@ gql(`
     created
     closed
     topic_id
+    category {
+      category_id
+      name
+    }
     posts {
       ...postFields
     }

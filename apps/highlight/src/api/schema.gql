@@ -28,7 +28,7 @@ type Alias {
 type Topic {
   id: String!
   category_id: Int!
-  category: Category!
+  category: Category
   title: String!
   body: Text!
   discussion_url: String!

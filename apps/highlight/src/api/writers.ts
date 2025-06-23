@@ -182,7 +182,7 @@ export function createWriters(indexerName: string) {
     const categoryEntityId = `${spaceId}/${category}`;
     const topic = new Topic(`${spaceId}/${id}`, indexerName);
     topic.category_id = category;
-    topic.category = categoryEntityId;
+    topic.category = category !== 0 ? categoryEntityId : null;
     topic.topic_id = id;
     topic.space = spaceEntityId;
     topic.author = author;
