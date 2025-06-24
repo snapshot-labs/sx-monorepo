@@ -29,10 +29,10 @@ const deprecatedStrategies = computed(
 
 const hasVotingStrategiesAlerts = computed(
   () =>
-    (props.activeTab === 'voting-strategies' &&
-      (unsupportedProOnlyStrategies.value.length > 0 ||
-    deprecatedStrategies.value.length > 0 ||
-    unsupportedProOnlyNetworks.value.length > 0))
+    props.activeTab === 'voting-strategies' &&
+    (unsupportedProOnlyStrategies.value.length > 0 ||
+      deprecatedStrategies.value.length > 0 ||
+      unsupportedProOnlyNetworks.value.length > 0)
 );
 </script>
 
@@ -53,7 +53,11 @@ const hasVotingStrategiesAlerts = computed(
     <UiAlert v-if="unsupportedProOnlyStrategies.length" type="error">
       The
       {{ prettyConcat(unsupportedProOnlyStrategies, 'and') }}
-      {{ unsupportedProOnlyStrategies.length > 1 ? 'strategies require' : 'strategy requires' }}
+      {{
+        unsupportedProOnlyStrategies.length > 1
+          ? 'strategies require'
+          : 'strategy requires'
+      }}
       Snapshot Pro.
       <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
       or
@@ -69,7 +73,10 @@ const hasVotingStrategiesAlerts = computed(
       The
       {{ prettyConcat(unsupportedProOnlyNetworks, 'and') }}
       {{ unsupportedProOnlyNetworks.length > 1 ? 'networks' : 'network' }}
-      used by your space and/or its strategies require{{ unsupportedProOnlyNetworks.length > 1 ? '' : 's' }} Snapshot Pro.
+      used by your space and/or its strategies require{{
+        unsupportedProOnlyNetworks.length > 1 ? '' : 's'
+      }}
+      Snapshot Pro.
       <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
       or
       <AppLink
