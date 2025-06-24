@@ -227,7 +227,7 @@ const showToolbar = computed(() => {
 });
 
 // Live space with minimum properties for alerts
-const alertSpace = computed(() => {
+const pendingSpace = computed(() => {
   return {
     ...props.space,
     strategies: strategies.value.map(strategy => strategy.name),
@@ -367,7 +367,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
     >
       <SpaceSettingsAlerts
-        :space="alertSpace"
+        :space="pendingSpace"
         :active-tab="activeTab"
         class="max-w-[592px] mb-4"
       />
