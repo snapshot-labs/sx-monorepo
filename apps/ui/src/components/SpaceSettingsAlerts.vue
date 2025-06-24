@@ -30,9 +30,9 @@ const deprecatedStrategies = computed(
 const hasVotingStrategiesAlerts = computed(
   () =>
     (props.activeTab === 'voting-strategies' &&
-      unsupportedProOnlyStrategies.value.length > 0) ||
+      (unsupportedProOnlyStrategies.value.length > 0 ||
     deprecatedStrategies.value.length > 0 ||
-    unsupportedProOnlyNetworks.value.length > 0
+    unsupportedProOnlyNetworks.value.length > 0))
 );
 </script>
 
