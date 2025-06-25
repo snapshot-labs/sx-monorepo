@@ -91,9 +91,7 @@ export function createActions(
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: STARKNET_CONNECTORS,
-    lowPriorityAuthenticators: ['evm-tx']
+    helpers
   });
 
   const getIsContract = async (

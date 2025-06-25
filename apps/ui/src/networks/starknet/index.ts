@@ -75,12 +75,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   });
 
   const helpers = {
-    isAuthenticatorSupported: (authenticator: string) =>
-      constants.SUPPORTED_AUTHENTICATORS[authenticator],
-    isAuthenticatorContractSupported: (authenticator: string) =>
-      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
-    getRelayerAuthenticatorType: (authenticator: string) =>
-      constants.RELAYER_AUTHENTICATORS[authenticator],
+    getAuthenticatorSupportInfo: (authenticator: string) =>
+      constants.AUTHENTICATORS_SUPPORT_INFO[authenticator] || null,
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) =>
