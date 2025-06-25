@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ContractFactory } from '@ethersproject/contracts';
 import { StepRecords } from '@/components/Ui/Stepper.vue';
+import {
+  SPACE_CONTRACT,
+  VANILLA_AUTHENTICATOR,
+  VANILLA_EXECUTION_STRATEGY,
+  VANILLA_PROPOSAL_VALIDATION_STRATEGY,
+  VANILLA_VOTING_STRATEGY
+} from '@/contracts/contract-info';
 import { clone } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
@@ -111,31 +118,6 @@ const deployedAddresses = ref<{
 } | null>(null);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
-
-const SPACE_CONTRACT = {
-  abi: [],
-  bytecode: '0x'
-};
-
-const VANILLA_AUTHENTICATOR = {
-  abi: [],
-  bytecode: '0x'
-};
-
-const VANILLA_PROPOSAL_VALIDATION_STRATEGY = {
-  abi: [],
-  bytecode: '0x'
-};
-
-const VANILLA_VOTING_STRATEGY = {
-  abi: [],
-  bytecode: '0x'
-};
-
-const VANILLA_EXECUTION_STRATEGY = {
-  abi: [],
-  bytecode: '0x'
-};
 
 const deployContract = async ({
   abi,
@@ -274,6 +256,8 @@ const handleSubmit = async () => {
 
     storeDeployedAddresses(deployedAddresses.value);
     isLoading.value = false;
+
+    console.log('Deployed addresses:', deployedAddresses.value);
 
     // Now initialize
     await initialize(deployedAddresses.value);
