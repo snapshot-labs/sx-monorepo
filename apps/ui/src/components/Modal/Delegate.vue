@@ -139,10 +139,10 @@ const chainIds = computed(() => {
     .flatMap(params => {
       return [
         params.network,
-        ...params.params?.strategies?.flatMap(p => [
+        ...(params.params?.strategies?.flatMap(p => [
           p.network,
           p.params?.network
-        ])
+        ]) || [])
       ];
     })
     .filter(Boolean)

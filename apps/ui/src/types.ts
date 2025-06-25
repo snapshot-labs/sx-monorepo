@@ -60,6 +60,7 @@ export type VoteTypeInfo = {
 
 export type DelegationType =
   | 'governor-subgraph'
+  | 'apechain-delegate-registry'
   // From v1
   | 'delegate-registry'
   | 'split-delegation';
@@ -100,6 +101,7 @@ export type SpaceMetadata = {
   twitter: string;
   github: string;
   discord: string;
+  farcaster: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
   labels: SpaceMetadataLabel[];
@@ -148,6 +150,7 @@ export type OffchainAdditionalRawData = {
   OffchainApiSpace,
   | 'private'
   | 'flagged'
+  | 'flagCode'
   | 'domain'
   | 'skin'
   | 'skinSettings'
@@ -183,6 +186,7 @@ export type Space = {
   twitter: string;
   github: string;
   discord: string;
+  farcaster: string;
   coingecko?: string;
   terms: string;
   privacy: SpacePrivacy;
@@ -307,6 +311,7 @@ export type Proposal = {
   state: ProposalState;
   privacy: Privacy;
   flagged: boolean;
+  flag_code: number;
 };
 
 export type UserProfile = {

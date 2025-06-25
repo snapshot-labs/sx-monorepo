@@ -178,7 +178,7 @@ export async function processProposal(proposal: DbProposal) {
       console.log('proposal is not ready yet', proposal.herodotusId, status);
       return;
     }
-  } catch (e: unknown) {
+  } catch (e) {
     if (e instanceof Error && e.message === 'No query found') {
       console.log('query does not exist', proposal.herodotusId);
       return db.markProposalProcessed(proposal.id);

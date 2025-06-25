@@ -1,3 +1,4 @@
+import { defaultAbiCoder } from '@ethersproject/abi';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
@@ -12,6 +13,7 @@ import { handleSpaceMetadata } from './ipfs';
 import {
   convertChoice,
   handleCustomExecutionStrategy,
+  registerApeGasProposal,
   updateProposalValidationStrategy
 } from './utils';
 import {
@@ -30,7 +32,13 @@ import {
   handleStrategiesMetadata,
   handleVoteMetadata
 } from '../common/ipfs';
-import { dropIpfs, getCurrentTimestamp, updateCounter } from '../common/utils';
+import {
+  dropIpfs,
+  getCurrentTimestamp,
+  getProposalLink,
+  getSpaceLink,
+  updateCounter
+} from '../common/utils';
 
 /**
  * List of execution strategies type that are known and we expect them to be deployed via factory.
@@ -211,6 +219,10 @@ export function createWriters(config: FullConfig) {
     const id = getAddress(event.args.space);
 
     const space = new Space(id, config.indexerName);
+    space.link = getSpaceLink({
+      networkId: config.indexerName,
+      spaceId: id
+    });
     space.verified = false;
     space.turbo = false;
     space.metadata = null;
@@ -582,6 +594,11 @@ export function createWriters(config: FullConfig) {
       `${spaceId}/${proposalId}`,
       config.indexerName
     );
+    proposal.link = getProposalLink({
+      networkId: config.indexerName,
+      spaceId,
+      proposalId
+    });
     proposal.proposal_id = proposalId;
     proposal.space = spaceId;
     proposal.author = author;
@@ -647,12 +664,19 @@ export function createWriters(config: FullConfig) {
     proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
 
     if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
-      const executionHash = new ExecutionHash(
+      let executionHash = await ExecutionHash.loadEntity(
         proposal.execution_hash,
         config.indexerName
       );
-      executionHash.proposal_id = `${spaceId}/${proposalId}`;
-      await executionHash.save();
+
+      if (!executionHash) {
+        executionHash = new ExecutionHash(
+          proposal.execution_hash,
+          config.indexerName
+        );
+        executionHash.proposal_id = `${spaceId}/${proposalId}`;
+        await executionHash.save();
+      }
     }
 
     try {
@@ -702,6 +726,43 @@ export function createWriters(config: FullConfig) {
 
     if (leaderboardItem.proposal_count === 1) space.proposer_count += 1;
     space.proposal_count += 1;
+
+    const apeGasStrategyAddress = config.overrides.apeGasStrategy;
+    const apeGasStrategiesIndices = apeGasStrategyAddress
+      ? space.strategies
+          .map((strategy, i) => [strategy, i] as const)
+          .filter(
+            ([strategy]) => strategy === getAddress(apeGasStrategyAddress)
+          )
+      : [];
+
+    if (apeGasStrategiesIndices.length) {
+      proposal.start += config.overrides.apeGasStrategyDelay;
+      proposal.min_end = Math.max(proposal.start, proposal.min_end);
+    }
+
+    for (const [, i] of apeGasStrategiesIndices) {
+      const params = space.strategies_params[i];
+      if (!params) continue;
+
+      try {
+        const [, , , , viewId] = defaultAbiCoder.decode(
+          ['uint256', 'uint256', 'address', 'address', 'bytes32', 'address'],
+          params
+        );
+
+        await registerApeGasProposal(
+          {
+            viewId,
+            snapshot: proposal.snapshot
+          },
+          config
+        );
+      } catch (e) {
+        console.log('failed to decode ape gas strategy params', e);
+        continue;
+      }
+    }
 
     await Promise.all([
       updateCounter(config.indexerName, 'proposal_count', 1),

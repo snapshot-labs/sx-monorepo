@@ -12,12 +12,13 @@ const props = defineProps<{
   definition: BaseDefinition<string | number | null> & {
     networkId: NetworkID;
     networksListKind?: 'full' | 'builtin' | 'offchain';
+    networksFilter?: unknown[];
   };
 }>();
 
 const { networks } = useOffchainNetworksList(props.definition.networkId);
 
-const options = computed(() => {
+const allOptions = computed(() => {
   const networksListKind = props.definition.networksListKind;
   if (networksListKind === 'full' || networksListKind === 'offchain') {
     const baseNetworks = networks.value
@@ -84,6 +85,14 @@ const options = computed(() => {
       };
     })
     .filter(network => !network.readOnly);
+});
+
+const options = computed(() => {
+  const networksFilter = props.definition.networksFilter;
+
+  if (!networksFilter) return allOptions.value;
+
+  return allOptions.value.filter(option => networksFilter.includes(option.id));
 });
 </script>
 

@@ -14,6 +14,7 @@ import {
   constants as starknetConstants,
   uint256
 } from 'starknet';
+import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
@@ -90,9 +91,7 @@ export function createActions(
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: STARKNET_CONNECTORS,
-    lowPriorityAuthenticators: ['evm-tx']
+    helpers
   });
 
   const getIsContract = async (
@@ -102,8 +101,7 @@ export function createActions(
     if (!EVM_CONNECTORS.includes(connectorType)) return false;
     if (connectorType === 'sequence') return true;
 
-    const code = await l1Provider.getCode(address);
-    return code !== '0x';
+    return _getIsContract(l1Provider, address);
   };
 
   const client = new clients.StarknetTx(clientConfig);

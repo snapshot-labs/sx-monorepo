@@ -33,6 +33,7 @@ gql(`
       github
       twitter
       discord
+      farcaster
       voting_power_symbol
       treasuries
       labels
@@ -95,28 +96,7 @@ gql(`
     id
     proposal_id
     space {
-      id
-      controller
-      authenticators
-      metadata {
-        id
-        name
-        avatar
-        labels
-        voting_power_symbol
-      }
-      strategies_parsed_metadata {
-        index
-        data {
-          id
-          name
-          description
-          decimals
-          symbol
-          token
-          payload
-        }
-      }
+      ...spaceFields
     }
     author {
       id

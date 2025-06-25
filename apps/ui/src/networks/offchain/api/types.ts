@@ -34,6 +34,7 @@ export type ApiSpace = {
   website: string | null;
   twitter: string | null;
   github: string | null;
+  farcaster: string | null;
   coingecko: string | null;
   symbol: string;
   activeProposals: number;
@@ -78,6 +79,7 @@ export type ApiSpace = {
   // properties used for settings
   private: boolean;
   flagged: boolean;
+  flagCode: number;
   domain: string | null;
   skin: string | null;
   skinSettings: SkinSettings;
@@ -134,6 +136,7 @@ export type ApiProposal = {
   privacy: 'shutter' | '';
   plugins: Record<string, any>;
   flagged: boolean;
+  flagCode: number;
 };
 
 export type ApiVote = {

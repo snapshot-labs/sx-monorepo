@@ -7,6 +7,7 @@ import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createApi } from './api';
 import * as constants from './constants';
+import { EVM_CONNECTORS } from '../common/constants';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
@@ -40,9 +41,11 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   };
 
   const helpers = {
-    isAuthenticatorSupported: () => true,
-    isAuthenticatorContractSupported: () => false,
-    getRelayerAuthenticatorType: () => null,
+    getAuthenticatorSupportInfo: () => ({
+      isSupported: true,
+      isContractSupported: false,
+      connectors: EVM_CONNECTORS
+    }),
     isStrategySupported: () => true,
     isExecutorSupported: isExecutorSupported,
     isExecutorActionsSupported: isExecutorActionsSupported,
