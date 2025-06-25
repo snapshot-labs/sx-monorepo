@@ -7,17 +7,17 @@ defineProps<{
 
 <template>
   <div class="max-w-[592px]">
-    <h3
-      v-if="title"
+    <div
       :class="{
         'mb-4': !description
       }"
     >
-      {{ title }}
-    </h3>
-    <span v-if="description" class="mb-4 inline-block">
-      {{ description }}
-    </span>
+      <div class="flex items-center justify-between gap-2">
+        <h3 v-if="title" v-text="title" />
+        <slot name="actions" />
+      </div>
+      <span v-if="description" class="mb-4 inline-block" v-text="description" />
+    </div>
     <slot />
   </div>
 </template>

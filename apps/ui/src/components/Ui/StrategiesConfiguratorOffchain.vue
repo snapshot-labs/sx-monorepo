@@ -88,6 +88,13 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
 
 <template>
   <div>
+    <template v-if="$slots.title || $slots.actions">
+      <div class="flex items-center justify-between mb-2">
+        <slot name="title" />
+        <div />
+        <slot name="actions" />
+      </div>
+    </template>
     <div class="space-y-3 mb-3">
       <slot v-if="strategies.length === 0" name="empty">
         <div>No strategies selected</div>

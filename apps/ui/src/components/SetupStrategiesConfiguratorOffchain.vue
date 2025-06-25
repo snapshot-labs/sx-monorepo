@@ -116,6 +116,16 @@ onMounted(() => {
         :limit="limits['space.default.strategies_limit']"
         @test-strategies="handleTestStrategies"
       >
+        <template v-if="strategies.length" #actions>
+          <UiTooltip title="Test all custom strategies">
+            <UiButton
+              class="!p-0 !border-0 !h-auto !w-[20px]"
+              @click="handleTestStrategies(strategies)"
+            >
+              <IH-play />
+            </UiButton>
+          </UiTooltip>
+        </template>
         <template #empty>
           <div class="space-y-3">
             <div>Here are some of the most common voting strategies:</div>

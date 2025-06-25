@@ -103,7 +103,7 @@ watch(
 <template>
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
-      <h3>Test strategy</h3>
+      <h3>Test {{ strategies.length > 1 ? 'strategies' : 'strategy' }}</h3>
       <template v-if="isPickerShown">
         <button
           type="button"
@@ -167,7 +167,7 @@ watch(
         :loading="isLoading"
         @click="handleSubmit"
       >
-        Test strategy
+        Test {{ strategies.length > 1 ? 'strategies' : 'strategy' }}
       </UiButton>
     </template>
   </UiModal>

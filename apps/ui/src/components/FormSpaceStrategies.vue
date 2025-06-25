@@ -57,6 +57,17 @@ function handleTestStrategies(strategies: StrategyConfig[]) {
     description="(Voting power is cumulative)"
     class="!mx-0"
   >
+    <template #actions>
+      <UiTooltip title="Test all custom strategies">
+        <UiButton
+          class="!p-0 !border-0 !h-auto !w-[20px]"
+          :disabled="!strategies.length"
+          @click="handleTestStrategies(strategies)"
+        >
+          <IH-play />
+        </UiButton>
+      </UiTooltip>
+    </template>
     <UiMessage
       v-if="!isTicketValid"
       type="danger"

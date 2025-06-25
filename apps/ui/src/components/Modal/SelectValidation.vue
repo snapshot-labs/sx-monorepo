@@ -296,12 +296,23 @@ watch(
           :error="formErrors.rawParams"
         />
         <template v-if="selectedValidation.key === 'basic'">
-          <div class="flex items-center gap-1 mb-2 mt-4">
-            <h4 class="eyebrow font-medium">Custom strategies</h4>
-            <UiTooltip
-              title="Calculate the score with a different configuration of Voting Strategies"
-            >
-              <IH-question-mark-circle class="shrink-0" />
+          <div class="flex items-center justify-between gap-1 mb-2 mt-4">
+            <div class="flex items-center gap-1">
+              <h4 class="eyebrow font-medium">Custom strategies</h4>
+              <UiTooltip
+                title="Calculate the score with a different configuration of Voting Strategies"
+              >
+                <IH-question-mark-circle class="shrink-0" />
+              </UiTooltip>
+            </div>
+            <UiTooltip title="Test all custom strategies">
+              <UiButton
+                class="!p-0 !border-0 !h-auto !w-[20px]"
+                :disabled="!customStrategies.length"
+                @click="handleTestStrategies(customStrategies)"
+              >
+                <IH-play />
+              </UiButton>
             </UiTooltip>
           </div>
           <UiStrategiesConfiguratorOffchain
