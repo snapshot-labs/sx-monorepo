@@ -132,6 +132,7 @@ watchEffect(() => setTitle(props.space.name));
         </div>
       </div>
     </div>
+    <SpaceAlerts :space="space" />
     <OnboardingSpace :space="space" />
     <template v-if="showChildren">
       <UiLabel :label="'Sub-spaces'" />
