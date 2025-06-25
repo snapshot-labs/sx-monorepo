@@ -21,6 +21,8 @@ type Space {
   strategies_metadata: [String!]!
   strategies_parsed_metadata: [StrategiesParsedMetadataItem!]!
     @derivedFrom(field: "space")
+  strategies_decimals: [Int!]!
+  vp_decimals: Int!
   authenticators: [String!]!
   validation_strategy: String!
   validation_strategy_params: Text!
@@ -129,11 +131,16 @@ type Proposal {
   strategies_indices: [Int!]!
   strategies: [String!]!
   strategies_params: [String!]!
+  vp_decimals: Int!
   type: String!
   scores_1: BigDecimalVP!
+  scores_1_parsed: String!
   scores_2: BigDecimalVP!
+  scores_2_parsed: String!
   scores_3: BigDecimalVP!
+  scores_3_parsed: String!
   scores_total: BigDecimalVP!
+  scores_total_parsed: String!
   quorum: BigInt!
   created: Int!
   edited: Int
@@ -165,6 +172,7 @@ type Vote {
   proposal: Int!
   choice: Int!
   vp: BigDecimalVP!
+  vp_parsed: String!
   metadata: VoteMetadataItem
   created: Int!
   tx: String!

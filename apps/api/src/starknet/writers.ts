@@ -28,6 +28,7 @@ import {
 import {
   dropIpfs,
   getCurrentTimestamp,
+  getParsedVP,
   getProposalLink,
   getSpaceLink,
   updateCounter
@@ -99,6 +100,8 @@ export function createWriters(config: FullConfig) {
     space.next_strategy_index = strategies.length;
     space.strategies_params = strategiesParams;
     space.strategies_metadata = strategiesMetadataUris;
+    space.strategies_decimals = [];
+    space.vp_decimals = 0;
     space.authenticators = event.authenticators;
     space.proposal_count = 0;
     space.vote_count = 0;
@@ -128,12 +131,15 @@ export function createWriters(config: FullConfig) {
     }
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         strategiesMetadataUris,
         0,
         config
       );
+
+      space.strategies_decimals = strategiesDecimals;
+      space.vp_decimals = Math.max(...strategiesDecimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -325,12 +331,18 @@ export function createWriters(config: FullConfig) {
     ];
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         strategiesMetadataUris,
         initialNextStrategy,
         config
       );
+
+      space.strategies_decimals = [
+        ...space.strategies_decimals,
+        ...strategiesDecimals
+      ];
+      space.vp_decimals = Math.max(...strategiesDecimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -367,6 +379,10 @@ export function createWriters(config: FullConfig) {
     space.strategies_metadata = space.strategies_metadata.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
+    space.strategies_decimals = space.strategies_decimals.filter(
+      (_, i) => !indicesToRemove.includes(i)
+    );
+    space.vp_decimals = Math.max(...space.strategies_decimals);
 
     await space.save();
   };
@@ -457,13 +473,18 @@ export function createWriters(config: FullConfig) {
     proposal.execution_strategy_type = 'none';
     proposal.type = 'basic';
     proposal.scores_1 = '0';
+    proposal.scores_1_parsed = '0';
     proposal.scores_2 = '0';
+    proposal.scores_2_parsed = '0';
     proposal.scores_3 = '0';
+    proposal.scores_3_parsed = '0';
     proposal.scores_total = '0';
+    proposal.scores_total_parsed = '0';
     proposal.quorum = 0n;
     proposal.strategies_indices = space.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
+    proposal.vp_decimals = space.vp_decimals;
     proposal.created = parseInt(created.toString());
     proposal.tx = tx.transaction_hash;
     proposal.execution_tx = null;
@@ -752,6 +773,12 @@ export function createWriters(config: FullConfig) {
     const created = block?.timestamp ?? getCurrentTimestamp();
     const voter = formatAddressVariant(findVariant(event.voter));
 
+    const proposal = await Proposal.loadEntity(
+      `${spaceId}/${proposalId}`,
+      config.indexerName
+    );
+    if (!proposal) return;
+
     const vote = new Vote(
       `${spaceId}/${proposalId}/${voter.address}`,
       config.indexerName
@@ -761,6 +788,7 @@ export function createWriters(config: FullConfig) {
     vote.voter = voter.address;
     vote.choice = choice;
     vote.vp = vp.toString();
+    vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
     vote.created = created;
     vote.tx = tx.transaction_hash;
 
@@ -817,20 +845,22 @@ export function createWriters(config: FullConfig) {
       await space.save();
     }
 
-    const proposal = await Proposal.loadEntity(
-      `${spaceId}/${proposalId}`,
-      config.indexerName
+    proposal.vote_count += 1;
+    proposal.scores_total = (
+      BigInt(proposal.scores_total) + BigInt(vote.vp)
+    ).toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
     );
-    if (proposal) {
-      proposal.vote_count += 1;
-      proposal.scores_total = (
-        BigInt(proposal.scores_total) + BigInt(vote.vp)
-      ).toString();
-      proposal[`scores_${choice}`] = (
-        BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
-      ).toString();
-      await proposal.save();
-    }
+    proposal[`scores_${choice}`] = (
+      BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
+    ).toString();
+    proposal[`scores_${choice}_parsed`] = getParsedVP(
+      proposal[`scores_${choice}`],
+      proposal.vp_decimals
+    );
+    await proposal.save();
   };
 
   return {
