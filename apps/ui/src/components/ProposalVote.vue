@@ -25,28 +25,44 @@ const { isInvalidNetwork } = useSafeWallet(
 
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
-const isConnectorSupported = computed(() => {
+const hasSupportedAuthenticator = computed(() => {
   const network = getNetwork(props.proposal.network);
 
-  return (
-    !auth.value ||
-    network.governanceConnectors.includes(auth.value.connector.type)
-  );
+  return props.proposal.space.authenticators.some(authenticator => {
+    const supportInfo =
+      network.helpers.getAuthenticatorSupportInfo(authenticator);
+
+    return supportInfo?.isSupported;
+  });
+});
+
+const isConnectorSupported = computed(() => {
+  if (!auth.value) return true;
+  const currentConnector = auth.value.connector.type;
+
+  const network = getNetwork(props.proposal.network);
+
+  return props.proposal.space.authenticators.some(authenticator => {
+    const supportInfo =
+      network.helpers.getAuthenticatorSupportInfo(authenticator);
+
+    return (
+      supportInfo?.isSupported &&
+      supportInfo?.connectors.includes(currentConnector)
+    );
+  });
 });
 
 const isSupported = computed(() => {
   const network = getNetwork(props.proposal.network);
 
-  const hasSupportedAuthenticator = props.proposal.space.authenticators.find(
-    authenticator => network.helpers.isAuthenticatorSupported(authenticator)
-  );
   const hasSupportedStrategies = props.proposal.strategies.find(strategy =>
     network.helpers.isStrategySupported(strategy)
   );
 
   return (
+    hasSupportedAuthenticator.value &&
     isConnectorSupported.value &&
-    hasSupportedAuthenticator &&
     hasSupportedStrategies &&
     SUPPORTED_VOTING_TYPES.includes(props.proposal.type)
   );

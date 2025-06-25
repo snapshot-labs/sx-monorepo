@@ -27,7 +27,6 @@ import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
-import { EVM_CONNECTORS } from '@/networks/common/constants';
 import {
   buildMetadata,
   createStrategyPicker,
@@ -79,8 +78,7 @@ export function createActions(
   const networkConfig = CONFIGS[chainId];
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: EVM_CONNECTORS
+    helpers
   });
 
   const clientOpts = {

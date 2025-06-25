@@ -11,7 +11,7 @@ import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createConstants } from './constants';
 import { createProvider } from './provider';
-import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '../common/constants';
+import { STARKNET_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
 import { awaitIndexedOnApi } from '../common/helpers';
 
@@ -75,12 +75,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   });
 
   const helpers = {
-    isAuthenticatorSupported: (authenticator: string) =>
-      constants.SUPPORTED_AUTHENTICATORS[authenticator],
-    isAuthenticatorContractSupported: (authenticator: string) =>
-      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
-    getRelayerAuthenticatorType: (authenticator: string) =>
-      constants.RELAYER_AUTHENTICATORS[authenticator],
+    getAuthenticatorSupportInfo: (authenticator: string) =>
+      constants.AUTHENTICATORS_SUPPORT_INFO[authenticator] || null,
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) =>
@@ -177,7 +173,6 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
     currentChainId: baseChainId,
     baseNetworkId,
     supportsSimulation: true,
-    governanceConnectors: [...STARKNET_CONNECTORS, ...EVM_CONNECTORS],
     managerConnectors: STARKNET_CONNECTORS,
     actions: createActions(networkId, provider, helpers, {
       chainId,
