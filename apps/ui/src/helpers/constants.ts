@@ -91,6 +91,7 @@ export const APE_GAS_CONFIGS: Record<number, ApeGasConfig> = {
 };
 
 export const MAX_SYMBOL_LENGTH = 12;
+export const MAX_FILE_SIZE_BYTES = 1024 * 1024; // 1 MB should be same as https://github.com/snapshot-labs/pineapple/blob/4023c623585e4cde2296922572d35c85d45cf940/src/upload.ts#L10
 
 export const SPACE_CATEGORIES = [
   { id: 'protocol', name: 'Protocol' },

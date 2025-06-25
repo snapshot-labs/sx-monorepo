@@ -17,7 +17,11 @@ import { RouteParamsRaw } from 'vue-router';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
-import { EVM_EMPTY_ADDRESS, MAX_SYMBOL_LENGTH } from './constants';
+import {
+  EVM_EMPTY_ADDRESS,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SYMBOL_LENGTH
+} from './constants';
 import { getOwner } from './stamp';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -528,9 +532,19 @@ export function getStampUrl(
 
 export async function imageUpload(file: File) {
   if (!file) return;
-  // TODO: Additional Validations - File Size, File Type, Empty File, Hidden File
+
   if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-    return;
+    throw new Error('Invalid file type. Only JPEG and PNG images are allowed.');
+  }
+
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error(
+      `File size must be less than ${(
+        MAX_FILE_SIZE_BYTES /
+        1024 /
+        1024
+      ).toFixed(0)} MB`
+    );
   }
 
   const formData = new FormData();
@@ -696,11 +710,11 @@ export function isUserAbortError(e: any) {
   );
 }
 
-export function getUserFacingErrorMessage(e: unknown): string {
-  return (
-    (e instanceof Error && e.message) ||
-    'Something went wrong. Please try again later.'
-  );
+export function getUserFacingErrorMessage(
+  e: unknown,
+  fallback: string = 'Something went wrong. Please try again later.'
+): string {
+  return (e instanceof Error && e.message) || fallback;
 }
 
 export async function getSpaceController(id: string, network: NetworkID) {
