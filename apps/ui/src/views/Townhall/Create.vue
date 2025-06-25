@@ -61,12 +61,12 @@ const formErrors = computed(() => {
   );
 });
 
-const formValid = computed(() => {
+const isFormValid = computed(() => {
   return Object.keys(formErrors.value).length === 0;
 });
 
 async function handleSubmit() {
-  if (!formValid.value) {
+  if (!isFormValid.value) {
     return;
   }
 
@@ -164,7 +164,7 @@ watchEffect(() => {
       <div class="flex gap-2.5 items-center">
         <UiButton
           class="primary flex items-center space-x-1"
-          :disabled="submitLoading || !formValid"
+          :disabled="submitLoading || !isFormValid"
           @click="handleSubmit"
         >
           <div>Publish</div>
