@@ -95,8 +95,6 @@ export function createWriters(config: FullConfig) {
     );
     space.proposal_threshold = '0';
     space.strategies_indices = strategies.map((_, i) => i);
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = strategies;
     space.next_strategy_index = strategies.length;
     space.strategies_params = strategiesParams;
@@ -318,8 +316,6 @@ export function createWriters(config: FullConfig) {
       ...space.strategies_indices,
       ...strategies.map((_, i) => space.next_strategy_index + i)
     ];
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = [...space.strategies, ...strategies];
     space.next_strategy_index += strategies.length;
     space.strategies_params = [...space.strategies_params, ...strategiesParams];
@@ -362,8 +358,6 @@ export function createWriters(config: FullConfig) {
     space.strategies_indices = space.strategies_indices.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = space.strategies.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
@@ -468,8 +462,6 @@ export function createWriters(config: FullConfig) {
     proposal.scores_total = '0';
     proposal.quorum = 0n;
     proposal.strategies_indices = space.strategies_indices;
-    // NOTE: deprecated
-    proposal.strategies_indicies = proposal.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
     proposal.created = parseInt(created.toString());

@@ -16,8 +16,6 @@ type Space {
   proposal_threshold: BigDecimalVP!
   next_strategy_index: Int!
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
   strategies: [String!]!
   strategies_params: [String!]!
   strategies_metadata: [String!]!
@@ -129,8 +127,6 @@ type Proposal {
   axiom_snapshot_slot: BigInt
   treasuries: [String!]!
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
   strategies: [String!]!
   strategies_params: [String!]!
   type: String!

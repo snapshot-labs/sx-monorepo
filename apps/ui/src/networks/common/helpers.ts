@@ -71,14 +71,14 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
   return function pick({
     authenticators,
     strategies,
-    strategiesIndicies,
+    strategiesIndices,
     isContract,
     connectorType,
     ignoreRelayer
   }: {
     authenticators: string[];
     strategies: string[];
-    strategiesIndicies: number[];
+    strategiesIndices: number[];
     isContract: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
@@ -128,7 +128,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         (strategy, index) =>
           ({
             address: strategy,
-            index: strategiesIndicies[index],
+            index: strategiesIndices[index],
             paramsIndex: index
           }) as const
       )
