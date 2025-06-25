@@ -97,11 +97,85 @@ export function useTownhall() {
     );
   }
 
+  async function sendCreateCategory(
+    space: number,
+    name: string,
+    description: string,
+    parentCategoryId: number | null
+  ) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.createCategory({
+        signer,
+        data: {
+          space,
+          name,
+          description,
+          parentCategoryId: parentCategoryId ?? 0
+        },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendEditCategory(
+    space: number,
+    id: number,
+    name: string,
+    description: string,
+    parentCategoryId: number | null
+  ) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.editCategory({
+        signer,
+        data: {
+          space,
+          id,
+          name,
+          description,
+          parentCategoryId: parentCategoryId ?? 0
+        },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendDeleteCategory(space: number, id: number) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.deleteCategory({
+        signer,
+        data: { space, id },
+        salt: getSalt()
+      })
+    );
+  }
+
   async function sendTopic(
     space: number,
     title: string,
     body: string,
-    discussionUrl: string
+    discussionUrl: string,
+    categoryId: number | null
   ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -113,7 +187,7 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createTopic({
         signer,
-        data: { space, title, body, discussionUrl },
+        data: { space, category: categoryId ?? 0, title, body, discussionUrl },
         salt: getSalt()
       })
     );
@@ -323,6 +397,9 @@ export function useTownhall() {
   }
 
   return {
+    sendCreateCategory,
+    sendEditCategory,
+    sendDeleteCategory,
     sendTopic,
     sendCloseTopic,
     sendPost,

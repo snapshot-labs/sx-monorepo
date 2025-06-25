@@ -1,8 +1,9 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
-import { Post, Vote } from '@/helpers/townhall/types';
+import { Category, Post, Vote } from '@/helpers/townhall/types';
 import { gql } from './gql';
 
+type NewCategoryEvent = [number, number, string, string, string, number];
 type NewPostEvent = [string, number, number, string, string];
 type NewVoteEvent = [string, number, number, string, number];
 
@@ -27,6 +28,15 @@ gql(`
     id
     space_id
     vote_count
+    topic_count
+  }
+
+  fragment categoryFields on Category {
+    id
+    category_id
+    name
+    description
+    parent_category_id
     topic_count
   }
 
@@ -59,6 +69,10 @@ gql(`
     created
     closed
     topic_id
+    category {
+      category_id
+      name
+    }
     posts {
       ...postFields
     }
@@ -99,9 +113,25 @@ const SPACE_QUERY = gql(`
   }
 `);
 
+const CATEGORY_QUERY = gql(`
+  query Category($id: String!) {
+    category(id: $id) {
+      ...categoryFields
+    }
+  }
+`);
+
+const CATEGORIES_QUERY = gql(`
+  query Categories($spaceId: String!, $parentCategoryId: Int!) {
+    categories(where: { space: $spaceId, parent_category_id: $parentCategoryId }, orderBy: created, orderDirection: asc) {
+      ...categoryFields
+    }
+  }
+`);
+
 const TOPICS_QUERY = gql(`
-  query Topics($spaceId: String!, $limit: Int!, $skip: Int!) {
-    topics(first: $limit, skip: $skip, orderBy: created, orderDirection: desc, where: { space: $spaceId }) {
+  query Topics($spaceId: String!, $categoryId: Int!, $limit: Int!, $skip: Int!) {
+    topics(first: $limit, skip: $skip, orderBy: created, orderDirection: desc, where: { space: $spaceId, category_id: $categoryId }) {
       ...topicFields
     }
   }
@@ -152,18 +182,60 @@ export async function getSpace(spaceId: number) {
   return data.space;
 }
 
+export async function getCategory({
+  spaceId,
+  categoryId
+}: {
+  spaceId: number;
+  categoryId: number;
+}) {
+  const { data } = await client.query({
+    query: CATEGORY_QUERY,
+    variables: {
+      id: `${spaceId}/${categoryId}`
+    }
+  });
+
+  return data.category;
+}
+
+export async function getCategories({
+  spaceId,
+  parentCategoryId
+}: {
+  spaceId: number;
+  parentCategoryId: number | null;
+}) {
+  const { data } = await client.query({
+    query: CATEGORIES_QUERY,
+    variables: {
+      spaceId: spaceId.toString(),
+      parentCategoryId: parentCategoryId ?? 0
+    }
+  });
+
+  return data.categories;
+}
+
 export async function getTopics({
   spaceId,
+  categoryId,
   limit,
   skip
 }: {
   spaceId: number;
+  categoryId?: number | null;
   limit: number;
   skip: number;
 }) {
   const { data } = await client.query({
     query: TOPICS_QUERY,
-    variables: { spaceId: spaceId.toString(), limit, skip }
+    variables: {
+      spaceId: spaceId.toString(),
+      categoryId: categoryId ?? 0,
+      limit,
+      skip
+    }
   });
 
   return data.topics;
@@ -225,6 +297,19 @@ export async function getResultsByRole(
     ...r,
     vote_count: Number(r.vote_count)
   }));
+}
+
+export function newCategoryEventToEntry(event: NewCategoryEvent): Category {
+  const [spaceId, id, , name, description, parentCategoryId] = event;
+
+  return {
+    id: `${spaceId}/${id}`,
+    category_id: id,
+    name,
+    description,
+    parent_category_id: parentCategoryId,
+    topic_count: 0
+  };
 }
 
 export function newPostEventToEntry(event: NewPostEvent): Post {

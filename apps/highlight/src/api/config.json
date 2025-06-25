@@ -16,6 +16,18 @@
       "start": 1,
       "events": [
         {
+          "name": "new_category",
+          "fn": "handleNewCategory"
+        },
+        {
+          "name": "edit_category",
+          "fn": "handleEditCategory"
+        },
+        {
+          "name": "delete_category",
+          "fn": "handleDeleteCategory"
+        },
+        {
           "name": "new_topic",
           "fn": "handleNewTopic"
         },

@@ -1,11 +1,42 @@
 <script setup lang="ts">
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
-import { useTopicsQuery } from '@/queries/townhall';
+import {
+  useCategoriesQuery,
+  useCategoryQuery,
+  useDeleteCategoryMutation,
+  useTopicsQuery
+} from '@/queries/townhall';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const { setTitle } = useTitle();
+const route = useRoute();
+
+const spaceId = computed(() => props.townhallSpace.space_id);
+const categoryId = computed(() => {
+  const category = route.query.category;
+
+  if (typeof category === 'string') {
+    const parsed = Number(category);
+    return isNaN(parsed) ? null : parsed;
+  }
+
+  return null;
+});
+
+const { data: category } = useCategoryQuery({
+  spaceId,
+  categoryId
+});
+const { data: categories } = useCategoriesQuery({
+  spaceId,
+  categoryId
+});
+const { mutate: deleteCategory } = useDeleteCategoryMutation({
+  spaceId,
+  categoryId
+});
 
 const {
   data: topics,
@@ -15,8 +46,20 @@ const {
   isError,
   isFetchingNextPage
 } = useTopicsQuery({
-  spaceId: toRef(() => props.townhallSpace.space_id)
+  spaceId,
+  categoryId
 });
+
+const addCategoryModalOpen = ref(false);
+const activeCategoryId = ref<string | null>(null);
+
+function setAddCategoryModalStatus(
+  open: boolean = false,
+  categoryId: string | null = null
+) {
+  addCategoryModalOpen.value = open;
+  activeCategoryId.value = categoryId;
+}
 
 async function handleEndReached() {
   if (!hasNextPage.value) return;
@@ -29,27 +72,144 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
 
 <template>
   <div>
-    <div class="flex justify-end p-4">
-      <UiButton
-        :to="{
-          name: 'space-townhall-create',
-          params: { space: `${space.network}:${space.id}` }
-        }"
-        primary
-      >
-        New topic
-      </UiButton>
+    <div class="flex justify-end p-4 gap-2">
+      <div class="flex-auto">
+        <div v-if="category" class="flex items-center space-x-3">
+          <router-link
+            :to="{
+              name: 'space-townhall-topics',
+              query: { category: category.parent_category_id }
+            }"
+          >
+            <UiButton class="!px-0 w-[46px]">
+              <IH-arrow-narrow-left class="inline-block" />
+            </UiButton>
+          </router-link>
+          <h3 class="text-[21px]">{{ category.name }}</h3>
+        </div>
+      </div>
+      <UiTooltip title="New topic">
+        <UiButton
+          :to="{
+            name: 'space-townhall-create',
+            params: { space: `${space.network}:${space.id}` },
+            query: {
+              category: categoryId
+            }
+          }"
+          class="!px-0 w-[46px]"
+        >
+          <IH-pencil-alt />
+        </UiButton>
+      </UiTooltip>
+      <UiDropdown>
+        <template #button>
+          <UiButton class="!px-0 w-[46px]">
+            <IH-dots-horizontal class="inline-block" />
+          </UiButton>
+        </template>
+        <template #items>
+          <UiDropdownItem v-slot="{ active }">
+            <AppLink
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+              :to="{ name: 'space-townhall-roles' }"
+            >
+              <IS-users :width="16" />
+              Roles
+            </AppLink>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <button
+              type="button"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+              @click="setAddCategoryModalStatus(true)"
+            >
+              <IH-plus :width="16" /> Create category
+            </button>
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
     </div>
-    <div>
-      <UiLabel label="Topics" sticky />
-      <TownhallTopicsList
-        limit="off"
-        :is-error="isError"
-        :is-loading="isPending"
-        :is-loading-more="isFetchingNextPage"
-        :topics="topics?.pages.flat() ?? []"
-        @end-reached="handleEndReached"
+    <div class="space-y-3">
+      <div v-if="categories?.length">
+        <UiLabel label="Categories" sticky />
+        <router-link
+          v-for="(c, i) in categories"
+          :key="i"
+          :to="{
+            name: 'space-townhall-topics',
+            query: { category: c.category_id }
+          }"
+          class="flex justify-between items-center mx-4 py-3 border-b"
+        >
+          <div>
+            <div
+              class="w-[48px] h-[48px] bg-skin-border rounded-lg items-center justify-center flex mr-3"
+            >
+              <IH-folder class="inline-block" />
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-skin-link text-[21px]" v-text="c.name" />
+            <div class="text-skin-text">{{ c.topic_count }} topic(s)</div>
+          </div>
+          <UiDropdown class="flex gap-3 items-center h-[24px]">
+            <template #button>
+              <UiButton class="!p-0 !border-0 !h-auto">
+                <IH-dots-vertical
+                  class="text-skin-text inline-block size-[22px]"
+                />
+              </UiButton>
+            </template>
+            <template #items>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="setAddCategoryModalStatus(true, c.id)"
+                >
+                  <IH-pencil :width="16" />
+                  Edit category
+                </button>
+              </UiDropdownItem>
+              <UiDropdownItem v-slot="{ active }">
+                <button
+                  type="button"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                  @click="() => deleteCategory({ id: c.category_id })"
+                >
+                  <IH-trash :width="16" />
+                  Delete category
+                </button>
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
+        </router-link>
+      </div>
+      <div>
+        <UiLabel label="Topics" sticky />
+        <TownhallTopicsList
+          limit="off"
+          :is-error="isError"
+          :is-loading="isPending"
+          :is-loading-more="isFetchingNextPage"
+          :topics="topics?.pages.flat() ?? []"
+          @end-reached="handleEndReached"
+        />
+      </div>
+    </div>
+    <teleport to="#modal">
+      <ModalAddCategory
+        :space-id="spaceId"
+        :category-id="categoryId"
+        :open="addCategoryModalOpen"
+        :initial-state="(categories || []).find(l => l.id === activeCategoryId)"
+        @close="setAddCategoryModalStatus(false)"
       />
-    </div>
+    </teleport>
   </div>
 </template>
