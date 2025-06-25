@@ -151,7 +151,7 @@ export function useSpaceQuery({
         return {
           ...localSpace,
           id: localSpace.spaceContractAddress,
-          network: localSpace.network,
+          network: 'base-sep',
           name: localSpace.name,
           avatar: localSpace.avatar,
           cover: localSpace.cover,
