@@ -5,7 +5,9 @@ import {
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const UPCOMING_PRO_ONLY_NETWORKS: readonly number[] = [137];
+const UPCOMING_PRO_ONLY_NETWORKS: readonly number[] = [
+  137 // Polygon
+];
 
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
