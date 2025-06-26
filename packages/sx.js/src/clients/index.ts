@@ -7,3 +7,4 @@ export { HerodotusController } from './starknet/herodotus';
 export { EthereumTx as EvmEthereumTx } from './evm/ethereum-tx';
 export { EthereumSig as EvmEthereumSig } from './evm/ethereum-sig';
 export { EthereumSig as OffchainEthereumSig } from './offchain/ethereum-sig';
+export { HighlightEthereumSigClient } from './highlight/ethereum-sig';

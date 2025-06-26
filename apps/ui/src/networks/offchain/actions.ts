@@ -369,7 +369,7 @@ export function createActions(
         data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
       });
     },
-    setAlias(web3: Web3Provider, alias: string) {
+    async setAlias(web3: Web3Provider, alias: string) {
       return client.setAlias({
         signer: web3.getSigner(),
         data: { alias }

@@ -2,9 +2,7 @@
 import { getCacheHash, shorten } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
 
-defineProps<{
-  hasAppNav: boolean;
-}>();
+defineProps<{ hasAppNav: boolean }>();
 
 const route = useRoute();
 const router = useRouter();
@@ -21,7 +19,12 @@ const SEARCH_CONFIG = {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-proposals',
     placeholder: 'Search for a proposal',
-    exclude: ['space-editor', 'space-proposal']
+    exclude: [
+      'space-editor',
+      'space-proposal',
+      'space-townhall-create',
+      'space-townhall-topic'
+    ]
   },
   my: {
     defaultRoute: 'my-explore',
@@ -86,9 +89,7 @@ watch(
   { immediate: true }
 );
 
-onUnmounted(() => {
-  resetAccountModal();
-});
+onUnmounted(() => resetAccountModal());
 </script>
 
 <template>

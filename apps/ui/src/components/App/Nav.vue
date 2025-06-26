@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
-import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
@@ -32,6 +31,7 @@ const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
+const { spaceType } = useTownhallSpace(param);
 const { data: spaceData } = useSpaceQuery({
   networkId: networkId,
   spaceId: address
@@ -71,14 +71,30 @@ const navigationConfig = computed<
       name: 'Overview',
       icon: IHGlobeAlt
     },
-    proposals: {
-      name: 'Proposals',
-      icon: IHNewspaper
-    },
-    leaderboard: {
-      name: 'Leaderboard',
-      icon: IHUserGroup
-    },
+    ...(spaceType.value === 'proposalsSpace'
+      ? {
+          proposals: {
+            name: 'Proposals',
+            icon: IHNewspaper
+          },
+          leaderboard: {
+            name: 'Leaderboard',
+            icon: IHUserGroup
+          }
+        }
+      : undefined),
+    ...(spaceType.value === 'discussionsSpace'
+      ? {
+          'townhall-topics': {
+            name: 'Townhall',
+            icon: IHAnnotation
+          },
+          'townhall-roles': {
+            name: 'Roles',
+            icon: IHUsers
+          }
+        }
+      : undefined),
     ...(space.value?.delegations && space.value.delegations.length > 0
       ? {
           delegates: {
@@ -142,8 +158,19 @@ const navigationConfig = computed<
       icon: IHBell,
       hidden: !web3.value.account
     }
+  },
+  townhall: {
+    topics: {
+      name: 'Home',
+      icon: IHHome
+    },
+    roles: {
+      name: 'Roles',
+      icon: IHUsers
+    }
   }
 }));
+
 const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
   () => {
     return {
@@ -168,6 +195,7 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
     };
   }
 );
+
 const navigationItems = computed(() =>
   Object.fromEntries(
     Object.entries({
