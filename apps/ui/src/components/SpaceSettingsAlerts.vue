@@ -103,6 +103,14 @@ const hasAnyAlerts = computed(
       <UiAlert type="error">
         Whitelabel requires Snapshot Pro.
         <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
+        or
+        <AppLink
+          to="https://help.snapshot.box/en/articles/11661865-migrating-from-using-a-whitelabel"
+          class="inline-flex items-center"
+        >
+          follow migration guide
+          <IH-arrow-sm-right class="-rotate-45" />
+        </AppLink>
       </UiAlert>
     </template>
   </div>
