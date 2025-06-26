@@ -342,7 +342,7 @@ export function createWriters(config: FullConfig) {
         ...space.strategies_decimals,
         ...strategiesDecimals
       ];
-      space.vp_decimals = Math.max(...strategiesDecimals);
+      space.vp_decimals = Math.max(...space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
