@@ -5,10 +5,15 @@ import {
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
+const UPCOMING_PRO_ONLY_NETWORKS: readonly number[] = [
+  137 // Polygon
+];
+
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
-  | 'HAS_PRO_ONLY_NETWORKS';
+  | 'HAS_PRO_ONLY_NETWORKS'
+  | 'HAS_PRO_ONLY_WHITELABEL';
 
 export function useSpaceAlerts(space: Ref<Space>) {
   const {
@@ -60,7 +65,11 @@ export function useSpaceAlerts(space: Ref<Space>) {
     ]);
 
     return Array.from(ids)
-      .filter(n => !premiumChainIds.value.has(n))
+      .filter(
+        n =>
+          !premiumChainIds.value.has(n) ||
+          UPCOMING_PRO_ONLY_NETWORKS.includes(n)
+      )
       .map(chainId => networks.value.find(n => n.chainId === chainId))
       .filter(network => !!network);
   });
@@ -83,6 +92,12 @@ export function useSpaceAlerts(space: Ref<Space>) {
     if (unsupportedProOnlyNetworks.value.length) {
       alertsMap.set('HAS_PRO_ONLY_NETWORKS', {
         networks: unsupportedProOnlyNetworks.value
+      });
+    }
+
+    if (space.value.additionalRawData?.domain && !space.value.turbo) {
+      alertsMap.set('HAS_PRO_ONLY_WHITELABEL', {
+        domain: space.value.additionalRawData.domain
       });
     }
 
