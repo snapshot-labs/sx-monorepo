@@ -40,10 +40,14 @@ const hasWhitelabelAlerts = computed(
     props.activeTab === 'whitelabel' &&
     alerts.value.has('HAS_PRO_ONLY_WHITELABEL')
 );
+
+const hasAnyAlerts = computed(
+  () => hasVotingStrategiesAlerts.value || hasWhitelabelAlerts.value
+);
 </script>
 
 <template>
-  <div class="space-y-2" v-bind="$attrs">
+  <div v-if="hasAnyAlerts" class="space-y-2" v-bind="$attrs">
     <template v-if="hasVotingStrategiesAlerts">
       <UiAlert v-if="deprecatedStrategies.length" type="error">
         The {{ prettyConcat(deprecatedStrategies, 'and') }}
