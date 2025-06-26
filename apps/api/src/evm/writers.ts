@@ -1,6 +1,8 @@
+import { defaultAbiCoder } from '@ethersproject/abi';
 import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
+import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
 import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
@@ -11,6 +13,7 @@ import { handleSpaceMetadata } from './ipfs';
 import {
   convertChoice,
   handleCustomExecutionStrategy,
+  registerApeGasProposal,
   updateProposalValidationStrategy
 } from './utils';
 import {
@@ -29,7 +32,15 @@ import {
   handleStrategiesMetadata,
   handleVoteMetadata
 } from '../common/ipfs';
-import { dropIpfs, getCurrentTimestamp, updateCounter } from '../common/utils';
+import {
+  dropIpfs,
+  getCurrentTimestamp,
+  getParsedVP,
+  getProposalLink,
+  getSpaceDecimals,
+  getSpaceLink,
+  updateCounter
+} from '../common/utils';
 
 /**
  * List of execution strategies type that are known and we expect them to be deployed via factory.
@@ -210,6 +221,10 @@ export function createWriters(config: FullConfig) {
     const id = getAddress(event.args.space);
 
     const space = new Space(id, config.indexerName);
+    space.link = getSpaceLink({
+      networkId: config.indexerName,
+      spaceId: id
+    });
     space.verified = false;
     space.turbo = false;
     space.metadata = null;
@@ -219,12 +234,12 @@ export function createWriters(config: FullConfig) {
     space.max_voting_period = event.args.input.maxVotingDuration;
     space.proposal_threshold = '0';
     space.strategies_indices = votingStrategies.map((_, i) => i);
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = votingStrategies.map(s => getAddress(s.addr));
     space.next_strategy_index = votingStrategies.length;
     space.strategies_params = votingStrategies.map(s => s.params);
     space.strategies_metadata = event.args.input.votingStrategyMetadataURIs;
+    space.strategies_decimals = [];
+    space.vp_decimals = 0;
     space.authenticators = event.args.input.authenticators.map(
       (address: string) => getAddress(address)
     );
@@ -273,12 +288,15 @@ export function createWriters(config: FullConfig) {
     }
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         space.strategies_metadata,
         0,
         config
       );
+
+      space.strategies_decimals = strategiesDecimals;
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -471,8 +489,6 @@ export function createWriters(config: FullConfig) {
       ...space.strategies_indices,
       ...strategies.map((_, i) => space.next_strategy_index + i)
     ];
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = [...space.strategies, ...strategies];
     space.next_strategy_index += strategies.length;
     space.strategies_params = [...space.strategies_params, ...strategiesParams];
@@ -482,12 +498,18 @@ export function createWriters(config: FullConfig) {
     ];
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         strategiesMetadataUris,
         initialNextStrategy,
         config
       );
+
+      space.strategies_decimals = [
+        ...space.strategies_decimals,
+        ...strategiesDecimals
+      ];
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -515,8 +537,6 @@ export function createWriters(config: FullConfig) {
     space.strategies_indices = space.strategies_indices.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = space.strategies.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
@@ -526,6 +546,10 @@ export function createWriters(config: FullConfig) {
     space.strategies_metadata = space.strategies_metadata.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
+    space.strategies_decimals = space.strategies_decimals.filter(
+      (_, i) => !indicesToRemove.includes(i)
+    );
+    space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
 
     await space.save();
   };
@@ -581,6 +605,11 @@ export function createWriters(config: FullConfig) {
       `${spaceId}/${proposalId}`,
       config.indexerName
     );
+    proposal.link = getProposalLink({
+      networkId: config.indexerName,
+      spaceId,
+      proposalId
+    });
     proposal.proposal_id = proposalId;
     proposal.space = spaceId;
     proposal.author = author;
@@ -592,15 +621,18 @@ export function createWriters(config: FullConfig) {
     proposal.snapshot = event.args.proposal.startBlockNumber;
     proposal.type = 'basic';
     proposal.scores_1 = '0';
+    proposal.scores_1_parsed = 0;
     proposal.scores_2 = '0';
+    proposal.scores_2_parsed = 0;
     proposal.scores_3 = '0';
+    proposal.scores_3_parsed = 0;
     proposal.scores_total = '0';
+    proposal.scores_total_parsed = 0;
     proposal.quorum = 0n;
     proposal.strategies_indices = space.strategies_indices;
-    // NOTE: deprecated
-    proposal.strategies_indicies = proposal.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
+    proposal.vp_decimals = space.vp_decimals;
     proposal.created = created;
     proposal.tx = tx.hash;
     proposal.execution_tx = null;
@@ -646,17 +678,31 @@ export function createWriters(config: FullConfig) {
     proposal.execution_ready = proposal.execution_strategy_type != 'Axiom';
 
     if (proposal.execution_hash !== EMPTY_EXECUTION_HASH) {
-      const executionHash = new ExecutionHash(
+      let executionHash = await ExecutionHash.loadEntity(
         proposal.execution_hash,
         config.indexerName
       );
-      executionHash.proposal_id = `${spaceId}/${proposalId}`;
-      await executionHash.save();
+
+      if (!executionHash) {
+        executionHash = new ExecutionHash(
+          proposal.execution_hash,
+          config.indexerName
+        );
+        executionHash.proposal_id = `${spaceId}/${proposalId}`;
+        await executionHash.save();
+      }
     }
 
     try {
       const metadataUri = event.args.metadataUri;
-      await handleProposalMetadata(metadataUri, config);
+      await handleProposalMetadata(
+        'evm',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
 
       proposal.metadata = dropIpfs(metadataUri);
     } catch (e) {
@@ -694,6 +740,43 @@ export function createWriters(config: FullConfig) {
 
     if (leaderboardItem.proposal_count === 1) space.proposer_count += 1;
     space.proposal_count += 1;
+
+    const apeGasStrategyAddress = config.overrides.apeGasStrategy;
+    const apeGasStrategiesIndices = apeGasStrategyAddress
+      ? space.strategies
+          .map((strategy, i) => [strategy, i] as const)
+          .filter(
+            ([strategy]) => strategy === getAddress(apeGasStrategyAddress)
+          )
+      : [];
+
+    if (apeGasStrategiesIndices.length) {
+      proposal.start += config.overrides.apeGasStrategyDelay;
+      proposal.min_end = Math.max(proposal.start, proposal.min_end);
+    }
+
+    for (const [, i] of apeGasStrategiesIndices) {
+      const params = space.strategies_params[i];
+      if (!params) continue;
+
+      try {
+        const [, , , , viewId] = defaultAbiCoder.decode(
+          ['uint256', 'uint256', 'address', 'address', 'bytes32', 'address'],
+          params
+        );
+
+        await registerApeGasProposal(
+          {
+            viewId,
+            snapshot: proposal.snapshot
+          },
+          config
+        );
+      } catch (e) {
+        console.log('failed to decode ape gas strategy params', e);
+        continue;
+      }
+    }
 
     await Promise.all([
       updateCounter(config.indexerName, 'proposal_count', 1),
@@ -743,14 +826,10 @@ export function createWriters(config: FullConfig) {
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    try {
-      await handleProposalMetadata(metadataUri, config);
-
-      proposal.metadata = dropIpfs(metadataUri);
-      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
-    } catch (e) {
-      console.log('failed to update proposal metadata', e);
-    }
+    proposal.execution_strategy = getAddress(
+      event.args.newExecutionStrategy.addr
+    );
+    proposal.execution_hash = keccak256(event.args.newExecutionStrategy.params);
 
     const executionStrategy = await ExecutionStrategy.loadEntity(
       proposal.execution_strategy,
@@ -765,6 +844,11 @@ export function createWriters(config: FullConfig) {
         executionStrategy.axiom_snapshot_address;
       proposal.axiom_snapshot_slot = executionStrategy.axiom_snapshot_slot;
       proposal.execution_strategy_type = executionStrategy.type;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      proposal.execution_strategy_details = executionStrategy.id;
     } else {
       proposal.quorum = 0n;
       proposal.timelock_veto_guardian = null;
@@ -788,6 +872,22 @@ export function createWriters(config: FullConfig) {
         executionHash.proposal_id = `${spaceId}/${proposalId}`;
         await executionHash.save();
       }
+    }
+
+    try {
+      await handleProposalMetadata(
+        'evm',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
+
+      proposal.metadata = dropIpfs(metadataUri);
+      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
+    } catch (e) {
+      console.log('failed to update proposal metadata', e);
     }
 
     await proposal.save();
@@ -850,6 +950,12 @@ export function createWriters(config: FullConfig) {
       return;
     }
 
+    const proposal = await Proposal.loadEntity(
+      `${spaceId}/${proposalId}`,
+      config.indexerName
+    );
+    if (!proposal) return;
+
     const created = block?.timestamp ?? getCurrentTimestamp();
 
     const voter = getAddress(event.args.voter);
@@ -863,6 +969,7 @@ export function createWriters(config: FullConfig) {
     vote.voter = voter;
     vote.choice = choice;
     vote.vp = vp.toString();
+    vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
     vote.created = created;
     vote.tx = tx.hash;
 
@@ -918,20 +1025,22 @@ export function createWriters(config: FullConfig) {
       await space.save();
     }
 
-    const proposal = await Proposal.loadEntity(
-      `${spaceId}/${proposalId}`,
-      config.indexerName
+    proposal.vote_count += 1;
+    proposal.scores_total = (
+      BigInt(proposal.scores_total) + BigInt(vote.vp)
+    ).toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
     );
-    if (proposal) {
-      proposal.vote_count += 1;
-      proposal.scores_total = (
-        BigInt(proposal.scores_total) + BigInt(vote.vp)
-      ).toString();
-      proposal[`scores_${choice}`] = (
-        BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
-      ).toString();
-      await proposal.save();
-    }
+    proposal[`scores_${choice}`] = (
+      BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
+    ).toString();
+    proposal[`scores_${choice}_parsed`] = getParsedVP(
+      proposal[`scores_${choice}`],
+      proposal.vp_decimals
+    );
+    await proposal.save();
   };
 
   const handleTimelockProposalExecuted: evm.Writer = async ({

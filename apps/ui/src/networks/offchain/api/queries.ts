@@ -16,6 +16,7 @@ const SPACE_FRAGMENT = gql`
     website
     twitter
     github
+    farcaster
     coingecko
     symbol
     activeProposals
@@ -91,6 +92,7 @@ const SPACE_FRAGMENT = gql`
     terms
     private
     flagged
+    flagCode
     domain
     skin
     skinSettings {
@@ -168,6 +170,7 @@ const PROPOSAL_FRAGMENT = gql`
     privacy
     plugins
     flagged
+    flagCode
   }
 `;
 

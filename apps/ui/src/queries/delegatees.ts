@@ -1,6 +1,7 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
+import { getProvider } from '@/helpers/provider';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork } from '@/networks';
 import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
@@ -17,6 +18,7 @@ const PERCENT_DIVISOR = 10000;
 
 const FETCH_DELEGATEES_FN = {
   'governor-subgraph': fetchGovernorSubgraphDelegatees,
+  'apechain-delegate-registry': fetchApeChainDelegatees,
   'delegate-registry': fetchDelegateRegistryDelegatees,
   'split-delegation': fetchSplitDelegationDelegatees
 } as const;
@@ -60,6 +62,50 @@ async function fetchGovernorSubgraphDelegatees(
             Number(apiDelegate.delegatedVotesRaw)
           : 1,
       name: names[delegateeData.address],
+      share: 100
+    }
+  ];
+}
+
+async function fetchApeChainDelegatees(
+  account: string,
+  delegation: SpaceMetadataDelegation,
+  space: Space
+): Promise<Delegatee[]> {
+  const { getDelegates, getDelegation } = useDelegates(
+    delegation as RequiredProperty<typeof delegation>,
+    space
+  );
+
+  const accountDelegation = await getDelegation(account.toLowerCase());
+  if (!accountDelegation) return [];
+
+  const provider = getProvider(Number(delegation.chainId));
+  const balance = await provider.getBalance(account);
+
+  const [names, [apiDelegate]] = await Promise.all([
+    getNames([accountDelegation.delegate]),
+    getDelegates({
+      first: 1,
+      skip: 0,
+      orderBy: 'delegatedVotes',
+      orderDirection: 'desc',
+      where: {
+        // NOTE: This is subgraph, needs to be lowercase
+        user: accountDelegation.delegate.toLocaleLowerCase()
+      }
+    })
+  ]);
+
+  return [
+    {
+      id: accountDelegation.delegate,
+      balance: Number(balance.toBigInt()) / 1e18,
+      delegatedVotePercentage:
+        apiDelegate && apiDelegate.delegatedVotesRaw !== '0'
+          ? Number(balance.toBigInt()) / Number(apiDelegate.delegatedVotesRaw)
+          : 1,
+      name: names[accountDelegation.delegate],
       share: 100
     }
   ];
@@ -223,11 +269,7 @@ export function useDelegateesQuery(
   delegation: MaybeRefOrGetter<SpaceMetadataDelegation | null>
 ) {
   return useQuery({
-    queryKey: [
-      'delegatees',
-      () => toValue(delegation)?.contractAddress,
-      account
-    ],
+    queryKey: ['delegatees', delegation, account],
     queryFn: () =>
       FETCH_DELEGATEES_FN[
         toValue(delegation)!.apiType as keyof typeof FETCH_DELEGATEES_FN

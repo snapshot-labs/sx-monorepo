@@ -5,6 +5,7 @@ scalar BigDecimalVP
 
 type Space {
   id: String!
+  link: String!
   verified: Boolean!
   turbo: Boolean!
   metadata: SpaceMetadataItem
@@ -15,13 +16,13 @@ type Space {
   proposal_threshold: BigDecimalVP!
   next_strategy_index: Int!
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
   strategies: [String!]!
   strategies_params: [String!]!
   strategies_metadata: [String!]!
   strategies_parsed_metadata: [StrategiesParsedMetadataItem!]!
     @derivedFrom(field: "space")
+  strategies_decimals: [Int!]!
+  vp_decimals: Int!
   authenticators: [String!]!
   validation_strategy: String!
   validation_strategy_params: Text!
@@ -52,6 +53,7 @@ type SpaceMetadataItem {
   github: String!
   twitter: String!
   discord: String!
+  farcaster: String!
   voting_power_symbol: String!
   wallet: String!
   executors: [String!]!
@@ -105,6 +107,7 @@ type ExecutionHash {
 
 type Proposal {
   id: String!
+  link: String!
   proposal_id: Int!
   space: Space!
   author: User!
@@ -126,15 +129,18 @@ type Proposal {
   axiom_snapshot_slot: BigInt
   treasuries: [String!]!
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
   strategies: [String!]!
   strategies_params: [String!]!
+  vp_decimals: Int!
   type: String!
   scores_1: BigDecimalVP!
+  scores_1_parsed: Float!
   scores_2: BigDecimalVP!
+  scores_2_parsed: Float!
   scores_3: BigDecimalVP!
+  scores_3_parsed: Float!
   scores_total: BigDecimalVP!
+  scores_total_parsed: Float!
   quorum: BigInt!
   created: Int!
   edited: Int
@@ -166,6 +172,7 @@ type Vote {
   proposal: Int!
   choice: Int!
   vp: BigDecimalVP!
+  vp_parsed: Float!
   metadata: VoteMetadataItem
   created: Int!
   tx: String!

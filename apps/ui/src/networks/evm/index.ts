@@ -9,6 +9,7 @@ import { createActions } from './actions';
 import { createConstants } from './constants';
 import { EVM_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -117,12 +118,8 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   });
 
   const helpers = {
-    isAuthenticatorSupported: (authenticator: string) =>
-      constants.SUPPORTED_AUTHENTICATORS[authenticator],
-    isAuthenticatorContractSupported: (authenticator: string) =>
-      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
-    getRelayerAuthenticatorType: (authenticator: string) =>
-      constants.RELAYER_AUTHENTICATORS[authenticator],
+    getAuthenticatorSupportInfo: (authenticator: string) =>
+      constants.AUTHENTICATORS_SUPPORT_INFO[authenticator] || null,
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executorType: string) =>
@@ -135,6 +132,20 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransaction(txId);
+          return transaction.blockNumber ?? null;
+        }
+      });
+    },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
         const timer = setInterval(async () => {

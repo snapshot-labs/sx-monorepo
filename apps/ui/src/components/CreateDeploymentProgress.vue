@@ -203,7 +203,7 @@ async function deploy(startIndex: number = 0) {
 
     try {
       await deployStep(step);
-    } catch (e: unknown) {
+    } catch (e) {
       console.log('e', e);
       failed.value = true;
       return;

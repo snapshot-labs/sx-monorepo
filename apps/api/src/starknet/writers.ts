@@ -1,5 +1,5 @@
 import { starknet } from '@snapshot-labs/checkpoint';
-import { validateAndParseAddress } from 'starknet';
+import { hash, validateAndParseAddress } from 'starknet';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
 import {
@@ -25,7 +25,15 @@ import {
   handleStrategiesMetadata,
   handleVoteMetadata
 } from '../common/ipfs';
-import { dropIpfs, getCurrentTimestamp, updateCounter } from '../common/utils';
+import {
+  dropIpfs,
+  getCurrentTimestamp,
+  getParsedVP,
+  getProposalLink,
+  getSpaceDecimals,
+  getSpaceLink,
+  updateCounter
+} from '../common/utils';
 
 type Strategy = {
   address: string;
@@ -72,6 +80,10 @@ export function createWriters(config: FullConfig) {
     const id = validateAndParseAddress(event.space);
 
     const space = new Space(id, config.indexerName);
+    space.link = getSpaceLink({
+      networkId: config.indexerName,
+      spaceId: id
+    });
     space.verified = config.overrides.verifiedSpaces.includes(id);
     space.turbo = false;
     space.metadata = null;
@@ -85,12 +97,12 @@ export function createWriters(config: FullConfig) {
     );
     space.proposal_threshold = '0';
     space.strategies_indices = strategies.map((_, i) => i);
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = strategies;
     space.next_strategy_index = strategies.length;
     space.strategies_params = strategiesParams;
     space.strategies_metadata = strategiesMetadataUris;
+    space.strategies_decimals = [];
+    space.vp_decimals = 0;
     space.authenticators = event.authenticators;
     space.proposal_count = 0;
     space.vote_count = 0;
@@ -120,12 +132,15 @@ export function createWriters(config: FullConfig) {
     }
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         strategiesMetadataUris,
         0,
         config
       );
+
+      space.strategies_decimals = strategiesDecimals;
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -308,8 +323,6 @@ export function createWriters(config: FullConfig) {
       ...space.strategies_indices,
       ...strategies.map((_, i) => space.next_strategy_index + i)
     ];
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = [...space.strategies, ...strategies];
     space.next_strategy_index += strategies.length;
     space.strategies_params = [...space.strategies_params, ...strategiesParams];
@@ -319,12 +332,18 @@ export function createWriters(config: FullConfig) {
     ];
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         strategiesMetadataUris,
         initialNextStrategy,
         config
       );
+
+      space.strategies_decimals = [
+        ...space.strategies_decimals,
+        ...strategiesDecimals
+      ];
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -352,8 +371,6 @@ export function createWriters(config: FullConfig) {
     space.strategies_indices = space.strategies_indices.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = space.strategies.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
@@ -363,6 +380,10 @@ export function createWriters(config: FullConfig) {
     space.strategies_metadata = space.strategies_metadata.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
+    space.strategies_decimals = space.strategies_decimals.filter(
+      (_, i) => !indicesToRemove.includes(i)
+    );
+    space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
 
     await space.save();
   };
@@ -428,6 +449,11 @@ export function createWriters(config: FullConfig) {
       `${spaceId}/${proposalId}`,
       config.indexerName
     );
+    proposal.link = getProposalLink({
+      networkId: config.indexerName,
+      spaceId,
+      proposalId
+    });
     proposal.proposal_id = proposalId;
     proposal.space = spaceId;
     proposal.author = author.address;
@@ -448,15 +474,18 @@ export function createWriters(config: FullConfig) {
     proposal.execution_strategy_type = 'none';
     proposal.type = 'basic';
     proposal.scores_1 = '0';
+    proposal.scores_1_parsed = 0;
     proposal.scores_2 = '0';
+    proposal.scores_2_parsed = 0;
     proposal.scores_3 = '0';
+    proposal.scores_3_parsed = 0;
     proposal.scores_total = '0';
+    proposal.scores_total_parsed = 0;
     proposal.quorum = 0n;
     proposal.strategies_indices = space.strategies_indices;
-    // NOTE: deprecated
-    proposal.strategies_indicies = proposal.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
+    proposal.vp_decimals = space.vp_decimals;
     proposal.created = parseInt(created.toString());
     proposal.tx = tx.transaction_hash;
     proposal.execution_tx = null;
@@ -514,7 +543,14 @@ export function createWriters(config: FullConfig) {
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
-      await handleProposalMetadata(metadataUri, config);
+      await handleProposalMetadata(
+        'starknet',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
 
       proposal.metadata = dropIpfs(metadataUri);
     } catch (e) {
@@ -630,17 +666,18 @@ export function createWriters(config: FullConfig) {
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    try {
-      await handleProposalMetadata(metadataUri, config);
+    const space = await Space.loadEntity(spaceId, config.indexerName);
+    if (!space) return;
 
-      proposal.metadata = dropIpfs(metadataUri);
-      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
-    } catch (e) {
-      console.log('failed to update proposal metadata', e);
-    }
+    proposal.execution_strategy = validateAndParseAddress(
+      event.execution_strategy.address
+    );
+    proposal.execution_hash = hash.computeHashOnElements(
+      event.execution_strategy.params
+    );
 
     const executionStrategy = await handleExecutionStrategy(
-      event.execution_strategy,
+      event.execution_strategy.address,
       event.payload,
       config
     );
@@ -648,6 +685,54 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
       proposal.quorum = executionStrategy.quorum;
+
+      // Find matching strategy and persist it on space object
+      // We use this on UI to properly display execution with treasury
+      // information.
+      // Current way of persisting it isn't great, because we need to fetch every strategy
+      // for space and compare it with execution strategy address.
+      // In the future we should find way to optimize it for example by adding where lookup
+      // via ORM
+      if (space.metadata) {
+        const spaceMetadata = await SpaceMetadataItem.loadEntity(
+          space.metadata,
+          config.indexerName
+        );
+
+        if (spaceMetadata) {
+          proposal.treasuries = spaceMetadata.treasuries;
+
+          const strategies = await Promise.all(
+            spaceMetadata.executors_strategies.map(id =>
+              ExecutionStrategy.loadEntity(id, config.indexerName)
+            )
+          );
+
+          const matchingStrategy = strategies.find(
+            strategy => strategy?.address === proposal.execution_strategy
+          );
+
+          if (matchingStrategy) {
+            proposal.execution_strategy_details = matchingStrategy.id;
+          }
+        }
+      }
+    }
+
+    try {
+      await handleProposalMetadata(
+        'starknet',
+        proposal.execution_strategy_type,
+        proposal.execution_destination,
+        proposal.execution_hash,
+        metadataUri,
+        config
+      );
+
+      proposal.metadata = dropIpfs(metadataUri);
+      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
+    } catch (e) {
+      console.log('failed to update proposal metadata', e);
     }
 
     await proposal.save();
@@ -689,6 +774,12 @@ export function createWriters(config: FullConfig) {
     const created = block?.timestamp ?? getCurrentTimestamp();
     const voter = formatAddressVariant(findVariant(event.voter));
 
+    const proposal = await Proposal.loadEntity(
+      `${spaceId}/${proposalId}`,
+      config.indexerName
+    );
+    if (!proposal) return;
+
     const vote = new Vote(
       `${spaceId}/${proposalId}/${voter.address}`,
       config.indexerName
@@ -698,6 +789,7 @@ export function createWriters(config: FullConfig) {
     vote.voter = voter.address;
     vote.choice = choice;
     vote.vp = vp.toString();
+    vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
     vote.created = created;
     vote.tx = tx.transaction_hash;
 
@@ -754,20 +846,22 @@ export function createWriters(config: FullConfig) {
       await space.save();
     }
 
-    const proposal = await Proposal.loadEntity(
-      `${spaceId}/${proposalId}`,
-      config.indexerName
+    proposal.vote_count += 1;
+    proposal.scores_total = (
+      BigInt(proposal.scores_total) + BigInt(vote.vp)
+    ).toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
     );
-    if (proposal) {
-      proposal.vote_count += 1;
-      proposal.scores_total = (
-        BigInt(proposal.scores_total) + BigInt(vote.vp)
-      ).toString();
-      proposal[`scores_${choice}`] = (
-        BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
-      ).toString();
-      await proposal.save();
-    }
+    proposal[`scores_${choice}`] = (
+      BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
+    ).toString();
+    proposal[`scores_${choice}_parsed`] = getParsedVP(
+      proposal[`scores_${choice}`],
+      proposal.vp_decimals
+    );
+    await proposal.save();
   };
 
   return {

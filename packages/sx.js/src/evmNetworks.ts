@@ -4,7 +4,9 @@ import { EvmNetworkConfig } from './types';
 type AdditionalProperties = {
   maxPriorityFeePerGas?: BigNumberish;
   authenticators?: Record<string, string>;
-  strategies?: Record<string, string>;
+  strategies?: {
+    ApeGas?: string;
+  };
   executionStrategies?: {
     Axiom?: string;
     Isokratia?: string;
@@ -82,7 +84,14 @@ function createEvmConfig(
     },
     [network.Strategies.Whitelist]: {
       type: 'whitelist'
-    }
+    },
+    ...(network.Strategies.ApeGas
+      ? {
+          [network.Strategies.ApeGas]: {
+            type: 'apeGas' as const
+          }
+        }
+      : {})
   } as const;
 
   const executionStrategiesImplementations = {
@@ -123,8 +132,16 @@ export const evmNetworks = {
     // https://docs.mantle.xyz/network/system-information/fee-mechanism/eip-1559-support#application-of-eip-1559-in-mantle-v2-tectonic
     maxPriorityFeePerGas: 0
   }),
-  ape: createStandardConfig(33139),
-  curtis: createStandardConfig(33111)
+  ape: createStandardConfig(33139, {
+    strategies: {
+      ApeGas: '0xDd6B74123b2aB93aD701320D3F8D1b92B4fA5202'
+    }
+  }),
+  curtis: createStandardConfig(33111, {
+    strategies: {
+      ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
+    }
+  })
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');

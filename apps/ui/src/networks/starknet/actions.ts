@@ -14,6 +14,7 @@ import {
   constants as starknetConstants,
   uint256
 } from 'starknet';
+import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
@@ -90,9 +91,7 @@ export function createActions(
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: STARKNET_CONNECTORS,
-    lowPriorityAuthenticators: ['evm-tx']
+    helpers
   });
 
   const getIsContract = async (
@@ -102,8 +101,7 @@ export function createActions(
     if (!EVM_CONNECTORS.includes(connectorType)) return false;
     if (connectorType === 'sequence') return true;
 
-    const code = await l1Provider.getCode(address);
-    return code !== '0x';
+    return _getIsContract(l1Provider, address);
   };
 
   const client = new clients.StarknetTx(clientConfig);
@@ -256,7 +254,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
           strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndicies:
+          strategiesIndices:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
@@ -375,7 +373,7 @@ export function createActions(
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies:
+        strategiesIndices:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
@@ -470,7 +468,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indices,
+          strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
           ignoreRelayer: !relayer?.hasMinimumBalance
