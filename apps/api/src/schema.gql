@@ -134,13 +134,13 @@ type Proposal {
   vp_decimals: Int!
   type: String!
   scores_1: BigDecimalVP!
-  scores_1_parsed: String!
+  scores_1_parsed: Float!
   scores_2: BigDecimalVP!
-  scores_2_parsed: String!
+  scores_2_parsed: Float!
   scores_3: BigDecimalVP!
-  scores_3_parsed: String!
+  scores_3_parsed: Float!
   scores_total: BigDecimalVP!
-  scores_total_parsed: String!
+  scores_total_parsed: Float!
   quorum: BigInt!
   created: Int!
   edited: Int
@@ -172,7 +172,7 @@ type Vote {
   proposal: Int!
   choice: Int!
   vp: BigDecimalVP!
-  vp_parsed: String!
+  vp_parsed: Float!
   metadata: VoteMetadataItem
   created: Int!
   tx: String!

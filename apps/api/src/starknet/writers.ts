@@ -473,13 +473,13 @@ export function createWriters(config: FullConfig) {
     proposal.execution_strategy_type = 'none';
     proposal.type = 'basic';
     proposal.scores_1 = '0';
-    proposal.scores_1_parsed = '0';
+    proposal.scores_1_parsed = 0;
     proposal.scores_2 = '0';
-    proposal.scores_2_parsed = '0';
+    proposal.scores_2_parsed = 0;
     proposal.scores_3 = '0';
-    proposal.scores_3_parsed = '0';
+    proposal.scores_3_parsed = 0;
     proposal.scores_total = '0';
-    proposal.scores_total_parsed = '0';
+    proposal.scores_total_parsed = 0;
     proposal.quorum = 0n;
     proposal.strategies_indices = space.strategies_indices;
     proposal.strategies = space.strategies;
