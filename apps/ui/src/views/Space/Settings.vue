@@ -369,7 +369,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       <SpaceSettingsAlerts
         :space="pendingSpace"
         :active-tab="activeTab"
-        class="max-w-[592px] mb-4"
+        class="mb-4"
+        :class="{
+          'max-w-full': activeTab === 'whitelabel',
+          'max-w-[592px]': activeTab !== 'whitelabel'
+        }"
       />
       <div v-show="activeTab === 'profile'">
         <FormSpaceProfile

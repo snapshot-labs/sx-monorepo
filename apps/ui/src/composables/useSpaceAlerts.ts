@@ -8,7 +8,8 @@ import { Space } from '@/types';
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
-  | 'HAS_PRO_ONLY_NETWORKS';
+  | 'HAS_PRO_ONLY_NETWORKS'
+  | 'HAS_PRO_ONLY_WHITELABEL';
 
 export function useSpaceAlerts(space: Ref<Space>) {
   const {
@@ -83,6 +84,12 @@ export function useSpaceAlerts(space: Ref<Space>) {
     if (unsupportedProOnlyNetworks.value.length) {
       alertsMap.set('HAS_PRO_ONLY_NETWORKS', {
         networks: unsupportedProOnlyNetworks.value
+      });
+    }
+
+    if (space.value.additionalRawData?.domain && !space.value.turbo) {
+      alertsMap.set('HAS_PRO_ONLY_WHITELABEL', {
+        domain: space.value.additionalRawData.domain
       });
     }
 
