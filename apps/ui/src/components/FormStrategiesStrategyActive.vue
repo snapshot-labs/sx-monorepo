@@ -64,9 +64,6 @@ const isOffchainNetwork = computed(() => {
         >
           <IH-pencil />
         </button>
-        <button type="button" @click="$emit('deleteStrategy', strategy)">
-          <IH-trash />
-        </button>
         <button
           v-if="isOffchainNetwork"
           type="button"
@@ -82,6 +79,9 @@ const isOffchainNetwork = computed(() => {
         >
           <IH-information-circle />
         </a>
+        <button type="button" @click="$emit('deleteStrategy', strategy)">
+          <IH-trash />
+        </button>
       </div>
     </div>
     <a
