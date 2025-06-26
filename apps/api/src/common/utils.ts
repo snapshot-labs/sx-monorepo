@@ -125,3 +125,9 @@ export function getExecutionHash({
 
   return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
 }
+
+export function getParsedVP(value: string, decimals: number) {
+  const parsedValue = parseInt(value, 10);
+
+  return parsedValue / 10 ** decimals;
+}
