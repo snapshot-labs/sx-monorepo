@@ -37,6 +37,7 @@ import {
   getCurrentTimestamp,
   getParsedVP,
   getProposalLink,
+  getSpaceDecimals,
   getSpaceLink,
   updateCounter
 } from '../common/utils';
@@ -295,7 +296,7 @@ export function createWriters(config: FullConfig) {
       );
 
       space.strategies_decimals = strategiesDecimals;
-      space.vp_decimals = Math.max(...strategiesDecimals);
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -508,7 +509,7 @@ export function createWriters(config: FullConfig) {
         ...space.strategies_decimals,
         ...strategiesDecimals
       ];
-      space.vp_decimals = Math.max(...space.strategies_decimals);
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -548,7 +549,7 @@ export function createWriters(config: FullConfig) {
     space.strategies_decimals = space.strategies_decimals.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
-    space.vp_decimals = Math.max(...space.strategies_decimals);
+    space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
 
     await space.save();
   };
