@@ -79,6 +79,7 @@ const hasAnyAlerts = computed(
           follow migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
+        before August 15, 2025
       </UiAlert>
       <UiAlert v-if="unsupportedProOnlyNetworks.length" type="error">
         The
@@ -97,6 +98,7 @@ const hasAnyAlerts = computed(
           change to a premium network
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
+        before August 15, 2025
       </UiAlert>
     </template>
     <template v-if="hasWhitelabelAlerts">
@@ -111,6 +113,7 @@ const hasAnyAlerts = computed(
           follow migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
+        before August 15, 2025
       </UiAlert>
     </template>
   </div>
