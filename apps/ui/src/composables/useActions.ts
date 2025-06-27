@@ -311,6 +311,48 @@ export function useActions() {
       return null;
     }
 
+    if (proposal.id.startsWith('local-')) {
+      const localVote = {
+        id: `local-vote-${Date.now()}`,
+        voter: {
+          id: auth.value.account,
+          name: ''
+        },
+        space: {
+          id: proposal.space.id
+        },
+        proposal: proposal.id,
+        choice: choice,
+        vp: 1,
+        reason: reason,
+        created: Math.floor(Date.now() / 1000),
+        tx: `local-${Date.now()}`
+      };
+
+      // Store vote in localStorage
+      const voteKey = `localVotes:${proposal.space.id}`;
+      const existingVotes = JSON.parse(localStorage.getItem(voteKey) || '[]');
+      existingVotes.push(localVote);
+      localStorage.setItem(voteKey, JSON.stringify(existingVotes));
+
+      // Update proposal vote count
+      const proposalKey = `localProposals:${proposal.space.id}`;
+      const proposals = JSON.parse(localStorage.getItem(proposalKey) || '[]');
+      const proposalIndex = proposals.findIndex(
+        (p: any) => p.id === proposal.id
+      );
+      if (proposalIndex !== -1) {
+        proposals[proposalIndex].vote_count =
+          (proposals[proposalIndex].vote_count || 0) + 1;
+        localStorage.setItem(proposalKey, JSON.stringify(proposals));
+      }
+
+      // Add to pending votes for UI
+      addPendingVote(proposal.id);
+
+      return `local-${Date.now()}`;
+    }
+
     const network = getNetwork(proposal.network);
     const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
