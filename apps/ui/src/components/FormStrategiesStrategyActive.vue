@@ -23,6 +23,7 @@ const props = defineProps<{
   readOnly?: boolean;
   networkId: NetworkID;
   strategy: Strategy;
+  testable?: boolean;
 }>();
 
 defineEmits<{
@@ -65,7 +66,7 @@ const isOffchainNetwork = computed(() => {
           <IH-pencil />
         </button>
         <button
-          v-if="isOffchainNetwork"
+          v-if="testable"
           type="button"
           @click="$emit('testStrategies', [strategy])"
         >

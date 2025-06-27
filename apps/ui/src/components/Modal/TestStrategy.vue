@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { evmNetworks, offchainNetworks } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { getVotingPower, VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, NetworkID } from '@/types';
@@ -69,6 +70,40 @@ async function handleSubmit() {
   try {
     hasError.value = false;
 
+    const isOffchainNetwork = offchainNetworks.includes(props.networkId);
+
+    let strategiesParams: any[] = props.strategies;
+    let strategiesMetadata: any[] = [];
+
+    if (!isOffchainNetwork) {
+      strategiesParams = await Promise.all(
+        props.strategies.map(async strategy => {
+          if (evmNetworks.includes(props.networkId)) {
+            return strategy.generateParams
+              ? (await strategy.generateParams(strategy.params))[0]
+              : '0x';
+          }
+
+          return strategy.generateParams
+            ? (await strategy.generateParams(strategy.params)).join(',')
+            : '';
+        })
+      );
+
+      strategiesMetadata = (
+        await Promise.all(
+          props.strategies.map(async strategy =>
+            strategy.generateMetadata
+              ? await strategy.generateMetadata(strategy.params)
+              : {}
+          )
+        )
+      ).map((metadata: any) => ({
+        payload: null,
+        ...metadata.properties
+      }));
+    }
+
     votingPower.value = await getVotingPower(
       form.value.address,
       null,
@@ -78,7 +113,11 @@ async function handleSubmit() {
         network: props.networkId,
         voting_power_symbol: props.votingPowerSymbol
       },
-      [props.strategies.map(s => s.name), props.strategies.map(s => s), []]
+      [
+        props.strategies.map(s => s.address),
+        strategiesParams,
+        strategiesMetadata
+      ]
     );
   } catch {
     hasError.value = true;

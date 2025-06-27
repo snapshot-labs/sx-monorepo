@@ -15,6 +15,7 @@ withDefaults(
     description: string;
     availableStrategies: StrategyTemplate[];
     defaultParams?: Record<string, any>;
+    testable?: boolean;
   }>(),
   {
     limit: Infinity,
@@ -33,6 +34,7 @@ withDefaults(
       :unique="unique"
       :available-strategies="availableStrategies"
       :default-params="defaultParams"
+      :testable="testable"
       @update:model-value="value => (model = value)"
     />
   </UiContainerSettings>
