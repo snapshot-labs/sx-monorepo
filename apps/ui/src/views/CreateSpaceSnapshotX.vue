@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ContractFactory } from '@ethersproject/contracts';
+import { Contract, ContractFactory } from '@ethersproject/contracts';
 import { StepRecords } from '@/components/Ui/Stepper.vue';
+import { useWeb3 } from '@/composables/useWeb3';
 import {
   SPACE_CONTRACT,
   VANILLA_AUTHENTICATOR,
@@ -107,7 +108,11 @@ const stepsErrors = ref<Record<string, boolean>>({
   controller: false
 });
 
+// Add loading states
 const isInitializing = ref(false);
+const deploymentProgress = ref('');
+const initializationProgress = ref('');
+
 const deployedAddresses = ref<{
   spaceContract: string;
   vanillaAuthenticator: string;
@@ -121,19 +126,69 @@ const error = ref<string | null>(null);
 const deployContract = async ({
   abi,
   bytecode,
-  args = []
+  args = [],
+  name
 }: {
   abi: any;
   bytecode: string;
   args?: any[];
+  name?: string;
 }) => {
   if (!auth.value?.provider) throw new Error('No provider available');
 
+  if (name) {
+    deploymentProgress.value = `Deploying ${name}...`;
+  }
+
+  console.log(`Deploying ${name || 'Contract'}...`);
+  console.log(`Bytecode length: ${bytecode.length} characters`);
+  if (args.length > 0) console.log(`Constructor args:`, args);
+
+  // Validate bytecode
+  if (!bytecode || bytecode === '0x' || bytecode.length < 10) {
+    throw new Error(
+      `Invalid bytecode for ${name}. Contract may not be compiled correctly.`
+    );
+  }
+
   const signer = auth.value.provider.getSigner();
   const factory = new ContractFactory(abi, bytecode, signer);
-  const contract = await factory.deploy(...args);
-  await contract.deployed();
-  return contract.address;
+
+  try {
+    // Deploy without manual gas limit - let the network estimate
+    const contract = await factory.deploy(...args);
+
+    console.log(
+      `${name || 'Contract'} deployment tx:`,
+      contract.deployTransaction.hash
+    );
+
+    // Wait for deployment
+    await contract.deployed();
+
+    console.log(`${name || 'Contract'} deployed at:`, contract.address);
+
+    return contract.address;
+  } catch (error) {
+    console.error(`Failed to deploy ${name}:`, error);
+
+    // Enhanced error reporting
+    if (error.code === 'UNPREDICTABLE_GAS_LIMIT') {
+      throw new Error(
+        `Gas estimation failed for ${name}. The contract may be too complex or have invalid constructor parameters.`
+      );
+    } else if (error.code === 'INSUFFICIENT_FUNDS') {
+      throw new Error(
+        `Insufficient funds to deploy ${name}. Please ensure you have enough ETH for gas fees.`
+      );
+    } else if (error.message.includes('execution reverted')) {
+      throw new Error(
+        `Contract deployment reverted for ${name}. Check constructor parameters and contract code.`
+      );
+    }
+
+    throw new Error(`Failed to deploy ${name}: ${error.message}`);
+  }
 };
 
 const storeDeployedAddresses = (addresses: any) => {
@@ -167,33 +222,27 @@ const storeDeployedAddresses = (addresses: any) => {
 
 const initialize = async (contractAddress: any) => {
   isInitializing.value = true;
+  initializationProgress.value = 'Initializing space contract...';
+
   try {
-    console.log(
-      'Vanilla Validation Strategy',
-      contractAddress?.vanillaProposalValidationStrategy
-    );
+    console.log('Starting space initialization...');
+
     const data0 = {
       addr: contractAddress?.vanillaProposalValidationStrategy,
       params: '0x'
     };
-    console.log(
-      'Vanilla Voting Strategy',
-      contractAddress?.vanillaVotingStrategy
-    );
     const data1 = {
       addr: contractAddress?.vanillaVotingStrategy,
       params: '0x'
     };
     const votingData = settingsForm;
     const profileData = metadataForm;
-    const votingDelaySeconds = votingData.votingDelay;
-    const minVotingDurationSeconds = votingData.minVotingDuration;
-    const maxVotingDurationSeconds = votingData.maxVotingDuration;
+
     const initData = {
       owner: controller.value,
-      votingDelay: votingDelaySeconds,
-      minVotingDuration: minVotingDurationSeconds,
-      maxVotingDuration: maxVotingDurationSeconds,
+      votingDelay: votingData.votingDelay,
+      minVotingDuration: votingData.minVotingDuration,
+      maxVotingDuration: votingData.maxVotingDuration,
       proposalValidationStrategy: data0,
       proposalValidationStrategyMetadataURI:
         profileData.externalUrl || 'https://example.com/metadata',
@@ -207,42 +256,86 @@ const initialize = async (contractAddress: any) => {
     if (!auth.value?.provider) throw new Error('No provider available');
 
     console.log('Initialization data:', initData);
+
+    const signer = auth.value.provider.getSigner();
+    const spaceContract = new Contract(
+      contractAddress.spaceContract,
+      SPACE_CONTRACT.abi,
+      signer
+    );
+
+    const tx = await spaceContract.initialize(initData);
+
+    console.log('Initialization transaction:', tx.hash);
+
+    const receipt = await tx.wait();
+
+    if (receipt.status === 0) {
+      throw new Error('Initialization transaction failed');
+    }
+
+    console.log('Space initialized successfully!');
   } catch (err) {
     console.error('Initialization failed:', err);
-    error.value =
+    const errorMessage =
       err instanceof Error ? err.message : 'An unknown error occurred';
+    error.value = `Initialization failed: ${errorMessage}`;
+    throw err;
   } finally {
     isInitializing.value = false;
   }
 };
 
 const handleSubmit = async () => {
+  if (!auth.value?.provider) {
+    error.value = 'Please connect your wallet first';
+    return;
+  }
+
   isLoading.value = true;
   error.value = null;
   deployedAddresses.value = null;
 
   try {
-    // Deploy contracts
+    console.log('Starting contract deployment...');
+    console.log('Network:', selectedNetworkId.value);
+    console.log('Account:', auth.value.account);
+
+    // Deploy contracts sequentially to avoid nonce issues
+    deploymentProgress.value = 'Deploying Space Contract...';
     const spaceContract = await deployContract({
       abi: SPACE_CONTRACT.abi,
-      bytecode: SPACE_CONTRACT.bytecode
+      bytecode: SPACE_CONTRACT.bytecode,
+      name: 'Space Contract'
     });
+
+    deploymentProgress.value = 'Deploying Vanilla Authenticator...';
     const vanillaAuthenticator = await deployContract({
       abi: VANILLA_AUTHENTICATOR.abi,
-      bytecode: VANILLA_AUTHENTICATOR.bytecode
+      bytecode: VANILLA_AUTHENTICATOR.bytecode,
+      name: 'Vanilla Authenticator'
     });
+
+    deploymentProgress.value = 'Deploying Proposal Validation Strategy...';
     const vanillaProposalValidationStrategy = await deployContract({
       abi: VANILLA_PROPOSAL_VALIDATION_STRATEGY.abi,
-      bytecode: VANILLA_PROPOSAL_VALIDATION_STRATEGY.bytecode
+      bytecode: VANILLA_PROPOSAL_VALIDATION_STRATEGY.bytecode,
+      name: 'Proposal Validation Strategy'
     });
+
+    deploymentProgress.value = 'Deploying Voting Strategy...';
     const vanillaVotingStrategy = await deployContract({
       abi: VANILLA_VOTING_STRATEGY.abi,
-      bytecode: VANILLA_VOTING_STRATEGY.bytecode
+      bytecode: VANILLA_VOTING_STRATEGY.bytecode,
+      name: 'Voting Strategy'
     });
+
+    deploymentProgress.value = 'Deploying Execution Strategy...';
     const vanillaExecutionStrategy = await deployContract({
       abi: VANILLA_EXECUTION_STRATEGY.abi,
       bytecode: VANILLA_EXECUTION_STRATEGY.bytecode,
-      args: [controller.value, 1]
+      args: [controller.value, 1],
+      name: 'Execution Strategy'
     });
 
     deployedAddresses.value = {
@@ -253,19 +346,22 @@ const handleSubmit = async () => {
       vanillaExecutionStrategy
     };
 
+    console.log('All contracts deployed:', deployedAddresses.value);
+
     storeDeployedAddresses(deployedAddresses.value);
     isLoading.value = false;
 
-    console.log('Deployed addresses:', deployedAddresses.value);
-
-    // Now initialize
+    // Now initialize the space
     await initialize(deployedAddresses.value);
+
     confirming.value = true;
   } catch (err) {
-    error.value =
+    const errorMessage =
       err instanceof Error ? err.message : 'An unknown error occurred';
+    error.value = `Deployment failed: ${errorMessage}`;
     console.error('Deployment failed:', err);
     isLoading.value = false;
+    isInitializing.value = false;
   }
 };
 
@@ -298,11 +394,11 @@ watch(selectedNetworkId, () => {
     >
       <div class="flex items-center gap-2">
         <UiLoading v-if="isLoading" class="mr-2" />
-        <span>Deploying contracts...</span>
+        <span>{{ deploymentProgress || 'Deploying contracts...' }}</span>
       </div>
       <div class="flex items-center gap-2">
         <UiLoading v-if="isInitializing" class="mr-2" />
-        <span>Initializing space...</span>
+        <span>{{ initializationProgress || 'Initializing space...' }}</span>
       </div>
     </div>
     <div v-else>

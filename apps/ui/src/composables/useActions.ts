@@ -20,6 +20,9 @@ import {
   User,
   VoteType
 } from '@/types';
+// You may need to import writeContractAsync and deployedAddresses from your actual setup
+// import { writeContractAsync } from 'wherever';
+// import { deployedAddresses } from 'wherever';
 
 const offchainToStarknetIds: Record<string, NetworkID> = {
   s: 'sn',
@@ -351,35 +354,66 @@ export function useActions() {
       return false;
     }
 
-    const network = getNetwork(space.network);
+    // Only use EVM logic for EVM networks, fallback to old logic otherwise
+    if (space.network === 'base-sep' || space.network === 'base') {
+      const network = getNetwork(space.network);
 
-    const txHash = await wrapPromise(
-      space.network,
-      network.actions.propose(
-        auth.value.provider,
-        auth.value.connector.type,
-        auth.value.account,
-        space,
-        title,
-        body,
-        discussion,
-        type,
-        choices,
-        privacy,
-        labels,
-        app,
-        created,
-        start,
-        min_end,
-        max_end,
-        executions
-      ),
-      {
-        safeAppContext: 'propose'
-      }
-    );
-
-    return txHash;
+      const txHash = await wrapPromise(
+        space.network,
+        network.actions.propose(
+          auth.value.provider,
+          auth.value.connector.type,
+          auth.value.account,
+          space,
+          title,
+          body,
+          discussion,
+          type,
+          choices,
+          privacy,
+          labels,
+          app,
+          created,
+          start,
+          min_end,
+          max_end,
+          executions
+        ),
+        {
+          safeAppContext: 'propose'
+        }
+      );
+      return txHash;
+    } else {
+      // fallback to old logic for non-EVM networks
+      const network = getNetwork(space.network);
+      const txHash = await wrapPromise(
+        space.network,
+        network.actions.propose(
+          auth.value.provider,
+          auth.value.connector.type,
+          auth.value.account,
+          space,
+          title,
+          body,
+          discussion,
+          type,
+          choices,
+          privacy,
+          labels,
+          app,
+          created,
+          start,
+          min_end,
+          max_end,
+          executions
+        ),
+        {
+          safeAppContext: 'propose'
+        }
+      );
+      return txHash;
+    }
   }
 
   async function updateProposal(
@@ -641,10 +675,9 @@ export function useActions() {
   async function delegate(
     space: Space,
     delegationType: DelegationType,
-    delegatees: string[],
+    delegatee: string | null,
     delegationContract: string,
-    chainId: ChainId,
-    delegateesMetadata?: Record<string, any>
+    chainId: ChainId
   ) {
     if (!auth.value) {
       await forceLogin();
@@ -661,10 +694,9 @@ export function useActions() {
         space,
         actionNetwork,
         delegationType,
-        delegatees,
+        delegatee ? [delegatee] : [],
         delegationContract,
-        chainId,
-        delegateesMetadata
+        chainId
       ),
       { chainId }
     );
