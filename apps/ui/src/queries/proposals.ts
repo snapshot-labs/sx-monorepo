@@ -83,7 +83,7 @@ function setProposalsDetails(
       PROPOSALS_KEYS.detail(
         networkId,
         proposal.space.id,
-        proposal.proposal_id.toString()
+        (proposal.proposal_id || proposal.id).toString()
       ),
       proposal
     );
@@ -130,7 +130,6 @@ async function getProposals(
     console.log('🔍 spaceIdWithoutPrefix:', spaceIdWithoutPrefix);
     console.log('🔍 spaceIdWithPrefix:', spaceIdWithPrefix);
 
-    // Try the format used when storing (contract address without prefix)
     const localKey1 = `localProposals:${spaceIdWithoutPrefix}`;
     const spaceLocalProposals1 = JSON.parse(
       localStorage.getItem(localKey1) || '[]'
