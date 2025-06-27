@@ -1,4 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
+import { getAddress } from '@ethersproject/address';
+import { Contract } from '@ethersproject/contracts';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { isUserAbortError } from '@/helpers/utils';
@@ -311,45 +313,156 @@ export function useActions() {
     }
 
     if (proposal.id.startsWith('local-')) {
-      const localVote = {
-        id: `local-vote-${Date.now()}`,
-        voter: {
-          id: auth.value.account,
-          name: ''
-        },
-        space: {
-          id: proposal.space.id
-        },
-        proposal: proposal.id,
-        choice: choice,
-        vp: 1,
-        reason: reason,
-        created: Math.floor(Date.now() / 1000),
-        tx: `local-${Date.now()}`
-      };
-
-      // Store vote in localStorage
-      const voteKey = `localVotes:${proposal.space.id}`;
-      const existingVotes = JSON.parse(localStorage.getItem(voteKey) || '[]');
-      existingVotes.push(localVote);
-      localStorage.setItem(voteKey, JSON.stringify(existingVotes));
-
-      // Update proposal vote count
-      const proposalKey = `localProposals:${proposal.space.id}`;
-      const proposals = JSON.parse(localStorage.getItem(proposalKey) || '[]');
-      const proposalIndex = proposals.findIndex(
-        (p: any) => p.id === proposal.id
-      );
-      if (proposalIndex !== -1) {
-        proposals[proposalIndex].vote_count =
-          (proposals[proposalIndex].vote_count || 0) + 1;
-        localStorage.setItem(proposalKey, JSON.stringify(proposals));
+      // Convert choice to BigInt for Lightning
+      let selectedChoiceBigInt;
+      switch (choice) {
+        case 'for':
+          selectedChoiceBigInt = BigInt('1');
+          break;
+        case 'against':
+          selectedChoiceBigInt = BigInt('0');
+          break;
+        case 'abstain':
+          selectedChoiceBigInt = BigInt('2');
+          break;
+        default:
+          // Handle numeric choices
+          selectedChoiceBigInt = BigInt(choice.toString());
+          break;
       }
 
-      // Add to pending votes for UI
-      addPendingVote(proposal.id);
+      const spaceAddress = proposal.space.id;
+      const checksummedAddress = getAddress(spaceAddress);
 
-      return `local-${Date.now()}`;
+      try {
+        // @ts-expect-error - Dynamic import for Lightning
+        const { Lightning } = await import('@inco/js/lite');
+        const incoConfig = Lightning.latest('demonet', 84532);
+
+        // Encrypt the vote using Lightning
+        const encryptedData = await incoConfig.encrypt(selectedChoiceBigInt, {
+          accountAddress: auth.value.account,
+          dappAddress: checksummedAddress
+        });
+
+        // Define voting ABI
+        const votingABI = [
+          {
+            inputs: [
+              {
+                internalType: 'address',
+                name: 'voter',
+                type: 'address'
+              },
+              {
+                internalType: 'uint256',
+                name: 'proposalId',
+                type: 'uint256'
+              },
+              {
+                internalType: 'bytes',
+                name: 'ciphertext',
+                type: 'bytes'
+              },
+              {
+                components: [
+                  {
+                    internalType: 'uint8',
+                    name: 'index',
+                    type: 'uint8'
+                  },
+                  {
+                    internalType: 'bytes',
+                    name: 'params',
+                    type: 'bytes'
+                  }
+                ],
+                internalType: 'struct IndexedStrategy[]',
+                name: 'userVotingStrategies',
+                type: 'tuple[]'
+              },
+              {
+                internalType: 'string',
+                name: 'metadataURI',
+                type: 'string'
+              }
+            ],
+            name: 'vote',
+            outputs: [],
+            stateMutability: 'nonpayable',
+            type: 'function'
+          }
+        ];
+
+        // Get the proposal ID (ggp field from local proposal)
+        const proposalId = (proposal as any).ggp || 0;
+
+        // Create contract instance and call vote function
+        const signer = auth.value.provider.getSigner();
+        const contract = new Contract(checksummedAddress, votingABI, signer);
+
+        const tx = await contract.vote(
+          auth.value.account,
+          proposalId,
+          encryptedData,
+          [[0, '0x']],
+          reason || ''
+        );
+
+        const receipt = await tx.wait();
+
+        if (receipt.status === 1) {
+          // Store local vote record
+          const localVote = {
+            id: `local-vote-${Date.now()}`,
+            voter: {
+              id: auth.value.account,
+              name: ''
+            },
+            space: {
+              id: proposal.space.id
+            },
+            proposal: proposal.id,
+            choice: choice,
+            vp: 1,
+            reason: reason,
+            created: Math.floor(Date.now() / 1000),
+            tx: receipt.transactionHash
+          };
+
+          // Store vote in localStorage
+          const voteKey = `localVotes:${proposal.space.id}`;
+          const existingVotes = JSON.parse(
+            localStorage.getItem(voteKey) || '[]'
+          );
+          existingVotes.push(localVote);
+          localStorage.setItem(voteKey, JSON.stringify(existingVotes));
+
+          // Update proposal vote count
+          const proposalKey = `localProposals:${proposal.space.id}`;
+          const proposals = JSON.parse(
+            localStorage.getItem(proposalKey) || '[]'
+          );
+          const proposalIndex = proposals.findIndex(
+            (p: any) => p.id === proposal.id
+          );
+          if (proposalIndex !== -1) {
+            proposals[proposalIndex].vote_count =
+              (proposals[proposalIndex].vote_count || 0) + 1;
+            localStorage.setItem(proposalKey, JSON.stringify(proposals));
+          }
+
+          // Add to pending votes for UI
+          addPendingVote(proposal.id);
+
+          return receipt.transactionHash;
+        } else {
+          throw new Error('Transaction failed or was reverted');
+        }
+      } catch (error) {
+        console.error('Lightning vote failed:', error);
+        throw error;
+      }
     }
 
     const network = getNetwork(proposal.network);
