@@ -64,6 +64,10 @@ const votingPowerDecimals = computed(() => {
   );
 });
 
+const isLocalProposal = computed(() => {
+  return proposal.value?.id.startsWith('local-') || false;
+});
+
 const currentVote = computed(
   () =>
     proposal.value &&
@@ -243,7 +247,8 @@ watchEffect(() => {
             <div
               v-if="
                 !proposal.cancelled &&
-                ['pending', 'active'].includes(proposal.state)
+                (['pending', 'active'].includes(proposal.state) ||
+                  isLocalProposal)
               "
             >
               <h4 class="mb-2.5 eyebrow flex items-center space-x-2">

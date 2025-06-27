@@ -332,6 +332,15 @@ export function createActions(
 
       const localKey = `localProposals:${deployedAddresses.spaceContract}`;
       const localProposals = JSON.parse(localStorage.getItem(localKey) || '[]');
+
+      // Helper function to ensure timestamp is in seconds
+      const ensureSeconds = (timestamp: number) => {
+        // If timestamp is in milliseconds (13+ digits), convert to seconds
+        return timestamp > 9999999999
+          ? Math.floor(timestamp / 1000)
+          : timestamp;
+      };
+
       const newProposal = {
         id: `local-${Date.now()}`,
         title,
@@ -339,7 +348,7 @@ export function createActions(
         ggp: Number(ggp),
         discussion,
         choices,
-        created: Date.now(),
+        created: Math.floor(Date.now() / 1000),
         author: {
           id: account,
           name: '',
@@ -373,9 +382,9 @@ export function createActions(
         execution_hash: '',
         metadata_uri: '',
         executions: [],
-        start: start || Date.now(),
-        min_end: min_end || Date.now(),
-        max_end: max_end || Date.now(),
+        start: ensureSeconds(start || Math.floor(Date.now() / 1000) + 3600), // 1 hour from now
+        min_end: ensureSeconds(min_end || Math.floor(Date.now() / 1000) + 7200), // 2 hours from now
+        max_end: ensureSeconds(max_end || Math.floor(Date.now() / 1000) + 7200), // 2 hours from now
         snapshot: 0,
         labels: labels || [],
         scores: [],

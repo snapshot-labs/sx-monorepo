@@ -25,6 +25,11 @@ const { isInvalidNetwork } = useSafeWallet(
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
 const isSupported = computed(() => {
+  // Always allow voting for local proposals
+  if (props.proposal.id.startsWith('local-')) {
+    return true;
+  }
+
   const network = getNetwork(props.proposal.network);
 
   const hasSupportedAuthenticator = props.proposal.space.authenticators.find(
@@ -108,7 +113,12 @@ const isEditable = computed(() => {
   >
     You have already voted for this proposal
   </slot>
-  <slot v-else-if="proposal.state === 'pending'" name="waiting">
+  <slot
+    v-else-if="
+      proposal.state === 'pending' && !proposal.id.startsWith('local-')
+    "
+    name="waiting"
+  >
     Voting for this proposal hasn't started yet. Voting will start
     {{ _t(start) }}.
   </slot>
