@@ -171,6 +171,7 @@ watch(selectedNetworkId, () => {
           :available-strategies="
             selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
           "
+          :testable="true"
           title="Voting strategies"
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
         />
