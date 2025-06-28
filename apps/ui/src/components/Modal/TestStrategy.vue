@@ -65,17 +65,14 @@ async function handleSubmit() {
   }
 
   isLoading.value = true;
+  hasError.value = false;
   votingPower.value = null;
 
   try {
-    hasError.value = false;
-
-    const isOffchainNetwork = offchainNetworks.includes(props.networkId);
-
     let strategiesParams: any[] = props.strategies;
     let strategiesMetadata: any[] = [];
 
-    if (!isOffchainNetwork) {
+    if (!offchainNetworks.includes(props.networkId)) {
       strategiesParams = await Promise.all(
         props.strategies.map(async strategy => {
           if (evmNetworks.includes(props.networkId)) {
