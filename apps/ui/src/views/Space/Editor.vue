@@ -190,7 +190,6 @@ const isSubmitButtonLoading = computed(() => {
   );
 });
 const canSubmit = computed(() => {
-  console.log(alerts);
   const hasUnsupportedNetworks =
     alerts.value.has('HAS_PRO_ONLY_NETWORKS') && !proposal.value?.proposalId;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
