@@ -6,7 +6,7 @@ import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const UPCOMING_PRO_ONLY_NETWORKS: readonly number[] = [
-  // 137 // Polygon (disabled as it throws an error in the editor)
+  137 // Polygon
 ];
 
 type AlertType =
@@ -15,7 +15,12 @@ type AlertType =
   | 'HAS_PRO_ONLY_NETWORKS'
   | 'HAS_PRO_ONLY_WHITELABEL';
 
-export function useSpaceAlerts(space: Ref<Space>) {
+export function useSpaceAlerts(
+  space: Ref<Space>,
+  options = {
+    isEditor: false
+  }
+) {
   const {
     networks,
     premiumChainIds,
@@ -89,7 +94,7 @@ export function useSpaceAlerts(space: Ref<Space>) {
       });
     }
 
-    if (unsupportedProOnlyNetworks.value.length) {
+    if (unsupportedProOnlyNetworks.value.length && !options.isEditor) {
       alertsMap.set('HAS_PRO_ONLY_NETWORKS', {
         networks: unsupportedProOnlyNetworks.value
       });

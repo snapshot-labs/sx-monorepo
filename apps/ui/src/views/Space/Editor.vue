@@ -53,7 +53,9 @@ const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
 const { limits, lists } = useSettings();
 const { isWhiteLabel } = useWhiteLabel();
-const { alerts } = useSpaceAlerts(toRef(props, 'space'));
+const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
+  isEditor: true
+});
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -188,6 +190,7 @@ const isSubmitButtonLoading = computed(() => {
   );
 });
 const canSubmit = computed(() => {
+  console.log(alerts);
   const hasUnsupportedNetworks =
     alerts.value.has('HAS_PRO_ONLY_NETWORKS') && !proposal.value?.proposalId;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
