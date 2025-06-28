@@ -69,12 +69,11 @@ export function useSpaceAlerts(
       )
     ]);
 
+    const isNetworkUpcomingPro = (networkId: number) =>
+      UPCOMING_PRO_ONLY_NETWORKS.includes(networkId) && !options.isEditor;
+
     return Array.from(ids)
-      .filter(
-        n =>
-          !premiumChainIds.value.has(n) ||
-          UPCOMING_PRO_ONLY_NETWORKS.includes(n)
-      )
+      .filter(n => !premiumChainIds.value.has(n) || isNetworkUpcomingPro(n))
       .map(chainId => networks.value.find(n => n.chainId === chainId))
       .filter(network => !!network);
   });
@@ -94,7 +93,7 @@ export function useSpaceAlerts(
       });
     }
 
-    if (unsupportedProOnlyNetworks.value.length && !options.isEditor) {
+    if (unsupportedProOnlyNetworks.value.length) {
       alertsMap.set('HAS_PRO_ONLY_NETWORKS', {
         networks: unsupportedProOnlyNetworks.value
       });
