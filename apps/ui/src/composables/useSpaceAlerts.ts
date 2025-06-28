@@ -17,7 +17,7 @@ type AlertType =
 
 export function useSpaceAlerts(
   space: Ref<Space>,
-  options = {
+  options: { isEditor: boolean } = {
     isEditor: false
   }
 ) {
