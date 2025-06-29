@@ -49,7 +49,8 @@ function getProposalSnapshot(proposal?: Proposal | null): Snapshot {
   return isOnchainPendingProposal(proposal) ? null : proposal.snapshot;
 }
 
-async function getVotingPower(
+export async function getVotingPower(
+  address: string,
   block: Snapshot,
   space: SpaceLike,
   strategiesData: [
@@ -63,7 +64,7 @@ async function getVotingPower(
     const vp = await network.actions.getVotingPower(
       space.id,
       ...strategiesData,
-      web3.value.account,
+      address,
       {
         at: block,
         chainId: space.snapshot_chain_id
@@ -100,7 +101,7 @@ export function useSpaceVotingPowerQuery(
     queryFn: async () => {
       const spaceValue = toValue(space);
 
-      return getVotingPower(null, spaceValue, [
+      return getVotingPower(web3.value.account, null, spaceValue, [
         spaceValue.strategies,
         spaceValue.strategies_params,
         spaceValue.strategies_parsed_metadata
@@ -134,6 +135,7 @@ export function useProposalVotingPowerQuery(
       if (!proposalValue) return;
 
       return getVotingPower(
+        web3.value.account,
         getProposalSnapshot(toValue(proposal)),
         {
           ...proposalValue.space,

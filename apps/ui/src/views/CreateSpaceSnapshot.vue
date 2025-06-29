@@ -246,13 +246,16 @@ watch(
             v-model="settingsForm.strategies"
             :snapshot-chain-id="settingsForm.chainId"
             :network-id="networkId"
-            :space="space"
+            :space-id="settingsForm.id"
+            :voting-power-symbol="settingsForm.votingPowerSymbol"
           />
           <ProposalValidationConfigurator
             v-if="currentStep === 'proposal'"
             v-model="settingsForm.proposalValidation"
             :network-id="networkId"
             :snapshot-chain-id="settingsForm.chainId"
+            :space-id="settingsForm.id"
+            :voting-power-symbol="settingsForm.votingPowerSymbol"
           />
           <template v-if="currentStep === 'voting'">
             <div class="mb-3">
