@@ -82,7 +82,6 @@ type Tab = {
     | 'whitelabel'
     | 'advanced'
     | 'controller';
-  name: string;
   visible: boolean;
 };
 
@@ -95,67 +94,54 @@ const tabs = computed<Tab[]>(
     [
       {
         id: 'profile',
-        name: 'Profile',
         visible: true
       },
       {
         id: 'proposal',
-        name: 'Proposal',
         visible: true
       },
       {
         id: 'voting-strategies',
-        name: 'Voting strategies',
         visible: true
       },
       {
         id: 'voting',
-        name: 'Voting',
         visible: true
       },
       {
         id: 'members',
-        name: 'Members',
         visible: isOffchainNetwork.value
       },
       {
         id: 'execution',
-        name: 'Execution',
         visible: !isOffchainNetwork.value
       },
       {
         id: 'authenticators',
-        name: 'Authenticators',
         visible: !isOffchainNetwork.value
       },
       {
         id: 'treasuries',
-        name: 'Treasuries',
         visible: true
       },
       {
         id: 'delegations',
-        name: 'Delegations',
         visible: true
       },
       {
         id: 'labels',
-        name: 'Labels',
         visible: true
       },
       {
         id: 'whitelabel',
-        name: 'Whitelabel',
         visible: isOffchainNetwork.value
       },
       {
         id: 'advanced',
-        name: 'Advanced',
         visible: isOffchainNetwork.value
       },
       {
         id: 'controller',
-        name: 'Controller',
         visible: true
       }
     ] as const
@@ -242,7 +228,7 @@ const pendingSpace = computed(() => {
 
 function isValidTab(param: string | string[]): param is Tab['id'] {
   if (Array.isArray(param)) return false;
-  return tabs.value.map(tab => tab.id).includes(param as any);
+  return tabs.value.find(tab => tab.id === param)?.visible ?? false;
 }
 
 async function reloadSpaceAndReset() {
@@ -305,14 +291,6 @@ function addCustomStrategy(strategy: { address: string; type: string }) {
   ];
 }
 
-function handleTabFocus(event: FocusEvent) {
-  if (!event.target) return;
-
-  (event.target as HTMLElement).scrollIntoView({
-    block: 'end'
-  });
-}
-
 watch(
   () => props.space.controller,
   () => {
@@ -332,27 +310,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <UiScrollerHorizontal
-    class="sticky z-40 top-[72px]"
-    with-buttons
-    gradient="xxl"
-  >
-    <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <AppLink
-        v-for="tab in tabs.filter(tab => tab.visible)"
-        :key="tab.id"
-        :to="{
-          name: 'space-settings',
-          params: { space: route.params.space, tab: tab.id }
-        }"
-        type="button"
-        class="scroll-mx-8"
-        @focus="handleTabFocus"
-      >
-        <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-      </AppLink>
-    </div>
-  </UiScrollerHorizontal>
   <div
     v-bind="$attrs"
     class="!h-auto"
