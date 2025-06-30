@@ -319,7 +319,7 @@ export type Proposal = {
   cancelled: boolean;
   state: ProposalState;
   privacy: Privacy;
-  plugins: Record<string, any>;
+  plugins: Record<string, unknown>;
   flagged: boolean;
   flag_code: number;
 };
