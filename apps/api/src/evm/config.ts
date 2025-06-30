@@ -179,6 +179,10 @@ export function createConfig(indexerName: NetworkID): FullConfig {
           {
             name: 'ProposalVetoed(bytes32)',
             fn: 'handleTimelockProposalVetoed'
+          },
+          {
+            name: 'QuorumUpdated(uint256)',
+            fn: 'handleQuorumUpdated'
           }
         ]
       },
