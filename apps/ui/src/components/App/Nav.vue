@@ -106,10 +106,11 @@ function getNavigationConfig(
       return {
         style: 'slim',
         items: {
-          settings: {
+          back: {
             name: 'Settings',
             icon: IHArrowLongLeft,
-            link: { name: 'space-overview' }
+            link: { name: 'space-overview' },
+            active: true
           },
           profile: getSettingsRoute({
             name: 'Profile',
