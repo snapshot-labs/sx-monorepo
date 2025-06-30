@@ -91,7 +91,7 @@ export function useEditor() {
         return acc;
       }
 
-      if (proposal.originalProposal !== null) {
+      if (proposal.originalProposal) {
         return acc;
       }
 
