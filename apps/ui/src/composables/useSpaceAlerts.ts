@@ -46,6 +46,7 @@ export function useSpaceAlerts(space: Ref<Space>) {
 
   const unsupportedProOnlyNetworks = computed(() => {
     if (
+      !isOffchainSpace.value ||
       !space.value.snapshot_chain_id ||
       !networksLoaded.value ||
       space.value.turbo
