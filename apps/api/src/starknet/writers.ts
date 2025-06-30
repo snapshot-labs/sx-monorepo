@@ -482,7 +482,6 @@ export function createWriters(config: FullConfig) {
     proposal.scores_total = '0';
     proposal.quorum = '0';
     proposal.scores_total_parsed = 0;
-    proposal.quorum = 0n;
     proposal.strategies_indices = space.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;

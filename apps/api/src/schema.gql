@@ -142,7 +142,6 @@ type Proposal {
   scores_total: BigDecimalVP!
   quorum: BigDecimalVP!
   scores_total_parsed: Float!
-  quorum: BigInt!
   created: Int!
   edited: Int
   tx: String!
