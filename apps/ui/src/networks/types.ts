@@ -196,7 +196,11 @@ export type ReadOnlyNetworkActions = {
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
-  flagProposal(web3: Web3Provider, proposal: Proposal);
+  flagProposal(
+    web3: Web3Provider | Wallet,
+    account: string,
+    proposal: Proposal
+  );
   cancelProposal(
     web3: Web3Provider | Wallet,
     connectorType: ConnectorType,

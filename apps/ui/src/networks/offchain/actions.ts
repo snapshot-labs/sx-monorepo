@@ -217,19 +217,25 @@ export function createActions(
         data
       });
     },
-    async flagProposal(web3: Web3Provider, proposal: Proposal) {
+    async flagProposal(
+      web3: Web3Provider | Wallet,
+      account: string,
+      proposal: Proposal
+    ) {
       if (
         proposal.space.snapshot_chain_id &&
+        web3 instanceof Web3Provider &&
         (web3.provider as any)._isSequenceProvider
       ) {
         await verifyNetwork(web3, proposal.space.snapshot_chain_id);
       }
 
       return client.flagProposal({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },

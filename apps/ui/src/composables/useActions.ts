@@ -455,10 +455,11 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.flagProposal(auth.value.provider, proposal)
+      network.actions.flagProposal(signer, auth.value.account, proposal)
     );
 
     return true;
