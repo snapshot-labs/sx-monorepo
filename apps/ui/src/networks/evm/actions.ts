@@ -17,7 +17,7 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
-import { APE_GAS_REGISTRIES } from '@/helpers/constants';
+import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
@@ -27,7 +27,6 @@ import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
-import { EVM_CONNECTORS } from '@/networks/common/constants';
 import {
   buildMetadata,
   createStrategyPicker,
@@ -79,8 +78,7 @@ export function createActions(
   const networkConfig = CONFIGS[chainId];
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: EVM_CONNECTORS
+    helpers
   });
 
   const clientOpts = {
@@ -269,7 +267,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
           strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndicies:
+          strategiesIndices:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
@@ -381,7 +379,7 @@ export function createActions(
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies:
+        strategiesIndices:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
@@ -480,7 +478,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indices,
+          strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
           ignoreRelayer: !relayer?.hasMinimumBalance
@@ -653,7 +651,7 @@ export function createActions(
         const contractAddress =
           delegationType === 'delegate-registry'
             ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
-            : APE_GAS_REGISTRIES[currentChainId];
+            : APE_GAS_CONFIGS[currentChainId].registryContract;
 
         const delegationId =
           delegationType === 'delegate-registry'

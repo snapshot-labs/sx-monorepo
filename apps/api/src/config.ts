@@ -1,3 +1,5 @@
+export const UI_URL = process.env.UI_URL || 'https://snapshot.box';
+
 export const MANA_URL = process.env.VITE_MANA_URL || 'https://mana.box';
 
 /**

@@ -1,12 +1,17 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
-import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import {
+  APE_GAS_CONFIGS,
+  HELPDESK_URL,
+  MAX_SYMBOL_LENGTH
+} from '@/helpers/constants';
 import { PinFunction } from '@/helpers/pin';
 import { getUrl, shorten, sleep } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
-import { StrategyConfig } from '../types';
+import { EVM_CONNECTORS } from '../common/constants';
+import { AuthenticatorSupportInfo, StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';
 import IHCode from '~icons/heroicons-outline/code';
@@ -22,26 +27,26 @@ export function createConstants(
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
-  const HERODOTUS_L1_CHAINS = new Map<number, number>([
-    [33139, 1],
-    [33111, 11155111]
-  ]);
-  const HERODORUS_CONTRACT = '0xfda8190B613497c47695F54a512a092F1216fA47';
-  const HERODOTUS_SATELLITE_CONTRACT =
-    '0xc9854fd6034fbc41B65b454919a48a5a9b342fa8';
-  const DELEGATION_REGISTRY_CONTRACT =
-    '0xdd6b74123b2ab93ad701320d3f8d1b92b4fa5202';
-
-  const SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSigV2]: true,
-    [config.Authenticators.EthSig]: true,
-    [config.Authenticators.EthTx]: true
-  };
-
-  const CONTRACT_SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSigV2]: true,
-    [config.Authenticators.EthTx]: true
-  };
+  const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
+    {
+      [config.Authenticators.EthSigV2]: {
+        isSupported: true,
+        isContractSupported: true,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthSig]: {
+        isSupported: true,
+        isContractSupported: false,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthTx]: {
+        isSupported: true,
+        isContractSupported: true,
+        connectors: EVM_CONNECTORS
+      }
+    };
 
   const SUPPORTED_STRATEGIES = {
     [config.Strategies.Vanilla]: true,
@@ -57,11 +62,6 @@ export function createConstants(
     Axiom: true,
     Isokratia: true
   };
-
-  const RELAYER_AUTHENTICATORS = {
-    [config.Authenticators.EthSig]: 'evm',
-    [config.Authenticators.EthSigV2]: 'evm'
-  } as const;
 
   const AUTHS = {
     [config.Authenticators.EthSig]: 'Ethereum signature (deprecated)',
@@ -329,7 +329,7 @@ export function createConstants(
         type: 'object',
         title: 'Params',
         additionalProperties: false,
-        required: [],
+        required: ['whitelist'],
         properties: {
           whitelist: {
             type: 'string',
@@ -474,6 +474,8 @@ export function createConstants(
             generateSummary: (params: Record<string, any>) =>
               `(${shorten(params.delegationId)})`,
             generateParams: async (params: Record<string, any>) => {
+              const apeGasConfig = APE_GAS_CONFIGS[config.Meta.eip712ChainId];
+
               const abiCoder = new AbiCoder();
 
               return [
@@ -487,12 +489,12 @@ export function createConstants(
                     'address'
                   ],
                   [
-                    HERODOTUS_L1_CHAINS.get(config.Meta.eip712ChainId) ?? 1,
+                    apeGasConfig.l1ChainId,
                     config.Meta.eip712ChainId,
-                    HERODORUS_CONTRACT,
-                    HERODOTUS_SATELLITE_CONTRACT,
+                    apeGasConfig.herodotusContract,
+                    apeGasConfig.herodotusSatelliteContract,
                     params.delegationId,
-                    DELEGATION_REGISTRY_CONTRACT
+                    apeGasConfig.registryContract
                   ]
                 )
               ];
@@ -840,11 +842,9 @@ export function createConstants(
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
-    SUPPORTED_AUTHENTICATORS,
-    CONTRACT_SUPPORTED_AUTHENTICATORS,
+    AUTHENTICATORS_SUPPORT_INFO,
     SUPPORTED_STRATEGIES,
     SUPPORTED_EXECUTORS,
-    RELAYER_AUTHENTICATORS,
     AUTHS,
     PROPOSAL_VALIDATIONS,
     STRATEGIES,

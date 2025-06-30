@@ -17,7 +17,11 @@ import { RouteParamsRaw } from 'vue-router';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
-import { EVM_EMPTY_ADDRESS, MAX_SYMBOL_LENGTH } from './constants';
+import {
+  EVM_EMPTY_ADDRESS,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SYMBOL_LENGTH
+} from './constants';
 import { getOwner } from './stamp';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -380,7 +384,12 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId]) throw err;
+    if (
+      (err instanceof Error && 'code' in err && err.code !== 4902) ||
+      !ADDABLE_NETWORKS[chainId]
+    ) {
+      throw err;
+    }
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',
@@ -422,7 +431,10 @@ export async function verifyStarknetNetwork(
       }
     });
   } catch (e) {
-    if (!e.message.toLowerCase().includes('not implemented')) {
+    if (
+      e instanceof Error &&
+      !e.message.toLowerCase().includes('not implemented')
+    ) {
       throw new Error(e.message);
     }
   }
@@ -450,6 +462,7 @@ export function createErc1155Metadata(
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
+      farcaster: metadata.farcaster,
       treasuries: metadata.treasuries.map(treasury => ({
         name: treasury.name,
         chain_id: treasury.chainId,
@@ -519,9 +532,19 @@ export function getStampUrl(
 
 export async function imageUpload(file: File) {
   if (!file) return;
-  // TODO: Additional Validations - File Size, File Type, Empty File, Hidden File
+
   if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-    return;
+    throw new Error('Invalid file type. Only JPEG and PNG images are allowed.');
+  }
+
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error(
+      `File size must be less than ${(
+        MAX_FILE_SIZE_BYTES /
+        1024 /
+        1024
+      ).toFixed(0)} MB`
+    );
   }
 
   const formData = new FormData();
@@ -685,6 +708,13 @@ export function isUserAbortError(e: any) {
     ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
     ['User abort', 'User rejected the request.'].includes(e.message)
   );
+}
+
+export function getUserFacingErrorMessage(
+  e: unknown,
+  fallback: string = 'Something went wrong. Please try again later.'
+): string {
+  return (e instanceof Error && e.message) || fallback;
 }
 
 export async function getSpaceController(id: string, network: NetworkID) {

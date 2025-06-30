@@ -63,6 +63,17 @@ const FEATURES = [
     about: 'Personalize your space with your own domain, colors, and logo.'
   },
   {
+    name: 'Proposal monitoring',
+    icon: ICFlag,
+    about:
+      'Rapid detection and review of spam or malicious proposals within 2 hours.'
+  },
+  {
+    name: 'Support non-premium network',
+    icon: ICGlobeAlt,
+    about: 'Choose between premium or standard networks for your strategies.'
+  },
+  {
     name: 'Priority support',
     icon: ICSupport,
     about:
@@ -73,17 +84,6 @@ const FEATURES = [
     icon: ICSparkles,
     about:
       'Exclusive preview and early use of upcoming features and improvements.'
-  },
-  {
-    name: 'Proposal monitoring',
-    icon: ICFlag,
-    about:
-      'Rapid detection and review of spam or malicious proposals within 2 hours.'
-  },
-  {
-    name: 'Support non-premium network',
-    icon: ICGlobeAlt,
-    about: 'Choose between premium or standard networks for your strategies.'
   }
 ];
 

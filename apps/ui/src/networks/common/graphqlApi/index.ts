@@ -249,6 +249,7 @@ function formatSpace(
     github: space.metadata.github,
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
+    farcaster: space.metadata.farcaster,
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
@@ -369,8 +370,9 @@ function formatProposal(
     state,
     network: networkId,
     privacy: 'none',
-    quorum: +proposal.quorum,
+    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     flagged: false,
+    flag_code: 0,
     completed: ['passed', 'executed', 'rejected'].includes(state)
   };
 }

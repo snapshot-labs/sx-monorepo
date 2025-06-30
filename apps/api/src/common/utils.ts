@@ -6,8 +6,33 @@ import fetch from 'cross-fetch';
 import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { Network } from '../../.checkpoint/models';
+import { UI_URL } from '../config';
 
 type ExecutionType = Parameters<typeof getExecutionData>[0];
+
+export function getSpaceLink({
+  networkId,
+  spaceId
+}: {
+  networkId: string;
+  spaceId: string;
+}) {
+  return `${UI_URL}/#/${networkId}:${spaceId}`;
+}
+
+export function getProposalLink({
+  networkId,
+  spaceId,
+  proposalId
+}: {
+  networkId: string;
+  spaceId: string;
+  proposalId: number;
+}) {
+  const spaceLink = getSpaceLink({ networkId, spaceId });
+
+  return `${spaceLink}/proposal/${proposalId}`;
+}
 
 export async function updateCounter(
   indexerName: string,
@@ -99,4 +124,16 @@ export function getExecutionHash({
   }
 
   return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
+}
+
+export function getSpaceDecimals(decimals: number[]) {
+  if (decimals.length === 0) return 0;
+
+  return Math.max(...decimals);
+}
+
+export function getParsedVP(value: string, decimals: number) {
+  const parsedValue = parseInt(value, 10);
+
+  return parsedValue / 10 ** decimals;
 }

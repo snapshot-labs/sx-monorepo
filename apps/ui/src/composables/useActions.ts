@@ -1,7 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
-import { isUserAbortError } from '@/helpers/utils';
+import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
 import {
   getNetwork,
   getReadWriteNetwork,
@@ -48,10 +48,7 @@ export function useActions() {
       } catch (e) {
         if (!isUserAbortError(e)) {
           console.error(e);
-          uiStore.addNotification(
-            'error',
-            'Something went wrong. Please try again later.'
-          );
+          uiStore.addNotification('error', getUserFacingErrorMessage(e));
         }
 
         throw e;
@@ -725,7 +722,10 @@ export function useActions() {
         )
       );
     } catch (e) {
-      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      }
+
       return false;
     }
 
@@ -751,7 +751,10 @@ export function useActions() {
         )
       );
     } catch (e) {
-      if (!isUserAbortError(e)) uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      }
+
       return false;
     }
 

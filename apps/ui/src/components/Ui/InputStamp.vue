@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { getUrl, imageUpload } from '@/helpers/utils';
+import {
+  getUrl,
+  getUserFacingErrorMessage,
+  imageUpload
+} from '@/helpers/utils';
 
 const model = defineModel<string>();
 
@@ -40,18 +44,22 @@ function openFilePicker() {
 async function handleFileChange(e: Event) {
   try {
     const file = (e.target as HTMLInputElement).files?.[0];
-    if (!file) throw new Error('File not found');
+
     isUploadingImage.value = true;
 
-    const image = await imageUpload(file);
-    if (!image) throw new Error('Image not uploaded');
+    const image = await imageUpload(file as File);
+    if (!image) throw new Error('Failed to upload image.');
 
     model.value = image.url;
     isUploadingImage.value = false;
   } catch (e) {
-    uiStore.addNotification('error', 'Failed to upload image.');
+    uiStore.addNotification('error', getUserFacingErrorMessage(e));
 
     console.error('Failed to upload image', e);
+
+    if (fileInput.value) {
+      fileInput.value.value = '';
+    }
     isUploadingImage.value = false;
   }
 }
@@ -73,6 +81,7 @@ async function handleFileChange(e: Event) {
     <img
       v-if="imgUrl"
       :src="imgUrl"
+      alt="Uploaded avatar"
       :class="[
         `object-cover group-hover:opacity-80`,
         {

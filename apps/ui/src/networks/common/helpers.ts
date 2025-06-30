@@ -5,12 +5,12 @@ import {
 import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { getUrl } from '@/helpers/utils';
 import {
+  AuthenticatorSupportInfo,
   ConnectorType,
   NetworkHelpers,
   StrategyConfig
 } from '@/networks/types';
 import { Choice, Space } from '@/types';
-import { EVM_CONNECTORS, STARKNET_CONNECTORS } from './constants';
 
 type SpaceExecutionData = Pick<Space, 'executors' | 'executors_types'>;
 type ExecutorType = Parameters<typeof _getExecutionData>[0];
@@ -67,86 +67,57 @@ export async function buildMetadata(
   return `ipfs://${pinned.cid}`;
 }
 
-export function createStrategyPicker({
-  helpers,
-  managerConnectors,
-  lowPriorityAuthenticators = []
-}: {
-  helpers: NetworkHelpers;
-  managerConnectors: ConnectorType[];
-  lowPriorityAuthenticators?: ('evm' | 'evm-tx' | 'starknet')[];
-}) {
+export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
   return function pick({
     authenticators,
     strategies,
-    strategiesIndicies,
+    strategiesIndices,
     isContract,
     connectorType,
     ignoreRelayer
   }: {
     authenticators: string[];
     strategies: string[];
-    strategiesIndicies: number[];
+    strategiesIndices: number[];
     isContract: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
   }) {
+    type AuthenticatorWithSupportInfo = {
+      authenticator: string;
+      supportInfo: AuthenticatorSupportInfo;
+    };
+
+    const hasSupportInfo = (entry: {
+      supportInfo: AuthenticatorSupportInfo | null;
+    }): entry is AuthenticatorWithSupportInfo => {
+      if (!entry.supportInfo) return false;
+      return true;
+    };
+
     const authenticatorsInfo = [...authenticators]
-      .filter(authenticator =>
-        isContract
-          ? helpers.isAuthenticatorContractSupported(authenticator)
-          : helpers.isAuthenticatorSupported(authenticator)
-      )
+      .map(authenticator => ({
+        authenticator,
+        supportInfo: helpers.getAuthenticatorSupportInfo(authenticator)
+      }))
+      .filter(hasSupportInfo)
+      .filter(({ supportInfo }) => {
+        if (isContract && !supportInfo.isContractSupported) return false;
+        if (ignoreRelayer && supportInfo.relayerType) return false;
+
+        return supportInfo.isSupported;
+      })
       .sort((a, b) => {
-        const aRelayer = helpers.getRelayerAuthenticatorType(a);
-        const bRelayer = helpers.getRelayerAuthenticatorType(b);
-        const aLowPriority =
-          aRelayer && lowPriorityAuthenticators.includes(aRelayer);
-        const bLowPriority =
-          bRelayer && lowPriorityAuthenticators.includes(bRelayer);
+        const aRelayerPriority = a.supportInfo.priority ?? 0;
+        const bRelayerPriority = b.supportInfo.priority ?? 0;
 
-        if (aLowPriority && !bLowPriority) {
-          return 1;
-        }
-
-        if (!aLowPriority && bLowPriority) {
-          return -1;
-        }
-
-        if (aRelayer && bRelayer) {
-          return 0;
-        }
-
-        if (aRelayer) {
-          return -1;
-        }
-
-        if (bRelayer) {
-          return 1;
-        }
-
-        return 0;
+        return bRelayerPriority - aRelayerPriority;
       })
-      .map(authenticator => {
-        const relayerType = helpers.getRelayerAuthenticatorType(authenticator);
-
-        let connectors: ConnectorType[] = [];
-        if (relayerType && ['evm', 'evm-tx'].includes(relayerType))
-          connectors = EVM_CONNECTORS;
-        else if (relayerType === 'starknet') connectors = STARKNET_CONNECTORS;
-        else connectors = managerConnectors;
-
-        return {
-          authenticator,
-          relayerType,
-          connectors
-        };
-      })
-      .filter(authenticator =>
-        ignoreRelayer && authenticator.relayerType
-          ? !['evm', 'starknet'].includes(authenticator.relayerType)
-          : true
-      );
+      .map(({ authenticator, supportInfo }) => ({
+        authenticator,
+        relayerType: supportInfo.relayerType,
+        connectors: supportInfo.connectors
+      }));
 
     const authenticatorInfo = authenticatorsInfo.find(({ connectors }) =>
       connectors.includes(connectorType)
@@ -157,7 +128,7 @@ export function createStrategyPicker({
         (strategy, index) =>
           ({
             address: strategy,
-            index: strategiesIndicies[index],
+            index: strategiesIndices[index],
             paramsIndex: index
           }) as const
       )

@@ -91,9 +91,7 @@ export function createActions(
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: STARKNET_CONNECTORS,
-    lowPriorityAuthenticators: ['evm-tx']
+    helpers
   });
 
   const getIsContract = async (
@@ -256,7 +254,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
           strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndicies:
+          strategiesIndices:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
@@ -375,7 +373,7 @@ export function createActions(
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies:
+        strategiesIndices:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
@@ -471,7 +469,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indices,
+          strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
           ignoreRelayer: !relayer?.hasMinimumBalance
