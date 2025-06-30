@@ -486,7 +486,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </UiContainerSettings>
       <UiContainerSettings
         v-show="activeTab === 'whitelabel'"
-        title="Whitelabel"
+        title="Custom domain"
         description="Customize the appearance of your space to match your brand."
         class="max-w-full"
       >
