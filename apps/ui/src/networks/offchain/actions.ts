@@ -1,4 +1,3 @@
-import { isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import {
@@ -17,6 +16,7 @@ import {
 } from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
 import { verifyNetwork } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   Choice,
   NetworkID,
@@ -308,7 +308,7 @@ export function createActions(
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
 
-      if (!strategy || !isAddress(voterAddress)) {
+      if (!strategy || !isValidAddress(voterAddress)) {
         return [
           {
             address: name,
