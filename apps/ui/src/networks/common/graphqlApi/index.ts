@@ -373,7 +373,8 @@ function formatProposal(
     quorum: +proposal.quorum,
     flagged: false,
     flag_code: 0,
-    completed: ['passed', 'executed', 'rejected'].includes(state)
+    completed: ['passed', 'executed', 'rejected'].includes(state),
+    plugins: {}
   };
 }
 
