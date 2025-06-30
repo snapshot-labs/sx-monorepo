@@ -1,8 +1,17 @@
 import { VNode } from 'vue';
+import { RouteLocationRaw } from 'vue-router';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
+
+export type Task = {
+  description: string;
+  link?: RouteLocationRaw;
+  currentStep?: number;
+  totalSteps?: number;
+  type?: NotificationType | 'info';
+};
 
 export type Theme = 'light' | 'dark';
 

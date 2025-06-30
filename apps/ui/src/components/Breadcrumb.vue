@@ -91,7 +91,7 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
       type="space-logo"
       :width="SPACE_LOGO_WIDTH"
       :height="SPACE_LOGO_HEIGHT"
-      class="rounded-none border-none"
+      class="rounded-none border-none bg-transparent"
       :style="`max-width:${SPACE_LOGO_WIDTH}px; max-height:${SPACE_LOGO_HEIGHT}px;`"
       :cb="cb"
     />

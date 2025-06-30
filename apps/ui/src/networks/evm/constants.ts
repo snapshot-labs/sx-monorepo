@@ -10,7 +10,8 @@ import { PinFunction } from '@/helpers/pin';
 import { getUrl, shorten, sleep } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
-import { StrategyConfig } from '../types';
+import { EVM_CONNECTORS } from '../common/constants';
+import { AuthenticatorSupportInfo, StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';
 import IHCode from '~icons/heroicons-outline/code';
@@ -26,16 +27,26 @@ export function createConstants(
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
-  const SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSigV2]: true,
-    [config.Authenticators.EthSig]: true,
-    [config.Authenticators.EthTx]: true
-  };
-
-  const CONTRACT_SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSigV2]: true,
-    [config.Authenticators.EthTx]: true
-  };
+  const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
+    {
+      [config.Authenticators.EthSigV2]: {
+        isSupported: true,
+        isContractSupported: true,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthSig]: {
+        isSupported: true,
+        isContractSupported: false,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthTx]: {
+        isSupported: true,
+        isContractSupported: true,
+        connectors: EVM_CONNECTORS
+      }
+    };
 
   const SUPPORTED_STRATEGIES = {
     [config.Strategies.Vanilla]: true,
@@ -51,11 +62,6 @@ export function createConstants(
     Axiom: true,
     Isokratia: true
   };
-
-  const RELAYER_AUTHENTICATORS = {
-    [config.Authenticators.EthSig]: 'evm',
-    [config.Authenticators.EthSigV2]: 'evm'
-  } as const;
 
   const AUTHS = {
     [config.Authenticators.EthSig]: 'Ethereum signature (deprecated)',
@@ -836,11 +842,9 @@ export function createConstants(
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
-    SUPPORTED_AUTHENTICATORS,
-    CONTRACT_SUPPORTED_AUTHENTICATORS,
+    AUTHENTICATORS_SUPPORT_INFO,
     SUPPORTED_STRATEGIES,
     SUPPORTED_EXECUTORS,
-    RELAYER_AUTHENTICATORS,
     AUTHS,
     PROPOSAL_VALIDATIONS,
     STRATEGIES,
