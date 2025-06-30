@@ -173,7 +173,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -193,7 +193,7 @@ export function createActions(
       const plugins = await getPlugins(executions);
 
       const data = {
-        proposal: proposalId as string,
+        proposal: proposal.proposal_id as string,
         space: space.id,
         title,
         body,

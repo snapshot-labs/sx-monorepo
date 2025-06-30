@@ -401,7 +401,7 @@ export type Member = {
 };
 
 export type Draft = {
-  proposalId: number | string | null;
+  originalProposal: Proposal | null;
   title: string;
   body: string;
   discussion: string;
