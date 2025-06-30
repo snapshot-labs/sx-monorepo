@@ -131,7 +131,6 @@ onMounted(() => emit('errors', formErrors.value));
   <div class="flex flex-col items-stretch md:flex-row md:h-full gap-4">
     <div class="s-box space-y-4 order-last md:order-first max-w-[592px]">
       <div>
-        <h4 class="eyebrow mb-2 font-medium">Custom domain</h4>
         <UiMessage
           type="info"
           class="mb-3"

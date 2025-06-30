@@ -103,7 +103,7 @@ const hasAnyAlerts = computed(
     </template>
     <template v-if="hasWhitelabelAlerts">
       <UiAlert type="error">
-        Whitelabel requires Snapshot Pro.
+        Custom domain requires Snapshot Pro.
         <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
         or
         <AppLink
