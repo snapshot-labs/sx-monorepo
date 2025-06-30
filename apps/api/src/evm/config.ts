@@ -5,6 +5,7 @@ import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
 import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy.json';
 import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory.json';
 import ProxyFactory from './abis/ProxyFactory.json';
+import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
 
@@ -178,6 +179,19 @@ export function createConfig(indexerName: NetworkID): FullConfig {
           {
             name: 'ProposalVetoed(bytes32)',
             fn: 'handleTimelockProposalVetoed'
+          },
+          {
+            name: 'QuorumUpdated(uint256)',
+            fn: 'handleQuorumUpdated'
+          }
+        ]
+      },
+      SimpleQuorumAvatarExecutionStrategy: {
+        abi: 'SimpleQuorumAvatarExecutionStrategy',
+        events: [
+          {
+            name: 'QuorumUpdated(uint256)',
+            fn: 'handleQuorumUpdated'
           }
         ]
       },
@@ -203,6 +217,7 @@ export function createConfig(indexerName: NetworkID): FullConfig {
     abis: {
       ProxyFactory,
       Space,
+      SimpleQuorumAvatarExecutionStrategy,
       SimpleQuorumTimelockExecutionStrategy,
       AxiomExecutionStrategy,
       L1AvatarExecutionStrategy,

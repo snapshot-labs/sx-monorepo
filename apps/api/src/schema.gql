@@ -140,8 +140,8 @@ type Proposal {
   scores_3: BigDecimalVP!
   scores_3_parsed: Float!
   scores_total: BigDecimalVP!
+  quorum: BigDecimalVP!
   scores_total_parsed: Float!
-  quorum: BigInt!
   created: Int!
   edited: Int
   tx: String!
