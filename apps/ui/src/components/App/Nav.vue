@@ -156,7 +156,7 @@ function getNavigationConfig(
             tab: 'labels'
           }),
           whitelabel: getSettingsRoute({
-            name: 'White label',
+            name: 'Custom domain',
             tab: 'whitelabel',
             hidden: !isOffchainNetwork
           }),
