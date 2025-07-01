@@ -3,11 +3,16 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import {
+  BASIC_CHOICES,
+  CHAIN_IDS,
+  EVM_EMPTY_ADDRESS,
+  STARKNET_EMPTY_ADDRESS
+} from '@/helpers/constants';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, starknetNetworks } from '@/networks';
 import {
   NetworkApi,
   NetworkConstants,
@@ -41,6 +46,7 @@ import {
   mixinHighlightVotes
 } from './highlight';
 import {
+  LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
@@ -243,6 +249,7 @@ function formatSpace(
     github: space.metadata.github,
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
+    farcaster: space.metadata.farcaster,
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
@@ -256,7 +263,7 @@ function formatSpace(
       const { name, api_type, api_url, contract, chain_id } =
         JSON.parse(delegation);
 
-      if (contract.includes(':')) {
+      if (contract?.includes(':')) {
         // NOTE: Legacy format
         const [network, address] = contract.split(':');
 
@@ -312,9 +319,18 @@ function formatProposal(
       : networkId;
   const state = getProposalState(networkId, proposal, current);
 
+  const isStarknetNetwork = starknetNetworks.includes(networkId);
+
+  const emptyAddress = isStarknetNetwork
+    ? STARKNET_EMPTY_ADDRESS
+    : EVM_EMPTY_ADDRESS;
+
   return {
     ...proposal,
-    isInvalid: proposal.metadata === null,
+    isInvalid:
+      proposal.metadata === null ||
+      (proposal.metadata.execution === null &&
+        proposal.execution_strategy !== emptyAddress),
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,
@@ -356,6 +372,7 @@ function formatProposal(
     privacy: 'none',
     quorum: +proposal.quorum,
     flagged: false,
+    flag_code: 0,
     completed: ['passed', 'executed', 'rejected'].includes(state)
   };
 }
@@ -782,6 +799,15 @@ export function createApi(
     },
     loadSettings: async () => {
       return [];
+    },
+    async loadLastIndexedBlock(): Promise<number | null> {
+      const { data } = await apollo.query({
+        query: LAST_INDEXED_BLOCK_QUERY,
+        variables: {
+          indexer: networkId
+        }
+      });
+      return data._metadata?.value ? Number(data._metadata.value) : null;
     }
   };
 }

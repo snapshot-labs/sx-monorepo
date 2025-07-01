@@ -371,6 +371,7 @@ export type NetworkApi = {
     Record<ChainId, { spaces_count: number; premium: boolean }>
   >;
   loadSettings(): Promise<Setting[]>;
+  loadLastIndexedBlock(): Promise<number | null>;
 };
 
 export type NetworkConstants = {
@@ -387,12 +388,36 @@ export type NetworkConstants = {
   STORAGE_PROOF_STRATEGIES_TYPES?: string[];
 };
 
+export type AuthenticatorSupportInfo = {
+  /**
+   * Whether the authenticator is supported by the app.
+   */
+  isSupported: boolean;
+  /**
+   * Whether the authenticator can be used with contract-based accounts.
+   */
+  isContractSupported: boolean;
+  /**
+   * Type of the relayer used by authenticator.
+   * Determines how authenticator is interacted with.
+   */
+  relayerType?: 'starknet' | 'evm' | 'evm-tx';
+  /**
+   * List of connectors that can be used with this authenticator.
+   */
+  connectors: ConnectorType[];
+  /**
+   * Priority of the authenticator.
+   * Lower number means higher priority.
+   * Default is 0.
+   */
+  priority?: number;
+};
+
 export type NetworkHelpers = {
-  isAuthenticatorSupported(authenticator: string): boolean;
-  isAuthenticatorContractSupported(authenticator: string): boolean;
-  getRelayerAuthenticatorType(
+  getAuthenticatorSupportInfo(
     authenticator: string
-  ): 'evm' | 'evm-tx' | 'starknet' | null;
+  ): AuthenticatorSupportInfo | null;
   isStrategySupported(strategy: string): boolean;
   /**
    * Checks if the executor type is supported.
@@ -411,6 +436,7 @@ export type NetworkHelpers = {
   getRelayerInfo(space: string, network: NetworkID): Promise<any>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
+  waitForIndexing(txId: string, timeout?: number): Promise<boolean>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(
     id: string,

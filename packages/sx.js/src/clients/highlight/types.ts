@@ -14,6 +14,20 @@ export type SetAlias = {
   alias: string;
 };
 
+export type CreateCategory = {
+  space: number;
+  name: string;
+  description: string;
+  parentCategoryId: number;
+};
+
+export type EditCategory = CreateCategory & { id: number };
+
+export type DeleteCategory = {
+  space: number;
+  id: number;
+};
+
 export type CreateTopic = {
   space: number;
   metadataUri: string;

@@ -1,12 +1,17 @@
 import { AbiCoder } from '@ethersproject/abi';
 import { Web3Provider } from '@ethersproject/providers';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
-import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import {
+  APE_GAS_CONFIGS,
+  HELPDESK_URL,
+  MAX_SYMBOL_LENGTH
+} from '@/helpers/constants';
 import { PinFunction } from '@/helpers/pin';
 import { getUrl, shorten, sleep } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
-import { StrategyConfig } from '../types';
+import { EVM_CONNECTORS } from '../common/constants';
+import { AuthenticatorSupportInfo, StrategyConfig } from '../types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
 import IHClock from '~icons/heroicons-outline/clock';
 import IHCode from '~icons/heroicons-outline/code';
@@ -22,22 +27,33 @@ export function createConstants(
   const config = evmNetworks[networkId];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
-  const SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSigV2]: true,
-    [config.Authenticators.EthSig]: true,
-    [config.Authenticators.EthTx]: true
-  };
-
-  const CONTRACT_SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSigV2]: true,
-    [config.Authenticators.EthTx]: true
-  };
+  const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
+    {
+      [config.Authenticators.EthSigV2]: {
+        isSupported: true,
+        isContractSupported: true,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthSig]: {
+        isSupported: true,
+        isContractSupported: false,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthTx]: {
+        isSupported: true,
+        isContractSupported: true,
+        connectors: EVM_CONNECTORS
+      }
+    };
 
   const SUPPORTED_STRATEGIES = {
     [config.Strategies.Vanilla]: true,
     [config.Strategies.Comp]: true,
     [config.Strategies.OZVotes]: true,
-    [config.Strategies.Whitelist]: true
+    [config.Strategies.Whitelist]: true,
+    [config.Strategies.ApeGas]: true
   };
 
   const SUPPORTED_EXECUTORS = {
@@ -46,11 +62,6 @@ export function createConstants(
     Axiom: true,
     Isokratia: true
   };
-
-  const RELAYER_AUTHENTICATORS = {
-    [config.Authenticators.EthSig]: 'evm',
-    [config.Authenticators.EthSigV2]: 'evm'
-  } as const;
 
   const AUTHS = {
     [config.Authenticators.EthSig]: 'Ethereum signature (deprecated)',
@@ -66,7 +77,8 @@ export function createConstants(
     [config.Strategies.Vanilla]: 'Vanilla',
     [config.Strategies.Comp]: 'ERC-20 Votes Comp (EIP-5805)',
     [config.Strategies.OZVotes]: 'ERC-20 Votes (EIP-5805)',
-    [config.Strategies.Whitelist]: 'Merkle whitelist'
+    [config.Strategies.Whitelist]: 'Merkle whitelist',
+    [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
   };
 
   const EXECUTORS = {
@@ -317,7 +329,7 @@ export function createConstants(
         type: 'object',
         title: 'Params',
         additionalProperties: false,
-        required: [],
+        required: ['whitelist'],
         properties: {
           whitelist: {
             type: 'string',
@@ -450,10 +462,109 @@ export function createConstants(
           }
         }
       }
-    }
+    },
+    ...(config.Strategies.ApeGas
+      ? [
+          {
+            address: config.Strategies.ApeGas,
+            name: 'ApeChain Delegated Gas',
+            about:
+              'A strategy that allows delegated balances of APE gas token to be used as voting power.',
+            icon: IHCode,
+            generateSummary: (params: Record<string, any>) =>
+              `(${shorten(params.delegationId)})`,
+            generateParams: async (params: Record<string, any>) => {
+              const apeGasConfig = APE_GAS_CONFIGS[config.Meta.eip712ChainId];
+
+              const abiCoder = new AbiCoder();
+
+              return [
+                abiCoder.encode(
+                  [
+                    'uint256',
+                    'uint256',
+                    'address',
+                    'address',
+                    'bytes32',
+                    'address'
+                  ],
+                  [
+                    apeGasConfig.l1ChainId,
+                    config.Meta.eip712ChainId,
+                    apeGasConfig.herodotusContract,
+                    apeGasConfig.herodotusSatelliteContract,
+                    params.delegationId,
+                    apeGasConfig.registryContract
+                  ]
+                )
+              ];
+            },
+            generateMetadata: async (params: Record<string, any>) => {
+              const pinned = await pin({ delegationId: params.delegationId });
+
+              return {
+                name: 'ApeChain Delegated Gas',
+                properties: {
+                  decimals: 18,
+                  symbol: params.symbol,
+                  payload: `ipfs://${pinned.cid}`
+                }
+              };
+            },
+            parseParams: async (
+              params: string,
+              metadata: StrategyParsedMetadata | null
+            ) => {
+              if (!metadata) throw new Error('Missing metadata');
+              if (!metadata.payload) {
+                throw new Error('Missing metadata payload');
+              }
+
+              const metadataUrl = getUrl(metadata.payload);
+              if (!metadataUrl) {
+                throw new Error('Invalid metadata URL');
+              }
+
+              const res = await fetch(metadataUrl);
+              const { delegationId } = await res.json();
+
+              return {
+                delegationId,
+                symbol: metadata.symbol
+              };
+            },
+            paramsDefinition: {
+              type: 'object',
+              title: 'Params',
+              additionalProperties: false,
+              required: ['delegationId', 'symbol'],
+              properties: {
+                delegationId: {
+                  type: 'string',
+                  format: 'bytes32',
+                  title: 'Delegation ID',
+                  examples: [
+                    'e.g. 0x0000000000000000000000000000000000000000000000000000000000000001'
+                  ]
+                },
+                symbol: {
+                  type: 'string',
+                  maxLength: MAX_SYMBOL_LENGTH,
+                  title: 'Symbol',
+                  examples: ['e.g. UNI']
+                }
+              }
+            }
+          }
+        ]
+      : [])
   ];
 
-  const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES = EDITOR_VOTING_STRATEGIES;
+  const EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES =
+    EDITOR_VOTING_STRATEGIES.filter(
+      strategy =>
+        !([config.Strategies.ApeGas] as string[]).includes(strategy.address)
+    );
 
   const EDITOR_EXECUTION_STRATEGIES = [
     {
@@ -731,11 +842,9 @@ export function createConstants(
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
-    SUPPORTED_AUTHENTICATORS,
-    CONTRACT_SUPPORTED_AUTHENTICATORS,
+    AUTHENTICATORS_SUPPORT_INFO,
     SUPPORTED_STRATEGIES,
     SUPPORTED_EXECUTORS,
-    RELAYER_AUTHENTICATORS,
     AUTHS,
     PROPOSAL_VALIDATIONS,
     STRATEGIES,

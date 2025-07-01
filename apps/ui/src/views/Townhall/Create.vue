@@ -2,6 +2,7 @@
 import { getTopic } from '@/helpers/townhall/api';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { sleep } from '@/helpers/utils';
+import { getValidator } from '@/helpers/validation';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
@@ -17,6 +18,17 @@ const title = ref(route.query.title as string);
 const body = ref('');
 const discussion = ref('');
 const submitLoading = ref(false);
+
+const categoryId = computed(() => {
+  const category = route.query.category;
+
+  if (typeof category === 'string') {
+    const parsed = Number(category);
+    return isNaN(parsed) ? null : parsed;
+  }
+
+  return null;
+});
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -41,7 +53,34 @@ const DISCUSSION_DEFINITION = {
   examples: ['e.g. https://forum.balancer.fi/t/proposal…']
 };
 
+const validator = getValidator({
+  type: 'object',
+  title: 'Topic',
+  additionalProperties: false,
+  required: ['title'],
+  properties: {
+    title: TITLE_DEFINITION,
+    body: BODY_DEFINITION,
+    discussion: DISCUSSION_DEFINITION
+  }
+});
+
+const formErrors = computed(() => {
+  return validator.validate(
+    { title: title.value, body: body.value, discussion: discussion.value },
+    { skipEmptyOptionalFields: true }
+  );
+});
+
+const isFormValid = computed(() => {
+  return Object.keys(formErrors.value).length === 0;
+});
+
 async function handleSubmit() {
+  if (!isFormValid.value) {
+    return;
+  }
+
   submitLoading.value = true;
 
   try {
@@ -49,7 +88,8 @@ async function handleSubmit() {
       props.townhallSpace.space_id,
       title.value,
       body.value,
-      discussion.value
+      discussion.value,
+      categoryId.value
     );
     if (!res) return;
 
@@ -116,19 +156,28 @@ watchEffect(() => {
         <UiInputString
           v-model="title"
           :definition="TITLE_DEFINITION"
+          :error="formErrors.title"
           :required="true"
         />
       </div>
       <div class="s-base">
-        <UiComposer v-model="body" :definition="BODY_DEFINITION" />
+        <UiComposer
+          v-model="body"
+          :definition="BODY_DEFINITION"
+          :error="formErrors.body"
+        />
       </div>
-      <UiInputString v-model="discussion" :definition="DISCUSSION_DEFINITION" />
+      <UiInputString
+        v-model="discussion"
+        :definition="DISCUSSION_DEFINITION"
+        :error="formErrors.discussion"
+      />
       <UiLinkPreview :url="discussion" />
       <div class="flex gap-2.5 items-center">
         <UiButton
           class="primary flex items-center justify-center space-x-1"
-          :disabled="submitLoading"
           :loading="submitLoading"
+          :disabled="submitLoading || !isFormValid"
           @click="handleSubmit"
         >
           <div>Publish</div>

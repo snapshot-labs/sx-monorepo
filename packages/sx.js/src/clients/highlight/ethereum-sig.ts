@@ -7,10 +7,13 @@ import {
 import {
   ClaimRole,
   CloseTopic,
+  CreateCategory,
   CreatePost,
   CreateRole,
   CreateTopic,
+  DeleteCategory,
   DeleteRole,
+  EditCategory,
   EditRole,
   Envelope,
   HidePost,
@@ -129,6 +132,115 @@ export class HighlightEthereumSigClient {
       domain,
       message,
       primaryType: 'SetAlias',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async createCategory({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: CreateCategory;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, name, description, parentCategoryId } = data;
+    const message = {
+      space,
+      name,
+      description,
+      parentCategoryId
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.createCategory,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'CreateCategory',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async editCategory({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: EditCategory;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, id, name, description, parentCategoryId } = data;
+    const message = {
+      space,
+      id,
+      name,
+      description,
+      parentCategoryId: parentCategoryId ?? 0
+    };
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.editCategory,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'EditCategory',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
+  public async deleteCategory({
+    signer,
+    data,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: DeleteCategory;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const { space, id } = data;
+    const message = {
+      space,
+      id
+    };
+
+    console.log('message', message);
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.deleteCategory,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'DeleteCategory',
       signer: await signer.getAddress(),
       signature
     };

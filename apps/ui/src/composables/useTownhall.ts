@@ -98,18 +98,97 @@ export function useTownhall() {
     );
   }
 
-  async function sendTopic(
+  async function sendCreateCategory(
     space: number,
-    title: string,
-    body: string,
-    discussionUrl: string
+    name: string,
+    description: string,
+    parentCategoryId: number | null
   ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
       return null;
     }
 
-    const pinned = await pin({ title, body, discussionUrl });
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.createCategory({
+        signer,
+        data: {
+          space,
+          name,
+          description,
+          parentCategoryId: parentCategoryId ?? 0
+        },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendEditCategory(
+    space: number,
+    id: number,
+    name: string,
+    description: string,
+    parentCategoryId: number | null
+  ) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.editCategory({
+        signer,
+        data: {
+          space,
+          id,
+          name,
+          description,
+          parentCategoryId: parentCategoryId ?? 0
+        },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendDeleteCategory(space: number, id: number) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.deleteCategory({
+        signer,
+        data: { space, id },
+        salt: getSalt()
+      })
+    );
+  }
+
+  async function sendTopic(
+    space: number,
+    title: string,
+    body: string,
+    discussionUrl: string,
+    categoryId: number | null
+  ) {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const pinned = await pin({
+      title,
+      body,
+      discussionUrl,
+      category: categoryId ?? 0
+    });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
@@ -328,6 +407,9 @@ export function useTownhall() {
   }
 
   return {
+    sendCreateCategory,
+    sendEditCategory,
+    sendDeleteCategory,
     sendTopic,
     sendCloseTopic,
     sendPost,

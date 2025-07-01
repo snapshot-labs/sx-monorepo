@@ -30,7 +30,8 @@ describe('EthereumTx', () => {
     const clientOpts = {
       networkConfig: testConfig.networkConfig,
       whitelistServerUrl: 'https://wls.snapshot.box',
-      manaUrl: 'https://mana.box'
+      manaUrl: 'https://mana.box',
+      provider
     };
 
     ethTxClient = new EthereumTx(clientOpts);

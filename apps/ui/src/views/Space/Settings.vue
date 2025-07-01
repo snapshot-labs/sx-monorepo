@@ -226,6 +226,20 @@ const showToolbar = computed(() => {
   );
 });
 
+// Live space with minimum properties for alerts
+const pendingSpace = computed(() => {
+  return {
+    ...props.space,
+    strategies: strategies.value.map(strategy => strategy.name),
+    strategies_params: strategies.value.map(strategy => ({
+      name: strategy.name,
+      params: strategy.params,
+      network: strategy.chainId?.toString() ?? snapshotChainId.value
+    })),
+    snapshot_chain_id: snapshotChainId.value
+  };
+});
+
 function isValidTab(param: string | string[]): param is Tab['id'] {
   if (Array.isArray(param)) return false;
   return tabs.value.map(tab => tab.id).includes(param as any);
@@ -352,6 +366,15 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       class="flex-grow"
       :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
     >
+      <SpaceSettingsAlerts
+        :space="pendingSpace"
+        :active-tab="activeTab"
+        class="mb-4"
+        :class="{
+          'max-w-full': activeTab === 'whitelabel',
+          'max-w-[592px]': activeTab !== 'whitelabel'
+        }"
+      />
       <div v-show="activeTab === 'profile'">
         <FormSpaceProfile
           :id="space.id"
@@ -602,6 +625,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         successSubtitle: 'Your changes were successfully saved'
       }"
       :execute="executeFn"
+      :wait-for-index="!isOffchainNetwork"
       @confirmed="
         reloadSpaceAndReset();
         saving = false;

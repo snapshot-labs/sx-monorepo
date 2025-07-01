@@ -9,6 +9,8 @@ import {
 import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useTownhallSpace';
 import {
+  getCategories,
+  getCategory,
   getResultsByRole,
   getRoles,
   getSpace,
@@ -16,11 +18,12 @@ import {
   getTopics,
   getUserRoles,
   getVotes,
+  newCategoryEventToEntry,
   newPostEventToEntry,
   newVoteEventToEntry,
   Result
 } from '@/helpers/townhall/api';
-import { Role, Topic, Vote } from '@/helpers/townhall/types';
+import { Category, Role, Topic, Vote } from '@/helpers/townhall/types';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
@@ -93,17 +96,85 @@ export function useSpaceQuery({
   });
 }
 
-export function useTopicsQuery({
-  spaceId
+export function useCategoryQuery({
+  spaceId,
+  categoryId
 }: {
   spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
+}) {
+  const queryFn = computed(() => {
+    const spaceIdValue = toValue(spaceId);
+    const categoryIdValue = toValue(categoryId);
+
+    if (!spaceIdValue || !categoryIdValue) {
+      return skipToken;
+    }
+
+    return () => {
+      return getCategory({
+        spaceId: spaceIdValue,
+        categoryId: categoryIdValue
+      });
+    };
+  });
+
+  return useQuery({
+    queryKey: ['townhall', 'categories', 'detail', { spaceId, categoryId }],
+    queryFn,
+    staleTime: DEFAULT_STALE_TIME
+  });
+}
+
+export function useCategoriesQuery({
+  spaceId,
+  categoryId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
+}) {
+  const queryClient = useQueryClient();
+
+  return useQuery({
+    queryKey: ['townhall', 'categories', 'list', { spaceId, categoryId }],
+    queryFn: async () => {
+      const categories = await getCategories({
+        spaceId: toValue(spaceId),
+        parentCategoryId: toValue(categoryId)
+      });
+
+      for (const category of categories) {
+        queryClient.setQueryData(
+          [
+            'townhall',
+            'categories',
+            'detail',
+            { spaceId, categoryId: category.category_id }
+          ],
+          category
+        );
+      }
+
+      return categories;
+    },
+    staleTime: DEFAULT_STALE_TIME
+  });
+}
+
+export function useTopicsQuery({
+  spaceId,
+  categoryId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: ['townhall', 'topics', 'list', { spaceId }],
+    queryKey: ['townhall', 'topics', 'list', { spaceId, categoryId }],
     queryFn: async ({ pageParam = 0 }) => {
       return getTopics({
         spaceId: toValue(spaceId),
+        categoryId: toValue(categoryId),
         limit: TOPICS_LIMIT,
         skip: pageParam
       });
@@ -267,6 +338,146 @@ export function useRoleMutation({
         (old = []) =>
           isRevoking ? old.filter(r => r.id !== role.id) : [...old, role]
       );
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useCreateCategoryMutation({
+  spaceId,
+  categoryId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
+}) {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendCreateCategory } = useTownhall();
+
+  return useMutation({
+    mutationFn: ({
+      name,
+      description
+    }: {
+      name: string;
+      description: string;
+    }) => {
+      return sendCreateCategory(
+        toValue(spaceId),
+        name,
+        description,
+        toValue(categoryId)
+      );
+    },
+    onSuccess: data => {
+      if (!data) return;
+
+      const { data: eventData } = data.result.events.find(
+        event => event.key === 'new_category'
+      );
+
+      const category = newCategoryEventToEntry(eventData);
+
+      queryClient.setQueryData<Category[]>(
+        ['townhall', 'categories', 'list', { spaceId, categoryId }],
+        old => {
+          if (!old) return old;
+
+          return [...old, category];
+        }
+      );
+
+      addNotification('success', 'Category created successfully');
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useEditCategoryMutation({
+  spaceId,
+  categoryId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
+}) {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendEditCategory } = useTownhall();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      name,
+      description
+    }: {
+      id: number;
+      name: string;
+      description: string;
+    }) => {
+      return sendEditCategory(
+        toValue(spaceId),
+        id,
+        name,
+        description,
+        toValue(categoryId)
+      );
+    },
+    onSuccess: data => {
+      if (!data) return;
+
+      const { data: eventData } = data.result.events.find(
+        event => event.key === 'edit_category'
+      );
+
+      const category = newCategoryEventToEntry(eventData);
+
+      queryClient.setQueryData<Category[]>(
+        ['townhall', 'categories', 'list', { spaceId, categoryId }],
+        old => {
+          if (!old) return old;
+
+          return old.map(c => (c.id === category.id ? category : c));
+        }
+      );
+
+      addNotification('success', 'Category edited successfully');
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useDeleteCategoryMutation({
+  spaceId,
+  categoryId
+}: {
+  spaceId: MaybeRefOrGetter<number>;
+  categoryId: MaybeRefOrGetter<number | null>;
+}) {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendDeleteCategory } = useTownhall();
+
+  return useMutation({
+    mutationFn: ({ id }: { id: number }) => {
+      return sendDeleteCategory(toValue(spaceId), id);
+    },
+    onSuccess: (data, { id }) => {
+      queryClient.setQueryData<Category[]>(
+        ['townhall', 'categories', 'list', { spaceId, categoryId }],
+        old => {
+          if (!old) return old;
+
+          return old.filter(category => category.category_id !== id);
+        }
+      );
+
+      addNotification('success', 'Category deleted successfully');
     },
     onError: error => {
       addNotification('error', error.message);

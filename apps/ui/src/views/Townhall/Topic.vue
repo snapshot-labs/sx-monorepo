@@ -154,6 +154,20 @@ watchEffect(() => {
             {{ shortenAddress(topic.author) }}
             <span>·</span>
             {{ _rt(topic.created) }}
+            <template v-if="topic.category">
+              <span>·</span>
+              <span>
+                {{ 'in ' }}
+                <router-link
+                  :to="{
+                    name: 'space-townhall-topics',
+                    query: { category: topic.category.category_id }
+                  }"
+                >
+                  {{ topic.category.name }}
+                </router-link>
+              </span>
+            </template>
           </div>
           <UiDropdown
             v-if="
