@@ -11,8 +11,7 @@ const props = withDefaults(
     itemType?: 'label' | 'role';
   }>(),
   {
-    itemType: 'label',
-    loading: false
+    itemType: 'label'
   }
 );
 
