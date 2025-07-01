@@ -46,7 +46,6 @@ const DeleteCategoryEventData = z.tuple([
 const NewTopicEventData = z.tuple([
   z.number(), // spaceId
   z.number(), // id
-  z.number(), // category
   z.string(), // author
   z.string() // metadataUri
 ]);
