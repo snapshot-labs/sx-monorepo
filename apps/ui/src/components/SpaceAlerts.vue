@@ -23,7 +23,7 @@ const pendingTasks = computed(() => {
 
   if (alerts.value.has('HAS_PRO_ONLY_WHITELABEL')) {
     _alerts.push({
-      description: 'Whitelabel settings need to be updated',
+      description: 'Custom domain settings need to be updated',
       link: { name: 'space-settings', params: { tab: 'whitelabel' } },
       type: 'error'
     });

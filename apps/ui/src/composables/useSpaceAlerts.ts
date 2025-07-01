@@ -6,7 +6,7 @@ import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
 const UPCOMING_PRO_ONLY_NETWORKS: readonly number[] = [
-  // 137 // Polygon (disabled as it throws an error in the editor)
+  137 // Polygon
 ];
 
 type AlertType =
@@ -15,7 +15,12 @@ type AlertType =
   | 'HAS_PRO_ONLY_NETWORKS'
   | 'HAS_PRO_ONLY_WHITELABEL';
 
-export function useSpaceAlerts(space: Ref<Space>) {
+export function useSpaceAlerts(
+  space: Ref<Space>,
+  options: { isEditor: boolean } = {
+    isEditor: false
+  }
+) {
   const {
     networks,
     premiumChainIds,
@@ -46,6 +51,7 @@ export function useSpaceAlerts(space: Ref<Space>) {
 
   const unsupportedProOnlyNetworks = computed(() => {
     if (
+      !isOffchainSpace.value ||
       !space.value.snapshot_chain_id ||
       !networksLoaded.value ||
       space.value.turbo
@@ -64,12 +70,11 @@ export function useSpaceAlerts(space: Ref<Space>) {
       )
     ]);
 
+    const isNetworkUpcomingPro = (networkId: number) =>
+      UPCOMING_PRO_ONLY_NETWORKS.includes(networkId) && !options.isEditor;
+
     return Array.from(ids)
-      .filter(
-        n =>
-          !premiumChainIds.value.has(n) ||
-          UPCOMING_PRO_ONLY_NETWORKS.includes(n)
-      )
+      .filter(n => !premiumChainIds.value.has(n) || isNetworkUpcomingPro(n))
       .map(chainId => networks.value.find(n => n.chainId === chainId))
       .filter(network => !!network);
   });

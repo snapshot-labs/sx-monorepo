@@ -164,6 +164,11 @@ export function createWriters(config: FullConfig) {
 
         await executionStrategy.save();
 
+        await executeTemplate('SimpleQuorumAvatarExecutionStrategy', {
+          contract: proxyAddress,
+          start: blockNumber
+        });
+
         break;
       }
       case config.overrides.masterAxiom
@@ -628,7 +633,7 @@ export function createWriters(config: FullConfig) {
     proposal.scores_3_parsed = 0;
     proposal.scores_total = '0';
     proposal.scores_total_parsed = 0;
-    proposal.quorum = 0n;
+    proposal.quorum = '0';
     proposal.strategies_indices = space.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
@@ -655,7 +660,7 @@ export function createWriters(config: FullConfig) {
     );
 
     if (executionStrategy) {
-      proposal.quorum = BigInt(executionStrategy.quorum);
+      proposal.quorum = executionStrategy.quorum.toString();
       proposal.timelock_veto_guardian =
         executionStrategy.timelock_veto_guardian;
       proposal.timelock_delay = executionStrategy.timelock_delay;
@@ -669,7 +674,7 @@ export function createWriters(config: FullConfig) {
       // information.
       proposal.execution_strategy_details = executionStrategy.id;
     } else {
-      proposal.quorum = 0n;
+      proposal.quorum = '0';
       proposal.timelock_veto_guardian = null;
       proposal.timelock_delay = 0n;
       proposal.execution_strategy_type = 'none';
@@ -836,7 +841,7 @@ export function createWriters(config: FullConfig) {
       config.indexerName
     );
     if (executionStrategy) {
-      proposal.quorum = BigInt(executionStrategy.quorum);
+      proposal.quorum = executionStrategy.quorum.toString();
       proposal.timelock_veto_guardian =
         executionStrategy.timelock_veto_guardian;
       proposal.timelock_delay = executionStrategy.timelock_delay;
@@ -850,7 +855,7 @@ export function createWriters(config: FullConfig) {
       // information.
       proposal.execution_strategy_details = executionStrategy.id;
     } else {
-      proposal.quorum = 0n;
+      proposal.quorum = '0';
       proposal.timelock_veto_guardian = null;
       proposal.timelock_delay = 0n;
       proposal.execution_strategy_type = 'none';
@@ -1165,6 +1170,24 @@ export function createWriters(config: FullConfig) {
     await executionEntity.save();
   };
 
+  const handleQuorumUpdated: evm.Writer = async ({ rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+
+    console.log('Handle QuorumUpdated');
+
+    const executionStrategyAddress = getAddress(rawEvent.address);
+
+    const executionStrategy = await ExecutionStrategy.loadEntity(
+      executionStrategyAddress,
+      config.indexerName
+    );
+
+    if (executionStrategy) {
+      executionStrategy.quorum = event.args.newQuorum.toString();
+      await executionStrategy.save();
+    }
+  };
+
   return {
     // ProxyFactory
     handleProxyDeployed,
@@ -1193,6 +1216,8 @@ export function createWriters(config: FullConfig) {
     // L1AvatarExecutionStrategyFactory
     handleL1AvatarExecutionContractDeployed,
     // L1AvatarExecutionStrategy
-    handleStarknetProposalExecuted
+    handleStarknetProposalExecuted,
+    // SimpleQuorumAvatarExecutionStrategy
+    handleQuorumUpdated
   };
 }
