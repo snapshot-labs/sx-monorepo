@@ -494,6 +494,7 @@ export function createWriters(config: FullConfig) {
     proposal.execution_ready = true;
     proposal.executed = false;
     proposal.vetoed = false;
+    proposal.execution_settled = false;
     proposal.completed = false;
     proposal.cancelled = false;
 
@@ -750,6 +751,7 @@ export function createWriters(config: FullConfig) {
     if (!proposal) return;
 
     proposal.executed = true;
+    proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = tx.transaction_hash ?? null;
 

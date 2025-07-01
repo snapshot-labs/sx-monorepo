@@ -151,6 +151,8 @@ type Proposal {
   execution_ready: Boolean!
   executed: Boolean!
   vetoed: Boolean!
+  execution_settled: Boolean!
+  # Deprecated: use execution_settled instead
   completed: Boolean!
   cancelled: Boolean!
 }
