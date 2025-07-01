@@ -35,6 +35,30 @@ import {
   updateCounter
 } from '../common/utils';
 
+export function normalizeProposalTimestamps(
+  start: bigint,
+  minEnd: bigint,
+  votingDelay: bigint,
+  hasErc20Votes: boolean
+) {
+  const created = start - votingDelay;
+  let normalizedStart = start;
+  let normalizedMinEnd = minEnd;
+
+  if (hasErc20Votes) {
+    const minimumDelay = 10n * 60n;
+    const adjustedStart = created + minimumDelay;
+    if (normalizedStart < adjustedStart) normalizedStart = adjustedStart;
+    if (normalizedMinEnd < normalizedStart) normalizedMinEnd = normalizedStart;
+  }
+
+  return {
+    created,
+    start: normalizedStart,
+    minEnd: normalizedMinEnd
+  };
+}
+
 type Strategy = {
   address: string;
   params: string[];
@@ -425,25 +449,14 @@ export function createWriters(config: FullConfig) {
     const proposalId = parseInt(BigInt(event.proposal_id).toString());
     const author = formatAddressVariant(findVariant(event.author));
 
-    const created =
-      BigInt(event.proposal.start_timestamp) - BigInt(space.voting_delay);
-
-    // for erc20votes strategies we have to add artificial delay to prevent voting within same block
-    // snapshot needs to remain the same as we need real timestamp to compute VP
-    let startTimestamp = BigInt(event.proposal.start_timestamp);
-    let minEnd = BigInt(event.proposal.min_end_timestamp);
-    if (
+    const { created, start, minEnd } = normalizeProposalTimestamps(
+      BigInt(event.proposal.start_timestamp),
+      BigInt(event.proposal.min_end_timestamp),
+      BigInt(space.voting_delay),
       space.strategies.some(
         strategy => strategy === config.overrides.erc20VotesStrategy
       )
-    ) {
-      const minimumDelay = 10n * 60n;
-      startTimestamp =
-        startTimestamp > created + minimumDelay
-          ? startTimestamp
-          : created + minimumDelay;
-      minEnd = minEnd > startTimestamp ? minEnd : startTimestamp;
-    }
+    );
 
     const proposal = new Proposal(
       `${spaceId}/${proposalId}`,
@@ -459,7 +472,7 @@ export function createWriters(config: FullConfig) {
     proposal.author = author.address;
     proposal.metadata = null;
     proposal.execution_hash = event.proposal.execution_payload_hash;
-    proposal.start = parseInt(startTimestamp.toString());
+    proposal.start = parseInt(start.toString());
     proposal.min_end = parseInt(minEnd.toString());
     proposal.max_end = parseInt(
       BigInt(event.proposal.max_end_timestamp).toString()
