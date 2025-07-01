@@ -18,7 +18,7 @@ const queryClient = useQueryClient();
 
 const modalOpen = ref(false);
 const activeLabelId = ref<string | null>(null);
-const submitLoading = ref(false);
+const isSubmitLoading = ref(false);
 const spaceId = computed(() => props.townhallSpace.space_id);
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
@@ -43,7 +43,7 @@ function setModalStatus(open: boolean = false, roleId: string | null = null) {
 
 async function handleAddRole(config: SpaceMetadataLabel) {
   try {
-    submitLoading.value = true;
+    isSubmitLoading.value = true;
     const res = await sendCreateRole(
       spaceId.value,
       config.name,
@@ -72,7 +72,7 @@ async function handleAddRole(config: SpaceMetadataLabel) {
   } catch (e) {
     addNotification('error', e.message);
   } finally {
-    submitLoading.value = false;
+    isSubmitLoading.value = false;
   }
 }
 
@@ -82,7 +82,7 @@ async function handleEditRole(config: SpaceMetadataLabel) {
   }
 
   try {
-    submitLoading.value = true;
+    isSubmitLoading.value = true;
     const res = await sendEditRole(
       spaceId.value,
       activeLabelId.value,
@@ -114,7 +114,7 @@ async function handleEditRole(config: SpaceMetadataLabel) {
   } catch (e) {
     addNotification('error', e.message);
   } finally {
-    submitLoading.value = false;
+    isSubmitLoading.value = false;
   }
 }
 
@@ -244,7 +244,7 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
       <ModalLabelConfig
         item-type="role"
         :open="modalOpen"
-        :loading="submitLoading"
+        :loading="isSubmitLoading"
         :initial-state="(roles || []).find(l => l.id === activeLabelId)"
         @add="
           config => {
