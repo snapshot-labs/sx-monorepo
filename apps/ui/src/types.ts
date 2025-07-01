@@ -315,6 +315,13 @@ export type Proposal = {
   has_execution_window_opened: boolean;
   execution_ready: boolean;
   vetoed: boolean;
+  /**
+   * Determines if proposal execution is settled - all transactions have been executed or vetoed.
+   */
+  execution_settled: boolean;
+  /**
+   * Determines if proposal is completed - all votes have been already counted.
+   */
   completed: boolean;
   cancelled: boolean;
   state: ProposalState;
