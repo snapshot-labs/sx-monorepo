@@ -44,6 +44,7 @@ export const TOWNHALL_CONFIG = {
     createTopic: {
       Topic: [
         { name: 'space', type: 'uint64' },
+        { name: 'category', type: 'uint64' },
         { name: 'metadataUri', type: 'string' }
       ]
     },

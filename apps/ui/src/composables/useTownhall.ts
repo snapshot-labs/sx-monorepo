@@ -186,15 +186,18 @@ export function useTownhall() {
     const pinned = await pin({
       title,
       body,
-      discussionUrl,
-      category: categoryId ?? 0
+      discussionUrl
     });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
       highlightClient.createTopic({
         signer,
-        data: { space, metadataUri: `ipfs://${pinned.cid}` },
+        data: {
+          space,
+          category: categoryId ?? 0,
+          metadataUri: `ipfs://${pinned.cid}`
+        },
         salt: getSalt()
       })
     );

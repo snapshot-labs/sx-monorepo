@@ -30,6 +30,7 @@ export type DeleteCategory = {
 
 export type CreateTopic = {
   space: number;
+  category: number;
   metadataUri: string;
 };
 

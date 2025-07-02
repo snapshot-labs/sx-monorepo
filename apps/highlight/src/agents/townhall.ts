@@ -91,7 +91,11 @@ export default class Townhall extends Agent {
   }
 
   async topic(
-    { space, metadataUri }: { space: number; metadataUri: string },
+    {
+      space,
+      category,
+      metadataUri
+    }: { space: number; category: number; metadataUri: string },
     { signer }: { signer: string }
   ) {
     const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
@@ -99,7 +103,7 @@ export default class Townhall extends Agent {
     const author = await this.getSigner(signer);
 
     this.write(`space:${space}:topics:id`, id + 1);
-    this.emit('new_topic', [space, id, author, metadataUri]);
+    this.emit('new_topic', [space, id, category, author, metadataUri]);
   }
 
   async closeTopic({ space, topic }: { space: number; topic: number }) {
