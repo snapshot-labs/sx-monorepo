@@ -31,9 +31,7 @@ export type DeleteCategory = {
 export type CreateTopic = {
   space: number;
   category: number;
-  title: string;
-  body: string;
-  discussionUrl: string;
+  metadataUri: string;
 };
 
 export type CloseTopic = {
@@ -44,7 +42,7 @@ export type CloseTopic = {
 export type CreatePost = {
   space: number;
   topic: number;
-  body: string;
+  metadataUri: string;
 };
 
 export type HidePost = {
@@ -64,9 +62,7 @@ export type Vote = {
 
 export type CreateRole = {
   space: number;
-  name: string;
-  description: string;
-  color: string;
+  metadataUri: string;
 };
 
 export type EditRole = CreateRole & { id: string };

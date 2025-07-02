@@ -252,8 +252,9 @@ watchEffect(() => {
             />
             <div class="flex gap-2.5 items-center">
               <UiButton
-                class="primary items-center flex space-x-1"
+                class="primary items-center justify-center flex space-x-1"
                 :disabled="isCreatePostPending || !body.trim() || !web3.account"
+                :loading="isCreatePostPending"
                 @click="
                   createPost(body);
                   body = '';
