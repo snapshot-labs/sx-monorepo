@@ -13,7 +13,7 @@ const props = withDefaults(
     unique?: boolean;
     availableStrategies: StrategyTemplate[];
     defaultParams?: Record<string, any>;
-    testable?: boolean;
+    showTestButton?: boolean;
   }>(),
   {
     limit: Infinity,
@@ -91,7 +91,7 @@ async function handleTestStrategies(strategies: StrategyConfig[]) {
     <div class="mb-2 flex items-center justify-between">
       <h4 class="eyebrow font-medium">Active</h4>
       <UiTooltip
-        v-if="model.length && testable"
+        v-if="model.length && showTestButton"
         title="Test all custom strategies"
       >
         <UiButton
@@ -109,7 +109,7 @@ async function handleTestStrategies(strategies: StrategyConfig[]) {
         :key="strategy.id"
         :network-id="networkId"
         :strategy="strategy"
-        :testable="testable"
+        :show-test-button="showTestButton"
         @edit-strategy="editStrategy"
         @delete-strategy="removeStrategy"
         @test-strategies="handleTestStrategies"

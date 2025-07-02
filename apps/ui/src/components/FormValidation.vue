@@ -75,7 +75,7 @@ function handleStrategySave(value: Record<string, any>) {
         v-else
         :network-id="networkId"
         :strategy="model"
-        :testable="false"
+        :show-test-button="false"
         @edit-strategy="editStrategy"
         @delete-strategy="removeStrategy"
       />
@@ -99,7 +99,7 @@ function handleStrategySave(value: Record<string, any>) {
         :space-id="spaceId"
         :voting-power-symbol="votingPowerSymbol"
         :available-strategies="availableVotingStrategies"
-        :testable="true"
+        :show-test-button="true"
       />
     </div>
     <teleport to="#modal">

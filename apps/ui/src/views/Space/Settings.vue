@@ -413,7 +413,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
           :space-id="space.id"
           :voting-power-symbol="space.voting_power_symbol"
-          :testable="true"
+          :show-test-button="true"
         />
       </template>
       <UiContainerSettings

@@ -105,7 +105,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
         class="mb-3"
         :network-id="networkId"
         :strategy="strategy"
-        :testable="true"
+        :show-test-button="true"
         @edit-strategy="handleEditStrategy"
         @delete-strategy="handleRemoveStrategy"
         @test-strategies="
