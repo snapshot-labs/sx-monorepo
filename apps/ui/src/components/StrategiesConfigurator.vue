@@ -133,7 +133,7 @@ async function handleTestStrategies(strategies: StrategyConfig[]) {
         :open="isTestStrategiesModalOpen"
         :network-id="networkId"
         :space-id="spaceId"
-        :voting-power-symbol="props.votingPowerSymbol"
+        :voting-power-symbol="votingPowerSymbol"
         :strategies="testedStrategies"
         @close="isTestStrategiesModalOpen = false"
       />
