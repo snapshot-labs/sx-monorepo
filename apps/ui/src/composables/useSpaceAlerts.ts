@@ -5,8 +5,8 @@ import {
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const UPCOMING_PRO_ONLY_NETWORKS: readonly number[] = [
-  137 // Polygon
+const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
+  '137' // Polygon
 ];
 
 type AlertType =
@@ -58,24 +58,26 @@ export function useSpaceAlerts(
     )
       return [];
 
-    const ids = new Set<number>([
+    const ids = new Set<string>([
       space.value.snapshot_chain_id,
       ...space.value.strategies_params.map(strategy =>
-        Number(strategy.network)
+        strategy.network.toString()
       ),
       ...space.value.strategies_params.flatMap(strategy =>
         Array.isArray(strategy.params?.strategies)
-          ? strategy.params.strategies.map(param => Number(param.network))
+          ? strategy.params.strategies.map(param => param.network.toString())
           : []
       )
     ]);
 
-    const isNetworkUpcomingPro = (networkId: number) =>
+    const isNetworkUpcomingPro = (networkId: string) =>
       UPCOMING_PRO_ONLY_NETWORKS.includes(networkId) && !options.isEditor;
 
     return Array.from(ids)
       .filter(n => !premiumChainIds.value.has(n) || isNetworkUpcomingPro(n))
-      .map(chainId => networks.value.find(n => n.chainId === chainId))
+      .map(chainId =>
+        networks.value.find(n => n.chainId.toString() === chainId)
+      )
       .filter(network => !!network);
   });
 

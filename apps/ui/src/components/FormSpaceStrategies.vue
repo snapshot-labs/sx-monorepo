@@ -2,7 +2,7 @@
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
-const snapshotChainId = defineModel<number>('snapshotChainId', {
+const snapshotChainId = defineModel<string>('snapshotChainId', {
   required: true
 });
 const strategies = defineModel<StrategyConfig[]>('strategies', {
