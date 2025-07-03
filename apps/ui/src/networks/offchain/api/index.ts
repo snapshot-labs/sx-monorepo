@@ -177,7 +177,7 @@ function formatSpace(
       active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
-      snapshot_chain_id: parseInt(space.network)
+      snapshot_chain_id: space.network
     };
   }
 
@@ -224,7 +224,7 @@ function formatSpace(
     turbo: space.turbo,
     turbo_expiration: space.turboExpiration,
     controller: '',
-    snapshot_chain_id: parseInt(space.network),
+    snapshot_chain_id: space.network,
     name: space.name || '',
     avatar: space.avatar || '',
     cover: space.cover || '',
@@ -377,7 +377,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     space: {
       id: proposal.space.id,
       name: proposal.space.name,
-      snapshot_chain_id: parseInt(proposal.space.network),
+      snapshot_chain_id: proposal.space.network,
       avatar: proposal.space.avatar,
       controller: '',
       admins,

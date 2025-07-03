@@ -24,7 +24,7 @@ export type StrategyConfig = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: string;
 };
 
 export type Strategy = {
