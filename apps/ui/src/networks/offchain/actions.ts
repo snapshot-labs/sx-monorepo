@@ -60,7 +60,7 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
   5: offchainGoerli
 };
 
-const STARKNET_CHAIN_IDS = Object.values(STARKNET_METADATA).map(
+const STARKNET_CHAIN_IDS: string[] = Object.values(STARKNET_METADATA).map(
   metadata => metadata.chainId
 );
 
@@ -79,11 +79,9 @@ export function createActions(
     web3: Web3Provider,
     snapshotChainId: string | undefined
   ) {
-    // TODO: Add check when space is using starknet
-    // or when signer chain id is different from snapshot chain id
     if (
       snapshotChainId &&
-      !STARKNET_CHAIN_IDS.includes(snapshotChainId as any) &&
+      !STARKNET_CHAIN_IDS.includes(snapshotChainId) &&
       (web3.provider as any)._isSequenceProvider
     ) {
       await verifyNetwork(web3, Number(snapshotChainId));
@@ -160,9 +158,18 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[]
     ) {
+      // TODO: remove this check after implementing starknet support on getProvider
+      if (
+        space.snapshot_chain_id &&
+        STARKNET_CHAIN_IDS.includes(space.snapshot_chain_id)
+      ) {
+        throw new Error(
+          'Proposal creation not supported for spaces on Starknet network'
+        );
+      }
+
       await verifyOffchainNetwork(web3, space.snapshot_chain_id);
 
-      // TODO: Missing support for starknet, will fail for spaces using starknet
       const provider = getProvider(Number(space.snapshot_chain_id));
       const plugins = await getPlugins(executions);
       const data = {
