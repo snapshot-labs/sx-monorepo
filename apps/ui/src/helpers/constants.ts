@@ -260,7 +260,7 @@ export const DELEGATE_REGISTRY_STRATEGIES = [
 ];
 
 export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
-  'delegate-registry': 'Delegat registry',
+  'delegate-registry': 'Delegate registry',
   'apechain-delegate-registry': 'ApeChain Delegate Registry',
   'split-delegation': 'Split Delegation',
   'governor-subgraph': 'ERC-20 Votes'
