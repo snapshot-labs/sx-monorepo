@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import { Role, Space as TownhallSpace } from '@/helpers/townhall/types';
+import { getUserFacingErrorMessage } from '@/helpers/utils';
 import {
   useRoleMutation,
   useRolesQuery,
@@ -69,7 +70,7 @@ async function handleAddRole(config: SpaceMetadataLabel) {
       }
     );
   } catch (e) {
-    addNotification('error', e.message);
+    addNotification('error', getUserFacingErrorMessage(e));
   }
 }
 
@@ -109,7 +110,7 @@ async function handleEditRole(config: SpaceMetadataLabel) {
         )
     );
   } catch (e) {
-    addNotification('error', e.message);
+    addNotification('error', getUserFacingErrorMessage(e));
   }
 }
 
@@ -123,7 +124,7 @@ async function handleDeleteRole(id: string) {
       (old = []) => old.filter(role => role.id !== id)
     );
   } catch (e) {
-    addNotification('error', e.message);
+    addNotification('error', getUserFacingErrorMessage(e));
   }
 }
 
