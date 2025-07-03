@@ -7,10 +7,13 @@ const model = defineModel<StrategyConfig[]>({ required: true });
 const props = withDefaults(
   defineProps<{
     networkId: NetworkID;
+    spaceId: string;
+    votingPowerSymbol: string;
     limit?: number;
     unique?: boolean;
     availableStrategies: StrategyTemplate[];
     defaultParams?: Record<string, any>;
+    showTestButton?: boolean;
   }>(),
   {
     limit: Infinity,
@@ -20,7 +23,9 @@ const props = withDefaults(
 );
 
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 const editStrategyModalOpen = ref(false);
+const isTestStrategiesModalOpen = ref(false);
 
 const limitReached = computed(() => model.value.length >= props.limit);
 const activeStrategiesMap = computed(() =>
@@ -74,11 +79,29 @@ function handleStrategySave(value: Record<string, any>) {
     };
   });
 }
+
+async function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
 </script>
 
 <template>
   <div>
-    <h4 class="eyebrow mb-2 font-medium">Active</h4>
+    <div class="mb-2 flex items-center justify-between">
+      <h4 class="eyebrow font-medium">Active</h4>
+      <UiTooltip
+        v-if="model.length && showTestButton"
+        title="Test all custom strategies"
+      >
+        <UiButton
+          class="!p-0 !border-0 !h-auto !w-[20px]"
+          @click="handleTestStrategies(model)"
+        >
+          <IH-play />
+        </UiButton>
+      </UiTooltip>
+    </div>
     <div class="space-y-3 mb-4">
       <div v-if="model.length === 0">No strategies selected</div>
       <FormStrategiesStrategyActive
@@ -86,8 +109,10 @@ function handleStrategySave(value: Record<string, any>) {
         :key="strategy.id"
         :network-id="networkId"
         :strategy="strategy"
+        :show-test-button="showTestButton"
         @edit-strategy="editStrategy"
         @delete-strategy="removeStrategy"
+        @test-strategies="handleTestStrategies"
       />
     </div>
     <h4 class="eyebrow mb-2 font-medium">Available</h4>
@@ -104,6 +129,14 @@ function handleStrategySave(value: Record<string, any>) {
       />
     </div>
     <teleport to="#modal">
+      <ModalTestStrategy
+        :open="isTestStrategiesModalOpen"
+        :network-id="networkId"
+        :space-id="spaceId"
+        :voting-power-symbol="votingPowerSymbol"
+        :strategies="testedStrategies"
+        @close="isTestStrategiesModalOpen = false"
+      />
       <ModalEditStrategy
         v-if="editedStrategy"
         :open="editStrategyModalOpen"

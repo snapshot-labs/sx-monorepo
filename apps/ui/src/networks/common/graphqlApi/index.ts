@@ -367,6 +367,7 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
+    execution_settled: proposal.completed,
     state,
     network: networkId,
     privacy: 'none',

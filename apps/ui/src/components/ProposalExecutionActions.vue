@@ -100,7 +100,7 @@ const network = computed(() => getNetwork(props.proposal.network));
       <UiButton
         v-if="
           proposal.state === 'executed' &&
-          !proposal.completed &&
+          !proposal.execution_settled &&
           !proposal.vetoed &&
           proposal.timelock_veto_guardian &&
           compareAddresses(proposal.timelock_veto_guardian, web3.account)

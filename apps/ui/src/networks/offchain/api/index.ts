@@ -372,6 +372,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     state,
     cancelled: false,
     vetoed: false,
+    execution_settled: false,
     completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,

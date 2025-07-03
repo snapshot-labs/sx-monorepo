@@ -651,6 +651,7 @@ export function createWriters(config: FullConfig) {
     proposal.execution_time = 0;
     proposal.executed = false;
     proposal.vetoed = false;
+    proposal.execution_settled = false;
     proposal.completed = false;
     proposal.cancelled = false;
 
@@ -927,6 +928,7 @@ export function createWriters(config: FullConfig) {
       switch (executionStrategy.type) {
         case 'SimpleQuorumAvatar':
         case 'Axiom':
+          proposal.execution_settled = true;
           proposal.completed = true;
           proposal.execution_tx = tx.hash;
           break;
@@ -1067,6 +1069,7 @@ export function createWriters(config: FullConfig) {
     );
     if (!proposal) return;
 
+    proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = tx.hash;
     await proposal.save();
@@ -1091,6 +1094,7 @@ export function createWriters(config: FullConfig) {
     );
     if (!proposal) return;
 
+    proposal.execution_settled = true;
     proposal.completed = true;
     proposal.vetoed = true;
     proposal.veto_tx = tx.hash;

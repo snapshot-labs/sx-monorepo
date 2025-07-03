@@ -364,6 +364,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-voting-strategies="
             network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
           "
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
           title="Proposal"
           description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
         />
@@ -389,6 +391,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
           title="Voting strategies"
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
+          :show-test-button="true"
         />
       </template>
       <UiContainerSettings
@@ -452,6 +457,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
           title="Authenticators"
           description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
         />
         <RelayerBalance :space="space" :network="network" />
       </UiContainerSettings>
