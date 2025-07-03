@@ -911,7 +911,7 @@ export function createApi(
 
       return Object.fromEntries(
         data.networks.map((network: any) => [
-          Number(network.id),
+          network.id,
           {
             spaces_count: network.spacesCount,
             premium: network.premium
