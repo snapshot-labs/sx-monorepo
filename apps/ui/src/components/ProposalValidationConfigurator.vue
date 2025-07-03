@@ -36,6 +36,8 @@ const PROPOSAL_VALIDATIONS: Record<ValidationDetailId, ValidationDetailsExtra> =
 const validation = defineModel<Validation | null>({ required: true });
 
 defineProps<{
+  spaceId: string;
+  votingPowerSymbol: string;
   networkId: NetworkID;
   snapshotChainId: number;
 }>();
@@ -92,6 +94,8 @@ function handleClick(validationId: string) {
         :open="isSelectValidationModalOpen"
         :network-id="networkId"
         :default-chain-id="snapshotChainId"
+        :space-id="spaceId"
+        :voting-power-symbol="votingPowerSymbol"
         :current="initialValidation"
         :skip-menu="true"
         @close="isSelectValidationModalOpen = false"
