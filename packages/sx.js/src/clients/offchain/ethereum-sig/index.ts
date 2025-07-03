@@ -289,8 +289,7 @@ export class EthereumSig {
       choice,
       reason: data.reason || '',
       app: data.app,
-      metadata: '',
-      from: data.from
+      metadata: ''
     };
 
     if (data.privacy !== 'none') {

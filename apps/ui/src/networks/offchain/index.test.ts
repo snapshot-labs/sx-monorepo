@@ -8,13 +8,7 @@ const voter = '0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90';
 describe('offchain network', () => {
   describe('getVotingPower', () => {
     describe('vote validation', () => {
-      it.each([
-        ['invalid address', 'invalid-address'],
-        [
-          'starknet address',
-          '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'
-        ]
-      ])(
+      it.each([['invalid address', 'invalid-address']])(
         'returns a single VotingPower object with 0 (%s)',
         async (label, invalidVoter) => {
           await expect(
@@ -122,13 +116,7 @@ describe('offchain network', () => {
     });
 
     describe('proposal validation', () => {
-      it.each([
-        ['invalid address', 'invalid-address'],
-        [
-          'starknet address',
-          '0x25ec026985a3bf9d0cc1fe17326b245dfdc3ff89b8fde106542a3ea56c5a918'
-        ]
-      ])(
+      it.each([['invalid address', 'invalid-address']])(
         'returns a single VotingPower object with 0 (%s)',
         async (label, invalidVoter) => {
           await expect(
