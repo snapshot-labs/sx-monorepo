@@ -1,7 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { formatUnits } from '@ethersproject/units';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { constants } from 'starknet';
 import {
   LAST_USED_CONNECTOR_CACHE_KEY,
   RECENT_CONNECTOR
@@ -19,21 +18,6 @@ type Web3providerWithSafe = Web3Provider & {
     };
   };
 };
-
-const STARKNET_NETWORKS = {
-  [constants.StarknetChainId.SN_MAIN]: {
-    key: constants.StarknetChainId.SN_MAIN,
-    chainId: constants.StarknetChainId.SN_MAIN,
-    explorer: { url: 'https://starkscan.co' }
-  },
-  [constants.StarknetChainId.SN_SEPOLIA]: {
-    key: constants.StarknetChainId.SN_SEPOLIA,
-    chainId: constants.StarknetChainId.SN_SEPOLIA,
-    explorer: { url: 'https://sepolia.starkscan.co' }
-  }
-};
-
-Object.assign(networks, STARKNET_NETWORKS);
 
 const defaultNetwork: any =
   import.meta.env.VITE_DEFAULT_NETWORK || Object.keys(networks)[0];

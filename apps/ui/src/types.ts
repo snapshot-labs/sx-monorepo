@@ -145,7 +145,7 @@ export type RelatedSpace = {
   active_proposals: number | null;
   turbo: boolean;
   verified: boolean;
-  snapshot_chain_id: number;
+  snapshot_chain_id: string;
 };
 
 export type Validation = {
@@ -183,7 +183,7 @@ export type Space = {
   verified: boolean;
   turbo: boolean;
   turbo_expiration: number;
-  snapshot_chain_id?: number;
+  snapshot_chain_id?: string;
   name: string;
   avatar: string;
   cover: string;
@@ -265,7 +265,7 @@ export type Proposal = {
   space: {
     id: string;
     name: string;
-    snapshot_chain_id?: number;
+    snapshot_chain_id?: string;
     avatar: string;
     terms: string;
     controller: string;

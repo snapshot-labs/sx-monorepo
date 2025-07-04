@@ -237,7 +237,7 @@ watch(
                   'Networks can also be specified in individual strategies, delegations, treasuries, etc...',
                 examples: ['Select network'],
                 networkId: networkId,
-                networksListKind: 'offchain'
+                networksListKind: 'full'
               }"
             />
           </div>

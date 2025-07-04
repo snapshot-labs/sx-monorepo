@@ -129,7 +129,7 @@ export type ExecutionInfo = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: ChainId;
 };
 
 export type VotingPower = {
@@ -145,7 +145,7 @@ export type VotingPower = {
   displayDecimals: number;
   token: string | null;
   symbol: string;
-  chainId?: number;
+  chainId?: ChainId;
   swapLink?: string;
 };
 
@@ -441,7 +441,7 @@ export type NetworkHelpers = {
   getExplorerUrl(
     id: string,
     type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-    chainId?: number
+    chainId?: ChainId
   ): string;
 };
 

@@ -114,7 +114,7 @@ async function handleSubmit() {
       null,
       {
         id: props.spaceId,
-        snapshot_chain_id: props.chainId as number | undefined,
+        snapshot_chain_id: props.chainId as string | undefined,
         network: props.networkId,
         voting_power_symbol: props.votingPowerSymbol
       },
