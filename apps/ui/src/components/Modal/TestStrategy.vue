@@ -69,10 +69,18 @@ async function handleSubmit() {
   votingPower.value = null;
 
   try {
-    let strategiesParams: any[] = props.strategies;
+    let strategiesParams: any[] = [];
     let strategiesMetadata: any[] = [];
 
-    if (!offchainNetworks.includes(props.networkId)) {
+    if (offchainNetworks.includes(props.networkId)) {
+      strategiesParams = props.strategies.map(strategy => {
+        return {
+          name: strategy.name,
+          network: strategy.chainId ?? props.chainId,
+          params: strategy.params
+        };
+      });
+    } else {
       strategiesParams = await Promise.all(
         props.strategies.map(async strategy => {
           if (evmNetworks.includes(props.networkId)) {
