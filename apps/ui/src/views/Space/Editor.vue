@@ -191,7 +191,8 @@ const isSubmitButtonLoading = computed(() => {
 });
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
-    alerts.value.has('HAS_PRO_ONLY_NETWORKS') && !proposal.value?.proposalId;
+    alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
+    !proposal.value?.originalProposal;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
   if (hasUnsupportedNetworks || hasFormErrors) {
@@ -292,10 +293,10 @@ async function handleProposeClick() {
       }));
 
     let result;
-    if (proposal.value.proposalId) {
+    if (proposal.value.originalProposal) {
       result = await updateProposal(
         props.space,
-        proposal.value.proposalId,
+        proposal.value.originalProposal,
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
@@ -335,13 +336,13 @@ async function handleProposeClick() {
     }
 
     if (
-      proposal.value.proposalId &&
+      proposal.value.originalProposal &&
       offchainNetworks.includes(props.space.network)
     ) {
       router.push({
         name: 'space-proposal-overview',
         params: {
-          proposal: proposal.value.proposalId
+          proposal: proposal.value.originalProposal.proposal_id
         }
       });
     } else {
@@ -442,7 +443,9 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  const title = proposal.value?.proposalId ? 'Update proposal' : 'New proposal';
+  const title = proposal.value?.originalProposal
+    ? 'Update proposal'
+    : 'New proposal';
 
   setTitle(`${title} - ${props.space.name}`);
 });
@@ -462,7 +465,9 @@ watchEffect(() => {
         </UiButton>
         <h4
           class="grow truncate"
-          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
+          v-text="
+            proposal?.originalProposal ? 'Update proposal' : 'New proposal'
+          "
         />
       </div>
       <div class="flex gap-2 items-center">
@@ -480,7 +485,7 @@ watchEffect(() => {
         >
           <span
             class="hidden md:inline-block"
-            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+            v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
           />
           <IH-paper-airplane class="rotate-90 relative left-[2px]" />
         </UiButton>
@@ -495,7 +500,7 @@ watchEffect(() => {
       >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
-            v-if="nonPremiumNetworksList && !proposal?.proposalId"
+            v-if="nonPremiumNetworksList && !proposal?.originalProposal"
             type="error"
             class="mb-4"
           >
@@ -700,7 +705,7 @@ watchEffect(() => {
             :start="proposalStart"
             :min_end="proposalMinEnd"
             :max_end="proposalMaxEnd"
-            :editable="!proposal.proposalId"
+            :editable="!proposal.originalProposal"
           />
         </div>
       </Affix>

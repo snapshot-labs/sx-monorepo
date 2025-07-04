@@ -408,7 +408,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     veto_tx: null,
     privacy: proposal.privacy || 'none',
     flagged: proposal.flagged,
-    flag_code: proposal.flagCode
+    flag_code: proposal.flagCode,
+    plugins: proposal.plugins
   };
 }
 
