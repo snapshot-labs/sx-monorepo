@@ -220,7 +220,9 @@ const pendingSpace = computed(() => {
     strategies_params: strategies.value.map(strategy => ({
       name: strategy.name,
       params: strategy.params,
-      network: strategy.chainId?.toString() ?? snapshotChainId.value
+      network: strategy.chainId
+        ? String(strategy.chainId)
+        : snapshotChainId.value
     })),
     snapshot_chain_id: snapshotChainId.value
   };
