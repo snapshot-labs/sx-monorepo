@@ -61,11 +61,11 @@ export function useSpaceAlerts(
     const ids = new Set<string>([
       space.value.snapshot_chain_id,
       ...space.value.strategies_params.map(strategy =>
-        strategy.network.toString()
+        String(strategy.network)
       ),
       ...space.value.strategies_params.flatMap(strategy =>
         Array.isArray(strategy.params?.strategies)
-          ? strategy.params.strategies.map(param => param.network.toString())
+          ? strategy.params.strategies.map(param => String(param.network))
           : []
       )
     ]);
@@ -75,9 +75,7 @@ export function useSpaceAlerts(
 
     return Array.from(ids)
       .filter(n => !premiumChainIds.value.has(n) || isNetworkUpcomingPro(n))
-      .map(chainId =>
-        networks.value.find(n => n.chainId.toString() === chainId)
-      )
+      .map(chainId => networks.value.find(n => String(n.chainId) === chainId))
       .filter(network => !!network);
   });
 
