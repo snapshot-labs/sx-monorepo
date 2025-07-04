@@ -75,15 +75,15 @@ export function createActions(
     networkConfig
   });
 
-  async function verifyOffchainNetwork(
+  async function verifyChainNetwork(
     web3: Web3Provider,
     snapshotChainId: string | undefined
   ) {
-    if (
-      snapshotChainId &&
-      !STARKNET_CHAIN_IDS.includes(snapshotChainId) &&
-      (web3.provider as any)._isSequenceProvider
-    ) {
+    if (!snapshotChainId || STARKNET_CHAIN_IDS.includes(snapshotChainId)) {
+      return;
+    }
+
+    if ((web3.provider as any)._isSequenceProvider) {
       await verifyNetwork(web3, Number(snapshotChainId));
     }
   }
@@ -168,7 +168,7 @@ export function createActions(
         );
       }
 
-      await verifyOffchainNetwork(web3, space.snapshot_chain_id);
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
 
       const provider = getProvider(Number(space.snapshot_chain_id));
       const plugins = await getPlugins(executions);
@@ -206,7 +206,7 @@ export function createActions(
       labels: string[],
       executions: ExecutionInfo[]
     ) {
-      await verifyOffchainNetwork(web3, space.snapshot_chain_id);
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
 
       const plugins = await getPlugins(executions);
 
@@ -226,7 +226,7 @@ export function createActions(
       return client.updateProposal({ signer: web3.getSigner(), data });
     },
     async flagProposal(web3: Web3Provider, proposal: Proposal) {
-      await verifyOffchainNetwork(web3, proposal.space.snapshot_chain_id);
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.flagProposal({
         signer: web3.getSigner(),
@@ -241,7 +241,7 @@ export function createActions(
       connectorType: ConnectorType,
       proposal: Proposal
     ) {
-      await verifyOffchainNetwork(web3, proposal.space.snapshot_chain_id);
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.cancel({
         signer: web3.getSigner(),
@@ -260,7 +260,7 @@ export function createActions(
       reason: string,
       app: string
     ): Promise<any> {
-      await verifyOffchainNetwork(web3, proposal.space.snapshot_chain_id);
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       const data = {
         space: proposal.space.id,
