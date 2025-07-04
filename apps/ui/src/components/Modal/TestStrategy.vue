@@ -76,7 +76,7 @@ async function handleSubmit() {
       strategiesParams = props.strategies.map(strategy => {
         return {
           name: strategy.name,
-          network: strategy.chainId ?? props.chainId,
+          network: String(strategy.chainId ?? props.chainId),
           params: strategy.params
         };
       });
