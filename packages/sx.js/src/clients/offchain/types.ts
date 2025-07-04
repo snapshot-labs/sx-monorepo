@@ -159,6 +159,7 @@ export type EIP712Message = Required<
 >;
 
 export type Vote = {
+  from?: string;
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];

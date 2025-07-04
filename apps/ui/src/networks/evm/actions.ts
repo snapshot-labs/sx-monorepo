@@ -437,6 +437,7 @@ export function createActions(
     cancelProposal: async (
       web3: Web3Provider,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) => {
       await verifyNetwork(web3, chainId);

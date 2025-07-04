@@ -5,7 +5,7 @@ export const domain = {
 
 export const basicVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'string' },
@@ -20,7 +20,7 @@ export const singleChoiceVoteTypes = basicVoteTypes;
 
 export const approvalVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'string' },
@@ -35,7 +35,7 @@ export const rankedChoiceVoteTypes = approvalVoteTypes;
 
 export const encryptedVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'bytes32' },
@@ -48,7 +48,7 @@ export const encryptedVoteTypes = {
 
 export const weightedVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'string' },
@@ -61,7 +61,7 @@ export const weightedVoteTypes = {
 
 export const proposeTypes = {
   Proposal: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'type', type: 'string' },
@@ -82,7 +82,7 @@ export const proposeTypes = {
 export const updateProposalTypes = {
   UpdateProposal: [
     { name: 'proposal', type: 'string' },
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'type', type: 'string' },
@@ -98,7 +98,7 @@ export const updateProposalTypes = {
 
 export const flagProposalTypes = {
   FlagProposal: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'proposal', type: 'string' },
     { name: 'timestamp', type: 'uint64' }
@@ -107,7 +107,7 @@ export const flagProposalTypes = {
 
 export const cancelProposalTypes = {
   CancelProposal: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'bytes32' }

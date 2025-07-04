@@ -1,4 +1,3 @@
-import { isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import {
@@ -17,6 +16,7 @@ import {
 } from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
 import { verifyNetwork } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import { METADATA as STARKNET_METADATA } from '@/networks/starknet';
 import {
   Choice,
@@ -76,14 +76,17 @@ export function createActions(
   });
 
   async function verifyChainNetwork(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     snapshotChainId: string | undefined
   ) {
     if (!snapshotChainId || STARKNET_CHAIN_IDS.includes(snapshotChainId)) {
       return;
     }
 
-    if ((web3.provider as any)._isSequenceProvider) {
+    if (
+      web3 instanceof Web3Provider &&
+      (web3.provider as any)._isSequenceProvider
+    ) {
       await verifyNetwork(web3, Number(snapshotChainId));
     }
   }
@@ -140,7 +143,7 @@ export function createActions(
 
   return {
     async propose(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
@@ -186,13 +189,17 @@ export function createActions(
         snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
-        timestamp: created
+        timestamp: created,
+        from: account
       };
 
-      return client.propose({ signer: web3.getSigner(), data });
+      return client.propose({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     async updateProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
@@ -220,39 +227,50 @@ export function createActions(
         choices,
         privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
-        plugins: JSON.stringify(plugins)
+        plugins: JSON.stringify(plugins),
+        from: account
       };
 
-      return client.updateProposal({ signer: web3.getSigner(), data });
+      return client.updateProposal({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
-    async flagProposal(web3: Web3Provider, proposal: Proposal) {
+    async flagProposal(
+      web3: Web3Provider | Wallet,
+      account: string,
+      proposal: Proposal
+    ) {
       await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.flagProposal({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },
     async cancelProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) {
       await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.cancel({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },
     async vote(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
@@ -272,11 +290,12 @@ export function createActions(
         metadataUri: '',
         privacy: proposal.privacy,
         reason,
-        app: app || EDITOR_APP_NAME
+        app: app || EDITOR_APP_NAME,
+        from: account
       };
 
       return client.vote({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data
       });
     },
@@ -296,7 +315,7 @@ export function createActions(
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
 
-      if (!strategy || !isAddress(voterAddress)) {
+      if (!strategy || !isValidAddress(voterAddress)) {
         return [
           {
             address: name,

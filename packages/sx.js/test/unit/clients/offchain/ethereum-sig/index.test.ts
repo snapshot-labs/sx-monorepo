@@ -32,7 +32,8 @@ describe('EthereumSig', () => {
       privacy: 'none' as Privacy,
       metadataUri: '',
       type: 'basic',
-      app: 'snapshot-v2'
+      app: 'snapshot-v2',
+      from: signer.address
     };
 
     const envelope = await client.vote({
