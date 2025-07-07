@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getTopic } from '@/helpers/townhall/api';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
-import { sleep } from '@/helpers/utils';
+import { getUserFacingErrorMessage, sleep } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Space } from '@/types';
 
@@ -116,7 +116,7 @@ async function handleSubmit() {
       params: { id: topicId }
     });
   } catch (e) {
-    addNotification('error', e.message);
+    addNotification('error', getUserFacingErrorMessage(e));
   } finally {
     submitLoading.value = false;
   }
