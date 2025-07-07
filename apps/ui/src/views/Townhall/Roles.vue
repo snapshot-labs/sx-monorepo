@@ -72,7 +72,6 @@ async function handleAddRole(config: SpaceMetadataLabel) {
     modalOpen.value = false;
   } catch (e) {
     addNotification('error', getUserFacingErrorMessage(e));
-    addNotification('error', e.message);
   } finally {
     isSubmitLoading.value = false;
   }
