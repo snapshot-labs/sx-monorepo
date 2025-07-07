@@ -3,7 +3,7 @@ import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { Category, Post, Vote } from '@/helpers/townhall/types';
 import { gql } from './gql';
 
-type NewCategoryEvent = [number, number, string, string, string, number];
+type NewCategoryEvent = [number, number, string, string, number];
 type NewPostEvent = [string, number, number, string, string];
 type NewVoteEvent = [string, number, number, string, number];
 
@@ -300,13 +300,13 @@ export async function getResultsByRole(
 }
 
 export function newCategoryEventToEntry(event: NewCategoryEvent): Category {
-  const [spaceId, id, , name, description, parentCategoryId] = event;
+  const [spaceId, id, author, metadataUri, parentCategoryId] = event;
 
   return {
     id: `${spaceId}/${id}`,
     category_id: id,
-    name,
-    description,
+    name: '',
+    description: '',
     parent_category_id: parentCategoryId,
     topic_count: 0
   };

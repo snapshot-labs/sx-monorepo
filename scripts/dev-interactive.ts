@@ -16,7 +16,7 @@ const SERVICES: Record<ServiceType, Service> = {
       UI_URL: 'http://localhost:8080',
       ENABLED_NETWORKS: 'sep,sn-sep',
       VITE_ENABLED_NETWORKS: 's-tn,sep,sn-sep',
-      VITE_METADATA_NETWORK: 's-tn',
+      VITE_METADATA_NETWORK: 's-sn',
       VITE_UNIFIED_API_TESTNET_URL: 'http://localhost:3000'
     }
   },

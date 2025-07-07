@@ -371,14 +371,18 @@ export function useCreateCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: data => {
+    onSuccess: (data, meta) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
         event => event.key === 'new_category'
       );
 
-      const category = newCategoryEventToEntry(eventData);
+      const category = {
+        ...newCategoryEventToEntry(eventData),
+        name: meta.name,
+        description: meta.description
+      };
 
       queryClient.setQueryData<Category[]>(
         ['townhall', 'categories', 'list', { spaceId, categoryId }],
@@ -426,14 +430,18 @@ export function useEditCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: data => {
+    onSuccess: (data, meta) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
         event => event.key === 'edit_category'
       );
 
-      const category = newCategoryEventToEntry(eventData);
+      const category = {
+        ...newCategoryEventToEntry(eventData),
+        name: meta.name,
+        description: meta.description
+      };
 
       queryClient.setQueryData<Category[]>(
         ['townhall', 'categories', 'list', { spaceId, categoryId }],

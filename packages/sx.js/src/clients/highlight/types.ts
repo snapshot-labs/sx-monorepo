@@ -16,8 +16,7 @@ export type SetAlias = {
 
 export type CreateCategory = {
   space: number;
-  name: string;
-  description: string;
+  metadataUri: string;
   parentCategoryId: number;
 };
 

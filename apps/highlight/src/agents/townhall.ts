@@ -30,13 +30,11 @@ export default class Townhall extends Agent {
   async createCategory(
     {
       space,
-      name,
-      description,
+      metadataUri,
       parentCategoryId
     }: {
       space: number;
-      name: string;
-      description: string;
+      metadataUri: string;
       parentCategoryId: string | null;
     },
     { signer }: { signer: string }
@@ -49,8 +47,7 @@ export default class Townhall extends Agent {
       space,
       id,
       author,
-      name,
-      description,
+      metadataUri,
       parentCategoryId
     ]);
   }
@@ -59,14 +56,12 @@ export default class Townhall extends Agent {
     {
       space,
       id,
-      name,
-      description,
+      metadataUri,
       parentCategoryId
     }: {
       space: number;
       id: number;
-      name: string;
-      description: string;
+      metadataUri: string;
       parentCategoryId: string | null;
     },
     { signer }: { signer: string }
@@ -76,8 +71,7 @@ export default class Townhall extends Agent {
       space,
       id,
       author,
-      name,
-      description,
+      metadataUri,
       parentCategoryId
     ]);
   }
