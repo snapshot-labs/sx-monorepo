@@ -40,7 +40,7 @@ export async function getLatestBlockNumber(chainId: string): Promise<number> {
 
     const blockNumber = await provider.getBlockNumber();
 
-    return blockNumber - EDITOR_SNAPSHOT_OFFSET;
+    return Math.max(0, blockNumber - EDITOR_SNAPSHOT_OFFSET);
   } catch (error) {
     throw new Error(
       `Failed to get latest block number for chain ${chainId}: ${error}`
