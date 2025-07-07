@@ -1,11 +1,52 @@
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import { RpcProvider } from 'starknet';
 import { getProvider } from '@/helpers/provider';
 import { METADATA as STARKNET_METADATA } from '@/networks/starknet';
-import { Choice } from '@/types';
+import { ChainId, Choice, NetworkID } from '@/types';
 import { EDITOR_SNAPSHOT_OFFSET } from './constants';
+import { createProvider } from '../starknet/provider';
 
-const STARKNET_CHAIN_IDS: string[] = Object.values(STARKNET_METADATA).map(
-  metadata => metadata.chainId
-);
+const STARKNET_CHAIN_ID_TO_NETWORK_MAPPING: Record<ChainId, NetworkID> =
+  Object.fromEntries(
+    Object.entries(STARKNET_METADATA).map(([network, metadata]) => [
+      metadata.chainId as ChainId,
+      network as NetworkID
+    ])
+  );
+
+function getStarknetMetadata(chainId: string) {
+  return STARKNET_METADATA[
+    STARKNET_CHAIN_ID_TO_NETWORK_MAPPING[chainId as ChainId]
+  ];
+}
+
+export function isStarknetChainId(chainId: string): boolean {
+  return !!STARKNET_CHAIN_ID_TO_NETWORK_MAPPING[chainId as ChainId];
+}
+
+export async function getLatestBlockNumber(chainId: string): Promise<number> {
+  try {
+    let provider: StaticJsonRpcProvider | RpcProvider;
+
+    if (isStarknetChainId(chainId)) {
+      const starknetMetadata = getStarknetMetadata(chainId);
+      if (!starknetMetadata) {
+        throw new Error(`Error creating provider for chain ID: ${chainId}`);
+      }
+      provider = createProvider(starknetMetadata.rpcUrl);
+    } else {
+      provider = getProvider(Number(chainId));
+    }
+
+    const blockNumber = await provider.getBlockNumber();
+
+    return blockNumber - EDITOR_SNAPSHOT_OFFSET;
+  } catch (error) {
+    throw new Error(
+      `Failed to get latest block number for chain ${chainId}: ${error}`
+    );
+  }
+}
 
 export function getSdkChoice(
   type: string,
@@ -30,21 +71,4 @@ export function getSdkChoice(
   }
 
   throw new Error('Vote type not supported');
-}
-
-export function isStarknetChainId(chainId: string): boolean {
-  return STARKNET_CHAIN_IDS.includes(chainId);
-}
-
-export async function getLatestBlockNumber(chainId: string): Promise<number> {
-  // TODO: remove this check after implementing starknet support on getProvider
-  if (isStarknetChainId(chainId)) {
-    throw new Error(
-      'Proposal creation not supported for spaces on Starknet network'
-    );
-  }
-
-  const provider = getProvider(Number(chainId));
-
-  return (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET;
 }
