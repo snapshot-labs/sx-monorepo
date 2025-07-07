@@ -23,8 +23,7 @@ const NewCategoryEventData = z.tuple([
   z.number(), // spaceId
   z.number(), // id
   z.string(), // author
-  z.string(), // name
-  z.string(), // description
+  z.string(), // metadataUri
   z.number() // parentCategoryId
 ]);
 
@@ -32,8 +31,7 @@ const EditCategoryEventData = z.tuple([
   z.number(), // spaceId
   z.number(), // id
   z.string(), // author
-  z.string(), // name
-  z.string(), // description
+  z.string(), // metadataUri
   z.number() // parentCategoryId
 ]);
 
@@ -112,7 +110,7 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewCategory: Writer = async ({ unit, payload }) => {
-    const [spaceId, id, author, name, description, parentCategoryId] =
+    const [spaceId, id, author, metadataUri, parentCategoryId] =
       NewCategoryEventData.parse(payload.data);
 
     console.log(
@@ -120,17 +118,18 @@ export function createWriters(indexerName: string) {
       spaceId,
       id,
       author,
-      name,
-      description,
+      metadataUri,
       parentCategoryId
     );
+
+    const metadata = await getJSON(metadataUri);
 
     const spaceEntityId = spaceId.toString();
     const category = new Category(`${spaceId}/${id}`, indexerName);
     category.category_id = id;
     category.space = spaceEntityId;
-    category.name = name;
-    category.description = description;
+    category.name = metadata.name || '';
+    category.description = metadata.description || '';
     category.parent_category_id = parentCategoryId;
     category.created = unit.timestamp;
 
@@ -138,7 +137,7 @@ export function createWriters(indexerName: string) {
   };
 
   const handleEditCategory: Writer = async ({ payload }) => {
-    const [spaceId, id, author, name, description, parentCategoryId] =
+    const [spaceId, id, author, metadataUri, parentCategoryId] =
       EditCategoryEventData.parse(payload.data);
 
     console.log(
@@ -146,16 +145,17 @@ export function createWriters(indexerName: string) {
       spaceId,
       id,
       author,
-      name,
-      description,
+      metadataUri,
       parentCategoryId
     );
 
     const category = await Category.loadEntity(`${spaceId}/${id}`, indexerName);
     if (!category) return;
 
-    category.name = name;
-    category.description = description;
+    const metadata = await getJSON(metadataUri);
+
+    category.name = metadata.name || '';
+    category.description = metadata.description || '';
 
     await category.save();
   };

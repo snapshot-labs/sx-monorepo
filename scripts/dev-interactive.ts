@@ -14,9 +14,9 @@ const SERVICES: Record<ServiceType, Service> = {
   api: {
     env: {
       UI_URL: 'http://localhost:8080',
-      ENABLED_NETWORKS: 'sep,sn-sep',
-      VITE_ENABLED_NETWORKS: 's-tn,sep,sn-sep',
-      VITE_METADATA_NETWORK: 's-tn',
+      ENABLED_NETWORKS: 'sep,sn-sep,s',
+      VITE_ENABLED_NETWORKS: 's-tn,sep,sn-sep,s',
+      VITE_METADATA_NETWORK: 's',
       VITE_UNIFIED_API_TESTNET_URL: 'http://localhost:3000'
     }
   },

@@ -109,6 +109,10 @@ export function useTownhall() {
       return null;
     }
 
+    const pinned = await pin({
+      name,
+      description
+    });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
@@ -116,8 +120,7 @@ export function useTownhall() {
         signer,
         data: {
           space,
-          name,
-          description,
+          metadataUri: `ipfs://${pinned.cid}`,
           parentCategoryId: parentCategoryId ?? 0
         },
         salt: getSalt()
@@ -137,6 +140,10 @@ export function useTownhall() {
       return null;
     }
 
+    const pinned = await pin({
+      name,
+      description
+    });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
@@ -145,8 +152,7 @@ export function useTownhall() {
         data: {
           space,
           id,
-          name,
-          description,
+          metadataUri: `ipfs://${pinned.cid}`,
           parentCategoryId: parentCategoryId ?? 0
         },
         salt: getSalt()

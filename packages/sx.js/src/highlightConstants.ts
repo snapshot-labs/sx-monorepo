@@ -21,8 +21,7 @@ export const TOWNHALL_CONFIG = {
     createCategory: {
       CreateCategory: [
         { name: 'space', type: 'uint64' },
-        { name: 'name', type: 'string' },
-        { name: 'description', type: 'string' },
+        { name: 'metadataUri', type: 'string' },
         { name: 'parentCategoryId', type: 'uint64' }
       ]
     },
@@ -30,8 +29,7 @@ export const TOWNHALL_CONFIG = {
       EditCategory: [
         { name: 'space', type: 'uint64' },
         { name: 'id', type: 'uint64' },
-        { name: 'name', type: 'string' },
-        { name: 'description', type: 'string' },
+        { name: 'metadataUri', type: 'string' },
         { name: 'parentCategoryId', type: 'uint64' }
       ]
     },
