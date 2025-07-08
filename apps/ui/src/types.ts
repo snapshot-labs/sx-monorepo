@@ -306,6 +306,8 @@ export type Proposal = {
   strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
+  voting_power_validation_strategy_strategies: string[];
+  voting_power_validation_strategy_strategies_params: any[];
   created: number;
   edited: number | null;
   tx: string;
