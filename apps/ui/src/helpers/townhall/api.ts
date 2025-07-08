@@ -300,7 +300,7 @@ export async function getResultsByRole(
 }
 
 export function newCategoryEventToEntry(event: NewCategoryEvent): Category {
-  const [spaceId, id, author, metadataUri, parentCategoryId] = event;
+  const [spaceId, id, , , parentCategoryId] = event;
 
   return {
     id: `${spaceId}/${id}`,
