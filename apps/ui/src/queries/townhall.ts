@@ -371,14 +371,18 @@ export function useCreateCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: data => {
+    onSuccess: (data, variables) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
         event => event.key === 'new_category'
       );
 
-      const category = newCategoryEventToEntry(eventData);
+      const category = {
+        ...newCategoryEventToEntry(eventData),
+        name: variables.name,
+        description: variables.description
+      };
 
       queryClient.setQueryData<Category[]>(
         ['townhall', 'categories', 'list', { spaceId, categoryId }],
@@ -426,14 +430,18 @@ export function useEditCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: data => {
+    onSuccess: (data, variables) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
         event => event.key === 'edit_category'
       );
 
-      const category = newCategoryEventToEntry(eventData);
+      const category = {
+        ...newCategoryEventToEntry(eventData),
+        name: variables.name,
+        description: variables.description
+      };
 
       queryClient.setQueryData<Category[]>(
         ['townhall', 'categories', 'list', { spaceId, categoryId }],
@@ -536,14 +544,14 @@ export function useCreatePostMutation({
     mutationFn: (body: string) => {
       return sendPost(toValue(spaceId), toValue(topicId), body);
     },
-    onSuccess: async data => {
+    onSuccess: async (data, body) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
         event => event.key === 'new_post'
       );
 
-      const post = newPostEventToEntry(eventData);
+      const post = { ...newPostEventToEntry(eventData), body };
 
       queryClient.setQueryData<Topic>(
         ['townhall', 'topics', 'detail', { spaceId, topicId }],
