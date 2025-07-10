@@ -217,9 +217,9 @@ watch(
         :definition="definition.properties.quantity"
         :error="formErrors.quantity"
       />
-      <div class="space-y-[14px] pt-3">
+      <div class="space-y-3">
         <div
-          class="border rounded-lg text-[16px] bg-skin-input-bg p-3 py-2.5 space-y-1"
+          class="border rounded-lg text-[17px] bg-skin-input-bg p-3 py-2.5 space-y-1"
         >
           <div class="flex justify-between">
             You will pay
@@ -238,7 +238,7 @@ watch(
         </div>
         <UiCheckbox v-model="isTermsAccepted" class="text-start">
           <div class="text-skin-text leading-[22px] top-[-1px] relative">
-            Before confirming, please read and agree to the
+            I have read and agree to the
             <AppLink is-external :to="{ name: 'site-terms' }" @click.stop
               >Terms of service</AppLink
             >.
