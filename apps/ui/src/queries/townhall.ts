@@ -371,7 +371,7 @@ export function useCreateCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: (data, meta) => {
+    onSuccess: (data, variables) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
@@ -380,8 +380,8 @@ export function useCreateCategoryMutation({
 
       const category = {
         ...newCategoryEventToEntry(eventData),
-        name: meta.name,
-        description: meta.description
+        name: variables.name,
+        description: variables.description
       };
 
       queryClient.setQueryData<Category[]>(
@@ -430,7 +430,7 @@ export function useEditCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: (data, meta) => {
+    onSuccess: (data, variables) => {
       if (!data) return;
 
       const { data: eventData } = data.result.events.find(
@@ -439,8 +439,8 @@ export function useEditCategoryMutation({
 
       const category = {
         ...newCategoryEventToEntry(eventData),
-        name: meta.name,
-        description: meta.description
+        name: variables.name,
+        description: variables.description
       };
 
       queryClient.setQueryData<Category[]>(
