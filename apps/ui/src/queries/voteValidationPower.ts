@@ -22,7 +22,7 @@ async function getVoteValidationPower(account: string, proposal: Proposal) {
   // Skipped for onchain proposals, or when using 'any' strategy
   const canVote =
     !offchainNetworks.includes(proposal.network) ||
-    proposal.strategies[0] === 'any';
+    proposal.voting_power_validation_strategy_strategies[0] === 'any';
 
   const vpItem: VoteValidationPowerItem = {
     votingPowers: [],
