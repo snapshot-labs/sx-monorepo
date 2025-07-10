@@ -403,6 +403,10 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
+    voting_power_validation_strategy_strategies: [proposal.validation.name],
+    voting_power_validation_strategy_strategies_params: [
+      proposal.validation.params
+    ],
     tx: '',
     execution_tx: null,
     veto_tx: null,
