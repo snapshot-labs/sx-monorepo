@@ -167,7 +167,7 @@ export async function processProposal(proposal: DbProposal) {
   }
 
   const { getAccount, herodotusController } = getClient(proposal.chainId);
-  const { account, nonceManager } = getAccount('0x0');
+  const { account, nonceManager, deployAccount } = getAccount('0x0');
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
@@ -199,6 +199,8 @@ export async function processProposal(proposal: DbProposal) {
   );
 
   const tree = await res.json();
+
+  await deployAccount();
 
   try {
     await nonceManager.acquire();
