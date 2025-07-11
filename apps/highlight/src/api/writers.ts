@@ -178,7 +178,7 @@ export function createWriters(indexerName: string) {
     const metadata = await getJSON(metadataUri);
 
     const spaceEntityId = spaceId.toString();
-    const categoryEntityId = `${spaceId}/${metadata.category}`;
+    const categoryEntityId = `${spaceId}/${category}`;
     const topic = new Topic(`${spaceId}/${id}`, indexerName);
     topic.category_id = category;
     topic.category = category !== 0 ? categoryEntityId : null;
