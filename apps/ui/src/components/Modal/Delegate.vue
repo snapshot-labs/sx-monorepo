@@ -177,22 +177,7 @@ function isValidDelegation(delegation?: SpaceMetadataDelegation): boolean {
 }
 
 function getNetworkDetails(chainId: number | string) {
-  if (typeof chainId === 'number') {
-    return networks[chainId];
-  }
-
-  const starknetNetwork = Object.entries(STARKNET_NETWORK_METADATA).find(
-    ([, { chainId: starknetChainId }]) => starknetChainId === chainId
-  )?.[0];
-
-  if (!starknetNetwork) {
-    return { name: 'Unknown network', logo: '' };
-  }
-
-  return {
-    name: STARKNET_NETWORK_METADATA[starknetNetwork].name,
-    logo: STARKNET_NETWORK_METADATA[starknetNetwork].avatar
-  };
+  return networks[chainId] || { name: 'Unknown network', logo: '' };
 }
 
 async function handleSubmit() {

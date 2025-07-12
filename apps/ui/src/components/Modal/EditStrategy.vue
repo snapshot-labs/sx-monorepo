@@ -167,7 +167,7 @@ watchEffect(() => {
           title: 'Network',
           examples: ['Select network'],
           networkId,
-          networksListKind: 'offchain'
+          networksListKind: 'full'
         }"
       />
       <UiForm

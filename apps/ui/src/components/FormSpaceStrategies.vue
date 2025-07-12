@@ -2,7 +2,7 @@
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
-const snapshotChainId = defineModel<number>('snapshotChainId', {
+const snapshotChainId = defineModel<string>('snapshotChainId', {
   required: true
 });
 const strategies = defineModel<StrategyConfig[]>('strategies', {
@@ -48,7 +48,7 @@ function handleTestStrategies(strategies: StrategyConfig[]) {
           'The default network used for this space. Networks can also be specified in individual strategies',
         examples: ['Select network'],
         networkId,
-        networksListKind: 'offchain'
+        networksListKind: 'full'
       }"
     />
   </div>
