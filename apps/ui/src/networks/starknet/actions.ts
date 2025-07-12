@@ -339,7 +339,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -406,7 +406,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: proposal.proposal_id as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
