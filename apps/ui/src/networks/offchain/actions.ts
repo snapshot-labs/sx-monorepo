@@ -76,14 +76,17 @@ export function createActions(
   });
 
   async function verifyChainNetwork(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     snapshotChainId: string | undefined
   ) {
     if (!snapshotChainId || STARKNET_CHAIN_IDS.includes(snapshotChainId)) {
       return;
     }
 
-    if ((web3.provider as any)._isSequenceProvider) {
+    if (
+      web3 instanceof Web3Provider &&
+      (web3.provider as any)._isSequenceProvider
+    ) {
       await verifyNetwork(web3, Number(snapshotChainId));
     }
   }

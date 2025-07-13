@@ -5,8 +5,8 @@ import {
 import { offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
-const UPCOMING_PRO_ONLY_NETWORKS: readonly number[] = [
-  137 // Polygon
+const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
+  '137' // Polygon
 ];
 
 type AlertType =
