@@ -597,7 +597,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       template: template.value,
       strategies: strategies.value.map(strategy => ({
         name: strategy.name,
-        network: strategy.chainId?.toString() ?? snapshotChainId.value,
+        network: strategy.chainId
+          ? String(strategy.chainId)
+          : snapshotChainId.value,
         params: strategy.params
       })),
       treasuries: form.value.treasuries.map(treasury => ({

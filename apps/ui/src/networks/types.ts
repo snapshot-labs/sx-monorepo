@@ -186,7 +186,7 @@ export type ReadOnlyNetworkActions = {
     connectorType: ConnectorType,
     account: string,
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
