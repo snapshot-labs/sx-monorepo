@@ -1,6 +1,5 @@
 import {
   DelegationType,
-  NetworkID,
   SkinSettings,
   SpaceMetadataLabel,
   VoteType
@@ -9,7 +8,7 @@ import {
 export type ApiRelatedSpace = {
   id: string;
   name: string;
-  network: NetworkID;
+  network: string;
   avatar: string;
   cover: string | null;
   proposalsCount: number;
