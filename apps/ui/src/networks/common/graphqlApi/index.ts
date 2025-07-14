@@ -375,7 +375,9 @@ function formatProposal(
     flagged: false,
     flag_code: 0,
     completed: ['passed', 'executed', 'rejected'].includes(state),
-    plugins: {}
+    plugins: {},
+    voting_power_validation_strategy_strategies: [],
+    voting_power_validation_strategy_strategies_params: []
   };
 }
 
