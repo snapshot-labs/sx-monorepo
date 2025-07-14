@@ -400,7 +400,7 @@ export function useActions() {
 
   async function updateProposal(
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
@@ -425,7 +425,7 @@ export function useActions() {
         auth.value.connector.type,
         auth.value.account,
         space,
-        proposalId,
+        proposal,
         title,
         body,
         discussion,

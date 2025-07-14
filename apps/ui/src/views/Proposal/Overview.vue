@@ -139,7 +139,7 @@ async function handleEditClick() {
   );
 
   const draftId = await createDraft(spaceId, {
-    proposalId: props.proposal.proposal_id,
+    originalProposal: props.proposal,
     title: props.proposal.title,
     body: props.proposal.body,
     discussion: props.proposal.discussion,

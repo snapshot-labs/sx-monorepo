@@ -88,11 +88,24 @@ export function createActions(
     }
   }
 
-  async function getPlugins(executions: ExecutionInfo[] | null) {
+  async function getPlugins(
+    executions: ExecutionInfo[] | null,
+    originalProposal: Proposal | null
+  ) {
+    const supportedPlugins = ['oSnap', 'readOnlyExecution'];
+
     const plugins = {} as {
       oSnap?: OSnapPlugin;
       readOnlyExecution?: ReadOnlyExecutionPlugin;
     };
+
+    if (originalProposal) {
+      for (const [name, plugin] of Object.entries(originalProposal.plugins)) {
+        if (!supportedPlugins.includes(name)) {
+          plugins[name] = plugin;
+        }
+      }
+    }
 
     if (!executions) return plugins;
 
@@ -160,7 +173,7 @@ export function createActions(
     ) {
       await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const plugins = await getPlugins(executions);
+      const plugins = await getPlugins(executions, null);
       const data = {
         space: space.id,
         title,
@@ -189,7 +202,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -201,10 +214,10 @@ export function createActions(
     ) {
       await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const plugins = await getPlugins(executions);
+      const plugins = await getPlugins(executions, proposal);
 
       const data = {
-        proposal: proposalId as string,
+        proposal: proposal.proposal_id as string,
         space: space.id,
         title,
         body,

@@ -374,7 +374,8 @@ function formatProposal(
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     flagged: false,
     flag_code: 0,
-    completed: ['passed', 'executed', 'rejected'].includes(state)
+    completed: ['passed', 'executed', 'rejected'].includes(state),
+    plugins: {}
   };
 }
 

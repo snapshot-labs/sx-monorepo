@@ -326,6 +326,7 @@ export type Proposal = {
   cancelled: boolean;
   state: ProposalState;
   privacy: Privacy;
+  plugins: Record<string, unknown>;
   flagged: boolean;
   flag_code: number;
 };
@@ -408,7 +409,7 @@ export type Member = {
 };
 
 export type Draft = {
-  proposalId: number | string | null;
+  originalProposal: Proposal | null;
   title: string;
   body: string;
   discussion: string;

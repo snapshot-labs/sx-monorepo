@@ -75,9 +75,7 @@ export function useSpaceAlerts(
 
     return Array.from(ids)
       .filter(n => !premiumChainIds.value.has(n) || isNetworkUpcomingPro(n))
-      .map(chainId =>
-        networks.value.find(n => n.chainId.toString() === chainId)
-      )
+      .map(chainId => networks.value.find(n => String(n.chainId) === chainId))
       .filter(network => !!network);
   });
 
