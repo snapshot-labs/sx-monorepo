@@ -175,7 +175,6 @@ export function createActions(
       executions: ExecutionInfo[]
     ) {
       // TODO: remove this check after implementing starknet support on getProvider
-      // TODO: remove this check after implementing starknet support on getProvider
       if (
         space.snapshot_chain_id &&
         STARKNET_CHAIN_IDS.includes(space.snapshot_chain_id)
