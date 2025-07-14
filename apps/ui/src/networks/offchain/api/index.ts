@@ -332,6 +332,14 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     ];
   }
 
+  const voting_power_validation_params: any = [proposal.validation.params];
+  if (
+    proposal.validation.name === 'basic' &&
+    !(proposal.validation.params.strategies || []).length
+  ) {
+    voting_power_validation_params[0].strategies = proposal.strategies;
+  }
+
   const state = getProposalState(networkId, proposal);
 
   const { admins, moderators, members } = proposal.space;
@@ -404,9 +412,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
     voting_power_validation_strategy_strategies: [proposal.validation.name],
-    voting_power_validation_strategy_strategies_params: [
-      proposal.validation.params
-    ],
+    voting_power_validation_strategy_strategies_params:
+      voting_power_validation_params,
     tx: '',
     execution_tx: null,
     veto_tx: null,
