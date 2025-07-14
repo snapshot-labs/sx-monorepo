@@ -165,16 +165,21 @@ watch(selectedNetworkId, () => {
         <FormStrategies
           v-else-if="currentStep === 'strategies'"
           v-model="votingStrategies"
+          :space-id="''"
+          :voting-power-symbol="metadataForm.votingPowerSymbol"
           :network-id="selectedNetworkId"
           :available-strategies="
             selectedNetwork.constants.EDITOR_VOTING_STRATEGIES
           "
+          :show-test-button="true"
           title="Voting strategies"
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
         />
         <FormStrategies
           v-else-if="currentStep === 'auths'"
           v-model="authenticators"
+          :space-id="''"
+          :voting-power-symbol="metadataForm.votingPowerSymbol"
           unique
           :network-id="selectedNetworkId"
           :available-strategies="
@@ -194,12 +199,16 @@ watch(selectedNetworkId, () => {
             selectedNetwork.constants
               .EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
           "
+          :space-id="''"
+          :voting-power-symbol="metadataForm.votingPowerSymbol"
           title="Proposal validation"
           description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
         />
         <FormStrategies
           v-else-if="currentStep === 'executions'"
           v-model="executionStrategies"
+          :space-id="''"
+          :voting-power-symbol="metadataForm.votingPowerSymbol"
           :network-id="selectedNetworkId"
           :available-strategies="
             selectedNetwork.constants.EDITOR_EXECUTION_STRATEGIES

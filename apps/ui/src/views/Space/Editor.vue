@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { VERIFIED_URL } from '@/helpers/constants';
-import { _n, omit } from '@/helpers/utils';
+import { _n, omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
@@ -51,13 +51,11 @@ const {
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const termsStore = useTermsStore();
 const timestamp = useTimestamp({ interval: 1000 });
-const {
-  networks,
-  premiumChainIds,
-  loaded: networksLoaded
-} = useOffchainNetworksList(props.space.network);
 const { limits, lists } = useSettings();
 const { isWhiteLabel } = useWhiteLabel();
+const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
+  isEditor: true
+});
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -65,6 +63,13 @@ const { modalAccountOpen } = useModal();
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
+
+const nonPremiumNetworksList = computed(() => {
+  const networks = alerts.value.get('HAS_PRO_ONLY_NETWORKS')?.networks;
+  if (!networks) return '';
+  const boldNames = networks.map((n: any) => `<b>${n.name}</b>`);
+  return prettyConcat(boldNames, 'and');
+});
 
 const privacy = computed({
   get() {
@@ -186,9 +191,8 @@ const isSubmitButtonLoading = computed(() => {
 });
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
-    !props.space.turbo &&
-    !proposal.value?.proposalId &&
-    unsupportedProposalNetworks.value.length;
+    alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
+    !proposal.value?.originalProposal;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
   if (hasUnsupportedNetworks || hasFormErrors) {
@@ -257,25 +261,6 @@ const {
   refetch: fetchPropositionPower
 } = usePropositionPowerQuery(toRef(props, 'space'));
 
-const unsupportedProposalNetworks = computed(() => {
-  if (!props.space.snapshot_chain_id || !networksLoaded.value) return [];
-
-  const ids = new Set<number>([
-    props.space.snapshot_chain_id,
-    ...props.space.strategies_params.map(strategy => Number(strategy.network)),
-    ...props.space.strategies_params.flatMap(strategy =>
-      Array.isArray(strategy.params?.strategies)
-        ? strategy.params.strategies.map(param => Number(param.network))
-        : []
-    )
-  ]);
-
-  return Array.from(ids)
-    .filter(n => !premiumChainIds.value.has(n))
-    .map(chainId => networks.value.find(n => n.chainId === chainId))
-    .filter(network => !!network);
-});
-
 async function handleProposeClick() {
   if (!proposal.value) return;
 
@@ -308,10 +293,10 @@ async function handleProposeClick() {
       }));
 
     let result;
-    if (proposal.value.proposalId) {
+    if (proposal.value.originalProposal) {
       result = await updateProposal(
         props.space,
-        proposal.value.proposalId,
+        proposal.value.originalProposal,
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
@@ -351,13 +336,13 @@ async function handleProposeClick() {
     }
 
     if (
-      proposal.value.proposalId &&
+      proposal.value.originalProposal &&
       offchainNetworks.includes(props.space.network)
     ) {
       router.push({
         name: 'space-proposal-overview',
         params: {
-          proposal: proposal.value.proposalId
+          proposal: proposal.value.originalProposal.proposal_id
         }
       });
     } else {
@@ -458,7 +443,9 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  const title = proposal.value?.proposalId ? 'Update proposal' : 'New proposal';
+  const title = proposal.value?.originalProposal
+    ? 'Update proposal'
+    : 'New proposal';
 
   setTitle(`${title} - ${props.space.name}`);
 });
@@ -478,7 +465,9 @@ watchEffect(() => {
         </UiButton>
         <h4
           class="grow truncate"
-          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
+          v-text="
+            proposal?.originalProposal ? 'Update proposal' : 'New proposal'
+          "
         />
       </div>
       <div class="flex gap-2 items-center">
@@ -496,7 +485,7 @@ watchEffect(() => {
         >
           <span
             class="hidden md:inline-block"
-            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+            v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
           />
           <IH-paper-airplane class="rotate-90 relative left-[2px]" />
         </UiButton>
@@ -511,28 +500,13 @@ watchEffect(() => {
       >
         <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
           <UiAlert
-            v-if="
-              !space.turbo &&
-              unsupportedProposalNetworks.length &&
-              !proposal?.proposalId
-            "
+            v-if="nonPremiumNetworksList && !proposal?.originalProposal"
             type="error"
             class="mb-4"
           >
             You cannot create proposals. This space is configured with
-            non-premium networks (<template
-              v-for="(n, i) in unsupportedProposalNetworks"
-              :key="n.key"
-            >
-              <b>{{ n.name }}</b>
-              <template
-                v-if="
-                  unsupportedProposalNetworks.length > 1 &&
-                  i < unsupportedProposalNetworks.length - 1
-                "
-                >,
-              </template> </template
-            >). Change to a
+            non-premium networks (<span v-html="nonPremiumNetworksList" />).
+            Change to a
             <AppLink
               to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
               class="font-semibold text-rose-500"
@@ -731,7 +705,7 @@ watchEffect(() => {
             :start="proposalStart"
             :min_end="proposalMinEnd"
             :max_end="proposalMaxEnd"
-            :editable="!proposal.proposalId"
+            :editable="!proposal.originalProposal"
           />
         </div>
       </Affix>

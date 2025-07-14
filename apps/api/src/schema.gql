@@ -16,13 +16,13 @@ type Space {
   proposal_threshold: BigDecimalVP!
   next_strategy_index: Int!
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
   strategies: [String!]!
   strategies_params: [String!]!
   strategies_metadata: [String!]!
   strategies_parsed_metadata: [StrategiesParsedMetadataItem!]!
     @derivedFrom(field: "space")
+  strategies_decimals: [Int!]!
+  vp_decimals: Int!
   authenticators: [String!]!
   validation_strategy: String!
   validation_strategy_params: Text!
@@ -129,16 +129,19 @@ type Proposal {
   axiom_snapshot_slot: BigInt
   treasuries: [String!]!
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
   strategies: [String!]!
   strategies_params: [String!]!
+  vp_decimals: Int!
   type: String!
   scores_1: BigDecimalVP!
+  scores_1_parsed: Float!
   scores_2: BigDecimalVP!
+  scores_2_parsed: Float!
   scores_3: BigDecimalVP!
+  scores_3_parsed: Float!
   scores_total: BigDecimalVP!
-  quorum: BigInt!
+  quorum: BigDecimalVP!
+  scores_total_parsed: Float!
   created: Int!
   edited: Int
   tx: String!
@@ -148,6 +151,8 @@ type Proposal {
   execution_ready: Boolean!
   executed: Boolean!
   vetoed: Boolean!
+  execution_settled: Boolean!
+  # Deprecated: use execution_settled instead
   completed: Boolean!
   cancelled: Boolean!
 }
@@ -169,6 +174,7 @@ type Vote {
   proposal: Int!
   choice: Int!
   vp: BigDecimalVP!
+  vp_parsed: Float!
   metadata: VoteMetadataItem
   created: Int!
   tx: String!

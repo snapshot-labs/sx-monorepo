@@ -367,13 +367,17 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
+    execution_settled: proposal.completed,
     state,
     network: networkId,
     privacy: 'none',
-    quorum: +proposal.quorum,
+    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     flagged: false,
     flag_code: 0,
-    completed: ['passed', 'executed', 'rejected'].includes(state)
+    completed: ['passed', 'executed', 'rejected'].includes(state),
+    plugins: {},
+    voting_power_validation_strategy_strategies: [],
+    voting_power_validation_strategy_strategies_params: []
   };
 }
 

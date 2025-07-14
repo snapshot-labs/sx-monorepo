@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { BaseDefinition, NetworkID } from '@/types';
 
 const network = defineModel<string | number | null>({
@@ -11,7 +10,7 @@ const network = defineModel<string | number | null>({
 const props = defineProps<{
   definition: BaseDefinition<string | number | null> & {
     networkId: NetworkID;
-    networksListKind?: 'full' | 'builtin' | 'offchain';
+    networksListKind?: 'full' | 'builtin';
     networksFilter?: unknown[];
   };
 }>();
@@ -20,8 +19,8 @@ const { networks } = useOffchainNetworksList(props.definition.networkId);
 
 const allOptions = computed(() => {
   const networksListKind = props.definition.networksListKind;
-  if (networksListKind === 'full' || networksListKind === 'offchain') {
-    const baseNetworks = networks.value
+  if (networksListKind === 'full') {
+    return networks.value
       .filter(network => {
         if (
           props.definition.networkId === 's' &&
@@ -34,7 +33,7 @@ const allOptions = computed(() => {
         return true;
       })
       .map(network => ({
-        id: network.chainId,
+        id: String(network.chainId),
         name: network.name,
         icon: h('img', {
           src: getUrl(network.logo),
@@ -42,31 +41,6 @@ const allOptions = computed(() => {
           class: 'rounded-full'
         })
       }));
-    if (networksListKind === 'offchain') return baseNetworks;
-
-    return [
-      ...baseNetworks,
-      ...Object.values(STARKNET_NETWORK_METADATA)
-        .filter(metadata => {
-          if (
-            props.definition.networkId === 's' &&
-            metadata.name.includes('Sepolia')
-          ) {
-            return false;
-          }
-
-          return true;
-        })
-        .map(metadata => ({
-          id: metadata.chainId,
-          name: metadata.name,
-          icon: h('img', {
-            src: getUrl(metadata.avatar),
-            alt: metadata.name,
-            class: 'rounded-full'
-          })
-        }))
-    ];
   }
 
   return enabledNetworks

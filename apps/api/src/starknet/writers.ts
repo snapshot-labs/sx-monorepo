@@ -28,7 +28,9 @@ import {
 import {
   dropIpfs,
   getCurrentTimestamp,
+  getParsedVP,
   getProposalLink,
+  getSpaceDecimals,
   getSpaceLink,
   updateCounter
 } from '../common/utils';
@@ -95,12 +97,12 @@ export function createWriters(config: FullConfig) {
     );
     space.proposal_threshold = '0';
     space.strategies_indices = strategies.map((_, i) => i);
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = strategies;
     space.next_strategy_index = strategies.length;
     space.strategies_params = strategiesParams;
     space.strategies_metadata = strategiesMetadataUris;
+    space.strategies_decimals = [];
+    space.vp_decimals = 0;
     space.authenticators = event.authenticators;
     space.proposal_count = 0;
     space.vote_count = 0;
@@ -130,12 +132,15 @@ export function createWriters(config: FullConfig) {
     }
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         strategiesMetadataUris,
         0,
         config
       );
+
+      space.strategies_decimals = strategiesDecimals;
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -318,8 +323,6 @@ export function createWriters(config: FullConfig) {
       ...space.strategies_indices,
       ...strategies.map((_, i) => space.next_strategy_index + i)
     ];
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = [...space.strategies, ...strategies];
     space.next_strategy_index += strategies.length;
     space.strategies_params = [...space.strategies_params, ...strategiesParams];
@@ -329,12 +332,18 @@ export function createWriters(config: FullConfig) {
     ];
 
     try {
-      await handleStrategiesMetadata(
+      const { strategiesDecimals } = await handleStrategiesMetadata(
         space.id,
         strategiesMetadataUris,
         initialNextStrategy,
         config
       );
+
+      space.strategies_decimals = [
+        ...space.strategies_decimals,
+        ...strategiesDecimals
+      ];
+      space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
     } catch (e) {
       console.log('failed to handle strategies metadata', e);
     }
@@ -362,8 +371,6 @@ export function createWriters(config: FullConfig) {
     space.strategies_indices = space.strategies_indices.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
-    // NOTE: deprecated
-    space.strategies_indicies = space.strategies_indices;
     space.strategies = space.strategies.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
@@ -373,6 +380,10 @@ export function createWriters(config: FullConfig) {
     space.strategies_metadata = space.strategies_metadata.filter(
       (_, i) => !indicesToRemove.includes(i)
     );
+    space.strategies_decimals = space.strategies_decimals.filter(
+      (_, i) => !indicesToRemove.includes(i)
+    );
+    space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
 
     await space.save();
   };
@@ -463,15 +474,18 @@ export function createWriters(config: FullConfig) {
     proposal.execution_strategy_type = 'none';
     proposal.type = 'basic';
     proposal.scores_1 = '0';
+    proposal.scores_1_parsed = 0;
     proposal.scores_2 = '0';
+    proposal.scores_2_parsed = 0;
     proposal.scores_3 = '0';
+    proposal.scores_3_parsed = 0;
     proposal.scores_total = '0';
-    proposal.quorum = 0n;
+    proposal.quorum = '0';
+    proposal.scores_total_parsed = 0;
     proposal.strategies_indices = space.strategies_indices;
-    // NOTE: deprecated
-    proposal.strategies_indicies = proposal.strategies_indices;
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
+    proposal.vp_decimals = space.vp_decimals;
     proposal.created = parseInt(created.toString());
     proposal.tx = tx.transaction_hash;
     proposal.execution_tx = null;
@@ -480,6 +494,7 @@ export function createWriters(config: FullConfig) {
     proposal.execution_ready = true;
     proposal.executed = false;
     proposal.vetoed = false;
+    proposal.execution_settled = false;
     proposal.completed = false;
     proposal.cancelled = false;
 
@@ -492,7 +507,7 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
       proposal.execution_destination = executionStrategy.destinationAddress;
-      proposal.quorum = executionStrategy.quorum;
+      proposal.quorum = executionStrategy.quorum.toString();
 
       // Find matching strategy and persist it on space object
       // We use this on UI to properly display execution with treasury
@@ -670,7 +685,7 @@ export function createWriters(config: FullConfig) {
     if (executionStrategy) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
-      proposal.quorum = executionStrategy.quorum;
+      proposal.quorum = executionStrategy.quorum.toString();
 
       // Find matching strategy and persist it on space object
       // We use this on UI to properly display execution with treasury
@@ -736,6 +751,7 @@ export function createWriters(config: FullConfig) {
     if (!proposal) return;
 
     proposal.executed = true;
+    proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = tx.transaction_hash ?? null;
 
@@ -760,6 +776,12 @@ export function createWriters(config: FullConfig) {
     const created = block?.timestamp ?? getCurrentTimestamp();
     const voter = formatAddressVariant(findVariant(event.voter));
 
+    const proposal = await Proposal.loadEntity(
+      `${spaceId}/${proposalId}`,
+      config.indexerName
+    );
+    if (!proposal) return;
+
     const vote = new Vote(
       `${spaceId}/${proposalId}/${voter.address}`,
       config.indexerName
@@ -769,6 +791,7 @@ export function createWriters(config: FullConfig) {
     vote.voter = voter.address;
     vote.choice = choice;
     vote.vp = vp.toString();
+    vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
     vote.created = created;
     vote.tx = tx.transaction_hash;
 
@@ -825,20 +848,22 @@ export function createWriters(config: FullConfig) {
       await space.save();
     }
 
-    const proposal = await Proposal.loadEntity(
-      `${spaceId}/${proposalId}`,
-      config.indexerName
+    proposal.vote_count += 1;
+    proposal.scores_total = (
+      BigInt(proposal.scores_total) + BigInt(vote.vp)
+    ).toString();
+    proposal.scores_total_parsed = getParsedVP(
+      proposal.scores_total,
+      proposal.vp_decimals
     );
-    if (proposal) {
-      proposal.vote_count += 1;
-      proposal.scores_total = (
-        BigInt(proposal.scores_total) + BigInt(vote.vp)
-      ).toString();
-      proposal[`scores_${choice}`] = (
-        BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
-      ).toString();
-      await proposal.save();
-    }
+    proposal[`scores_${choice}`] = (
+      BigInt(proposal[`scores_${choice}`]) + BigInt(vote.vp)
+    ).toString();
+    proposal[`scores_${choice}_parsed`] = getParsedVP(
+      proposal[`scores_${choice}`],
+      proposal.vp_decimals
+    );
+    await proposal.save();
   };
 
   return {

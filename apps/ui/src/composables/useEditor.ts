@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { BASIC_CHOICES } from '@/helpers/constants';
 import { clone, lsGet, lsSet, omit } from '@/helpers/utils';
 import { getSpaces } from '@/queries/spaces';
-import { Draft, Drafts, Privacy, Space, VoteType } from '@/types';
+import { Draft, Drafts, Privacy, Proposal, Space, VoteType } from '@/types';
 
 const PREFERRED_VOTE_TYPE = 'basic';
 
@@ -91,7 +91,7 @@ export function useEditor() {
         return acc;
       }
 
-      if (proposal.proposalId !== null) {
+      if (proposal.originalProposal) {
         return acc;
       }
 
@@ -166,7 +166,7 @@ export function useEditor() {
 
   async function createDraft(
     spaceId: string,
-    payload?: Partial<Draft> & { proposalId?: number | string },
+    payload?: Partial<Draft> & { originalProposal?: Proposal },
     draftKey?: string
   ) {
     await setSpacesMeta([spaceId]);
@@ -191,7 +191,7 @@ export function useEditor() {
       labels: [],
       executions: Object.create(null),
       updatedAt: Date.now(),
-      proposalId: null,
+      originalProposal: null,
       ...payload
     };
 

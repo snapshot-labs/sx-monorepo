@@ -130,6 +130,7 @@ gql(`
       type
       treasury_chain
       treasury
+      quorum
     }
     execution_strategy_type
     execution_destination

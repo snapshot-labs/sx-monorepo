@@ -21,6 +21,8 @@ type Feature = {
 };
 type SubscriptionLength = 'monthly' | 'yearly';
 
+const CALENDLY = 'https://calendly.com/snapshot-labs/pro-plan';
+
 const USERS = [
   'aave.eth',
   'ens.eth',
@@ -63,6 +65,17 @@ const FEATURES = [
     about: 'Personalize your space with your own domain, colors, and logo.'
   },
   {
+    name: 'Proposal monitoring',
+    icon: ICFlag,
+    about:
+      'Rapid detection and review of spam or malicious proposals within 2 hours.'
+  },
+  {
+    name: 'Support non-premium network',
+    icon: ICGlobeAlt,
+    about: 'Choose between premium or standard networks for your strategies.'
+  },
+  {
     name: 'Priority support',
     icon: ICSupport,
     about:
@@ -73,17 +86,6 @@ const FEATURES = [
     icon: ICSparkles,
     about:
       'Exclusive preview and early use of upcoming features and improvements.'
-  },
-  {
-    name: 'Proposal monitoring',
-    icon: ICFlag,
-    about:
-      'Rapid detection and review of spam or malicious proposals within 2 hours.'
-  },
-  {
-    name: 'Support non-premium network',
-    icon: ICGlobeAlt,
-    about: 'Choose between premium or standard networks for your strategies.'
   }
 ];
 
@@ -225,8 +227,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="space-y-10">
-    <div class="shapes px-4 py-8 bg-skin-border/40 flex items-center">
+  <div class="space-y-8">
+    <div class="shapes px-4 py-8 bg-skin-border/20 flex items-center">
       <div class="text-center w-full space-y-4">
         <span
           class="eyebrow inline-block text-skin-bg bg-skin-link rounded-full px-2"
@@ -271,27 +273,23 @@ onMounted(() => {
           </div>
         </button>
       </div>
-      <UiButton
-        class="primary"
-        :disabled="!!selectedSpace && selectedSpace.network !== metadataNetwork"
-        @click="handleTurboClick"
-      >
-        {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
-        {{ selectedSpace?.name || 'space' }}
-      </UiButton>
-    </div>
-
-    <div class="space-y-4 mx-4 flex flex-col items-center">
-      <h4 class="eyebrow">Trusted by leaders</h4>
-      <div class="max-w-[740px] flex flex-wrap justify-center gap-3">
-        <UiStamp
-          v-for="(user, i) in USERS"
-          :id="`s:${user}`"
-          :key="i"
-          :size="48"
-          class="!bg-skin-bg rounded-lg"
-          type="space"
-        />
+      <div class="space-y-2.5 text-center">
+        <UiButton
+          class="primary"
+          :disabled="
+            !!selectedSpace && selectedSpace.network !== metadataNetwork
+          "
+          @click="handleTurboClick"
+        >
+          {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
+          {{ selectedSpace?.name || 'space' }}
+        </UiButton>
+        <div>
+          <a :href="CALENDLY" target="_blank">
+            Talk to sales
+            <IH-arrow-sm-right class="inline-block -rotate-45" />
+          </a>
+        </div>
       </div>
     </div>
 
@@ -304,7 +302,7 @@ onMounted(() => {
         <div
           v-for="(feature, i) in FEATURES"
           :key="i"
-          class="bg-skin-border/20 border rounded-lg p-3 pb-4"
+          class="bg-skin-border/10 border rounded-lg p-3 pb-4"
         >
           <component
             :is="feature.icon"
@@ -351,16 +349,40 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="text-center shapes py-10 bg-skin-border/40 px-4 space-y-4">
+    <div class="space-y-4 mx-4 flex flex-col items-center">
+      <h4 class="eyebrow">Trusted by leaders</h4>
+      <div class="max-w-[740px] flex flex-wrap justify-center gap-3">
+        <UiStamp
+          v-for="(user, i) in USERS"
+          :id="`s:${user}`"
+          :key="i"
+          :size="48"
+          class="!bg-skin-bg rounded-lg"
+          type="space"
+        />
+      </div>
+    </div>
+
+    <div class="text-center shapes py-8 bg-skin-border/20 px-4 space-y-4">
       <h2 class="text-[32px]">Get started today</h2>
-      <UiButton
-        class="primary"
-        :disabled="!!selectedSpace && selectedSpace.network !== metadataNetwork"
-        @click="handleTurboClick"
-      >
-        {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
-        {{ selectedSpace?.name || 'space' }}
-      </UiButton>
+      <div class="space-y-2.5 text-center">
+        <UiButton
+          class="primary"
+          :disabled="
+            !!selectedSpace && selectedSpace.network !== metadataNetwork
+          "
+          @click="handleTurboClick"
+        >
+          {{ selectedSpace?.turbo ? 'Extend' : 'Upgrade' }}
+          {{ selectedSpace?.name || 'space' }}
+        </UiButton>
+        <div>
+          <a :href="CALENDLY" target="_blank">
+            Talk to sales
+            <IH-arrow-sm-right class="inline-block -rotate-45" />
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="px-4">

@@ -61,7 +61,9 @@ export const createNetworkHandler = (chainId: string) => {
   async function execute(id: number, params: any, res: Response) {
     try {
       const { space, proposalId, executionParams } = params;
-      const { account, nonceManager } = getAccount(space);
+      const { account, nonceManager, deployAccount } = getAccount(space);
+
+      await deployAccount();
 
       let receipt;
       try {

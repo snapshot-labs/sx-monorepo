@@ -17,6 +17,7 @@ import {
 } from '@/helpers/osnap';
 import { getProvider } from '@/helpers/provider';
 import { verifyNetwork } from '@/helpers/utils';
+import { METADATA as STARKNET_METADATA } from '@/networks/starknet';
 import {
   Choice,
   NetworkID,
@@ -59,6 +60,10 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
   5: offchainGoerli
 };
 
+const STARKNET_CHAIN_IDS: string[] = Object.values(STARKNET_METADATA).map(
+  metadata => metadata.chainId
+);
+
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
@@ -70,11 +75,37 @@ export function createActions(
     networkConfig
   });
 
-  async function getPlugins(executions: ExecutionInfo[] | null) {
+  async function verifyChainNetwork(
+    web3: Web3Provider,
+    snapshotChainId: string | undefined
+  ) {
+    if (!snapshotChainId || STARKNET_CHAIN_IDS.includes(snapshotChainId)) {
+      return;
+    }
+
+    if ((web3.provider as any)._isSequenceProvider) {
+      await verifyNetwork(web3, Number(snapshotChainId));
+    }
+  }
+
+  async function getPlugins(
+    executions: ExecutionInfo[] | null,
+    originalProposal: Proposal | null
+  ) {
+    const supportedPlugins = ['oSnap', 'readOnlyExecution'];
+
     const plugins = {} as {
       oSnap?: OSnapPlugin;
       readOnlyExecution?: ReadOnlyExecutionPlugin;
     };
+
+    if (originalProposal) {
+      for (const [name, plugin] of Object.entries(originalProposal.plugins)) {
+        if (!supportedPlugins.includes(name)) {
+          plugins[name] = plugin;
+        }
+      }
+    }
 
     if (!executions) return plugins;
 
@@ -140,15 +171,20 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[]
     ) {
+      // TODO: remove this check after implementing starknet support on getProvider
       if (
         space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
+        STARKNET_CHAIN_IDS.includes(space.snapshot_chain_id)
       ) {
-        await verifyNetwork(web3, space.snapshot_chain_id);
+        throw new Error(
+          'Proposal creation not supported for spaces on Starknet network'
+        );
       }
 
-      const provider = getProvider(space.snapshot_chain_id as number);
-      const plugins = await getPlugins(executions);
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
+
+      const provider = getProvider(Number(space.snapshot_chain_id));
+      const plugins = await getPlugins(executions, null);
       const data = {
         space: space.id,
         title,
@@ -173,7 +209,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -183,17 +219,12 @@ export function createActions(
       labels: string[],
       executions: ExecutionInfo[]
     ) {
-      if (
-        space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const plugins = await getPlugins(executions);
+      const plugins = await getPlugins(executions, proposal);
 
       const data = {
-        proposal: proposalId as string,
+        proposal: proposal.proposal_id as string,
         space: space.id,
         title,
         body,
@@ -208,12 +239,7 @@ export function createActions(
       return client.updateProposal({ signer: web3.getSigner(), data });
     },
     async flagProposal(web3: Web3Provider, proposal: Proposal) {
-      if (
-        proposal.space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.flagProposal({
         signer: web3.getSigner(),
@@ -228,12 +254,7 @@ export function createActions(
       connectorType: ConnectorType,
       proposal: Proposal
     ) {
-      if (
-        proposal.space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.cancel({
         signer: web3.getSigner(),
@@ -252,12 +273,7 @@ export function createActions(
       reason: string,
       app: string
     ): Promise<any> {
-      if (
-        proposal.space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       const data = {
         space: proposal.space.id,
@@ -310,7 +326,10 @@ export function createActions(
         spaceId,
         voterAddress,
         strategiesOrValidationParams,
-        snapshotInfo
+        {
+          at: snapshotInfo.at || null,
+          chainId: String(snapshotInfo.chainId)
+        }
       );
 
       if (strategy.type !== 'remote-vp') {
@@ -338,7 +357,7 @@ export function createActions(
           displayDecimals: decimals,
           symbol: strategy.params.symbol,
           token: strategy.params.address,
-          chainId: strategy.network ? parseInt(strategy.network) : undefined,
+          chainId: strategy.network,
           swapLink: getSwapLink(
             strategy.name,
             strategy.params.address,

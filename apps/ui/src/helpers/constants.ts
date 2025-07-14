@@ -228,6 +228,28 @@ export const FLAGS = {
   DMCA: 2
 };
 
+export const OVERRIDING_STRATEGIES = [
+  'aura-vlaura-vebal-with-overrides',
+  'balance-of-with-linear-vesting-power',
+  'balancer-delegation',
+  'cyberkongz',
+  'cyberkongz-v2',
+  'delegation',
+  'delegation-with-cap',
+  'delegation-with-overrides',
+  'erc20-balance-of-delegation',
+  'erc20-balance-of-fixed-total',
+  'erc20-balance-of-quadratic-delegation',
+  'erc20-votes-with-override',
+  'esd-delegation',
+  'ocean-dao-brightid',
+  'orbs-network-delegation',
+  'api-v2-override',
+  'rocketpool-node-operator-delegate-v8',
+  'eden-online-override',
+  'split-delegation'
+] as const;
+export const DEPRECATED_STRATEGIES = ['multichain'] as const;
 export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
@@ -238,7 +260,7 @@ export const DELEGATE_REGISTRY_STRATEGIES = [
 ];
 
 export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
-  'delegate-registry': 'Delegat registry',
+  'delegate-registry': 'Delegate registry',
   'apechain-delegate-registry': 'ApeChain Delegate Registry',
   'split-delegation': 'Split Delegation',
   'governor-subgraph': 'ERC-20 Votes'

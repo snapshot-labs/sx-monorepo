@@ -18,7 +18,7 @@ const FAQ = [
   }
 ];
 
-const LINK = 'https://tally.so/r/31ApGb';
+const LINK = 'https://calendly.com/snapshot-labs/network-plan';
 
 const currentQuestion = ref();
 
@@ -30,7 +30,7 @@ function toggleQuestion(id) {
   <div class="space-y-[80px] pt-12 mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
-        <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[46px]">
+        <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[52px]">
           Unlock governance for your ecosystem
         </h1>
         <a
@@ -158,20 +158,6 @@ function toggleQuestion(id) {
         Talk to sales
         <IH-arrow-sm-right class="inline-block -rotate-45" />
       </a>
-    </UiContainer>
-
-    <UiContainer class="!max-w-[880px]">
-      <div class="border p-4 rounded-lg">
-        <h3 class="mb-1">
-          <IH-exclamation-circle class="inline-block mr-1" />
-          Is your network already live on Snapshot?
-        </h3>
-        <div class="text-md">
-          All networks must subscribe to the network plan to maintain support on
-          Snapshot. To ensure continuous service and avoid interruptions, please
-          contact our team today.
-        </div>
-      </div>
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">

@@ -254,7 +254,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
           strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndicies:
+          strategiesIndices:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
@@ -339,7 +339,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -373,7 +373,7 @@ export function createActions(
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies:
+        strategiesIndices:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
@@ -406,7 +406,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: proposal.proposal_id as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -468,7 +468,7 @@ export function createActions(
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indices,
+          strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
           ignoreRelayer: !relayer?.hasMinimumBalance
