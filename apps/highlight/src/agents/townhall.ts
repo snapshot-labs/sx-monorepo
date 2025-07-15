@@ -29,11 +29,14 @@ export default class Townhall extends Agent {
   }
 
   async createSpace(data: unknown, { signer }: { signer: string }) {
+    const user = await this.getSigner(signer);
+
     const id: number = (await this.get('spaces:id')) ?? 1;
     this.write('spaces:id', id + 1);
 
-    const owner = await this.getSigner(signer);
-    this.emit('new_space', [id, owner]);
+    this.write(`space:${id}:owner`, user);
+
+    this.emit('new_space', [id, user]);
   }
 
   async createCategory(
