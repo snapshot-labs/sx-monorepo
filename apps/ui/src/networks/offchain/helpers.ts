@@ -27,6 +27,7 @@ export function isStarknetChainId(chainId: string): boolean {
 export async function getLatestBlockNumber(chainId: string): Promise<number> {
   try {
     let provider: StaticJsonRpcProvider | RpcProvider;
+    let blockOffset = 0;
 
     if (isStarknetChainId(chainId)) {
       const starknetMetadata = getStarknetMetadata(chainId);
@@ -36,11 +37,12 @@ export async function getLatestBlockNumber(chainId: string): Promise<number> {
       provider = createProvider(starknetMetadata.rpcUrl);
     } else {
       provider = getProvider(Number(chainId));
+      blockOffset = EDITOR_SNAPSHOT_OFFSET;
     }
 
     const blockNumber = await provider.getBlockNumber();
 
-    return Math.max(0, blockNumber - EDITOR_SNAPSHOT_OFFSET);
+    return Math.max(0, blockNumber - blockOffset);
   } catch (error) {
     throw new Error(
       `Failed to get latest block number for chain ${chainId}: ${error}`
