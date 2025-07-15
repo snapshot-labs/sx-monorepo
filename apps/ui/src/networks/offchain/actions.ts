@@ -14,10 +14,8 @@ import {
   OSnapPlugin,
   parseInternalTransaction
 } from '@/helpers/osnap';
-import { getProvider } from '@/helpers/provider';
 import { verifyNetwork } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
-import { METADATA as STARKNET_METADATA } from '@/networks/starknet';
 import {
   Choice,
   NetworkID,
@@ -31,8 +29,11 @@ import {
   UserProfile,
   VoteType
 } from '@/types';
-import { EDITOR_SNAPSHOT_OFFSET } from './constants';
-import { getSdkChoice } from './helpers';
+import {
+  getLatestBlockNumber,
+  getSdkChoice,
+  isStarknetChainId
+} from './helpers';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
   ConnectorType,
@@ -60,10 +61,6 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
   5: offchainGoerli
 };
 
-const STARKNET_CHAIN_IDS: string[] = Object.values(STARKNET_METADATA).map(
-  metadata => metadata.chainId
-);
-
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
@@ -79,7 +76,7 @@ export function createActions(
     web3: Web3Provider | Wallet,
     snapshotChainId: string | undefined
   ) {
-    if (!snapshotChainId || STARKNET_CHAIN_IDS.includes(snapshotChainId)) {
+    if (!snapshotChainId || isStarknetChainId(snapshotChainId)) {
       return;
     }
 
@@ -174,19 +171,8 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[]
     ) {
-      // TODO: remove this check after implementing starknet support on getProvider
-      if (
-        space.snapshot_chain_id &&
-        STARKNET_CHAIN_IDS.includes(space.snapshot_chain_id)
-      ) {
-        throw new Error(
-          'Proposal creation not supported for spaces on Starknet network'
-        );
-      }
-
       await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const provider = getProvider(Number(space.snapshot_chain_id));
       const plugins = await getPlugins(executions, null);
       const data = {
         space: space.id,
@@ -199,7 +185,7 @@ export function createActions(
         labels,
         start,
         end: min_end,
-        snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
+        snapshot: await getLatestBlockNumber(space.snapshot_chain_id as string),
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
         timestamp: created,
