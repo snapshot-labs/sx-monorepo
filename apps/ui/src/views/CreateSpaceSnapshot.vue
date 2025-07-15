@@ -5,6 +5,7 @@ import { clone } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { Member, NetworkID, Validation } from '@/types';
+import { useQueryClient } from '@tanstack/vue-query';
 
 const DEFAULT_SETTINGS_FORM = {
   id: '',
@@ -96,6 +97,7 @@ const sending = ref(false);
 const stepsErrors = ref<Record<string, boolean>>(clone(DEFAULT_STEP_ERRORS));
 
 const settingsForm = ref(clone(DEFAULT_SETTINGS_FORM));
+const queryClient = useQueryClient();
 
 const space = computed(() => ({
   turbo: false,
@@ -169,6 +171,60 @@ async function handleSubmit() {
       settingsForm.value.id,
       JSON.stringify(formattedSpaceSettings.value)
     );
+
+    // Patch Vue Query cache with the new space
+    const newSpace = {
+      id: settingsForm.value.id,
+      network: networkId,
+      verified: false,
+      turbo: false,
+      turbo_expiration: 0,
+      name: settingsForm.value.name,
+      avatar: settingsForm.value.avatar,
+      cover: settingsForm.value.cover,
+      about: settingsForm.value.description,
+      external_url: settingsForm.value.externalUrl,
+      treasuries: [],
+      delegations: [],
+      twitter: settingsForm.value.twitter,
+      github: settingsForm.value.github,
+      discord: '',
+      farcaster: settingsForm.value.farcaster,
+      coingecko: settingsForm.value.coingecko,
+      terms: '',
+      privacy: 'any', // ensure valid privacy
+      voting_power_symbol: settingsForm.value.votingPowerSymbol,
+      active_proposals: null,
+      controller: web3.value.account || '',
+      voting_delay: settingsForm.value.votingDelay,
+      voting_types: ['basic'], // ensure valid voting_types
+      min_voting_period: settingsForm.value.minVotingDuration,
+      max_voting_period: 0,
+      proposal_threshold: '',
+      validation_strategy: settingsForm.value.proposalValidation?.name || '',
+      validation_strategy_params: JSON.stringify(
+        settingsForm.value.proposalValidation?.params || {}
+      ),
+      voting_power_validation_strategy_strategies: [],
+      voting_power_validation_strategy_strategies_params: [],
+      voting_power_validation_strategies_parsed_metadata: [],
+      strategies_indices: [],
+      strategies: [],
+      strategies_params: [],
+      strategies_parsed_metadata: [],
+      authenticators: [],
+      executors: [],
+      executors_types: [],
+      executors_destinations: [],
+      executors_strategies: [],
+      proposal_count: 0,
+      vote_count: 0,
+      children: [],
+      parent: null,
+      template: null,
+      guidelines: null
+    };
+    queryClient.setQueryData(['spaces', 'detail', compositeSpaceId], newSpace);
 
     await router.push({
       name: 'space-overview',

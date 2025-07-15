@@ -147,17 +147,14 @@ export function useEditor() {
       const space = queryClient.getQueryData<Space>(['spaces', 'detail', id]);
       if (!space) continue;
 
-      const types = space.voting_types.includes(PREFERRED_VOTE_TYPE)
-        ? (Array.from(
-            new Set([PREFERRED_VOTE_TYPE, ...space.voting_types])
-          ) as VoteType[])
-        : space.voting_types;
-
+      const types =
+        space.voting_types && space.voting_types.length > 0
+          ? space.voting_types
+          : ['basic'];
       spaceVoteTypes.set(id, types);
-      spacePrivacies.set(
-        id,
-        space.privacy === 'any' ? ['none', 'shutter'] : [space.privacy]
-      );
+
+      const privacies = space.privacy ? [space.privacy] : ['none'];
+      spacePrivacies.set(id, privacies);
       spaceDelays.set(id, space.voting_delay);
       spaceMinPeriods.set(id, space.min_voting_period);
       spaceMaxPeriods.set(id, space.max_voting_period);
@@ -171,9 +168,10 @@ export function useEditor() {
   ) {
     await setSpacesMeta([spaceId]);
 
-    const type = payload?.type || spaceVoteTypes.get(spaceId)![0];
-    const privacy: Privacy =
-      payload?.privacy || spacePrivacies.get(spaceId)![0];
+    const types = spaceVoteTypes.get(spaceId) || ['basic'];
+    const type = payload?.type || types[0];
+    const privacies = spacePrivacies.get(spaceId) || ['none'];
+    const privacy: Privacy = payload?.privacy || privacies[0];
     const choices = type === 'basic' ? clone(BASIC_CHOICES) : Array(2).fill('');
 
     const id = draftKey ?? generateId();
