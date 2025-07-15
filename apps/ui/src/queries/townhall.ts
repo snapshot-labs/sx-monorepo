@@ -23,7 +23,7 @@ import {
   newVoteEventToEntry,
   Result
 } from '@/helpers/townhall/api';
-import { Category, Role, Topic, Vote } from '@/helpers/townhall/types';
+import { Category, Role, Space, Topic, Vote } from '@/helpers/townhall/types';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
@@ -338,6 +338,47 @@ export function useRoleMutation({
         (old = []) =>
           isRevoking ? old.filter(r => r.id !== role.id) : [...old, role]
       );
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
+export function useCreateSpaceMutation() {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendCreateSpace } = useTownhall();
+
+  return useMutation({
+    mutationFn: () => {
+      return sendCreateSpace();
+    },
+    onSuccess: data => {
+      const { data: eventData } = data.result.events.find(
+        event => event.key === 'new_space'
+      );
+
+      const [spaceId]: [number] = eventData;
+
+      queryClient.setQueryData<Space>(
+        [
+          'townhall',
+          'spaces',
+          'detail',
+          {
+            spaceId
+          }
+        ],
+        () => ({
+          id: spaceId.toString(),
+          space_id: spaceId,
+          topic_count: 0,
+          vote_count: 0
+        })
+      );
+
+      addNotification('success', 'Space created successfully');
     },
     onError: error => {
       addNotification('error', error.message);

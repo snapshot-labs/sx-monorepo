@@ -98,6 +98,22 @@ export function useTownhall() {
     );
   }
 
+  async function sendCreateSpace() {
+    if (!auth.value) {
+      modalAccountOpen.value = true;
+      return null;
+    }
+
+    const signer = await getAliasSigner(auth.value.provider);
+
+    return wrapPromise(
+      highlightClient.createSpace({
+        signer,
+        salt: getSalt()
+      })
+    );
+  }
+
   async function sendCreateCategory(
     space: number,
     name: string,
@@ -416,6 +432,7 @@ export function useTownhall() {
   }
 
   return {
+    sendCreateSpace,
     sendCreateCategory,
     sendEditCategory,
     sendDeleteCategory,

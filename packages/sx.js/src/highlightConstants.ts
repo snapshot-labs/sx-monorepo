@@ -18,6 +18,9 @@ export const ALIASES_CONFIG = {
 export const TOWNHALL_CONFIG = {
   address: '0x0000000000000000000000000000000000000002',
   types: {
+    createSpace: {
+      CreateSpace: []
+    },
     createCategory: {
       CreateCategory: [
         { name: 'space', type: 'uint64' },

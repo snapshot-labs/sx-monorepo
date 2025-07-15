@@ -19,6 +19,11 @@ const SetAliasEventData = z.tuple([
   z.string() // salt
 ]);
 
+const NewSpaceEventData = z.tuple([
+  z.number(), // spaceId
+  z.string() // owner
+]);
+
 const NewCategoryEventData = z.tuple([
   z.number(), // spaceId
   z.number(), // id
@@ -107,6 +112,18 @@ export function createWriters(indexerName: string) {
     alias.created = unit.timestamp;
 
     await alias.save();
+  };
+
+  const handleNewSpace: Writer = async ({ unit, payload }) => {
+    const [spaceId, owner] = NewSpaceEventData.parse(payload.data);
+
+    console.log('Handle new space', spaceId, owner);
+
+    const space = new Space(spaceId.toString(), indexerName);
+    space.space_id = spaceId;
+    space.owner = owner;
+    space.created = unit.timestamp;
+    await space.save();
   };
 
   const handleNewCategory: Writer = async ({ unit, payload }) => {
@@ -438,6 +455,7 @@ export function createWriters(indexerName: string) {
     // aliases
     handleSetAlias,
     // townhall
+    handleNewSpace,
     handleNewCategory,
     handleEditCategory,
     handleDeleteCategory,
