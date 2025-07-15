@@ -355,6 +355,8 @@ export function useCreateSpaceMutation() {
       return sendCreateSpace();
     },
     onSuccess: data => {
+      if (!data) return;
+
       const { data: eventData } = data.result.events.find(
         event => event.key === 'new_space'
       );
@@ -517,6 +519,8 @@ export function useDeleteCategoryMutation({
       return sendDeleteCategory(toValue(spaceId), id);
     },
     onSuccess: (data, { id }) => {
+      if (!data) return;
+
       queryClient.setQueryData<Category[]>(
         ['townhall', 'categories', 'list', { spaceId, categoryId }],
         old => {
@@ -549,7 +553,9 @@ export function useCloseTopicMutation({
     mutationFn: () => {
       return sendCloseTopic(toValue(spaceId), toValue(topicId));
     },
-    onSuccess: () => {
+    onSuccess: data => {
+      if (!data) return;
+
       queryClient.setQueryData<Topic>(
         ['townhall', 'topics', 'detail', { spaceId, topicId }],
         old => {
@@ -647,7 +653,9 @@ export function useSetPostVisibilityMutation({
 
       throw new Error('Invalid visibility type');
     },
-    onSuccess: async (_, { postId, visibility }) => {
+    onSuccess: async (data, { postId, visibility }) => {
+      if (!data) return;
+
       queryClient.setQueryData<Topic>(
         ['townhall', 'topics', 'detail', { spaceId, topicId }],
         old => {
