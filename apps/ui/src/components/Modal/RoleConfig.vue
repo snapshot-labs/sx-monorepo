@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { RoleConfig } from '@/helpers/townhall/types';
 import { clone, getRandomHexColor } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { SpaceMetadataLabel } from '@/types';
 
 const props = defineProps<{
   open: boolean;
   loading?: boolean;
-  initialState?: SpaceMetadataLabel;
+  initialState?: RoleConfig;
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataLabel);
+  (e: 'add', config: RoleConfig);
   (e: 'close'): void;
 }>();
 
@@ -26,7 +26,7 @@ const definition = computed(() => ({
   properties: {
     name: {
       type: 'string',
-      title: 'Label name',
+      title: 'Role name',
       minLength: 1,
       maxLength: 32,
       examples: ['council']
@@ -35,7 +35,7 @@ const definition = computed(() => ({
       type: 'string',
       title: 'Description',
       maxLength: 100,
-      examples: ['Explain about label']
+      examples: ['Role description']
     },
     color: {
       type: 'string',
@@ -43,6 +43,10 @@ const definition = computed(() => ({
       title: 'Color',
       examples: ['#FF0000'],
       showControls: true
+    },
+    isAdmin: {
+      type: 'boolean',
+      title: 'Administrator role'
     }
   }
 }));
@@ -56,12 +60,13 @@ const formValid = computed(() => {
   return Object.keys(formErrors.value).length === 0;
 });
 
-function generateDefaultState(): SpaceMetadataLabel {
+function generateDefaultState(): RoleConfig {
   return {
     id: crypto.randomUUID().substring(0, 8),
     name: '',
     description: '',
-    color: getRandomHexColor()
+    color: getRandomHexColor(),
+    isAdmin: false
   };
 }
 
@@ -80,13 +85,18 @@ watch(
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="initialState ? 'Edit label' : 'Add label'" />
+      <h3 v-text="initialState ? 'Edit role' : 'Add role'" />
     </template>
     <div class="flex items-center max-w-md gap-3 pt-4 px-4">
-      <UiProposalLabel
-        :label="form.name || 'Label preview'"
-        :color="form.color"
-      />
+      <div
+        class="md:min-w-max min-w-0 flex-shrink-0 items-center flex space-x-2"
+      >
+        <div
+          class="size-[10px] rounded-full"
+          :style="{ background: form.color }"
+        />
+        <h4 v-text="form.name || 'Preview'" />
+      </div>
       <div class="truncate">
         {{ form.description || 'This is a description preview' }}
       </div>

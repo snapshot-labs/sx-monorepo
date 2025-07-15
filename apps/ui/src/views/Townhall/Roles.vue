@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { Role, Space as TownhallSpace } from '@/helpers/townhall/types';
+import {
+  Role,
+  RoleConfig,
+  Space as TownhallSpace
+} from '@/helpers/townhall/types';
 import { getUserFacingErrorMessage } from '@/helpers/utils';
 import {
   useRoleMutation,
   useRolesQuery,
   useUserRolesQuery
 } from '@/queries/townhall';
-import { Space, SpaceMetadataLabel } from '@/types';
+import { Space } from '@/types';
 
 const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
@@ -42,14 +46,15 @@ function setModalStatus(open: boolean = false, roleId: string | null = null) {
   activeLabelId.value = roleId;
 }
 
-async function handleAddRole(config: SpaceMetadataLabel) {
+async function handleAddRole(config: RoleConfig) {
   try {
     isSubmitLoading.value = true;
     const res = await sendCreateRole(
       spaceId.value,
       config.name,
       config.description,
-      config.color
+      config.color,
+      config.isAdmin
     );
     if (!res) return;
 
@@ -60,7 +65,8 @@ async function handleAddRole(config: SpaceMetadataLabel) {
         id: event.data[1],
         name: config.name,
         description: config.description,
-        color: config.color
+        color: config.color,
+        isAdmin: config.isAdmin
       }));
 
     queryClient.setQueryData<Role[]>(
@@ -77,7 +83,7 @@ async function handleAddRole(config: SpaceMetadataLabel) {
   }
 }
 
-async function handleEditRole(config: SpaceMetadataLabel) {
+async function handleEditRole(config: RoleConfig) {
   if (!activeLabelId.value) {
     return;
   }
@@ -89,7 +95,8 @@ async function handleEditRole(config: SpaceMetadataLabel) {
       activeLabelId.value,
       config.name,
       config.description,
-      config.color
+      config.color,
+      config.isAdmin
     );
     if (!res) return;
 
@@ -106,7 +113,8 @@ async function handleEditRole(config: SpaceMetadataLabel) {
                 id: activeLabelId.value,
                 name: config.name,
                 description: config.description,
-                color: config.color
+                color: config.color,
+                isAdmin: config.isAdmin
               }
             : role
         )
@@ -242,8 +250,7 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
       </div>
     </div>
     <teleport to="#modal">
-      <ModalLabelConfig
-        item-type="role"
+      <ModalRoleConfig
         :open="modalOpen"
         :loading="isSubmitLoading"
         :initial-state="(roles || []).find(l => l.id === activeLabelId)"

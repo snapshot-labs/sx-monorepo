@@ -94,6 +94,7 @@ export const TOWNHALL_CONFIG = {
     createRole: {
       CreateRole: [
         { name: 'space', type: 'uint64' },
+        { name: 'isAdmin', type: 'bool' },
         { name: 'metadataUri', type: 'string' }
       ]
     },
@@ -101,6 +102,7 @@ export const TOWNHALL_CONFIG = {
       EditRole: [
         { name: 'space', type: 'uint64' },
         { name: 'id', type: 'uint64' },
+        { name: 'isAdmin', type: 'bool' },
         { name: 'metadataUri', type: 'string' }
       ]
     },

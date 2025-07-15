@@ -2,6 +2,9 @@ import { TOWNHALL_CONFIG } from '@snapshot-labs/sx';
 import Agent from '../highlight/agent';
 import Process from '../highlight/process';
 
+type RoleData = {
+  isAdmin: boolean;
+};
 export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
@@ -28,6 +31,30 @@ export default class Townhall extends Agent {
     return this.get(`aliases:${signer}`, 'aliases') ?? signer;
   }
 
+  async getHasAdminRights(space: number, signer: string) {
+    const isOwner = await this.get(`space:${space}:owner`);
+    console.log('getHasAdminRights', space, signer, isOwner);
+
+    if (isOwner === signer) {
+      return true;
+    }
+
+    const userRoles: string[] = await this.get(
+      `space:${space}:userRoles:${signer}`
+    );
+
+    if (!userRoles) return false;
+
+    for (const role of userRoles) {
+      const roleData: RoleData = await this.get(`space:${space}:role:${role}`);
+      if (roleData?.isAdmin) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   async createSpace(data: unknown, { signer }: { signer: string }) {
     const user = await this.getSigner(signer);
 
@@ -51,17 +78,15 @@ export default class Townhall extends Agent {
     },
     { signer }: { signer: string }
   ) {
+    const user = await this.getSigner(signer);
+
+    const hasAdminRights = await this.getHasAdminRights(space, user);
+    this.assert(hasAdminRights, 'You do not have admin rights for this space');
+
     const id: number = (await this.get(`space:${space}:categories:id`)) || 1;
 
-    const author = await this.getSigner(signer);
     this.write(`space:${space}:categories:id`, id + 1);
-    this.emit('new_category', [
-      space,
-      id,
-      author,
-      metadataUri,
-      parentCategoryId
-    ]);
+    this.emit('new_category', [space, id, user, metadataUri, parentCategoryId]);
   }
 
   async editCategory(
@@ -78,11 +103,15 @@ export default class Townhall extends Agent {
     },
     { signer }: { signer: string }
   ) {
-    const author = await this.getSigner(signer);
+    const user = await this.getSigner(signer);
+
+    const hasAdminRights = await this.getHasAdminRights(space, user);
+    this.assert(hasAdminRights, 'You do not have admin rights for this space');
+
     this.emit('edit_category', [
       space,
       id,
-      author,
+      user,
       metadataUri,
       parentCategoryId
     ]);
@@ -92,8 +121,12 @@ export default class Townhall extends Agent {
     { space, id }: { space: number; id: number },
     { signer }: { signer: string }
   ) {
-    const author = await this.getSigner(signer);
-    this.emit('delete_category', [space, id, author]);
+    const user = await this.getSigner(signer);
+
+    const hasAdminRights = await this.getHasAdminRights(space, user);
+    this.assert(hasAdminRights, 'You do not have admin rights for this space');
+
+    this.emit('delete_category', [space, id, user]);
   }
 
   async topic(
@@ -207,32 +240,74 @@ export default class Townhall extends Agent {
     this.emit('new_vote', [space, topic, post, author, choice]);
   }
 
-  async createRole({
-    space,
-    metadataUri
-  }: {
-    space: number;
-    metadataUri: string;
-  }) {
+  async createRole(
+    {
+      space,
+      isAdmin,
+      metadataUri
+    }: {
+      space: number;
+      isAdmin: boolean;
+      metadataUri: string;
+    },
+    { signer }: { signer: string }
+  ) {
+    const user = await this.getSigner(signer);
+
+    const hasAdminRights = await this.getHasAdminRights(space, user);
+    this.assert(hasAdminRights, 'You do not have admin rights for this space');
+
     const id: number = (await this.get(`roles:id`)) ?? 0;
     this.write(`roles:id`, id + 1);
 
-    this.emit('new_role', [space, String(id), metadataUri]);
+    const roleData: RoleData = {
+      isAdmin
+    };
+
+    this.write(`space:${space}:role:${id}`, roleData);
+
+    this.emit('new_role', [space, String(id), isAdmin, metadataUri]);
   }
 
-  async editRole({
-    space,
-    id,
-    metadataUri
-  }: {
-    space: number;
-    id: string;
-    metadataUri: string;
-  }) {
-    this.emit('edit_role', [space, id, metadataUri]);
+  async editRole(
+    {
+      space,
+      id,
+      isAdmin,
+      metadataUri
+    }: {
+      space: number;
+      id: string;
+      isAdmin: boolean;
+      metadataUri: string;
+    },
+    { signer }: { signer: string }
+  ) {
+    const user = await this.getSigner(signer);
+
+    const hasAdminRights = await this.getHasAdminRights(space, user);
+    this.assert(hasAdminRights, 'You do not have admin rights for this space');
+
+    const roleData: RoleData = {
+      isAdmin
+    };
+
+    this.write(`space:${space}:role:${id}`, roleData);
+
+    this.emit('edit_role', [space, id, isAdmin, metadataUri]);
   }
 
-  async deleteRole({ space, id }: { space: number; id: string }) {
+  async deleteRole(
+    { space, id }: { space: number; id: string },
+    { signer }: { signer: string }
+  ) {
+    const user = await this.getSigner(signer);
+
+    const hasAdminRights = await this.getHasAdminRights(space, user);
+    this.assert(hasAdminRights, 'You do not have admin rights for this space');
+
+    this.delete(`space:${space}:role:${id}`);
+
     this.emit('delete_role', [space, id]);
   }
 
@@ -242,6 +317,14 @@ export default class Townhall extends Agent {
   ) {
     const user = await this.getSigner(signer);
 
+    const userRoles: string[] = await this.get(
+      `space:${space}:userRoles:${user}`
+    );
+
+    const newUserRoles = userRoles ? [...userRoles, id] : [id];
+
+    this.write(`space:${space}:userRoles:${user}`, [...new Set(newUserRoles)]);
+
     this.emit('claim_role', [space, id, user]);
   }
 
@@ -250,6 +333,14 @@ export default class Townhall extends Agent {
     { signer }: { signer: string }
   ) {
     const user = await this.getSigner(signer);
+
+    const userRoles: string[] = await this.get(
+      `space:${space}:userRoles:${user}`
+    );
+
+    const newUserRoles = userRoles.filter(role => role !== id);
+
+    this.write(`space:${space}:userRoles:${user}`, [...new Set(newUserRoles)]);
 
     this.emit('revoke_role', [space, id, user]);
   }

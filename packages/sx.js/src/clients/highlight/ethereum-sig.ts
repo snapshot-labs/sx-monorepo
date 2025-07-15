@@ -528,9 +528,10 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { space, metadataUri } = data;
+    const { space, isAdmin, metadataUri } = data;
     const message = {
       space,
+      isAdmin,
       metadataUri
     };
 
@@ -562,10 +563,11 @@ export class HighlightEthereumSigClient {
   }): Promise<Envelope> {
     const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
 
-    const { space, id, metadataUri } = data;
+    const { space, id, isAdmin, metadataUri } = data;
     const message = {
       space,
       id,
+      isAdmin,
       metadataUri
     };
 

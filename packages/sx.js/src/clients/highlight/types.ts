@@ -61,6 +61,7 @@ export type Vote = {
 
 export type CreateRole = {
   space: number;
+  isAdmin: boolean;
   metadataUri: string;
 };
 

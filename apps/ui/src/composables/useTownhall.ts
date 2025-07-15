@@ -337,7 +337,8 @@ export function useTownhall() {
     space: number,
     name: string,
     description: string,
-    color: string
+    color: string,
+    isAdmin: boolean
   ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -350,7 +351,7 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createRole({
         signer,
-        data: { space, metadataUri: `ipfs://${pinned.cid}` },
+        data: { space, isAdmin, metadataUri: `ipfs://${pinned.cid}` },
         salt: getSalt()
       })
     );
@@ -361,7 +362,8 @@ export function useTownhall() {
     id: string,
     name: string,
     description: string,
-    color: string
+    color: string,
+    isAdmin: boolean
   ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -374,7 +376,7 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.editRole({
         signer,
-        data: { space, id, metadataUri: `ipfs://${pinned.cid}` },
+        data: { space, id, isAdmin, metadataUri: `ipfs://${pinned.cid}` },
         salt: getSalt()
       })
     );

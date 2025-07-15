@@ -102,6 +102,7 @@ gql(`
     name
     description
     color
+    isAdmin
   }
 `);
 
