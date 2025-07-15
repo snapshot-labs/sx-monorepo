@@ -726,13 +726,23 @@ export async function getSpaceController(id: string, network: NetworkID) {
     shibarium: {
       s: 109,
       's-tn': 157
+    },
+    sonic: {
+      s: 146,
+      's-tn': 57054
     }
   };
+  const tldMapping = {
+    shib: 'shibarium',
+    sonic: 'sonic'
+  };
+  const tld = id.split('.').pop()?.toLowerCase();
 
-  if (id.endsWith('.shib')) {
-    const owner = await getOwner(id, chainMapping.shibarium[network]);
-
-    return owner || EVM_EMPTY_ADDRESS;
+  if (tld && tldMapping[tld]) {
+    return (
+      (await getOwner(id, chainMapping[tldMapping[tld]][network])) ||
+      EVM_EMPTY_ADDRESS
+    );
   }
 
   return getEnsSpaceController(id, chainMapping.ens[network]);
