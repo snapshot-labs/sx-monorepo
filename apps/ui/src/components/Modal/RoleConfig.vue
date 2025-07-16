@@ -62,7 +62,7 @@ const formValid = computed(() => {
 
 function generateDefaultState(): RoleConfig {
   return {
-    id: crypto.randomUUID().substring(0, 8),
+    id: crypto.randomUUID(),
     name: '',
     description: '',
     color: getRandomHexColor(),
