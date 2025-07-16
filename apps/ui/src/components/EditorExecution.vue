@@ -38,6 +38,8 @@ const simulationState: Ref<
   'SIMULATING' | 'SIMULATION_SUCCEDED' | 'SIMULATION_FAILED' | null
 > = ref(null);
 
+const fileInput = ref<HTMLInputElement | null>(null);
+
 const network = computed(() => getNetwork(props.space.network));
 
 function addTx(tx: TransactionType) {
@@ -65,6 +67,122 @@ function openModal(
   editedTx.value = null;
   modalState.value[type] = null;
   modalOpen.value[type] = true;
+}
+
+function convertSafeToTransaction(safeTransaction: any): TransactionType {
+  const { to, value, data, contractMethod, contractInputsValues } =
+    safeTransaction;
+
+  // Create a proper ABI entry for the method
+  const abiEntry = contractMethod
+    ? {
+        name: contractMethod.name,
+        type: 'function',
+        inputs: contractMethod.inputs || [],
+        outputs: [],
+        stateMutability: contractMethod.payable ? 'payable' : 'nonpayable'
+      }
+    : null;
+
+  // Generate the full method signature with parameters
+  const methodSignature = contractMethod
+    ? `${contractMethod.name}(${contractMethod.inputs?.map((input: any) => input.type).join(',') || ''})`
+    : '';
+
+  // Convert Safe transaction to ContractCall transaction
+  return {
+    to,
+    value: value || '0x0',
+    data: data || '0x',
+    salt: '0x0000000000000000000000000000000000000000000000000000000000000000',
+    _type: 'contractCall',
+    _form: {
+      abi: abiEntry ? [abiEntry] : [],
+      recipient: to,
+      method: methodSignature,
+      args: contractInputsValues || {},
+      amount: value && value !== '0x0' ? value : ''
+    }
+  };
+}
+
+function handleImportSafeFile() {
+  if (!fileInput.value) return;
+  fileInput.value.click();
+}
+
+function handleFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  if (!input.files || !input.files[0]) return;
+
+  const file = input.files[0];
+  const reader = new FileReader();
+
+  reader.onload = e => {
+    try {
+      const result = e.target?.result as string;
+      const safeFile = JSON.parse(result);
+
+      // Validate it's a Safe file
+      if (!safeFile.transactions || !Array.isArray(safeFile.transactions)) {
+        throw new Error('Invalid Safe file format');
+      }
+
+      if (safeFile.transactions.length === 0) {
+        throw new Error('No transactions found in file');
+      }
+
+      // Validate chainId matches if provided
+      if (safeFile.chainId && props.strategy.treasury.chainId) {
+        const fileChainId = String(safeFile.chainId);
+        const currentChainId = String(props.strategy.treasury.chainId);
+
+        if (fileChainId !== currentChainId) {
+          throw new Error(
+            `Chain mismatch: file is for chain ${fileChainId}, expected ${currentChainId}`
+          );
+        }
+      }
+
+      // Convert each Safe transaction to our format
+      const convertedTransactions = safeFile.transactions.map(
+        convertSafeToTransaction
+      );
+
+      // Add converted transactions to the current list
+      model.value = [...model.value, ...convertedTransactions];
+
+      // Show success message
+      uiStore.addNotification(
+        'success',
+        `Imported ${convertedTransactions.length} transaction${convertedTransactions.length > 1 ? 's' : ''}`
+      );
+
+      // Clear file input
+      if (fileInput.value) {
+        fileInput.value.value = '';
+      }
+    } catch (error) {
+      console.error('Error importing Safe file:', error);
+      // Show user-friendly error message via notification system
+      let errorMessage = 'Failed to import Safe file';
+
+      if (error instanceof SyntaxError) {
+        errorMessage = 'Invalid JSON file';
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      uiStore.addNotification('error', errorMessage);
+
+      // Clear file input on error
+      if (fileInput.value) {
+        fileInput.value.value = '';
+      }
+    }
+  };
+
+  reader.readAsText(file);
 }
 
 function editTx(index: number) {
@@ -171,6 +289,15 @@ watch(
               @click="openModal('contractCall')"
             >
               <IH-code class="inline-block" />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Import Safe file">
+            <UiButton
+              :disabled="!treasury || disabled"
+              class="!px-0 w-[46px]"
+              @click="handleImportSafeFile"
+            >
+              <IH-upload class="inline-block" />
             </UiButton>
           </UiTooltip>
         </div>
@@ -284,5 +411,14 @@ watch(
         @add="addTx"
       />
     </teleport>
+
+    <!-- Hidden file input for Safe file import -->
+    <input
+      ref="fileInput"
+      type="file"
+      accept=".json"
+      style="display: none"
+      @change="handleFileChange"
+    />
   </div>
 </template>
