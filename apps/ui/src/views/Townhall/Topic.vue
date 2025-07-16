@@ -7,6 +7,7 @@ import {
   useResultsByRoleQuery,
   useRolesQuery,
   useTopicQuery,
+  useUserRolesQuery,
   useUserVotesQuery
 } from '@/queries/townhall';
 import { Space } from '@/types';
@@ -42,6 +43,10 @@ const {
   spaceId,
   topicId: id,
   roleId: roleFilter
+});
+const { data: userRoles } = useUserRolesQuery({
+  spaceId,
+  user: toRef(() => web3.value.account)
 });
 const { data: userVotes, isError: isUserVotesError } = useUserVotesQuery({
   spaceId,
@@ -236,7 +241,17 @@ watchEffect(() => {
             <IH-pencil />
             Add a post
           </h4>
-          <div class="p-4 border rounded-md">
+          <UiAlert v-if="userRoles?.length === 0" type="warning" class="mb-4">
+            You need to
+            <router-link
+              :to="{ name: 'space-townhall-roles' }"
+              class="font-semibold"
+            >
+              claim a role
+            </router-link>
+            before adding a post.
+          </UiAlert>
+          <div v-else class="p-4 border rounded-md">
             <div class="mb-3">
               <IH-light-bulb
                 class="inline-block align-middle relative -top-0.5"

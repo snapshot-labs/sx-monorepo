@@ -28,7 +28,7 @@ const spaceId = computed(() => props.townhallSpace.space_id);
 
 const { data: roles, isPending, isError } = useRolesQuery(spaceId);
 const { data: userRoles } = useUserRolesQuery({
-  spaceId: spaceId,
+  spaceId,
   user: toRef(() => web3.value.account)
 });
 const {
