@@ -1,4 +1,3 @@
-import { isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import {
@@ -15,9 +14,8 @@ import {
   OSnapPlugin,
   parseInternalTransaction
 } from '@/helpers/osnap';
-import { getProvider } from '@/helpers/provider';
 import { verifyNetwork } from '@/helpers/utils';
-import { METADATA as STARKNET_METADATA } from '@/networks/starknet';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   Choice,
   NetworkID,
@@ -31,8 +29,11 @@ import {
   UserProfile,
   VoteType
 } from '@/types';
-import { EDITOR_SNAPSHOT_OFFSET } from './constants';
-import { getSdkChoice } from './helpers';
+import {
+  getLatestBlockNumber,
+  getSdkChoice,
+  isStarknetChainId
+} from './helpers';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
   ConnectorType,
@@ -60,10 +61,6 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
   5: offchainGoerli
 };
 
-const STARKNET_CHAIN_IDS: string[] = Object.values(STARKNET_METADATA).map(
-  metadata => metadata.chainId
-);
-
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
@@ -76,14 +73,17 @@ export function createActions(
   });
 
   async function verifyChainNetwork(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     snapshotChainId: string | undefined
   ) {
-    if (!snapshotChainId || STARKNET_CHAIN_IDS.includes(snapshotChainId)) {
+    if (!snapshotChainId || isStarknetChainId(snapshotChainId)) {
       return;
     }
 
-    if ((web3.provider as any)._isSequenceProvider) {
+    if (
+      web3 instanceof Web3Provider &&
+      (web3.provider as any)._isSequenceProvider
+    ) {
       await verifyNetwork(web3, Number(snapshotChainId));
     }
   }
@@ -153,7 +153,7 @@ export function createActions(
 
   return {
     async propose(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
@@ -171,19 +171,8 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[]
     ) {
-      // TODO: remove this check after implementing starknet support on getProvider
-      if (
-        space.snapshot_chain_id &&
-        STARKNET_CHAIN_IDS.includes(space.snapshot_chain_id)
-      ) {
-        throw new Error(
-          'Proposal creation not supported for spaces on Starknet network'
-        );
-      }
-
       await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const provider = getProvider(Number(space.snapshot_chain_id));
       const plugins = await getPlugins(executions, null);
       const data = {
         space: space.id,
@@ -196,16 +185,20 @@ export function createActions(
         labels,
         start,
         end: min_end,
-        snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
+        snapshot: await getLatestBlockNumber(space.snapshot_chain_id as string),
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
-        timestamp: created
+        timestamp: created,
+        from: account
       };
 
-      return client.propose({ signer: web3.getSigner(), data });
+      return client.propose({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     async updateProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
@@ -233,39 +226,50 @@ export function createActions(
         choices,
         privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
-        plugins: JSON.stringify(plugins)
+        plugins: JSON.stringify(plugins),
+        from: account
       };
 
-      return client.updateProposal({ signer: web3.getSigner(), data });
+      return client.updateProposal({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
-    async flagProposal(web3: Web3Provider, proposal: Proposal) {
+    async flagProposal(
+      web3: Web3Provider | Wallet,
+      account: string,
+      proposal: Proposal
+    ) {
       await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.flagProposal({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },
     async cancelProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) {
       await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.cancel({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },
     async vote(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
@@ -285,11 +289,12 @@ export function createActions(
         metadataUri: '',
         privacy: proposal.privacy,
         reason,
-        app: app || EDITOR_APP_NAME
+        app: app || EDITOR_APP_NAME,
+        from: account
       };
 
       return client.vote({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data
       });
     },
@@ -309,7 +314,7 @@ export function createActions(
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
 
-      if (!strategy || !isAddress(voterAddress)) {
+      if (!strategy || !isValidAddress(voterAddress)) {
         return [
           {
             address: name,
