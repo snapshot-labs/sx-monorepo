@@ -353,7 +353,7 @@ export function useTownhall() {
         signer,
         data: {
           space,
-          permissionsLevel: isAdmin
+          permissionLevel: isAdmin
             ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
             : TOWNHALL_PERMISSIONS.DEFAULT,
           metadataUri: `ipfs://${pinned.cid}`
@@ -385,7 +385,7 @@ export function useTownhall() {
         data: {
           space,
           id,
-          permissionsLevel: isAdmin
+          permissionLevel: isAdmin
             ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
             : TOWNHALL_PERMISSIONS.DEFAULT,
           metadataUri: `ipfs://${pinned.cid}`

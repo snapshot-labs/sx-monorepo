@@ -87,7 +87,7 @@ const NewVoteEventData = z.tuple([
 const NewRoleEventData = z.tuple([
   z.number(), // spaceId
   z.string(), // id
-  z.number(), // permissionsLevel
+  z.number(), // permissionLevel
   z.string() // metadataUri
 ]);
 const EditRoleEventData = NewRoleEventData;
@@ -373,11 +373,11 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewRole: Writer = async ({ unit, payload }) => {
-    const [spaceId, id, permissionsLevel, metadataUri] = NewRoleEventData.parse(
+    const [spaceId, id, permissionLevel, metadataUri] = NewRoleEventData.parse(
       payload.data
     );
 
-    console.log('Handle new role', spaceId, id, permissionsLevel, metadataUri);
+    console.log('Handle new role', spaceId, id, permissionLevel, metadataUri);
 
     const metadata = await getJSON(metadataUri);
 
@@ -386,16 +386,17 @@ export function createWriters(indexerName: string) {
     role.name = metadata.name || '';
     role.description = metadata.description || '';
     role.color = metadata.color || '';
-    role.isAdmin = permissionsLevel === TOWNHALL_PERMISSIONS.ADMINISTRATOR;
+    role.isAdmin = permissionLevel === TOWNHALL_PERMISSIONS.ADMINISTRATOR;
     role.created = unit.timestamp;
     await role.save();
   };
 
   const handleEditRole: Writer = async ({ payload }) => {
-    const [spaceId, id, permissionsLevel, metadataUri] =
-      EditRoleEventData.parse(payload.data);
+    const [spaceId, id, permissionLevel, metadataUri] = EditRoleEventData.parse(
+      payload.data
+    );
 
-    console.log('Handle edit role', spaceId, id, permissionsLevel, metadataUri);
+    console.log('Handle edit role', spaceId, id, permissionLevel, metadataUri);
 
     const metadata = await getJSON(metadataUri);
 
@@ -406,7 +407,7 @@ export function createWriters(indexerName: string) {
     role.name = metadata.name || '';
     role.description = metadata.description || '';
     role.color = metadata.color || '';
-    role.isAdmin = permissionsLevel === TOWNHALL_PERMISSIONS.ADMINISTRATOR;
+    role.isAdmin = permissionLevel === TOWNHALL_PERMISSIONS.ADMINISTRATOR;
     await role.save();
   };
 

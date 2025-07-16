@@ -62,7 +62,7 @@ export type Vote = {
 
 export type CreateRole = {
   space: number;
-  permissionsLevel: (typeof TOWNHALL_PERMISSIONS)[keyof typeof TOWNHALL_PERMISSIONS];
+  permissionLevel: (typeof TOWNHALL_PERMISSIONS)[keyof typeof TOWNHALL_PERMISSIONS];
   metadataUri: string;
 };
 
