@@ -37,6 +37,10 @@ const {
   mutate
 } = useRoleMutation({ spaceId });
 
+const isUserAdmin = computed(() =>
+  (userRoles.value ?? []).some(role => role.isAdmin)
+);
+
 function getIsRoleClaimed(roleId: string) {
   return (userRoles.value ?? []).some(role => role.id === roleId);
 }
@@ -147,7 +151,9 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
 <template>
   <div>
     <div class="flex justify-end p-4">
-      <UiButton primary @click="modalOpen = true">Add role</UiButton>
+      <UiButton v-if="isUserAdmin" primary @click="modalOpen = true">
+        Add role
+      </UiButton>
     </div>
     <div>
       <UiLabel label="Roles" sticky />
@@ -210,7 +216,10 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
                     {{ getIsRoleClaimed(role.id) ? 'Revoke' : 'Claim' }}
                   </UiButton>
                 </div>
-                <UiDropdown class="flex gap-3 items-center h-[24px]">
+                <UiDropdown
+                  v-if="isUserAdmin"
+                  class="flex gap-3 items-center h-[24px]"
+                >
                   <template #button>
                     <UiButton class="!p-0 !border-0 !h-auto">
                       <IH-dots-vertical
