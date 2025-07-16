@@ -48,8 +48,11 @@ export default class Townhall extends Agent {
     if (!userRoles) return false;
 
     for (const role of userRoles) {
-      const roleData: RoleData = await this.get(`space:${space}:role:${role}`);
-      if (roleData.permissionLevel === PERMISSIONS.ADMINISTRATOR) {
+      const roleData: RoleData | null = await this.get(
+        `space:${space}:role:${role}`
+      );
+
+      if (roleData && roleData.permissionLevel === PERMISSIONS.ADMINISTRATOR) {
         return true;
       }
     }
