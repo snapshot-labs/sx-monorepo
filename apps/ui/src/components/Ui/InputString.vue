@@ -16,6 +16,9 @@ const props = defineProps<{
 
 const dirty = ref(false);
 
+// Mark as dirty if there's an error and a value
+const isDirty = computed(() => dirty.value || (!!props.error && !!model.value));
+
 const inputValue = computed({
   get() {
     if (!model.value && !dirty.value && props.definition.default) {
@@ -60,7 +63,7 @@ watch(model, () => {
     :definition="definition"
     :loading="loading"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
     :required="required"
     :input-value-length="inputLength"
   >
