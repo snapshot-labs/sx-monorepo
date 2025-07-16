@@ -36,7 +36,6 @@ export default class Townhall extends Agent {
 
   async getHasAdminRights(space: number, signer: string) {
     const isOwner = await this.get(`space:${space}:owner`);
-    console.log('getHasAdminRights', space, signer, isOwner);
 
     if (isOwner === signer) {
       return true;
