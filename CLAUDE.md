@@ -1,6 +1,6 @@
-# Snapshot Labs monorepo
+# Snapshot monorepo
 
-This monorepo contains the unified interface for the Snapshot protocol - a gasless, offchain voting platform for DAOs, DeFi protocols, and NFT communities - and Snapshot X, the onchain voting protocol. The repository includes the Snapshot X API for blockchain indexing and the meta transaction relayer Mana.
+This monorepo contains the unified interface for the Snapshot protocol, a gasless, offchain voting platform for DAOs and Snapshot X, the onchain voting protocol. The repository includes the Snapshot X API for blockchain indexing and the meta transaction relayer Mana.
 
 For more information see [Snapshot documentation](https://docs.snapshot.box) and [Snapshot help center](https://help.snapshot.box).
 
