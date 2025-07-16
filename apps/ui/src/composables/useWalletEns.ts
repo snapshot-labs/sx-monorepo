@@ -12,7 +12,7 @@ const MAX_ENS_NAME_LENGTH = 64;
 const DEFAULT_STATUS = 'AVAILABLE';
 const LOOKUP_CHAIN_IDS = {
   s: ['1', '109', '146'],
-  's-tn': ['11155111', '157', '57054']
+  's-tn': ['11155111', '157']
 };
 
 const ensNames = ref<Map<string, ENSNames>>(new Map());
