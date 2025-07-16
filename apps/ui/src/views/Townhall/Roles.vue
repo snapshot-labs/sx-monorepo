@@ -5,7 +5,7 @@ import {
   RoleConfig,
   Space as TownhallSpace
 } from '@/helpers/townhall/types';
-import { getUserFacingErrorMessage } from '@/helpers/utils';
+import { compareAddresses, getUserFacingErrorMessage } from '@/helpers/utils';
 import {
   useRoleMutation,
   useRolesQuery,
@@ -37,9 +37,13 @@ const {
   mutate
 } = useRoleMutation({ spaceId });
 
-const isUserAdmin = computed(() =>
-  (userRoles.value ?? []).some(role => role.isAdmin)
-);
+const isUserAdmin = computed(() => {
+  if (compareAddresses(props.townhallSpace.owner, web3.value.account)) {
+    return true;
+  }
+
+  return (userRoles.value ?? []).some(role => role.isAdmin);
+});
 
 function getIsRoleClaimed(roleId: string) {
   return (userRoles.value ?? []).some(role => role.id === roleId);

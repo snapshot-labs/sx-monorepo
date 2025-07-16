@@ -27,6 +27,7 @@ gql(`
   fragment spaceFields on Space {
     id
     space_id
+    owner
     vote_count
     topic_count
   }

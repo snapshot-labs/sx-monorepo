@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
+import { compareAddresses } from '@/helpers/utils';
 import {
   useCategoriesQuery,
   useCategoryQuery,
@@ -59,9 +60,13 @@ const {
 const addCategoryModalOpen = ref(false);
 const activeCategoryId = ref<string | null>(null);
 
-const isUserAdmin = computed(() =>
-  (userRoles.value ?? []).some(role => role.isAdmin)
-);
+const isUserAdmin = computed(() => {
+  if (compareAddresses(props.townhallSpace.owner, web3.value.account)) {
+    return true;
+  }
+
+  return (userRoles.value ?? []).some(role => role.isAdmin);
+});
 
 function setAddCategoryModalStatus(
   open: boolean = false,
