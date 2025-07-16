@@ -1,9 +1,12 @@
-import { TOWNHALL_CONFIG } from '@snapshot-labs/sx';
+import {
+  TOWNHALL_PERMISSIONS as PERMISSIONS,
+  TOWNHALL_CONFIG
+} from '@snapshot-labs/sx';
 import Agent from '../highlight/agent';
 import Process from '../highlight/process';
 
 type RoleData = {
-  isAdmin: boolean;
+  permissionsLevel: (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 };
 export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
@@ -47,7 +50,7 @@ export default class Townhall extends Agent {
 
     for (const role of userRoles) {
       const roleData: RoleData = await this.get(`space:${space}:role:${role}`);
-      if (roleData?.isAdmin) {
+      if (roleData.permissionsLevel === PERMISSIONS.ADMINISTRATOR) {
         return true;
       }
     }
@@ -243,11 +246,11 @@ export default class Townhall extends Agent {
   async createRole(
     {
       space,
-      isAdmin,
+      permissionsLevel,
       metadataUri
     }: {
       space: number;
-      isAdmin: boolean;
+      permissionsLevel: RoleData['permissionsLevel'];
       metadataUri: string;
     },
     { signer }: { signer: string }
@@ -261,24 +264,24 @@ export default class Townhall extends Agent {
     this.write(`roles:id`, id + 1);
 
     const roleData: RoleData = {
-      isAdmin
+      permissionsLevel
     };
 
     this.write(`space:${space}:role:${id}`, roleData);
 
-    this.emit('new_role', [space, String(id), isAdmin, metadataUri]);
+    this.emit('new_role', [space, String(id), permissionsLevel, metadataUri]);
   }
 
   async editRole(
     {
       space,
       id,
-      isAdmin,
+      permissionsLevel,
       metadataUri
     }: {
       space: number;
       id: string;
-      isAdmin: boolean;
+      permissionsLevel: RoleData['permissionsLevel'];
       metadataUri: string;
     },
     { signer }: { signer: string }
@@ -289,12 +292,12 @@ export default class Townhall extends Agent {
     this.assert(hasAdminRights, 'You do not have admin rights for this space');
 
     const roleData: RoleData = {
-      isAdmin
+      permissionsLevel
     };
 
     this.write(`space:${space}:role:${id}`, roleData);
 
-    this.emit('edit_role', [space, id, isAdmin, metadataUri]);
+    this.emit('edit_role', [space, id, permissionsLevel, metadataUri]);
   }
 
   async deleteRole(

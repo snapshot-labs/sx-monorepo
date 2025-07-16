@@ -1,4 +1,5 @@
 import { TypedDataDomain } from '@ethersproject/abstract-signer';
+import { TOWNHALL_PERMISSIONS } from '../../highlightConstants';
 
 export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
@@ -61,7 +62,7 @@ export type Vote = {
 
 export type CreateRole = {
   space: number;
-  isAdmin: boolean;
+  permissionsLevel: (typeof TOWNHALL_PERMISSIONS)[keyof typeof TOWNHALL_PERMISSIONS];
   metadataUri: string;
 };
 
