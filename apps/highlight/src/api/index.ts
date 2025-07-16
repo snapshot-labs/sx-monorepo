@@ -5,7 +5,6 @@ import config from './config.json';
 import { HighlightIndexer } from './indexer';
 import overrides from './overrides.json';
 import { createWriters } from './writers';
-import { Space } from '../../.checkpoint/models';
 import Highlight from '../highlight/highlight';
 import { sleep } from '../utils';
 
@@ -45,14 +44,6 @@ export default async function createCheckpoint(highlight: Highlight) {
   console.log('Checkpoint ready');
 
   checkpoint.start();
-
-  let space = await Space.loadEntity('1', 'highlight');
-  if (!space) {
-    console.log('Space not found, creating a new one');
-    space = new Space('1', 'highlight');
-    space.space_id = 1;
-    await space.save();
-  }
 
   return checkpoint;
 }

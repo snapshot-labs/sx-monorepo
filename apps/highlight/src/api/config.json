@@ -16,6 +16,10 @@
       "start": 1,
       "events": [
         {
+          "name": "new_space",
+          "fn": "handleNewSpace"
+        },
+        {
           "name": "new_category",
           "fn": "handleNewCategory"
         },

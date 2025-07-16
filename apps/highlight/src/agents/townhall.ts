@@ -6,6 +6,7 @@ export default class Townhall extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
 
+    this.addEntrypoint(TOWNHALL_CONFIG.types.createSpace);
     this.addEntrypoint(TOWNHALL_CONFIG.types.createCategory);
     this.addEntrypoint(TOWNHALL_CONFIG.types.editCategory);
     this.addEntrypoint(TOWNHALL_CONFIG.types.deleteCategory);
@@ -25,6 +26,17 @@ export default class Townhall extends Agent {
 
   getSigner(signer: string) {
     return this.get(`aliases:${signer}`, 'aliases') ?? signer;
+  }
+
+  async createSpace(data: unknown, { signer }: { signer: string }) {
+    const user = await this.getSigner(signer);
+
+    const id: number = (await this.get('spaces:id')) ?? 1;
+    this.write('spaces:id', id + 1);
+
+    this.write(`space:${id}:owner`, user);
+
+    this.emit('new_space', [id, user]);
   }
 
   async createCategory(

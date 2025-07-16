@@ -23,7 +23,7 @@ import {
   newVoteEventToEntry,
   Result
 } from '@/helpers/townhall/api';
-import { Category, Role, Topic, Vote } from '@/helpers/townhall/types';
+import { Category, Role, Space, Topic, Vote } from '@/helpers/townhall/types';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
@@ -345,6 +345,49 @@ export function useRoleMutation({
   });
 }
 
+export function useCreateSpaceMutation() {
+  const queryClient = useQueryClient();
+  const { addNotification } = useUiStore();
+  const { sendCreateSpace } = useTownhall();
+
+  return useMutation({
+    mutationFn: () => {
+      return sendCreateSpace();
+    },
+    onSuccess: data => {
+      if (!data) return;
+
+      const { data: eventData } = data.result.events.find(
+        event => event.key === 'new_space'
+      );
+
+      const [spaceId]: [number] = eventData;
+
+      queryClient.setQueryData<Space>(
+        [
+          'townhall',
+          'spaces',
+          'detail',
+          {
+            spaceId
+          }
+        ],
+        () => ({
+          id: spaceId.toString(),
+          space_id: spaceId,
+          topic_count: 0,
+          vote_count: 0
+        })
+      );
+
+      addNotification('success', 'Space created successfully');
+    },
+    onError: error => {
+      addNotification('error', error.message);
+    }
+  });
+}
+
 export function useCreateCategoryMutation({
   spaceId,
   categoryId
@@ -476,6 +519,8 @@ export function useDeleteCategoryMutation({
       return sendDeleteCategory(toValue(spaceId), id);
     },
     onSuccess: (data, { id }) => {
+      if (!data) return;
+
       queryClient.setQueryData<Category[]>(
         ['townhall', 'categories', 'list', { spaceId, categoryId }],
         old => {
@@ -508,7 +553,9 @@ export function useCloseTopicMutation({
     mutationFn: () => {
       return sendCloseTopic(toValue(spaceId), toValue(topicId));
     },
-    onSuccess: () => {
+    onSuccess: data => {
+      if (!data) return;
+
       queryClient.setQueryData<Topic>(
         ['townhall', 'topics', 'detail', { spaceId, topicId }],
         old => {
@@ -606,7 +653,9 @@ export function useSetPostVisibilityMutation({
 
       throw new Error('Invalid visibility type');
     },
-    onSuccess: async (_, { postId, visibility }) => {
+    onSuccess: async (data, { postId, visibility }) => {
+      if (!data) return;
+
       queryClient.setQueryData<Topic>(
         ['townhall', 'topics', 'detail', { spaceId, topicId }],
         old => {

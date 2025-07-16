@@ -137,6 +137,34 @@ export class HighlightEthereumSigClient {
     };
   }
 
+  public async createSpace({
+    signer,
+    salt
+  }: {
+    signer: Signer & TypedDataSigner;
+    salt: bigint;
+  }): Promise<Envelope> {
+    const domain = await this.getDomain(signer, salt, TOWNHALL_CONFIG.address);
+
+    const message = {};
+
+    const signature = await this.sign(
+      signer,
+      domain,
+      TOWNHALL_CONFIG.types.createSpace,
+      message
+    );
+
+    return {
+      type: 'HIGHLIGHT_ENVELOPE',
+      domain,
+      message,
+      primaryType: 'CreateSpace',
+      signer: await signer.getAddress(),
+      signature
+    };
+  }
+
   public async createCategory({
     signer,
     data,

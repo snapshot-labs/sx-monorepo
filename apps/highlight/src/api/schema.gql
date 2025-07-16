@@ -3,6 +3,8 @@ scalar Text
 type Space {
   id: String!
   space_id: Int!
+  created: Int!
+  owner: String!
   topic_count: Int!
   vote_count: Int!
 }
