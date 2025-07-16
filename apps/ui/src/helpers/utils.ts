@@ -730,7 +730,7 @@ async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {
   }
 
   const provider = getProvider(chainId);
-  const tokenId = BigInt(namehash(name));
+  const tokenId = namehash(name);
 
   return call(
     provider,
