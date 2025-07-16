@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { isAddress } from '@ethersproject/address';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
+import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { Member, NetworkID } from '@/types';
 
 const model = defineModel<Member[]>({
@@ -17,6 +20,11 @@ const modalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.networkId));
 const isAbleToChangeAdmins = computed(() => props.isController);
+const starknetChainId = computed(() => {
+  return Object.values(STARKNET_NETWORK_METADATA).find(
+    snNetwork => snNetwork.baseChainId === network.value.baseChainId
+  )?.chainId;
+});
 
 function addMembers(members: Member[]) {
   model.value = [...model.value, ...members];
@@ -53,7 +61,15 @@ function deleteMember(index: number) {
     >
       <div class="flex flex-col">
         <a
-          :href="network.helpers.getExplorerUrl(member.address, 'address')"
+          :href="
+            getGenericExplorerUrl(
+              !isAddress(member.address) && starknetChainId
+                ? starknetChainId
+                : network.chainId,
+              member.address,
+              'address'
+            ) || ''
+          "
           target="_blank"
           class="flex items-center text-skin-text leading-5"
         >
