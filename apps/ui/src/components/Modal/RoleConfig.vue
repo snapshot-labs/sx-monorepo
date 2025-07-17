@@ -20,7 +20,7 @@ const form = ref(
 
 const definition = computed(() => ({
   type: 'object',
-  title: 'Space',
+  title: 'Role',
   additionalProperties: false,
   required: ['name', 'color'],
   properties: {
