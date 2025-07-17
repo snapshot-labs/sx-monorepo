@@ -43,10 +43,6 @@ const definition = computed(() => ({
       title: 'Color',
       examples: ['#FF0000'],
       showControls: true
-    },
-    isAdmin: {
-      type: 'boolean',
-      title: 'Administrator role'
     }
   }
 }));
@@ -107,6 +103,9 @@ watch(
         :error="formErrors"
         :definition="definition"
       />
+      <div class="mt-3">
+        <UiSwitch v-model="form.isAdmin" title="Administrator role" />
+      </div>
     </div>
     <template #footer>
       <UiButton
