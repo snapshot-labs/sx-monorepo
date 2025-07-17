@@ -114,11 +114,7 @@ async function handleEditRole(config: RoleConfig) {
         old.map(role =>
           role.id === activeLabelId.value
             ? {
-                space: {
-                  id: spaceId.value.toString(),
-                  space_id: spaceId.value
-                },
-                id: activeLabelId.value,
+                ...role,
                 name: config.name,
                 description: config.description,
                 color: config.color,
@@ -127,6 +123,23 @@ async function handleEditRole(config: RoleConfig) {
             : role
         )
     );
+
+    queryClient.setQueryData<Role[]>(
+      ['townhall', 'userRoles', { spaceId, user: web3.value.account }, 'list'],
+      (old = []) =>
+        old.map(role =>
+          role.id === activeLabelId.value
+            ? {
+                ...role,
+                name: config.name,
+                description: config.description,
+                color: config.color,
+                isAdmin: config.isAdmin
+              }
+            : role
+        )
+    );
+
     modalOpen.value = false;
   } catch (e) {
     addNotification('error', getUserFacingErrorMessage(e));
@@ -143,6 +156,14 @@ async function handleDeleteRole(id: string) {
     queryClient.setQueryData<Role[]>(
       ['townhall', 'roles', spaceId.value, 'list'],
       (old = []) => old.filter(role => role.id !== id)
+    );
+
+    queryClient.setQueryData<Role[]>(
+      ['townhall', 'userRoles', { spaceId, user: web3.value.account }, 'list'],
+      old => {
+        if (!old) return old;
+        return old.filter(role => role.id !== id.toString());
+      }
     );
   } catch (e) {
     addNotification('error', getUserFacingErrorMessage(e));
