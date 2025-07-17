@@ -3,6 +3,7 @@ import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pinGraph, pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
+import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -161,6 +162,8 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       if (type === 'token') dataType = 'token';
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'address';
+
+      if (dataType === 'address') id = formatAddress(id);
 
       return `${networks[chainId].explorer.url}/${dataType}/${id}`;
     }

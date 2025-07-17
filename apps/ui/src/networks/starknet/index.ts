@@ -6,6 +6,7 @@ import {
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
+import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -159,6 +160,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       if (type === 'token') dataType = 'token';
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'contract';
+
+      if (dataType === 'contract') id = formatAddress(id);
 
       return `${explorerUrl}/${dataType}/${id}`;
     }
