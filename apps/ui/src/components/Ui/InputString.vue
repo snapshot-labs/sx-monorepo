@@ -14,25 +14,25 @@ const props = defineProps<{
   definition: any;
 }>();
 
-const dirty = ref(false);
+const isModified = ref(false);
 
 // Mark as dirty if there's an error and the value differs from default
 const isDirty = computed(
   () =>
-    dirty.value ||
+    isModified.value ||
     (!!props.error && model.value !== (props.definition.default ?? ''))
 );
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isModified.value && props.definition.default) {
       return props.definition.default;
     }
 
     return model.value;
   },
   set(newValue: string) {
-    dirty.value = true;
+    isModified.value = true;
     model.value = newValue;
   }
 });
@@ -57,7 +57,7 @@ const inputLength = computed(() => {
 });
 
 watch(model, () => {
-  dirty.value = true;
+  isModified.value = true;
 });
 </script>
 
