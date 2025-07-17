@@ -5,7 +5,7 @@ import {
 } from '@apollo/client/core';
 import { Web3Provider } from '@ethersproject/providers';
 import { pin } from '@snapshot-labs/pineapple';
-import { clients } from '@snapshot-labs/sx';
+import { clients, TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
 import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { Alias } from '@/types';
@@ -337,7 +337,8 @@ export function useTownhall() {
     space: number,
     name: string,
     description: string,
-    color: string
+    color: string,
+    isAdmin: boolean
   ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -350,7 +351,13 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.createRole({
         signer,
-        data: { space, metadataUri: `ipfs://${pinned.cid}` },
+        data: {
+          space,
+          permissionLevel: isAdmin
+            ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
+            : TOWNHALL_PERMISSIONS.DEFAULT,
+          metadataUri: `ipfs://${pinned.cid}`
+        },
         salt: getSalt()
       })
     );
@@ -361,7 +368,8 @@ export function useTownhall() {
     id: string,
     name: string,
     description: string,
-    color: string
+    color: string,
+    isAdmin: boolean
   ) {
     if (!auth.value) {
       modalAccountOpen.value = true;
@@ -374,7 +382,14 @@ export function useTownhall() {
     return wrapPromise(
       highlightClient.editRole({
         signer,
-        data: { space, id, metadataUri: `ipfs://${pinned.cid}` },
+        data: {
+          space,
+          id,
+          permissionLevel: isAdmin
+            ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
+            : TOWNHALL_PERMISSIONS.DEFAULT,
+          metadataUri: `ipfs://${pinned.cid}`
+        },
         salt: getSalt()
       })
     );

@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { Role, Space as TownhallSpace } from '@/helpers/townhall/types';
-import { getUserFacingErrorMessage } from '@/helpers/utils';
+import {
+  Role,
+  RoleConfig,
+  Space as TownhallSpace
+} from '@/helpers/townhall/types';
+import { compareAddresses, getUserFacingErrorMessage } from '@/helpers/utils';
 import {
   useRoleMutation,
   useRolesQuery,
   useUserRolesQuery
 } from '@/queries/townhall';
-import { Space, SpaceMetadataLabel } from '@/types';
+import { Space } from '@/types';
 
 const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
@@ -33,6 +37,14 @@ const {
   mutate
 } = useRoleMutation({ spaceId });
 
+const isUserAdmin = computed(() => {
+  if (compareAddresses(props.townhallSpace.owner, web3.value.account)) {
+    return true;
+  }
+
+  return (userRoles.value ?? []).some(role => role.isAdmin);
+});
+
 function getIsRoleClaimed(roleId: string) {
   return (userRoles.value ?? []).some(role => role.id === roleId);
 }
@@ -42,14 +54,15 @@ function setModalStatus(open: boolean = false, roleId: string | null = null) {
   activeLabelId.value = roleId;
 }
 
-async function handleAddRole(config: SpaceMetadataLabel) {
+async function handleAddRole(config: RoleConfig) {
   try {
     isSubmitLoading.value = true;
     const res = await sendCreateRole(
       spaceId.value,
       config.name,
       config.description,
-      config.color
+      config.color,
+      config.isAdmin
     );
     if (!res) return;
 
@@ -60,7 +73,8 @@ async function handleAddRole(config: SpaceMetadataLabel) {
         id: event.data[1],
         name: config.name,
         description: config.description,
-        color: config.color
+        color: config.color,
+        isAdmin: config.isAdmin
       }));
 
     queryClient.setQueryData<Role[]>(
@@ -77,7 +91,7 @@ async function handleAddRole(config: SpaceMetadataLabel) {
   }
 }
 
-async function handleEditRole(config: SpaceMetadataLabel) {
+async function handleEditRole(config: RoleConfig) {
   if (!activeLabelId.value) {
     return;
   }
@@ -89,7 +103,8 @@ async function handleEditRole(config: SpaceMetadataLabel) {
       activeLabelId.value,
       config.name,
       config.description,
-      config.color
+      config.color,
+      config.isAdmin
     );
     if (!res) return;
 
@@ -99,18 +114,32 @@ async function handleEditRole(config: SpaceMetadataLabel) {
         old.map(role =>
           role.id === activeLabelId.value
             ? {
-                space: {
-                  id: spaceId.value.toString(),
-                  space_id: spaceId.value
-                },
-                id: activeLabelId.value,
+                ...role,
                 name: config.name,
                 description: config.description,
-                color: config.color
+                color: config.color,
+                isAdmin: config.isAdmin
               }
             : role
         )
     );
+
+    queryClient.setQueryData<Role[]>(
+      ['townhall', 'userRoles', { spaceId, user: web3.value.account }, 'list'],
+      (old = []) =>
+        old.map(role =>
+          role.id === activeLabelId.value
+            ? {
+                ...role,
+                name: config.name,
+                description: config.description,
+                color: config.color,
+                isAdmin: config.isAdmin
+              }
+            : role
+        )
+    );
+
     modalOpen.value = false;
   } catch (e) {
     addNotification('error', getUserFacingErrorMessage(e));
@@ -128,6 +157,14 @@ async function handleDeleteRole(id: string) {
       ['townhall', 'roles', spaceId.value, 'list'],
       (old = []) => old.filter(role => role.id !== id)
     );
+
+    queryClient.setQueryData<Role[]>(
+      ['townhall', 'userRoles', { spaceId, user: web3.value.account }, 'list'],
+      old => {
+        if (!old) return old;
+        return old.filter(role => role.id !== id.toString());
+      }
+    );
   } catch (e) {
     addNotification('error', getUserFacingErrorMessage(e));
   }
@@ -139,7 +176,9 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
 <template>
   <div>
     <div class="flex justify-end p-4">
-      <UiButton primary @click="modalOpen = true">Add role</UiButton>
+      <UiButton v-if="isUserAdmin" primary @click="modalOpen = true">
+        Add role
+      </UiButton>
     </div>
     <div>
       <UiLabel label="Roles" sticky />
@@ -202,7 +241,10 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
                     {{ getIsRoleClaimed(role.id) ? 'Revoke' : 'Claim' }}
                   </UiButton>
                 </div>
-                <UiDropdown class="flex gap-3 items-center h-[24px]">
+                <UiDropdown
+                  v-if="isUserAdmin"
+                  class="flex gap-3 items-center h-[24px]"
+                >
                   <template #button>
                     <UiButton class="!p-0 !border-0 !h-auto">
                       <IH-dots-vertical
@@ -242,8 +284,7 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
       </div>
     </div>
     <teleport to="#modal">
-      <ModalLabelConfig
-        item-type="role"
+      <ModalRoleConfig
         :open="modalOpen"
         :loading="isSubmitLoading"
         :initial-state="(roles || []).find(l => l.id === activeLabelId)"
