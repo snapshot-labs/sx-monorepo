@@ -74,7 +74,7 @@ const formValid = computed(() => {
 });
 
 async function handleSubmit() {
-  emit('add', form.value);
+  emit('add', clone(form.value));
 }
 
 watch(
