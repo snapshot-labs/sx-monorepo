@@ -16,8 +16,12 @@ const props = defineProps<{
 
 const dirty = ref(false);
 
-// Mark as dirty if there's an error and a value
-const isDirty = computed(() => dirty.value || (!!props.error && !!model.value));
+// Mark as dirty if there's an error and the value differs from default
+const isDirty = computed(
+  () =>
+    dirty.value ||
+    (!!props.error && model.value !== (props.definition.default ?? ''))
+);
 
 const inputValue = computed({
   get() {
