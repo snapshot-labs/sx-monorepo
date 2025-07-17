@@ -1,7 +1,7 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
-import { getSpaceController } from '@/helpers/utils';
+import { formatAddress, getSpaceController } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { ChainId, NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -85,7 +85,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
         case 'contract':
         case 'address':
           return network
-            ? `${network.explorer.url}/${network.starknet ? 'contract' : 'address'}/${id}`
+            ? `${network.explorer.url}/${network.starknet ? 'contract' : 'address'}/${formatAddress(id)}`
             : '';
         default:
           throw new Error('Not implemented');
