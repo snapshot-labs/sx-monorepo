@@ -72,12 +72,17 @@ export async function deployContract(
     owner: starkKeyPubAX,
     guardian: '0'
   });
-  const deployResponse = await account.deployAccount({
-    classHash: contractAXclassHash,
-    constructorCalldata: AXConstructorCallData,
-    contractAddress,
-    addressSalt: starkKeyPubAX
-  });
+  const deployResponse = await account.deployAccount(
+    {
+      classHash: contractAXclassHash,
+      constructorCalldata: AXConstructorCallData,
+      contractAddress,
+      addressSalt: starkKeyPubAX
+    },
+    {
+      version: 3
+    }
+  );
   await provider.waitForTransaction(deployResponse.transaction_hash);
 }
 
