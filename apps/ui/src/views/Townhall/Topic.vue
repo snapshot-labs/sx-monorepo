@@ -163,7 +163,10 @@ watchEffect(() => {
                     name: topic.category.category_id
                       ? 'space-townhall-category-topics'
                       : 'space-townhall-topics',
-                    params: { category: topic.category.category_id }
+                    params: {
+                      category: topic.category.category_id,
+                      category_slug: topic.category.slug
+                    }
                   }"
                 >
                   {{ topic.category.name }}

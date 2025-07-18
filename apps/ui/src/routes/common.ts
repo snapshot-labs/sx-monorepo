@@ -105,7 +105,7 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
     component: TownhallTopics
   },
   {
-    path: 'townhall/c/:category(\\d+)',
+    path: 'townhall/c/:category(\\d+)/:category_slug',
     name: 'space-townhall-category-topics',
     component: TownhallTopics
   },
@@ -115,7 +115,7 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
     component: TownhallCreate
   },
   {
-    path: 'townhall/c/:category(\\d+)/create',
+    path: 'townhall/c/:category(\\d+)/:category_slug/create',
     name: 'space-townhall-category-topics-create',
     component: TownhallCreate
   },

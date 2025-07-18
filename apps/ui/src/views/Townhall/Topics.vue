@@ -75,7 +75,10 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
               name: category.parent_category_id
                 ? 'space-townhall-category-topics'
                 : 'space-townhall-topics',
-              params: { category: category.parent_category_id }
+              params: {
+                category: category.parent_category_id,
+                category_slug: category.parent_category?.slug
+              }
             }"
           >
             <UiButton class="!px-0 w-[46px]">
@@ -88,12 +91,13 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       <UiTooltip title="New topic">
         <UiButton
           :to="{
-            name: categoryId
+            name: category
               ? 'space-townhall-category-topics-create'
               : 'space-townhall-create',
             params: {
               space: `${space.network}:${space.id}`,
-              category: categoryId
+              category: category?.category_id,
+              category_slug: category?.slug
             }
           }"
           class="!px-0 w-[46px]"
@@ -139,7 +143,7 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
           :key="i"
           :to="{
             name: 'space-townhall-category-topics',
-            params: { category: c.category_id }
+            params: { category: c.category_id, category_slug: c.slug }
           }"
           class="flex justify-between items-center mx-4 py-3 border-b"
         >

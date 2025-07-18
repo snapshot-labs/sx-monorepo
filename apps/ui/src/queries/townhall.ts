@@ -24,6 +24,7 @@ import {
   Result
 } from '@/helpers/townhall/api';
 import { Category, Role, Space, Topic, Vote } from '@/helpers/townhall/types';
+import { getSlug } from '@/helpers/utils';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
@@ -424,7 +425,8 @@ export function useCreateCategoryMutation({
       const category = {
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
-        description: variables.description
+        description: variables.description,
+        slug: getSlug(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(
@@ -483,7 +485,8 @@ export function useEditCategoryMutation({
       const category = {
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
-        description: variables.description
+        description: variables.description,
+        slug: getSlug(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(
