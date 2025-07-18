@@ -11,7 +11,7 @@ import {
   UserRole,
   Vote
 } from '../../.checkpoint/models';
-import { getJSON } from '../utils';
+import { getJSON, getSlug } from '../utils';
 
 const SetAliasEventData = z.tuple([
   z.string(), // from
@@ -148,6 +148,9 @@ export function createWriters(indexerName: string) {
     category.name = metadata.name || '';
     category.description = metadata.description || '';
     category.parent_category_id = parentCategoryId;
+    category.parent_category =
+      parentCategoryId !== 0 ? `${spaceId}/${parentCategoryId}` : null;
+    category.slug = getSlug(metadata.name || id);
     category.created = unit.timestamp;
 
     await category.save();
@@ -173,7 +176,7 @@ export function createWriters(indexerName: string) {
 
     category.name = metadata.name || '';
     category.description = metadata.description || '';
-
+    category.slug = getSlug(metadata.name || id);
     await category.save();
   };
 

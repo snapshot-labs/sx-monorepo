@@ -737,3 +737,12 @@ export async function getSpaceController(id: string, network: NetworkID) {
 
   return getEnsSpaceController(id, chainMapping.ens[network]);
 }
+
+export function getSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}

@@ -35,8 +35,14 @@ gql(`
     id
     category_id
     name
+    slug
     description
     parent_category_id
+    parent_category {
+      category_id
+      name
+      slug
+    }
     topic_count
   }
 
@@ -72,6 +78,7 @@ gql(`
     category {
       category_id
       name
+      slug
     }
     posts {
       ...postFields
@@ -307,7 +314,11 @@ export function newCategoryEventToEntry(event: NewCategoryEvent): Category {
     category_id: id,
     name: '',
     description: '',
+    slug: '',
     parent_category_id: parentCategoryId,
+    parent_category: parentCategoryId
+      ? { category_id: parentCategoryId, name: '', slug: '' }
+      : null,
     topic_count: 0
   };
 }
