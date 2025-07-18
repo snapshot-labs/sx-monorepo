@@ -20,14 +20,9 @@ const discussion = ref('');
 const submitLoading = ref(false);
 
 const categoryId = computed(() => {
-  const category = route.query.category;
+  const category = route.params.category;
 
-  if (typeof category === 'string') {
-    const parsed = Number(category);
-    return isNaN(parsed) ? null : parsed;
-  }
-
-  return null;
+  return category ? Number(category) : null;
 });
 
 const TITLE_DEFINITION = {

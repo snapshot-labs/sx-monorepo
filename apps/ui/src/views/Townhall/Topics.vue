@@ -15,14 +15,9 @@ const route = useRoute();
 
 const spaceId = computed(() => props.townhallSpace.space_id);
 const categoryId = computed(() => {
-  const category = route.query.category;
+  const category = route.params.category;
 
-  if (typeof category === 'string') {
-    const parsed = Number(category);
-    return isNaN(parsed) ? null : parsed;
-  }
-
-  return null;
+  return category ? Number(category) : null;
 });
 
 const { data: category } = useCategoryQuery({
@@ -77,8 +72,10 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
         <div v-if="category" class="flex items-center space-x-3">
           <router-link
             :to="{
-              name: 'space-townhall-topics',
-              query: { category: category.parent_category_id }
+              name: category.parent_category_id
+                ? 'space-townhall-category-topics'
+                : 'space-townhall-topics',
+              params: { category: category.parent_category_id }
             }"
           >
             <UiButton class="!px-0 w-[46px]">
@@ -91,9 +88,11 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       <UiTooltip title="New topic">
         <UiButton
           :to="{
-            name: 'space-townhall-create',
-            params: { space: `${space.network}:${space.id}` },
-            query: {
+            name: categoryId
+              ? 'space-townhall-category-topics-create'
+              : 'space-townhall-create',
+            params: {
+              space: `${space.network}:${space.id}`,
               category: categoryId
             }
           }"
@@ -139,8 +138,8 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
           v-for="(c, i) in categories"
           :key="i"
           :to="{
-            name: 'space-townhall-topics',
-            query: { category: c.category_id }
+            name: 'space-townhall-category-topics',
+            params: { category: c.category_id }
           }"
           class="flex justify-between items-center mx-4 py-3 border-b"
         >

@@ -160,8 +160,10 @@ watchEffect(() => {
                 {{ 'in ' }}
                 <router-link
                   :to="{
-                    name: 'space-townhall-topics',
-                    query: { category: topic.category.category_id }
+                    name: topic.category.category_id
+                      ? 'space-townhall-category-topics'
+                      : 'space-townhall-topics',
+                    params: { category: topic.category.category_id }
                   }"
                 >
                   {{ topic.category.name }}
