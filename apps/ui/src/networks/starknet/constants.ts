@@ -35,6 +35,7 @@ export function createConstants(
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.EthTx]: {
+        priority: 2,
         isSupported: true,
         isContractSupported: true,
         relayerType: 'evm-tx',
@@ -47,6 +48,7 @@ export function createConstants(
         connectors: STARKNET_CONNECTORS
       },
       [config.Authenticators.StarkTx]: {
+        priority: 1,
         isSupported: true,
         isContractSupported: false,
         connectors: STARKNET_CONNECTORS

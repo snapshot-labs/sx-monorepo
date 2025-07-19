@@ -36,12 +36,14 @@ export function createConstants(
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.EthSig]: {
+        priority: 1,
         isSupported: true,
         isContractSupported: false,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.EthTx]: {
+        priority: 2,
         isSupported: true,
         isContractSupported: true,
         connectors: EVM_CONNECTORS
