@@ -16,12 +16,14 @@ withDefaults(
     disabled?: boolean;
     fallback?: boolean;
     cropped?: boolean;
+    type?: 'avatar' | 'space';
   }>(),
   {
     width: 80,
     height: 80,
     fallback: true,
-    cropped: true
+    cropped: true,
+    type: 'avatar'
   }
 );
 
@@ -96,7 +98,7 @@ async function handleFileChange(e: Event) {
       :height="height"
       :cropped="cropped"
       class="pointer-events-none !rounded-none group-hover:opacity-80"
-      type="space"
+      :type="type"
       :class="{
         'opacity-80': isUploadingImage
       }"
