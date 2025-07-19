@@ -210,7 +210,7 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'mt-[72px] inset-y-0 z-10 hidden lg:block shrink-0 app-nav',
+          'top-[72px] bottom-0 z-10 hidden lg:block shrink-0 app-nav',
           {
             '!block app-nav-open': uiStore.sideMenuOpen
           }
