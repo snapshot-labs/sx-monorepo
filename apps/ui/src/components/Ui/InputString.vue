@@ -16,7 +16,6 @@ const props = defineProps<{
 
 const isModified = ref(false);
 
-// Mark as dirty if there's an error and the value differs from default
 const isDirty = computed(
   () => isModified.value || model.value !== (props.definition.default ?? '')
 );
