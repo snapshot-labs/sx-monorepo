@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SPACE_COVER_DIMENSIONS } from '@/helpers/constants';
 import {
   getUrl,
   getUserFacingErrorMessage,
@@ -80,7 +81,11 @@ watch(
       const file = new File([blob], 'image', { type: blob.type });
 
       // Resize the image
-      const resizedFile = await resizeImage(file, 1500, 400);
+      const resizedFile = await resizeImage(
+        file,
+        SPACE_COVER_DIMENSIONS.lg.width,
+        SPACE_COVER_DIMENSIONS.lg.height
+      );
       resizedImageUrl.value = URL.createObjectURL(resizedFile);
     } catch (error) {
       console.error('Failed to resize image:', error);
