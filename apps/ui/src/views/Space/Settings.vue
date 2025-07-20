@@ -315,7 +315,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   <div
     v-bind="$attrs"
     class="!h-auto"
-    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 114}px)`"
+    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 73}px)`"
   >
     <div v-if="loading" class="p-4">
       <UiLoading />
