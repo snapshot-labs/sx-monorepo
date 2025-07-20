@@ -2,7 +2,8 @@
 import {
   getUrl,
   getUserFacingErrorMessage,
-  imageUpload
+  imageUpload,
+  resizeImage
 } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 
@@ -27,12 +28,9 @@ const uiStore = useUiStore();
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const isUploadingImage = ref(false);
+const resizedImageUrl = ref<string | null>(null);
 
-const imgUrl = computed(() => {
-  if (!model.value) return undefined;
-  if (model.value.startsWith('ipfs://')) return getUrl(model.value);
-  return model.value;
-});
+const imgUrl = computed(() => resizedImageUrl.value);
 
 function openFilePicker() {
   if (isUploadingImage.value) return;
@@ -61,6 +59,36 @@ async function handleFileChange(e: Event) {
     isUploadingImage.value = false;
   }
 }
+
+watch(
+  model,
+  async () => {
+    if (!model.value?.startsWith('ipfs://')) {
+      resizedImageUrl.value = null;
+      return;
+    }
+
+    const imageUrl = getUrl(model.value);
+    if (!imageUrl) {
+      resizedImageUrl.value = null;
+      return;
+    }
+
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'image', { type: blob.type });
+
+      // Resize the image
+      const resizedFile = await resizeImage(file, 1500, 400);
+      resizedImageUrl.value = URL.createObjectURL(resizedFile);
+    } catch (error) {
+      console.error('Failed to resize image:', error);
+      resizedImageUrl.value = imageUrl;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
