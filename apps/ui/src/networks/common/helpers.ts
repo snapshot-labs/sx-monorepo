@@ -111,7 +111,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         const aRelayerPriority = a.supportInfo.priority ?? 0;
         const bRelayerPriority = b.supportInfo.priority ?? 0;
 
-        return bRelayerPriority - aRelayerPriority;
+        return aRelayerPriority - bRelayerPriority;
       })
       .map(({ authenticator, supportInfo }) => ({
         authenticator,
