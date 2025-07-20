@@ -61,9 +61,19 @@ async function handleFileChange(e: Event) {
   }
 }
 
+onUnmounted(() => {
+  if (resizedImageUrl.value) {
+    URL.revokeObjectURL(resizedImageUrl.value);
+  }
+});
+
 watch(
   model,
   async () => {
+    if (resizedImageUrl.value) {
+      URL.revokeObjectURL(resizedImageUrl.value);
+    }
+
     if (!model.value?.startsWith('ipfs://')) {
       resizedImageUrl.value = null;
       return;
