@@ -110,7 +110,9 @@ watch(
   <button
     type="button"
     v-bind="$attrs"
+    :disabled="isUploadingImage"
     class="relative block bg-skin-border h-[140px] mb-[-50px] w-full overflow-hidden cursor-pointer group"
+    :class="{ '!cursor-not-allowed': isUploadingImage }"
     @click="openFilePicker()"
   >
     <img
