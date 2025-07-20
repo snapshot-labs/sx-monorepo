@@ -82,7 +82,10 @@ watch(
     const imageUrl = getUrl(model.value);
     if (!imageUrl) {
       resizedImageUrl.value = null;
-      return;
+      return uiStore.addNotification(
+        'error',
+        getUserFacingErrorMessage(new Error('Unable to render image preview'))
+      );
     }
 
     try {
