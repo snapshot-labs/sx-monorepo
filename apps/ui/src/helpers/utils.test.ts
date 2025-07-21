@@ -327,6 +327,20 @@ describe('utils', () => {
       const controller = await getSpaceController(spaceId, 's-tn');
       expect(controller).toBe(expectedController);
     });
+
+    it('should return the space controller address for a sonic name on mainnet', async () => {
+      const spaceId = 'boorger.sonic';
+      const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should throw an error when getting a sonic name on testnet', async () => {
+      const spaceId = 'boorger.sonic';
+      await expect(getSpaceController(spaceId, 's-tn')).rejects.toThrow(
+        'Unsupported network'
+      );
+    });
   });
 
   describe('abiToDefinition', () => {
