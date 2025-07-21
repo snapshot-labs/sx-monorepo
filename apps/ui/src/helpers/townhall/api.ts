@@ -27,6 +27,7 @@ gql(`
   fragment spaceFields on Space {
     id
     space_id
+    owner
     vote_count
     topic_count
   }
@@ -102,6 +103,7 @@ gql(`
     name
     description
     color
+    isAdmin
   }
 `);
 
@@ -167,6 +169,7 @@ const USER_ROLES_QUERY = gql(`
       roles {
         role {
           ...roleFields
+          deleted
         }
       }
     }
@@ -278,7 +281,9 @@ export async function getUserRoles(spaceId: number, user: string) {
     variables: { user: `${spaceId}/${user}` }
   });
 
-  return data.user?.roles.map(role => role.role) ?? [];
+  return (
+    data.user?.roles.map(role => role.role).filter(role => !role.deleted) ?? []
+  );
 }
 
 export async function getResultsByRole(

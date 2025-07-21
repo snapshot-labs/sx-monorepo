@@ -13,3 +13,5 @@ export type Topic = TopicFieldsFragment;
 export type Post = PostFieldsFragment;
 export type Vote = VoteFieldsFragment;
 export type Role = RoleFieldsFragment;
+
+export type RoleConfig = Omit<Role, 'space'>;
