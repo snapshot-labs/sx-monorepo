@@ -242,21 +242,25 @@ watchEffect(() => {
       >
         <Affix :top="72" :bottom="64">
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
-            <div v-if="!proposal.cancelled">
+            <div
+              v-if="
+                (!proposal.cancelled &&
+                  ['pending', 'active'].includes(proposal.state)) ||
+                currentVote
+              "
+            >
               <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
                 <template v-if="editMode">
                   <IH-cursor-click />
                   <span>Edit your vote</span>
                 </template>
-                <template
-                  v-else-if="['pending', 'active'].includes(proposal.state)"
-                >
-                  <IH-cursor-click />
-                  <span>Cast your vote</span>
-                </template>
-                <template v-else>
+                <template v-else-if="currentVote">
                   <IH-check-circle />
                   <span>Your vote</span>
+                </template>
+                <template v-else>
+                  <IH-cursor-click />
+                  <span>Cast your vote</span>
                 </template>
               </h4>
               <div class="space-y-2">
