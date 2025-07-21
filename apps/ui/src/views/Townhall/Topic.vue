@@ -241,7 +241,11 @@ watchEffect(() => {
             <IH-pencil />
             Add a post
           </h4>
-          <UiAlert v-if="userRoles?.length === 0" type="warning" class="mb-4">
+          <UiAlert
+            v-if="userRoles && userRoles.length"
+            type="warning"
+            class="mb-4"
+          >
             You need to
             <router-link
               :to="{ name: 'space-townhall-roles' }"

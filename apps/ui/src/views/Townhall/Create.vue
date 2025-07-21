@@ -81,7 +81,7 @@ const formErrors = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  if (userRoles.value?.length === 0) {
+  if (!userRoles || userRoles.length === 0) {
     return false;
   }
 
@@ -164,7 +164,11 @@ watchEffect(() => {
 <template>
   <div class="pt-5">
     <UiContainer class="!max-w-[710px] s-box space-y-3">
-      <UiAlert v-if="userRoles?.length === 0" type="error" class="mb-4">
+      <UiAlert
+        v-if="userRoles && userRoles.length === 0"
+        type="error"
+        class="mb-4"
+      >
         You need to
         <router-link
           :to="{ name: 'space-townhall-roles' }"
