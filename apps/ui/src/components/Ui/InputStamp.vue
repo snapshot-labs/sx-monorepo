@@ -2,12 +2,13 @@
 import {
   getUrl,
   getUserFacingErrorMessage,
-  imageUpload
+  imageUpload,
+  resizeImage
 } from '@/helpers/utils';
 
 const model = defineModel<string>();
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     error?: string;
     definition: any;
@@ -31,12 +32,7 @@ const uiStore = useUiStore();
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const isUploadingImage = ref(false);
-
-const imgUrl = computed(() => {
-  if (!model.value) return undefined;
-  if (model.value.startsWith('ipfs://')) return getUrl(model.value);
-  return model.value;
-});
+const resizedImageUrl = ref<string | null>(null);
 
 function openFilePicker() {
   if (isUploadingImage.value) return;
@@ -65,6 +61,57 @@ async function handleFileChange(e: Event) {
     isUploadingImage.value = false;
   }
 }
+
+watch(
+  model,
+  async () => {
+    const oldUrl = resizedImageUrl.value;
+
+    try {
+      if (!model.value?.startsWith('ipfs://')) {
+        resizedImageUrl.value = null;
+        return;
+      }
+
+      isUploadingImage.value = true;
+
+      const imageUrl = getUrl(model.value);
+      if (!imageUrl) {
+        resizedImageUrl.value = null;
+        return uiStore.addNotification(
+          'error',
+          getUserFacingErrorMessage(new Error('Unable to render image preview'))
+        );
+      }
+
+      const response = await fetch(imageUrl);
+      if (!response.ok) throw new Error('Failed to fetch image');
+
+      const blob = await response.blob();
+      const file = new File([blob], 'image', { type: blob.type });
+
+      const resizedFile = await resizeImage(file, props.width, props.height);
+      const newUrl = URL.createObjectURL(resizedFile);
+
+      resizedImageUrl.value = newUrl;
+    } catch (error) {
+      uiStore.addNotification('error', getUserFacingErrorMessage(error));
+      console.error('Failed to resize image:', error);
+    } finally {
+      if (oldUrl) {
+        URL.revokeObjectURL(oldUrl);
+      }
+      isUploadingImage.value = false;
+    }
+  },
+  { immediate: true }
+);
+
+onUnmounted(() => {
+  if (resizedImageUrl.value) {
+    URL.revokeObjectURL(resizedImageUrl.value);
+  }
+});
 </script>
 
 <template>
@@ -81,8 +128,8 @@ async function handleFileChange(e: Event) {
     @click="openFilePicker()"
   >
     <img
-      v-if="imgUrl"
-      :src="imgUrl"
+      v-if="resizedImageUrl"
+      :src="resizedImageUrl"
       alt="Uploaded avatar"
       :class="[
         `object-cover group-hover:opacity-80`,
@@ -92,7 +139,7 @@ async function handleFileChange(e: Event) {
       ]"
     />
     <UiStamp
-      v-else-if="fallback"
+      v-else-if="fallback && !model"
       :id="definition.default"
       :width="width"
       :height="height"
