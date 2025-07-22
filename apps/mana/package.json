@@ -10,7 +10,8 @@
     "predev": "yarn migrate",
     "dev": "nodemon src/index.ts",
     "prestart": "yarn migrate",
-    "start": "node dist/src/index.js"
+    "start": "node dist/src/index.js",
+    "check-starknet-balances": "node --experimental-strip-types --no-warnings=ExperimentalWarning ./scripts/check-starknet-balances.mts"
   },
   "eslintConfig": {
     "extends": "@snapshot-labs"
@@ -47,6 +48,7 @@
     "@types/express": "^4.17.11",
     "@types/node": "^18.14.4",
     "eslint": "^8.57.0",
+    "graphql-request": "^7.2.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "ts-node": "^10.9.1",
