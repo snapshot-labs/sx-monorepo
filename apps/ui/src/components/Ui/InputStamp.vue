@@ -91,12 +91,11 @@ watch(
       const file = new File([blob], 'image', { type: blob.type });
 
       const resizedFile = await resizeImage(file, props.width, props.height);
-      const newUrl = URL.createObjectURL(resizedFile);
-
-      resizedImageUrl.value = newUrl;
+      resizedImageUrl.value = URL.createObjectURL(resizedFile);
     } catch (error) {
       uiStore.addNotification('error', getUserFacingErrorMessage(error));
       console.error('Failed to resize image:', error);
+      resizedImageUrl.value = null;
     } finally {
       if (oldUrl) {
         URL.revokeObjectURL(oldUrl);
