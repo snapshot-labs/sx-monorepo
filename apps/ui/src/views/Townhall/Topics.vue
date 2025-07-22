@@ -75,10 +75,12 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
               name: category.parent_category_id
                 ? 'space-townhall-category-topics'
                 : 'space-townhall-topics',
-              params: {
-                category: category.parent_category_id,
-                category_slug: category.parent_category?.slug
-              }
+              params: category.parent_category_id
+                ? {
+                    category: category.parent_category_id,
+                    category_slug: category.parent_category?.slug
+                  }
+                : {}
             }"
           >
             <UiButton class="!px-0 w-[46px]">
@@ -96,8 +98,12 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
               : 'space-townhall-create',
             params: {
               space: `${space.network}:${space.id}`,
-              category: category?.category_id,
-              category_slug: category?.slug
+              ...(category
+                ? {
+                    category: category.category_id,
+                    category_slug: category.slug
+                  }
+                : {})
             }
           }"
           class="!px-0 w-[46px]"
