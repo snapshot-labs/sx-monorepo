@@ -31,8 +31,6 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const isUploadingImage = ref(false);
 const resizedImageUrl = ref<string | null>(null);
 
-const imgUrl = computed(() => resizedImageUrl.value);
-
 function openFilePicker() {
   if (isUploadingImage.value) return;
   fileInput.value?.click();
@@ -70,25 +68,23 @@ onUnmounted(() => {
 watch(
   model,
   async () => {
-    if (resizedImageUrl.value) {
-      URL.revokeObjectURL(resizedImageUrl.value);
-    }
-
-    if (!model.value?.startsWith('ipfs://')) {
-      resizedImageUrl.value = null;
-      return;
-    }
-
-    const imageUrl = getUrl(model.value);
-    if (!imageUrl) {
-      resizedImageUrl.value = null;
-      return uiStore.addNotification(
-        'error',
-        getUserFacingErrorMessage(new Error('Unable to render image preview'))
-      );
-    }
+    const oldUrl = resizedImageUrl.value;
 
     try {
+      if (!model.value?.startsWith('ipfs://')) {
+        resizedImageUrl.value = null;
+        return;
+      }
+
+      const imageUrl = getUrl(model.value);
+      if (!imageUrl) {
+        resizedImageUrl.value = null;
+        return uiStore.addNotification(
+          'error',
+          getUserFacingErrorMessage(new Error('Unable to render image preview'))
+        );
+      }
+
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const file = new File([blob], 'image', { type: blob.type });
@@ -102,7 +98,11 @@ watch(
       resizedImageUrl.value = URL.createObjectURL(resizedFile);
     } catch (error) {
       console.error('Failed to resize image:', error);
-      resizedImageUrl.value = imageUrl;
+      resizedImageUrl.value = null;
+    } finally {
+      if (oldUrl) {
+        URL.revokeObjectURL(oldUrl);
+      }
     }
   },
   { immediate: true }
@@ -119,9 +119,9 @@ watch(
     @click="openFilePicker()"
   >
     <img
-      v-if="imgUrl"
+      v-if="resizedImageUrl"
       alt=""
-      :src="imgUrl"
+      :src="resizedImageUrl"
       class="size-full object-cover group-hover:opacity-80"
       :class="{
         'opacity-80': isUploadingImage
