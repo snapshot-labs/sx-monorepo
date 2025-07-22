@@ -65,6 +65,6 @@ export class HerodotusController {
     const maxFee = opts?.nonce
       ? await estimateStarknetFee(signer, this.networkConfig, call)
       : undefined;
-    return signer.execute(call, undefined, { ...opts, maxFee });
+    return signer.execute(call, { ...opts, maxFee });
   }
 }
