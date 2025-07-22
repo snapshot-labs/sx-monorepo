@@ -1,8 +1,4 @@
-import {
-  LibraryError,
-  ReceiptTx,
-  constants as starknetConstants
-} from 'starknet';
+import { LibraryError, constants as starknetConstants } from 'starknet';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
@@ -113,8 +109,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
             return;
           }
 
-          const receiptTx = new ReceiptTx(tx);
-          if (receiptTx.isSuccess()) {
+          if (tx.isSuccess()) {
             resolve(tx);
           } else {
             reject(tx);
