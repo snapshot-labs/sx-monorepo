@@ -92,7 +92,7 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
         <UiButton
           :to="{
             name: category
-              ? 'space-townhall-category-topics-create'
+              ? 'space-townhall-category-create'
               : 'space-townhall-create',
             params: {
               space: `${space.network}:${space.id}`,
