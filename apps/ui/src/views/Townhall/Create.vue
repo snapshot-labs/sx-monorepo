@@ -81,7 +81,7 @@ const formErrors = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  if (!userRoles || userRoles.length === 0) {
+  if (!userRoles.value || userRoles.value.length === 0) {
     return false;
   }
 
