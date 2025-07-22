@@ -71,17 +71,17 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       <div class="flex-auto">
         <div v-if="category" class="flex items-center space-x-3">
           <router-link
-            :to="{
-              name: category.parent_category_id
-                ? 'space-townhall-category-topics'
-                : 'space-townhall-topics',
-              params: category.parent_category_id
+            :to="
+              category.parent_category
                 ? {
-                    category: category.parent_category_id,
-                    category_slug: category.parent_category?.slug
+                    name: 'space-townhall-category-topics',
+                    params: {
+                      category: category.parent_category_id,
+                      category_slug: category.parent_category.slug
+                    }
                   }
-                : {}
-            }"
+                : { name: 'space-townhall-topics' }
+            "
           >
             <UiButton class="!px-0 w-[46px]">
               <IH-arrow-narrow-left class="inline-block" />
