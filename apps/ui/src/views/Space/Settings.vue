@@ -52,6 +52,7 @@ const {
 } = useSpaceSettings(toRef(props, 'space'));
 const { invalidateController } = useSpaceController(toRef(props, 'space'));
 
+const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
 
@@ -250,6 +251,10 @@ async function handleSettingsSave() {
     try {
       await save();
       reloadSpaceAndReset();
+      uiStore.addNotification(
+        'success',
+        'Your changes were successfully saved.'
+      );
     } catch {
     } finally {
       saving.value = false;
