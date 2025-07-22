@@ -128,7 +128,7 @@ export async function setup({
   ethereumWallet: Wallet;
   ethUrl: string;
 }): Promise<TestConfig> {
-  await mint(starknetAccount.address, 100000000000000000);
+  await mint(starknetAccount.address, 10000 * 1e18, 'FRI');
 
   const masterSpaceResult = await starknetAccount.declareIfNot({
     contract: sxSpaceSierra as any,
@@ -519,10 +519,11 @@ export async function postDevnet(path: string, body: Record<string, any>) {
   return res.json();
 }
 
-export function mint(address: string, amount: number) {
+export function mint(address: string, amount: number, unit: 'FRI' | 'WEI') {
   return postDevnet('mint', {
     address,
-    amount
+    amount,
+    unit
   });
 }
 

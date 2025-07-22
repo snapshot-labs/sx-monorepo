@@ -229,7 +229,7 @@ export class StarknetTx {
     const maxFee = opts?.nonce
       ? await estimateStarknetFee(account, this.config.networkConfig, calls)
       : undefined;
-    return account.execute(calls, undefined, { ...opts, maxFee });
+    return account.execute(calls, { ...opts, maxFee });
   }
 
   async updateProposal(
@@ -260,7 +260,7 @@ export class StarknetTx {
     const maxFee = opts?.nonce
       ? await estimateStarknetFee(account, this.config.networkConfig, call)
       : undefined;
-    return account.execute(call, undefined, { ...opts, maxFee });
+    return account.execute(call, { ...opts, maxFee });
   }
 
   async vote(account: Account, envelope: Envelope<Vote>, opts?: Opts) {
@@ -293,7 +293,7 @@ export class StarknetTx {
     const maxFee = opts?.nonce
       ? await estimateStarknetFee(account, this.config.networkConfig, call)
       : undefined;
-    return account.execute(call, undefined, { ...opts, maxFee });
+    return account.execute(call, { ...opts, maxFee });
   }
 
   async execute(
@@ -322,7 +322,7 @@ export class StarknetTx {
     const maxFee = opts?.nonce
       ? await estimateStarknetFee(signer, this.config.networkConfig, call)
       : undefined;
-    return signer.execute(call, undefined, { ...opts, maxFee });
+    return signer.execute(call, { ...opts, maxFee });
   }
 
   async updateSettings({
