@@ -92,20 +92,23 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       </div>
       <UiTooltip title="New topic">
         <UiButton
-          :to="{
-            name: category
-              ? 'space-townhall-category-create'
-              : 'space-townhall-create',
-            params: {
-              space: `${space.network}:${space.id}`,
-              ...(category
-                ? {
+          :to="
+            category
+              ? {
+                  name: 'space-townhall-category-create',
+                  params: {
+                    space: `${space.network}:${space.id}`,
                     category: category.category_id,
                     category_slug: category.slug
                   }
-                : {})
-            }
-          }"
+                }
+              : {
+                  name: 'space-townhall-create',
+                  params: {
+                    space: `${space.network}:${space.id}`
+                  }
+                }
+          "
           class="!px-0 w-[46px]"
         >
           <IH-pencil-alt />
