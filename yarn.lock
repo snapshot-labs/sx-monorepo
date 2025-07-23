@@ -3942,10 +3942,10 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.6.0.tgz#3c7c9c46e678feefe7a2e5bb609d3dbd665ffb3f"
   integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
 
-"@snapshot-labs/checkpoint@^0.1.0-beta.59":
-  version "0.1.0-beta.59"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.59.tgz#e1ba3acf223a0875e32d0f88c01b311539f340e0"
-  integrity sha512-1Tdd4rZxxW4PiCE8x9iU9GJdT+W1Vjh6rmHtekzJO9nbQlJYfNpLiWM1f2uNVGmVB6VuqCjX35/Pg3wg63IZ6A==
+"@snapshot-labs/checkpoint@^0.1.0-beta.63":
+  version "0.1.0-beta.63"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/checkpoint/-/checkpoint-0.1.0-beta.63.tgz#1d790eddc7c761c792a07612d2a830f414d7176b"
+  integrity sha512-sMgNrIIS6oOIIEWFFTSpYpCuagQnIEO7h397METQOQuP0A9Up3MBB2MBs7GrCFqlw7S8UfLFOBrC4znUUafFBA==
   dependencies:
     "@ethersproject/abi" "^5.7.0"
     "@ethersproject/address" "^5.7.0"
@@ -3953,6 +3953,7 @@
     "@ethersproject/providers" "^5.7.2"
     "@ethersproject/strings" "^5.7.0"
     "@graphql-tools/schema" "^8.5.1"
+    "@starknet-io/types-js" "^0.7.10"
     connection-string "^4.3.5"
     dataloader "^2.1.0"
     express-graphql "^0.12.0"
@@ -4183,6 +4184,11 @@
     "@stablelib/keyagreement" "^1.0.1"
     "@stablelib/random" "^1.0.2"
     "@stablelib/wipe" "^1.0.1"
+
+"@starknet-io/types-js@^0.7.10":
+  version "0.7.10"
+  resolved "https://registry.yarnpkg.com/@starknet-io/types-js/-/types-js-0.7.10.tgz#d21dc973d0cd04d7b6293ce461f2f06a5873c760"
+  integrity sha512-1VtCqX4AHWJlRRSYGSn+4X1mqolI1Tdq62IwzoU2vUuEE72S1OlEeGhpvd6XsdqXcfHmVzYfj8k1XtKBQqwo9w==
 
 "@starknet-io/types-js@^0.7.7":
   version "0.7.7"
