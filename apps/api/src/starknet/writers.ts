@@ -62,10 +62,14 @@ export function createWriters(config: FullConfig) {
     }
   };
 
-  const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
+  const handleSpaceCreated: starknet.Writer = async ({
+    block,
+    txId,
+    event
+  }) => {
     console.log('Handle space created');
 
-    if (!event || !tx.transaction_hash) return;
+    if (!event || !txId) return;
 
     const strategies: string[] = event.voting_strategies.map(
       (strategy: Strategy) => strategy.address
@@ -109,7 +113,7 @@ export function createWriters(config: FullConfig) {
     space.proposer_count = 0;
     space.voter_count = 0;
     space.created = block?.timestamp ?? getCurrentTimestamp();
-    space.tx = tx.transaction_hash;
+    space.tx = txId;
 
     await updateProposalValidationStrategy(
       space,
@@ -412,8 +416,8 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) => {
-    if (!rawEvent || !event || !tx.transaction_hash) return;
+  const handlePropose: starknet.Writer = async ({ txId, rawEvent, event }) => {
+    if (!rawEvent || !event || !txId) return;
 
     console.log('Handle propose');
 
@@ -487,7 +491,7 @@ export function createWriters(config: FullConfig) {
     proposal.strategies_params = space.strategies_params;
     proposal.vp_decimals = space.vp_decimals;
     proposal.created = parseInt(created.toString());
-    proposal.tx = tx.transaction_hash;
+    proposal.tx = txId;
     proposal.execution_tx = null;
     proposal.veto_tx = null;
     proposal.vote_count = 0;
@@ -739,7 +743,7 @@ export function createWriters(config: FullConfig) {
     await proposal.save();
   };
 
-  const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) => {
+  const handleExecute: starknet.Writer = async ({ txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     console.log('Handle execute');
@@ -753,14 +757,14 @@ export function createWriters(config: FullConfig) {
     proposal.executed = true;
     proposal.execution_settled = true;
     proposal.completed = true;
-    proposal.execution_tx = tx.transaction_hash ?? null;
+    proposal.execution_tx = txId ?? null;
 
     await proposal.save();
   };
 
   const handleVote: starknet.Writer = async ({
     block,
-    tx,
+    txId,
     rawEvent,
     event
   }) => {
@@ -793,7 +797,7 @@ export function createWriters(config: FullConfig) {
     vote.vp = vp.toString();
     vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
     vote.created = created;
-    vote.tx = tx.transaction_hash;
+    vote.tx = txId;
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
