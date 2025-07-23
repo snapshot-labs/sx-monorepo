@@ -214,7 +214,7 @@ export function createWriters(config: FullConfig) {
   const handleSpaceCreated: evm.Writer = async ({
     block,
     blockNumber,
-    tx,
+    txId,
     event
   }) => {
     console.log('Handle space created');
@@ -253,7 +253,7 @@ export function createWriters(config: FullConfig) {
     space.proposer_count = 0;
     space.voter_count = 0;
     space.created = block?.timestamp ?? getCurrentTimestamp();
-    space.tx = tx.hash;
+    space.tx = txId;
 
     await updateProposalValidationStrategy(
       space,
@@ -586,10 +586,10 @@ export function createWriters(config: FullConfig) {
   const handleProposalCreated: evm.Writer = async ({
     rawEvent,
     event,
-    tx,
+    txId,
     block
   }) => {
-    if (!rawEvent || !event || !tx.hash) return;
+    if (!rawEvent || !event || !txId) return;
 
     console.log('Handle propose');
 
@@ -639,7 +639,7 @@ export function createWriters(config: FullConfig) {
     proposal.strategies_params = space.strategies_params;
     proposal.vp_decimals = space.vp_decimals;
     proposal.created = created;
-    proposal.tx = tx.hash;
+    proposal.tx = txId;
     proposal.execution_tx = null;
     proposal.veto_tx = null;
     proposal.vote_count = 0;
@@ -900,7 +900,7 @@ export function createWriters(config: FullConfig) {
   };
 
   const handleProposalExecuted: evm.Writer = async ({
-    tx,
+    txId,
     rawEvent,
     event,
     block
@@ -930,7 +930,7 @@ export function createWriters(config: FullConfig) {
         case 'Axiom':
           proposal.execution_settled = true;
           proposal.completed = true;
-          proposal.execution_tx = tx.hash;
+          proposal.execution_tx = txId;
           break;
         case 'SimpleQuorumTimelock':
           proposal.execution_time =
@@ -942,7 +942,12 @@ export function createWriters(config: FullConfig) {
     await proposal.save();
   };
 
-  const handleVoteCast: evm.Writer = async ({ block, tx, rawEvent, event }) => {
+  const handleVoteCast: evm.Writer = async ({
+    block,
+    txId,
+    rawEvent,
+    event
+  }) => {
     if (!rawEvent || !event) return;
 
     console.log('Handle vote');
@@ -978,7 +983,7 @@ export function createWriters(config: FullConfig) {
     vote.vp = vp.toString();
     vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
     vote.created = created;
-    vote.tx = tx.hash;
+    vote.tx = txId;
 
     if (event.args.metadataUri) {
       try {
@@ -1051,7 +1056,7 @@ export function createWriters(config: FullConfig) {
   };
 
   const handleTimelockProposalExecuted: evm.Writer = async ({
-    tx,
+    txId,
     rawEvent,
     event
   }) => {
@@ -1071,12 +1076,12 @@ export function createWriters(config: FullConfig) {
 
     proposal.execution_settled = true;
     proposal.completed = true;
-    proposal.execution_tx = tx.hash;
+    proposal.execution_tx = txId;
     await proposal.save();
   };
 
   const handleTimelockProposalVetoed: evm.Writer = async ({
-    tx,
+    txId,
     rawEvent,
     event
   }) => {
@@ -1097,7 +1102,7 @@ export function createWriters(config: FullConfig) {
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.vetoed = true;
-    proposal.veto_tx = tx.hash;
+    proposal.veto_tx = txId;
     await proposal.save();
   };
 
@@ -1151,7 +1156,7 @@ export function createWriters(config: FullConfig) {
 
   const handleStarknetProposalExecuted: evm.Writer = async ({
     block,
-    tx,
+    txId,
     event
   }) => {
     if (!event) return;
@@ -1170,7 +1175,7 @@ export function createWriters(config: FullConfig) {
     executionEntity.space = paddedSpace;
     executionEntity.proposalId = proposalId;
     executionEntity.created = block?.timestamp ?? getCurrentTimestamp();
-    executionEntity.tx = tx.hash;
+    executionEntity.tx = txId;
     await executionEntity.save();
   };
 
