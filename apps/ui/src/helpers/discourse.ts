@@ -137,10 +137,12 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
   const hasPostNumber =
     secondLastParam && /^\d+$/.test(secondLastParam) && /^\d+$/.test(lastParam);
 
+  const topicPath = hasPostNumber
+    ? `${secondLastParam}/${lastParam}`
+    : lastParam;
+
   const res = await fetch(
-    `${PROXY_URL}/${encodeURIComponent(
-      `${baseUrl}/t/${hasPostNumber ? `${secondLastParam}/${lastParam}` : lastParam}.json`
-    )}`
+    `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicPath}.json`)}`
   );
   const topic = await res.json();
 
