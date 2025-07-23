@@ -13,9 +13,11 @@ type Category {
   id: String!
   category_id: Int!
   name: String!
+  slug: String!
   description: String!
   created: Int!
   parent_category_id: Int!
+  parent_category: Category
   topic_count: Int!
   space: Space!
 }

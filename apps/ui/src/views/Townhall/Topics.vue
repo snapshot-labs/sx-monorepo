@@ -18,14 +18,9 @@ const { web3 } = useWeb3();
 
 const spaceId = computed(() => props.townhallSpace.space_id);
 const categoryId = computed(() => {
-  const category = route.query.category;
+  const category = route.params.category;
 
-  if (typeof category === 'string') {
-    const parsed = Number(category);
-    return isNaN(parsed) ? null : parsed;
-  }
-
-  return null;
+  return category ? Number(category) : null;
 });
 
 const { data: category } = useCategoryQuery({
@@ -91,10 +86,17 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       <div class="flex-auto">
         <div v-if="category" class="flex items-center space-x-3">
           <router-link
-            :to="{
-              name: 'space-townhall-topics',
-              query: { category: category.parent_category_id }
-            }"
+            :to="
+              category.parent_category
+                ? {
+                    name: 'space-townhall-category-topics',
+                    params: {
+                      category: category.parent_category_id,
+                      category_slug: category.parent_category.slug
+                    }
+                  }
+                : { name: 'space-townhall-topics' }
+            "
           >
             <UiButton class="!px-0 w-[46px]">
               <IH-arrow-narrow-left class="inline-block" />
@@ -105,13 +107,23 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
       </div>
       <UiTooltip title="New topic">
         <UiButton
-          :to="{
-            name: 'space-townhall-create',
-            params: { space: `${space.network}:${space.id}` },
-            query: {
-              category: categoryId
-            }
-          }"
+          :to="
+            category
+              ? {
+                  name: 'space-townhall-category-create',
+                  params: {
+                    space: `${space.network}:${space.id}`,
+                    category: category.category_id,
+                    category_slug: category.slug
+                  }
+                }
+              : {
+                  name: 'space-townhall-create',
+                  params: {
+                    space: `${space.network}:${space.id}`
+                  }
+                }
+          "
           class="!px-0 w-[46px]"
         >
           <IH-pencil-alt />
@@ -154,8 +166,8 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
           v-for="(c, i) in categories"
           :key="i"
           :to="{
-            name: 'space-townhall-topics',
-            query: { category: c.category_id }
+            name: 'space-townhall-category-topics',
+            params: { category: c.category_id, category_slug: c.slug }
           }"
           class="flex justify-between items-center mx-4 py-3 border-b"
         >

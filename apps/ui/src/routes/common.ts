@@ -105,8 +105,18 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
     component: TownhallTopics
   },
   {
+    path: 'townhall/c/:category(\\d+)/:category_slug',
+    name: 'space-townhall-category-topics',
+    component: TownhallTopics
+  },
+  {
     path: 'townhall/create',
     name: 'space-townhall-create',
+    component: TownhallCreate
+  },
+  {
+    path: 'townhall/c/:category(\\d+)/:category_slug/create',
+    name: 'space-townhall-category-create',
     component: TownhallCreate
   },
   {
