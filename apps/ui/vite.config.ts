@@ -1,5 +1,8 @@
+/// <reference types="vitest/config" />
+import { fileURLToPath } from 'node:url';
 import path from 'path';
 import inject from '@rollup/plugin-inject';
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import vue from '@vitejs/plugin-vue';
 import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
@@ -9,6 +12,12 @@ import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 
+const dirname =
+  typeof __dirname !== 'undefined'
+    ? __dirname
+    : path.dirname(fileURLToPath(import.meta.url));
+
+// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 const ELECTRON = process.env.ELECTRON || false;
 
 const target = ['esnext'];
@@ -90,5 +99,33 @@ export default defineConfig({
       buffer: path.resolve('../../node_modules/buffer')
     },
     dedupe: ['@popperjs/core']
+  },
+  test: {
+    projects: [
+      {
+        extends: true,
+        plugins: [
+          // The plugin will run tests for the stories defined in your Storybook config
+          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+          storybookTest({
+            configDir: path.join(dirname, '.storybook')
+          })
+        ],
+        test: {
+          name: 'storybook',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: 'playwright',
+            instances: [
+              {
+                browser: 'chromium'
+              }
+            ]
+          },
+          setupFiles: ['.storybook/vitest.setup.ts']
+        }
+      }
+    ]
   }
 });
