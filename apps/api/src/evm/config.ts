@@ -13,7 +13,7 @@ export type NetworkID =
   | 'eth'
   | 'sep'
   | 'oeth'
-  | 'matic'
+  // | 'matic'
   | 'arb1'
   | 'base'
   | 'mnt'
@@ -24,7 +24,7 @@ const START_BLOCKS: Record<NetworkID, number> = {
   eth: 18962278,
   sep: 4519171,
   oeth: 118359200,
-  matic: 50858232,
+  // matic: 50858232,
   arb1: 157825417,
   base: 23524251,
   mnt: 75662182,
