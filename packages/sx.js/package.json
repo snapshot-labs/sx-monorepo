@@ -68,8 +68,8 @@
     "@types/randombytes": "^2.0.3",
     "eslint": "^8.57.0",
     "prettier": "^3.1.0",
-    "typescript": "^5.5.4",
-    "vitest": "^1.2.2"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/**/*",
