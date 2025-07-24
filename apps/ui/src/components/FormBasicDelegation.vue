@@ -86,7 +86,7 @@ watchEffect(async () => {
   <UiInputAddress
     v-model="form.delegatees[0].id"
     :definition="delegateDefinition"
-    :error="formErrors.delegatees?.[0]?.id"
+    :error="formErrors.delegatee"
     :required="true"
     @pick="emit('pick')"
   />
