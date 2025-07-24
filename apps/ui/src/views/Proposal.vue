@@ -244,8 +244,9 @@ watchEffect(() => {
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
-                !proposal.cancelled &&
-                ['pending', 'active'].includes(proposal.state)
+                (!proposal.cancelled &&
+                  ['pending', 'active'].includes(proposal.state)) ||
+                currentVote
               "
             >
               <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
@@ -264,7 +265,10 @@ watchEffect(() => {
               </h4>
               <div class="space-y-2">
                 <IndicatorVotingPower
-                  v-if="!currentVote || editMode"
+                  v-if="
+                    (!currentVote || editMode) &&
+                    ['pending', 'active'].includes(proposal.state)
+                  "
                   v-slot="votingPowerProps"
                   :network-id="proposal.network"
                   :voting-power="votingPower"
