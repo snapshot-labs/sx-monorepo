@@ -1,6 +1,15 @@
 <script setup lang="ts">
 const props = withDefaults(
-  defineProps<{ url: string; showDefault?: boolean }>(),
+  defineProps<{
+    /**
+     * The URL to preview.
+     */
+    url: string;
+    /**
+     * Whether to show a default link preview when actual preview is not available.
+     */
+    showDefault?: boolean;
+  }>(),
   {
     showDefault: false
   }
@@ -35,11 +44,12 @@ async function update(val: string) {
     preview.value = await result.json();
 
     if (preview.value?.links?.icon[0]?.href) {
-      const image = await fetch(preview.value.links.icon[0].href, {
-        method: 'HEAD'
+      await fetch(preview.value.links.icon[0].href, {
+        method: 'HEAD',
+        mode: 'no-cors'
       });
 
-      previewIconResolved.value = image.ok;
+      previewIconResolved.value = true;
     }
   } catch {
   } finally {
