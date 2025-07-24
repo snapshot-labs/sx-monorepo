@@ -146,7 +146,7 @@ interface ProposalData {
   title: string;
   description: string;
   status: 'pending' | 'approved' | 'rejected';
-}
+};
 
 class ProposalManager {
   async createProposal(data: ProposalData): Promise<void> {

@@ -22,6 +22,8 @@ const props = defineProps<{
 
 const { copy } = useClipboard();
 
+const selfRef = ref<HTMLDivElement>();
+
 const remarkable = new Remarkable({
   html: false,
   breaks: true,
@@ -80,11 +82,9 @@ const parsed = computed(() => {
 });
 
 onMounted(() => {
-  const body = document.querySelector('.markdown-body');
+  if (!selfRef.value) return;
 
-  if (!body) return;
-
-  body.querySelectorAll('pre>code').forEach(code => {
+  selfRef.value.querySelectorAll('pre>code').forEach(code => {
     const parent = code.parentElement!;
 
     const copyButton = document.createElement('button');
@@ -120,7 +120,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="markdown-body break-words" v-html="parsed" />
+  <div ref="selfRef" class="markdown-body break-words" v-html="parsed" />
 </template>
 
 <style lang="scss" scoped>
