@@ -124,9 +124,11 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/highlightjs/github.scss';
+.markdown-body:deep() {
+  @import '@/assets/styles/highlightjs/github.scss';
+}
 
-html.dark {
+html.dark .markdown-body:deep() {
   @import '@/assets/styles/highlightjs/github-dark-dimmed.scss';
 }
 
