@@ -107,7 +107,7 @@
     "@rollup/plugin-inject": "^5.0.3",
     "@types/node": "^20.7.1",
     "@types/remarkable": "^2.0.4",
-    "@vitejs/plugin-vue": "^5.0.3",
+    "@vitejs/plugin-vue": "^6.0.0",
     "@vue/test-utils": "^2.4.5",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.57.0",
@@ -122,8 +122,8 @@
     "typescript": "^5.5.4",
     "unplugin-icons": "^0.17.0",
     "unplugin-vue-components": "^0.25.2",
-    "vite": "^5.0.12",
-    "vitest": "^1.2.2",
+    "vite": "^7.0.6",
+    "vitest": "^3.2.4",
     "vue-tsc": "^2.1.6"
   }
 }
