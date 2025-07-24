@@ -9,8 +9,6 @@
   "scripts": {
     "dev": "vite --port=8080",
     "build": "vite build",
-    "story:dev": "histoire dev",
-    "story:build": "histoire build",
     "codegen": "graphql-codegen",
     "lint": "eslint \"./src/**/*.{ts,vue}\" --ignore-pattern \"**/gql/**\"",
     "typecheck": "vue-tsc --noEmit",
@@ -101,7 +99,6 @@
   "devDependencies": {
     "@babel/core": "^7.26.7",
     "@graphql-codegen/cli": "^5.0.4",
-    "@histoire/plugin-vue": "^0.17.4",
     "@iconify-json/heroicons-outline": "^1.1.7",
     "@iconify-json/heroicons-solid": "^1.1.8",
     "@rollup/plugin-inject": "^5.0.3",
@@ -112,7 +109,6 @@
     "autoprefixer": "^10.4.16",
     "eslint": "^8.57.0",
     "happy-dom": "^14.12.3",
-    "histoire": "^0.17.9",
     "husky": "^8.0.3",
     "postcss": "^8.4.30",
     "prettier": "^3.1.0",
