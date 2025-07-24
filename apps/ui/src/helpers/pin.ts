@@ -5,6 +5,10 @@ export type PinFunction = (
   payload: any
 ) => Promise<{ provider: string; cid: string }>;
 
+type Protocol = 'ipfs' | 'swarm';
+
+const DEFAULT_PROTOCOL = 'ipfs';
+
 function createIpfsPinner(name: string, url: string): PinFunction {
   const client = create({ url });
 
@@ -28,8 +32,11 @@ export const pinMantle = createIpfsPinner(
   'https://subgraph-api.mantle.xyz/ipfs'
 );
 
-export async function pinPineapple(payload: any) {
-  const pinned = await pin(payload);
+export async function pinPineapple(
+  payload: any,
+  protocol: Protocol = DEFAULT_PROTOCOL
+) {
+  const pinned = await pin(payload, 'https://pineapple.fyi', { protocol });
   if (!pinned) throw new Error('Failed to pin');
 
   return {
