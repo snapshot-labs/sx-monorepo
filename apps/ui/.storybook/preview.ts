@@ -1,8 +1,15 @@
-import { Preview, Decorator } from '@storybook/vue3-vite';
+import { Preview, Decorator, setup } from '@storybook/vue3-vite';
+import VueTippy from 'vue-tippy';
 import { withThemeByClassName } from '@storybook/addon-themes';
 
 import '../src/style.scss';
 import './style.css';
+
+setup(app => {
+  app.use(VueTippy, {
+    defaultProps: { appendTo: 'parent' }
+  });
+});
 
 export const decorators: Decorator[] = [
   withThemeByClassName({
