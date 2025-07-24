@@ -235,6 +235,7 @@ type Proposal {
   execution_time: Int!
   "Address of the execution strategy contract"
   execution_strategy: String!
+  # Note: in the future move this field to execution_strategy
   "Detailed execution strategy configuration"
   execution_strategy_details: ExecutionStrategy
   "Type of execution strategy used"
