@@ -242,7 +242,7 @@ watchEffect(() => {
             Add a post
           </h4>
           <UiAlert
-            v-if="userRoles && userRoles.length"
+            v-if="userRoles && userRoles.length === 0"
             type="warning"
             class="mb-4"
           >
