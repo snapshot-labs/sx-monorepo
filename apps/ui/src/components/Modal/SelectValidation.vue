@@ -204,9 +204,10 @@ function handleSelect(validationDetails: ValidationDetails) {
     form.value.stamps ??= [];
 
     // Remove unsupported options
-    form.value.stamps = definition.value.properties.stamps.options
-      .filter(option => form.value.stamps.includes(option.id))
-      .map(option => option.id);
+    form.value.stamps =
+      definition.value.properties?.stamps?.options
+        ?.filter(option => form.value.stamps.includes(option.id))
+        ?.map(option => option.id) ?? form.value.stamps;
   }
 }
 
