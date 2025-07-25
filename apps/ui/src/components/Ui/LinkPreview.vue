@@ -17,8 +17,8 @@ const props = withDefaults(
 
 type Preview = {
   meta: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
   };
   links: {
     icon: { href: string }[];
@@ -32,6 +32,15 @@ const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
 
+async function isImageUrlValid(url: string): Promise<boolean> {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
 async function update(val: string) {
   try {
     preview.value = null;
@@ -44,12 +53,9 @@ async function update(val: string) {
     preview.value = await result.json();
 
     if (preview.value?.links?.icon[0]?.href) {
-      await fetch(preview.value.links.icon[0].href, {
-        method: 'HEAD',
-        mode: 'no-cors'
-      });
-
-      previewIconResolved.value = true;
+      previewIconResolved.value = await isImageUrlValid(
+        preview.value.links.icon[0].href
+      );
     }
   } catch {
   } finally {

@@ -21,9 +21,27 @@ export const Default: Story = {
   }
 };
 
-export const WithDefault: Story = {
+export const WithInvalidURLAndDefault: Story = {
   args: {
     url: 'not-a-valid-url',
     showDefault: true
+  }
+};
+
+export const WithURLWithoutImage: Story = {
+  args: {
+    url: 'https://example.com'
+  }
+};
+
+export const WithURLWithEmptyPreview: Story = {
+  args: {
+    url: 'https://bad.com'
+  }
+};
+
+export const WithURLWithExpriedSSL: Story = {
+  args: {
+    url: 'https://expired.badssl.com/'
   }
 };
