@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useDirty } from '@/composables/useDirty';
+
 const model = defineModel<boolean>();
 
 const props = defineProps<{
@@ -7,13 +9,13 @@ const props = defineProps<{
   definition: any;
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
   get() {
     if (
       model.value === undefined &&
-      !dirty.value &&
+      !isDirty.value &&
       props.definition.default !== undefined
     ) {
       return props.definition.default;
@@ -22,19 +24,14 @@ const inputValue = computed({
     return model.value;
   },
   set(newValue: boolean) {
-    dirty.value = true;
     model.value = newValue;
   }
 });
 
 onMounted(() => {
-  if (model.value === undefined && !dirty.value) {
+  if (model.value === undefined && !isDirty.value) {
     model.value = props.definition.default ?? false;
   }
-});
-
-watch(model, () => {
-  dirty.value = true;
 });
 </script>
 
@@ -43,7 +40,7 @@ watch(model, () => {
     v-slot="{ id }"
     :definition="definition"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
   >
     <input :id="id" v-model="inputValue" type="checkbox" class="mt-[7px]" />
   </UiWrapperInput>

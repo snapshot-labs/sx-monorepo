@@ -7,6 +7,7 @@ import {
   ComboboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
+import { useDirty } from '@/composables/useDirty';
 import { omit } from '@/helpers/utils';
 import { DefinitionWithOptions } from '@/types';
 
@@ -22,7 +23,7 @@ const props = defineProps<{
   required?: boolean;
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 const query = ref('');
 
 const filteredOptions = computed(() => {
@@ -35,14 +36,13 @@ const filteredOptions = computed(() => {
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
     }
 
     return model.value;
   },
   set(newValue: T | null) {
-    dirty.value = true;
     query.value = '';
     model.value = newValue;
   }
@@ -72,17 +72,13 @@ function getDisplayValue(value: T | null) {
   const option = props.definition.options.find(option => option.id === value);
   return option ? option.name || String(option.id) : '';
 }
-
-watch(model, () => {
-  dirty.value = true;
-});
 </script>
 
 <template>
   <UiWrapperInput
     :definition="inline ? omit(definition, ['title']) : definition"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
     :required="required"
     class="relative w-auto"
     :class="{
