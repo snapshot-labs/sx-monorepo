@@ -269,13 +269,16 @@ export function useUserRolesQuery({
 }) {
   return useQuery({
     queryKey: ['townhall', 'userRoles', { spaceId, user }, 'list'],
-    queryFn: () => {
-      return getUserRoles(toValue(spaceId), toValue(user));
-    },
-    retry: (failureCount, error) => {
-      if (error?.message.includes('Row not found')) return false;
+    queryFn: async () => {
+      try {
+        return await getUserRoles(toValue(spaceId), toValue(user));
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('Row not found')) {
+          return [];
+        }
 
-      return failureCount < 3;
+        throw e;
+      }
     },
     enabled: () => !!toValue(user),
     staleTime: DEFAULT_STALE_TIME

@@ -60,6 +60,26 @@ export default class Townhall extends Agent {
     return false;
   }
 
+  async getHasRoleClaimed(space: number, signer: string) {
+    const userRoles: string[] = await this.get(
+      `space:${space}:userRoles:${signer}`
+    );
+
+    if (!userRoles) return false;
+
+    for (const role of userRoles) {
+      const roleData: RoleData | null = await this.get(
+        `space:${space}:role:${role}`
+      );
+
+      if (roleData) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   async createSpace(data: unknown, { signer }: { signer: string }) {
     const user = await this.getSigner(signer);
 
@@ -142,9 +162,12 @@ export default class Townhall extends Agent {
     }: { space: number; category: number; metadataUri: string },
     { signer }: { signer: string }
   ) {
-    const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
-
     const author = await this.getSigner(signer);
+
+    const hasRoleClaimed = await this.getHasRoleClaimed(space, author);
+    this.assert(hasRoleClaimed, 'You have not claimed a role in this space');
+
+    const id: number = (await this.get(`space:${space}:topics:id`)) || 1;
 
     this.write(`space:${space}:topics:id`, id + 1);
     this.emit('new_topic', [space, id, category, author, metadataUri]);
@@ -167,11 +190,13 @@ export default class Townhall extends Agent {
     { signer }: { signer: string }
   ) {
     // @TODO: reject the post if it was already proposed
+    const author = await this.getSigner(signer);
+
+    const hasRoleClaimed = await this.getHasRoleClaimed(space, author);
+    this.assert(hasRoleClaimed, 'You have not claimed a role in this space');
 
     const id: number =
       (await this.get(`space:${space}:topic:${topic}:posts:id`)) || 1;
-
-    const author = await this.getSigner(signer);
 
     this.write(`space:${space}:topic:${topic}:posts:id`, id + 1);
     this.emit('new_post', [space, topic, id, author, metadataUri]);
