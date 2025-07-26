@@ -72,7 +72,7 @@ debouncedWatch(
 
 <template>
   <div
-    v-if="preview?.meta.title || (showDefault && !previewLoading)"
+    v-if="preview?.meta?.title || (showDefault && !previewLoading)"
     class="flex items-center px-4 py-3 border rounded-lg"
     :class="{
       'gap-2': showDefault,
