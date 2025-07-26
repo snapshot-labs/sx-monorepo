@@ -21,6 +21,10 @@ import { spaceChildrenRoutes } from './common';
 
 export default [
   {
+    path: '/',
+    redirect: '/home'
+  },
+  {
     path: '/about',
     name: 'site',
     component: Site,
