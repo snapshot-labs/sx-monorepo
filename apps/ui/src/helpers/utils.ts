@@ -530,96 +530,109 @@ export function getStampUrl(
   return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
 
-export function resizeImage(
+export async function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  const url = URL.createObjectURL(file);
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = url;
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+export async function loadImageFromIpfs(ipfsUrl: string): Promise<File> {
+  const imageUrl = getUrl(ipfsUrl);
+  if (!imageUrl) {
+    throw new Error('Unable to resolve IPFS URL');
+  }
+
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  return new File([blob], 'image', { type: blob.type });
+}
+
+export async function resizeImage(
   file: File,
   width: number,
   height: number
 ): Promise<File> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
+  const img = await loadImageFromFile(file);
 
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
 
-      if (!ctx) {
-        reject(new Error('Failed to get canvas context'));
+  if (!ctx) {
+    throw new Error('Failed to get canvas context');
+  }
+
+  // Calculate scale factors for both dimensions
+  const scaleX = width / img.width;
+  const scaleY = height / img.height;
+
+  // Use the larger scale factor to ensure both minimum dimensions are met
+  const scale = Math.max(scaleX, scaleY);
+
+  const scaledWidth = img.width * scale;
+  const scaledHeight = img.height * scale;
+
+  // Calculate source dimensions for cropping
+  let sourceX = 0;
+  let sourceY = 0;
+  let sourceWidth = img.width;
+  let sourceHeight = img.height;
+
+  if (scaledWidth > width) {
+    // Image is too wide after scaling, crop from center
+    const cropWidth = width / scale;
+    sourceX = (img.width - cropWidth) / 2;
+    sourceWidth = cropWidth;
+  }
+
+  if (scaledHeight > height) {
+    // Image is too tall after scaling, crop from center
+    const cropHeight = height / scale;
+    sourceY = (img.height - cropHeight) / 2;
+    sourceHeight = cropHeight;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Fill background with transparent
+  ctx.clearRect(0, 0, width, height);
+
+  // Draw the image, cropping from center if necessary
+  ctx.drawImage(
+    img,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    width,
+    height
+  );
+
+  return new Promise<File>((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (!blob) {
+        reject(new Error('Failed to convert canvas to blob'));
         return;
       }
 
-      // Calculate scale factors for both dimensions
-      const scaleX = width / img.width;
-      const scaleY = height / img.height;
+      const resizedFile = new File([blob], file.name, {
+        type: file.type,
+        lastModified: Date.now()
+      });
 
-      // Use the larger scale factor to ensure both minimum dimensions are met
-      const scale = Math.max(scaleX, scaleY);
-
-      const scaledWidth = img.width * scale;
-      const scaledHeight = img.height * scale;
-
-      // Calculate source dimensions for cropping
-      let sourceX = 0;
-      let sourceY = 0;
-      let sourceWidth = img.width;
-      let sourceHeight = img.height;
-
-      if (scaledWidth > width) {
-        // Image is too wide after scaling, crop from center
-        const cropWidth = width / scale;
-        sourceX = (img.width - cropWidth) / 2;
-        sourceWidth = cropWidth;
-      }
-
-      if (scaledHeight > height) {
-        // Image is too tall after scaling, crop from center
-        const cropHeight = height / scale;
-        sourceY = (img.height - cropHeight) / 2;
-        sourceHeight = cropHeight;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      // Fill background with transparent
-      ctx.clearRect(0, 0, width, height);
-
-      // Draw the image, cropping from center if necessary
-      ctx.drawImage(
-        img,
-        sourceX,
-        sourceY,
-        sourceWidth,
-        sourceHeight,
-        0,
-        0,
-        width,
-        height
-      );
-
-      canvas.toBlob(
-        blob => {
-          if (!blob) {
-            reject(new Error('Failed to convert canvas to blob'));
-            return;
-          }
-
-          const resizedFile = new File([blob], file.name, {
-            type: file.type,
-            lastModified: Date.now()
-          });
-
-          resolve(resizedFile);
-        },
-        file.type,
-        0.9 // Quality for JPEG
-      );
-    };
-
-    img.onerror = () => {
-      reject(new Error('Failed to load image'));
-    };
-
-    img.src = URL.createObjectURL(file);
+      resolve(resizedFile);
+    }, file.type);
   });
 }
 
