@@ -3,12 +3,14 @@ import { getTopic } from '@/helpers/townhall/api';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { getUserFacingErrorMessage, sleep } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { useUserRolesQuery } from '@/queries/townhall';
 import { Space } from '@/types';
 
 const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const route = useRoute();
 const router = useRouter();
+const { web3 } = useWeb3();
 const { sendTopic } = useTownhall();
 const { addNotification } = useUiStore();
 const { setTitle } = useTitle();
@@ -19,6 +21,7 @@ const body = ref('');
 const discussion = ref('');
 const submitLoading = ref(false);
 
+const spaceId = computed(() => props.townhallSpace.space_id);
 const categoryId = computed(() => {
   const category = route.query.category;
 
@@ -28,6 +31,11 @@ const categoryId = computed(() => {
   }
 
   return null;
+});
+
+const { data: userRoles } = useUserRolesQuery({
+  spaceId,
+  user: toRef(() => web3.value.account)
 });
 
 const TITLE_DEFINITION = {
@@ -73,6 +81,10 @@ const formErrors = computed(() => {
 });
 
 const isFormValid = computed(() => {
+  if (!userRoles.value || userRoles.value.length === 0) {
+    return false;
+  }
+
   return Object.keys(formErrors.value).length === 0;
 });
 
@@ -152,6 +164,20 @@ watchEffect(() => {
 <template>
   <div class="pt-5">
     <UiContainer class="!max-w-[710px] s-box space-y-3">
+      <UiAlert
+        v-if="userRoles && userRoles.length === 0"
+        type="error"
+        class="mb-4"
+      >
+        You need to
+        <router-link
+          :to="{ name: 'space-townhall-roles' }"
+          class="font-semibold"
+        >
+          claim a role
+        </router-link>
+        before creating a topic.
+      </UiAlert>
       <div>
         <UiInputString
           v-model="title"
