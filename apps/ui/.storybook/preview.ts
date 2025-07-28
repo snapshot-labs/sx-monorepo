@@ -23,6 +23,12 @@ export const decorators: Decorator[] = [
 
 const preview: Preview = {
   parameters: {
+    backgrounds: {
+      options: {
+        dark: { name: 'dark', value: 'rgb(24, 23, 28)' },
+        light: { name: 'light', value: '#ffffff' }
+      }
+    },
     controls: {
       matchers: {
         color: /(background|color)$/i,
