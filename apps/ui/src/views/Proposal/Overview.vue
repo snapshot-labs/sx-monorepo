@@ -207,6 +207,9 @@ async function handleFlagClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal flagged successfully.');
+
       router.push({
         name: 'space-overview'
       });
@@ -228,6 +231,9 @@ async function handleCancelClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal cancelled successfully.');
+
       router.push({
         name: 'space-overview'
       });
