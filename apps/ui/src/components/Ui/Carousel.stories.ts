@@ -1,6 +1,15 @@
 import { Meta, StoryObj } from '@storybook/vue3-vite';
 import Carousel from './Carousel.vue';
 
+const meta = {
+  title: 'Ui/Carousel',
+  component: Carousel,
+  tags: ['autodocs']
+} satisfies Meta<typeof Carousel>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
 const carouselContent = `<div class="flex min-w-max">
       <div class="w-48 p-4 bg-white border rounded-lg shadow-sm mx-3">
         <h3 class="font-semibold mb-2">Card Title 1</h3>
@@ -19,15 +28,6 @@ const carouselContent = `<div class="flex min-w-max">
         <p class="text-sm text-gray-600">Fourth card to show continuous scrolling effect.</p>
       </div>
     </div>`;
-
-const meta = {
-  title: 'Ui/Carousel',
-  component: Carousel,
-  tags: ['autodocs']
-} satisfies Meta<typeof Carousel>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {},
