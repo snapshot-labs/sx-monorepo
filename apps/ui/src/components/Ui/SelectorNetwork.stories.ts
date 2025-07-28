@@ -8,10 +8,15 @@ const meta = {
   parameters: {
     docs: {
       story: {
-        height: '350px'
+        height: '300px'
       }
     }
-  }
+  },
+  decorators: [
+    () => ({
+      template: '<div class="s-box"><story /></div>'
+    })
+  ]
 } satisfies Meta<typeof SelectorNetwork>;
 
 export default meta;
