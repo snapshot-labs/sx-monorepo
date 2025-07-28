@@ -6,6 +6,7 @@ import {
   useQuery,
   useQueryClient
 } from '@tanstack/vue-query';
+import kebabCase from 'lodash.kebabcase';
 import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useTownhallSpace';
 import {
@@ -24,7 +25,6 @@ import {
   Result
 } from '@/helpers/townhall/api';
 import { Category, Role, Space, Topic, Vote } from '@/helpers/townhall/types';
-import { getSlug } from '@/helpers/utils';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
@@ -426,7 +426,7 @@ export function useCreateCategoryMutation({
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
         description: variables.description,
-        slug: getSlug(variables.name)
+        slug: kebabCase(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(
@@ -486,7 +486,7 @@ export function useEditCategoryMutation({
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
         description: variables.description,
-        slug: getSlug(variables.name)
+        slug: kebabCase(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(

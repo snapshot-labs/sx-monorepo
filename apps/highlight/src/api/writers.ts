@@ -1,3 +1,4 @@
+import kebabCase from 'lodash.kebabcase';
 import { z } from 'zod';
 import { Writer } from './indexer/types';
 import {
@@ -11,7 +12,7 @@ import {
   UserRole,
   Vote
 } from '../../.checkpoint/models';
-import { getJSON, getSlug } from '../utils';
+import { getJSON } from '../utils';
 
 const SetAliasEventData = z.tuple([
   z.string(), // from
@@ -150,7 +151,7 @@ export function createWriters(indexerName: string) {
     category.parent_category_id = parentCategoryId;
     category.parent_category =
       parentCategoryId !== 0 ? `${spaceId}/${parentCategoryId}` : null;
-    category.slug = getSlug(metadata.name || id);
+    category.slug = kebabCase(metadata.name || id.toString());
     category.created = unit.timestamp;
 
     await category.save();
@@ -176,7 +177,7 @@ export function createWriters(indexerName: string) {
 
     category.name = metadata.name || '';
     category.description = metadata.description || '';
-    category.slug = getSlug(metadata.name || id);
+    category.slug = kebabCase(metadata.name || id.toString());
     await category.save();
   };
 
