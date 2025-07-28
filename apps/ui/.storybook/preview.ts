@@ -1,11 +1,26 @@
 import { Preview, Decorator, setup } from '@storybook/vue3-vite';
+import { createRouter, createMemoryHistory } from 'vue-router';
 import VueTippy from 'vue-tippy';
 import { withThemeByClassName } from '@storybook/addon-themes';
 
 import '../src/style.scss';
 import './style.css';
+import { h } from 'vue';
 
 setup(app => {
+  app.use(
+    createRouter({
+      history: createMemoryHistory(),
+      routes: [
+        {
+          path: '/:pathMatch(.*)?',
+          name: 'home',
+          component: async () => h('div')
+        }
+      ]
+    })
+  );
+
   app.use(VueTippy, {
     defaultProps: { appendTo: 'parent' }
   });

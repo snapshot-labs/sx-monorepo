@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { RouteLocationNamedRaw } from 'vue-router';
+import { RouteLocationRaw } from 'vue-router';
 import { hexToRgb } from '@/helpers/utils';
 
 const props = defineProps<{
   label: string;
   color: string;
-  to?: RouteLocationNamedRaw;
+  to?: RouteLocationRaw;
 }>();
 
 const { currentTheme } = useTheme();
