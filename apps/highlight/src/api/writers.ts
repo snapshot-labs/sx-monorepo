@@ -1,4 +1,5 @@
 import { TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
+import kebabCase from 'lodash.kebabcase';
 import { z } from 'zod';
 import { Writer } from './indexer/types';
 import {
@@ -150,6 +151,9 @@ export function createWriters(indexerName: string) {
     category.name = metadata.name || '';
     category.description = metadata.description || '';
     category.parent_category_id = parentCategoryId;
+    category.parent_category =
+      parentCategoryId !== 0 ? `${spaceId}/${parentCategoryId}` : null;
+    category.slug = kebabCase(metadata.name || id.toString());
     category.created = unit.timestamp;
 
     await category.save();
@@ -175,7 +179,7 @@ export function createWriters(indexerName: string) {
 
     category.name = metadata.name || '';
     category.description = metadata.description || '';
-
+    category.slug = kebabCase(metadata.name || id.toString());
     await category.save();
   };
 

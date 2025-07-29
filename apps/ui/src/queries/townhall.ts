@@ -6,6 +6,7 @@ import {
   useQuery,
   useQueryClient
 } from '@tanstack/vue-query';
+import kebabCase from 'lodash.kebabcase';
 import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useTownhallSpace';
 import {
@@ -269,13 +270,16 @@ export function useUserRolesQuery({
 }) {
   return useQuery({
     queryKey: ['townhall', 'userRoles', { spaceId, user }, 'list'],
-    queryFn: () => {
-      return getUserRoles(toValue(spaceId), toValue(user));
-    },
-    retry: (failureCount, error) => {
-      if (error?.message.includes('Row not found')) return false;
+    queryFn: async () => {
+      try {
+        return await getUserRoles(toValue(spaceId), toValue(user));
+      } catch (e) {
+        if (e instanceof Error && e.message.includes('Row not found')) {
+          return [];
+        }
 
-      return failureCount < 3;
+        throw e;
+      }
     },
     enabled: () => !!toValue(user),
     staleTime: DEFAULT_STALE_TIME
@@ -427,7 +431,8 @@ export function useCreateCategoryMutation({
       const category = {
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
-        description: variables.description
+        description: variables.description,
+        slug: kebabCase(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(
@@ -486,7 +491,8 @@ export function useEditCategoryMutation({
       const category = {
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
-        description: variables.description
+        description: variables.description,
+        slug: kebabCase(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(
