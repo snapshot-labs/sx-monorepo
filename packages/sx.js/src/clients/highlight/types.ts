@@ -1,4 +1,8 @@
 import { TypedDataDomain } from '@ethersproject/abstract-signer';
+import { TOWNHALL_PERMISSIONS } from '../../highlightConstants';
+
+type PermissionLevel =
+  (typeof TOWNHALL_PERMISSIONS)[keyof typeof TOWNHALL_PERMISSIONS];
 
 export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
@@ -61,6 +65,7 @@ export type Vote = {
 
 export type CreateRole = {
   space: number;
+  permissionLevel: PermissionLevel;
   metadataUri: string;
 };
 

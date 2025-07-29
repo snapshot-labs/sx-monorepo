@@ -83,6 +83,7 @@ type Role {
   name: String!
   description: String!
   color: String!
+  isAdmin: Boolean!
   # Workaround as we can't cascade delete yet
   deleted: Boolean!
   created: Int!

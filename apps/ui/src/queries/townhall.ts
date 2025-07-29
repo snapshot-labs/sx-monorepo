@@ -347,6 +347,8 @@ export function useRoleMutation({
 }
 
 export function useCreateSpaceMutation() {
+  const { web3 } = useWeb3();
+
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
   const { sendCreateSpace } = useTownhall();
@@ -376,6 +378,7 @@ export function useCreateSpaceMutation() {
         () => ({
           id: spaceId.toString(),
           space_id: spaceId,
+          owner: web3.value.account,
           topic_count: 0,
           vote_count: 0
         })

@@ -1,4 +1,5 @@
 import kebabCase from 'lodash.kebabcase';
+import { TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
 import { z } from 'zod';
 import { Writer } from './indexer/types';
 import {
@@ -87,6 +88,7 @@ const NewVoteEventData = z.tuple([
 const NewRoleEventData = z.tuple([
   z.number(), // spaceId
   z.string(), // id
+  z.number(), // permissionLevel
   z.string() // metadataUri
 ]);
 const EditRoleEventData = NewRoleEventData;
@@ -375,9 +377,11 @@ export function createWriters(indexerName: string) {
   };
 
   const handleNewRole: Writer = async ({ unit, payload }) => {
-    const [spaceId, id, metadataUri] = NewRoleEventData.parse(payload.data);
+    const [spaceId, id, permissionLevel, metadataUri] = NewRoleEventData.parse(
+      payload.data
+    );
 
-    console.log('Handle new role', spaceId, id, metadataUri);
+    console.log('Handle new role', spaceId, id, permissionLevel, metadataUri);
 
     const metadata = await getJSON(metadataUri);
 
@@ -386,14 +390,17 @@ export function createWriters(indexerName: string) {
     role.name = metadata.name || '';
     role.description = metadata.description || '';
     role.color = metadata.color || '';
+    role.isAdmin = permissionLevel === TOWNHALL_PERMISSIONS.ADMINISTRATOR;
     role.created = unit.timestamp;
     await role.save();
   };
 
   const handleEditRole: Writer = async ({ payload }) => {
-    const [spaceId, id, metadataUri] = EditRoleEventData.parse(payload.data);
+    const [spaceId, id, permissionLevel, metadataUri] = EditRoleEventData.parse(
+      payload.data
+    );
 
-    console.log('Handle edit role', spaceId, id, metadataUri);
+    console.log('Handle edit role', spaceId, id, permissionLevel, metadataUri);
 
     const metadata = await getJSON(metadataUri);
 
@@ -404,6 +411,7 @@ export function createWriters(indexerName: string) {
     role.name = metadata.name || '';
     role.description = metadata.description || '';
     role.color = metadata.color || '';
+    role.isAdmin = permissionLevel === TOWNHALL_PERMISSIONS.ADMINISTRATOR;
     await role.save();
   };
 

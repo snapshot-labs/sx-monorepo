@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
+import { compareAddresses } from '@/helpers/utils';
 import {
   useCategoriesQuery,
   useCategoryQuery,
   useDeleteCategoryMutation,
-  useTopicsQuery
+  useTopicsQuery,
+  useUserRolesQuery
 } from '@/queries/townhall';
 import { Space } from '@/types';
 
@@ -12,6 +14,7 @@ const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 
 const { setTitle } = useTitle();
 const route = useRoute();
+const { web3 } = useWeb3();
 
 const spaceId = computed(() => props.townhallSpace.space_id);
 const categoryId = computed(() => {
@@ -27,6 +30,10 @@ const { data: category } = useCategoryQuery({
 const { data: categories } = useCategoriesQuery({
   spaceId,
   categoryId
+});
+const { data: userRoles } = useUserRolesQuery({
+  spaceId: spaceId,
+  user: toRef(() => web3.value.account)
 });
 const { mutate: deleteCategory } = useDeleteCategoryMutation({
   spaceId,
@@ -47,6 +54,14 @@ const {
 
 const addCategoryModalOpen = ref(false);
 const activeCategoryId = ref<string | null>(null);
+
+const isUserAdmin = computed(() => {
+  if (compareAddresses(props.townhallSpace.owner, web3.value.account)) {
+    return true;
+  }
+
+  return (userRoles.value ?? []).some(role => role.isAdmin);
+});
 
 function setAddCategoryModalStatus(
   open: boolean = false,
@@ -131,7 +146,7 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
               Roles
             </AppLink>
           </UiDropdownItem>
-          <UiDropdownItem v-slot="{ active }">
+          <UiDropdownItem v-if="isUserAdmin" v-slot="{ active }">
             <button
               type="button"
               class="flex items-center gap-2"
@@ -167,7 +182,10 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
             <h3 class="text-skin-link text-[21px]" v-text="c.name" />
             <div class="text-skin-text">{{ c.topic_count }} topic(s)</div>
           </div>
-          <UiDropdown class="flex gap-3 items-center h-[24px]">
+          <UiDropdown
+            v-if="isUserAdmin"
+            class="flex gap-3 items-center h-[24px]"
+          >
             <template #button>
               <UiButton class="!p-0 !border-0 !h-auto">
                 <IH-dots-vertical
