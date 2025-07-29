@@ -142,14 +142,14 @@ function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
     return {
       name,
       address,
-      chainId: CHAIN_IDS[network]
+      chainId: String(CHAIN_IDS[network])
     };
   }
 
   return {
     name,
     address,
-    chainId: chain_id
+    chainId: String(chain_id)
   };
 }
 
