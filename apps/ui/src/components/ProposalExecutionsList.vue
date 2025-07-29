@@ -31,6 +31,7 @@ function downloadExecution(execution: ProposalExecution) {
   a.href = url;
   a.download = `execution-${execution.safeAddress}.json`;
   a.click();
+  URL.revokeObjectURL(url);
 }
 </script>
 
