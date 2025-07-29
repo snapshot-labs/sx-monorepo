@@ -6,6 +6,7 @@ import {
   useQuery,
   useQueryClient
 } from '@tanstack/vue-query';
+import kebabCase from 'lodash.kebabcase';
 import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useTownhallSpace';
 import {
@@ -430,7 +431,8 @@ export function useCreateCategoryMutation({
       const category = {
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
-        description: variables.description
+        description: variables.description,
+        slug: kebabCase(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(
@@ -489,7 +491,8 @@ export function useEditCategoryMutation({
       const category = {
         ...newCategoryEventToEntry(eventData),
         name: variables.name,
-        description: variables.description
+        description: variables.description,
+        slug: kebabCase(variables.name)
       };
 
       queryClient.setQueryData<Category[]>(
