@@ -1,6 +1,8 @@
 import { Response } from 'express';
 
 export const IPFS_GATEWAY = process.env.IPFS_GATEWAY || 'pineapple.fyi';
+export const SWARM_GATEWAY =
+  process.env.SWARM_GATEWAY || 'api.gateway.ethswarm.org/bzz';
 
 export function getUrl(uri: string, gateway = IPFS_GATEWAY) {
   const ipfsGateway = `https://${gateway}`;
@@ -8,6 +10,7 @@ export function getUrl(uri: string, gateway = IPFS_GATEWAY) {
   if (
     !uri.startsWith('ipfs://') &&
     !uri.startsWith('ipns://') &&
+    !uri.startsWith('swarm://') &&
     !uri.startsWith('https://') &&
     !uri.startsWith('http://')
   )
@@ -17,6 +20,8 @@ export function getUrl(uri: string, gateway = IPFS_GATEWAY) {
     return uri.replace('ipfs://', `${ipfsGateway}/ipfs/`);
   if (uriScheme === 'ipns')
     return uri.replace('ipns://', `${ipfsGateway}/ipns/`);
+  if (uriScheme === 'swarm')
+    return uri.replace('swarm://', `https://${SWARM_GATEWAY}/`);
   return uri;
 }
 
