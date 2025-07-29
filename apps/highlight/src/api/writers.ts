@@ -1,5 +1,5 @@
-import kebabCase from 'lodash.kebabcase';
 import { TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
+import kebabCase from 'lodash.kebabcase';
 import { z } from 'zod';
 import { Writer } from './indexer/types';
 import {
