@@ -11,7 +11,9 @@ test('should have functional search page', async ({ page }) => {
   await searchBox.fill('nosuchspacenosuchspacenosuchspacedummy');
   await searchBox.press('Enter');
 
-  await expect(page.getByText('No results found for your')).toBeVisible();
+  await expect(
+    page.getByText('No results found for your search')
+  ).toBeVisible();
 
   await searchBox.click();
   await searchBox.clear();
@@ -37,7 +39,7 @@ test('should be able to switch to Snapshot X protocol', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Nimbora' })).toBeVisible();
 
   await page.getByRole('combobox', { name: 'All networks' }).click();
-  await page.getByText('Base').click();
+  await page.getByRole('option', { name: 'Base' }).click();
 
   await expect(page.getByRole('link', { name: 'GRQ DAO' })).toBeVisible();
 });
