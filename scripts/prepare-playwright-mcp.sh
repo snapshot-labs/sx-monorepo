@@ -45,5 +45,3 @@ fi
 
 echo "MetaMask extension prepared successfully in .browser directory"
 
-echo "Before Agents can use your MetaMask wallet, you need to restore it."
-echo "You can do this by running the following command:"
