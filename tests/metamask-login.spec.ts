@@ -16,7 +16,7 @@ test('should successfully login with MetaMask', async ({ page, wallet }) => {
     page.getByRole('heading', { name: 'Log in', exact: true })
   ).toBeVisible();
 
-  await page.getByRole('button', { name: /MetaMask/ }).click();
+  await page.getByRole('button', { name: 'MetaMask' }).click();
 
   await wallet.approveConnection();
 
@@ -49,7 +49,7 @@ test('should successfully logout after logging in with MetaMask', async ({
     page.getByRole('heading', { name: 'Log in', exact: true })
   ).toBeVisible();
 
-  await page.getByRole('button', { name: /MetaMask/ }).click();
+  await page.getByRole('button', { name: 'MetaMask' }).click();
 
   await wallet.approveConnection();
 
