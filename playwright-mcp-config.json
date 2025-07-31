@@ -1,0 +1,12 @@
+{
+  "browser": {
+    "launchOptions": {
+      "channel": "chromium",
+      "headless": false,
+      "args": [
+        "--disable-extensions-except=.browser/metamask-extension/dist/chrome",
+        "--load-extension=.browser/metamask-extension/dist/chrome"
+      ]
+    }
+  }
+}
