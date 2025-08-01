@@ -1,6 +1,6 @@
 import { expect, test } from './fixtures/base';
 
-test('space overview page should load', async ({
+test('should load space overview page', async ({
   spacePage,
   proposalsPage
 }) => {
@@ -18,7 +18,7 @@ test('space overview page should load', async ({
   await proposalsPage.isReady();
 });
 
-test('navigate to proposals page', async ({
+test('should navigate to proposal page', async ({
   page,
   proposalsPage,
   proposalPage
@@ -35,7 +35,11 @@ test('navigate to proposals page', async ({
   await proposalPage.isReady();
 });
 
-test('view votes', async ({ page, proposalPage, modalHelper }) => {
+test('should load votes and vote reason', async ({
+  page,
+  proposalPage,
+  modalHelper
+}) => {
   await proposalPage.goto(
     's:arbitrumfoundation.eth',
     '0xd3d164905fee7dfd8516db6150a97f7f91cf6f9377f614fa6a82333c4fb20546'
@@ -57,7 +61,7 @@ test('view votes', async ({ page, proposalPage, modalHelper }) => {
   await modalHelper.close();
 });
 
-test('view discussion', async ({ page, proposalPage }) => {
+test('should load discussion', async ({ page, proposalPage }) => {
   await proposalPage.goto(
     's:arbitrumfoundation.eth',
     '0xd3d164905fee7dfd8516db6150a97f7f91cf6f9377f614fa6a82333c4fb20546'
