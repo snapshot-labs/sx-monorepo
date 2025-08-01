@@ -147,3 +147,29 @@ export class ProposalPage {
     await locator.click();
   }
 }
+
+export class ModalHelper {
+  readonly page: Page;
+  readonly modal: Locator;
+  readonly header: Locator;
+  readonly body: Locator;
+  readonly footer: Locator;
+  readonly closeButton: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.modal = page.getByTestId('modal');
+    this.header = this.modal.getByTestId('modal-header');
+    this.body = this.modal.getByTestId('modal-body');
+    this.footer = this.modal.getByTestId('modal-footer');
+    this.closeButton = this.modal.getByRole('button', { name: 'Close modal' });
+  }
+
+  async isReady() {
+    return expect(this.modal).toBeVisible();
+  }
+
+  async close() {
+    await this.closeButton.click();
+  }
+}
