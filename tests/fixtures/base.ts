@@ -1,5 +1,6 @@
-import { test as base } from '@playwright/test';
+import { test as base } from './metamask';
 import {
+  AuthPage,
   ExplorePage,
   ModalHelper,
   ProposalPage,
@@ -9,12 +10,17 @@ import {
 export { expect } from '@playwright/test';
 
 export const test = base.extend<{
+  authPage: AuthPage;
   explorePage: ExplorePage;
   spacePage: SpacePage;
   proposalsPage: ProposalsPage;
   proposalPage: ProposalPage;
   modalHelper: ModalHelper;
 }>({
+  authPage: async ({ page }, use) => {
+    const authPage = new AuthPage(page);
+    await use(authPage);
+  },
   explorePage: async ({ page }, use) => {
     const explorePage = new ExplorePage(page);
     await use(explorePage);
