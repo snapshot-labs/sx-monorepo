@@ -1,5 +1,33 @@
 import { expect, Locator, Page } from '@playwright/test';
 
+export class AuthPage {
+  readonly page: Page;
+  readonly loginButton: Locator;
+  readonly profileButton: Locator;
+
+  constructor(page: Page) {
+    this.page = page;
+    this.loginButton = page
+      .getByRole('banner')
+      .getByRole('button', { name: 'Log in' });
+    this.profileButton = page.getByTestId('profile-button');
+  }
+
+  async login() {
+    await this.loginButton.click();
+
+    await expect(
+      this.page.getByRole('heading', { name: 'Log in', exact: true })
+    ).toBeVisible();
+
+    await this.page.getByRole('button', { name: 'MetaMask' }).click();
+  }
+
+  async logout() {
+    await this.profileButton.click();
+    await this.page.getByRole('button', { name: 'Log out' }).click();
+  }
+}
 export class ExplorePage {
   readonly page: Page;
   readonly searchInput: Locator;
