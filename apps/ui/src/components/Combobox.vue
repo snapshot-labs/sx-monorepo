@@ -103,6 +103,7 @@ watch(model, () => {
         >
           <ComboboxButton
             as="div"
+            :aria-label="definition.title"
             :data-value="content"
             :class="{
               sizer: inline,

@@ -50,6 +50,12 @@ yarn lint
 yarn test
 ```
 
+### Run E2E tests using Playwright
+
+```
+yarn test:e2e
+```
+
 ### Verifies TypeScript code
 
 ```
