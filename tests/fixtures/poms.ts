@@ -112,6 +112,10 @@ export class SpacePage {
   async goto(spaceId: string) {
     await this.page.goto(`/#/${spaceId}`);
   }
+
+  async isReady() {
+    return expect(this.spaceName).toBeVisible();
+  }
 }
 
 export class ProposalsPage {

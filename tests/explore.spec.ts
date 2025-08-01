@@ -44,3 +44,14 @@ test('should fetch more spaces on scroll', async ({ page, explorePage }) => {
     .all();
   expect(spacesAfterScroll.length).toBeGreaterThan(initialSpaces.length);
 });
+
+test('should load space overview page', async ({ explorePage, spacePage }) => {
+  await explorePage.goto();
+
+  await explorePage.exploreSpacesList
+    .getByRole('link', { name: 'Arbitrum DAO' })
+    .click();
+
+  await spacePage.isReady();
+  await expect(spacePage.spaceName).toHaveText('Arbitrum DAO');
+});
