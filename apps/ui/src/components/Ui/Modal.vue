@@ -36,7 +36,7 @@ watch(open, val => {
 
 <template>
   <transition name="fade">
-    <div v-if="open" class="modal mx-auto">
+    <div v-if="open" class="modal mx-auto" data-testid="modal">
       <div class="backdrop" @click="closeable ? $emit('close') : null" />
       <div class="shell overflow-hidden relative rounded-none md:rounded-lg">
         <div v-if="$slots.header" class="border-b py-3 text-center">
