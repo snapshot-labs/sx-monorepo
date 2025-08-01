@@ -39,19 +39,28 @@ watch(open, val => {
     <div v-if="open" class="modal mx-auto" data-testid="modal">
       <div class="backdrop" @click="closeable ? $emit('close') : null" />
       <div class="shell overflow-hidden relative rounded-none md:rounded-lg">
-        <div v-if="$slots.header" class="border-b py-3 text-center">
+        <div
+          v-if="$slots.header"
+          class="border-b py-3 text-center"
+          data-testid="modal-header"
+        >
           <slot name="header" />
         </div>
-        <div class="modal-body">
+        <div class="modal-body" data-testid="modal-body">
           <slot />
         </div>
-        <div v-if="$slots.footer" class="border-t p-4 text-center">
+        <div
+          v-if="$slots.footer"
+          class="border-t p-4 text-center"
+          data-testid="modal-footer"
+        >
           <slot name="footer" />
         </div>
         <button
           v-if="closeable"
           type="button"
           class="absolute right-0 -top-1 p-4"
+          aria-label="Close modal"
           @click="$emit('close')"
         >
           <IH-x />

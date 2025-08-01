@@ -1,5 +1,11 @@
 import { test as base } from '@playwright/test';
-import { ExplorePage, ProposalPage, ProposalsPage, SpacePage } from './poms';
+import {
+  ExplorePage,
+  ModalHelper,
+  ProposalPage,
+  ProposalsPage,
+  SpacePage
+} from './poms';
 export { expect } from '@playwright/test';
 
 export const test = base.extend<{
@@ -7,6 +13,7 @@ export const test = base.extend<{
   spacePage: SpacePage;
   proposalsPage: ProposalsPage;
   proposalPage: ProposalPage;
+  modalHelper: ModalHelper;
 }>({
   explorePage: async ({ page }, use) => {
     const explorePage = new ExplorePage(page);
@@ -23,5 +30,9 @@ export const test = base.extend<{
   proposalPage: async ({ page }, use) => {
     const proposalPage = new ProposalPage(page);
     await use(proposalPage);
+  },
+  modalHelper: async ({ page }, use) => {
+    const modalHelper = new ModalHelper(page);
+    await use(modalHelper);
   }
 });

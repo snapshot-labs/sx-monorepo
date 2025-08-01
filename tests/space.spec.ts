@@ -35,7 +35,7 @@ test('navigate to proposals page', async ({
   await proposalPage.isReady();
 });
 
-test('view votes', async ({ page, proposalPage }) => {
+test('view votes', async ({ page, proposalPage, modalHelper }) => {
   await proposalPage.goto(
     's:arbitrumfoundation.eth',
     '0xd3d164905fee7dfd8516db6150a97f7f91cf6f9377f614fa6a82333c4fb20546'
@@ -46,14 +46,15 @@ test('view votes', async ({ page, proposalPage }) => {
 
   await page.getByRole('button', { name: 'Abstain Democratising' }).click();
 
-  // TODO: Create POM for modal
-  const modal = page.getByTestId('modal');
-  await expect(modal.getByRole('heading', { name: 'Reason' })).toBeVisible();
+  await modalHelper.isReady();
   await expect(
-    modal.getByText('Democratising lobbyism, on-chain. Check out')
+    modalHelper.header.getByRole('heading', { name: 'Reason' })
+  ).toBeVisible();
+  await expect(
+    modalHelper.body.getByText('Democratising lobbyism, on-chain. Check out')
   ).toBeVisible();
 
-  await modal.getByRole('button').click();
+  await modalHelper.close();
 });
 
 test('view discussion', async ({ page, proposalPage }) => {
