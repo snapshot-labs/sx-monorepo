@@ -36,6 +36,7 @@ defineOptions({ inheritAttrs: false });
 
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
+const uiStore = useUiStore();
 const { proposals, createDraft, refreshDrafts } = useEditor();
 const route = useRoute();
 const router = useRouter();
@@ -306,6 +307,8 @@ async function handleProposeClick() {
         proposal.value.labels,
         executions
       );
+
+      uiStore.addNotification('success', 'Proposal updated successfully.');
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
 
@@ -328,6 +331,8 @@ async function handleProposeClick() {
         proposalMaxEnd.value,
         executions
       );
+
+      uiStore.addNotification('success', 'Proposal created successfully.');
     }
     if (result) {
       queryClient.invalidateQueries({
@@ -492,7 +497,7 @@ watchEffect(() => {
       </div>
     </UiTopnav>
     <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-[72px]"
     >
       <div
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"

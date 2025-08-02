@@ -1,7 +1,6 @@
 import { keccak256 } from '@ethersproject/keccak256';
 import { faker } from '@faker-js/faker';
-import { getExecutionData } from '@snapshot-labs/sx';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
+import { getExecutionData, utils } from '@snapshot-labs/sx';
 import fetch from 'cross-fetch';
 import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
@@ -100,7 +99,7 @@ export function getExecutionHash({
   type: 'starknet' | 'evm';
   executionType: string;
   executionDestination: string | null;
-  transactions: MetaTransaction[];
+  transactions: utils.encoding.MetaTransaction[];
 }) {
   const data = getExecutionData(
     executionType as ExecutionType,

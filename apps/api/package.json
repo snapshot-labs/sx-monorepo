@@ -26,7 +26,7 @@
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/units": "^5.6.1",
     "@faker-js/faker": "^7.4.0",
-    "@snapshot-labs/checkpoint": "^0.1.0-beta.63",
+    "@snapshot-labs/checkpoint": "^0.1.0-beta.64",
     "@snapshot-labs/sx": "^0.1.0",
     "@types/bn.js": "^5.1.0",
     "@types/mysql": "^2.15.21",
@@ -46,7 +46,7 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.5.4",
-    "vitest": "^1.2.2"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   }
 }
