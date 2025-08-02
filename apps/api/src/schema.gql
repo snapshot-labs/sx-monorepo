@@ -9,17 +9,17 @@ Space represents a DAO or governance organization on Snapshot X
 type Space {
   "Unique identifier for the space"
   id: String!
-  "IPFS or external link to space metadata"
+  "UI link to space interface"
   link: String!
   "Whether the space is verified by Snapshot team"
   verified: Boolean!
-  "Whether the space has turbo mode enabled for faster operations"
+  "Whether the space has turbo mode enabled (premium space)"
   turbo: Boolean!
   "Space metadata containing name, description, avatar, and other details"
   metadata: SpaceMetadataItem
   "Address of the space controller/owner"
   controller: String!
-  "Delay in blocks before voting starts after proposal creation"
+  "Delay before voting starts after proposal creation (blocks on EVM, seconds on Starknet)"
   voting_delay: Int!
   "Minimum voting period duration in blocks"
   min_voting_period: Int!
@@ -67,7 +67,7 @@ type Space {
   proposer_count: Int!
   "Number of unique voters in this space"
   voter_count: Int!
-  "Block number when the space was created"
+  "Timestamp when the space was created"
   created: Int!
   "Transaction hash of space creation"
   tx: String!
@@ -93,7 +93,7 @@ type SpaceMetadataItem {
   external_url: String!
   "Array of treasury contract addresses"
   treasuries: [String!]!
-  "Array of label tags for categorization"
+  "List of labels that can be used on this space for tagging proposals"
   labels: [String!]!
   "Array of delegation contract addresses"
   delegations: [String!]!
@@ -107,7 +107,7 @@ type SpaceMetadataItem {
   farcaster: String!
   "Symbol for voting power display (e.g., 'UNI', 'AAVE')"
   voting_power_symbol: String!
-  "Primary wallet address for the space"
+  "Unused field (legacy)"
   wallet: String!
   "Array of executor contract addresses"
   executors: [String!]!
@@ -211,7 +211,7 @@ Proposal represents a governance proposal within a space
 type Proposal {
   "Unique identifier for the proposal"
   id: String!
-  "IPFS or external link to proposal metadata"
+  "UI link to proposal interface"
   link: String!
   "Numeric ID of the proposal within the space"
   proposal_id: Int!
@@ -223,7 +223,7 @@ type Proposal {
   execution_hash: String!
   "Proposal metadata containing title, body, and choices"
   metadata: ProposalMetadataItem
-  "Block number when voting starts"
+  "Timestamp when voting starts (timestamp on Starknet)"
   start: Int!
   "Minimum block number when voting can end"
   min_end: Int!
@@ -280,9 +280,9 @@ type Proposal {
   quorum: BigDecimalVP!
   "Parsed total voting power as float"
   scores_total_parsed: Float!
-  "Block number when proposal was created"
+  "Timestamp when proposal was created"
   created: Int!
-  "Block number when proposal was last edited (optional)"
+  "Timestamp when proposal was last edited (optional)"
   edited: Int
   "Transaction hash of proposal creation"
   tx: String!
@@ -346,7 +346,7 @@ type Vote {
   vp_parsed: Float!
   "Vote metadata containing optional reason"
   metadata: VoteMetadataItem
-  "Block number when vote was cast"
+  "Timestamp when vote was cast"
   created: Int!
   "Transaction hash of the vote"
   tx: String!
