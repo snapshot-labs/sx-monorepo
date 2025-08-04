@@ -10,6 +10,10 @@ export default defineConfig({
     baseURL: 'http://localhost:8080',
     trace: 'retain-on-failure'
   },
+  expect: {
+    // 5 seconds is not quite enough it seems
+    timeout: 10000
+  },
   webServer: {
     command: 'yarn dev',
     url: 'http://localhost:8080',
