@@ -265,3 +265,8 @@ export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
   'split-delegation': 'Split Delegation',
   'governor-subgraph': 'ERC-20 Votes'
 };
+
+export const SPACE_COVER_DIMENSIONS = {
+  sm: { width: 450, height: 120 },
+  lg: { width: 1500, height: 400 }
+};
