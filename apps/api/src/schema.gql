@@ -21,9 +21,9 @@ type Space {
   controller: String!
   "Delay before voting starts after proposal creation (blocks on EVM, seconds on Starknet)"
   voting_delay: Int!
-  "Minimum voting period duration in blocks"
+  "Minimum voting period duration (blocks on EVM, seconds on Starknet)"
   min_voting_period: Int!
-  "Maximum voting period duration in blocks"
+  "Maximum voting period duration (blocks on EVM, seconds on Starknet)"
   max_voting_period: Int!
   "Minimum voting power required to create a proposal"
   proposal_threshold: BigDecimalVP!
@@ -223,7 +223,7 @@ type Proposal {
   execution_hash: String!
   "Proposal metadata containing title, body, and choices"
   metadata: ProposalMetadataItem
-  "Timestamp when voting starts (timestamp on Starknet)"
+  "When voting starts (blocks on EVM, seconds on Starknet)"
   start: Int!
   "Minimum block number when voting can end"
   min_end: Int!
@@ -231,7 +231,7 @@ type Proposal {
   max_end: Int!
   "Block number used for voting power calculation"
   snapshot: Int!
-  "Block number when proposal can be executed"
+  "Timestamp when proposal can be executed"
   execution_time: Int!
   "Address of the execution strategy contract"
   execution_strategy: String!
@@ -374,7 +374,7 @@ type User {
   proposal_count: Int!
   "Number of votes cast by this user"
   vote_count: Int!
-  "Block number when user first interacted"
+  "Timestamp when user first interacted"
   created: Int!
   "All proposals created by this user"
   proposals: [Proposal!]! @derivedFrom(field: "author")
@@ -422,7 +422,7 @@ type StarknetL1Execution {
   space: String!
   "Proposal ID being executed on L1"
   proposalId: Int!
-  "Block number when L1 execution was initiated"
+  "Timestamp when L1 execution was initiated"
   created: Int!
   "Transaction hash of L1 execution"
   tx: String!
