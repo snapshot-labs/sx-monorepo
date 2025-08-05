@@ -247,7 +247,8 @@ export const OVERRIDING_STRATEGIES = [
   'api-v2-override',
   'rocketpool-node-operator-delegate-v8',
   'eden-online-override',
-  'split-delegation'
+  'split-delegation',
+  'sonic-staked-balance'
 ] as const;
 export const DEPRECATED_STRATEGIES = ['multichain'] as const;
 export const DELEGATE_REGISTRY_STRATEGIES = [
