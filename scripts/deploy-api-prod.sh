@@ -2,22 +2,18 @@
 
 set -euo pipefail
 
-NAME_SERVER="ns1.3dns.box"
-PRODUCTION_DOMAIN="api.snapshot.box"
-APP_DOMAIN_1="sx-api-starknet-mainnet-dfghg.ondigitalocean.app."
-APP_DOMAIN_2="sx-api-mainnet-2-fmlg8.ondigitalocean.app."
-APP_ID_1="c4eba570-abea-4ab3-8941-d968db6cad36"
+APP_ID_1="a2730f1c-94cc-414f-a68c-179a3adee405"
 APP_ID_2="9282b162-7280-43b9-b429-9f53810003bc"
 
-CURRENT_DOMAIN=$(dig -t CNAME +short "$PRODUCTION_DOMAIN" @"$NAME_SERVER")
+APP_ID=$(curl -s https://api.snapshot.box/deployment | jq '.index|tonumber')
 
 CURRENT_STAGING_APP_ID=""
-if [ "$CURRENT_DOMAIN" = "$APP_DOMAIN_1" ]; then
+if [ "$APP_ID" = "1" ]; then
   CURRENT_STAGING_APP_ID=$APP_ID_2
-elif [ "$CURRENT_DOMAIN" = "$APP_DOMAIN_2" ]; then
+elif [ "$APP_ID" = "2" ]; then
   CURRENT_STAGING_APP_ID=$APP_ID_1
 else
-  echo "Unknown domain: $CURRENT_DOMAIN"
+  echo "Unknown app: $APP_ID"
   exit -1
 fi
 
