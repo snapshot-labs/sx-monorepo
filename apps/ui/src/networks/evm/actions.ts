@@ -57,6 +57,7 @@ import {
   VoteType
 } from '@/types';
 import { EDITOR_APP_NAME } from '../common/constants';
+import { send } from '../helpers';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
@@ -851,7 +852,7 @@ export function createActions(
     deleteSpace: () => {
       throw new Error('Not implemented');
     },
-    send: (envelope: any) => ethSigClient.send(envelope),
+    send: (envelope: any) => send(ethSigClient, envelope),
     getVotingPower: async (
       spaceId: string,
       strategiesAddresses: string[],
