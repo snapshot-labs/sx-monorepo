@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy_api:
-    name: Deploy API to staging
+    name: Deploy API to staging (${{ matrix.environment }})
     strategy:
       matrix:
         environment: [api_mainnet, api_testnet]
