@@ -86,7 +86,7 @@
     "remarkable": "^2.0.1",
     "remove-markdown": "^0.5.2",
     "scrollmonitor": "^1.2.11",
-    "starknet": "6.11.0",
+    "starknet": "7.6.4",
     "starknetkit": "^1.1.9",
     "stream-browserify": "^3.0.0",
     "thirdweb": "^5.88.6",
