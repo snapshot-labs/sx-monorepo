@@ -32,7 +32,6 @@
     "@types/mysql": "^2.15.21",
     "@types/node": "^18.11.6",
     "cors": "^2.8.5",
-    "cross-fetch": "^4.0.0",
     "dotenv": "^16.0.1",
     "express": "^4.21.2",
     "graphql": "^16.8.1",

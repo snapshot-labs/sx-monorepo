@@ -1,4 +1,3 @@
-import fetch from 'cross-fetch';
 import { constants } from 'starknet';
 import { getClient } from './networks';
 import * as db from '../db';
