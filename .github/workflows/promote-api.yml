@@ -1,0 +1,48 @@
+name: Promote API
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to promote'
+        required: true
+        type: choice
+        options:
+        - api_mainnet
+        - api_testnet
+
+jobs:
+  promote-api:
+    environment: ${{ inputs.environment }}_promote
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install doctl
+      uses: digitalocean/action-doctl@v2
+      with:
+        token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+    - name: Get deployments
+      id: get-deployments
+      uses: ./.github/actions/get-deployments
+      with:
+        public-api-url: ${{ vars.PUBLIC_API_URL }}
+        app-1-id: ${{ vars.APP_1_ID }}
+        app-2-id: ${{ vars.APP_2_ID }}
+    - name: Promoting staging to production
+      run: |
+        doctl apps spec get "$APP_ID" --format "json" | \
+        jq '.services[0].envs |= map(if .key == "DATABASE_URL_INDEX" then .value = "'$NEW_INDEX'" else . end)' | \
+        doctl apps update "$APP_ID" --wait --spec -
+      env:
+        APP_ID: ${{ vars.PUBLIC_API_APP_ID }}
+        NEW_INDEX: ${{ steps.get-deployments.outputs.staging-index }}
+    - name: Get new deployments
+      id: get-new-deployments
+      uses: ./.github/actions/get-deployments
+      with:
+        public-api-url: ${{ vars.PUBLIC_API_URL }}
+        app-1-id: ${{ vars.APP_1_ID }}
+        app-2-id: ${{ vars.APP_2_ID }}
+    - name: Deploying new changes to new staging
+      run: ./scripts/deploy-changed.sh apps/api ${{ steps.get-new-deployments.outputs.staging-app-id }}
