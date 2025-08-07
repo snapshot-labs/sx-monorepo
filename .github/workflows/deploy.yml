@@ -6,11 +6,14 @@ on:
       - master
 
 jobs:
-  deploy_api_mainnet:
-    name: Deploy API to mainnet staging
-    environment: api_mainnet
+  deploy_api:
+    name: Deploy API to staging (${{ matrix.environment }})
+    strategy:
+      matrix:
+        environment: [api_mainnet, api_testnet]
+    environment: ${{ matrix.environment }}
     concurrency:
-      group: api_mainnet
+      group: ${{ matrix.environment }}
       cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
@@ -26,33 +29,7 @@ jobs:
         id: get-deployments
         uses: ./.github/actions/get-deployments
         with:
-          public-api-url: https://api.snapshot.box
-          app-1-id: ${{ vars.APP_1_ID }}
-          app-2-id: ${{ vars.APP_2_ID }}
-      - name: Deploy if files have changed
-        run: ./scripts/deploy-changed.sh apps/api ${{ steps.get-deployments.outputs.staging-app-id }}
-
-  deploy_api_testnet:
-    name: Deploy API to testnet staging
-    environment: api_testnet
-    concurrency:
-      group: api_testnet
-      cancel-in-progress: true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Get deployments
-        id: get-deployments
-        uses: ./.github/actions/get-deployments
-        with:
-          public-api-url: https://testnet-api.snapshot.box
+          public-api-url: ${{ vars.PUBLIC_API_URL }}
           app-1-id: ${{ vars.APP_1_ID }}
           app-2-id: ${{ vars.APP_2_ID }}
       - name: Deploy if files have changed
