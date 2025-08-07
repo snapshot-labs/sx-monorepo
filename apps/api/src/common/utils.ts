@@ -1,7 +1,6 @@
 import { keccak256 } from '@ethersproject/keccak256';
 import { faker } from '@faker-js/faker';
 import { getExecutionData, utils } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { Network } from '../../.checkpoint/models';

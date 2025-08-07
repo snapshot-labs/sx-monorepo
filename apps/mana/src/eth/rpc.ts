@@ -12,7 +12,6 @@ import {
   evmPolygon,
   evmSepolia
 } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
 import * as db from '../db';
