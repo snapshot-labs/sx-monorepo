@@ -45,4 +45,4 @@ jobs:
         app-1-id: ${{ vars.APP_1_ID }}
         app-2-id: ${{ vars.APP_2_ID }}
     - name: Deploying new changes to new staging
-      run: ./scripts/deploy-changed.sh apps/api ${{ steps.get-new-deployments.outputs.staging-app-id }}
+      run: doctl apps create-deployment ${{ steps.get-new-deployments.outputs.staging-app-id }}
