@@ -87,7 +87,7 @@ export async function getJSON(uri: string) {
   if (!url) throw new Error('Invalid URI');
 
   const res = await fetch(url, {
-    signal: AbortSignal.timeout(5000)
+    signal: AbortSignal.timeout(15000)
   });
 
   if (!res.ok) {
