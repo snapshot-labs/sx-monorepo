@@ -14,7 +14,6 @@ jobs:
     environment: ${{ matrix.environment }}
     concurrency:
       group: ${{ matrix.environment }}
-      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo

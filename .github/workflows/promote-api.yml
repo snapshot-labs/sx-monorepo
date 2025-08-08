@@ -14,6 +14,7 @@ on:
 jobs:
   promote-api:
     environment: ${{ inputs.environment }}_promote
+    concurrency: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
