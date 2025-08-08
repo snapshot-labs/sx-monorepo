@@ -17,6 +17,12 @@ outputs:
   staging-app-id:
     description: "DigitalOcean App ID for staging app"
     value: ${{ steps.set-app-ids.outputs.staging-app-id }}
+  production-index:
+    description: "Index of the production app"
+    value: ${{ steps.set-app-ids.outputs.production-index }}
+  staging-index:
+    description: "Index of the staging app"
+    value: ${{ steps.set-app-ids.outputs.staging-index }}
 runs:
   using: "composite"
   steps:
@@ -34,9 +40,13 @@ runs:
         if [ "$DEPLOYMENT_ID" = "1" ]; then
           echo "production-app-id=$INPUT_APP_1_ID" >> $GITHUB_OUTPUT
           echo "staging-app-id=$INPUT_APP_2_ID" >> $GITHUB_OUTPUT
+          echo "production-index=1" >> $GITHUB_OUTPUT
+          echo "staging-index=2" >> $GITHUB_OUTPUT
         elif [ "$DEPLOYMENT_ID" = "2" ]; then
           echo "production-app-id=$INPUT_APP_2_ID" >> $GITHUB_OUTPUT
           echo "staging-app-id=$INPUT_APP_1_ID" >> $GITHUB_OUTPUT
+          echo "production-index=2" >> $GITHUB_OUTPUT
+          echo "staging-index=1" >> $GITHUB_OUTPUT
         else
           echo "Error: Unexpected deployment-id value: $DEPLOYMENT_ID"
           exit 1
