@@ -14,13 +14,12 @@ jobs:
     environment: ${{ matrix.environment }}
     concurrency:
       group: ${{ matrix.environment }}
-      cancel-in-progress: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 100
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
