@@ -124,7 +124,7 @@ watchEffect(() => setTitle(props.space.name));
             <a
               :href="social.href"
               target="_blank"
-              class="text-[#606060] hover:text-skin-link"
+              class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
             </a>
@@ -132,6 +132,7 @@ watchEffect(() => setTitle(props.space.name));
         </div>
       </div>
     </div>
+    <SpaceAlerts :space="space" />
     <OnboardingSpace :space="space" />
     <template v-if="showChildren">
       <UiLabel :label="'Sub-spaces'" />

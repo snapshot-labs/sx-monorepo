@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getBoostsCount } from '@/helpers/boost';
-import { HELPDESK_URL } from '@/helpers/constants';
+import { FLAGS, HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
@@ -17,9 +17,7 @@ const route = useRoute();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
-const uiStore = useUiStore();
 const termsStore = useTermsStore();
-const { isDownloadingVotes, downloadVotes } = useReportDownload();
 
 const modalOpenVote = ref(false);
 const modalOpenTerms = ref(false);
@@ -91,28 +89,6 @@ async function handleVoteClick(choice: Choice) {
   modalOpenVote.value = true;
 }
 
-async function handleDownloadVotes() {
-  if (!proposal.value) return;
-
-  try {
-    await downloadVotes(proposal.value.id);
-  } catch (e: unknown) {
-    if (e instanceof Error) {
-      if (e.message === 'PENDING_GENERATION') {
-        return uiStore.addNotification(
-          'success',
-          'Your report is currently being generated. It may take a few minutes. Please check back shortly.'
-        );
-      }
-
-      uiStore.addNotification(
-        'error',
-        "We're having trouble connecting to the server responsible for downloads"
-      );
-    }
-  }
-}
-
 function handleAcceptTerms() {
   termsStore.accept(props.space);
   handleVoteClick(selectedChoice.value!);
@@ -154,7 +130,10 @@ watch(
 watchEffect(() => {
   if (!proposal.value) return;
 
-  setTitle(proposal.value.title || `Proposal #${proposal.value.proposal_id}`);
+  setTitle(
+    (proposal.value.flag_code !== FLAGS.DMCA && proposal.value.title) ||
+      `Proposal #${proposal.value.proposal_id}`
+  );
 });
 </script>
 
@@ -265,8 +244,9 @@ watchEffect(() => {
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
-                !proposal.cancelled &&
-                ['pending', 'active'].includes(proposal.state)
+                (!proposal.cancelled &&
+                  ['pending', 'active'].includes(proposal.state)) ||
+                currentVote
               "
             >
               <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
@@ -285,7 +265,10 @@ watchEffect(() => {
               </h4>
               <div class="space-y-2">
                 <IndicatorVotingPower
-                  v-if="!currentVote || editMode"
+                  v-if="
+                    (!currentVote || editMode) &&
+                    ['pending', 'active'].includes(proposal.state)
+                  "
                   v-slot="votingPowerProps"
                   :network-id="proposal.network"
                   :voting-power="votingPower"
@@ -298,7 +281,7 @@ watchEffect(() => {
                       class="mr-1 -mt-1 inline-block h-[27px]"
                     />
                     Please allow a few minutes for the voting power to be
-                    collected from Ethereum.
+                    computed.
                   </div>
                   <div v-else class="flex gap-1.5 items-center">
                     <span class="shrink-0">Voting power:</span>
@@ -384,26 +367,6 @@ watchEffect(() => {
                 :proposal="proposal"
                 :decimals="votingPowerDecimals"
               />
-              <button
-                v-if="
-                  proposal.network === 's' &&
-                  proposal.completed &&
-                  ['passed', 'rejected', 'executed', 'closed'].includes(
-                    proposal.state
-                  )
-                "
-                class="mt-2.5 inline-flex items-center gap-2 hover:text-skin-link"
-                @click="handleDownloadVotes"
-              >
-                <template v-if="isDownloadingVotes">
-                  <UiLoading :size="18" />
-                  Downloading votes
-                </template>
-                <template v-else>
-                  <IS-arrow-down-tray />
-                  Download votes
-                </template>
-              </button>
             </div>
             <div v-if="space.labels?.length && proposal.labels?.length">
               <h4 class="mb-2.5 eyebrow flex items-center gap-2">

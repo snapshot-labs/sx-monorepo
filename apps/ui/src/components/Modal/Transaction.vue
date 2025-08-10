@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Fragment, Interface, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
+import { getIsContract } from '@/helpers/contracts';
 import { getABI } from '@/helpers/etherscan';
 import { getProvider } from '@/helpers/provider';
 import { resolver } from '@/helpers/resolver';
@@ -169,8 +170,8 @@ async function handleToChange(to: string) {
   const provider = getProvider(props.network);
 
   try {
-    const code = await provider.getCode(contractAddress);
-    if (code === '0x') {
+    const isContract = await getIsContract(provider, contractAddress);
+    if (!isContract) {
       addressInvalid.value = true;
       return;
     }
@@ -212,7 +213,7 @@ watch(abiStr, value => {
     new Interface(abi);
     form.abi = abi;
     showAbiInput.value = false;
-  } catch (e) {
+  } catch {
     console.log('Invalid abi', value);
   }
 });

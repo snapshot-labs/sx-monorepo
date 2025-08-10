@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS_FORM = {
   externalUrl: '',
   twitter: '',
   github: '',
+  farcaster: '',
   coingecko: '',
   votingPowerSymbol: '',
   categories: [],
@@ -115,6 +116,7 @@ const formattedSpaceSettings = computed(() => {
     website: settingsForm.value.externalUrl,
     twitter: settingsForm.value.twitter,
     github: settingsForm.value.github,
+    farcaster: settingsForm.value.farcaster,
     coingecko: settingsForm.value.coingecko,
     symbol: settingsForm.value.votingPowerSymbol,
     network: String(settingsForm.value.chainId),
@@ -235,7 +237,7 @@ watch(
                   'Networks can also be specified in individual strategies, delegations, treasuries, etc...',
                 examples: ['Select network'],
                 networkId: networkId,
-                networksListKind: 'offchain'
+                networksListKind: 'full'
               }"
             />
           </div>
@@ -244,13 +246,16 @@ watch(
             v-model="settingsForm.strategies"
             :snapshot-chain-id="settingsForm.chainId"
             :network-id="networkId"
-            :space="space"
+            :space-id="settingsForm.id"
+            :voting-power-symbol="settingsForm.votingPowerSymbol"
           />
           <ProposalValidationConfigurator
             v-if="currentStep === 'proposal'"
             v-model="settingsForm.proposalValidation"
             :network-id="networkId"
             :snapshot-chain-id="settingsForm.chainId"
+            :space-id="settingsForm.id"
+            :voting-power-symbol="settingsForm.votingPowerSymbol"
           />
           <template v-if="currentStep === 'voting'">
             <div class="mb-3">

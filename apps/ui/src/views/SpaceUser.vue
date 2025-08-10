@@ -7,7 +7,7 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork } from '@/networks';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { Space, UserActivity } from '@/types';
 
@@ -15,7 +15,6 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const usersStore = useUsersStore();
-const { getCurrent } = useMetaStore();
 const { isWhiteLabel } = useWhiteLabel();
 
 const userActivity = ref<UserActivity>({
@@ -26,7 +25,9 @@ const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
 const delegateModalOpen = ref(false);
-const delegateModalState = ref<{ delegatee: string } | null>(null);
+const delegateModalState = ref<{
+  delegatees: { id: string }[];
+}>({ delegatees: [] });
 
 // const delegatesCount = ref(0);
 
@@ -75,7 +76,7 @@ const hasOnlyInvalidDelegations = computed(() => {
 
   return props.space.delegations.every(
     delegation =>
-      !delegation.apiUrl || delegation.apiType === 'split-delegation'
+      !delegation.chainId || !delegation.apiUrl || !delegation.apiType
   );
 });
 
@@ -132,7 +133,7 @@ async function loadUserActivity() {
 // }
 
 function handleDelegateClick() {
-  delegateModalState.value = { delegatee: userId.value };
+  delegateModalState.value.delegatees[0] = { id: userId.value };
   delegateModalOpen.value = true;
 }
 
@@ -146,9 +147,7 @@ async function getVotingPower() {
       props.space.strategies_parsed_metadata,
       userId.value,
       {
-        at: supportsNullCurrent(props.space.network)
-          ? null
-          : getCurrent(props.space.network) || 0,
+        at: null,
         chainId: props.space.snapshot_chain_id
       }
     );
@@ -245,7 +244,7 @@ watch(
             <a
               :href="social.href"
               target="_blank"
-              class="text-[#606060] hover:text-skin-link"
+              class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
             </a>

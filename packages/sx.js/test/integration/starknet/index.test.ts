@@ -2,16 +2,7 @@ import { JsonRpcProvider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import { Account, RpcProvider, uint256 } from 'starknet';
 import { beforeAll, describe, expect, it } from 'vitest';
-import ozAccountCasm from './fixtures/openzeppelin_Account.casm.json';
-import ozAccountSierra from './fixtures/openzeppelin_Account.sierra.json';
-import {
-  deployDependency,
-  flush,
-  increaseTime,
-  setTime,
-  setup,
-  TestConfig
-} from './utils';
+import { flush, increaseTime, setTime, setup, TestConfig } from './utils';
 import {
   EthereumSig,
   EthereumTx,
@@ -30,11 +21,6 @@ describe('sx-starknet', () => {
   const ethPrivateKey =
     '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
 
-  let address = '';
-  const publicKey =
-    '0x138b5dd1ca094fcaebd669a5d2aa7bb7d13db32d5939939ee66b938ded2f361';
-  const privateKey = '0x9c7d498a8f76dc87564274036988f668';
-
   const starkProvider = new RpcProvider({
     nodeUrl: 'http://127.0.0.1:5050/rpc',
     // default is 5s and for some reason each call with call it 2 times (one before looking for receipt, and once after)
@@ -45,12 +31,7 @@ describe('sx-starknet', () => {
   const provider = new JsonRpcProvider(ethUrl);
   const wallet = new Wallet(ethPrivateKey, provider);
   const walletAddress = wallet.address;
-  const entryAccount = new Account(
-    starkProvider,
-    entryAddress,
-    entryPrivateKey
-  );
-  let account: Account;
+  const account = new Account(starkProvider, entryAddress, entryPrivateKey);
 
   let client: StarknetTx;
   let ethSigClient: EthereumSig;
@@ -62,14 +43,6 @@ describe('sx-starknet', () => {
   beforeAll(async () => {
     setTime(Math.floor(Date.now() / 1000));
 
-    address = await deployDependency(
-      entryAccount,
-      ozAccountSierra,
-      ozAccountCasm,
-      [publicKey]
-    );
-    account = new Account(starkProvider, address, privateKey, '1');
-
     testConfig = await setup({
       starknetProvider: starkProvider as any,
       starknetAccount: account,
@@ -79,28 +52,19 @@ describe('sx-starknet', () => {
 
     spaceAddress = testConfig.spaceAddress;
 
-    client = new StarknetTx({
-      starkProvider: starkProvider as any,
-      ethUrl,
-      networkConfig: testConfig.networkConfig
-    });
-    ethSigClient = new EthereumSig({
-      starkProvider: starkProvider as any,
-      ethUrl,
-      networkConfig: testConfig.networkConfig
-    });
-    ethTxClient = new EthereumTx({
-      starkProvider: starkProvider as any,
-      ethUrl,
-      networkConfig: testConfig.networkConfig
-    });
-    starkSigClient = new StarknetSig({
+    const clientOpts = {
       starkProvider: starkProvider as any,
       ethUrl,
       networkConfig: testConfig.networkConfig,
-      manaUrl: 'http://localhost:3000'
-    });
-  }, 500_000);
+      whitelistServerUrl: 'https://wls.snapshot.box',
+      manaUrl: 'https://mana.box'
+    };
+
+    client = new StarknetTx(clientOpts);
+    ethSigClient = new EthereumSig(clientOpts);
+    ethTxClient = new EthereumTx(clientOpts);
+    starkSigClient = new StarknetSig(clientOpts);
+  }, 60_000);
 
   describe('vanilla authenticator', () => {
     it('StarknetTx.propose()', async () => {
@@ -114,7 +78,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           executionStrategy: {
@@ -144,7 +109,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           proposal: 1,
@@ -170,7 +136,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         executionStrategy: {
@@ -197,7 +164,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         proposal: 2,
@@ -224,7 +192,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         executionStrategy: {
@@ -257,7 +226,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         proposal: 3,
@@ -290,7 +260,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         executionStrategy: {
@@ -317,7 +288,8 @@ describe('sx-starknet', () => {
         strategies: [
           {
             index: 0,
-            address: testConfig.vanillaVotingStrategy
+            address: testConfig.vanillaVotingStrategy,
+            params: testConfig.vanillaVotingStrategyParams
           }
         ],
         proposal: 4,
@@ -340,7 +312,7 @@ describe('sx-starknet', () => {
     it('StarknetTx.propose()', async () => {
       const envelope = {
         signatureData: {
-          address
+          address: account.address
         },
         data: {
           space: spaceAddress,
@@ -348,7 +320,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           executionStrategy: {
@@ -370,7 +343,7 @@ describe('sx-starknet', () => {
     it('StarknetTx.vote()', async () => {
       const envelope = {
         signatureData: {
-          address
+          address: account.address
         },
         data: {
           space: spaceAddress,
@@ -378,7 +351,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 0,
-              address: testConfig.vanillaVotingStrategy
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
             }
           ],
           proposal: 5,
@@ -409,6 +383,7 @@ describe('sx-starknet', () => {
             {
               index: 1,
               address: testConfig.merkleWhitelistVotingStrategy,
+              params: testConfig.merkleWhitelistVotingStrategyParams,
               metadata: testConfig.merkleWhitelistStrategyMetadata
             }
           ],
@@ -440,6 +415,7 @@ describe('sx-starknet', () => {
             {
               index: 1,
               address: testConfig.merkleWhitelistVotingStrategy,
+              params: testConfig.merkleWhitelistVotingStrategyParams,
               metadata: testConfig.merkleWhitelistStrategyMetadata
             }
           ],
@@ -462,7 +438,7 @@ describe('sx-starknet', () => {
     it('StarknetTx.propose()', async () => {
       const envelope = {
         signatureData: {
-          address
+          address: account.address
         },
         data: {
           space: spaceAddress,
@@ -470,7 +446,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 2,
-              address: testConfig.erc20VotesVotingStrategy
+              address: testConfig.erc20VotesVotingStrategy,
+              params: testConfig.erc20VotesVotingStrategyParams
             }
           ],
           executionStrategy: {
@@ -492,7 +469,7 @@ describe('sx-starknet', () => {
     it('StarknetTx.vote()', async () => {
       const envelope = {
         signatureData: {
-          address
+          address: account.address
         },
         data: {
           space: spaceAddress,
@@ -500,7 +477,8 @@ describe('sx-starknet', () => {
           strategies: [
             {
               index: 2,
-              address: testConfig.erc20VotesVotingStrategy
+              address: testConfig.erc20VotesVotingStrategy,
+              params: testConfig.erc20VotesVotingStrategyParams
             }
           ],
           proposal: 7,
@@ -545,7 +523,13 @@ describe('sx-starknet', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           executionStrategy: {
             addr: testConfig.ethRelayerExecutionStrategy,
             params: executionParams
@@ -567,7 +551,13 @@ describe('sx-starknet', () => {
         data: {
           space: spaceAddress,
           authenticator: testConfig.vanillaAuthenticator,
-          strategies: [{ index: 0, address: testConfig.vanillaVotingStrategy }],
+          strategies: [
+            {
+              index: 0,
+              address: testConfig.vanillaVotingStrategy,
+              params: testConfig.vanillaVotingStrategyParams
+            }
+          ],
           proposal: 8,
           choice: 1,
           metadataUri: ''
@@ -621,7 +611,13 @@ describe('sx-starknet', () => {
         }
       );
 
-      const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
+      const [, executionHashLower, executionHashUpper] = executionParams;
+
+      if (!executionHashLower || !executionHashUpper) {
+        throw new Error('Invalid execution hash');
+      }
+
+      const executionHash = `${executionHashUpper}${executionHashLower.slice(2)}`;
 
       const proposal = {
         startTimestamp: message_payload[3],

@@ -24,7 +24,7 @@ export type StrategyConfig = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: string;
 };
 
 export type Strategy = {
@@ -159,6 +159,7 @@ export type EIP712Message = Required<
 >;
 
 export type Vote = {
+  from?: string;
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];

@@ -2,17 +2,24 @@ import {
   clients,
   NetworkConfig,
   starknetMainnet,
+  starknetNetworks,
   starknetSepolia
 } from '@snapshot-labs/sx';
 import { Account, constants, RpcProvider } from 'starknet';
 import { createAccountProxy, ETH_NODE_URLS, getProvider } from './dependencies';
 import { NonceManager } from './nonce-manager';
-import { PORT } from '../constants';
 
 export const NETWORKS = new Map<string, NetworkConfig>([
   [constants.StarknetChainId.SN_MAIN, starknetMainnet],
   [constants.StarknetChainId.SN_SEPOLIA, starknetSepolia]
 ]);
+
+export const NETWORK_IDS = new Map<string, string>(
+  Object.entries(starknetNetworks).map(([networkId, config]) => [
+    config.Meta.eip712ChainId,
+    networkId
+  ])
+);
 
 const clientsMap = new Map<
   string,
@@ -23,6 +30,7 @@ const clientsMap = new Map<
     getAccount: (spaceAddress: string) => {
       account: Account;
       nonceManager: NonceManager;
+      deployAccount: () => Promise<void>;
     };
   }
 >();
@@ -32,10 +40,7 @@ export function getClient(chainId: string) {
   if (cached) return cached;
 
   const provider = getProvider(chainId);
-  const getAccount = createAccountProxy(
-    process.env.STARKNET_MNEMONIC || '',
-    provider
-  );
+  const getAccount = createAccountProxy(chainId, provider);
 
   const ethUrl = ETH_NODE_URLS.get(chainId);
   if (!ethUrl)
@@ -49,7 +54,7 @@ export function getClient(chainId: string) {
     starkProvider: provider,
     ethUrl,
     networkConfig,
-    manaUrl: `http://localhost:${PORT}`
+    whitelistServerUrl: 'https://wls.snapshot.box'
   });
 
   const herodotusController = new clients.HerodotusController(networkConfig);

@@ -1,23 +1,32 @@
 <script setup lang="ts">
 import { _n, prettyConcat } from '@/helpers/utils';
 import { PropositionPowerItem } from '@/queries/propositionPower';
+import { VoteValidationPowerItem } from '@/queries/voteValidationPower';
 
 type Strategy = PropositionPowerItem['strategies'][0];
 
 const props = defineProps<{
-  propositionPower: PropositionPowerItem;
+  propositionPower: PropositionPowerItem | VoteValidationPowerItem;
 }>();
 
-const OFFCHAIN_ERRORS = {
+const actionName = computed(() => {
+  return 'canPropose' in props.propositionPower ? 'create a proposal' : 'vote';
+});
+
+const offchainErrors = computed(() => ({
   'only-members': () =>
-    'You need to be a member of the space in order to create a proposal.',
+    `You need to be a member of the space in order to ${actionName.value}.`,
   basic: (strategy: Strategy) =>
-    `You need at least ${_n(strategy.params.minScore, 'compact')} ${props.propositionPower.symbol} to create a proposal.`,
+    `You need at least ${_n(strategy.params.minScore, 'compact')} ${prettySymbolsList(
+      strategy.params.strategies.map(
+        s => s.params.symbol || props.propositionPower.symbol
+      )
+    )} to ${actionName.value}.`,
   'passport-gated': (strategy: Strategy) =>
-    `You need a Gitcoin Passport with ${strategy.params.operator === 'AND' ? 'all' : 'one'} of the following stamps to create a proposal: ${prettyConcat(strategy.params.stamps, strategy.params.operator === 'AND' ? 'and' : 'or')}.`,
+    `You need a Gitcoin Passport with ${strategy.params.operator === 'AND' ? 'all' : 'one'} of the following stamps to ${actionName.value}: ${prettyConcat(strategy.params.stamps, strategy.params.operator === 'AND' ? 'and' : 'or')}.`,
   'karma-eas-attestation': () =>
-    'You need to be attested by Karma EAS to create a proposal.'
-} as const;
+    `You need to be attested by Karma EAS to ${actionName.value}.`
+}));
 
 const LINKS = {
   'passport-gated': {
@@ -29,18 +38,22 @@ const LINKS = {
 const offchainStrategy = computed(() => {
   const name = props.propositionPower.strategies[0].name;
 
-  if (OFFCHAIN_ERRORS[name]) {
+  if (offchainErrors.value[name]) {
     return props.propositionPower.strategies[0];
   }
 
   return null;
 });
+
+function prettySymbolsList(symbols: string[]): string {
+  return prettyConcat(Array.from(new Set(symbols)));
+}
 </script>
 
 <template>
   <UiAlert type="error" v-bind="$attrs">
     <template v-if="offchainStrategy">
-      {{ OFFCHAIN_ERRORS[offchainStrategy.name](offchainStrategy) }}
+      {{ offchainErrors[offchainStrategy.name](offchainStrategy) }}
       <AppLink
         v-if="LINKS[offchainStrategy.name]"
         :to="LINKS[offchainStrategy.name].url"
@@ -52,13 +65,13 @@ const offchainStrategy = computed(() => {
     <template v-else>
       You need at least {{ _n(propositionPower.threshold) }}
       {{
-        prettyConcat(
+        prettySymbolsList(
           propositionPower.strategies.map(
             s => s.params.symbol || propositionPower.symbol
           )
         )
       }}
-      to create a proposal.
+      to {{ actionName }}.
     </template>
   </UiAlert>
 </template>

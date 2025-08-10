@@ -7,8 +7,8 @@ enum StickStatus {
 
 const props = withDefaults(
   defineProps<{
-    top: number;
-    bottom: number;
+    top?: number;
+    bottom?: number;
   }>(),
   {
     top: 0,

@@ -33,6 +33,7 @@ gql(`
       github
       twitter
       discord
+      farcaster
       voting_power_symbol
       treasuries
       labels
@@ -95,39 +96,7 @@ gql(`
     id
     proposal_id
     space {
-      id
-      controller
-      authenticators
-      metadata {
-        id
-        name
-        avatar
-        labels
-        voting_power_symbol
-        treasuries
-        executors
-        executors_types
-        executors_strategies {
-          id
-          address
-          destination_address
-          type
-          treasury_chain
-          treasury
-        }
-      }
-      strategies_parsed_metadata {
-        index
-        data {
-          id
-          name
-          description
-          decimals
-          symbol
-          token
-          payload
-        }
-      }
+      ...spaceFields
     }
     author {
       id
@@ -154,8 +123,18 @@ gql(`
     scores_total
     execution_time
     execution_strategy
+    execution_strategy_details {
+      id
+      address
+      destination_address
+      type
+      treasury_chain
+      treasury
+      quorum
+    }
     execution_strategy_type
     execution_destination
+    treasuries
     timelock_veto_guardian
     strategies_indices
     strategies
@@ -298,6 +277,14 @@ export const LEADERBOARD_QUERY = gql(`
       }
       proposal_count
       vote_count
+    }
+  }
+`);
+
+export const LAST_INDEXED_BLOCK_QUERY = gql(`
+  query _Metadata($indexer: String!) {
+    _metadata(indexer: $indexer, id: "last_indexed_block") {
+      value
     }
   }
 `);

@@ -3,198 +3,427 @@ scalar Text
 scalar BigInt
 scalar BigDecimalVP
 
+"""
+Space represents a DAO or governance organization on Snapshot X
+"""
 type Space {
+  "Unique identifier for the space"
   id: String!
+  "UI link to space interface"
+  link: String!
+  "Whether the space is verified by Snapshot team"
   verified: Boolean!
+  "Whether the space has turbo mode enabled (premium space)"
   turbo: Boolean!
+  "Space metadata containing name, description, avatar, and other details"
   metadata: SpaceMetadataItem
+  "Address of the space controller/owner"
   controller: String!
+  "Delay before voting starts after proposal creation (blocks on EVM, seconds on Starknet)"
   voting_delay: Int!
+  "Minimum voting period duration (blocks on EVM, seconds on Starknet)"
   min_voting_period: Int!
+  "Maximum voting period duration (blocks on EVM, seconds on Starknet)"
   max_voting_period: Int!
+  "Minimum voting power required to create a proposal"
   proposal_threshold: BigDecimalVP!
+  "Index for the next strategy to be added"
   next_strategy_index: Int!
+  "Array of strategy indices currently active"
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
+  "Array of strategy contract addresses"
   strategies: [String!]!
+  "Array of strategy parameters as encoded strings"
   strategies_params: [String!]!
+  "Array of strategy metadata as JSON strings"
   strategies_metadata: [String!]!
+  "Parsed strategy metadata with structured data"
   strategies_parsed_metadata: [StrategiesParsedMetadataItem!]!
     @derivedFrom(field: "space")
+  "Array of decimal places for each strategy's voting power"
+  strategies_decimals: [Int!]!
+  "Number of decimal places for voting power display"
+  vp_decimals: Int!
+  "Array of authenticator contract addresses for proposal validation"
   authenticators: [String!]!
+  "Main validation strategy contract address"
   validation_strategy: String!
+  "Parameters for the validation strategy"
   validation_strategy_params: Text!
+  "Array of voting power validation strategy addresses"
   voting_power_validation_strategy_strategies: [String!]!
+  "Array of parameters for voting power validation strategies"
   voting_power_validation_strategy_strategies_params: [String!]!
+  "Metadata for voting power validation strategies"
   voting_power_validation_strategy_metadata: String!
+  "Parsed metadata for voting power validation strategies"
   voting_power_validation_strategies_parsed_metadata: [VotingPowerValidationStrategiesParsedMetadataItem!]!
     @derivedFrom(field: "space")
+  "Total number of proposals created in this space"
   proposal_count: Int!
+  "Total number of votes cast in this space"
   vote_count: Int!
+  "Number of unique proposers in this space"
   proposer_count: Int!
+  "Number of unique voters in this space"
   voter_count: Int!
+  "Timestamp when the space was created"
   created: Int!
+  "Transaction hash of space creation"
   tx: String!
+  "All proposals belonging to this space"
   proposals: [Proposal!]! @derivedFrom(field: "space")
 }
 
+"""
+Metadata for a Space containing display information and configuration
+"""
 type SpaceMetadataItem {
+  "Unique identifier for the metadata item"
   id: String!
+  "Display name of the space"
   name: String!
+  "Description of the space and its purpose"
   about: String!
+  "Avatar image URL for the space"
   avatar: String!
+  "Cover image URL for the space"
   cover: String!
+  "External website URL for the space"
   external_url: String!
+  "Array of treasury contract addresses"
   treasuries: [String!]!
+  "List of labels that can be used on this space for tagging proposals"
   labels: [String!]!
+  "Array of delegation contract addresses"
   delegations: [String!]!
+  "GitHub organization or repository link"
   github: String!
+  "Twitter/X handle or URL"
   twitter: String!
+  "Discord server invite link"
   discord: String!
+  "Farcaster profile or channel"
+  farcaster: String!
+  "Symbol for voting power display (e.g., 'UNI', 'AAVE')"
   voting_power_symbol: String!
+  "Unused field (legacy)"
   wallet: String!
+  "Array of executor contract addresses"
   executors: [String!]!
+  "Array of executor types (e.g., 'SimpleQuorum', 'Timelock')"
   executors_types: [String!]!
+  "Array of executor destination addresses"
   executors_destinations: [String!]!
+  "Array of execution strategy configurations"
   executors_strategies: [ExecutionStrategy!]!
 }
 
+"""
+Parsed metadata for voting power validation strategies
+"""
 type VotingPowerValidationStrategiesParsedMetadataItem {
+  "Unique identifier for the metadata item"
   id: String!
+  "Space this validation strategy belongs to"
   space: Space!
+  "Index of the validation strategy in the space"
   index: Int!
+  "Parsed metadata data for the validation strategy"
   data: StrategiesParsedMetadataDataItem
 }
 
+"""
+Parsed metadata for voting strategies
+"""
 type StrategiesParsedMetadataItem {
+  "Unique identifier for the metadata item"
   id: String!
+  "Space this strategy belongs to"
   space: Space!
+  "Index of the strategy in the space"
   index: Int!
+  "Parsed metadata data for the strategy"
   data: StrategiesParsedMetadataDataItem
 }
 
+"""
+Parsed metadata data for strategies containing token and display information
+"""
 type StrategiesParsedMetadataDataItem {
+  "Unique identifier for the data item"
   id: String!
+  "Display name of the strategy"
   name: String!
+  "Description of what the strategy does"
   description: String!
+  "Number of decimal places for the token"
   decimals: Int!
+  "Token symbol (e.g., 'UNI', 'AAVE')"
   symbol: String!
+  "Token contract address (optional)"
   token: String
+  "Additional strategy-specific payload data"
   payload: String
 }
 
+"""
+Execution strategy configuration for how proposals are executed onchain
+"""
 type ExecutionStrategy {
+  "Unique identifier for the execution strategy"
   id: String!
+  "Contract address of the execution strategy"
   address: String!
+  "Destination address for execution (optional)"
   destination_address: String
+  "Type of execution strategy (e.g., 'SimpleQuorum', 'Timelock')"
   type: String!
+  "Minimum voting power required for execution"
   quorum: BigDecimalVP!
+  "Treasury address for funding execution (optional)"
   treasury: String
+  "Chain ID where the treasury is located (optional)"
   treasury_chain: Int
+  "Guardian address that can veto timelock executions (optional)"
   timelock_veto_guardian: String
+  "Delay in blocks before timelock execution can proceed"
   timelock_delay: BigInt!
+  "Axiom snapshot contract address for storage proofs (optional)"
   axiom_snapshot_address: String
+  "Axiom snapshot storage slot for proofs (optional)"
   axiom_snapshot_slot: BigInt
 }
 
+"""
+Execution hash for tracking proposal execution status
+"""
 type ExecutionHash {
+  "Unique identifier for the execution hash"
   id: String!
+  "ID of the proposal this execution hash belongs to"
   proposal_id: String!
 }
 
+"""
+Proposal represents a governance proposal within a space
+"""
 type Proposal {
+  "Unique identifier for the proposal"
   id: String!
+  "UI link to proposal interface"
+  link: String!
+  "Numeric ID of the proposal within the space"
   proposal_id: Int!
+  "Space this proposal belongs to"
   space: Space!
+  "User who created the proposal"
   author: User!
+  "Hash for tracking proposal execution"
   execution_hash: String!
+  "Proposal metadata containing title, body, and choices"
   metadata: ProposalMetadataItem
+  "When voting starts (blocks on EVM, seconds on Starknet)"
   start: Int!
+  "Minimum block number when voting can end"
   min_end: Int!
+  "Maximum block number when voting must end"
   max_end: Int!
+  "Block number used for voting power calculation"
   snapshot: Int!
+  "Timestamp when proposal can be executed"
   execution_time: Int!
+  "Address of the execution strategy contract"
   execution_strategy: String!
+  # Note: in the future move this field to execution_strategy
+  "Detailed execution strategy configuration"
+  execution_strategy_details: ExecutionStrategy
+  "Type of execution strategy used"
   execution_strategy_type: String!
+  "Destination address for proposal execution"
   execution_destination: String
+  "Guardian address that can veto timelock executions"
   timelock_veto_guardian: String
+  "Delay in blocks before timelock execution"
   timelock_delay: BigInt
+  "Axiom snapshot contract address for storage proofs"
   axiom_snapshot_address: String
+  "Axiom snapshot storage slot for proofs"
   axiom_snapshot_slot: BigInt
+  "Array of treasury addresses involved in execution"
+  treasuries: [String!]!
+  "Array of strategy indices used for voting"
   strategies_indices: [Int!]!
-  # Deprecated
-  strategies_indicies: [Int!]!
+  "Array of strategy contract addresses"
   strategies: [String!]!
+  "Array of strategy parameters"
   strategies_params: [String!]!
+  "Number of decimal places for voting power display"
+  vp_decimals: Int!
+  "Type of proposal (e.g., 'basic', 'single-choice')"
   type: String!
+  "Voting power for choice 1"
   scores_1: BigDecimalVP!
+  "Parsed voting power for choice 1 as float"
+  scores_1_parsed: Float!
+  "Voting power for choice 2"
   scores_2: BigDecimalVP!
+  "Parsed voting power for choice 2 as float"
+  scores_2_parsed: Float!
+  "Voting power for choice 3"
   scores_3: BigDecimalVP!
+  "Parsed voting power for choice 3 as float"
+  scores_3_parsed: Float!
+  "Total voting power cast"
   scores_total: BigDecimalVP!
-  quorum: BigInt!
+  "Minimum voting power required for execution"
+  quorum: BigDecimalVP!
+  "Parsed total voting power as float"
+  scores_total_parsed: Float!
+  "Timestamp when proposal was created"
   created: Int!
+  "Timestamp when proposal was last edited (optional)"
   edited: Int
+  "Transaction hash of proposal creation"
   tx: String!
+  "Transaction hash of proposal execution (optional)"
   execution_tx: String
+  "Transaction hash of proposal veto (optional)"
   veto_tx: String
+  "Number of votes cast on this proposal"
   vote_count: Int!
+  "Whether proposal is ready for execution"
   execution_ready: Boolean!
+  "Whether proposal has been executed"
   executed: Boolean!
+  "Whether proposal has been vetoed"
   vetoed: Boolean!
+  "Whether proposal execution has been settled"
+  execution_settled: Boolean!
+  "Whether proposal is completed (deprecated: use execution_settled)"
   completed: Boolean!
+  "Whether proposal has been cancelled"
   cancelled: Boolean!
 }
 
+"""
+Metadata for a proposal containing display content and voting options
+"""
 type ProposalMetadataItem {
+  "Unique identifier for the metadata item"
   id: String!
+  "Title of the proposal"
   title: Text
+  "Main body text of the proposal"
   body: Text
+  "Link to discussion forum or thread"
   discussion: Text
+  "Execution details and parameters"
   execution: Text
+  "Array of voting choices (e.g., ['For', 'Against', 'Abstain'])"
   choices: [String!]!
+  "Array of label tags for categorization"
   labels: [String!]!
 }
 
+"""
+Vote represents a user's vote on a specific proposal
+"""
 type Vote {
+  "Unique identifier for the vote"
   id: String!
+  "User who cast the vote"
   voter: User!
+  "Space where the vote was cast"
   space: Space!
+  "Numeric ID of the proposal being voted on"
   proposal: Int!
+  "Voting choice (1, 2, 3, etc.)"
   choice: Int!
+  "Voting power used for this vote"
   vp: BigDecimalVP!
+  "Parsed voting power as float"
+  vp_parsed: Float!
+  "Vote metadata containing optional reason"
   metadata: VoteMetadataItem
+  "Timestamp when vote was cast"
   created: Int!
+  "Transaction hash of the vote"
   tx: String!
 }
 
+"""
+Metadata for a vote containing optional reasoning
+"""
 type VoteMetadataItem {
+  "Unique identifier for the metadata item"
   id: String!
+  "Optional reason provided by the voter"
   reason: Text!
 }
 
+"""
+User represents a governance participant (voter or proposer)
+"""
 type User {
+  "Unique identifier for the user (wallet address)"
   id: String!
+  "Type of address (1 for Ethereum, 2 for Starknet)"
   address_type: Int!
+  "Number of proposals created by this user"
   proposal_count: Int!
+  "Number of votes cast by this user"
   vote_count: Int!
+  "Timestamp when user first interacted"
   created: Int!
+  "All proposals created by this user"
   proposals: [Proposal!]! @derivedFrom(field: "author")
+  "All votes cast by this user"
   votes: [Vote!]! @derivedFrom(field: "voter")
 }
 
+"""
+Leaderboard tracks user participation statistics within a space
+"""
 type Leaderboard {
+  "Unique identifier for the leaderboard entry"
   id: String!
+  "Space this leaderboard entry belongs to"
   space: Space!
+  "User being tracked"
   user: User!
+  "Number of proposals created by user in this space"
   proposal_count: Int!
+  "Number of votes cast by user in this space"
   vote_count: Int!
 }
 
-type StarknetL1Execution {
+"""
+Network statistics for blockchain network activity
+"""
+type Network {
+  "Network identifier (e.g., 'sn', 'eth', 'sep')"
   id: String!
+  "Total number of spaces on this network"
+  space_count: Int!
+  "Total number of proposals on this network"
+  proposal_count: Int!
+  "Total number of votes on this network"
+  vote_count: Int!
+}
+
+"""
+Starknet L1 execution tracking for cross-chain proposal execution
+"""
+type StarknetL1Execution {
+  "Unique identifier for the L1 execution"
+  id: String!
+  "Space ID where the proposal originated"
   space: String!
+  "Proposal ID being executed on L1"
   proposalId: Int!
+  "Timestamp when L1 execution was initiated"
   created: Int!
+  "Transaction hash of L1 execution"
   tx: String!
 }

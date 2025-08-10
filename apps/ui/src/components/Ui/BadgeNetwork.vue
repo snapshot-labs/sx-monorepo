@@ -34,7 +34,7 @@ const networkData = computed<NetworkData | null>(() => {
     } catch {}
   }
 
-  if (props.chainId && typeof props.chainId === 'number') {
+  if (props.chainId) {
     try {
       const network: SnapshotJSNetwork | undefined =
         networks[String(props.chainId)];
@@ -44,7 +44,7 @@ const networkData = computed<NetworkData | null>(() => {
         name: network.name,
         avatar: network.logo
       };
-    } catch (e) {
+    } catch {
       return null;
     }
   }

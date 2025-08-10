@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { getGenericExplorerUrl, waitForTransaction } from '@/helpers/generic';
-import { sleep } from '@/helpers/utils';
+import { isUserAbortError } from '@/helpers/utils';
 import { ChainId } from '@/types';
-
-const API_DELAY = 10000;
 
 type Messages = {
   approveTitle?: string;
@@ -21,16 +19,19 @@ const props = withDefaults(
     open: boolean;
     chainId: ChainId;
     messages?: Messages;
+    waitForIndex?: boolean;
     execute: () => Promise<string | null>;
   }>(),
   {
-    messages: () => ({})
+    messages: () => ({}),
+    waitForIndex: false
   }
 );
 
 const emit = defineEmits<{
   (e: 'confirmed', txId: string | null): void;
   (e: 'close'): void;
+  (e: 'cancelled'): void;
 }>();
 
 const step: Ref<'approve' | 'confirming' | 'success' | 'fail'> = ref('approve');
@@ -77,16 +78,18 @@ async function handleExecute() {
 
     if (txId.value) {
       step.value = 'confirming';
-      await waitForTransaction(txId.value, props.chainId);
-      await sleep(API_DELAY);
+      await waitForTransaction(txId.value, props.chainId, props.waitForIndex);
 
       step.value = 'success';
       emit('confirmed', txId.value);
     } else {
       emit('confirmed', null);
-      emit('close');
     }
   } catch (e) {
+    if (isUserAbortError(e)) {
+      emit('cancelled');
+      return;
+    }
     console.warn('Transaction failed', e);
 
     step.value = 'fail';
@@ -112,22 +115,26 @@ watch(
       >
         <UiLoading :size="28" />
       </div>
-
       <div
         v-if="step === 'success'"
-        class="bg-skin-success rounded-full p-[12px]"
+        class="bg-skin-success text-white rounded-full p-[12px]"
       >
-        <IS-check :width="28" :height="28" class="text-skin-bg" />
+        <IS-check :width="28" :height="28" />
       </div>
-      <div v-if="step === 'fail'" class="bg-skin-danger rounded-full p-[12px]">
-        <IS-x-mark :width="28" :height="28" class="text-skin-bg" />
+      <div
+        v-if="step === 'fail'"
+        class="bg-skin-danger text-white rounded-full p-[12px]"
+      >
+        <IS-x-mark :width="28" :height="28" />
       </div>
       <div class="flex flex-col space-y-1 leading-6">
-        <h4
-          class="font-semibold text-skin-heading text-lg"
-          v-text="text.title"
-        />
-        <div v-text="text.subtitle" />
+        <slot name="headerContent" :step="step" :text="text">
+          <h4
+            class="font-semibold text-skin-heading text-lg"
+            v-text="text.title"
+          />
+          <div v-text="text.subtitle" />
+        </slot>
       </div>
     </div>
     <slot id="content" :step="step" :tx-id="txId" />

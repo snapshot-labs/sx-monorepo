@@ -18,7 +18,7 @@ import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { StrategyConfig } from '@/networks/types';
-import { ChainId, NetworkID, Space, Validation } from '@/types';
+import { ChainId, NetworkID, Validation } from '@/types';
 
 const SCORE_API_URL = 'https://score.snapshot.org/api/validations';
 const STRATEGIES_WITHOUT_PARAMS: ValidationDetails['key'][] = [
@@ -31,7 +31,8 @@ const props = withDefaults(
     open: boolean;
     networkId: NetworkID;
     defaultChainId: ChainId;
-    space?: Space;
+    spaceId: string;
+    votingPowerSymbol: string;
     type: 'voting' | 'proposal';
     current?: Validation;
     skipMenu?: boolean;
@@ -50,6 +51,8 @@ const selectedValidation = ref(null as ValidationDetails | null);
 const form = ref({} as Record<string, any>);
 const rawParams = ref('{}');
 const customStrategies = ref([] as StrategyConfig[]);
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 
 async function fetchValidations() {
   if (isLoading.value || validations.value.length) return;
@@ -201,9 +204,10 @@ function handleSelect(validationDetails: ValidationDetails) {
     form.value.stamps ??= [];
 
     // Remove unsupported options
-    form.value.stamps = definition.value.properties.stamps.options
-      .filter(option => form.value.stamps.includes(option.id))
-      .map(option => option.id);
+    form.value.stamps =
+      definition.value.properties?.stamps?.options
+        ?.filter(option => form.value.stamps.includes(option.id))
+        ?.map(option => option.id) ?? form.value.stamps;
   }
 }
 
@@ -226,6 +230,11 @@ function handleApply() {
 
   emit('save', { name: selectedValidation.value.key, params });
   emit('close');
+}
+
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
 }
 
 watch(
@@ -288,12 +297,23 @@ watch(
           :error="formErrors.rawParams"
         />
         <template v-if="selectedValidation.key === 'basic'">
-          <div class="flex items-center gap-1 mb-2 mt-4">
-            <h4 class="eyebrow font-medium">Custom strategies</h4>
-            <UiTooltip
-              title="Calculate the score with a different configuration of Voting Strategies"
-            >
-              <IH-question-mark-circle class="shrink-0" />
+          <div class="flex items-center justify-between gap-1 mb-2 mt-4">
+            <div class="flex items-center gap-1">
+              <h4 class="eyebrow font-medium">Custom strategies</h4>
+              <UiTooltip
+                title="Calculate the score with a different configuration of Voting Strategies"
+              >
+                <IH-question-mark-circle class="shrink-0" />
+              </UiTooltip>
+            </div>
+            <UiTooltip title="Test all custom strategies">
+              <UiButton
+                class="!p-0 !border-0 !h-auto !w-[20px]"
+                :disabled="!customStrategies.length"
+                @click="handleTestStrategies(customStrategies)"
+              >
+                <IH-play />
+              </UiButton>
             </UiTooltip>
           </div>
           <UiStrategiesConfiguratorOffchain
@@ -302,6 +322,7 @@ watch(
             allow-duplicates
             :network-id="networkId"
             :default-chain-id="defaultChainId"
+            @test-strategies="handleTestStrategies"
           >
             <template #empty>
               <div class="p-3 border border-dashed rounded-lg text-center">
@@ -356,4 +377,15 @@ watch(
       </UiButton>
     </template>
   </UiModal>
+  <teleport to="#modal">
+    <ModalTestStrategy
+      :open="isTestStrategiesModalOpen"
+      :network-id="networkId"
+      :chain-id="defaultChainId"
+      :space-id="spaceId"
+      :voting-power-symbol="votingPowerSymbol"
+      :strategies="testedStrategies"
+      @close="isTestStrategiesModalOpen = false"
+    />
+  </teleport>
 </template>

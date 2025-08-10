@@ -14,7 +14,8 @@ import {
   constants as starknetConstants,
   uint256
 } from 'starknet';
-import { executionCall, MANA_URL } from '@/helpers/mana';
+import { getIsContract as _getIsContract } from '@/helpers/contracts';
+import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import {
@@ -22,6 +23,7 @@ import {
   verifyNetwork,
   verifyStarknetNetwork
 } from '@/helpers/utils';
+import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   EVM_CONNECTORS,
   STARKNET_CONNECTORS
@@ -84,13 +86,12 @@ export function createActions(
     starkProvider,
     manaUrl: MANA_URL,
     ethUrl,
-    networkConfig
+    networkConfig,
+    whitelistServerUrl: WHITELIST_SERVER_URL
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: STARKNET_CONNECTORS,
-    lowPriorityAuthenticators: ['evm-tx']
+    helpers
   });
 
   const getIsContract = async (
@@ -100,8 +101,7 @@ export function createActions(
     if (!EVM_CONNECTORS.includes(connectorType)) return false;
     if (connectorType === 'sequence') return true;
 
-    const code = await l1Provider.getCode(address);
-    return code !== '0x';
+    return _getIsContract(l1Provider, address);
   };
 
   const client = new clients.StarknetTx(clientConfig);
@@ -244,14 +244,21 @@ export function createActions(
 
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        space.id,
+        space.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
           strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndicies:
+          strategiesIndices:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -332,7 +339,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -357,13 +364,20 @@ export function createActions(
 
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        space.id,
+        space.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies:
+        strategiesIndices:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
-        isContract
+        isContract,
+        ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -392,7 +406,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: proposal.proposal_id as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -424,6 +438,7 @@ export function createActions(
     cancelProposal: async (
       web3: any,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) => {
       await verifyStarknetNetwork(web3, chainId);
@@ -444,13 +459,20 @@ export function createActions(
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indices,
+          strategiesIndices: proposal.strategies_indices,
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -603,6 +625,7 @@ export function createActions(
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
       validationStrategy: StrategyConfig,
+      executionStrategies: StrategyConfig[],
       votingDelay: number | null,
       minVotingDuration: number | null,
       maxVotingDuration: number | null
@@ -611,8 +634,12 @@ export function createActions(
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
-          execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types,
+          execution_strategies: executionStrategies.map(
+            config => config.address
+          ),
+          execution_strategies_types: executionStrategies.map(
+            config => config.type
+          ),
           execution_destinations: space.executors_destinations
         })
       );
@@ -671,14 +698,14 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegationType: DelegationType,
-      delegatee: string | null,
+      delegatees: string[],
       delegationContract: string
     ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       const { account }: { account: Account } = web3.provider;
 
-      delegatee = delegatee ?? '0x0';
+      const delegatee = delegatees[0] ?? '0x0';
 
       let calls: AllowArray<Call> = {
         contractAddress: delegationContract,
@@ -710,7 +737,6 @@ export function createActions(
       return account.execute(calls);
     },
     getDelegatee: async (
-      web3: any,
       delegation: SpaceMetadataDelegation,
       delegator: string
     ) => {

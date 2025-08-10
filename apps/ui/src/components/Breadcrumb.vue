@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getCacheHash, getUrl } from '@/helpers/utils';
+import { offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID } from '@/types';
 
@@ -9,7 +10,7 @@ const SPACE_LOGO_HEIGHT = 38;
 defineOptions({ inheritAttrs: false });
 
 const route = useRoute();
-const { isWhiteLabel } = useWhiteLabel();
+const { isWhiteLabel, skinSettings } = useWhiteLabel();
 const { logo } = useSkin();
 const { param } = useRouteParser('space');
 const { resolved, address: spaceAddress, networkId } = useResolve(param);
@@ -41,16 +42,29 @@ const previewLogoUrl = computed(() => {
   if (
     !isWhiteLabel.value ||
     !logo.value ||
-    logo.value === space.value?.additionalRawData?.skinSettings?.logo
+    logo.value === skinSettings.value?.logo
   )
     return;
   return getUrl(logo.value);
 });
 
-const hasWhiteLabelLogo = computed(() => {
-  if (!isWhiteLabel.value) return;
-  return space.value?.additionalRawData?.skinSettings?.logo;
+const onchainLogoUrl = computed(() => {
+  if (
+    !space.value ||
+    offchainNetworks.includes(space.value.network) ||
+    !skinSettings.value?.logo
+  )
+    return;
+  return getUrl(skinSettings.value?.logo);
 });
+
+const directUrlLogo = computed(() => {
+  return previewLogoUrl.value || onchainLogoUrl.value;
+});
+
+const hasWhiteLabelLogo = computed(
+  () => isWhiteLabel.value && skinSettings.value?.logo
+);
 
 const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
 </script>
@@ -65,8 +79,8 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
     v-bind="$attrs"
   >
     <img
-      v-if="previewLogoUrl"
-      :src="previewLogoUrl"
+      v-if="directUrlLogo"
+      :src="directUrlLogo"
       :style="`max-width:${SPACE_LOGO_WIDTH}px; max-height:${SPACE_LOGO_HEIGHT}px;`"
       :alt="space.name"
     />
@@ -77,7 +91,7 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
       type="space-logo"
       :width="SPACE_LOGO_WIDTH"
       :height="SPACE_LOGO_HEIGHT"
-      class="rounded-none border-none"
+      class="rounded-none border-none bg-transparent"
       :style="`max-width:${SPACE_LOGO_WIDTH}px; max-height:${SPACE_LOGO_HEIGHT}px;`"
       :cb="cb"
     />

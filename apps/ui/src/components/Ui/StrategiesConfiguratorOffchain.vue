@@ -15,6 +15,10 @@ const props = defineProps<{
   hiddenStrategies?: string[];
 }>();
 
+const emit = defineEmits<{
+  (e: 'testStrategies', strategies: StrategyConfig[]): void;
+}>();
+
 const isStrategiesModalOpen = ref(false);
 const isEditStrategyModalOpen = ref(false);
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
@@ -84,6 +88,13 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
 
 <template>
   <div>
+    <template v-if="$slots.title || $slots.actions">
+      <div class="flex items-center justify-between mb-2">
+        <slot name="title" />
+        <div />
+        <slot name="actions" />
+      </div>
+    </template>
     <div class="space-y-3 mb-3">
       <slot v-if="strategies.length === 0" name="empty">
         <div>No strategies selected</div>
@@ -94,8 +105,12 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
         class="mb-3"
         :network-id="networkId"
         :strategy="strategy"
+        :show-test-button="true"
         @edit-strategy="handleEditStrategy"
         @delete-strategy="handleRemoveStrategy"
+        @test-strategies="
+          (strategies: StrategyConfig[]) => emit('testStrategies', strategies)
+        "
       />
     </div>
     <UiButton

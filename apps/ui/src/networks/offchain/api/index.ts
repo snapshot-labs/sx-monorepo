@@ -3,7 +3,11 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS } from '@/helpers/constants';
+import {
+  CHAIN_IDS,
+  DELEGATE_REGISTRY_STRATEGIES,
+  DELEGATION_TYPES_NAMES
+} from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
@@ -64,14 +68,15 @@ import {
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
-const DELEGATION_STRATEGIES = [
-  'delegation',
-  'erc20-balance-of-delegation',
-  'delegation-with-cap',
-  'delegation-with-overrides',
-  'with-delegation',
-  'erc20-balance-of-with-delegation'
-];
+const SPLIT_DELEGATION_STRATEGIES = ['split-delegation'];
+
+const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
+  name: 'Split Delegation',
+  apiType: 'split-delegation',
+  apiUrl: 'https://delegate-api.gnosisguild.org',
+  contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
+  chainId: 1
+};
 
 const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
   s: 'https://delegate-registry-api.snapshot.box',
@@ -83,22 +88,22 @@ function getProposalState(
   proposal: ApiProposal
 ): ProposalState {
   if (proposal.state === 'closed') {
+    if (proposal.type !== 'basic') {
+      return 'closed';
+    }
+
     const currentQuorum = getProposalCurrentQuorum(networkId, {
       scores: proposal.scores,
       scores_total: proposal.scores_total,
       quorum_type: proposal.quorumType
     });
 
-    if (
-      proposal.quorumType === 'rejection'
-        ? currentQuorum > proposal.quorum
-        : currentQuorum < proposal.quorum
-    ) {
-      return 'rejected';
+    if (proposal.quorumType === 'rejection') {
+      return currentQuorum > proposal.quorum ? 'rejected' : 'passed';
     }
 
-    if (proposal.type !== 'basic') {
-      return 'closed';
+    if (currentQuorum < proposal.quorum) {
+      return 'rejected';
     }
 
     return proposal.scores[0] > proposal.scores[1] ? 'passed' : 'rejected';
@@ -172,7 +177,7 @@ function formatSpace(
       active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
-      snapshot_chain_id: parseInt(space.network)
+      snapshot_chain_id: space.network
     };
   }
 
@@ -193,6 +198,8 @@ function formatSpace(
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
     private: space.private,
+    flagged: space.flagged,
+    flagCode: space.flagCode,
     domain: space.domain,
     skin: space.skin,
     skinSettings: formatSkinSettings(space.skinSettings),
@@ -215,8 +222,9 @@ function formatSpace(
     network: networkId,
     verified: space.verified,
     turbo: space.turbo,
+    turbo_expiration: space.turboExpiration,
     controller: '',
-    snapshot_chain_id: parseInt(space.network),
+    snapshot_chain_id: space.network,
     name: space.name || '',
     avatar: space.avatar || '',
     cover: space.cover || '',
@@ -225,6 +233,7 @@ function formatSpace(
     github: space.github || '',
     twitter: space.twitter || '',
     discord: '',
+    farcaster: space.farcaster || '',
     coingecko: space.coingecko || '',
     proposal_count_1d: space.proposalsCount1d,
     proposal_count_30d: space.proposalsCount30d,
@@ -323,6 +332,14 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     ];
   }
 
+  const voting_power_validation_params: any = [proposal.validation.params];
+  if (
+    proposal.validation.name === 'basic' &&
+    !(proposal.validation.params.strategies || []).length
+  ) {
+    voting_power_validation_params[0].strategies = proposal.strategies;
+  }
+
   const state = getProposalState(networkId, proposal);
 
   const { admins, moderators, members } = proposal.space;
@@ -331,6 +348,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
+    isInvalid: false,
     author: {
       id: proposal.author,
       address_type: 1,
@@ -362,11 +380,12 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     state,
     cancelled: false,
     vetoed: false,
+    execution_settled: false,
     completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,
       name: proposal.space.name,
-      snapshot_chain_id: parseInt(proposal.space.network),
+      snapshot_chain_id: proposal.space.network,
       avatar: proposal.space.avatar,
       controller: '',
       admins,
@@ -392,11 +411,16 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
+    voting_power_validation_strategy_strategies: [proposal.validation.name],
+    voting_power_validation_strategy_strategies_params:
+      voting_power_validation_params,
     tx: '',
     execution_tx: null,
     veto_tx: null,
     privacy: proposal.privacy || 'none',
-    flagged: proposal.flagged
+    flagged: proposal.flagged,
+    flag_code: proposal.flagCode,
+    plugins: proposal.plugins
   };
 }
 
@@ -424,15 +448,17 @@ function formatDelegations(
 ): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
-  const spaceDelegationStrategy = space.strategies.find(strategy =>
-    DELEGATION_STRATEGIES.includes(strategy.name)
+  const basicDelegationStrategy = space.strategies.find(strategy =>
+    DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
   );
 
   if (space.delegationPortal) {
-    const [apiType, name] =
+    const apiType =
       space.delegationPortal.delegationType === 'compound-governor'
-        ? (['governor-subgraph', 'ERC-20 Votes'] as const)
-        : [space.delegationPortal.delegationType, 'Split Delegation'];
+        ? 'governor-subgraph'
+        : space.delegationPortal.delegationType;
+
+    const name = DELEGATION_TYPES_NAMES[apiType];
 
     const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
       ? space.delegationPortal.delegationNetwork
@@ -447,19 +473,29 @@ function formatDelegations(
     });
   }
 
-  if (spaceDelegationStrategy) {
+  if (basicDelegationStrategy) {
     const chainId = parseInt(space.network, 10);
 
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
       delegations.push({
-        name: 'Delegate registry',
+        name: DELEGATION_TYPES_NAMES['delegate-registry'],
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,
         chainId
       });
     }
+  }
+
+  const splitDelegationStrategy = space.strategies.find(strategy =>
+    SPLIT_DELEGATION_STRATEGIES.includes(strategy.name)
+  );
+  if (
+    splitDelegationStrategy &&
+    space.delegationPortal?.delegationType !== SPLIT_DELEGATION_DATA.apiType
+  ) {
+    delegations.push(SPLIT_DELEGATION_DATA);
   }
 
   return delegations;
@@ -888,7 +924,7 @@ export function createApi(
 
       return Object.fromEntries(
         data.networks.map((network: any) => [
-          Number(network.id),
+          network.id,
           {
             spaces_count: network.spacesCount,
             premium: network.premium
@@ -904,6 +940,7 @@ export function createApi(
       });
 
       return options;
-    }
+    },
+    loadLastIndexedBlock: async () => null
   };
 }

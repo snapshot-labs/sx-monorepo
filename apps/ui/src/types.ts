@@ -1,8 +1,17 @@
 import { VNode } from 'vue';
+import { RouteLocationRaw } from 'vue-router';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
+
+export type Task = {
+  description: string;
+  link?: RouteLocationRaw;
+  currentStep?: number;
+  totalSteps?: number;
+  type?: NotificationType | 'info';
+};
 
 export type Theme = 'light' | 'dark';
 
@@ -23,6 +32,8 @@ export type NetworkID =
   | 'oeth'
   | 'base'
   | 'mnt'
+  | 'ape'
+  | 'curtis'
   | 'sep'
   | 'sn'
   | 'sn-sep';
@@ -58,6 +69,7 @@ export type VoteTypeInfo = {
 
 export type DelegationType =
   | 'governor-subgraph'
+  | 'apechain-delegate-registry'
   // From v1
   | 'delegate-registry'
   | 'split-delegation';
@@ -98,6 +110,7 @@ export type SpaceMetadata = {
   twitter: string;
   github: string;
   discord: string;
+  farcaster: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
   labels: SpaceMetadataLabel[];
@@ -132,7 +145,7 @@ export type RelatedSpace = {
   active_proposals: number | null;
   turbo: boolean;
   verified: boolean;
-  snapshot_chain_id: number;
+  snapshot_chain_id: string;
 };
 
 export type Validation = {
@@ -145,6 +158,8 @@ export type OffchainAdditionalRawData = {
 } & Pick<
   OffchainApiSpace,
   | 'private'
+  | 'flagged'
+  | 'flagCode'
   | 'domain'
   | 'skin'
   | 'skinSettings'
@@ -167,7 +182,8 @@ export type Space = {
   network: NetworkID;
   verified: boolean;
   turbo: boolean;
-  snapshot_chain_id?: number;
+  turbo_expiration: number;
+  snapshot_chain_id?: string;
   name: string;
   avatar: string;
   cover: string;
@@ -179,6 +195,7 @@ export type Space = {
   twitter: string;
   github: string;
   discord: string;
+  farcaster: string;
   coingecko?: string;
   terms: string;
   privacy: SpacePrivacy;
@@ -238,13 +255,17 @@ export type Proposal = {
   proposal_id: number | string;
   network: NetworkID;
   execution_network: NetworkID;
+  /**
+   * If proposal is invalid it means that it was not created correctly.
+   */
+  isInvalid: boolean;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';
   space: {
     id: string;
     name: string;
-    snapshot_chain_id?: number;
+    snapshot_chain_id?: string;
     avatar: string;
     terms: string;
     controller: string;
@@ -285,6 +306,8 @@ export type Proposal = {
   strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
+  voting_power_validation_strategy_strategies: string[];
+  voting_power_validation_strategy_strategies_params: any[];
   created: number;
   edited: number | null;
   tx: string;
@@ -294,11 +317,20 @@ export type Proposal = {
   has_execution_window_opened: boolean;
   execution_ready: boolean;
   vetoed: boolean;
+  /**
+   * Determines if proposal execution is settled - all transactions have been executed or vetoed.
+   */
+  execution_settled: boolean;
+  /**
+   * Determines if proposal is completed - all votes have been already counted.
+   */
   completed: boolean;
   cancelled: boolean;
   state: ProposalState;
   privacy: Privacy;
+  plugins: Record<string, unknown>;
   flagged: boolean;
+  flag_code: number;
 };
 
 export type UserProfile = {
@@ -379,7 +411,7 @@ export type Member = {
 };
 
 export type Draft = {
-  proposalId: number | string | null;
+  originalProposal: Proposal | null;
   title: string;
   body: string;
   discussion: string;

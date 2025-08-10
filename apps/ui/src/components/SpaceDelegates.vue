@@ -1,17 +1,13 @@
 <script setup lang="ts">
-import { getAddress } from '@ethersproject/address';
-import {
-  useInfiniteQuery,
-  useQuery,
-  useQueryClient
-} from '@tanstack/vue-query';
+import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { getNames } from '@/helpers/stamp';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
-import { getNetwork, supportsNullCurrent } from '@/networks';
-import { SNAPSHOT_URLS } from '@/networks/offchain';
-import { RequiredProperty, Space, SpaceMetadataDelegation } from '@/types';
+import { useDelegateesQuery } from '@/queries/delegatees';
+import { useDelegatesQuery } from '@/queries/delegates';
+import { Space, SpaceMetadataDelegation } from '@/types';
+
+type SortType = 'delegatedVotes' | 'tokenHoldersRepresentedAmount';
 
 const props = defineProps<{
   space: Space;
@@ -19,7 +15,11 @@ const props = defineProps<{
 }>();
 
 const delegateModalOpen = ref(false);
-const delegateModalState = ref<{ delegatee: string } | null>(null);
+const delegateModalState = ref<{
+  delegatees: { id: string }[];
+}>({
+  delegatees: []
+});
 const isUndelegating = ref(false);
 const undelegateFn = ref(undelegate);
 const sortBy = ref(
@@ -30,15 +30,10 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-asc'
 );
 const { setTitle } = useTitle();
-const { getDelegates, getDelegation } = useDelegates(
-  props.delegation as RequiredProperty<typeof props.delegation>,
-  props.space
-);
-const { getDelegatee } = useActions();
-const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const actions = useActions();
 const queryClient = useQueryClient();
+const { modalAccountOpen } = useModal();
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 
@@ -50,131 +45,27 @@ const {
   isPending,
   isFetchingNextPage,
   isError
-} = useInfiniteQuery({
-  initialPageParam: 0,
-  queryKey: ['delegates', props.delegation.contractAddress, sortBy],
-  queryFn: ({ pageParam }) => {
-    const [orderBy, orderDirection] = sortBy.value.split('-');
+} = useDelegatesQuery(
+  toRef(props, 'delegation'),
+  toRef(props, 'space'),
+  sortBy
+);
 
-    return getDelegates({
-      orderBy,
-      orderDirection,
-      first: 40,
-      skip: pageParam
-    });
-  },
-  getNextPageParam: (lastPage, pages) => {
-    if (lastPage.length < 40) return null;
+const { data: delegatees, isPending: isPendingDelegatees } = useDelegateesQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'space'),
+  toRef(props, 'delegation')
+);
 
-    return pages.length * 40;
-  },
-  retry: (failureCount, error) => {
-    if (error?.message.includes('Row not found')) return false;
-
-    return failureCount < 3;
-  }
+const isUpdatableDelegation = computed(() => {
+  return props.delegation.apiType === 'split-delegation';
 });
 
-const { data: delegatee } = useQuery({
-  queryKey: [
-    'delegatees',
-    props.delegation.contractAddress,
-    () => web3.value.account
-  ],
-  queryFn: () => getCurrentDelegatee(),
-  enabled: !!web3.value.account && !web3.value.authLoading
-});
-
-async function fetchDelegateRegistryDelegatee() {
-  const delegation = await getDelegation(web3.value.account);
-
-  if (!delegation) return null;
-
-  const [names, votingPowers, [apiDelegate]] = await Promise.all([
-    getNames([delegation.delegate]),
-    getNetwork(props.space.network).actions.getVotingPower(
-      props.space.id,
-      props.space.strategies,
-      props.space.strategies_params,
-      props.space.strategies_parsed_metadata,
-      web3.value.account,
-      {
-        at: supportsNullCurrent(props.space.network)
-          ? null
-          : getCurrent(props.space.network) || 0,
-        chainId: props.space.snapshot_chain_id
-      }
-    ),
-    getDelegates({
-      first: 1,
-      skip: 0,
-      orderBy: 'delegatedVotes',
-      orderDirection: 'desc',
-      where: {
-        // NOTE: this is delegate registry, needs to be checksummed
-        user: getAddress(delegation.delegate)
-      }
-    })
-  ]);
-
-  const balance = votingPowers.reduce(
-    (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
-    0
+function getIsSortingDisabled(type: SortType) {
+  return (
+    props.delegation.apiType === 'split-delegation' &&
+    sortBy.value.includes(type)
   );
-
-  return {
-    id: delegation.delegate,
-    balance,
-    share: apiDelegate ? balance / Number(apiDelegate.delegatedVotes) : 1,
-    name: names[delegation.delegate]
-  };
-}
-
-async function fetchGovernorSubgraphDelegatee() {
-  const delegateeData = await getDelegatee(
-    props.delegation,
-    web3.value.account
-  );
-
-  if (!delegateeData) return null;
-
-  const [names, [apiDelegate]] = await Promise.all([
-    getNames([delegateeData.address]),
-    getDelegates({
-      first: 1,
-      skip: 0,
-      orderBy: 'delegatedVotes',
-      orderDirection: 'desc',
-      where: {
-        // NOTE: This is subgraph, needs to be lowercase
-        user: delegateeData.address.toLocaleLowerCase()
-      }
-    })
-  ]);
-
-  return {
-    id: delegateeData.address,
-    balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
-    share:
-      apiDelegate && apiDelegate.delegatedVotesRaw !== '0'
-        ? Number(delegateeData.balance) / Number(apiDelegate.delegatedVotesRaw)
-        : 1,
-    name: names[delegateeData.address]
-  };
-}
-
-async function getCurrentDelegatee() {
-  if (!props.delegation.apiType || !props.delegation.chainId) return null;
-
-  if (!web3.value.account) {
-    return null;
-  }
-
-  if (props.delegation.apiType === 'governor-subgraph') {
-    return fetchGovernorSubgraphDelegatee();
-  } else if (props.delegation.apiType === 'delegate-registry') {
-    return fetchDelegateRegistryDelegatee();
-  }
 }
 
 function getExplorerUrl(address: string, type: 'address' | 'token') {
@@ -185,9 +76,13 @@ function getExplorerUrl(address: string, type: 'address' | 'token') {
   }
 }
 
-function handleSortChange(
-  type: 'delegatedVotes' | 'tokenHoldersRepresentedAmount'
-) {
+function getHasDelegatedTo(delegatee: string): boolean {
+  return (
+    delegatees.value?.some(d => compareAddresses(d.id, delegatee)) || false
+  );
+}
+
+function handleSortChange(type: SortType) {
   if (sortBy.value.startsWith(type)) {
     sortBy.value = sortBy.value.endsWith('desc')
       ? `${type}-asc`
@@ -198,16 +93,27 @@ function handleSortChange(
 }
 
 function handleDelegateToggle(newDelegatee?: string) {
-  if (
-    newDelegatee &&
-    delegatee.value &&
-    compareAddresses(newDelegatee, delegatee.value.id)
-  ) {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
+  if (newDelegatee && getHasDelegatedTo(newDelegatee)) {
     isUndelegating.value = true;
     return;
   }
 
-  delegateModalState.value = newDelegatee ? { delegatee: newDelegatee } : null;
+  delegateModalState.value.delegatees[0] = { id: newDelegatee || '' };
+  delegateModalOpen.value = true;
+}
+
+function handleUpdateDelegatesClick(newDelegatee?: string) {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
+  delegateModalState.value.delegatees[0] = { id: newDelegatee || '' };
   delegateModalOpen.value = true;
 }
 
@@ -223,7 +129,7 @@ async function undelegate() {
   return actions.delegate(
     props.space,
     props.delegation.apiType,
-    null,
+    [],
     props.delegation.contractAddress,
     props.delegation.chainId
   );
@@ -241,6 +147,12 @@ function handleUndelegateConfirmed() {
       web3.value.account
     ]
   });
+
+  isUndelegating.value = false;
+}
+
+function handleUndelegateClick() {
+  isUndelegating.value = true;
 }
 
 watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
@@ -254,22 +166,6 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <IH-exclamation-circle class="shrink-0" />
     <span>Invalid delegation settings.</span>
   </div>
-  <UiMessage
-    v-if="delegation.apiType === 'split-delegation'"
-    :type="'info'"
-    class="m-4"
-  >
-    This space uses the split-delegation feature, which is currently not
-    supported on the new interface. You can view the delegates dashboard on the
-    <a
-      :href="`${SNAPSHOT_URLS[props.space.network]}/#/${props.space.id}/delegates`"
-      target="_blank"
-      class="inline-flex items-center font-bold"
-    >
-      previous interface
-      <IH-arrow-sm-right class="inline-block -rotate-45" /></a
-    >.
-  </UiMessage>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <UiButton
@@ -285,17 +181,31 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         Edit my statement
       </UiButton>
       <div class="flex-auto" />
-      <UiTooltip title="Delegate">
-        <UiButton class="!px-0 w-[46px]" @click="handleDelegateToggle()">
+      <UiTooltip
+        :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
+      >
+        <UiButton
+          class="!px-0 w-[46px]"
+          @click="
+            isUpdatableDelegation
+              ? handleUpdateDelegatesClick()
+              : handleDelegateToggle()
+          "
+        >
           <IH-user-add class="inline-block" />
         </UiButton>
       </UiTooltip>
     </div>
 
-    <div v-if="delegatee" class="mb-3">
+    <div v-if="web3.account" class="mb-3">
       <UiLabel label="Delegating to" />
-      <div class="w-full truncate px-4">
-        <div class="flex w-full space-x-3 truncate border-b py-3">
+      <UiLoading v-if="isPendingDelegatees" class="px-4 py-3 block" />
+      <div v-else-if="delegatees?.length" class="w-full truncate px-4">
+        <div
+          v-for="delegatee in delegatees"
+          :key="delegatee.id"
+          class="flex w-full space-x-3 truncate border-b py-3"
+        >
           <AppLink
             :to="{
               name: 'space-user-statement',
@@ -324,7 +234,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 {{ _vp(delegatee.balance) }}
                 {{ space.voting_power_symbol }}
               </h4>
-              <div class="text-[17px]" v-text="_p(delegatee.share)" />
+              <div
+                class="text-[17px]"
+                v-text="_p(delegatee.delegatedVotePercentage)"
+              />
             </div>
           </AppLink>
           <div class="flex items-center justify-center">
@@ -340,15 +253,34 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     type="button"
                     class="flex items-center gap-2"
                     :class="{ 'opacity-80': active }"
-                    @click="isUndelegating = true"
+                    @click="
+                      isUpdatableDelegation
+                        ? handleUpdateDelegatesClick()
+                        : handleUndelegateClick()
+                    "
                   >
-                    <IH-user-remove />
-                    Undelegate
+                    <template v-if="isUpdatableDelegation">
+                      <IH-pencil />
+                      Edit delegation
+                    </template>
+                    <template v-else>
+                      <IH-user-remove />
+                      Undelegate
+                    </template>
                   </button>
                 </UiDropdownItem>
               </template>
             </UiDropdown>
           </div>
+        </div>
+      </div>
+      <div v-else class="flex space-x-2 border-b py-3 mx-4">
+        <IH-exclamation-circle class="shrink-0 mt-[5px]" />
+        <div>
+          You are not delegating your voting power yet.
+          <span v-if="isUpdatableDelegation">
+            If you just delegated, it may take up to 5 minutes to show up.
+          </span>
         </div>
       </div>
     </div>
@@ -359,7 +291,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
       >
         <div
-          class="w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
+          class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
         >
           <span class="truncate">Delegatee</span>
         </div>
@@ -369,6 +301,12 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <button
           type="button"
           class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
+          :class="{
+            'hover:text-skin-text': getIsSortingDisabled(
+              'tokenHoldersRepresentedAmount'
+            )
+          }"
+          :disabled="getIsSortingDisabled('tokenHoldersRepresentedAmount')"
           @click="handleSortChange('tokenHoldersRepresentedAmount')"
         >
           <span class="truncate">Delegators</span>
@@ -383,7 +321,11 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </button>
         <button
           type="button"
-          class="w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
+          class="w-[120px] md:w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
+          :class="{
+            'hover:text-skin-text': getIsSortingDisabled('delegatedVotes')
+          }"
+          :disabled="getIsSortingDisabled('delegatedVotes')"
           @click="handleSortChange('delegatedVotes')"
         >
           <span class="truncate">Voting power</span>
@@ -433,7 +375,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               class="flex w-full space-x-3"
             >
               <div
-                class="flex grow sm:grow-0 sm:shrink-0 items-center w-[190px] py-3 gap-x-3 leading-[22px] truncate"
+                class="flex grow sm:grow-0 sm:shrink-0 items-center w-[120px] xs:w-[190px] py-3 gap-x-3 leading-[22px] truncate"
               >
                 <UiStamp :id="delegate.user" :size="32" />
                 <div class="flex flex-col truncate">
@@ -471,7 +413,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 />
               </div>
               <div
-                class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
+                class="w-[120px] md:w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
               >
                 <h4 class="text-skin-link truncate">
                   {{ _vp(Number(delegate.delegatedVotes)) }}
@@ -496,16 +438,21 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                       type="button"
                       class="flex items-center gap-2"
                       :class="{ 'opacity-80': active }"
-                      @click="handleDelegateToggle(delegate.user)"
+                      @click="
+                        isUpdatableDelegation
+                          ? handleUpdateDelegatesClick(delegate.user)
+                          : handleDelegateToggle(delegate.user)
+                      "
                     >
-                      <template
-                        v-if="
-                          delegatee &&
-                          compareAddresses(delegate.user, delegatee.id)
-                        "
-                      >
-                        <IH-user-remove />
-                        Undelegate
+                      <template v-if="getHasDelegatedTo(delegate.user)">
+                        <template v-if="isUpdatableDelegation">
+                          <IH-pencil />
+                          Edit delegation
+                        </template>
+                        <template v-else>
+                          <IH-user-remove />
+                          Undelegate
+                        </template>
                       </template>
                       <template v-else>
                         <IH-user-add />
@@ -566,6 +513,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :execute="undelegateFn"
         @confirmed="handleUndelegateConfirmed"
         @close="isUndelegating = false"
+        @cancelled="isUndelegating = false"
       />
     </teleport>
   </template>

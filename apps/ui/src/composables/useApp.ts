@@ -16,7 +16,10 @@ export function useApp() {
 
     // Auto connect with unicorn-connector when walletId param is in URL
     const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = useUrlSearchParams('hash');
+
     if (searchParams.get('walletId')) connectorId = 'unicorn';
+    else if (hashParams.as) connectorId = 'guest';
     // Auto connect with gnosis-connector when inside gnosis-safe iframe
     if (window?.parent !== window) connectorId = 'gnosis';
 

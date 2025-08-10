@@ -1,13 +1,16 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { getRelayerInfo } from '@/helpers/mana';
 import { pinGraph, pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
+import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createConstants } from './constants';
 import { EVM_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -58,6 +61,7 @@ export const METADATA: Record<string, Metadata> = {
   },
   mnt: {
     name: 'Mantle',
+    ticker: 'MNT',
     chainId: 5000,
     apiUrl: UNIFIED_API_URL,
     avatar:
@@ -72,10 +76,30 @@ export const METADATA: Record<string, Metadata> = {
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: ETH_MAINNET_BLOCK_TIME
   },
+  ape: {
+    name: 'ApeChain',
+    ticker: 'APE',
+    chainId: 33139,
+    currentChainId: 1,
+    apiUrl: UNIFIED_API_URL,
+    avatar:
+      'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4',
+    blockTime: ETH_MAINNET_BLOCK_TIME
+  },
+  curtis: {
+    name: 'Curtis',
+    ticker: 'APE',
+    chainId: 33111,
+    currentChainId: 11155111,
+    apiUrl: UNIFIED_API_TESTNET_URL,
+    avatar:
+      'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4',
+    blockTime: ETH_MAINNET_BLOCK_TIME
+  },
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
-    apiUrl: import.meta.env.VITE_EVM_SEPOLIA_API ?? UNIFIED_API_TESTNET_URL,
+    apiUrl: UNIFIED_API_TESTNET_URL,
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816
@@ -95,20 +119,34 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   });
 
   const helpers = {
-    isAuthenticatorSupported: (authenticator: string) =>
-      constants.SUPPORTED_AUTHENTICATORS[authenticator],
-    isAuthenticatorContractSupported: (authenticator: string) =>
-      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
-    getRelayerAuthenticatorType: (authenticator: string) =>
-      constants.RELAYER_AUTHENTICATORS[authenticator],
+    getAuthenticatorSupportInfo: (authenticator: string) =>
+      constants.AUTHENTICATORS_SUPPORT_INFO[authenticator] || null,
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
-    isExecutorSupported: (executor: string) =>
-      constants.SUPPORTED_EXECUTORS[executor],
+    isExecutorSupported: (executorType: string) =>
+      executorType !== 'ReadOnlyExecution',
+    isExecutorActionsSupported: (executorType: string) =>
+      constants.SUPPORTED_EXECUTORS[executorType],
     pin,
     getSpaceController: async (space: Space) => space.controller,
+    getRelayerInfo: (space: string, network: NetworkID) =>
+      getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransaction(txId);
+          return transaction.blockNumber ?? null;
+        }
+      });
+    },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
         const timer = setInterval(async () => {
@@ -124,6 +162,8 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       if (type === 'token') dataType = 'token';
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'address';
+
+      if (dataType === 'address') id = formatAddress(id);
 
       return `${networks[chainId].explorer.url}/${dataType}/${id}`;
     }
@@ -143,7 +183,9 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'matic',
       'base',
       'mnt',
-      'arb1'
+      'arb1',
+      'ape',
+      'curtis'
     ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),

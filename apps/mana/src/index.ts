@@ -2,14 +2,20 @@ import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
-import { createTables } from './db';
 import ethRpc from './eth';
+import { registeredApeGasProposalsLoop } from './eth/registered';
 import starkRpc from './stark';
+import pkg from '../package.json';
 import {
   registeredProposalsLoop,
   registeredTransactionsLoop
 } from './stark/registered';
-import pkg from '../package.json';
+
+// Validate that WALLET_SECRET is defined
+if (!process.env.WALLET_SECRET) {
+  console.error('Error: WALLET_SECRET environment variable is required');
+  process.exit(1);
+}
 
 const app = express();
 
@@ -30,10 +36,9 @@ app.get('/', (req, res) =>
 );
 
 async function start() {
-  await createTables();
-
   registeredTransactionsLoop();
   registeredProposalsLoop();
+  registeredApeGasProposalsLoop();
 
   app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
 }

@@ -3,11 +3,16 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS } from '@/helpers/constants';
+import {
+  BASIC_CHOICES,
+  CHAIN_IDS,
+  EVM_EMPTY_ADDRESS,
+  STARKNET_EMPTY_ADDRESS
+} from '@/helpers/constants';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, starknetNetworks } from '@/networks';
 import {
   NetworkApi,
   NetworkConstants,
@@ -41,6 +46,7 @@ import {
   mixinHighlightVotes
 } from './highlight';
 import {
+  LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
@@ -81,13 +87,11 @@ function isSpaceWithMetadata(space: ApiSpace): space is ApiSpaceWithMetadata {
   );
 }
 
-function isProposalWithMetadata(
+function isProposalWithSpaceMetadata(
   proposal: ApiProposal
 ): proposal is ApiProposalWithMetadata {
   return (
-    !!proposal.metadata &&
-    !!proposal.space.metadata &&
-    !!proposal.space.strategies_parsed_metadata
+    !!proposal.space.metadata && !!proposal.space.strategies_parsed_metadata
   );
 }
 
@@ -124,7 +128,7 @@ function formatExecution(execution: string): Transaction[] {
     const result = JSON.parse(execution);
 
     return Array.isArray(result) ? result : [];
-  } catch (e) {
+  } catch {
     console.log('Failed to parse execution');
     return [];
   }
@@ -156,13 +160,23 @@ function formatLabels(labels: string[]) {
   });
 }
 
+function getValidationStrategyStrategiesIndices(
+  strategies: string[],
+  parsedMetadata: ApiStrategyParsedMetadata[]
+) {
+  // Those values are default sorted by block_range so newest entries are at the end
+  const maxIndex = Math.max(
+    ...parsedMetadata.slice(-strategies.length).map(metadata => metadata.index)
+  );
+
+  return Array.from(Array(maxIndex + 1).keys());
+}
+
 function processStrategiesMetadata(
   parsedMetadata: ApiStrategyParsedMetadata[],
-  strategiesIndicies?: number[]
+  strategiesIndices: number[]
 ) {
   if (parsedMetadata.length === 0) return [];
-
-  const maxIndex = Math.max(...parsedMetadata.map(metadata => metadata.index));
 
   const metadataMap = Object.fromEntries(
     parsedMetadata.map(metadata => [
@@ -179,29 +193,21 @@ function processStrategiesMetadata(
     ])
   );
 
-  strategiesIndicies =
-    strategiesIndicies || Array.from(Array(maxIndex + 1).keys());
-  return strategiesIndicies.map(index => metadataMap[index]) || [];
+  return strategiesIndices.map(index => metadataMap[index]) || [];
 }
 
 function processExecutions(
   proposal: ApiProposal,
   executionNetworkId: NetworkID
 ): ProposalExecution[] {
-  // NOTE: This is unstable, meaning that if executors_strategies or treasuries
-  // are modified in the future it will affect pass proposals.
-  // We should persist those values on proposal directly so it's stable.
-  // Right now we can't really update subgraphs because of TheGraph issue.
   if (!proposal.metadata?.execution) return [];
 
   const transactions = formatExecution(proposal.metadata?.execution);
   if (transactions.length === 0) return [];
 
-  const match = proposal.space.metadata?.executors_strategies.find(
-    strategy => strategy.address === proposal.execution_strategy
-  );
+  const match = proposal.execution_strategy_details;
 
-  const treasuries = proposal.space.metadata?.treasuries.map(treasury =>
+  const treasuries = proposal.treasuries.map(treasury =>
     formatMetadataTreasury(treasury)
   );
 
@@ -233,6 +239,7 @@ function formatSpace(
 ): Space {
   return {
     ...space,
+    turbo_expiration: 0,
     network: space._indexer as NetworkID,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
@@ -242,6 +249,7 @@ function formatSpace(
     github: space.metadata.github,
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
+    farcaster: space.metadata.farcaster,
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
@@ -255,7 +263,7 @@ function formatSpace(
       const { name, api_type, api_url, contract, chain_id } =
         JSON.parse(delegation);
 
-      if (contract.includes(':')) {
+      if (contract?.includes(':')) {
         // NOTE: Legacy format
         const [network, address] = contract.split(':');
 
@@ -282,7 +290,11 @@ function formatSpace(
     executors_strategies: space.metadata.executors_strategies,
     voting_power_validation_strategies_parsed_metadata:
       processStrategiesMetadata(
-        space.voting_power_validation_strategies_parsed_metadata
+        space.voting_power_validation_strategies_parsed_metadata,
+        getValidationStrategyStrategiesIndices(
+          space.voting_power_validation_strategy_strategies,
+          space.voting_power_validation_strategies_parsed_metadata
+        )
       ),
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
@@ -307,8 +319,18 @@ function formatProposal(
       : networkId;
   const state = getProposalState(networkId, proposal, current);
 
+  const isStarknetNetwork = starknetNetworks.includes(networkId);
+
+  const emptyAddress = isStarknetNetwork
+    ? STARKNET_EMPTY_ADDRESS
+    : EVM_EMPTY_ADDRESS;
+
   return {
     ...proposal,
+    isInvalid:
+      proposal.metadata === null ||
+      (proposal.metadata.execution === null &&
+        proposal.execution_strategy !== emptyAddress),
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,
@@ -330,14 +352,14 @@ function formatProposal(
       address_type: getAddressType(proposal.author),
       role: null
     },
-    metadata_uri: proposal.metadata.id,
+    metadata_uri: proposal.metadata?.id ?? '',
     type: 'basic',
-    choices: proposal.metadata.choices,
-    labels: proposal.metadata.labels,
+    choices: proposal.metadata?.choices ?? BASIC_CHOICES,
+    labels: proposal.metadata?.labels ?? [],
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    title: proposal.metadata.title ?? '',
-    body: proposal.metadata.body ?? '',
-    discussion: proposal.metadata.discussion ?? '',
+    title: proposal.metadata?.title ?? `Proposal #${proposal.proposal_id}`,
+    body: proposal.metadata?.body ?? '',
+    discussion: proposal.metadata?.discussion ?? '',
     execution_network: executionNetworkId,
     executions: processExecutions(proposal, executionNetworkId),
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
@@ -345,12 +367,17 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
+    execution_settled: proposal.completed,
     state,
     network: networkId,
     privacy: 'none',
-    quorum: +proposal.quorum,
+    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     flagged: false,
-    completed: ['passed', 'executed', 'rejected'].includes(state)
+    flag_code: 0,
+    completed: ['passed', 'executed', 'rejected'].includes(state),
+    plugins: {},
+    voting_power_validation_strategy_strategies: [],
+    voting_power_validation_strategy_strategies_params: []
   };
 }
 
@@ -507,9 +534,10 @@ export function createApi(
       searchQuery = ''
     ): Promise<Proposal[]> => {
       const _filters: ProposalsFilter = clone(filters || {});
-      const metadataFilters: Record<string, any> = {
-        title_contains_nocase: searchQuery
-      };
+
+      const metadataFilters: Record<string, any> = {};
+      if (searchQuery) metadataFilters.title_contains_nocase = searchQuery;
+
       const state = _filters.state;
 
       if (state === 'active') {
@@ -537,7 +565,9 @@ export function createApi(
           where: {
             space_in: spaceIds,
             cancelled: false,
-            metadata_: metadataFilters,
+            metadata_: Object.keys(metadataFilters).length
+              ? metadataFilters
+              : undefined,
             ..._filters
           }
         }
@@ -559,7 +589,7 @@ export function createApi(
       }
 
       return data.proposals
-        .filter(proposal => isProposalWithMetadata(proposal))
+        .filter(proposal => isProposalWithSpaceMetadata(proposal))
         .map(proposal =>
           formatProposal(proposal, networkId, current, opts.baseNetworkId)
         );
@@ -589,7 +619,7 @@ export function createApi(
         highlightResult?.data.sxproposal
       );
 
-      if (!isProposalWithMetadata(data.proposal)) return null;
+      if (!isProposalWithSpaceMetadata(data.proposal)) return null;
       return formatProposal(
         data.proposal,
         networkId,
@@ -773,6 +803,15 @@ export function createApi(
     },
     loadSettings: async () => {
       return [];
+    },
+    async loadLastIndexedBlock(): Promise<number | null> {
+      const { data } = await apollo.query({
+        query: LAST_INDEXED_BLOCK_QUERY,
+        variables: {
+          indexer: networkId
+        }
+      });
+      return data._metadata?.value ? Number(data._metadata.value) : null;
     }
   };
 }

@@ -1,16 +1,16 @@
 import {
   getExecutionData as _getExecutionData,
-  Choice as SdkChoice
+  Choice as SdkChoice,
+  utils
 } from '@snapshot-labs/sx';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { getUrl } from '@/helpers/utils';
 import {
+  AuthenticatorSupportInfo,
   ConnectorType,
   NetworkHelpers,
   StrategyConfig
 } from '@/networks/types';
 import { Choice, Space } from '@/types';
-import { EVM_CONNECTORS, STARKNET_CONNECTORS } from './constants';
 
 type SpaceExecutionData = Pick<Space, 'executors' | 'executors_types'>;
 type ExecutorType = Parameters<typeof _getExecutionData>[0];
@@ -25,7 +25,7 @@ export function getExecutionData(
   space: SpaceExecutionData,
   executionStrategy: string,
   destinationAddress: string | null,
-  transactions: MetaTransaction[]
+  transactions: utils.encoding.MetaTransaction[]
 ) {
   const supportedExecutionIndex = space.executors.findIndex(
     executor => executor === executionStrategy
@@ -67,79 +67,57 @@ export async function buildMetadata(
   return `ipfs://${pinned.cid}`;
 }
 
-export function createStrategyPicker({
-  helpers,
-  managerConnectors,
-  lowPriorityAuthenticators = []
-}: {
-  helpers: NetworkHelpers;
-  managerConnectors: ConnectorType[];
-  lowPriorityAuthenticators?: ('evm' | 'evm-tx' | 'starknet')[];
-}) {
+export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
   return function pick({
     authenticators,
     strategies,
-    strategiesIndicies,
+    strategiesIndices,
     isContract,
-    connectorType
+    connectorType,
+    ignoreRelayer
   }: {
     authenticators: string[];
     strategies: string[];
-    strategiesIndicies: number[];
+    strategiesIndices: number[];
     isContract: boolean;
     connectorType: ConnectorType;
+    ignoreRelayer?: boolean;
   }) {
+    type AuthenticatorWithSupportInfo = {
+      authenticator: string;
+      supportInfo: AuthenticatorSupportInfo;
+    };
+
+    const hasSupportInfo = (entry: {
+      supportInfo: AuthenticatorSupportInfo | null;
+    }): entry is AuthenticatorWithSupportInfo => {
+      if (!entry.supportInfo) return false;
+      return true;
+    };
+
     const authenticatorsInfo = [...authenticators]
-      .filter(authenticator =>
-        isContract
-          ? helpers.isAuthenticatorContractSupported(authenticator)
-          : helpers.isAuthenticatorSupported(authenticator)
-      )
-      .sort((a, b) => {
-        const aRelayer = helpers.getRelayerAuthenticatorType(a);
-        const bRelayer = helpers.getRelayerAuthenticatorType(b);
-        const aLowPriority =
-          aRelayer && lowPriorityAuthenticators.includes(aRelayer);
-        const bLowPriority =
-          bRelayer && lowPriorityAuthenticators.includes(bRelayer);
+      .map(authenticator => ({
+        authenticator,
+        supportInfo: helpers.getAuthenticatorSupportInfo(authenticator)
+      }))
+      .filter(hasSupportInfo)
+      .filter(({ supportInfo }) => {
+        if (isContract && !supportInfo.isContractSupported) return false;
+        if (ignoreRelayer && supportInfo.relayerType) return false;
 
-        if (aLowPriority && !bLowPriority) {
-          return 1;
-        }
-
-        if (!aLowPriority && bLowPriority) {
-          return -1;
-        }
-
-        if (aRelayer && bRelayer) {
-          return 0;
-        }
-
-        if (aRelayer) {
-          return -1;
-        }
-
-        if (bRelayer) {
-          return 1;
-        }
-
-        return 0;
+        return supportInfo.isSupported;
       })
-      .map(authenticator => {
-        const relayerType = helpers.getRelayerAuthenticatorType(authenticator);
+      .sort((a, b) => {
+        const aRelayerPriority = a.supportInfo.priority ?? 0;
+        const bRelayerPriority = b.supportInfo.priority ?? 0;
 
-        let connectors: ConnectorType[] = [];
-        if (relayerType && ['evm', 'evm-tx'].includes(relayerType))
-          connectors = EVM_CONNECTORS;
-        else if (relayerType === 'starknet') connectors = STARKNET_CONNECTORS;
-        else connectors = managerConnectors;
-
-        return {
-          authenticator,
-          relayerType,
-          connectors
-        };
-      });
+        return aRelayerPriority - bRelayerPriority;
+      })
+      .map(({ authenticator, supportInfo }) => ({
+        authenticator,
+        relayerType: supportInfo.relayerType,
+        connectors: supportInfo.connectors
+      }));
 
     const authenticatorInfo = authenticatorsInfo.find(({ connectors }) =>
       connectors.includes(connectorType)
@@ -150,7 +128,7 @@ export function createStrategyPicker({
         (strategy, index) =>
           ({
             address: strategy,
-            index: strategiesIndicies[index],
+            index: strategiesIndices[index],
             paramsIndex: index
           }) as const
       )
@@ -169,4 +147,60 @@ export function createStrategyPicker({
       strategies: selectedStrategies
     };
   };
+}
+
+export function awaitIndexedOnApi({
+  txId,
+  getLastIndexedBlockNumber,
+  getTransactionBlockNumber,
+  timeout
+}: {
+  txId: string;
+  getLastIndexedBlockNumber: () => Promise<number | null>;
+  getTransactionBlockNumber: (txId: string) => Promise<number | null>;
+  timeout: number;
+}): Promise<boolean> {
+  let blockNumber: number | null = null;
+  const interval = 2000;
+  const maxRetries = Math.floor(timeout / interval);
+  let retries = 0;
+
+  return new Promise((resolve, reject) => {
+    const checkTransaction = async () => {
+      try {
+        if (!blockNumber) {
+          blockNumber = await getTransactionBlockNumber(txId);
+        }
+
+        if (!blockNumber) {
+          throw new Error('Invalid transaction block number');
+        }
+
+        const lastIndexedBlockNumber = await getLastIndexedBlockNumber();
+
+        if (!lastIndexedBlockNumber) {
+          throw new Error('Invalid indexer block number');
+        }
+
+        if (blockNumber <= lastIndexedBlockNumber) {
+          return resolve(true);
+        }
+
+        if (retries > maxRetries) {
+          return reject(new Error('Transaction not indexed yet'));
+        }
+
+        throw new Error('Transaction not indexed yet');
+      } catch {
+        if (retries > maxRetries) {
+          return reject(new Error('Timeout waiting for indexing'));
+        }
+
+        retries++;
+        setTimeout(checkTransaction, interval);
+      }
+    };
+
+    setTimeout(checkTransaction, interval);
+  });
 }

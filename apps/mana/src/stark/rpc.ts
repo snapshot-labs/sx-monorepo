@@ -17,12 +17,14 @@ export const createNetworkHandler = (chainId: string) => {
       const { address, primaryType, message } = signatureData;
       let receipt;
 
-      const { account, nonceManager } = getAccount(data.space);
+      const { account, nonceManager, deployAccount } = getAccount(data.space);
 
       console.time('Send');
       console.log('Type', primaryType);
       console.log('Address', address);
       console.log('Message', message);
+
+      await deployAccount();
 
       try {
         await nonceManager.acquire();
@@ -59,7 +61,9 @@ export const createNetworkHandler = (chainId: string) => {
   async function execute(id: number, params: any, res: Response) {
     try {
       const { space, proposalId, executionParams } = params;
-      const { account, nonceManager } = getAccount(space);
+      const { account, nonceManager, deployAccount } = getAccount(space);
+
+      await deployAccount();
 
       let receipt;
       try {
@@ -165,6 +169,8 @@ export const createNetworkHandler = (chainId: string) => {
 
       const requestId = crypto.randomUUID();
 
+      await db.saveRequest(requestId);
+
       // NOTE: no await here as we want to execute it in the background
       generateTree(requestId, entries);
 
@@ -180,7 +186,7 @@ export const createNetworkHandler = (chainId: string) => {
       const { requestId } = params;
 
       const request = await db.getMerkleTreeRequest(requestId);
-      if (!request) throw new Error('Request not ready yet');
+      if (!request) throw new Error('Request not found');
 
       return rpcSuccess(res, request.root, id);
     } catch (e) {

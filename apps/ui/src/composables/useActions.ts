@@ -1,7 +1,13 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
-import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
+import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
+import {
+  getNetwork,
+  getReadWriteNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
 import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
@@ -40,16 +46,9 @@ export function useActions() {
       try {
         return await fn(...args);
       } catch (e) {
-        const isUserAbortError =
-          e.code === 4001 ||
-          e.message === 'User rejected the request.' ||
-          e.code === 'ACTION_REJECTED';
-
-        if (!isUserAbortError) {
-          uiStore.addNotification(
-            'error',
-            'Something went wrong. Please try again later.'
-          );
+        if (!isUserAbortError(e)) {
+          console.error(e);
+          uiStore.addNotification('error', getUserFacingErrorMessage(e));
         }
 
         throw e;
@@ -152,7 +151,10 @@ export function useActions() {
           'success',
           'Your vote is pending! waiting for other signers'
         );
-      hash && uiStore.addPendingTransaction(hash, network.chainId);
+
+      if (hash) {
+        uiStore.addPendingTransaction(hash, network.chainId);
+      }
     } else {
       hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
@@ -183,6 +185,18 @@ export function useActions() {
     return alias.getAliasWallet(address =>
       wrapPromise(metadataNetwork, network.actions.setAlias(provider, address))
     );
+  }
+
+  // Returns an alias signer if the connector is a Starknet wallet and the network is offchain,
+  // otherwise returns the original provider.
+  async function getOptionalAliasSigner(
+    auth: { connector: Connector; provider: Web3Provider },
+    networkId: NetworkID
+  ) {
+    return auth.connector.type === 'argentx' &&
+      offchainNetworks.includes(networkId)
+      ? await getAliasSigner(auth)
+      : auth.provider;
   }
 
   async function predictSpaceAddress(
@@ -308,11 +322,12 @@ export function useActions() {
     }
 
     const network = getNetwork(proposal.network);
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         proposal,
@@ -352,11 +367,12 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         space,
@@ -384,7 +400,7 @@ export function useActions() {
 
   async function updateProposal(
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
@@ -400,15 +416,16 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     await wrapPromise(
       space.network,
       network.actions.updateProposal(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         space,
-        proposalId,
+        proposal,
         title,
         body,
         discussion,
@@ -438,10 +455,11 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.flagProposal(auth.value.provider, proposal)
+      network.actions.flagProposal(signer, auth.value.account, proposal)
     );
 
     return true;
@@ -459,12 +477,14 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
       network.actions.cancelProposal(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
+        auth.value.account,
         proposal
       )
     );
@@ -557,6 +577,7 @@ export function useActions() {
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
     validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
@@ -585,6 +606,7 @@ export function useActions() {
         votingStrategiesToAdd,
         votingStrategiesToRemove,
         validationStrategy,
+        executionStrategies,
         votingDelay !== null
           ? getCurrentFromDuration(space.network, votingDelay)
           : null,
@@ -639,9 +661,10 @@ export function useActions() {
   async function delegate(
     space: Space,
     delegationType: DelegationType,
-    delegatee: string | null,
+    delegatees: string[],
     delegationContract: string,
-    chainId: ChainId
+    chainId: ChainId,
+    delegateesMetadata?: Record<string, any>
   ) {
     if (!auth.value) {
       await forceLogin();
@@ -658,9 +681,10 @@ export function useActions() {
         space,
         actionNetwork,
         delegationType,
-        delegatee,
+        delegatees,
         delegationContract,
-        chainId
+        chainId,
+        delegateesMetadata
       ),
       { chainId }
     );
@@ -677,11 +701,7 @@ export function useActions() {
     const actionNetwork = getDelegationNetwork(delegation.chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
-    return network.actions.getDelegatee(
-      auth.value.provider,
-      delegation,
-      delegator
-    );
+    return network.actions.getDelegatee(delegation, delegator);
   }
 
   async function followSpace(networkId: NetworkID, spaceId: string) {
@@ -703,7 +723,10 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      }
+
       return false;
     }
 
@@ -729,7 +752,10 @@ export function useActions() {
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      }
+
       return false;
     }
 

@@ -32,6 +32,7 @@ export type OffchainSpaceSettings = {
   website: string;
   twitter: string;
   github: string;
+  farcaster: string;
   coingecko: string;
   parent: string | null;
   children: string[];
@@ -73,6 +74,7 @@ const DEFAULT_FORM_STATE: Form = {
   twitter: '',
   github: '',
   discord: '',
+  farcaster: '',
   coingecko: '',
   votingPowerSymbol: '',
   treasuries: [],
@@ -155,7 +157,9 @@ export function useSpaceSettings(space: Ref<Space>) {
   // Onchain properties
   const authenticators = ref([] as StrategyConfig[]);
   const validationStrategy = ref(null as StrategyConfig | null);
+  const executionStrategies = ref([] as StrategyConfig[]);
   const votingStrategies = ref([] as StrategyConfig[]);
+  const initialExecutionStrategiesObjectHash = ref(null as string | null);
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
@@ -180,7 +184,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const privacy = ref('none' as SpacePrivacy);
   const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
-  const snapshotChainId: Ref<number> = ref(1);
+  const snapshotChainId: Ref<string> = ref('1');
   const strategies = ref([] as StrategyConfig[]);
   const members = ref([] as Member[]);
   const parent = ref('');
@@ -283,6 +287,25 @@ export function useSpaceSettings(space: Ref<Space>) {
     };
   }
 
+  async function getInitialExecutionStrategies(
+    executors: string[],
+    executorTypes: string[]
+  ) {
+    return executors.map((executor, i) => {
+      return {
+        id: executor,
+        address: executor,
+        type: executorTypes[i],
+        name:
+          network.value.constants.EXECUTORS[executor] ||
+          network.value.constants.EXECUTORS[executorTypes[i]] ||
+          executorTypes[i],
+        params: {},
+        paramsDefinition: {}
+      };
+    });
+  }
+
   async function hasStrategyChanged(
     strategy: StrategyConfig,
     previousParams: any,
@@ -327,7 +350,14 @@ export function useSpaceSettings(space: Ref<Space>) {
     const formattedParams = params.map(param =>
       param === '0x' ? param : `0x${BigInt(param).toString(16)}`
     );
-    return objectHash(formattedParams) !== objectHash(previousParams);
+
+    // NOTE: This is a workaround for ApeGas - in this case it needs to be zero-padded,
+    // otherwise it will revert
+    const formattedPreviousParams = previousParams.map(param =>
+      param === '0x' ? param : `0x${BigInt(param).toString(16)}`
+    );
+
+    return objectHash(formattedParams) !== objectHash(formattedPreviousParams);
   }
 
   async function processChanges(
@@ -404,13 +434,17 @@ export function useSpaceSettings(space: Ref<Space>) {
       externalUrl: space.external_url,
       github: space.github,
       discord: space.discord,
+      farcaster: space.farcaster,
       coingecko: space.coingecko || '',
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
       treasuries: space.treasuries,
       labels: space.labels || [],
       delegations: space.delegations.filter(
-        delegation => delegation.apiType !== 'delegate-registry'
+        delegation =>
+          !['delegate-registry', 'split-delegation'].includes(
+            delegation.apiType || ''
+          )
       )
     };
   }
@@ -483,7 +517,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     return space.additionalRawData.strategies.map(strategy => ({
       id: crypto.randomUUID(),
-      chainId: Number(strategy.network),
+      chainId: strategy.network,
       address: strategy.name,
       name: strategy.name,
       paramsDefinition: null,
@@ -546,12 +580,13 @@ export function useSpaceSettings(space: Ref<Space>) {
         form.value.categories ?? space.value.additionalRawData.categories,
       avatar: form.value.avatar ?? space.value.avatar,
       cover: form.value.cover ?? space.value.cover,
-      network: String(snapshotChainId.value),
+      network: snapshotChainId.value,
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
       terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
+      farcaster: form.value.farcaster ?? space.value.farcaster,
       coingecko: form.value.coingecko ?? space.value.coingecko,
       parent: parent.value,
       children: children.value,
@@ -562,7 +597,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       template: template.value,
       strategies: strategies.value.map(strategy => ({
         name: strategy.name,
-        network: strategy.chainId?.toString() ?? snapshotChainId.value,
+        network: strategy.chainId
+          ? String(strategy.chainId)
+          : snapshotChainId.value,
         params: strategy.params
       })),
       treasuries: form.value.treasuries.map(treasury => ({
@@ -668,6 +705,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       strategiesToAdd,
       strategiesToRemove,
       validationStrategy.value,
+      executionStrategies.value,
       votingDelay.value,
       minVotingPeriod.value,
       maxVotingPeriod.value
@@ -712,6 +750,11 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.voting_power_validation_strategies_parsed_metadata
     );
 
+    const executionStrategiesValue = await getInitialExecutionStrategies(
+      space.value.executors,
+      space.value.executors_types
+    );
+
     controller.value = force
       ? await network.value.helpers.getSpaceController(space.value)
       : initialController.value;
@@ -729,6 +772,10 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy.value = validationStrategyValue;
     initialValidationStrategyObjectHash.value = objectHash(
       validationStrategyValue
+    );
+    executionStrategies.value = executionStrategiesValue;
+    initialExecutionStrategiesObjectHash.value = objectHash(
+      executionStrategiesValue
     );
 
     if (offchainNetworks.includes(space.value.network)) {
@@ -750,7 +797,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         }
       );
 
-      snapshotChainId.value = space.value.snapshot_chain_id ?? 1;
+      snapshotChainId.value = space.value.snapshot_chain_id ?? '1';
 
       if (space.value.additionalRawData?.type === 'offchain') {
         strategies.value = getInitialStrategies(space.value);
@@ -783,6 +830,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       const validationStrategyValue = validationStrategy.value;
       const initialValidationStrategyObjectHashValue =
         initialValidationStrategyObjectHash.value;
+      const executionStrategiesValue = executionStrategies.value;
+      const initialExecutionStrategiesObjectHashValue =
+        initialExecutionStrategiesObjectHash.value;
       const proposalValidationValue = proposalValidation.value;
       const guidelinesValue = guidelines.value;
       const templateValue = template.value;
@@ -891,7 +941,7 @@ export function useSpaceSettings(space: Ref<Space>) {
           return true;
         }
 
-        if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? 1)) {
+        if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? '1')) {
           return true;
         }
 
@@ -975,6 +1025,13 @@ export function useSpaceSettings(space: Ref<Space>) {
         if (hasValidationStrategyChanged) {
           return true;
         }
+
+        const hasExecutionStrategiesChanged =
+          objectHash(executionStrategiesValue) !==
+          initialExecutionStrategiesObjectHashValue;
+        if (hasExecutionStrategiesChanged) {
+          return true;
+        }
       }
     },
     false,
@@ -1000,6 +1057,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy,
     votingStrategies,
     proposalValidation,
+    executionStrategies,
     guidelines,
     template,
     quorumType,

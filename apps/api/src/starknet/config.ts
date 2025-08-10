@@ -1,17 +1,14 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { starknetNetworks } from '@snapshot-labs/sx';
 import { validateAndParseAddress } from 'starknet';
+import { MANA_URL } from '../config';
 import spaceAbi from './abis/space.json';
 import spaceFactoryAbi from './abis/spaceFactory.json';
-import { DEFAULT_INFURA_API_KEY } from '../config';
 
 const snNetworkNodeUrl =
-  process.env.NETWORK_NODE_URL_SN ||
-  `https://starknet-mainnet.infura.io/v3/${DEFAULT_INFURA_API_KEY}`;
+  process.env.NETWORK_NODE_URL_SN || 'https://rpc.snapshot.org/sn';
 const snSepNetworkNodeUrl =
-  process.env.NETWORK_NODE_URL_SN_SEP ||
-  `https://starknet-sepolia.infura.io/v3/${DEFAULT_INFURA_API_KEY}`;
-const manaRpcUrl = process.env.VITE_MANA_URL || 'https://mana.box';
+  process.env.NETWORK_NODE_URL_SN_SEP || 'https://rpc.snapshot.org/sn-sep';
 
 export type FullConfig = {
   indexerName: 'sn' | 'sn-sep';
@@ -50,7 +47,7 @@ function createOverrides(networkId: keyof typeof CONFIG) {
   return {
     networkNodeUrl: CONFIG[networkId].networkNodeUrl,
     l1NetworkNodeUrl: CONFIG[networkId].l1NetworkNodeUrl,
-    manaRpcUrl: `${manaRpcUrl}/stark_rpc/${config.Meta.eip712ChainId}`,
+    manaRpcUrl: `${MANA_URL}/stark_rpc/${config.Meta.eip712ChainId}`,
     baseChainId: config.Meta.herodotusAccumulatesChainId,
     erc20VotesStrategy: config.Strategies.ERC20Votes,
     propositionPowerValidationStrategyAddress:

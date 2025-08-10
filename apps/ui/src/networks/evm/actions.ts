@@ -1,11 +1,14 @@
 import { isAddress } from '@ethersproject/address';
+import { hexZeroPad } from '@ethersproject/bytes';
 import { Contract } from '@ethersproject/contracts';
 import { Provider, Web3Provider } from '@ethersproject/providers';
 import { formatBytes32String } from '@ethersproject/strings';
 import {
   clients,
+  evmApe,
   evmArbitrum,
   evmBase,
+  evmCurtis,
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
@@ -14,14 +17,16 @@ import {
   evmSepolia,
   getEvmStrategy
 } from '@snapshot-labs/sx';
+import { APE_GAS_CONFIGS } from '@/helpers/constants';
+import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { vote as highlightVote } from '@/helpers/highlight';
 import { getSwapLink } from '@/helpers/link';
-import { executionCall, MANA_URL } from '@/helpers/mana';
+import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
-import { EVM_CONNECTORS } from '@/networks/common/constants';
+import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   buildMetadata,
   createStrategyPicker,
@@ -60,6 +65,8 @@ const CONFIGS: Record<number, EvmNetworkConfig> = {
   8453: evmBase,
   42161: evmArbitrum,
   1: evmMainnet,
+  33139: evmApe,
+  33111: evmCurtis,
   11155111: evmSepolia
 };
 
@@ -71,13 +78,18 @@ export function createActions(
   const networkConfig = CONFIGS[chainId];
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: EVM_CONNECTORS
+    helpers
   });
 
-  const client = new clients.EvmEthereumTx({ networkConfig });
-  const ethSigClient = new clients.EvmEthereumSig({
+  const clientOpts = {
     networkConfig,
+    whitelistServerUrl: WHITELIST_SERVER_URL,
+    provider
+  };
+
+  const client = new clients.EvmEthereumTx(clientOpts);
+  const ethSigClient = new clients.EvmEthereumSig({
+    ...clientOpts,
     manaUrl: MANA_URL
   });
 
@@ -91,8 +103,7 @@ export function createActions(
       return true;
     }
 
-    const code = await provider.getCode(address);
-    return code !== '0x';
+    return _getIsContract(provider, address);
   };
 
   /**
@@ -250,14 +261,17 @@ export function createActions(
 
       const isContract = await getIsContract(account, connectorType);
 
+      const relayer = await getRelayerInfo(space.id, space.network, provider);
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
           strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndicies:
+          strategiesIndices:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       let selectedExecutionStrategy;
@@ -280,6 +294,11 @@ export function createActions(
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
+          const params =
+            space.voting_power_validation_strategy_strategies_params[
+              strategy.paramsIndex
+            ];
+
           const metadata = await parseStrategyMetadata(
             space.voting_power_validation_strategies_parsed_metadata[
               strategy.index
@@ -288,6 +307,7 @@ export function createActions(
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -327,7 +347,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposalId: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -354,13 +374,16 @@ export function createActions(
 
       const isContract = await getIsContract(account, connectorType);
 
+      const relayer = await getRelayerInfo(space.id, space.network, provider);
+
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies:
+        strategiesIndices:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
-        isContract
+        isContract,
+        ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
       let selectedExecutionStrategy;
@@ -383,7 +406,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: proposalId.proposal_id as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -414,6 +437,7 @@ export function createActions(
     cancelProposal: async (
       web3: Web3Provider,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) => {
       await verifyNetwork(web3, chainId);
@@ -444,13 +468,20 @@ export function createActions(
 
       const isContract = await getIsContract(account, connectorType);
 
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        provider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indices,
+          strategiesIndices: proposal.strategies_indices,
           connectorType,
-          isContract
+          isContract,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       const strategiesWithMetadata = await Promise.all(
@@ -459,12 +490,14 @@ export function createActions(
             strategy.index
           );
 
+          const params = proposal.strategies_params[strategy.paramsIndex];
           const metadata = await parseStrategyMetadata(
             proposal.space.strategies_parsed_metadata[metadataIndex].payload
           );
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -582,9 +615,10 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegationType: DelegationType,
-      delegatee: string,
+      delegatees: string[],
       delegationContract: string,
-      chainIdOverride?: ChainId
+      chainIdOverride?: ChainId,
+      delegateesMetadata?: Record<string, any>
     ) => {
       if (typeof chainIdOverride === 'string') {
         throw new Error('Chain ID must be a number for EVM networks');
@@ -601,7 +635,8 @@ export function createActions(
       };
 
       if (delegationType === 'governor-subgraph') {
-        delegatee = delegatee ?? '0x0000000000000000000000000000000000000000';
+        const delegatee =
+          delegatees[0] ?? '0x0000000000000000000000000000000000000000';
 
         contractParams = {
           address: delegationContract,
@@ -609,20 +644,71 @@ export function createActions(
           functionParams: [delegatee],
           abi: ['function delegate(address delegatee)']
         };
-      } else if (delegationType == 'delegate-registry') {
-        if (delegatee) {
+      } else if (
+        delegationType === 'delegate-registry' ||
+        delegationType === 'apechain-delegate-registry'
+      ) {
+        const contractAddress =
+          delegationType === 'delegate-registry'
+            ? '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446'
+            : APE_GAS_CONFIGS[currentChainId].registryContract;
+
+        const delegationId =
+          delegationType === 'delegate-registry'
+            ? formatBytes32String(space.id)
+            : delegationContract;
+
+        if (delegatees[0]) {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'setDelegate',
-            functionParams: [formatBytes32String(space.id), delegatee],
+            functionParams: [delegationId, delegatees[0]],
             abi: ['function setDelegate(bytes32 id, address delegate)']
           };
         } else {
           contractParams = {
-            address: '0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446',
+            address: contractAddress,
             functionName: 'clearDelegate',
-            functionParams: [formatBytes32String(space.id)],
+            functionParams: [delegationId],
             abi: ['function clearDelegate(bytes32 id)']
+          };
+        }
+      } else if (delegationType === 'split-delegation') {
+        if (!delegateesMetadata?.expirationDate) {
+          throw new Error('Expiration is required for split delegation');
+        }
+
+        if (delegateesMetadata?.shares?.length !== delegatees.length) {
+          throw new Error('Matching shares are required for split delegation');
+        }
+
+        if (delegatees.length) {
+          const delegations = delegatees
+            .map((address, index) => ({
+              delegate: hexZeroPad(address, 32),
+              ratio: delegateesMetadata.shares[index]
+            }))
+            .sort((a, b) => {
+              return BigInt(a.delegate) < BigInt(b.delegate) ? -1 : 1;
+            });
+          contractParams = {
+            address: delegationContract,
+            functionName: 'setDelegation',
+            functionParams: [
+              space.id,
+              delegations,
+              delegateesMetadata.expirationDate
+            ],
+            abi: [
+              'function setDelegation(string context, tuple(bytes32 delegate, uint256 ratio)[] delegation, uint256 expirationTimestamp)'
+            ]
+          };
+        } else {
+          contractParams = {
+            address: delegationContract,
+            functionName: 'clearDelegation',
+            functionParams: [space.id],
+            abi: ['function clearDelegation(string context)']
           };
         }
       } else {
@@ -642,19 +728,22 @@ export function createActions(
       );
     },
     getDelegatee: async (
-      web3: any,
       delegation: SpaceMetadataDelegation,
       delegator: string
     ) => {
       const { contractAddress } = delegation;
-      if (!contractAddress) return null;
-      if (!isAddress(delegator)) return null;
+      if (!contractAddress || !delegation.chainId || !isAddress(delegator))
+        return null;
 
-      const multi = new Multicaller(chainId.toString(), provider, [
-        'function decimals() view returns (uint8)',
-        'function balanceOf(address account) view returns (uint256)',
-        'function delegates(address) view returns (address)'
-      ]);
+      const multi = new Multicaller(
+        delegation.chainId.toString(),
+        getProvider(delegation.chainId as number),
+        [
+          'function decimals() view returns (uint8)',
+          'function balanceOf(address account) view returns (uint256)',
+          'function delegates(address) view returns (address)'
+        ]
+      );
       multi.call('decimals', contractAddress, 'decimals');
       multi.call('balanceOf', contractAddress, 'balanceOf', [delegator]);
       multi.call('delegatee', contractAddress, 'delegates', [delegator]);
@@ -675,6 +764,7 @@ export function createActions(
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
       validationStrategy: StrategyConfig,
+      executionStrategies: StrategyConfig[],
       votingDelay: number | null,
       minVotingDuration: number | null,
       maxVotingDuration: number | null
@@ -686,9 +776,15 @@ export function createActions(
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
-          execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types,
-          execution_destinations: space.executors_destinations
+          execution_strategies: executionStrategies.map(
+            config => config.address
+          ),
+          execution_strategies_types: executionStrategies.map(
+            config => config.type
+          ),
+          execution_destinations: executionStrategies.map(
+            (_, i) => space.executors_destinations[i] ?? ''
+          )
         })
       );
 
@@ -764,9 +860,6 @@ export function createActions(
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
-      if (snapshotInfo.at === null)
-        throw new Error('EVM requires block number to be defined');
-
       const cumulativeDecimals = Math.max(
         ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
       );

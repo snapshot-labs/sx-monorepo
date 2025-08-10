@@ -94,13 +94,13 @@
   font-weight: 700;
   src: url('./assets/fonts/Stolzl-Medium.woff2') format('woff2');
 }
-
 html {
-  @apply overflow-y-scroll;
+  scrollbar-gutter: stable;
 }
-
 body {
-  @apply h-0 font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  @apply overflow-y-scroll font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  scrollbar-gutter: stable;
+
 }
 
 .font-display {
@@ -283,6 +283,16 @@ input:placeholder-shown {
   background-image: url('@/assets/blocks-x-dark.svg');
 }
 
+.shapes {
+  background-repeat: repeat;
+  background-position: top center;
+  background-image: url('@/assets/shapes-light.svg');
+}
+
+.dark .shapes {
+  background-image: url('@/assets/shapes-dark.svg');
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -367,6 +377,9 @@ input:placeholder-shown {
 
   .s-label {
     @apply absolute px-3 mt-1 text-[17px];
+    &:has(+ input[type="checkbox"]) {
+      @apply px-0 m-0 ml-3.5;
+    }
   }
 
   .s-input {

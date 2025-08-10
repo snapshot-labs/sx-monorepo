@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { getUserFacingErrorMessage } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
-  space: { id: string; network: NetworkID; snapshot_chain_id?: number };
+  space: { id: string; network: NetworkID; snapshot_chain_id?: string };
 }>();
 
 const { isSafeWallet } = useSafeWallet(
@@ -53,7 +54,7 @@ async function handleClick() {
   try {
     await followedSpacesStore.toggleSpaceFollow(spaceIdComposite.value);
   } catch (error) {
-    uiStore.addNotification('error', error.message);
+    uiStore.addNotification('error', getUserFacingErrorMessage(error));
   }
 }
 </script>
