@@ -3,7 +3,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { utils } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import {
   BigNumberish,
   CallData,
@@ -29,7 +28,7 @@ const encodersAbi = new CallData(EncodersAbi);
 export function toAddress(bn: any) {
   try {
     return getAddress(BigNumber.from(bn).toHexString());
-  } catch (e) {
+  } catch {
     return bn;
   }
 }

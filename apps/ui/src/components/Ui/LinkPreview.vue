@@ -1,6 +1,15 @@
 <script setup lang="ts">
 const props = withDefaults(
-  defineProps<{ url: string; showDefault?: boolean }>(),
+  defineProps<{
+    /**
+     * The URL to preview.
+     */
+    url: string;
+    /**
+     * Whether to show a default link preview when actual preview is not available.
+     */
+    showDefault?: boolean;
+  }>(),
   {
     showDefault: false
   }
@@ -8,8 +17,8 @@ const props = withDefaults(
 
 type Preview = {
   meta: {
-    title: string;
-    description: string;
+    title?: string;
+    description?: string;
   };
   links: {
     icon: { href: string }[];
@@ -23,6 +32,15 @@ const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
 
+async function isImageUrlValid(url: string): Promise<boolean> {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = url;
+  });
+}
+
 async function update(val: string) {
   try {
     preview.value = null;
@@ -35,13 +53,11 @@ async function update(val: string) {
     preview.value = await result.json();
 
     if (preview.value?.links?.icon[0]?.href) {
-      const image = await fetch(preview.value.links.icon[0].href, {
-        method: 'HEAD'
-      });
-
-      previewIconResolved.value = image.ok;
+      previewIconResolved.value = await isImageUrlValid(
+        preview.value.links.icon[0].href
+      );
     }
-  } catch (e) {
+  } catch {
   } finally {
     previewLoading.value = false;
   }
@@ -56,7 +72,7 @@ debouncedWatch(
 
 <template>
   <div
-    v-if="preview?.meta || (showDefault && !previewLoading)"
+    v-if="preview?.meta?.title || (showDefault && !previewLoading)"
     class="flex items-center px-4 py-3 border rounded-lg"
     :class="{
       'gap-2': showDefault,

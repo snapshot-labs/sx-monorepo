@@ -7,16 +7,17 @@ import {
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
+  evmNetworks,
   evmOptimism,
   evmPolygon,
   evmSepolia
 } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
+import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
 
-export const NETWORKS = new Map<number, EvmNetworkConfig>([
+const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [137, evmPolygon],
   [8453, evmBase],
@@ -28,15 +29,23 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [11155111, evmSepolia]
 ]);
 
+export const NETWORK_IDS = new Map<number, string>(
+  Object.entries(evmNetworks).map(([networkId, config]) => [
+    config.Meta.eip712ChainId,
+    networkId
+  ])
+);
+
 export const createNetworkHandler = (chainId: number) => {
   const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
+  const { provider, getWallet } = createWalletProxy(chainId);
 
   const client = new clients.EvmEthereumTx({
     networkConfig,
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    whitelistServerUrl: 'https://wls.snapshot.box',
+    provider
   });
   const l1ExecutorClient = new clients.L1Executor();
 
@@ -47,6 +56,8 @@ export const createNetworkHandler = (chainId: number) => {
       let receipt;
 
       const signer = getWallet(params.envelope.data.space);
+
+      console.log('params', JSON.stringify(params));
 
       console.time('Send');
       console.log('Types', types);
@@ -181,11 +192,37 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
+  async function registerApeGasProposal(
+    id: number,
+    params: any,
+    res: Response
+  ) {
+    try {
+      const { viewId, snapshot } = params;
+
+      if (!viewId || !snapshot) {
+        return rpcError(res, 400, 'Missing viewId or snapshot', id);
+      }
+
+      await db.saveApeGasProposal({
+        chainId,
+        viewId,
+        snapshot
+      });
+
+      return rpcSuccess(res, 'success', id);
+    } catch (e) {
+      console.log('Error registering ApeGas proposal:', e);
+      return rpcError(res, 500, e, id);
+    }
+  }
+
   return {
     send,
     finalizeProposal,
     execute,
     executeQueuedProposal,
-    executeStarknetProposal
+    executeStarknetProposal,
+    registerApeGasProposal
   };
 };

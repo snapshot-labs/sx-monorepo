@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
-import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { BaseDefinition } from '@/types';
-
-const STARKNET_NETWORKS = Object.fromEntries(
-  Object.values(STARKNET_NETWORK_METADATA).map(metadata => [
-    metadata.chainId,
-    {
-      name: metadata.name,
-      logoUrl: getUrl(metadata.avatar)
-    }
-  ])
-);
 
 type NetworkDetails = {
   name: string;
@@ -44,9 +33,7 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 
   if (!chainId) return null;
 
-  if (typeof chainId === 'string' && chainId in STARKNET_NETWORKS) {
-    return STARKNET_NETWORKS[chainId];
-  } else if (chainId in snapshotJsNetworks) {
+  if (chainId in snapshotJsNetworks) {
     const network = snapshotJsNetworks[chainId];
     return {
       name: network.name,

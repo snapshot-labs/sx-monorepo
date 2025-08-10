@@ -1,13 +1,16 @@
 [![Test CI](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/test.yml/badge.svg)](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/test.yml)
 [![Discord](https://img.shields.io/discord/707079246388133940.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.snapshot.org/)
 
-# Snapshot X monorepository
+# Snapshot monorepository
 
-This is an Snapshot X monorepository.
+This is the Snapshot monorepository containing a Vue frontend, GraphQL API, transaction relayer, and TypeScript SDK.
 
-## Apps and Packages
+## Apps and packages
 
-- `ui`: Snapshot X front-end written in Vue
+- [`./apps/ui`](./apps/ui): Snapshot official frontend using Vue 3
+- [`./apps/api`](./apps/api): Multichain indexer for Snapshot X using [Checkpoint](https://checkpoint.box)
+- [`./apps/mana`](./apps/mana): Transaction relayer for gasless voting on Snapshot X
+- [`./packages/sx.js`](./packages/sx.js): TypeScript SDK for Snapshot and Snapshot X
 
 # Usage
 
@@ -72,7 +75,7 @@ In `apps/api` and `apps/mana` copy `.env.example` to `.env` files.
 
 In `apps/mana/.env` you need to fill in following empty variables:
 
-- `STARKNET_MNEMONIC` and `ETH_MNEMONIC` - if you want to use it as relayer.
+- `WALLET_SECRET` - if you want to use it as relayer (used for both Starknet and Ethereum wallets).
 - `HERODOTUS_API_KEY` and `HERODOTUS_LEGACY_API_KEY` - if you want to use L1<->L2 messaging (voting with strategies that use L1 proofs)
 
 ### Getting it running faster

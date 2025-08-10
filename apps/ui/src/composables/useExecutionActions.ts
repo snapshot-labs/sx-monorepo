@@ -68,7 +68,7 @@ export function useExecutionActions(
       return proposal.state === 'executed' ? isL1ExecutionReady.value : false;
     }
 
-    return proposal.state === 'executed' && !proposal.completed;
+    return proposal.state === 'executed' && !proposal.execution_settled;
   });
 
   const executionCountdown = computed(() => {
@@ -163,7 +163,7 @@ export function useExecutionActions(
       } else if (data.executionTransactionHash) {
         try {
           executionTx.value = data.executionTransactionHash;
-        } catch (e) {
+        } catch {
           message.value =
             'Proposal has been executed but execution details are not available.';
         }

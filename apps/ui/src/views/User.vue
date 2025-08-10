@@ -58,7 +58,7 @@ async function loadUserMetadata(userId: string) {
     userMetadata.following_count = userStats.following_count;
     userMetadata.loading = false;
     userMetadata.loaded = true;
-  } catch (e) {
+  } catch {
     userMetadata.loading = false;
   }
 }
@@ -231,7 +231,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
             <a
               :href="social.href"
               target="_blank"
-              class="text-[#606060] hover:text-skin-link"
+              class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
             </a>

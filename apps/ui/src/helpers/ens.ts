@@ -3,7 +3,7 @@ import { getAddress, isAddress } from '@ethersproject/address';
 import { Contract } from '@ethersproject/contracts';
 import { ensNormalize, namehash } from '@ethersproject/hash';
 import { call, multicall } from './call';
-import { EMPTY_ADDRESS } from './constants';
+import { EVM_EMPTY_ADDRESS } from './constants';
 import { getProvider } from './provider';
 import { getAddresses } from './stamp';
 
@@ -61,14 +61,14 @@ async function getDNSOwner(domain: string): Promise<string> {
 
   const data = await response.json();
   // Error list: https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml#dns-parameters-6
-  if (data.Status === 3) return EMPTY_ADDRESS;
+  if (data.Status === 3) return EVM_EMPTY_ADDRESS;
   if (data.Status !== 0) throw new Error('Failed to fetch DNS Owner');
 
   const ownerRecord = data.Answer?.find((record: any) =>
     record.data.includes('ENS1')
   );
 
-  if (!ownerRecord) return EMPTY_ADDRESS;
+  if (!ownerRecord) return EVM_EMPTY_ADDRESS;
 
   return getAddress(
     ownerRecord.data.replace(new RegExp('"', 'g'), '').split(' ').pop()
@@ -109,7 +109,7 @@ export async function resolveName(name: string, chainId: ENSChainId) {
 
   const address: string = await deepResolve(chainId, node, 'addr', [node]);
 
-  if (address === EMPTY_ADDRESS) return null;
+  if (address === EVM_EMPTY_ADDRESS) return null;
 
   return address;
 }
@@ -126,7 +126,7 @@ export async function getEnsTextRecord(
 
   try {
     ensHash = namehash(ensNormalize(ens));
-  } catch (e: any) {
+  } catch {
     return null;
   }
 
@@ -176,12 +176,12 @@ export async function getNameOwner(name: string, chainId: ENSChainId) {
     }
   );
 
-  if (!name.endsWith('.eth') && owner === EMPTY_ADDRESS) {
+  if (!name.endsWith('.eth') && owner === EVM_EMPTY_ADDRESS) {
     const resolvedAddress = (await getAddresses([name], chainId))[name];
     const nameTokens = name.split('.');
 
     if (nameTokens.length > 2) {
-      owner = resolvedAddress || EMPTY_ADDRESS;
+      owner = resolvedAddress || EVM_EMPTY_ADDRESS;
     } else if (nameTokens.length === 2 && resolvedAddress) {
       owner = await getDNSOwner(name);
     }

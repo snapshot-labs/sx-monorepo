@@ -1,13 +1,15 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
+import { MANA_URL } from '../config';
 import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
 import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy.json';
 import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory.json';
 import ProxyFactory from './abis/ProxyFactory.json';
+import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import Space from './abis/Space.json';
 
-type NetworkID =
+export type NetworkID =
   | 'eth'
   | 'sep'
   | 'oeth'
@@ -34,11 +36,14 @@ export type FullConfig = {
   indexerName: NetworkID;
   chainId: number;
   overrides: {
+    manaRpcUrl: string;
     masterSpace: string;
     masterSimpleQuorumAvatar: string;
     masterSimpleQuorumTimelock: string;
     masterAxiom: string | null;
     propositionPowerValidationStrategyAddress: string;
+    apeGasStrategy: string | null;
+    apeGasStrategyDelay: number;
   };
 } & CheckpointConfig;
 
@@ -77,13 +82,16 @@ export function createConfig(indexerName: NetworkID): FullConfig {
     indexerName,
     chainId: network.Meta.eip712ChainId,
     overrides: {
+      manaRpcUrl: `${MANA_URL}/eth_rpc/${network.Meta.eip712ChainId}`,
       masterSpace: network.Meta.masterSpace,
       masterSimpleQuorumAvatar: network.ExecutionStrategies.SimpleQuorumAvatar,
       masterSimpleQuorumTimelock:
         network.ExecutionStrategies.SimpleQuorumTimelock,
       masterAxiom: network.ExecutionStrategies.Axiom,
       propositionPowerValidationStrategyAddress:
-        network.ProposalValidations.VotingPower
+        network.ProposalValidations.VotingPower,
+      apeGasStrategy: network.Strategies.ApeGas ?? null,
+      apeGasStrategyDelay: 20 * 5 // 20 minutes, with 5 blocks per minute
     },
     network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
     sources,
@@ -171,6 +179,19 @@ export function createConfig(indexerName: NetworkID): FullConfig {
           {
             name: 'ProposalVetoed(bytes32)',
             fn: 'handleTimelockProposalVetoed'
+          },
+          {
+            name: 'QuorumUpdated(uint256)',
+            fn: 'handleQuorumUpdated'
+          }
+        ]
+      },
+      SimpleQuorumAvatarExecutionStrategy: {
+        abi: 'SimpleQuorumAvatarExecutionStrategy',
+        events: [
+          {
+            name: 'QuorumUpdated(uint256)',
+            fn: 'handleQuorumUpdated'
           }
         ]
       },
@@ -196,6 +217,7 @@ export function createConfig(indexerName: NetworkID): FullConfig {
     abis: {
       ProxyFactory,
       Space,
+      SimpleQuorumAvatarExecutionStrategy,
       SimpleQuorumTimelockExecutionStrategy,
       AxiomExecutionStrategy,
       L1AvatarExecutionStrategy,

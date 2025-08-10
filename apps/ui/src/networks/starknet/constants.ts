@@ -6,8 +6,12 @@ import { pinPineapple } from '@/helpers/pin';
 import { _n, getUrl, shorten, sleep, verifyNetwork } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
-import { EVM_CONNECTORS } from '../common/constants';
-import { StrategyConfig, StrategyTemplate } from '../types';
+import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '../common/constants';
+import {
+  AuthenticatorSupportInfo,
+  StrategyConfig,
+  StrategyTemplate
+} from '../types';
 import IHCode from '~icons/heroicons-outline/code';
 import IHCube from '~icons/heroicons-outline/cube';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
@@ -22,16 +26,34 @@ export function createConstants(
   const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
   if (!config) throw new Error(`Unsupported network ${networkId}`);
 
-  const SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSig]: true,
-    [config.Authenticators.EthTx]: true,
-    [config.Authenticators.StarkSig]: true,
-    [config.Authenticators.StarkTx]: true
-  };
-
-  const CONTRACT_SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthTx]: true
-  };
+  const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
+    {
+      [config.Authenticators.EthSig]: {
+        isSupported: true,
+        isContractSupported: false,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthTx]: {
+        priority: 2,
+        isSupported: true,
+        isContractSupported: true,
+        relayerType: 'evm-tx',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.StarkSig]: {
+        isSupported: true,
+        isContractSupported: false,
+        relayerType: 'starknet',
+        connectors: STARKNET_CONNECTORS
+      },
+      [config.Authenticators.StarkTx]: {
+        priority: 1,
+        isSupported: true,
+        isContractSupported: false,
+        connectors: STARKNET_CONNECTORS
+      }
+    };
 
   const SUPPORTED_STRATEGIES = {
     [config.Strategies.MerkleWhitelist]: true,
@@ -50,12 +72,6 @@ export function createConstants(
   const SUPPORTED_EXECUTORS = {
     EthRelayer: true
   };
-
-  const RELAYER_AUTHENTICATORS = {
-    [config.Authenticators.StarkSig]: 'starknet',
-    [config.Authenticators.EthSig]: 'evm',
-    [config.Authenticators.EthTx]: 'evm-tx'
-  } as const;
 
   const AUTHS = {
     [config.Authenticators.EthSig]: 'Ethereum signature',
@@ -361,7 +377,7 @@ export function createConstants(
         type: 'object',
         title: 'Params',
         additionalProperties: false,
-        required: [],
+        required: ['whitelist'],
         properties: {
           whitelist: {
             type: 'string',
@@ -552,11 +568,9 @@ export function createConstants(
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
-    SUPPORTED_AUTHENTICATORS,
-    CONTRACT_SUPPORTED_AUTHENTICATORS,
+    AUTHENTICATORS_SUPPORT_INFO,
     SUPPORTED_STRATEGIES,
     SUPPORTED_EXECUTORS,
-    RELAYER_AUTHENTICATORS,
     AUTHS,
     PROPOSAL_VALIDATIONS,
     STRATEGIES,

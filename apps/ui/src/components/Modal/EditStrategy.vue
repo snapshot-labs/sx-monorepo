@@ -63,7 +63,7 @@ const formErrors = computed(() => {
   if (!props.definition) {
     try {
       JSON.parse(rawParams.value);
-    } catch (e) {
+    } catch {
       return { rawParams: 'Invalid JSON' };
     }
   }
@@ -167,7 +167,7 @@ watchEffect(() => {
           title: 'Network',
           examples: ['Select network'],
           networkId,
-          networksListKind: 'offchain'
+          networksListKind: 'full'
         }"
       />
       <UiForm

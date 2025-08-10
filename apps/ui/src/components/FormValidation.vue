@@ -8,6 +8,8 @@ defineProps<{
   networkId: NetworkID;
   title: string;
   description: string;
+  spaceId: string;
+  votingPowerSymbol: string;
   availableStrategies: StrategyTemplate[];
   availableVotingStrategies: StrategyTemplate[];
 }>();
@@ -73,6 +75,7 @@ function handleStrategySave(value: Record<string, any>) {
         v-else
         :network-id="networkId"
         :strategy="model"
+        :show-test-button="false"
         @edit-strategy="editStrategy"
         @delete-strategy="removeStrategy"
       />
@@ -93,7 +96,10 @@ function handleStrategySave(value: Record<string, any>) {
       <StrategiesConfigurator
         v-model="votingStrategies"
         :network-id="networkId"
+        :space-id="spaceId"
+        :voting-power-symbol="votingPowerSymbol"
         :available-strategies="availableVotingStrategies"
+        :show-test-button="true"
       />
     </div>
     <teleport to="#modal">
@@ -104,6 +110,8 @@ function handleStrategySave(value: Record<string, any>) {
         :strategy-address="editedStrategy.address"
         :definition="editedStrategy.paramsDefinition"
         :initial-state="editedStrategy.params"
+        :space-id="spaceId"
+        :voting-power-symbol="votingPowerSymbol"
         @close="editStrategyModalOpen = false"
         @save="handleStrategySave"
       />

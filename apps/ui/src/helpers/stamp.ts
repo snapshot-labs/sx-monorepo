@@ -103,7 +103,7 @@ export async function getNames(
 
 export async function getENSNames(
   address: string,
-  chainId: ChainId
+  chainIds: ChainId[]
 ): Promise<string[]> {
   const res = await fetch(STAMP_URL, {
     method: 'POST',
@@ -113,12 +113,35 @@ export async function getENSNames(
     body: JSON.stringify({
       method: 'lookup_domains',
       params: formatAddress(address),
-      network: chainId
+      network: chainIds
     })
   });
 
   if (res.status !== 200) {
     throw new Error('Failed to get domains');
+  }
+
+  return (await res.json()).result;
+}
+
+export async function getOwner(
+  name: string,
+  chainId: ChainId
+): Promise<string> {
+  const res = await fetch(STAMP_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      method: 'get_owner',
+      params: name,
+      network: chainId
+    })
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Failed to get owner');
   }
 
   return (await res.json()).result;

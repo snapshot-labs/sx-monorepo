@@ -3,11 +3,16 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { BASIC_CHOICES, CHAIN_IDS } from '@/helpers/constants';
+import {
+  BASIC_CHOICES,
+  CHAIN_IDS,
+  EVM_EMPTY_ADDRESS,
+  STARKNET_EMPTY_ADDRESS
+} from '@/helpers/constants';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, starknetNetworks } from '@/networks';
 import {
   NetworkApi,
   NetworkConstants,
@@ -41,6 +46,7 @@ import {
   mixinHighlightVotes
 } from './highlight';
 import {
+  LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
@@ -122,7 +128,7 @@ function formatExecution(execution: string): Transaction[] {
     const result = JSON.parse(execution);
 
     return Array.isArray(result) ? result : [];
-  } catch (e) {
+  } catch {
     console.log('Failed to parse execution');
     return [];
   }
@@ -154,16 +160,23 @@ function formatLabels(labels: string[]) {
   });
 }
 
+function getValidationStrategyStrategiesIndices(
+  strategies: string[],
+  parsedMetadata: ApiStrategyParsedMetadata[]
+) {
+  // Those values are default sorted by block_range so newest entries are at the end
+  const maxIndex = Math.max(
+    ...parsedMetadata.slice(-strategies.length).map(metadata => metadata.index)
+  );
+
+  return Array.from(Array(maxIndex + 1).keys());
+}
+
 function processStrategiesMetadata(
   parsedMetadata: ApiStrategyParsedMetadata[],
-  strategiesIndicies?: number[]
+  strategiesIndices: number[]
 ) {
   if (parsedMetadata.length === 0) return [];
-
-  // Those values are default sorted by block_range so newest entries are at the end
-  // To find *current* maxIndex we can just look at the last item.
-  // In the past there could be more strategies so we can't check for max index among all entries.
-  const maxIndex = parsedMetadata[parsedMetadata.length - 1].index;
 
   const metadataMap = Object.fromEntries(
     parsedMetadata.map(metadata => [
@@ -180,9 +193,7 @@ function processStrategiesMetadata(
     ])
   );
 
-  strategiesIndicies =
-    strategiesIndicies || Array.from(Array(maxIndex + 1).keys());
-  return strategiesIndicies.map(index => metadataMap[index]) || [];
+  return strategiesIndices.map(index => metadataMap[index]) || [];
 }
 
 function processExecutions(
@@ -228,6 +239,7 @@ function formatSpace(
 ): Space {
   return {
     ...space,
+    turbo_expiration: 0,
     network: space._indexer as NetworkID,
     name: space.metadata.name,
     avatar: space.metadata.avatar,
@@ -237,6 +249,7 @@ function formatSpace(
     github: space.metadata.github,
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
+    farcaster: space.metadata.farcaster,
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
@@ -250,7 +263,7 @@ function formatSpace(
       const { name, api_type, api_url, contract, chain_id } =
         JSON.parse(delegation);
 
-      if (contract.includes(':')) {
+      if (contract?.includes(':')) {
         // NOTE: Legacy format
         const [network, address] = contract.split(':');
 
@@ -277,7 +290,11 @@ function formatSpace(
     executors_strategies: space.metadata.executors_strategies,
     voting_power_validation_strategies_parsed_metadata:
       processStrategiesMetadata(
-        space.voting_power_validation_strategies_parsed_metadata
+        space.voting_power_validation_strategies_parsed_metadata,
+        getValidationStrategyStrategiesIndices(
+          space.voting_power_validation_strategy_strategies,
+          space.voting_power_validation_strategies_parsed_metadata
+        )
       ),
     strategies_parsed_metadata: processStrategiesMetadata(
       space.strategies_parsed_metadata,
@@ -302,9 +319,18 @@ function formatProposal(
       : networkId;
   const state = getProposalState(networkId, proposal, current);
 
+  const isStarknetNetwork = starknetNetworks.includes(networkId);
+
+  const emptyAddress = isStarknetNetwork
+    ? STARKNET_EMPTY_ADDRESS
+    : EVM_EMPTY_ADDRESS;
+
   return {
     ...proposal,
-    isInvalid: proposal.metadata === null,
+    isInvalid:
+      proposal.metadata === null ||
+      (proposal.metadata.execution === null &&
+        proposal.execution_strategy !== emptyAddress),
     space: {
       id: proposal.space.id,
       name: proposal.space.metadata.name,
@@ -341,12 +367,17 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
+    execution_settled: proposal.completed,
     state,
     network: networkId,
     privacy: 'none',
-    quorum: +proposal.quorum,
+    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     flagged: false,
-    completed: ['passed', 'executed', 'rejected'].includes(state)
+    flag_code: 0,
+    completed: ['passed', 'executed', 'rejected'].includes(state),
+    plugins: {},
+    voting_power_validation_strategy_strategies: [],
+    voting_power_validation_strategy_strategies_params: []
   };
 }
 
@@ -772,6 +803,15 @@ export function createApi(
     },
     loadSettings: async () => {
       return [];
+    },
+    async loadLastIndexedBlock(): Promise<number | null> {
+      const { data } = await apollo.query({
+        query: LAST_INDEXED_BLOCK_QUERY,
+        variables: {
+          indexer: networkId
+        }
+      });
+      return data._metadata?.value ? Number(data._metadata.value) : null;
     }
   };
 }

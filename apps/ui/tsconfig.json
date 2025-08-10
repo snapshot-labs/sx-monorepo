@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "isolatedModules": true,
     "strict": true,
     "jsx": "preserve",
@@ -19,11 +19,7 @@
       "@/*": ["src/*"]
     },
     "noImplicitAny": false,
-    "skipLibCheck": true,
-    "useUnknownInCatchVariables": false
-  },
-  "vueCompilerOptions": {
-    "narrowingTypesInInlineHandlers": true
+    "skipLibCheck": true
   },
   "include": [
     "src/**/*.ts",
@@ -31,6 +27,7 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "auto-imports.d.ts",
-    "components.d.ts"
+    "components.d.ts",
+    "vite.config.ts"
   ]
 }

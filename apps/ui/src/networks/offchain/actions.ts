@@ -1,4 +1,3 @@
-import { isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import {
@@ -15,8 +14,8 @@ import {
   OSnapPlugin,
   parseInternalTransaction
 } from '@/helpers/osnap';
-import { getProvider } from '@/helpers/provider';
 import { verifyNetwork } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   Choice,
   NetworkID,
@@ -30,8 +29,11 @@ import {
   UserProfile,
   VoteType
 } from '@/types';
-import { EDITOR_SNAPSHOT_OFFSET } from './constants';
-import { getSdkChoice } from './helpers';
+import {
+  getLatestBlockNumber,
+  getSdkChoice,
+  isStarknetChainId
+} from './helpers';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
   ConnectorType,
@@ -70,11 +72,40 @@ export function createActions(
     networkConfig
   });
 
-  async function getPlugins(executions: ExecutionInfo[] | null) {
+  async function verifyChainNetwork(
+    web3: Web3Provider | Wallet,
+    snapshotChainId: string | undefined
+  ) {
+    if (!snapshotChainId || isStarknetChainId(snapshotChainId)) {
+      return;
+    }
+
+    if (
+      web3 instanceof Web3Provider &&
+      (web3.provider as any)._isSequenceProvider
+    ) {
+      await verifyNetwork(web3, Number(snapshotChainId));
+    }
+  }
+
+  async function getPlugins(
+    executions: ExecutionInfo[] | null,
+    originalProposal: Proposal | null
+  ) {
+    const supportedPlugins = ['oSnap', 'readOnlyExecution'];
+
     const plugins = {} as {
       oSnap?: OSnapPlugin;
       readOnlyExecution?: ReadOnlyExecutionPlugin;
     };
+
+    if (originalProposal) {
+      for (const [name, plugin] of Object.entries(originalProposal.plugins)) {
+        if (!supportedPlugins.includes(name)) {
+          plugins[name] = plugin;
+        }
+      }
+    }
 
     if (!executions) return plugins;
 
@@ -122,7 +153,7 @@ export function createActions(
 
   return {
     async propose(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
@@ -140,15 +171,9 @@ export function createActions(
       max_end: number,
       executions: ExecutionInfo[]
     ) {
-      if (
-        space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const provider = getProvider(space.snapshot_chain_id as number);
-      const plugins = await getPlugins(executions);
+      const plugins = await getPlugins(executions, null);
       const data = {
         space: space.id,
         title,
@@ -160,20 +185,24 @@ export function createActions(
         labels,
         start,
         end: min_end,
-        snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
+        snapshot: await getLatestBlockNumber(space.snapshot_chain_id as string),
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
-        timestamp: created
+        timestamp: created,
+        from: account
       };
 
-      return client.propose({ signer: web3.getSigner(), data });
+      return client.propose({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     async updateProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -183,17 +212,12 @@ export function createActions(
       labels: string[],
       executions: ExecutionInfo[]
     ) {
-      if (
-        space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const plugins = await getPlugins(executions);
+      const plugins = await getPlugins(executions, proposal);
 
       const data = {
-        proposal: proposalId as string,
+        proposal: proposal.proposal_id as string,
         space: space.id,
         title,
         body,
@@ -202,49 +226,50 @@ export function createActions(
         choices,
         privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
-        plugins: JSON.stringify(plugins)
+        plugins: JSON.stringify(plugins),
+        from: account
       };
 
-      return client.updateProposal({ signer: web3.getSigner(), data });
+      return client.updateProposal({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
-    async flagProposal(web3: Web3Provider, proposal: Proposal) {
-      if (
-        proposal.space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
-      }
+    async flagProposal(
+      web3: Web3Provider | Wallet,
+      account: string,
+      proposal: Proposal
+    ) {
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.flagProposal({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },
     async cancelProposal(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) {
-      if (
-        proposal.space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       return client.cancel({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },
     async vote(
-      web3: Web3Provider,
+      web3: Web3Provider | Wallet,
       connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
@@ -252,12 +277,7 @@ export function createActions(
       reason: string,
       app: string
     ): Promise<any> {
-      if (
-        proposal.space.snapshot_chain_id &&
-        (web3.provider as any)._isSequenceProvider
-      ) {
-        await verifyNetwork(web3, proposal.space.snapshot_chain_id);
-      }
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
 
       const data = {
         space: proposal.space.id,
@@ -269,11 +289,12 @@ export function createActions(
         metadataUri: '',
         privacy: proposal.privacy,
         reason,
-        app: app || EDITOR_APP_NAME
+        app: app || EDITOR_APP_NAME,
+        from: account
       };
 
       return client.vote({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data
       });
     },
@@ -293,7 +314,7 @@ export function createActions(
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
 
-      if (!strategy || !isAddress(voterAddress)) {
+      if (!strategy || !isValidAddress(voterAddress)) {
         return [
           {
             address: name,
@@ -310,7 +331,10 @@ export function createActions(
         spaceId,
         voterAddress,
         strategiesOrValidationParams,
-        snapshotInfo
+        {
+          at: snapshotInfo.at || null,
+          chainId: String(snapshotInfo.chainId)
+        }
       );
 
       if (strategy.type !== 'remote-vp') {
@@ -338,7 +362,7 @@ export function createActions(
           displayDecimals: decimals,
           symbol: strategy.params.symbol,
           token: strategy.params.address,
-          chainId: strategy.network ? parseInt(strategy.network) : undefined,
+          chainId: strategy.network,
           swapLink: getSwapLink(
             strategy.name,
             strategy.params.address,

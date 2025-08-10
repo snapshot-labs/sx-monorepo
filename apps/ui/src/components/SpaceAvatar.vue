@@ -12,7 +12,7 @@ const props = withDefaults(
       network: NetworkID;
       active_proposals: number | null;
     };
-    size: number;
+    size?: number;
     showActiveProposals?: boolean;
   }>(),
   {

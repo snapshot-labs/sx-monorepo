@@ -34,9 +34,6 @@ const privacy = defineModel<SpacePrivacy>('privacy', {
 const voteValidation = defineModel<Validation>('voteValidation', {
   required: true
 });
-const ignoreAbstainVotes = defineModel<boolean>('ignoreAbstainVotes', {
-  required: true
-});
 
 const props = defineProps<{
   snapshotChainId: ChainId;
@@ -188,9 +185,9 @@ watchEffect(() => {
         :definition="{
           type: 'integer',
           format: 'duration',
-          maximum: isOffchainNetwork ? 15552000 : undefined,
+          maximum: isOffchainNetwork ? 31622400 : undefined,
           errorMessage: {
-            maximum: 'Voting period must be less than 180 days'
+            maximum: 'Voting period must be less than a year'
           }
         }"
         :custom-error-validation="
@@ -286,10 +283,6 @@ watchEffect(() => {
           <IH-chevron-down />
         </button>
       </UiWrapperInput>
-      <UiSwitch
-        v-model="ignoreAbstainVotes"
-        title="Ignore abstain votes in basic voting results"
-      />
     </div>
   </div>
   <teleport to="#modal">
@@ -312,7 +305,8 @@ watchEffect(() => {
       :open="isSelectValidationModalOpen"
       :network-id="space.network"
       :default-chain-id="snapshotChainId"
-      :space="space"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
       :current="voteValidation"
       @close="isSelectValidationModalOpen = false"
       @save="value => (voteValidation = value)"

@@ -1,3 +1,4 @@
+import createApeGasStrategy from './apeGas';
 import createCompStrategy from './comp';
 import createMerkleWhitelist from './merkleWhitelist';
 import createOzVotesStrategy from './ozVotes';
@@ -35,6 +36,10 @@ export function getStrategy(
     return createMerkleWhitelist();
   }
 
+  if (strategy.type === 'apeGas') {
+    return createApeGasStrategy();
+  }
+
   return null;
 }
 
@@ -67,7 +72,7 @@ export async function getStrategiesWithParams(
           index: strategyConfig.index,
           params
         };
-      } catch (e) {
+      } catch {
         return null;
       }
     })

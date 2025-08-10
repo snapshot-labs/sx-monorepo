@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
-import { _n, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
+import { _n, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -23,6 +23,12 @@ const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+
+const hasVoted = computed(
+  () =>
+    props.showVotedIndicator &&
+    votes.value[`${props.proposal.network}:${props.proposal.id}`]
+);
 </script>
 <template>
   <div v-bind="$attrs">
@@ -78,12 +84,6 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             inline
             with-link
           />
-          <IH-check
-            v-if="
-              showVotedIndicator && votes[`${proposal.network}:${proposal.id}`]
-            "
-            class="text-skin-success inline-block shrink-0 relative"
-          />
         </AppLink>
       </div>
     </div>
@@ -132,12 +132,22 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
         {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
-      <button
-        type="button"
-        class="text-skin-text"
-        @click="modalOpenTimeline = true"
-        v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"
-      />
+      <TimeRelative
+        v-slot="{ relativeTime }"
+        :time="getTsFromCurrent(props.proposal.network, props.proposal.max_end)"
+      >
+        <button
+          type="button"
+          class="text-skin-text"
+          @click="modalOpenTimeline = true"
+          v-text="relativeTime"
+        />
+      </TimeRelative>
+      <template v-if="hasVoted">
+        ·
+        <IH-check class="inline-block mt-[-2px]" />
+        voted
+      </template>
     </span>
   </div>
   <teleport to="#modal">

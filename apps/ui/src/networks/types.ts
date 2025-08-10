@@ -129,7 +129,7 @@ export type ExecutionInfo = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: ChainId;
 };
 
 export type VotingPower = {
@@ -145,7 +145,7 @@ export type VotingPower = {
   displayDecimals: number;
   token: string | null;
   symbol: string;
-  chainId?: number;
+  chainId?: ChainId;
   swapLink?: string;
 };
 
@@ -163,7 +163,7 @@ export type ReadOnlyNetworkActions = {
     snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
   propose(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
@@ -182,11 +182,11 @@ export type ReadOnlyNetworkActions = {
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
@@ -196,14 +196,19 @@ export type ReadOnlyNetworkActions = {
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
-  flagProposal(web3: Web3Provider, proposal: Proposal);
+  flagProposal(
+    web3: Web3Provider | Wallet,
+    account: string,
+    proposal: Proposal
+  );
   cancelProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
+    account: string,
     proposal: Proposal
   );
   vote(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     proposal: Proposal,
@@ -296,12 +301,12 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     space: Space,
     networkId: NetworkID,
     delegationType: DelegationType,
-    delegatee: string | null,
+    delegatees: string[],
     delegationContract: string,
-    chainIdOverride?: ChainId
+    chainIdOverride?: ChainId,
+    delegateesMetadata?: Record<string, any>
   );
   getDelegatee(
-    web3: Web3Provider,
     delegation: SpaceMetadataDelegation,
     delegator: string
   ): Promise<{ address: string; balance: bigint; decimals: number } | null>;
@@ -371,6 +376,7 @@ export type NetworkApi = {
     Record<ChainId, { spaces_count: number; premium: boolean }>
   >;
   loadSettings(): Promise<Setting[]>;
+  loadLastIndexedBlock(): Promise<number | null>;
 };
 
 export type NetworkConstants = {
@@ -387,12 +393,36 @@ export type NetworkConstants = {
   STORAGE_PROOF_STRATEGIES_TYPES?: string[];
 };
 
+export type AuthenticatorSupportInfo = {
+  /**
+   * Whether the authenticator is supported by the app.
+   */
+  isSupported: boolean;
+  /**
+   * Whether the authenticator can be used with contract-based accounts.
+   */
+  isContractSupported: boolean;
+  /**
+   * Type of the relayer used by authenticator.
+   * Determines how authenticator is interacted with.
+   */
+  relayerType?: 'starknet' | 'evm' | 'evm-tx';
+  /**
+   * List of connectors that can be used with this authenticator.
+   */
+  connectors: ConnectorType[];
+  /**
+   * Priority of the authenticator.
+   * Lower number means higher priority.
+   * Default is 0.
+   */
+  priority?: number;
+};
+
 export type NetworkHelpers = {
-  isAuthenticatorSupported(authenticator: string): boolean;
-  isAuthenticatorContractSupported(authenticator: string): boolean;
-  getRelayerAuthenticatorType(
+  getAuthenticatorSupportInfo(
     authenticator: string
-  ): 'evm' | 'evm-tx' | 'starknet' | null;
+  ): AuthenticatorSupportInfo | null;
   isStrategySupported(strategy: string): boolean;
   /**
    * Checks if the executor type is supported.
@@ -408,13 +438,15 @@ export type NetworkHelpers = {
   isExecutorActionsSupported(executorType: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   getSpaceController(space: Space): Promise<string>;
+  getRelayerInfo(space: string, network: NetworkID): Promise<any>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
+  waitForIndexing(txId: string, timeout?: number): Promise<boolean>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(
     id: string,
     type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-    chainId?: number
+    chainId?: ChainId
   ): string;
 };
 

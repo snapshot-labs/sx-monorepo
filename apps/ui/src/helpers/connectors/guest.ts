@@ -61,7 +61,7 @@ export function formatAddress(address: string): string {
     return address.length === 42
       ? getAddress(address)
       : validateAndParseAddress(address);
-  } catch (e) {
+  } catch {
     throw new Error(`${address} is not a valid address`);
   }
 }
