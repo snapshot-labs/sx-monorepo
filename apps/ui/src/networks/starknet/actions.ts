@@ -57,6 +57,7 @@ import {
   VoteType
 } from '@/types';
 import { EDITOR_APP_NAME } from '../common/constants';
+import { send } from '../helpers';
 
 const CONFIGS: Partial<Record<NetworkID, NetworkConfig>> = {
   sn: starknetMainnet,
@@ -844,6 +845,6 @@ export function createActions(
     deleteSpace: () => {
       throw new Error('Not implemented');
     },
-    send: (envelope: any) => starkSigClient.send(envelope) // TODO: extract it out of client to common helper
+    send: (envelope: any) => send(starkSigClient, envelope)
   };
 }
