@@ -176,7 +176,7 @@ export async function processProposal(proposal: DbProposal) {
   try {
     const status = await getStatus(proposal.herodotusId, ACCUMULATES_CHAIN_ID);
     if (status !== 'DONE') {
-      logger.info(
+      logger.debug(
         { herodotusId: proposal.herodotusId, status },
         'Proposal is not ready yet'
       );
