@@ -58,7 +58,7 @@ async function processTransaction(transaction: Transaction) {
       );
     }
 
-    logger.debug({ receipt }, 'Transaction broadcasted successfully');
+    logger.info({ receipt }, 'Transaction broadcasted successfully');
   } catch (err) {
     logger.error({ err }, 'Failed to broadcast transaction');
 

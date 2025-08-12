@@ -58,7 +58,7 @@ export const createNetworkHandler = (chainId: number) => {
 
       const signer = getWallet(params.envelope.data.space);
 
-      logger.debug({ params }, 'Processing send request');
+      logger.info({ params }, 'Processing send request');
 
       if (types.Propose) {
         receipt = await client.propose({
@@ -77,7 +77,7 @@ export const createNetworkHandler = (chainId: number) => {
         });
       }
 
-      logger.debug({ receipt }, 'Transaction broadcasted successfully');
+      logger.info({ receipt }, 'Transaction broadcasted successfully');
 
       return rpcSuccess(res, receipt, id);
     } catch (err) {

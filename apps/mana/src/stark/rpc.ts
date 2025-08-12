@@ -20,7 +20,7 @@ export const createNetworkHandler = (chainId: string) => {
 
       const { account, nonceManager, deployAccount } = getAccount(data.space);
 
-      logger.debug({ params }, 'Processing send request');
+      logger.info({ params }, 'Processing send request');
 
       await deployAccount();
 
@@ -43,7 +43,7 @@ export const createNetworkHandler = (chainId: string) => {
         nonceManager.release();
       }
 
-      logger.debug({ receipt }, 'Transaction broadcasted successfully');
+      logger.info({ receipt }, 'Transaction broadcasted successfully');
 
       return rpcSuccess(res, receipt, id);
     } catch (err) {
@@ -88,7 +88,7 @@ export const createNetworkHandler = (chainId: string) => {
     try {
       const { type, sender, hash, payload } = params;
 
-      logger.debug({ type, sender, hash, payload }, 'Registering transaction');
+      logger.info({ type, sender, hash, payload }, 'Registering transaction');
 
       await db.registerTransaction(chainId, type, sender, hash, payload);
 
@@ -116,7 +116,7 @@ export const createNetworkHandler = (chainId: string) => {
         );
       }
 
-      logger.debug(
+      logger.info(
         { l1TokenAddress, strategyAddress, snapshotTimestamp },
         'Registering proposal'
       );
