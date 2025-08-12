@@ -2813,6 +2813,48 @@
   dependencies:
     "@lit-labs/ssr-dom-shim" "^1.2.0"
 
+"@logtail/core@^0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@logtail/core/-/core-0.5.4.tgz#e6b956b42b93725d583d29226c10c650c47a5f8a"
+  integrity sha512-UlbxvUg5MDroqk6gEhtfKuuBShrvD/VaXl3T3jGU1U6I19Y1OwfB7e681LvH7RbsCAnOJFziM/7rMQib/CJTdg==
+  dependencies:
+    "@logtail/tools" "^0.5.4"
+    "@logtail/types" "^0.5.3"
+    serialize-error "8.1.0"
+
+"@logtail/node@^0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@logtail/node/-/node-0.5.5.tgz#0f69b33baca3c4278b501029123102840c8a4dfe"
+  integrity sha512-hSZDjl2wFRxe/+pxSlYNSpm0V3a2ZsiWqBifvtCBHTriwrNkd0LjQtedRlrjoBBumVxIMGdDOCPayAIbcux5YQ==
+  dependencies:
+    "@logtail/core" "^0.5.4"
+    "@logtail/types" "^0.5.3"
+    "@msgpack/msgpack" "^2.5.1"
+    "@types/stack-trace" "^0.0.33"
+    minimatch "^9.0.5"
+    stack-trace "0.0.10"
+
+"@logtail/pino@^0.5.5":
+  version "0.5.5"
+  resolved "https://registry.yarnpkg.com/@logtail/pino/-/pino-0.5.5.tgz#404836711ebf6cb20f6a9394e23819ceb829407d"
+  integrity sha512-RNGWSWmqXHmchWm0MZS69JfnEAULck2uTrbh0/rZDBhnsZjsUTXmviDsA+zfjLr6Y702CmPLwx7ctlhHK7pbEw==
+  dependencies:
+    "@logtail/node" "^0.5.5"
+    "@logtail/types" "^0.5.3"
+    pino-abstract-transport "^1.0.0"
+
+"@logtail/tools@^0.5.4":
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/@logtail/tools/-/tools-0.5.4.tgz#a52b515833e24f373ae372b56d8717ee8cf599a9"
+  integrity sha512-S0PtfWOVVgvb36q8mLksMw910mO2TahDaqIYnUM/ZEYX+AwqKRGov4zt/X33zHRzCFVpSKoZFv7bFs8TBie/pQ==
+  dependencies:
+    "@logtail/types" "^0.5.3"
+
+"@logtail/types@^0.5.3":
+  version "0.5.3"
+  resolved "https://registry.yarnpkg.com/@logtail/types/-/types-0.5.3.tgz#1b5f386fbd9c647bf390d3d0350cba8629bf4a99"
+  integrity sha512-5uKf1xQ7wRqSW0lYIwDpXdXcFHxPKH5EM22MoEjwTpd8suymOYuEdx9qCCHCYey4uOhPq7x6OkZf86bTO83JsA==
+
 "@manypkg/find-root@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@manypkg/find-root/-/find-root-1.1.0.tgz#a62d8ed1cd7e7d4c11d9d52a8397460b5d4ad29f"
@@ -2915,6 +2957,11 @@
   dependencies:
     "@motionone/dom" "^10.16.4"
     tslib "^2.3.1"
+
+"@msgpack/msgpack@^2.5.1":
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/@msgpack/msgpack/-/msgpack-2.8.0.tgz#4210deb771ee3912964f14a15ddfb5ff877e70b9"
+  integrity sha512-h9u4u/jiIRKbq25PM+zymTyW6bhTzELvOoUd+AvYriWOAKpLGnIamaET3pnHYoI5iYphAHBI4ayx0MehR+VVPQ==
 
 "@multiformats/multiaddr-to-uri@^9.0.1":
   version "9.0.8"
@@ -4562,6 +4609,11 @@
     "@types/http-errors" "*"
     "@types/mime" "*"
     "@types/node" "*"
+
+"@types/stack-trace@^0.0.33":
+  version "0.0.33"
+  resolved "https://registry.yarnpkg.com/@types/stack-trace/-/stack-trace-0.0.33.tgz#979a3fde9e721e78603b781e468ef30f0df0f049"
+  integrity sha512-O7in6531Bbvlb2KEsJ0dq0CHZvc3iWSR5ZYMtvGgnHA56VgriAN/AU2LorfmcvAl2xc9N5fbCTRyMRRl8nd74g==
 
 "@types/trusted-types@^2.0.2":
   version "2.0.7"
@@ -13305,6 +13357,13 @@ sentence-case@^3.0.4:
     tslib "^2.0.3"
     upper-case-first "^2.0.2"
 
+serialize-error@8.1.0:
+  version "8.1.0"
+  resolved "https://registry.yarnpkg.com/serialize-error/-/serialize-error-8.1.0.tgz#3a069970c712f78634942ddd50fbbc0eaebe2f67"
+  integrity sha512-3NnuWfM6vBYoy5gZFvHiYsVbafvI9vZv/+jlIigFn4oP4zjNPK3LhcY0xSCgeb1a5L8jO71Mit9LlNoi2UfDDQ==
+  dependencies:
+    type-fest "^0.20.2"
+
 serialize-error@^7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/serialize-error/-/serialize-error-7.0.1.tgz#f1360b0447f61ffb483ec4157c737fab7d778e18"
@@ -13670,6 +13729,11 @@ sprintf-js@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==
+
+stack-trace@0.0.10:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/stack-trace/-/stack-trace-0.0.10.tgz#547c70b347e8d32b4e108ea1a2a159e5fdde19c0"
+  integrity sha512-KGzahc7puUKkzyMt+IqAep+TVNbKP+k2Lmwhub39m1AsTSkaDutx56aDCo+HLDzf/D26BIHTJWNiTG1KAJiQCg==
 
 stackback@0.0.2:
   version "0.0.2"
