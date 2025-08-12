@@ -16,6 +16,7 @@ import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
 import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
+import logger from './logger';
 
 const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
@@ -51,17 +52,13 @@ export const createNetworkHandler = (chainId: number) => {
 
   async function send(id: number, params: any, res: Response) {
     try {
-      const { signatureData, data } = params.envelope;
+      const { signatureData } = params.envelope;
       const { types } = signatureData;
       let receipt;
 
       const signer = getWallet(params.envelope.data.space);
 
-      console.log('params', JSON.stringify(params));
-
-      console.time('Send');
-      console.log('Types', types);
-      console.log('Message', data);
+      logger.info({ params }, 'Processing send request');
 
       if (types.Propose) {
         receipt = await client.propose({
@@ -80,14 +77,12 @@ export const createNetworkHandler = (chainId: number) => {
         });
       }
 
-      console.log('Receipt', receipt);
+      logger.info({ receipt }, 'Transaction broadcasted successfully');
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      console.log('Failed', e);
-      return rpcError(res, 500, e, id);
-    } finally {
-      console.timeEnd('Send');
+    } catch (err) {
+      logger.error({ err }, 'Failed to broadcast transaction');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -114,8 +109,9 @@ export const createNetworkHandler = (chainId: number) => {
       const result = await response.text();
 
       return rpcSuccess(res, result, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to finalize proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -132,8 +128,9 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to execute proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -149,8 +146,9 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to execute queued proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -211,9 +209,9 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, 'success', id);
-    } catch (e) {
-      console.log('Error registering ApeGas proposal:', e);
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to register ape gas proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 

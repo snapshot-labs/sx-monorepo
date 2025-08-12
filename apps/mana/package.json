@@ -14,7 +14,10 @@
     "check-starknet-balances": "node --experimental-strip-types --no-warnings=ExperimentalWarning ./scripts/check-starknet-balances.mts"
   },
   "eslintConfig": {
-    "extends": "@snapshot-labs"
+    "extends": "@snapshot-labs",
+    "rules": {
+      "no-console": "error"
+    }
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
@@ -37,6 +40,8 @@
     "express": "^4.17.1",
     "knex": "^3.1.0",
     "pg": "^8.11.3",
+    "pino": "^9.8.0",
+    "pino-pretty": "^13.1.1",
     "starknet": "7.6.4",
     "zod": "^3.22.4"
   },
