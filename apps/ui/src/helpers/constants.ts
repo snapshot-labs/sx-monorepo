@@ -257,7 +257,8 @@ export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation-with-cap',
   'delegation-with-overrides',
   'with-delegation',
-  'erc20-balance-of-with-delegation'
+  'erc20-balance-of-with-delegation',
+  'spark-with-delegation'
 ];
 
 export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
