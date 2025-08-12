@@ -3909,10 +3909,10 @@
   dependencies:
     cross-fetch "^3.1.5"
 
-"@snapshot-labs/pineapple@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/pineapple/-/pineapple-1.2.0.tgz#22c8c0e8e593057f2da3769e0b9c03d45ddd8002"
-  integrity sha512-jw7vAvNYGJKb8EchKXzo7cJyvgfkt+rpXj2hfei2VZYkJlvkW7m4SUUo3hNiup15UFEX7efiQEEQisE6E8RTUA==
+"@snapshot-labs/pineapple@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/pineapple/-/pineapple-1.2.1.tgz#ad414959e9b43fe9b387ac05456fb17b2cd456dd"
+  integrity sha512-oUwIGU7xovQG7/rRNVgZi29UfrI7eqTmJh5/sk4oOV8+fGFy4yg7dbHRU62cBV6bJPuuN8PWwUgLzcXUmmuXwQ==
   dependencies:
     ofetch "^1.3.3"
 
