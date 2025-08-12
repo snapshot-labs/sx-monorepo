@@ -152,10 +152,7 @@ export async function registerProposal(proposal: ApiProposal) {
   try {
     await submitBatch(proposal);
   } catch (err) {
-    logger.error(
-      { err, proposal },
-      'Failed to submit herodotus batch proposal'
-    );
+    logger.error({ err, proposal }, 'Failed to submit herodotus batch');
   }
 }
 
