@@ -229,6 +229,7 @@ export function createWriters(
     const id = getAddress(event.args.space);
 
     const space = new Space(id, config.indexerName);
+    space.protocol = 'snapshot-x';
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id

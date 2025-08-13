@@ -13,6 +13,7 @@ export type NetworkID =
 
 export type Protocols = {
   snapshotX: boolean;
+  governorBravo: boolean;
 };
 
 export type SnapshotXConfig = {
@@ -27,7 +28,12 @@ export type SnapshotXConfig = {
   apeGasStrategyDelay: number;
 };
 
+export type GovernorBravoConfig = {
+  chainId: number;
+};
+
 export type EVMConfig = {
   indexerName: NetworkID;
   snapshotXConfig?: SnapshotXConfig;
+  governorBravoConfig?: GovernorBravoConfig;
 } & CheckpointConfig;
