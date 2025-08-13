@@ -21,14 +21,7 @@ const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
-const votingPowerDecimals = computed(() => {
-  return Math.max(
-    ...props.proposal.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
+const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
 const {
   data,
