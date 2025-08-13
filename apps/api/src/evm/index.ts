@@ -1,7 +1,8 @@
 import Checkpoint, { evm } from '@snapshot-labs/checkpoint';
 import { createConfig } from './config';
-import { createWriters } from './writers';
 import { registerIndexer } from '../register';
+import { createWriters as createSnapshotXWriters } from './protocols/snapshotX/writers';
+import { EVMConfig } from './types';
 
 const ethConfig = createConfig('eth');
 const sepConfig = createConfig('sep');
@@ -12,6 +13,16 @@ const baseConfig = createConfig('base');
 const mntConfig = createConfig('mnt');
 const apeConfig = createConfig('ape');
 const curtisConfig = createConfig('curtis');
+
+function createWriters(config: EVMConfig) {
+  let writers: Record<string, evm.Writer> = {};
+
+  if (config.snapshotXConfig) {
+    writers = createSnapshotXWriters(config, config.snapshotXConfig);
+  }
+
+  return writers;
+}
 
 const ethIndexer = new evm.EvmIndexer(createWriters(ethConfig));
 const sepIndexer = new evm.EvmIndexer(createWriters(sepConfig));

@@ -1,22 +1,22 @@
 import { getAddress } from '@ethersproject/address';
-import { FullConfig } from './config';
-import { SpaceMetadataItem } from '../../.checkpoint/models';
-import { dropIpfs, getJSON, getSpaceName } from '../common/utils';
+import { SpaceMetadataItem } from '../../../../.checkpoint/models';
+import { dropIpfs, getJSON, getSpaceName } from '../../../common/utils';
+import { NetworkID } from '../../types';
 
 export async function handleSpaceMetadata(
   space: string,
   metadataUri: string,
-  config: FullConfig
+  indexerName: NetworkID
 ) {
   const exists = await SpaceMetadataItem.loadEntity(
     dropIpfs(metadataUri),
-    config.indexerName
+    indexerName
   );
   if (exists) return;
 
   const spaceMetadataItem = new SpaceMetadataItem(
     dropIpfs(metadataUri),
-    config.indexerName
+    indexerName
   );
   spaceMetadataItem.name = getSpaceName(space);
   spaceMetadataItem.about = '';
