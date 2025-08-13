@@ -181,6 +181,7 @@ export type OffchainAdditionalRawData = {
 
 export type Space = {
   id: string;
+  protocol: string;
   network: NetworkID;
   verified: boolean;
   turbo: boolean;

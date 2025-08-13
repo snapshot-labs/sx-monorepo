@@ -22,6 +22,7 @@ gql(`
   fragment spaceFields on Space {
     id
     _indexer
+    protocol
     verified
     turbo
     metadata {
