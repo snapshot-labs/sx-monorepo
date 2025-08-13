@@ -72,7 +72,7 @@ const network = computed(() => getNetwork(props.proposal.network));
         Finalize proposal
       </UiButton>
       <UiButton
-        v-else-if="proposal.state !== 'executed'"
+        v-else-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
         class="w-full flex justify-center items-center gap-2"
         :loading="executeProposalSending"
         @click="executeProposal"
@@ -99,8 +99,7 @@ const network = computed(() => getNetwork(props.proposal.network));
       </UiButton>
       <UiButton
         v-if="
-          proposal.state === 'executed' &&
-          !proposal.execution_settled &&
+          proposal.state === 'queued' &&
           !proposal.vetoed &&
           proposal.timelock_veto_guardian &&
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
