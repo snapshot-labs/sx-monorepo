@@ -75,6 +75,9 @@ watchEffect(() => setTitle(props.space.name));
             :turbo="space.turbo"
           />
         </div>
+        <div v-if="space.protocol === 'governor-bravo'" class="mb-3">
+          <UiProposalLabel label="Governor Bravo space" color="#272727" />
+        </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">
           <div>
             <b class="text-skin-link">{{ _n(space.proposal_count) }}</b>

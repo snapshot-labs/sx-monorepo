@@ -219,6 +219,7 @@ function formatSpace(
 
   return {
     id: space.id,
+    protocol: 'snapshot',
     network: networkId,
     verified: space.verified,
     turbo: space.turbo,
