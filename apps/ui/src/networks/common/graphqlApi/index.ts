@@ -164,6 +164,10 @@ function getValidationStrategyStrategiesIndices(
   strategies: string[],
   parsedMetadata: ApiStrategyParsedMetadata[]
 ) {
+  if (strategies.length === 0 || parsedMetadata.length === 0) {
+    return [];
+  }
+
   // Those values are default sorted by block_range so newest entries are at the end
   const maxIndex = Math.max(
     ...parsedMetadata.slice(-strategies.length).map(metadata => metadata.index)
