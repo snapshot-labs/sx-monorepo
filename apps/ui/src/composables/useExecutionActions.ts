@@ -68,7 +68,7 @@ export function useExecutionActions(
       return proposal.state === 'executed' ? isL1ExecutionReady.value : false;
     }
 
-    return proposal.state === 'executed' && !proposal.execution_settled;
+    return proposal.state === 'queued';
   });
 
   const executionCountdown = computed(() => {
