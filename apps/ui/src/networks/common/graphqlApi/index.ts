@@ -111,7 +111,8 @@ function getProposalState(
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);
 
-  if (proposal.executed) return 'executed';
+  if (proposal.executed)
+    return proposal.execution_settled ? 'executed' : 'queued';
   if (proposal.max_end <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
@@ -367,7 +368,7 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
-    execution_settled: proposal.completed,
+    execution_settled: proposal.execution_settled,
     state,
     network: networkId,
     privacy: 'none',

@@ -21,6 +21,7 @@ export type ProposalState =
   | 'passed'
   | 'rejected'
   | 'closed'
+  | 'queued'
   | 'executed';
 
 export type NetworkID =
