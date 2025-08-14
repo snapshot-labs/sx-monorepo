@@ -376,6 +376,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     labels: proposal.labels,
     scores: proposal.scores,
     scores_total: proposal.scores_total,
+    vp_decimals: 0,
     vote_count: proposal.votes,
     state,
     cancelled: false,

@@ -53,15 +53,7 @@ const discussion = computed(() => {
   return sanitizeUrl(proposal.value.discussion);
 });
 
-const votingPowerDecimals = computed(() => {
-  if (!proposal.value) return 0;
-  return Math.max(
-    ...proposal.value.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
+const votingPowerDecimals = computed(() => proposal.value?.vp_decimals ?? 0);
 
 const currentVote = computed(
   () =>
