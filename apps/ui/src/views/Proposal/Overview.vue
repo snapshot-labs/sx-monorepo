@@ -91,7 +91,7 @@ const cancellable = computed(() => {
   } else {
     return (
       compareAddresses(props.proposal.space.controller, web3.value.account) &&
-      props.proposal.state !== 'executed' &&
+      !['queued', 'vetoed', 'executed'].includes(props.proposal.state) &&
       props.proposal.cancelled === false
     );
   }
