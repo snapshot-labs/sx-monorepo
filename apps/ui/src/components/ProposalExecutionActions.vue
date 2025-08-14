@@ -26,7 +26,10 @@ const {
   executeProposal,
   executeQueuedProposal,
   vetoProposal
-} = useExecutionActions(props.proposal, props.execution);
+} = useExecutionActions(
+  () => props.proposal,
+  () => props.execution
+);
 
 const network = computed(() => getNetwork(props.proposal.network));
 </script>
