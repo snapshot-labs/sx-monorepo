@@ -9,6 +9,8 @@ Space represents a DAO or governance organization on Snapshot X
 type Space {
   "Unique identifier for the space"
   id: String!
+  "Protocol of the space ('snapshot-x', 'governor-bravo')"
+  protocol: String!
   "UI link to space interface"
   link: String!
   "Whether the space is verified by Snapshot team"

@@ -7,6 +7,7 @@ const titles: Record<ProposalState, string> = {
   passed: 'Passed',
   closed: 'Closed',
   rejected: 'Rejected',
+  queued: 'Queued',
   executed: 'Executed'
 };
 
@@ -42,6 +43,11 @@ const style = computed(() => ({
     <IS-minus-circle
       v-else-if="state === 'closed'"
       class="text-skin-link"
+      :style="style"
+    />
+    <IS-play
+      v-else-if="state === 'queued'"
+      class="text-gray-400"
       :style="style"
     />
     <IS-play

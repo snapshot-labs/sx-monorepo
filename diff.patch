@@ -1,0 +1,52 @@
+diff --git a/apps/api/src/evm/protocols/snapshot-x/config.ts b/apps/api/src/evm/protocols/snapshot-x/config.ts
+index 34a50d2c..09a95e2f 100644
+--- a/apps/api/src/evm/protocols/snapshot-x/config.ts
++++ b/apps/api/src/evm/protocols/snapshot-x/config.ts
+@@ -11,7 +11,7 @@ import { MANA_URL } from '../../../config';
+ import { NetworkID, SnapshotXConfig } from '../../types';
+ 
+ const START_BLOCKS: Record<NetworkID, number> = {
+-  eth: 18962278,
++  eth: 22590664,
+   sep: 4519171,
+   oeth: 118359200,
+   matic: 50858232,
+diff --git a/scripts/dev-interactive.ts b/scripts/dev-interactive.ts
+index 5a60152e..d16fbf8a 100644
+--- a/scripts/dev-interactive.ts
++++ b/scripts/dev-interactive.ts
+@@ -14,9 +14,12 @@ const SERVICES: Record<ServiceType, Service> = {
+   api: {
+     env: {
+       UI_URL: 'http://localhost:8080',
+-      ENABLED_NETWORKS: 'sep,sn-sep',
+-      VITE_ENABLED_NETWORKS: 's-tn,sep,sn-sep',
++      ENABLED_NETWORKS: 'eth',
++      ENABLE_SNAPSHOT_X: 'true',
++      ENABLE_GOVERNOR_BRAVO: 'true',
++      VITE_ENABLED_NETWORKS: 's-tn,eth',
+       VITE_METADATA_NETWORK: 's-tn',
++      VITE_UNIFIED_API_URL: 'http://localhost:3000',
+       VITE_UNIFIED_API_TESTNET_URL: 'http://localhost:3000'
+     }
+   },
+diff --git a/turbo.json b/turbo.json
+index d8eb018d..92a935f7 100644
+--- a/turbo.json
++++ b/turbo.json
+@@ -21,7 +21,14 @@
+       "cache": false,
+       "persistent": true,
+       "dependsOn": ["codegen", "^build"],
+-      "passThroughEnv": ["UI_URL", "ENABLED_NETWORKS", "INFURA_API_KEY", "VITE_MANA_URL"]
++      "passThroughEnv": [
++        "UI_URL",
++        "ENABLED_NETWORKS",
++        "ENABLE_SNAPSHOT_X",
++        "ENABLE_GOVERNOR_BRAVO",
++        "INFURA_API_KEY",
++        "VITE_MANA_URL"
++      ]
+     },
+     "codegen": {
+       "outputs": [".checkpoint/**", "src/networks/common/graphqlApi/gql/**"],

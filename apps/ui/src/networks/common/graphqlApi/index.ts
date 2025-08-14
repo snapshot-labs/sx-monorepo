@@ -111,7 +111,8 @@ function getProposalState(
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);
 
-  if (proposal.executed) return 'executed';
+  if (proposal.executed)
+    return proposal.execution_settled ? 'executed' : 'queued';
   if (proposal.max_end <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
@@ -164,6 +165,10 @@ function getValidationStrategyStrategiesIndices(
   strategies: string[],
   parsedMetadata: ApiStrategyParsedMetadata[]
 ) {
+  if (strategies.length === 0 || parsedMetadata.length === 0) {
+    return [];
+  }
+
   // Those values are default sorted by block_range so newest entries are at the end
   const maxIndex = Math.max(
     ...parsedMetadata.slice(-strategies.length).map(metadata => metadata.index)
@@ -333,6 +338,7 @@ function formatProposal(
         proposal.execution_strategy !== emptyAddress),
     space: {
       id: proposal.space.id,
+      protocol: proposal.space.protocol,
       name: proposal.space.metadata.name,
       avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,
@@ -367,7 +373,7 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
-    execution_settled: proposal.completed,
+    execution_settled: proposal.execution_settled,
     state,
     network: networkId,
     privacy: 'none',

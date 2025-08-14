@@ -7,6 +7,7 @@ const titles: Record<ProposalState, string> = {
   passed: 'Passed',
   closed: 'Closed',
   rejected: 'Rejected',
+  queued: 'Queued',
   executed: 'Executed'
 };
 
@@ -16,7 +17,7 @@ defineProps<{ state: ProposalState }>();
 <template>
   <div
     :class="{
-      'bg-gray-400': state === 'pending',
+      'bg-gray-400': state === 'pending' || state === 'queued',
       'bg-skin-success': state === 'active',
       'bg-skin-link': ['passed', 'closed'].includes(state),
       'bg-purple-500': state === 'executed',
@@ -40,6 +41,10 @@ defineProps<{ state: ProposalState }>();
     <IS-minus-circle
       v-else-if="state === 'closed'"
       class="text-skin-bg inline-block size-[17px] mb-[1px]"
+    />
+    <IS-play
+      v-else-if="state === 'queued'"
+      class="text-white inline-block size-[17px]"
     />
     <IS-play
       v-else-if="state === 'executed'"

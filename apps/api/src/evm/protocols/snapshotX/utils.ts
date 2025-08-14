@@ -4,16 +4,16 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import IExecutionStrategy from './abis/IExecutionStrategy.json';
-import { FullConfig } from './config';
-import { ExecutionStrategy, Space } from '../../.checkpoint/models';
-import { handleVotingPowerValidationMetadata } from '../common/ipfs';
+import { ExecutionStrategy, Space } from '../../../../.checkpoint/models';
+import { handleVotingPowerValidationMetadata } from '../../../common/ipfs';
+import { EVMConfig, SnapshotXConfig } from '../../types';
 
 /**
  * Convert EVM onchain choice value to common format.
  * EVM uses 0 for Against, 1 for For, 2 for Abstain.
  * Common format uses 1 for For, 2 for Against, 3 for Abstain.
  * @param rawChoice onchain choice value
- * @returns common format choice value or -1 if unknown
+ * @returns common format choice value or null if unknown
  */
 export function convertChoice(rawChoice: number): 1 | 2 | 3 | null {
   if (rawChoice === 0) return 2;
@@ -28,7 +28,8 @@ export async function updateProposalValidationStrategy(
   validationStrategyAddress: string,
   validationStrategyParams: string,
   metadataUri: string,
-  config: FullConfig
+  config: EVMConfig,
+  protocolConfig: SnapshotXConfig
 ) {
   const strategyAddress = getAddress(validationStrategyAddress);
 
@@ -40,7 +41,7 @@ export async function updateProposalValidationStrategy(
 
   if (
     strategyAddress ===
-    getAddress(config.overrides.propositionPowerValidationStrategyAddress)
+    getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
   ) {
     try {
       const decoded = defaultAbiCoder.decode(
@@ -77,7 +78,8 @@ export async function handleCustomExecutionStrategy(
   address: string,
   blockNumber: number,
   provider: JsonRpcProvider,
-  config: FullConfig
+  config: EVMConfig,
+  protocolConfig: SnapshotXConfig
 ) {
   const contract = new Contract(address, IExecutionStrategy, provider);
 
@@ -98,7 +100,7 @@ export async function handleCustomExecutionStrategy(
   executionStrategy.address = address;
   executionStrategy.type = type;
   executionStrategy.quorum = '0';
-  executionStrategy.treasury_chain = config.chainId;
+  executionStrategy.treasury_chain = protocolConfig.chainId;
   executionStrategy.treasury = getAddress(address);
   executionStrategy.timelock_delay = 0n;
 
@@ -113,9 +115,9 @@ export async function registerApeGasProposal(
     viewId: string;
     snapshot: number;
   },
-  config: FullConfig
+  protocolConfig: SnapshotXConfig
 ) {
-  const res = await fetch(config.overrides.manaRpcUrl, {
+  const res = await fetch(protocolConfig.manaRpcUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

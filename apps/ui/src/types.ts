@@ -21,6 +21,7 @@ export type ProposalState =
   | 'passed'
   | 'rejected'
   | 'closed'
+  | 'queued'
   | 'executed';
 
 export type NetworkID =
@@ -179,6 +180,7 @@ export type OffchainAdditionalRawData = {
 
 export type Space = {
   id: string;
+  protocol: string;
   network: NetworkID;
   verified: boolean;
   turbo: boolean;
@@ -259,11 +261,13 @@ export type Proposal = {
    * If proposal is invalid it means that it was not created correctly.
    */
   isInvalid: boolean;
+  vp_decimals: number;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';
   space: {
     id: string;
+    protocol: string;
     name: string;
     snapshot_chain_id?: string;
     avatar: string;
