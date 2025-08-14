@@ -340,6 +340,7 @@ function formatProposal(
         proposal.execution_strategy !== emptyAddress),
     space: {
       id: proposal.space.id,
+      protocol: proposal.space.protocol,
       name: proposal.space.metadata.name,
       avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,

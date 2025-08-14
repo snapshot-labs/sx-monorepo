@@ -386,6 +386,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,
+      protocol: 'snapshot',
       name: proposal.space.name,
       snapshot_chain_id: proposal.space.network,
       avatar: proposal.space.avatar,
