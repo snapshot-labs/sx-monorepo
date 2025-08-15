@@ -541,7 +541,9 @@ watchEffect(() => {
             to continue.
           </UiAlert>
           <UiAlert
-            v-else-if="disabledStrategiesList.length"
+            v-else-if="
+              disabledStrategiesList.length && !proposal?.originalProposal
+            "
             type="error"
             class="mb-4"
           >
