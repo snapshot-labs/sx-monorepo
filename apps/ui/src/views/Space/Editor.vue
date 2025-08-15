@@ -200,12 +200,15 @@ const isSubmitButtonLoading = computed(() => {
 });
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
-    (alerts.value.has('HAS_PRO_ONLY_NETWORKS') ||
-      alerts.value.has('HAS_DISABLED_STRATEGIES')) &&
+    alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
     !proposal.value?.originalProposal;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
-  if (hasUnsupportedNetworks || hasFormErrors) {
+  if (
+    hasUnsupportedNetworks ||
+    hasFormErrors ||
+    disabledStrategiesList.value.length
+  ) {
     return false;
   }
 
