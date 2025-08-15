@@ -89,6 +89,14 @@ const disabledStrategiesList = computed(() => {
   );
 });
 
+const premiumStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_PRO_ONLY_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
+});
+
 const privacy = computed({
   get() {
     return proposal.value?.privacy === 'shutter';
