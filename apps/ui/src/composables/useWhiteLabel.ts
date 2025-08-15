@@ -75,6 +75,14 @@ export function useWhiteLabel() {
       space.value = await getSpace(domain);
 
       if (space.value) {
+        if (!space.value.turbo) {
+          const redirectUrl = new URL(
+            `${window.location.protocol}//${DEFAULT_DOMAIN}`
+          );
+          redirectUrl.hash = `/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
+          window.location.href = redirectUrl.href;
+        }
+
         isWhiteLabel.value = true;
         skinSettings.value =
           MAPPING[domain]?.skinSettings ||
