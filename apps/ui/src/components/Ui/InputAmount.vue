@@ -5,6 +5,8 @@ export default {
 </script>
 
 <script setup lang="ts">
+import { useDirty } from '@/composables/useDirty';
+
 const model = defineModel<string>({
   required: true
 });
@@ -15,10 +17,10 @@ const props = defineProps<{
   definition: any;
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed(() => {
-  if (!model.value && !dirty.value && props.definition.default) {
+  if (!model.value && !isDirty.value && props.definition.default) {
     return props.definition.default;
   }
 
@@ -29,8 +31,6 @@ function handleInput(event: Event) {
   const inputEvent = event as InputEvent;
   const target = inputEvent.target as HTMLInputElement;
   const value = target.value;
-
-  dirty.value = true;
 
   if (value === '') {
     model.value = '';
@@ -44,10 +44,6 @@ function handleInput(event: Event) {
 
   model.value = value;
 }
-
-watch(model, () => {
-  dirty.value = true;
-});
 </script>
 
 <template>
@@ -55,7 +51,7 @@ watch(model, () => {
     v-slot="{ id }"
     :definition="definition"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
     :required="required"
     :input-value-length="inputValue?.length"
   >
