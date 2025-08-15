@@ -72,6 +72,14 @@ const nonPremiumNetworksList = computed(() => {
   return prettyConcat(boldNames, 'and');
 });
 
+const nonPremiumStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_PRO_ONLY_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
+});
+
 const privacy = computed({
   get() {
     return proposal.value?.privacy === 'shutter';
@@ -196,7 +204,11 @@ const canSubmit = computed(() => {
     !proposal.value?.originalProposal;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
-  if (hasUnsupportedNetworks || hasFormErrors) {
+  if (
+    hasUnsupportedNetworks ||
+    hasFormErrors ||
+    nonPremiumStrategiesList.value.length
+  ) {
     return false;
   }
 
@@ -525,6 +537,25 @@ watchEffect(() => {
               class="font-semibold text-rose-500"
             >
               upgrade your space
+            </AppLink>
+            to continue.
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              nonPremiumStrategiesList.length && !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            You cannot create proposals. This space is configured with
+            non-premium strategies (<span
+              v-html="prettyConcat(nonPremiumStrategiesList, 'and')"
+            />).
+            <AppLink
+              :to="{ name: 'space-pro' }"
+              class="font-semibold text-rose-500"
+            >
+              Upgrade your space
             </AppLink>
             to continue.
           </UiAlert>
