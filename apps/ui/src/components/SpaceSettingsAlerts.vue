@@ -27,11 +27,19 @@ const deprecatedStrategies = computed(
       ?.strategies.map((s: string) => `"${s}"`) || []
 );
 
+const disabledStrategies = computed(
+  () =>
+    alerts.value
+      .get('HAS_DISABLED_STRATEGIES')
+      ?.strategies.map((s: string) => `"${s}"`) || []
+);
+
 const hasVotingStrategiesAlerts = computed(
   () =>
     props.activeTab === 'voting-strategies' &&
     (unsupportedProOnlyStrategies.value.length > 0 ||
       deprecatedStrategies.value.length > 0 ||
+      disabledStrategies.value.length > 0 ||
       unsupportedProOnlyNetworks.value.length > 0)
 );
 
@@ -61,6 +69,11 @@ const hasAnyAlerts = computed(
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
+      <UiAlert v-if="disabledStrategies.length" type="error">
+        The {{ prettyConcat(disabledStrategies, 'and') }}
+        {{ disabledStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
+        no longer available.
+      </UiAlert>
       <UiAlert v-if="unsupportedProOnlyStrategies.length" type="error">
         The
         {{ prettyConcat(unsupportedProOnlyStrategies, 'and') }}
@@ -79,7 +92,6 @@ const hasAnyAlerts = computed(
           follow migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
-        before August 15, 2025
       </UiAlert>
       <UiAlert v-if="unsupportedProOnlyNetworks.length" type="error">
         The
@@ -98,7 +110,6 @@ const hasAnyAlerts = computed(
           change to a premium network
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
-        before August 15, 2025
       </UiAlert>
     </template>
     <template v-if="hasWhitelabelAlerts">
@@ -113,7 +124,6 @@ const hasAnyAlerts = computed(
           follow migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
-        before August 15, 2025
       </UiAlert>
     </template>
   </div>

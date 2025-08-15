@@ -55,6 +55,7 @@ const { invalidateController } = useSpaceController(toRef(props, 'space'));
 const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
+const { alerts } = useSpaceAlerts(toRef(props, 'space'));
 
 const el = ref(null);
 const { height: bottomToolbarHeight } = useElementSize(el);
@@ -184,7 +185,7 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (!isTicketValid.value) {
+    if (!isTicketValid.value || alerts.value.has('HAS_DISABLED_STRATEGIES')) {
       return 'Strategies are invalid';
     }
 

@@ -72,6 +72,14 @@ const nonPremiumNetworksList = computed(() => {
   return prettyConcat(boldNames, 'and');
 });
 
+const disabledStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_DISABLED_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
+});
+
 const privacy = computed({
   get() {
     return proposal.value?.privacy === 'shutter';
@@ -192,7 +200,8 @@ const isSubmitButtonLoading = computed(() => {
 });
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
-    alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
+    (alerts.value.has('HAS_PRO_ONLY_NETWORKS') ||
+      alerts.value.has('HAS_DISABLED_STRATEGIES')) &&
     !proposal.value?.originalProposal;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
@@ -527,6 +536,20 @@ watchEffect(() => {
               upgrade your space
             </AppLink>
             to continue.
+          </UiAlert>
+          <UiAlert
+            v-else-if="disabledStrategiesList.length"
+            type="error"
+            class="mb-4"
+          >
+            You can not create proposals. The
+            <span v-html="prettyConcat(disabledStrategiesList)" />
+            {{
+              disabledStrategiesList.length > 1
+                ? 'strategies are'
+                : 'strategy is'
+            }}
+            no longer available.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
