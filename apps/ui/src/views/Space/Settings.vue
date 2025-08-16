@@ -570,7 +570,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         {{ error || 'You have unsaved changes' }}
       </h4>
       <div class="flex space-x-3">
-        <button type="reset" class="text-skin-heading" @click="reset()">
+        <button
+          v-if="isModified"
+          type="reset"
+          class="text-skin-heading"
+          @click="reset()"
+        >
           Reset
         </button>
         <UiButton
