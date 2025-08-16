@@ -1,7 +1,7 @@
 ## Code review guidelines
 
 - Limit feedback to 3 bullet points maximum
-- Be consice
+- Be concise
 - Finish all your comment with the word "Snapshot"
 - Focus on: security, performance, bugs
 - Skip style/formatting unless critical
