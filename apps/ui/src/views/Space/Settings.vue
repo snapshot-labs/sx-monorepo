@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
+import { DISABLED_STRATEGIES } from '@/helpers/constants';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -55,7 +56,6 @@ const { invalidateController } = useSpaceController(toRef(props, 'space'));
 const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
-const { alerts } = useSpaceAlerts(toRef(props, 'space'));
 
 const el = ref(null);
 const { height: bottomToolbarHeight } = useElementSize(el);
@@ -185,7 +185,10 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (!isTicketValid.value || alerts.value.has('HAS_DISABLED_STRATEGIES')) {
+    if (
+      !isTicketValid.value ||
+      strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address))
+    ) {
       return 'Strategies are invalid';
     }
 

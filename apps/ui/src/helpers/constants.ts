@@ -250,7 +250,7 @@ export const OVERRIDING_STRATEGIES = [
   'split-delegation',
   'sonic-staked-balance'
 ] as const;
-export const DISABLED_STRATEGIES = ['multichain'] as const;
+export const DISABLED_STRATEGIES: readonly string[] = ['multichain'];
 export const DEPRECATED_STRATEGIES = [] as const;
 export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation',
