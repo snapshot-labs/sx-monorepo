@@ -555,6 +555,13 @@ watchEffect(() => {
                 : 'strategy is'
             }}
             no longer available.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              See migration guide
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">

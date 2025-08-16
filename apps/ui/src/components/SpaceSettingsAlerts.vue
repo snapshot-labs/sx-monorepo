@@ -73,6 +73,13 @@ const hasAnyAlerts = computed(
         The {{ prettyConcat(disabledStrategies, 'and') }}
         {{ disabledStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
         no longer available.
+        <AppLink
+          to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+          class="inline-flex items-center font-semibold text-rose-500"
+        >
+          See migration guide
+          <IH-arrow-sm-right class="-rotate-45" />
+        </AppLink>
       </UiAlert>
       <UiAlert v-if="unsupportedProOnlyStrategies.length" type="error">
         The
