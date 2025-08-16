@@ -2,6 +2,9 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { SkinSettings, Space } from '@/types';
 
+// List of global paths, that should not be nested inside space scope
+// when redirecting from whitelabel to main app
+const GLOBAL_PATHS = { contacts: 'settings/contacts' };
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
 
@@ -79,8 +82,23 @@ export function useWhiteLabel() {
           const redirectUrl = new URL(
             `${window.location.protocol}//${DEFAULT_DOMAIN}`
           );
-          redirectUrl.hash = `/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
-          return (window.location.href = redirectUrl.href);
+
+          const originalHash = window.location.hash.replace(/^#\//, '');
+          const globalPathKey = Object.keys(GLOBAL_PATHS).find(path =>
+            originalHash.startsWith(path)
+          );
+
+          if (globalPathKey) {
+            redirectUrl.hash = `#/${GLOBAL_PATHS[globalPathKey]}`;
+          } else {
+            const newHash = `#/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
+            redirectUrl.hash = [newHash, originalHash]
+              .filter(Boolean)
+              .join('/');
+          }
+
+          window.location.href = redirectUrl.href;
+          return;
         }
 
         isWhiteLabel.value = true;
