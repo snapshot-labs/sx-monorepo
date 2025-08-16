@@ -14,7 +14,10 @@ const validations = ref([] as ValidationDetails[]);
 </script>
 
 <script setup lang="ts">
-import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
+import {
+  DISABLED_STRATEGIES,
+  VALIDATION_TYPES_INFO
+} from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { StrategyConfig } from '@/networks/types';
@@ -322,6 +325,7 @@ watch(
             allow-duplicates
             :network-id="networkId"
             :default-chain-id="defaultChainId"
+            :hidden-strategies="[...DISABLED_STRATEGIES]"
             @test-strategies="handleTestStrategies"
           >
             <template #empty>

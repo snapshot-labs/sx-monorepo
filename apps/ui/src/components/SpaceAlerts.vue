@@ -11,6 +11,7 @@ const pendingTasks = computed(() => {
 
   if (
     alerts.value.has('HAS_DEPRECATED_STRATEGIES') ||
+    alerts.value.has('HAS_DISABLED_STRATEGIES') ||
     alerts.value.has('HAS_PRO_ONLY_STRATEGIES') ||
     alerts.value.has('HAS_PRO_ONLY_NETWORKS')
   ) {

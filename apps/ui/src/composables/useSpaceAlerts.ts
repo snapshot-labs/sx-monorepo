@@ -1,5 +1,6 @@
 import {
   DEPRECATED_STRATEGIES,
+  DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
 } from '@/helpers/constants';
 import { offchainNetworks } from '@/networks';
@@ -11,6 +12,7 @@ const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
 
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
+  | 'HAS_DISABLED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
   | 'HAS_PRO_ONLY_WHITELABEL';
@@ -46,6 +48,14 @@ export function useSpaceAlerts(
 
     return space.value.strategies.filter(strategy =>
       (DEPRECATED_STRATEGIES as readonly string[]).includes(strategy)
+    );
+  });
+
+  const disabledStrategies = computed(() => {
+    if (!isOffchainSpace.value) return [];
+
+    return space.value.strategies.filter(strategy =>
+      (DISABLED_STRATEGIES as readonly string[]).includes(strategy)
     );
   });
 
@@ -85,6 +95,12 @@ export function useSpaceAlerts(
     if (deprecatedStrategies.value.length) {
       alertsMap.set('HAS_DEPRECATED_STRATEGIES', {
         strategies: deprecatedStrategies.value
+      });
+    }
+
+    if (disabledStrategies.value.length) {
+      alertsMap.set('HAS_DISABLED_STRATEGIES', {
+        strategies: disabledStrategies.value
       });
     }
 
