@@ -73,14 +73,6 @@ const nonPremiumNetworksList = computed(() => {
   return prettyConcat(boldNames, 'and');
 });
 
-const unsupportedPremiumStrategiesList = computed(() => {
-  return (
-    alerts.value
-      .get('HAS_PRO_ONLY_STRATEGIES')
-      ?.strategies?.map((n: string) => `<b>${n}</b>`) || []
-  );
-});
-
 const disabledStrategiesList = computed(() => {
   return (
     alerts.value
@@ -89,7 +81,7 @@ const disabledStrategiesList = computed(() => {
   );
 });
 
-const premiumStrategiesList = computed(() => {
+const unsupportedPremiumStrategiesList = computed(() => {
   return (
     alerts.value
       .get('HAS_PRO_ONLY_STRATEGIES')
@@ -224,8 +216,8 @@ const canSubmit = computed(() => {
   if (
     hasUnsupportedNetworks ||
     hasFormErrors ||
-    unsupportedPremiumStrategiesList.value.length ||
-    disabledStrategiesList.value.length
+    disabledStrategiesList.value.length ||
+    unsupportedPremiumStrategiesList.value.length
   ) {
     return false;
   }
