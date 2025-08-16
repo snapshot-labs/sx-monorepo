@@ -72,6 +72,14 @@ const nonPremiumNetworksList = computed(() => {
   return prettyConcat(boldNames, 'and');
 });
 
+const nonPremiumStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_PRO_ONLY_STRATEGIES')
+      ?.strategies?.map((n: string) => `<b>${n}</b>`) || []
+  );
+});
+
 const privacy = computed({
   get() {
     return proposal.value?.privacy === 'shutter';
@@ -196,7 +204,11 @@ const canSubmit = computed(() => {
     !proposal.value?.originalProposal;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
-  if (hasUnsupportedNetworks || hasFormErrors) {
+  if (
+    hasUnsupportedNetworks ||
+    hasFormErrors ||
+    nonPremiumStrategiesList.value.length
+  ) {
     return false;
   }
 
@@ -518,6 +530,33 @@ watchEffect(() => {
             >
               premium network
               <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </AppLink>
+            or
+            <AppLink
+              :to="{ name: 'space-pro' }"
+              class="font-semibold text-rose-500"
+            >
+              upgrade your space
+            </AppLink>
+            to continue.
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              nonPremiumStrategiesList.length && !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            You cannot create proposals. This space is configured with premium
+            strategies (<span
+              v-html="prettyConcat(nonPremiumStrategiesList, 'and')"
+            />).
+            <AppLink
+              to="https://help.snapshot.box/en/articles/11568442-migrating-from-delegation-to-with-delegation-strategy"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              See migration guide
+              <IH-arrow-sm-right class="-rotate-45" />
             </AppLink>
             or
             <AppLink
