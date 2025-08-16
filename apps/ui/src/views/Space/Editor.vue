@@ -57,6 +57,7 @@ const { isWhiteLabel } = useWhiteLabel();
 const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
   isEditor: true
 });
+const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -562,6 +563,17 @@ watchEffect(() => {
               See migration guide
               <IH-arrow-sm-right class="-rotate-45" />
             </AppLink>
+            <template v-if="isController || isAdmin">
+              and
+              <AppLink
+                :to="{
+                  name: 'space-settings',
+                  params: { tab: 'voting-strategies' }
+                }"
+                class="font-semibold text-rose-500"
+                >update your space</AppLink
+              >.
+            </template>
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
