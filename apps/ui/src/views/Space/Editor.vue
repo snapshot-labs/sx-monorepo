@@ -547,15 +547,23 @@ watchEffect(() => {
             type="error"
             class="mb-4"
           >
-            You cannot create proposals. This space is configured with
-            premium strategies (<span
+            You cannot create proposals. This space is configured with premium
+            strategies (<span
               v-html="prettyConcat(nonPremiumStrategiesList, 'and')"
             />).
+            <AppLink
+              to="https://help.snapshot.box/en/articles/11568442-migrating-from-delegation-to-with-delegation-strategy"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              See migration guide
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
+            or
             <AppLink
               :to="{ name: 'space-pro' }"
               class="font-semibold text-rose-500"
             >
-              Upgrade your space
+              upgrade your space
             </AppLink>
             to continue.
           </UiAlert>
