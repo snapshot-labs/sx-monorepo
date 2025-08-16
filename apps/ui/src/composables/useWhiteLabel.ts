@@ -80,7 +80,7 @@ export function useWhiteLabel() {
             `${window.location.protocol}//${DEFAULT_DOMAIN}`
           );
           redirectUrl.hash = `/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
-          window.location.href = redirectUrl.href;
+          return (window.location.href = redirectUrl.href);
         }
 
         isWhiteLabel.value = true;
