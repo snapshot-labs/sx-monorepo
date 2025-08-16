@@ -2,18 +2,6 @@
 import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
-const route = useRoute();
-const router = useRouter();
-const { app } = useApp();
-const {
-  init: initWhiteLabel,
-  isWhiteLabel,
-  isCustomDomain,
-  resolved: whiteLabelResolved,
-  failed: whiteLabelFailed
-} = useWhiteLabel();
-const { setTitle } = useTitle();
-
 const routeName = computed(() => String(route.matched[0]?.name));
 
 function mountCustomDomainRoutes() {
