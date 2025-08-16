@@ -548,7 +548,7 @@ watchEffect(() => {
             class="mb-4"
           >
             You cannot create proposals. This space is configured with
-            non-premium strategies (<span
+            premium strategies (<span
               v-html="prettyConcat(nonPremiumStrategiesList, 'and')"
             />).
             <AppLink
