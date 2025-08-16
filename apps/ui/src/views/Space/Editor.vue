@@ -76,7 +76,7 @@ const nonPremiumStrategiesList = computed(() => {
   return (
     alerts.value
       .get('HAS_PRO_ONLY_STRATEGIES')
-      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+      ?.strategies?.map((n: string) => `<b>${n}</b>`) || []
   );
 });
 
