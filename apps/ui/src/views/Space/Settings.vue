@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
+import { DISABLED_STRATEGIES } from '@/helpers/constants';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -184,7 +185,10 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (!isTicketValid.value) {
+    if (
+      !isTicketValid.value ||
+      strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address))
+    ) {
       return 'Strategies are invalid';
     }
 
@@ -566,7 +570,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         {{ error || 'You have unsaved changes' }}
       </h4>
       <div class="flex space-x-3">
-        <button type="reset" class="text-skin-heading" @click="reset()">
+        <button
+          v-if="isModified"
+          type="reset"
+          class="text-skin-heading"
+          @click="reset()"
+        >
           Reset
         </button>
         <UiButton
