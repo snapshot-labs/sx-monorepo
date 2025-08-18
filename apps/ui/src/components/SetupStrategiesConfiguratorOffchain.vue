@@ -4,6 +4,7 @@ const editStrategyModalStrategyId = ref<StrategyTemplate['address']>();
 </script>
 
 <script setup lang="ts">
+import { DISABLED_STRATEGIES } from '@/helpers/constants';
 import { getNetwork } from '@/networks';
 import { StrategyConfig, StrategyTemplate } from '@/networks/types';
 import { ChainId, NetworkID } from '@/types';
@@ -14,6 +15,11 @@ const POPULAR_STRATEGIES: Record<string, StrategyTemplate['address']> = {
   'ERC-721': 'erc721',
   'ERC-1155': 'erc1155-balance-of'
 } as const;
+
+const HIDDEN_STRATEGIES: StrategyTemplate['address'][] = [
+  ...DISABLED_STRATEGIES,
+  'ticket'
+];
 
 const strategies = defineModel<StrategyConfig[]>({ required: true });
 
@@ -112,7 +118,7 @@ onMounted(() => {
         v-model:model-value="strategies"
         :network-id="networkId"
         :default-chain-id="chainId"
-        :hidden-strategies="['ticket']"
+        :hidden-strategies="HIDDEN_STRATEGIES"
         :limit="limits['space.default.strategies_limit']"
         @test-strategies="handleTestStrategies"
       >
