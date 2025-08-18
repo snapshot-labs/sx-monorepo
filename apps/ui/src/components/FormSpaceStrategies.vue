@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DISABLED_STRATEGIES } from '@/helpers/constants';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
@@ -85,6 +86,7 @@ function handleTestStrategies(strategies: StrategyConfig[]) {
       :limit="strategiesLimit"
       :space-id="space.id"
       :voting-power-symbol="space.voting_power_symbol"
+      :hidden-strategies="[...DISABLED_STRATEGIES]"
       @test-strategies="handleTestStrategies"
     />
   </UiContainerSettings>

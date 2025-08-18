@@ -57,6 +57,7 @@ const { isWhiteLabel } = useWhiteLabel();
 const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
   isEditor: true
 });
+const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -72,11 +73,19 @@ const nonPremiumNetworksList = computed(() => {
   return prettyConcat(boldNames, 'and');
 });
 
-const nonPremiumStrategiesList = computed(() => {
+const unsupportedPremiumStrategiesList = computed(() => {
   return (
     alerts.value
       .get('HAS_PRO_ONLY_STRATEGIES')
       ?.strategies?.map((n: string) => `<b>${n}</b>`) || []
+  );
+});
+
+const disabledStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_DISABLED_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
   );
 });
 
@@ -207,7 +216,8 @@ const canSubmit = computed(() => {
   if (
     hasUnsupportedNetworks ||
     hasFormErrors ||
-    nonPremiumStrategiesList.value.length
+    unsupportedPremiumStrategiesList.value.length ||
+    disabledStrategiesList.value.length
   ) {
     return false;
   }
@@ -542,14 +552,49 @@ watchEffect(() => {
           </UiAlert>
           <UiAlert
             v-else-if="
-              nonPremiumStrategiesList.length && !proposal?.originalProposal
+              disabledStrategiesList.length && !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            You can not create proposals. The
+            <span v-html="prettyConcat(disabledStrategiesList)" />
+            {{
+              disabledStrategiesList.length > 1
+                ? 'strategies are'
+                : 'strategy is'
+            }}
+            no longer available.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              See migration guide
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
+            <template v-if="isController || isAdmin">
+              and
+              <AppLink
+                :to="{
+                  name: 'space-settings',
+                  params: { tab: 'voting-strategies' }
+                }"
+                class="font-semibold text-rose-500"
+                >update your space</AppLink
+              >.
+            </template>
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              unsupportedPremiumStrategiesList.length &&
+              !proposal?.originalProposal
             "
             type="error"
             class="mb-4"
           >
             You cannot create proposals. This space is configured with premium
             strategies (<span
-              v-html="prettyConcat(nonPremiumStrategiesList, 'and')"
+              v-html="prettyConcat(unsupportedPremiumStrategiesList, 'and')"
             />).
             <AppLink
               to="https://help.snapshot.box/en/articles/11568442-migrating-from-delegation-to-with-delegation-strategy"

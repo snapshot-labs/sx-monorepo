@@ -27,11 +27,19 @@ const deprecatedStrategies = computed(
       ?.strategies.map((s: string) => `"${s}"`) || []
 );
 
+const disabledStrategies = computed(
+  () =>
+    alerts.value
+      .get('HAS_DISABLED_STRATEGIES')
+      ?.strategies.map((s: string) => `"${s}"`) || []
+);
+
 const hasVotingStrategiesAlerts = computed(
   () =>
     props.activeTab === 'voting-strategies' &&
     (unsupportedProOnlyStrategies.value.length > 0 ||
       deprecatedStrategies.value.length > 0 ||
+      disabledStrategies.value.length > 0 ||
       unsupportedProOnlyNetworks.value.length > 0)
 );
 
@@ -56,6 +64,18 @@ const hasAnyAlerts = computed(
         <AppLink
           to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
           class="inline-flex items-center"
+        >
+          See migration guide
+          <IH-arrow-sm-right class="-rotate-45" />
+        </AppLink>
+      </UiAlert>
+      <UiAlert v-if="disabledStrategies.length" type="error">
+        The {{ prettyConcat(disabledStrategies, 'and') }}
+        {{ disabledStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
+        no longer available.
+        <AppLink
+          to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+          class="inline-flex items-center font-semibold text-rose-500"
         >
           See migration guide
           <IH-arrow-sm-right class="-rotate-45" />
@@ -97,7 +117,6 @@ const hasAnyAlerts = computed(
           change to a premium network
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
-        before August 15, 2025
       </UiAlert>
     </template>
     <template v-if="hasWhitelabelAlerts">
@@ -112,7 +131,6 @@ const hasAnyAlerts = computed(
           follow migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
-        before August 15, 2025
       </UiAlert>
     </template>
   </div>
