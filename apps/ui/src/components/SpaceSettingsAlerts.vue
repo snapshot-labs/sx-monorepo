@@ -113,7 +113,6 @@ const hasAnyAlerts = computed(
           follow migration guide
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
-        before August 15, 2025
       </UiAlert>
     </template>
   </div>
