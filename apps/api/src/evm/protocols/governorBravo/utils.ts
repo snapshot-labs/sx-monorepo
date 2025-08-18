@@ -1,14 +1,10 @@
-const UNTITLED_PROPOSAL = 'Untitled Proposal';
-
 export function getProposalTitle(body: string) {
   // Some Uniswap proposals were created with body like this.
-  if (body === '""') return UNTITLED_PROPOSAL;
+  if (body === '""') return null;
 
   const title = body.split('\n');
 
-  return title[0]
-    ? title[0].replace(/^#+ +/, '').slice(0, 200)
-    : UNTITLED_PROPOSAL;
+  return title[0] ? title[0].replace(/^#+ +/, '').slice(0, 200) : null;
 }
 
 /**
