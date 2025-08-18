@@ -484,4 +484,5 @@ export type ProtocolConfig = {
   apiNetwork: NetworkID;
   networks: NetworkID[];
   limit: number;
+  disabled?: boolean;
 };

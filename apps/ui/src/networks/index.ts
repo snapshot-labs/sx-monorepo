@@ -111,6 +111,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       label: 'Governor Bravo',
       apiNetwork: 'eth',
       networks: ['eth'],
-      limit: 18
+      limit: 18,
+      disabled: true
     }
   };
