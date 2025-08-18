@@ -592,25 +592,30 @@ watchEffect(() => {
             type="error"
             class="mb-4"
           >
-            You cannot create proposals. This space is configured with premium
-            strategies (<span
-              v-html="prettyConcat(unsupportedPremiumStrategiesList, 'and')"
-            />).
-            <AppLink
-              to="https://help.snapshot.box/en/articles/11568442-migrating-from-delegation-to-with-delegation-strategy"
-              class="inline-flex items-center font-semibold text-rose-500"
-            >
-              See migration guide
-              <IH-arrow-sm-right class="-rotate-45" />
-            </AppLink>
-            or
+            This space is configured with premium strategies, please
             <AppLink
               :to="{ name: 'space-pro' }"
               class="font-semibold text-rose-500"
             >
-              upgrade your space
+              upgrade to Snapshot Pro
             </AppLink>
-            to continue.
+            or
+            <AppLink
+              :to="{
+                name: 'space-settings',
+                params: { tab: 'voting-strategies' }
+              }"
+              class="font-semibold text-rose-500"
+              >edit your strategies</AppLink
+            >
+            to create a proposal.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/12038725-premium-voting-strategies"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              Learn more
+              <IH-arrow-sm-right class="-rotate-45" /> </AppLink
+            >.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
