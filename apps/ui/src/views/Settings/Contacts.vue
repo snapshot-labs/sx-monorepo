@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, shortenAddress } from '@/helpers/utils';
+import { shorten } from '@/helpers/utils';
 
 useTitle('Contacts');
 const contactsStore = useContactsStore();
@@ -42,9 +42,10 @@ function handleContactEdit(contact) {
         <UiStamp :id="contact.address" type="avatar" :size="32" />
         <div class="flex flex-col ml-3 leading-[22px] min-w-0 pr-2 md:pr-0">
           <h4 class="text-skin-link" v-text="shorten(contact.name, 24)" />
-          <div
+          <UiAddress
+            :address="contact.address"
+            :copy-button="'always'"
             class="text-[17px] truncate"
-            v-text="shortenAddress(contact.address)"
           />
         </div>
       </div>
