@@ -81,6 +81,14 @@ const disabledStrategiesList = computed(() => {
   );
 });
 
+const unsupportedPremiumStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_PRO_ONLY_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
+});
+
 const privacy = computed({
   get() {
     return proposal.value?.privacy === 'shutter';
@@ -208,7 +216,8 @@ const canSubmit = computed(() => {
   if (
     hasUnsupportedNetworks ||
     hasFormErrors ||
-    disabledStrategiesList.value.length
+    disabledStrategiesList.value.length ||
+    unsupportedPremiumStrategiesList.value.length
   ) {
     return false;
   }
@@ -574,6 +583,39 @@ watchEffect(() => {
                 >update your space</AppLink
               >.
             </template>
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              unsupportedPremiumStrategiesList.length &&
+              !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            This space is configured with premium strategies, please
+            <AppLink
+              :to="{ name: 'space-pro' }"
+              class="font-semibold text-rose-500"
+            >
+              upgrade to Snapshot Pro
+            </AppLink>
+            or
+            <AppLink
+              :to="{
+                name: 'space-settings',
+                params: { tab: 'voting-strategies' }
+              }"
+              class="font-semibold text-rose-500"
+              >edit your strategies</AppLink
+            >
+            to create a proposal.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/12038725-premium-voting-strategies"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              Learn more
+              <IH-arrow-sm-right class="-rotate-45" /> </AppLink
+            >.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
