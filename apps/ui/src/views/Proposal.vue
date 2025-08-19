@@ -161,6 +161,27 @@ watchEffect(() => {
               />
             </AppLink>
             <AppLink
+              v-if="
+                proposal.executions.length ||
+                proposal.execution_strategy_type === 'safeSnap'
+              "
+              :to="{
+                name: 'space-proposal-executions',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLink
+                :is-active="route.name === 'space-proposal-executions'"
+                :count="proposal.executions.length"
+                text="Executions"
+                class="inline-block"
+              />
+            </AppLink>
+            <AppLink
               :to="{
                 name: 'space-proposal-votes',
                 params: {

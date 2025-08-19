@@ -1,4 +1,5 @@
 import { RouteRecordRaw } from 'vue-router';
+import ProposalExecutions from '@/views/Proposal/Executions.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
 import Proposal from '@/views/Proposal.vue';
@@ -38,6 +39,11 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
         component: ProposalOverview
       },
       { path: 'votes', name: 'space-proposal-votes', component: ProposalVotes },
+      {
+        path: 'executions',
+        name: 'space-proposal-executions',
+        component: ProposalExecutions
+      },
       {
         path: 'discussion',
         name: 'space-proposal-discussion',
