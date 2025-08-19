@@ -162,7 +162,7 @@ watchEffect(() => {
             </AppLink>
             <AppLink
               v-if="
-                proposal.executions.length ||
+                proposal.executions?.length ||
                 proposal.execution_strategy_type === 'safeSnap'
               "
               :to="{
