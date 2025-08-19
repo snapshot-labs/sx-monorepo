@@ -13,7 +13,7 @@ const { copy, copied } = useClipboard();
 </script>
 
 <template>
-  <div class="flex items-center gap-2 group">
+  <span class="flex items-center gap-1.5 group">
     {{ shortenAddress(address) }}
     <UiTooltip
       title="Copy address"
@@ -39,5 +39,5 @@ const { copy, copied } = useClipboard();
         />
       </button>
     </UiTooltip>
-  </div>
+  </span>
 </template>
