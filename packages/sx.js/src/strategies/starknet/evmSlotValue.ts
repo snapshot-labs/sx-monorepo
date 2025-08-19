@@ -89,6 +89,20 @@ export default function createEvmSlotValueStrategy(): Strategy {
         chainId
       );
 
+      // This check is only needed to look for "Slot is zero" error
+      // Current storage proof contracts will revert if we try to use them
+      // and user has no slot value.
+      // This can be removed after contracts include this
+      // https://github.com/snapshot-labs/sx-starknet/pull/624
+      await contract.get_voting_power(
+        startTimestamp,
+        getUserAddressEnum('ETHEREUM', signerAddress),
+        params,
+        CallData.compile({
+          storageProof
+        })
+      );
+
       return CallData.compile({
         storageProof
       });
@@ -152,10 +166,7 @@ export default function createEvmSlotValueStrategy(): Strategy {
       try {
         return await contract.get_voting_power(
           timestamp,
-          getUserAddressEnum(
-            voterAddress.length === 42 ? 'ETHEREUM' : 'STARKNET',
-            voterAddress
-          ),
+          getUserAddressEnum('ETHEREUM', voterAddress),
           params,
           CallData.compile({
             storageProof
