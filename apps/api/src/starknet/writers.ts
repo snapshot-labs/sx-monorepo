@@ -84,6 +84,7 @@ export function createWriters(config: FullConfig) {
     const id = validateAndParseAddress(event.space);
 
     const space = new Space(id, config.indexerName);
+    space.protocol = 'snapshot-x';
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
