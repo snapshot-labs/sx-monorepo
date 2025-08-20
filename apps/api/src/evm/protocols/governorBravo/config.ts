@@ -4,7 +4,13 @@ import GovernorModule from './abis/GovernorModule.json';
 import { GovernorBravoConfig, NetworkID } from '../../types';
 
 const START_BLOCKS: Partial<Record<NetworkID, number>> = {
-  eth: 22590664
+  eth: 22590664,
+  sep: 9025765
+};
+
+const MODULE_ADDRESSES: Partial<Record<NetworkID, string>> = {
+  eth: '0x408ed6354d4973f66138c91495f2f2fcbd8724c3',
+  sep: '0x69112d158a607dd388034c0c09242ff966985258'
 };
 
 type Config = Pick<CheckpointConfig, 'sources' | 'templates' | 'abis'> & {
@@ -15,11 +21,12 @@ export function createConfig(indexerName: NetworkID): Config | null {
   const network = evmNetworks[indexerName];
 
   const start = START_BLOCKS[indexerName];
-  if (!start) return null;
+  const contract = MODULE_ADDRESSES[indexerName];
+  if (!start || !contract) return null;
 
   const sources = [
     {
-      contract: '0x408ed6354d4973f66138c91495f2f2fcbd8724c3',
+      contract,
       start,
       abi: 'GovernorModule',
       events: [

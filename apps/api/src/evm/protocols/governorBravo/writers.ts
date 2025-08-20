@@ -23,13 +23,38 @@ import {
 } from '../../../../.checkpoint/models';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 
-const NAME = 'Uniswap';
-const SYMBOL = 'UNI';
-const DECIMALS = 18;
-const TREASURY = {
-  name: 'Uniswap Treasury',
-  address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC',
-  chain_id: 1
+type SpaceData = {
+  name: string;
+  symbol: string;
+  decimals: number;
+  treasury: {
+    name: string;
+    address: string;
+    chain_id: number;
+  };
+};
+
+const spaceData: Record<string, SpaceData | undefined> = {
+  '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': {
+    name: 'Uniswap',
+    symbol: 'UNI',
+    decimals: 18,
+    treasury: {
+      name: 'Uniswap Treasury',
+      address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC',
+      chain_id: 1
+    }
+  },
+  '0x69112D158A607DD388034c0C09242FF966985258': {
+    name: 'Sepolia Governor Bravo',
+    symbol: 'MOCK',
+    decimals: 18,
+    treasury: {
+      name: 'MOCK',
+      address: '0x52f26d07f8fEf1CF806A53159ce68bf1B4031baB',
+      chain_id: 11155111
+    }
+  }
 };
 
 export function createWriters(
@@ -50,10 +75,15 @@ export function createWriters(
 
     const metadataId = `${contractAddress}_metadata`;
 
+    const spaceDataEntry = spaceData[contractAddress];
+    if (!spaceDataEntry) return;
+
+    const { name, symbol, treasury } = spaceDataEntry;
+
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
-    spaceMetadata.name = NAME;
-    spaceMetadata.voting_power_symbol = SYMBOL;
-    spaceMetadata.treasuries = [JSON.stringify(TREASURY)];
+    spaceMetadata.name = name;
+    spaceMetadata.voting_power_symbol = symbol;
+    spaceMetadata.treasuries = [JSON.stringify(treasury)];
     await spaceMetadata.save();
 
     space = new Space(contractAddress, config.indexerName);
@@ -97,6 +127,9 @@ export function createWriters(
 
     await initializeSpace(spaceAddress, block);
     await initializeUser(proposerAddress, block);
+
+    const spaceDataEntry = spaceData[spaceAddress];
+    if (!spaceDataEntry) return;
 
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
     if (!space) return;
@@ -150,7 +183,7 @@ export function createWriters(
     proposal.execution_strategy = executionStrategy.address;
     proposal.execution_strategy_type = executionStrategy.type;
     proposal.execution_strategy_details = executionStrategy.id;
-    proposal.vp_decimals = DECIMALS;
+    proposal.vp_decimals = spaceDataEntry.decimals;
     proposal.type = 'basic';
     proposal.created = block?.timestamp ?? getCurrentTimestamp();
     proposal.tx = rawEvent.transactionHash;
