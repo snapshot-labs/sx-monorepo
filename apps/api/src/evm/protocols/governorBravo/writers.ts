@@ -1,4 +1,5 @@
 import { getAddress } from '@ethersproject/address';
+import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
@@ -199,6 +200,8 @@ export function createWriters(
 
     const targets: string[] = event.args.targets;
     const calldatas: string[] = event.args.calldatas;
+    // NOTE: this is called "values" and conflicts with Result object
+    const values: BigNumber[] = event.args[3];
 
     const execution = targets.map((target, index) => ({
       _type: 'raw',
@@ -207,7 +210,7 @@ export function createWriters(
       },
       to: target,
       data: calldatas[index] ?? '0x',
-      value: '0',
+      value: values[index]?.toString() ?? '0',
       salt: '0'
     }));
 
