@@ -81,7 +81,6 @@ const disabledStrategiesList = computed(() => {
   );
 });
 
-
 const unsupportedPremiumStrategiesList = computed(() => {
   return (
     alerts.value
