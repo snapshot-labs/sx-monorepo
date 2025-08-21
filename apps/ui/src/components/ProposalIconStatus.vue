@@ -57,7 +57,7 @@ const style = computed(() => ({
       :style="style"
     />
     <IS-x-circle
-      v-else-if="['rejecteed', 'vetoed'].includes(state)"
+      v-else-if="['rejected', 'vetoed'].includes(state)"
       class="text-skin-danger"
       :style="style"
     />
