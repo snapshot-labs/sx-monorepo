@@ -1,9 +1,9 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
-import { getSpaceController } from '@/helpers/utils';
+import { formatAddress, getSpaceController } from '@/helpers/utils';
 import { Network } from '@/networks/types';
-import { NetworkID, Space } from '@/types';
+import { ChainId, NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createApi } from './api';
 import * as constants from './constants';
@@ -61,7 +61,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     getExplorerUrl: (
       id: string,
       type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-      chainId?: number
+      chainId?: ChainId
     ) => {
       chainId = chainId || l1ChainId;
       const network = networks[chainId.toString()];
@@ -72,12 +72,16 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             return network ? `${network.explorer.url}/tx/${id}` : '';
           }
 
+          if (network.starknet) return '';
+
           return `https://signator.io/ipfs/${id}`;
         case 'strategy':
           return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
         case 'contract':
         case 'address':
-          return network ? `${network.explorer.url}/address/${id}` : '';
+          return network
+            ? `${network.explorer.url}/${network.starknet ? 'contract' : 'address'}/${formatAddress(id)}`
+            : '';
         default:
           throw new Error('Not implemented');
       }

@@ -1,8 +1,6 @@
 import { keccak256 } from '@ethersproject/keccak256';
 import { faker } from '@faker-js/faker';
-import { getExecutionData } from '@snapshot-labs/sx';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
-import fetch from 'cross-fetch';
+import { getExecutionData, utils } from '@snapshot-labs/sx';
 import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { Network } from '../../.checkpoint/models';
@@ -88,7 +86,15 @@ export async function getJSON(uri: string) {
   const url = getUrl(uri);
   if (!url) throw new Error('Invalid URI');
 
-  return fetch(url).then(res => res.json());
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(15000)
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch JSON from ${url}: ${res.statusText}`);
+  }
+
+  return res.json();
 }
 
 export function getExecutionHash({
@@ -100,7 +106,7 @@ export function getExecutionHash({
   type: 'starknet' | 'evm';
   executionType: string;
   executionDestination: string | null;
-  transactions: MetaTransaction[];
+  transactions: utils.encoding.MetaTransaction[];
 }) {
   const data = getExecutionData(
     executionType as ExecutionType,

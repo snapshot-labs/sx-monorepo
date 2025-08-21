@@ -117,6 +117,7 @@ gql(`
     min_end
     max_end
     snapshot
+    vp_decimals
     scores_1
     scores_2
     scores_3
@@ -130,6 +131,7 @@ gql(`
       type
       treasury_chain
       treasury
+      quorum
     }
     execution_strategy_type
     execution_destination

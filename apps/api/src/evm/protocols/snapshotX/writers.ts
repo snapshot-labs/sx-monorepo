@@ -8,7 +8,6 @@ import { evm } from '@snapshot-labs/checkpoint';
 import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
 import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
-import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
 import {
   convertChoice,
@@ -26,19 +25,20 @@ import {
   StarknetL1Execution,
   User,
   Vote
-} from '../../.checkpoint/models';
+} from '../../../../.checkpoint/models';
 import {
   handleProposalMetadata,
   handleStrategiesMetadata,
   handleVoteMetadata
-} from '../common/ipfs';
+} from '../../../common/ipfs';
 import {
   dropIpfs,
   getCurrentTimestamp,
   getProposalLink,
   getSpaceLink,
   updateCounter
-} from '../common/utils';
+} from '../../../common/utils';
+import { EVMConfig, SnapshotXConfig } from '../../types';
 
 /**
  * List of execution strategies type that are known and we expect them to be deployed via factory.
@@ -60,10 +60,13 @@ type Strategy = {
   params: string;
 };
 
-export function createWriters(config: FullConfig) {
+export function createWriters(
+  config: EVMConfig,
+  protocolConfig: SnapshotXConfig
+) {
   const provider = new StaticJsonRpcProvider(
     config.network_node_url,
-    config.chainId
+    protocolConfig.chainId
   );
 
   const handleProxyDeployed: evm.Writer = async ({
@@ -79,14 +82,14 @@ export function createWriters(config: FullConfig) {
     const implementationAddress = getAddress(event.args.implementation);
 
     switch (implementationAddress) {
-      case getAddress(config.overrides.masterSpace): {
+      case getAddress(protocolConfig.masterSpace): {
         await executeTemplate('Space', {
           contract: proxyAddress,
           start: blockNumber
         });
         break;
       }
-      case getAddress(config.overrides.masterSimpleQuorumTimelock): {
+      case getAddress(protocolConfig.masterSimpleQuorumTimelock): {
         const contract = new Contract(
           proxyAddress,
           SimpleQuorumTimelockExecutionStrategy,
@@ -116,7 +119,7 @@ export function createWriters(config: FullConfig) {
         executionStrategy.address = proxyAddress;
         executionStrategy.type = type;
         executionStrategy.quorum = quorum.toString();
-        executionStrategy.treasury_chain = config.chainId;
+        executionStrategy.treasury_chain = protocolConfig.chainId;
         executionStrategy.treasury = proxyAddress;
         executionStrategy.timelock_veto_guardian =
           getAddress(timelockVetoGuardian);
@@ -131,7 +134,7 @@ export function createWriters(config: FullConfig) {
 
         break;
       }
-      case getAddress(config.overrides.masterSimpleQuorumAvatar): {
+      case getAddress(protocolConfig.masterSimpleQuorumAvatar): {
         const contract = new Contract(
           proxyAddress,
           SimpleQuorumAvatarExecutionStrategy,
@@ -156,16 +159,21 @@ export function createWriters(config: FullConfig) {
         executionStrategy.address = proxyAddress;
         executionStrategy.type = type;
         executionStrategy.quorum = quorum.toString();
-        executionStrategy.treasury_chain = config.chainId;
+        executionStrategy.treasury_chain = protocolConfig.chainId;
         executionStrategy.treasury = getAddress(target);
         executionStrategy.timelock_delay = 0n;
 
         await executionStrategy.save();
 
+        await executeTemplate('SimpleQuorumAvatarExecutionStrategy', {
+          contract: proxyAddress,
+          start: blockNumber
+        });
+
         break;
       }
-      case config.overrides.masterAxiom
-        ? getAddress(config.overrides.masterAxiom)
+      case protocolConfig.masterAxiom
+        ? getAddress(protocolConfig.masterAxiom)
         : Symbol('never'): {
         const contract = new Contract(
           proxyAddress,
@@ -186,7 +194,7 @@ export function createWriters(config: FullConfig) {
         executionStrategy.address = proxyAddress;
         executionStrategy.type = 'Axiom'; // override because contract returns AxiomExecutionStrategyMock
         executionStrategy.quorum = quorum.toString();
-        executionStrategy.treasury_chain = config.chainId;
+        executionStrategy.treasury_chain = protocolConfig.chainId;
         executionStrategy.treasury = proxyAddress;
         executionStrategy.timelock_delay = 0n;
 
@@ -207,7 +215,7 @@ export function createWriters(config: FullConfig) {
   const handleSpaceCreated: evm.Writer = async ({
     block,
     blockNumber,
-    tx,
+    txId,
     event
   }) => {
     console.log('Handle space created');
@@ -219,6 +227,7 @@ export function createWriters(config: FullConfig) {
     const id = getAddress(event.args.space);
 
     const space = new Space(id, config.indexerName);
+    space.protocol = 'snapshot-x';
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
@@ -246,14 +255,15 @@ export function createWriters(config: FullConfig) {
     space.proposer_count = 0;
     space.voter_count = 0;
     space.created = block?.timestamp ?? getCurrentTimestamp();
-    space.tx = tx.hash;
+    space.tx = txId;
 
     await updateProposalValidationStrategy(
       space,
       event.args.input.proposalValidationStrategy.addr,
       event.args.input.proposalValidationStrategy.params,
       event.args.input.proposalValidationStrategyMetadataURI,
-      config
+      config,
+      protocolConfig
     );
 
     let spaceMetadataItem: SpaceMetadataItem | undefined;
@@ -262,7 +272,7 @@ export function createWriters(config: FullConfig) {
       spaceMetadataItem = await handleSpaceMetadata(
         space.id,
         metadataUri,
-        config
+        config.indexerName
       );
 
       space.metadata = dropIpfs(metadataUri);
@@ -279,7 +289,8 @@ export function createWriters(config: FullConfig) {
             executor,
             blockNumber,
             provider,
-            config
+            config,
+            protocolConfig
           );
         }
       }
@@ -318,7 +329,7 @@ export function createWriters(config: FullConfig) {
       spaceMetadataItem = await handleSpaceMetadata(
         spaceId,
         metadataUri,
-        config
+        config.indexerName
       );
 
       const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -340,7 +351,8 @@ export function createWriters(config: FullConfig) {
             executor,
             blockNumber,
             provider,
-            config
+            config,
+            protocolConfig
           );
         }
       }
@@ -561,7 +573,8 @@ export function createWriters(config: FullConfig) {
       event.args.newProposalValidationStrategy.addr,
       event.args.newProposalValidationStrategy.params,
       event.args.newProposalValidationStrategyMetadataURI,
-      config
+      config,
+      protocolConfig
     );
 
     await space.save();
@@ -570,10 +583,10 @@ export function createWriters(config: FullConfig) {
   const handleProposalCreated: evm.Writer = async ({
     rawEvent,
     event,
-    tx,
+    txId,
     block
   }) => {
-    if (!rawEvent || !event || !tx.hash) return;
+    if (!rawEvent || !event || !txId) return;
 
     console.log('Handle propose');
 
@@ -620,7 +633,7 @@ export function createWriters(config: FullConfig) {
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
     proposal.created = created;
-    proposal.tx = tx.hash;
+    proposal.tx = txId;
     proposal.execution_tx = null;
     proposal.veto_tx = null;
     proposal.vote_count = 0;
@@ -632,6 +645,7 @@ export function createWriters(config: FullConfig) {
     proposal.execution_time = 0;
     proposal.executed = false;
     proposal.vetoed = false;
+    proposal.execution_settled = false;
     proposal.completed = false;
     proposal.cancelled = false;
 
@@ -641,7 +655,7 @@ export function createWriters(config: FullConfig) {
     );
 
     if (executionStrategy) {
-      proposal.quorum = BigInt(executionStrategy.quorum);
+      proposal.quorum = executionStrategy.quorum.toString();
       proposal.timelock_veto_guardian =
         executionStrategy.timelock_veto_guardian;
       proposal.timelock_delay = executionStrategy.timelock_delay;
@@ -655,7 +669,7 @@ export function createWriters(config: FullConfig) {
       // information.
       proposal.execution_strategy_details = executionStrategy.id;
     } else {
-      proposal.quorum = 0n;
+      proposal.quorum = '0';
       proposal.timelock_veto_guardian = null;
       proposal.timelock_delay = 0n;
       proposal.execution_strategy_type = 'none';
@@ -727,7 +741,7 @@ export function createWriters(config: FullConfig) {
     if (leaderboardItem.proposal_count === 1) space.proposer_count += 1;
     space.proposal_count += 1;
 
-    const apeGasStrategyAddress = config.overrides.apeGasStrategy;
+    const apeGasStrategyAddress = protocolConfig.apeGasStrategy;
     const apeGasStrategiesIndices = apeGasStrategyAddress
       ? space.strategies
           .map((strategy, i) => [strategy, i] as const)
@@ -737,7 +751,7 @@ export function createWriters(config: FullConfig) {
       : [];
 
     if (apeGasStrategiesIndices.length) {
-      proposal.start += config.overrides.apeGasStrategyDelay;
+      proposal.start += protocolConfig.apeGasStrategyDelay;
       proposal.min_end = Math.max(proposal.start, proposal.min_end);
     }
 
@@ -756,7 +770,7 @@ export function createWriters(config: FullConfig) {
             viewId,
             snapshot: proposal.snapshot
           },
-          config
+          protocolConfig
         );
       } catch (e) {
         console.log('failed to decode ape gas strategy params', e);
@@ -822,7 +836,7 @@ export function createWriters(config: FullConfig) {
       config.indexerName
     );
     if (executionStrategy) {
-      proposal.quorum = BigInt(executionStrategy.quorum);
+      proposal.quorum = executionStrategy.quorum.toString();
       proposal.timelock_veto_guardian =
         executionStrategy.timelock_veto_guardian;
       proposal.timelock_delay = executionStrategy.timelock_delay;
@@ -836,7 +850,7 @@ export function createWriters(config: FullConfig) {
       // information.
       proposal.execution_strategy_details = executionStrategy.id;
     } else {
-      proposal.quorum = 0n;
+      proposal.quorum = '0';
       proposal.timelock_veto_guardian = null;
       proposal.timelock_delay = 0n;
       proposal.execution_strategy_type = 'none';
@@ -880,7 +894,7 @@ export function createWriters(config: FullConfig) {
   };
 
   const handleProposalExecuted: evm.Writer = async ({
-    tx,
+    txId,
     rawEvent,
     event,
     block
@@ -908,8 +922,9 @@ export function createWriters(config: FullConfig) {
       switch (executionStrategy.type) {
         case 'SimpleQuorumAvatar':
         case 'Axiom':
+          proposal.execution_settled = true;
           proposal.completed = true;
-          proposal.execution_tx = tx.hash;
+          proposal.execution_tx = txId;
           break;
         case 'SimpleQuorumTimelock':
           proposal.execution_time =
@@ -921,7 +936,12 @@ export function createWriters(config: FullConfig) {
     await proposal.save();
   };
 
-  const handleVoteCast: evm.Writer = async ({ block, tx, rawEvent, event }) => {
+  const handleVoteCast: evm.Writer = async ({
+    block,
+    txId,
+    rawEvent,
+    event
+  }) => {
     if (!rawEvent || !event) return;
 
     console.log('Handle vote');
@@ -950,7 +970,7 @@ export function createWriters(config: FullConfig) {
     vote.choice = choice;
     vote.vp = vp.toString();
     vote.created = created;
-    vote.tx = tx.hash;
+    vote.tx = txId;
 
     if (event.args.metadataUri) {
       try {
@@ -1021,7 +1041,7 @@ export function createWriters(config: FullConfig) {
   };
 
   const handleTimelockProposalExecuted: evm.Writer = async ({
-    tx,
+    txId,
     rawEvent,
     event
   }) => {
@@ -1039,13 +1059,14 @@ export function createWriters(config: FullConfig) {
     );
     if (!proposal) return;
 
+    proposal.execution_settled = true;
     proposal.completed = true;
-    proposal.execution_tx = tx.hash;
+    proposal.execution_tx = txId;
     await proposal.save();
   };
 
   const handleTimelockProposalVetoed: evm.Writer = async ({
-    tx,
+    txId,
     rawEvent,
     event
   }) => {
@@ -1063,9 +1084,10 @@ export function createWriters(config: FullConfig) {
     );
     if (!proposal) return;
 
+    proposal.execution_settled = true;
     proposal.completed = true;
     proposal.vetoed = true;
-    proposal.veto_tx = tx.hash;
+    proposal.veto_tx = txId;
     await proposal.save();
   };
 
@@ -1119,7 +1141,7 @@ export function createWriters(config: FullConfig) {
 
   const handleStarknetProposalExecuted: evm.Writer = async ({
     block,
-    tx,
+    txId,
     event
   }) => {
     if (!event) return;
@@ -1138,8 +1160,26 @@ export function createWriters(config: FullConfig) {
     executionEntity.space = paddedSpace;
     executionEntity.proposalId = proposalId;
     executionEntity.created = block?.timestamp ?? getCurrentTimestamp();
-    executionEntity.tx = tx.hash;
+    executionEntity.tx = txId;
     await executionEntity.save();
+  };
+
+  const handleQuorumUpdated: evm.Writer = async ({ rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+
+    console.log('Handle QuorumUpdated');
+
+    const executionStrategyAddress = getAddress(rawEvent.address);
+
+    const executionStrategy = await ExecutionStrategy.loadEntity(
+      executionStrategyAddress,
+      config.indexerName
+    );
+
+    if (executionStrategy) {
+      executionStrategy.quorum = event.args.newQuorum.toString();
+      await executionStrategy.save();
+    }
   };
 
   return {
@@ -1170,6 +1210,8 @@ export function createWriters(config: FullConfig) {
     // L1AvatarExecutionStrategyFactory
     handleL1AvatarExecutionContractDeployed,
     // L1AvatarExecutionStrategy
-    handleStarknetProposalExecuted
+    handleStarknetProposalExecuted,
+    // SimpleQuorumAvatarExecutionStrategy
+    handleQuorumUpdated
   };
 }

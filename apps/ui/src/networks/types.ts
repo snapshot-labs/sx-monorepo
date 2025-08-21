@@ -129,7 +129,7 @@ export type ExecutionInfo = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: ChainId;
 };
 
 export type VotingPower = {
@@ -145,7 +145,7 @@ export type VotingPower = {
   displayDecimals: number;
   token: string | null;
   symbol: string;
-  chainId?: number;
+  chainId?: ChainId;
   swapLink?: string;
 };
 
@@ -163,7 +163,7 @@ export type ReadOnlyNetworkActions = {
     snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
   propose(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
@@ -182,11 +182,11 @@ export type ReadOnlyNetworkActions = {
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
@@ -196,14 +196,19 @@ export type ReadOnlyNetworkActions = {
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
-  flagProposal(web3: Web3Provider, proposal: Proposal);
+  flagProposal(
+    web3: Web3Provider | Wallet,
+    account: string,
+    proposal: Proposal
+  );
   cancelProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
+    account: string,
     proposal: Proposal
   );
   vote(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     proposal: Proposal,
@@ -417,7 +422,7 @@ export type NetworkHelpers = {
   getExplorerUrl(
     id: string,
     type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-    chainId?: number
+    chainId?: ChainId
   ): string;
 };
 

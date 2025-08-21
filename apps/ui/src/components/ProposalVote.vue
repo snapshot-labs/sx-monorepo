@@ -70,7 +70,10 @@ const isEditable = computed(() => {
       @click="$emit('enterEditMode')"
     >
       <div
-        v-if="proposal.privacy !== 'none'"
+        v-if="
+          proposal.privacy !== 'none' &&
+          ['pending', 'active'].includes(proposal.state)
+        "
         class="flex space-x-2 items-center grow truncate text-skin-link"
       >
         <IH-lock-closed class="size-[16px] shrink-0" />

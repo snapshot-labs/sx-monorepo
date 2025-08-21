@@ -164,6 +164,10 @@ function getValidationStrategyStrategiesIndices(
   strategies: string[],
   parsedMetadata: ApiStrategyParsedMetadata[]
 ) {
+  if (strategies.length === 0 || parsedMetadata.length === 0) {
+    return [];
+  }
+
   // Those values are default sorted by block_range so newest entries are at the end
   const maxIndex = Math.max(
     ...parsedMetadata.slice(-strategies.length).map(metadata => metadata.index)
@@ -367,10 +371,11 @@ function formatProposal(
     )
       ? proposal.max_end <= current
       : proposal.min_end <= current,
+    execution_settled: proposal.completed,
     state,
     network: networkId,
     privacy: 'none',
-    quorum: +proposal.quorum,
+    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     flagged: false,
     completed: ['passed', 'executed', 'rejected'].includes(state)
   };

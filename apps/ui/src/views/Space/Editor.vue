@@ -36,6 +36,7 @@ defineOptions({ inheritAttrs: false });
 
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
+const uiStore = useUiStore();
 const { proposals, createDraft, refreshDrafts } = useEditor();
 const route = useRoute();
 const router = useRouter();
@@ -191,7 +192,12 @@ const canSubmit = computed(() => {
     unsupportedProposalNetworks.value.length;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
-  if (hasUnsupportedNetworks || hasFormErrors) {
+  if (
+    hasUnsupportedNetworks ||
+    hasFormErrors ||
+    disabledStrategiesList.value.length ||
+    unsupportedPremiumStrategiesList.value.length
+  ) {
     return false;
   }
 
@@ -308,10 +314,10 @@ async function handleProposeClick() {
       }));
 
     let result;
-    if (proposal.value.proposalId) {
+    if (proposal.value.originalProposal) {
       result = await updateProposal(
         props.space,
-        proposal.value.proposalId,
+        proposal.value.originalProposal,
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
@@ -321,6 +327,8 @@ async function handleProposeClick() {
         proposal.value.labels,
         executions
       );
+
+      uiStore.addNotification('success', 'Proposal updated successfully.');
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
 
@@ -343,6 +351,8 @@ async function handleProposeClick() {
         proposalMaxEnd.value,
         executions
       );
+
+      uiStore.addNotification('success', 'Proposal created successfully.');
     }
     if (result) {
       queryClient.invalidateQueries({
@@ -351,13 +361,13 @@ async function handleProposeClick() {
     }
 
     if (
-      proposal.value.proposalId &&
+      proposal.value.originalProposal &&
       offchainNetworks.includes(props.space.network)
     ) {
       router.push({
         name: 'space-proposal-overview',
         params: {
-          proposal: proposal.value.proposalId
+          proposal: proposal.value.originalProposal.proposal_id
         }
       });
     } else {
@@ -458,7 +468,9 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  const title = proposal.value?.proposalId ? 'Update proposal' : 'New proposal';
+  const title = proposal.value?.originalProposal
+    ? 'Update proposal'
+    : 'New proposal';
 
   setTitle(`${title} - ${props.space.name}`);
 });
@@ -478,7 +490,9 @@ watchEffect(() => {
         </UiButton>
         <h4
           class="grow truncate"
-          v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
+          v-text="
+            proposal?.originalProposal ? 'Update proposal' : 'New proposal'
+          "
         />
       </div>
       <div class="flex gap-2 items-center">
@@ -496,14 +510,14 @@ watchEffect(() => {
         >
           <span
             class="hidden md:inline-block"
-            v-text="proposal?.proposalId ? 'Update' : 'Publish'"
+            v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
           />
           <IH-paper-airplane class="rotate-90 relative left-[2px]" />
         </UiButton>
       </div>
     </UiTopnav>
     <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-[72px]"
     >
       <div
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
@@ -548,6 +562,73 @@ watchEffect(() => {
               upgrade your space
             </AppLink>
             to continue.
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              disabledStrategiesList.length && !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            You can not create proposals. The
+            <span v-html="prettyConcat(disabledStrategiesList)" />
+            {{
+              disabledStrategiesList.length > 1
+                ? 'strategies are'
+                : 'strategy is'
+            }}
+            no longer available.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              See migration guide
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
+            <template v-if="isController || isAdmin">
+              and
+              <AppLink
+                :to="{
+                  name: 'space-settings',
+                  params: { tab: 'voting-strategies' }
+                }"
+                class="font-semibold text-rose-500"
+                >update your space</AppLink
+              >.
+            </template>
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              unsupportedPremiumStrategiesList.length &&
+              !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            This space is configured with premium strategies, please
+            <AppLink
+              :to="{ name: 'space-pro' }"
+              class="font-semibold text-rose-500"
+            >
+              upgrade to Snapshot Pro
+            </AppLink>
+            or
+            <AppLink
+              :to="{
+                name: 'space-settings',
+                params: { tab: 'voting-strategies' }
+              }"
+              class="font-semibold text-rose-500"
+              >edit your strategies</AppLink
+            >
+            to create a proposal.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/12038725-premium-voting-strategies"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              Learn more
+              <IH-arrow-sm-right class="-rotate-45" /> </AppLink
+            >.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
@@ -731,7 +812,7 @@ watchEffect(() => {
             :start="proposalStart"
             :min_end="proposalMinEnd"
             :max_end="proposalMaxEnd"
-            :editable="!proposal.proposalId"
+            :editable="!proposal.originalProposal"
           />
         </div>
       </Affix>

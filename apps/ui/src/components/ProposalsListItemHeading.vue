@@ -23,6 +23,12 @@ const { votes } = useAccount();
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+
+const hasVoted = computed(
+  () =>
+    props.showVotedIndicator &&
+    votes.value[`${props.proposal.network}:${props.proposal.id}`]
+);
 </script>
 <template>
   <div v-bind="$attrs">
@@ -77,12 +83,6 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             :labels="proposal.labels"
             inline
             with-link
-          />
-          <IH-check
-            v-if="
-              showVotedIndicator && votes[`${proposal.network}:${proposal.id}`]
-            "
-            class="text-skin-success inline-block shrink-0 relative"
           />
         </AppLink>
       </div>
@@ -143,6 +143,11 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           v-text="relativeTime"
         />
       </TimeRelative>
+      <template v-if="hasVoted">
+        ·
+        <IH-check class="inline-block mt-[-2px]" />
+        voted
+      </template>
     </span>
   </div>
   <teleport to="#modal">

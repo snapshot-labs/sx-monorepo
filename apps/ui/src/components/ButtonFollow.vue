@@ -2,7 +2,7 @@
 import { NetworkID } from '@/types';
 
 const props = defineProps<{
-  space: { id: string; network: NetworkID; snapshot_chain_id?: number };
+  space: { id: string; network: NetworkID; snapshot_chain_id?: string };
 }>();
 
 const { isSafeWallet } = useSafeWallet(

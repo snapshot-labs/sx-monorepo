@@ -190,6 +190,18 @@ export function useActions() {
     );
   }
 
+  // Returns an alias signer if the connector is a Starknet wallet and the network is offchain,
+  // otherwise returns the original provider.
+  async function getOptionalAliasSigner(
+    auth: { connector: Connector; provider: Web3Provider },
+    networkId: NetworkID
+  ) {
+    return auth.connector.type === 'argentx' &&
+      offchainNetworks.includes(networkId)
+      ? await getAliasSigner(auth)
+      : auth.provider;
+  }
+
   async function predictSpaceAddress(
     networkId: NetworkID,
     salt: string
@@ -466,11 +478,12 @@ export function useActions() {
     }
 
     const network = getNetwork(proposal.network);
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         proposal,
@@ -573,7 +586,7 @@ export function useActions() {
 
   async function updateProposal(
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
@@ -589,15 +602,16 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     await wrapPromise(
       space.network,
       network.actions.updateProposal(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         space,
-        proposalId,
+        proposal,
         title,
         body,
         discussion,
@@ -627,10 +641,11 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.flagProposal(auth.value.provider, proposal)
+      network.actions.flagProposal(signer, auth.value.account, proposal)
     );
 
     return true;
@@ -648,12 +663,14 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
       network.actions.cancelProposal(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
+        auth.value.account,
         proposal
       )
     );

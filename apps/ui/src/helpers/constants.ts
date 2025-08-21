@@ -228,12 +228,18 @@ export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation-with-cap',
   'delegation-with-overrides',
   'with-delegation',
-  'erc20-balance-of-with-delegation'
+  'erc20-balance-of-with-delegation',
+  'spark-with-delegation'
 ];
 
 export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
-  'delegate-registry': 'Delegat registry',
+  'delegate-registry': 'Delegate registry',
   'apechain-delegate-registry': 'ApeChain Delegate Registry',
   'split-delegation': 'Split Delegation',
   'governor-subgraph': 'ERC-20 Votes'
+};
+
+export const SPACE_COVER_DIMENSIONS = {
+  sm: { width: 450, height: 120 },
+  lg: { width: 1500, height: 400 }
 };

@@ -60,10 +60,14 @@ export function createWriters(config: FullConfig) {
     }
   };
 
-  const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
+  const handleSpaceCreated: starknet.Writer = async ({
+    block,
+    txId,
+    event
+  }) => {
     console.log('Handle space created');
 
-    if (!event || !tx.transaction_hash) return;
+    if (!event || !txId) return;
 
     const strategies: string[] = event.voting_strategies.map(
       (strategy: Strategy) => strategy.address
@@ -78,6 +82,7 @@ export function createWriters(config: FullConfig) {
     const id = validateAndParseAddress(event.space);
 
     const space = new Space(id, config.indexerName);
+    space.protocol = 'snapshot-x';
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
@@ -107,7 +112,7 @@ export function createWriters(config: FullConfig) {
     space.proposer_count = 0;
     space.voter_count = 0;
     space.created = block?.timestamp ?? getCurrentTimestamp();
-    space.tx = tx.transaction_hash;
+    space.tx = txId;
 
     await updateProposalValidationStrategy(
       space,
@@ -401,8 +406,8 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) => {
-    if (!rawEvent || !event || !tx.transaction_hash) return;
+  const handlePropose: starknet.Writer = async ({ txId, rawEvent, event }) => {
+    if (!rawEvent || !event || !txId) return;
 
     console.log('Handle propose');
 
@@ -473,13 +478,14 @@ export function createWriters(config: FullConfig) {
     proposal.strategies = space.strategies;
     proposal.strategies_params = space.strategies_params;
     proposal.created = parseInt(created.toString());
-    proposal.tx = tx.transaction_hash;
+    proposal.tx = txId;
     proposal.execution_tx = null;
     proposal.veto_tx = null;
     proposal.vote_count = 0;
     proposal.execution_ready = true;
     proposal.executed = false;
     proposal.vetoed = false;
+    proposal.execution_settled = false;
     proposal.completed = false;
     proposal.cancelled = false;
 
@@ -492,7 +498,7 @@ export function createWriters(config: FullConfig) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
       proposal.execution_destination = executionStrategy.destinationAddress;
-      proposal.quorum = executionStrategy.quorum;
+      proposal.quorum = executionStrategy.quorum.toString();
 
       // Find matching strategy and persist it on space object
       // We use this on UI to properly display execution with treasury
@@ -670,7 +676,7 @@ export function createWriters(config: FullConfig) {
     if (executionStrategy) {
       proposal.execution_strategy_type =
         executionStrategy.executionStrategyType;
-      proposal.quorum = executionStrategy.quorum;
+      proposal.quorum = executionStrategy.quorum.toString();
 
       // Find matching strategy and persist it on space object
       // We use this on UI to properly display execution with treasury
@@ -724,7 +730,7 @@ export function createWriters(config: FullConfig) {
     await proposal.save();
   };
 
-  const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) => {
+  const handleExecute: starknet.Writer = async ({ txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     console.log('Handle execute');
@@ -736,15 +742,16 @@ export function createWriters(config: FullConfig) {
     if (!proposal) return;
 
     proposal.executed = true;
+    proposal.execution_settled = true;
     proposal.completed = true;
-    proposal.execution_tx = tx.transaction_hash ?? null;
+    proposal.execution_tx = txId ?? null;
 
     await proposal.save();
   };
 
   const handleVote: starknet.Writer = async ({
     block,
-    tx,
+    txId,
     rawEvent,
     event
   }) => {
@@ -770,7 +777,7 @@ export function createWriters(config: FullConfig) {
     vote.choice = choice;
     vote.vp = vp.toString();
     vote.created = created;
-    vote.tx = tx.transaction_hash;
+    vote.tx = txId;
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);

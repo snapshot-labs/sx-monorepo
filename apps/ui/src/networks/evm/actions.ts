@@ -420,7 +420,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposalId: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -479,7 +479,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: proposalId.proposal_id as number,
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -510,6 +510,7 @@ export function createActions(
     cancelProposal: async (
       web3: Web3Provider,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) => {
       await verifyNetwork(web3, chainId);

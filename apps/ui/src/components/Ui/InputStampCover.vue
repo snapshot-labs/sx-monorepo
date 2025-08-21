@@ -22,16 +22,10 @@ const props = defineProps<{
 const uiStore = useUiStore();
 
 const fileInput = ref<HTMLInputElement | null>(null);
-const isUploadingImage = ref(false);
-
-const imgUrl = computed(() => {
-  if (!model.value) return undefined;
-  if (model.value.startsWith('ipfs://')) return getUrl(model.value);
-  return model.value;
-});
+const isUploading = ref(false);
 
 function openFilePicker() {
-  if (isUploadingImage.value) return;
+  if (isUploading.value) return;
   fileInput.value?.click();
 }
 
@@ -45,7 +39,7 @@ async function handleFileChange(e: Event) {
     if (!image) throw new Error('Image not uploaded');
 
     model.value = image.url;
-    isUploadingImage.value = false;
+    isUploading.value = false;
   } catch (e) {
     uiStore.addNotification('error', 'Failed to upload image.');
 
@@ -59,16 +53,20 @@ async function handleFileChange(e: Event) {
   <button
     type="button"
     v-bind="$attrs"
+    :disabled="isUploading"
     class="relative block bg-skin-border h-[140px] mb-[-50px] w-full overflow-hidden cursor-pointer group"
+    :class="{ '!cursor-not-allowed': isUploading }"
     @click="openFilePicker()"
   >
-    <img
-      v-if="imgUrl"
-      alt=""
-      :src="imgUrl"
+    <UiImagePreview
+      v-if="model"
+      :src="model"
+      :width="SPACE_COVER_DIMENSIONS.lg.width"
+      :height="SPACE_COVER_DIMENSIONS.lg.height"
+      alt="Cover image"
       class="size-full object-cover group-hover:opacity-80"
       :class="{
-        'opacity-80': isUploadingImage
+        'opacity-80': isUploading
       }"
     />
     <SpaceCover
@@ -85,7 +83,7 @@ async function handleFileChange(e: Event) {
     <div
       class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row size-full items-center content-center justify-center"
     >
-      <UiLoading v-if="isUploadingImage" class="block z-10" />
+      <UiLoading v-if="isUploading" class="block z-10" />
       <IH-pencil v-else class="invisible text-skin-link group-hover:visible" />
     </div>
   </button>

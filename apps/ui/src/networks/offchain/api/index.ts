@@ -177,7 +177,7 @@ function formatSpace(
       active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
-      snapshot_chain_id: parseInt(space.network)
+      snapshot_chain_id: space.network
     };
   }
 
@@ -223,7 +223,7 @@ function formatSpace(
     turbo: space.turbo,
     turbo_expiration: space.turboExpiration,
     controller: '',
-    snapshot_chain_id: parseInt(space.network),
+    snapshot_chain_id: space.network,
     name: space.name || '',
     avatar: space.avatar || '',
     cover: space.cover || '',
@@ -331,6 +331,14 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     ];
   }
 
+  const voting_power_validation_params: any = [proposal.validation.params];
+  if (
+    proposal.validation.name === 'basic' &&
+    !(proposal.validation.params.strategies || []).length
+  ) {
+    voting_power_validation_params[0].strategies = proposal.strategies;
+  }
+
   const state = getProposalState(networkId, proposal);
 
   const { admins, moderators, members } = proposal.space;
@@ -367,15 +375,17 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     labels: proposal.labels,
     scores: proposal.scores,
     scores_total: proposal.scores_total,
+    vp_decimals: 0,
     vote_count: proposal.votes,
     state,
     cancelled: false,
     vetoed: false,
+    execution_settled: false,
     completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,
       name: proposal.space.name,
-      snapshot_chain_id: parseInt(proposal.space.network),
+      snapshot_chain_id: proposal.space.network,
       avatar: proposal.space.avatar,
       controller: '',
       admins,
@@ -401,6 +411,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
+    voting_power_validation_strategy_strategies: [proposal.validation.name],
+    voting_power_validation_strategy_strategies_params:
+      voting_power_validation_params,
     tx: '',
     execution_tx: null,
     veto_tx: null,
@@ -908,7 +921,7 @@ export function createApi(
 
       return Object.fromEntries(
         data.networks.map((network: any) => [
-          Number(network.id),
+          network.id,
           {
             spaces_count: network.spacesCount,
             premium: network.premium
