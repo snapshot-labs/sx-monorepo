@@ -21,6 +21,9 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    inject({
+      Buffer: ['buffer', 'Buffer']
+    }),
     AutoImport({
       imports: ['vue', 'vue-router', '@vueuse/core'],
       dirs: ['./src/composables', './src/stores'],
@@ -59,6 +62,7 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
+    include: ['buffer'],
     exclude: ['@snapshot-labs/sx'],
     esbuildOptions: {
       target
