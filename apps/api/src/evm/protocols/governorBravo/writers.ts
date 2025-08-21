@@ -198,7 +198,7 @@ export function createWriters(
       config.indexerName
     );
     executionStrategy.address = timelock;
-    executionStrategy.type = 'SimpleQuorumTimelock';
+    executionStrategy.type = 'GovernorBravoTimelock';
     executionStrategy.quorum = quorum.toString();
     executionStrategy.treasury_chain = protocolConfig.chainId;
     executionStrategy.treasury = timelock;
