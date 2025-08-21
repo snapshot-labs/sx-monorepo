@@ -36,7 +36,7 @@ export async function getLatestBlockNumber(chainId: string): Promise<number> {
       }
       provider = createProvider(starknetMetadata.rpcUrl);
     } else {
-      provider = getProvider(Number(chainId));
+      provider = getProvider(chainId);
       blockOffset = EDITOR_SNAPSHOT_OFFSET;
     }
 

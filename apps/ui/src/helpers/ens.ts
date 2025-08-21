@@ -81,7 +81,7 @@ async function deepResolve(
   property: string,
   params: any[]
 ) {
-  const provider = getProvider(chainId);
+  const provider = getProvider(chainId.toString());
   const resolvers = ENS_CONTRACTS.resolvers[chainId];
   if (!resolvers) throw new Error('Unsupported chainId');
 
@@ -146,7 +146,7 @@ export async function setEnsTextRecord(
   const ensHash = namehash(ensNormalize(ens));
 
   const resolverAddress = await call(
-    getProvider(chainId),
+    getProvider(chainId.toString()),
     ENS_CONTRACTS.registryAbi,
     [ENS_CONTRACTS.registry, 'resolver', [ensHash]]
   );
@@ -164,7 +164,7 @@ export async function setEnsTextRecord(
 }
 
 export async function getNameOwner(name: string, chainId: ENSChainId) {
-  const provider = getProvider(chainId);
+  const provider = getProvider(chainId.toString());
   const ensHash = namehash(name);
 
   let owner = await call(

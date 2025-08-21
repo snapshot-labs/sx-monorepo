@@ -17,7 +17,9 @@ export const useMetaStore = defineStore('meta', () => {
   async function fetchBlock(networkId: NetworkID) {
     if (currentBlocks.value.get(networkId)) return;
 
-    const provider = getProvider(getNetwork(networkId).currentChainId);
+    const provider = getProvider(
+      getNetwork(networkId).currentChainId.toString()
+    );
 
     try {
       const blockNumber = await provider.getBlockNumber();

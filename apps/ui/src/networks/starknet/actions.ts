@@ -80,7 +80,7 @@ export function createActions(
   const networkConfig = CONFIGS[networkId];
   if (!networkConfig) throw new Error(`Unsupported network ${networkId}`);
 
-  const l1Provider = getProvider(l1ChainId);
+  const l1Provider = getProvider(l1ChainId.toString());
 
   const clientConfig = {
     starkProvider,

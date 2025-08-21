@@ -111,7 +111,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
 
   const pin = networkId === 'mnt' ? pinPineapple : pinGraph;
 
-  const provider = getProvider(chainId);
+  const provider = getProvider(chainId.toString());
   const constants = createConstants(networkId, { pin });
   const api = createApi(apiUrl, networkId, constants, {
     // NOTE: Highlight is currently disabled

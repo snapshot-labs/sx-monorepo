@@ -67,7 +67,7 @@ export async function waitForTransaction(
     try {
       networkId = getEvmNetworkId(chainId);
     } catch {
-      const provider = getProvider(chainId);
+      const provider = getProvider(chainId.toString());
       return provider.waitForTransaction(txId);
     }
   } else {

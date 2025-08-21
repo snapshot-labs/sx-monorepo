@@ -161,13 +161,15 @@ async function handleToChange(to: string) {
     return;
   }
 
-  if (typeof props.network === 'string') {
+  const network = props.network.toString();
+
+  if (!/^[0-9]+$/.test(network)) {
     console.log('network is not a number (starknet is not supported)');
     return;
   }
 
   loading.value = true;
-  const provider = getProvider(props.network);
+  const provider = getProvider(network);
 
   try {
     const isContract = await getIsContract(provider, contractAddress);
@@ -176,7 +178,7 @@ async function handleToChange(to: string) {
       return;
     }
 
-    form.abi = await getABI(props.network, contractAddress);
+    form.abi = await getABI(Number(props.network), contractAddress);
   } catch (e) {
     console.log(e);
     showAbiInput.value = true;

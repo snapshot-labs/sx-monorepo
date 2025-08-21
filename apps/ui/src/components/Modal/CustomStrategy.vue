@@ -54,7 +54,7 @@ async function handleSubmit() {
     const contract = new Contract(
       contractAddress.value,
       ABI,
-      getProvider(props.chainId as number)
+      getProvider(props.chainId.toString())
     );
 
     const type = await contract.getStrategyType();

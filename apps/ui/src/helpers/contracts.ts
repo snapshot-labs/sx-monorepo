@@ -14,7 +14,7 @@ export async function getIsContract(provider: Provider, address: string) {
 }
 
 export async function getTokensMetadata(chainId: number, tokens: string[]) {
-  const provider = getProvider(chainId);
+  const provider = getProvider(chainId.toString());
 
   const multi = new Multicaller(chainId.toString(), provider, abis.erc20);
   tokens.forEach(token => {

@@ -18,10 +18,11 @@ export async function getABI(chainId: number, address: string) {
 
   // if there is a `implementation` method, get the ABI for that instead
   if (abi.find(({ name }) => name === 'implementation')) {
-    const implementationAddress = await call(getProvider(chainId), abi, [
-      address,
-      'implementation'
-    ]);
+    const implementationAddress = await call(
+      getProvider(chainId.toString()),
+      abi,
+      [address, 'implementation']
+    );
 
     if (implementationAddress) {
       return await getABI(chainId, implementationAddress);

@@ -101,7 +101,7 @@ export async function getBalance(
   address: string,
   chainId: ChainId
 ): Promise<string> {
-  const provider = getProvider(Number(chainId));
+  const provider = getProvider(chainId.toString());
   const balance = await provider.getBalance(address, 'latest');
 
   return balance.toHexString();

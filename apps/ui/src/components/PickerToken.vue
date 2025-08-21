@@ -59,22 +59,23 @@ function handlePick(token: Token) {
   emit('pick', token.contractAddress);
 }
 
-async function fetchCustomToken(address) {
+async function fetchCustomToken(address: string) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
 
-  if (typeof props.network === 'string') {
+  const network = props.network.toString();
+
+  if (!/^[0-9]+$/.test(network)) {
     console.log('network is not a number (starknet is not supported)');
     return;
   }
 
   customTokenLoading.value = true;
 
-  const network = props.network;
   const provider = getProvider(network);
   const tokens = [address];
 
   try {
-    const multi = new Multicaller(network.toString(), provider, abis.erc20);
+    const multi = new Multicaller(network, provider, abis.erc20);
     tokens.forEach(token => {
       multi.call(`${token}.name`, token, 'name');
       multi.call(`${token}.symbol`, token, 'symbol');

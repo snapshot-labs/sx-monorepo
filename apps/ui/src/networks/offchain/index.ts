@@ -27,7 +27,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const hubUrl = HUB_URLS[networkId];
   if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);
 
-  const provider = getProvider(l1ChainId);
+  const provider = getProvider(l1ChainId.toString());
   const api = createApi(hubUrl, networkId, constants);
 
   const isExecutorSupported = (executorType: string) => {

@@ -114,7 +114,7 @@ export function createActions(
   const getSigner = (web3: Web3Provider) => {
     const signer = web3.getSigner();
     signer.provider.getResolver = (value: string) => {
-      return getProvider(1).getResolver(value);
+      return getProvider('1').getResolver(value);
     };
 
     return signer;
@@ -737,7 +737,7 @@ export function createActions(
 
       const multi = new Multicaller(
         delegation.chainId.toString(),
-        getProvider(delegation.chainId as number),
+        getProvider(delegation.chainId.toString()),
         [
           'function decimals() view returns (uint8)',
           'function balanceOf(address account) view returns (uint256)',

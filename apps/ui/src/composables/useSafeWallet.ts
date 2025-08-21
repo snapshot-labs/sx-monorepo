@@ -7,7 +7,7 @@ import { NetworkID } from '@/types';
 
 const getSafeVersion = useMemoize(
   async (networkKey: string, account: string) => {
-    const provider = getProvider(Number(networkKey));
+    const provider = getProvider(networkKey);
 
     const isContract = await getIsContract(provider, account);
     if (!isContract) return undefined;

@@ -835,7 +835,7 @@ async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {
     throw new Error('Unsupported network');
   }
 
-  const provider = getProvider(chainId);
+  const provider = getProvider(chainId.toString());
   const tokenId = namehash(name);
 
   return call(
