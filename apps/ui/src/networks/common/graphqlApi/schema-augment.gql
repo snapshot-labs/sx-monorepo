@@ -1,0 +1,6 @@
+# Local UI codegen augmentation for upstream schema differences.
+# Adds vp_decimals to Proposal so UI queries validate without changing queries.
+
+extend type Proposal {
+  vp_decimals: Int!
+}

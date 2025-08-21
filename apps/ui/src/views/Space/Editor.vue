@@ -218,6 +218,10 @@ const spaceTypeForProposalLimit = computed(() => {
   return spaceType.value;
 });
 
+// Ensure template guards referencing these lists don't crash if undefined
+const disabledStrategiesList = computed(() => [] as string[]);
+const unsupportedPremiumStrategiesList = computed(() => [] as string[]);
+
 const proposalLimitReached = computed(() => {
   const type = spaceTypeForProposalLimit.value;
 
@@ -432,7 +436,7 @@ watch(
 
     router.replace({
       name: 'space-editor',
-      params: { key: newId },
+      params: { space: spaceKey.value, key: newId },
       query: route.query
     });
   },
@@ -781,7 +785,7 @@ watchEffect(() => {
             "
             :definition="choicesDefinition"
             :error="
-              proposal.choices.length > choicesDefinition.maxItems
+              (proposal?.choices?.length || 0) > choicesDefinition.maxItems
                 ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
                 : ''
             "

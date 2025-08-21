@@ -1,7 +1,10 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
-  schema: '../api/.checkpoint/schema.gql',
+  schema: [
+    '../api/.checkpoint/schema.gql',
+    'src/networks/common/graphqlApi/schema-augment.gql'
+  ],
   documents: ['src/networks/common/graphqlApi/queries.ts'],
   ignoreNoDocuments: true, // for better experience with the watcher
   generates: {

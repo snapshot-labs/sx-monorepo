@@ -239,6 +239,10 @@ export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
   'governor-subgraph': 'ERC-20 Votes'
 };
 
+// Strategies that should be hidden/disabled in selectors.
+// Keep empty unless you need to explicitly hide problematic strategies.
+export const DISABLED_STRATEGIES: string[] = [];
+
 export const SPACE_COVER_DIMENSIONS = {
   sm: { width: 450, height: 120 },
   lg: { width: 1500, height: 400 }

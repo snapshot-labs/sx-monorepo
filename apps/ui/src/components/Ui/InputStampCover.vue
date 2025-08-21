@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { getUrl, imageUpload } from '@/helpers/utils';
+import { SPACE_COVER_DIMENSIONS } from '@/helpers/constants';
 import { NetworkID } from '@/types';
 
 const model = defineModel<string | null>();
