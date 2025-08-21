@@ -5,6 +5,7 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
 import GovernorModule from './abis/GovernorModule.json';
+import Timelock from './abis/Timelock.json';
 import { convertChoice, getProposalTitle } from './utils';
 import {
   getCurrentTimestamp,
@@ -127,7 +128,8 @@ export function createWriters(
   async function initializeSpace(
     contractAddress: string,
     blockNumber: number,
-    block: evm.Block | null
+    block: evm.Block | null,
+    helpers: Parameters<evm.Writer>[0]['helpers']
   ) {
     let space = await Space.loadEntity(contractAddress, config.indexerName);
     if (space) return;
@@ -161,8 +163,11 @@ export function createWriters(
       governorModuleContract.proposalThreshold(overrides)
     ]);
 
+    const timelockContract = new Contract(timelock, Timelock, provider);
+    const timelockDelay = await timelockContract.delay(overrides);
+
     const executionStrategy = new ExecutionStrategy(
-      `${contractAddress}_execution_strategy`,
+      timelock,
       config.indexerName
     );
     executionStrategy.address = timelock;
@@ -170,9 +175,13 @@ export function createWriters(
     executionStrategy.quorum = quorum.toString();
     executionStrategy.treasury_chain = protocolConfig.chainId;
     executionStrategy.treasury = timelock;
-    executionStrategy.timelock_delay = 0n;
+    executionStrategy.timelock_delay = timelockDelay.toString();
     await executionStrategy.save();
-    // TODO: watch updates to timelock delay
+
+    await helpers.executeTemplate('Timelock', {
+      contract: timelock,
+      start: blockNumber
+    });
 
     const { votingPowerStrategyParsedMetadata } =
       await initializeStrategies(contractAddress);
@@ -218,7 +227,8 @@ export function createWriters(
     blockNumber,
     block,
     event,
-    rawEvent
+    rawEvent,
+    helpers
   }) => {
     console.log('Handle proposal created');
 
@@ -231,7 +241,7 @@ export function createWriters(
     const proposalMetadataId = `${proposalId}_metadata`;
     const leaderboardId = `${spaceAddress}/${proposerAddress}`;
 
-    await initializeSpace(spaceAddress, blockNumber, block);
+    await initializeSpace(spaceAddress, blockNumber, block, helpers);
     await initializeUser(proposerAddress, block);
 
     const spaceDataEntry = spaceData[spaceAddress];
@@ -244,8 +254,12 @@ export function createWriters(
       ? await SpaceMetadataItem.loadEntity(space.metadata, config.indexerName)
       : null;
 
+    const executionStrategyAddress =
+      spaceMetadataItem?.executors_strategies?.[0];
+    if (!executionStrategyAddress) return;
+
     const executionStrategy = new ExecutionStrategy(
-      `${spaceAddress}_execution_strategy`,
+      executionStrategyAddress,
       config.indexerName
     );
     if (!executionStrategy) return;
@@ -490,12 +504,31 @@ export function createWriters(
     await space.save();
   };
 
+  const handleNewDelay: evm.Writer = async ({ event, rawEvent }) => {
+    console.log('Handle new delay');
+
+    if (!event || !rawEvent) return;
+
+    const timelockAddress = getAddress(rawEvent.address);
+
+    const timelock = await ExecutionStrategy.loadEntity(
+      timelockAddress,
+      config.indexerName
+    );
+    if (!timelock) return;
+
+    timelock.timelock_delay = event.args.newDelay.toString();
+
+    await timelock.save();
+  };
+
   return {
     handleProposalCreated,
     handleProposalCanceled,
     handleProposalQueued,
     handleProposalExecuted,
     handleVoteCast,
-    handleProposalThresholdSet
+    handleProposalThresholdSet,
+    handleNewDelay
   };
 }

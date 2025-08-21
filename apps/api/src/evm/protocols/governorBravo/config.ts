@@ -1,6 +1,7 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
 import GovernorModule from './abis/GovernorModule.json';
+import Timelock from './abis/Timelock.json';
 import { GovernorBravoConfig, NetworkID } from '../../types';
 
 const START_BLOCKS: Partial<Record<NetworkID, number>> = {
@@ -60,8 +61,20 @@ export function createConfig(indexerName: NetworkID): Config | null {
 
   return {
     sources,
+    templates: {
+      Timelock: {
+        abi: 'Timelock',
+        events: [
+          {
+            name: 'NewDelay(uint256)',
+            fn: 'handleNewDelay'
+          }
+        ]
+      }
+    },
     abis: {
-      GovernorModule
+      GovernorModule,
+      Timelock
     },
     protocolConfig: {
       chainId: network.Meta.eip712ChainId
