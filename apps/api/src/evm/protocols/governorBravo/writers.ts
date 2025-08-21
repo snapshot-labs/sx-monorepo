@@ -3,6 +3,7 @@ import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
+import { evmNetworks } from '@snapshot-labs/sx';
 import GovernorModule from './abis/GovernorModule.json';
 import { convertChoice, getProposalTitle } from './utils';
 import {
@@ -18,6 +19,8 @@ import {
   ProposalMetadataItem,
   Space,
   SpaceMetadataItem,
+  StrategiesParsedMetadataDataItem,
+  StrategiesParsedMetadataItem,
   User,
   Vote,
   VoteMetadataItem
@@ -28,6 +31,7 @@ type SpaceData = {
   name: string;
   symbol: string;
   decimals: number;
+  governanceToken: string;
   treasury: {
     name: string;
     address: string;
@@ -40,6 +44,7 @@ const spaceData: Record<string, SpaceData | undefined> = {
     name: 'Uniswap',
     symbol: 'UNI',
     decimals: 18,
+    governanceToken: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     treasury: {
       name: 'Uniswap Treasury',
       address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC',
@@ -50,6 +55,7 @@ const spaceData: Record<string, SpaceData | undefined> = {
     name: 'Sepolia Governor Bravo',
     symbol: 'MOCK',
     decimals: 18,
+    governanceToken: '0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546',
     treasury: {
       name: 'MOCK',
       address: '0x52f26d07f8fEf1CF806A53159ce68bf1B4031baB',
@@ -79,7 +85,8 @@ export function createWriters(
     const spaceDataEntry = spaceData[contractAddress];
     if (!spaceDataEntry) return;
 
-    const { name, symbol, treasury } = spaceDataEntry;
+    const { name, symbol, governanceToken, decimals, treasury } =
+      spaceDataEntry;
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = name;
@@ -96,6 +103,38 @@ export function createWriters(
     });
     space.metadata = metadataId;
     space.created = block?.timestamp ?? getCurrentTimestamp();
+
+    // Strategies & authentication
+    const strategyId = `${contractAddress}_strategy`;
+    const strategyDataItemId = `${strategyId}_data`;
+
+    const strategyParsedMetadataDataItem = new StrategiesParsedMetadataDataItem(
+      strategyDataItemId,
+      config.indexerName
+    );
+    strategyParsedMetadataDataItem.name = 'ERC-20 Votes';
+    strategyParsedMetadataDataItem.description = '';
+    strategyParsedMetadataDataItem.decimals = decimals;
+    strategyParsedMetadataDataItem.symbol = symbol;
+    strategyParsedMetadataDataItem.token = governanceToken;
+
+    await strategyParsedMetadataDataItem.save();
+
+    const strategyParsedMetadata = new StrategiesParsedMetadataItem(
+      strategyId,
+      config.indexerName
+    );
+    strategyParsedMetadata.space = contractAddress;
+    strategyParsedMetadata.index = 0;
+    strategyParsedMetadata.data = strategyDataItemId;
+
+    await strategyParsedMetadata.save();
+
+    space.authenticators = ['GovernorBravoAuthenticator'];
+    space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
+    space.strategies_params = ['0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546'];
+    space.strategies_indices = [0];
+
     await space.save();
   }
 
@@ -181,6 +220,9 @@ export function createWriters(
     proposal.snapshot = proposal.start;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
+    proposal.strategies = space.strategies;
+    proposal.strategies_params = space.strategies_params;
+    proposal.strategies_indices = space.strategies_indices;
     proposal.execution_strategy = executionStrategy.address;
     proposal.execution_strategy_type = executionStrategy.type;
     proposal.execution_strategy_details = executionStrategy.id;
