@@ -49,6 +49,10 @@ export function createConfig(indexerName: NetworkID): Config | null {
         {
           name: 'ProposalExecuted(uint256)',
           fn: 'handleProposalExecuted'
+        },
+        {
+          name: 'ProposalThresholdSet(uint256, uint256)',
+          fn: 'handleProposalThresholdSet'
         }
       ]
     }

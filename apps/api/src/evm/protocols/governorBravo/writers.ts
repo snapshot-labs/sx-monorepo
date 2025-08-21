@@ -23,7 +23,8 @@ import {
   StrategiesParsedMetadataItem,
   User,
   Vote,
-  VoteMetadataItem
+  VoteMetadataItem,
+  VotingPowerValidationStrategiesParsedMetadataItem
 } from '../../../../.checkpoint/models';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 
@@ -73,6 +74,56 @@ export function createWriters(
     protocolConfig.chainId
   );
 
+  async function initializeStrategies(spaceAddress: string) {
+    const spaceDataEntry = spaceData[spaceAddress];
+    if (!spaceDataEntry) {
+      throw new Error(`Space data not found for ${spaceAddress}`);
+    }
+
+    const { symbol, governanceToken, decimals } = spaceDataEntry;
+
+    const strategyId = `${spaceAddress}_strategy`;
+    const strategyDataItemId = `${strategyId}_data`;
+
+    const strategyParsedMetadataDataItem = new StrategiesParsedMetadataDataItem(
+      strategyDataItemId,
+      config.indexerName
+    );
+    strategyParsedMetadataDataItem.name = 'ERC-20 Votes';
+    strategyParsedMetadataDataItem.description = '';
+    strategyParsedMetadataDataItem.decimals = decimals;
+    strategyParsedMetadataDataItem.symbol = symbol;
+    strategyParsedMetadataDataItem.token = governanceToken;
+
+    await strategyParsedMetadataDataItem.save();
+
+    const strategyParsedMetadata = new StrategiesParsedMetadataItem(
+      strategyId,
+      config.indexerName
+    );
+    strategyParsedMetadata.space = spaceAddress;
+    strategyParsedMetadata.index = 0;
+    strategyParsedMetadata.data = strategyDataItemId;
+
+    await strategyParsedMetadata.save();
+
+    const votingPowerStrategyParsedMetadata =
+      new VotingPowerValidationStrategiesParsedMetadataItem(
+        strategyId,
+        config.indexerName
+      );
+    votingPowerStrategyParsedMetadata.space = spaceAddress;
+    votingPowerStrategyParsedMetadata.index = 0;
+    votingPowerStrategyParsedMetadata.data = strategyDataItemId;
+
+    await votingPowerStrategyParsedMetadata.save();
+
+    return {
+      strategyParsedMetadata,
+      votingPowerStrategyParsedMetadata
+    };
+  }
+
   async function initializeSpace(
     contractAddress: string,
     blockNumber: number,
@@ -82,12 +133,6 @@ export function createWriters(
     if (space) return;
 
     const metadataId = `${contractAddress}_metadata`;
-
-    const spaceDataEntry = spaceData[contractAddress];
-    if (!spaceDataEntry) return;
-
-    const { name, symbol, governanceToken, decimals, treasury } =
-      spaceDataEntry;
 
     space = new Space(contractAddress, config.indexerName);
     space.protocol = 'governor-bravo';
@@ -110,9 +155,10 @@ export function createWriters(
       provider
     );
 
-    const [quorum, timelock] = await Promise.all([
+    const [quorum, timelock, proposalThreshold] = await Promise.all([
       governorModuleContract.quorumVotes(overrides),
-      governorModuleContract.timelock(overrides)
+      governorModuleContract.timelock(overrides),
+      governorModuleContract.proposalThreshold(overrides)
     ]);
 
     const executionStrategy = new ExecutionStrategy(
@@ -128,35 +174,25 @@ export function createWriters(
     await executionStrategy.save();
     // TODO: watch updates to timelock delay
 
-    const strategyId = `${contractAddress}_strategy`;
-    const strategyDataItemId = `${strategyId}_data`;
-
-    const strategyParsedMetadataDataItem = new StrategiesParsedMetadataDataItem(
-      strategyDataItemId,
-      config.indexerName
-    );
-    strategyParsedMetadataDataItem.name = 'ERC-20 Votes';
-    strategyParsedMetadataDataItem.description = '';
-    strategyParsedMetadataDataItem.decimals = decimals;
-    strategyParsedMetadataDataItem.symbol = symbol;
-    strategyParsedMetadataDataItem.token = governanceToken;
-
-    await strategyParsedMetadataDataItem.save();
-
-    const strategyParsedMetadata = new StrategiesParsedMetadataItem(
-      strategyId,
-      config.indexerName
-    );
-    strategyParsedMetadata.space = contractAddress;
-    strategyParsedMetadata.index = 0;
-    strategyParsedMetadata.data = strategyDataItemId;
-
-    await strategyParsedMetadata.save();
+    const { votingPowerStrategyParsedMetadata } =
+      await initializeStrategies(contractAddress);
 
     space.authenticators = ['GovernorBravoAuthenticator'];
     space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
     space.strategies_params = ['0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546'];
     space.strategies_indices = [0];
+    space.voting_power_validation_strategy_strategies = space.strategies;
+    space.voting_power_validation_strategy_strategies_params =
+      space.strategies_params;
+    space.voting_power_validation_strategies_parsed_metadata = [
+      votingPowerStrategyParsedMetadata.id
+    ];
+    space.proposal_threshold = proposalThreshold.toString();
+
+    const spaceDataEntry = spaceData[contractAddress];
+    if (!spaceDataEntry) return;
+
+    const { name, symbol, treasury } = spaceDataEntry;
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = name;
@@ -436,11 +472,30 @@ export function createWriters(
     ]);
   };
 
+  const handleProposalThresholdSet: evm.Writer = async ({
+    event,
+    rawEvent
+  }) => {
+    console.log('Handle proposal threshold set');
+
+    if (!event || !rawEvent) return;
+
+    const spaceAddress = getAddress(rawEvent.address);
+
+    const space = await Space.loadEntity(spaceAddress, config.indexerName);
+    if (!space) return;
+
+    space.proposal_threshold = event.args.newProposalThreshold.toString();
+
+    await space.save();
+  };
+
   return {
     handleProposalCreated,
     handleProposalCanceled,
     handleProposalQueued,
     handleProposalExecuted,
-    handleVoteCast
+    handleVoteCast,
+    handleProposalThresholdSet
   };
 }
