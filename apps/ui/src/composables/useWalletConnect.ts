@@ -39,7 +39,7 @@ async function getConnector() {
 
 const connections: Ref<Record<string, ConnectionData | undefined>> = ref({});
 
-async function parseCall(chainId: number, call) {
+async function parseCall(chainId: string, call) {
   const params = call.params[0];
 
   const abi = await getABI(chainId, params.to);
@@ -75,7 +75,7 @@ async function parseCall(chainId: number, call) {
 
 export function useWalletConnect(
   networkId: NetworkID,
-  chainId: number,
+  chainId: string,
   account: string,
   spaceKey: string,
   executionStrategy: SelectedStrategy | null
@@ -149,7 +149,7 @@ export function useWalletConnect(
 
   function getApprovedNamespaces(
     proposal: ProposalTypes.Struct,
-    chainId: number,
+    chainId: string,
     account: string
   ) {
     const requiredChains = proposal.requiredNamespaces.eip155?.chains || [];

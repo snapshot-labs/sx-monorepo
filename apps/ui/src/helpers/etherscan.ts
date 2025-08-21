@@ -1,11 +1,11 @@
 import { call } from './call';
 import { getProvider } from './provider';
 
-export async function getABI(chainId: number, address: string) {
+export async function getABI(chainId: string, address: string) {
   const apiHost = `https://api.etherscan.io/v2/api`;
 
   const params = new URLSearchParams({
-    chainid: chainId.toString(),
+    chainid: chainId,
     module: 'contract',
     action: 'getAbi',
     address,
@@ -18,11 +18,10 @@ export async function getABI(chainId: number, address: string) {
 
   // if there is a `implementation` method, get the ABI for that instead
   if (abi.find(({ name }) => name === 'implementation')) {
-    const implementationAddress = await call(
-      getProvider(chainId.toString()),
-      abi,
-      [address, 'implementation']
-    );
+    const implementationAddress = await call(getProvider(chainId), abi, [
+      address,
+      'implementation'
+    ]);
 
     if (implementationAddress) {
       return await getABI(chainId, implementationAddress);

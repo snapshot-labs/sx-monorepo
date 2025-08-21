@@ -40,7 +40,7 @@ const emit = defineEmits<{
 const { transaction } = useWalletConnectTransaction();
 const { loading, logged, proposal, connect, logout } = useWalletConnect(
   props.networkId,
-  Number(props.network),
+  props.network.toString(),
   props.address,
   props.spaceKey,
   props.executionStrategy

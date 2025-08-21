@@ -80,7 +80,7 @@ async function fetchApeChainDelegatees(
   const accountDelegation = await getDelegation(account.toLowerCase());
   if (!accountDelegation) return [];
 
-  const provider = getProvider((delegation.chainId || '').toString());
+  const provider = getProvider((delegation.chainId || '33139').toString());
   const balance = await provider.getBalance(account);
 
   const [names, [apiDelegate]] = await Promise.all([

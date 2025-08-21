@@ -2,7 +2,7 @@ import { NetworkID, SelectedStrategy, Transaction } from '@/types';
 
 const spaceKey = ref<string | null>(null);
 const spaceNetwork = ref<NetworkID | null>(null);
-const network = ref<number | null>(null);
+const network = ref<string | null>(null);
 const executionStrategy = ref<SelectedStrategy | null>(null);
 const transaction = ref<Transaction | null>(null);
 
@@ -10,7 +10,7 @@ export function useWalletConnectTransaction() {
   function setTransaction(
     _spaceKey: string,
     _spaceNetwork: NetworkID,
-    _network: number,
+    _network: string,
     _executionStrategy: SelectedStrategy | null,
     _tx: Transaction | null
   ) {
