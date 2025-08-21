@@ -75,6 +75,7 @@ export function createWriters(
 
   async function initializeSpace(
     contractAddress: string,
+    blockNumber: number,
     block: evm.Block | null
   ) {
     let space = await Space.loadEntity(contractAddress, config.indexerName);
@@ -88,12 +89,6 @@ export function createWriters(
     const { name, symbol, governanceToken, decimals, treasury } =
       spaceDataEntry;
 
-    const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
-    spaceMetadata.name = name;
-    spaceMetadata.voting_power_symbol = symbol;
-    spaceMetadata.treasuries = [JSON.stringify(treasury)];
-    await spaceMetadata.save();
-
     space = new Space(contractAddress, config.indexerName);
     space.protocol = 'governor-bravo';
     space.verified = true;
@@ -105,6 +100,34 @@ export function createWriters(
     space.created = block?.timestamp ?? getCurrentTimestamp();
 
     // Strategies & authentication
+    const overrides = {
+      blockTag: blockNumber
+    };
+
+    const governorModuleContract = new Contract(
+      contractAddress,
+      GovernorModule,
+      provider
+    );
+
+    const [quorum, timelock] = await Promise.all([
+      governorModuleContract.quorumVotes(overrides),
+      governorModuleContract.timelock(overrides)
+    ]);
+
+    const executionStrategy = new ExecutionStrategy(
+      `${contractAddress}_execution_strategy`,
+      config.indexerName
+    );
+    executionStrategy.address = timelock;
+    executionStrategy.type = 'GovernorBravoTimelock';
+    executionStrategy.quorum = quorum.toString();
+    executionStrategy.treasury_chain = protocolConfig.chainId;
+    executionStrategy.treasury = timelock;
+    executionStrategy.timelock_delay = 0n;
+    await executionStrategy.save();
+    // TODO: watch updates to timelock delay
+
     const strategyId = `${contractAddress}_strategy`;
     const strategyDataItemId = `${strategyId}_data`;
 
@@ -134,6 +157,13 @@ export function createWriters(
     space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
     space.strategies_params = ['0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546'];
     space.strategies_indices = [0];
+
+    const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
+    spaceMetadata.name = name;
+    spaceMetadata.voting_power_symbol = symbol;
+    spaceMetadata.treasuries = [JSON.stringify(treasury)];
+    spaceMetadata.executors_strategies = [executionStrategy.id];
+    await spaceMetadata.save();
 
     await space.save();
   }
@@ -165,7 +195,7 @@ export function createWriters(
     const proposalMetadataId = `${proposalId}_metadata`;
     const leaderboardId = `${spaceAddress}/${proposerAddress}`;
 
-    await initializeSpace(spaceAddress, block);
+    await initializeSpace(spaceAddress, blockNumber, block);
     await initializeUser(proposerAddress, block);
 
     const spaceDataEntry = spaceData[spaceAddress];
@@ -178,31 +208,11 @@ export function createWriters(
       ? await SpaceMetadataItem.loadEntity(space.metadata, config.indexerName)
       : null;
 
-    const governorModuleContract = new Contract(
-      spaceAddress,
-      GovernorModule,
-      provider
-    );
-
-    const overrides = {
-      blockTag: blockNumber
-    };
-
-    const [quorum, timelock] = await Promise.all([
-      governorModuleContract.quorumVotes(overrides),
-      governorModuleContract.timelock(overrides)
-    ]);
-
     const executionStrategy = new ExecutionStrategy(
-      `${proposalId}_execution_strategy`,
+      `${spaceAddress}_execution_strategy`,
       config.indexerName
     );
-    executionStrategy.address = timelock;
-    executionStrategy.type = 'GovernorBravoTimelock';
-    executionStrategy.quorum = quorum.toString();
-    executionStrategy.treasury_chain = protocolConfig.chainId;
-    executionStrategy.treasury = timelock;
-    executionStrategy.timelock_delay = 0n;
+    if (!executionStrategy) return;
 
     const proposal = new Proposal(proposalId, config.indexerName);
     proposal.link = getProposalLink({
@@ -279,7 +289,6 @@ export function createWriters(
       proposal.save(),
       space.save(),
       proposalMetadata.save(),
-      executionStrategy.save(),
       leaderboardItem.save()
     ]);
   };
