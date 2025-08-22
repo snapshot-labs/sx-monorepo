@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "license": "MIT",
   "scripts": {
@@ -26,18 +26,18 @@
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/units": "^5.6.1",
     "@faker-js/faker": "^7.4.0",
-    "@snapshot-labs/checkpoint": "^0.1.0-beta.63",
+    "@logtail/pino": "^0.5.5",
+    "@snapshot-labs/checkpoint": "^0.1.0-beta.65",
     "@snapshot-labs/sx": "^0.1.0",
     "@types/bn.js": "^5.1.0",
     "@types/mysql": "^2.15.21",
     "@types/node": "^18.11.6",
     "cors": "^2.8.5",
-    "cross-fetch": "^4.0.0",
     "dotenv": "^16.0.1",
     "express": "^4.21.2",
     "graphql": "^16.8.1",
     "micro-starknet": "^0.2.3",
-    "starknet": "6.11.0"
+    "starknet": "7.6.4"
   },
   "devDependencies": {
     "@snapshot-labs/eslint-config": "^0.1.0-beta.21",
