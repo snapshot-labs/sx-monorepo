@@ -36,6 +36,7 @@ defineOptions({ inheritAttrs: false });
 
 const { setTitle } = useTitle();
 const queryClient = useQueryClient();
+const uiStore = useUiStore();
 const { proposals, createDraft, refreshDrafts } = useEditor();
 const route = useRoute();
 const router = useRouter();
@@ -56,6 +57,7 @@ const { isWhiteLabel } = useWhiteLabel();
 const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
   isEditor: true
 });
+const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -69,6 +71,22 @@ const nonPremiumNetworksList = computed(() => {
   if (!networks) return '';
   const boldNames = networks.map((n: any) => `<b>${n.name}</b>`);
   return prettyConcat(boldNames, 'and');
+});
+
+const disabledStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_DISABLED_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
+});
+
+const unsupportedPremiumStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_PRO_ONLY_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
 });
 
 const privacy = computed({
@@ -195,7 +213,12 @@ const canSubmit = computed(() => {
     !proposal.value?.originalProposal;
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
-  if (hasUnsupportedNetworks || hasFormErrors) {
+  if (
+    hasUnsupportedNetworks ||
+    hasFormErrors ||
+    disabledStrategiesList.value.length ||
+    unsupportedPremiumStrategiesList.value.length
+  ) {
     return false;
   }
 
@@ -306,6 +329,8 @@ async function handleProposeClick() {
         proposal.value.labels,
         executions
       );
+
+      uiStore.addNotification('success', 'Proposal updated successfully.');
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
 
@@ -328,6 +353,8 @@ async function handleProposeClick() {
         proposalMaxEnd.value,
         executions
       );
+
+      uiStore.addNotification('success', 'Proposal created successfully.');
     }
     if (result) {
       queryClient.invalidateQueries({
@@ -492,7 +519,7 @@ watchEffect(() => {
       </div>
     </UiTopnav>
     <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full mt-[72px]"
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-[72px]"
     >
       <div
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
@@ -522,6 +549,73 @@ watchEffect(() => {
               upgrade your space
             </AppLink>
             to continue.
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              disabledStrategiesList.length && !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            You can not create proposals. The
+            <span v-html="prettyConcat(disabledStrategiesList)" />
+            {{
+              disabledStrategiesList.length > 1
+                ? 'strategies are'
+                : 'strategy is'
+            }}
+            no longer available.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              See migration guide
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
+            <template v-if="isController || isAdmin">
+              and
+              <AppLink
+                :to="{
+                  name: 'space-settings',
+                  params: { tab: 'voting-strategies' }
+                }"
+                class="font-semibold text-rose-500"
+                >update your space</AppLink
+              >.
+            </template>
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              unsupportedPremiumStrategiesList.length &&
+              !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            This space is configured with premium strategies, please
+            <AppLink
+              :to="{ name: 'space-pro' }"
+              class="font-semibold text-rose-500"
+            >
+              upgrade to Snapshot Pro
+            </AppLink>
+            or
+            <AppLink
+              :to="{
+                name: 'space-settings',
+                params: { tab: 'voting-strategies' }
+              }"
+              class="font-semibold text-rose-500"
+              >edit your strategies</AppLink
+            >
+            to create a proposal.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/12038725-premium-voting-strategies"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              Learn more
+              <IH-arrow-sm-right class="-rotate-45" /> </AppLink
+            >.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">

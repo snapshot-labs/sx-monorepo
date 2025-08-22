@@ -1,11 +1,8 @@
-import {
-  LibraryError,
-  ReceiptTx,
-  constants as starknetConstants
-} from 'starknet';
+import { LibraryError, constants as starknetConstants } from 'starknet';
 import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
+import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -33,7 +30,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     chainId: starknetConstants.StarknetChainId.SN_MAIN,
     baseChainId: 1,
     baseNetworkId: 'eth',
-    rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    rpcUrl: 'https://rpc.snapshot.org/sn',
     ethRpcUrl: 'https://rpc.snapshot.org/1',
     apiUrl: UNIFIED_API_URL,
     explorerUrl: 'https://starkscan.co',
@@ -44,7 +41,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     chainId: starknetConstants.StarknetChainId.SN_SEPOLIA,
     baseChainId: 11155111,
     baseNetworkId: 'sep',
-    rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    rpcUrl: 'https://rpc.snapshot.org/sn-sep',
     ethRpcUrl: 'https://rpc.snapshot.org/11155111',
     apiUrl: UNIFIED_API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
@@ -112,8 +109,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
             return;
           }
 
-          const receiptTx = new ReceiptTx(tx);
-          if (receiptTx.isSuccess()) {
+          if (tx.isSuccess()) {
             resolve(tx);
           } else {
             reject(tx);
@@ -159,6 +155,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       if (type === 'token') dataType = 'token';
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'contract';
+
+      if (dataType === 'contract') id = formatAddress(id);
 
       return `${explorerUrl}/${dataType}/${id}`;
     }

@@ -1,13 +1,16 @@
 [![Test CI](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/test.yml/badge.svg)](https://github.com/snapshot-labs/sx-monorepo/actions/workflows/test.yml)
 [![Discord](https://img.shields.io/discord/707079246388133940.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.snapshot.org/)
 
-# Snapshot X monorepository
+# Snapshot monorepository
 
-This is an Snapshot X monorepository.
+This is the Snapshot monorepository containing a Vue frontend, GraphQL API, transaction relayer, and TypeScript SDK.
 
-## Apps and Packages
+## Apps and packages
 
-- `ui`: Snapshot X front-end written in Vue
+- [`./apps/ui`](./apps/ui): Snapshot official frontend using Vue 3
+- [`./apps/api`](./apps/api): Multichain indexer for Snapshot X using [Checkpoint](https://checkpoint.box)
+- [`./apps/mana`](./apps/mana): Transaction relayer for gasless voting on Snapshot X
+- [`./packages/sx.js`](./packages/sx.js): TypeScript SDK for Snapshot and Snapshot X
 
 # Usage
 

@@ -3,7 +3,6 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { utils } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import {
   BigNumberish,
   CallData,

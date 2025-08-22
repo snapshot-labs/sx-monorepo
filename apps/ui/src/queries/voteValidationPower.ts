@@ -82,9 +82,6 @@ export function useVoteValidationPowerQuery(
     ],
     queryFn: async () =>
       getVoteValidationPower(toValue(account), toValue(proposal)),
-    retry: failureCount => {
-      return failureCount < 3;
-    },
     enabled: () => !!toValue(account) && toValue(active),
     staleTime: 60 * 1000
   });
