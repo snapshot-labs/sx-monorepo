@@ -1,5 +1,12 @@
 # @snapshot-labs/sx
 
+## 0.1.9
+
+### Patch Changes
+
+- 5429684: Call get_voting_power in storage proof strategies to verify Slot is zero is not thrown
+- bd2cc25: convert params for getVotingPower check in storage slot proof strategies
+
 ## 0.1.8
 
 ### Patch Changes
