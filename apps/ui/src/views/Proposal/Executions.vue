@@ -8,12 +8,12 @@ defineProps<{
 </script>
 
 <template>
-  <div
+  <UiContainer
     v-if="
       (proposal.executions && proposal.executions.length > 0) ||
       proposal.execution_strategy_type === 'safeSnap'
     "
-    class="p-4"
+    class="pt-5 !max-w-[710px] mx-0 md:mx-auto"
   >
     <UiAlert
       v-if="proposal.execution_strategy_type === 'safeSnap'"
@@ -36,7 +36,7 @@ defineProps<{
       :proposal="proposal"
       :executions="proposal.executions"
     />
-  </div>
+  </UiContainer>
   <div v-else class="px-4 py-3 flex items-center gap-2">
     <IH-exclamation-circle class="shrink-0" />
     This proposal has no executions.
