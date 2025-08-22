@@ -15,8 +15,10 @@ export function useTreasury(treasuryData: SpaceMetadataTreasury) {
       network: chainId,
       wallet: address,
       name,
-      supportsTokens: TOKENS_SUPPORTED_CHAIN_IDS.includes(chainId as any),
-      supportsNfts: NFTS_SUPPORTED_CHAIN_IDS.includes(chainId as any)
+      supportsTokens: TOKENS_SUPPORTED_CHAIN_IDS.includes(
+        chainId.toString() as any
+      ),
+      supportsNfts: NFTS_SUPPORTED_CHAIN_IDS.includes(chainId.toString() as any)
     };
   });
 

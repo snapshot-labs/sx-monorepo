@@ -74,7 +74,7 @@ export function useBalances({
       ? { name: metadata.name, symbol: metadata.ticker }
       : { name: 'Ether', symbol: 'ETH' };
 
-    const data = await getBalances(address, chainId, baseToken);
+    const data = await getBalances(address, chainId.toString(), baseToken);
     const tokensWithBalance = data.filter(
       asset =>
         formatUnits(asset.tokenBalance, asset.decimals) !== '0.0' ||

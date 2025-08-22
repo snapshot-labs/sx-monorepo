@@ -55,7 +55,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
             strategy.treasury_chain &&
             treasury.address &&
             compareAddresses(strategy.treasury, treasury.address) &&
-            treasury.chainId === strategy.treasury_chain
+            treasury.chainId?.toString() === strategy.treasury_chain.toString()
           );
         });
 
