@@ -14,7 +14,10 @@ const validations = ref([] as ValidationDetails[]);
 </script>
 
 <script setup lang="ts">
-import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
+import {
+  DISABLED_STRATEGIES,
+  VALIDATION_TYPES_INFO
+} from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { StrategyConfig } from '@/networks/types';
@@ -204,9 +207,10 @@ function handleSelect(validationDetails: ValidationDetails) {
     form.value.stamps ??= [];
 
     // Remove unsupported options
-    form.value.stamps = definition.value.properties.stamps.options
-      .filter(option => form.value.stamps.includes(option.id))
-      .map(option => option.id);
+    form.value.stamps =
+      definition.value.properties?.stamps?.options
+        ?.filter(option => form.value.stamps.includes(option.id))
+        ?.map(option => option.id) ?? form.value.stamps;
   }
 }
 
@@ -321,6 +325,7 @@ watch(
             allow-duplicates
             :network-id="networkId"
             :default-chain-id="defaultChainId"
+            :hidden-strategies="[...DISABLED_STRATEGIES]"
             @test-strategies="handleTestStrategies"
           >
             <template #empty>

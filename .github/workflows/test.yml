@@ -3,7 +3,7 @@ name: CI
 on: [push]
 
 env:
-  STARKNET_DEVNET_VERSION: 0.2.3
+  STARKNET_DEVNET_VERSION: 0.4.2
 
 jobs:
   lint-build-test:
@@ -17,7 +17,7 @@ jobs:
           node-version: 22
           cache: 'yarn'
       - name: Setup Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.86.0
       - name: Restore Cargo
         uses: actions/cache@v4
         with:

@@ -1,6 +1,6 @@
 {
   "name": "@snapshot-labs/sx",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "publishConfig": {
     "access": "public"
   },
@@ -52,11 +52,10 @@
     "@openzeppelin/merkle-tree": "^1.0.5",
     "@shutter-network/shutter-crypto": "1.0.1",
     "bn.js": "^5.2.1",
-    "cross-fetch": "^3.1.5",
     "micro-starknet": "^0.2.3",
     "randombytes": "^2.1.0",
     "snake-case": "^3.0.4",
-    "starknet": "6.11.0"
+    "starknet": "7.6.4"
   },
   "devDependencies": {
     "@ethersproject/units": "^5.7.0",
@@ -68,8 +67,8 @@
     "@types/randombytes": "^2.0.3",
     "eslint": "^8.57.0",
     "prettier": "^3.1.0",
-    "typescript": "^5.5.4",
-    "vitest": "^1.2.2"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/**/*",
