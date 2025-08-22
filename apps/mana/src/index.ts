@@ -5,15 +5,15 @@ import { PORT } from './constants';
 import ethRpc from './eth';
 import { registeredApeGasProposalsLoop } from './eth/registered';
 import starkRpc from './stark';
+import logger from '../logger';
 import pkg from '../package.json';
 import {
   registeredProposalsLoop,
   registeredTransactionsLoop
 } from './stark/registered';
 
-// Validate that WALLET_SECRET is defined
 if (!process.env.WALLET_SECRET) {
-  console.error('Error: WALLET_SECRET environment variable is required');
+  logger.fatal('WALLET_SECRET environment variable is required');
   process.exit(1);
 }
 
@@ -40,7 +40,7 @@ async function start() {
   registeredProposalsLoop();
   registeredApeGasProposalsLoop();
 
-  app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
+  app.listen(PORT, () => logger.info(`Listening at http://localhost:${PORT}`));
 }
 
 start();

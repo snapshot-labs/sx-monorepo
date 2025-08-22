@@ -117,6 +117,7 @@ gql(`
     min_end
     max_end
     snapshot
+    vp_decimals
     scores_1
     scores_2
     scores_3
@@ -148,7 +149,7 @@ gql(`
     execution_ready
     executed
     vetoed
-    completed
+    execution_settled
     cancelled
   }
 `);

@@ -2,6 +2,7 @@ import { Contract } from '@ethersproject/contracts';
 import * as db from '../db';
 import { sleep } from '../utils';
 import { createWalletProxy } from './dependencies';
+import logger from './logger';
 
 const APE_GAS_CHAIN_IDS = [
   33139
@@ -54,8 +55,9 @@ export async function processApeGasProposals(chainId: number) {
     await multicallContract.getBlockNumber()
   ).toNumber();
 
-  console.log(
-    `Processing ape gas proposals for chain ${chainId} at block ${currentL1BlockNumber}`
+  logger.info(
+    { chainId, currentL1BlockNumber },
+    'Processing ape gas proposals'
   );
 
   const proposals = await db.getApeGasProposalsToProcess({
@@ -63,13 +65,11 @@ export async function processApeGasProposals(chainId: number) {
     maxSnapshot: currentL1BlockNumber
   });
 
-  console.log('processing', proposals.length, 'ape gas proposals');
-
   for (const proposal of proposals) {
     try {
       await processApeGasProposal(proposal);
-    } catch (e) {
-      console.log('error', e);
+    } catch (err) {
+      logger.error({ err, proposal }, 'Failed to process ape gas proposal');
     }
   }
 }
@@ -79,8 +79,8 @@ export async function registeredApeGasProposalsLoop() {
     for (const chainId of APE_GAS_CHAIN_IDS) {
       try {
         await processApeGasProposals(chainId);
-      } catch (e) {
-        console.error(`Error processing ape gas on ${chainId} proposals:`, e);
+      } catch (err) {
+        logger.error({ err, chainId }, 'Failed to process ape gas proposals');
       }
     }
 
