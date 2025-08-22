@@ -196,7 +196,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         />
         <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
         <div class="mb-3 flex flex-col xs:flex-row xs:items-center gap-x-2">
-          <UiAddress :address="user.id" :copy-button="'always'" />
+          <UiAddress :address="user.id" copy-button="always" />
           <div v-if="userMetadata.loaded" class="flex items-center gap-2">
             <span class="hidden xs:inline">·</span>
             <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
