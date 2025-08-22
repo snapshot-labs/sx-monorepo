@@ -314,31 +314,29 @@ const navigationItems = computed(() =>
 
 <template>
   <div class="border-r bg-skin-bg">
-    <Affix :top="72">
-      <div class="py-4">
-        <AppLink
-          v-for="(item, key) in navigationItems"
-          :key="key"
-          :to="item.link"
-          class="px-4 space-x-2 flex items-center"
-          :class="[
-            item.active ? 'text-skin-link' : 'text-skin-text',
-            navigationConfig?.style === 'slim' ? 'py-1' : 'py-1.5'
-          ]"
-        >
-          <component
-            :is="item.icon"
-            v-if="item.icon"
-            class="inline-block"
-          ></component>
-          <span class="grow" v-text="item.name" />
-          <span
-            v-if="item.count"
-            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-            v-text="item.count"
-          />
-        </AppLink>
-      </div>
-    </Affix>
+    <div class="py-4 no-scrollbar overscroll-contain overflow-auto">
+      <AppLink
+        v-for="(item, key) in navigationItems"
+        :key="key"
+        :to="item.link"
+        class="px-4 space-x-2 flex items-center"
+        :class="[
+          item.active ? 'text-skin-link' : 'text-skin-text',
+          navigationConfig?.style === 'slim' ? 'py-1' : 'py-1.5'
+        ]"
+      >
+        <component
+          :is="item.icon"
+          v-if="item.icon"
+          class="inline-block"
+        ></component>
+        <span class="grow" v-text="item.name" />
+        <span
+          v-if="item.count"
+          class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
+          v-text="item.count"
+        />
+      </AppLink>
+    </div>
   </div>
 </template>

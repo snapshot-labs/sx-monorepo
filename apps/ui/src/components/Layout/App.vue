@@ -210,9 +210,9 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'top-[72px] bottom-0 z-10 hidden lg:block shrink-0 app-nav',
+          'top-[72px] inset-y-0 z-10 hidden lg:flex fixed app-nav',
           {
-            '!block app-nav-open': uiStore.sideMenuOpen
+            '!flex app-nav-open': uiStore.sideMenuOpen
           }
         ]"
       />
@@ -275,7 +275,7 @@ $placeholderSidebarWidth: 240px;
       }
 
       &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
-        @apply translate-x-[#{$sidebarWidth}];
+        @apply translate-x-[#{$sidebarWidth + $navWidth}];
       }
     }
   }
@@ -334,17 +334,18 @@ $placeholderSidebarWidth: 240px;
     }
 
     &:has(~ .app-nav) ~ .app-nav {
+      & ~ :deep(main),
       & ~ .backdrop,
       & ~ :deep(header.fixed > div),
       & ~ :deep(main header.fixed > div),
       & ~ :deep(.app-nav) {
-        @apply ml-[#{$sidebarWidth}];
+        @apply ml-[#{$sidebarWidth + $navWidth}];
       }
     }
+  }
 
-    &:has(~ .app-nav) ~ .app-nav ~ :deep(*) {
-      @apply ml-0;
-    }
+  .app-nav ~ :deep(*) {
+    @apply ml-[#{$navWidth}];
   }
 }
 
