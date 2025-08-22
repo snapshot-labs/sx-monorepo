@@ -26,8 +26,6 @@ const { copy, copied } = useClipboard();
         type="button"
         class="text-skin-text h-[18px]"
         @click.prevent.stop="copy(address)"
-        @keydown.enter.prevent.stop="copy(address)"
-        @keydown.space.prevent.stop="copy(address)"
       >
         <IH-duplicate
           v-if="!copied"
