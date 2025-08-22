@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useDirty } from '@/composables/useDirty';
 import { _n } from '@/helpers/utils';
 
 const model = defineModel<string>({ required: true });

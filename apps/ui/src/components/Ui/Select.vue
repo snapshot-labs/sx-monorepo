@@ -1,5 +1,4 @@
 <script setup lang="ts" generic="T extends string | number">
-import { useDirty } from '@/composables/useDirty';
 import { DefinitionWithOptions } from '@/types';
 
 const model = defineModel<T>({ required: true });

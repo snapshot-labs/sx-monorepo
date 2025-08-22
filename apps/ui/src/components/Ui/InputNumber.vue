@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useDirty } from '@/composables/useDirty';
-
 const model = defineModel<string | number>();
 
 const props = withDefaults(

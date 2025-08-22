@@ -5,7 +5,6 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { useDirty } from '@/composables/useDirty';
 import { getRandomHexColor } from '@/helpers/utils';
 
 const props = defineProps<{

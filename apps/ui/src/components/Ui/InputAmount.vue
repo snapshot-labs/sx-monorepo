@@ -5,8 +5,6 @@ export default {
 </script>
 
 <script setup lang="ts">
-import { useDirty } from '@/composables/useDirty';
-
 const model = defineModel<string>({
   required: true
 });
