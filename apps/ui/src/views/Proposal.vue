@@ -166,7 +166,7 @@ watchEffect(() => {
                 proposal.execution_strategy_type === 'safeSnap'
               "
               :to="{
-                name: 'space-proposal-executions',
+                name: 'space-proposal-execution',
                 params: {
                   proposal: proposal.proposal_id,
                   space: `${proposal.network}:${proposal.space.id}`
@@ -175,9 +175,13 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLink
-                :is-active="route.name === 'space-proposal-executions'"
-                :count="proposal.executions.length"
-                text="Executions"
+                :is-active="route.name === 'space-proposal-execution'"
+                :count="
+                  proposal.executions
+                    .map(execution => execution.transactions.length)
+                    .reduce((a, b) => a + b, 0)
+                "
+                text="Execution"
                 class="inline-block"
               />
             </AppLink>
