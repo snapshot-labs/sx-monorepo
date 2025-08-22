@@ -44,7 +44,7 @@ function handleContactEdit(contact) {
           <h4 class="text-skin-link" v-text="shorten(contact.name, 24)" />
           <UiAddress
             :address="contact.address"
-            :copy-button="'always'"
+            copy-button="always"
             class="text-[17px] truncate"
           />
         </div>
