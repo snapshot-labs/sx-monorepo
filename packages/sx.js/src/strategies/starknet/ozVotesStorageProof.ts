@@ -136,10 +136,11 @@ export default function createOzVotesStorageProofStrategy({
       // and user has no slot value.
       // This can be removed after contracts include this
       // https://github.com/snapshot-labs/sx-starknet/pull/624
+
       await contract.get_voting_power(
         startTimestamp,
         getUserAddressEnum('ETHEREUM', signerAddress),
-        params,
+        params.split(','),
         CallData.compile({
           checkpointIndex,
           checkpointMptProof,
