@@ -227,7 +227,7 @@ watch(
         <div
           class="mb-3 text-skin-text flex flex-col xs:flex-row flex-wrap xs:items-center gap-x-2 whitespace-nowrap"
         >
-          <UiAddress :address="user.id" :copy-button="'always'" />
+          <UiAddress :address="user.id" copy-button="always" />
           <div class="flex items-center gap-2">
             <span class="hidden xs:inline">·</span>
             <div>
