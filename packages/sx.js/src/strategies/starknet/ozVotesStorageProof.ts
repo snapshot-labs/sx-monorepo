@@ -139,7 +139,7 @@ export default function createOzVotesStorageProofStrategy({
       await contract.get_voting_power(
         startTimestamp,
         getUserAddressEnum('ETHEREUM', signerAddress),
-        params,
+        params.split(','),
         CallData.compile({
           checkpointIndex,
           checkpointMptProof,

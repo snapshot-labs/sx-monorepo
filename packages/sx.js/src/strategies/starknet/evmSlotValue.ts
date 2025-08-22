@@ -97,7 +97,7 @@ export default function createEvmSlotValueStrategy(): Strategy {
       await contract.get_voting_power(
         startTimestamp,
         getUserAddressEnum('ETHEREUM', signerAddress),
-        params,
+        params.split(','),
         CallData.compile({
           storageProof
         })
