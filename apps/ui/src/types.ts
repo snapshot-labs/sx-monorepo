@@ -21,6 +21,8 @@ export type ProposalState =
   | 'passed'
   | 'rejected'
   | 'closed'
+  | 'queued'
+  | 'vetoed'
   | 'executed';
 
 export type NetworkID =
@@ -259,6 +261,7 @@ export type Proposal = {
    * If proposal is invalid it means that it was not created correctly.
    */
   isInvalid: boolean;
+  vp_decimals: number;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';

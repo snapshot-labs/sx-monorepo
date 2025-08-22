@@ -11,7 +11,7 @@ type ENSNames = Record<ENSName['name'], ENSName>;
 const MAX_ENS_NAME_LENGTH = 64;
 const DEFAULT_STATUS = 'AVAILABLE';
 const LOOKUP_CHAIN_IDS = {
-  s: ['1', '109'],
+  s: ['1', '109', '146'],
   's-tn': ['11155111', '157']
 };
 

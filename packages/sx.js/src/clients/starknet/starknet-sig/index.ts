@@ -3,7 +3,7 @@ import {
   Account,
   CallData,
   shortString,
-  typedData,
+  TypedData,
   uint256,
   validateAndParseAddress
 } from 'starknet';
@@ -84,7 +84,7 @@ export class StarknetSig {
       verifyingContract
     };
 
-    const data: typeof typedData.TypedData = {
+    const data: TypedData = {
       types,
       primaryType,
       domain,

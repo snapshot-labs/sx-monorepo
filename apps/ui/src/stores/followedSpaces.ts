@@ -1,6 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { defineStore } from 'pinia';
-import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import {
+  enabledNetworks,
+  getNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
 import { useFollowedSpacesQuery } from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
 import pkg from '../../package.json';
@@ -35,7 +40,9 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
     queryFn: async () => {
       const follows = await network.api.loadFollows(web3.value.account);
 
-      return follows.map(follow => getCompositeSpaceId(follow.space));
+      return follows
+        .filter(follow => enabledNetworks.includes(follow.space.network))
+        .map(follow => getCompositeSpaceId(follow.space));
     },
     enabled: () =>
       authInitiated.value && !isWhiteLabel.value && !!web3.value.account

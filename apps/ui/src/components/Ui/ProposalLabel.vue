@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { RouteLocationNamedRaw } from 'vue-router';
+import { RouteLocationRaw } from 'vue-router';
 import { hexToRgb } from '@/helpers/utils';
 
 const props = defineProps<{
   label: string;
   color: string;
-  to?: RouteLocationNamedRaw;
+  to?: RouteLocationRaw;
 }>();
 
 const { currentTheme } = useTheme();
@@ -18,7 +18,7 @@ function checkColorProximity(color: string): {
   textColor: string;
 } {
   // if color is not a hex color, return default colors
-  if (!color.match(/^#[0-9A-F]{6}$/)) {
+  if (!color.match(/^#[0-9A-F]{6}$/i)) {
     return {
       showBorder: true,
       backgroundColor: currentTheme.value === 'dark' ? '#000000' : '#FFFFFF',

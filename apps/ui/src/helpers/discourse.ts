@@ -131,11 +131,18 @@ function formatPosts(posts: any[], baseUrl: string): Reply[] {
 
 export async function loadSingleTopic(url: string): Promise<Topic> {
   const baseUrl = new URL(url).origin;
-  const params = new URL(url).pathname.split('/');
-  const topicId = params[params.length - 1];
+  const params = new URL(url).pathname.split('/').filter(Boolean);
+  const lastParam = params[params.length - 1];
+  const secondLastParam = params[params.length - 2];
+  const hasPostNumber =
+    secondLastParam && /^\d+$/.test(secondLastParam) && /^\d+$/.test(lastParam);
+
+  const topicPath = hasPostNumber
+    ? `${secondLastParam}/${lastParam}`
+    : lastParam;
 
   const res = await fetch(
-    `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicId}.json`)}`
+    `${PROXY_URL}/${encodeURIComponent(`${baseUrl}/t/${topicPath}.json`)}`
   );
   const topic = await res.json();
 
@@ -145,6 +152,13 @@ export async function loadSingleTopic(url: string): Promise<Topic> {
 
   topic.posts_count--;
   topic.posts = formatPosts(topic.post_stream?.posts, baseUrl);
+
+  if (hasPostNumber) {
+    topic.posts = topic.posts.filter(
+      post => post.post_number >= Number(lastParam)
+    );
+  }
+
   return topic;
 }
 
