@@ -250,14 +250,16 @@ export const OVERRIDING_STRATEGIES = [
   'split-delegation',
   'sonic-staked-balance'
 ] as const;
-export const DEPRECATED_STRATEGIES = ['multichain'] as const;
+export const DISABLED_STRATEGIES: readonly string[] = ['multichain'];
+export const DEPRECATED_STRATEGIES = [] as const;
 export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
   'delegation-with-cap',
   'delegation-with-overrides',
   'with-delegation',
-  'erc20-balance-of-with-delegation'
+  'erc20-balance-of-with-delegation',
+  'spark-with-delegation'
 ];
 
 export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {

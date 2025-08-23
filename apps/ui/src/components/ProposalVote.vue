@@ -144,7 +144,11 @@ const isEditable = computed(() => {
   </slot>
 
   <slot
-    v-else-if="['passed', 'rejected', 'executed'].includes(proposal.state)"
+    v-else-if="
+      ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(
+        proposal.state
+      )
+    "
     name="ended"
   >
     Proposal voting window has ended

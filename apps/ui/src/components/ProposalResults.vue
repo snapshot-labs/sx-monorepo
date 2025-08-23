@@ -95,6 +95,7 @@ const otherResultsSummary = computed(() => {
 
 const isFinalizing = computed(() => {
   return (
+    offchainNetworks.includes(props.proposal.network) &&
     !props.proposal.completed &&
     ['passed', 'executed', 'rejected', 'closed'].includes(props.proposal.state)
   );
@@ -121,9 +122,7 @@ async function refreshScores() {
 }
 
 onMounted(() => {
-  if (offchainNetworks.includes(props.proposal.network) && isFinalizing.value) {
-    refreshScores();
-  }
+  if (isFinalizing.value) refreshScores();
 });
 </script>
 
