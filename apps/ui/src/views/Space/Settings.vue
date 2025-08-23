@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
+import RelayerBalance from '@/components/RelayerBalance.vue';
+import { DISABLED_STRATEGIES } from '@/helpers/constants';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -51,6 +53,7 @@ const {
 } = useSpaceSettings(toRef(props, 'space'));
 const { invalidateController } = useSpaceController(toRef(props, 'space'));
 
+const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
 
@@ -81,7 +84,6 @@ type Tab = {
     | 'whitelabel'
     | 'advanced'
     | 'controller';
-  name: string;
   visible: boolean;
 };
 
@@ -94,67 +96,54 @@ const tabs = computed<Tab[]>(
     [
       {
         id: 'profile',
-        name: 'Profile',
         visible: true
       },
       {
         id: 'proposal',
-        name: 'Proposal',
         visible: true
       },
       {
         id: 'voting-strategies',
-        name: 'Voting strategies',
         visible: true
       },
       {
         id: 'voting',
-        name: 'Voting',
         visible: true
       },
       {
         id: 'members',
-        name: 'Members',
         visible: isOffchainNetwork.value
       },
       {
         id: 'execution',
-        name: 'Execution',
         visible: !isOffchainNetwork.value
       },
       {
         id: 'authenticators',
-        name: 'Authenticators',
         visible: !isOffchainNetwork.value
       },
       {
         id: 'treasuries',
-        name: 'Treasuries',
         visible: true
       },
       {
         id: 'delegations',
-        name: 'Delegations',
         visible: true
       },
       {
         id: 'labels',
-        name: 'Labels',
         visible: true
       },
       {
         id: 'whitelabel',
-        name: 'Whitelabel',
         visible: isOffchainNetwork.value
       },
       {
         id: 'advanced',
-        name: 'Advanced',
         visible: isOffchainNetwork.value
       },
       {
         id: 'controller',
-        name: 'Controller',
         visible: true
       }
     ] as const
@@ -196,7 +185,10 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (!isTicketValid.value) {
+    if (
+      !isTicketValid.value ||
+      strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address))
+    ) {
       return 'Strategies are invalid';
     }
 
@@ -225,9 +217,25 @@ const showToolbar = computed(() => {
   );
 });
 
+// Live space with minimum properties for alerts
+const pendingSpace = computed(() => {
+  return {
+    ...props.space,
+    strategies: strategies.value.map(strategy => strategy.name),
+    strategies_params: strategies.value.map(strategy => ({
+      name: strategy.name,
+      params: strategy.params,
+      network: strategy.chainId
+        ? String(strategy.chainId)
+        : snapshotChainId.value
+    })),
+    snapshot_chain_id: snapshotChainId.value
+  };
+});
+
 function isValidTab(param: string | string[]): param is Tab['id'] {
   if (Array.isArray(param)) return false;
-  return tabs.value.map(tab => tab.id).includes(param as any);
+  return tabs.value.find(tab => tab.id === param)?.visible ?? false;
 }
 
 async function reloadSpaceAndReset() {
@@ -247,6 +255,10 @@ async function handleSettingsSave() {
     try {
       await save();
       reloadSpaceAndReset();
+      uiStore.addNotification(
+        'success',
+        'Your changes were successfully saved.'
+      );
     } catch {
     } finally {
       saving.value = false;
@@ -267,6 +279,7 @@ function handleSpaceDelete() {
   saving.value = true;
   executeFn.value = async () => {
     await deleteSpace();
+    uiStore.addNotification('success', 'Your space was successfully deleted.');
     router.push({ name: 'my-home' });
 
     return null;
@@ -290,14 +303,6 @@ function addCustomStrategy(strategy: { address: string; type: string }) {
   ];
 }
 
-function handleTabFocus(event: FocusEvent) {
-  if (!event.target) return;
-
-  (event.target as HTMLElement).scrollIntoView({
-    block: 'end'
-  });
-}
-
 watch(
   () => props.space.controller,
   () => {
@@ -317,31 +322,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <UiScrollerHorizontal
-    class="sticky z-40 top-[72px]"
-    with-buttons
-    gradient="xxl"
-  >
-    <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <AppLink
-        v-for="tab in tabs.filter(tab => tab.visible)"
-        :key="tab.id"
-        :to="{
-          name: 'space-settings',
-          params: { space: route.params.space, tab: tab.id }
-        }"
-        type="button"
-        class="scroll-mx-8"
-        @focus="handleTabFocus"
-      >
-        <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-      </AppLink>
-    </div>
-  </UiScrollerHorizontal>
   <div
     v-bind="$attrs"
     class="!h-auto"
-    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 114}px)`"
+    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 73}px)`"
   >
     <div v-if="loading" class="p-4">
       <UiLoading />
@@ -351,6 +335,15 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       class="flex-grow"
       :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
     >
+      <SpaceSettingsAlerts
+        :space="pendingSpace"
+        :active-tab="activeTab"
+        class="mb-4"
+        :class="{
+          'max-w-full': activeTab === 'whitelabel',
+          'max-w-[592px]': activeTab !== 'whitelabel'
+        }"
+      />
       <div v-show="activeTab === 'profile'">
         <FormSpaceProfile
           :id="space.id"
@@ -383,6 +376,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-voting-strategies="
             network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
           "
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
           title="Proposal"
           description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
         />
@@ -408,6 +403,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
           title="Voting strategies"
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
+          :show-test-button="true"
         />
       </template>
       <UiContainerSettings
@@ -463,15 +461,19 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           </UiButton>
         </div>
       </UiContainerSettings>
-      <FormStrategies
-        v-if="activeTab === 'authenticators'"
-        v-model="authenticators"
-        unique
-        :network-id="space.network"
-        :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
-        title="Authenticators"
-        description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
-      />
+      <UiContainerSettings v-if="activeTab === 'authenticators'">
+        <FormStrategies
+          v-model="authenticators"
+          unique
+          :network-id="space.network"
+          :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
+          title="Authenticators"
+          description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
+        />
+        <RelayerBalance :space="space" :network="network" />
+      </UiContainerSettings>
       <UiContainerSettings
         v-if="activeTab === 'treasuries'"
         title="Treasuries"
@@ -503,7 +505,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </UiContainerSettings>
       <UiContainerSettings
         v-show="activeTab === 'whitelabel'"
-        title="Whitelabel"
+        title="Custom domain"
         description="Customize the appearance of your space to match your brand."
         class="max-w-full"
       >
@@ -537,8 +539,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         title="Controller"
         description="The controller is the account able to change the space settings and cancel pending proposals."
       >
+        <UiMessage v-if="space.id.endsWith('.shib')" type="danger" class="mb-3">
+          Controller edition is not available for .shib spaces, and is locked to
+          the name's owner
+        </UiMessage>
         <UiMessage
-          v-if="isOffchainNetwork && isController && !isOwner"
+          v-else-if="isOffchainNetwork && isController && !isOwner"
           type="danger"
           class="mb-3"
         >
@@ -547,7 +553,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         <FormSpaceController
           :controller="controller"
           :network="network"
-          :disabled="!isOwner"
+          :disabled="!isOwner || space.id.endsWith('.shib')"
           @save="handleControllerSave"
         />
       </UiContainerSettings>
@@ -564,7 +570,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         {{ error || 'You have unsaved changes' }}
       </h4>
       <div class="flex space-x-3">
-        <button type="reset" class="text-skin-heading" @click="reset()">
+        <button
+          v-if="isModified"
+          type="reset"
+          class="text-skin-heading"
+          @click="reset()"
+        >
           Reset
         </button>
         <UiButton
@@ -595,7 +606,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         successSubtitle: 'Your changes were successfully saved'
       }"
       :execute="executeFn"
-      @confirmed="reloadSpaceAndReset"
+      :wait-for-index="!isOffchainNetwork"
+      @confirmed="
+        reloadSpaceAndReset();
+        saving = false;
+      "
       @close="saving = false"
       @cancelled="saving = false"
     />

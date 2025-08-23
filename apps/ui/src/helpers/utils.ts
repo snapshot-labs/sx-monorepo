@@ -1,5 +1,7 @@
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
+import { FunctionFragment } from '@ethersproject/abi';
 import { getAddress, isAddress } from '@ethersproject/address';
+import { namehash } from '@ethersproject/hash';
 import { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import Autolinker from 'autolinker';
@@ -13,9 +15,17 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
+import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
-import { ChainId, Choice, Proposal, SpaceMetadata } from '@/types';
-import { MAX_SYMBOL_LENGTH } from './constants';
+import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
+import { call } from './call';
+import {
+  EVM_EMPTY_ADDRESS,
+  MAX_FILE_SIZE_BYTES,
+  MAX_SYMBOL_LENGTH
+} from './constants';
+import { getProvider } from './provider';
+import { getOwner } from './stamp';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
 import ICDiscord from '~icons/c/discord';
@@ -249,16 +259,16 @@ export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   }
 }
 
-export function _rt(number) {
+export function _rt(time: number) {
   try {
-    return dayjs(number * 1000).fromNow(false);
+    return dayjs(time * 1000).fromNow(false);
   } catch (e) {
     console.log(e);
     return '';
   }
 }
 
-export function abiToDefinition(abi, chainId?: ChainId) {
+export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
   const definition = {
     $async: true,
     title: abi.name,
@@ -267,36 +277,39 @@ export function abiToDefinition(abi, chainId?: ChainId) {
     additionalProperties: false,
     properties: {}
   };
-  abi.inputs.forEach(input => {
-    definition.properties[input.name] = {};
-    definition.required.push(input.name);
+
+  abi.inputs.forEach((input, i) => {
+    const inputName = input.name ?? `Input ${i + 1}`;
+
+    definition.properties[inputName] = {};
+    definition.required.push(inputName);
     let type = 'string';
     if (input.type === 'bool') type = 'boolean';
     if (input.type === 'uint256') {
-      definition.properties[input.name].format = 'uint256';
-      definition.properties[input.name].examples = ['0'];
+      definition.properties[inputName].format = 'uint256';
+      definition.properties[inputName].examples = ['0'];
     }
     if (input.type === 'int256') {
-      definition.properties[input.name].format = 'int256';
-      definition.properties[input.name].examples = ['0'];
+      definition.properties[inputName].format = 'int256';
+      definition.properties[inputName].examples = ['0'];
     }
     if (input.type === 'bytes') {
-      definition.properties[input.name].format = 'bytes';
-      definition.properties[input.name].examples = ['0x0000…'];
+      definition.properties[inputName].format = 'bytes';
+      definition.properties[inputName].examples = ['0x0000…'];
     }
     if (input.type === 'address') {
-      definition.properties[input.name].format = 'ens-or-address';
-      definition.properties[input.name].examples = ['0x0000…'];
+      definition.properties[inputName].format = 'ens-or-address';
+      definition.properties[inputName].examples = ['0x0000…'];
       if (chainId) {
-        definition.properties[input.name].chainId = chainId;
+        definition.properties[inputName].chainId = chainId;
       }
     }
     if (input.type.endsWith('[]')) {
-      definition.properties[input.name].format = input.type;
-      definition.properties[input.name].examples = ['0x0, 0x1'];
+      definition.properties[inputName].format = input.type;
+      definition.properties[inputName].examples = ['0x0, 0x1'];
     }
-    definition.properties[input.name].type = type;
-    definition.properties[input.name].title = `${input.name} (${input.type})`;
+    definition.properties[inputName].type = type;
+    definition.properties[inputName].title = `${inputName} (${input.type})`;
   });
   return definition;
 }
@@ -374,7 +387,12 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err.code !== 4902 || !ADDABLE_NETWORKS[chainId]) throw err;
+    if (
+      (err instanceof Error && 'code' in err && err.code !== 4902) ||
+      !ADDABLE_NETWORKS[chainId]
+    ) {
+      throw err;
+    }
 
     await web3Provider.provider.request({
       method: 'wallet_addEthereumChain',
@@ -416,7 +434,10 @@ export async function verifyStarknetNetwork(
       }
     });
   } catch (e) {
-    if (!e.message.toLowerCase().includes('not implemented')) {
+    if (
+      e instanceof Error &&
+      !e.message.toLowerCase().includes('not implemented')
+    ) {
       throw new Error(e.message);
     }
   }
@@ -444,6 +465,7 @@ export function createErc1155Metadata(
       github: metadata.github,
       twitter: metadata.twitter,
       discord: metadata.discord,
+      farcaster: metadata.farcaster,
       treasuries: metadata.treasuries.map(treasury => ({
         name: treasury.name,
         chain_id: treasury.chainId,
@@ -511,11 +533,127 @@ export function getStampUrl(
   return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
 }
 
+export async function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  const url = URL.createObjectURL(file);
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = url;
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+export async function loadImageFromIpfs(ipfsUrl: string): Promise<File> {
+  const imageUrl = getUrl(ipfsUrl);
+  if (!imageUrl) {
+    throw new Error('Unable to resolve IPFS URL');
+  }
+
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  return new File([blob], 'image', { type: blob.type });
+}
+
+export async function resizeImage(
+  file: File,
+  width: number,
+  height: number
+): Promise<File> {
+  const img = await loadImageFromFile(file);
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('Failed to get canvas context');
+  }
+
+  // Calculate scale factors for both dimensions
+  const scaleX = width / img.width;
+  const scaleY = height / img.height;
+
+  // Use the larger scale factor to ensure both minimum dimensions are met
+  const scale = Math.max(scaleX, scaleY);
+
+  const scaledWidth = img.width * scale;
+  const scaledHeight = img.height * scale;
+
+  // Calculate source dimensions for cropping
+  let sourceX = 0;
+  let sourceY = 0;
+  let sourceWidth = img.width;
+  let sourceHeight = img.height;
+
+  if (scaledWidth > width) {
+    // Image is too wide after scaling, crop from center
+    const cropWidth = width / scale;
+    sourceX = (img.width - cropWidth) / 2;
+    sourceWidth = cropWidth;
+  }
+
+  if (scaledHeight > height) {
+    // Image is too tall after scaling, crop from center
+    const cropHeight = height / scale;
+    sourceY = (img.height - cropHeight) / 2;
+    sourceHeight = cropHeight;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Fill background with transparent
+  ctx.clearRect(0, 0, width, height);
+
+  // Draw the image, cropping from center if necessary
+  ctx.drawImage(
+    img,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    width,
+    height
+  );
+
+  return new Promise<File>((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (!blob) {
+        reject(new Error('Failed to convert canvas to blob'));
+        return;
+      }
+
+      const resizedFile = new File([blob], file.name, {
+        type: file.type,
+        lastModified: Date.now()
+      });
+
+      resolve(resizedFile);
+    }, file.type);
+  });
+}
+
 export async function imageUpload(file: File) {
   if (!file) return;
-  // TODO: Additional Validations - File Size, File Type, Empty File, Hidden File
+
   if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-    return;
+    throw new Error('Invalid file type. Only JPEG and PNG images are allowed.');
+  }
+
+  if (file.size > MAX_FILE_SIZE_BYTES) {
+    throw new Error(
+      `File size must be less than ${(
+        MAX_FILE_SIZE_BYTES /
+        1024 /
+        1024
+      ).toFixed(0)} MB`
+    );
   }
 
   const formData = new FormData();
@@ -597,7 +735,7 @@ export function autoLinkText(text: string) {
 export function getSocialNetworksLink(data: any) {
   return [
     { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
-    { key: 'twitter', icon: ICX, urlFormat: 'https://twitter.com/$' },
+    { key: 'twitter', icon: ICX, urlFormat: 'https://x.com/$' },
     { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
     {
       key: 'coingecko',
@@ -679,4 +817,63 @@ export function isUserAbortError(e: any) {
     ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
     ['User abort', 'User rejected the request.'].includes(e.message)
   );
+}
+
+export function getUserFacingErrorMessage(
+  e: unknown,
+  fallback: string = 'Something went wrong. Please try again later.'
+): string {
+  return (e instanceof Error && e.message) || fallback;
+}
+
+async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {
+  const registries = {
+    146: '0xDe1DAdcF11a7447C3D093e97FdbD513f488cE3b4' // Sonic
+  };
+
+  if (!registries[chainId]) {
+    throw new Error('Unsupported network');
+  }
+
+  const provider = getProvider(chainId);
+  const tokenId = namehash(name);
+
+  return call(
+    provider,
+    [
+      'function ownerOf(uint256 tokenId) external view returns (address address)'
+    ],
+    [registries[chainId], 'ownerOf', [tokenId]],
+    {
+      blockTag: 'latest'
+    }
+  );
+}
+
+export async function getSpaceController(id: string, network: NetworkID) {
+  const chainMapping = {
+    ens: {
+      s: 1,
+      's-tn': 11155111
+    },
+    shibarium: {
+      s: 109,
+      's-tn': 157
+    },
+    sonic: {
+      s: 146
+    }
+  };
+
+  if (id.endsWith('.shib')) {
+    const owner = await getOwner(id, chainMapping.shibarium[network]);
+
+    return owner || EVM_EMPTY_ADDRESS;
+  }
+
+  if (id.endsWith('.sonic')) {
+    return getUnstoppableDomainsNameOwner(id, chainMapping.sonic[network]);
+  }
+
+  return getEnsSpaceController(id, chainMapping.ens[network]);
 }

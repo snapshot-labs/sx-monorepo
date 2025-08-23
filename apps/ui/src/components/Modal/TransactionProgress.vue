@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { getGenericExplorerUrl, waitForTransaction } from '@/helpers/generic';
-import { isUserAbortError, sleep } from '@/helpers/utils';
+import { isUserAbortError } from '@/helpers/utils';
 import { ChainId } from '@/types';
-
-const API_DELAY = 10000;
 
 type Messages = {
   approveTitle?: string;
@@ -21,10 +19,12 @@ const props = withDefaults(
     open: boolean;
     chainId: ChainId;
     messages?: Messages;
+    waitForIndex?: boolean;
     execute: () => Promise<string | null>;
   }>(),
   {
-    messages: () => ({})
+    messages: () => ({}),
+    waitForIndex: false
   }
 );
 
@@ -78,14 +78,12 @@ async function handleExecute() {
 
     if (txId.value) {
       step.value = 'confirming';
-      await waitForTransaction(txId.value, props.chainId);
-      await sleep(API_DELAY);
+      await waitForTransaction(txId.value, props.chainId, props.waitForIndex);
 
       step.value = 'success';
       emit('confirmed', txId.value);
     } else {
       emit('confirmed', null);
-      emit('close');
     }
   } catch (e) {
     if (isUserAbortError(e)) {
@@ -117,7 +115,6 @@ watch(
       >
         <UiLoading :size="28" />
       </div>
-
       <div
         v-if="step === 'success'"
         class="bg-skin-success text-white rounded-full p-[12px]"
@@ -131,11 +128,13 @@ watch(
         <IS-x-mark :width="28" :height="28" />
       </div>
       <div class="flex flex-col space-y-1 leading-6">
-        <h4
-          class="font-semibold text-skin-heading text-lg"
-          v-text="text.title"
-        />
-        <div v-text="text.subtitle" />
+        <slot name="headerContent" :step="step" :text="text">
+          <h4
+            class="font-semibold text-skin-heading text-lg"
+            v-text="text.title"
+          />
+          <div v-text="text.subtitle" />
+        </slot>
       </div>
     </div>
     <slot id="content" :step="step" :tx-id="txId" />

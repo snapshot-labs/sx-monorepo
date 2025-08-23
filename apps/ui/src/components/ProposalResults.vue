@@ -95,6 +95,7 @@ const otherResultsSummary = computed(() => {
 
 const isFinalizing = computed(() => {
   return (
+    offchainNetworks.includes(props.proposal.network) &&
     !props.proposal.completed &&
     ['passed', 'executed', 'rejected', 'closed'].includes(props.proposal.state)
   );
@@ -121,9 +122,7 @@ async function refreshScores() {
 }
 
 onMounted(() => {
-  if (offchainNetworks.includes(props.proposal.network) && isFinalizing.value) {
-    refreshScores();
-  }
+  if (isFinalizing.value) refreshScores();
 });
 </script>
 
@@ -190,10 +189,7 @@ onMounted(() => {
             class="text-white size-[14px] mt-0.5 ml-0.5"
           />
         </div>
-        <div
-          class="truncate grow"
-          v-text="proposal.choices[result.choice - 1]"
-        />
+        <UiTooltipOnTruncate :content="proposal.choices[result.choice - 1]" />
         <IH-lock-closed
           v-if="proposal.privacy !== 'none' && !proposal.completed"
           class="size-[16px] shrink-0"

@@ -32,11 +32,13 @@ export type StrategyConfig = {
 export type ClientOpts = {
   networkConfig: EvmNetworkConfig;
   whitelistServerUrl: string;
+  provider: Provider;
 };
 
 export type ClientConfig = {
   networkConfig: EvmNetworkConfig;
   whitelistServerUrl: string;
+  provider: Provider;
 };
 
 export type Propose = {
@@ -92,7 +94,7 @@ export type Strategy = {
     strategyAddress: string,
     voterAddress: string,
     metadata: Record<string, any> | null,
-    block: number,
+    block: number | null,
     params: string,
     provider: Provider
   ): Promise<bigint>;

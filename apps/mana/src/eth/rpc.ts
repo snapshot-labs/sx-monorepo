@@ -7,16 +7,18 @@ import {
   evmMainnet,
   evmMantle,
   EvmNetworkConfig,
+  evmNetworks,
   evmOptimism,
   evmPolygon,
   evmSepolia
 } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
+import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
+import logger from './logger';
 
-export const NETWORKS = new Map<number, EvmNetworkConfig>([
+const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [137, evmPolygon],
   [8453, evmBase],
@@ -28,29 +30,35 @@ export const NETWORKS = new Map<number, EvmNetworkConfig>([
   [11155111, evmSepolia]
 ]);
 
+export const NETWORK_IDS = new Map<number, string>(
+  Object.entries(evmNetworks).map(([networkId, config]) => [
+    config.Meta.eip712ChainId,
+    networkId
+  ])
+);
+
 export const createNetworkHandler = (chainId: number) => {
   const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
+  const { provider, getWallet } = createWalletProxy(chainId);
 
   const client = new clients.EvmEthereumTx({
     networkConfig,
-    whitelistServerUrl: 'https://wls.snapshot.box'
+    whitelistServerUrl: 'https://wls.snapshot.box',
+    provider
   });
   const l1ExecutorClient = new clients.L1Executor();
 
   async function send(id: number, params: any, res: Response) {
     try {
-      const { signatureData, data } = params.envelope;
+      const { signatureData } = params.envelope;
       const { types } = signatureData;
       let receipt;
 
       const signer = getWallet(params.envelope.data.space);
 
-      console.time('Send');
-      console.log('Types', types);
-      console.log('Message', data);
+      logger.info({ params }, 'Processing send request');
 
       if (types.Propose) {
         receipt = await client.propose({
@@ -69,14 +77,12 @@ export const createNetworkHandler = (chainId: number) => {
         });
       }
 
-      console.log('Receipt', receipt);
+      logger.info({ receipt }, 'Transaction broadcasted successfully');
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      console.log('Failed', e);
-      return rpcError(res, 500, e, id);
-    } finally {
-      console.timeEnd('Send');
+    } catch (err) {
+      logger.error({ err }, 'Failed to broadcast transaction');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -103,8 +109,9 @@ export const createNetworkHandler = (chainId: number) => {
       const result = await response.text();
 
       return rpcSuccess(res, result, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to finalize proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -121,8 +128,9 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to execute proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -138,8 +146,9 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to execute queued proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -181,11 +190,37 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
+  async function registerApeGasProposal(
+    id: number,
+    params: any,
+    res: Response
+  ) {
+    try {
+      const { viewId, snapshot } = params;
+
+      if (!viewId || !snapshot) {
+        return rpcError(res, 400, 'Missing viewId or snapshot', id);
+      }
+
+      await db.saveApeGasProposal({
+        chainId,
+        viewId,
+        snapshot
+      });
+
+      return rpcSuccess(res, 'success', id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to register ape gas proposal');
+      return rpcError(res, 500, err, id);
+    }
+  }
+
   return {
     send,
     finalizeProposal,
     execute,
     executeQueuedProposal,
-    executeStarknetProposal
+    executeStarknetProposal,
+    registerApeGasProposal
   };
 };

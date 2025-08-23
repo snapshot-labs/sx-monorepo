@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
+import { utils } from '@snapshot-labs/sx';
 import { Nft } from '@/composables/useNfts';
 import { abis } from '@/helpers/abis';
 import { Token } from '@/helpers/alchemy';
@@ -122,7 +122,7 @@ export async function createSendNftTransaction({
 export async function createContractCallTransaction({
   form
 }): Promise<ContractCallTransaction> {
-  const args: any[] = Object.values(form.args);
+  let args: any[] = Object.values(form.args);
 
   let recipientAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);
@@ -133,6 +133,11 @@ export async function createContractCallTransaction({
   const methodAbi = iface.functions[form.method];
 
   if (methodAbi) {
+    // Send in same order as the ABI
+    args = methodAbi.inputs.map(({ name }) => {
+      return form.args[name];
+    });
+
     await Promise.all(
       methodAbi.inputs.map(async (input, i) => {
         if (input.type === 'address') {
@@ -198,7 +203,7 @@ export async function createStakeTokenTransaction({
 
 export function convertToMetaTransactions(
   transactions: Transaction[]
-): MetaTransaction[] {
+): utils.encoding.MetaTransaction[] {
   return transactions.map((tx: Transaction) => ({
     ...tx,
     operation: 0,

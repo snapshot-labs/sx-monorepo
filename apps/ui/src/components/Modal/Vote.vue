@@ -5,6 +5,7 @@ import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { useVoteValidationPowerQuery } from '@/queries/voteValidationPower';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Proposal } from '@/types';
 
@@ -38,6 +39,16 @@ const {
   isError: isVotingPowerError,
   refetch: fetchVotingPower
 } = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'proposal'),
+  toRef(props, 'open')
+);
+const {
+  data: voteValidationPower,
+  isPending: isVoteValidationPowerPending,
+  isError: isVoteValidationPowerError,
+  refetch: fetchVoteValidationPower
+} = useVoteValidationPowerQuery(
   toRef(() => web3.value.account),
   toRef(props, 'proposal'),
   toRef(props, 'open')
@@ -77,6 +88,7 @@ const canSubmit = computed<boolean>(
     formValidated.value &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
+    !!voteValidationPower.value?.canVote &&
     !!votingPower.value?.canVote
 );
 
@@ -133,6 +145,9 @@ async function handleConfirmed(tx?: string | null) {
         props.proposal.proposal_id.toString()
       )
     });
+    queryClient.invalidateQueries({
+      queryKey: ['votes', props.proposal.proposal_id.toString(), 'list']
+    });
     await loadVotes(props.proposal.network, [props.proposal.space.id]);
   }
 }
@@ -178,7 +193,16 @@ watchEffect(async () => {
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
       <MessageErrorFetchPower
-        v-if="isVotingPowerError"
+        v-if="isVoteValidationPowerError"
+        type="vote-validation"
+        @fetch="fetchVoteValidationPower"
+      />
+      <MessagePropositionPower
+        v-else-if="voteValidationPower && !voteValidationPower.canVote"
+        :proposition-power="voteValidationPower"
+      />
+      <MessageErrorFetchPower
+        v-else-if="voteValidationPower?.canVote && isVotingPowerError"
         type="voting"
         @fetch="fetchVotingPower"
       />
@@ -230,7 +254,7 @@ watchEffect(async () => {
           primary
           class="w-full"
           :disabled="!canSubmit"
-          :loading="loading"
+          :loading="isVoteValidationPowerPending || loading"
           @click="handleSubmit"
         >
           Confirm
@@ -247,6 +271,7 @@ watchEffect(async () => {
         approveTitle: 'Confirm vote'
       }"
       :execute="voteFn"
+      :wait-for-index="!offchainProposal"
       @confirmed="handleConfirmed"
       @cancelled="handleCancelled"
       @close="modalTransactionOpen = false"

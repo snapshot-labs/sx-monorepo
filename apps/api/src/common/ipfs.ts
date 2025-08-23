@@ -1,4 +1,4 @@
-import { dropIpfs, getJSON } from './utils';
+import { dropIpfs, getExecutionHash, getJSON } from './utils';
 import {
   ProposalMetadataItem,
   StrategiesParsedMetadataDataItem,
@@ -12,6 +12,10 @@ type CommonConfig = {
 };
 
 export async function handleProposalMetadata(
+  type: 'evm' | 'starknet',
+  executionType: string,
+  executionDestination: string | null,
+  executionHash: string,
   metadataUri: string,
   config: CommonConfig
 ) {
@@ -33,8 +37,20 @@ export async function handleProposalMetadata(
   if (metadata.body) proposalMetadataItem.body = metadata.body;
   if (metadata.discussion)
     proposalMetadataItem.discussion = metadata.discussion;
-  if (metadata.execution)
-    proposalMetadataItem.execution = JSON.stringify(metadata.execution);
+
+  if (metadata.execution) {
+    const recoveredHash = getExecutionHash({
+      type,
+      executionType,
+      executionDestination,
+      transactions: metadata.execution
+    });
+
+    if (recoveredHash === executionHash) {
+      proposalMetadataItem.execution = JSON.stringify(metadata.execution);
+    }
+  }
+
   if (
     Array.isArray(metadata.labels) &&
     metadata.labels.every((label: string) => typeof label === 'string')
@@ -60,7 +76,7 @@ export async function handleStrategiesParsedMetadata(
     dropIpfs(metadataUri),
     config.indexerName
   );
-  if (exists) return;
+  if (exists) return { decimals: exists.decimals };
 
   const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(
     dropIpfs(metadataUri),
@@ -87,6 +103,8 @@ export async function handleStrategiesParsedMetadata(
   }
 
   await strategiesParsedMetadataItem.save();
+
+  return { decimals: strategiesParsedMetadataItem.decimals };
 }
 
 export async function handleVoteMetadata(
@@ -119,6 +137,8 @@ export async function handleStrategiesMetadata(
     | typeof StrategiesParsedMetadataItem
     | typeof VotingPowerValidationStrategiesParsedMetadataItem = StrategiesParsedMetadataItem
 ) {
+  const strategiesDecimals = [];
+
   for (let i = 0; i < metadataUris.length; i++) {
     const metadataUri = metadataUris[i];
     if (!metadataUri) continue;
@@ -133,11 +153,18 @@ export async function handleStrategiesMetadata(
     if (metadataUri.startsWith('ipfs://')) {
       strategiesParsedMetadataItem.data = dropIpfs(metadataUri);
 
-      await handleStrategiesParsedMetadata(metadataUri, config);
+      const { decimals } = await handleStrategiesParsedMetadata(
+        metadataUri,
+        config
+      );
+
+      strategiesDecimals.push(decimals);
     }
 
     await strategiesParsedMetadataItem.save();
   }
+
+  return { strategiesDecimals };
 }
 
 export async function handleVotingPowerValidationMetadata(

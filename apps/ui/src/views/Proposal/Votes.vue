@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _n, _rt, _t, _vp, shortenAddress } from '@/helpers/utils';
+import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useProposalVotesQuery } from '@/queries/votes';
 import { Proposal as ProposalType, Vote } from '@/types';
@@ -21,14 +21,7 @@ const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
-const votingPowerDecimals = computed(() => {
-  return Math.max(
-    ...props.proposal.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
+const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
 const {
   data,
@@ -203,7 +196,9 @@ function handleScrollEvent(target: HTMLElement) {
           <div
             class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
           >
-            <h4>{{ _rt(vote.created) }}</h4>
+            <TimeRelative v-slot="{ relativeTime }" :time="vote.created">
+              <h4>{{ relativeTime }}</h4>
+            </TimeRelative>
             <div class="text-[17px]">
               {{ _t(vote.created, 'MMM D, YYYY') }}
             </div>

@@ -5,6 +5,7 @@ const SPACE_FRAGMENT = gql`
     id
     verified
     turbo
+    turboExpiration
     admins
     members
     name
@@ -15,6 +16,7 @@ const SPACE_FRAGMENT = gql`
     website
     twitter
     github
+    farcaster
     coingecko
     symbol
     activeProposals
@@ -90,6 +92,7 @@ const SPACE_FRAGMENT = gql`
     terms
     private
     flagged
+    flagCode
     domain
     skin
     skinSettings {
@@ -161,12 +164,17 @@ const PROPOSAL_FRAGMENT = gql`
       params
       network
     }
+    validation {
+      name
+      params
+    }
     created
     updated
     votes
     privacy
     plugins
     flagged
+    flagCode
   }
 `;
 

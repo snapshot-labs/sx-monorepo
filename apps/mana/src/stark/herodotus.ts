@@ -1,7 +1,7 @@
-import fetch from 'cross-fetch';
 import { constants } from 'starknet';
 import { getClient } from './networks';
 import * as db from '../db';
+import logger from './logger';
 
 type HerodotusConfig = {
   DESTINATION_CHAIN_ID: string;
@@ -119,14 +119,15 @@ async function submitBatch(proposal: ApiProposal) {
 
   if (result.error) {
     if (result.error.startsWith('Invalid account address or ENS')) {
-      console.log('invalid herodotus batch', result.error);
+      logger.warn(
+        { proposal },
+        'Invalid account address or ENS in herodotus batch proposal'
+      );
       return db.markProposalProcessed(getId(proposal));
     }
 
     throw new Error(result.error);
   }
-
-  console.log('herodotus internalId', result.internalId);
 
   await db.updateProposal(getId(proposal), {
     herodotusId: result.internalId
@@ -150,8 +151,8 @@ export async function registerProposal(proposal: ApiProposal) {
 
   try {
     await submitBatch(proposal);
-  } catch (e) {
-    console.log('failed to submit batch', e);
+  } catch (err) {
+    logger.error({ err, proposal }, 'Failed to submit herodotus batch');
   }
 }
 
@@ -167,7 +168,7 @@ export async function processProposal(proposal: DbProposal) {
   }
 
   const { getAccount, herodotusController } = getClient(proposal.chainId);
-  const { account, nonceManager } = getAccount('0x0');
+  const { account, nonceManager, deployAccount } = getAccount('0x0');
   const mapping = HERODOTUS_MAPPING.get(proposal.chainId);
   if (!mapping) throw new Error('Invalid chainId');
   const { DESTINATION_CHAIN_ID, ACCUMULATES_CHAIN_ID } = mapping;
@@ -175,12 +176,18 @@ export async function processProposal(proposal: DbProposal) {
   try {
     const status = await getStatus(proposal.herodotusId, ACCUMULATES_CHAIN_ID);
     if (status !== 'DONE') {
-      console.log('proposal is not ready yet', proposal.herodotusId, status);
+      logger.info(
+        { herodotusId: proposal.herodotusId, status },
+        'Proposal is not ready yet'
+      );
       return;
     }
-  } catch (e: unknown) {
+  } catch (e) {
     if (e instanceof Error && e.message === 'No query found') {
-      console.log('query does not exist', proposal.herodotusId);
+      logger.warn(
+        { proposalId: proposal.id, herodotusId: proposal.herodotusId },
+        'Query does not exist'
+      );
       return db.markProposalProcessed(proposal.id);
     }
 
@@ -200,6 +207,8 @@ export async function processProposal(proposal: DbProposal) {
 
   const tree = await res.json();
 
+  await deployAccount();
+
   try {
     await nonceManager.acquire();
     const nonce = await nonceManager.getNonce();
@@ -216,7 +225,10 @@ export async function processProposal(proposal: DbProposal) {
 
     nonceManager.increaseNonce();
 
-    console.log('cached proposal', receipt);
+    logger.info(
+      { proposalId: proposal.id, receipt },
+      'Proposal cached successfully'
+    );
 
     await db.markProposalProcessed(proposal.id);
   } finally {

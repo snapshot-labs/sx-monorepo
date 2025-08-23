@@ -7,6 +7,8 @@ const titles: Record<ProposalState, string> = {
   passed: 'Passed',
   closed: 'Closed',
   rejected: 'Rejected',
+  queued: 'Queued',
+  vetoed: 'Vetoed',
   executed: 'Executed'
 };
 
@@ -16,11 +18,11 @@ defineProps<{ state: ProposalState }>();
 <template>
   <div
     :class="{
-      'bg-gray-400': state === 'pending',
+      'bg-gray-400': state === 'pending' || state === 'queued',
       'bg-skin-success': state === 'active',
       'bg-skin-link': ['passed', 'closed'].includes(state),
       'bg-purple-500': state === 'executed',
-      'bg-skin-danger': state === 'rejected',
+      'bg-skin-danger': ['rejected', 'vetoed'].includes(state),
       '!text-skin-bg': ['passed', 'closed'].includes(state)
     }"
     class="inline-block rounded-full pl-2 pr-[10px] pb-0.5 text-white mb-2"
@@ -42,11 +44,15 @@ defineProps<{ state: ProposalState }>();
       class="text-skin-bg inline-block size-[17px] mb-[1px]"
     />
     <IS-play
+      v-else-if="state === 'queued'"
+      class="text-white inline-block size-[17px]"
+    />
+    <IS-play
       v-else-if="state === 'executed'"
       class="text-white inline-block size-[17px]"
     />
     <IS-x-circle
-      v-else-if="state === 'rejected'"
+      v-else-if="['rejected', 'vetoed'].includes(state)"
       class="text-white inline-block size-[17px] mb-[1px]"
     />
     {{ titles[state] }}

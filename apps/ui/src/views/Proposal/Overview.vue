@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
-import { EMPTY_ADDRESS } from '@/helpers/constants';
+import { EVM_EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
-  _rt,
   compareAddresses,
   getProposalId,
   getUrl,
@@ -92,7 +91,7 @@ const cancellable = computed(() => {
   } else {
     return (
       compareAddresses(props.proposal.space.controller, web3.value.account) &&
-      props.proposal.state !== 'executed' &&
+      !['queued', 'vetoed', 'executed'].includes(props.proposal.state) &&
       props.proposal.cancelled === false
     );
   }
@@ -109,19 +108,19 @@ const proposalMetadataUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
+const endTime = useRelativeTime(() => {
+  return getTsFromCurrent(props.proposal.network, props.proposal.max_end);
+});
+
 const votingTime = computed(() => {
   if (!props.proposal) return null;
 
   const current = getCurrent(props.proposal.network);
   if (!current) return null;
 
-  const time = _rt(
-    getTsFromCurrent(props.proposal.network, props.proposal.max_end)
-  );
-
   const hasEnded = props.proposal.max_end <= current;
 
-  return hasEnded ? `Ended ${time}` : time;
+  return hasEnded ? `Ended ${endTime.value}` : endTime.value;
 });
 
 async function handleEditClick() {
@@ -140,7 +139,7 @@ async function handleEditClick() {
   );
 
   const draftId = await createDraft(spaceId, {
-    proposalId: props.proposal.proposal_id,
+    originalProposal: props.proposal,
     title: props.proposal.title,
     body: props.proposal.body,
     discussion: props.proposal.discussion,
@@ -208,6 +207,9 @@ async function handleFlagClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal flagged successfully.');
+
       router.push({
         name: 'space-overview'
       });
@@ -229,6 +231,9 @@ async function handleCancelClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal cancelled successfully.');
+
       router.push({
         name: 'space-overview'
       });
@@ -282,7 +287,7 @@ async function handleDownloadVotes() {
 
   try {
     await downloadVotes(props.proposal.proposal_id);
-  } catch (e: unknown) {
+  } catch (e) {
     if (e instanceof Error) {
       if (e.message === 'PENDING_GENERATION') {
         return uiStore.addNotification(
@@ -304,21 +309,17 @@ onBeforeUnmount(() => destroyAudio());
 
 <template>
   <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
-    <div>
-      <UiAlert v-if="proposal.flagged" type="error" class="mb-3">
-        This proposal might contain scams, offensive material, or be malicious
-        in nature. Please proceed with caution.
-      </UiAlert>
+    <ContentFlagable :item="proposal">
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
-        <template v-if="proposal.execution_strategy === EMPTY_ADDRESS">
+        <template v-if="proposal.execution_strategy === EVM_EMPTY_ADDRESS">
           This proposal is invalid and was not created correctly. We cannot
           display its details.
         </template>
         <template v-else>
           This proposal is invalid and was not created correctly. We cannot
           display its details, and it <strong>includes execution</strong>. This
-          might mean possible malicious behavior. We strongly advise you to
-          reject this proposal.
+          might mean possible malicious behavior. We strongly advise you to vote
+          against this proposal.
         </template>
       </UiAlert>
 
@@ -360,7 +361,9 @@ onBeforeUnmount(() => destroyAudio());
               >
                 {{ proposal.space.name }}
               </AppLink>
-              <span> · {{ _rt(proposal.created) }}</span>
+              <TimeRelative v-slot="{ relativeTime }" :time="proposal.created">
+                <span> · {{ relativeTime }}</span>
+              </TimeRelative>
               <span> · {{ getProposalId(proposal) }}</span>
             </span>
           </div>
@@ -368,6 +371,7 @@ onBeforeUnmount(() => destroyAudio());
         <div class="flex gap-2 items-center">
           <UiTooltip
             v-if="
+              !proposal.flagged &&
               offchainNetworks.includes(props.proposal.network) &&
               props.proposal.body.length > 500
             "
@@ -387,6 +391,7 @@ onBeforeUnmount(() => destroyAudio());
           </UiTooltip>
           <UiTooltip
             v-if="
+              !proposal.flagged &&
               offchainNetworks.includes(props.proposal.network) &&
               props.proposal.body.length > 0 &&
               props.proposal.body.length < 4096
@@ -595,7 +600,7 @@ onBeforeUnmount(() => destroyAudio());
         />
         <template v-if="proposal.edited"> · (edited)</template>
       </div>
-    </div>
+    </ContentFlagable>
   </UiContainer>
   <teleport to="#modal">
     <ModalTimeline

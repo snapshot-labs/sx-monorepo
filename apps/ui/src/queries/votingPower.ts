@@ -1,9 +1,9 @@
 import { utils } from '@snapshot-labs/sx';
 import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
-import { getNetwork, offchainNetworks, supportsNullCurrent } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { VotingPower } from '@/networks/types';
-import { NetworkID, Proposal, Space } from '@/types';
+import { Proposal, Space } from '@/types';
 
 export type VotingPowerItem = {
   votingPowers: VotingPower[];
@@ -46,20 +46,11 @@ function isOnchainPendingProposal(proposal: Proposal): boolean {
 function getProposalSnapshot(proposal?: Proposal | null): Snapshot {
   if (!proposal) return null;
 
-  const snapshot = isOnchainPendingProposal(proposal)
-    ? null
-    : proposal.snapshot;
-
-  return snapshot || getLatestBlock(proposal.network);
+  return isOnchainPendingProposal(proposal) ? null : proposal.snapshot;
 }
 
-function getLatestBlock(network: NetworkID): Snapshot {
-  const { getCurrent } = useMetaStore();
-
-  return supportsNullCurrent(network) ? null : getCurrent(network) || 0;
-}
-
-async function getVotingPower(
+export async function getVotingPower(
+  address: string,
   block: Snapshot,
   space: SpaceLike,
   strategiesData: [
@@ -73,7 +64,7 @@ async function getVotingPower(
     const vp = await network.actions.getVotingPower(
       space.id,
       ...strategiesData,
-      web3.value.account,
+      address,
       {
         at: block,
         chainId: space.snapshot_chain_id
@@ -89,7 +80,7 @@ async function getVotingPower(
     if (
       e instanceof utils.errors.VotingPowerDetailsError &&
       e.details === 'NOT_READY_YET' &&
-      ['evmSlotValue', 'ozVotesStorageProof'].includes(e.source)
+      ['evmSlotValue', 'ozVotesStorageProof', 'apeGas'].includes(e.source)
     ) {
       throw new Error('NOT_READY_YET');
     }
@@ -104,13 +95,13 @@ export function useSpaceVotingPowerQuery(
   return useQuery({
     queryKey: VOTING_POWER_KEYS.space(
       toRef(() => toValue(account)),
-      toRef(() => getLatestBlock(toValue(space).network)),
+      null,
       toRef(() => toValue(space).id)
     ),
     queryFn: async () => {
       const spaceValue = toValue(space);
 
-      return getVotingPower(getLatestBlock(spaceValue.network), spaceValue, [
+      return getVotingPower(web3.value.account, null, spaceValue, [
         spaceValue.strategies,
         spaceValue.strategies_params,
         spaceValue.strategies_parsed_metadata
@@ -144,6 +135,7 @@ export function useProposalVotingPowerQuery(
       if (!proposalValue) return;
 
       return getVotingPower(
+        web3.value.account,
         getProposalSnapshot(toValue(proposal)),
         {
           ...proposalValue.space,

@@ -15,6 +15,7 @@ defineEmits<{
   (e: 'enterEditMode');
 }>();
 
+const { auth } = useWeb3();
 const { votes, pendingVotes } = useAccount();
 const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
@@ -24,18 +25,44 @@ const { isInvalidNetwork } = useSafeWallet(
 
 const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
+const hasSupportedAuthenticator = computed(() => {
+  const network = getNetwork(props.proposal.network);
+
+  return props.proposal.space.authenticators.some(authenticator => {
+    const supportInfo =
+      network.helpers.getAuthenticatorSupportInfo(authenticator);
+
+    return supportInfo?.isSupported;
+  });
+});
+
+const isConnectorSupported = computed(() => {
+  if (!auth.value) return true;
+  const currentConnector = auth.value.connector.type;
+
+  const network = getNetwork(props.proposal.network);
+
+  return props.proposal.space.authenticators.some(authenticator => {
+    const supportInfo =
+      network.helpers.getAuthenticatorSupportInfo(authenticator);
+
+    return (
+      supportInfo?.isSupported &&
+      supportInfo?.connectors.includes(currentConnector)
+    );
+  });
+});
+
 const isSupported = computed(() => {
   const network = getNetwork(props.proposal.network);
 
-  const hasSupportedAuthenticator = props.proposal.space.authenticators.find(
-    authenticator => network.helpers.isAuthenticatorSupported(authenticator)
-  );
   const hasSupportedStrategies = props.proposal.strategies.find(strategy =>
     network.helpers.isStrategySupported(strategy)
   );
 
   return (
-    hasSupportedAuthenticator &&
+    hasSupportedAuthenticator.value &&
+    isConnectorSupported.value &&
     hasSupportedStrategies &&
     SUPPORTED_VOTING_TYPES.includes(props.proposal.type)
   );
@@ -65,7 +92,10 @@ const isEditable = computed(() => {
       @click="$emit('enterEditMode')"
     >
       <div
-        v-if="proposal.privacy !== 'none'"
+        v-if="
+          proposal.privacy !== 'none' &&
+          ['pending', 'active'].includes(proposal.state)
+        "
         class="flex space-x-2 items-center grow truncate text-skin-link"
       >
         <IH-lock-closed class="size-[16px] shrink-0" />
@@ -114,7 +144,11 @@ const isEditable = computed(() => {
   </slot>
 
   <slot
-    v-else-if="['passed', 'rejected', 'executed'].includes(proposal.state)"
+    v-else-if="
+      ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(
+        proposal.state
+      )
+    "
     name="ended"
   >
     Proposal voting window has ended
@@ -125,7 +159,10 @@ const isEditable = computed(() => {
   >
 
   <slot v-else-if="!isSupported" name="unsupported">
-    Voting for this proposal is not supported
+    <template v-if="!isConnectorSupported">
+      This space does not support your connected wallet
+    </template>
+    <template v-else>Voting for this proposal is not supported</template>
   </slot>
   <slot v-else-if="isInvalidNetwork" name="wrong-safe-network">
     Safe's network should be same as space's network
