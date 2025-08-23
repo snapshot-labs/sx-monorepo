@@ -37,6 +37,7 @@ function handleContactEdit(contact) {
       v-for="contact in contactsStore.contacts"
       :key="contact.address"
       class="mx-4 py-3 border-b flex group"
+      tabindex="0"
     >
       <div class="flex-auto flex items-center min-w-0">
         <UiStamp :id="contact.address" type="avatar" :size="32" />
@@ -48,14 +49,14 @@ function handleContactEdit(contact) {
       <div class="flex flex-row items-center content-center gap-x-3">
         <button
           type="button"
-          class="invisible group-hover:visible"
+          class="invisible group-hover:visible group-focus-within:visible"
           @click="handleContactEdit(contact)"
         >
           <IH-pencil />
         </button>
         <button
           type="button"
-          class="invisible group-hover:visible"
+          class="invisible group-hover:visible group-focus-within:visible"
           @click="contactsStore.deleteContact(contact.address)"
         >
           <IH-trash />
