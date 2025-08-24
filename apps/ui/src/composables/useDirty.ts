@@ -57,18 +57,11 @@ export function useDirty<T>(model: Ref<T>, definition: Definition<T> = {}) {
         ? definition.default
         : getTypeBasedDefault(definition.type);
 
-    if (!modelModified.value) {
-      if (effectiveDefault !== undefined) {
-        return compareValues(model.value, effectiveDefault);
-      }
-      return !!model.value;
-    }
-
     if (effectiveDefault !== undefined) {
       return compareValues(model.value, effectiveDefault);
     }
 
-    return true;
+    return modelModified.value || !!model.value;
   });
 
   watch(model, () => {
