@@ -1,8 +1,6 @@
-import { JSONSchemaType } from 'ajv';
 import { computed, ref, Ref, watch } from 'vue';
 
 export interface Definition<T> {
-  type?: JSONSchemaType<T>['type'];
   default?: T;
 }
 
