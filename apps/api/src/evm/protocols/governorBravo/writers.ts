@@ -504,6 +504,21 @@ export function createWriters(
     await space.save();
   };
 
+  const handleNewAdmin: evm.Writer = async ({ event, rawEvent }) => {
+    console.log('Handle new admin');
+
+    if (!event || !rawEvent) return;
+
+    const spaceAddress = getAddress(rawEvent.address);
+
+    const space = await Space.loadEntity(spaceAddress, config.indexerName);
+    if (!space) return;
+
+    space.proposal_threshold = event.args.newAdmin.toString();
+
+    await space.save();
+  };
+
   const handleNewDelay: evm.Writer = async ({ event, rawEvent }) => {
     console.log('Handle new delay');
 
@@ -529,6 +544,7 @@ export function createWriters(
     handleProposalExecuted,
     handleVoteCast,
     handleProposalThresholdSet,
+    handleNewAdmin,
     handleNewDelay
   };
 }

@@ -54,6 +54,10 @@ export function createConfig(indexerName: NetworkID): Config | null {
         {
           name: 'ProposalThresholdSet(uint256, uint256)',
           fn: 'handleProposalThresholdSet'
+        },
+        {
+          name: 'NewAdmin(address,address)',
+          fn: 'handleNewAdmin'
         }
       ]
     }
