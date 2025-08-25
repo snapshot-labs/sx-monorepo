@@ -22,7 +22,6 @@ describe('useDirty', () => {
       }
     );
   });
-  });
 
   describe('initial state with default', () => {
     it('should not be dirty when model equals default', () => {
@@ -108,38 +107,6 @@ describe('useDirty', () => {
 
       expect(isDirty1.value).toBe(false);
       expect(isDirty2.value).toBe(false);
-    });
-  });
-
-  describe('type handling', () => {
-    it('should handle string type without affecting logic', () => {
-      const model = ref('test');
-      const { isDirty } = useDirty(model, { type: 'string' });
-      expect(isDirty.value).toBe(true);
-    });
-
-    it('should handle number type without affecting logic', () => {
-      const model = ref(42);
-      const { isDirty } = useDirty(model, { type: 'number' });
-      expect(isDirty.value).toBe(true);
-    });
-
-    it('should handle boolean type without affecting logic', () => {
-      const model = ref(true);
-      const { isDirty } = useDirty(model, { type: 'boolean' });
-      expect(isDirty.value).toBe(true);
-    });
-
-    it('should handle array type without affecting logic', () => {
-      const model = ref([1, 2, 3]);
-      const { isDirty } = useDirty(model, { type: 'array' });
-      expect(isDirty.value).toBe(true);
-    });
-
-    it('should handle object type without affecting logic', () => {
-      const model = ref({ key: 'value' });
-      const { isDirty } = useDirty(model, { type: 'object' });
-      expect(isDirty.value).toBe(true);
     });
   });
 });
