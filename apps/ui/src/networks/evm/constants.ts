@@ -185,9 +185,9 @@ export function createConstants(
         required: ['threshold'],
         properties: {
           threshold: {
-            type: 'integer',
+            type: 'string',
+            format: 'uint256',
             title: 'Proposal threshold',
-            minimum: 1,
             examples: ['1']
           }
         }

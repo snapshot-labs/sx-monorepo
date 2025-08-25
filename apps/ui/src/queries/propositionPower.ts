@@ -73,10 +73,7 @@ async function getPropositionPower(space: Space, block: number | null) {
     opts
   );
 
-  const totalPowers = powers.reduce(
-    (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
-    0
-  );
+  const totalPowers = powers.reduce((acc, b) => acc + Number(b.value), 0);
 
   vpItem.canPropose = totalPowers >= BigInt(space.proposal_threshold);
 
