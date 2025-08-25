@@ -26,18 +26,17 @@ const props = defineProps<{
   path?: string;
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
     }
 
     return model.value;
   },
   set(newValue) {
-    dirty.value = true;
     model.value = newValue;
   }
 });
