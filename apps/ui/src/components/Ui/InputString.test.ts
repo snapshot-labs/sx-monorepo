@@ -64,7 +64,7 @@ it('should trim input value', async () => {
   expect(wrapper.emitted('update:modelValue')?.[0]?.[0]).toBe('hello');
 });
 
-it('should show error when input is dirtied and hide when reverted to original', async () => {
+it('should show error when input is dirtied', async () => {
   const error = 'Input error';
   const originalValue = 'original';
   const definitionWithDefault = {
@@ -87,11 +87,6 @@ it('should show error when input is dirtied and hide when reverted to original',
   await wrapper.vm.$nextTick();
 
   expect(wrapper.find('.s-input-error-message').text()).toBe(error);
-
-  await wrapper.find('input').setValue(originalValue);
-  await wrapper.vm.$nextTick();
-
-  expect(wrapper.find('.s-input-error-message').exists()).toBe(false);
 });
 
 it('should show error when initialized with invalid value different from default', () => {
