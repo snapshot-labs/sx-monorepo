@@ -4,47 +4,24 @@ import { useDirty } from './useDirty';
 
 describe('useDirty', () => {
   describe('initial state without default', () => {
-    it('should be dirty for truthy values (string)', () => {
-      const model = ref('hello');
-      const { isDirty } = useDirty(model);
-      expect(isDirty.value).toBe(true);
-    });
+    it.for(['hello', 'true'])(
+      'should be dirty for truthy values (%s)',
+      value => {
+        const model = ref(value);
+        const { isDirty } = useDirty(model);
+        expect(isDirty.value).toBe(true);
+      }
+    );
 
-    it('should be dirty for truthy values (true)', () => {
-      const model = ref(true);
-      const { isDirty } = useDirty(model);
-      expect(isDirty.value).toBe(true);
-    });
-
-    it('should not be dirty for falsy values (empty string)', () => {
-      const model = ref('');
-      const { isDirty } = useDirty(model);
-      expect(isDirty.value).toBe(false);
-    });
-
-    it('should not be dirty for falsy values (zero)', () => {
-      const model = ref(0);
-      const { isDirty } = useDirty(model);
-      expect(isDirty.value).toBe(false);
-    });
-
-    it('should not be dirty for falsy values (false)', () => {
-      const model = ref(false);
-      const { isDirty } = useDirty(model);
-      expect(isDirty.value).toBe(false);
-    });
-
-    it('should not be dirty for null values', () => {
-      const model = ref(null);
-      const { isDirty } = useDirty(model);
-      expect(isDirty.value).toBe(false);
-    });
-
-    it('should not be dirty for undefined values', () => {
-      const model = ref(undefined);
-      const { isDirty } = useDirty(model);
-      expect(isDirty.value).toBe(false);
-    });
+    it.for([0, '', false, null, undefined])(
+      'should not be dirty for falsy values (%s)',
+      value => {
+        const model = ref(value);
+        const { isDirty } = useDirty(model);
+        expect(isDirty.value).toBe(false);
+      }
+    );
+  });
   });
 
   describe('initial state with default', () => {
