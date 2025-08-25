@@ -20,7 +20,6 @@ const route = useRoute();
 const usersStore = useUsersStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
-const { copy, copied } = useClipboard();
 
 const activities = ref<
   (UserActivity & {
@@ -196,20 +195,10 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
         <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
-        <div class="mb-3 flex items-center space-x-2">
-          <span class="text-skin-text" v-text="shortenAddress(user.id)" />
-          <UiTooltip title="Copy address">
-            <button
-              type="button"
-              class="text-skin-text"
-              @click.prevent="copy(user.id)"
-            >
-              <IH-duplicate v-if="!copied" class="inline-block" />
-              <IH-check v-else class="inline-block" />
-            </button>
-          </UiTooltip>
-          <span v-if="userMetadata.loaded">
-            ·
+        <div class="mb-3 flex flex-col xs:flex-row xs:items-center gap-x-2">
+          <UiAddress :address="user.id" copy-button="always" />
+          <div v-if="userMetadata.loaded" class="flex items-center gap-2">
+            <span class="hidden xs:inline">·</span>
             <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
               {{ _n(userMetadata.following_count) }}
               <span class="text-skin-text">following</span>
@@ -219,7 +208,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
               {{ _n(userMetadata.followers_count) }}
               <span class="text-skin-text">followers</span>
             </a>
-          </span>
+          </div>
         </div>
         <div
           v-if="user.about"

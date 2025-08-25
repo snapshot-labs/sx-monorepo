@@ -182,7 +182,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         <a
           :href="treasuryExplorerUrl || '#'"
           target="_blank"
-          class="flex justify-between items-center mx-4 py-3 border-b"
+          class="flex justify-between items-center mx-4 py-3 border-b group"
           :class="{
             'pointer-events-none': !treasuryExplorerUrl
           }"
@@ -200,9 +200,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               class="text-skin-link"
               v-text="treasury.name || shorten(treasury.wallet)"
             />
-            <div
+            <UiAddress
               class="text-skin-text text-[17px]"
-              v-text="shorten(treasury.wallet)"
+              :address="treasury.wallet"
             />
           </div>
           <div

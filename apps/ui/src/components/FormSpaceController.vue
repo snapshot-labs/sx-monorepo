@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { shorten } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 
 defineProps<{
@@ -28,7 +27,7 @@ function handleSave(value: string) {
         <a
           :href="network.helpers.getExplorerUrl(controller, 'contract')"
           target="_blank"
-          class="flex items-center text-skin-text leading-5"
+          class="flex items-center text-skin-text leading-5 group"
         >
           <UiStamp
             :id="controller"
@@ -36,7 +35,7 @@ function handleSave(value: string) {
             :size="18"
             class="mr-2 !rounded"
           />
-          {{ shorten(controller) }}
+          <UiAddress :address="controller" />
           <IH-arrow-sm-right class="-rotate-45" />
         </a>
       </div>
