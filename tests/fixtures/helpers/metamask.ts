@@ -38,12 +38,27 @@ export class MetaMaskHelper {
     this.seed = seed;
   }
 
-  static async downloadExtension() {
-    const extensionExists = await fs
-      .access(EXTENSION_PATH)
-      .then(() => true)
-      .catch(() => false);
+  static async checkIfExists() {
+    try {
+      await fs.access(EXTENSION_PATH);
 
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  static async downloadExtension() {
+    if (process.env.TEST_PARALLEL_INDEX !== '0') {
+      while (true) {
+        const extensionExists = await this.checkIfExists();
+        if (extensionExists) return EXTENSION_PATH;
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
+
+    const extensionExists = await this.checkIfExists();
     if (extensionExists) {
       return EXTENSION_PATH;
     }
