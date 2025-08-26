@@ -243,7 +243,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               }
             }"
           >
-            <UiLink :is-active="page === 'tokens'" text="Tokens" />
+            <UiLabel :is-active="page === 'tokens'" text="Tokens" />
           </AppLink>
           <AppLink
             :to="{
@@ -252,7 +252,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               }
             }"
           >
-            <UiLink :is-active="page === 'nfts'" text="NFTs" />
+            <UiLabel :is-active="page === 'nfts'" text="NFTs" />
           </AppLink>
         </div>
         <div

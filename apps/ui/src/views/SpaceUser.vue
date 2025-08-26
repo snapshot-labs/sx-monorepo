@@ -263,7 +263,7 @@ watch(
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
         >
-          <UiLink
+          <UiLabel
             :is-active="route.name === item.route"
             :text="item.label"
             :count="item.count"
