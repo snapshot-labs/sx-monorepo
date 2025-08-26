@@ -198,7 +198,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </div>
 
     <div v-if="web3.account" class="mb-3">
-      <UiLabel label="Delegating to" />
+      <UiSectionHeader label="Delegating to" />
       <UiLoading v-if="isPendingDelegatees" class="px-4 py-3 block" />
       <div v-else-if="delegatees?.length" class="w-full truncate px-4">
         <div
@@ -285,7 +285,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </div>
     </div>
 
-    <UiLabel label="Delegates" sticky />
+    <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
         class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"

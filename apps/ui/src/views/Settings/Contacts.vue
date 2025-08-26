@@ -32,7 +32,7 @@ function handleContactEdit(contact) {
         </UiButton>
       </div>
     </div>
-    <UiLabel label="Contacts" />
+    <UiSectionHeader label="Contacts" />
     <div
       v-for="contact in contactsStore.contacts"
       :key="contact.address"

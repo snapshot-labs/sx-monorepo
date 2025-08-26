@@ -81,14 +81,14 @@ watchEffect(async () => {
     <div class="mb-3">
       <div class="flex space-x-3">
         <button type="button" @click="previewEnabled = false">
-          <UiLink
+          <UiLabel
             :is-active="!previewEnabled"
             text="Write"
             class="border-transparent"
           />
         </button>
         <button type="button" @click="previewEnabled = true">
-          <UiLink
+          <UiLabel
             :is-active="previewEnabled"
             text="Preview"
             class="border-transparent"

@@ -1,19 +1,18 @@
 <script setup lang="ts">
 const model = defineModel<number>();
 
-defineProps<{
+const props = defineProps<{
   error?: string;
   required?: boolean;
   definition: any;
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 const days = ref(0);
 const hours = ref(0);
 const minutes = ref(0);
 
 watch([days, hours, minutes], () => {
-  dirty.value = true;
   model.value = (days.value * 24 * 60 + hours.value * 60 + minutes.value) * 60;
 });
 
@@ -35,15 +34,15 @@ watch(
     <div
       v-if="definition.title"
       class="mb-1"
-      :class="{ 'text-skin-danger': error && dirty }"
+      :class="{ 'text-skin-danger': error && isDirty }"
       v-text="`${definition.title}${required ? ' *' : ''}`"
     />
-    <div class="flex !mb-0" :class="{ 's-error': error && dirty }">
+    <div class="flex !mb-0" :class="{ 's-error': error && isDirty }">
       <UiWrapperInput
         v-slot="{ id }"
         :definition="{ title: 'Days' }"
         class="flex-1"
-        :dirty="dirty"
+        :dirty="isDirty"
       >
         <input
           :id="id"
@@ -57,7 +56,7 @@ watch(
         v-slot="{ id }"
         :definition="{ title: 'Hours' }"
         class="flex-1"
-        :dirty="dirty"
+        :dirty="isDirty"
       >
         <input
           :id="id"
@@ -71,7 +70,7 @@ watch(
         v-slot="{ id }"
         :definition="{ title: 'Minutes' }"
         class="flex-1"
-        :dirty="dirty"
+        :dirty="isDirty"
       >
         <input
           :id="id"
@@ -82,7 +81,7 @@ watch(
         />
       </UiWrapperInput>
     </div>
-    <div v-if="error && dirty" class="s-base s-error">
+    <div v-if="error && isDirty" class="s-base s-error">
       <span class="s-input-error-message">{{ error }}</span>
     </div>
   </div>
