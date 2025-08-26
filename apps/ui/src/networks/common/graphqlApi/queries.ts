@@ -149,7 +149,7 @@ gql(`
     execution_ready
     executed
     vetoed
-    completed
+    execution_settled
     cancelled
   }
 `);
