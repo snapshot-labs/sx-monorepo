@@ -135,7 +135,7 @@ watchEffect(() => setTitle(props.space.name));
     <SpaceAlerts :space="space" />
     <OnboardingSpace :space="space" />
     <template v-if="showChildren">
-      <UiLabel :label="'Sub-spaces'" />
+      <UiSectionHeader label="Sub-spaces" />
       <UiScrollerHorizontal gradient="md">
         <div class="px-4 py-3 flex gap-3 min-w-max">
           <SpacesListItem

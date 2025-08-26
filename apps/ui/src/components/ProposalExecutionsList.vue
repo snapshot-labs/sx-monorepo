@@ -79,7 +79,7 @@ function downloadExecution(execution: ProposalExecution) {
       </div>
     </a>
     <div class="flex justify-between items-center border-y pr-3">
-      <UiLabel label="Transactions" class="border-b-0 pr-0 truncate" />
+      <UiSectionHeader label="Transactions" class="border-b-0 pr-0 truncate" />
       <UiTooltip
         v-if="execution.strategyType === 'ReadOnlyExecution'"
         title="Export transactions"

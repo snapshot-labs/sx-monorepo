@@ -178,7 +178,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     </div>
     <div class="space-y-3">
       <div>
-        <UiLabel label="Treasury" sticky />
+        <UiSectionHeader label="Treasury" sticky />
         <a
           :href="treasuryExplorerUrl || '#'"
           target="_blank"
