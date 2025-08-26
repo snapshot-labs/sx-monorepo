@@ -5,7 +5,13 @@ import { CallData, Contract, LibraryError } from 'starknet';
 import EVMSlotValue from './abis/EVMSlotValue.json';
 import { getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
-import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import {
+  ClientConfig,
+  Envelope,
+  Propose,
+  Strategy,
+  Vote
+} from '../../clients/starknet/types';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 
