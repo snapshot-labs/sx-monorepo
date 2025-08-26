@@ -25,6 +25,7 @@ const { copy, copied } = useClipboard();
       <button
         type="button"
         class="text-skin-text h-[18px]"
+        arial-label="Copy address"
         @click.prevent.stop="copy(address)"
       >
         <IH-duplicate
