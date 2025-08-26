@@ -70,7 +70,7 @@ watchEffect(() => {
           }"
           :aria-active="activeTreasuryId === i"
         >
-          <UiLink
+          <UiLabel
             :is-active="activeTreasuryId === i"
             :text="treasury.name || shorten(treasury.address)"
           />

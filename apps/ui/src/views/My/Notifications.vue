@@ -35,7 +35,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
 
 <template>
   <div>
-    <UiLabel :label="'Notifications'" sticky />
+    <UiSectionHeader label="Notifications" sticky />
     <UiLoading v-if="notificationsStore.loading" class="block px-4 py-3" />
     <div v-else-if="notificationsStore.notifications.length">
       <div

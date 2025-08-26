@@ -68,7 +68,7 @@ watch(
         </UiButton>
       </UiTooltip>
     </div>
-    <UiLabel label="My spaces" sticky />
+    <UiSectionHeader label="My spaces" sticky />
     <UiLoading v-if="loading" class="block m-4" />
     <UiContainer
       v-else-if="data?.pages.flat().length"

@@ -196,7 +196,7 @@ watchEffect(() => setTitle('Explore'));
       </UiTooltip>
     </div>
     <div class="flex-grow" v-bind="$attrs">
-      <UiLabel label="Spaces" sticky />
+      <UiSectionHeader label="Spaces" sticky />
       <UiLoading v-if="isPending" class="block m-4" />
       <div v-else-if="data">
         <UiContainerInfiniteScroll

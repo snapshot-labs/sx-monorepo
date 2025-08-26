@@ -1,16 +1,27 @@
 <script setup lang="ts">
+import { _n } from '@/helpers/utils';
+
 defineProps<{
-  label: string;
-  sticky?: boolean;
+  text: string;
+  isActive?: boolean;
+  count?: number;
 }>();
 </script>
 
 <template>
-  <h4
-    class="eyebrow border-b py-2 px-4 text-skin-text"
-    :class="{
-      'sticky z-10 top-[71px] lg:top-[72px] bg-skin-bg': sticky
-    }"
-    v-text="label"
-  />
+  <div
+    class="flex items-center"
+    :class="[isActive && 'border-b border-skin-link mb-[-1px]']"
+  >
+    <h4
+      class="eyebrow py-2 cursor-pointer inline-block hover:text-skin-link"
+      :class="[isActive ? 'text-skin-link' : 'text-skin-text']"
+      v-text="text"
+    />
+    <span
+      v-if="count"
+      class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-2"
+      v-text="_n(count, 'compact')"
+    />
+  </div>
 </template>

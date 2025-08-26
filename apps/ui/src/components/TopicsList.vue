@@ -10,7 +10,7 @@ defineProps<{
 
 <template>
   <div>
-    <UiLabel v-if="title" :label="title" sticky />
+    <UiSectionHeader v-if="title" :label="title" sticky />
     <UiLoading v-if="loading" class="block px-4 py-3" />
     <div v-else>
       <TopicsListItem v-for="(topic, i) in topics" :key="i" :topic="topic" />

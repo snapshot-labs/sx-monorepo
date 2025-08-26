@@ -155,7 +155,7 @@ watchEffect(() => {
                 }
               }"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-overview'"
                 text="Overview"
               />
@@ -174,7 +174,7 @@ watchEffect(() => {
               }"
               class="flex items-center"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-execution'"
                 :count="
                   proposal.executions
@@ -195,7 +195,7 @@ watchEffect(() => {
               }"
               class="flex items-center"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
@@ -214,7 +214,7 @@ watchEffect(() => {
                 }"
                 class="flex items-center"
               >
-                <UiLink
+                <UiLabel
                   :is-active="route.name === 'space-proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
@@ -237,7 +237,11 @@ watchEffect(() => {
                 class="flex items-center"
                 target="_blank"
               >
-                <UiLink :count="boostCount" text="Boost" class="inline-block" />
+                <UiLabel
+                  :count="boostCount"
+                  text="Boost"
+                  class="inline-block"
+                />
               </a>
             </template>
           </div>
