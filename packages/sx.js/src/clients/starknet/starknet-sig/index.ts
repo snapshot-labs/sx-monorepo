@@ -28,6 +28,7 @@ import {
   UpdateProposal,
   Vote
 } from '../../../types';
+import { parseStarknetError } from '../../../utils/starknet-rpc';
 import { getStrategiesWithParams } from '../../../utils/strategies';
 
 export class StarknetSig {
@@ -60,6 +61,26 @@ export class StarknetSig {
       `${this.config.manaUrl}/stark_rpc/${this.config.networkConfig.eip712ChainId}`,
       body
     );
+
+    if (!res.ok) {
+      const json = await res.json();
+
+      const parsedError = parseStarknetError(json);
+      if (
+        parsedError &&
+        envelope.signatureData &&
+        parsedError.includes(
+          `${envelope.signatureData.address} is not deployed`
+        )
+      ) {
+        throw new Error(
+          'Account is not deployed. Please deploy your account first.'
+        );
+      }
+
+      throw new Error('Failed to send transaction');
+    }
+
     const json = await res.json();
 
     return json.result;
