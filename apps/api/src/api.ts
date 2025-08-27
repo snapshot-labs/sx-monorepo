@@ -7,6 +7,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import Checkpoint, { createGetLoader } from '@snapshot-labs/checkpoint';
 import cors from 'cors';
 import express from 'express';
+import logger from './logger';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -50,5 +51,5 @@ export async function startApiServer(checkpoint: Checkpoint) {
     httpServer.listen({ port: PORT }, resolve)
   );
 
-  console.log(`Listening on port ${PORT}`);
+  logger.info(`Listening on port ${PORT}`);
 }
