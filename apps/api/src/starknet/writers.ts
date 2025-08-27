@@ -49,6 +49,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event) return;
 
+    logger.info('Handle contract deployed');
+
     const paddedClassHash = validateAndParseAddress(event.class_hash);
 
     if (paddedClassHash === config.overrides.spaceClassHash) {
@@ -67,6 +69,8 @@ export function createWriters(config: FullConfig) {
     event
   }) => {
     if (!event || !txId) return;
+
+    logger.info('Handle space deployed');
 
     const strategies: string[] = event.voting_strategies.map(
       (strategy: Strategy) => strategy.address
@@ -158,6 +162,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space metadata uri updated');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
     try {
@@ -184,6 +190,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space min voting duration updated');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -201,6 +209,8 @@ export function createWriters(config: FullConfig) {
     event
   }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle space max voting duration updated');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -220,6 +230,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space ownership transferred');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -236,6 +248,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space voting delay updated');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -251,6 +265,8 @@ export function createWriters(config: FullConfig) {
     event
   }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle space authenticators added');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -270,6 +286,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space authenticators removed');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -287,6 +305,8 @@ export function createWriters(config: FullConfig) {
     event
   }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle space voting strategies added');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -343,6 +363,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space voting strategies removed');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -378,6 +400,8 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space proposal validation strategy updated');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -396,6 +420,8 @@ export function createWriters(config: FullConfig) {
 
   const handlePropose: starknet.Writer = async ({ txId, rawEvent, event }) => {
     if (!rawEvent || !event || !txId) return;
+
+    logger.info('Handle propose');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -613,6 +639,8 @@ export function createWriters(config: FullConfig) {
   const handleCancel: starknet.Writer = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
+    logger.info('Handle cancel');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
 
@@ -635,6 +663,8 @@ export function createWriters(config: FullConfig) {
 
   const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle update');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
@@ -718,6 +748,8 @@ export function createWriters(config: FullConfig) {
   const handleExecute: starknet.Writer = async ({ txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
+    logger.info('Handle execute');
+
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
 
@@ -739,6 +771,8 @@ export function createWriters(config: FullConfig) {
     event
   }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle vote');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = parseInt(event.proposal_id);

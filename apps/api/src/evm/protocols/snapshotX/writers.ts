@@ -79,6 +79,8 @@ export function createWriters(
   }) => {
     if (!event) return;
 
+    logger.info('Handle contract deployed');
+
     const proxyAddress = getAddress(event.args.proxy);
     const implementationAddress = getAddress(event.args.implementation);
 
@@ -224,6 +226,8 @@ export function createWriters(
   }) => {
     if (!event) return;
 
+    logger.info('Handle space created');
+
     const votingStrategies: Strategy[] = event.args.input.votingStrategies;
 
     const id = getAddress(event.args.space);
@@ -324,6 +328,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space metadata uri updated');
+
     const spaceId = getAddress(rawEvent.address);
 
     let spaceMetadataItem: SpaceMetadataItem | undefined;
@@ -368,6 +374,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space min voting duration updated');
+
     const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -386,6 +394,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space max voting duration updated');
+
     const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -400,6 +410,8 @@ export function createWriters(
 
   const handleVotingDelayUpdated: evm.Writer = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle space voting delay updated');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -417,6 +429,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space ownership transferred');
+
     const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -429,6 +443,8 @@ export function createWriters(
 
   const handleAuthenticatorsAdded: evm.Writer = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle space authenticators added');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -448,6 +464,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space authenticators removed');
+
     const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -465,6 +483,8 @@ export function createWriters(
     event
   }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle space voting strategies added');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -519,6 +539,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space voting strategies removed');
+
     const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -554,6 +576,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle space proposal validation strategy updated');
+
     const spaceId = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceId, config.indexerName);
@@ -578,6 +602,8 @@ export function createWriters(
     block
   }) => {
     if (!rawEvent || !event || !txId) return;
+
+    logger.info('Handle proposal created');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -780,6 +806,8 @@ export function createWriters(
   const handleProposalCancelled: evm.Writer = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
+    logger.info('Handle proposal cancelled');
+
     const spaceId = getAddress(rawEvent.address);
     const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
 
@@ -806,6 +834,8 @@ export function createWriters(
     event
   }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle proposal updated');
 
     const spaceId = getAddress(rawEvent.address);
     const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
@@ -889,6 +919,8 @@ export function createWriters(
   }) => {
     if (!rawEvent || !event) return;
 
+    logger.info('Handle proposal executed');
+
     const spaceId = getAddress(rawEvent.address);
     const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
 
@@ -929,6 +961,8 @@ export function createWriters(
     event
   }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle vote cast');
 
     const spaceId = getAddress(rawEvent.address);
     const proposalId = parseInt(event.args.proposalId);
@@ -1040,6 +1074,8 @@ export function createWriters(
   }) => {
     if (!rawEvent || !event) return;
 
+    logger.info('Handle timelock proposal executed');
+
     const executionHash = await ExecutionHash.loadEntity(
       event.args.executionPayloadHash,
       config.indexerName
@@ -1064,6 +1100,8 @@ export function createWriters(
     event
   }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle timelock proposal vetoed');
 
     const executionHash = await ExecutionHash.loadEntity(
       event.args.executionPayloadHash,
@@ -1090,6 +1128,8 @@ export function createWriters(
     event
   }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle axiom write offchain votes');
 
     const contract = new Contract(
       rawEvent.address,
@@ -1122,6 +1162,8 @@ export function createWriters(
   }) => {
     if (!event) return;
 
+    logger.info('Handle L1AvatarExecutionStrategy contract deployed');
+
     const contractAddress = getAddress(event.args.contractAddress);
 
     await executeTemplate('L1AvatarExecutionStrategy', {
@@ -1136,6 +1178,8 @@ export function createWriters(
     event
   }) => {
     if (!event) return;
+
+    logger.info('Handle starknet proposal executed');
 
     const rawSpace: BigNumber = event.args.space;
     const rawProposalId: BigNumber = event.args.proposalId;
@@ -1157,6 +1201,8 @@ export function createWriters(
 
   const handleQuorumUpdated: evm.Writer = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle quorum updated');
 
     const executionStrategyAddress = getAddress(rawEvent.address);
 

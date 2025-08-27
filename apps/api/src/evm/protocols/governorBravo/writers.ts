@@ -6,6 +6,7 @@ import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
 import GovernorModule from './abis/GovernorModule.json';
 import Timelock from './abis/Timelock.json';
+import logger from './logger';
 import { convertChoice, getProposalTitle } from './utils';
 import {
   getCurrentTimestamp,
@@ -232,6 +233,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle proposal created');
+
     const id = event.args.id.toNumber();
     const spaceAddress = getAddress(rawEvent.address);
     const proposerAddress = getAddress(event.args.proposer);
@@ -344,6 +347,8 @@ export function createWriters(
   const handleProposalCanceled: evm.Writer = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle proposal canceled');
+
     const id = event.args.id.toNumber();
     const spaceAddress = getAddress(rawEvent.address);
     const proposalId = `${spaceAddress}/${id}`;
@@ -364,6 +369,8 @@ export function createWriters(
   const handleProposalQueued: evm.Writer = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle proposal queued');
+
     const id = event.args.id.toNumber();
     const spaceAddress = getAddress(rawEvent.address);
     const proposalId = `${spaceAddress}/${id}`;
@@ -379,6 +386,8 @@ export function createWriters(
 
   const handleProposalExecuted: evm.Writer = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle proposal executed');
 
     const id = event.args.id.toNumber();
     const spaceAddress = getAddress(rawEvent.address);
@@ -396,6 +405,8 @@ export function createWriters(
 
   const handleVoteCast: evm.Writer = async ({ block, event, rawEvent }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle vote cast');
 
     const id = event.args.proposalId.toNumber();
     const voterAddress = getAddress(event.args.voter);
@@ -482,6 +493,8 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle proposal threshold set');
+
     const spaceAddress = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
@@ -495,6 +508,8 @@ export function createWriters(
   const handleNewAdmin: evm.Writer = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
+    logger.info('Handle new admin');
+
     const spaceAddress = getAddress(rawEvent.address);
 
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
@@ -507,6 +522,8 @@ export function createWriters(
 
   const handleNewDelay: evm.Writer = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
+
+    logger.info('Handle new delay');
 
     const timelockAddress = getAddress(rawEvent.address);
 
