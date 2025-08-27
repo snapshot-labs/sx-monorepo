@@ -3,10 +3,10 @@ import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
 import ethRpc from './eth';
-import { registeredApeGasProposalsLoop } from './eth/registered';
-import starkRpc from './stark';
-import logger from '../logger';
 import pkg from '../package.json';
+import { registeredApeGasProposalsLoop } from './eth/registered';
+import logger from './logger';
+import starkRpc from './stark';
 import {
   registeredProposalsLoop,
   registeredTransactionsLoop
