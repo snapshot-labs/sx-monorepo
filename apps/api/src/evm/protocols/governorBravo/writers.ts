@@ -230,8 +230,6 @@ export function createWriters(
     rawEvent,
     helpers
   }) => {
-    console.log('Handle proposal created');
-
     if (!event || !rawEvent) return;
 
     const id = event.args.id.toNumber();
@@ -344,8 +342,6 @@ export function createWriters(
   };
 
   const handleProposalCanceled: evm.Writer = async ({ event, rawEvent }) => {
-    console.log('Handle proposal canceled');
-
     if (!event || !rawEvent) return;
 
     const id = event.args.id.toNumber();
@@ -366,8 +362,6 @@ export function createWriters(
   };
 
   const handleProposalQueued: evm.Writer = async ({ event, rawEvent }) => {
-    console.log('Handle proposal queued');
-
     if (!event || !rawEvent) return;
 
     const id = event.args.id.toNumber();
@@ -384,8 +378,6 @@ export function createWriters(
   };
 
   const handleProposalExecuted: evm.Writer = async ({ event, rawEvent }) => {
-    console.log('Handle proposal executed');
-
     if (!event || !rawEvent) return;
 
     const id = event.args.id.toNumber();
@@ -403,8 +395,6 @@ export function createWriters(
   };
 
   const handleVoteCast: evm.Writer = async ({ block, event, rawEvent }) => {
-    console.log('Handle vote cast');
-
     if (!event || !rawEvent) return;
 
     const id = event.args.proposalId.toNumber();
@@ -490,8 +480,6 @@ export function createWriters(
     event,
     rawEvent
   }) => {
-    console.log('Handle proposal threshold set');
-
     if (!event || !rawEvent) return;
 
     const spaceAddress = getAddress(rawEvent.address);
@@ -505,8 +493,6 @@ export function createWriters(
   };
 
   const handleNewAdmin: evm.Writer = async ({ event, rawEvent }) => {
-    console.log('Handle new admin');
-
     if (!event || !rawEvent) return;
 
     const spaceAddress = getAddress(rawEvent.address);
@@ -520,8 +506,6 @@ export function createWriters(
   };
 
   const handleNewDelay: evm.Writer = async ({ event, rawEvent }) => {
-    console.log('Handle new delay');
-
     if (!event || !rawEvent) return;
 
     const timelockAddress = getAddress(rawEvent.address);
