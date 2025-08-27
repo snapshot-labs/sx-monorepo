@@ -224,15 +224,29 @@ watch(
           class="relative mb-2 border-4 border-skin-bg !bg-skin-border !rounded-full -left-1"
         />
         <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
-        <div class="mb-3 text-skin-text">
-          <span class="text-skin-link" v-text="userActivity.proposal_count" />
-          proposals ·
-          <span class="text-skin-link" v-text="userActivity.vote_count" />
-          votes
-          <template v-if="votingPowerStatus === 'success'">
+        <div
+          class="mb-3 text-skin-text flex flex-col xs:flex-row flex-wrap xs:items-center gap-x-2 whitespace-nowrap"
+        >
+          <UiAddress :address="user.id" copy-button="always" />
+          <div class="flex items-center gap-2">
+            <span class="hidden xs:inline">·</span>
+            <div>
+              <span
+                class="text-skin-link"
+                v-text="userActivity.proposal_count"
+              />
+              proposals
+            </div>
             ·
-            {{ formattedVotingPower }}
-          </template>
+            <div>
+              <span class="text-skin-link" v-text="userActivity.vote_count" />
+              votes
+            </div>
+            <template v-if="votingPowerStatus === 'success'">
+              ·
+              {{ formattedVotingPower }}
+            </template>
+          </div>
         </div>
         <div
           v-if="user.about"

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { isAddress } from '@ethersproject/address';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { Member, NetworkID } from '@/types';
@@ -71,7 +70,7 @@ function deleteMember(index: number) {
             ) || ''
           "
           target="_blank"
-          class="flex items-center text-skin-text leading-5"
+          class="flex items-center text-skin-text leading-5 group"
         >
           <UiStamp
             :id="member.address"
@@ -79,7 +78,7 @@ function deleteMember(index: number) {
             :size="18"
             class="mr-2 !rounded"
           />
-          {{ shorten(member.address) }}
+          <UiAddress :address="member.address" />
           <IH-arrow-sm-right class="-rotate-45" />
         </a>
       </div>
