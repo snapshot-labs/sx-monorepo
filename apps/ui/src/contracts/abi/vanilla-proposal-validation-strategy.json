@@ -1,0 +1,40 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "VanillaProposalValidationStrategy",
+  "sourceName": "contracts/proposal-validation-strategies/VanillaProposalValidationStrategy.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "validate",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460145760ef90816100198239f35b5f80fdfe60808060405260043610156011575f80fd5b5f3560e01c6307216095146023575f80fd5b34608a576060366003190112608a576004356001600160a01b03811603608a5760243567ffffffffffffffff8111608a576060903690600401608e565b50506044359067ffffffffffffffff8211608a5760826020923690600401608e565b505060018152f35b5f80fd5b9181601f84011215608a5782359167ffffffffffffffff8311608a5760208381860195010111608a5756fea26469706673582212201bfd2e95c12a912dc3d00ef26dc893957583bd11f1ee9494cbca5b4720a8250964736f6c634300081c0033",
+  "deployedBytecode": "0x60808060405260043610156011575f80fd5b5f3560e01c6307216095146023575f80fd5b34608a576060366003190112608a576004356001600160a01b03811603608a5760243567ffffffffffffffff8111608a576060903690600401608e565b50506044359067ffffffffffffffff8211608a5760826020923690600401608e565b505060018152f35b5f80fd5b9181601f84011215608a5782359167ffffffffffffffff8311608a5760208381860195010111608a5756fea26469706673582212201bfd2e95c12a912dc3d00ef26dc893957583bd11f1ee9494cbca5b4720a8250964736f6c634300081c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

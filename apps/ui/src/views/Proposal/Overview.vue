@@ -583,7 +583,7 @@ onBeforeUnmount(() => destroyAudio());
           :to="{
             name: 'space-proposal-votes',
             params: {
-              proposal: proposal.proposal_id,
+              proposal: proposal.proposal_id || proposal.id,
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"

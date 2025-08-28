@@ -141,7 +141,8 @@ export const evmNetworks = {
     strategies: {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
-  })
+  }),
+  'base-sep': createStandardConfig(84532)
 } as const;
 
 export const evmMainnet = createEvmConfig('eth');

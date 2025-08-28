@@ -88,7 +88,9 @@ const canSubmit = computed<boolean>(
     formValidated.value &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
-    !!voteValidationPower.value?.canVote &&
+    // If fetching vote validation failed, ignore the error and allow submit
+    (isVoteValidationPowerError.value ||
+      !!voteValidationPower.value?.canVote) &&
     !!votingPower.value?.canVote
 );
 

@@ -57,8 +57,27 @@ export async function getVotingPower(
     Proposal['strategies'],
     Proposal['strategies_params'],
     Proposal['space']['strategies_parsed_metadata']
-  ]
+  ],
+  proposalId?: string
 ): Promise<VotingPowerItem> {
+  // For local proposals, return default voting power of 1
+  if (proposalId && proposalId.startsWith('local-')) {
+    return {
+      symbol: space.voting_power_symbol || 'VP',
+      votingPowers: [
+        {
+          address: '',
+          value: 1n,
+          displayDecimals: 0,
+          cumulativeDecimals: 0,
+          token: null,
+          symbol: space.voting_power_symbol || 'VP'
+        }
+      ],
+      canVote: true
+    };
+  }
+
   try {
     const network = getNetwork(space.network);
     const vp = await network.actions.getVotingPower(
@@ -145,7 +164,8 @@ export function useProposalVotingPowerQuery(
           proposalValue.strategies,
           proposalValue.strategies_params,
           proposalValue.space.strategies_parsed_metadata
-        ]
+        ],
+        proposalValue.id
       );
     },
     retry: (failureCount, error) => {
@@ -153,7 +173,18 @@ export function useProposalVotingPowerQuery(
 
       return failureCount < 3;
     },
-    enabled: () => !!toValue(account) && toValue(active),
+    enabled: () => {
+      const accountValue = toValue(account);
+      const activeValue = toValue(active);
+      const proposalValue = toValue(proposal);
+
+      // Enable for local proposals regardless of state
+      if (proposalValue?.id.startsWith('local-')) {
+        return !!accountValue;
+      }
+
+      return !!accountValue && activeValue;
+    },
     staleTime: CACHE_TTL
   });
 }

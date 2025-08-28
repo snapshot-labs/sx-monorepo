@@ -103,6 +103,13 @@ export const METADATA: Record<string, Metadata> = {
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816
+  },
+  'base-sep': {
+    name: 'Base Sepolia',
+    chainId: 84532,
+    apiUrl: UNIFIED_API_TESTNET_URL,
+    avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
+    blockTime: 13.2816
   }
 };
 

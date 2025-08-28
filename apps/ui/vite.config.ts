@@ -24,6 +24,9 @@ export default defineConfig({
   },
   plugins: [
     vue(),
+    inject({
+      Buffer: ['buffer', 'Buffer']
+    }),
     AutoImport({
       imports: ['vue', 'vue-router', '@vueuse/core'],
       dirs: ['./src/composables', './src/stores'],
@@ -62,6 +65,7 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
+    include: ['buffer'],
     exclude: ['@snapshot-labs/sx'],
     esbuildOptions: {
       target
@@ -88,7 +92,8 @@ export default defineConfig({
       stream: path.resolve('../../node_modules/stream-browserify'),
       events: path.resolve('../../node_modules/events'),
       util: path.resolve('../../node_modules/util'),
-      buffer: path.resolve('../../node_modules/buffer')
+      buffer: path.resolve('../../node_modules/buffer'),
+      crypto: path.resolve('../../node_modules/crypto-browserify')
     },
     dedupe: ['@popperjs/core']
   }

@@ -28,7 +28,34 @@ export function useAccount() {
       limit: VOTES_LIMIT
     });
 
-    votes.value = { ...votes.value, ...userVotes };
+    // Load local votes for local proposals
+    const localVotes: Record<Proposal['id'], Vote> = {};
+    for (const spaceId of spaceIds) {
+      const voteKey = `localVotes:${spaceId}`;
+      const spaceVotes = JSON.parse(localStorage.getItem(voteKey) || '[]');
+
+      // Filter votes for current user
+      const userLocalVotes = spaceVotes.filter(
+        (vote: any) => vote.voter.id === account
+      );
+
+      // Convert to the expected format
+      userLocalVotes.forEach((vote: any) => {
+        localVotes[vote.proposal] = {
+          id: vote.id,
+          voter: vote.voter,
+          space: vote.space,
+          proposal: vote.proposal,
+          choice: vote.choice,
+          vp: vote.vp,
+          reason: vote.reason,
+          created: vote.created,
+          tx: vote.tx
+        };
+      });
+    }
+
+    votes.value = { ...votes.value, ...userVotes, ...localVotes };
   }
 
   function addPendingVote(proposalId: string) {
