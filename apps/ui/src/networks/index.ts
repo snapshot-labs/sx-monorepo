@@ -105,5 +105,13 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
         network => !offchainNetworks.includes(network)
       ),
       limit: 18
+    },
+    'governor-bravo': {
+      key: 'governor-bravo',
+      label: 'Governor Bravo',
+      apiNetwork: 'eth',
+      networks: ['eth'],
+      limit: 18,
+      disabled: import.meta.env.VITE_ENABLE_GOVERNOR_BRAVO !== 'true'
     }
   };

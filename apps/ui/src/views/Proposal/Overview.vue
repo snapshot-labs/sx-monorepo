@@ -9,7 +9,7 @@ import {
   sanitizeUrl,
   shortenAddress
 } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
@@ -102,10 +102,24 @@ const discussion = computed(() => {
 });
 
 const proposalMetadataUrl = computed(() => {
+  if (props.proposal.space.protocol === 'governor-bravo') {
+    return null;
+  }
+
   const url = getUrl(props.proposal.metadata_uri);
   if (!url) return null;
 
   return sanitizeUrl(url);
+});
+
+const proposalTransactionId = computed(() => {
+  const network = getNetwork(props.proposal.network);
+
+  if (props.proposal.space.protocol === 'governor-bravo') {
+    return network.helpers.getExplorerUrl(props.proposal.tx, 'transaction');
+  }
+
+  return null;
 });
 
 const endTime = useRelativeTime(() => {
@@ -514,6 +528,17 @@ onBeforeUnmount(() => destroyAudio());
                 >
                   <IH-arrow-sm-right class="-rotate-45" :width="16" />
                   View metadata
+                </a>
+              </UiDropdownItem>
+              <UiDropdownItem v-if="proposalTransactionId" v-slot="{ active }">
+                <a
+                  :href="proposalTransactionId"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  View on block explorer
                 </a>
               </UiDropdownItem>
             </template>
