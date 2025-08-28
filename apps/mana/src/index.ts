@@ -40,7 +40,17 @@ async function start() {
   registeredProposalsLoop();
   registeredApeGasProposalsLoop();
 
-  app.listen(PORT, () => logger.info(`Listening at http://localhost:${PORT}`));
+  const server = app.listen(PORT, () =>
+    logger.info(`Listening at http://localhost:${PORT}`)
+  );
+
+  process.on('uncaughtException', err => {
+    logger.fatal({ err }, 'Uncaught exception');
+
+    server.close(() => {
+      process.exit(1);
+    });
+  });
 }
 
 start();
