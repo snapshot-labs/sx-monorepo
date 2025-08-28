@@ -6,6 +6,11 @@ import randomBytes from 'randombytes';
 import { Account, CallData, hash, shortString, uint256 } from 'starknet';
 import SpaceAbi from './abis/Space.json';
 import { getAuthenticator } from '../../../authenticators/starknet';
+import { predictCloneAddress } from '../../../utils/address';
+import { hexPadLeft } from '../../../utils/encoding';
+import { estimateStarknetFee } from '../../../utils/fees';
+import { getStrategiesWithParams } from '../../../utils/strategies';
+import L1AvatarExecutionStrategyFactoryAbi from '../l1-executor/abis/L1AvatarExecutionStrategyFactory.json';
 import {
   AddressConfig,
   ClientConfig,
@@ -14,12 +19,7 @@ import {
   Propose,
   UpdateProposal,
   Vote
-} from '../../../types';
-import { predictCloneAddress } from '../../../utils/address';
-import { hexPadLeft } from '../../../utils/encoding';
-import { estimateStarknetFee } from '../../../utils/fees';
-import { getStrategiesWithParams } from '../../../utils/strategies';
-import L1AvatarExecutionStrategyFactoryAbi from '../l1-executor/abis/L1AvatarExecutionStrategyFactory.json';
+} from '../types';
 
 type SpaceParams = {
   controller: string;

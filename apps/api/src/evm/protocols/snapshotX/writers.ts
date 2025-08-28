@@ -9,6 +9,7 @@ import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
 import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
 import { handleSpaceMetadata } from './ipfs';
+import logger from './logger';
 import {
   convertChoice,
   handleCustomExecutionStrategy,
@@ -76,9 +77,9 @@ export function createWriters(
     event,
     helpers: { executeTemplate }
   }) => {
-    console.log('Handle contract deployed');
-
     if (!event) return;
+
+    logger.info('Handle contract deployed');
 
     const proxyAddress = getAddress(event.args.proxy);
     const implementationAddress = getAddress(event.args.implementation);
@@ -210,7 +211,10 @@ export function createWriters(
         break;
       }
       default:
-        console.log('Unknown implementation', implementationAddress);
+        logger.warn(
+          { address: implementationAddress },
+          'Unknown implementation'
+        );
     }
   };
 
@@ -220,9 +224,9 @@ export function createWriters(
     txId,
     event
   }) => {
-    console.log('Handle space created');
-
     if (!event) return;
+
+    logger.info('Handle space created');
 
     const votingStrategies: Strategy[] = event.args.input.votingStrategies;
 
@@ -278,8 +282,8 @@ export function createWriters(
       );
 
       space.metadata = dropIpfs(metadataUri);
-    } catch (e) {
-      console.log('failed to parse space metadata', e);
+    } catch (err) {
+      logger.info({ err }, 'Failed to fetch space metadata');
     }
 
     if (spaceMetadataItem) {
@@ -308,8 +312,8 @@ export function createWriters(
 
       space.strategies_decimals = strategiesDecimals;
       space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
-    } catch (e) {
-      console.log('failed to handle strategies metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle strategies metadata');
     }
 
     await updateCounter(config.indexerName, 'space_count', 1);
@@ -324,7 +328,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space metadata uri updated');
+    logger.info('Handle space metadata uri updated');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -343,8 +347,8 @@ export function createWriters(
       space.metadata = dropIpfs(metadataUri);
 
       await space.save();
-    } catch (e) {
-      console.log('failed to update space metadata', e);
+    } catch (err) {
+      logger.info({ err }, 'Failed to fetch space metadata');
     }
 
     if (spaceMetadataItem) {
@@ -370,7 +374,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space min voting duration updated');
+    logger.info('Handle space min voting duration updated');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -390,7 +394,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space max voting duration updated');
+    logger.info('Handle space max voting duration updated');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -407,7 +411,7 @@ export function createWriters(
   const handleVotingDelayUpdated: evm.Writer = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space voting delay updated');
+    logger.info('Handle space voting delay updated');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -425,7 +429,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space ownership transferred');
+    logger.info('Handle space ownership transferred');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -440,7 +444,7 @@ export function createWriters(
   const handleAuthenticatorsAdded: evm.Writer = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space authenticators added');
+    logger.info('Handle space authenticators added');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -460,7 +464,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space authenticators removed');
+    logger.info('Handle space authenticators removed');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -480,7 +484,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space voting strategies added');
+    logger.info('Handle space voting strategies added');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -522,8 +526,8 @@ export function createWriters(
         ...strategiesDecimals
       ];
       space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
-    } catch (e) {
-      console.log('failed to handle strategies metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle strategies metadata');
     }
 
     await space.save();
@@ -535,7 +539,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space voting strategies removed');
+    logger.info('Handle space voting strategies removed');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -572,7 +576,7 @@ export function createWriters(
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space proposal validation strategy updated');
+    logger.info('Handle space proposal validation strategy updated');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -599,7 +603,7 @@ export function createWriters(
   }) => {
     if (!rawEvent || !event || !txId) return;
 
-    console.log('Handle propose');
+    logger.info('Handle proposal created');
 
     const spaceId = getAddress(rawEvent.address);
 
@@ -719,8 +723,8 @@ export function createWriters(
       );
 
       proposal.metadata = dropIpfs(metadataUri);
-    } catch (e) {
-      console.log(JSON.stringify(e).slice(0, 256));
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle proposal metadata');
     }
 
     const existingUser = await User.loadEntity(author, config.indexerName);
@@ -786,8 +790,8 @@ export function createWriters(
           },
           protocolConfig
         );
-      } catch (e) {
-        console.log('failed to decode ape gas strategy params', e);
+      } catch (err) {
+        logger.warn({ err }, 'Failed to decode ape gas strategy params');
         continue;
       }
     }
@@ -802,7 +806,7 @@ export function createWriters(
   const handleProposalCancelled: evm.Writer = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle cancel');
+    logger.info('Handle proposal cancelled');
 
     const spaceId = getAddress(rawEvent.address);
     const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
@@ -831,7 +835,7 @@ export function createWriters(
   }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle update');
+    logger.info('Handle proposal updated');
 
     const spaceId = getAddress(rawEvent.address);
     const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
@@ -900,8 +904,8 @@ export function createWriters(
 
       proposal.metadata = dropIpfs(metadataUri);
       proposal.edited = block?.timestamp ?? getCurrentTimestamp();
-    } catch (e) {
-      console.log('failed to update proposal metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle proposal metadata');
     }
 
     await proposal.save();
@@ -915,7 +919,7 @@ export function createWriters(
   }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle execute');
+    logger.info('Handle proposal executed');
 
     const spaceId = getAddress(rawEvent.address);
     const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
@@ -958,7 +962,7 @@ export function createWriters(
   }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle vote');
+    logger.info('Handle vote cast');
 
     const spaceId = getAddress(rawEvent.address);
     const proposalId = parseInt(event.args.proposalId);
@@ -999,8 +1003,8 @@ export function createWriters(
         await handleVoteMetadata(metadataUri, config);
 
         vote.metadata = dropIpfs(metadataUri);
-      } catch (e) {
-        console.log(JSON.stringify(e).slice(0, 256));
+      } catch (err) {
+        logger.info({ err }, 'Failed to handle vote metadata');
       }
     }
 
@@ -1070,6 +1074,8 @@ export function createWriters(
   }) => {
     if (!rawEvent || !event) return;
 
+    logger.info('Handle timelock proposal executed');
+
     const executionHash = await ExecutionHash.loadEntity(
       event.args.executionPayloadHash,
       config.indexerName
@@ -1094,6 +1100,8 @@ export function createWriters(
     event
   }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle timelock proposal vetoed');
 
     const executionHash = await ExecutionHash.loadEntity(
       event.args.executionPayloadHash,
@@ -1120,6 +1128,8 @@ export function createWriters(
     event
   }) => {
     if (!rawEvent || !event) return;
+
+    logger.info('Handle axiom write offchain votes');
 
     const contract = new Contract(
       rawEvent.address,
@@ -1150,9 +1160,9 @@ export function createWriters(
     event,
     helpers: { executeTemplate }
   }) => {
-    console.log('Handle contract deployed');
-
     if (!event) return;
+
+    logger.info('Handle L1AvatarExecutionStrategy contract deployed');
 
     const contractAddress = getAddress(event.args.contractAddress);
 
@@ -1168,6 +1178,8 @@ export function createWriters(
     event
   }) => {
     if (!event) return;
+
+    logger.info('Handle starknet proposal executed');
 
     const rawSpace: BigNumber = event.args.space;
     const rawProposalId: BigNumber = event.args.proposalId;
@@ -1190,7 +1202,7 @@ export function createWriters(
   const handleQuorumUpdated: evm.Writer = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle QuorumUpdated');
+    logger.info('Handle quorum updated');
 
     const executionStrategyAddress = getAddress(rawEvent.address);
 

@@ -1,37 +1,37 @@
 import { Meta, StoryObj } from '@storybook/vue3-vite';
-import Link from './Link.vue';
+import Label from './Label.vue';
 
 const meta = {
-  title: 'Ui/Link',
-  component: Link,
+  title: 'Ui/Label',
+  component: Label,
   tags: ['autodocs'],
   argTypes: {
     text: { control: 'text' },
     isActive: { control: 'boolean' },
     count: { control: 'number' }
   }
-} satisfies Meta<typeof Link>;
+} satisfies Meta<typeof Label>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    text: 'Link',
+    text: 'Label',
     isActive: false
   }
 };
 
 export const Active: Story = {
   args: {
-    text: 'Active Link',
+    text: 'Active label',
     isActive: true
   }
 };
 
 export const WithCount: Story = {
   args: {
-    text: 'Link with count',
+    text: 'Label with count',
     count: 42,
     isActive: false
   }
@@ -39,7 +39,7 @@ export const WithCount: Story = {
 
 export const ActiveWithCount: Story = {
   args: {
-    text: 'Active link with count',
+    text: 'Active label with count',
     count: 123,
     isActive: true
   }

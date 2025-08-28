@@ -8,7 +8,13 @@ import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
 import OzVotesToken from './abis/OzVotesToken.json';
 import { getNestedSlotKey, getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
-import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import {
+  ClientConfig,
+  Envelope,
+  Propose,
+  Strategy,
+  Vote
+} from '../../clients/starknet/types';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 

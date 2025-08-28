@@ -13,7 +13,10 @@
     "test": "vitest run"
   },
   "eslintConfig": {
-    "extends": "@snapshot-labs"
+    "extends": "@snapshot-labs",
+    "rules": {
+      "no-console": "error"
+    }
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
@@ -37,6 +40,8 @@
     "express": "^4.21.2",
     "graphql": "^16.8.1",
     "micro-starknet": "^0.2.3",
+    "pino": "^9.9.0",
+    "pino-pretty": "^13.1.1",
     "starknet": "7.6.4"
   },
   "devDependencies": {
