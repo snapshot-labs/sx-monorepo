@@ -313,7 +313,7 @@ watchEffect(async () => {
             title: 'Contract address',
             examples: ['Address or ENS'],
             chainId: props.network,
-            showPicker: !loading
+            showControls: !loading
           }"
           @pick="handlePickerClick('to')"
         />

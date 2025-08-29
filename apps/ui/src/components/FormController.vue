@@ -20,7 +20,7 @@ const definition = computed(() => ({
   chainId: props.chainId,
   title: 'Space controller',
   examples: ['0x0000…'],
-  showPicker: false
+  showControls: false
 }));
 
 const formErrors = computed(() =>

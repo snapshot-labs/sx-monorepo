@@ -34,7 +34,7 @@ const definition = {
       format: 'address',
       title: 'Address',
       examples: ['Address'],
-      showPicker: false
+      showControls: false
     }
   }
 };

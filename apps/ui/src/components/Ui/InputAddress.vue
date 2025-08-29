@@ -14,7 +14,7 @@ const props = defineProps<{
   path?: string;
   definition?: BaseDefinition<string> & {
     chainId?: number | string;
-    showPicker?: boolean;
+    showControls?: boolean;
   };
   required?: boolean;
 }>();
@@ -40,7 +40,7 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 });
 
 const shouldShowPicker = computed(() => {
-  return props.definition?.showPicker ?? true;
+  return props.definition?.showControls ?? true;
 });
 </script>
 

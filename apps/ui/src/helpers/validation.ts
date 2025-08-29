@@ -258,7 +258,6 @@ ajv.addKeyword({
 ajv.addKeyword('options');
 ajv.addKeyword('tooltip');
 ajv.addKeyword('showControls');
-ajv.addKeyword('showPicker');
 
 // UiSelectorNetwork
 ajv.addFormat('network', {
