@@ -19,7 +19,8 @@ const definition = computed(() => ({
   format: 'address',
   chainId: props.chainId,
   title: 'Space controller',
-  examples: ['0x0000…']
+  examples: ['0x0000…'],
+  showPicker: false
 }));
 
 const formErrors = computed(() =>
@@ -46,7 +47,6 @@ watch(formErrors, value => emit('errors', value));
   <UiContainerSettings :title="title" :description="description">
     <div class="s-box">
       <UiInputAddress
-        :show-picker="false"
         :model-value="model"
         :error="formErrors.controller"
         :definition="definition"

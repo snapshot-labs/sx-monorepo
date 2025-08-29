@@ -10,19 +10,14 @@ type NetworkDetails = {
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(
-  defineProps<{
+const props = defineProps<{
+  path?: string;
+  definition?: BaseDefinition<string> & {
+    chainId?: number | string;
     showPicker?: boolean;
-    path?: string;
-    definition?: BaseDefinition<string> & {
-      chainId?: number | string;
-    };
-    required?: boolean;
-  }>(),
-  {
-    showPicker: true
-  }
-);
+  };
+  required?: boolean;
+}>();
 
 const emit = defineEmits<{
   (e: 'pick', path: string);
@@ -47,7 +42,10 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 
 <template>
   <div class="relative">
-    <div v-if="showPicker" class="absolute top-3.5 right-3 z-10">
+    <div
+      v-if="definition?.showPicker ?? true"
+      class="absolute top-3.5 right-3 z-10"
+    >
       <button type="button" @click="emit('pick', path || '')">
         <IH-identification />
       </button>
@@ -63,7 +61,7 @@ const networkDetails = computed<NetworkDetails | null>(() => {
       />
     </UiTooltip>
     <UiInputString
-      :definition="props.definition"
+      :definition="definition"
       :required="required"
       v-bind="$attrs as any"
       class="!pr-7"

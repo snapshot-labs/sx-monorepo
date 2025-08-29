@@ -33,7 +33,8 @@ const definition = {
       type: 'string',
       format: 'address',
       title: 'Address',
-      examples: ['Address']
+      examples: ['Address'],
+      showPicker: false
     }
   }
 };
