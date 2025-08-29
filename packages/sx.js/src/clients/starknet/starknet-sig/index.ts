@@ -14,6 +14,7 @@ import {
   updateProposalTypes,
   voteTypes
 } from './types';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import {
   Alias,
   ClientConfig,
@@ -27,8 +28,7 @@ import {
   StarknetEIP712VoteMessage,
   UpdateProposal,
   Vote
-} from '../../../types';
-import { getStrategiesWithParams } from '../../../utils/strategies';
+} from '../types';
 
 export class StarknetSig {
   config: ClientConfig & { manaUrl: string };

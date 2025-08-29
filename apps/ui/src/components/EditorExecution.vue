@@ -176,7 +176,7 @@ watch(
         </div>
       </div>
       <template v-if="model.length > 0 && treasury">
-        <UiLabel label="Transactions" class="border-t" />
+        <UiSectionHeader label="Transactions" class="border-t" />
         <div>
           <Draggable
             v-model="model"

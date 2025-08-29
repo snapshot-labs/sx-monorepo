@@ -86,6 +86,7 @@ export type StrategyTemplate = {
   version?: string;
   spaceCount?: number;
   verifiedSpaceCount?: number;
+  disabled?: boolean;
   link?: string;
   icon?: FunctionalComponent;
   type?: string;

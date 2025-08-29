@@ -9,7 +9,7 @@ import {
   UpdateProposalCallArgs,
   Vote,
   VoteCallArgs
-} from '../../types';
+} from '../../clients/starknet/types';
 import { getChoiceEnum, getUserAddressEnum } from '../../utils/starknet-enums';
 
 const callData = new CallData(SpaceAbi);
