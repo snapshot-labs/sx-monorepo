@@ -8,13 +8,7 @@ export default defineConfig({
   outputDir: '.browser/test-results',
   use: {
     baseURL: 'http://localhost:8080',
-    trace: 'retain-on-failure',
-    video: process.env.CI ? 'on' : undefined,
-    contextOptions: {
-      recordVideo: {
-        dir: '.browser/videos'
-      }
-    }
+    trace: process.env.CI ? 'on' : 'retain-on-failure'
   },
   expect: {
     // 5 seconds is not quite enough it seems
