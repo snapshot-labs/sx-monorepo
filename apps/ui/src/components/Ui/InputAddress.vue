@@ -61,13 +61,14 @@ const networkDetails = computed<NetworkDetails | null>(() => {
         '!pl-[42px]': !!networkDetails
       }"
     />
-    <div
-      v-if="definition?.showPicker ?? true"
+    <button
+      v-if="shouldShowPicker"
       class="absolute top-3.5 right-3 z-10"
+      type="button"
+      aria-label="Pick address from contacts"
+      @click="emit('pick', path || '')"
     >
-      <button type="button" @click="emit('pick', path || '')">
-        <IH-identification />
-      </button>
-    </div>
+      <IH-identification />
+    </button>
   </div>
 </template>
