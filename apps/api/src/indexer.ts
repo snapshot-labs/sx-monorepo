@@ -19,7 +19,7 @@ export async function startIndexer(checkpoint: Checkpoint) {
     await sleep(PRODUCTION_INDEXER_DELAY);
   }
 
-  await checkpoint.resetMetadata();
-  await checkpoint.reset();
+  // await checkpoint.resetMetadata();
+  // await checkpoint.reset();
   checkpoint.start();
 }
