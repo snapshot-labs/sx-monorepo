@@ -67,5 +67,5 @@ export async function getStrategiesWithParams(
     })
   );
 
-  return results.filter(result => result !== null);
+  return results.filter((result): result is IndexedConfig => result !== null);
 }
