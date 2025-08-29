@@ -42,14 +42,6 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 
 <template>
   <div class="relative">
-    <div
-      v-if="definition?.showPicker ?? true"
-      class="absolute top-3.5 right-3 z-10"
-    >
-      <button type="button" @click="emit('pick', path || '')">
-        <IH-identification />
-      </button>
-    </div>
     <UiTooltip
       v-if="networkDetails"
       :title="networkDetails.name"
@@ -69,5 +61,13 @@ const networkDetails = computed<NetworkDetails | null>(() => {
         '!pl-[42px]': !!networkDetails
       }"
     />
+    <div
+      v-if="definition?.showPicker ?? true"
+      class="absolute top-3.5 right-3 z-10"
+    >
+      <button type="button" @click="emit('pick', path || '')">
+        <IH-identification />
+      </button>
+    </div>
   </div>
 </template>
