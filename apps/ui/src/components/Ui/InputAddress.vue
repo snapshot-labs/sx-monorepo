@@ -38,6 +38,10 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 
   return null;
 });
+
+const shouldShowPicker = computed(() => {
+  return props.definition?.showPicker ?? true;
+});
 </script>
 
 <template>
@@ -56,9 +60,9 @@ const networkDetails = computed<NetworkDetails | null>(() => {
       :definition="definition"
       :required="required"
       v-bind="$attrs as any"
-      class="!pr-7"
       :class="{
-        '!pl-[42px]': !!networkDetails
+        '!pl-[42px]': !!networkDetails,
+        '!pr-7': shouldShowPicker
       }"
     />
     <button
