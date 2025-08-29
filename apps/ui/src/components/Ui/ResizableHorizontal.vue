@@ -85,6 +85,7 @@ onMounted(() => {
   >
     <div
       ref="sliderEl"
+      data-no-sidebar-swipe
       :class="[
         'slider',
         {
