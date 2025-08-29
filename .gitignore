@@ -39,3 +39,6 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# playwright related files
+.browser

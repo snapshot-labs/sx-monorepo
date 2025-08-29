@@ -144,6 +144,7 @@ watchEffect(() => {
           class="z-40 sticky top-[71px] lg:top-[72px]"
           with-buttons
           gradient="xxl"
+          data-testid="proposal-tabs"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
@@ -261,7 +262,7 @@ watchEffect(() => {
           }
         ]"
       >
-        <Affix :top="72" :bottom="64">
+        <Affix data-testid="proposal-sidebar" :top="72" :bottom="64">
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
