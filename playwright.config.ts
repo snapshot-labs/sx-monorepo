@@ -12,7 +12,7 @@ export default defineConfig({
     video: process.env.CI ? 'on' : undefined,
     contextOptions: {
       recordVideo: {
-        dir: './browser/videos'
+        dir: '.browser/videos'
       }
     }
   },
