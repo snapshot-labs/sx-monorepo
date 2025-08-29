@@ -210,9 +210,9 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+          'top-[72px] inset-y-0 z-10 hidden lg:flex fixed app-nav',
           {
-            '!block app-nav-open': uiStore.sideMenuOpen
+            '!flex app-nav-open': uiStore.sideMenuOpen
           }
         ]"
       />
