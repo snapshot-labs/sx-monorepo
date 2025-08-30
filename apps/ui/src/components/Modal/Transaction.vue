@@ -310,13 +310,13 @@ watchEffect(async () => {
         <UiInputAddress
           v-model="form.to"
           :error="errors.to"
-          :show-picker="!loading"
           :required="true"
           :definition="{
             type: 'string',
             title: 'Contract address',
             examples: ['Address or ENS'],
-            chainId: props.network
+            chainId: props.network,
+            showControls: !loading
           }"
           @pick="handlePickerClick('to')"
         />
