@@ -12,7 +12,11 @@ withDefaults(
 </script>
 
 <template>
-  <span class="loading" :class="{ inverse: !!inverse }">
+  <span
+    data-testid="loading-indicator"
+    class="loading"
+    :class="{ inverse: !!inverse }"
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       :width="size"

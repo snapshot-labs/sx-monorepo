@@ -198,7 +198,7 @@ watchEffect(() => setTitle('Explore'));
     <div class="flex-grow" v-bind="$attrs">
       <UiSectionHeader label="Spaces" sticky />
       <UiLoading v-if="isPending" class="block m-4" />
-      <div v-else-if="data">
+      <div v-else-if="data" data-testid="explore-spaces-list">
         <UiContainerInfiniteScroll
           v-if="data.pages.flat().length"
           :loading-more="isFetchingNextPage"

@@ -67,7 +67,7 @@ watchEffect(() => setTitle(props.space.name));
           class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
         />
         <div class="flex items-center">
-          <h1 v-text="space.name" />
+          <h1 data-testid="space-name" v-text="space.name" />
           <UiBadgeVerified
             v-if="!isWhiteLabel"
             class="ml-1 top-0.5"
@@ -150,6 +150,7 @@ watchEffect(() => setTitle(props.space.name));
     </template>
     <div>
       <ProposalsList
+        data-testid="summary-proposals-list"
         title="Proposals"
         :is-error="isError"
         :loading="isPending"
