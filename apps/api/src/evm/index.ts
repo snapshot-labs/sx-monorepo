@@ -6,8 +6,9 @@ import { createWriters as createSnapshotXWriters } from './protocols/snapshotX/w
 import { EVMConfig, Protocols } from './types';
 
 // SnapshotX runs by default unless explicitly disabled
-const ENABLE_SNAPSHOT_X = process.env.ENABLE_SNAPSHOT_X !== 'false';
-const ENABLE_GOVERNOR_BRAVO = process.env.ENABLE_GOVERNOR_BRAVO === 'true';
+export const ENABLE_SNAPSHOT_X = process.env.ENABLE_SNAPSHOT_X !== 'false';
+export const ENABLE_GOVERNOR_BRAVO =
+  process.env.ENABLE_GOVERNOR_BRAVO === 'true';
 
 const protocols: Protocols = {
   snapshotX: ENABLE_SNAPSHOT_X,
