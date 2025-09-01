@@ -10,19 +10,14 @@ type NetworkDetails = {
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(
-  defineProps<{
-    showPicker?: boolean;
-    path?: string;
-    definition?: BaseDefinition<string> & {
-      chainId?: number | string;
-    };
-    required?: boolean;
-  }>(),
-  {
-    showPicker: true
-  }
-);
+const props = defineProps<{
+  path?: string;
+  definition?: BaseDefinition<string> & {
+    chainId?: number | string;
+    showControls?: boolean;
+  };
+  required?: boolean;
+}>();
 
 const emit = defineEmits<{
   (e: 'pick', path: string);
@@ -43,15 +38,14 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 
   return null;
 });
+
+const shouldShowPicker = computed(() => {
+  return props.definition?.showControls ?? true;
+});
 </script>
 
 <template>
   <div class="relative">
-    <div v-if="showPicker" class="absolute top-3.5 right-3 z-10">
-      <button type="button" @click="emit('pick', path || '')">
-        <IH-identification />
-      </button>
-    </div>
     <UiTooltip
       v-if="networkDetails"
       :title="networkDetails.name"
@@ -63,13 +57,22 @@ const networkDetails = computed<NetworkDetails | null>(() => {
       />
     </UiTooltip>
     <UiInputString
-      :definition="props.definition"
+      :definition="definition"
       :required="required"
       v-bind="$attrs as any"
-      class="!pr-7"
       :class="{
-        '!pl-[42px]': !!networkDetails
+        '!pl-[42px]': !!networkDetails,
+        '!pr-7': shouldShowPicker
       }"
     />
+    <button
+      v-if="shouldShowPicker"
+      class="absolute top-3.5 right-3 z-10"
+      type="button"
+      aria-label="Pick address from contacts"
+      @click="emit('pick', path || '')"
+    >
+      <IH-identification />
+    </button>
   </div>
 </template>

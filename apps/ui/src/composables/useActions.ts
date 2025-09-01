@@ -89,7 +89,7 @@ export function useActions() {
       if (envelope.signatureData.commitTxId) {
         uiStore.addPendingTransaction(
           envelope.signatureData.commitTxId,
-          network.baseNetworkId
+          network.baseChainId
         );
       }
 

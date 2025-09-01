@@ -198,7 +198,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </div>
 
     <div v-if="web3.account" class="mb-3">
-      <UiLabel label="Delegating to" />
+      <UiSectionHeader label="Delegating to" />
       <UiLoading v-if="isPendingDelegatees" class="px-4 py-3 block" />
       <div v-else-if="delegatees?.length" class="w-full truncate px-4">
         <div
@@ -214,7 +214,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 user: delegatee.id
               }
             }"
-            class="w-full flex justify-between items-center"
+            class="w-full flex justify-between items-center group"
           >
             <UiStamp :id="delegatee.id" type="avatar" :size="32" class="mr-3" />
             <div class="flex-1 leading-[22px]">
@@ -222,9 +222,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 class="text-skin-link"
                 v-text="delegatee.name || shorten(delegatee.id)"
               />
-              <div
+              <UiAddress
+                :address="delegatee.id"
                 class="text-skin-text text-[17px]"
-                v-text="shorten(delegatee.id)"
               />
             </div>
             <div
@@ -285,7 +285,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </div>
     </div>
 
-    <UiLabel label="Delegates" sticky />
+    <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
         class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
@@ -372,7 +372,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   user: delegate.user
                 }
               }"
-              class="flex w-full space-x-3"
+              class="flex w-full space-x-3 group"
             >
               <div
                 class="flex grow sm:grow-0 sm:shrink-0 items-center w-[120px] xs:w-[190px] py-3 gap-x-3 leading-[22px] truncate"
@@ -383,9 +383,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                     class="text-skin-link truncate"
                     v-text="delegate.name || shorten(delegate.user)"
                   />
-                  <div
+                  <UiAddress
+                    :address="delegate.user"
                     class="text-[17px] text-skin-text truncate"
-                    v-text="shorten(delegate.user)"
                   />
                 </div>
               </div>

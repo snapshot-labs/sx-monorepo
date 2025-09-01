@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, shortenAddress } from '@/helpers/utils';
+import { shorten } from '@/helpers/utils';
 import { Contact } from '@/types';
 
 const props = withDefaults(
@@ -72,9 +72,9 @@ const filteredContacts = computed(() =>
           <UiStamp :id="contact.address" type="avatar" :size="32" />
           <div class="flex flex-col ml-3 leading-5 overflow-hidden text-left">
             <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
-            <div
+            <UiAddress
+              :address="contact.address"
               class="text-[17px] text-ellipsis overflow-hidden"
-              v-text="shortenAddress(contact.address)"
             />
           </div>
         </div>

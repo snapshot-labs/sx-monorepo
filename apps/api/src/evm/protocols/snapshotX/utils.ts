@@ -4,6 +4,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import IExecutionStrategy from './abis/IExecutionStrategy.json';
+import logger from './logger';
 import { ExecutionStrategy, Space } from '../../../../.checkpoint/models';
 import { handleVotingPowerValidationMetadata } from '../../../common/ipfs';
 import { EVMConfig, SnapshotXConfig } from '../../types';
@@ -63,8 +64,11 @@ export async function updateProposalValidationStrategy(
           space.voting_power_validation_strategy_metadata,
           config
         );
-      } catch (e) {
-        console.log('failed to handle voting power strategies metadata', e);
+      } catch (err) {
+        logger.warn(
+          { err },
+          'Failed to handle voting power strategies metadata'
+        );
       }
     } catch {
       space.proposal_threshold = '0';

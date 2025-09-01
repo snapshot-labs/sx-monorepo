@@ -40,7 +40,7 @@ const isVisible = computed(() => {
 
 <template>
   <div v-if="isVisible">
-    <UiLabel label="important" sticky />
+    <UiSectionHeader label="Important" sticky />
     <OnboardingTask v-for="(alert, i) in pendingTasks" :key="i" :task="alert" />
     <div class="mx-4 py-[10px] mb-4 flex gap-x-1.5 text-sm">
       <IH-eye class="mt-[3px]" /> Only admins can see this

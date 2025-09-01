@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import Checkpoint from '@snapshot-labs/checkpoint';
 import { addEvmIndexers } from './evm';
+import logger from './logger';
 import { addStarknetIndexers } from './starknet';
 
 const PRODUCTION_INDEXER_DELAY = 60 * 1000;
@@ -12,7 +13,7 @@ export async function startIndexer(checkpoint: Checkpoint) {
   addEvmIndexers(checkpoint);
 
   if (process.env.NODE_ENV === 'production') {
-    console.log(
+    logger.info(
       'Delaying indexer to prevent multiple processes indexing at the same time.'
     );
     await sleep(PRODUCTION_INDEXER_DELAY);
