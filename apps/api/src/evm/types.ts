@@ -37,3 +37,9 @@ export type EVMConfig = {
   snapshotXConfig?: SnapshotXConfig;
   governorBravoConfig?: GovernorBravoConfig;
 } & CheckpointConfig;
+
+export type PartialConfig = {
+  sources: NonNullable<EVMConfig['sources']>;
+  templates: EVMConfig['templates'];
+  abis: EVMConfig['abis'];
+};
