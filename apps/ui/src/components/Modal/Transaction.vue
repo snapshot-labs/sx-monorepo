@@ -147,7 +147,10 @@ function handleMethodChange() {
 }
 
 async function handleToChange(to: string) {
-  form.abi = [];
+  form.abi = DEFAULT_FORM_STATE.abi;
+  form.method = DEFAULT_FORM_STATE.method;
+  form.args = DEFAULT_FORM_STATE.args;
+  form.amount = DEFAULT_FORM_STATE.amount;
   abiStr.value = '';
   addressInvalid.value = false;
   showAbiInput.value = false;
@@ -307,13 +310,13 @@ watchEffect(async () => {
         <UiInputAddress
           v-model="form.to"
           :error="errors.to"
-          :show-picker="!loading"
           :required="true"
           :definition="{
             type: 'string',
             title: 'Contract address',
             examples: ['Address or ENS'],
-            chainId: props.network
+            chainId: props.network,
+            showControls: !loading
           }"
           @pick="handlePickerClick('to')"
         />

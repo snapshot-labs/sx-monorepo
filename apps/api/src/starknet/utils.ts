@@ -17,6 +17,7 @@ import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStr
 import { FullConfig } from './config';
 import { Space } from '../../.checkpoint/models';
 import { handleVotingPowerValidationMetadata } from '../common/ipfs';
+import logger from '../logger';
 
 type StrategyConfig = {
   address: BigNumberish;
@@ -139,8 +140,8 @@ export async function handleExecutionStrategy(
       destinationAddress,
       quorum
     };
-  } catch (e) {
-    console.log('failed to get execution strategy type', e);
+  } catch (err) {
+    logger.warn({ err }, 'Failed to get execution strategy type');
 
     return null;
   }
@@ -189,8 +190,8 @@ export async function updateProposalValidationStrategy(
         space.voting_power_validation_strategy_metadata,
         config
       );
-    } catch (e) {
-      console.log('failed to handle voting power strategies metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle voting power strategies metadata');
     }
   }
 }

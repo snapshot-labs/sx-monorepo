@@ -156,15 +156,15 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
                 name: 'space-user-statement',
                 params: { space: `${space.network}:${space.id}`, user: user.id }
               }"
-              class="overflow-hidden"
+              class="overflow-hidden group"
             >
               <h4
                 class="text-skin-link truncate"
                 v-text="user.name || shorten(user.id)"
               />
-              <div
+              <UiAddress
+                :address="user.id"
                 class="text-[17px] text-skin-text truncate"
-                v-text="shorten(user.id)"
               />
             </AppLink>
           </div>
