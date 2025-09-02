@@ -28,25 +28,29 @@ async function initializeCheckpoint(checkpoint: Checkpoint) {
   const currentVersionTag = `commit:${GIT_COMMIT}|snapshotX:${ENABLE_SNAPSHOT_X}|governorBravo:${ENABLE_GOVERNOR_BRAVO}`;
   const { knex } = checkpoint.getBaseContext();
 
-  const versionTagRow = await knex
-    .select('*')
-    .from('_metadatas')
-    .where({ id: 'version_tag', indexer: '_global' })
-    .first();
+  const isInitialized = await knex.schema.hasTable('_metadatas');
 
-  const storedVersionTag = versionTagRow?.value ?? null;
+  if (isInitialized) {
+    const versionTagRow = await knex
+      .select('*')
+      .from('_metadatas')
+      .where({ id: 'version_tag', indexer: '_global' })
+      .first();
 
-  if (storedVersionTag === currentVersionTag) {
-    return logger.info(
+    const storedVersionTag = versionTagRow?.value ?? null;
+
+    if (storedVersionTag === currentVersionTag) {
+      return logger.info(
+        { currentVersionTag, storedVersionTag },
+        'No change detected. Continuing.'
+      );
+    }
+
+    logger.info(
       { currentVersionTag, storedVersionTag },
-      'No change detected. Continuing.'
+      'Stored version tag differs from current. Resetting database.'
     );
   }
-
-  logger.info(
-    { currentVersionTag, storedVersionTag },
-    'Stored version tag differs from current. Resetting database.'
-  );
 
   await checkpoint.resetMetadata();
   await checkpoint.reset();
