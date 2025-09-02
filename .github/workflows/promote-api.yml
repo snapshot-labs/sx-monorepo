@@ -34,7 +34,7 @@ jobs:
       run: |
         doctl apps spec get "$APP_ID" --format "json" | \
         jq '.services[0].envs |= map(if .key == "DATABASE_URL_INDEX" then .value = "'$NEW_INDEX'" else . end)' | \
-        doctl apps update "$APP_ID" --wait --spec -
+        doctl apps update "$APP_ID" --update-sources --wait --spec -
       env:
         APP_ID: ${{ vars.PUBLIC_API_APP_ID }}
         NEW_INDEX: ${{ steps.get-deployments.outputs.staging-index }}
