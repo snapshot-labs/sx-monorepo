@@ -54,6 +54,17 @@ const spaceData: Record<string, SpaceData | undefined> = {
       chain_id: 1
     }
   },
+  '0xc0Da02939E1441F497fd74F78cE7Decb17B66529': {
+    name: 'Compound',
+    symbol: 'COMP',
+    decimals: 18,
+    governanceToken: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
+    treasury: {
+      name: 'Compound Treasury',
+      address: '0x6d903f6003cca6255D85CcA4D3B5E5146dC33925',
+      chain_id: 1
+    }
+  },
   '0x69112D158A607DD388034c0C09242FF966985258': {
     name: 'Sepolia Governor Bravo',
     symbol: 'MOCK',
