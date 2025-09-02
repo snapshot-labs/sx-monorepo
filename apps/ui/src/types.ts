@@ -181,6 +181,7 @@ export type OffchainAdditionalRawData = {
 
 export type Space = {
   id: string;
+  protocol: string;
   network: NetworkID;
   verified: boolean;
   turbo: boolean;
@@ -267,6 +268,7 @@ export type Proposal = {
   quorum_type?: 'default' | 'rejection';
   space: {
     id: string;
+    protocol: string;
     name: string;
     snapshot_chain_id?: string;
     avatar: string;

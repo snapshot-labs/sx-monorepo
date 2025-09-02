@@ -47,6 +47,12 @@ export function createConstants(
         isSupported: true,
         isContractSupported: true,
         connectors: EVM_CONNECTORS
+      },
+      // Governor Bravo
+      GovernorBravoAuthenticator: {
+        isSupported: true,
+        isContractSupported: true,
+        connectors: EVM_CONNECTORS
       }
     };
 
@@ -62,7 +68,9 @@ export function createConstants(
     SimpleQuorumAvatar: true,
     SimpleQuorumTimelock: true,
     Axiom: true,
-    Isokratia: true
+    Isokratia: true,
+    // Governor Bravo
+    GovernorBravoTimelock: true
   };
 
   const AUTHS = {
