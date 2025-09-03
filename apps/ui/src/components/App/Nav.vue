@@ -250,11 +250,12 @@ function getNavigationConfig(
         home: {
           name: 'Home',
           icon: IHHome,
-          hidden: !web3.value.account
+          hidden: !web3.value.account || true // Modified: Set to true to hide from sidebar
         },
         explore: {
           name: 'Explore',
-          icon: IHGlobe
+          icon: IHGlobe,
+          hidden: true // Modified: Set to true to hide from sidebar
         },
         notifications: {
           name: 'Notifications',

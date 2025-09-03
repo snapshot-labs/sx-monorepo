@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getCacheHash, shorten } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
+import BimaLogo from '@/components/App/BimaLogo.vue'; // New: Import BimaLogo component
 
 defineProps<{
   hasAppNav: boolean;
@@ -49,12 +50,18 @@ const searchConfig = computed(() => {
   const subRootName = route.matched[1]?.name || '';
   const exclusions = SEARCH_CONFIG[rootName]?.exclude || [];
 
+  // New: Hide search config if we are on a 'my' route, matching the image design.
+  if (isMyRootRoute.value) return null;
+
   if (SEARCH_CONFIG[rootName] && !exclusions.includes(subRootName)) {
     return SEARCH_CONFIG[rootName];
   }
 
   return null;
 });
+
+// New: Computed property to determine if the root route is 'my'
+const isMyRootRoute = computed(() => route.matched[0]?.name === 'my');
 
 async function handleLogin(connector: Connector) {
   resetAccountModal();
@@ -93,7 +100,28 @@ onUnmounted(() => {
 
 <template>
   <UiTopnav v-bind="$attrs">
+    <!-- New: Conditional content for 'my' route - Bima logo and navigation links -->
+    <div v-if="isMyRootRoute" class="flex items-center h-full truncate px-4 space-x-6">
+      <AppLink :to="{ name: 'my-home' }" class="flex items-center space-x-2.5">
+        <BimaLogo class="h-5 w-auto text-black" /> <!-- Apply text-black or adjust fill in SVG if dynamic coloring is needed -->
+      </AppLink>
+      <AppLink :to="{ name: 'my-home' }"
+               class="text-skin-link text-[19px] font-medium"
+               :class="{'font-semibold': route.name === 'my-home'}">
+        Home
+      </AppLink>
+      <AppLink :to="{ name: 'my-explore' }"
+               class="text-skin-link text-[19px] font-medium"
+               :class="{'font-semibold': route.name === 'my-explore'}">
+        Explore
+      </AppLink>
+      <!-- If "Docs" and "Launch Mainnet Alpha" buttons are needed, they would go here. -->
+      <!-- For this request, we only focused on the Bima logo, Home, and Explore links on the left. -->
+    </div>
+
+    <!-- Existing: Default app navigation for other routes (sidebar toggle, breadcrumb) -->
     <div
+      v-else
       class="flex items-center h-full truncate"
       :class="{
         'lg:border-r lg:pr-4 lg:w-[240px] shrink-0': hasAppNav,
@@ -108,8 +136,10 @@ onUnmounted(() => {
         ]"
       />
     </div>
+
+    <!-- Existing: Search form - now conditionally rendered to hide on 'my' routes -->
     <form
-      v-if="searchConfig"
+      v-if="searchConfig && !isMyRootRoute"
       id="search-form"
       class="flex flex-1 py-3 h-full"
       @submit="handleSearchSubmit"
