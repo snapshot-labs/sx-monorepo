@@ -4,73 +4,73 @@ import { createOffchainNetwork } from './offchain';
 import { createStarknetNetwork } from './starknet';
 import { ExplorePageProtocol, ProtocolConfig, ReadWriteNetwork } from './types';
 
-const snapshotNetwork = createOffchainNetwork('s');
+// const snapshotNetwork = createOffchainNetwork('s');
 const snapshotTestnetNetwork = createOffchainNetwork('s-tn');
-const starknetNetwork = createStarknetNetwork('sn');
-const starknetSepoliaNetwork = createStarknetNetwork('sn-sep');
-const polygonNetwork = createEvmNetwork('matic');
-const arbitrumNetwork = createEvmNetwork('arb1');
-const baseNetwork = createEvmNetwork('base');
-const mantleNetwork = createEvmNetwork('mnt');
-const optimismNetwork = createEvmNetwork('oeth');
+// const starknetNetwork = createStarknetNetwork('sn');
+// const starknetSepoliaNetwork = createStarknetNetwork('sn-sep');
+// const polygonNetwork = createEvmNetwork('matic');
+// const arbitrumNetwork = createEvmNetwork('arb1');
+// const baseNetwork = createEvmNetwork('base');
+// const mantleNetwork = createEvmNetwork('mnt');
+// const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
-const apeNetwork = createEvmNetwork('ape');
-const curtisNetwork = createEvmNetwork('curtis');
+// const apeNetwork = createEvmNetwork('ape');
+// const curtisNetwork = createEvmNetwork('curtis');
 const sepoliaNetwork = createEvmNetwork('sep');
 
 export const enabledNetworks: NetworkID[] = import.meta.env
   .VITE_ENABLED_NETWORKS
   ? (import.meta.env.VITE_ENABLED_NETWORKS.split(',') as NetworkID[])
   : [
-      's',
+      // 's',
       's-tn',
       'eth',
-      'matic',
-      'arb1',
-      'base',
-      'mnt',
-      'oeth',
-      'ape',
-      'curtis',
+      // 'matic',
+      // 'arb1',
+      // 'base',
+      // 'mnt',
+      // 'oeth',
+      // 'ape',
+      // 'curtis',
       'sep',
-      'sn',
-      'sn-sep'
+      // 'sn',
+      // 'sn-sep'
     ];
 
 export const evmNetworks: NetworkID[] = [
   'eth',
-  'matic',
-  'arb1',
-  'mnt',
-  'base',
-  'oeth',
-  'ape',
-  'curtis',
+  // 'matic',
+  // 'arb1',
+  // 'mnt',
+  // 'base',
+  // 'oeth',
+  // 'ape',
+  // 'curtis',
   'sep'
 ];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
-  import.meta.env.VITE_METADATA_NETWORK || 's';
+  import.meta.env.VITE_METADATA_NETWORK || 's-tn';
 
 export const getNetwork = (id: NetworkID) => {
   if (!enabledNetworks.includes(id))
     throw new Error(`Network ${id} is not enabled`);
 
-  if (id === 's') return snapshotNetwork;
+  // if (id === 's') return snapshotNetwork;
   if (id === 's-tn') return snapshotTestnetNetwork;
-  if (id === 'matic') return polygonNetwork;
-  if (id === 'arb1') return arbitrumNetwork;
-  if (id === 'base') return baseNetwork;
-  if (id === 'mnt') return mantleNetwork;
-  if (id === 'oeth') return optimismNetwork;
+  // if (id === 'matic') return polygonNetwork;
+  // if (id === 'arb1') return arbitrumNetwork;
+  // if (id === 'base') return baseNetwork;
+  // if (id === 'mnt') return mantleNetwork;
+  // if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
-  if (id === 'ape') return apeNetwork;
-  if (id === 'curtis') return curtisNetwork;
+  // if (id === 'ape') return apeNetwork;
+  // if (id === 'curtis') return curtisNetwork;
   if (id === 'sep') return sepoliaNetwork;
-  if (id === 'sn') return starknetNetwork;
-  if (id === 'sn-sep') return starknetSepoliaNetwork;
+  // if (id === 'sn') return starknetNetwork;
+  // if (id === 'sn-sep') return starknetSepoliaNetwork;
 
   throw new Error(`Unknown network ${id}`);
 };
@@ -100,7 +100,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       label: 'Snapshot X',
       apiNetwork:
         enabledNetworks.find(network => !offchainNetworks.includes(network)) ||
-        'eth',
+        'sep',
       networks: enabledNetworks.filter(
         network => !offchainNetworks.includes(network)
       ),

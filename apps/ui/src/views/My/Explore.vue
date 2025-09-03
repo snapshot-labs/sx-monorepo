@@ -11,7 +11,7 @@ defineOptions({ inheritAttrs: false });
 type SpaceCategory = 'all' | (typeof SPACE_CATEGORIES)[number]['id'];
 
 const DEFAULT_PROTOCOL = 'snapshot';
-const DEFAULT_NETWORK = 'all';
+const DEFAULT_NETWORK = 'eth';
 const DEFAULT_CATEGORY = 'all';
 
 const protocols = Object.values(explorePageProtocols).map(
@@ -91,7 +91,7 @@ const networks = computed(() => {
     });
   }
 
-  return [{ id: 'all', name: 'All networks' }, ...protocolNetworks];
+  return [{ id: 'eth', name: 'Ethereum' }, ...protocolNetworks];
 });
 
 function isValidNetwork(network: string): network is string {

@@ -58,7 +58,7 @@
     "@snapshot-labs/pineapple": "^1.2.1",
     "@snapshot-labs/prettier-config": "^0.1.0-beta.19",
     "@snapshot-labs/snapshot.js": "^0.14.7",
-    "@snapshot-labs/sx": "^0.1.0",
+    "@snapshot-labs/sx": "^0.1.8",
     "@tanstack/vue-query": "^5.64.2",
     "@vueuse/core": "^10.4.1",
     "@walletconnect/core": "^2.11.0",
