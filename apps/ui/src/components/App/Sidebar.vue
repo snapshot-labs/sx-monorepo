@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import draggable from 'vuedraggable';
+import { computed } from 'vue'; // Ensure 'computed' is imported
 
 const followedSpacesStore = useFollowedSpacesStore();
+
+// New: Computed property to filter for only 'bima.eth' space
+const filteredFollowedSpaces = computed(() => {
+  // Assuming 'bima.eth' is the unique identifier (id) for the space
+  return followedSpacesStore.followedSpaces.filter(space => space.id === 'bima.eth');
+});
 </script>
 
 <template>
@@ -15,7 +22,7 @@ const followedSpacesStore = useFollowedSpacesStore();
     <UiLoading v-if="!followedSpacesStore.followedSpacesLoaded" />
     <draggable
       v-else
-      v-model="followedSpacesStore.followedSpaces"
+      :list="filteredFollowedSpaces" 
       :delay="100"
       :delay-on-touch-only="true"
       :touch-start-threshold="35"
