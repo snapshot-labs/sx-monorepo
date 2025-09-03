@@ -177,15 +177,18 @@ function getNavigationConfig(
       items: {
         overview: {
           name: 'Overview',
-          icon: IHGlobeAlt
+          icon: IHGlobeAlt,
+          hidden: true // Modified: Hidden from sidebar, now in Topnav
         },
         proposals: {
           name: 'Proposals',
-          icon: IHNewspaper
+          icon: IHNewspaper,
+          hidden: true // Modified: Hidden from sidebar, now in Topnav
         },
         leaderboard: {
           name: 'Leaderboard',
-          icon: IHUserGroup
+          icon: IHUserGroup,
+          hidden: true // Modified: Hidden from sidebar, now in Topnav
         },
         ...(space.value?.delegations && space.value.delegations.length > 0
           ? {
@@ -250,18 +253,18 @@ function getNavigationConfig(
         home: {
           name: 'Home',
           icon: IHHome,
-          hidden: !web3.value.account || true // Modified: Set to true to hide from sidebar
+          hidden: !web3.value.account || true
         },
         explore: {
           name: 'Explore',
           icon: IHGlobe,
-          hidden: true // Modified: Set to true to hide from sidebar
+          hidden: true
         },
         notifications: {
           name: 'Notifications',
           count: notificationsStore.unreadNotificationsCount,
           icon: IHBell,
-          hidden: !web3.value.account
+          hidden: !web3.value.account || true
         }
       },
       shortcuts: {

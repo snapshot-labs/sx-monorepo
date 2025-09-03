@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { getCacheHash, shorten } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
-import BimaLogo from '@/components/App/BimaLogo.vue'; // New: Import BimaLogo component
+import BimaLogo from '@/components/App/BimaLogo.vue';
+import IHBell from '~icons/heroicons-outline/bell';
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt'; // New: Import GlobeAlt icon for Overview
+import IHNewspaper from '~icons/heroicons-outline/newspaper'; // New: Import Newspaper icon for Proposals
+import IHUserGroup from '~icons/heroicons-outline/user-group'; // New: Import UserGroup icon for Leaderboard
+
 
 defineProps<{
   hasAppNav: boolean;
@@ -16,6 +21,7 @@ const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
 const { login, web3 } = useWeb3();
 const { toggleTheme, currentTheme } = useTheme();
 const { isWhiteLabel } = useWhiteLabel();
+const notificationsStore = useNotificationsStore();
 
 const SEARCH_CONFIG = {
   space: {
@@ -50,7 +56,7 @@ const searchConfig = computed(() => {
   const subRootName = route.matched[1]?.name || '';
   const exclusions = SEARCH_CONFIG[rootName]?.exclude || [];
 
-  // New: Hide search config if we are on a 'my' route, matching the image design.
+  // Hide search config if we are on a 'my' root route.
   if (isMyRootRoute.value) return null;
 
   if (SEARCH_CONFIG[rootName] && !exclusions.includes(subRootName)) {
@@ -60,8 +66,16 @@ const searchConfig = computed(() => {
   return null;
 });
 
-// New: Computed property to determine if the root route is 'my'
+// Computed property to determine if the root route is 'my'
 const isMyRootRoute = computed(() => route.matched[0]?.name === 'my');
+
+// New: Computed property to determine if the root route is 'space'
+const isSpaceRootRoute = computed(() => route.matched[0]?.name === 'space' && route.name !== 'space-settings');
+
+// Computed property for unread notifications count
+const unreadNotificationsCount = computed(
+  () => notificationsStore.unreadNotificationsCount
+);
 
 async function handleLogin(connector: Connector) {
   resetAccountModal();
@@ -100,10 +114,10 @@ onUnmounted(() => {
 
 <template>
   <UiTopnav v-bind="$attrs">
-    <!-- New: Conditional content for 'my' route - Bima logo and navigation links -->
+    <!-- Conditional content for 'my' route - Bima logo and navigation links -->
     <div v-if="isMyRootRoute" class="flex items-center h-full truncate px-4 space-x-6">
       <AppLink :to="{ name: 'my-home' }" class="flex items-center space-x-2.5">
-        <BimaLogo class="h-5 w-auto text-black" /> <!-- Apply text-black or adjust fill in SVG if dynamic coloring is needed -->
+        <BimaLogo class="h-5 w-auto text-black" />
       </AppLink>
       <AppLink :to="{ name: 'my-home' }"
                class="text-skin-link text-[19px] font-medium"
@@ -115,8 +129,31 @@ onUnmounted(() => {
                :class="{'font-semibold': route.name === 'my-explore'}">
         Explore
       </AppLink>
-      <!-- If "Docs" and "Launch Mainnet Alpha" buttons are needed, they would go here. -->
-      <!-- For this request, we only focused on the Bima logo, Home, and Explore links on the left. -->
+    </div>
+
+    <!-- New: Conditional content for 'space' route - Space-specific navigation links -->
+    <div v-else-if="isSpaceRootRoute" class="flex items-center h-full truncate px-4 space-x-6">
+      <AppLink
+        :to="{ name: 'space-overview', params: { space: route.params.space } }"
+        class="text-skin-link text-[19px] font-medium"
+        :class="{'font-semibold': route.name === 'space-overview'}"
+      >
+        <IH-globe-alt class="inline-block mr-2" /> Overview
+      </AppLink>
+      <AppLink
+        :to="{ name: 'space-proposals', params: { space: route.params.space } }"
+        class="text-skin-link text-[19px] font-medium"
+        :class="{'font-semibold': route.name === 'space-proposals'}"
+      >
+        <IH-newspaper class="inline-block mr-2" /> Proposals
+      </AppLink>
+      <AppLink
+        :to="{ name: 'space-leaderboard', params: { space: route.params.space } }"
+        class="text-skin-link text-[19px] font-medium"
+        :class="{'font-semibold': route.name === 'space-leaderboard'}"
+      >
+        <IH-user-group class="inline-block mr-2" /> Leaderboard
+      </AppLink>
     </div>
 
     <!-- Existing: Default app navigation for other routes (sidebar toggle, breadcrumb) -->
@@ -137,9 +174,9 @@ onUnmounted(() => {
       />
     </div>
 
-    <!-- Existing: Search form - now conditionally rendered to hide on 'my' routes -->
+    <!-- Existing: Search form - now conditionally rendered to hide on 'my' routes, but visible for space routes -->
     <form
-      v-if="searchConfig && !isMyRootRoute"
+      v-if="searchConfig"
       id="search-form"
       class="flex flex-1 py-3 h-full"
       @submit="handleSearchSubmit"
@@ -157,6 +194,22 @@ onUnmounted(() => {
     </form>
 
     <div class="flex space-x-2 shrink-0">
+      <!-- Notifications button -->
+      <UiButton
+        v-if="web3.account"
+        class="!px-0 w-[46px] relative"
+        :class="{ 'text-skin-link': unreadNotificationsCount > 0 }"
+        @click="router.push({ name: 'my-notifications' })"
+      >
+        <IH-bell class="inline-block" />
+        <div
+          v-if="unreadNotificationsCount > 0"
+          class="absolute top-1 right-1 h-3 w-3 rounded-full bg-red-500 text-white text-xs flex items-center justify-center"
+        >
+          <span class="sr-only">{{ unreadNotificationsCount }} unread notifications</span>
+        </div>
+      </UiButton>
+
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
