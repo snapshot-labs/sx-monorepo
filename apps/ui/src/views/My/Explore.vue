@@ -151,7 +151,7 @@ watchEffect(() => setTitle('Explore'));
 
 <template>
   <div class="flex flex-col" style="min-height: calc(100vh - 72px)">
-    <OnboardingUser class="mb-2" />
+    <!-- <OnboardingUser class="mb-2" /> -->
     <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
       <div class="flex sm:flex-row flex-col flex-wrap gap-2">
         <UiSelectDropdown
