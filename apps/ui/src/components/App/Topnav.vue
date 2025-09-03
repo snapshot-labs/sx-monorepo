@@ -3,9 +3,9 @@ import { getCacheHash, shorten } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
 import BimaLogo from '@/components/App/BimaLogo.vue';
 import IHBell from '~icons/heroicons-outline/bell';
-import IHGlobeAlt from '~icons/heroicons-outline/globe-alt'; // New: Import GlobeAlt icon for Overview
-import IHNewspaper from '~icons/heroicons-outline/newspaper'; // New: Import Newspaper icon for Proposals
-import IHUserGroup from '~icons/heroicons-outline/user-group'; // New: Import UserGroup icon for Leaderboard
+import IHGlobeAlt from '~icons/heroicons-outline/globe-alt'; // Import GlobeAlt icon for Overview
+import IHNewspaper from '~icons/heroicons-outline/newspaper'; // Import Newspaper icon for Proposals
+import IHUserGroup from '~icons/heroicons-outline/user-group'; // Import UserGroup icon for Leaderboard
 
 
 defineProps<{
@@ -69,8 +69,14 @@ const searchConfig = computed(() => {
 // Computed property to determine if the root route is 'my'
 const isMyRootRoute = computed(() => route.matched[0]?.name === 'my');
 
-// New: Computed property to determine if the root route is 'space'
+// Computed property to determine if the root route is 'space'
 const isSpaceRootRoute = computed(() => route.matched[0]?.name === 'space' && route.name !== 'space-settings');
+
+// New: Computed property to check if the current space is 'bima.eth'
+const isCurrentSpaceBimaEth = computed(() => {
+  const spaceParam = route.params.space as string | undefined;
+  return isSpaceRootRoute.value && spaceParam?.endsWith(':bima.eth');
+});
 
 // Computed property for unread notifications count
 const unreadNotificationsCount = computed(
@@ -131,8 +137,17 @@ onUnmounted(() => {
       </AppLink>
     </div>
 
-    <!-- New: Conditional content for 'space' route - Space-specific navigation links -->
+    <!-- Conditional content for 'space' route - Space-specific navigation links -->
     <div v-else-if="isSpaceRootRoute" class="flex items-center h-full truncate px-4 space-x-6">
+      <!-- New: Display BimaLogo if the current space is 'bima.eth' -->
+      <AppLink
+        v-if="isCurrentSpaceBimaEth"
+        :to="{ name: 'space-overview', params: { space: route.params.space } }"
+        class="flex items-center space-x-2.5 !mr-4"
+      >
+        <BimaLogo class="h-5 w-auto text-black" />
+      </AppLink>
+
       <AppLink
         :to="{ name: 'space-overview', params: { space: route.params.space } }"
         class="text-skin-link text-[19px] font-medium"
@@ -174,7 +189,7 @@ onUnmounted(() => {
       />
     </div>
 
-    <!-- Existing: Search form - now conditionally rendered to hide on 'my' routes, but visible for space routes -->
+    <!-- Existing: Search form -->
     <form
       v-if="searchConfig"
       id="search-form"
