@@ -86,43 +86,45 @@ export function useWhiteLabel() {
   async function init() {
     if (resolved.value) return;
 
+    let shouldResolve = true;
+
     try {
       space.value = await getSpace(domain);
 
-      if (space.value) {
-        if (!space.value.turbo) {
-          const redirectUrl = new URL(
-            `${window.location.protocol}//${DEFAULT_DOMAIN}`
-          );
+      if (!space.value) return;
 
-          const originalHash = window.location.hash.replace(/^#\//, '');
-          const globalPathKey = Object.keys(GLOBAL_PATHS).find(path =>
-            originalHash.startsWith(path)
-          );
+      if (!space.value.turbo) {
+        const redirectUrl = new URL(
+          `${window.location.protocol}//${DEFAULT_DOMAIN}`
+        );
 
-          if (globalPathKey) {
-            redirectUrl.hash = `#/${GLOBAL_PATHS[globalPathKey]}`;
-          } else {
-            const newHash = `#/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
-            redirectUrl.hash = [newHash, originalHash]
-              .filter(Boolean)
-              .join('/');
-          }
+        const originalHash = window.location.hash.replace(/^#\//, '');
+        const globalPathKey = Object.keys(GLOBAL_PATHS).find(path =>
+          originalHash.startsWith(path)
+        );
 
-          window.location.href = redirectUrl.href;
-          return;
+        if (globalPathKey) {
+          redirectUrl.hash = `#/${GLOBAL_PATHS[globalPathKey]}`;
+        } else {
+          const newHash = `#/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
+          redirectUrl.hash = [newHash, originalHash].filter(Boolean).join('/');
         }
 
-        isWhiteLabel.value = true;
-        skinSettings.value =
-          MAPPING[domain]?.skinSettings ||
-          space.value.additionalRawData?.skinSettings;
+        window.location.href = redirectUrl.href;
+        // Don't mark as resolved, to keep the UI splash screen while redirecting
+        shouldResolve = false;
+        return;
       }
+
+      isWhiteLabel.value = true;
+      skinSettings.value =
+        MAPPING[domain]?.skinSettings ||
+        space.value.additionalRawData?.skinSettings;
     } catch (e) {
       console.log(e);
       failed.value = true;
     } finally {
-      resolved.value = true;
+      resolved.value = shouldResolve;
     }
   }
 
