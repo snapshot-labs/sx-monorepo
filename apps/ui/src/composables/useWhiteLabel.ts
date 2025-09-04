@@ -33,7 +33,16 @@ const MAPPING = {
   },
   'starknet.stage.box': {
     network: 's',
-    id: 'starknetdemo.eth'
+    id: 'starknetdemo.eth',
+    skinSettings: {
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      theme: 'light',
+      logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
+    }
   }
 };
 
