@@ -198,9 +198,14 @@ export function createWriters(
     const { votingPowerStrategyParsedMetadata } =
       await initializeStrategies(contractAddress);
 
+    const spaceDataEntry = spaceData[contractAddress];
+    if (!spaceDataEntry) return;
+
+    const { name, symbol, treasury, governanceToken } = spaceDataEntry;
+
     space.authenticators = ['GovernorBravoAuthenticator'];
     space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
-    space.strategies_params = ['0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546'];
+    space.strategies_params = [governanceToken];
     space.strategies_indices = [0];
     space.voting_power_validation_strategy_strategies = space.strategies;
     space.voting_power_validation_strategy_strategies_params =
@@ -209,11 +214,6 @@ export function createWriters(
       votingPowerStrategyParsedMetadata.id
     ];
     space.proposal_threshold = proposalThreshold.toString();
-
-    const spaceDataEntry = spaceData[contractAddress];
-    if (!spaceDataEntry) return;
-
-    const { name, symbol, treasury } = spaceDataEntry;
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = name;
