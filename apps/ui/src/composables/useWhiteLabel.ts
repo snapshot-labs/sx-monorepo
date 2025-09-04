@@ -22,6 +22,18 @@ const MAPPING = {
       theme: 'dark',
       logo: 'ipfs://bafkreiab7pgyo4gzvospqgrlnfp6o5d6dpq4vijnzvcf5mhwzevt4hnd2m'
     }
+  },
+  'worldlibertyfinancial.com': {
+    network: 's',
+    id: 'worldlibertyfinancial.com'
+  },
+  'townhall.box': {
+    network: 's',
+    id: 'openagora.eth'
+  },
+  'starknet.stage.box': {
+    network: 's',
+    id: 'starknetdemo.eth'
   }
 };
 
