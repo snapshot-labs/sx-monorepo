@@ -93,7 +93,7 @@ export function useWhiteLabel() {
 
       if (!space.value) return;
 
-      if (!space.value.turbo) {
+      if (!space.value.turbo && !MAPPING[domain]) {
         const redirectUrl = new URL(
           `${window.location.protocol}//${DEFAULT_DOMAIN}`
         );
