@@ -803,9 +803,10 @@ export function createWriters(config: FullConfig) {
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
-      await handleVoteMetadata(metadataUri, config);
-
-      vote.metadata = dropIpfs(metadataUri);
+      if (metadataUri) {
+        await handleVoteMetadata(metadataUri, config);
+        vote.metadata = dropIpfs(metadataUri);
+      }
     } catch (err) {
       logger.warn({ err }, 'Failed to handle vote metadata');
     }
