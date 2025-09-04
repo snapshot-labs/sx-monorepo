@@ -79,7 +79,7 @@ export function useWhiteLabel() {
     try {
       space.value = await getSpace(domain);
 
-      if (!space.value) return true;
+      if (!space.value) return;
 
       if (!space.value.turbo) {
         const redirectUrl = new URL(
