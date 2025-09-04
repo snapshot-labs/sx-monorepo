@@ -425,7 +425,7 @@ onMounted(() => {
           <div class="text-skin-heading">
             {{
               dayjs(
-                selectedSpace.turbo_expiration
+                (selectedSpace.turbo_expiration || 0) * 1e3 > Date.now()
                   ? selectedSpace.turbo_expiration * 1e3
                   : new Date()
               )
