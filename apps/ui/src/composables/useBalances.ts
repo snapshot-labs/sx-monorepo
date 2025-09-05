@@ -31,6 +31,11 @@ METADATA_BY_CHAIN_ID.set(100, {
   ticker: 'XDAI'
 });
 
+METADATA_BY_CHAIN_ID.set(42220, {
+  name: 'Celo',
+  ticker: 'CELO'
+});
+
 type Treasury = {
   chainId: ChainId;
   address: string;
@@ -78,7 +83,7 @@ export function useBalances({
     const tokensWithBalance = data.filter(
       asset =>
         formatUnits(asset.tokenBalance, asset.decimals) !== '0.0' ||
-        asset.symbol === baseToken.symbol
+        asset.contractAddress === ETH_CONTRACT
     );
 
     const coingeckoAssetPlatform = COINGECKO_ASSET_PLATFORMS[chainId];
