@@ -18,6 +18,7 @@ export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
   33139, // Apechain
   42161, // Arbitrum
   42170, // Arbitrum Nova
+  42220, // Celo
   11155111 // Sepolia
 ] as const;
 
@@ -44,6 +45,7 @@ const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
   33139: 'apechain-mainnet',
   42161: 'arb-mainnet',
   42170: 'arbnova-mainnet',
+  42220: 'celo-mainnet',
   11155111: 'eth-sepolia'
 };
 
