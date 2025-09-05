@@ -688,6 +688,8 @@ export function createApi(
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      delete filter?.protocol;
+
       if (
         !filter ||
         filter.hasOwnProperty('searchQuery') ||
