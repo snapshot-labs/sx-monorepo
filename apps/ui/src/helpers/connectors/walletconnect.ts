@@ -54,7 +54,8 @@ export default class Walletconnect extends Connector {
         metis,
         sepolia,
         apeChain,
-        fantomTestnet
+        fantomTestnet,
+        celo
       } = await import('@reown/appkit/networks');
 
       const { projectId, ...metadata } = this.options;
@@ -73,7 +74,8 @@ export default class Walletconnect extends Connector {
           metis,
           sepolia,
           apeChain,
-          fantomTestnet
+          fantomTestnet,
+          celo
         ],
         themeMode: currentTheme.value,
         allWallets: 'ONLY_MOBILE',
