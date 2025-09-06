@@ -228,7 +228,7 @@ export const FLAGS = {
   DMCA: 2
 };
 
-export const OVERRIDING_STRATEGIES = [
+export const OVERRIDING_STRATEGIES: readonly string[] = [
   'aura-vlaura-vebal-with-overrides',
   'balance-of-with-linear-vesting-power',
   'balancer-delegation',
