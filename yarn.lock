@@ -4417,6 +4417,11 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-strike/-/extension-strike-3.4.1.tgz#0b3312d8ed592e4a55948be05b89f99183b49ae3"
   integrity sha512-m3RJA9kq39mDUZR/i9NJVtNlbaa+7F+hv8FkNDNOyaHwn52mas7bbtNEI73/O48r7GsPhLhfzeShhGXtwRINmQ==
 
+"@tiptap/extension-table@^3.4.1":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-table/-/extension-table-3.4.1.tgz#44c14029a5544a97c9f998032b9b8b828e3766a9"
+  integrity sha512-2yXveI1632p/B/jq6Kjg5/BE85hKM5OQAkLExisxdmQ2vAEARBj6Y8iMXdsc7BJJMjwu0Q7eT3EsvDNpYJgehw==
+
 "@tiptap/extension-text@^3.4.1":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-text/-/extension-text-3.4.1.tgz#0c32964eb311f3bc85373dd6f03e005e92f95ce4"
@@ -4485,6 +4490,11 @@
     "@tiptap/extension-underline" "^3.4.1"
     "@tiptap/extensions" "^3.4.1"
     "@tiptap/pm" "^3.4.1"
+
+"@tiptap/static-renderer@^3.4.1":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@tiptap/static-renderer/-/static-renderer-3.4.1.tgz#dfb206438ad9739c619a806b4a4717c3c60ac3b5"
+  integrity sha512-VhguGVHv/IPMfc0eEscFd51GccpBBvyo9h5TXmmWgIGVpsPaq+RKHI1q6q4MnBjPJ4QQ4Ia70p3x9unGx0imXw==
 
 "@tiptap/vue-3@^3.4.1":
   version "3.4.1"

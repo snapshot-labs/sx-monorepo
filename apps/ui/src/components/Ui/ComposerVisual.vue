@@ -1,9 +1,20 @@
 <script setup lang="ts">
+import { TableKit } from '@tiptap/extension-table';
 import { Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
+import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { BubbleMenu } from '@tiptap/vue-3/menus';
 import { Remarkable } from 'remarkable';
+
+const extensions = [
+  StarterKit,
+  TableKit,
+  Placeholder.configure({
+    placeholder: 'Write something ...',
+    showOnlyWhenEditable: true
+  })
+];
 
 const model = defineModel<string>({ required: true });
 
@@ -11,19 +22,16 @@ const props = defineProps<{
   error?: string;
   definition: any;
 }>();
-
 const editor = useEditor({
   content: new Remarkable().render(model.value || ''),
-  extensions: [
-    StarterKit,
-    Placeholder.configure({
-      placeholder: props.definition.examples?.[0] || 'Start typing...'
-    })
-  ],
+  extensions,
   editorProps: {
     attributes: {
       class: 'focus:outline-none'
     }
+  },
+  onUpdate: ({ editor }) => {
+    model.value = renderToMarkdown({ extensions, content: editor.getJSON() });
   }
 });
 const { isDirty } = useDirty(model, props.definition);
