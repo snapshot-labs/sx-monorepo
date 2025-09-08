@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { stripHtmlTags } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Statement } from '@/types';
 
@@ -14,7 +13,6 @@ const emit = defineEmits<{
 const actions = useActions();
 
 const sending = ref(false);
-const previewEnabled = ref(false);
 const form = reactive({
   statement: model.value.statement,
   status: model.value.status
@@ -82,6 +80,7 @@ watchEffect(async () => {
       v-model="form.statement"
       :definition="STATEMENT_DEFINITION"
       :error="formErrors.statement"
+      no-html-tags
       class="mb-3"
     />
     <div class="flex items-center justify-between space-x-2.5">
