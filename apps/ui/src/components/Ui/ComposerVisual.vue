@@ -134,7 +134,10 @@ const showError = computed<boolean>(
         </button>
       </div>
     </bubble-menu>
-    <editor-content :editor="editor" class="min-h-[260px] mb-[14px]" />
+    <editor-content
+      :editor="editor"
+      class="markdown-body min-h-[260px] mb-[14px]"
+    />
   </div>
 </template>
 

@@ -33,11 +33,13 @@ function toggleEditorType() {
             :is-active="previewEnabled"
             text="Preview"
             class="border-transparent"
-          /></button
-      ></template>
+          />
+        </button>
+      </template>
       <div class="grow" />
       <button class="py-2" @click="toggleEditorType">
-        {{ editorType === 'markdown' ? 'Visual editor' : 'Markdown editor' }}
+        Switch to
+        {{ editorType === 'markdown' ? 'visual editor' : 'markdown editor' }}
       </button>
     </div>
     <UiComposerVisual
@@ -50,12 +52,14 @@ function toggleEditorType() {
       <UiMarkdown
         v-if="previewEnabled"
         class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
-        :body="noHtmlTags ? stripHtmlTags(model) : model" />
+        :body="noHtmlTags ? stripHtmlTags(model) : model"
+      />
       <UiComposerMarkdown
         v-else
         v-model="model"
         :error="error"
         :definition="definition"
-    /></template>
+      />
+    </template>
   </div>
 </template>
