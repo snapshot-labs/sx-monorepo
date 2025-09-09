@@ -1,17 +1,62 @@
 <script setup lang="ts">
+import FileHandler from '@tiptap/extension-file-handler';
+import Image from '@tiptap/extension-image';
 import { TableKit } from '@tiptap/extension-table';
-import { Placeholder } from '@tiptap/extensions';
+import { Gapcursor, Placeholder } from '@tiptap/extensions';
 import StarterKit from '@tiptap/starter-kit';
 import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown';
 import { EditorContent, useEditor } from '@tiptap/vue-3';
 import { Remarkable } from 'remarkable';
+import {
+  getUrl,
+  getUserFacingErrorMessage,
+  imageUpload
+} from '@/helpers/utils';
+
+async function uploadFile(file: File) {
+  try {
+    const image = await imageUpload(file);
+    if (!image) throw new Error('Failed to upload image.');
+
+    return image;
+  } catch (e) {
+    uiStore.addNotification('error', getUserFacingErrorMessage(e));
+
+    console.error('Failed to upload image', e);
+  }
+}
+
+function insertEditorImages(currentEditor, files: File[], pos: number | null) {
+  files.forEach(async file => {
+    const image = await uploadFile(file);
+
+    if (!image) return;
+
+    currentEditor
+      .chain()
+      .insertContentAt(pos ?? currentEditor.state.selection.anchor, {
+        type: 'image',
+        attrs: {
+          src: getUrl(image.url)
+        }
+      })
+      .focus()
+      .run();
+  });
+}
 
 const extensions = [
   StarterKit,
   TableKit,
+  Image,
+  Gapcursor,
+  FileHandler.configure({
+    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg'],
+    onDrop: insertEditorImages,
+    onPaste: insertEditorImages
+  }),
   Placeholder.configure({
-    placeholder: 'Write something ...',
-    showOnlyWhenEditable: true
+    placeholder: 'Write something ...'
   })
 ];
 
@@ -22,8 +67,9 @@ const props = defineProps<{
   definition: any;
 }>();
 
+const uiStore = useUiStore();
 const editor = useEditor({
-  content: new Remarkable().render(model.value || ''),
+  content: new Remarkable({ breaks: true }).render(model.value || ''),
   extensions,
   editorProps: {
     attributes: {
@@ -31,6 +77,8 @@ const editor = useEditor({
     }
   },
   onUpdate: ({ editor }) => {
+    // FIXME: this is stripping all new lines
+    // FIXME: this is not efficient
     model.value = renderToMarkdown({ extensions, content: editor.getJSON() });
   }
 });
@@ -63,9 +111,31 @@ const showError = computed<boolean>(
 </template>
 
 <style lang="scss">
-p.is-editor-empty:first-child::before {
-  @apply opacity-60 float-left h-0 pointer-events-none;
+.tiptap {
+  // Style placeholder text
+  p.is-editor-empty:first-child::before {
+    @apply opacity-60 float-left h-0 pointer-events-none;
 
-  content: attr(data-placeholder);
+    content: attr(data-placeholder);
+  }
+
+  img {
+    // Add visual selection indicator for images
+    &.ProseMirror-selectednode {
+      @apply outline outline-2 outline-offset-2 outline-skin-text;
+    }
+  }
+
+  // Mute paragraphs style inside table cells and list items
+  li,
+  td {
+    > p:only-child {
+      @apply m-0 p-0;
+    }
+  }
+
+  & + div[style*='position: absolute'] {
+    @apply z-20;
+  }
 }
 </style>

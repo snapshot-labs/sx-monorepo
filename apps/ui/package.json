@@ -60,6 +60,8 @@
     "@snapshot-labs/snapshot.js": "^0.14.11",
     "@snapshot-labs/sx": "^0.1.0",
     "@tanstack/vue-query": "^5.64.2",
+    "@tiptap/extension-file-handler": "^3.4.2",
+    "@tiptap/extension-image": "^3.4.1",
     "@tiptap/extension-table": "^3.4.1",
     "@tiptap/extensions": "^3.4.1",
     "@tiptap/pm": "^3.4.1",

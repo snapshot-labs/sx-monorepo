@@ -4350,6 +4350,11 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-dropcursor/-/extension-dropcursor-3.4.1.tgz#3bd10fe6c2f9ce3ea1a24a4285f3a222e8352ba9"
   integrity sha512-BCK5yDpNL14A1oTfEVfPOhNt8XdDwXmS1L1eqY42NajV7U2GKfMar+OuAi/BAmrF0AF7t0has61tSqF7InmR4Q==
 
+"@tiptap/extension-file-handler@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-file-handler/-/extension-file-handler-3.4.2.tgz#65dada0bdad1714f57bc09f8e8bd8d0869925a5b"
+  integrity sha512-MjX1Y58/pGg7pbsZrg3iIBQy0HDDa/meNdna+tUyQIx0wJoQax1bmuCUug2QFer9bEZ/BYLa+SoqxILvNz1Ojg==
+
 "@tiptap/extension-floating-menu@^3.4.1":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-floating-menu/-/extension-floating-menu-3.4.1.tgz#0f72d43c71a22fe532acd6406cdc78e6e1a36bf6"
@@ -4374,6 +4379,11 @@
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-horizontal-rule/-/extension-horizontal-rule-3.4.1.tgz#f261e62dd276a9c602cf14b057869a1dc115f4cf"
   integrity sha512-rZDci6ZER5e41qr6z8ZC8L7Ir8AaPwRfY534jH/FVuKJeg6T7TEIxUQoYFp2QZQMhr1Hb81MfmLO0RUpoIitMg==
+
+"@tiptap/extension-image@^3.4.1":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-image/-/extension-image-3.4.1.tgz#1ceba9693f95e51548913becf6a8e322d4fc4810"
+  integrity sha512-LOEsyDyxO6i/7gZbBJ9jLcVtKfHGbItWVaPosug6IbWeKpWDLpp6ao4DvnMLuckuzTkcLW14k0uVUVdMTcFQuQ==
 
 "@tiptap/extension-italic@^3.4.1":
   version "3.4.1"
