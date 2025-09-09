@@ -191,7 +191,7 @@ const error = computed(() => {
     if (
       !isTicketValid.value ||
       strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address)) ||
-      strategies.value.some(s => OVERRIDING_STRATEGIES.includes(s.address))
+      (!props.space.turbo && strategies.value.some(s => OVERRIDING_STRATEGIES.includes(s.address)))
     ) {
       return 'Strategies are invalid';
     }
