@@ -10,10 +10,10 @@ defineProps<{
 }>();
 
 const previewEnabled = ref(false);
-const editorType = ref<'visual' | 'markdown'>('markdown');
+const editorType = ref<'visual' | 'markdown'>('visual');
 
-function toggleEditorType() {
-  editorType.value = editorType.value === 'visual' ? 'markdown' : 'visual';
+function setEditorType(type: 'visual' | 'markdown') {
+  editorType.value = type;
 }
 </script>
 
@@ -37,10 +37,28 @@ function toggleEditorType() {
         </button>
       </template>
       <div class="grow" />
-      <button class="py-2" @click="toggleEditorType">
-        Switch to
-        {{ editorType === 'markdown' ? 'visual editor' : 'markdown editor' }}
-      </button>
+      <div>
+        <div class="border border-skin-border flex space-x-1 rounded p-0.5">
+          <button
+            :class="{ 'bg-skin-border': editorType === 'markdown' }"
+            class="p-0.5 size-[28px] rounded"
+            @click="setEditorType('markdown')"
+          >
+            <UiTooltip title="Switch to markdown editor">
+              <IH-bolt class="size-3" />
+            </UiTooltip>
+          </button>
+          <button
+            class="p-0.5 size-[28px] rounded"
+            :class="{ 'bg-skin-border': editorType === 'visual' }"
+            @click="setEditorType('visual')"
+          >
+            <UiTooltip title="Switch to visual editor">
+              <IH-eye class="size-3" />
+            </UiTooltip>
+          </button>
+        </div>
+      </div>
     </div>
     <UiComposerVisual
       v-if="editorType === 'visual'"
