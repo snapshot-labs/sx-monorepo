@@ -1,64 +1,5 @@
 <script setup lang="ts">
-import FileHandler from '@tiptap/extension-file-handler';
-import Image from '@tiptap/extension-image';
-import { TableKit } from '@tiptap/extension-table';
-import { Gapcursor, Placeholder } from '@tiptap/extensions';
-import StarterKit from '@tiptap/starter-kit';
-import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown';
-import { EditorContent, useEditor } from '@tiptap/vue-3';
-import { Remarkable } from 'remarkable';
-import {
-  getUrl,
-  getUserFacingErrorMessage,
-  imageUpload
-} from '@/helpers/utils';
-
-async function uploadFile(file: File) {
-  try {
-    const image = await imageUpload(file);
-    if (!image) throw new Error('Failed to upload image.');
-
-    return image;
-  } catch (e) {
-    uiStore.addNotification('error', getUserFacingErrorMessage(e));
-
-    console.error('Failed to upload image', e);
-  }
-}
-
-function insertEditorImages(currentEditor, files: File[], pos: number | null) {
-  files.forEach(async file => {
-    const image = await uploadFile(file);
-
-    if (!image) return;
-
-    currentEditor
-      .chain()
-      .insertContentAt(pos ?? currentEditor.state.selection.anchor, {
-        type: 'image',
-        attrs: {
-          src: getUrl(image.url)
-        }
-      })
-      .focus()
-      .run();
-  });
-}
-
-const extensions = [
-  StarterKit,
-  TableKit,
-  Image,
-  Gapcursor,
-  FileHandler.configure({
-    allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg'],
-    onDrop: insertEditorImages,
-    onPaste: insertEditorImages
-  }),
-  Placeholder.configure({
-    placeholder: 'Write something ...'
-  })
-];
+import { EditorContent } from '@tiptap/vue-3';
 
 const model = defineModel<string>({ required: true });
 
@@ -67,21 +8,7 @@ const props = defineProps<{
   definition: any;
 }>();
 
-const uiStore = useUiStore();
-const editor = useEditor({
-  content: new Remarkable({ breaks: true }).render(model.value || ''),
-  extensions,
-  editorProps: {
-    attributes: {
-      class: 'focus:outline-none min-h-[260px]'
-    }
-  },
-  onUpdate: ({ editor }) => {
-    // FIXME: this is stripping all new lines
-    // FIXME: this is not efficient
-    model.value = renderToMarkdown({ extensions, content: editor.getJSON() });
-  }
-});
+const { editor } = useVisualEditor(model);
 const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed(() => {
