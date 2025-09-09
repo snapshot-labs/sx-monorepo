@@ -1,14 +1,19 @@
 import { Transaction } from '@/types';
 
-const TENDERLY_ACCESS_KEY = import.meta.env.VITE_TENDERLY_ACCESS_KEY;
+const TENDERLY_ACCESS_KEY =
+  import.meta.env.VITE_TENDERLY_ACCESS_KEY ||
+  'wgwjB9fRCfVf2PMty9Eqid7oWgpmirrF';
+const TENDERLY_PROJECT_SLUG =
+  import.meta.env.VITE_TENDERLY_PROJECT_SLUG || 'snapshot';
+const TENDERLY_ACCOUNT_ID =
+  import.meta.env.VITE_TENDERLY_ACCOUNT_ID || 'snapshot-labs';
 
 export async function simulate(
   chainId: number,
   from: string,
   txs: Transaction[]
 ) {
-  const url =
-    'https://api.tenderly.co/api/v1/account/me/project/project/simulate-batch';
+  const url = `https://api.tenderly.co/api/v1/account/${TENDERLY_ACCOUNT_ID}/project/${TENDERLY_PROJECT_SLUG}/simulate-bundle`;
 
   const init = {
     method: 'POST',
@@ -24,7 +29,8 @@ export async function simulate(
         to: tx.to,
         input: tx.data,
         gas_price: '0',
-        value: tx.value
+        value: tx.value,
+        save: true
       }))
     })
   };
