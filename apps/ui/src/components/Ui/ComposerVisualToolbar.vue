@@ -57,13 +57,6 @@ function setLink() {
       </button>
       <button
         class="text-[16px]"
-        :class="{ 'is-active': editor.isActive('heading', { level: 1 }) }"
-        @click="editor.chain().focus().toggleHeading({ level: 1 }).run()"
-      >
-        H1
-      </button>
-      <button
-        class="text-[16px]"
         :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
         @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
       >
