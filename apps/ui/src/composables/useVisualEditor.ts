@@ -102,7 +102,12 @@ function markdownToHtml(markdown: string) {
 }
 
 function jsonToMarkdown(extensions, json) {
-  const markdown = renderToMarkdown({ extensions, content: json });
+  let markdown = renderToMarkdown({ extensions, content: json });
+
+  // Remove all leading newlines
+  // renderToMarkdown adds a leading newline when the content is not starting with a heading
+  markdown = markdown.trimStart();
+
   return replaceCdnUrls(markdown, getOriginalUrl);
 }
 
@@ -141,7 +146,7 @@ export function useVisualEditor(model: Ref<string>) {
     extensions,
     editorProps: {
       attributes: {
-        class: 'focus:outline-none min-h-[260px]'
+        class: 'markdown-body focus:outline-none min-h-[260px]'
       },
       clipboardTextSerializer: slice => {
         const json = slice.content.toJSON();

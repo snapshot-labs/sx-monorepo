@@ -33,7 +33,7 @@ const showError = computed<boolean>(
   </UiAlert>
   <template v-if="editor">
     <UiComposerVisualToolbar :editor="editor" />
-    <editor-content :editor="editor" class="markdown-body mb-[14px]" />
+    <editor-content :editor="editor" class="mb-[14px]" />
   </template>
 </template>
 
