@@ -1,7 +1,9 @@
+import { generateJSON } from '@tiptap/core';
 import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
 import { TableKit } from '@tiptap/extension-table';
 import { Gapcursor, Placeholder } from '@tiptap/extensions';
+import { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown';
 import { useEditor } from '@tiptap/vue-3';
@@ -14,7 +16,7 @@ import {
 
 const cdnUrlsMapping = {};
 
-function replaceImageUrls(
+function replaceCdnUrls(
   markdown: string,
   urlTransformer: (url: string) => string
 ): string {
@@ -73,13 +75,21 @@ function getOriginalUrl(cdnUrl: string) {
 }
 
 function markdownToHtml(markdown: string) {
-  const processedMarkdown = replaceImageUrls(markdown, getCdnUrl);
-  return new Remarkable({ breaks: true }).render(processedMarkdown);
+  const processedMarkdown = replaceCdnUrls(markdown, getCdnUrl);
+  const html = new Remarkable({ breaks: true }).render(processedMarkdown);
+
+  // Remove trailing newlines inside <pre><code> blocks
+  const cleanedHtml = html.replace(
+    /(<pre><code[^>]*>[\s\S]*?)\n+(<\/code><\/pre>)/g,
+    '$1$2'
+  );
+
+  return cleanedHtml;
 }
 
 function jsonToMarkdown(extensions, json) {
   const markdown = renderToMarkdown({ extensions, content: json });
-  return replaceImageUrls(markdown, getOriginalUrl);
+  return replaceCdnUrls(markdown, getOriginalUrl);
 }
 
 export function useVisualEditor(model: Ref<string>) {
@@ -117,6 +127,33 @@ export function useVisualEditor(model: Ref<string>) {
       clipboardTextSerializer: slice => {
         const json = slice.content.toJSON();
         return jsonToMarkdown(extensions, { type: 'doc', content: json });
+      },
+      handlePaste: (view, event) => {
+        const clipboardData = event.clipboardData;
+        if (!clipboardData) return false;
+
+        const text = clipboardData.getData('text/plain');
+        const hasFiles = clipboardData.files && clipboardData.files.length > 0;
+
+        // If there are files, let FileHandler handle the entire paste
+        // This is because mixed content (files + text) is typically from rich editors
+        // where the text is just a fallback representation
+        if (hasFiles) return false;
+
+        // Handle pure text paste - convert markdown to HTML
+        if (text && !hasFiles) {
+          const html = markdownToHtml(text);
+          const json = generateJSON(html, extensions);
+          const doc = view.state.schema.nodeFromJSON(json);
+          const slice = new Slice(doc.content, 0, 0);
+
+          const tr = view.state.tr.replaceSelection(slice);
+          view.dispatch(tr);
+
+          return true;
+        }
+
+        return false;
       }
     }
   });

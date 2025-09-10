@@ -37,7 +37,7 @@ function setEditorType(type: 'visual' | 'markdown') {
         </button>
       </template>
       <div class="grow" />
-      <div>
+      <div class="h-[40px]">
         <div class="border border-skin-border flex space-x-1 rounded p-0.5">
           <button
             :class="{ 'bg-skin-border': editorType === 'markdown' }"
