@@ -12,7 +12,7 @@ import {
   imageUpload
 } from '@/helpers/utils';
 
-const imagesUrlMapping = {};
+const cdnUrlsMapping = {};
 
 function replaceImageUrls(
   markdown: string,
@@ -62,14 +62,14 @@ function getCdnUrl(url: string) {
   const cdnUrl = getUrl(url);
 
   if (cdnUrl) {
-    imagesUrlMapping[cdnUrl] = url;
+    cdnUrlsMapping[cdnUrl] = url;
   }
 
   return cdnUrl || url;
 }
 
 function getOriginalUrl(cdnUrl: string) {
-  return imagesUrlMapping[cdnUrl] || cdnUrl;
+  return cdnUrlsMapping[cdnUrl] || cdnUrl;
 }
 
 function markdownToHtml(markdown: string) {
