@@ -113,6 +113,10 @@ export function useVisualEditor(model: Ref<string>) {
     editorProps: {
       attributes: {
         class: 'focus:outline-none min-h-[260px]'
+      },
+      clipboardTextSerializer: slice => {
+        const json = slice.content.toJSON();
+        return jsonToMarkdown(extensions, { type: 'doc', content: json });
       }
     }
   });
