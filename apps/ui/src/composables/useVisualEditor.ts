@@ -83,7 +83,7 @@ function jsonToMarkdown(extensions, json) {
 }
 
 export function useVisualEditor(model: Ref<string>) {
-  const uiStore = useUiStore();
+  const isEdited = ref(false);
 
   const extensions = [
     StarterKit,
@@ -114,12 +114,41 @@ export function useVisualEditor(model: Ref<string>) {
       attributes: {
         class: 'focus:outline-none min-h-[260px]'
       }
-    },
-    onUpdate: ({ editor }) => {
-      // FIXME: this is stripping all new lines
-      // FIXME: this is not efficient
-      model.value = jsonToMarkdown(extensions, editor.getJSON());
     }
+  });
+  const uiStore = useUiStore();
+
+  function updateModel() {
+    if (!editor.value || !isEdited.value) return;
+
+    model.value = jsonToMarkdown(extensions, editor.value.getJSON());
+    isEdited.value = false;
+  }
+
+  // FIXME: this is stripping all new lines
+  // FIXME: find a more efficient way to update the model
+  const updateModelFn = useDebounceFn(updateModel, 1000);
+
+  // Watch for editor initialization and set up event listener
+  watch(
+    editor,
+    newEditor => {
+      if (!newEditor) return;
+
+      newEditor.on('update', () => {
+        isEdited.value = true;
+        updateModelFn();
+      });
+    },
+    { immediate: true }
+  );
+
+  onUnmounted(() => {
+    if (!editor.value) return;
+
+    editor.value.off('update', updateModelFn);
+    updateModel();
+    editor.value.destroy();
   });
 
   return { editor };
