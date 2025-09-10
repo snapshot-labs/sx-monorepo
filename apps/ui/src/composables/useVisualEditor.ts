@@ -1,4 +1,5 @@
 import { generateJSON } from '@tiptap/core';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
 import { TableKit } from '@tiptap/extension-table';
@@ -7,6 +8,12 @@ import { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown';
 import { useEditor } from '@tiptap/vue-3';
+import javascript from 'highlight.js/lib/languages/javascript';
+import json from 'highlight.js/lib/languages/json';
+import python from 'highlight.js/lib/languages/python';
+import rust from 'highlight.js/lib/languages/rust';
+import { solidity } from 'highlightjs-solidity';
+import { createLowlight } from 'lowlight';
 import { Remarkable } from 'remarkable';
 import {
   getUrl,
@@ -15,6 +22,13 @@ import {
 } from '@/helpers/utils';
 
 const cdnUrlsMapping = {};
+
+const lowlight = createLowlight();
+lowlight.register('javascript', javascript);
+lowlight.register('json', json);
+lowlight.register('rust', rust);
+lowlight.register('python', python);
+lowlight.register('solidity', solidity);
 
 function replaceCdnUrls(
   markdown: string,
@@ -100,6 +114,11 @@ export function useVisualEditor(model: Ref<string>) {
     TableKit,
     Image,
     Gapcursor,
+    CodeBlockLowlight.configure({
+      // prevent code blocks without language from showing as: ```null
+      defaultLanguage: '',
+      lowlight
+    }),
     FileHandler.configure({
       allowedMimeTypes: ['image/png', 'image/jpeg', 'image/jpg'],
       onDrop: (editor, files, pos) =>
