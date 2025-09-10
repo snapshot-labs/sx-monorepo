@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DragHandle } from '@tiptap/extension-drag-handle-vue-3';
 import { EditorContent } from '@tiptap/vue-3';
 
 const model = defineModel<string>({ required: true });
@@ -32,6 +33,12 @@ const showError = computed<boolean>(
     <slot name="error-suffix" />
   </UiAlert>
   <template v-if="editor">
+    <drag-handle
+      :editor="editor"
+      class="handle text-skin-link opacity-70 hover:opacity-100 p-1 py-1.5 cursor-grab"
+    >
+      <IC-drag />
+    </drag-handle>
     <UiComposerVisualToolbar :editor="editor" />
     <editor-content :editor="editor" class="mb-[14px]" />
   </template>
@@ -61,7 +68,7 @@ const showError = computed<boolean>(
     }
   }
 
-  & + div[style*='position: absolute'] {
+  & ~ div[style*='position: absolute'] {
     @apply z-20;
   }
 }

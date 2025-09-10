@@ -2,6 +2,7 @@ import { generateJSON } from '@tiptap/core';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
+import NodeRange from '@tiptap/extension-node-range';
 import { TableKit } from '@tiptap/extension-table';
 import { Gapcursor, Placeholder } from '@tiptap/extensions';
 import { Slice } from '@tiptap/pm/model';
@@ -119,6 +120,11 @@ export function useVisualEditor(model: Ref<string>) {
     TableKit,
     Image,
     Gapcursor,
+    NodeRange.configure({
+      // allow to select only on depth 0
+      // depth: 0,
+      key: null
+    }),
     CodeBlockLowlight.configure({
       // prevent code blocks without language from showing as: ```null
       defaultLanguage: '',
