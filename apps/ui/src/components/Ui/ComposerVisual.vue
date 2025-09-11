@@ -64,7 +64,7 @@ const showError = computed<boolean>(
   li,
   td,
   th {
-    > p:only-child {
+    > p {
       @apply m-0 p-0;
     }
   }

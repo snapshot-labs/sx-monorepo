@@ -587,6 +587,10 @@ html.dark .markdown-body {
   }
 
   li > p {
+    &:first-child {
+      margin-top: 0;
+    }
+
     margin-top: 16px;
   }
 

@@ -29,7 +29,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `| Name | Age | City |
 | --- | --- | --- |
 | John | 30 | New York |
@@ -60,7 +60,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `| Name | Value |
 | --- | --- |
 | Item 1 |  |
@@ -91,7 +91,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
 
     // Should preserve formatting within table cells
     const expected = `| Description | Status |
@@ -118,7 +118,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `| Header |
 | --- |
 | Single cell |`;
@@ -142,7 +142,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `| Col1 | Col2 |
 | --- | --- |
 | Data1 | Data2 |`;
@@ -180,7 +180,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `| ID | Name | Score |
 | --- | --- | --- |
 | 1 | Alice | 95 |
@@ -212,7 +212,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `| Left | Center | Right | Default |
 | :--- | :---: | ---: | --- |
 | A | B | C | D |`;
@@ -240,7 +240,7 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `|  |  |
 | --- | --- |
 | Name | Age |
@@ -264,11 +264,166 @@ describe('turndownService table conversion', () => {
       </table>
     `;
 
-    const result = converter(html).trim();
+    const result = converter(html);
     const expected = `|  |  |
 | --- | --- |
 | Header1 | Header2 |
 | Data1 | Data2 |`;
+
+    expect(result).toBe(expected);
+  });
+});
+
+describe('turndownService list conversion', () => {
+  const converter = turndownService();
+
+  it('should unwrap paragraph-wrapped list items', () => {
+    const html = `
+      <ul>
+        <li><p>Item 1</p></li>
+        <li><p>Item 2</p></li>
+        <li><p>Item 3</p></li>
+      </ul>
+    `;
+
+    const result = converter(html);
+    const expected = `- Item 1
+- Item 2
+- Item 3`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should handle ordered lists with paragraph-wrapped items', () => {
+    const html = `
+      <ol>
+        <li><p>First item</p></li>
+        <li><p>Second item</p></li>
+      </ol>
+    `;
+
+    const result = converter(html);
+    const expected = `1. First item
+2. Second item`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should unwrap all paragraphs in list items when they are not adjacent', () => {
+    const html = `
+      <ul>
+        <li><p>First item</p></li>
+        <li>
+          <p>First paragraph</p>
+          <p>Second paragraph</p>
+        </li>
+        <li><p>Third item</p></li>
+      </ul>
+    `;
+
+    const result = converter(html);
+    const expected = `- First item
+- First paragraph
+    
+    Second paragraph
+- Third item`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should handle nested lists without adjacent paragraphs', () => {
+    const html = `
+      <ul>
+        <li><p>Main item 1</p></li>
+        <li>
+          <p>Main item 2</p>
+          <ul>
+            <li><p>Nested item 1</p></li>
+            <li><p>Nested item 2</p></li>
+          </ul>
+        </li>
+        <li><p>Main item 3</p></li>
+      </ul>
+    `;
+
+    const result = converter(html);
+    const expected = `- Main item 1
+- Main item 2
+    - Nested item 1
+    - Nested item 2
+- Main item 3`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should handle nested lists with adjacent paragraphs', () => {
+    const html = `
+      <ul>
+        <li>
+          <p>First paragraph</p>
+          <p>Second paragraph</p>
+          <ul>
+            <li><p>Nested item</p></li>
+          </ul>
+        </li>
+        <li><p>Simple item</p></li>
+      </ul>
+    `;
+
+    const result = converter(html);
+    const expected = `- First paragraph
+    
+    Second paragraph
+    - Nested item
+- Simple item`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should handle nested ordered lists', () => {
+    const html = `
+      <ol>
+        <li><p>First item</p></li>
+        <li>
+          <p>Second item</p>
+          <ol>
+            <li><p>Nested item 1</p></li>
+            <li><p>Nested item 2</p></li>
+          </ol>
+        </li>
+        <li><p>Third item</p></li>
+      </ol>
+    `;
+
+    const result = converter(html);
+    const expected = `1. First item
+2. Second item
+    1. Nested item 1
+    2. Nested item 2
+3. Third item`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should handle mixed ordered and unordered nested lists', () => {
+    const html = `
+      <ul>
+        <li><p>Unordered item</p></li>
+        <li>
+          <p>Item with nested ordered list</p>
+          <ol>
+            <li><p>Ordered nested 1</p></li>
+            <li><p>Ordered nested 2</p></li>
+          </ol>
+        </li>
+      </ul>
+    `;
+
+    const result = converter(html);
+    const expected = `- Unordered item
+- Item with nested ordered list
+    1. Ordered nested 1
+    2. Ordered nested 2`;
 
     expect(result).toBe(expected);
   });

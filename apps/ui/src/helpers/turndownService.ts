@@ -89,6 +89,105 @@ export default function (options: { discussion?: string } = {}) {
 | ${rows.map(row => row.join(' | ')).join(' |\n| ')} |`;
     }
   });
+
+  turndownService.addRule('listItem', {
+    filter: ['li'],
+    replacement: function (content, node) {
+      // Handle paragraph unwrapping based on content type
+      const paragraphs = Array.from(node.querySelectorAll('p'));
+      const children = Array.from(node.children);
+      const hasNestedLists = children.some(child =>
+        ['UL', 'OL'].includes((child as Element).nodeName)
+      );
+
+      if (paragraphs.length === 1 && !hasNestedLists) {
+        // Single paragraph with no nested lists - unwrap it
+        content = turndownService.turndown(
+          (paragraphs[0] as HTMLElement).innerHTML
+        );
+      } else if (paragraphs.length > 1 && !hasNestedLists) {
+        // Multiple paragraphs with no nested lists - check if only paragraphs
+        const hasNonParagraphContent = children.some(
+          child =>
+            (child as Element).nodeName !== 'P' &&
+            (child as Element).textContent?.trim() !== ''
+        );
+
+        if (!hasNonParagraphContent) {
+          // Only paragraphs - unwrap all of them
+          content = paragraphs
+            .map(p => turndownService.turndown((p as HTMLElement).innerHTML))
+            .join('\n\n');
+        }
+      } else if (hasNestedLists) {
+        // Has nested lists - unwrap paragraphs but keep lists properly formatted
+        let processedContent = '';
+        let prevWasParagraph = false;
+
+        for (let i = 0; i < children.length; i++) {
+          const child = children[i] as Element;
+          const nextChild = children[i + 1] as Element | undefined;
+
+          if (child.nodeName === 'P') {
+            if (prevWasParagraph) {
+              processedContent += '\n'; // blank line between adjacent paragraphs
+            }
+            processedContent += turndownService.turndown(
+              (child as HTMLElement).innerHTML
+            );
+
+            // Add newline after paragraph, but check if next element needs special handling
+            if (nextChild) {
+              if (nextChild.nodeName === 'P') {
+                processedContent += '\n'; // will add another newline at start of next iteration
+              } else if (['UL', 'OL'].includes(nextChild.nodeName)) {
+                processedContent += '\n'; // single newline before nested list
+              } else {
+                processedContent += '\n';
+              }
+            }
+
+            prevWasParagraph = true;
+          } else if (['UL', 'OL'].includes(child.nodeName)) {
+            processedContent += turndownService.turndown(
+              (child as HTMLElement).outerHTML
+            );
+            if (nextChild) {
+              processedContent += '\n';
+            }
+            prevWasParagraph = false;
+          } else {
+            processedContent += turndownService.turndown(
+              (child as HTMLElement).outerHTML
+            );
+            if (nextChild) {
+              processedContent += '\n';
+            }
+            prevWasParagraph = false;
+          }
+        }
+
+        content = processedContent.replace(/\n+$/, ''); // remove trailing newlines
+      }
+
+      content = content
+        .replace(/^\n+/, '') // remove leading newlines
+        .replace(/\n+$/, '\n') // replace trailing newlines with single newline
+        .replace(/\n/gm, '\n    '); // indent wrapped lines
+
+      let prefix = '- ';
+      if (/ol/i.test(node.parentNode.nodeName)) {
+        // Find the index of this list item within its parent
+        const siblings = Array.from(node.parentNode.children).filter(
+          child => (child as Element).nodeName === 'LI'
+        );
+        const index = siblings.indexOf(node) + 1;
+        prefix = `${index}. `;
+      }
+      return prefix + content + (content === '' ? '' : '\n');
+    }
+  });
+
   turndownService.addRule('handleQuote', {
     filter: ['aside'],
     replacement: function (content, node) {
