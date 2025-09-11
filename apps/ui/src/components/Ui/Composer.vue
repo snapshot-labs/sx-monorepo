@@ -12,14 +12,14 @@ defineProps<{
 const previewEnabled = ref(false);
 const editorType = ref<'visual' | 'markdown'>('visual');
 
-function setEditorType(type: 'visual' | 'markdown') {
-  editorType.value = type;
+function toggleEditor() {
+  editorType.value = editorType.value === 'visual' ? 'markdown' : 'visual';
 }
 </script>
 
 <template>
   <div>
-    <div class="flex space-x-3">
+    <div class="h-[40px] flex space-x-3">
       <template v-if="editorType === 'markdown'">
         <button type="button" @click="previewEnabled = false">
           <UiLabel
@@ -37,28 +37,13 @@ function setEditorType(type: 'visual' | 'markdown') {
         </button>
       </template>
       <div class="grow" />
-      <div class="h-[40px]">
-        <div class="border border-skin-border flex space-x-1 rounded p-0.5">
-          <button
-            :class="{ 'bg-skin-border': editorType === 'markdown' }"
-            class="p-0.5 size-[28px] rounded"
-            @click="setEditorType('markdown')"
-          >
-            <UiTooltip title="Switch to markdown editor">
-              <IH-bolt class="size-3" />
-            </UiTooltip>
-          </button>
-          <button
-            class="p-0.5 size-[28px] rounded"
-            :class="{ 'bg-skin-border': editorType === 'visual' }"
-            @click="setEditorType('visual')"
-          >
-            <UiTooltip title="Switch to visual editor">
-              <IH-eye class="size-3" />
-            </UiTooltip>
-          </button>
-        </div>
-      </div>
+      <button class="flex items-center space-x-1.5" @click="toggleEditor">
+        <IH-eye v-if="editorType === 'markdown'" />
+        <IC-markdown v-else class="size-[28px]" />
+        <span>
+          Switch to {{ editorType === 'visual' ? 'markdown' : 'visual' }} editor
+        </span>
+      </button>
     </div>
     <UiComposerVisual
       v-if="editorType === 'visual'"
