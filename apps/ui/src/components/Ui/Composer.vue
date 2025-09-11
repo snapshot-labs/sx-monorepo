@@ -41,7 +41,7 @@ function toggleEditor() {
         <IH-eye v-if="editorType === 'markdown'" />
         <IC-markdown v-else class="size-[28px]" />
         <span>
-          Switch to {{ editorType === 'visual' ? 'markdown' : 'visual' }} editor
+          Switch to {{ editorType === 'visual' ? 'Markdown' : 'visual' }} editor
         </span>
       </button>
     </div>
