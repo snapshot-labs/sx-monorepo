@@ -16,20 +16,62 @@ export default function (options: { discussion?: string } = {}) {
   turndownService.addRule('table', {
     filter: ['table'],
     replacement: function (content, node) {
-      const headers = Array.from(node.querySelectorAll('thead th')).map(
+      // Get headers from thead or first row with th elements
+      let headers = Array.from(node.querySelectorAll('thead th')).map(
         (th: any) => turndownService.turndown(th.innerHTML).trim()
       );
-      const rows = Array.from(node.querySelectorAll('tbody tr')).map(
-        (tr: any) =>
-          Array.from(tr.querySelectorAll('td')).map((td: any) =>
-            turndownService.turndown(td.innerHTML).trim()
-          )
+      let headerCells = Array.from(node.querySelectorAll('thead th'));
+
+      // If no thead, check for th elements in tbody (first row)
+      if (headers.length === 0) {
+        const firstRow = node.querySelector('tbody tr');
+        if (firstRow) {
+          const thElements = firstRow.querySelectorAll('th');
+          if (thElements.length > 0) {
+            headers = Array.from(thElements).map((th: any) =>
+              turndownService.turndown(th.innerHTML).trim()
+            );
+            headerCells = Array.from(thElements);
+          }
+        }
+      }
+
+      // Get alignment from header cells
+      const alignments = headerCells.map((th: any) => {
+        const style = th.style.textAlign || th.getAttribute('align') || '';
+        switch (style.toLowerCase()) {
+          case 'left':
+            return ':---';
+          case 'right':
+            return '---:';
+          case 'center':
+            return ':---:';
+          default:
+            return '---';
+        }
+      });
+
+      // Get data rows, excluding the header row if it's in tbody
+      const bodyRows = Array.from(node.querySelectorAll('tbody tr'));
+      let dataRows = bodyRows;
+
+      // If headers were found in first tbody row, skip it for data
+      if (headers.length > 0 && bodyRows.length > 0) {
+        const firstRow = bodyRows[0];
+        if (firstRow.querySelectorAll('th').length > 0) {
+          dataRows = bodyRows.slice(1);
+        }
+      }
+
+      const rows = dataRows.map((tr: any) =>
+        Array.from(tr.querySelectorAll('td, th')).map((cell: any) =>
+          turndownService.turndown(cell.innerHTML).trim()
+        )
       );
-      return `
-        | ${headers.join(' | ')} |
-        | ${headers.map(() => '---').join(' | ')} |
-        | ${rows.map(row => row.join(' | ')).join('| \n |')} |
-      `;
+
+      return `| ${headers.join(' | ')} |
+| ${alignments.join(' | ')} |
+| ${rows.map(row => row.join(' | ')).join(' |\n| ')} |`;
     }
   });
   turndownService.addRule('handleQuote', {

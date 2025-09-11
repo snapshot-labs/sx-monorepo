@@ -31,9 +31,9 @@ describe('turndownService table conversion', () => {
 
     const result = converter(html).trim();
     const expected = `| Name | Age | City |
-        | --- | --- | --- |
-        | John | 30 | New York|
- |Jane | 25 | Paris |`;
+| --- | --- | --- |
+| John | 30 | New York |
+| Jane | 25 | Paris |`;
 
     expect(result).toBe(expected);
   });
@@ -62,9 +62,9 @@ describe('turndownService table conversion', () => {
 
     const result = converter(html).trim();
     const expected = `| Name | Value |
-        | --- | --- |
-        | Item 1 | |
- | | 100 |`;
+| --- | --- |
+| Item 1 |  |
+|  | 100 |`;
 
     expect(result).toBe(expected);
   });
@@ -95,9 +95,9 @@ describe('turndownService table conversion', () => {
 
     // Should preserve formatting within table cells
     const expected = `| Description | Status |
-        | --- | --- |
-        | **Bold text** and _italic_ | Active|
- |Plain text | \`pending\` |`;
+| --- | --- |
+| **Bold text** and _italic_ | Active |
+| Plain text | \`pending\` |`;
 
     expect(result).toBe(expected);
   });
@@ -120,8 +120,8 @@ describe('turndownService table conversion', () => {
 
     const result = converter(html).trim();
     const expected = `| Header |
-        | --- |
-        | Single cell |`;
+| --- |
+| Single cell |`;
 
     expect(result).toBe(expected);
   });
@@ -144,8 +144,8 @@ describe('turndownService table conversion', () => {
 
     const result = converter(html).trim();
     const expected = `| Col1 | Col2 |
-        | --- | --- |
-        | Data1 | Data2 |`;
+| --- | --- |
+| Data1 | Data2 |`;
 
     expect(result).toBe(expected);
   });
@@ -182,10 +182,40 @@ describe('turndownService table conversion', () => {
 
     const result = converter(html).trim();
     const expected = `| ID | Name | Score |
-        | --- | --- | --- |
-        | 1 | Alice | 95|
- |2 | Bob | 87|
- |3 | Charlie | 92 |`;
+| --- | --- | --- |
+| 1 | Alice | 95 |
+| 2 | Bob | 87 |
+| 3 | Charlie | 92 |`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should handle column alignment', () => {
+    const html = `
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:left">Left</th>
+            <th style="text-align:center">Center</th>
+            <th style="text-align:right">Right</th>
+            <th>Default</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>A</td>
+            <td>B</td>
+            <td>C</td>
+            <td>D</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    const result = converter(html).trim();
+    const expected = `| Left | Center | Right | Default |
+| :--- | :---: | ---: | --- |
+| A | B | C | D |`;
 
     expect(result).toBe(expected);
   });

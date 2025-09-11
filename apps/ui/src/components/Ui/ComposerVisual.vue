@@ -62,7 +62,8 @@ const showError = computed<boolean>(
 
   // Mute paragraphs style inside table cells and list items
   li,
-  td {
+  td,
+  th {
     > p:only-child {
       @apply m-0 p-0;
     }
