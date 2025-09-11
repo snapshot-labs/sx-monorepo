@@ -17,11 +17,13 @@ export default function (options: { discussion?: string } = {}) {
     filter: ['table'],
     replacement: function (content, node) {
       const headers = Array.from(node.querySelectorAll('thead th')).map(
-        (th: any) => th.textContent
+        (th: any) => turndownService.turndown(th.innerHTML).trim()
       );
       const rows = Array.from(node.querySelectorAll('tbody tr')).map(
         (tr: any) =>
-          Array.from(tr.querySelectorAll('td')).map((td: any) => td.textContent)
+          Array.from(tr.querySelectorAll('td')).map((td: any) =>
+            turndownService.turndown(td.innerHTML).trim()
+          )
       );
       return `
         | ${headers.join(' | ')} |
