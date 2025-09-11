@@ -4,40 +4,6 @@ import turndownService from '../turndownService';
 describe('turndownService table conversion', () => {
   const converter = turndownService();
 
-  it('should convert a basic table with headers and data', () => {
-    const html = `
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Age</th>
-            <th>City</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>John</td>
-            <td>30</td>
-            <td>New York</td>
-          </tr>
-          <tr>
-            <td>Jane</td>
-            <td>25</td>
-            <td>Paris</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-
-    const result = converter(html);
-    const expected = `| Name | Age | City |
-| --- | --- | --- |
-| John | 30 | New York |
-| Jane | 25 | Paris |`;
-
-    expect(result).toBe(expected);
-  });
-
   it('should handle table with empty cells', () => {
     const html = `
       <table>
@@ -150,7 +116,7 @@ describe('turndownService table conversion', () => {
     expect(result).toBe(expected);
   });
 
-  it('should preserve table structure with multiple data rows', () => {
+  it('should convert a basic table with headers and data', () => {
     const html = `
       <table>
         <thead>
