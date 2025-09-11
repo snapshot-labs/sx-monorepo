@@ -40,7 +40,7 @@ const showError = computed<boolean>(
       <IC-drag />
     </drag-handle>
     <UiComposerVisualToolbar :editor="editor" />
-    <editor-content :editor="editor" class="mb-4" />
+    <editor-content :editor="editor" class="mb-6" />
   </template>
 </template>
 

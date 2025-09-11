@@ -249,7 +249,7 @@ export function useVisualEditor(
     extensions,
     editorProps: {
       attributes: {
-        class: 'markdown-body focus:outline-none mt-2 min-h-[242px]'
+        class: 'markdown-body focus:outline-none mt-2 min-h-[226px]'
       },
       clipboardTextSerializer: slice => {
         const json = slice.content.toJSON();
