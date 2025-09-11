@@ -661,16 +661,15 @@ html.dark .markdown-body {
       @apply p-3 m-0 bg-skin-border rounded-none border-none overflow-auto block;
     }
   }
-}
 
-// Those can't be nested because those don't work with :deep selector
-.markdown-body::before {
-  display: table;
-  content: '';
-}
+  &::before {
+    display: table;
+    content: '';
+  }
 
-.markdown-body::after {
-  display: table;
-  clear: both;
-  content: '';
+  &::after {
+    display: table;
+    clear: both;
+    content: '';
+  }
 }
