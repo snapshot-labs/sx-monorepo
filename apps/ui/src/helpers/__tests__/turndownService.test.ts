@@ -219,4 +219,57 @@ describe('turndownService table conversion', () => {
 
     expect(result).toBe(expected);
   });
+
+  it('should handle table without headers by creating empty headers', () => {
+    const html = `
+      <table>
+        <tbody>
+          <tr>
+            <td>Name</td>
+            <td>Age</td>
+          </tr>
+          <tr>
+            <td>John</td>
+            <td>30</td>
+          </tr>
+          <tr>
+            <td>Jane</td>
+            <td>25</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    const result = converter(html).trim();
+    const expected = `|  |  |
+| --- | --- |
+| Name | Age |
+| John | 30 |
+| Jane | 25 |`;
+
+    expect(result).toBe(expected);
+  });
+
+  it('should handle simple table without thead or tbody', () => {
+    const html = `
+      <table>
+        <tr>
+          <td>Header1</td>
+          <td>Header2</td>
+        </tr>
+        <tr>
+          <td>Data1</td>
+          <td>Data2</td>
+        </tr>
+      </table>
+    `;
+
+    const result = converter(html).trim();
+    const expected = `|  |  |
+| --- | --- |
+| Header1 | Header2 |
+| Data1 | Data2 |`;
+
+    expect(result).toBe(expected);
+  });
 });

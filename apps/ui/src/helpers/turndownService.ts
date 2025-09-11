@@ -36,6 +36,17 @@ export default function (options: { discussion?: string } = {}) {
         }
       }
 
+      // If no headers found, create empty headers based on first row cell count
+      if (headers.length === 0) {
+        const firstDataRow =
+          node.querySelector('tbody tr') || node.querySelector('tr');
+        if (firstDataRow) {
+          const cells = firstDataRow.querySelectorAll('td, th');
+          headers = Array.from(cells).map(() => '');
+          headerCells = Array.from(cells);
+        }
+      }
+
       // Get alignment from header cells
       const alignments = headerCells.map((th: any) => {
         const style = th.style.textAlign || th.getAttribute('align') || '';
@@ -53,13 +64,17 @@ export default function (options: { discussion?: string } = {}) {
 
       // Get data rows, excluding the header row if it's in tbody
       const bodyRows = Array.from(node.querySelectorAll('tbody tr'));
-      let dataRows = bodyRows;
+      const allRows =
+        bodyRows.length > 0
+          ? bodyRows
+          : Array.from(node.querySelectorAll('tr'));
+      let dataRows = allRows;
 
       // If headers were found in first tbody row, skip it for data
-      if (headers.length > 0 && bodyRows.length > 0) {
-        const firstRow = bodyRows[0] as HTMLTableRowElement;
+      if (headers.length > 0 && allRows.length > 0) {
+        const firstRow = allRows[0] as HTMLTableRowElement;
         if (firstRow.querySelectorAll('th').length > 0) {
-          dataRows = bodyRows.slice(1);
+          dataRows = allRows.slice(1);
         }
       }
 
