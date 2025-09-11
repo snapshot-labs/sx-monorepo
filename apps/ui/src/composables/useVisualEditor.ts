@@ -268,12 +268,29 @@ export function useVisualEditor(
         // where the text is just a fallback representation
         if (hasFiles) return false;
 
-        // Handle pure text paste - convert markdown to HTML
+        // Handle pure text paste - convert markdown to HTML and paste inline
         if (text && !hasFiles) {
           const html = markdownToHtml(text);
           const json = generateJSON(html, extensions);
           const doc = view.state.schema.nodeFromJSON(json);
-          const slice = new Slice(doc.content, 0, 0);
+
+          // Check if content contains block elements (headings, lists, code blocks, etc.)
+          const blockTypes = [
+            'heading',
+            'bulletList',
+            'orderedList',
+            'codeBlock',
+            'blockquote',
+            'table'
+          ];
+          const hasBlockElements = doc.content.content.some(node =>
+            blockTypes.includes(node.type.name)
+          );
+
+          // Create slice with appropriate openStart/openEnd based on content type
+          const slice = hasBlockElements
+            ? new Slice(doc.content, 0, 0) // Block paste for headings, lists, etc.
+            : new Slice(doc.content, 1, 1); // Inline paste for regular text
 
           const tr = view.state.tr.replaceSelection(slice);
           view.dispatch(tr);
