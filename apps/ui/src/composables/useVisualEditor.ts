@@ -171,7 +171,7 @@ function htmlToMarkdown(html: string) {
   return replaceCdnUrls(markdown, getOriginalUrl);
 }
 
-export function useVisualEditor(model: Ref<string>) {
+export function useVisualEditor(model: Ref<string>, definition: any) {
   const isEdited = ref(false);
 
   const extensions = [
@@ -235,7 +235,7 @@ export function useVisualEditor(model: Ref<string>) {
         )
     }),
     Placeholder.configure({
-      placeholder: 'Write something ...'
+      placeholder: definition.examples?.[0] || 'Write something ...'
     })
   ];
 

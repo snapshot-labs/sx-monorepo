@@ -9,7 +9,7 @@ const props = defineProps<{
   definition: any;
 }>();
 
-const { editor } = useVisualEditor(model);
+const { editor } = useVisualEditor(model, props.definition);
 const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed(() => {
