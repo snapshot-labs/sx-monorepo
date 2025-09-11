@@ -1865,6 +1865,13 @@
   dependencies:
     "@floating-ui/utils" "^0.2.8"
 
+"@floating-ui/core@^1.7.3":
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/@floating-ui/core/-/core-1.7.3.tgz#462d722f001e23e46d86fd2bd0d21b7693ccb8b7"
+  integrity sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==
+  dependencies:
+    "@floating-ui/utils" "^0.2.10"
+
 "@floating-ui/dom@^1.0.0", "@floating-ui/dom@^1.5.4":
   version "1.6.11"
   resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-1.6.11.tgz#8631857838d34ee5712339eb7cbdfb8ad34da723"
@@ -1873,12 +1880,25 @@
     "@floating-ui/core" "^1.6.0"
     "@floating-ui/utils" "^0.2.8"
 
+"@floating-ui/dom@^1.6.13":
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/@floating-ui/dom/-/dom-1.7.4.tgz#ee667549998745c9c3e3e84683b909c31d6c9a77"
+  integrity sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA==
+  dependencies:
+    "@floating-ui/core" "^1.7.3"
+    "@floating-ui/utils" "^0.2.10"
+
 "@floating-ui/react-dom@^2.0.0":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@floating-ui/react-dom/-/react-dom-2.1.2.tgz#a1349bbf6a0e5cb5ded55d023766f20a4d439a31"
   integrity sha512-06okr5cgPzMNBy+Ycse2A6udMi4bqwW/zgBF/rwjcNqWkyr82Mcg8b0vjX8OJpZFy/FKjJmw6wV7t44kK6kW7A==
   dependencies:
     "@floating-ui/dom" "^1.0.0"
+
+"@floating-ui/utils@^0.2.10":
+  version "0.2.10"
+  resolved "https://registry.yarnpkg.com/@floating-ui/utils/-/utils-0.2.10.tgz#a2a1e3812d14525f725d011a73eceb41fef5bc1c"
+  integrity sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==
 
 "@floating-ui/utils@^0.2.8":
   version "0.2.8"
@@ -4345,6 +4365,11 @@
   resolved "https://registry.yarnpkg.com/@tiptap/extension-code/-/extension-code-3.4.1.tgz#5b8271392588c77a5bc96ae0545feabe4eb17429"
   integrity sha512-ZLdzl6tfp1gS4fQPpnxEYtLC50ql+depzlP7sTDy84mNdtFnGnEo19NjM402ijX2CtFQw86ieX05K8qFBzNSxw==
 
+"@tiptap/extension-collaboration@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-collaboration/-/extension-collaboration-3.4.2.tgz#36db2a5f74a72c96bf44ea4b30785e308300674e"
+  integrity sha512-VS/wiWwrEmyy1emqGF+yStpo58xPYgF440U9ciFMyB2nRI+4DIbsmt0yQz3eczzXEQ3oeSTSIC9nnW+RVZ1FNw==
+
 "@tiptap/extension-document@^3.4.1":
   version "3.4.1"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-document/-/extension-document-3.4.1.tgz#c01db41a32435714193eb83d5bf4dbad5b112490"
@@ -4354,6 +4379,13 @@
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/@tiptap/extension-drag-handle-vue-3/-/extension-drag-handle-vue-3-3.4.2.tgz#6151c85fde1fe51855760e65c0be98b04369bd8c"
   integrity sha512-PIe7H9cJfT/903mDvl4Vk9oKopoDfREwvxpwAuKs8OLU9NGdM44VXoqFvgiPm9aes/5rJUc+Irp8tUhfwgKlQQ==
+
+"@tiptap/extension-drag-handle@^3.4.2":
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/@tiptap/extension-drag-handle/-/extension-drag-handle-3.4.2.tgz#ec9fc925d1a4cd6019b1e1c228d280994d1795e0"
+  integrity sha512-vjEH9kvIkMUQxt2Tjd0hsdEN3K9BXSqGHY+Irnh3UrKiNg4YmxNHhLGjYb1i49VOCackKnSQ0VGcoyACPkqgNQ==
+  dependencies:
+    "@floating-ui/dom" "^1.6.13"
 
 "@tiptap/extension-dropcursor@^3.4.1":
   version "3.4.1"
@@ -4523,6 +4555,13 @@
   optionalDependencies:
     "@tiptap/extension-bubble-menu" "^3.4.1"
     "@tiptap/extension-floating-menu" "^3.4.1"
+
+"@tiptap/y-tiptap@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@tiptap/y-tiptap/-/y-tiptap-3.0.0.tgz#e2cf46b9346dd4666f0ecceab45bb4bccf85f1ce"
+  integrity sha512-HIeJZCj+KYJde2x6fONzo4o6kd7gW7eonwhQsv2p2VQnUgwNXMVhN+D6Z3AH/2i541Sq33y1PO4U/1ThCPjqbA==
+  dependencies:
+    lib0 "^0.2.100"
 
 "@trpc/client@^10.38.1":
   version "10.45.2"
@@ -11063,7 +11102,7 @@ levn@^0.4.1:
     prelude-ls "^1.2.1"
     type-check "~0.4.0"
 
-lib0@^0.2.85, lib0@^0.2.99:
+lib0@^0.2.100, lib0@^0.2.85, lib0@^0.2.99:
   version "0.2.114"
   resolved "https://registry.yarnpkg.com/lib0/-/lib0-0.2.114.tgz#0b0e55c3ffa8768fe3d9efca971059f465db4baf"
   integrity sha512-gcxmNFzA4hv8UYi8j43uPlQ7CGcyMJ2KQb5kZASw6SnAKAf10hK12i2fjrS3Cl/ugZa5Ui6WwIu1/6MIXiHttQ==
