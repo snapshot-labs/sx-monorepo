@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { Editor } from '@tiptap/core';
 import { BubbleMenu } from '@tiptap/vue-3/menus';
 
 const props = defineProps<{
-  editor: any;
+  editor: Editor;
 }>();
 
 function setLink() {

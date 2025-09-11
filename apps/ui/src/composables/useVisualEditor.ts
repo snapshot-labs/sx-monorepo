@@ -1,4 +1,4 @@
-import { generateHTML, generateJSON } from '@tiptap/core';
+import { Editor, generateHTML, generateJSON } from '@tiptap/core';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
@@ -10,7 +10,7 @@ import {
   TableRow
 } from '@tiptap/extension-table';
 import { Gapcursor, Placeholder } from '@tiptap/extensions';
-import { Slice } from '@tiptap/pm/model';
+import { Node as ProseMirrorNode, Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import { useEditor } from '@tiptap/vue-3';
 import javascript from 'highlight.js/lib/languages/javascript';
@@ -53,8 +53,8 @@ async function uploadFile(file: File) {
 }
 
 function insertEditorImages(
-  uiStore: any,
-  editor: any,
+  uiStore: ReturnType<typeof useUiStore>,
+  editor: Editor,
   files: File[],
   pos: number
 ) {
@@ -90,7 +90,7 @@ function insertEditorImages(
 
       // Find and update the image with the CDN URL
       let imageUpdated = false;
-      editor.state.doc.descendants((node: any, pos: number) => {
+      editor.state.doc.descendants((node: ProseMirrorNode, pos: number) => {
         if (
           !imageUpdated &&
           node.type.name === 'image' &&
@@ -116,7 +116,7 @@ function insertEditorImages(
 
       // Remove the temporary image if it exists
       let imageRemoved = false;
-      editor.state.doc.descendants((node: any, pos: number) => {
+      editor.state.doc.descendants((node: ProseMirrorNode, pos: number) => {
         if (
           !imageRemoved &&
           node.type.name === 'image' &&
@@ -171,7 +171,10 @@ function htmlToMarkdown(html: string) {
   return replaceCdnUrls(markdown, getOriginalUrl);
 }
 
-export function useVisualEditor(model: Ref<string>, definition: any) {
+export function useVisualEditor(
+  model: Ref<string>,
+  definition: { examples?: string[] }
+) {
   const isEdited = ref(false);
 
   const uiStore = useUiStore();
