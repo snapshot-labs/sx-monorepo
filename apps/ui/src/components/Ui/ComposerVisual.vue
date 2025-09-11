@@ -72,5 +72,18 @@ const showError = computed<boolean>(
   & ~ div[style*='position: absolute'] {
     @apply z-20;
   }
+
+  .ProseMirror-selectednode,
+  .ProseMirror-selectednoderange {
+    position: relative;
+
+    &::before {
+      @apply bg-skin-border/60 rounded-md -left-2 -top-2 -right-2 -bottom-2;
+      position: absolute;
+      pointer-events: none;
+      z-index: -1;
+      content: '';
+    }
+  }
 }
 </style>
