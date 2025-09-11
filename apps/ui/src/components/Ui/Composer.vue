@@ -10,7 +10,7 @@ defineProps<{
 }>();
 
 const previewEnabled = ref(false);
-const editorType = ref<'visual' | 'markdown'>('visual');
+const editorType = ref<'visual' | 'markdown'>('markdown');
 
 function toggleEditor() {
   editorType.value = editorType.value === 'visual' ? 'markdown' : 'visual';
