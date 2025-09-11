@@ -174,6 +174,8 @@ function htmlToMarkdown(html: string) {
 export function useVisualEditor(model: Ref<string>, definition: any) {
   const isEdited = ref(false);
 
+  const uiStore = useUiStore();
+
   const extensions = [
     StarterKit,
     Table,
@@ -280,7 +282,6 @@ export function useVisualEditor(model: Ref<string>, definition: any) {
       }
     }
   });
-  const uiStore = useUiStore();
 
   function updateModel() {
     if (!editor.value || !isEdited.value) return;
