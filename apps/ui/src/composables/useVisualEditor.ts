@@ -59,22 +59,79 @@ function insertEditorImages(
   pos: number
 ) {
   files.forEach(async file => {
+    // Create a temporary blob URL for immediate display
+    const tempUrl = URL.createObjectURL(file);
+
     try {
-      const image = await uploadFile(file);
+      // Insert image immediately with temporary URL
       editor
         .chain()
         .insertContentAt(pos, {
           type: 'image',
           attrs: {
-            alt: image.name,
-            src: getCdnUrl(image.url)
+            alt: file.name,
+            src: tempUrl
           }
         })
         .focus()
         .run();
-    } catch (e) {
-      uiStore.addNotification('error', getUserFacingErrorMessage(e));
 
+      // Upload the file in the background
+      const image = await uploadFile(file);
+      const cdnUrl = getCdnUrl(image.url);
+
+      // Preload the CDN image to prevent flashing
+      const preloadImage = new window.Image();
+      await new Promise((resolve, reject) => {
+        preloadImage.onload = resolve;
+        preloadImage.onerror = reject;
+        preloadImage.src = cdnUrl;
+      });
+
+      // Find and update the image with the CDN URL
+      let imageUpdated = false;
+      editor.state.doc.descendants((node: any, pos: number) => {
+        if (
+          !imageUpdated &&
+          node.type.name === 'image' &&
+          node.attrs.src === tempUrl
+        ) {
+          const tr = editor.state.tr;
+          tr.setNodeMarkup(pos, undefined, {
+            alt: image.name,
+            src: cdnUrl
+          });
+          editor.view.dispatch(tr);
+          imageUpdated = true;
+          return false; // stop iteration
+        }
+        return true;
+      });
+
+      // Clean up the temporary blob URL
+      URL.revokeObjectURL(tempUrl);
+    } catch (e) {
+      // Clean up the temporary blob URL on error
+      URL.revokeObjectURL(tempUrl);
+
+      // Remove the temporary image if it exists
+      let imageRemoved = false;
+      editor.state.doc.descendants((node: any, pos: number) => {
+        if (
+          !imageRemoved &&
+          node.type.name === 'image' &&
+          node.attrs.src === tempUrl
+        ) {
+          const tr = editor.state.tr;
+          tr.delete(pos, pos + node.nodeSize);
+          editor.view.dispatch(tr);
+          imageRemoved = true;
+          return false; // stop iteration
+        }
+        return true;
+      });
+
+      uiStore.addNotification('error', getUserFacingErrorMessage(e));
       console.error('Failed to upload image', e);
     }
   });
