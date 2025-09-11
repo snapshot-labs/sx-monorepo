@@ -57,7 +57,7 @@ export default function (options: { discussion?: string } = {}) {
 
       // If headers were found in first tbody row, skip it for data
       if (headers.length > 0 && bodyRows.length > 0) {
-        const firstRow = bodyRows[0];
+        const firstRow = bodyRows[0] as HTMLTableRowElement;
         if (firstRow.querySelectorAll('th').length > 0) {
           dataRows = bodyRows.slice(1);
         }

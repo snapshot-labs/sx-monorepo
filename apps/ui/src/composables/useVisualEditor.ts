@@ -3,7 +3,12 @@ import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
 import NodeRange from '@tiptap/extension-node-range';
-import { TableKit } from '@tiptap/extension-table';
+import {
+  Table,
+  TableCell,
+  TableHeader,
+  TableRow
+} from '@tiptap/extension-table';
 import { Gapcursor, Placeholder } from '@tiptap/extensions';
 import { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
@@ -114,7 +119,40 @@ export function useVisualEditor(model: Ref<string>) {
 
   const extensions = [
     StarterKit,
-    TableKit,
+    Table,
+    TableRow,
+    TableHeader.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          // keep style, for cell alignment
+          style: {
+            default: null,
+            parseHTML: element => element.getAttribute('style'),
+            renderHTML: attributes => {
+              if (!attributes.style) return {};
+              return { style: attributes.style };
+            }
+          }
+        };
+      }
+    }),
+    TableCell.extend({
+      addAttributes() {
+        return {
+          ...this.parent?.(),
+          // keep style, for cell alignment
+          style: {
+            default: null,
+            parseHTML: element => element.getAttribute('style'),
+            renderHTML: attributes => {
+              if (!attributes.style) return {};
+              return { style: attributes.style };
+            }
+          }
+        };
+      }
+    }),
     Image,
     Gapcursor,
     NodeRange.configure({
