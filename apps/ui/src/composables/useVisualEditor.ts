@@ -1,4 +1,4 @@
-import { generateJSON } from '@tiptap/core';
+import { generateHTML, generateJSON } from '@tiptap/core';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
@@ -7,7 +7,6 @@ import { TableKit } from '@tiptap/extension-table';
 import { Gapcursor, Placeholder } from '@tiptap/extensions';
 import { Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
-import { renderToMarkdown } from '@tiptap/static-renderer/pm/markdown';
 import { useEditor } from '@tiptap/vue-3';
 import javascript from 'highlight.js/lib/languages/javascript';
 import json from 'highlight.js/lib/languages/json';
@@ -16,6 +15,7 @@ import rust from 'highlight.js/lib/languages/rust';
 import { solidity } from 'highlightjs-solidity';
 import { createLowlight } from 'lowlight';
 import { Remarkable } from 'remarkable';
+import turndownService from '@/helpers/turndownService';
 import {
   getUrl,
   getUserFacingErrorMessage,
@@ -102,12 +102,9 @@ function markdownToHtml(markdown: string) {
   return cleanedHtml;
 }
 
-function jsonToMarkdown(extensions, json) {
-  let markdown = renderToMarkdown({ extensions, content: json });
-
-  // Remove all leading newlines
-  // renderToMarkdown adds a leading newline when the content is not starting with a heading
-  markdown = markdown.trimStart();
+function htmlToMarkdown(html: string) {
+  const converter = turndownService();
+  const markdown = converter(html);
 
   return replaceCdnUrls(markdown, getOriginalUrl);
 }
@@ -156,7 +153,8 @@ export function useVisualEditor(model: Ref<string>) {
       },
       clipboardTextSerializer: slice => {
         const json = slice.content.toJSON();
-        return jsonToMarkdown(extensions, { type: 'doc', content: json });
+        const html = generateHTML({ type: 'doc', content: json }, extensions);
+        return htmlToMarkdown(html);
       },
       handlePaste: (view, event) => {
         const clipboardData = event.clipboardData;
@@ -192,7 +190,7 @@ export function useVisualEditor(model: Ref<string>) {
   function updateModel() {
     if (!editor.value || !isEdited.value) return;
 
-    model.value = jsonToMarkdown(extensions, editor.value.getJSON());
+    model.value = htmlToMarkdown(editor.value.getHTML());
     isEdited.value = false;
   }
 

@@ -1,8 +1,15 @@
 import TurndownService from 'turndown';
 
 const turndownService = new TurndownService({
-  linkStyle: 'referenced',
-  headingStyle: 'atx'
+  headingStyle: 'atx',
+  hr: '---',
+  bulletListMarker: '-',
+  codeBlockStyle: 'fenced',
+  fence: '```',
+  emDelimiter: '_',
+  strongDelimiter: '**',
+  linkStyle: 'inlined',
+  linkReferenceStyle: 'full'
 });
 
 export default function (options: { discussion?: string } = {}) {
