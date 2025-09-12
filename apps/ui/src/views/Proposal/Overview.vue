@@ -115,7 +115,9 @@ const proposalMetadataUrl = computed(() => {
 const proposalTransactionId = computed(() => {
   const network = getNetwork(props.proposal.network);
 
-  if (props.proposal.space.protocol === 'governor-bravo') {
+  if (
+    ['governor-bravo', 'open-zeppelin'].includes(props.proposal.space.protocol)
+  ) {
     return network.helpers.getExplorerUrl(props.proposal.tx, 'transaction');
   }
 
