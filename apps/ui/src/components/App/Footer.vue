@@ -23,14 +23,14 @@ const isSiteRoute = computed(() => {
         title="About Snapshot"
       >
         <router-link :to="{ name: 'site-landing' }" tabindex="-1">
-          <UiButton class="!px-0 w-[46px]">
+          <UiButton pill>
             <IC-zap class="inline-block size-[24px]" />
           </UiButton>
         </router-link>
       </UiTooltip>
       <UiTooltip title="Get help">
         <a :href="HELPDESK_URL" target="_blank" tabindex="-1">
-          <UiButton class="!px-0 w-[46px]">
+          <UiButton pill>
             <IH-chat class="inline-block" />
           </UiButton>
         </a>

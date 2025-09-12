@@ -62,7 +62,7 @@ watch(
           :to="{
             name: `create-space-${protocol}`
           }"
-          class="!px-0 w-[46px]"
+          pill
         >
           <IH-plus-sm />
         </UiButton>

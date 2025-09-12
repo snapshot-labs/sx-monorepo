@@ -322,7 +322,7 @@ const navigationItems = computed(() =>
         class="px-4 space-x-2 flex items-center"
         :class="[
           item.active ? 'text-skin-link' : 'text-skin-text',
-          navigationConfig?.style === 'slim' ? 'py-1' : 'py-1.5'
+          navigationConfig?.style === 'slim' ? 'py-1' : 'py-[5px]'
         ]"
       >
         <component

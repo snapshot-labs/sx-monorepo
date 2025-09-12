@@ -217,7 +217,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
               name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }
             }"
-            class="!px-0 w-[46px]"
+            pill
           >
             <IH-pencil-alt />
           </UiButton>
