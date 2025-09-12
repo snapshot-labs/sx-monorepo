@@ -56,6 +56,12 @@ export function createConstants(
         isSupported: true,
         isContractSupported: true,
         connectors: EVM_CONNECTORS
+      },
+      // OpenZeppelin
+      OpenZeppelinAuthenticator: {
+        isSupported: true,
+        isContractSupported: true,
+        connectors: EVM_CONNECTORS
       }
     };
 
@@ -75,7 +81,9 @@ export function createConstants(
     Axiom: true,
     Isokratia: true,
     // Governor Bravo
-    GovernorBravoTimelock: true
+    GovernorBravoTimelock: true,
+    // OpenZeppelin
+    OpenZeppelinTimelockController: true
   };
 
   const AUTHS = {
