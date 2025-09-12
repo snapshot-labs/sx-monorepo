@@ -147,6 +147,10 @@ export function getProposalId(proposal: Proposal) {
     return `#${proposalId.slice(-5)}`;
   }
 
+  if (proposalId.length > 10) {
+    return `#${proposalId.slice(0, 6)}...${proposalId.slice(-4)}`;
+  }
+
   return `#${proposalId}`;
 }
 

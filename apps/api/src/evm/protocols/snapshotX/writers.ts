@@ -627,7 +627,7 @@ export function createWriters(
       spaceId,
       proposalId
     });
-    proposal.proposal_id = proposalId;
+    proposal.proposal_id = proposalId.toString();
     proposal.space = spaceId;
     proposal.author = author;
     proposal.metadata = null;
@@ -989,7 +989,7 @@ export function createWriters(
       config.indexerName
     );
     vote.space = spaceId;
-    vote.proposal = proposalId;
+    vote.proposal = proposalId.toString();
     vote.voter = voter;
     vote.choice = choice;
     vote.vp = vp.toString();
