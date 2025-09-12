@@ -14,6 +14,7 @@ export type NetworkID =
 export type Protocols = {
   snapshotX: boolean;
   governorBravo: boolean;
+  openZeppelin: boolean;
 };
 
 export type SnapshotXConfig = {
@@ -32,10 +33,15 @@ export type GovernorBravoConfig = {
   chainId: number;
 };
 
+export type OpenZeppelinConfig = {
+  chainId: number;
+};
+
 export type EVMConfig = {
   indexerName: NetworkID;
   snapshotXConfig?: SnapshotXConfig;
   governorBravoConfig?: GovernorBravoConfig;
+  openZeppelinConfig?: OpenZeppelinConfig;
 } & CheckpointConfig;
 
 export type PartialConfig = {
