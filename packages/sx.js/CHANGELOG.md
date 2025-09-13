@@ -1,5 +1,11 @@
 # @snapshot-labs/sx
 
+## 0.1.10
+
+### Patch Changes
+
+- 046eed3: add GovernorBravo client
+
 ## 0.1.9
 
 ### Patch Changes
