@@ -5,8 +5,11 @@ import {
   getOffchainStrategy,
   offchainGoerli,
   offchainMainnet,
-  OffchainNetworkConfig
+  OffchainNetworkConfig,
+  offchainStarknetMainnet,
+  offchainStarknetSepolia
 } from '@snapshot-labs/sx';
+import { RpcProvider, constants as starknetConstants } from 'starknet';
 import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
 import {
@@ -14,7 +17,7 @@ import {
   OSnapPlugin,
   parseInternalTransaction
 } from '@/helpers/osnap';
-import { verifyNetwork } from '@/helpers/utils';
+import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   Choice,
@@ -61,15 +64,29 @@ const CONFIGS: Record<number, OffchainNetworkConfig> = {
   5: offchainGoerli
 };
 
+const STARKNET_CONFIGS: Record<number, OffchainNetworkConfig> = {
+  1: offchainStarknetMainnet,
+  11155111: offchainStarknetSepolia
+};
+
+const STARKNET_CHAIN_IDS = Object.entries(
+  starknetConstants.StarknetChainId
+).flat();
+
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
+  starkProvider: RpcProvider,
   chainId: 1 | 11155111
 ): ReadOnlyNetworkActions {
   const networkConfig = CONFIGS[chainId];
 
   const client = new clients.OffchainEthereumSig({
     networkConfig
+  });
+  const starknetSigClient = new clients.OffchainStarknetSig({
+    networkConfig: STARKNET_CONFIGS[chainId],
+    starkProvider
   });
 
   async function verifyChainNetwork(
@@ -393,7 +410,23 @@ export function createActions(
         data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
       });
     },
-    setAlias(web3: Web3Provider, alias: string) {
+    async setAlias(web3: any, alias: string) {
+      const web3ChainId =
+        web3.provider?.chainId || web3.provider?.provider?.chainId;
+
+      if (STARKNET_CHAIN_IDS.includes(web3ChainId)) {
+        await verifyStarknetNetwork(
+          web3,
+          // Argent X is returning SN_... while Braavos is returning Ox....
+          starknetConstants.StarknetChainId[web3ChainId] || web3ChainId
+        );
+
+        return starknetSigClient.setAlias({
+          signer: web3.provider.account,
+          data: { alias }
+        });
+      }
+
       return client.setAlias({
         signer: web3.getSigner(),
         data: { alias }

@@ -25,7 +25,7 @@ import {
   weightedVoteTypes
 } from './types';
 import { offchainGoerli } from '../../../offchainNetworks';
-import { OffchainNetworkConfig, SignatureData } from '../../../types';
+import { OffchainNetworkConfig } from '../../../types';
 import {
   CancelProposal,
   CreateSpace,
@@ -48,6 +48,7 @@ import {
   FollowSpace,
   Propose,
   SetAlias,
+  SignatureData,
   UnfollowSpace,
   UpdateProposal,
   UpdateSpace,
@@ -59,12 +60,16 @@ import { encryptChoices } from '../utils';
 
 const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://seq.snapshot.org',
-  5: 'https://testnet.seq.snapshot.org'
+  5: 'https://testnet.seq.snapshot.org',
+  '0x534e5f4d41494e': 'https://seq.snapshot.org', // Not used
+  '0x534e5f5345504f4c4941': 'https://testnet.seq.snapshot.org' // Not used
 };
 
 const RELAYER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
   1: 'https://relayer.snapshot.org',
-  5: 'https://testnet.seq.snapshot.org' // no relayer for testnet
+  5: 'https://testnet.seq.snapshot.org', // no relayer for testnet
+  '0x534e5f4d41494e': 'https://relayer.snapshot.org', // Not used
+  '0x534e5f5345504f4c4941': 'https://testnet.seq.snapshot.org' // Not used
 };
 
 type EthereumSigClientOpts = {
