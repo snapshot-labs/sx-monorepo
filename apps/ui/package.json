@@ -4,7 +4,7 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "main": "main.js",
+  "main": "main.cjs",
   "repository": "snapshot-labs/sx-monorepo",
   "scripts": {
     "dev": "vite --port=8080",
@@ -16,8 +16,8 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "electron:start": "electron .",
-    "electron:build": "ELECTRON=true yarn build"
+    "electron:start": "ELECTRON=true yarn build && electron .",
+    "electron:build": "ELECTRON=true yarn build && electron-builder --mac"
   },
   "eslintConfig": {
     "extends": [
@@ -71,9 +71,9 @@
     "autolinker": "^3.11.0",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.10",
-    "electron": "^26.2.3",
     "ethers": "^6.13.5",
     "events": "^3.3.0",
+    "electron-updater": "^6.6.2",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "highlight.js": "10",
@@ -114,6 +114,8 @@
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/test-utils": "^2.4.5",
     "autoprefixer": "^10.4.16",
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12",
     "eslint": "^8.57.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",

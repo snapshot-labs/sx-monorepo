@@ -30,3 +30,6 @@ gql
 
 *storybook.log
 storybook-static
+
+# Electron
+dist-electron

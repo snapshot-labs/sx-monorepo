@@ -1,0 +1,28 @@
+appId: com.snapshot.app
+productName: "Snapshot"
+electronVersion: "38.0.0"
+directories:
+  output: dist-electron
+publish:
+  provider: github
+  owner: snapshot-labs
+  repo: sx-monorepo
+files:
+  - "**/*"
+  - "!src"
+  - "!test"
+  - "!tests"
+  - "!storybook-static"
+  - "!screenshots"
+  - "!*.md"
+mac:
+  category: public.app-category.utilities
+  icon: ./src/assets/snapshot.png
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+dmg:
+  title: "${productName} ${version}"
+  icon: ./src/assets/snapshot.png
