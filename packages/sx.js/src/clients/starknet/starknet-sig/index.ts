@@ -8,7 +8,6 @@ import {
   validateAndParseAddress
 } from 'starknet';
 import {
-  aliasTypes,
   baseDomain,
   proposeTypes,
   updateProposalTypes,
@@ -16,13 +15,11 @@ import {
 } from './types';
 import { getStrategiesWithParams } from '../../../utils/strategies';
 import {
-  Alias,
   ClientConfig,
   ClientOpts,
   Envelope,
   Propose,
   SignatureData,
-  StarknetEIP712AliasMessage,
   StarknetEIP712ProposeMessage,
   StarknetEIP712UpdateProposalMessage,
   StarknetEIP712VoteMessage,
@@ -70,7 +67,6 @@ export class StarknetSig {
       | StarknetEIP712ProposeMessage
       | StarknetEIP712UpdateProposalMessage
       | StarknetEIP712VoteMessage
-      | StarknetEIP712AliasMessage
   >(
     signer: Account,
     verifyingContract: string,
@@ -222,33 +218,6 @@ export class StarknetSig {
       message,
       voteTypes,
       'Vote'
-    );
-
-    return {
-      signatureData,
-      data
-    };
-  }
-
-  public async setAlias({
-    signer,
-    data
-  }: {
-    signer: Account;
-    data: Alias;
-  }): Promise<Envelope<Alias>> {
-    const message = {
-      from: validateAndParseAddress(signer.address),
-      timestamp: parseInt((Date.now() / 1000).toFixed()),
-      ...data
-    };
-
-    const signatureData = await this.sign(
-      signer,
-      '',
-      message,
-      aliasTypes,
-      'SetAlias'
     );
 
     return {
