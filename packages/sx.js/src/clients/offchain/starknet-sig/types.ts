@@ -1,23 +1,21 @@
 export const baseDomain = {
   name: 'sx-starknet',
-  version: '0.1.0',
-  revision: 1
+  version: '0.1.0'
 };
 
 export const domainTypes = {
-  StarknetDomain: [
-    { name: 'name', type: 'shortstring' },
-    { name: 'version', type: 'shortstring' },
-    { name: 'revision', type: 'shortstring' },
-    { name: 'chainId', type: 'shortstring' }
+  StarkNetDomain: [
+    { name: 'name', type: 'felt' },
+    { name: 'version', type: 'felt' },
+    { name: 'chainId', type: 'felt' }
   ]
 };
 
 export const aliasTypes = {
-  StarknetDomain: domainTypes.StarknetDomain,
+  StarkNetDomain: domainTypes.StarkNetDomain,
   SetAlias: [
-    { name: 'from', type: 'ContractAddress' },
-    { name: 'alias', type: 'string' },
+    { name: 'from', type: 'felt' },
+    { name: 'alias', type: 'felt' },
     { name: 'timestamp', type: 'felt' }
   ]
 };
