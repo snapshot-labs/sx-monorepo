@@ -1,6 +1,5 @@
 const path = require('path');
-const { app, BrowserWindow, protocol, dialog } = require('electron');
-const fs = require('fs');
+const { app, BrowserWindow } = require('electron');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -9,24 +8,11 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      webSecurity: true,
     },
-    show: false, // Don't show until ready
-    titleBarStyle: 'default',
+    show: false,
   });
 
-  const indexPath = path.join(__dirname, 'dist', 'index.html');
-
-  let buildFile;
-  if (fs.existsSync(indexPath)) {
-    buildFile = indexPath;
-  } else {
-    console.error('Build files not found! Please run "yarn build:electron" first.');
-    app.quit();
-    return;
-  }
-
-  win.loadFile(buildFile);
+  win.loadFile(path.join(__dirname, 'dist', 'index.html'));
 
   win.once('ready-to-show', () => {
     win.show();
