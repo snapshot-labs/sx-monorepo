@@ -120,6 +120,10 @@ export type EvmNetworkConfig = Omit<
   };
 };
 
-export type OffchainNetworkConfig = {
-  eip712ChainId: 1 | 5 | starknetConstants.StarknetChainId;
+export type OffchainNetworkEthereumConfig = {
+  eip712ChainId: 1 | 5;
+};
+
+export type OffchainNetworkStarknetConfig = {
+  eip712ChainId: starknetConstants.StarknetChainId;
 };

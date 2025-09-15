@@ -1,6 +1,6 @@
 import { Account, TypedData, validateAndParseAddress } from 'starknet';
 import { aliasTypes, baseDomain } from './types';
-import { OffchainNetworkConfig } from '../../../types';
+import { OffchainNetworkStarknetConfig } from '../../../types';
 import {
   EIP712SetAliasMessage,
   Envelope,
@@ -9,7 +9,7 @@ import {
 } from '../types';
 
 type StarknetSigClientOpts = {
-  networkConfig: OffchainNetworkConfig;
+  networkConfig: OffchainNetworkStarknetConfig;
 };
 
 export class StarknetSig {

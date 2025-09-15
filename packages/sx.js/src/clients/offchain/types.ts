@@ -1,9 +1,4 @@
-import { RpcProvider } from 'starknet';
-import {
-  SignatureData as BaseSignatureData,
-  OffchainNetworkConfig,
-  Privacy
-} from '../../types';
+import { SignatureData as BaseSignatureData, Privacy } from '../../types';
 
 export type SignatureData = BaseSignatureData;
 
@@ -21,16 +16,6 @@ export type Envelope<
 > = {
   signatureData?: BaseSignatureData;
   data: T;
-};
-
-export type StarknetClientOpts = {
-  starkProvider: RpcProvider;
-  networkConfig: OffchainNetworkConfig;
-};
-
-export type StarknetClientConfig = {
-  starkProvider: RpcProvider;
-  networkConfig: OffchainNetworkConfig;
 };
 
 export type StrategyConfig = {

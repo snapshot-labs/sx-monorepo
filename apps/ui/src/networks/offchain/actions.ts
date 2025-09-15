@@ -5,7 +5,8 @@ import {
   getOffchainStrategy,
   offchainGoerli,
   offchainMainnet,
-  OffchainNetworkConfig,
+  OffchainNetworkEthereumConfig,
+  OffchainNetworkStarknetConfig,
   offchainStarknetMainnet,
   offchainStarknetSepolia
 } from '@snapshot-labs/sx';
@@ -59,12 +60,12 @@ type ReadOnlyExecutionPlugin = {
   safes: ReadOnlyExecutionSafe[];
 };
 
-const CONFIGS: Record<number, OffchainNetworkConfig> = {
+const CONFIGS: Record<number, OffchainNetworkEthereumConfig> = {
   1: offchainMainnet,
   5: offchainGoerli
 };
 
-const STARKNET_CONFIGS: Record<number, OffchainNetworkConfig> = {
+const STARKNET_CONFIGS: Record<number, OffchainNetworkStarknetConfig> = {
   1: offchainStarknetMainnet,
   11155111: offchainStarknetSepolia
 };
