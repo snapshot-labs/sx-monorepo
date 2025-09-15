@@ -12,6 +12,24 @@ configured for those networks.
 If you need to modify services that are used by sx-ui you can specify them in `.env` file or applicable
 file in `./src/networks`.
 
+## Electron App
+
+### Development
+
+```bash
+yarn electron:start
+```
+
+This will start the Electron app in development mode. but uses the built files from `dist/` folder.
+
+### Build
+
+```bash
+yarn electron:build
+```
+
+This will create installers for all platforms (macOS, Windows, Linux).
+
 ## License
 
 Snapshot is open-sourced software licensed under the © [MIT license](LICENSE).

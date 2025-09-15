@@ -17,7 +17,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "electron:start": "ELECTRON=true yarn build && electron .",
-    "electron:build": "ELECTRON=true yarn build && electron-builder --mac"
+    "electron:build": "ELECTRON=true yarn build && electron-builder --mac --win --linux"
   },
   "eslintConfig": {
     "extends": [
@@ -73,7 +73,6 @@
     "dayjs": "^1.11.10",
     "ethers": "^6.13.5",
     "events": "^3.3.0",
-    "electron-updater": "^6.6.2",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "highlight.js": "10",

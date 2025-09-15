@@ -1,6 +1,7 @@
 appId: com.snapshot.app
 productName: "Snapshot"
 electronVersion: "38.0.0"
+icon: ./src/assets/snapshot.png
 directories:
   output: dist-electron
 publish:
@@ -17,7 +18,6 @@ files:
   - "!*.md"
 mac:
   category: public.app-category.utilities
-  icon: ./src/assets/snapshot.png
   target:
     - target: dmg
       arch:
@@ -25,4 +25,20 @@ mac:
         - arm64
 dmg:
   title: "${productName} ${version}"
-  icon: ./src/assets/snapshot.png
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
