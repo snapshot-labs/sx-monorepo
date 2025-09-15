@@ -1,18 +1,21 @@
 import { Account, TypedData, validateAndParseAddress } from 'starknet';
 import { aliasTypes, baseDomain } from './types';
+import { OffchainNetworkConfig } from '../../../types';
 import {
   EIP712SetAliasMessage,
   Envelope,
   SetAlias,
-  SignatureData,
-  StarknetClientConfig,
-  StarknetClientOpts
+  SignatureData
 } from '../types';
 
-export class StarknetSig {
-  config: StarknetClientConfig;
+type StarknetSigClientOpts = {
+  networkConfig: OffchainNetworkConfig;
+};
 
-  constructor(opts: StarknetClientOpts) {
+export class StarknetSig {
+  config: StarknetSigClientOpts;
+
+  constructor(opts: StarknetSigClientOpts) {
     this.config = opts;
   }
 

@@ -9,7 +9,7 @@ import {
   offchainStarknetMainnet,
   offchainStarknetSepolia
 } from '@snapshot-labs/sx';
-import { RpcProvider, constants as starknetConstants } from 'starknet';
+import { constants as starknetConstants } from 'starknet';
 import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
 import {
@@ -76,7 +76,6 @@ const STARKNET_CHAIN_IDS = Object.entries(
 export function createActions(
   constants: NetworkConstants,
   helpers: NetworkHelpers,
-  starkProvider: RpcProvider,
   chainId: 1 | 11155111
 ): ReadOnlyNetworkActions {
   const networkConfig = CONFIGS[chainId];
@@ -85,8 +84,7 @@ export function createActions(
     networkConfig
   });
   const starknetSigClient = new clients.OffchainStarknetSig({
-    networkConfig: STARKNET_CONFIGS[chainId],
-    starkProvider
+    networkConfig: STARKNET_CONFIGS[chainId]
   });
 
   async function verifyChainNetwork(

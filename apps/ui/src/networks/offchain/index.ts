@@ -1,5 +1,4 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { RpcProvider } from 'starknet';
 import { pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress, getSpaceController } from '@/helpers/utils';
@@ -22,20 +21,13 @@ const CHAIN_IDS: Partial<Record<NetworkID, 1 | 11155111>> = {
   s: 1,
   's-tn': 11155111
 };
-const STARKNET_RPC_URLS: Partial<Record<NetworkID, string | undefined>> = {
-  s: 'https://rpc.snapshot.org/sn',
-  's-tn': 'https://rpc.snapshot.org/sn-sep'
-};
 
 export function createOffchainNetwork(networkId: NetworkID): Network {
   const l1ChainId = CHAIN_IDS[networkId];
   const hubUrl = HUB_URLS[networkId];
-  const starknetRpcUrl = STARKNET_RPC_URLS[networkId];
-  if (!hubUrl || !l1ChainId || !starknetRpcUrl)
-    throw new Error(`Unknown network ${networkId}`);
+  if (!hubUrl || !l1ChainId) throw new Error(`Unknown network ${networkId}`);
 
   const provider = getProvider(l1ChainId);
-  const starknetProvider = new RpcProvider({ nodeUrl: starknetRpcUrl });
   const api = createApi(hubUrl, networkId, constants);
 
   const isExecutorSupported = (executorType: string) => {
@@ -114,6 +106,6 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     api,
     constants,
     helpers,
-    actions: createActions(constants, helpers, starknetProvider, l1ChainId)
+    actions: createActions(constants, helpers, l1ChainId)
   };
 }
