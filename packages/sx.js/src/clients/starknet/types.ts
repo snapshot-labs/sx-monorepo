@@ -124,11 +124,7 @@ export type Vote = {
   metadataUri: string;
 };
 
-export type Alias = {
-  alias: string;
-};
-
-export type Message = Propose | Vote | UpdateProposal | Alias;
+export type Message = Propose | Vote | UpdateProposal;
 
 export type Envelope<T extends Message> = {
   signatureData?: SignatureData;
@@ -166,12 +162,6 @@ export type StarknetEIP712VoteMessage = {
   choice: string;
   userVotingStrategies: { index: number; params: string[] }[];
   metadataUri: string[];
-};
-
-export type StarknetEIP712AliasMessage = {
-  alias: string;
-  from?: string;
-  timestamp?: number;
 };
 
 export type EIP712ProposeMessage = StarknetEIP712ProposeMessage & {

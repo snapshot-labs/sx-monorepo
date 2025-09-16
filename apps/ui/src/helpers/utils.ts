@@ -418,6 +418,9 @@ export async function verifyNetwork(
   }
 }
 
+// Not implemented by Braavos and Argent Mobile
+// Signing and verifying messages on different network should work fine
+// for single signer message
 export async function verifyStarknetNetwork(
   web3: any,
   chainId: starknetConstants.StarknetChainId
