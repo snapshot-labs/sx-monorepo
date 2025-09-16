@@ -105,7 +105,7 @@ function handleSelect(value: string) {
     <div v-if="web3.account" class="space-y-4">
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <h4 class="eyebrow">ENS names</h4>
+          <h4 class="eyebrow">Domain names</h4>
           <UiButton
             v-if="names"
             class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
