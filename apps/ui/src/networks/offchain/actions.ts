@@ -70,6 +70,8 @@ const STARKNET_CONFIGS: Record<number, OffchainNetworkStarknetConfig> = {
   11155111: offchainStarknetSepolia
 };
 
+// List of valid starknet chaind IDs returned by wallets
+// Argent X will return 0x534e5f4d41494e while Braavos will return SN_MAIN
 const STARKNET_CHAIN_IDS = Object.entries(
   starknetConstants.StarknetChainId
 ).flat();
