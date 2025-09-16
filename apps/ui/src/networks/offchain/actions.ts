@@ -416,8 +416,7 @@ export function createActions(
       if (STARKNET_CHAIN_IDS.includes(web3ChainId)) {
         await verifyStarknetNetwork(
           web3,
-          // Argent X is returning SN_... while Braavos is returning Ox....
-          starknetConstants.StarknetChainId[web3ChainId] || web3ChainId
+          STARKNET_CONFIGS[chainId].eip712ChainId
         );
 
         return starknetSigClient.setAlias({
