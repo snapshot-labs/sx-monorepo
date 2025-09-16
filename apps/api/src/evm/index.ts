@@ -1,8 +1,8 @@
 import Checkpoint, { evm } from '@snapshot-labs/checkpoint';
 import { createConfig } from './config';
 import { registerIndexer } from '../register';
-import { createWriters as createGovernorBravoWriters } from './protocols/governorBravo/writers';
-import { createWriters as createSnapshotXWriters } from './protocols/snapshotX/writers';
+import { createWriters as createGovernorBravoWriters } from './protocols/governor-bravo/writers';
+import { createWriters as createSnapshotXWriters } from './protocols/snapshot-x/writers';
 import { EVMConfig, Protocols } from './types';
 import { applyProtocolPrefixToWriters } from './utils';
 
