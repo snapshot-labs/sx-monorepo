@@ -3975,10 +3975,10 @@
   resolved "https://registry.yarnpkg.com/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.19.tgz#0c463b172ed22668fc9cd69ac8b433110f7e3dee"
   integrity sha512-vpfk3WU4idf7o0go4J+JnzZTRXB+KJEw39yElZhXxq4rzBQBzeZm/9xvlew4ZdN2A2bAHY4Ov6NL0/C8I+R1TA==
 
-"@snapshot-labs/snapshot.js@^0.14.11":
-  version "0.14.11"
-  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.14.11.tgz#7a71bc8b47b16457563080f5fae1bae8b44a520d"
-  integrity sha512-pFCBHVCSBpQb+BuV0/zq3JowfzYa42wAL7V8pGF7AmM4XrDc8aP2WNSUFtgKjT4cGdFfHCcl3GoD9jMhQxX4BQ==
+"@snapshot-labs/snapshot.js@^0.14.13":
+  version "0.14.13"
+  resolved "https://registry.yarnpkg.com/@snapshot-labs/snapshot.js/-/snapshot.js-0.14.13.tgz#cb1cd4766be91255ca2d63e3489299f555ead727"
+  integrity sha512-NnoV5qNDZnxoAPhpe5IEqQvSyJpx431+0vALXUZoDtJUsP64YR8tMwom/CgEMOXbr+Zem+RyENoWPwrjTOdS3w==
   dependencies:
     "@ensdomains/eth-ens-namehash" "^2.0.15"
     "@ethersproject/abi" "^5.6.4"
@@ -5976,6 +5976,11 @@ ansi-regex@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-5.0.1.tgz#082cb2c89c9fe8659a311a53bd6a4dc5301db304"
   integrity sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==
+
+ansi-regex@^6.0.1:
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-6.2.2.tgz#60216eea464d864597ce2832000738a0589650c1"
+  integrity sha512-Bq3SmSpyFHaWjPk8If9yc6svM8c56dB5BAtW4Qbw5jHTwwXXcTLoRMkpDJp6VL0XzlWaCHTXrkFURMYmD0sLqg==
 
 ansi-styles@^3.2.1:
   version "3.2.1"
