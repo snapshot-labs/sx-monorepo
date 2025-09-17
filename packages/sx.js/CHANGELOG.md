@@ -1,5 +1,12 @@
 # @snapshot-labs/sx
 
+## 0.1.10
+
+### Patch Changes
+
+- 046eed3: add GovernorBravo client
+- 3a10211: use dedicated client for offchain starknet-sig, and support SNIP-12
+
 ## 0.1.9
 
 ### Patch Changes
