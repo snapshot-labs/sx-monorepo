@@ -9,7 +9,9 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true
     },
-    show: false
+    show: false,
+    titleBarStyle: 'hidden',
+    frame: false
   });
 
   const isDev = !app.isPackaged;
