@@ -20,7 +20,7 @@ file in `./src/networks`.
 yarn electron:start
 ```
 
-This will start the Electron app in development mode. but uses the built files from `dist/` folder.
+This will start the Electron app in development mode. uses dev server at http://localhost:8080
 
 ### Build
 
