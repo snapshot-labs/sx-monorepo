@@ -1,7 +1,7 @@
 appId: com.snapshot.app
 productName: "Snapshot"
 electronVersion: "38.0.0"
-icon: ./src/assets/snapshot.png
+icon: ./src/assets/icon.icns
 directories:
   output: dist-electron
 publish:
@@ -16,29 +16,47 @@ files:
   - "!storybook-static"
   - "!screenshots"
   - "!*.md"
+compression: normal
+nodeGypRebuild: false
+buildDependenciesFromSource: false
+nativeRebuilder: null
+npmRebuild: false
+asarUnpack:
+  - "node_modules/.pnpm"
+  - "**/*.node"
+  - "**/keccak/**"
+  - "**/secp256k1/**"
 mac:
   category: public.app-category.utilities
   target:
     - target: dmg
       arch:
-        - x64
         - arm64
+        - x64
 dmg:
   title: "${productName} ${version}"
+  format: "UDRO"  # Uncompressed for faster creation (avoids hdiutil compression issues)
+  artifactName: "${productName}-${version}-${arch}.${ext}"
+  background: null
+  writeUpdateInfo: false
+  internetEnabled: false
 win:
   target:
     - target: nsis
       arch:
-        - x64
         - arm64
+        - x64
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
+  differentialPackage: false
+  useZip: true
 linux:
   target:
     - target: AppImage
       arch:
-        - x64
         - arm64
+        - x64
+  compression: store

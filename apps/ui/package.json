@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "electron:start": "ELECTRON=true yarn build && electron .",
+    "electron:start": "concurrently \"yarn dev\" \"wait-on http://localhost:8080 && NODE_ENV=development electron .\"",
     "electron:build": "ELECTRON=true yarn build && electron-builder --mac --win --linux"
   },
   "eslintConfig": {
@@ -113,6 +113,7 @@
     "@vitejs/plugin-vue": "^6.0.0",
     "@vue/test-utils": "^2.4.5",
     "autoprefixer": "^10.4.16",
+    "concurrently": "^9.2.1",
     "electron": "^38.0.0",
     "electron-builder": "^26.0.12",
     "eslint": "^8.57.0",
@@ -130,6 +131,7 @@
     "unplugin-vue-components": "^0.25.2",
     "vite": "^7.0.6",
     "vitest": "^3.2.4",
-    "vue-tsc": "^3.0.3"
+    "vue-tsc": "^3.0.3",
+    "wait-on": "^8.0.5"
   }
 }

@@ -7,12 +7,19 @@ function createWindow() {
     height: 800,
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true,
+      contextIsolation: true
     },
-    show: false,
+    show: false
   });
 
-  win.loadFile(path.join(__dirname, 'dist', 'index.html'));
+  const isDev = !app.isPackaged;
+  console.log('Running in', isDev ? 'development' : 'production', 'mode');
+
+  if (isDev) {
+    win.loadURL('http://localhost:8080');
+  } else {
+    win.loadFile(path.join(__dirname, 'dist', 'index.html'));
+  }
 
   win.once('ready-to-show', () => {
     win.show();
