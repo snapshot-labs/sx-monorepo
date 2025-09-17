@@ -1,4 +1,5 @@
 import { BigNumberish } from '@ethersproject/bignumber';
+import { constants as starknetConstants } from 'starknet';
 
 export type ExecutorType =
   | 'SimpleQuorumVanilla'
@@ -119,6 +120,10 @@ export type EvmNetworkConfig = Omit<
   };
 };
 
-export type OffchainNetworkConfig = {
+export type OffchainNetworkEthereumConfig = {
   eip712ChainId: 1 | 5;
+};
+
+export type OffchainNetworkStarknetConfig = {
+  eip712ChainId: starknetConstants.StarknetChainId;
 };

@@ -270,7 +270,7 @@ export function createWriters(
       spaceMetadataItem?.executors_strategies?.[0];
     if (!executionStrategyAddress) return;
 
-    const executionStrategy = new ExecutionStrategy(
+    const executionStrategy = await ExecutionStrategy.loadEntity(
       executionStrategyAddress,
       config.indexerName
     );
@@ -282,7 +282,7 @@ export function createWriters(
       spaceId: spaceAddress,
       proposalId: id
     });
-    proposal.proposal_id = id;
+    proposal.proposal_id = id.toString();
     proposal.space = space.id;
     proposal.author = proposerAddress;
     proposal.metadata = proposalMetadataId;
@@ -452,7 +452,7 @@ export function createWriters(
     const vote = new Vote(voteId, config.indexerName);
     vote.voter = voterAddress;
     vote.space = space.id;
-    vote.proposal = id;
+    vote.proposal = id.toString();
     vote.choice = choice;
     vote.vp = event.args.votes.toString();
     vote.vp_parsed = getParsedVP(vote.vp, proposal.vp_decimals);
