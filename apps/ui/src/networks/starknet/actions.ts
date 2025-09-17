@@ -825,14 +825,7 @@ export function createActions(
     },
     followSpace: () => {},
     unfollowSpace: () => {},
-    setAlias: async (web3: any, alias: string) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return starkSigClient.setAlias({
-        signer: web3.provider.account,
-        data: { alias }
-      });
-    },
+    setAlias: async () => {},
     updateUser: () => {},
     updateStatement: () => {},
     updateSettingsRaw: () => {
