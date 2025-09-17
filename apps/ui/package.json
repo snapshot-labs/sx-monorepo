@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "electron:start": "concurrently \"yarn dev\" \"wait-on http://localhost:8080 && NODE_ENV=development electron .\"",
+    "electron:start": "concurrently \"yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
     "electron:build": "ELECTRON=true yarn build && electron-builder --mac --win --linux"
   },
   "eslintConfig": {
