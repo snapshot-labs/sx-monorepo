@@ -217,11 +217,7 @@ export function useVisualEditor(
     }),
     Image,
     Gapcursor,
-    NodeRange.configure({
-      // allow to select only on depth 0
-      // depth: 0,
-      key: null
-    }),
+    NodeRange,
     CodeBlockLowlight.configure({
       // prevent code blocks without language from showing as: ```null
       defaultLanguage: '',
