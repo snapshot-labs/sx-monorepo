@@ -2,7 +2,6 @@ import { Editor, generateHTML, generateJSON } from '@tiptap/core';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import FileHandler from '@tiptap/extension-file-handler';
 import Image from '@tiptap/extension-image';
-import NodeRange from '@tiptap/extension-node-range';
 import {
   Table,
   TableCell,
@@ -217,7 +216,6 @@ export function useVisualEditor(
     }),
     Image,
     Gapcursor,
-    NodeRange,
     CodeBlockLowlight.configure({
       // prevent code blocks without language from showing as: ```null
       defaultLanguage: '',

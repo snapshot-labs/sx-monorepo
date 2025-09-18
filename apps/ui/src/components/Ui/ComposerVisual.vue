@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { DragHandle } from '@tiptap/extension-drag-handle-vue-3';
 import { EditorContent } from '@tiptap/vue-3';
 
 const model = defineModel<string>({ required: true });
@@ -36,12 +35,6 @@ const showError = computed<boolean>(
   </UiAlert>
   <div ref="editorContainerRef">
     <template v-if="editor">
-      <drag-handle
-        :editor="editor"
-        class="handle text-skin-link opacity-70 hover:opacity-100 p-1 py-1.5 cursor-grab"
-      >
-        <IC-drag />
-      </drag-handle>
       <UiComposerVisualToolbar
         :clipping-container="editorContainerRef"
         :editor="editor"
@@ -78,19 +71,6 @@ const showError = computed<boolean>(
 
   & ~ div[style*='position: absolute'] {
     @apply z-20;
-  }
-
-  .ProseMirror-selectednode,
-  .ProseMirror-selectednoderange {
-    position: relative;
-
-    &::before {
-      @apply bg-skin-border/60 rounded-md -left-2 -top-2 -right-2 -bottom-2;
-      position: absolute;
-      pointer-events: none;
-      z-index: -1;
-      content: '';
-    }
   }
 }
 </style>
