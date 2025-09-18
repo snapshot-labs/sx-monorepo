@@ -4,6 +4,7 @@ import { BubbleMenu } from '@tiptap/vue-3/menus';
 
 const props = defineProps<{
   editor: Editor;
+  clippingContainer: HTMLElement | null;
 }>();
 
 function setLink() {
@@ -33,7 +34,14 @@ function setLink() {
 </script>
 
 <template>
-  <bubble-menu :editor="editor">
+  <bubble-menu
+    :editor="editor"
+    :options="{
+      shift: {
+        boundary: clippingContainer
+      }
+    }"
+  >
     <div class="bubble-menu">
       <button
         class="font-bold"

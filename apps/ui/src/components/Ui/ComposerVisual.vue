@@ -12,6 +12,8 @@ const props = defineProps<{
 const { editor } = useVisualEditor(model, props.definition);
 const { isDirty } = useDirty(model, props.definition);
 
+const editorContainerRef = ref<HTMLElement | null>(null);
+
 const inputValue = computed(() => {
   if (!model.value && !isDirty.value && props.definition.default) {
     return props.definition.default;
@@ -32,16 +34,21 @@ const showError = computed<boolean>(
     <span v-text="error" />
     <slot name="error-suffix" />
   </UiAlert>
-  <template v-if="editor">
-    <drag-handle
-      :editor="editor"
-      class="handle text-skin-link opacity-70 hover:opacity-100 p-1 py-1.5 cursor-grab"
-    >
-      <IC-drag />
-    </drag-handle>
-    <UiComposerVisualToolbar :editor="editor" />
-    <editor-content :editor="editor" class="mb-6" />
-  </template>
+  <div ref="editorContainerRef">
+    <template v-if="editor">
+      <drag-handle
+        :editor="editor"
+        class="handle text-skin-link opacity-70 hover:opacity-100 p-1 py-1.5 cursor-grab"
+      >
+        <IC-drag />
+      </drag-handle>
+      <UiComposerVisualToolbar
+        :clipping-container="editorContainerRef"
+        :editor="editor"
+      />
+      <editor-content :editor="editor" class="mb-6" />
+    </template>
+  </div>
 </template>
 
 <style lang="scss">
