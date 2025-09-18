@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { stripHtmlTags } from '@/helpers/utils';
 
+const DEFAULT_EDITOR = 'markdown';
+
 const model = defineModel<string>({ required: true });
 
 defineProps<{
@@ -10,11 +12,15 @@ defineProps<{
 }>();
 
 const previewEnabled = ref(false);
-const editorType = ref<'visual' | 'markdown'>('markdown');
+const editorType = ref<'visual' | 'markdown'>(DEFAULT_EDITOR);
 
 function toggleEditor() {
   editorType.value = editorType.value === 'visual' ? 'markdown' : 'visual';
 }
+
+const AsyncVisualEditor = defineAsyncComponent(
+  () => import('./ComposerVisual.vue')
+);
 </script>
 
 <template>
@@ -45,7 +51,7 @@ function toggleEditor() {
         </span>
       </button>
     </div>
-    <UiComposerVisual
+    <AsyncVisualEditor
       v-if="editorType === 'visual'"
       v-model="model"
       :error="error"
