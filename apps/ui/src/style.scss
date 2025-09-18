@@ -591,14 +591,6 @@ html.dark .markdown-body {
     word-wrap: break-all;
   }
 
-  li > p {
-    &:first-child {
-      margin-top: 0;
-    }
-
-    margin-top: 16px;
-  }
-
   li + li {
     margin-top: 0.25em;
   }
@@ -648,6 +640,16 @@ html.dark .markdown-body {
 
   table img {
     background-color: transparent;
+  }
+
+  // Mute paragraphs style inside table cells and list items
+  // All list should be styled as markdown tight list
+  li,
+  td,
+  th {
+    > p {
+      @apply m-0 p-0;
+    }
   }
 
   pre {

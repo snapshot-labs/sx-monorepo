@@ -60,15 +60,6 @@ const showError = computed<boolean>(
     }
   }
 
-  // Mute paragraphs style inside table cells and list items
-  li,
-  td,
-  th {
-    > p {
-      @apply m-0 p-0;
-    }
-  }
-
   & ~ div[style*='position: absolute'] {
     @apply z-20;
   }
