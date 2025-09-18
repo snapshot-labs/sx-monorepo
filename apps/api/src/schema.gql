@@ -215,8 +215,8 @@ type Proposal {
   id: String!
   "UI link to proposal interface"
   link: String!
-  "Numeric ID of the proposal within the space"
-  proposal_id: Int!
+  "ID of the proposal within the space"
+  proposal_id: String!
   "Space this proposal belongs to"
   space: Space!
   "User who created the proposal"
@@ -338,8 +338,8 @@ type Vote {
   voter: User!
   "Space where the vote was cast"
   space: Space!
-  "Numeric ID of the proposal being voted on"
-  proposal: Int!
+  "ID of the proposal being voted on"
+  proposal: String!
   "Voting choice (1, 2, 3, etc.)"
   choice: Int!
   "Voting power used for this vote"

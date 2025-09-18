@@ -70,8 +70,8 @@ function handleSelect(value: string) {
 <template>
   <div v-if="hasError" class="flex flex-col gap-3 items-start">
     <UiAlert type="error">
-      An error happened while fetching the ENS names associated to your wallet.
-      Please try again
+      An error happened while fetching the domain names associated to your
+      wallet. Please try again
     </UiAlert>
     <UiButton
       class="flex items-center gap-2"
@@ -86,7 +86,10 @@ function handleSelect(value: string) {
     <div class="space-y-2">
       <div>
         To create a space, you need an ENS name on
-        {{ isTestnet ? 'Sepolia testnet' : 'Ethereum mainnet' }}.
+        {{ isTestnet ? 'Sepolia testnet' : 'Ethereum mainnet'
+        }}{{
+          !isTestnet ? ', or a web3 domain name on a mainnet network' : ''
+        }}.
       </div>
       <UiMessage v-if="!isTestnet" type="info">
         Still experimenting?
@@ -102,7 +105,7 @@ function handleSelect(value: string) {
     <div v-if="web3.account" class="space-y-4">
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <h4 class="eyebrow">ENS names</h4>
+          <h4 class="eyebrow">Domain names</h4>
           <UiButton
             v-if="names"
             class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
@@ -142,12 +145,12 @@ function handleSelect(value: string) {
               <div class="flex flex-col">
                 <div class="text-skin-danger" v-text="name.name" />
                 <div v-if="name.status === 'TOO_LONG'">
-                  ENS name is too long. It must be less than
+                  Domain name is too long. It must be less than
                   {{ MAX_ENS_NAME_LENGTH }} characters
                 </div>
                 <div v-else-if="name.status === 'DELETED'">
-                  ENS name was used by a previously deleted space and can not be
-                  reused to create a new space.
+                  Domain name was used by a previously deleted space and can not
+                  be reused to create a new space.
                   <AppLink
                     to="https://docs.snapshot.box/faq/im-a-snapshot-user/space-settings#why-cant-i-create-a-new-space-with-my-previous-deleted-space-ens-name"
                     class="text-skin-link"
@@ -163,11 +166,11 @@ function handleSelect(value: string) {
             v-if="!validNames.length && !invalidNames.length"
             type="danger"
           >
-            No more ENS names available for space creation found.
+            No more domain names available for space creation found.
           </UiMessage>
         </div>
         <UiMessage v-else type="danger">
-          No ENS names found for the current wallet.
+          No domain names found for the current wallet.
         </UiMessage>
         <AppLink :to="ensUrl" class="inline-block">
           Register a new ENS name
@@ -180,9 +183,9 @@ function handleSelect(value: string) {
       <div class="space-y-3">
         <h4 class="eyebrow">Controller</h4>
         <UiMessage type="info">
-          By default, the ENS domain’s controller is its owner. You can change
-          it later in your space setting.</UiMessage
-        >
+          By default, the space's controller is the domain owner. You can change
+          this later in your space setting.
+        </UiMessage>
         <FormSpaceController
           :controller="web3.account"
           :network="getNetwork(networkId)"
@@ -194,7 +197,7 @@ function handleSelect(value: string) {
       <button class="text-skin-link" @click="modalAccountOpen = true">
         Connect your wallet
       </button>
-      in order to see your ENS names
+      in order to see your domain names
     </UiMessage>
   </div>
   <teleport to="#modal">

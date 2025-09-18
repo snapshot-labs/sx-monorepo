@@ -1,4 +1,6 @@
-import { Privacy, SignatureData } from '../../types';
+import { SignatureData as BaseSignatureData, Privacy } from '../../types';
+
+export type SignatureData = BaseSignatureData;
 
 export type Choice = number | number[] | string | Record<string, number>;
 
@@ -12,7 +14,7 @@ export type Envelope<
     | UnfollowSpace
     | SetAlias
 > = {
-  signatureData?: SignatureData;
+  signatureData?: BaseSignatureData;
   data: T;
 };
 
