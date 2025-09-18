@@ -406,7 +406,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposal.proposal_id as number,
+        proposal: Number(proposal.id),
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -446,7 +446,7 @@ export function createActions(
       return client.cancelProposal({
         signer: web3.provider.account,
         space: proposal.space.id,
-        proposal: proposal.proposal_id as number
+        proposal: Number(proposal.id)
       });
     },
     vote: async (
@@ -507,7 +507,7 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
-        proposal: proposal.proposal_id as number,
+        proposal: Number(proposal.id),
         choice: getSdkChoice(choice),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : ''
       };
@@ -586,7 +586,7 @@ export function createActions(
       return executionCall('eth', l1ChainId, 'executeStarknetProposal', {
         space: proposal.space.id,
         executor: proposal.execution_destination,
-        proposalId: proposal.proposal_id as number,
+        proposalId: Number(proposal.id),
         proposal: proposalData,
         votesFor,
         votesAgainst,

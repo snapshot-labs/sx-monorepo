@@ -421,7 +421,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId.proposal_id as number,
+        proposal: Number(proposalId.proposal_id),
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -466,7 +466,7 @@ export function createActions(
         {
           signer,
           space: proposal.space.id,
-          proposal: proposal.proposal_id as number
+          proposal: Number(proposal.proposal_id)
         },
         { noWait: isContract && connectorType !== 'sequence' }
       );
@@ -488,7 +488,7 @@ export function createActions(
           envelope: {
             data: {
               spaceId: proposal.space.id,
-              proposalId: proposal.proposal_id as number,
+              proposalId: Number(proposal.proposal_id),
               choice: getSdkChoice(choice),
               reason
             }
@@ -540,7 +540,7 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
-        proposal: proposal.proposal_id as number,
+        proposal: Number(proposal.proposal_id),
         choice: getSdkChoice(choice),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
@@ -582,7 +582,7 @@ export function createActions(
         return governorBravoClient.queue({
           signer: getSigner(web3),
           spaceId: proposal.space.id,
-          proposalId: proposal.proposal_id as number
+          proposalId: Number(proposal.proposal_id)
         });
       }
 
@@ -606,7 +606,7 @@ export function createActions(
         return governorBravoClient.execute({
           signer: getSigner(web3),
           spaceId: proposal.space.id,
-          proposalId: proposal.proposal_id as number
+          proposalId: Number(proposal.proposal_id)
         });
       }
 

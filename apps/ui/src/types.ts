@@ -255,7 +255,7 @@ export type ProposalExecution = {
 
 export type Proposal = {
   id: string;
-  proposal_id: number | string;
+  proposal_id: string;
   network: NetworkID;
   execution_network: NetworkID;
   /**
@@ -402,7 +402,7 @@ export type Vote = {
   space: {
     id: string;
   };
-  proposal: number | string;
+  proposal: string;
   choice: number | number[] | Record<string, number>;
   vp: number;
   reason?: string;

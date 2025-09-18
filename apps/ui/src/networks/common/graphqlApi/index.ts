@@ -463,7 +463,7 @@ export function createApi(
           orderDirection,
           where: {
             space: proposal.space.id,
-            proposal: Number(proposal.proposal_id),
+            proposal: proposal.proposal_id,
             ...filters
           }
         }
