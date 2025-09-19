@@ -227,12 +227,20 @@ type Proposal {
   metadata: ProposalMetadataItem
   "When voting starts (blocks on EVM, seconds on Starknet)"
   start: Int!
-  "Minimum block number when voting can end"
+  "When voting starts (only defined on EVM)"
+  start_block_number: Int
+  "Minimum timepoint when voting can end (blocks on EVM, seconds on Starknet)"
   min_end: Int!
-  "Maximum block number when voting must end"
+  "Minimum block number when voting can end (only defined on EVM)"
+  min_end_block_number: Int
+  "Maximum timepoint when voting must end (blocks on EVM, seconds on Starknet)"
   max_end: Int!
-  "Block number used for voting power calculation"
+  "Maximum block number when voting must end (only defined on EVM)"
+  max_end_block_number: Int!
+  "Timepoint used for voting power calculation (blocks on EVM, seconds on Starknet)"
   snapshot: Int!
+  "Block number used for voting power calculation (only defined on EVM)"
+  snapshot_block_number: Int
   "Timestamp when proposal can be executed"
   execution_time: Int!
   "Address of the execution strategy contract"
