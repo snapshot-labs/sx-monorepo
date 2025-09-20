@@ -1,5 +1,7 @@
 {
   "name": "ui",
+  "author": "snapshot-labs",
+  "description": "UI for Snapshot",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
@@ -17,7 +19,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "electron:start": "concurrently \"yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
-    "electron:build": "ELECTRON=true yarn build && electron-builder --mac --win --linux"
+    "electron:build": "ELECTRON=true yarn build && electron-builder -mwl",
+    "electron:publish": "ELECTRON=true yarn build && electron-builder -mwl --publish always"
   },
   "eslintConfig": {
     "extends": [

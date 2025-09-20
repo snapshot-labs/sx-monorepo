@@ -9,25 +9,40 @@ publish:
   owner: snapshot-labs
   repo: sx-monorepo
 files:
-  - "**/*"
+  - "dist/**/*"
+  - "main.cjs"
+  - "!node_modules"
   - "!src"
   - "!test"
   - "!tests"
   - "!storybook-static"
   - "!screenshots"
   - "!*.md"
-compression: normal
+  - "!.turbo"
+  - "!.storybook"
+  - "!dist-electron"
+  - "!*.config.*"
+  - "!auto-imports.d.ts"
+  - "!components.d.ts"
+  - "!dist/stats.html"
+  - "!dist/**/*.map"
+  - "!**/*.log"
+  - "!**/.DS_Store"
+asar: true
+asarUnpack:
+  - "**/*.node"
 nodeGypRebuild: false
 buildDependenciesFromSource: false
-nativeRebuilder: null
 npmRebuild: false
-asarUnpack:
-  - "node_modules/.pnpm"
-  - "**/*.node"
-  - "**/keccak/**"
-  - "**/secp256k1/**"
+afterSign: null
+afterAllArtifactBuild: null
+artifactName: "${productName}-${version}-${arch}.${ext}"
+extraMetadata:
+  main: "main.cjs"
 mac:
   category: public.app-category.utilities
+  hardenedRuntime: false
+  mergeASARs: false
   target:
     - target: dmg
       arch:
@@ -35,28 +50,33 @@ mac:
         - x64
 dmg:
   title: "${productName} ${version}"
-  format: "UDRO"  # Uncompressed for faster creation (avoids hdiutil compression issues)
-  artifactName: "${productName}-${version}-${arch}.${ext}"
-  background: null
-  writeUpdateInfo: false
-  internetEnabled: false
+  window:
+    width: 540
+    height: 380
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
 win:
   target:
     - target: nsis
       arch:
         - arm64
         - x64
+  requestedExecutionLevel: asInvoker
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  differentialPackage: false
-  useZip: true
+  packElevateHelper: false
+  artifactName: "${productName}-Setup-${version}-${arch}.${ext}"
 linux:
   target:
     - target: AppImage
       arch:
         - arm64
         - x64
-  compression: store

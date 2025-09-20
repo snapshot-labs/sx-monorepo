@@ -15,7 +15,6 @@ function createWindow() {
   });
 
   const isDev = !app.isPackaged;
-  console.log('Running in', isDev ? 'development' : 'production', 'mode');
 
   if (isDev) {
     win.loadURL('http://localhost:8080');
