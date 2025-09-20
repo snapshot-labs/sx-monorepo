@@ -236,7 +236,7 @@ type Proposal {
   "Maximum timepoint when voting must end (blocks on EVM, seconds on Starknet)"
   max_end: Int!
   "Maximum block number when voting must end (only defined on EVM)"
-  max_end_block_number: Int!
+  max_end_block_number: Int
   "Timepoint used for voting power calculation (blocks on EVM, seconds on Starknet)"
   snapshot: Int!
   "Block number used for voting power calculation (only defined on EVM)"
