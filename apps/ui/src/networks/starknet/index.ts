@@ -1,5 +1,5 @@
 import { LibraryError, constants as starknetConstants } from 'starknet';
-import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
 import { formatAddress } from '@/helpers/utils';
@@ -32,7 +32,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'eth',
     rpcUrl: 'https://rpc.snapshot.org/sn',
     ethRpcUrl: 'https://rpc.snapshot.org/1',
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     explorerUrl: 'https://starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   },
@@ -43,7 +43,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     baseNetworkId: 'sep',
     rpcUrl: 'https://rpc.snapshot.org/sn-sep',
     ethRpcUrl: 'https://rpc.snapshot.org/11155111',
-    apiUrl: UNIFIED_API_TESTNET_URL,
+    apiUrl: API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   }
