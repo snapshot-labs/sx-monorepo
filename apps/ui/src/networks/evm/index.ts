@@ -56,7 +56,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Base',
     chainId: 8453,
     apiUrl: UNIFIED_API_URL,
-    avatar: 'ipfs://QmaxRoHpxZd8PqccAynherrMznMufG6sdmHZLihkECXmZv',
+    avatar: 'ipfs://bafkreid4ek4gnj6ccxl3yubwj2wr3d5t6dqelvvh4hv5wo5eldkqs725ri',
     blockTime: 2
   },
   mnt: {
