@@ -114,6 +114,7 @@ export type EvmNetworkConfig = Omit<
 > & {
   eip712ChainId: number;
   maxPriorityFeePerGas?: BigNumberish;
+  blockTime: number;
   proxyFactory: string;
   executionStrategiesImplementations: {
     [key in ExecutorType]?: string;
