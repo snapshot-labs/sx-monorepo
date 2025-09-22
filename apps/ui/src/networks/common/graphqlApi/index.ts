@@ -379,9 +379,17 @@ function formatProposal(
       : proposal.min_end <= current,
     execution_settled: proposal.execution_settled,
     state,
-    start: getTsFromCurrent(networkId, proposal.start),
-    min_end: getTsFromCurrent(networkId, proposal.min_end),
-    max_end: getTsFromCurrent(networkId, proposal.max_end),
+    start:
+      proposal.start_block_number !== null
+        ? getTsFromCurrent(networkId, proposal.start_block_number)
+        : proposal.start,
+    min_end:
+      proposal.min_end_block_number !== null
+        ? getTsFromCurrent(networkId, proposal.min_end_block_number)
+        : proposal.min_end,
+    max_end: proposal.max_end_block_number
+      ? getTsFromCurrent(networkId, proposal.max_end_block_number)
+      : proposal.max_end,
     network: networkId,
     privacy: 'none',
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
