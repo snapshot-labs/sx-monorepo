@@ -1,5 +1,5 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pinGraph, pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
@@ -30,7 +30,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Polygon',
     ticker: 'MATIC',
     chainId: 137,
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     avatar:
       'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am',
     blockTime: 2.15812
@@ -39,7 +39,7 @@ export const METADATA: Record<string, Metadata> = {
     name: 'Arbitrum One',
     chainId: 42161,
     currentChainId: 1,
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     avatar:
       'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -47,7 +47,7 @@ export const METADATA: Record<string, Metadata> = {
   oeth: {
     name: 'OP Mainnet',
     chainId: 10,
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     avatar:
       'ipfs://bafkreifu2remiqfpsb4hgisbwb3qxedrzpwsea7ik4el45znjcf56xf2ku',
     blockTime: 2
@@ -55,15 +55,16 @@ export const METADATA: Record<string, Metadata> = {
   base: {
     name: 'Base',
     chainId: 8453,
-    apiUrl: UNIFIED_API_URL,
-    avatar: 'ipfs://bafkreid4ek4gnj6ccxl3yubwj2wr3d5t6dqelvvh4hv5wo5eldkqs725ri',
+    apiUrl: API_URL,
+    avatar:
+      'ipfs://bafkreid4ek4gnj6ccxl3yubwj2wr3d5t6dqelvvh4hv5wo5eldkqs725ri',
     blockTime: 2
   },
   mnt: {
     name: 'Mantle',
     ticker: 'MNT',
     chainId: 5000,
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     avatar:
       'ipfs://bafkreidkucwfn4mzo2gtydrt2wogk3je5xpugom67vhi4h4comaxxjzoz4',
     blockTime: 2
@@ -71,7 +72,7 @@ export const METADATA: Record<string, Metadata> = {
   eth: {
     name: 'Ethereum',
     chainId: 1,
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -81,7 +82,7 @@ export const METADATA: Record<string, Metadata> = {
     ticker: 'APE',
     chainId: 33139,
     currentChainId: 1,
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     avatar:
       'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -91,7 +92,7 @@ export const METADATA: Record<string, Metadata> = {
     ticker: 'APE',
     chainId: 33111,
     currentChainId: 11155111,
-    apiUrl: UNIFIED_API_TESTNET_URL,
+    apiUrl: API_TESTNET_URL,
     avatar:
       'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4',
     blockTime: ETH_MAINNET_BLOCK_TIME
@@ -99,7 +100,7 @@ export const METADATA: Record<string, Metadata> = {
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
-    apiUrl: UNIFIED_API_TESTNET_URL,
+    apiUrl: API_TESTNET_URL,
     avatar:
       'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
     blockTime: 13.2816
