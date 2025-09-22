@@ -1,11 +1,15 @@
 {
-  "name": "ui",
+  "name": "@snapshot-labs/ui",
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
   "type": "module",
   "main": "main.cjs",
-  "repository": "snapshot-labs/sx-monorepo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snapshot-labs/sx-monorepo.git",
+    "directory": "apps/ui"
+  },
   "scripts": {
     "dev": "vite --port=8080",
     "build": "vite build",
@@ -17,7 +21,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "electron:start": "concurrently \"yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
-    "electron:build": "ELECTRON=true yarn build && electron-builder --mac --win --linux"
+    "electron:build": "ELECTRON=true yarn build && electron-forge make --platform=darwin --arch=x64 && electron-forge make --platform=darwin --arch=arm64 && electron-forge make --platform=win32 --arch=x64 && electron-forge make --platform=win32 --arch=arm64 && electron-forge make --platform=win32 --arch=ia32 && electron-forge make --platform=linux --arch=x64 && electron-forge make --platform=linux --arch=arm64"
   },
   "eslintConfig": {
     "extends": [
@@ -100,6 +104,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.7",
+    "@electron-forge/cli": "^7.9.0",
+    "@electron-forge/maker-dmg": "^7.9.0",
+    "@electron-forge/maker-zip": "^7.9.0",
     "@graphql-codegen/cli": "^5.0.4",
     "@iconify-json/heroicons-outline": "^1.1.7",
     "@iconify-json/heroicons-solid": "^1.1.8",
@@ -115,7 +122,6 @@
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.1",
     "electron": "^38.0.0",
-    "electron-builder": "^26.0.12",
     "eslint": "^8.57.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",

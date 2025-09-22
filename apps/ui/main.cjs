@@ -1,4 +1,3 @@
-const path = require('path');
 const { app, BrowserWindow } = require('electron');
 
 function createWindow() {
@@ -10,17 +9,16 @@ function createWindow() {
       contextIsolation: true
     },
     show: false,
-    titleBarStyle: 'hidden',
+    titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
     frame: false
   });
 
   const isDev = !app.isPackaged;
-  console.log('Running in', isDev ? 'development' : 'production', 'mode');
 
   if (isDev) {
     win.loadURL('http://localhost:8080');
   } else {
-    win.loadFile(path.join(__dirname, 'dist', 'index.html'));
+    win.loadFile('dist/index.html');
   }
 
   win.once('ready-to-show', () => {
