@@ -21,7 +21,7 @@ const props = defineProps<{
 const queryClient = useQueryClient();
 const router = useRouter();
 const uiStore = useUiStore();
-const { getCurrent, getTsFromCurrent } = useMetaStore();
+const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
@@ -122,9 +122,7 @@ const proposalTransactionId = computed(() => {
   return null;
 });
 
-const endTime = useRelativeTime(() => {
-  return getTsFromCurrent(props.proposal.network, props.proposal.max_end);
-});
+const endTime = useRelativeTime(() => props.proposal.max_end);
 
 const votingTime = computed(() => {
   if (!props.proposal) return null;

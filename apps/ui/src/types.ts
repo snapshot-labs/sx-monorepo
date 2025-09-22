@@ -295,8 +295,11 @@ export type Proposal = {
   body: string;
   discussion: string;
   executions: ProposalExecution[];
+  /** Timestamp when proposal starts */
   start: number;
+  /** Timestamp when proposal can end at the earliest */
   min_end: number;
+  /** Timestamp when proposal can end at the latest */
   max_end: number;
   snapshot: number;
   choices: string[];
