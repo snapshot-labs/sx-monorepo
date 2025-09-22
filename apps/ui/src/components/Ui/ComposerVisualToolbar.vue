@@ -79,13 +79,6 @@ function setLink() {
         H3
       </button>
       <button
-        class="text-[16px]"
-        :class="{ 'is-active': editor.isActive('heading', { level: 4 }) }"
-        @click="editor.chain().focus().toggleHeading({ level: 4 }).run()"
-      >
-        H4
-      </button>
-      <button
         :class="{ 'is-active': editor.isActive('link') }"
         @click="setLink"
       >
