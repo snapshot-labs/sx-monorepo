@@ -45,73 +45,70 @@ function setLink() {
     <div class="bubble-menu">
       <button
         class="font-bold"
-        :class="{ 'is-active': editor.isActive('bold') }"
+        :class="{ active: editor.isActive('bold') }"
         @click="editor.chain().focus().toggleBold().run()"
       >
         B
       </button>
       <button
         class="italic"
-        :class="{ 'is-active': editor.isActive('italic') }"
+        :class="{ active: editor.isActive('italic') }"
         @click="editor.chain().focus().toggleItalic().run()"
       >
         I
       </button>
       <button
         class="line-through"
-        :class="{ 'is-active': editor.isActive('strike') }"
+        :class="{ active: editor.isActive('strike') }"
         @click="editor.chain().focus().toggleStrike().run()"
       >
         S
       </button>
       <button
         class="text-[16px]"
-        :class="{ 'is-active': editor.isActive('heading', { level: 2 }) }"
+        :class="{ active: editor.isActive('heading', { level: 2 }) }"
         @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
       >
         H2
       </button>
       <button
         class="text-[16px]"
-        :class="{ 'is-active': editor.isActive('heading', { level: 3 }) }"
+        :class="{ active: editor.isActive('heading', { level: 3 }) }"
         @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
       >
         H3
       </button>
-      <button
-        :class="{ 'is-active': editor.isActive('link') }"
-        @click="setLink"
-      >
+      <button :class="{ active: editor.isActive('link') }" @click="setLink">
         <IH-link class="size-3" />
       </button>
 
       <button
-        :class="{ 'is-active': editor.isActive('bulletList') }"
+        :class="{ active: editor.isActive('bulletList') }"
         @click="editor.chain().focus().toggleBulletList().run()"
       >
         <IH-list-bullet class="size-4" />
       </button>
       <button
-        :class="{ 'is-active': editor.isActive('orderedList') }"
+        :class="{ active: editor.isActive('orderedList') }"
         @click="editor.chain().focus().toggleOrderedList().run()"
       >
         <IC-numbered-list class="size-3.5" />
       </button>
       <button
-        :class="{ 'is-active': editor.isActive('code') }"
+        :class="{ active: editor.isActive('code') }"
         @click="editor.chain().focus().toggleCode().run()"
       >
         <IH-code-bracket />
       </button>
       <button
-        :class="{ 'is-active': editor.isActive('codeBlock') }"
+        :class="{ active: editor.isActive('codeBlock') }"
         @click="editor.chain().focus().toggleCodeBlock().run()"
       >
         <IH-code-bracket-square />
       </button>
       <button
         class="text-[28px] leading-none pt-2"
-        :class="{ 'is-active': editor.isActive('blockquote') }"
+        :class="{ active: editor.isActive('blockquote') }"
         @click="editor.chain().focus().toggleBlockquote().run()"
       >
         ”
@@ -131,7 +128,7 @@ function setLink() {
       @apply bg-skin-border;
     }
 
-    &.is-active {
+    &.active {
       @apply bg-skin-border/50;
 
       &:hover {
