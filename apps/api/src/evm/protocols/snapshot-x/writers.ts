@@ -633,9 +633,13 @@ export function createWriters(
     proposal.metadata = null;
     proposal.execution_hash = event.args.proposal.executionPayloadHash;
     proposal.start = event.args.proposal.startBlockNumber;
+    proposal.start_block_number = proposal.start;
     proposal.min_end = event.args.proposal.minEndBlockNumber;
+    proposal.min_end_block_number = proposal.min_end;
     proposal.max_end = event.args.proposal.maxEndBlockNumber;
+    proposal.max_end_block_number = proposal.max_end;
     proposal.snapshot = event.args.proposal.startBlockNumber;
+    proposal.snapshot_block_number = proposal.snapshot;
     proposal.type = 'basic';
     proposal.scores_1 = '0';
     proposal.scores_1_parsed = 0;
