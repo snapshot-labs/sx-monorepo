@@ -1,6 +1,6 @@
 export default {
   packagerConfig: {
-    appBundleId: 'com.snapshot.app',
+    appBundleId: 'box.snapshot.app',
     name: 'Snapshot',
     icon: './src/assets/icon',
     ignore: [
