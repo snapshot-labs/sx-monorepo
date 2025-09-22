@@ -11,7 +11,7 @@ export default {
       /^\/screenshots/,
       /\.md$/
     ],
-    asar: false, // Disable asar to fix Windows module resolution
+    asar: false,
     out: 'out',
     overwrite: true,
     prune: false,
@@ -26,12 +26,10 @@ export default {
       name: '@electron-forge/maker-dmg',
       platforms: ['darwin']
     },
-    // Windows: ZIP files (cross-platform compatible) - supports 64-bit
     {
       name: '@electron-forge/maker-zip',
       platforms: ['win32']
     },
-    // Linux: ZIP packages (universal format)
     {
       name: '@electron-forge/maker-zip',
       platforms: ['linux']
