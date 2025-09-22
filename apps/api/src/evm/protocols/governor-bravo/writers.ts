@@ -29,6 +29,7 @@ import {
   VotingPowerValidationStrategiesParsedMetadataItem
 } from '../../../../.checkpoint/models';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
+import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
 
 type SpaceData = {
   name: string;
@@ -286,14 +287,22 @@ export function createWriters(
     proposal.space = space.id;
     proposal.author = proposerAddress;
     proposal.metadata = proposalMetadataId;
-    proposal.start = event.args.startBlock.toNumber();
-    proposal.start_block_number = proposal.start;
-    proposal.min_end = event.args.endBlock.toNumber();
-    proposal.min_end_block_number = proposal.min_end;
+
+    const getTimestampFromBlock = (value: number) =>
+      _getTimestampFromBlock({
+        networkId: config.indexerName,
+        blockNumber: value,
+        currentBlockNumber: blockNumber,
+        currentTimestamp: block?.timestamp ?? getCurrentTimestamp()
+      });
+
+    proposal.start = getTimestampFromBlock(event.args.startBlock.toNumber());
+    proposal.start_block_number = event.args.startBlock.toNumber();
+    proposal.min_end = getTimestampFromBlock(event.args.endBlock.toNumber());
+    proposal.min_end_block_number = event.args.endBlock.toNumber();
     proposal.max_end = proposal.min_end;
     proposal.max_end_block_number = proposal.max_end;
     proposal.snapshot = proposal.start;
-    proposal.snapshot_block_number = proposal.snapshot;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
     proposal.strategies = space.strategies;

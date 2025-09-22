@@ -42,6 +42,7 @@ import {
   updateCounter
 } from '../../../common/utils';
 import { EVMConfig, SnapshotXConfig } from '../../types';
+import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
 
 /**
  * List of execution strategies type that are known and we expect them to be deployed via factory.
@@ -599,7 +600,8 @@ export function createWriters(
     rawEvent,
     event,
     txId,
-    block
+    block,
+    blockNumber
   }) => {
     if (!rawEvent || !event || !txId) return;
 
@@ -632,14 +634,28 @@ export function createWriters(
     proposal.author = author;
     proposal.metadata = null;
     proposal.execution_hash = event.args.proposal.executionPayloadHash;
-    proposal.start = event.args.proposal.startBlockNumber;
-    proposal.start_block_number = proposal.start;
-    proposal.min_end = event.args.proposal.minEndBlockNumber;
-    proposal.min_end_block_number = proposal.min_end;
-    proposal.max_end = event.args.proposal.maxEndBlockNumber;
-    proposal.max_end_block_number = proposal.max_end;
+
+    const getTimestampFromBlock = (value: number) =>
+      _getTimestampFromBlock({
+        networkId: config.indexerName,
+        blockNumber: value,
+        currentBlockNumber: blockNumber,
+        currentTimestamp: block?.timestamp ?? getCurrentTimestamp()
+      });
+
+    proposal.start = getTimestampFromBlock(
+      event.args.proposal.startBlockNumber
+    );
+    proposal.start_block_number = event.args.proposal.startBlockNumber;
+    proposal.min_end = getTimestampFromBlock(
+      event.args.proposal.minEndBlockNumber
+    );
+    proposal.min_end_block_number = event.args.proposal.minEndBlockNumber;
+    proposal.max_end = getTimestampFromBlock(
+      event.args.proposal.maxEndBlockNumber
+    );
+    proposal.max_end_block_number = event.args.proposal.maxEndBlockNumber;
     proposal.snapshot = event.args.proposal.startBlockNumber;
-    proposal.snapshot_block_number = proposal.snapshot;
     proposal.type = 'basic';
     proposal.scores_1 = '0';
     proposal.scores_1_parsed = 0;

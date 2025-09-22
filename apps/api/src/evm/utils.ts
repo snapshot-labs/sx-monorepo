@@ -1,5 +1,6 @@
 import { evm } from '@snapshot-labs/checkpoint';
-import { EVMConfig, PartialConfig } from './types';
+import { evmNetworks } from '@snapshot-labs/sx';
+import { EVMConfig, NetworkID, PartialConfig } from './types';
 
 type ProtocolConfig = Pick<EVMConfig, 'sources' | 'templates' | 'abis'>;
 
@@ -66,4 +67,22 @@ export function applyConfig(
     },
     abis: { ...target.abis, ...config.abis }
   };
+}
+
+export function getTimestampFromBlock({
+  networkId,
+  blockNumber,
+  currentBlockNumber,
+  currentTimestamp
+}: {
+  networkId: NetworkID;
+  blockNumber: number;
+  currentBlockNumber: number;
+  currentTimestamp: number;
+}) {
+  const blockDifference = blockNumber - currentBlockNumber;
+
+  return Math.round(
+    currentTimestamp + blockDifference * evmNetworks[networkId].Meta.blockTime
+  );
 }
