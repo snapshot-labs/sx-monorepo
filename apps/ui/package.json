@@ -20,7 +20,7 @@
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "electron:start": "concurrently \"yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
+    "electron:start": "concurrently \"ELECTRON=true yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
     "electron:build": "ELECTRON=true yarn build && electron-forge make --platform=darwin --arch=x64 && electron-forge make --platform=darwin --arch=arm64 && electron-forge make --platform=win32 --arch=x64 && electron-forge make --platform=win32 --arch=arm64 && electron-forge make --platform=win32 --arch=ia32 && electron-forge make --platform=linux --arch=x64 && electron-forge make --platform=linux --arch=arm64"
   },
   "eslintConfig": {

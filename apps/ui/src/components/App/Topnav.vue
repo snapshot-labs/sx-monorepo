@@ -100,12 +100,15 @@ onUnmounted(() => {
         'border-r pr-4 w-[240px]': hasAppNav && uiStore.sideMenuOpen
       }"
     >
-      <slot name="toggle-sidebar-button" />
+      <div style="-webkit-app-region: no-drag">
+        <slot name="toggle-sidebar-button" />
+      </div>
       <Breadcrumb
         :class="[
           'ml-4',
           { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
         ]"
+        style="-webkit-app-region: no-drag"
       />
     </div>
     <form
@@ -114,7 +117,10 @@ onUnmounted(() => {
       class="flex flex-1 py-3 h-full"
       @submit="handleSearchSubmit"
     >
-      <label class="flex items-center w-full space-x-2.5">
+      <label
+        class="flex items-center w-full space-x-2.5"
+        style="-webkit-app-region: no-drag"
+      >
         <IH-search class="shrink-0" />
         <input
           ref="searchInput"
@@ -126,7 +132,7 @@ onUnmounted(() => {
       </label>
     </form>
 
-    <div class="flex space-x-2 shrink-0">
+    <div class="flex space-x-2 shrink-0" style="-webkit-app-region: no-drag">
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
