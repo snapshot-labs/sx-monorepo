@@ -2,6 +2,7 @@ import { BigNumberish } from '@ethersproject/bignumber';
 import { EvmNetworkConfig } from './types';
 
 type AdditionalProperties = {
+  blockTime: number;
   maxPriorityFeePerGas?: BigNumberish;
   authenticators?: Record<string, string>;
   strategies?: {
@@ -15,7 +16,7 @@ type AdditionalProperties = {
 
 function createStandardConfig(
   eip712ChainId: number,
-  additionalProperties: AdditionalProperties = {}
+  additionalProperties: AdditionalProperties
 ) {
   const additionalAuthenticators = additionalProperties.authenticators || {};
   const additionalStrategies = additionalProperties.strategies || {};
@@ -26,6 +27,7 @@ function createStandardConfig(
     Meta: {
       eip712ChainId,
       maxPriorityFeePerGas: additionalProperties.maxPriorityFeePerGas,
+      blockTime: additionalProperties.blockTime,
       proxyFactory: '0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c',
       masterSpace: '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D'
     },
@@ -108,6 +110,7 @@ function createEvmConfig(
   return {
     eip712ChainId: network.Meta.eip712ChainId,
     maxPriorityFeePerGas: network.Meta.maxPriorityFeePerGas,
+    blockTime: network.Meta.blockTime,
     proxyFactory: network.Meta.proxyFactory,
     masterSpace: network.Meta.masterSpace,
     authenticators,
@@ -116,28 +119,35 @@ function createEvmConfig(
   };
 }
 
+const ethMainnetBlockTime = 12.09;
+const ethSepoliaBlockTime = 13.2816;
+
 export const evmNetworks = {
-  eth: createStandardConfig(1),
-  oeth: createStandardConfig(10),
+  eth: createStandardConfig(1, { blockTime: ethMainnetBlockTime }),
+  oeth: createStandardConfig(10, { blockTime: 2 }),
   sep: createStandardConfig(11155111, {
+    blockTime: ethSepoliaBlockTime
     // executionStrategies: {
     //   Axiom: '0xaC6dbd42Ed254E9407fe0D2798784d0110979DC2',
     //   Isokratia: '0xc674eCf233920aa3052738BFCDbDd0812AEE5A83'
     // }
   }),
-  matic: createStandardConfig(137),
-  arb1: createStandardConfig(42161),
-  base: createStandardConfig(8453),
+  matic: createStandardConfig(137, { blockTime: 2.15812 }),
+  arb1: createStandardConfig(42161, { blockTime: ethMainnetBlockTime }),
+  base: createStandardConfig(8453, { blockTime: 2 }),
   mnt: createStandardConfig(5000, {
+    blockTime: 2,
     // https://docs.mantle.xyz/network/system-information/fee-mechanism/eip-1559-support#application-of-eip-1559-in-mantle-v2-tectonic
     maxPriorityFeePerGas: 0
   }),
   ape: createStandardConfig(33139, {
+    blockTime: ethMainnetBlockTime,
     strategies: {
       ApeGas: '0xDd6B74123b2aB93aD701320D3F8D1b92B4fA5202'
     }
   }),
   curtis: createStandardConfig(33111, {
+    blockTime: ethSepoliaBlockTime,
     strategies: {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
