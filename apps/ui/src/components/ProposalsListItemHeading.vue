@@ -17,7 +17,6 @@ const props = withDefaults(
   }
 );
 
-const { getTsFromCurrent } = useMetaStore();
 const { votes } = useAccount();
 
 const modalOpenTimeline = ref(false);
@@ -132,10 +131,7 @@ const hasVoted = computed(
         {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
-      <TimeRelative
-        v-slot="{ relativeTime }"
-        :time="getTsFromCurrent(props.proposal.network, props.proposal.max_end)"
-      >
+      <TimeRelative v-slot="{ relativeTime }" :time="props.proposal.max_end">
         <button
           type="button"
           class="text-skin-text"
