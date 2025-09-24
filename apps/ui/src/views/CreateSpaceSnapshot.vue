@@ -49,10 +49,10 @@ const STEPS: extendedStepRecords = {
     isValid: () => !stepsErrors.value['profile']
   },
   id: {
-    title: 'ENS name',
+    title: 'Domain name',
     isValid: () => !!settingsForm.value.id,
-    contentTitle: 'ENS name',
-    contentDescription: 'Select your space ENS name.'
+    contentTitle: 'Domain name',
+    contentDescription: 'Select your space domain name.'
   },
   network: {
     title: 'Network',

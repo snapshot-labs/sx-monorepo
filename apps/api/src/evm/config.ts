@@ -1,7 +1,8 @@
 import { evmNetworks } from '@snapshot-labs/sx';
-import { createConfig as createGovernorBravoConfig } from './protocols/governorBravo/config';
-import { createConfig as createSnapshotXConfig } from './protocols/snapshotX/config';
-import { EVMConfig, NetworkID, Protocols } from './types';
+import { createConfig as createGovernorBravoConfig } from './protocols/governor-bravo/config';
+import { createConfig as createSnapshotXConfig } from './protocols/snapshot-x/config';
+import { EVMConfig, NetworkID, PartialConfig, Protocols } from './types';
+import { applyConfig } from './utils';
 
 export function createConfig(
   indexerName: NetworkID,
@@ -13,30 +14,33 @@ export function createConfig(
   let governorBravoConfig: ReturnType<typeof createGovernorBravoConfig> | null =
     null;
 
-  let sources: EVMConfig['sources'] = [];
-  let templates: EVMConfig['templates'] = {};
-  let abis: EVMConfig['abis'] = {};
+  let partialConfig: PartialConfig = {
+    sources: [],
+    templates: {},
+    abis: {}
+  };
 
   if (protocols.snapshotX) {
     snapshotXConfig = createSnapshotXConfig(indexerName);
-    sources = [...sources, ...(snapshotXConfig.sources ?? [])];
-    templates = { ...templates, ...snapshotXConfig.templates };
-    abis = { ...abis, ...snapshotXConfig.abis };
+    partialConfig = applyConfig(partialConfig, 'snapshotX', snapshotXConfig);
   }
 
   if (protocols.governorBravo) {
     governorBravoConfig = createGovernorBravoConfig(indexerName);
-    sources = [...sources, ...(governorBravoConfig?.sources ?? [])];
-    templates = { ...templates, ...governorBravoConfig?.templates };
-    abis = { ...abis, ...governorBravoConfig?.abis };
+
+    if (governorBravoConfig) {
+      partialConfig = applyConfig(
+        partialConfig,
+        'governorBravo',
+        governorBravoConfig
+      );
+    }
   }
 
   return {
     indexerName,
     network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
-    sources,
-    templates,
-    abis,
+    ...partialConfig,
     snapshotXConfig: snapshotXConfig?.protocolConfig,
     governorBravoConfig: governorBravoConfig?.protocolConfig
   };

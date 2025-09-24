@@ -2,6 +2,7 @@
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
+import { StrategyConfig } from '@/networks/types';
 import { ChainId, NetworkID } from '@/types';
 
 const CUSTOM_ERROR_SYMBOL = Symbol('customError');
@@ -103,6 +104,49 @@ async function handleSubmit() {
   emit('save', value, network.value);
 }
 
+function cloneStrategyConfig(config: StrategyConfig): StrategyConfig {
+  const {
+    validate,
+    generateSummary,
+    generateParams,
+    generateMetadata,
+    parseParams,
+    deploy,
+    ...rest
+  } = config;
+
+  return {
+    validate,
+    generateSummary,
+    generateParams,
+    generateMetadata,
+    parseParams,
+    deploy,
+    ...clone(rest)
+  };
+}
+
+function isStrategyConfig(config: unknown): config is StrategyConfig {
+  if (typeof config !== 'object' || config === null) return false;
+
+  return 'generateParams' in config;
+}
+
+function cloneInitialState(state: any) {
+  if (!state) return {};
+
+  if ('strategies' in state && Array.isArray(state.strategies)) {
+    return {
+      ...clone(state),
+      strategies: state.strategies.map((s: unknown) =>
+        isStrategyConfig(s) ? cloneStrategyConfig(s) : clone(s)
+      )
+    };
+  }
+
+  return clone(state);
+}
+
 watchEffect(() => {
   if (props.open && props.initialNetwork) {
     network.value = props.initialNetwork;
@@ -111,7 +155,7 @@ watchEffect(() => {
 
 watchEffect(() => {
   if (props.open && props.initialState) {
-    form.value = clone(props.initialState);
+    form.value = cloneInitialState(props.initialState);
     rawParams.value = JSON.stringify(props.initialState, null, 2);
   }
 });

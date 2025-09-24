@@ -22,6 +22,27 @@ const MAPPING = {
       theme: 'dark',
       logo: 'ipfs://bafkreiab7pgyo4gzvospqgrlnfp6o5d6dpq4vijnzvcf5mhwzevt4hnd2m'
     }
+  },
+  'vote.worldlibertyfinancial.com': {
+    network: 's',
+    id: 'worldlibertyfinancial.com'
+  },
+  'townhall.box': {
+    network: 's',
+    id: 'openagora.eth'
+  },
+  'starknet.stage.box': {
+    network: 's',
+    id: 'starknetdemo.eth',
+    skinSettings: {
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      theme: 'light',
+      logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
+    }
   }
 };
 
@@ -74,43 +95,45 @@ export function useWhiteLabel() {
   async function init() {
     if (resolved.value) return;
 
+    let shouldResolve = true;
+
     try {
       space.value = await getSpace(domain);
 
-      if (space.value) {
-        if (!space.value.turbo) {
-          const redirectUrl = new URL(
-            `${window.location.protocol}//${DEFAULT_DOMAIN}`
-          );
+      if (!space.value) return;
 
-          const originalHash = window.location.hash.replace(/^#\//, '');
-          const globalPathKey = Object.keys(GLOBAL_PATHS).find(path =>
-            originalHash.startsWith(path)
-          );
+      if (!space.value.turbo && !MAPPING[domain]) {
+        const redirectUrl = new URL(
+          `${window.location.protocol}//${DEFAULT_DOMAIN}`
+        );
 
-          if (globalPathKey) {
-            redirectUrl.hash = `#/${GLOBAL_PATHS[globalPathKey]}`;
-          } else {
-            const newHash = `#/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
-            redirectUrl.hash = [newHash, originalHash]
-              .filter(Boolean)
-              .join('/');
-          }
+        const originalHash = window.location.hash.replace(/^#\//, '');
+        const globalPathKey = Object.keys(GLOBAL_PATHS).find(path =>
+          originalHash.startsWith(path)
+        );
 
-          window.location.href = redirectUrl.href;
-          return;
+        if (globalPathKey) {
+          redirectUrl.hash = `#/${GLOBAL_PATHS[globalPathKey]}`;
+        } else {
+          const newHash = `#/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
+          redirectUrl.hash = [newHash, originalHash].filter(Boolean).join('/');
         }
 
-        isWhiteLabel.value = true;
-        skinSettings.value =
-          MAPPING[domain]?.skinSettings ||
-          space.value.additionalRawData?.skinSettings;
+        window.location.href = redirectUrl.href;
+        // Don't mark as resolved, to keep the UI splash screen while redirecting
+        shouldResolve = false;
+        return;
       }
+
+      isWhiteLabel.value = true;
+      skinSettings.value =
+        MAPPING[domain]?.skinSettings ||
+        space.value.additionalRawData?.skinSettings;
     } catch (e) {
       console.log(e);
       failed.value = true;
     } finally {
-      resolved.value = true;
+      resolved.value = shouldResolve;
     }
   }
 

@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
-import { DISABLED_STRATEGIES } from '@/helpers/constants';
+import {
+  DISABLED_STRATEGIES,
+  OVERRIDING_STRATEGIES
+} from '@/helpers/constants';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -187,7 +190,9 @@ const error = computed(() => {
 
     if (
       !isTicketValid.value ||
-      strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address))
+      strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address)) ||
+      (!props.space.turbo &&
+        strategies.value.some(s => OVERRIDING_STRATEGIES.includes(s.address)))
     ) {
       return 'Strategies are invalid';
     }

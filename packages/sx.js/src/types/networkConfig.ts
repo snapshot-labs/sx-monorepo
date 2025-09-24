@@ -1,4 +1,5 @@
 import { BigNumberish } from '@ethersproject/bignumber';
+import { constants as starknetConstants } from 'starknet';
 
 export type ExecutorType =
   | 'SimpleQuorumVanilla'
@@ -113,12 +114,17 @@ export type EvmNetworkConfig = Omit<
 > & {
   eip712ChainId: number;
   maxPriorityFeePerGas?: BigNumberish;
+  blockTime: number;
   proxyFactory: string;
   executionStrategiesImplementations: {
     [key in ExecutorType]?: string;
   };
 };
 
-export type OffchainNetworkConfig = {
+export type OffchainNetworkEthereumConfig = {
   eip712ChainId: 1 | 5;
+};
+
+export type OffchainNetworkStarknetConfig = {
+  eip712ChainId: starknetConstants.StarknetChainId;
 };

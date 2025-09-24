@@ -219,6 +219,7 @@ function formatSpace(
 
   return {
     id: space.id,
+    protocol: 'snapshot',
     network: networkId,
     verified: space.verified,
     turbo: space.turbo,
@@ -385,6 +386,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,
+      protocol: 'snapshot',
       name: proposal.space.name,
       snapshot_chain_id: proposal.space.network,
       avatar: proposal.space.avatar,
@@ -686,6 +688,8 @@ export function createApi(
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      delete filter?.protocol;
+
       if (
         !filter ||
         filter.hasOwnProperty('searchQuery') ||

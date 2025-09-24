@@ -1,12 +1,20 @@
+import { evmNetworks as evmConfigs } from '@snapshot-labs/sx';
 import { defineStore } from 'pinia';
 import { getProvider } from '@/helpers/provider';
 import { evmNetworks, getNetwork } from '@/networks';
-import { METADATA } from '@/networks/evm';
 import { NetworkID } from '@/types';
 
 export const useMetaStore = defineStore('meta', () => {
   const currentTs = ref(new Map<NetworkID, number>());
   const currentBlocks = ref(new Map<NetworkID, number>());
+
+  function getConfigBlockTime(networkId: NetworkID) {
+    if (networkId in evmConfigs) {
+      return evmConfigs[networkId as keyof typeof evmConfigs].Meta.blockTime;
+    }
+
+    throw new Error('Unsupported network');
+  }
 
   function getCurrent(networkId: NetworkID): number | undefined {
     if (evmNetworks.includes(networkId))
@@ -33,7 +41,7 @@ export const useMetaStore = defineStore('meta', () => {
 
     if (network.currentUnit === 'second') return duration;
 
-    return Math.round(duration / METADATA[networkId].blockTime);
+    return Math.round(duration / getConfigBlockTime(networkId));
   }
 
   function getDurationFromCurrent(networkId: NetworkID, current: number) {
@@ -41,7 +49,7 @@ export const useMetaStore = defineStore('meta', () => {
 
     if (network.currentUnit === 'second') return current;
 
-    return Math.round(current * METADATA[networkId].blockTime);
+    return Math.round(current * getConfigBlockTime(networkId));
   }
 
   function getTsFromCurrent(networkId: NetworkID, current: number) {
@@ -52,7 +60,7 @@ export const useMetaStore = defineStore('meta', () => {
 
     return (
       (currentTs.value.get(networkId) || 0) -
-      METADATA[networkId].blockTime * blockDiff
+      getConfigBlockTime(networkId) * blockDiff
     );
   }
 

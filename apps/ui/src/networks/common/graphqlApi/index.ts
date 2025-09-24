@@ -115,11 +115,15 @@ function getProposalState(
     if (proposal.vetoed) return 'vetoed';
     return proposal.execution_settled ? 'executed' : 'queued';
   }
-  if (proposal.max_end <= current) {
+
+  if ((proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
-  if (proposal.start > current) return 'pending';
+
+  if ((proposal.start_block_number ?? proposal.start) > current) {
+    return 'pending';
+  }
 
   return 'active';
 }
@@ -320,6 +324,8 @@ function formatProposal(
   current: number,
   baseNetworkId?: NetworkID
 ): Proposal {
+  const { getTsFromCurrent } = useMetaStore();
+
   const executionNetworkId =
     proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
       ? baseNetworkId
@@ -340,6 +346,7 @@ function formatProposal(
         proposal.execution_strategy !== emptyAddress),
     space: {
       id: proposal.space.id,
+      protocol: proposal.space.protocol,
       name: proposal.space.metadata.name,
       avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,
@@ -372,10 +379,21 @@ function formatProposal(
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
       proposal.execution_strategy_type
     )
-      ? proposal.max_end <= current
-      : proposal.min_end <= current,
+      ? (proposal.max_end_block_number ?? proposal.max_end) <= current
+      : (proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
     state,
+    start:
+      proposal.start_block_number !== null
+        ? getTsFromCurrent(networkId, proposal.start_block_number)
+        : proposal.start,
+    min_end:
+      proposal.min_end_block_number !== null
+        ? getTsFromCurrent(networkId, proposal.min_end_block_number)
+        : proposal.min_end,
+    max_end: proposal.max_end_block_number
+      ? getTsFromCurrent(networkId, proposal.max_end_block_number)
+      : proposal.max_end,
     network: networkId,
     privacy: 'none',
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
@@ -462,7 +480,7 @@ export function createApi(
           orderDirection,
           where: {
             space: proposal.space.id,
-            proposal: Number(proposal.proposal_id),
+            proposal: proposal.proposal_id,
             ...filters
           }
         }
