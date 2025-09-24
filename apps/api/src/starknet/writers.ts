@@ -460,7 +460,7 @@ export function createWriters(config: FullConfig) {
       spaceId,
       proposalId
     });
-    proposal.proposal_id = proposalId;
+    proposal.proposal_id = proposalId.toString();
     proposal.space = spaceId;
     proposal.author = author.address;
     proposal.metadata = null;
@@ -793,7 +793,7 @@ export function createWriters(config: FullConfig) {
       config.indexerName
     );
     vote.space = spaceId;
-    vote.proposal = proposalId;
+    vote.proposal = proposalId.toString();
     vote.voter = voter.address;
     vote.choice = choice;
     vote.vp = vp.toString();
@@ -803,9 +803,10 @@ export function createWriters(config: FullConfig) {
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
-      await handleVoteMetadata(metadataUri, config);
-
-      vote.metadata = dropIpfs(metadataUri);
+      if (metadataUri) {
+        await handleVoteMetadata(metadataUri, config);
+        vote.metadata = dropIpfs(metadataUri);
+      }
     } catch (err) {
       logger.warn({ err }, 'Failed to handle vote metadata');
     }

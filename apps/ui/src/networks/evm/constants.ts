@@ -24,8 +24,11 @@ export function createConstants(
   networkId: NetworkID,
   { pin }: { pin: PinFunction }
 ) {
-  const config = evmNetworks[networkId];
-  if (!config) throw new Error(`Unsupported network ${networkId}`);
+  if (!(networkId in evmNetworks)) {
+    throw new Error(`Unsupported network ${networkId}`);
+  }
+
+  const config = evmNetworks[networkId as keyof typeof evmNetworks];
 
   const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
     {
@@ -47,6 +50,12 @@ export function createConstants(
         isSupported: true,
         isContractSupported: true,
         connectors: EVM_CONNECTORS
+      },
+      // Governor Bravo
+      GovernorBravoAuthenticator: {
+        isSupported: true,
+        isContractSupported: true,
+        connectors: EVM_CONNECTORS
       }
     };
 
@@ -55,14 +64,18 @@ export function createConstants(
     [config.Strategies.Comp]: true,
     [config.Strategies.OZVotes]: true,
     [config.Strategies.Whitelist]: true,
-    [config.Strategies.ApeGas]: true
+    ...(config.Strategies.ApeGas && {
+      [config.Strategies.ApeGas]: true
+    })
   };
 
   const SUPPORTED_EXECUTORS = {
     SimpleQuorumAvatar: true,
     SimpleQuorumTimelock: true,
     Axiom: true,
-    Isokratia: true
+    Isokratia: true,
+    // Governor Bravo
+    GovernorBravoTimelock: true
   };
 
   const AUTHS = {
@@ -80,7 +93,9 @@ export function createConstants(
     [config.Strategies.Comp]: 'ERC-20 Votes Comp (EIP-5805)',
     [config.Strategies.OZVotes]: 'ERC-20 Votes (EIP-5805)',
     [config.Strategies.Whitelist]: 'Merkle whitelist',
-    [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
+    ...(config.Strategies.ApeGas && {
+      [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
+    })
   };
 
   const EXECUTORS = {

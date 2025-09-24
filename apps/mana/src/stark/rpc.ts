@@ -1,4 +1,3 @@
-import { utils } from '@snapshot-labs/sx';
 import { Response } from 'express';
 import * as herodotus from './herodotus';
 import { getClient, NETWORKS } from './networks';
@@ -148,71 +147,12 @@ export const createNetworkHandler = (chainId: string) => {
     }
   }
 
-  async function generateTree(requestId: string, entries: string[]) {
-    const tree = await utils.merkle.generateMerkleTree(entries);
-    const root = tree[0];
-    if (!root) throw new Error('Merkle tree not generated');
-
-    await db.saveMerkleTree(requestId, root, tree);
-  }
-
-  async function generateMerkleTree(id: number, params: any, res: Response) {
-    try {
-      const { entries } = params;
-
-      const requestId = crypto.randomUUID();
-
-      await db.saveRequest(requestId);
-
-      // NOTE: no await here as we want to execute it in the background
-      generateTree(requestId, entries);
-
-      return rpcSuccess(res, requestId, id);
-    } catch (err) {
-      logger.error({ err }, 'Failed to generate merkle tree');
-      return rpcError(res, 500, err, id);
-    }
-  }
-
-  async function getMerkleRoot(id: number, params: any, res: Response) {
-    try {
-      const { requestId } = params;
-
-      const request = await db.getMerkleTreeRequest(requestId);
-      if (!request) throw new Error('Request not found');
-
-      return rpcSuccess(res, request.root, id);
-    } catch (err) {
-      logger.error({ err }, 'Failed to get merkle root');
-      return rpcError(res, 500, err, id);
-    }
-  }
-
-  async function getMerkleProof(id: number, params: any, res: Response) {
-    try {
-      const { root, index } = params;
-
-      const result = await db.getMerkleTree(root);
-      if (!result) throw new Error('Merkle tree not generated');
-
-      const proof = utils.merkle.generateMerkleProof(result.tree, index);
-
-      return rpcSuccess(res, proof, id);
-    } catch (err) {
-      logger.error({ err }, 'Failed to get merkle proof');
-      return rpcError(res, 500, err, id);
-    }
-  }
-
   return {
     send,
     execute,
     registerTransaction,
     registerProposal,
     getAccount,
-    getDataByMessageHash,
-    generateMerkleTree,
-    getMerkleRoot,
-    getMerkleProof
+    getDataByMessageHash
   };
 };

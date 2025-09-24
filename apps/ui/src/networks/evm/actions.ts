@@ -88,6 +88,7 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const ethSigClient = new clients.EvmEthereumSig({
     ...clientOpts,
     manaUrl: MANA_URL
@@ -244,8 +245,24 @@ export function createActions(
       executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
+      const signer = getSigner(web3);
 
       const executionInfo = executions?.[0];
+
+      if (space.protocol === 'governor-bravo') {
+        return governorBravoClient.propose({
+          signer,
+          envelope: {
+            data: {
+              spaceId: space.id,
+              title,
+              body,
+              executions: executionInfo?.transactions ?? []
+            }
+          }
+        });
+      }
+
       const pinned = await helpers.pin({
         title,
         body,
@@ -320,8 +337,6 @@ export function createActions(
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
       };
-
-      const signer = getSigner(web3);
 
       if (relayerType === 'evm') {
         return ethSigClient.propose({
@@ -406,7 +421,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId.proposal_id as number,
+        proposal: Number(proposalId.proposal_id),
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -451,7 +466,7 @@ export function createActions(
         {
           signer,
           space: proposal.space.id,
-          proposal: proposal.proposal_id as number
+          proposal: Number(proposal.proposal_id)
         },
         { noWait: isContract && connectorType !== 'sequence' }
       );
@@ -465,6 +480,21 @@ export function createActions(
       reason: string
     ) => {
       await verifyNetwork(web3, chainId);
+      const signer = getSigner(web3);
+
+      if (proposal.space.protocol === 'governor-bravo') {
+        return governorBravoClient.vote({
+          signer,
+          envelope: {
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: Number(proposal.proposal_id),
+              choice: getSdkChoice(choice),
+              reason
+            }
+          }
+        });
+      }
 
       const isContract = await getIsContract(account, connectorType);
 
@@ -510,13 +540,11 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
-        proposal: proposal.proposal_id as number,
+        proposal: Number(proposal.proposal_id),
         choice: getSdkChoice(choice),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
-
-      const signer = getSigner(web3);
 
       if (!isContract && proposal.execution_strategy_type === 'Axiom') {
         return highlightVote({ signer, data });
@@ -550,6 +578,14 @@ export function createActions(
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
+      if (proposal.space.protocol === 'governor-bravo') {
+        return governorBravoClient.queue({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          proposalId: Number(proposal.proposal_id)
+        });
+      }
+
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
@@ -565,6 +601,14 @@ export function createActions(
     },
     executeQueuedProposal: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
+
+      if (proposal.space.protocol === 'governor-bravo') {
+        return governorBravoClient.execute({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          proposalId: Number(proposal.proposal_id)
+        });
+      }
 
       const executionData = getExecutionData(
         proposal.space,

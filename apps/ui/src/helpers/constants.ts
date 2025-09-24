@@ -11,11 +11,10 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
-export const UNIFIED_API_URL =
-  import.meta.env.VITE_UNIFIED_API_URL ?? 'https://api.snapshot.box';
-export const UNIFIED_API_TESTNET_URL =
-  import.meta.env.VITE_UNIFIED_API_TESTNET_URL ??
-  'https://testnet-api.snapshot.box';
+export const API_URL =
+  import.meta.env.VITE_API_URL ?? 'https://api.snapshot.box';
+export const API_TESTNET_URL =
+  import.meta.env.VITE_API_TESTNET_URL ?? 'https://testnet-api.snapshot.box';
 
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
@@ -228,7 +227,7 @@ export const FLAGS = {
   DMCA: 2
 };
 
-export const OVERRIDING_STRATEGIES = [
+export const OVERRIDING_STRATEGIES: readonly string[] = [
   'aura-vlaura-vebal-with-overrides',
   'balance-of-with-linear-vesting-power',
   'balancer-delegation',
