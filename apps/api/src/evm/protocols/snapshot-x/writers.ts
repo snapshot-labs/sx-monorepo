@@ -640,18 +640,19 @@ export function createWriters(
         networkId: config.indexerName,
         blockNumber: value,
         currentBlockNumber: blockNumber,
-        currentTimestamp: block?.timestamp ?? getCurrentTimestamp()
+        currentTimestamp: block?.timestamp ?? getCurrentTimestamp(),
+        provider
       });
 
-    proposal.start = getTimestampFromBlock(
+    proposal.start = await getTimestampFromBlock(
       event.args.proposal.startBlockNumber
     );
     proposal.start_block_number = event.args.proposal.startBlockNumber;
-    proposal.min_end = getTimestampFromBlock(
+    proposal.min_end = await getTimestampFromBlock(
       event.args.proposal.minEndBlockNumber
     );
     proposal.min_end_block_number = event.args.proposal.minEndBlockNumber;
-    proposal.max_end = getTimestampFromBlock(
+    proposal.max_end = await getTimestampFromBlock(
       event.args.proposal.maxEndBlockNumber
     );
     proposal.max_end_block_number = event.args.proposal.maxEndBlockNumber;

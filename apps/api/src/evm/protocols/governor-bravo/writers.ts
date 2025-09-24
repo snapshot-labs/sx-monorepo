@@ -293,12 +293,17 @@ export function createWriters(
         networkId: config.indexerName,
         blockNumber: value,
         currentBlockNumber: blockNumber,
-        currentTimestamp: block?.timestamp ?? getCurrentTimestamp()
+        currentTimestamp: block?.timestamp ?? getCurrentTimestamp(),
+        provider
       });
 
-    proposal.start = getTimestampFromBlock(event.args.startBlock.toNumber());
+    proposal.start = await getTimestampFromBlock(
+      event.args.startBlock.toNumber()
+    );
     proposal.start_block_number = event.args.startBlock.toNumber();
-    proposal.min_end = getTimestampFromBlock(event.args.endBlock.toNumber());
+    proposal.min_end = await getTimestampFromBlock(
+      event.args.endBlock.toNumber()
+    );
     proposal.min_end_block_number = event.args.endBlock.toNumber();
     proposal.max_end = proposal.min_end;
     proposal.max_end_block_number = proposal.max_end;
