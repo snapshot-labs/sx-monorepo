@@ -24,7 +24,11 @@ export default {
   makers: [
     {
       name: '@electron-forge/maker-dmg',
-      platforms: ['darwin']
+      platforms: ['darwin'],
+      config: {
+        icon: './src/assets/icon.icns',
+        iconSize: 80
+      }
     },
     {
       name: '@electron-forge/maker-zip',
