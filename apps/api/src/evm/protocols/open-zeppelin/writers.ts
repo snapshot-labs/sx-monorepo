@@ -4,9 +4,13 @@ import { Contract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
-import GovernorModule from './abis/GovernorModule.json';
-import Timelock from './abis/Timelock.json';
+import ERC20Votes from './abis/ERC20Votes.json';
+import GovernorTimelockControl from './abis/GovernorTimelockControl.json';
+import GovernorVotes from './abis/GovernorVotes.json';
+import TimelockController from './abis/TimelockController.json';
+import { GOVERNANCES } from './governances';
 import logger from './logger';
+import { convertChoice, getProposalTitle } from './utils';
 import {
   ExecutionStrategy,
   Leaderboard,
@@ -27,77 +31,64 @@ import {
   getProposalLink,
   getSpaceLink
 } from '../../../common/utils';
-import { EVMConfig, GovernorBravoConfig } from '../../types';
+import { EVMConfig, OpenZeppelinConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
-import { convertChoice, getProposalTitle } from '../open-zeppelin/utils';
-
-type SpaceData = {
-  name: string;
-  symbol: string;
-  decimals: number;
-  governanceToken: string;
-  treasury: {
-    name: string;
-    address: string;
-    chain_id: number;
-  };
-};
-
-const spaceData: Record<string, SpaceData | undefined> = {
-  '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': {
-    name: 'Uniswap',
-    symbol: 'UNI',
-    decimals: 18,
-    governanceToken: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
-    treasury: {
-      name: 'Uniswap Treasury',
-      address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC',
-      chain_id: 1
-    }
-  },
-  '0xc0Da02939E1441F497fd74F78cE7Decb17B66529': {
-    name: 'Compound',
-    symbol: 'COMP',
-    decimals: 18,
-    governanceToken: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
-    treasury: {
-      name: 'Compound Treasury',
-      address: '0x6d903f6003cca6255D85CcA4D3B5E5146dC33925',
-      chain_id: 1
-    }
-  },
-  '0x69112D158A607DD388034c0C09242FF966985258': {
-    name: 'Sepolia Governor Bravo',
-    symbol: 'MOCK',
-    decimals: 18,
-    governanceToken: '0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546',
-    treasury: {
-      name: 'MOCK',
-      address: '0x52f26d07f8fEf1CF806A53159ce68bf1B4031baB',
-      chain_id: 11155111
-    }
-  }
-};
 
 export function createWriters(
   config: EVMConfig,
-  protocolConfig: GovernorBravoConfig
+  protocolConfig: OpenZeppelinConfig
 ) {
+  const governances = GOVERNANCES[config.indexerName];
+  if (!governances) throw new Error('Governances not found for this network');
+
+  const getGovernanceInfo = (address: string) => {
+    const governanceInfo = Object.values(governances).find(
+      governance => governance.address === address
+    );
+    if (!governanceInfo) {
+      throw new Error(`Governance info not found for ${address}`);
+    }
+
+    return governanceInfo;
+  };
+
+  const getEntitiesIds = (spaceAddress: string) => {
+    const strategyId = `${spaceAddress}_strategy`;
+    const strategyDataItemId = `${strategyId}_data`;
+    const metadataId = `${spaceAddress}_metadata`;
+
+    return { strategyId, strategyDataItemId, metadataId };
+  };
+
+  const createTreasuries = (spaceAddress: string, timelockAddress: string) => {
+    const governanceInfo = getGovernanceInfo(spaceAddress);
+
+    return [
+      JSON.stringify({
+        name: `${governanceInfo.name} Governance`,
+        chain_id: protocolConfig.chainId,
+        address: timelockAddress
+      })
+    ];
+  };
+
   const provider = new StaticJsonRpcProvider(
     config.network_node_url,
     protocolConfig.chainId
   );
 
-  async function initializeStrategies(spaceAddress: string) {
-    const spaceDataEntry = spaceData[spaceAddress];
-    if (!spaceDataEntry) {
-      throw new Error(`Space data not found for ${spaceAddress}`);
-    }
-
-    const { symbol, governanceToken, decimals } = spaceDataEntry;
-
-    const strategyId = `${spaceAddress}_strategy`;
-    const strategyDataItemId = `${strategyId}_data`;
+  async function initializeStrategies({
+    spaceAddress,
+    decimals,
+    symbol,
+    token
+  }: {
+    spaceAddress: string;
+    decimals: number;
+    symbol: string;
+    token: string;
+  }) {
+    const { strategyId, strategyDataItemId } = getEntitiesIds(spaceAddress);
 
     const strategyParsedMetadataDataItem = new StrategiesParsedMetadataDataItem(
       strategyDataItemId,
@@ -105,9 +96,9 @@ export function createWriters(
     );
     strategyParsedMetadataDataItem.name = 'ERC-20 Votes';
     strategyParsedMetadataDataItem.description = '';
-    strategyParsedMetadataDataItem.decimals = decimals;
+    strategyParsedMetadataDataItem.token = token;
     strategyParsedMetadataDataItem.symbol = symbol;
-    strategyParsedMetadataDataItem.token = governanceToken;
+    strategyParsedMetadataDataItem.decimals = decimals;
 
     await strategyParsedMetadataDataItem.save();
 
@@ -147,10 +138,10 @@ export function createWriters(
     let space = await Space.loadEntity(contractAddress, config.indexerName);
     if (space) return;
 
-    const metadataId = `${contractAddress}_metadata`;
+    const { metadataId } = getEntitiesIds(contractAddress);
 
     space = new Space(contractAddress, config.indexerName);
-    space.protocol = 'governor-bravo';
+    space.protocol = 'open-zeppelin';
     space.verified = true;
     space.link = getSpaceLink({
       networkId: config.indexerName,
@@ -164,49 +155,68 @@ export function createWriters(
       blockTag: blockNumber
     };
 
-    const governorModuleContract = new Contract(
+    const governorTimelockContract = new Contract(
       contractAddress,
-      GovernorModule,
+      GovernorTimelockControl,
       provider
     );
 
-    const [quorum, timelock, proposalThreshold] = await Promise.all([
-      governorModuleContract.quorumVotes(overrides),
-      governorModuleContract.timelock(overrides),
-      governorModuleContract.proposalThreshold(overrides)
+    const governorVotesContract = new Contract(
+      contractAddress,
+      GovernorVotes,
+      provider
+    );
+
+    const [quorum, timelock, token, proposalThreshold] = await Promise.all([
+      governorTimelockContract.quorum(blockNumber - 1, overrides),
+      governorTimelockContract.timelock(overrides),
+      governorVotesContract.token(overrides),
+      governorTimelockContract.proposalThreshold(overrides)
     ]);
 
-    const timelockContract = new Contract(timelock, Timelock, provider);
-    const timelockDelay = await timelockContract.delay(overrides);
+    const tokenContract = new Contract(token, ERC20Votes, provider);
+
+    const [decimals, symbol] = await Promise.all([
+      tokenContract.decimals(overrides),
+      tokenContract.symbol(overrides)
+    ]);
+
+    const timelockContract = new Contract(
+      timelock,
+      TimelockController,
+      provider
+    );
+    const timelockDelay = await timelockContract.getMinDelay(overrides);
 
     const executionStrategy = new ExecutionStrategy(
       timelock,
       config.indexerName
     );
     executionStrategy.address = timelock;
-    executionStrategy.type = 'GovernorBravoTimelock';
+    executionStrategy.type = 'OpenZeppelinTimelockController';
     executionStrategy.quorum = quorum.toString();
     executionStrategy.treasury_chain = protocolConfig.chainId;
     executionStrategy.treasury = timelock;
     executionStrategy.timelock_delay = timelockDelay.toString();
     await executionStrategy.save();
 
-    await helpers.executeTemplate('Timelock', {
+    await helpers.executeTemplate('OpenZeppelinTimelockController', {
       contract: timelock,
       start: blockNumber
     });
 
-    const { votingPowerStrategyParsedMetadata } =
-      await initializeStrategies(contractAddress);
+    const { votingPowerStrategyParsedMetadata } = await initializeStrategies({
+      spaceAddress: contractAddress,
+      token,
+      symbol,
+      decimals
+    });
 
-    const spaceDataEntry = spaceData[contractAddress];
-    if (!spaceDataEntry) return;
+    const governanceInfo = getGovernanceInfo(contractAddress);
 
-    const { name, symbol, treasury, governanceToken } = spaceDataEntry;
-
-    space.authenticators = ['GovernorBravoAuthenticator'];
-    space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
-    space.strategies_params = [governanceToken];
+    space.authenticators = ['OpenZeppelinAuthenticator'];
+    space.strategies = [evmNetworks[config.indexerName].Strategies.OZVotes];
+    space.strategies_params = [token];
     space.strategies_indices = [0];
     space.voting_power_validation_strategy_strategies = space.strategies;
     space.voting_power_validation_strategy_strategies_params =
@@ -217,9 +227,9 @@ export function createWriters(
     space.proposal_threshold = proposalThreshold.toString();
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
-    spaceMetadata.name = name;
+    spaceMetadata.name = governanceInfo.name;
     spaceMetadata.voting_power_symbol = symbol;
-    spaceMetadata.treasuries = [JSON.stringify(treasury)];
+    spaceMetadata.treasuries = createTreasuries(contractAddress, timelock);
     spaceMetadata.executors_strategies = [executionStrategy.id];
     await spaceMetadata.save();
 
@@ -247,7 +257,7 @@ export function createWriters(
 
     logger.info('Handle proposal created');
 
-    const id = event.args.id.toNumber();
+    const id = event.args.proposalId.toString();
     const spaceAddress = getAddress(rawEvent.address);
     const proposerAddress = getAddress(event.args.proposer);
     const proposalId = `${spaceAddress}/${id}`;
@@ -257,11 +267,14 @@ export function createWriters(
     await initializeSpace(spaceAddress, blockNumber, block, helpers);
     await initializeUser(proposerAddress, block);
 
-    const spaceDataEntry = spaceData[spaceAddress];
-    if (!spaceDataEntry) return;
-
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
     if (!space) return;
+
+    const governorContract = new Contract(
+      spaceAddress,
+      GovernorTimelockControl,
+      provider
+    );
 
     const spaceMetadataItem = space.metadata
       ? await SpaceMetadataItem.loadEntity(space.metadata, config.indexerName)
@@ -277,13 +290,28 @@ export function createWriters(
     );
     if (!executionStrategy) return;
 
+    const strategyParsedMetadataDataItem =
+      await StrategiesParsedMetadataDataItem.loadEntity(
+        getEntitiesIds(spaceAddress).strategyDataItemId,
+        config.indexerName
+      );
+    if (!strategyParsedMetadataDataItem) return;
+
+    const overrides = {
+      blockTag: blockNumber
+    };
+
+    const quorum = await governorContract.quorum(blockNumber - 1, overrides);
+
+    executionStrategy.quorum = quorum.toString();
+
     const proposal = new Proposal(proposalId, config.indexerName);
     proposal.link = getProposalLink({
       networkId: config.indexerName,
       spaceId: spaceAddress,
       proposalId: id
     });
-    proposal.proposal_id = id.toString();
+    proposal.proposal_id = id;
     proposal.space = space.id;
     proposal.author = proposerAddress;
     proposal.metadata = proposalMetadataId;
@@ -293,20 +321,15 @@ export function createWriters(
         networkId: config.indexerName,
         blockNumber: value,
         currentBlockNumber: blockNumber,
-        currentTimestamp: block?.timestamp ?? getCurrentTimestamp(),
-        provider
+        currentTimestamp: block?.timestamp ?? getCurrentTimestamp()
       });
 
-    proposal.start = await getTimestampFromBlock(
-      event.args.startBlock.toNumber()
-    );
-    proposal.start_block_number = event.args.startBlock.toNumber();
-    proposal.min_end = await getTimestampFromBlock(
-      event.args.endBlock.toNumber()
-    );
-    proposal.min_end_block_number = event.args.endBlock.toNumber();
+    proposal.start = getTimestampFromBlock(event.args.voteStart.toNumber());
+    proposal.start_block_number = event.args.voteStart.toNumber();
+    proposal.min_end = getTimestampFromBlock(event.args.voteEnd.toNumber());
+    proposal.min_end_block_number = event.args.voteEnd.toNumber();
     proposal.max_end = proposal.min_end;
-    proposal.max_end_block_number = proposal.max_end;
+    proposal.max_end_block_number = proposal.min_end_block_number;
     proposal.snapshot = proposal.start;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
@@ -316,7 +339,7 @@ export function createWriters(
     proposal.execution_strategy = executionStrategy.address;
     proposal.execution_strategy_type = executionStrategy.type;
     proposal.execution_strategy_details = executionStrategy.id;
-    proposal.vp_decimals = spaceDataEntry.decimals;
+    proposal.vp_decimals = strategyParsedMetadataDataItem.decimals;
     proposal.type = 'basic';
     proposal.created = block?.timestamp ?? getCurrentTimestamp();
     proposal.tx = rawEvent.transactionHash;
@@ -369,7 +392,8 @@ export function createWriters(
       proposal.save(),
       space.save(),
       proposalMetadata.save(),
-      leaderboardItem.save()
+      leaderboardItem.save(),
+      executionStrategy.save()
     ]);
   };
 
@@ -400,7 +424,7 @@ export function createWriters(
 
     logger.info('Handle proposal queued');
 
-    const id = event.args.id.toNumber();
+    const id = event.args.proposalId.toString();
     const spaceAddress = getAddress(rawEvent.address);
     const proposalId = `${spaceAddress}/${id}`;
 
@@ -408,7 +432,7 @@ export function createWriters(
     if (!proposal) return;
 
     proposal.executed = true;
-    proposal.execution_time = event.args.eta.toNumber();
+    proposal.execution_time = event.args.etaSeconds.toNumber();
 
     await proposal.save();
   };
@@ -418,7 +442,7 @@ export function createWriters(
 
     logger.info('Handle proposal executed');
 
-    const id = event.args.id.toNumber();
+    const id = event.args.proposalId.toString();
     const spaceAddress = getAddress(rawEvent.address);
     const proposalId = `${spaceAddress}/${id}`;
 
@@ -437,7 +461,7 @@ export function createWriters(
 
     logger.info('Handle vote cast');
 
-    const id = event.args.proposalId.toNumber();
+    const id = event.args.proposalId.toString();
     const voterAddress = getAddress(event.args.voter);
     const spaceAddress = getAddress(rawEvent.address);
     const proposalId = `${spaceAddress}/${id}`;
@@ -470,9 +494,9 @@ export function createWriters(
     const vote = new Vote(voteId, config.indexerName);
     vote.voter = voterAddress;
     vote.space = space.id;
-    vote.proposal = id.toString();
+    vote.proposal = id;
     vote.choice = choice;
-    vote.vp = event.args.votes.toString();
+    vote.vp = event.args.weight.toString();
     vote.vp_parsed = getParsedVP(vote.vp, proposal.vp_decimals);
     vote.metadata = voteMetadataId;
     vote.created = block?.timestamp ?? getCurrentTimestamp();
@@ -518,13 +542,17 @@ export function createWriters(
 
   const handleProposalThresholdSet: evm.Writer = async ({
     event,
-    rawEvent
+    rawEvent,
+    blockNumber,
+    block,
+    helpers
   }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal threshold set');
 
     const spaceAddress = getAddress(rawEvent.address);
+    await initializeSpace(spaceAddress, blockNumber, block, helpers);
 
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
     if (!space) return;
@@ -534,19 +562,131 @@ export function createWriters(
     await space.save();
   };
 
-  const handleNewAdmin: evm.Writer = async ({ event, rawEvent }) => {
+  const handleVotingDelaySet: evm.Writer = async ({
+    event,
+    rawEvent,
+    blockNumber,
+    block,
+    helpers
+  }) => {
     if (!event || !rawEvent) return;
 
-    logger.info('Handle new admin');
+    logger.info('Handle voting delay set');
 
     const spaceAddress = getAddress(rawEvent.address);
+    await initializeSpace(spaceAddress, blockNumber, block, helpers);
 
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
     if (!space) return;
 
-    space.proposal_threshold = event.args.newAdmin.toString();
+    space.voting_delay = event.args.newVotingDelay.toNumber();
 
     await space.save();
+  };
+
+  const handleVotingPeriodSet: evm.Writer = async ({
+    event,
+    rawEvent,
+    blockNumber,
+    block,
+    helpers
+  }) => {
+    if (!event || !rawEvent) return;
+
+    logger.info('Handle voting period set');
+
+    const spaceAddress = getAddress(rawEvent.address);
+    await initializeSpace(spaceAddress, blockNumber, block, helpers);
+
+    const space = await Space.loadEntity(spaceAddress, config.indexerName);
+    if (!space) return;
+
+    space.min_voting_period = event.args.newVotingPeriod.toNumber();
+    space.max_voting_period = space.min_voting_period;
+
+    await space.save();
+  };
+
+  const handleTimelockChange: evm.Writer = async ({
+    event,
+    rawEvent,
+    blockNumber,
+    block,
+    helpers
+  }) => {
+    if (!event || !rawEvent) return;
+
+    logger.info('Handle timelock change');
+
+    const spaceAddress = getAddress(rawEvent.address);
+    await initializeSpace(spaceAddress, blockNumber, block, helpers);
+
+    const timelock = event.args.newTimelock;
+
+    const { metadataId } = getEntitiesIds(spaceAddress);
+
+    const space = await Space.loadEntity(spaceAddress, config.indexerName);
+    if (!space) return;
+
+    const spaceMetadataItem = await SpaceMetadataItem.loadEntity(
+      metadataId,
+      config.indexerName
+    );
+    if (!spaceMetadataItem) return;
+
+    spaceMetadataItem.treasuries = createTreasuries(
+      spaceAddress,
+      getAddress(event.args.newTimelock)
+    );
+
+    const spaceContract = new Contract(
+      spaceAddress,
+      GovernorTimelockControl,
+      provider
+    );
+
+    const timelockContract = new Contract(
+      timelock,
+      TimelockController,
+      provider
+    );
+
+    const [timelockDelay, quorum] = await Promise.all([
+      timelockContract.getMinDelay({
+        blockTag: blockNumber
+      }),
+      spaceContract.quorum(blockNumber - 1, {
+        blockTag: blockNumber
+      })
+    ]);
+
+    const executionStrategy = await ExecutionStrategy.loadEntity(
+      timelock,
+      config.indexerName
+    );
+
+    if (!executionStrategy) {
+      const executionStrategy = new ExecutionStrategy(
+        timelock,
+        config.indexerName
+      );
+
+      executionStrategy.address = timelock;
+      executionStrategy.type = 'OpenZeppelinTimelockController';
+      executionStrategy.quorum = quorum.toString();
+      executionStrategy.treasury_chain = protocolConfig.chainId;
+      executionStrategy.treasury = timelock;
+      executionStrategy.timelock_delay = timelockDelay.toString();
+      await executionStrategy.save();
+
+      await helpers.executeTemplate('OpenZeppelinTimelockController', {
+        contract: timelock,
+        start: blockNumber
+      });
+
+      spaceMetadataItem.executors_strategies = [executionStrategy.id];
+      await spaceMetadataItem.save();
+    }
   };
 
   const handleNewDelay: evm.Writer = async ({ event, rawEvent }) => {
@@ -562,19 +702,25 @@ export function createWriters(
     );
     if (!timelock) return;
 
-    timelock.timelock_delay = event.args.newDelay.toString();
+    timelock.timelock_delay = event.args.newDuration.toString();
 
     await timelock.save();
   };
 
   return {
+    // IGovernor
     handleProposalCreated,
     handleProposalCanceled,
     handleProposalQueued,
     handleProposalExecuted,
     handleVoteCast,
+    // GovernorSettings
     handleProposalThresholdSet,
-    handleNewAdmin,
+    handleVotingDelaySet,
+    handleVotingPeriodSet,
+    // GovernorTimelockControl
+    handleTimelockChange,
+    // TimelockController
     handleNewDelay
   };
 }
