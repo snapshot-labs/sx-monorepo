@@ -1,5 +1,14 @@
 # @snapshot-labs/sx
 
+## 0.1.10
+
+### Patch Changes
+
+- d4a1f44: Add hasNonNativeBlockNumbers to EvmNetworkConfig
+- 046eed3: add GovernorBravo client
+- 3a10211: use dedicated client for offchain starknet-sig, and support SNIP-12
+- 32e122f: Add blockTime to EvmNetworkConfig
+
 ## 0.1.9
 
 ### Patch Changes
