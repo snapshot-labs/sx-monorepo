@@ -3,6 +3,7 @@ import { EvmNetworkConfig } from './types';
 
 type AdditionalProperties = {
   blockTime: number;
+  hasNonNativeBlockNumbers?: boolean;
   maxPriorityFeePerGas?: BigNumberish;
   authenticators?: Record<string, string>;
   strategies?: {
@@ -28,6 +29,7 @@ function createStandardConfig(
       eip712ChainId,
       maxPriorityFeePerGas: additionalProperties.maxPriorityFeePerGas,
       blockTime: additionalProperties.blockTime,
+      hasNonNativeBlockNumbers: additionalProperties.hasNonNativeBlockNumbers,
       proxyFactory: '0x4B4F7f64Be813Ccc66AEFC3bFCe2baA01188631c',
       masterSpace: '0xC3031A7d3326E47D49BfF9D374d74f364B29CE4D'
     },
@@ -111,6 +113,7 @@ function createEvmConfig(
     eip712ChainId: network.Meta.eip712ChainId,
     maxPriorityFeePerGas: network.Meta.maxPriorityFeePerGas,
     blockTime: network.Meta.blockTime,
+    hasNonNativeBlockNumbers: network.Meta.hasNonNativeBlockNumbers,
     proxyFactory: network.Meta.proxyFactory,
     masterSpace: network.Meta.masterSpace,
     authenticators,
@@ -133,7 +136,10 @@ export const evmNetworks = {
     // }
   }),
   matic: createStandardConfig(137, { blockTime: 2.15812 }),
-  arb1: createStandardConfig(42161, { blockTime: ethMainnetBlockTime }),
+  arb1: createStandardConfig(42161, {
+    blockTime: ethMainnetBlockTime,
+    hasNonNativeBlockNumbers: true
+  }),
   base: createStandardConfig(8453, { blockTime: 2 }),
   mnt: createStandardConfig(5000, {
     blockTime: 2,
@@ -142,12 +148,14 @@ export const evmNetworks = {
   }),
   ape: createStandardConfig(33139, {
     blockTime: ethMainnetBlockTime,
+    hasNonNativeBlockNumbers: true,
     strategies: {
       ApeGas: '0xDd6B74123b2aB93aD701320D3F8D1b92B4fA5202'
     }
   }),
   curtis: createStandardConfig(33111, {
     blockTime: ethSepoliaBlockTime,
+    hasNonNativeBlockNumbers: true,
     strategies: {
       ApeGas: '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87'
     }
