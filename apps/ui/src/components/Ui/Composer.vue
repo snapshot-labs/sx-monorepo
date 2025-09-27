@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiLoading from '@/components/Ui/Loading.vue';
 import { stripHtmlTags } from '@/helpers/utils';
 
 const DEFAULT_EDITOR = 'markdown';
@@ -18,9 +19,10 @@ function toggleEditor() {
   editorType.value = editorType.value === 'visual' ? 'markdown' : 'visual';
 }
 
-const AsyncVisualEditor = defineAsyncComponent(
-  () => import('./ComposerVisual.vue')
-);
+const AsyncVisualEditor = defineAsyncComponent({
+  loader: () => import('./ComposerVisual.vue'),
+  loadingComponent: UiLoading
+});
 </script>
 
 <template>
@@ -51,7 +53,7 @@ const AsyncVisualEditor = defineAsyncComponent(
         </span>
       </button>
     </div>
-    <div class="mb-3">
+    <div class="min-h-[260px] mb-3">
       <AsyncVisualEditor
         v-if="editorType === 'visual'"
         v-model="model"
