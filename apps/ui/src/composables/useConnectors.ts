@@ -26,7 +26,7 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
     options: {
       projectId: 'e6454bd61aba40b786e866a69bd4c5c6',
       name: APP_NAME,
-      url: 'https://snapshot.box',
+      url: window.location.host,
       description: 'Where decisions get made.',
       icons: ['https://snapshot.box/favicon.svg']
     }

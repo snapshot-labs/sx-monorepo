@@ -23,8 +23,11 @@ export function createConstants(
   baseNetworkId: NetworkID,
   baseChainId: number
 ) {
-  const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
-  if (!config) throw new Error(`Unsupported network ${networkId}`);
+  if (!(networkId in starknetNetworks)) {
+    throw new Error(`Unsupported network ${networkId}`);
+  }
+
+  const config = starknetNetworks[networkId as keyof typeof starknetNetworks];
 
   const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
     {

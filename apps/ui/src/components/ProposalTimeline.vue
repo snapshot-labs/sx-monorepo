@@ -30,7 +30,7 @@ const LABELS = {
   max_end: 'Max. end'
 };
 
-const { getTsFromCurrent, getDurationFromCurrent } = useMetaStore();
+const { getDurationFromCurrent } = useMetaStore();
 
 const timestamp = useTimestamp({ interval: 1000 });
 
@@ -39,12 +39,12 @@ const now = computed(() => Math.floor(timestamp.value / 1000));
 function formatTimelineValues(): ProposalTimelineValues {
   const data = props.data;
   if ('start' in data) {
-    const { network, created, start, min_end, max_end } = data;
+    const { created, start, min_end, max_end } = data;
     return {
       created,
-      start: getTsFromCurrent(network, start),
-      min_end: getTsFromCurrent(network, min_end),
-      max_end: getTsFromCurrent(network, max_end)
+      start,
+      min_end,
+      max_end
     };
   }
   const network = data.network;
