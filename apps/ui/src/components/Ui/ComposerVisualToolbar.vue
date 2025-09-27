@@ -37,7 +37,6 @@ function setLink() {
   <bubble-menu
     :editor="editor"
     :options="{
-      placement: 'bottom',
       shift: {
         boundary: clippingContainer
       }
@@ -120,10 +119,10 @@ function setLink() {
 
 <style lang="scss" scoped>
 .bubble-menu {
-  @apply border border-skin-border bg-skin-bg shadow-sm rounded-lg flex space-x-0.5 p-1;
+  @apply border border-skin-border bg-skin-bg shadow-sm rounded-lg flex space-x-0.5 p-1 max-w-full overflow-x-scroll;
 
   button {
-    @apply px-2 rounded-md text-center min-w-[26px];
+    @apply px-2 rounded-md text-center min-w-[26px] flex-shrink-0;
 
     &:hover {
       @apply bg-skin-border;
