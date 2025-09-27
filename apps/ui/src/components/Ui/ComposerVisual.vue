@@ -33,7 +33,7 @@ const showError = computed<boolean>(
     <span v-text="error" />
     <slot name="error-suffix" />
   </UiAlert>
-  <div ref="editorContainerRef">
+  <div ref="editorContainerRef" class="relative">
     <template v-if="editor">
       <UiComposerVisualToolbar
         :clipping-container="editorContainerRef"
@@ -62,6 +62,8 @@ const showError = computed<boolean>(
 
   & ~ div[style*='position: absolute'] {
     @apply z-20;
+
+    max-width: calc(100vw - 48px);
   }
 }
 </style>

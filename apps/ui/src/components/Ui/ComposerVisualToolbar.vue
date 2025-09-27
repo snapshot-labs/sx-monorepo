@@ -43,7 +43,7 @@ function setLink() {
       }
     }"
   >
-    <div class="bubble-menu">
+    <div class="bubble-menu" data-no-sidebar-swipe>
       <button
         class="font-bold"
         :class="{ active: editor.isActive('bold') }"
@@ -120,10 +120,10 @@ function setLink() {
 
 <style lang="scss" scoped>
 .bubble-menu {
-  @apply border border-skin-border bg-skin-bg shadow-sm rounded-lg flex space-x-0.5 p-1;
+  @apply border border-skin-border bg-skin-bg shadow-sm rounded-lg flex space-x-0.5 p-1 max-w-full overflow-x-auto;
 
   button {
-    @apply px-2 rounded-md text-center min-w-[26px];
+    @apply px-2 rounded-md text-center min-w-[26px] flex-shrink-0;
 
     &:hover {
       @apply bg-skin-border;
