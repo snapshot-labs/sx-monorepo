@@ -46,7 +46,7 @@ const AsyncVisualEditor = defineAsyncComponent(
       <button class="flex items-center space-x-1.5" @click="toggleEditor">
         <IH-eye v-if="editorType === 'markdown'" />
         <IC-markdown v-else class="size-[28px]" />
-        <span>
+        <span class="hidden sm:inline-block">
           Switch to {{ editorType === 'visual' ? 'Markdown' : 'visual' }} editor
         </span>
       </button>
