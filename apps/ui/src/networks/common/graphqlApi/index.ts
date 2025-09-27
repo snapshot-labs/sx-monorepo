@@ -115,11 +115,15 @@ function getProposalState(
     if (proposal.vetoed) return 'vetoed';
     return proposal.execution_settled ? 'executed' : 'queued';
   }
-  if (proposal.max_end <= current) {
+
+  if ((proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
-  if (proposal.start > current) return 'pending';
+
+  if ((proposal.start_block_number ?? proposal.start) > current) {
+    return 'pending';
+  }
 
   return 'active';
 }
@@ -145,14 +149,14 @@ function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
     return {
       name,
       address,
-      chainId: CHAIN_IDS[network]
+      chainId: String(CHAIN_IDS[network])
     };
   }
 
   return {
     name,
     address,
-    chainId: chain_id
+    chainId: String(chain_id)
   };
 }
 
@@ -224,7 +228,7 @@ function processExecutions(
     return (
       match.treasury &&
       compareAddresses(treasury.address, match.treasury) &&
-      match.treasury_chain === treasury.chainId
+      String(match.treasury_chain) === treasury.chainId
     );
   });
 
@@ -373,8 +377,8 @@ function formatProposal(
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
       proposal.execution_strategy_type
     )
-      ? proposal.max_end <= current
-      : proposal.min_end <= current,
+      ? (proposal.max_end_block_number ?? proposal.max_end) <= current
+      : (proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
     state,
     network: networkId,

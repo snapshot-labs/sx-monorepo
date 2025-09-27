@@ -1,19 +1,9 @@
-import { getAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber/lib/bignumber';
-import { Contract } from '@ethersproject/contracts';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
-import { evmNetworks } from '@snapshot-labs/sx';
-import GovernorModule from './abis/GovernorModule.json';
-import Timelock from './abis/Timelock.json';
+import { evmNetworks, utils } from '@snapshot-labs/sx';
+import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
+import GovernorModuleAbi from './abis/GovernorModule';
+import TimelockAbi from './abis/Timelock';
 import logger from './logger';
-import { convertChoice, getProposalTitle } from './utils';
-import {
-  getCurrentTimestamp,
-  getParsedVP,
-  getProposalLink,
-  getSpaceLink
-} from '../../..//common/utils';
 import {
   ExecutionStrategy,
   Leaderboard,
@@ -28,10 +18,24 @@ import {
   VoteMetadataItem,
   VotingPowerValidationStrategiesParsedMetadataItem
 } from '../../../../.checkpoint/models';
+import {
+  getCurrentTimestamp,
+  getParsedVP,
+  getProposalLink,
+  getSpaceLink
+} from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
+import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
+import { convertChoice, getProposalTitle } from '../openzeppelin/utils';
 
 type SpaceData = {
   name: string;
+  about?: string;
+  avatar?: string;
+  externalUrl?: string;
+  github?: string;
+  twitter?: string;
+  farcaster?: string;
   symbol: string;
   decimals: number;
   governanceToken: string;
@@ -45,22 +49,36 @@ type SpaceData = {
 const spaceData: Record<string, SpaceData | undefined> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': {
     name: 'Uniswap',
+    about:
+      'The largest onchain marketplace. Buy and sell crypto on Ethereum and 14+ other chains.',
+    avatar:
+      'ipfs://bafkreigzzj4yc3khx4mn2zmdrdgtvae3s36e5ae2sgry2azuqvxfakjuoa',
+    externalUrl: 'https://app.uniswap.org',
+    github: 'uniswap',
+    twitter: 'Uniswap',
+    farcaster: 'uniswap',
     symbol: 'UNI',
     decimals: 18,
     governanceToken: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     treasury: {
-      name: 'Uniswap Treasury',
+      name: 'Timelock',
       address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC',
       chain_id: 1
     }
   },
   '0xc0Da02939E1441F497fd74F78cE7Decb17B66529': {
     name: 'Compound',
+    about: 'Building infrastructure for the future of finance.',
+    avatar:
+      'ipfs://bafkreia4lin2o6uux2375uhekvgqlr466tes7gsdzg6aldakw5jicylcd4',
+    externalUrl: 'https://compound.finance',
+    github: 'compound-finance',
+    twitter: 'compoundfinance',
     symbol: 'COMP',
     decimals: 18,
     governanceToken: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
     treasury: {
-      name: 'Compound Treasury',
+      name: 'Timelock',
       address: '0x6d903f6003cca6255D85CcA4D3B5E5146dC33925',
       chain_id: 1
     }
@@ -71,7 +89,7 @@ const spaceData: Record<string, SpaceData | undefined> = {
     decimals: 18,
     governanceToken: '0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546',
     treasury: {
-      name: 'MOCK',
+      name: 'Timelock',
       address: '0x52f26d07f8fEf1CF806A53159ce68bf1B4031baB',
       chain_id: 11155111
     }
@@ -82,10 +100,9 @@ export function createWriters(
   config: EVMConfig,
   protocolConfig: GovernorBravoConfig
 ) {
-  const provider = new StaticJsonRpcProvider(
-    config.network_node_url,
-    protocolConfig.chainId
-  );
+  const client = createPublicClient({
+    transport: http(config.network_node_url)
+  });
 
   async function initializeStrategies(spaceAddress: string) {
     const spaceDataEntry = spaceData[spaceAddress];
@@ -138,7 +155,7 @@ export function createWriters(
   }
 
   async function initializeSpace(
-    contractAddress: string,
+    contractAddress: `0x${string}`,
     blockNumber: number,
     block: evm.Block | null,
     helpers: Parameters<evm.Writer>[0]['helpers']
@@ -156,27 +173,37 @@ export function createWriters(
       spaceId: contractAddress
     });
     space.metadata = metadataId;
-    space.created = block?.timestamp ?? getCurrentTimestamp();
+    space.created = Number(block?.timestamp ?? getCurrentTimestamp());
 
     // Strategies & authentication
-    const overrides = {
-      blockTag: blockNumber
-    };
-
-    const governorModuleContract = new Contract(
-      contractAddress,
-      GovernorModule,
-      provider
-    );
-
+    // NOTE: Not using multicall because some governors are older than Multicall3 contract
     const [quorum, timelock, proposalThreshold] = await Promise.all([
-      governorModuleContract.quorumVotes(overrides),
-      governorModuleContract.timelock(overrides),
-      governorModuleContract.proposalThreshold(overrides)
+      client.readContract({
+        address: contractAddress,
+        abi: GovernorModuleAbi,
+        functionName: 'quorumVotes',
+        blockNumber: BigInt(blockNumber)
+      }),
+      client.readContract({
+        address: contractAddress,
+        abi: GovernorModuleAbi,
+        functionName: 'timelock',
+        blockNumber: BigInt(blockNumber)
+      }),
+      client.readContract({
+        address: contractAddress,
+        abi: GovernorModuleAbi,
+        functionName: 'proposalThreshold',
+        blockNumber: BigInt(blockNumber)
+      })
     ]);
 
-    const timelockContract = new Contract(timelock, Timelock, provider);
-    const timelockDelay = await timelockContract.delay(overrides);
+    const timelockDelay = await client.readContract({
+      address: timelock,
+      abi: TimelockAbi,
+      functionName: 'delay',
+      blockNumber: BigInt(blockNumber)
+    });
 
     const executionStrategy = new ExecutionStrategy(
       timelock,
@@ -187,7 +214,7 @@ export function createWriters(
     executionStrategy.quorum = quorum.toString();
     executionStrategy.treasury_chain = protocolConfig.chainId;
     executionStrategy.treasury = timelock;
-    executionStrategy.timelock_delay = timelockDelay.toString();
+    executionStrategy.timelock_delay = timelockDelay;
     await executionStrategy.save();
 
     await helpers.executeTemplate('Timelock', {
@@ -217,6 +244,12 @@ export function createWriters(
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = name;
+    spaceMetadata.about = spaceDataEntry.about || '';
+    spaceMetadata.avatar = spaceDataEntry.avatar || '';
+    spaceMetadata.external_url = spaceDataEntry.externalUrl || '';
+    spaceMetadata.twitter = spaceDataEntry.twitter || '';
+    spaceMetadata.github = spaceDataEntry.github || '';
+    spaceMetadata.farcaster = spaceDataEntry.farcaster || '';
     spaceMetadata.voting_power_symbol = symbol;
     spaceMetadata.treasuries = [JSON.stringify(treasury)];
     spaceMetadata.executors_strategies = [executionStrategy.id];
@@ -231,22 +264,19 @@ export function createWriters(
 
     user = new User(address, config.indexerName);
     user.address_type = 1;
-    user.created = block?.timestamp ?? getCurrentTimestamp();
+    user.created = Number(block?.timestamp ?? getCurrentTimestamp());
     await user.save();
   }
 
-  const handleProposalCreated: evm.Writer = async ({
-    blockNumber,
-    block,
-    event,
-    rawEvent,
-    helpers
-  }) => {
+  const handleProposalCreated: evm.Writer<
+    typeof GovernorModuleAbi,
+    'ProposalCreated'
+  > = async ({ blockNumber, block, txId, event, rawEvent, helpers }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal created');
 
-    const id = event.args.id.toNumber();
+    const id = event.args.id;
     const spaceAddress = getAddress(rawEvent.address);
     const proposerAddress = getAddress(event.args.proposer);
     const proposalId = `${spaceAddress}/${id}`;
@@ -286,14 +316,23 @@ export function createWriters(
     proposal.space = space.id;
     proposal.author = proposerAddress;
     proposal.metadata = proposalMetadataId;
-    proposal.start = event.args.startBlock.toNumber();
-    proposal.start_block_number = proposal.start;
-    proposal.min_end = event.args.endBlock.toNumber();
-    proposal.min_end_block_number = proposal.min_end;
+
+    const getTimestampFromBlock = (value: bigint) =>
+      _getTimestampFromBlock({
+        networkId: config.indexerName,
+        blockNumber: Number(value),
+        currentBlockNumber: blockNumber,
+        currentTimestamp: Number(block?.timestamp ?? getCurrentTimestamp()),
+        client
+      });
+
+    proposal.start = await getTimestampFromBlock(event.args.startBlock);
+    proposal.start_block_number = Number(event.args.startBlock);
+    proposal.min_end = await getTimestampFromBlock(event.args.endBlock);
+    proposal.min_end_block_number = Number(event.args.endBlock);
     proposal.max_end = proposal.min_end;
-    proposal.max_end_block_number = proposal.max_end;
-    proposal.snapshot = proposal.start;
-    proposal.snapshot_block_number = proposal.snapshot;
+    proposal.max_end_block_number = proposal.min_end_block_number;
+    proposal.snapshot = proposal.start_block_number;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
     proposal.strategies = space.strategies;
@@ -304,8 +343,8 @@ export function createWriters(
     proposal.execution_strategy_details = executionStrategy.id;
     proposal.vp_decimals = spaceDataEntry.decimals;
     proposal.type = 'basic';
-    proposal.created = block?.timestamp ?? getCurrentTimestamp();
-    proposal.tx = rawEvent.transactionHash;
+    proposal.created = Number(block?.timestamp ?? getCurrentTimestamp());
+    proposal.tx = txId;
 
     space.proposal_count += 1;
 
@@ -316,21 +355,29 @@ export function createWriters(
 
     const proposalBody = event.args.description || '';
 
-    const targets: string[] = event.args.targets;
-    const calldatas: string[] = event.args.calldatas;
-    // NOTE: this is called "values" and conflicts with Result object
-    const values: BigNumber[] = event.args[3];
+    const execution = await Promise.all(
+      event.args.targets.map((target, index) => {
+        const signature = event.args.signatures[index] ?? '';
 
-    const execution = targets.map((target, index) => ({
-      _type: 'raw',
-      _form: {
-        recipient: target
-      },
-      to: target,
-      data: calldatas[index] ?? '0x',
-      value: values[index]?.toString() ?? '0',
-      salt: '0'
-    }));
+        let calldata: `0x${string}` | '';
+        if (signature) {
+          const sighash = keccak256(toHex(signature)).slice(0, 10);
+          calldata =
+            `${sighash}${(event.args.calldatas[index] ?? '').slice(2)}` as `0x${string}`;
+        } else {
+          calldata = event.args.calldatas[index] ?? '';
+        }
+
+        return utils.execution.convertToTransaction(
+          {
+            target,
+            calldata,
+            value: event.args.values[index]?.toString() ?? '0'
+          },
+          protocolConfig.chainId
+        );
+      })
+    );
 
     proposalMetadata.title = getProposalTitle(proposalBody);
     proposalMetadata.body = proposalBody;
@@ -359,14 +406,16 @@ export function createWriters(
     ]);
   };
 
-  const handleProposalCanceled: evm.Writer = async ({ event, rawEvent }) => {
+  const handleProposalCanceled: evm.Writer<
+    typeof GovernorModuleAbi,
+    'ProposalCanceled'
+  > = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal canceled');
 
-    const id = event.args.id.toNumber();
     const spaceAddress = getAddress(rawEvent.address);
-    const proposalId = `${spaceAddress}/${id}`;
+    const proposalId = `${spaceAddress}/${event.args.id}`;
 
     const [proposal, space] = await Promise.all([
       Proposal.loadEntity(proposalId, config.indexerName),
@@ -381,32 +430,36 @@ export function createWriters(
     await Promise.all([proposal.save(), space.save()]);
   };
 
-  const handleProposalQueued: evm.Writer = async ({ event, rawEvent }) => {
+  const handleProposalQueued: evm.Writer<
+    typeof GovernorModuleAbi,
+    'ProposalQueued'
+  > = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal queued');
 
-    const id = event.args.id.toNumber();
     const spaceAddress = getAddress(rawEvent.address);
-    const proposalId = `${spaceAddress}/${id}`;
+    const proposalId = `${spaceAddress}/${event.args.id}`;
 
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
     proposal.executed = true;
-    proposal.execution_time = event.args.eta.toNumber();
+    proposal.execution_time = Number(event.args.eta);
 
     await proposal.save();
   };
 
-  const handleProposalExecuted: evm.Writer = async ({ event, rawEvent }) => {
+  const handleProposalExecuted: evm.Writer<
+    typeof GovernorModuleAbi,
+    'ProposalExecuted'
+  > = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal executed');
 
-    const id = event.args.id.toNumber();
     const spaceAddress = getAddress(rawEvent.address);
-    const proposalId = `${spaceAddress}/${id}`;
+    const proposalId = `${spaceAddress}/${event.args.id}`;
 
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
@@ -418,12 +471,15 @@ export function createWriters(
     await proposal.save();
   };
 
-  const handleVoteCast: evm.Writer = async ({ block, event, rawEvent }) => {
+  const handleVoteCast: evm.Writer<
+    typeof GovernorModuleAbi,
+    'VoteCast'
+  > = async ({ block, txId, event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle vote cast');
 
-    const id = event.args.proposalId.toNumber();
+    const id = event.args.proposalId;
     const voterAddress = getAddress(event.args.voter);
     const spaceAddress = getAddress(rawEvent.address);
     const proposalId = `${spaceAddress}/${id}`;
@@ -461,8 +517,8 @@ export function createWriters(
     vote.vp = event.args.votes.toString();
     vote.vp_parsed = getParsedVP(vote.vp, proposal.vp_decimals);
     vote.metadata = voteMetadataId;
-    vote.created = block?.timestamp ?? getCurrentTimestamp();
-    vote.tx = rawEvent.transactionHash;
+    vote.created = Number(block?.timestamp ?? getCurrentTimestamp());
+    vote.tx = txId;
 
     proposal.scores_total = (
       BigInt(proposal.scores_total) + BigInt(vote.vp)
@@ -502,10 +558,10 @@ export function createWriters(
     ]);
   };
 
-  const handleProposalThresholdSet: evm.Writer = async ({
-    event,
-    rawEvent
-  }) => {
+  const handleProposalThresholdSet: evm.Writer<
+    typeof GovernorModuleAbi,
+    'ProposalThresholdSet'
+  > = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal threshold set');
@@ -520,7 +576,10 @@ export function createWriters(
     await space.save();
   };
 
-  const handleNewAdmin: evm.Writer = async ({ event, rawEvent }) => {
+  const handleNewAdmin: evm.Writer<
+    typeof GovernorModuleAbi,
+    'NewAdmin'
+  > = async ({ event, rawEvent }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle new admin');
@@ -530,12 +589,15 @@ export function createWriters(
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
     if (!space) return;
 
-    space.proposal_threshold = event.args.newAdmin.toString();
+    space.controller = event.args.newAdmin;
 
     await space.save();
   };
 
-  const handleNewDelay: evm.Writer = async ({ event, rawEvent }) => {
+  const handleNewDelay: evm.Writer<typeof TimelockAbi, 'NewDelay'> = async ({
+    event,
+    rawEvent
+  }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle new delay');
@@ -548,7 +610,7 @@ export function createWriters(
     );
     if (!timelock) return;
 
-    timelock.timelock_delay = event.args.newDelay.toString();
+    timelock.timelock_delay = event.args.newDelay;
 
     await timelock.save();
   };

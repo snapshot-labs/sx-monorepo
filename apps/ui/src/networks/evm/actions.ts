@@ -25,7 +25,11 @@ import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import {
+  createErc1155Metadata,
+  getChainIdKind,
+  verifyNetwork
+} from '@/helpers/utils';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   buildMetadata,
@@ -88,6 +92,7 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
   const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const ethSigClient = new clients.EvmEthereumSig({
     ...clientOpts,
@@ -251,6 +256,20 @@ export function createActions(
 
       if (space.protocol === 'governor-bravo') {
         return governorBravoClient.propose({
+          signer,
+          envelope: {
+            data: {
+              spaceId: space.id,
+              title,
+              body,
+              executions: executionInfo?.transactions ?? []
+            }
+          }
+        });
+      }
+
+      if (space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.propose({
           signer,
           envelope: {
             data: {
@@ -496,6 +515,20 @@ export function createActions(
         });
       }
 
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.vote({
+          signer,
+          envelope: {
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: proposal.proposal_id,
+              choice: getSdkChoice(choice),
+              reason
+            }
+          }
+        });
+      }
+
       const isContract = await getIsContract(account, connectorType);
 
       const relayer = await getRelayerInfo(
@@ -586,6 +619,17 @@ export function createActions(
         });
       }
 
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.queue({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          description: proposal.body,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
+        });
+      }
+
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
@@ -607,6 +651,17 @@ export function createActions(
           signer: getSigner(web3),
           spaceId: proposal.space.id,
           proposalId: Number(proposal.proposal_id)
+        });
+      }
+
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.execute({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          description: proposal.body,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
         });
       }
 
@@ -664,11 +719,11 @@ export function createActions(
       chainIdOverride?: ChainId,
       delegateesMetadata?: Record<string, any>
     ) => {
-      if (typeof chainIdOverride === 'string') {
+      if (chainIdOverride && getChainIdKind(chainIdOverride) !== 'evm') {
         throw new Error('Chain ID must be a number for EVM networks');
       }
 
-      const currentChainId = chainIdOverride || chainId;
+      const currentChainId = Number(chainIdOverride) || chainId;
       await verifyNetwork(web3, currentChainId);
 
       let contractParams: {
@@ -780,8 +835,8 @@ export function createActions(
         return null;
 
       const multi = new Multicaller(
-        delegation.chainId.toString(),
-        getProvider(delegation.chainId as number),
+        delegation.chainId,
+        getProvider(Number(delegation.chainId)),
         [
           'function decimals() view returns (uint8)',
           'function balanceOf(address account) view returns (uint256)',

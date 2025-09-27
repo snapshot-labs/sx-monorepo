@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
 import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
@@ -42,6 +43,7 @@ onMounted(() => initWhiteLabel());
 
 <template>
   <div class="max-w-maximum mx-auto">
+    <ElectronTitlebar />
     <LayoutSplash v-if="!whiteLabelResolved" />
     <LayoutSite v-else-if="routeName === 'site'" />
     <LayoutApp v-else />

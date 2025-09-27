@@ -6,7 +6,7 @@ import { getABI } from '@/helpers/etherscan';
 import { getProvider } from '@/helpers/provider';
 import { resolver } from '@/helpers/resolver';
 import { createContractCallTransaction } from '@/helpers/transactions';
-import { abiToDefinition, clone } from '@/helpers/utils';
+import { abiToDefinition, clone, getChainIdKind } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { ChainId, Contact } from '@/types';
 
@@ -164,13 +164,13 @@ async function handleToChange(to: string) {
     return;
   }
 
-  if (typeof props.network === 'string') {
-    console.log('network is not a number (starknet is not supported)');
+  if (getChainIdKind(props.network) !== 'evm') {
+    console.log('only evm networks are supported');
     return;
   }
 
   loading.value = true;
-  const provider = getProvider(props.network);
+  const provider = getProvider(Number(props.network));
 
   try {
     const isContract = await getIsContract(provider, contractAddress);
@@ -179,7 +179,7 @@ async function handleToChange(to: string) {
       return;
     }
 
-    form.abi = await getABI(props.network, contractAddress);
+    form.abi = await getABI(Number(props.network), contractAddress);
   } catch (e) {
     console.log(e);
     showAbiInput.value = true;
@@ -279,16 +279,7 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput v-model="searchValue" />
       </template>
     </template>
     <template v-if="showPicker">

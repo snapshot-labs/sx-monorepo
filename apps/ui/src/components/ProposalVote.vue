@@ -17,13 +17,10 @@ defineEmits<{
 
 const { auth } = useWeb3();
 const { votes, pendingVotes } = useAccount();
-const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
   props.proposal.network,
   props.proposal.space.snapshot_chain_id
 );
-
-const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
 const hasSupportedAuthenticator = computed(() => {
   const network = getNetwork(props.proposal.network);
@@ -84,7 +81,8 @@ const isEditable = computed(() => {
 <template>
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
     <UiButton
-      class="!h-[48px] text-left w-full flex items-center justify-between rounded-lg space-x-2"
+      class="text-left w-full !justify-between"
+      :size="48"
       :class="{
         'border-skin-link': isEditable
       }"
@@ -140,7 +138,7 @@ const isEditable = computed(() => {
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">
     Voting for this proposal hasn't started yet. Voting will start
-    {{ _t(start) }}.
+    {{ _t(proposal.start) }}.
   </slot>
 
   <slot

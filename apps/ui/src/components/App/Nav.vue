@@ -135,8 +135,7 @@ function getNavigationConfig(
           }),
           execution: getSettingsRoute({
             name: 'Execution',
-            tab: 'execution',
-            hidden: isOffchainNetwork
+            tab: 'execution'
           }),
           authenticators: getSettingsRoute({
             name: 'Authenticators',
@@ -168,7 +167,17 @@ function getNavigationConfig(
           controller: getSettingsRoute({
             name: 'Controller',
             tab: 'controller'
-          })
+          }),
+          billing: getSettingsRoute({
+            name: 'Billing',
+            tab: 'billing',
+            hidden: !isOffchainNetwork
+          }),
+          snapshotPro: {
+            name: 'Snapshot Pro',
+            link: { name: 'space-pro' },
+            hidden: !isOffchainNetwork
+          }
         }
       };
     }

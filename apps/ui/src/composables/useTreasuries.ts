@@ -24,7 +24,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
 
           try {
             return await getIsOsnapEnabled(
-              treasury.chainId as number,
+              Number(treasury.chainId),
               treasury.address
             );
           } catch {
@@ -55,7 +55,7 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
             strategy.treasury_chain &&
             treasury.address &&
             compareAddresses(strategy.treasury, treasury.address) &&
-            treasury.chainId === strategy.treasury_chain
+            treasury.chainId === String(strategy.treasury_chain)
           );
         });
 

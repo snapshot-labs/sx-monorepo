@@ -184,12 +184,12 @@ watchEffect(() => setTitle('Explore'));
           :items="categories"
         />
       </div>
-      <UiTooltip v-if="protocol !== 'governor-bravo'" title="Create new space">
+      <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
         <UiButton
           :to="{
             name: `create-space-${protocol}`
           }"
-          class="!px-0 w-[46px]"
+          uniform
         >
           <IH-plus-sm />
         </UiButton>
@@ -197,12 +197,25 @@ watchEffect(() => setTitle('Explore'));
     </div>
     <div class="flex-grow" v-bind="$attrs">
       <UiSectionHeader label="Spaces" sticky />
+      <UiColumnHeader class="hidden md:flex text-center">
+        <div class="grow" />
+        <div
+          v-if="protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Active'"
+        />
+        <div class="w-[100px]" v-text="'Proposals'" />
+        <div
+          v-if="protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Followers'"
+        />
+      </UiColumnHeader>
       <UiLoading v-if="isPending" class="block m-4" />
       <div v-else-if="data" data-testid="explore-spaces-list">
         <UiContainerInfiniteScroll
           v-if="data.pages.flat().length"
           :loading-more="isFetchingNextPage"
-          class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3"
           @end-reached="handleEndReached"
         >
           <SpacesListItem
@@ -211,10 +224,9 @@ watchEffect(() => setTitle('Explore'));
             :space="space"
           />
         </UiContainerInfiniteScroll>
-        <div v-else class="px-4 py-3 flex items-center space-x-2">
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>No results found for your search</span>
-        </div>
+        <UiStateWarning v-else class="px-4 py-3">
+          No results found for your search
+        </UiStateWarning>
       </div>
     </div>
     <UiToolbarBottom
@@ -231,7 +243,8 @@ watchEffect(() => setTitle('Explore'));
       </h4>
       <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
         <UiButton
-          class="primary w-full sm:w-auto"
+          class="w-full sm:w-auto"
+          primary
           @click="modalAccountOpen = true"
         >
           Log in

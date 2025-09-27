@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
+import SpaceBilling from '@/components/SpaceBilling.vue';
 import {
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
@@ -30,6 +31,7 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  enableOSnap,
   proposalValidation,
   executionStrategies,
   guidelines,
@@ -86,6 +88,7 @@ type Tab = {
     | 'labels'
     | 'whitelabel'
     | 'advanced'
+    | 'billing'
     | 'controller';
   visible: boolean;
 };
@@ -119,7 +122,7 @@ const tabs = computed<Tab[]>(
       },
       {
         id: 'execution',
-        visible: !isOffchainNetwork.value
+        visible: true
       },
       {
         id: 'authenticators',
@@ -143,6 +146,10 @@ const tabs = computed<Tab[]>(
       },
       {
         id: 'advanced',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'billing',
         visible: isOffchainNetwork.value
       },
       {
@@ -338,7 +345,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <div
       v-else
       class="flex-grow"
-      :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
+      :class="{
+        'px-4 pt-4': !['profile', 'billing'].includes(activeTab)
+      }"
     >
       <SpaceSettingsAlerts
         :space="pendingSpace"
@@ -445,27 +454,43 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :is-admin="isAdmin"
         />
       </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="activeTab === 'execution'"
-        title="Execution(s)"
-        description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
-      >
-        <div class="space-y-3">
-          <FormStrategiesStrategyActive
-            v-for="strategy in executionStrategies"
-            :key="strategy.id"
-            read-only
-            :network-id="space.network"
-            :strategy="strategy"
+      <template v-else-if="activeTab === 'execution'">
+        <UiContainerSettings
+          v-if="isOffchainNetwork"
+          title="Execution"
+          description="Execution allows you to define how proposals are executed once they pass."
+        >
+          <FormSpaceExecution
+            v-model:enable-o-snap="enableOSnap"
+            :is-o-snap-plugin-enabled="
+              !!space.additionalRawData?.plugins?.oSnap
+            "
+            :space="space"
+            :treasuries="form.treasuries"
           />
-          <UiButton
-            v-if="evmNetworks.includes(space.network)"
-            @click="customStrategyModalOpen = true"
-          >
-            Add custom strategy
-          </UiButton>
-        </div>
-      </UiContainerSettings>
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else
+          title="Execution(s)"
+          description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
+        >
+          <div class="space-y-3">
+            <FormStrategiesStrategyActive
+              v-for="strategy in executionStrategies"
+              :key="strategy.id"
+              read-only
+              :network-id="space.network"
+              :strategy="strategy"
+            />
+            <UiButton
+              v-if="evmNetworks.includes(space.network)"
+              @click="customStrategyModalOpen = true"
+            >
+              Add custom strategy
+            </UiButton>
+          </div>
+        </UiContainerSettings>
+      </template>
       <UiContainerSettings v-if="activeTab === 'authenticators'">
         <FormStrategies
           v-model="authenticators"
@@ -539,6 +564,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           "
         />
       </UiContainerSettings>
+      <SpaceBilling v-if="activeTab === 'billing'" :space="space" />
       <UiContainerSettings
         v-if="activeTab === 'controller'"
         title="Controller"

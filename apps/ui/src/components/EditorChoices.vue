@@ -69,7 +69,7 @@ function shouldHaveDeleteButton(index: number) {
       's-error': showError
     }"
   >
-    <h4 class="eyebrow mb-2.5">Choices</h4>
+    <UiEyebrow class="mb-2.5">Choices</UiEyebrow>
     <div class="flex flex-col space-y-3">
       <Draggable
         v-model="proposal.choices"
@@ -81,7 +81,7 @@ function shouldHaveDeleteButton(index: number) {
         <template #item="{ index }">
           <div>
             <div
-              class="flex items-center rounded-lg bg-skin-border h-[40px] gap-2.5 pl-2.5"
+              class="flex items-center rounded-lg bg-skin-border h-[40px] gap-2.5 px-2.5"
             >
               <div
                 v-if="proposal.type !== 'basic'"
@@ -120,20 +120,20 @@ function shouldHaveDeleteButton(index: number) {
                   @keydown.delete="e => handlePressDelete(e, index)"
                 />
               </div>
-              <UiButton
+              <button
                 v-if="shouldHaveDeleteButton(index)"
-                class="!border-0 !rounded-l-none !rounded-r-lg !bg-transparent !size-[40px] !px-0 !text-skin-text shrink-0"
+                class="shrink-0"
                 @click="proposal.choices.splice(index, 1)"
               >
-                <IH-trash class="inline-block" />
-              </UiButton>
+                <IH-trash />
+              </button>
             </div>
           </div>
         </template>
       </Draggable>
       <UiButton
         v-if="proposal.type !== 'basic'"
-        class="w-full flex items-center justify-center space-x-1"
+        class="w-full"
         @click="handleAddChoice"
       >
         <IH-plus-sm />

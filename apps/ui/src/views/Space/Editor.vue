@@ -10,6 +10,7 @@ import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
+import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
 
@@ -311,7 +312,7 @@ async function handleProposeClick() {
         destinationAddress: strategy.destinationAddress || '',
         transactions: strategy.transactions,
         treasuryName: strategy.treasury.name,
-        chainId: strategy.treasury.chainId as number
+        chainId: Number(strategy.treasury.chainId)
       }));
 
     let result;
@@ -485,7 +486,8 @@ watchEffect(() => {
       <div class="flex items-center gap-3 shrink truncate">
         <UiButton
           :to="{ name: 'space-overview', params: { space: spaceKey } }"
-          class="w-[46px] !px-0 ml-4 shrink-0"
+          class="ml-4 shrink-0"
+          uniform
         >
           <IH-arrow-narrow-left />
         </UiButton>
@@ -499,12 +501,13 @@ watchEffect(() => {
       <div class="flex gap-2 items-center">
         <IndicatorPendingTransactions />
         <UiTooltip title="Drafts">
-          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-            <IH-collection class="inline-block" />
+          <UiButton uniform @click="modalOpen = true">
+            <IH-collection />
           </UiButton>
         </UiTooltip>
         <UiButton
-          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          class="min-w-[46px] !px-0 md:!px-3"
+          primary
           :loading="isSubmitButtonLoading"
           :disabled="!canSubmit"
           @click="handleProposeClick"
@@ -518,13 +521,13 @@ watchEffect(() => {
       </div>
     </UiTopnav>
     <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-[72px]"
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-header-height"
     >
       <div
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
         v-bind="$attrs"
       >
-        <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
+        <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto s-box">
           <UiAlert
             v-if="nonPremiumNetworksList && !proposal?.originalProposal"
             type="error"
@@ -662,7 +665,7 @@ watchEffect(() => {
             </template>
           </template>
           <div v-if="guidelines">
-            <h4 class="mb-2 eyebrow">Guidelines</h4>
+            <UiEyebrow class="mb-2">Guidelines</UiEyebrow>
             <a :href="guidelines" target="_blank" class="block mb-4">
               <UiLinkPreview :url="guidelines" :show-default="true" />
             </a>
@@ -708,7 +711,7 @@ watchEffect(() => {
               strategiesWithTreasuries.length > 0
             "
           >
-            <h4 class="eyebrow mb-2 mt-4">Execution</h4>
+            <UiEyebrow class="mb-2 mt-4">Execution</UiEyebrow>
             <EditorExecution
               v-for="execution in editorExecutions"
               :key="execution.address"
@@ -730,7 +733,11 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+      <Affix
+        :class="['shrink-0 md:w-[340px]']"
+        :top="TOTAL_NAV_HEIGHT"
+        :bottom="64"
+      >
         <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"

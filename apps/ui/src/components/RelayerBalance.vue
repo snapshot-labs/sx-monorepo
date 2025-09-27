@@ -40,20 +40,16 @@ const {
 
 <template>
   <div>
-    <h4 class="eyebrow mt-4 mb-2 font-medium">Relayer Balance</h4>
+    <UiEyebrow class="mt-4 mb-2 font-medium">Relayer Balance</UiEyebrow>
     <div
       class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
     >
       <div v-if="isPending" class="flex flex-col">
         <UiLoading class="text-skin-text" :size="16" :loading="true" />
       </div>
-      <div
-        v-else-if="isError || !relayerInfo"
-        class="flex items-center text-skin-link space-x-2"
-      >
-        <IH-exclamation-circle class="inline-block shrink-0" />
-        <span>Failed to load relayer balance.</span>
-      </div>
+      <UiStateWarning v-else-if="isError || !relayerInfo">
+        Failed to load relayer balance.
+      </UiStateWarning>
       <template v-else>
         <div class="flex flex-col">
           <a

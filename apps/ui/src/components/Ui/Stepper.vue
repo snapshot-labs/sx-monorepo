@@ -40,7 +40,7 @@ function goToStep(stepName: string) {
 <template>
   <div class="flex">
     <div
-      class="flex fixed lg:sticky top-[72px] inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
+      class="flex fixed lg:sticky top-header-height inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
     >
       <button
         v-for="(step, stepName) in steps"
@@ -67,7 +67,8 @@ function goToStep(stepName: string) {
       </div>
       <UiButton
         v-if="stepper.isLast.value"
-        class="w-full primary"
+        class="w-full"
+        primary
         :loading="submitting"
         :disabled="submitDisabled"
         @click="emit('submit')"
@@ -76,7 +77,8 @@ function goToStep(stepName: string) {
       </UiButton>
       <UiButton
         v-else-if="stepper.next.value"
-        class="w-full primary"
+        class="w-full"
+        primary
         :disabled="!stepper.current.value.isValid()"
         @click="goToStep(stepper.next.value)"
       >

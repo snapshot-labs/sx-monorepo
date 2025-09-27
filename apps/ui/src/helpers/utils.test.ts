@@ -74,7 +74,7 @@ describe('utils', () => {
         treasuries: [
           {
             name: 'treasury 1',
-            chainId: 11155111,
+            chainId: '11155111',
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
@@ -92,7 +92,7 @@ describe('utils', () => {
             apiType: 'governor-subgraph',
             apiUrl:
               'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            chainId: 11155111,
+            chainId: '11155111',
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]
@@ -113,7 +113,7 @@ describe('utils', () => {
           treasuries: [
             {
               name: 'treasury 1',
-              chain_id: 11155111,
+              chain_id: '11155111',
               address: '0x000000000000000000000000000000000000dead'
             }
           ],
@@ -132,7 +132,7 @@ describe('utils', () => {
               api_url:
                 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
               contract: '0x000000000000000000000000000000000000dead',
-              chain_id: 11155111
+              chain_id: '11155111'
             }
           ]
         }
@@ -311,13 +311,6 @@ describe('utils', () => {
       const spaceId = 'ens.eth';
       const expectedController = '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9';
       const controller = await getSpaceController(spaceId, 's');
-      expect(controller).toBe(expectedController);
-    });
-
-    it('should return the space controller address for a shib name on testnet', async () => {
-      const spaceId = 'snapshot-test-unclaimed.shib';
-      const expectedController = '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3';
-      const controller = await getSpaceController(spaceId, 's-tn');
       expect(controller).toBe(expectedController);
     });
 

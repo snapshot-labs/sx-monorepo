@@ -6,7 +6,7 @@ import {
   SendNftTransaction,
   SendTokenTransaction,
   Transaction
-} from '@/types';
+} from '@snapshot-labs/sx';
 import { ETH_CONTRACT } from '../constants';
 
 export const transactionTypes = [

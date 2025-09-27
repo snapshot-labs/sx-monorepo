@@ -73,11 +73,7 @@ function handleSelect(value: string) {
       An error happened while fetching the domain names associated to your
       wallet. Please try again
     </UiAlert>
-    <UiButton
-      class="flex items-center gap-2"
-      :loading="isRefreshing"
-      @click="load"
-    >
+    <UiButton :loading="isRefreshing" @click="load">
       <IH-refresh />
       Retry
     </UiButton>
@@ -105,10 +101,10 @@ function handleSelect(value: string) {
     <div v-if="web3.account" class="space-y-4">
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <h4 class="eyebrow">Domain names</h4>
+          <UiEyebrow>Domain names</UiEyebrow>
           <UiButton
             v-if="names"
-            class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
+            class="gap-1 !text-skin-text !p-0 !border-0 !h-auto"
             :disabled="isLoading"
             :loading="isRefreshing"
             @click="refresh"
@@ -181,7 +177,7 @@ function handleSelect(value: string) {
         >.
       </div>
       <div class="space-y-3">
-        <h4 class="eyebrow">Controller</h4>
+        <UiEyebrow>Controller</UiEyebrow>
         <UiMessage type="info">
           By default, the space's controller is the domain owner. You can change
           this later in your space setting.

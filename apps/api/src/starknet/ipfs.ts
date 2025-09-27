@@ -1,8 +1,6 @@
-import { getAddress } from '@ethersproject/address';
-import { Contract as EthContract } from '@ethersproject/contracts';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { validateAndParseAddress } from 'starknet';
-import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
+import { createPublicClient, getAddress, http } from 'viem';
+import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy';
 import { FullConfig } from './config';
 import {
   ExecutionStrategy,
@@ -122,24 +120,24 @@ export async function handleSpaceMetadata(
         if (executionStrategy.type === 'EthRelayer') {
           const l1Destination = getAddress(destination);
 
-          const ethProvider = new StaticJsonRpcProvider(
-            config.overrides.l1NetworkNodeUrl,
-            config.overrides.baseChainId
-          );
+          const client = createPublicClient({
+            transport: http(config.overrides.l1NetworkNodeUrl)
+          });
 
-          const l1AvatarExecutionStrategyContract = new EthContract(
-            l1Destination,
-            L1AvatarExectionStrategyAbi,
-            ethProvider
-          );
+          const quorum = await client.readContract({
+            address: l1Destination as `0x${string}`,
+            abi: L1AvatarExectionStrategyAbi,
+            functionName: 'quorum'
+          });
 
-          const quorum = (
-            await l1AvatarExecutionStrategyContract.quorum()
-          ).toBigInt();
-          const treasury = await l1AvatarExecutionStrategyContract.target();
+          const treasury = await client.readContract({
+            address: l1Destination as `0x${string}`,
+            abi: L1AvatarExectionStrategyAbi,
+            functionName: 'target'
+          });
 
           executionStrategy.destination_address = l1Destination;
-          executionStrategy.quorum = quorum;
+          executionStrategy.quorum = quorum.toString();
           executionStrategy.treasury = treasury;
           executionStrategy.treasury_chain = config.overrides.baseChainId;
         }

@@ -136,6 +136,12 @@ export function formatAddress(address: string) {
   }
 }
 
+export function getChainIdKind(chainId: ChainId): 'evm' | 'starknet' {
+  return typeof chainId === 'number' || !String(chainId).startsWith('0x')
+    ? 'evm'
+    : 'starknet';
+}
+
 export function getProposalId(proposal: Proposal) {
   const proposalId = proposal.proposal_id.toString();
 
@@ -145,6 +151,10 @@ export function getProposalId(proposal: Proposal) {
 
   if ([46, 59].includes(proposalId.length)) {
     return `#${proposalId.slice(-5)}`;
+  }
+
+  if (proposalId.length > 10) {
+    return `#${proposalId.slice(0, 6)}...${proposalId.slice(-4)}`;
   }
 
   return `#${proposalId}`;

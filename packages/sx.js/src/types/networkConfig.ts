@@ -114,6 +114,13 @@ export type EvmNetworkConfig = Omit<
 > & {
   eip712ChainId: number;
   maxPriorityFeePerGas?: BigNumberish;
+  blockTime: number;
+  /**
+   * Indicates that the network block.number returns block
+   *  that is different than the native block number.
+   *  For example on Arbitrum block.number returns L1 block number.
+   * */
+  hasNonNativeBlockNumbers?: boolean;
   proxyFactory: string;
   executionStrategiesImplementations: {
     [key in ExecutorType]?: string;
