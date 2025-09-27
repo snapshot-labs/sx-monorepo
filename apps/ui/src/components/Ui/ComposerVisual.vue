@@ -33,19 +33,21 @@ const showError = computed<boolean>(
     <span v-text="error" />
     <slot name="error-suffix" />
   </UiAlert>
-  <div ref="editorContainerRef" class="relative">
+  <div ref="editorContainerRef">
     <template v-if="editor">
       <UiComposerVisualToolbar
         :clipping-container="editorContainerRef"
         :editor="editor"
       />
-      <editor-content :editor="editor" class="mb-6" />
+      <editor-content :editor="editor" class="flex" v-bind="$attrs" />
     </template>
   </div>
 </template>
 
 <style lang="scss">
 .tiptap {
+  @apply min-w-[100%] pb-6;
+
   // Style placeholder text
   p.is-editor-empty:first-child::before {
     @apply opacity-60 float-left h-0 pointer-events-none;

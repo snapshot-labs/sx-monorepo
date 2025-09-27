@@ -43,7 +43,7 @@ const showError = computed<boolean>(
 <template>
   <div
     ref="editorContainerRef"
-    class="s-base"
+    class="s-base flex"
     :class="{
       's-error': showError
     }"
@@ -115,7 +115,7 @@ const showError = computed<boolean>(
       ref="editorRef"
       v-model.trim="model"
       :placeholder="definition?.examples ? definition.examples[0] : ''"
-      class="s-input h-[260px]"
+      class="s-input"
     />
     <div v-if="showError" class="s-input-error-message leading-6 mt-2">
       <span v-text="error" />
@@ -129,7 +129,7 @@ $toolBarHeight: 43px;
 
 .s-base {
   .s-input {
-    @apply border-t-[#{$toolBarHeight}] pt-2 min-h-[85px];
+    @apply border-t-[#{$toolBarHeight}] pt-2 min-h-[85px] mb-0;
   }
 
   .s-toolbar {

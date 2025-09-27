@@ -51,24 +51,28 @@ const AsyncVisualEditor = defineAsyncComponent(
         </span>
       </button>
     </div>
-    <AsyncVisualEditor
-      v-if="editorType === 'visual'"
-      v-model="model"
-      :error="error"
-      :definition="definition"
-    />
-    <template v-else>
-      <UiMarkdown
-        v-if="previewEnabled"
-        class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
-        :body="noHtmlTags ? stripHtmlTags(model) : model"
-      />
-      <UiComposerMarkdown
-        v-else
+    <div class="mb-3">
+      <AsyncVisualEditor
+        v-if="editorType === 'visual'"
         v-model="model"
+        class="min-h-[260px]"
         :error="error"
         :definition="definition"
       />
-    </template>
+      <template v-else>
+        <UiMarkdown
+          v-if="previewEnabled"
+          class="px-3 py-2 border rounded-lg min-h-[260px]"
+          :body="noHtmlTags ? stripHtmlTags(model) : model"
+        />
+        <UiComposerMarkdown
+          v-else
+          v-model="model"
+          class="min-h-[260px]"
+          :error="error"
+          :definition="definition"
+        />
+      </template>
+    </div>
   </div>
 </template>

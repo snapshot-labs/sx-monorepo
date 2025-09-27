@@ -37,7 +37,6 @@ function setLink() {
   <bubble-menu
     :editor="editor"
     :options="{
-      placement: 'bottom',
       shift: {
         boundary: clippingContainer
       }
