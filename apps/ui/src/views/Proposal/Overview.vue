@@ -335,7 +335,7 @@ onBeforeUnmount(() => destroyAudio());
         </template>
       </UiAlert>
 
-      <h1 class="mb-3 text-[44px] leading-[1.1em] break-words">
+      <h1 class="mb-3 text-[42px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>
 
