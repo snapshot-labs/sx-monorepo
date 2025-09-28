@@ -64,7 +64,7 @@ onMounted(async () => {
 <template>
   <div>
     <div v-if="discussion" class="bg-skin-bg border-b">
-      <div class="max-w-[710px] mx-auto p-4">
+      <div class="max-w-[730px] mx-auto p-4">
         <a :href="discussion" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <IC-discourse class="size-[22px] shrink-0" />
@@ -84,7 +84,7 @@ onMounted(async () => {
       <IH-exclamation-circle class="shrink-0" />
       <span>Error while loading the topic.</span>
     </div>
-    <div v-if="loaded && !failed" class="pt-5 max-w-[710px] mx-auto px-4">
+    <div v-if="loaded && !failed" class="pt-5 max-w-[730px] mx-auto px-4">
       <h1 class="text-[40px] leading-[1.1em]">
         {{ topic?.title }}
       </h1>
@@ -129,7 +129,7 @@ onMounted(async () => {
       </div>
     </div>
     <div v-if="loaded && !failed && discussion" class="bg-skin-bg border-t">
-      <div class="max-w-[710px] mx-auto p-4 pb-0">
+      <div class="max-w-[730px] mx-auto p-4 pb-0">
         <a :href="discussion" target="_blank" tabindex="-1">
           <UiButton class="flex items-center gap-2 w-full justify-center">
             <IC-discourse class="size-[22px] shrink-0" />
