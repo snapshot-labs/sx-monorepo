@@ -1,10 +1,10 @@
 import { Interface } from '@ethersproject/abi';
 import { BigNumber } from '@ethersproject/bignumber';
 import { formatUnits } from '@ethersproject/units';
+import { WalletKit } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import { ProposalTypes, SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
-import { Web3Wallet } from '@walletconnect/web3wallet';
 import { APP_NAME } from '@/helpers/constants';
 import { getABI } from '@/helpers/etherscan';
 import { createContractCallTransaction } from '@/helpers/transactions';
@@ -18,11 +18,11 @@ type ConnectionData = {
   proposal: ProposalTypes.Struct | null;
 };
 
-let connector: Awaited<ReturnType<(typeof Web3Wallet)['init']>> | null = null;
+let connector: Awaited<ReturnType<(typeof WalletKit)['init']>> | null = null;
 async function getConnector() {
   if (connector) return connector;
 
-  connector = await Web3Wallet.init({
+  connector = await WalletKit.init({
     core: new Core({
       projectId: import.meta.env.VITE_WC_PROJECT_ID
     }),

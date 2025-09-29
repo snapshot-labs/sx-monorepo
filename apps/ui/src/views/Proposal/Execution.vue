@@ -13,7 +13,7 @@ defineProps<{
       (proposal.executions && proposal.executions.length > 0) ||
       proposal.execution_strategy_type === 'safeSnap'
     "
-    class="pt-5 !max-w-[710px] mx-0 md:mx-auto"
+    class="pt-5 !max-w-[730px] mx-0 md:mx-auto"
   >
     <UiAlert
       v-if="proposal.execution_strategy_type === 'safeSnap'"
