@@ -324,8 +324,6 @@ function formatProposal(
   current: number,
   baseNetworkId?: NetworkID
 ): Proposal {
-  const { getTsFromCurrent } = useMetaStore();
-
   const executionNetworkId =
     proposal.execution_strategy_type === 'EthRelayer' && baseNetworkId
       ? baseNetworkId
@@ -383,17 +381,6 @@ function formatProposal(
       : (proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
     state,
-    start:
-      proposal.start_block_number !== null
-        ? getTsFromCurrent(networkId, proposal.start_block_number)
-        : proposal.start,
-    min_end:
-      proposal.min_end_block_number !== null
-        ? getTsFromCurrent(networkId, proposal.min_end_block_number)
-        : proposal.min_end,
-    max_end: proposal.max_end_block_number
-      ? getTsFromCurrent(networkId, proposal.max_end_block_number)
-      : proposal.max_end,
     network: networkId,
     privacy: 'none',
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
