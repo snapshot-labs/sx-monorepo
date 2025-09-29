@@ -1,10 +1,14 @@
 <script setup lang="ts">
 const { toggleTheme, currentTheme } = useTheme();
+const isElectron = !!process.env.ELECTRON;
 </script>
 
 <template>
   <div
-    class="p-4 lg:px-6 flex justify-center items-center absolute z-10 left-0 right-0 max-w-maximum mx-auto"
+    :class="[
+      'p-4 lg:px-6 flex justify-center items-center absolute z-10 left-0 right-0 max-w-maximum mx-auto',
+      isElectron ? 'top-[32px]' : 'top-0'
+    ]"
   >
     <div class="grow">
       <AppLink

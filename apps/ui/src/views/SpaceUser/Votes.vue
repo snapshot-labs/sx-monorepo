@@ -16,6 +16,7 @@ const hasMore = ref(false);
 const failed = ref(false);
 const proposals = ref<Proposal[]>([]);
 const votes = ref<Record<Proposal['id'], Vote>>({});
+const isElectron = !!process.env.ELECTRON;
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -100,7 +101,10 @@ watchEffect(() =>
 
 <template>
   <div
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex gap-3 font-medium leading-[18px] px-4 py-2"
+    :class="[
+      'sticky z-40 bg-skin-bg pt-1 pb-3 md:pt-0',
+      isElectron ? 'top-[144px] lg:top-[145px]' : 'top-[112px] lg:top-[113px]'
+    ]"
   >
     <div class="grow truncate">Proposal</div>
     <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
