@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UiLoading from '@/components/Ui/Loading.vue';
-import { stripHtmlTags } from '@/helpers/utils';
+import { lsGet, lsSet, stripHtmlTags } from '@/helpers/utils';
 
 const DEFAULT_EDITOR = 'markdown';
 
@@ -13,10 +13,13 @@ defineProps<{
 }>();
 
 const previewEnabled = ref(false);
-const editorType = ref<'visual' | 'markdown'>(DEFAULT_EDITOR);
+const editorType = ref<'visual' | 'markdown'>(
+  lsGet('editor') ?? DEFAULT_EDITOR
+);
 
 function toggleEditor() {
   editorType.value = editorType.value === 'visual' ? 'markdown' : 'visual';
+  lsSet('editor', editorType.value);
 }
 
 const AsyncVisualEditor = defineAsyncComponent({
