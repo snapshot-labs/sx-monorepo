@@ -525,7 +525,7 @@ watchEffect(() => {
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
         v-bind="$attrs"
       >
-        <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
+        <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto s-box">
           <UiAlert
             v-if="nonPremiumNetworksList && !proposal?.originalProposal"
             type="error"
