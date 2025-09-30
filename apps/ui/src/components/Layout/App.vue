@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { APP_NAME } from '@/helpers/constants';
+import { APP_NAME, LAYOUT } from '@/helpers/constants';
 import {
   getCacheHash,
   getStampUrl,
@@ -73,19 +73,6 @@ const hasPlaceHolderSidebar = computed(
 
 const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
-});
-
-const isElectron = !!process.env.ELECTRON;
-
-const topMarginClass = computed(() => {
-  if (!hasTopNav.value) return '';
-  // Electron: 32px (header top-[32px]) + 72px (header height) = 104px total
-  return isElectron ? 'mt-[104px]' : 'mt-[72px]';
-});
-
-const navTopClass = computed(() => {
-  // Electron: 32px (header top-[32px]) + 72px (header height) = 104px total
-  return isElectron ? 'top-[104px]' : 'top-[72px]';
 });
 
 async function handleTransactionAccept() {
@@ -199,8 +186,7 @@ router.afterEach(() => {
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex app-sidebar fixed`,
-          isElectron ? 'top-[32px] bottom-0' : 'inset-y-0',
+          `hidden lg:flex app-sidebar fixed inset-y-0 top-titlebar`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
@@ -224,7 +210,7 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          `${navTopClass} inset-y-0 z-10 hidden lg:flex fixed app-nav`,
+          'top-header inset-y-0 z-10 hidden lg:flex fixed app-nav',
           {
             '!flex app-nav-open': uiStore.sideMenuOpen
           }
@@ -237,7 +223,7 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0" :class="topMarginClass">
+        <div class="flex-auto w-0" :class="{ 'mt-header': hasTopNav }">
           <router-view class="h-full pb-10" />
         </div>
         <div

@@ -5,7 +5,6 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const isElectron = !!process.env.ELECTRON;
 const route = useRoute();
 const router = useRouter();
 const treasuriesList = ref<HTMLElement | null>(null);
@@ -54,10 +53,7 @@ watchEffect(() => {
     <UiScrollerHorizontal
       v-if="props.space.treasuries.length !== 1"
       ref="treasuriesList"
-      :class="[
-        'z-40 sticky',
-        isElectron ? 'top-[103px] lg:top-[104px]' : 'top-[71px] lg:top-[72px]'
-      ]"
+      class="z-40 sticky top-sticky-header lg:top-sticky-header-lg"
       with-buttons
       gradient="xxl"
     >

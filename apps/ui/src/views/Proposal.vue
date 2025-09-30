@@ -17,8 +17,9 @@ const route = useRoute();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
-const isElectron = !!process.env.ELECTRON;
 const termsStore = useTermsStore();
+
+const isElectron = !!process.env.ELECTRON;
 
 const modalOpenVote = ref(false);
 const modalOpenTerms = ref(false);
@@ -142,12 +143,7 @@ watchEffect(() => {
         v-bind="$attrs"
       >
         <UiScrollerHorizontal
-          :class="[
-            'z-40 sticky with-buttons gradient-xxl',
-            isElectron
-              ? 'top-[103px] lg:top-[104px]'
-              : 'top-[71px] lg:top-[72px]'
-          ]"
+          class="z-40 sticky top-sticky-header lg:top-sticky-header-lg with-buttons gradient-xxl"
           data-testid="proposal-tabs"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">

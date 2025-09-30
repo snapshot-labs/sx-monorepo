@@ -29,8 +29,6 @@ const currentStep = computed(() => {
   return stepper.stepNames.value[stepper.index.value];
 });
 
-const isElectron = !!process.env.ELECTRON;
-
 function goToStep(stepName: string) {
   stepper.goTo(stepName);
   window.scrollTo({
@@ -42,10 +40,7 @@ function goToStep(stepName: string) {
 <template>
   <div class="flex">
     <div
-      :class="[
-        'flex fixed lg:sticky inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto',
-        isElectron ? 'top-[104px]' : 'top-[72px]'
-      ]"
+      class="flex fixed lg:sticky top-header inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
     >
       <button
         v-for="(step, stepName) in steps"

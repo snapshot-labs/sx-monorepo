@@ -34,7 +34,6 @@ const { web3 } = useWeb3();
 const actions = useActions();
 const queryClient = useQueryClient();
 const { modalAccountOpen } = useModal();
-const isElectron = !!process.env.ELECTRON;
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
 
@@ -289,12 +288,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
-        :class="[
-          'bg-skin-bg border-b sticky z-40 flex w-full font-medium space-x-3 px-4',
-          isElectron
-            ? 'top-[144px] lg:top-[145px]'
-            : 'top-[112px] lg:top-[113px]'
-        ]"
+        class="bg-skin-bg border-b sticky z-40 flex w-full font-medium space-x-3 px-4 top-sticky-content lg:top-sticky-content-lg"
       >
         <div
           class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"

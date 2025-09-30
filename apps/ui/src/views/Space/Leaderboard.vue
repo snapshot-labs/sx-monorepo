@@ -20,7 +20,6 @@ const sortBy = ref(
 );
 
 const network = computed(() => getNetwork(props.space.network));
-const isElectron = !!process.env.ELECTRON;
 
 const {
   data,
@@ -93,10 +92,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
     <div
-      :class="[
-        'bg-skin-bg sticky z-40 border-b w-full flex font-medium space-x-1',
-        isElectron ? 'top-[144px] lg:top-[145px]' : 'top-[112px] lg:top-[113px]'
-      ]"
+      class="bg-skin-bg sticky z-40 border-b w-full flex font-medium space-x-1 top-sticky-content lg:top-sticky-content-lg"
     >
       <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
       <button

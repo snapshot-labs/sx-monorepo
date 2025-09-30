@@ -17,8 +17,6 @@ const selectedVote = ref<Vote | null>(null);
 
 const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
-const isElectron = !!process.env.ELECTRON;
-
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
@@ -66,10 +64,7 @@ function handleScrollEvent(target: HTMLElement) {
 <template>
   <div
     ref="votesHeader"
-    :class="[
-      'bg-skin-bg sticky z-40 border-b overflow-hidden',
-      isElectron ? 'top-[144px] lg:top-[145px]' : 'top-[112px] lg:top-[113px]'
-    ]"
+    class="bg-skin-bg sticky top-sticky-content lg:top-sticky-content-lg z-40 border-b overflow-hidden"
   >
     <div class="flex space-x-3 font-medium min-w-[735px]">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>

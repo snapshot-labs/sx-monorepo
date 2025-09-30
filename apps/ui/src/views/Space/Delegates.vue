@@ -4,7 +4,6 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const isElectron = !!process.env.ELECTRON;
 
 const activeDelegationId = ref(0);
 const delegateData = computed(
@@ -26,10 +25,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <div v-else>
       <UiScrollerHorizontal
         v-if="space.delegations.length > 1"
-        :class="[
-          'z-40 sticky',
-          isElectron ? 'top-[103px] lg:top-[104px]' : 'top-[71px] lg:top-[72px]'
-        ]"
+        class="z-40 sticky top-sticky-header lg:top-sticky-header-lg"
         with-buttons
         gradient="xxl"
       >

@@ -16,7 +16,6 @@ const hasMore = ref(false);
 const failed = ref(false);
 const proposals = ref<Proposal[]>([]);
 const votes = ref<Record<Proposal['id'], Vote>>({});
-const isElectron = !!process.env.ELECTRON;
 
 const network = computed(() => getNetwork(props.space.network));
 
@@ -101,13 +100,12 @@ watchEffect(() =>
 
 <template>
   <div
-    :class="[
-      'sticky z-40 bg-skin-bg pt-1 pb-3 md:pt-0',
-      isElectron ? 'top-[144px] lg:top-[145px]' : 'top-[112px] lg:top-[113px]'
-    ]"
+    class="sticky z-[1] top-sticky-content lg:top-sticky-content-lg bg-skin-bg space-y-4 rounded-t-none md:rounded-t-lg border-x border-t border-skin-border"
   >
-    <div class="grow truncate">Proposal</div>
-    <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
+    <div class="flex gap-3 px-4 pt-4 font-medium border-b pb-2">
+      <div class="grow truncate">Proposal</div>
+      <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
+    </div>
   </div>
   <UiLoading v-if="!loaded" class="block px-4 py-3" />
   <div

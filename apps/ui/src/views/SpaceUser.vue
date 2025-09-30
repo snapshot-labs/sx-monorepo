@@ -36,7 +36,6 @@ const network = computed(() => getNetwork(props.space.network));
 const userId = computed(() => route.params.user as string);
 
 const user = computed(() => usersStore.getUser(userId.value));
-const isElectron = !!process.env.ELECTRON;
 
 const socials = computed(() => getSocialNetworksLink(user.value));
 
@@ -268,10 +267,7 @@ watch(
       </div>
     </div>
     <UiScrollerHorizontal
-      :class="[
-        'z-40 sticky',
-        isElectron ? 'top-[103px] lg:top-[104px]' : 'top-[71px] lg:top-[72px]'
-      ]"
+      class="z-40 sticky top-sticky-header lg:top-sticky-header-lg"
       with-buttons
       gradient="xxl"
     >
