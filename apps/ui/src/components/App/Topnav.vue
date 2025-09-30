@@ -86,6 +86,32 @@ watch(
   { immediate: true }
 );
 
+function handleKeyboardShortcut(event: KeyboardEvent) {
+  if (event.key !== '/') return;
+
+  const activeElement = document.activeElement;
+  const tagName = activeElement?.tagName.toLowerCase() || '';
+
+  if (
+    activeElement === searchInput.value ||
+    ['input', 'textarea'].includes(tagName)
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  searchInput.value?.focus();
+}
+
+watchEffect(onCleanup => {
+  if (searchConfig.value) {
+    document.addEventListener('keydown', handleKeyboardShortcut);
+    onCleanup(() => {
+      document.removeEventListener('keydown', handleKeyboardShortcut);
+    });
+  }
+});
+
 onUnmounted(() => {
   resetAccountModal();
 });
