@@ -50,7 +50,7 @@
     "@ethersproject/wallet": "^5.7.0",
     "@headlessui-float/vue": "^0.15.0",
     "@headlessui/vue": "^1.7.23",
-    "@reown/appkit": "^1.6.8",
+    "@reown/appkit": "^1.8.8",
     "@reown/walletkit": "^1.2.11",
     "@safe-global/safe-apps-provider": "^0.17.1",
     "@safe-global/safe-apps-sdk": "^8.0.0",
