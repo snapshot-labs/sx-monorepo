@@ -93,6 +93,8 @@ function handleKeyboardShortcut(event: KeyboardEvent) {
   const tagName = activeElement?.tagName.toLowerCase() || '';
 
   if (
+    modalAccountOpen.value ||
+    modalAccountWithoutDismissOpen.value ||
     activeElement === searchInput.value ||
     ['input', 'textarea'].includes(tagName)
   ) {
