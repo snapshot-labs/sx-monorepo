@@ -95,6 +95,7 @@ function handleKeyboardShortcut(event: KeyboardEvent) {
   if (
     modalAccountOpen.value ||
     modalAccountWithoutDismissOpen.value ||
+    uiStore.sideMenuOpen ||
     activeElement === searchInput.value ||
     ['input', 'textarea'].includes(tagName)
   ) {
