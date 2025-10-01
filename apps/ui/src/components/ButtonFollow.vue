@@ -13,6 +13,8 @@ const { isSafeWallet } = useSafeWallet(
 const followedSpacesStore = useFollowedSpacesStore();
 const { isWhiteLabel } = useWhiteLabel();
 const uiStore = useUiStore();
+const { web3 } = useWeb3();
+const { modalAccountOpen } = useModal();
 
 const spaceIdComposite = computed(
   () => `${props.space.network}:${props.space.id}`
@@ -51,6 +53,11 @@ const tooltipMessage = computed(() => {
 });
 
 async function handleClick() {
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   try {
     await followedSpacesStore.toggleSpaceFollow(spaceIdComposite.value);
   } catch (error) {
