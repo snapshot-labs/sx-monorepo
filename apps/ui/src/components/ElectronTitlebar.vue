@@ -5,7 +5,7 @@ const isElectron = !!process.env.ELECTRON;
 <template>
   <div
     v-if="isElectron"
-    class="fixed top-0 inset-x-0 z-40 bg-skin-bg border-b"
+    class="fixed top-0 inset-x-0 z-50 bg-skin-bg border-b"
     style="
       -webkit-app-region: drag;
       user-select: none;
