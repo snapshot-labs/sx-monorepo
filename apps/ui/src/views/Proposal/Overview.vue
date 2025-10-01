@@ -555,7 +555,7 @@ onBeforeUnmount(() => destroyAudio());
           AI can be inaccurate or misleading.
         </div>
       </div>
-      <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
+      <UiMarkdown v-if="proposal.body" class="mb-12" :body="proposal.body" />
       <div v-if="discussion">
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-chat-alt />
