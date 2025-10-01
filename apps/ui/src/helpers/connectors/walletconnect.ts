@@ -87,9 +87,8 @@ export default class Walletconnect extends Connector {
       // otherwise modal will be opened with half light and half dark theme
       await this.modal.setThemeMode(currentTheme.value);
 
-      if (!isAutoConnect) {
+      if (!isAutoConnect && !this.provider) {
         await this.disconnect();
-
         await this.modal.open();
       }
 
