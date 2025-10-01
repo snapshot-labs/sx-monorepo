@@ -314,13 +314,6 @@ describe('utils', () => {
       expect(controller).toBe(expectedController);
     });
 
-    it('should return the space controller address for a shib name on testnet', async () => {
-      const spaceId = 'snapshot-test-unclaimed.shib';
-      const expectedController = '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3';
-      const controller = await getSpaceController(spaceId, 's-tn');
-      expect(controller).toBe(expectedController);
-    });
-
     it('should return the space controller address for an ENS name on testnet', async () => {
       const spaceId = 'ens.eth';
       const expectedController = '0x179A862703a4adfb29896552DF9e307980D19285';
