@@ -174,6 +174,7 @@ function formatSpace(
       cover: space.cover || '',
       proposal_count: space.proposalsCount,
       vote_count: space.votesCount,
+      follower_count: space.followersCount,
       active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,

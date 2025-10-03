@@ -137,20 +137,16 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <SpaceAlerts :space="space" />
     <OnboardingSpace :space="space" />
-    <template v-if="showChildren">
+    <div v-if="showChildren" class="mb-4">
       <UiSectionHeader label="Sub-spaces" />
-      <UiScrollerHorizontal gradient="md">
-        <div class="px-4 py-3 flex gap-3 min-w-max">
-          <SpacesListItem
-            v-for="child in space.children"
-            :key="child.id"
-            :space="child"
-            :show-about="false"
-            class="w-[240px]"
-          />
-        </div>
-      </UiScrollerHorizontal>
-    </template>
+      <div>
+        <SpacesListItem
+          v-for="child in space.children"
+          :key="child.id"
+          :space="child"
+        />
+      </div>
+    </div>
     <div>
       <ProposalsList
         data-testid="summary-proposals-list"
