@@ -186,7 +186,7 @@ router.afterEach(() => {
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex app-sidebar fixed inset-y-0 top-titlebar`,
+          `hidden lg:flex app-sidebar fixed inset-y-0 top-electron-titlebar`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />

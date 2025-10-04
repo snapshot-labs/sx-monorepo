@@ -288,7 +288,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
       <div
-        class="bg-skin-bg border-b sticky z-40 flex w-full font-medium space-x-3 px-4 top-sticky-content lg:top-sticky-content-lg"
+        class="bg-skin-bg border-b sticky z-40 flex w-full font-medium space-x-3 px-4 top-header-with-section lg:top-header-with-section-offset"
       >
         <div
           class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"

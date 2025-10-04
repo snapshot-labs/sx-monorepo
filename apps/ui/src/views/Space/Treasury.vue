@@ -53,7 +53,7 @@ watchEffect(() => {
     <UiScrollerHorizontal
       v-if="props.space.treasuries.length !== 1"
       ref="treasuriesList"
-      class="z-40 sticky top-sticky-header lg:top-sticky-header-lg"
+      class="z-40 sticky top-header-offset lg:top-header"
       with-buttons
       gradient="xxl"
     >

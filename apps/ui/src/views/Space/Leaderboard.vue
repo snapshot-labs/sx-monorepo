@@ -92,7 +92,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
     <div
-      class="bg-skin-bg sticky z-40 border-b w-full flex font-medium space-x-1 top-sticky-content lg:top-sticky-content-lg"
+      class="bg-skin-bg sticky z-40 border-b w-full flex font-medium space-x-1 top-header-with-section lg:top-header-with-section-offset"
     >
       <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
       <button
