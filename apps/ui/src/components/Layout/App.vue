@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
-import { APP_NAME, LAYOUT } from '@/helpers/constants';
+import { APP_NAME } from '@/helpers/constants';
 import {
   getCacheHash,
   getStampUrl,

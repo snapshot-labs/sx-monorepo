@@ -6,6 +6,7 @@ import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Space } from '@/types';
+import { TOTAL_NAV_HEIGHT } from '../../tailwind.config';
 
 const props = defineProps<{
   space: Space;
@@ -18,8 +19,6 @@ const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
 const termsStore = useTermsStore();
-
-const isElectron = !!process.env.ELECTRON;
 
 const modalOpenVote = ref(false);
 const modalOpenTerms = ref(false);
@@ -143,8 +142,9 @@ watchEffect(() => {
         v-bind="$attrs"
       >
         <UiScrollerHorizontal
-          class="z-40 sticky top-sticky-header lg:top-sticky-header-lg with-buttons gradient-xxl"
-          data-testid="proposal-tabs"
+          class="z-40 sticky op-sticky-header lg:top-sticky-header-lg"
+          with-buttons
+          gradient="xxl"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
@@ -264,7 +264,7 @@ watchEffect(() => {
       >
         <Affix
           data-testid="proposal-sidebar"
-          :top="isElectron ? 104 : 72"
+          :top="TOTAL_NAV_HEIGHT"
           :bottom="64"
         >
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">

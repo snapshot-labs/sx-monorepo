@@ -100,12 +100,10 @@ watchEffect(() =>
 
 <template>
   <div
-    class="sticky z-[1] top-sticky-content lg:top-sticky-content-lg bg-skin-bg space-y-4 rounded-t-none md:rounded-t-lg border-x border-t border-skin-border"
+    class="bg-skin-bg sticky top-sticky-content lg:top-sticky-content-lg z-40 border-b flex gap-3 font-medium leading-[18px] px-4 py-2"
   >
-    <div class="flex gap-3 px-4 pt-4 font-medium border-b pb-2">
-      <div class="grow truncate">Proposal</div>
-      <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
-    </div>
+    <div class="grow truncate">Proposal</div>
+    <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
   </div>
   <UiLoading v-if="!loaded" class="block px-4 py-3" />
   <div

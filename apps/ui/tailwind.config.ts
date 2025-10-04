@@ -1,11 +1,11 @@
 import { Config } from 'tailwindcss';
 
-const isElectron = !!process.env.ELECTRON;
-const ELECTRON_TITLEBAR_HEIGHT = isElectron ? 32 : 0;
+const ELECTRON_TITLEBAR_HEIGHT = !!process.env.ELECTRON ? 32 : 0;
 const APP_TOPNAV_HEIGHT = 72;
-const TOTAL_NAV_HEIGHT = ELECTRON_TITLEBAR_HEIGHT + APP_TOPNAV_HEIGHT;
-const SECTION_HEADER_HEIGHT = 40;
-const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + SECTION_HEADER_HEIGHT;
+
+export const TOTAL_NAV_HEIGHT = ELECTRON_TITLEBAR_HEIGHT + APP_TOPNAV_HEIGHT;
+
+const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + 40;
 
 export default {
   future: {
