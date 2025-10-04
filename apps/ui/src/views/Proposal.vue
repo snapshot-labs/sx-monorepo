@@ -53,15 +53,7 @@ const discussion = computed(() => {
   return sanitizeUrl(proposal.value.discussion);
 });
 
-const votingPowerDecimals = computed(() => {
-  if (!proposal.value) return 0;
-  return Math.max(
-    ...proposal.value.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
+const votingPowerDecimals = computed(() => proposal.value?.vp_decimals ?? 0);
 
 const currentVote = computed(
   () =>
@@ -152,6 +144,7 @@ watchEffect(() => {
           class="z-40 sticky top-[71px] lg:top-[72px]"
           with-buttons
           gradient="xxl"
+          data-testid="proposal-tabs"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
@@ -163,9 +156,34 @@ watchEffect(() => {
                 }
               }"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-overview'"
                 text="Overview"
+              />
+            </AppLink>
+            <AppLink
+              v-if="
+                proposal.executions?.length ||
+                proposal.execution_strategy_type === 'safeSnap'
+              "
+              :to="{
+                name: 'space-proposal-execution',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-execution'"
+                :count="
+                  proposal.executions
+                    .map(execution => execution.transactions.length)
+                    .reduce((a, b) => a + b, 0)
+                "
+                text="Execution"
+                class="inline-block"
               />
             </AppLink>
             <AppLink
@@ -178,7 +196,7 @@ watchEffect(() => {
               }"
               class="flex items-center"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
@@ -197,7 +215,7 @@ watchEffect(() => {
                 }"
                 class="flex items-center"
               >
-                <UiLink
+                <UiLabel
                   :is-active="route.name === 'space-proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
@@ -220,7 +238,11 @@ watchEffect(() => {
                 class="flex items-center"
                 target="_blank"
               >
-                <UiLink :count="boostCount" text="Boost" class="inline-block" />
+                <UiLabel
+                  :count="boostCount"
+                  text="Boost"
+                  class="inline-block"
+                />
               </a>
             </template>
           </div>
@@ -240,12 +262,13 @@ watchEffect(() => {
           }
         ]"
       >
-        <Affix :top="72" :bottom="64">
+        <Affix data-testid="proposal-sidebar" :top="72" :bottom="64">
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
-                !proposal.cancelled &&
-                ['pending', 'active'].includes(proposal.state)
+                (!proposal.cancelled &&
+                  ['pending', 'active'].includes(proposal.state)) ||
+                currentVote
               "
             >
               <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
@@ -264,7 +287,10 @@ watchEffect(() => {
               </h4>
               <div class="space-y-2">
                 <IndicatorVotingPower
-                  v-if="!currentVote || editMode"
+                  v-if="
+                    (!currentVote || editMode) &&
+                    ['pending', 'active'].includes(proposal.state)
+                  "
                   v-slot="votingPowerProps"
                   :network-id="proposal.network"
                   :voting-power="votingPower"

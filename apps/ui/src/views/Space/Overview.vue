@@ -67,13 +67,16 @@ watchEffect(() => setTitle(props.space.name));
           class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
         />
         <div class="flex items-center">
-          <h1 v-text="space.name" />
+          <h1 data-testid="space-name" v-text="space.name" />
           <UiBadgeVerified
             v-if="!isWhiteLabel"
             class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
           />
+        </div>
+        <div v-if="space.protocol === 'governor-bravo'" class="mb-3">
+          <UiProposalLabel label="Governor Bravo space" color="#272727" />
         </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">
           <div>
@@ -135,7 +138,7 @@ watchEffect(() => setTitle(props.space.name));
     <SpaceAlerts :space="space" />
     <OnboardingSpace :space="space" />
     <template v-if="showChildren">
-      <UiLabel :label="'Sub-spaces'" />
+      <UiSectionHeader label="Sub-spaces" />
       <UiScrollerHorizontal gradient="md">
         <div class="px-4 py-3 flex gap-3 min-w-max">
           <SpacesListItem
@@ -150,6 +153,7 @@ watchEffect(() => setTitle(props.space.name));
     </template>
     <div>
       <ProposalsList
+        data-testid="summary-proposals-list"
         title="Proposals"
         :is-error="isError"
         :loading="isPending"

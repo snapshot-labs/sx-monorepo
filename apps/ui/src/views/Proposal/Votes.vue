@@ -8,8 +8,6 @@ const props = defineProps<{
   proposal: ProposalType;
 }>();
 
-const { copy, copied } = useClipboard();
-
 const sortBy = ref(
   'vp-desc' as 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
 );
@@ -21,14 +19,7 @@ const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
-const votingPowerDecimals = computed(() => {
-  return Math.max(
-    ...props.proposal.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
+const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
 const {
   data,
@@ -178,7 +169,7 @@ function handleScrollEvent(target: HTMLElement) {
                 user: vote.voter.id
               }
             }"
-            class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
+            class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate group"
           >
             <UiStamp :id="vote.voter.id" :size="32" />
             <div class="flex flex-col truncate">
@@ -186,9 +177,9 @@ function handleScrollEvent(target: HTMLElement) {
                 class="truncate"
                 v-text="vote.voter.name || shortenAddress(vote.voter.id)"
               />
-              <div
+              <UiAddress
+                :address="vote.voter.id"
                 class="text-[17px] text-skin-text truncate"
-                v-text="shortenAddress(vote.voter.id)"
               />
             </div>
           </AppLink>
@@ -247,23 +238,6 @@ function handleScrollEvent(target: HTMLElement) {
                         : 'View on block explorer'
                     }}
                   </a>
-                </UiDropdownItem>
-                <UiDropdownItem v-slot="{ active }">
-                  <button
-                    type="button"
-                    class="flex items-center gap-2"
-                    :class="{ 'opacity-80': active }"
-                    @click.prevent="copy(vote.voter.id)"
-                  >
-                    <template v-if="!copied">
-                      <IH-duplicate :width="16" />
-                      Copy voter address
-                    </template>
-                    <template v-else>
-                      <IH-check :width="16" />
-                      Copied
-                    </template>
-                  </button>
                 </UiDropdownItem>
               </template>
             </UiDropdown>

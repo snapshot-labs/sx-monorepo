@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import {
-  getUrl,
-  getUserFacingErrorMessage,
-  imageUpload
-} from '@/helpers/utils';
+import { getUserFacingErrorMessage, imageUpload } from '@/helpers/utils';
 
 const model = defineModel<string>();
 
@@ -16,28 +12,24 @@ withDefaults(
     disabled?: boolean;
     fallback?: boolean;
     cropped?: boolean;
+    type?: 'avatar' | 'space';
   }>(),
   {
     width: 80,
     height: 80,
     fallback: true,
-    cropped: true
+    cropped: true,
+    type: 'avatar'
   }
 );
 
 const uiStore = useUiStore();
 
 const fileInput = ref<HTMLInputElement | null>(null);
-const isUploadingImage = ref(false);
-
-const imgUrl = computed(() => {
-  if (!model.value) return undefined;
-  if (model.value.startsWith('ipfs://')) return getUrl(model.value);
-  return model.value;
-});
+const isUploading = ref(false);
 
 function openFilePicker() {
-  if (isUploadingImage.value) return;
+  if (isUploading.value) return;
   fileInput.value?.click();
 }
 
@@ -45,13 +37,13 @@ async function handleFileChange(e: Event) {
   try {
     const file = (e.target as HTMLInputElement).files?.[0];
 
-    isUploadingImage.value = true;
+    isUploading.value = true;
 
     const image = await imageUpload(file as File);
     if (!image) throw new Error('Failed to upload image.');
 
     model.value = image.url;
-    isUploadingImage.value = false;
+    isUploading.value = false;
   } catch (e) {
     uiStore.addNotification('error', getUserFacingErrorMessage(e));
 
@@ -60,7 +52,7 @@ async function handleFileChange(e: Event) {
     if (fileInput.value) {
       fileInput.value.value = '';
     }
-    isUploadingImage.value = false;
+    isUploading.value = false;
   }
 }
 </script>
@@ -70,7 +62,8 @@ async function handleFileChange(e: Event) {
     type="button"
     v-bind="$attrs"
     class="relative group max-w-max cursor-pointer mb-3 border-4 border-skin-bg rounded-lg overflow-hidden bg-skin-border"
-    :disabled="disabled"
+    :disabled="disabled || isUploading"
+    :class="{ '!cursor-not-allowed': disabled || isUploading }"
     :style="{
       'max-width': `${width}px`,
       height: `${height}px`,
@@ -78,34 +71,36 @@ async function handleFileChange(e: Event) {
     }"
     @click="openFilePicker()"
   >
-    <img
-      v-if="imgUrl"
-      :src="imgUrl"
+    <UiImagePreview
+      v-if="model"
+      :src="model"
+      :width="width"
+      :height="height"
       alt="Uploaded avatar"
       :class="[
         `object-cover group-hover:opacity-80`,
         {
-          'opacity-80': isUploadingImage
+          'opacity-80': isUploading
         }
       ]"
     />
     <UiStamp
-      v-else-if="fallback"
+      v-else-if="fallback && !model"
       :id="definition.default"
       :width="width"
       :height="height"
       :cropped="cropped"
       class="pointer-events-none !rounded-none group-hover:opacity-80"
-      type="space"
+      :type="type"
       :class="{
-        'opacity-80': isUploadingImage
+        'opacity-80': isUploading
       }"
     />
     <div v-else class="block w-full h-full" />
     <div
       class="pointer-events-none absolute group-hover:visible inset-0 z-10 flex flex-row size-full items-center content-center justify-center"
     >
-      <UiLoading v-if="isUploadingImage" class="block z-10" />
+      <UiLoading v-if="isUploading" class="block z-10" />
       <IH-pencil v-else class="invisible text-skin-link group-hover:visible" />
     </div>
   </button>

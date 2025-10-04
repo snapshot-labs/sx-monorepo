@@ -13,24 +13,19 @@ const props = defineProps<{
   definition: any;
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
     }
 
     return model.value;
   },
   set(newValue: string) {
-    dirty.value = true;
     model.value = newValue;
   }
-});
-
-watch(model, () => {
-  dirty.value = true;
 });
 </script>
 
@@ -39,7 +34,7 @@ watch(model, () => {
     v-slot="{ id }"
     :definition="definition"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
     :required="required"
     :input-value-length="inputValue?.length"
   >

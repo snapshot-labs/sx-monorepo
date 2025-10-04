@@ -1,9 +1,5 @@
-import {
-  LibraryError,
-  ReceiptTx,
-  constants as starknetConstants
-} from 'starknet';
-import { UNIFIED_API_TESTNET_URL, UNIFIED_API_URL } from '@/helpers/constants';
+import { LibraryError, constants as starknetConstants } from 'starknet';
+import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
 import { pinPineapple } from '@/helpers/pin';
 import { formatAddress } from '@/helpers/utils';
@@ -34,9 +30,9 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     chainId: starknetConstants.StarknetChainId.SN_MAIN,
     baseChainId: 1,
     baseNetworkId: 'eth',
-    rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    rpcUrl: 'https://rpc.snapshot.org/sn',
     ethRpcUrl: 'https://rpc.snapshot.org/1',
-    apiUrl: UNIFIED_API_URL,
+    apiUrl: API_URL,
     explorerUrl: 'https://starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   },
@@ -45,9 +41,9 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     chainId: starknetConstants.StarknetChainId.SN_SEPOLIA,
     baseChainId: 11155111,
     baseNetworkId: 'sep',
-    rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
+    rpcUrl: 'https://rpc.snapshot.org/sn-sep',
     ethRpcUrl: 'https://rpc.snapshot.org/11155111',
-    apiUrl: UNIFIED_API_TESTNET_URL,
+    apiUrl: API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   }
@@ -113,8 +109,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
             return;
           }
 
-          const receiptTx = new ReceiptTx(tx);
-          if (receiptTx.isSuccess()) {
+          if (tx.isSuccess()) {
             resolve(tx);
           } else {
             reject(tx);

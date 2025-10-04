@@ -1,146 +1,109 @@
-import { defaultAbiCoder } from '@ethersproject/abi';
-import { getAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import IExecutionStrategy from './abis/IExecutionStrategy.json';
-import { FullConfig } from './config';
-import { ExecutionStrategy, Space } from '../../.checkpoint/models';
-import { handleVotingPowerValidationMetadata } from '../common/ipfs';
+import { evm } from '@snapshot-labs/checkpoint';
+import { evmNetworks } from '@snapshot-labs/sx';
+import { EVMConfig, NetworkID, PartialConfig } from './types';
 
-/**
- * Convert EVM onchain choice value to common format.
- * EVM uses 0 for Against, 1 for For, 2 for Abstain.
- * Common format uses 1 for For, 2 for Against, 3 for Abstain.
- * @param rawChoice onchain choice value
- * @returns common format choice value or -1 if unknown
- */
-export function convertChoice(rawChoice: number): 1 | 2 | 3 | null {
-  if (rawChoice === 0) return 2;
-  if (rawChoice === 1) return 1;
-  if (rawChoice === 2) return 3;
+type ProtocolConfig = Pick<EVMConfig, 'sources' | 'templates' | 'abis'>;
 
-  return null;
-}
+type SourceOrTemplate = {
+  events: NonNullable<EVMConfig['sources']>[number]['events'];
+};
 
-export async function updateProposalValidationStrategy(
-  space: Space,
-  validationStrategyAddress: string,
-  validationStrategyParams: string,
-  metadataUri: string,
-  config: FullConfig
+const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
+
+function applyProtocolPrefixToEvents<T extends SourceOrTemplate>(
+  prefix: string,
+  source: T
 ) {
-  const strategyAddress = getAddress(validationStrategyAddress);
-
-  space.validation_strategy = strategyAddress;
-  space.validation_strategy_params = validationStrategyParams;
-  space.voting_power_validation_strategy_strategies = [];
-  space.voting_power_validation_strategy_strategies_params = [];
-  space.voting_power_validation_strategy_metadata = metadataUri;
-
-  if (
-    strategyAddress ===
-    getAddress(config.overrides.propositionPowerValidationStrategyAddress)
-  ) {
-    try {
-      const decoded = defaultAbiCoder.decode(
-        ['uint256', 'tuple(address,bytes)[]'],
-        validationStrategyParams
-      ) as [BigNumber, [string, string][]];
-
-      space.proposal_threshold = decoded[0].toString();
-      space.voting_power_validation_strategy_strategies = decoded[1].map(
-        ([strategyAddress]) => getAddress(strategyAddress)
-      );
-      space.voting_power_validation_strategy_strategies_params = decoded[1].map(
-        ([, params]) => params
-      );
-
-      try {
-        await handleVotingPowerValidationMetadata(
-          space.id,
-          space.voting_power_validation_strategy_metadata,
-          config
-        );
-      } catch (e) {
-        console.log('failed to handle voting power strategies metadata', e);
-      }
-    } catch {
-      space.proposal_threshold = '0';
-      space.voting_power_validation_strategy_strategies = [];
-      space.voting_power_validation_strategy_strategies_params = [];
-    }
-  }
-}
-
-export async function handleCustomExecutionStrategy(
-  address: string,
-  blockNumber: number,
-  provider: JsonRpcProvider,
-  config: FullConfig
-) {
-  const contract = new Contract(address, IExecutionStrategy, provider);
-
-  const overrides = {
-    blockTag: blockNumber
+  return {
+    ...source,
+    events: source.events.map(event => ({
+      ...event,
+      fn: `${prefix}_${event.fn}`
+    }))
   };
-
-  const type = await contract.getStrategyType(overrides);
-
-  let executionStrategy = await ExecutionStrategy.loadEntity(
-    address,
-    config.indexerName
-  );
-
-  if (executionStrategy) return;
-
-  executionStrategy = new ExecutionStrategy(address, config.indexerName);
-  executionStrategy.address = address;
-  executionStrategy.type = type;
-  executionStrategy.quorum = '0';
-  executionStrategy.treasury_chain = config.chainId;
-  executionStrategy.treasury = getAddress(address);
-  executionStrategy.timelock_delay = 0n;
-
-  await executionStrategy.save();
 }
 
-export async function registerApeGasProposal(
-  {
-    viewId,
-    snapshot
-  }: {
-    viewId: string;
-    snapshot: number;
-  },
-  config: FullConfig
+function applyProtocolPrefixToSources(
+  prefix: string,
+  sources: NonNullable<EVMConfig['sources']>
 ) {
-  const res = await fetch(config.overrides.manaRpcUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
+  return sources.map(source => applyProtocolPrefixToEvents(prefix, source));
+}
+
+function applyProtocolPrefixToTemplates(
+  prefix: string,
+  templates: EVMConfig['templates']
+) {
+  if (!templates) return {};
+
+  return Object.fromEntries(
+    Object.entries(templates).map(([key, template]) => [
+      key,
+      applyProtocolPrefixToEvents(prefix, template)
+    ])
+  );
+}
+
+export function applyProtocolPrefixToWriters(
+  prefix: string,
+  writers: Record<string, evm.Writer>
+) {
+  return Object.fromEntries(
+    Object.entries(writers).map(([key, writer]) => [`${prefix}_${key}`, writer])
+  );
+}
+
+export function applyConfig(
+  target: PartialConfig,
+  prefix: string,
+  config: ProtocolConfig
+): PartialConfig {
+  return {
+    sources: [
+      ...(target.sources ?? []),
+      ...applyProtocolPrefixToSources(prefix, config.sources ?? [])
+    ],
+    templates: {
+      ...target.templates,
+      ...applyProtocolPrefixToTemplates(prefix, config.templates ?? {})
     },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 0,
-      method: 'registerApeGasProposal',
-      params: {
-        viewId,
-        snapshot
-      }
-    })
-  });
+    abis: { ...target.abis, ...config.abis }
+  };
+}
 
-  if (!res.ok) {
-    throw new Error(
-      `Failed to register ApeGas proposal: ${res.status} ${res.statusText}`
+export async function getTimestampFromBlock({
+  networkId,
+  blockNumber,
+  currentBlockNumber,
+  currentTimestamp,
+  provider
+}: {
+  networkId: NetworkID;
+  blockNumber: number;
+  currentBlockNumber: number;
+  currentTimestamp: number;
+  provider: JsonRpcProvider;
+}) {
+  const baseNetwork = evmNetworks[networkId];
+
+  let actualCurrentBlockNumber = currentBlockNumber;
+  if (baseNetwork.Meta.hasNonNativeBlockNumbers) {
+    const multicallContract = new Contract(
+      MULTICALL3_ADDRESS,
+      ['function getBlockNumber() view returns (uint256 blockNumber)'],
+      provider
     );
+
+    actualCurrentBlockNumber = await multicallContract.getBlockNumber({
+      blockTag: `0x${currentBlockNumber.toString(16)}`
+    });
   }
 
-  const result = await res.json();
-  if (result.error) {
-    throw new Error(`Failed to register ApeGas proposal: ${result.error}`);
-  }
+  const blockDifference = blockNumber - actualCurrentBlockNumber;
 
-  return result;
+  return Math.round(
+    currentTimestamp + blockDifference * evmNetworks[networkId].Meta.blockTime
+  );
 }

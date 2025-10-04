@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
+import { utils } from '@snapshot-labs/sx';
 import { Nft } from '@/composables/useNfts';
 import { abis } from '@/helpers/abis';
 import { Token } from '@/helpers/alchemy';
@@ -203,7 +203,7 @@ export async function createStakeTokenTransaction({
 
 export function convertToMetaTransactions(
   transactions: Transaction[]
-): MetaTransaction[] {
+): utils.encoding.MetaTransaction[] {
   return transactions.map((tx: Transaction) => ({
     ...tx,
     operation: 0,

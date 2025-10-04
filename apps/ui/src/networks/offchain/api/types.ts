@@ -163,4 +163,5 @@ export type ApiStrategy = {
   verifiedSpacesCount: number;
   examples: any;
   schema: any;
+  disabled: boolean;
 };

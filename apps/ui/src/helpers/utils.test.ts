@@ -314,18 +314,25 @@ describe('utils', () => {
       expect(controller).toBe(expectedController);
     });
 
-    it('should return the space controller address for a shib name on testnet', async () => {
-      const spaceId = 'snapshot-test-unclaimed.shib';
-      const expectedController = '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3';
-      const controller = await getSpaceController(spaceId, 's-tn');
-      expect(controller).toBe(expectedController);
-    });
-
     it('should return the space controller address for an ENS name on testnet', async () => {
       const spaceId = 'ens.eth';
       const expectedController = '0x179A862703a4adfb29896552DF9e307980D19285';
       const controller = await getSpaceController(spaceId, 's-tn');
       expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for a sonic name on mainnet', async () => {
+      const spaceId = 'boorger.sonic';
+      const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should throw an error when getting a sonic name on testnet', async () => {
+      const spaceId = 'boorger.sonic';
+      await expect(getSpaceController(spaceId, 's-tn')).rejects.toThrow(
+        'Unsupported network'
+      );
     });
   });
 

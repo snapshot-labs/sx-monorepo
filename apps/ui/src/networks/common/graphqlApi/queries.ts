@@ -22,6 +22,7 @@ gql(`
   fragment spaceFields on Space {
     id
     _indexer
+    protocol
     verified
     turbo
     metadata {
@@ -114,9 +115,13 @@ gql(`
       labels
     }
     start
+    start_block_number
     min_end
+    min_end_block_number
     max_end
+    max_end_block_number
     snapshot
+    vp_decimals
     scores_1
     scores_2
     scores_3
@@ -148,7 +153,7 @@ gql(`
     execution_ready
     executed
     vetoed
-    completed
+    execution_settled
     cancelled
   }
 `);

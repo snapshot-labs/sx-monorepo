@@ -5,8 +5,12 @@ import {
   getOffchainStrategy,
   offchainGoerli,
   offchainMainnet,
-  OffchainNetworkConfig
+  OffchainNetworkEthereumConfig,
+  OffchainNetworkStarknetConfig,
+  offchainStarknetMainnet,
+  offchainStarknetSepolia
 } from '@snapshot-labs/sx';
+import { constants as starknetConstants } from 'starknet';
 import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
 import {
@@ -14,7 +18,7 @@ import {
   OSnapPlugin,
   parseInternalTransaction
 } from '@/helpers/osnap';
-import { verifyNetwork } from '@/helpers/utils';
+import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   Choice,
@@ -56,10 +60,21 @@ type ReadOnlyExecutionPlugin = {
   safes: ReadOnlyExecutionSafe[];
 };
 
-const CONFIGS: Record<number, OffchainNetworkConfig> = {
+const CONFIGS: Record<number, OffchainNetworkEthereumConfig> = {
   1: offchainMainnet,
   5: offchainGoerli
 };
+
+const STARKNET_CONFIGS: Record<number, OffchainNetworkStarknetConfig> = {
+  1: offchainStarknetMainnet,
+  11155111: offchainStarknetSepolia
+};
+
+// List of valid starknet chaind IDs returned by wallets
+// Argent X will return 0x534e5f4d41494e while Braavos will return SN_MAIN
+const STARKNET_CHAIN_IDS = Object.entries(
+  starknetConstants.StarknetChainId
+).flat();
 
 export function createActions(
   constants: NetworkConstants,
@@ -70,6 +85,9 @@ export function createActions(
 
   const client = new clients.OffchainEthereumSig({
     networkConfig
+  });
+  const starknetSigClient = new clients.OffchainStarknetSig({
+    networkConfig: STARKNET_CONFIGS[chainId]
   });
 
   async function verifyChainNetwork(
@@ -393,7 +411,22 @@ export function createActions(
         data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
       });
     },
-    setAlias(web3: Web3Provider, alias: string) {
+    async setAlias(web3: any, alias: string) {
+      const web3ChainId =
+        web3.provider?.chainId || web3.provider?.provider?.chainId;
+
+      if (STARKNET_CHAIN_IDS.includes(web3ChainId)) {
+        await verifyStarknetNetwork(
+          web3,
+          STARKNET_CONFIGS[chainId].eip712ChainId
+        );
+
+        return starknetSigClient.setAlias({
+          signer: web3.provider.account,
+          data: { alias }
+        });
+      }
+
       return client.setAlias({
         signer: web3.getSigner(),
         data: { alias }

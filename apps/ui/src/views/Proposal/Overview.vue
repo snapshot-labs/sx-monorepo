@@ -9,7 +9,7 @@ import {
   sanitizeUrl,
   shortenAddress
 } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
@@ -21,7 +21,7 @@ const props = defineProps<{
 const queryClient = useQueryClient();
 const router = useRouter();
 const uiStore = useUiStore();
-const { getCurrent, getTsFromCurrent } = useMetaStore();
+const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
@@ -91,7 +91,7 @@ const cancellable = computed(() => {
   } else {
     return (
       compareAddresses(props.proposal.space.controller, web3.value.account) &&
-      props.proposal.state !== 'executed' &&
+      !['queued', 'vetoed', 'executed'].includes(props.proposal.state) &&
       props.proposal.cancelled === false
     );
   }
@@ -102,15 +102,27 @@ const discussion = computed(() => {
 });
 
 const proposalMetadataUrl = computed(() => {
+  if (props.proposal.space.protocol === 'governor-bravo') {
+    return null;
+  }
+
   const url = getUrl(props.proposal.metadata_uri);
   if (!url) return null;
 
   return sanitizeUrl(url);
 });
 
-const endTime = useRelativeTime(() => {
-  return getTsFromCurrent(props.proposal.network, props.proposal.max_end);
+const proposalTransactionId = computed(() => {
+  const network = getNetwork(props.proposal.network);
+
+  if (props.proposal.space.protocol === 'governor-bravo') {
+    return network.helpers.getExplorerUrl(props.proposal.tx, 'transaction');
+  }
+
+  return null;
 });
+
+const endTime = useRelativeTime(() => props.proposal.max_end);
 
 const votingTime = computed(() => {
   if (!props.proposal) return null;
@@ -207,6 +219,9 @@ async function handleFlagClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal flagged successfully.');
+
       router.push({
         name: 'space-overview'
       });
@@ -228,6 +243,9 @@ async function handleCancelClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal cancelled successfully.');
+
       router.push({
         name: 'space-overview'
       });
@@ -302,7 +320,7 @@ onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
-  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto">
     <ContentFlagable :item="proposal">
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
         <template v-if="proposal.execution_strategy === EVM_EMPTY_ADDRESS">
@@ -317,7 +335,7 @@ onBeforeUnmount(() => destroyAudio());
         </template>
       </UiAlert>
 
-      <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
+      <h1 class="mb-3 text-[42px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>
 
@@ -510,6 +528,17 @@ onBeforeUnmount(() => destroyAudio());
                   View metadata
                 </a>
               </UiDropdownItem>
+              <UiDropdownItem v-if="proposalTransactionId" v-slot="{ active }">
+                <a
+                  :href="proposalTransactionId"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                  :class="{ 'opacity-80': active }"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  View on block explorer
+                </a>
+              </UiDropdownItem>
             </template>
           </UiDropdown>
         </div>
@@ -526,7 +555,7 @@ onBeforeUnmount(() => destroyAudio());
           AI can be inaccurate or misleading.
         </div>
       </div>
-      <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
+      <UiMarkdown v-if="proposal.body" class="mb-8" :body="proposal.body" />
       <div v-if="discussion">
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-chat-alt />

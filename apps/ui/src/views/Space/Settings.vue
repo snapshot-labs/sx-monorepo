@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
+import {
+  DISABLED_STRATEGIES,
+  OVERRIDING_STRATEGIES
+} from '@/helpers/constants';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -52,6 +56,7 @@ const {
 } = useSpaceSettings(toRef(props, 'space'));
 const { invalidateController } = useSpaceController(toRef(props, 'space'));
 
+const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
 
@@ -183,7 +188,12 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (!isTicketValid.value) {
+    if (
+      !isTicketValid.value ||
+      strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address)) ||
+      (!props.space.turbo &&
+        strategies.value.some(s => OVERRIDING_STRATEGIES.includes(s.address)))
+    ) {
       return 'Strategies are invalid';
     }
 
@@ -250,6 +260,10 @@ async function handleSettingsSave() {
     try {
       await save();
       reloadSpaceAndReset();
+      uiStore.addNotification(
+        'success',
+        'Your changes were successfully saved.'
+      );
     } catch {
     } finally {
       saving.value = false;
@@ -270,6 +284,7 @@ function handleSpaceDelete() {
   saving.value = true;
   executeFn.value = async () => {
     await deleteSpace();
+    uiStore.addNotification('success', 'Your space was successfully deleted.');
     router.push({ name: 'my-home' });
 
     return null;
@@ -315,7 +330,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   <div
     v-bind="$attrs"
     class="!h-auto"
-    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 114}px)`"
+    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 73}px)`"
   >
     <div v-if="loading" class="p-4">
       <UiLoading />
@@ -560,7 +575,12 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         {{ error || 'You have unsaved changes' }}
       </h4>
       <div class="flex space-x-3">
-        <button type="reset" class="text-skin-heading" @click="reset()">
+        <button
+          v-if="isModified"
+          type="reset"
+          class="text-skin-heading"
+          @click="reset()"
+        >
           Reset
         </button>
         <UiButton

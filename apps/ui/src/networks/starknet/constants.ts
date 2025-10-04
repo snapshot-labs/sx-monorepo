@@ -23,8 +23,11 @@ export function createConstants(
   baseNetworkId: NetworkID,
   baseChainId: number
 ) {
-  const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
-  if (!config) throw new Error(`Unsupported network ${networkId}`);
+  if (!(networkId in starknetNetworks)) {
+    throw new Error(`Unsupported network ${networkId}`);
+  }
+
+  const config = starknetNetworks[networkId as keyof typeof starknetNetworks];
 
   const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
     {
@@ -35,6 +38,7 @@ export function createConstants(
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.EthTx]: {
+        priority: 2,
         isSupported: true,
         isContractSupported: true,
         relayerType: 'evm-tx',
@@ -47,6 +51,7 @@ export function createConstants(
         connectors: STARKNET_CONNECTORS
       },
       [config.Authenticators.StarkTx]: {
+        priority: 1,
         isSupported: true,
         isContractSupported: false,
         connectors: STARKNET_CONNECTORS
@@ -269,9 +274,9 @@ export function createConstants(
         required: ['threshold'],
         properties: {
           threshold: {
-            type: 'integer',
+            type: 'string',
+            format: 'uint256',
             title: 'Proposal threshold',
-            minimum: 1,
             examples: ['1']
           }
         }

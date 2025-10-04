@@ -4,6 +4,7 @@ import path from 'path';
 import Checkpoint, { LogLevel } from '@snapshot-labs/checkpoint';
 import { startApiServer } from './api';
 import { startIndexer } from './indexer';
+import logger, { pinoOptions } from './logger';
 import overrides from './overrides.json';
 
 /**
@@ -16,6 +17,12 @@ const IS_INDEXER = process.env.IS_INDEXER === 'true';
 if (process.env.CA_CERT) {
   process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
 }
+
+process.on('uncaughtException', err => {
+  logger.fatal({ err }, 'Uncaught exception');
+
+  process.exit(1);
+});
 
 function getDatabaseConnection() {
   if (process.env.DATABASE_URL) {
@@ -37,7 +44,7 @@ async function run() {
   const checkpoint = new Checkpoint(schema, {
     logLevel: LogLevel.Info,
     resetOnConfigChange: true,
-    prettifyLogs: process.env.NODE_ENV !== 'production',
+    pinoOptions,
     overridesConfig: overrides,
     dbConnection: getDatabaseConnection()
   });

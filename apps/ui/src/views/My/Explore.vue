@@ -14,12 +14,12 @@ const DEFAULT_PROTOCOL = 'snapshot';
 const DEFAULT_NETWORK = 'all';
 const DEFAULT_CATEGORY = 'all';
 
-const protocols = Object.values(explorePageProtocols).map(
-  ({ key, label }: ProtocolConfig) => ({
+const protocols = Object.values(explorePageProtocols)
+  .filter(protocol => !protocol.disabled)
+  .map(({ key, label }: ProtocolConfig) => ({
     key,
     label
-  })
-);
+  }));
 
 const categories = [
   { key: 'all', label: 'All categories' },
@@ -184,7 +184,7 @@ watchEffect(() => setTitle('Explore'));
           :items="categories"
         />
       </div>
-      <UiTooltip title="Create new space">
+      <UiTooltip v-if="protocol !== 'governor-bravo'" title="Create new space">
         <UiButton
           :to="{
             name: `create-space-${protocol}`
@@ -196,9 +196,9 @@ watchEffect(() => setTitle('Explore'));
       </UiTooltip>
     </div>
     <div class="flex-grow" v-bind="$attrs">
-      <UiLabel label="Spaces" sticky />
+      <UiSectionHeader label="Spaces" sticky />
       <UiLoading v-if="isPending" class="block m-4" />
-      <div v-else-if="data">
+      <div v-else-if="data" data-testid="explore-spaces-list">
         <UiContainerInfiniteScroll
           v-if="data.pages.flat().length"
           :loading-more="isFetchingNextPage"

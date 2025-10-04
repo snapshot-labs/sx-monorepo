@@ -15,6 +15,8 @@ const POPULAR_STRATEGIES: Record<string, StrategyTemplate['address']> = {
   'ERC-1155': 'erc1155-balance-of'
 } as const;
 
+const HIDDEN_STRATEGIES: StrategyTemplate['address'][] = ['ticket'];
+
 const strategies = defineModel<StrategyConfig[]>({ required: true });
 
 const props = defineProps<{
@@ -112,7 +114,7 @@ onMounted(() => {
         v-model:model-value="strategies"
         :network-id="networkId"
         :default-chain-id="chainId"
-        :hidden-strategies="['ticket']"
+        :hidden-strategies="HIDDEN_STRATEGIES"
         :limit="limits['space.default.strategies_limit']"
         @test-strategies="handleTestStrategies"
       >

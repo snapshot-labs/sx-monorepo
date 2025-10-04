@@ -3,6 +3,8 @@ import { Contract } from '@ethersproject/contracts';
 import { poseidonHashMany } from 'micro-starknet';
 import { CallData, shortString } from 'starknet';
 import StarknetCommitAbi from './abis/StarknetCommit.json';
+import { getChoiceEnum } from '../../../utils/starknet-enums';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import {
   ClientConfig,
   ClientOpts,
@@ -10,9 +12,7 @@ import {
   Propose,
   UpdateProposal,
   Vote
-} from '../../../types';
-import { getChoiceEnum } from '../../../utils/starknet-enums';
-import { getStrategiesWithParams } from '../../../utils/strategies';
+} from '../types';
 
 type CallOptions = {
   noWait?: boolean;

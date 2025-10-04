@@ -2,6 +2,9 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { SkinSettings, Space } from '@/types';
 
+// List of global paths, that should not be nested inside space scope
+// when redirecting from whitelabel to main app
+const GLOBAL_PATHS = { contacts: 'settings/contacts' };
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const domain = window.location.hostname;
 
@@ -18,6 +21,27 @@ const MAPPING = {
       heading_color: '#CCD3F2',
       theme: 'dark',
       logo: 'ipfs://bafkreiab7pgyo4gzvospqgrlnfp6o5d6dpq4vijnzvcf5mhwzevt4hnd2m'
+    }
+  },
+  'vote.worldlibertyfinancial.com': {
+    network: 's',
+    id: 'worldlibertyfinancial.com'
+  },
+  'townhall.box': {
+    network: 's',
+    id: 'openagora.eth'
+  },
+  'starknet.stage.box': {
+    network: 's',
+    id: 'starknetdemo.eth',
+    skinSettings: {
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      theme: 'light',
+      logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
   }
 };
@@ -71,20 +95,45 @@ export function useWhiteLabel() {
   async function init() {
     if (resolved.value) return;
 
+    let shouldResolve = true;
+
     try {
       space.value = await getSpace(domain);
 
-      if (space.value) {
-        isWhiteLabel.value = true;
-        skinSettings.value =
-          MAPPING[domain]?.skinSettings ||
-          space.value.additionalRawData?.skinSettings;
+      if (!space.value) return;
+
+      if (!space.value.turbo && !MAPPING[domain]) {
+        const redirectUrl = new URL(
+          `${window.location.protocol}//${DEFAULT_DOMAIN}`
+        );
+
+        const originalHash = window.location.hash.replace(/^#\//, '');
+        const globalPathKey = Object.keys(GLOBAL_PATHS).find(path =>
+          originalHash.startsWith(path)
+        );
+
+        if (globalPathKey) {
+          redirectUrl.hash = `#/${GLOBAL_PATHS[globalPathKey]}`;
+        } else {
+          const newHash = `#/${encodeURIComponent(space.value.network)}:${encodeURIComponent(space.value.id)}`;
+          redirectUrl.hash = [newHash, originalHash].filter(Boolean).join('/');
+        }
+
+        window.location.href = redirectUrl.href;
+        // Don't mark as resolved, to keep the UI splash screen while redirecting
+        shouldResolve = false;
+        return;
       }
+
+      isWhiteLabel.value = true;
+      skinSettings.value =
+        MAPPING[domain]?.skinSettings ||
+        space.value.additionalRawData?.skinSettings;
     } catch (e) {
       console.log(e);
       failed.value = true;
     } finally {
-      resolved.value = true;
+      resolved.value = shouldResolve;
     }
   }
 

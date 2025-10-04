@@ -2,6 +2,7 @@ import { starknet } from '@snapshot-labs/checkpoint';
 import { hash, validateAndParseAddress } from 'starknet';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';
+import logger from './logger';
 import {
   findVariant,
   formatAddressVariant,
@@ -46,9 +47,9 @@ export function createWriters(config: FullConfig) {
     event,
     helpers: { executeTemplate }
   }) => {
-    console.log('Handle contract deployed');
-
     if (!event) return;
+
+    logger.info('Handle contract deployed');
 
     const paddedClassHash = validateAndParseAddress(event.class_hash);
 
@@ -58,14 +59,18 @@ export function createWriters(config: FullConfig) {
         start: blockNumber
       });
     } else {
-      console.log('Unknown class hash', paddedClassHash);
+      logger.warn({ classHash: paddedClassHash }, 'Unknown class hash');
     }
   };
 
-  const handleSpaceCreated: starknet.Writer = async ({ block, tx, event }) => {
-    console.log('Handle space created');
+  const handleSpaceCreated: starknet.Writer = async ({
+    block,
+    txId,
+    event
+  }) => {
+    if (!event || !txId) return;
 
-    if (!event || !tx.transaction_hash) return;
+    logger.info('Handle space deployed');
 
     const strategies: string[] = event.voting_strategies.map(
       (strategy: Strategy) => strategy.address
@@ -80,6 +85,7 @@ export function createWriters(config: FullConfig) {
     const id = validateAndParseAddress(event.space);
 
     const space = new Space(id, config.indexerName);
+    space.protocol = 'snapshot-x';
     space.link = getSpaceLink({
       networkId: config.indexerName,
       spaceId: id
@@ -109,7 +115,7 @@ export function createWriters(config: FullConfig) {
     space.proposer_count = 0;
     space.voter_count = 0;
     space.created = block?.timestamp ?? getCurrentTimestamp();
-    space.tx = tx.transaction_hash;
+    space.tx = txId;
 
     await updateProposalValidationStrategy(
       space,
@@ -127,8 +133,8 @@ export function createWriters(config: FullConfig) {
       await handleSpaceMetadata(space.id, metadataUri, config);
 
       space.metadata = dropIpfs(metadataUri);
-    } catch (e) {
-      console.log('failed to parse space metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle space metadata');
     }
 
     try {
@@ -141,8 +147,8 @@ export function createWriters(config: FullConfig) {
 
       space.strategies_decimals = strategiesDecimals;
       space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
-    } catch (e) {
-      console.log('failed to handle strategies metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle strategies metadata');
     }
 
     await updateCounter(config.indexerName, 'space_count', 1);
@@ -156,7 +162,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space metadata uri updated');
+    logger.info('Handle space metadata uri updated');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -173,8 +179,8 @@ export function createWriters(config: FullConfig) {
       space.metadata = dropIpfs(metadataUri);
 
       await space.save();
-    } catch (e) {
-      console.log('failed to update space metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle space metadata');
     }
   };
 
@@ -184,7 +190,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space min voting duration updated');
+    logger.info('Handle space min voting duration updated');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -204,7 +210,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space max voting duration updated');
+    logger.info('Handle space max voting duration updated');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -224,7 +230,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space ownership transferred');
+    logger.info('Handle space ownership transferred');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -242,7 +248,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space voting delay updated');
+    logger.info('Handle space voting delay updated');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -260,7 +266,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space authenticators added');
+    logger.info('Handle space authenticators added');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -280,7 +286,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space authenticators removed');
+    logger.info('Handle space authenticators removed');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -300,7 +306,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space voting strategies added');
+    logger.info('Handle space voting strategies added');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -344,8 +350,8 @@ export function createWriters(config: FullConfig) {
         ...strategiesDecimals
       ];
       space.vp_decimals = getSpaceDecimals(space.strategies_decimals);
-    } catch (e) {
-      console.log('failed to handle strategies metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle strategies metadata');
     }
 
     await space.save();
@@ -357,7 +363,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space voting strategies removed');
+    logger.info('Handle space voting strategies removed');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -394,7 +400,7 @@ export function createWriters(config: FullConfig) {
   }) => {
     if (!event || !rawEvent) return;
 
-    console.log('Handle space proposal validation strategy updated');
+    logger.info('Handle space proposal validation strategy updated');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -412,10 +418,10 @@ export function createWriters(config: FullConfig) {
     await space.save();
   };
 
-  const handlePropose: starknet.Writer = async ({ tx, rawEvent, event }) => {
-    if (!rawEvent || !event || !tx.transaction_hash) return;
+  const handlePropose: starknet.Writer = async ({ txId, rawEvent, event }) => {
+    if (!rawEvent || !event || !txId) return;
 
-    console.log('Handle propose');
+    logger.info('Handle propose');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
 
@@ -454,7 +460,7 @@ export function createWriters(config: FullConfig) {
       spaceId,
       proposalId
     });
-    proposal.proposal_id = proposalId;
+    proposal.proposal_id = proposalId.toString();
     proposal.space = spaceId;
     proposal.author = author.address;
     proposal.metadata = null;
@@ -487,7 +493,7 @@ export function createWriters(config: FullConfig) {
     proposal.strategies_params = space.strategies_params;
     proposal.vp_decimals = space.vp_decimals;
     proposal.created = parseInt(created.toString());
-    proposal.tx = tx.transaction_hash;
+    proposal.tx = txId;
     proposal.execution_tx = null;
     proposal.veto_tx = null;
     proposal.vote_count = 0;
@@ -554,8 +560,8 @@ export function createWriters(config: FullConfig) {
       );
 
       proposal.metadata = dropIpfs(metadataUri);
-    } catch (e) {
-      console.log(JSON.stringify(e).slice(0, 256));
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle proposal metadata');
     }
 
     const existingUser = await User.loadEntity(
@@ -618,8 +624,8 @@ export function createWriters(config: FullConfig) {
           },
           config
         );
-      } catch {
-        console.log('failed to register proposal');
+      } catch (err) {
+        logger.warn({ err }, 'failed to register herodotus proposal');
       }
     }
 
@@ -633,7 +639,7 @@ export function createWriters(config: FullConfig) {
   const handleCancel: starknet.Writer = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle cancel');
+    logger.info('Handle cancel');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
@@ -658,7 +664,7 @@ export function createWriters(config: FullConfig) {
   const handleUpdate: starknet.Writer = async ({ block, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle update');
+    logger.info('Handle update');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
@@ -732,17 +738,17 @@ export function createWriters(config: FullConfig) {
 
       proposal.metadata = dropIpfs(metadataUri);
       proposal.edited = block?.timestamp ?? getCurrentTimestamp();
-    } catch (e) {
-      console.log('failed to update proposal metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle proposal metadata');
     }
 
     await proposal.save();
   };
 
-  const handleExecute: starknet.Writer = async ({ tx, rawEvent, event }) => {
+  const handleExecute: starknet.Writer = async ({ txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle execute');
+    logger.info('Handle execute');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = `${spaceId}/${parseInt(event.proposal_id)}`;
@@ -753,20 +759,20 @@ export function createWriters(config: FullConfig) {
     proposal.executed = true;
     proposal.execution_settled = true;
     proposal.completed = true;
-    proposal.execution_tx = tx.transaction_hash ?? null;
+    proposal.execution_tx = txId ?? null;
 
     await proposal.save();
   };
 
   const handleVote: starknet.Writer = async ({
     block,
-    tx,
+    txId,
     rawEvent,
     event
   }) => {
     if (!rawEvent || !event) return;
 
-    console.log('Handle vote');
+    logger.info('Handle vote');
 
     const spaceId = validateAndParseAddress(rawEvent.from_address);
     const proposalId = parseInt(event.proposal_id);
@@ -787,21 +793,22 @@ export function createWriters(config: FullConfig) {
       config.indexerName
     );
     vote.space = spaceId;
-    vote.proposal = proposalId;
+    vote.proposal = proposalId.toString();
     vote.voter = voter.address;
     vote.choice = choice;
     vote.vp = vp.toString();
     vote.vp_parsed = getParsedVP(vp.toString(), proposal.vp_decimals);
     vote.created = created;
-    vote.tx = tx.transaction_hash;
+    vote.tx = txId;
 
     try {
       const metadataUri = longStringToText(event.metadata_uri);
-      await handleVoteMetadata(metadataUri, config);
-
-      vote.metadata = dropIpfs(metadataUri);
-    } catch (e) {
-      console.log(JSON.stringify(e).slice(0, 256));
+      if (metadataUri) {
+        await handleVoteMetadata(metadataUri, config);
+        vote.metadata = dropIpfs(metadataUri);
+      }
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle vote metadata');
     }
 
     await vote.save();

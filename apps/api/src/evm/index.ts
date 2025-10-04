@@ -1,17 +1,53 @@
 import Checkpoint, { evm } from '@snapshot-labs/checkpoint';
 import { createConfig } from './config';
-import { createWriters } from './writers';
 import { registerIndexer } from '../register';
+import { createWriters as createGovernorBravoWriters } from './protocols/governor-bravo/writers';
+import { createWriters as createSnapshotXWriters } from './protocols/snapshot-x/writers';
+import { EVMConfig, Protocols } from './types';
+import { applyProtocolPrefixToWriters } from './utils';
 
-const ethConfig = createConfig('eth');
-const sepConfig = createConfig('sep');
-const oethConfig = createConfig('oeth');
-const maticConfig = createConfig('matic');
-const arb1Config = createConfig('arb1');
-const baseConfig = createConfig('base');
-const mntConfig = createConfig('mnt');
-const apeConfig = createConfig('ape');
-const curtisConfig = createConfig('curtis');
+// SnapshotX runs by default unless explicitly disabled
+export const ENABLE_SNAPSHOT_X = process.env.ENABLE_SNAPSHOT_X !== 'false';
+export const ENABLE_GOVERNOR_BRAVO =
+  process.env.ENABLE_GOVERNOR_BRAVO === 'true';
+
+const protocols: Protocols = {
+  snapshotX: ENABLE_SNAPSHOT_X,
+  governorBravo: ENABLE_GOVERNOR_BRAVO
+};
+
+const ethConfig = createConfig('eth', protocols);
+const sepConfig = createConfig('sep', protocols);
+const oethConfig = createConfig('oeth', protocols);
+const maticConfig = createConfig('matic', protocols);
+const arb1Config = createConfig('arb1', protocols);
+const baseConfig = createConfig('base', protocols);
+const mntConfig = createConfig('mnt', protocols);
+const apeConfig = createConfig('ape', protocols);
+const curtisConfig = createConfig('curtis', protocols);
+
+function createWriters(config: EVMConfig) {
+  let writers: Record<string, evm.Writer> = {};
+
+  if (config.snapshotXConfig) {
+    writers = applyProtocolPrefixToWriters(
+      'snapshotX',
+      createSnapshotXWriters(config, config.snapshotXConfig)
+    );
+  }
+
+  if (config.governorBravoConfig) {
+    writers = {
+      ...writers,
+      ...applyProtocolPrefixToWriters(
+        'governorBravo',
+        createGovernorBravoWriters(config, config.governorBravoConfig)
+      )
+    };
+  }
+
+  return writers;
+}
 
 const ethIndexer = new evm.EvmIndexer(createWriters(ethConfig));
 const sepIndexer = new evm.EvmIndexer(createWriters(sepConfig));

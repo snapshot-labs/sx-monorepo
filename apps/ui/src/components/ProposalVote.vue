@@ -17,13 +17,10 @@ defineEmits<{
 
 const { auth } = useWeb3();
 const { votes, pendingVotes } = useAccount();
-const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
   props.proposal.network,
   props.proposal.space.snapshot_chain_id
 );
-
-const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
 const hasSupportedAuthenticator = computed(() => {
   const network = getNetwork(props.proposal.network);
@@ -92,7 +89,10 @@ const isEditable = computed(() => {
       @click="$emit('enterEditMode')"
     >
       <div
-        v-if="proposal.privacy !== 'none'"
+        v-if="
+          proposal.privacy !== 'none' &&
+          ['pending', 'active'].includes(proposal.state)
+        "
         class="flex space-x-2 items-center grow truncate text-skin-link"
       >
         <IH-lock-closed class="size-[16px] shrink-0" />
@@ -137,11 +137,15 @@ const isEditable = computed(() => {
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">
     Voting for this proposal hasn't started yet. Voting will start
-    {{ _t(start) }}.
+    {{ _t(proposal.start) }}.
   </slot>
 
   <slot
-    v-else-if="['passed', 'rejected', 'executed'].includes(proposal.state)"
+    v-else-if="
+      ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(
+        proposal.state
+      )
+    "
     name="ended"
   >
     Proposal voting window has ended

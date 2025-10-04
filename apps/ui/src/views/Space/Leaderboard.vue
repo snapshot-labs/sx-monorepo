@@ -90,7 +90,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 
 <template>
   <div>
-    <UiLabel label="Leaderboard" sticky />
+    <UiSectionHeader label="Leaderboard" sticky />
     <div
       class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b w-full flex font-medium space-x-1"
     >
@@ -156,15 +156,15 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
                 name: 'space-user-statement',
                 params: { space: `${space.network}:${space.id}`, user: user.id }
               }"
-              class="overflow-hidden"
+              class="overflow-hidden group"
             >
               <h4
                 class="text-skin-link truncate"
                 v-text="user.name || shorten(user.id)"
               />
-              <div
+              <UiAddress
+                :address="user.id"
                 class="text-[17px] text-skin-text truncate"
-                v-text="shorten(user.id)"
               />
             </AppLink>
           </div>

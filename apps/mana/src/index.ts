@@ -3,17 +3,17 @@ import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
 import ethRpc from './eth';
-import { registeredApeGasProposalsLoop } from './eth/registered';
-import starkRpc from './stark';
 import pkg from '../package.json';
+import { registeredApeGasProposalsLoop } from './eth/registered';
+import logger from './logger';
+import starkRpc from './stark';
 import {
   registeredProposalsLoop,
   registeredTransactionsLoop
 } from './stark/registered';
 
-// Validate that WALLET_SECRET is defined
 if (!process.env.WALLET_SECRET) {
-  console.error('Error: WALLET_SECRET environment variable is required');
+  logger.fatal('WALLET_SECRET environment variable is required');
   process.exit(1);
 }
 
@@ -40,7 +40,17 @@ async function start() {
   registeredProposalsLoop();
   registeredApeGasProposalsLoop();
 
-  app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
+  const server = app.listen(PORT, () =>
+    logger.info(`Listening at http://localhost:${PORT}`)
+  );
+
+  process.on('uncaughtException', err => {
+    logger.fatal({ err }, 'Uncaught exception');
+
+    server.close(() => {
+      process.exit(1);
+    });
+  });
 }
 
 start();

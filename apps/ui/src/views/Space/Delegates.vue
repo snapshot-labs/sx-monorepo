@@ -36,7 +36,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             type="button"
             @click="activeDelegationId = i"
           >
-            <UiLink
+            <UiLabel
               :is-active="activeDelegationId === i"
               :text="delegation.name || `Delegates ${i + 1}`"
             />

@@ -133,7 +133,11 @@ onUnmounted(() => {
         class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
         @click="modalAccountOpen = true"
       >
-        <span v-if="web3.account" class="sm:flex items-center space-x-2">
+        <span
+          v-if="web3.account"
+          class="sm:flex items-center space-x-2"
+          data-testid="profile-button"
+        >
           <UiStamp :id="user.id" :size="18" :cb="cb" />
           <span
             class="hidden sm:block truncate max-w-[120px]"

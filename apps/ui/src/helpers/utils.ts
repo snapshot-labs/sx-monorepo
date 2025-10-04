@@ -1,6 +1,7 @@
 import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import { FunctionFragment } from '@ethersproject/abi';
 import { getAddress, isAddress } from '@ethersproject/address';
+import { namehash } from '@ethersproject/hash';
 import { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import Autolinker from 'autolinker';
@@ -17,11 +18,13 @@ import { RouteParamsRaw } from 'vue-router';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
+import { call } from './call';
 import {
   EVM_EMPTY_ADDRESS,
   MAX_FILE_SIZE_BYTES,
   MAX_SYMBOL_LENGTH
 } from './constants';
+import { getProvider } from './provider';
 import { getOwner } from './stamp';
 import pkg from '@/../package.json';
 import ICCoingecko from '~icons/c/coingecko';
@@ -415,6 +418,9 @@ export async function verifyNetwork(
   }
 }
 
+// Not implemented by Braavos and Argent Mobile
+// Signing and verifying messages on different network should work fine
+// for single signer message
 export async function verifyStarknetNetwork(
   web3: any,
   chainId: starknetConstants.StarknetChainId
@@ -528,6 +534,112 @@ export function getStampUrl(
   const cropParam = cropped === false ? `&fit=inside` : '';
 
   return `https://cdn.stamp.fyi/${type}/${formatAddress(id)}${sizeParam}${cacheParam}${cropParam}`;
+}
+
+export async function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+  const url = URL.createObjectURL(file);
+
+  try {
+    return await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = url;
+    });
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+export async function loadImageFromIpfs(ipfsUrl: string): Promise<File> {
+  const imageUrl = getUrl(ipfsUrl);
+  if (!imageUrl) {
+    throw new Error('Unable to resolve IPFS URL');
+  }
+
+  const response = await fetch(imageUrl);
+  const blob = await response.blob();
+  return new File([blob], 'image', { type: blob.type });
+}
+
+export async function resizeImage(
+  file: File,
+  width: number,
+  height: number
+): Promise<File> {
+  const img = await loadImageFromFile(file);
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  if (!ctx) {
+    throw new Error('Failed to get canvas context');
+  }
+
+  // Calculate scale factors for both dimensions
+  const scaleX = width / img.width;
+  const scaleY = height / img.height;
+
+  // Use the larger scale factor to ensure both minimum dimensions are met
+  const scale = Math.max(scaleX, scaleY);
+
+  const scaledWidth = img.width * scale;
+  const scaledHeight = img.height * scale;
+
+  // Calculate source dimensions for cropping
+  let sourceX = 0;
+  let sourceY = 0;
+  let sourceWidth = img.width;
+  let sourceHeight = img.height;
+
+  if (scaledWidth > width) {
+    // Image is too wide after scaling, crop from center
+    const cropWidth = width / scale;
+    sourceX = (img.width - cropWidth) / 2;
+    sourceWidth = cropWidth;
+  }
+
+  if (scaledHeight > height) {
+    // Image is too tall after scaling, crop from center
+    const cropHeight = height / scale;
+    sourceY = (img.height - cropHeight) / 2;
+    sourceHeight = cropHeight;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  // Fill background with transparent
+  ctx.clearRect(0, 0, width, height);
+
+  // Draw the image, cropping from center if necessary
+  ctx.drawImage(
+    img,
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+    0,
+    0,
+    width,
+    height
+  );
+
+  return new Promise<File>((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (!blob) {
+        reject(new Error('Failed to convert canvas to blob'));
+        return;
+      }
+
+      const resizedFile = new File([blob], file.name, {
+        type: file.type,
+        lastModified: Date.now()
+      });
+
+      resolve(resizedFile);
+    }, file.type);
+  });
 }
 
 export async function imageUpload(file: File) {
@@ -717,6 +829,30 @@ export function getUserFacingErrorMessage(
   return (e instanceof Error && e.message) || fallback;
 }
 
+async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {
+  const registries = {
+    146: '0xDe1DAdcF11a7447C3D093e97FdbD513f488cE3b4' // Sonic
+  };
+
+  if (!registries[chainId]) {
+    throw new Error('Unsupported network');
+  }
+
+  const provider = getProvider(chainId);
+  const tokenId = namehash(name);
+
+  return call(
+    provider,
+    [
+      'function ownerOf(uint256 tokenId) external view returns (address address)'
+    ],
+    [registries[chainId], 'ownerOf', [tokenId]],
+    {
+      blockTag: 'latest'
+    }
+  );
+}
+
 export async function getSpaceController(id: string, network: NetworkID) {
   const chainMapping = {
     ens: {
@@ -726,6 +862,9 @@ export async function getSpaceController(id: string, network: NetworkID) {
     shibarium: {
       s: 109,
       's-tn': 157
+    },
+    sonic: {
+      s: 146
     }
   };
 
@@ -733,6 +872,10 @@ export async function getSpaceController(id: string, network: NetworkID) {
     const owner = await getOwner(id, chainMapping.shibarium[network]);
 
     return owner || EVM_EMPTY_ADDRESS;
+  }
+
+  if (id.endsWith('.sonic')) {
+    return getUnstoppableDomainsNameOwner(id, chainMapping.sonic[network]);
   }
 
   return getEnsSpaceController(id, chainMapping.ens[network]);

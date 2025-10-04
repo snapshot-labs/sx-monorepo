@@ -21,6 +21,8 @@ export type ProposalState =
   | 'passed'
   | 'rejected'
   | 'closed'
+  | 'queued'
+  | 'vetoed'
   | 'executed';
 
 export type NetworkID =
@@ -179,6 +181,7 @@ export type OffchainAdditionalRawData = {
 
 export type Space = {
   id: string;
+  protocol: string;
   network: NetworkID;
   verified: boolean;
   turbo: boolean;
@@ -252,18 +255,20 @@ export type ProposalExecution = {
 
 export type Proposal = {
   id: string;
-  proposal_id: number | string;
+  proposal_id: string;
   network: NetworkID;
   execution_network: NetworkID;
   /**
    * If proposal is invalid it means that it was not created correctly.
    */
   isInvalid: boolean;
+  vp_decimals: number;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';
   space: {
     id: string;
+    protocol: string;
     name: string;
     snapshot_chain_id?: string;
     avatar: string;
@@ -290,8 +295,11 @@ export type Proposal = {
   body: string;
   discussion: string;
   executions: ProposalExecution[];
+  /** Timestamp when proposal starts */
   start: number;
+  /** Timestamp when proposal can end at the earliest */
   min_end: number;
+  /** Timestamp when proposal can end at the latest */
   max_end: number;
   snapshot: number;
   choices: string[];
@@ -397,7 +405,7 @@ export type Vote = {
   space: {
     id: string;
   };
-  proposal: number | string;
+  proposal: string;
   choice: number | number[] | Record<string, number>;
   vp: number;
   reason?: string;

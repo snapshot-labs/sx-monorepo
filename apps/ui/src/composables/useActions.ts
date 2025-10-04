@@ -8,7 +8,6 @@ import {
   metadataNetwork,
   offchainNetworks
 } from '@/networks';
-import { STARKNET_CONNECTORS } from '@/networks/common/constants';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   ChainId,
@@ -25,13 +24,6 @@ import {
   User,
   VoteType
 } from '@/types';
-
-const offchainToStarknetIds: Record<string, NetworkID> = {
-  s: 'sn',
-  's-tn': 'sn-sep'
-};
-
-const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
   const uiStore = useUiStore();
@@ -89,7 +81,7 @@ export function useActions() {
       if (envelope.signatureData.commitTxId) {
         uiStore.addPendingTransaction(
           envelope.signatureData.commitTxId,
-          network.baseNetworkId
+          network.baseChainId
         );
       }
 
@@ -169,18 +161,8 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
-  async function getAliasSigner({
-    connector,
-    provider
-  }: {
-    connector: Connector;
-    provider: Web3Provider;
-  }) {
-    const network = getNetwork(
-      STARKNET_CONNECTORS.includes(connector.type)
-        ? starknetNetworkId
-        : metadataNetwork
-    );
+  async function getAliasSigner({ provider }: { provider: Web3Provider }) {
+    const network = getNetwork(metadataNetwork);
 
     return alias.getAliasWallet(address =>
       wrapPromise(metadataNetwork, network.actions.setAlias(provider, address))
