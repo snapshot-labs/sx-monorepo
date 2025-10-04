@@ -96,9 +96,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   );
 
   async function toggleSpaceFollow(id: string) {
-    if (!followedSpacesIds.value) return;
-
-    const alreadyFollowed = followedSpacesIds.value.includes(id);
+    const alreadyFollowed = followedSpacesIds.value?.includes(id) ?? false;
     const [spaceNetwork, spaceId] = id.split(':') as [NetworkID, string];
     followedSpaceLoading.add(id);
 
