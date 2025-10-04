@@ -197,6 +197,20 @@ watchEffect(() => setTitle('Explore'));
     </div>
     <div class="flex-grow" v-bind="$attrs">
       <UiSectionHeader label="Spaces" sticky />
+      <UiColumnHeader class="hidden md:flex">
+        <div class="grow" />
+        <div
+          v-if="protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Active'"
+        />
+        <div class="w-[100px]" v-text="'Proposals'" />
+        <div
+          v-if="protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Followers'"
+        />
+      </UiColumnHeader>
       <UiLoading v-if="isPending" class="block m-4" />
       <div v-else-if="data" data-testid="explore-spaces-list">
         <UiContainerInfiniteScroll

@@ -69,6 +69,16 @@ watch(
       </UiTooltip>
     </div>
     <UiSectionHeader label="My spaces" sticky />
+    <UiColumnHeader class="hidden md:flex">
+      <div class="grow" />
+      <div v-if="protocol === 'snapshot'" class="w-[100px]" v-text="'Active'" />
+      <div class="w-[100px]" v-text="'Proposals'" />
+      <div
+        v-if="protocol === 'snapshot'"
+        class="w-[100px]"
+        v-text="'Followers'"
+      />
+    </UiColumnHeader>
     <UiLoading v-if="loading" class="block m-4" />
     <div v-else-if="data?.pages.flat().length">
       <SpacesListItem
