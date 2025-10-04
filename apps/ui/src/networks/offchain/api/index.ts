@@ -147,7 +147,7 @@ function formatSpace(
     return {
       name: treasury.name,
       address: treasury.address,
-      chainId
+      chainId: String(chainId)
     };
   });
 
