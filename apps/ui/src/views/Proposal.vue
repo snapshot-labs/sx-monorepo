@@ -6,6 +6,7 @@ import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Space } from '@/types';
+import { TOTAL_NAV_HEIGHT } from '../../tailwind.config';
 
 const props = defineProps<{
   space: Space;
@@ -141,10 +142,9 @@ watchEffect(() => {
         v-bind="$attrs"
       >
         <UiScrollerHorizontal
-          class="z-40 sticky top-[71px] lg:top-[72px]"
+          class="z-40 sticky top-header-offset lg:top-header"
           with-buttons
           gradient="xxl"
-          data-testid="proposal-tabs"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
@@ -262,7 +262,11 @@ watchEffect(() => {
           }
         ]"
       >
-        <Affix data-testid="proposal-sidebar" :top="72" :bottom="64">
+        <Affix
+          data-testid="proposal-sidebar"
+          :top="TOTAL_NAV_HEIGHT"
+          :bottom="64"
+        >
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
