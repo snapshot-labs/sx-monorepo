@@ -70,18 +70,13 @@ watch(
     </div>
     <UiSectionHeader label="My spaces" sticky />
     <UiLoading v-if="loading" class="block m-4" />
-    <UiContainer
-      v-else-if="data?.pages.flat().length"
-      class="!max-w-screen-md pt-5"
-    >
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <SpacesListItem
-          v-for="space in data?.pages.flat()"
-          :key="space.id"
-          :space="space"
-        />
-      </div>
-    </UiContainer>
+    <div v-else-if="data?.pages.flat().length">
+      <SpacesListItem
+        v-for="space in data?.pages.flat()"
+        :key="space.id"
+        :space="space"
+      />
+    </div>
     <div v-else class="px-4 py-3 flex items-center space-x-2">
       <IH-exclamation-circle class="inline-block shrink-0" />
       <span v-text="'There are no spaces here.'" />

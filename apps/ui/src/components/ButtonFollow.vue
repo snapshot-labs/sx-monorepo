@@ -65,6 +65,7 @@ async function handleClick() {
       :disabled="loading || isSafeWallet || preventFollowingMore"
       class="group"
       :class="{ 'hover:border-skin-danger': spaceFollowed }"
+      :primary="!spaceFollowed"
       :loading="loading"
       @click.prevent="handleClick"
     >

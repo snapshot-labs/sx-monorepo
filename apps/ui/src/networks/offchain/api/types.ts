@@ -12,6 +12,7 @@ export type ApiRelatedSpace = {
   avatar: string;
   cover: string | null;
   proposalsCount: number;
+  followersCount: number;
   activeProposals: number;
   votesCount: number;
   turbo: boolean;

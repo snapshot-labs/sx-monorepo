@@ -71,6 +71,7 @@ const SPACE_FRAGMENT = gql`
       cover
       proposalsCount
       votesCount
+      followersCount
       activeProposals
       turbo
       verified
