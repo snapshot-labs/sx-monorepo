@@ -94,8 +94,8 @@
     "turndown": "^7.2.0",
     "unplugin-auto-import": "^0.16.6",
     "util": "^0.12.5",
-    "vue": "^3.4.15",
-    "vue-router": "^4.2.5",
+    "vue": "^3.5.22",
+    "vue-router": "^4.5.1",
     "vue-tippy": "^6.4.1",
     "vuedraggable": "^4.1.0"
   },
@@ -117,18 +117,17 @@
     "eslint": "^8.57.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",
-    "husky": "^8.0.3",
     "postcss": "^8.4.30",
     "prettier": "^3.1.0",
     "rollup-plugin-visualizer": "^5.9.2",
     "sass": "^1.68.0",
     "storybook": "^9.0.18",
     "tailwindcss": "^3.3.3",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.3",
     "unplugin-icons": "^0.17.0",
     "unplugin-vue-components": "^0.25.2",
-    "vite": "^7.0.6",
+    "vite": "^7.1.9",
     "vitest": "^3.2.4",
-    "vue-tsc": "^3.0.3"
+    "vue-tsc": "^3.1.0"
   }
 }
