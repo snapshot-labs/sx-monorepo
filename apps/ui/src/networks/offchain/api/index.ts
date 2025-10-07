@@ -168,6 +168,7 @@ function formatSpace(
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
     return {
       id: space.id,
+      protocol: 'snapshot',
       name: space.name,
       network: networkId,
       avatar: space.avatar,

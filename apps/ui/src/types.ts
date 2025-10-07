@@ -137,6 +137,7 @@ export type StrategyParsedMetadata = {
 
 export type RelatedSpace = {
   id: string;
+  protocol: string;
   name: string;
   network: NetworkID;
   avatar: string;

@@ -21,7 +21,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
           <SpaceAvatar :space="space" :size="32" class="rounded-md" />
         </UiBadgeNetwork>
       </div>
-      <div class="grow flex items-center truncate">
+      <div class="grow flex items-center truncate mr-2">
         <h3 class="truncate" v-text="space.name" />
         <UiBadgeVerified
           class="ml-1"
@@ -29,11 +29,15 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
           :turbo="space.turbo"
         />
       </div>
-      <div class="text-[21px] font-bold flex text-center group-hover:hidden">
+      <div @click="e => e.preventDefault()">
+        <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
+      </div>
+      <div class="text-[21px] font-bold flex text-center">
         <span
-          v-if="space.active_proposals && space.active_proposals > 0"
-          class="text-skin-success w-[50px] md:w-[100px]"
-          v-text="_n(space.active_proposals, 'compact')"
+          v-if="space.protocol === 'snapshot'"
+          class="w-[50px] md:w-[100px]"
+          :class="{ 'text-skin-success': (space.active_proposals ?? 0) > 0 }"
+          v-text="_n(space.active_proposals ?? 0, 'compact')"
         />
         <span
           class="text-skin-link w-[100px] hidden md:block"
@@ -45,7 +49,6 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
           v-text="_n(space.follower_count, 'compact')"
         />
       </div>
-      <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
     </div>
   </AppLink>
 </template>
