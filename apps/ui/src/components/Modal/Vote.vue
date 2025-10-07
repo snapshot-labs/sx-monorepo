@@ -245,7 +245,7 @@ watchEffect(async () => {
           v-else-if="votingPower"
           class="font-semibold text-skin-heading text-[20px] leading-6 flex gap-1.5"
         >
-          <span>{{ formattedVotingPower }}</span>
+          {{ formattedVotingPower }}
           <span
             v-if="proposal.snapshot && blockExplorerUrl"
             class="text-skin-text font-normal flex gap-0.5"
