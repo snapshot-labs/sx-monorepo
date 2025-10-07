@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
-import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
+import { _n, getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
@@ -78,6 +79,19 @@ const formValidator = getValidator({
 const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
+
+const blockExplorerUrl = computed(() => {
+  const chainId = props.proposal.space.snapshot_chain_id;
+  const snapshot = props.proposal.snapshot;
+
+  if (!chainId || !snapshot) return null;
+
+  const network = networks[chainId];
+
+  return network?.explorer?.url
+    ? `${network.explorer.url}/block/${snapshot}`
+    : null;
+});
 
 const offchainProposal = computed<boolean>(() =>
   offchainNetworks.includes(props.proposal.network)
@@ -229,9 +243,23 @@ watchEffect(async () => {
         </dd>
         <dd
           v-else-if="votingPower"
-          class="font-semibold text-skin-heading text-[20px] leading-6"
-          v-text="formattedVotingPower"
-        />
+          class="font-semibold text-skin-heading text-[20px] leading-6 flex gap-1.5"
+        >
+          <span>{{ formattedVotingPower }}</span>
+          <span
+            v-if="proposal.snapshot && blockExplorerUrl"
+            class="text-skin-text font-normal flex gap-0.5"
+          >
+            (
+            <a :href="blockExplorerUrl" target="_blank">{{
+              _n(proposal.snapshot)
+            }}</a>
+            <UiTooltip title="Snapshot block number">
+              <IH-information-circle class="mt-0.5" />
+            </UiTooltip>
+            )
+          </span>
+        </dd>
       </dl>
       <div v-if="proposal.privacy === 'none'" class="s-box">
         <UiForm
