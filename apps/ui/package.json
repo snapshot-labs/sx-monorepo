@@ -121,7 +121,7 @@
     "@vue/test-utils": "^2.4.5",
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.1",
-    "electron": "^38.0.0",
+    "electron": "^38.2.0",
     "eslint": "^8.57.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",
