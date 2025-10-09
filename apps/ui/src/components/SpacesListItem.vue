@@ -29,9 +29,11 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
           :turbo="space.turbo"
         />
       </div>
-      <div @click="e => e.preventDefault()">
-        <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
-      </div>
+      <ButtonFollow
+        :space="space"
+        class="hidden group-hover:block -my-2"
+        @click.prevent="e => e.preventDefault()"
+      />
       <div class="text-[21px] font-bold flex text-center">
         <span
           v-if="space.protocol === 'snapshot'"
