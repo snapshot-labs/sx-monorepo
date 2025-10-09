@@ -5,9 +5,13 @@ import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
-import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
-import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
-import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
+import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy';
+import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy';
+import L1AvatarExecutionStrategyFactoryAbi from './abis/L1AvatarExecutionStrategyFactory';
+import ProxyFactoryAbi from './abis/ProxyFactory';
+import SimpleQuorumAvatarExecutionStrategyAbi from './abis/SimpleQuorumAvatarExecutionStrategy.json';
+import SimpleQuorumTimelockExecutionStrategyAbi from './abis/SimpleQuorumTimelockExecutionStrategy';
+import SpaceAbi from './abis/Space';
 import { handleSpaceMetadata } from './ipfs';
 import logger from './logger';
 import {
@@ -59,11 +63,6 @@ const KNOWN_EXECUTION_STRATEGIES = [
 const EMPTY_EXECUTION_HASH =
   '0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470';
 
-type Strategy = {
-  addr: string;
-  params: string;
-};
-
 export function createWriters(
   config: EVMConfig,
   protocolConfig: SnapshotXConfig
@@ -73,11 +72,10 @@ export function createWriters(
     protocolConfig.chainId
   );
 
-  const handleProxyDeployed: evm.Writer = async ({
-    blockNumber,
-    event,
-    helpers: { executeTemplate }
-  }) => {
+  const handleProxyDeployed: evm.Writer<
+    typeof ProxyFactoryAbi,
+    'ProxyDeployed'
+  > = async ({ blockNumber, event, helpers: { executeTemplate } }) => {
     if (!event) return;
 
     logger.info('Handle contract deployed');
@@ -96,7 +94,7 @@ export function createWriters(
       case getAddress(protocolConfig.masterSimpleQuorumTimelock): {
         const contract = new Contract(
           proxyAddress,
-          SimpleQuorumTimelockExecutionStrategy,
+          SimpleQuorumTimelockExecutionStrategyAbi,
           provider
         );
 
@@ -141,7 +139,7 @@ export function createWriters(
       case getAddress(protocolConfig.masterSimpleQuorumAvatar): {
         const contract = new Contract(
           proxyAddress,
-          SimpleQuorumAvatarExecutionStrategy,
+          SimpleQuorumAvatarExecutionStrategyAbi,
           provider
         );
 
@@ -181,7 +179,7 @@ export function createWriters(
         : Symbol('never'): {
         const contract = new Contract(
           proxyAddress,
-          AxiomExecutionStrategy,
+          AxiomExecutionStrategyAbi,
           provider
         );
 
@@ -219,19 +217,16 @@ export function createWriters(
     }
   };
 
-  const handleSpaceCreated: evm.Writer = async ({
-    block,
-    blockNumber,
-    txId,
-    event
-  }) => {
+  const handleSpaceCreated: evm.Writer<
+    typeof SpaceAbi,
+    'SpaceCreated'
+  > = async ({ block, blockNumber, txId, event }) => {
     if (!event) return;
 
     logger.info('Handle space created');
 
-    const votingStrategies: Strategy[] = event.args.input.votingStrategies;
-
     const id = getAddress(event.args.space);
+    const { votingStrategies } = event.args.input;
 
     const space = new Space(id, config.indexerName);
     space.protocol = 'snapshot-x';
@@ -251,7 +246,9 @@ export function createWriters(
     space.strategies = votingStrategies.map(s => getAddress(s.addr));
     space.next_strategy_index = votingStrategies.length;
     space.strategies_params = votingStrategies.map(s => s.params);
-    space.strategies_metadata = event.args.input.votingStrategyMetadataURIs;
+    space.strategies_metadata = [
+      ...event.args.input.votingStrategyMetadataURIs
+    ];
     space.strategies_decimals = [];
     space.vp_decimals = 0;
     space.authenticators = event.args.input.authenticators.map(
@@ -261,7 +258,7 @@ export function createWriters(
     space.vote_count = 0;
     space.proposer_count = 0;
     space.voter_count = 0;
-    space.created = block?.timestamp ?? getCurrentTimestamp();
+    space.created = Number(block?.timestamp ?? getCurrentTimestamp());
     space.tx = txId;
 
     await updateProposalValidationStrategy(
@@ -322,11 +319,10 @@ export function createWriters(
     await space.save();
   };
 
-  const handleMetadataUriUpdated: evm.Writer = async ({
-    blockNumber,
-    rawEvent,
-    event
-  }) => {
+  const handleMetadataUriUpdated: evm.Writer<
+    typeof SpaceAbi,
+    'MetadataURIUpdated'
+  > = async ({ blockNumber, rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space metadata uri updated');
@@ -369,10 +365,10 @@ export function createWriters(
     }
   };
 
-  const handleMinVotingDurationUpdated: evm.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleMinVotingDurationUpdated: evm.Writer<
+    typeof SpaceAbi,
+    'MinVotingDurationUpdated'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space min voting duration updated');
@@ -382,17 +378,15 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.min_voting_period = Number(
-      BigInt(event.args.newMinVotingDuration).toString()
-    );
+    space.min_voting_period = event.args.newMinVotingDuration;
 
     await space.save();
   };
 
-  const handleMaxVotingDurationUpdated: evm.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleMaxVotingDurationUpdated: evm.Writer<
+    typeof SpaceAbi,
+    'MaxVotingDurationUpdated'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space max voting duration updated');
@@ -402,14 +396,15 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.max_voting_period = Number(
-      BigInt(event.args.newMaxVotingDuration).toString()
-    );
+    space.max_voting_period = event.args.newMaxVotingDuration;
 
     await space.save();
   };
 
-  const handleVotingDelayUpdated: evm.Writer = async ({ rawEvent, event }) => {
+  const handleVotingDelayUpdated: evm.Writer<
+    typeof SpaceAbi,
+    'VotingDelayUpdated'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space voting delay updated');
@@ -419,15 +414,15 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.voting_delay = Number(BigInt(event.args.newVotingDelay).toString());
+    space.voting_delay = event.args.newVotingDelay;
 
     await space.save();
   };
 
-  const handleOwnershipTransferred: evm.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleOwnershipTransferred: evm.Writer<
+    typeof SpaceAbi,
+    'OwnershipTransferred'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space ownership transferred');
@@ -442,7 +437,10 @@ export function createWriters(
     await space.save();
   };
 
-  const handleAuthenticatorsAdded: evm.Writer = async ({ rawEvent, event }) => {
+  const handleAuthenticatorsAdded: evm.Writer<
+    typeof SpaceAbi,
+    'AuthenticatorsAdded'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space authenticators added');
@@ -459,10 +457,10 @@ export function createWriters(
     await space.save();
   };
 
-  const handleAuthenticatorsRemoved: evm.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleAuthenticatorsRemoved: evm.Writer<
+    typeof SpaceAbi,
+    'AuthenticatorsRemoved'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space authenticators removed');
@@ -472,17 +470,19 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
+    const authenticatorsToRemove: string[] = [...event.args.authenticators];
+
     space.authenticators = space.authenticators.filter(
-      authenticator => !event.args.authenticators.includes(authenticator)
+      authenticator => !authenticatorsToRemove.includes(authenticator)
     );
 
     await space.save();
   };
 
-  const handleVotingStrategiesAdded: evm.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleVotingStrategiesAdded: evm.Writer<
+    typeof SpaceAbi,
+    'VotingStrategiesAdded'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space voting strategies added');
@@ -494,11 +494,11 @@ export function createWriters(
 
     const initialNextStrategy = space.next_strategy_index;
 
-    const strategies: string[] = event.args.newVotingStrategies.map(
-      (strategy: Strategy) => strategy.addr
+    const strategies = event.args.newVotingStrategies.map(
+      strategy => strategy.addr
     );
     const strategiesParams = event.args.newVotingStrategies.map(
-      (strategy: Strategy) => strategy.params
+      strategy => strategy.params
     );
     const strategiesMetadataUris = event.args.newVotingStrategyMetadataURIs;
 
@@ -534,10 +534,10 @@ export function createWriters(
     await space.save();
   };
 
-  const handleVotingStrategiesRemoved: evm.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleVotingStrategiesRemoved: evm.Writer<
+    typeof SpaceAbi,
+    'VotingStrategiesRemoved'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space voting strategies removed');
@@ -547,8 +547,8 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    const indicesToRemove = event.args.votingStrategyIndices.map(
-      (index: string) => space.strategies_indices.indexOf(parseInt(index))
+    const indicesToRemove = event.args.votingStrategyIndices.map(index =>
+      space.strategies_indices.indexOf(index)
     );
 
     space.strategies_indices = space.strategies_indices.filter(
@@ -571,10 +571,10 @@ export function createWriters(
     await space.save();
   };
 
-  const handleProposalValidationStrategyUpdated: evm.Writer = async ({
-    rawEvent,
-    event
-  }) => {
+  const handleProposalValidationStrategyUpdated: evm.Writer<
+    typeof SpaceAbi,
+    'ProposalValidationStrategyUpdated'
+  > = async ({ rawEvent, event }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle space proposal validation strategy updated');
@@ -596,13 +596,10 @@ export function createWriters(
     await space.save();
   };
 
-  const handleProposalCreated: evm.Writer = async ({
-    rawEvent,
-    event,
-    txId,
-    block,
-    blockNumber
-  }) => {
+  const handleProposalCreated: evm.Writer<
+    typeof SpaceAbi,
+    'ProposalCreated'
+  > = async ({ rawEvent, event, txId, block, blockNumber }) => {
     if (!rawEvent || !event || !txId) return;
 
     logger.info('Handle proposal created');
@@ -616,9 +613,9 @@ export function createWriters(
       ? await SpaceMetadataItem.loadEntity(space.metadata, config.indexerName)
       : null;
 
-    const proposalId = event.args.proposalId.toNumber();
+    const proposalId = event.args.proposalId;
     const author = getAddress(event.args.author);
-    const created = block?.timestamp ?? getCurrentTimestamp();
+    const created = Number(block?.timestamp ?? getCurrentTimestamp());
 
     const proposal = new Proposal(
       `${spaceId}/${proposalId}`,
@@ -640,7 +637,7 @@ export function createWriters(
         networkId: config.indexerName,
         blockNumber: value,
         currentBlockNumber: blockNumber,
-        currentTimestamp: block?.timestamp ?? getCurrentTimestamp(),
+        currentTimestamp: created,
         provider
       });
 
@@ -824,13 +821,16 @@ export function createWriters(
     ]);
   };
 
-  const handleProposalCancelled: evm.Writer = async ({ rawEvent, event }) => {
+  const handleProposalCancelled: evm.Writer<
+    typeof SpaceAbi,
+    'ProposalCancelled'
+  > = async ({ rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle proposal cancelled');
 
     const spaceId = getAddress(rawEvent.address);
-    const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
+    const proposalId = `${spaceId}/${event.args.proposalId}`;
 
     const [proposal, space] = await Promise.all([
       Proposal.loadEntity(proposalId, config.indexerName),
@@ -849,17 +849,16 @@ export function createWriters(
     ]);
   };
 
-  const handleProposalUpdated: evm.Writer = async ({
-    block,
-    rawEvent,
-    event
-  }) => {
+  const handleProposalUpdated: evm.Writer<
+    typeof SpaceAbi,
+    'ProposalUpdated'
+  > = async ({ block, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle proposal updated');
 
     const spaceId = getAddress(rawEvent.address);
-    const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
+    const proposalId = `${spaceId}/${event.args.proposalId}`;
     const metadataUri = event.args.newMetadataURI;
 
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
@@ -924,7 +923,7 @@ export function createWriters(
       );
 
       proposal.metadata = dropIpfs(metadataUri);
-      proposal.edited = block?.timestamp ?? getCurrentTimestamp();
+      proposal.edited = Number(block?.timestamp ?? getCurrentTimestamp());
     } catch (err) {
       logger.warn({ err }, 'Failed to handle proposal metadata');
     }
@@ -932,18 +931,16 @@ export function createWriters(
     await proposal.save();
   };
 
-  const handleProposalExecuted: evm.Writer = async ({
-    txId,
-    rawEvent,
-    event,
-    block
-  }) => {
+  const handleProposalExecuted: evm.Writer<
+    typeof SpaceAbi,
+    'ProposalExecuted'
+  > = async ({ txId, rawEvent, event, block }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle proposal executed');
 
     const spaceId = getAddress(rawEvent.address);
-    const proposalId = `${spaceId}/${parseInt(event.args.proposalId)}`;
+    const proposalId = `${spaceId}/${event.args.proposalId}`;
 
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
@@ -955,7 +952,7 @@ export function createWriters(
       config.indexerName
     );
 
-    const now = block?.timestamp ?? getCurrentTimestamp();
+    const now = Number(block?.timestamp ?? getCurrentTimestamp());
 
     if (executionStrategy) {
       switch (executionStrategy.type) {
@@ -975,18 +972,16 @@ export function createWriters(
     await proposal.save();
   };
 
-  const handleVoteCast: evm.Writer = async ({
-    block,
-    txId,
-    rawEvent,
-    event
-  }) => {
+  const handleVoteCast: evm.Writer<
+    typeof SpaceAbi,
+    'VoteCast' | 'VoteCastWithMetadata'
+  > = async ({ block, txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle vote cast');
 
     const spaceId = getAddress(rawEvent.address);
-    const proposalId = parseInt(event.args.proposalId);
+    const proposalId = event.args.proposalId;
     const choice = convertChoice(event.args.choice);
     const vp = event.args.votingPower;
 
@@ -1001,7 +996,7 @@ export function createWriters(
     );
     if (!proposal) return;
 
-    const created = block?.timestamp ?? getCurrentTimestamp();
+    const created = Number(block?.timestamp ?? getCurrentTimestamp());
 
     const voter = getAddress(event.args.voter);
 
@@ -1018,7 +1013,7 @@ export function createWriters(
     vote.created = created;
     vote.tx = txId;
 
-    if (event.args.metadataUri) {
+    if ('metadataUri' in event.args) {
       try {
         const metadataUri = event.args.metadataUri;
         await handleVoteMetadata(metadataUri, config);
@@ -1088,11 +1083,10 @@ export function createWriters(
     await proposal.save();
   };
 
-  const handleTimelockProposalExecuted: evm.Writer = async ({
-    txId,
-    rawEvent,
-    event
-  }) => {
+  const handleTimelockProposalExecuted: evm.Writer<
+    typeof SimpleQuorumTimelockExecutionStrategyAbi,
+    'ProposalExecuted'
+  > = async ({ txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle timelock proposal executed');
@@ -1115,11 +1109,10 @@ export function createWriters(
     await proposal.save();
   };
 
-  const handleTimelockProposalVetoed: evm.Writer = async ({
-    txId,
-    rawEvent,
-    event
-  }) => {
+  const handleTimelockProposalVetoed: evm.Writer<
+    typeof SimpleQuorumTimelockExecutionStrategyAbi,
+    'ProposalVetoed'
+  > = async ({ txId, rawEvent, event }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle timelock proposal vetoed');
@@ -1143,18 +1136,38 @@ export function createWriters(
     await proposal.save();
   };
 
-  const handleAxiomWriteOffchainVotes: evm.Writer = async ({
-    rawEvent,
-    blockNumber,
-    event
-  }) => {
+  const handleQuorumUpdated: evm.Writer<
+    typeof SimpleQuorumTimelockExecutionStrategyAbi,
+    'QuorumUpdated'
+  > = async ({ rawEvent, event }) => {
+    if (!rawEvent || !event) return;
+
+    logger.info('Handle quorum updated');
+
+    const executionStrategyAddress = getAddress(rawEvent.address);
+
+    const executionStrategy = await ExecutionStrategy.loadEntity(
+      executionStrategyAddress,
+      config.indexerName
+    );
+
+    if (executionStrategy) {
+      executionStrategy.quorum = event.args.newQuorum.toString();
+      await executionStrategy.save();
+    }
+  };
+
+  const handleAxiomWriteOffchainVotes: evm.Writer<
+    typeof AxiomExecutionStrategyAbi,
+    'WriteOffchainVotes'
+  > = async ({ rawEvent, blockNumber, event }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle axiom write offchain votes');
 
     const contract = new Contract(
       rawEvent.address,
-      AxiomExecutionStrategy,
+      AxiomExecutionStrategyAbi,
       provider
     );
 
@@ -1176,11 +1189,10 @@ export function createWriters(
     proposal.save();
   };
 
-  const handleL1AvatarExecutionContractDeployed: evm.Writer = async ({
-    blockNumber,
-    event,
-    helpers: { executeTemplate }
-  }) => {
+  const handleL1AvatarExecutionContractDeployed: evm.Writer<
+    typeof L1AvatarExecutionStrategyFactoryAbi,
+    'ContractDeployed'
+  > = async ({ blockNumber, event, helpers: { executeTemplate } }) => {
     if (!event) return;
 
     logger.info('Handle L1AvatarExecutionStrategy contract deployed');
@@ -1193,21 +1205,17 @@ export function createWriters(
     });
   };
 
-  const handleStarknetProposalExecuted: evm.Writer = async ({
-    block,
-    txId,
-    event
-  }) => {
+  const handleStarknetProposalExecuted: evm.Writer<
+    typeof L1AvatarExecutionStrategyAbi,
+    'ProposalExecuted'
+  > = async ({ block, txId, event }) => {
     if (!event) return;
 
     logger.info('Handle starknet proposal executed');
 
-    const rawSpace: BigNumber = event.args.space;
-    const rawProposalId: BigNumber = event.args.proposalId;
-
-    const space = rawSpace.toHexString();
+    const space = event.args.space.toString(16);
     const paddedSpace = `0x${space.replace('0x', '').padStart(64, '0')}`;
-    const proposalId = rawProposalId.toNumber();
+    const proposalId = Number(event.args.proposalId);
 
     const executionEntity = new StarknetL1Execution(
       `${paddedSpace}/${proposalId}`,
@@ -1215,27 +1223,9 @@ export function createWriters(
     );
     executionEntity.space = paddedSpace;
     executionEntity.proposalId = proposalId;
-    executionEntity.created = block?.timestamp ?? getCurrentTimestamp();
+    executionEntity.created = Number(block?.timestamp ?? getCurrentTimestamp());
     executionEntity.tx = txId;
     await executionEntity.save();
-  };
-
-  const handleQuorumUpdated: evm.Writer = async ({ rawEvent, event }) => {
-    if (!rawEvent || !event) return;
-
-    logger.info('Handle quorum updated');
-
-    const executionStrategyAddress = getAddress(rawEvent.address);
-
-    const executionStrategy = await ExecutionStrategy.loadEntity(
-      executionStrategyAddress,
-      config.indexerName
-    );
-
-    if (executionStrategy) {
-      executionStrategy.quorum = event.args.newQuorum.toString();
-      await executionStrategy.save();
-    }
   };
 
   return {
@@ -1261,13 +1251,12 @@ export function createWriters(
     // SimpleQuorumTimelockExecutionStrategy
     handleTimelockProposalExecuted,
     handleTimelockProposalVetoed,
+    handleQuorumUpdated,
     // Axiom
     handleAxiomWriteOffchainVotes,
     // L1AvatarExecutionStrategyFactory
     handleL1AvatarExecutionContractDeployed,
     // L1AvatarExecutionStrategy
-    handleStarknetProposalExecuted,
-    // SimpleQuorumAvatarExecutionStrategy
-    handleQuorumUpdated
+    handleStarknetProposalExecuted
   };
 }
