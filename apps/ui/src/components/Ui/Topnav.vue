@@ -4,6 +4,7 @@
   >
     <div
       class="border-b h-[72px] bg-skin-bg flex items-center justify-between pr-4 gap-4 pointer-events-auto"
+      style="-webkit-app-region: drag; user-select: none"
     >
       <slot />
     </div>

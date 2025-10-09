@@ -1,16 +1,29 @@
-const path = require('path');
 const { app, BrowserWindow } = require('electron');
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 400, // 357
-    height: 660, // 600
+    width: 1280,
+    height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
+      nodeIntegration: false,
+      contextIsolation: true
+    },
+    show: false,
+    titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
+    frame: false
   });
 
-  win.loadFile('dist/index.html');
+  const isDev = !app.isPackaged;
+
+  if (isDev) {
+    win.loadURL('http://localhost:8080');
+  } else {
+    win.loadFile('dist/index.html');
+  }
+
+  win.once('ready-to-show', () => {
+    win.show();
+  });
 }
 
 app.whenReady().then(() => {
