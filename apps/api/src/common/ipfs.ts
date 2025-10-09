@@ -130,7 +130,7 @@ export async function handleVoteMetadata(
 
 export async function handleStrategiesMetadata(
   spaceId: string,
-  metadataUris: string[],
+  metadataUris: readonly string[],
   startingIndex: number,
   config: CommonConfig,
   type:

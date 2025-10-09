@@ -25,7 +25,7 @@ export function getProposalLink({
 }: {
   networkId: string;
   spaceId: string;
-  proposalId: number;
+  proposalId: number | bigint;
 }) {
   const spaceLink = getSpaceLink({ networkId, spaceId });
 
