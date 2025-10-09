@@ -81,10 +81,12 @@ const formattedVotingPower = computed(() =>
 );
 
 const blockExplorerUrl = computed(() => {
-  const chainId = props.proposal.space.snapshot_chain_id;
+  const chainId =
+    props.proposal.space.snapshot_chain_id ||
+    getNetwork(props.proposal.network).currentChainId.toString();
   const snapshot = props.proposal.snapshot;
 
-  if (!chainId || !snapshot) return null;
+  if (!snapshot || !chainId) return null;
 
   const network = networks[chainId];
 
@@ -248,14 +250,14 @@ watchEffect(async () => {
           {{ formattedVotingPower }}
           <span
             v-if="proposal.snapshot && blockExplorerUrl"
-            class="text-skin-text font-normal flex gap-0.5"
+            class="font-normal flex gap-0.5 text-sm"
           >
             (
             <a :href="blockExplorerUrl" target="_blank">{{
               _n(proposal.snapshot)
             }}</a>
             <UiTooltip title="Snapshot block number">
-              <IH-information-circle class="mt-0.5" />
+              <IH-information-circle class="mt-1 size-3 cursor-pointer" />
             </UiTooltip>
             )
           </span>
