@@ -1,15 +1,17 @@
-import { defaultAbiCoder } from '@ethersproject/abi';
-import { getAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber';
-import { Contract } from '@ethersproject/contracts';
-import { keccak256 } from '@ethersproject/keccak256';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
+import {
+  createPublicClient,
+  decodeAbiParameters,
+  getAddress,
+  http,
+  keccak256,
+  parseAbiParameters
+} from 'viem';
 import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy';
 import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy';
 import L1AvatarExecutionStrategyFactoryAbi from './abis/L1AvatarExecutionStrategyFactory';
 import ProxyFactoryAbi from './abis/ProxyFactory';
-import SimpleQuorumAvatarExecutionStrategyAbi from './abis/SimpleQuorumAvatarExecutionStrategy.json';
+import SimpleQuorumAvatarExecutionStrategyAbi from './abis/SimpleQuorumAvatarExecutionStrategy';
 import SimpleQuorumTimelockExecutionStrategyAbi from './abis/SimpleQuorumTimelockExecutionStrategy';
 import SpaceAbi from './abis/Space';
 import { handleSpaceMetadata } from './ipfs';
@@ -46,7 +48,10 @@ import {
   updateCounter
 } from '../../../common/utils';
 import { EVMConfig, SnapshotXConfig } from '../../types';
-import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
+import {
+  getTimestampFromBlock as _getTimestampFromBlock,
+  MULTICALL3_ADDRESS
+} from '../../utils';
 
 /**
  * List of execution strategies type that are known and we expect them to be deployed via factory.
@@ -67,10 +72,9 @@ export function createWriters(
   config: EVMConfig,
   protocolConfig: SnapshotXConfig
 ) {
-  const provider = new StaticJsonRpcProvider(
-    config.network_node_url,
-    protocolConfig.chainId
-  );
+  const client = createPublicClient({
+    transport: http(config.network_node_url)
+  });
 
   const handleProxyDeployed: evm.Writer<
     typeof ProxyFactoryAbi,
@@ -92,27 +96,34 @@ export function createWriters(
         break;
       }
       case getAddress(protocolConfig.masterSimpleQuorumTimelock): {
-        const contract = new Contract(
-          proxyAddress,
-          SimpleQuorumTimelockExecutionStrategyAbi,
-          provider
-        );
-
-        const overrides = {
-          blockTag: blockNumber
-        };
-
-        const [type, quorum, timelockVetoGuardian, timelockDelay]: [
-          string,
-          BigNumber,
-          string,
-          BigNumber
-        ] = await Promise.all([
-          contract.getStrategyType(overrides),
-          contract.quorum(overrides),
-          contract.vetoGuardian(overrides),
-          contract.timelockDelay(overrides)
-        ]);
+        const [type, quorum, timelockVetoGuardian, timelockDelay] =
+          await client.multicall({
+            contracts: [
+              {
+                address: proxyAddress,
+                abi: SimpleQuorumTimelockExecutionStrategyAbi,
+                functionName: 'getStrategyType'
+              },
+              {
+                address: proxyAddress,
+                abi: SimpleQuorumTimelockExecutionStrategyAbi,
+                functionName: 'quorum'
+              },
+              {
+                address: proxyAddress,
+                abi: SimpleQuorumTimelockExecutionStrategyAbi,
+                functionName: 'vetoGuardian'
+              },
+              {
+                address: proxyAddress,
+                abi: SimpleQuorumTimelockExecutionStrategyAbi,
+                functionName: 'timelockDelay'
+              }
+            ],
+            multicallAddress: MULTICALL3_ADDRESS,
+            allowFailure: false,
+            blockNumber: BigInt(blockNumber)
+          });
 
         const executionStrategy = new ExecutionStrategy(
           proxyAddress,
@@ -125,7 +136,7 @@ export function createWriters(
         executionStrategy.treasury = proxyAddress;
         executionStrategy.timelock_veto_guardian =
           getAddress(timelockVetoGuardian);
-        executionStrategy.timelock_delay = timelockDelay.toBigInt();
+        executionStrategy.timelock_delay = timelockDelay;
 
         await executionStrategy.save();
 
@@ -137,22 +148,28 @@ export function createWriters(
         break;
       }
       case getAddress(protocolConfig.masterSimpleQuorumAvatar): {
-        const contract = new Contract(
-          proxyAddress,
-          SimpleQuorumAvatarExecutionStrategyAbi,
-          provider
-        );
-
-        const overrides = {
-          blockTag: blockNumber
-        };
-
-        const [type, quorum, target]: [string, BigNumber, string] =
-          await Promise.all([
-            contract.getStrategyType(overrides),
-            contract.quorum(overrides),
-            contract.target(overrides)
-          ]);
+        const [type, quorum, target] = await client.multicall({
+          contracts: [
+            {
+              address: proxyAddress,
+              abi: SimpleQuorumAvatarExecutionStrategyAbi,
+              functionName: 'getStrategyType'
+            },
+            {
+              address: proxyAddress,
+              abi: SimpleQuorumAvatarExecutionStrategyAbi,
+              functionName: 'quorum'
+            },
+            {
+              address: proxyAddress,
+              abi: SimpleQuorumAvatarExecutionStrategyAbi,
+              functionName: 'target'
+            }
+          ],
+          multicallAddress: MULTICALL3_ADDRESS,
+          allowFailure: false,
+          blockNumber: BigInt(blockNumber)
+        });
 
         const executionStrategy = new ExecutionStrategy(
           proxyAddress,
@@ -177,17 +194,12 @@ export function createWriters(
       case protocolConfig.masterAxiom
         ? getAddress(protocolConfig.masterAxiom)
         : Symbol('never'): {
-        const contract = new Contract(
-          proxyAddress,
-          AxiomExecutionStrategyAbi,
-          provider
-        );
-
-        const overrides = {
-          blockTag: blockNumber
-        };
-
-        const quorum: BigNumber = await contract.quorum(overrides);
+        const quorum = await client.readContract({
+          address: proxyAddress,
+          abi: AxiomExecutionStrategyAbi,
+          functionName: 'quorum',
+          blockNumber: BigInt(blockNumber)
+        });
 
         const executionStrategy = new ExecutionStrategy(
           proxyAddress,
@@ -292,7 +304,7 @@ export function createWriters(
           await handleCustomExecutionStrategy(
             executor,
             blockNumber,
-            provider,
+            client,
             config,
             protocolConfig
           );
@@ -356,7 +368,7 @@ export function createWriters(
           await handleCustomExecutionStrategy(
             executor,
             blockNumber,
-            provider,
+            client,
             config,
             protocolConfig
           );
@@ -638,7 +650,7 @@ export function createWriters(
         blockNumber: value,
         currentBlockNumber: blockNumber,
         currentTimestamp: created,
-        provider
+        client
       });
 
     proposal.start = await getTimestampFromBlock(
@@ -796,9 +808,11 @@ export function createWriters(
       if (!params) continue;
 
       try {
-        const [, , , , viewId] = defaultAbiCoder.decode(
-          ['uint256', 'uint256', 'address', 'address', 'bytes32', 'address'],
-          params
+        const [, , , , viewId] = decodeAbiParameters(
+          parseAbiParameters(
+            'uint256, uint256, address, address, bytes32, address'
+          ),
+          params as `0x${string}`
         );
 
         await registerApeGasProposal(
@@ -1165,17 +1179,13 @@ export function createWriters(
 
     logger.info('Handle axiom write offchain votes');
 
-    const contract = new Contract(
-      rawEvent.address,
-      AxiomExecutionStrategyAbi,
-      provider
-    );
+    const space = await client.readContract({
+      address: rawEvent.address,
+      abi: AxiomExecutionStrategyAbi,
+      functionName: 'space',
+      blockNumber: BigInt(blockNumber)
+    });
 
-    const overrides = {
-      blockTag: blockNumber
-    };
-
-    const space: string = await contract.space(overrides);
     const spaceId = getAddress(space);
 
     const proposal = await Proposal.loadEntity(
