@@ -1,4 +1,4 @@
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import { createPublicClient, http } from 'viem';
 import { describe, expect, it } from 'vitest';
 import { PartialConfig } from './types';
 import {
@@ -96,30 +96,32 @@ describe('applyConfig', () => {
 
 describe('getTimestampFromBlock', () => {
   it('should return timestamp for networks with own block.number', async () => {
-    const provider = new StaticJsonRpcProvider('https://rpc.snapshot.org/1');
+    const client = createPublicClient({
+      transport: http('https://rpc.snapshot.org/1')
+    });
 
     const actual = await getTimestampFromBlock({
       networkId: 'eth',
       blockNumber: 22294892,
       currentBlockNumber: 22287746,
       currentTimestamp: 1744881215,
-      provider
+      client
     });
 
     expect(actual).toBe(1744967610);
   });
 
   it('should return timestamp for networks with foreign block.number', async () => {
-    const provider = new StaticJsonRpcProvider(
-      'https://rpc.snapshot.org/42161'
-    );
+    const client = createPublicClient({
+      transport: http('https://rpc.snapshot.org/42161')
+    });
 
     const actual = await getTimestampFromBlock({
       networkId: 'arb1',
       blockNumber: 22997779,
       currentBlockNumber: 361494473,
       currentTimestamp: 1753466114,
-      provider
+      client
     });
 
     expect(actual).toBe(1753466114);

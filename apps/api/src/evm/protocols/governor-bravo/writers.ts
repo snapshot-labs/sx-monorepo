@@ -1,18 +1,10 @@
-import { Contract } from '@ethersproject/contracts';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
-import { getAddress } from 'viem';
+import { createPublicClient, getAddress, http } from 'viem';
 import GovernorModuleAbi from './abis/GovernorModule';
 import TimelockAbi from './abis/Timelock';
 import logger from './logger';
 import { convertChoice, getProposalTitle } from './utils';
-import {
-  getCurrentTimestamp,
-  getParsedVP,
-  getProposalLink,
-  getSpaceLink
-} from '../../..//common/utils';
 import {
   ExecutionStrategy,
   Leaderboard,
@@ -27,8 +19,17 @@ import {
   VoteMetadataItem,
   VotingPowerValidationStrategiesParsedMetadataItem
 } from '../../../../.checkpoint/models';
+import {
+  getCurrentTimestamp,
+  getParsedVP,
+  getProposalLink,
+  getSpaceLink
+} from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
-import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
+import {
+  getTimestampFromBlock as _getTimestampFromBlock,
+  MULTICALL3_ADDRESS
+} from '../../utils';
 
 type SpaceData = {
   name: string;
@@ -82,10 +83,9 @@ export function createWriters(
   config: EVMConfig,
   protocolConfig: GovernorBravoConfig
 ) {
-  const provider = new StaticJsonRpcProvider(
-    config.network_node_url,
-    protocolConfig.chainId
-  );
+  const client = createPublicClient({
+    transport: http(config.network_node_url)
+  });
 
   async function initializeStrategies(spaceAddress: string) {
     const spaceDataEntry = spaceData[spaceAddress];
@@ -138,7 +138,7 @@ export function createWriters(
   }
 
   async function initializeSpace(
-    contractAddress: string,
+    contractAddress: `0x${string}`,
     blockNumber: number,
     block: evm.Block | null,
     helpers: Parameters<evm.Writer>[0]['helpers']
@@ -159,24 +159,35 @@ export function createWriters(
     space.created = Number(block?.timestamp ?? getCurrentTimestamp());
 
     // Strategies & authentication
-    const overrides = {
-      blockTag: blockNumber
-    };
+    const [quorum, timelock, proposalThreshold] = await client.multicall({
+      contracts: [
+        {
+          address: contractAddress,
+          abi: GovernorModuleAbi,
+          functionName: 'quorumVotes'
+        },
+        {
+          address: contractAddress,
+          abi: GovernorModuleAbi,
+          functionName: 'timelock'
+        },
+        {
+          address: contractAddress,
+          abi: GovernorModuleAbi,
+          functionName: 'proposalThreshold'
+        }
+      ],
+      multicallAddress: MULTICALL3_ADDRESS,
+      allowFailure: false,
+      blockNumber: BigInt(blockNumber)
+    });
 
-    const governorModuleContract = new Contract(
-      contractAddress,
-      GovernorModuleAbi,
-      provider
-    );
-
-    const [quorum, timelock, proposalThreshold] = await Promise.all([
-      governorModuleContract.quorumVotes(overrides),
-      governorModuleContract.timelock(overrides),
-      governorModuleContract.proposalThreshold(overrides)
-    ]);
-
-    const timelockContract = new Contract(timelock, TimelockAbi, provider);
-    const timelockDelay = await timelockContract.delay(overrides);
+    const timelockDelay = await client.readContract({
+      address: timelock,
+      abi: TimelockAbi,
+      functionName: 'delay',
+      blockNumber: BigInt(blockNumber)
+    });
 
     const executionStrategy = new ExecutionStrategy(
       timelock,
@@ -187,7 +198,7 @@ export function createWriters(
     executionStrategy.quorum = quorum.toString();
     executionStrategy.treasury_chain = protocolConfig.chainId;
     executionStrategy.treasury = timelock;
-    executionStrategy.timelock_delay = timelockDelay.toString();
+    executionStrategy.timelock_delay = timelockDelay;
     await executionStrategy.save();
 
     await helpers.executeTemplate('Timelock', {
@@ -290,7 +301,7 @@ export function createWriters(
         blockNumber: Number(value),
         currentBlockNumber: blockNumber,
         currentTimestamp: Number(block?.timestamp ?? getCurrentTimestamp()),
-        provider
+        client
       });
 
     proposal.start = await getTimestampFromBlock(event.args.startBlock);

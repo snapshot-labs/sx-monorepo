@@ -21,10 +21,6 @@
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
     "@apollo/server": "^4.2.2",
-    "@ethersproject/abi": "^5.7.0",
-    "@ethersproject/bignumber": "^5.6.1",
-    "@ethersproject/contracts": "^5.7.0",
-    "@ethersproject/providers": "^5.7.2",
     "@faker-js/faker": "^7.4.0",
     "@logtail/pino": "^0.5.5",
     "@snapshot-labs/checkpoint": "^0.1.0-beta.66",

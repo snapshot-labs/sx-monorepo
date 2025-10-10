@@ -1,9 +1,10 @@
-import { defaultAbiCoder } from '@ethersproject/abi';
-import { BigNumber } from '@ethersproject/bignumber';
-import { Contract } from '@ethersproject/contracts';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { getAddress } from 'viem';
-import IExecutionStrategy from './abis/IExecutionStrategy.json';
+import {
+  decodeAbiParameters,
+  getAddress,
+  parseAbiParameters,
+  PublicClient
+} from 'viem';
+import IExecutionStrategy from './abis/IExecutionStrategy';
 import logger from './logger';
 import { ExecutionStrategy, Space } from '../../../../.checkpoint/models';
 import { handleVotingPowerValidationMetadata } from '../../../common/ipfs';
@@ -45,16 +46,16 @@ export async function updateProposalValidationStrategy(
     getAddress(protocolConfig.propositionPowerValidationStrategyAddress)
   ) {
     try {
-      const decoded = defaultAbiCoder.decode(
-        ['uint256', 'tuple(address,bytes)[]'],
-        validationStrategyParams
-      ) as [BigNumber, [string, string][]];
+      const [threshold, strategies] = decodeAbiParameters(
+        parseAbiParameters('uint256, (address,bytes)[]'),
+        validationStrategyParams as `0x${string}`
+      );
 
-      space.proposal_threshold = decoded[0].toString();
-      space.voting_power_validation_strategy_strategies = decoded[1].map(
+      space.proposal_threshold = threshold.toString();
+      space.voting_power_validation_strategy_strategies = strategies.map(
         ([strategyAddress]) => getAddress(strategyAddress)
       );
-      space.voting_power_validation_strategy_strategies_params = decoded[1].map(
+      space.voting_power_validation_strategy_strategies_params = strategies.map(
         ([, params]) => params
       );
 
@@ -81,17 +82,16 @@ export async function updateProposalValidationStrategy(
 export async function handleCustomExecutionStrategy(
   address: string,
   blockNumber: number,
-  provider: JsonRpcProvider,
+  client: PublicClient,
   config: EVMConfig,
   protocolConfig: SnapshotXConfig
 ) {
-  const contract = new Contract(address, IExecutionStrategy, provider);
-
-  const overrides = {
-    blockTag: blockNumber
-  };
-
-  const type = await contract.getStrategyType(overrides);
+  const type = await client.readContract({
+    address: address as `0x${string}`,
+    abi: IExecutionStrategy,
+    functionName: 'getStrategyType',
+    blockNumber: BigInt(blockNumber)
+  });
 
   let executionStrategy = await ExecutionStrategy.loadEntity(
     address,
