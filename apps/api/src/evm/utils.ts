@@ -105,7 +105,7 @@ export async function getTimestampFromBlock({
           stateMutability: 'view',
           type: 'function'
         }
-      ] as const,
+      ],
       functionName: 'getBlockNumber',
       blockNumber: BigInt(currentBlockNumber)
     });
