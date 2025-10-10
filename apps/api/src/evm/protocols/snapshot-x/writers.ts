@@ -1,10 +1,10 @@
 import { defaultAbiCoder } from '@ethersproject/abi';
-import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/keccak256';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { evm } from '@snapshot-labs/checkpoint';
+import { getAddress } from 'viem';
 import AxiomExecutionStrategyAbi from './abis/AxiomExecutionStrategy';
 import L1AvatarExecutionStrategyAbi from './abis/L1AvatarExecutionStrategy';
 import L1AvatarExecutionStrategyFactoryAbi from './abis/L1AvatarExecutionStrategyFactory';

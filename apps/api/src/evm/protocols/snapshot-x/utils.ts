@@ -1,8 +1,8 @@
 import { defaultAbiCoder } from '@ethersproject/abi';
-import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcProvider } from '@ethersproject/providers';
+import { getAddress } from 'viem';
 import IExecutionStrategy from './abis/IExecutionStrategy.json';
 import logger from './logger';
 import { ExecutionStrategy, Space } from '../../../../.checkpoint/models';

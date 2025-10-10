@@ -1,7 +1,7 @@
-import { getAddress } from '@ethersproject/address';
 import { Contract as EthContract } from '@ethersproject/contracts';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { validateAndParseAddress } from 'starknet';
+import { getAddress } from 'viem';
 import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy.json';
 import { FullConfig } from './config';
 import {
