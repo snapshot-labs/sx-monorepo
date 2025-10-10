@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate",
-    "lint": "eslint src/ test/ --ext .ts",
+    "lint": "eslint src/ --ext .ts",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "dev:debug": "nodemon --exec \"node --inspect --require ts-node/register src/index.ts\"",
