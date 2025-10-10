@@ -4,7 +4,7 @@ import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy';
 import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy';
 import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory';
 import ProxyFactory from './abis/ProxyFactory';
-import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
+import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy';
 import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy';
 import Space from './abis/Space';
 import { MANA_URL } from '../../../config';

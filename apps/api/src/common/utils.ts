@@ -1,8 +1,8 @@
-import { keccak256 } from '@ethersproject/keccak256';
 import { faker } from '@faker-js/faker';
 import { getExecutionData, utils } from '@snapshot-labs/sx';
 import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
+import { keccak256 } from 'viem';
 import { Network } from '../../.checkpoint/models';
 import { UI_URL } from '../config';
 
@@ -126,7 +126,7 @@ export function getExecutionHash({
       return null;
     }
 
-    return keccak256(data.executionParams[0]);
+    return keccak256(data.executionParams[0] as `0x${string}`);
   }
 
   return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
