@@ -357,12 +357,13 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         </div>
         <UiContainerInfiniteScroll
           :loading-more="isFetchingNextPage"
+          class="px-4"
           @end-reached="hasNextPage && fetchNextPage()"
         >
           <div
             v-for="(delegate, i) in data?.pages.flat()"
             :key="i"
-            class="border-b flex space-x-3 px-4"
+            class="border-b flex space-x-3"
           >
             <AppLink
               :to="{

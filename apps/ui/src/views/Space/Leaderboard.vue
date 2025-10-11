@@ -140,6 +140,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
       </div>
       <UiContainerInfiniteScroll
         :loading-more="isFetchingNextPage"
+        class="px-4"
         @end-reached="handleEndReached"
       >
         <div
@@ -148,7 +149,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           class="border-b flex space-x-1"
         >
           <div
-            class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
+            class="flex items-center py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
           >
             <UiStamp :id="user.id" :size="32" />
             <AppLink
@@ -177,7 +178,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
             </div>
           </div>
           <div
-            class="flex flex-col items-end justify-center pr-4 leading-[22px] w-[30%] lg:w-[25%] truncate"
+            class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"
           >
             <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
             <div class="text-[17px]">
