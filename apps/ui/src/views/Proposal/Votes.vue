@@ -63,6 +63,7 @@ function handleScrollEvent(target: HTMLElement) {
 
 <template>
   <div
+    ref="votesHeader"
     class="bg-skin-bg sticky top-header-with-section lg:top-header-with-section-offset z-40 border-b overflow-hidden"
   >
     <div class="flex space-x-3 font-medium min-w-[735px]">

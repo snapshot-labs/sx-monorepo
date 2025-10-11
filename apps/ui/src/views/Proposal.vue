@@ -145,6 +145,7 @@ watchEffect(() => {
           class="z-40 sticky top-header-offset lg:top-header"
           with-buttons
           gradient="xxl"
+          data-testid="proposal-tabs"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
