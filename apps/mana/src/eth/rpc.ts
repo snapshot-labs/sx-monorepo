@@ -14,7 +14,6 @@ import {
 } from '@snapshot-labs/sx';
 import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
-import * as db from '../db';
 import { rpcError, rpcSuccess } from '../utils';
 import logger from './logger';
 
@@ -202,11 +201,13 @@ export const createNetworkHandler = (chainId: number) => {
         return rpcError(res, 400, 'Missing viewId or snapshot', id);
       }
 
-      await db.saveApeGasProposal({
-        chainId,
-        viewId,
-        snapshot
-      });
+      // Ape API from Herodotus is down. For now we can skip storing the proposal in the DB.
+      // We also need it so we can add proper unique index on apegas_proposals.
+      //  await db.saveApeGasProposal({
+      //    chainId,
+      //    viewId,
+      //    snapshot
+      //  });
 
       return rpcSuccess(res, 'success', id);
     } catch (err) {
