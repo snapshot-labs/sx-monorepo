@@ -250,7 +250,7 @@ watchEffect(async () => {
           {{ formattedVotingPower }}
           <span
             v-if="proposal.snapshot && blockExplorerUrl"
-            class="font-normal flex gap-0.5 text-sm"
+            class="font-normal flex gap-0.5 text-sm items-center"
           >
             (
             <a :href="blockExplorerUrl" target="_blank">{{
