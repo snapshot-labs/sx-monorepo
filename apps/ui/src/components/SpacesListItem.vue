@@ -10,7 +10,7 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 <template>
   <AppLink
     :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
-    class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-3.5 space-x-2"
+    class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-3.5 space-x-3"
   >
     <div class="shrink-0">
       <UiBadgeNetwork
