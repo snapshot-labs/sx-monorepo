@@ -5,12 +5,13 @@ import { useExploreSpacesQuery } from '@/queries/spaces';
 
 useTitle('My spaces');
 
-const protocols = Object.values(explorePageProtocols).map(
-  ({ key, label }: ProtocolConfig) => ({
+const protocols = Object.values(explorePageProtocols)
+  .filter(protocol => !protocol.disabled)
+  .map(({ key, label }: ProtocolConfig) => ({
     key,
     label
-  })
-);
+  }));
+
 const DEFAULT_PROTOCOL = 'snapshot';
 
 const route = useRoute();
