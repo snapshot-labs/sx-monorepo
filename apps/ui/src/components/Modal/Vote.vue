@@ -257,7 +257,7 @@ watchEffect(async () => {
               _n(proposal.snapshot)
             }}</a>
             <UiTooltip title="Snapshot block number">
-              <IH-information-circle class="mt-1 size-3 cursor-pointer" />
+              <IH-information-circle class="mt-1 size-3" />
             </UiTooltip>
             )
           </span>
