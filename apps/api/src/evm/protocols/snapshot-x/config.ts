@@ -1,12 +1,12 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
-import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy.json';
-import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy.json';
-import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory.json';
-import ProxyFactory from './abis/ProxyFactory.json';
-import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy.json';
-import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy.json';
-import Space from './abis/Space.json';
+import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy';
+import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy';
+import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory';
+import ProxyFactory from './abis/ProxyFactory';
+import SimpleQuorumAvatarExecutionStrategy from './abis/SimpleQuorumAvatarExecutionStrategy';
+import SimpleQuorumTimelockExecutionStrategy from './abis/SimpleQuorumTimelockExecutionStrategy';
+import Space from './abis/Space';
 import { MANA_URL } from '../../../config';
 import { NetworkID, SnapshotXConfig } from '../../types';
 
