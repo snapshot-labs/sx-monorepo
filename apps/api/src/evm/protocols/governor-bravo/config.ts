@@ -1,7 +1,7 @@
 import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
-import GovernorModule from './abis/GovernorModule.json';
-import Timelock from './abis/Timelock.json';
+import GovernorModule from './abis/GovernorModule';
+import Timelock from './abis/Timelock';
 import { GovernorBravoConfig, NetworkID } from '../../types';
 
 const START_BLOCKS: Partial<Record<NetworkID, number>> = {
