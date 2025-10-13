@@ -35,6 +35,8 @@ const { data: proposal, isPending } = useProposalQuery(
   id
 );
 
+const router = useRouter();
+
 const {
   data: votingPower,
   error: votingPowerError,
@@ -92,12 +94,20 @@ async function handleVoteSubmitted() {
 }
 
 watch(
-  [id, proposal],
-  async ([id, proposal]) => {
+  [id, proposal, isPending],
+  async ([id, proposal, isPending]) => {
     modalOpenVote.value = false;
     editMode.value = false;
     discourseTopic.value = null;
     boostCount.value = 0;
+
+    if (!isPending && !proposal) {
+      router.push({
+        name: 'space-overview',
+        params: { space: `${props.space.network}:${props.space.id}` }
+      });
+      return;
+    }
 
     if (!proposal) return;
 
