@@ -137,6 +137,7 @@ export type StrategyParsedMetadata = {
 
 export type RelatedSpace = {
   id: string;
+  protocol: string;
   name: string;
   network: NetworkID;
   avatar: string;
@@ -144,6 +145,7 @@ export type RelatedSpace = {
   about?: string;
   proposal_count: number;
   vote_count: number;
+  follower_count: number;
   active_proposals: number | null;
   turbo: boolean;
   verified: boolean;
