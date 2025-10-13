@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ApolloClient, gql, InMemoryCache } from '@apollo/client/core';
-import { formatUnits } from '@ethersproject/units';
 import dayjs from 'dayjs';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n } from '@/helpers/utils';
@@ -9,7 +8,7 @@ import { Space } from '@/types';
 type Payment = {
   id: string;
   space: string;
-  amount_raw: string;
+  amount_decimal: string;
   block: number;
   token_symbol: string;
   token_address: string;
@@ -40,7 +39,7 @@ const PAYMENT_QUERY = gql`
     payments(where: { space: $space }) {
       id
       space
-      amount_raw
+      amount_decimal
       block
       token_symbol
       token_address
@@ -87,19 +86,18 @@ const statusText = computed(() => {
 
 function formatAmount(payment: Payment): string {
   try {
-    const formatted = formatUnits(payment.amount_raw, 6);
-    const num = parseFloat(formatted);
+    const num = parseFloat(payment.amount_decimal);
 
     return _n(num, 'standard', {
-      maximumFractionDigits: num >= 1 ? 2 : 4
+      maximumFractionDigits: 0
     });
   } catch (error) {
     console.error('Failed to format amount:', {
-      amount: payment.amount_raw,
+      amount: payment.amount_decimal,
       token: payment.token_symbol,
       error
     });
-    return `${payment.amount_raw} (raw)`;
+    return payment.amount_decimal;
   }
 }
 
