@@ -148,7 +148,7 @@ onMounted(() => {
       title="Billing"
       description="Manage your Snapshot Pro subscription and view billing information."
     >
-      <h4 class="eyebrow mb-3 font-medium">Current Plan</h4>
+      <h4 class="eyebrow mb-3 font-medium">Current plan</h4>
 
       <div class="border border-skin-border rounded-xl bg-skin-bg p-4">
         <div
@@ -156,7 +156,7 @@ onMounted(() => {
         >
           <div class="flex-1">
             <h5 class="text-lg font-semibold text-skin-heading">
-              {{ hasTurbo ? 'Snapshot Pro' : 'Basic Plan' }}
+              {{ hasTurbo ? 'Snapshot Pro' : 'Basic plan' }}
             </h5>
             <p class="text-sm text-skin-text mt-1">
               <template v-if="hasTurbo && turboExpirationDate">
@@ -173,14 +173,14 @@ onMounted(() => {
             <span :class="statusBadgeClasses">{{ statusText }}</span>
 
             <UiButton class="w-full sm:w-auto" @click="handleExtendPlan">
-              {{ hasTurbo ? 'Extend Plan' : 'Upgrade to Pro' }}
+              {{ hasTurbo ? 'Extend plan' : 'Upgrade to Pro' }}
             </UiButton>
           </div>
         </div>
       </div>
     </UiContainerSettings>
 
-    <UiSectionHeader class="mt-4" label="Payment History" sticky />
+    <UiSectionHeader class="mt-4" label="Payment history" sticky />
     <div class="text-left table-fixed w-full">
       <div
         class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3"
