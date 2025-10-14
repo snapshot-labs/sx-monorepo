@@ -1,49 +1,12 @@
 <script setup lang="ts">
-import { ApolloClient, gql, InMemoryCache } from '@apollo/client/core';
 import dayjs from 'dayjs';
+import { Payment, usePayments } from '@/composables/usePayments';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
-type Payment = {
-  id: string;
-  space: string;
-  amount_decimal: string;
-  block: number;
-  token_symbol: string;
-  token_address: string;
-  timestamp?: number;
-};
-
 const props = defineProps<{ space: Space }>();
-
-const SCHNAPS_GRAPHQL_URL = 'https://schnaps.snapshot.box/graphql';
-
-const schnapsClient = new ApolloClient({
-  uri: SCHNAPS_GRAPHQL_URL,
-  cache: new InMemoryCache({
-    addTypename: false
-  }),
-  defaultOptions: {
-    query: {
-      fetchPolicy: 'no-cache'
-    }
-  }
-});
-
-const PAYMENT_QUERY = gql`
-  query Payments($space: String!) {
-    payments(where: { space: $space }) {
-      id
-      space
-      amount_decimal
-      block
-      token_symbol
-      token_address
-      timestamp
-    }
-  }
-`;
 
 const hasTurbo = computed(() => props.space.turbo);
 const turboExpirationDate = computed(() => {
@@ -55,9 +18,10 @@ const daysUntilExpiration = computed(() => {
   return turboExpirationDate.value.diff(dayjs(), 'day');
 });
 
-const payments = ref<Payment[]>([]);
-const isLoadingPayments = ref(false);
-const hasLoadError = ref(false);
+const spaceId = computed(() => `${props.space.network}:${props.space.id}`);
+const network = computed(() => getNetwork(props.space.network));
+
+const { data: payments, isPending, isError } = usePayments(spaceId);
 
 const statusBadgeClasses = computed(() => {
   return 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-skin-border bg-skin-border/20 text-skin-text text-xs font-medium shrink-0';
@@ -88,35 +52,6 @@ function formatAmount(payment: Payment): string {
     return payment.amount_decimal;
   }
 }
-
-async function loadPaymentHistory() {
-  try {
-    isLoadingPayments.value = true;
-    hasLoadError.value = false;
-
-    const spaceId = `${props.space.network}:${props.space.id}`;
-
-    const { data, errors } = await schnapsClient.query({
-      query: PAYMENT_QUERY,
-      variables: { space: spaceId }
-    });
-
-    if (errors?.length) {
-      throw new Error(errors.map(e => e.message).join(', '));
-    }
-
-    payments.value = data?.payments || [];
-  } catch (error: any) {
-    console.error('Failed to load payment history:', error);
-    hasLoadError.value = true;
-  } finally {
-    isLoadingPayments.value = false;
-  }
-}
-
-onMounted(() => {
-  loadPaymentHistory();
-});
 </script>
 
 <template>
@@ -172,20 +107,16 @@ onMounted(() => {
         </div>
       </div>
 
-      <UiLoading v-if="isLoadingPayments" class="pl-4 py-3 block" />
+      <UiLoading v-if="isPending" class="pl-4 py-3 block" />
       <div
-        v-else-if="hasLoadError"
-        class="pl-4 py-3 flex items-center gap-1 text-skin-danger"
-      >
-        <IH-exclamation-circle class="inline-block" />
-        <span>Failed to load payment history. Please try again later.</span>
-      </div>
-      <div
-        v-else-if="!payments.length"
+        v-else-if="isError || !payments || payments.length === 0"
         class="pl-4 py-3 flex items-center gap-1"
       >
         <IH-exclamation-circle class="inline-block" />
-        <span>No payment history available.</span>
+        <span v-if="isError">
+          Failed to load payment history. Please try again later.
+        </span>
+        <span v-else>No payment history available.</span>
       </div>
       <div
         v-for="payment in payments"
@@ -204,7 +135,7 @@ onMounted(() => {
           <AppLink
             :to="
               getGenericExplorerUrl(
-                space.network === 's' ? 1 : 11155111,
+                network.chainId,
                 payment.id,
                 'transaction'
               ) || ''
