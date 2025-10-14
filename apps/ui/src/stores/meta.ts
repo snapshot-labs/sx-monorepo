@@ -52,23 +52,10 @@ export const useMetaStore = defineStore('meta', () => {
     return Math.round(current * getConfigBlockTime(networkId));
   }
 
-  function getTsFromCurrent(networkId: NetworkID, current: number) {
-    if (!evmNetworks.includes(networkId)) return current;
-
-    const networkBlockNum = currentBlocks.value.get(networkId) || 0;
-    const blockDiff = networkBlockNum - current;
-
-    return (
-      (currentTs.value.get(networkId) || 0) -
-      getConfigBlockTime(networkId) * blockDiff
-    );
-  }
-
   return {
     getCurrent,
     fetchBlock,
     getCurrentFromDuration,
-    getDurationFromCurrent,
-    getTsFromCurrent
+    getDurationFromCurrent
   };
 });

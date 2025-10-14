@@ -60,12 +60,12 @@ async function handleClick() {
 </script>
 
 <template>
-  <UiTooltip :title="tooltipMessage">
+  <UiTooltip v-if="!isWhiteLabel" :title="tooltipMessage">
     <UiButton
-      v-if="!isWhiteLabel"
       :disabled="loading || isSafeWallet || preventFollowingMore"
       class="group"
       :class="{ 'hover:border-skin-danger': spaceFollowed }"
+      :primary="!spaceFollowed"
       :loading="loading"
       @click.prevent="handleClick"
     >

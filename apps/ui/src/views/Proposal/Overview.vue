@@ -320,7 +320,7 @@ onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
-  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto">
     <ContentFlagable :item="proposal">
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
         <template v-if="proposal.execution_strategy === EVM_EMPTY_ADDRESS">
@@ -335,7 +335,7 @@ onBeforeUnmount(() => destroyAudio());
         </template>
       </UiAlert>
 
-      <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
+      <h1 class="mb-3 text-[42px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>
 
@@ -555,7 +555,7 @@ onBeforeUnmount(() => destroyAudio());
           AI can be inaccurate or misleading.
         </div>
       </div>
-      <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
+      <UiMarkdown v-if="proposal.body" class="mb-8" :body="proposal.body" />
       <div v-if="discussion">
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-chat-alt />
