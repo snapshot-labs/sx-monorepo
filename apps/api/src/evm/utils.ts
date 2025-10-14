@@ -1,11 +1,15 @@
 import { evm } from '@snapshot-labs/checkpoint';
-import { EVMConfig, PartialConfig } from './types';
+import { evmNetworks } from '@snapshot-labs/sx';
+import { PublicClient } from 'viem';
+import { EVMConfig, NetworkID, PartialConfig } from './types';
 
 type ProtocolConfig = Pick<EVMConfig, 'sources' | 'templates' | 'abis'>;
 
 type SourceOrTemplate = {
   events: NonNullable<EVMConfig['sources']>[number]['events'];
 };
+
+export const MULTICALL3_ADDRESS = '0xcA11bde05977b3631167028862bE2a173976CA11';
 
 function applyProtocolPrefixToEvents<T extends SourceOrTemplate>(
   prefix: string,
@@ -66,4 +70,50 @@ export function applyConfig(
     },
     abis: { ...target.abis, ...config.abis }
   };
+}
+
+export async function getTimestampFromBlock({
+  networkId,
+  blockNumber,
+  currentBlockNumber,
+  currentTimestamp,
+  client
+}: {
+  networkId: NetworkID;
+  blockNumber: number;
+  currentBlockNumber: number;
+  currentTimestamp: number;
+  client: PublicClient;
+}) {
+  const baseNetwork = evmNetworks[networkId];
+
+  let actualCurrentBlockNumber = BigInt(currentBlockNumber);
+  if (baseNetwork.Meta.hasNonNativeBlockNumbers) {
+    actualCurrentBlockNumber = await client.readContract({
+      address: MULTICALL3_ADDRESS,
+      abi: [
+        {
+          inputs: [],
+          name: 'getBlockNumber',
+          outputs: [
+            {
+              internalType: 'uint256',
+              name: 'blockNumber',
+              type: 'uint256'
+            }
+          ],
+          stateMutability: 'view',
+          type: 'function'
+        }
+      ],
+      functionName: 'getBlockNumber',
+      blockNumber: BigInt(currentBlockNumber)
+    });
+  }
+
+  const blockDifference = blockNumber - Number(actualCurrentBlockNumber);
+
+  return Math.round(
+    currentTimestamp + blockDifference * evmNetworks[networkId].Meta.blockTime
+  );
 }

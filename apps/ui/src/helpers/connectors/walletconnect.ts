@@ -55,7 +55,8 @@ export default class Walletconnect extends Connector {
         sepolia,
         apeChain,
         fantomTestnet,
-        celo
+        celo,
+        linea
       } = await import('@reown/appkit/networks');
 
       const { projectId, ...metadata } = this.options;
@@ -75,7 +76,8 @@ export default class Walletconnect extends Connector {
           sepolia,
           apeChain,
           fantomTestnet,
-          celo
+          celo,
+          linea
         ],
         themeMode: currentTheme.value,
         allWallets: 'ONLY_MOBILE',
@@ -87,9 +89,8 @@ export default class Walletconnect extends Connector {
       // otherwise modal will be opened with half light and half dark theme
       await this.modal.setThemeMode(currentTheme.value);
 
-      if (!isAutoConnect) {
+      if (!isAutoConnect && !this.provider) {
         await this.disconnect();
-
         await this.modal.open();
       }
 
@@ -108,7 +109,11 @@ export default class Walletconnect extends Connector {
   async disconnect() {
     await sleep(DISCONNECT_DELAY);
 
-    await this.modal?.adapter?.connectionControllerClient?.disconnect();
+    try {
+      await this.modal?.disconnect();
+    } catch (e) {
+      console.log('Error disconnecting modal', e);
+    }
 
     if (this.provider && 'disconnect' in this.provider) {
       try {

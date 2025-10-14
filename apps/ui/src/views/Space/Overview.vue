@@ -137,20 +137,30 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <SpaceAlerts :space="space" />
     <OnboardingSpace :space="space" />
-    <template v-if="showChildren">
-      <UiSectionHeader label="Sub-spaces" />
-      <UiScrollerHorizontal gradient="md">
-        <div class="px-4 py-3 flex gap-3 min-w-max">
-          <SpacesListItem
-            v-for="child in space.children"
-            :key="child.id"
-            :space="child"
-            :show-about="false"
-            class="w-[240px]"
-          />
-        </div>
-      </UiScrollerHorizontal>
-    </template>
+    <div v-if="showChildren" class="mb-4">
+      <UiSectionHeader label="Sub-spaces" sticky />
+      <UiColumnHeader class="hidden md:flex">
+        <div class="grow" />
+        <div
+          v-if="space.protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Active'"
+        />
+        <div class="w-[100px]" v-text="'Proposals'" />
+        <div
+          v-if="space.protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Followers'"
+        />
+      </UiColumnHeader>
+      <div>
+        <SpacesListItem
+          v-for="child in space.children"
+          :key="child.id"
+          :space="child"
+        />
+      </div>
+    </div>
     <div>
       <ProposalsList
         data-testid="summary-proposals-list"

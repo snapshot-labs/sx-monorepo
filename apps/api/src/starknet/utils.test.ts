@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatAddressVariant } from '../../../src/starknet/utils';
+import { formatAddressVariant } from './utils';
 
 describe('formatAddressVariant', () => {
   it.each([

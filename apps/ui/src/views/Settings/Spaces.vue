@@ -5,12 +5,13 @@ import { useExploreSpacesQuery } from '@/queries/spaces';
 
 useTitle('My spaces');
 
-const protocols = Object.values(explorePageProtocols).map(
-  ({ key, label }: ProtocolConfig) => ({
+const protocols = Object.values(explorePageProtocols)
+  .filter(protocol => !protocol.disabled)
+  .map(({ key, label }: ProtocolConfig) => ({
     key,
     label
-  })
-);
+  }));
+
 const DEFAULT_PROTOCOL = 'snapshot';
 
 const route = useRoute();
@@ -69,19 +70,24 @@ watch(
       </UiTooltip>
     </div>
     <UiSectionHeader label="My spaces" sticky />
+    <UiColumnHeader class="hidden md:flex">
+      <div class="grow" />
+      <div v-if="protocol === 'snapshot'" class="w-[100px]" v-text="'Active'" />
+      <div class="w-[100px]" v-text="'Proposals'" />
+      <div
+        v-if="protocol === 'snapshot'"
+        class="w-[100px]"
+        v-text="'Followers'"
+      />
+    </UiColumnHeader>
     <UiLoading v-if="loading" class="block m-4" />
-    <UiContainer
-      v-else-if="data?.pages.flat().length"
-      class="!max-w-screen-md pt-5"
-    >
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        <SpacesListItem
-          v-for="space in data?.pages.flat()"
-          :key="space.id"
-          :space="space"
-        />
-      </div>
-    </UiContainer>
+    <div v-else-if="data?.pages.flat().length">
+      <SpacesListItem
+        v-for="space in data?.pages.flat()"
+        :key="space.id"
+        :space="space"
+      />
+    </div>
     <div v-else class="px-4 py-3 flex items-center space-x-2">
       <IH-exclamation-circle class="inline-block shrink-0" />
       <span v-text="'There are no spaces here.'" />

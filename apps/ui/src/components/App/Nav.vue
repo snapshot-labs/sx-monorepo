@@ -168,7 +168,11 @@ function getNavigationConfig(
           controller: getSettingsRoute({
             name: 'Controller',
             tab: 'controller'
-          })
+          }),
+          snapshotPro: {
+            name: 'Snapshot Pro',
+            link: { name: 'space-pro' }
+          }
         }
       };
     }

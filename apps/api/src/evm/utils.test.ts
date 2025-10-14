@@ -1,6 +1,11 @@
+import { createPublicClient, http } from 'viem';
 import { describe, expect, it } from 'vitest';
 import { PartialConfig } from './types';
-import { applyConfig, applyProtocolPrefixToWriters } from './utils';
+import {
+  applyConfig,
+  applyProtocolPrefixToWriters,
+  getTimestampFromBlock
+} from './utils';
 
 describe('applyProtocolPrefixToWriters', () => {
   it('should apply prefix to writer keys', () => {
@@ -86,5 +91,39 @@ describe('applyConfig', () => {
         }
       }
     });
+  });
+});
+
+describe('getTimestampFromBlock', () => {
+  it('should return timestamp for networks with own block.number', async () => {
+    const client = createPublicClient({
+      transport: http('https://rpc.snapshot.org/1')
+    });
+
+    const actual = await getTimestampFromBlock({
+      networkId: 'eth',
+      blockNumber: 22294892,
+      currentBlockNumber: 22287746,
+      currentTimestamp: 1744881215,
+      client
+    });
+
+    expect(actual).toBe(1744967610);
+  });
+
+  it('should return timestamp for networks with foreign block.number', async () => {
+    const client = createPublicClient({
+      transport: http('https://rpc.snapshot.org/42161')
+    });
+
+    const actual = await getTimestampFromBlock({
+      networkId: 'arb1',
+      blockNumber: 22997779,
+      currentBlockNumber: 361494473,
+      currentTimestamp: 1753466114,
+      client
+    });
+
+    expect(actual).toBe(1753466114);
   });
 });
