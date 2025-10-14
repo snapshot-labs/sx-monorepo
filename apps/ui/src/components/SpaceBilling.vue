@@ -17,9 +17,6 @@ type Payment = {
 
 const props = defineProps<{ space: Space }>();
 
-const router = useRouter();
-const route = useRoute();
-
 const SCHNAPS_GRAPHQL_URL = 'https://schnaps.snapshot.box/graphql';
 
 const schnapsClient = new ApolloClient({
@@ -63,16 +60,7 @@ const isLoadingPayments = ref(false);
 const hasLoadError = ref(false);
 
 const statusBadgeClasses = computed(() => {
-  const baseClasses =
-    'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium shrink-0';
-
-  if (!hasTurbo.value) {
-    return `${baseClasses} border-skin-border bg-skin-border/20 text-skin-text`;
-  }
-  if (daysUntilExpiration.value !== null && daysUntilExpiration.value < 30) {
-    return `${baseClasses} bg-yellow-50 border-yellow-200 text-yellow-600`;
-  }
-  return `${baseClasses} bg-green-50 border-green-200 text-green-600`;
+  return 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-skin-border bg-skin-border/20 text-skin-text text-xs font-medium shrink-0';
 });
 
 const statusText = computed(() => {
@@ -126,16 +114,6 @@ async function loadPaymentHistory() {
   }
 }
 
-function handleExtendPlan() {
-  router.push({
-    name: 'space-pro',
-    params: {
-      ...route.params,
-      space: props.space.id
-    }
-  });
-}
-
 onMounted(() => {
   loadPaymentHistory();
 });
@@ -172,7 +150,10 @@ onMounted(() => {
           <div class="flex items-center gap-3 shrink-0">
             <span :class="statusBadgeClasses">{{ statusText }}</span>
 
-            <UiButton class="w-full sm:w-auto" @click="handleExtendPlan">
+            <UiButton
+              :to="{ name: 'space-pro', params: { space: props.space.id } }"
+              class="primary w-full sm:w-auto"
+            >
               {{ hasTurbo ? 'Extend plan' : 'Upgrade to Pro' }}
             </UiButton>
           </div>
