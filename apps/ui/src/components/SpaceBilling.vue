@@ -23,10 +23,6 @@ const network = computed(() => getNetwork(props.space.network));
 
 const { data: payments, isPending, isError } = usePayments(spaceId);
 
-const statusBadgeClasses = computed(() => {
-  return 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-skin-border bg-skin-border/20 text-skin-text text-xs font-medium shrink-0';
-});
-
 const statusText = computed(() => {
   if (!hasTurbo.value) return 'Free';
   if (daysUntilExpiration.value !== null && daysUntilExpiration.value < 30) {
@@ -83,10 +79,13 @@ function formatAmount(payment: Payment): string {
           </div>
 
           <div class="flex items-center gap-3 shrink-0">
-            <span :class="statusBadgeClasses">{{ statusText }}</span>
+            <span
+              class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-skin-border bg-skin-border/20 text-skin-text text-xs font-medium shrink-0"
+              >{{ statusText }}</span
+            >
 
             <UiButton
-              :to="{ name: 'space-pro', params: { space: props.space.id } }"
+              :to="{ name: 'space-pro' }"
               class="primary w-full sm:w-auto"
             >
               {{ hasTurbo ? 'Extend plan' : 'Upgrade to Pro' }}
@@ -110,48 +109,47 @@ function formatAmount(payment: Payment): string {
       <UiLoading v-if="isPending" class="pl-4 py-3 block" />
       <div
         v-else-if="isError || !payments || payments.length === 0"
-        class="pl-4 py-3 flex items-center gap-1"
+        class="pl-4 py-3 flex items-center space-x-2"
       >
-        <IH-exclamation-circle class="inline-block" />
-        <span v-if="isError">
-          Failed to load payment history. Please try again later.
-        </span>
+        <IH-exclamation-circle class="inline-block shrink-0" />
+        <span v-if="isError">Failed to load payment history.</span>
         <span v-else>No payment history available.</span>
       </div>
-      <div
-        v-for="payment in payments"
-        v-else
-        :key="payment.id"
-        class="border-b flex space-x-3"
-      >
-        <div class="w-[200px] flex items-center py-3 pl-4 text-skin-text">
-          {{
-            payment.timestamp
-              ? dayjs(payment.timestamp * 1000).format('MMM D, YYYY')
-              : '—'
-          }}
+      <template v-else>
+        <div
+          v-for="payment in payments"
+          :key="payment.id"
+          class="border-b flex space-x-3"
+        >
+          <div class="w-[200px] flex items-center py-3 pl-4 text-skin-text">
+            {{
+              payment.timestamp
+                ? dayjs(payment.timestamp * 1000).format('MMM D, YYYY')
+                : '—'
+            }}
+          </div>
+          <div class="grow flex justify-end py-3 pr-4">
+            <AppLink
+              :to="
+                getGenericExplorerUrl(
+                  network.chainId,
+                  payment.id,
+                  'transaction'
+                ) || ''
+              "
+              class="text-skin-link hover:text-skin-link/80 transition-colors font-semibold flex items-center gap-1"
+              :aria-label="`View transaction for ${formatAmount(payment)} ${payment.token_symbol} on block explorer. Opens in new tab.`"
+              hide-external-icon
+            >
+              <span class="truncate">
+                {{ formatAmount(payment) }}
+                {{ payment.token_symbol }}
+              </span>
+              <IH-arrow-top-right-on-square class="size-3 -mt-1" />
+            </AppLink>
+          </div>
         </div>
-        <div class="grow flex justify-end py-3 pr-4">
-          <AppLink
-            :to="
-              getGenericExplorerUrl(
-                network.chainId,
-                payment.id,
-                'transaction'
-              ) || ''
-            "
-            class="text-skin-link hover:text-skin-link/80 transition-colors font-semibold flex items-center gap-1"
-            :aria-label="`View transaction for ${formatAmount(payment)} ${payment.token_symbol} on block explorer. Opens in new tab.`"
-            hide-external-icon
-          >
-            <span class="truncate">
-              {{ formatAmount(payment) }}
-              {{ payment.token_symbol }}
-            </span>
-            <IH-arrow-top-right-on-square class="size-3 -mt-1" />
-          </AppLink>
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>

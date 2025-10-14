@@ -64,7 +64,7 @@ async function fetchPayments(spaceId: string): Promise<Payment[]> {
 
 export function usePayments(spaceId: MaybeRefOrGetter<string>) {
   return useQuery({
-    queryKey: ['payments', { spaceId: () => toValue(spaceId) }],
+    queryKey: ['payments', spaceId],
     queryFn: () => fetchPayments(toValue(spaceId))
   });
 }
