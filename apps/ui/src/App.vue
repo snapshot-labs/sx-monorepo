@@ -46,5 +46,6 @@ onMounted(() => initWhiteLabel());
     <LayoutSite v-else-if="routeName === 'site'" />
     <LayoutApp v-else />
     <AppFooter />
+    <div />
   </div>
 </template>
