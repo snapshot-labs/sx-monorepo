@@ -30,6 +30,7 @@ const {
   authenticators,
   validationStrategy,
   votingStrategies,
+  enableOSnap,
   proposalValidation,
   executionStrategies,
   guidelines,
@@ -119,7 +120,7 @@ const tabs = computed<Tab[]>(
       },
       {
         id: 'execution',
-        visible: !isOffchainNetwork.value
+        visible: true
       },
       {
         id: 'authenticators',
@@ -445,27 +446,45 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :is-admin="isAdmin"
         />
       </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="activeTab === 'execution'"
-        title="Execution(s)"
-        description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
-      >
-        <div class="space-y-3">
-          <FormStrategiesStrategyActive
-            v-for="strategy in executionStrategies"
-            :key="strategy.id"
-            read-only
-            :network-id="space.network"
-            :strategy="strategy"
-          />
-          <UiButton
-            v-if="evmNetworks.includes(space.network)"
-            @click="customStrategyModalOpen = true"
-          >
-            Add custom strategy
-          </UiButton>
-        </div>
-      </UiContainerSettings>
+      <template v-else-if="activeTab === 'execution'">
+        <UiContainerSettings
+          v-if="isOffchainNetwork"
+          title="Execution"
+          description="Execution allows you to define how proposals are executed once they pass."
+        >
+          <h4 class="eyebrow font-medium">oSnap</h4>
+          <div class="mb-2">
+            oSnap uses Optimistic Governor to execute proposals on-chain.
+          </div>
+          <div class="s-box mt-3">
+            <UiSwitch
+              v-model="enableOSnap"
+              title="Enable oSnap-based execution"
+            />
+          </div>
+        </UiContainerSettings>
+        <UiContainerSettings
+          v-else
+          title="Execution(s)"
+          description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
+        >
+          <div class="space-y-3">
+            <FormStrategiesStrategyActive
+              v-for="strategy in executionStrategies"
+              :key="strategy.id"
+              read-only
+              :network-id="space.network"
+              :strategy="strategy"
+            />
+            <UiButton
+              v-if="evmNetworks.includes(space.network)"
+              @click="customStrategyModalOpen = true"
+            >
+              Add custom strategy
+            </UiButton>
+          </div>
+        </UiContainerSettings>
+      </template>
       <UiContainerSettings v-if="activeTab === 'authenticators'">
         <FormStrategies
           v-model="authenticators"
