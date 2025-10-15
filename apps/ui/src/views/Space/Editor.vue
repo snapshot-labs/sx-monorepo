@@ -520,7 +520,7 @@ watchEffect(() => {
       </div>
     </UiTopnav>
     <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-[72px]"
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-header"
     >
       <div
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"

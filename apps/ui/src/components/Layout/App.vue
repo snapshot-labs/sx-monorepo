@@ -350,7 +350,7 @@ $placeholderSidebarWidth: 240px;
 }
 
 .backdrop {
-  @apply fixed inset-0 z-[99];
+  @apply fixed inset-0 top-electron-titlebar z-[99];
   @apply bg-[black]/40 #{!important};
 }
 </style>
