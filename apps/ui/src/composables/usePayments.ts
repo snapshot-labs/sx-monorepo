@@ -1,8 +1,12 @@
-import { ApolloClient, gql, InMemoryCache } from '@apollo/client/core';
-import { useQuery } from '@tanstack/vue-query';
-import { MaybeRefOrGetter, toValue } from 'vue';
+import { ApolloClient, InMemoryCache } from '@apollo/client/core';
+import gql from 'graphql-tag';
 
-const SCHNAPS_GRAPHQL_URL = 'https://schnaps.snapshot.box/graphql';
+const SCHNAPS_URLS: Record<string, string> = {
+  s: 'https://schnaps.snapshot.box/graphql',
+  's-tn': 'https://testnet-schnaps.snapshot.box/graphql'
+} as const;
+
+export const PAYMENTS_LIMIT = 20;
 
 export type Payment = {
   id: string;
@@ -14,9 +18,15 @@ export type Payment = {
   timestamp?: number;
 };
 
-const PAYMENT_QUERY = gql`
-  query Payments($space: String!) {
-    payments(where: { space: $space }) {
+const PAYMENTS_QUERY = gql`
+  query Payments($space: String!, $first: Int!, $skip: Int!) {
+    payments(
+      where: { space: $space }
+      first: $first
+      skip: $skip
+      orderBy: timestamp
+      orderDirection: desc
+    ) {
       id
       space
       amount_decimal
@@ -28,9 +38,16 @@ const PAYMENT_QUERY = gql`
   }
 `;
 
-async function fetchPayments(spaceId: string): Promise<Payment[]> {
+export async function fetchPayments(
+  spaceId: string,
+  network: string,
+  skip: number
+): Promise<Payment[]> {
+  const uri =
+    SCHNAPS_URLS[network as keyof typeof SCHNAPS_URLS] || SCHNAPS_URLS.s;
+
   const client = new ApolloClient({
-    uri: SCHNAPS_GRAPHQL_URL,
+    uri,
     cache: new InMemoryCache({
       addTypename: false
     }),
@@ -42,9 +59,11 @@ async function fetchPayments(spaceId: string): Promise<Payment[]> {
   });
 
   const { data, errors } = await client.query({
-    query: PAYMENT_QUERY,
+    query: PAYMENTS_QUERY,
     variables: {
-      space: spaceId
+      space: `${network}:${spaceId}`,
+      first: PAYMENTS_LIMIT,
+      skip
     }
   });
 
@@ -52,19 +71,5 @@ async function fetchPayments(spaceId: string): Promise<Payment[]> {
     throw new Error(errors.map(e => e.message).join(', '));
   }
 
-  const payments = (data?.payments || []) as Payment[];
-
-  // Sort by timestamp descending (most recent first)
-  return payments.sort((a, b) => {
-    const timeA = a.timestamp || 0;
-    const timeB = b.timestamp || 0;
-    return timeB - timeA;
-  });
-}
-
-export function usePayments(spaceId: MaybeRefOrGetter<string>) {
-  return useQuery({
-    queryKey: ['payments', spaceId],
-    queryFn: () => fetchPayments(toValue(spaceId))
-  });
+  return (data?.payments || []) as Payment[];
 }
