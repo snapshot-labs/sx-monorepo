@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { _n, getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { useVoteValidationPowerQuery } from '@/queries/voteValidationPower';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
@@ -97,6 +97,10 @@ const blockExplorerUrl = computed(() => {
 
 const offchainProposal = computed<boolean>(() =>
   offchainNetworks.includes(props.proposal.network)
+);
+
+const isStarknetProposal = computed<boolean>(() =>
+  starknetNetworks.includes(props.proposal.network)
 );
 
 const canSubmit = computed<boolean>(
@@ -249,7 +253,7 @@ watchEffect(async () => {
         >
           {{ formattedVotingPower }}
           <span
-            v-if="proposal.snapshot && blockExplorerUrl"
+            v-if="!isStarknetProposal && proposal.snapshot && blockExplorerUrl"
             class="font-normal flex gap-0.5 text-sm items-center"
           >
             (
