@@ -69,6 +69,7 @@ const fetchPrices = async () => {
     const data: FutarchyResponse = await response.json();
 
     // Validate that ALL required fields are present and have valid status
+    // IMPORTANT: event_id is required for linking to Futarchy market page
     if (
       data.status === 'ok' &&
       data.proposal_id &&
@@ -119,7 +120,7 @@ watch(() => props.proposal.id, fetchPrices);
       <div class="mb-2.5">
         Predict how this proposal will impact {{ priceData.company_tokens.base.tokenSymbol }}'s price through conditional
         markets on Futarchy.fi.
-        <a :href="`https://futarchy.fi`" target="_blank" rel="noopener noreferrer">Learn more</a>.
+        <a href="https://futarchy.fi" target="_blank" rel="noopener noreferrer">Learn more</a>.
       </div>
       <div class="mb-3 rounded-lg border px-3 py-2.5">
         <div class="flex justify-between">
@@ -143,7 +144,7 @@ watch(() => props.proposal.id, fetchPrices);
       </div>
       <div>
         <a
-          :href="`https://app.futarchy.fi/market?proposalId=${priceData.proposal_id}`"
+          :href="`https://app.futarchy.fi/market?proposalId=${priceData.event_id}`"
           target="_blank"
           rel="noopener noreferrer"
         >

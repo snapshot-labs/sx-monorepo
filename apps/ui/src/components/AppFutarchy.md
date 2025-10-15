@@ -85,7 +85,7 @@ The widget performs comprehensive validation before displaying. **ALL** of the f
 ### Top-level Fields
 - ✅ `status === "ok"`
 - ✅ `proposal_id` exists
-- ✅ `event_id` exists
+- ✅ `event_id` exists (required for linking to Futarchy market page)
 
 ### Conditional Yes
 - ✅ `conditional_yes.status === "ok"`
@@ -123,14 +123,16 @@ The widget performs comprehensive validation before displaying. **ALL** of the f
 ### User Interactions
 
 **"Learn more" link**
-- URL: `https://app.futarchy.fi/markets/{proposal_id}`
+- URL: `https://futarchy.fi`
 - Opens in new tab (`target="_blank"`)
 - Secure (`rel="noopener noreferrer"`)
+- Provides general information about Futarchy
 
 **"Trade on Futarchy.fi" button**
-- URL: `https://app.futarchy.fi/markets/{proposal_id}`
+- URL: `https://app.futarchy.fi/market?proposalId={event_id}`
 - Opens in new tab
 - Full-width button with arrow icon
+- Links to specific market for this proposal using `event_id` as query parameter
 
 ## Display Format
 
@@ -174,7 +176,7 @@ The widget is integrated in `apps/ui/src/views/Proposal.vue`:
 <AppFutarchy :proposal="proposal" />
 ```
 
-Placed in the proposal sidebar between voting section and results section.
+Placed in the proposal sidebar **after the Results section**, before Labels and Timeline sections.
 
 ## Error Handling
 
