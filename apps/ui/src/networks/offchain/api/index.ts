@@ -168,12 +168,14 @@ function formatSpace(
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
     return {
       id: space.id,
+      protocol: 'snapshot',
       name: space.name,
       network: networkId,
       avatar: space.avatar,
       cover: space.cover || '',
       proposal_count: space.proposalsCount,
       vote_count: space.votesCount,
+      follower_count: space.followersCount,
       active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
