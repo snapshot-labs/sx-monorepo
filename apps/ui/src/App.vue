@@ -2,6 +2,7 @@
 import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
+// Test
 const route = useRoute();
 const router = useRouter();
 const { app } = useApp();
