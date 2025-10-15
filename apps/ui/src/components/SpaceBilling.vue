@@ -15,10 +15,6 @@ const hasTurbo = computed(() => props.space.turbo);
 const turboExpirationDate = computed(() =>
   dayjs(props.space.turbo_expiration * 1000)
 );
-const daysUntilExpiration = computed(() => {
-  if (!hasTurbo.value) return null;
-  return turboExpirationDate.value.diff(dayjs(), 'day');
-});
 
 const {
   data,
@@ -36,10 +32,12 @@ const payments = computed(() => data.value?.pages.flat() || []);
 
 const statusText = computed(() => {
   if (!hasTurbo.value) return 'Free';
-  if (daysUntilExpiration.value !== null && daysUntilExpiration.value < 30) {
-    const days = daysUntilExpiration.value;
-    return `${days} day${days !== 1 ? 's' : ''} left`;
+
+  const daysUntilExpiration = turboExpirationDate.value.diff(dayjs(), 'day');
+  if (daysUntilExpiration < 30) {
+    return `${daysUntilExpiration} day${daysUntilExpiration !== 1 ? 's' : ''} left`;
   }
+
   return 'Active';
 });
 </script>
@@ -54,12 +52,8 @@ const statusText = computed(() => {
       <h4 class="eyebrow mb-3 font-medium">Current plan</h4>
 
       <div class="border rounded-xl p-4">
-        <div
-          class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
-        >
-          <div
-            class="flex items-start sm:items-center justify-between gap-3 sm:flex-1"
-          >
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div class="flex items-start sm:items-center sm:flex-1">
             <div class="flex-1">
               <h5 class="text-lg font-semibold text-skin-heading">
                 {{ hasTurbo ? 'Snapshot Pro' : 'Basic plan' }}

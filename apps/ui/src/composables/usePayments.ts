@@ -4,7 +4,7 @@ import gql from 'graphql-tag';
 const SCHNAPS_URLS: Record<string, string> = {
   s: 'https://schnaps.snapshot.box/graphql',
   's-tn': 'https://testnet-schnaps.snapshot.box/graphql'
-} as const;
+};
 
 export const PAYMENTS_LIMIT = 20;
 
@@ -12,9 +12,7 @@ export type Payment = {
   id: string;
   space: string;
   amount_decimal: string;
-  block: number;
   token_symbol: string;
-  token_address: string;
   timestamp?: number;
 };
 
@@ -30,9 +28,7 @@ const PAYMENTS_QUERY = gql`
       id
       space
       amount_decimal
-      block
       token_symbol
-      token_address
       timestamp
     }
   }
@@ -43,8 +39,7 @@ export async function fetchPayments(
   network: string,
   skip: number
 ): Promise<Payment[]> {
-  const uri =
-    SCHNAPS_URLS[network as keyof typeof SCHNAPS_URLS] || SCHNAPS_URLS.s;
+  const uri = SCHNAPS_URLS[network] || SCHNAPS_URLS.s;
 
   const client = new ApolloClient({
     uri,
