@@ -26,10 +26,7 @@ import {
   getSpaceLink
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
-import {
-  getTimestampFromBlock as _getTimestampFromBlock,
-  MULTICALL3_ADDRESS
-} from '../../utils';
+import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
 
 type SpaceData = {
   name: string;
@@ -159,28 +156,27 @@ export function createWriters(
     space.created = Number(block?.timestamp ?? getCurrentTimestamp());
 
     // Strategies & authentication
-    const [quorum, timelock, proposalThreshold] = await client.multicall({
-      contracts: [
-        {
-          address: contractAddress,
-          abi: GovernorModuleAbi,
-          functionName: 'quorumVotes'
-        },
-        {
-          address: contractAddress,
-          abi: GovernorModuleAbi,
-          functionName: 'timelock'
-        },
-        {
-          address: contractAddress,
-          abi: GovernorModuleAbi,
-          functionName: 'proposalThreshold'
-        }
-      ],
-      multicallAddress: MULTICALL3_ADDRESS,
-      allowFailure: false,
-      blockNumber: BigInt(blockNumber)
-    });
+    // NOTE: Not using multicall because some governors are older than Multicall3 contract
+    const [quorum, timelock, proposalThreshold] = await Promise.all([
+      client.readContract({
+        address: contractAddress,
+        abi: GovernorModuleAbi,
+        functionName: 'quorumVotes',
+        blockNumber: BigInt(blockNumber)
+      }),
+      client.readContract({
+        address: contractAddress,
+        abi: GovernorModuleAbi,
+        functionName: 'timelock',
+        blockNumber: BigInt(blockNumber)
+      }),
+      client.readContract({
+        address: contractAddress,
+        abi: GovernorModuleAbi,
+        functionName: 'proposalThreshold',
+        blockNumber: BigInt(blockNumber)
+      })
+    ]);
 
     const timelockDelay = await client.readContract({
       address: timelock,
