@@ -36,7 +36,11 @@ watch(open, val => {
 
 <template>
   <transition name="fade">
-    <div v-if="open" class="modal mx-auto" data-testid="modal">
+    <div
+      v-if="open"
+      class="modal mx-auto pt-electron-titlebar"
+      data-testid="modal"
+    >
       <div class="backdrop" @click="closeable ? $emit('close') : null" />
       <div class="shell overflow-hidden relative rounded-none md:rounded-lg">
         <div
@@ -90,6 +94,9 @@ watch(open, val => {
     right: 0;
     z-index: 99;
     background: rgba(0, 0, 0, 0.4);
+    @media (max-width: 767px) {
+      background: transparent;
+    }
   }
 
   .shell {

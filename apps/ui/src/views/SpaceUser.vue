@@ -267,7 +267,7 @@ watch(
       </div>
     </div>
     <UiScrollerHorizontal
-      class="z-40 sticky top-[71px] lg:top-[72px]"
+      class="z-40 sticky top-header-offset lg:top-header"
       with-buttons
       gradient="xxl"
     >
