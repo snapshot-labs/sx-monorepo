@@ -2,6 +2,7 @@ import Checkpoint, { evm } from '@snapshot-labs/checkpoint';
 import { createConfig } from './config';
 import { registerIndexer } from '../register';
 import { createWriters as createGovernorBravoWriters } from './protocols/governor-bravo/writers';
+import { createWriters as createOpenZeppelinWriters } from './protocols/openzeppelin/writers';
 import { createWriters as createSnapshotXWriters } from './protocols/snapshot-x/writers';
 import { EVMConfig, Protocols } from './types';
 import { applyProtocolPrefixToWriters } from './utils';
@@ -10,10 +11,12 @@ import { applyProtocolPrefixToWriters } from './utils';
 export const ENABLE_SNAPSHOT_X = process.env.ENABLE_SNAPSHOT_X !== 'false';
 export const ENABLE_GOVERNOR_BRAVO =
   process.env.ENABLE_GOVERNOR_BRAVO === 'true';
+export const ENABLE_OPEN_ZEPPELIN = process.env.ENABLE_OPEN_ZEPPELIN === 'true';
 
 const protocols: Protocols = {
   snapshotX: ENABLE_SNAPSHOT_X,
-  governorBravo: ENABLE_GOVERNOR_BRAVO
+  governorBravo: ENABLE_GOVERNOR_BRAVO,
+  openZeppelin: ENABLE_OPEN_ZEPPELIN
 };
 
 const ethConfig = createConfig('eth', protocols);
@@ -42,6 +45,16 @@ function createWriters(config: EVMConfig) {
       ...applyProtocolPrefixToWriters(
         'governorBravo',
         createGovernorBravoWriters(config, config.governorBravoConfig)
+      )
+    };
+  }
+
+  if (config.openZeppelinConfig) {
+    writers = {
+      ...writers,
+      ...applyProtocolPrefixToWriters(
+        'openZeppelin',
+        createOpenZeppelinWriters(config, config.openZeppelinConfig)
       )
     };
   }
