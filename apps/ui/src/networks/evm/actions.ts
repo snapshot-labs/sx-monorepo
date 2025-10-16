@@ -264,7 +264,7 @@ export function createActions(
         });
       }
 
-      if (space.protocol === 'open-zeppelin') {
+      if (space.protocol === '@openzeppelin/governor') {
         return openZeppelinClient.propose({
           signer,
           envelope: {
@@ -511,7 +511,7 @@ export function createActions(
         });
       }
 
-      if (proposal.space.protocol === 'open-zeppelin') {
+      if (proposal.space.protocol === '@openzeppelin/governor') {
         return openZeppelinClient.vote({
           signer,
           envelope: {
@@ -615,7 +615,7 @@ export function createActions(
         });
       }
 
-      if (proposal.space.protocol === 'open-zeppelin') {
+      if (proposal.space.protocol === '@openzeppelin/governor') {
         return openZeppelinClient.queue({
           signer: getSigner(web3),
           spaceId: proposal.space.id,
@@ -650,7 +650,7 @@ export function createActions(
         });
       }
 
-      if (proposal.space.protocol === 'open-zeppelin') {
+      if (proposal.space.protocol === '@openzeppelin/governor') {
         return openZeppelinClient.execute({
           signer: getSigner(web3),
           spaceId: proposal.space.id,

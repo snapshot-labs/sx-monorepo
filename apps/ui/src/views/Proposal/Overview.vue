@@ -116,7 +116,9 @@ const proposalTransactionId = computed(() => {
   const network = getNetwork(props.proposal.network);
 
   if (
-    ['governor-bravo', 'open-zeppelin'].includes(props.proposal.space.protocol)
+    ['governor-bravo', '@openzeppelin/governor'].includes(
+      props.proposal.space.protocol
+    )
   ) {
     return network.helpers.getExplorerUrl(props.proposal.tx, 'transaction');
   }

@@ -137,7 +137,7 @@ export function createWriters(
     const { metadataId } = getEntitiesIds(contractAddress);
 
     space = new Space(contractAddress, config.indexerName);
-    space.protocol = 'open-zeppelin';
+    space.protocol = '@openzeppelin/governor';
     space.verified = true;
     space.link = getSpaceLink({
       networkId: config.indexerName,

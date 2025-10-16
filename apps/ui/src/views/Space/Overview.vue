@@ -78,7 +78,7 @@ watchEffect(() => setTitle(props.space.name));
         <div v-if="space.protocol === 'governor-bravo'" class="mb-3">
           <UiProposalLabel label="Governor Bravo space" color="#272727" />
         </div>
-        <div v-if="space.protocol === 'open-zeppelin'" class="mb-3">
+        <div v-if="space.protocol === '@openzeppelin/governor'" class="mb-3">
           <UiProposalLabel label="OpenZeppelin space" color="#272727" />
         </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">
