@@ -59,12 +59,10 @@ export function createWriters(
     return { strategyId, strategyDataItemId, metadataId };
   };
 
-  const createTreasuries = (spaceAddress: string, timelockAddress: string) => {
-    const governanceInfo = getGovernanceInfo(spaceAddress);
-
+  const createTreasuries = (timelockAddress: string) => {
     return [
       JSON.stringify({
-        name: `${governanceInfo.name} Governance`,
+        name: 'Timelock',
         chain_id: protocolConfig.chainId,
         address: timelockAddress
       })
@@ -240,7 +238,7 @@ export function createWriters(
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = governanceInfo.name;
     spaceMetadata.voting_power_symbol = symbol;
-    spaceMetadata.treasuries = createTreasuries(contractAddress, timelock);
+    spaceMetadata.treasuries = createTreasuries(timelock);
     spaceMetadata.executors_strategies = [executionStrategy.id];
     await spaceMetadata.save();
 
@@ -634,7 +632,6 @@ export function createWriters(
     if (!spaceMetadataItem) return;
 
     spaceMetadataItem.treasuries = createTreasuries(
-      spaceAddress,
       getAddress(event.args.newTimelock)
     );
 
