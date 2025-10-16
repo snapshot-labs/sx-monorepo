@@ -182,3 +182,31 @@ export const contractData = [
       'https://subgrapher.snapshot.org/subgraph/arbitrum/5pwrjCkpcpCd79k9MBS5yVgnsHQiw6afvXUfzqHjdRFw'
   }
 ] as const;
+
+export const SAFE_APP_URLS = {
+  '1': 'https://app.safe.global/apps/open',
+  '5': 'https://app.safe.global/apps/open',
+  '56': 'https://app.safe.global/apps/open',
+  '100': 'https://app.safe.global/apps/open',
+  '137': 'https://app.safe.global/apps/open',
+  '246': 'https://app.safe.global/apps/open',
+  '1116': 'https://safe.coredao.org/apps/open',
+  '8453': 'https://app.safe.global/apps/open',
+  '42161': 'https://app.safe.global/apps/open',
+  '73799': 'https://app.safe.global/apps/open',
+  '11155111': 'https://app.safe.global/apps/open'
+} as const;
+
+export const SAFE_PREFIXES = {
+  1: 'eth',
+  5: 'gor',
+  56: 'bnb',
+  100: 'gno',
+  137: 'matic',
+  246: 'ewt',
+  1116: 'core',
+  8453: 'base',
+  42161: 'arb1',
+  73799: 'vt',
+  11155111: 'sep'
+} as const;

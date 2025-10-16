@@ -457,6 +457,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
             :is-o-snap-plugin-enabled="
               !!space.additionalRawData?.plugins?.oSnap
             "
+            :space="space"
             :treasuries="form.treasuries"
           />
         </UiContainerSettings>

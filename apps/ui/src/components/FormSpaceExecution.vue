@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
-import { SpaceMetadataTreasury } from '@/types';
+import { Space, SpaceMetadataTreasury } from '@/types';
 
 const enableOSnap = defineModel<boolean>('enableOSnap', { required: true });
 
 const props = defineProps<{
   isOSnapPluginEnabled: boolean;
+  space: Space;
   treasuries: SpaceMetadataTreasury[];
 }>();
+
+const selectedTreasury = ref<SpaceMetadataTreasury | null>(null);
+const isSelectedTreasuryActive = ref(false);
 
 const {
   isPending,
@@ -38,6 +42,14 @@ const {
     );
   }
 });
+
+function handleToggleTreasuryClick(
+  treasury: SpaceMetadataTreasury,
+  isActive: boolean
+) {
+  selectedTreasury.value = treasury;
+  isSelectedTreasuryActive.value = isActive;
+}
 </script>
 
 <template>
@@ -78,6 +90,7 @@ const {
           primary
           type="button"
           class="flex items-center justify-center gap-2"
+          @click="handleToggleTreasuryClick(treasury, true)"
         >
           <span class="block size-2 rounded-full bg-skin-success" />
           oSnap enabled
@@ -86,6 +99,7 @@ const {
           v-else-if="oSnapAvailability && oSnapAvailability[i] === 'DISABLED'"
           type="button"
           class="flex items-center justify-center gap-2"
+          @click="handleToggleTreasuryClick(treasury, false)"
         >
           <span class="block size-2 rounded-full bg-skin-border" />
           Activate oSnap
@@ -93,4 +107,14 @@ const {
       </div>
     </div>
   </template>
+  <teleport to="#modal">
+    <ModalOSnapRedirect
+      v-if="selectedTreasury"
+      :open="!!selectedTreasury"
+      :space="space"
+      :treasury="selectedTreasury"
+      :is-active="isSelectedTreasuryActive"
+      @close="selectedTreasury = null"
+    />
+  </teleport>
 </template>
