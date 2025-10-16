@@ -1,4 +1,4 @@
-import { getAddress } from '@ethersproject/address';
+import { getAddress } from 'viem';
 import { SpaceMetadataItem } from '../../../../.checkpoint/models';
 import { dropIpfs, getJSON, getSpaceName } from '../../../common/utils';
 import { NetworkID } from '../../types';
