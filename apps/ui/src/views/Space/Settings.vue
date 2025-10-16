@@ -452,16 +452,13 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           title="Execution"
           description="Execution allows you to define how proposals are executed once they pass."
         >
-          <h4 class="eyebrow font-medium">oSnap</h4>
-          <div class="mb-2">
-            oSnap uses Optimistic Governor to execute proposals on-chain.
-          </div>
-          <div class="s-box mt-3">
-            <UiSwitch
-              v-model="enableOSnap"
-              title="Enable oSnap-based execution"
-            />
-          </div>
+          <FormSpaceExecution
+            v-model:enable-o-snap="enableOSnap"
+            :is-o-snap-plugin-enabled="
+              !!space.additionalRawData?.plugins?.oSnap
+            "
+            :treasuries="form.treasuries"
+          />
         </UiContainerSettings>
         <UiContainerSettings
           v-else
