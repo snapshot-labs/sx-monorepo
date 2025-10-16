@@ -26,7 +26,7 @@ import {
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
-import { convertChoice, getProposalTitle } from '../open-zeppelin/utils';
+import { convertChoice, getProposalTitle } from '../openzeppelin/utils';
 
 type SpaceData = {
   name: string;

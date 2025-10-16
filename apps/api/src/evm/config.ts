@@ -1,6 +1,6 @@
 import { evmNetworks } from '@snapshot-labs/sx';
 import { createConfig as createGovernorBravoConfig } from './protocols/governor-bravo/config';
-import { createConfig as createOpenZeppelinConfig } from './protocols/open-zeppelin/config';
+import { createConfig as createOpenZeppelinConfig } from './protocols/openzeppelin/config';
 import { createConfig as createSnapshotXConfig } from './protocols/snapshot-x/config';
 import { EVMConfig, NetworkID, PartialConfig, Protocols } from './types';
 import { applyConfig } from './utils';

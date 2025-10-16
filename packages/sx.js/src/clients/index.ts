@@ -7,6 +7,6 @@ export { HerodotusController } from './starknet/herodotus';
 export { EthereumTx as EvmEthereumTx } from './evm/ethereum-tx';
 export { EthereumSig as EvmEthereumSig } from './evm/ethereum-sig';
 export { EthereumTx as GovernorBravoEthereumTx } from './governor-bravo/ethereum-tx';
-export { EthereumTx as OpenZeppelinEthereumTx } from './open-zeppelin/ethereum-tx';
+export { EthereumTx as OpenZeppelinEthereumTx } from './openzeppelin/ethereum-tx';
 export { EthereumSig as OffchainEthereumSig } from './offchain/ethereum-sig';
 export { StarknetSig as OffchainStarknetSig } from './offchain/starknet-sig';
