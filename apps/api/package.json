@@ -23,7 +23,7 @@
     "@apollo/server": "^4.2.2",
     "@faker-js/faker": "^7.4.0",
     "@logtail/pino": "^0.5.5",
-    "@snapshot-labs/checkpoint": "^0.1.0-beta.66",
+    "@snapshot-labs/checkpoint": "^0.1.0-beta.67",
     "@snapshot-labs/sx": "^0.1.0",
     "@types/bn.js": "^5.1.0",
     "@types/mysql": "^2.15.21",
