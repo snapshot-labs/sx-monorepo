@@ -200,13 +200,12 @@ export const SAFE_APP_URLS = {
 export const SAFE_PREFIXES = {
   1: 'eth',
   5: 'gor',
-  56: 'bnb',
+  10: 'oeth',
   100: 'gno',
   137: 'matic',
-  246: 'ewt',
   1116: 'core',
   8453: 'base',
   42161: 'arb1',
-  73799: 'vt',
+  43114: 'avax',
   11155111: 'sep'
 } as const;

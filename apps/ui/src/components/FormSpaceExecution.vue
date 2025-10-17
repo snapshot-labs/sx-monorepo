@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
+import { makeConfigureOsnapUrl } from '@/helpers/osnap/getters';
 import { shorten } from '@/helpers/utils';
 import { Space, SpaceMetadataTreasury } from '@/types';
 import IHPencil from '~icons/heroicons-outline/pencil';
@@ -12,9 +13,6 @@ const props = defineProps<{
   space: Space;
   treasuries: SpaceMetadataTreasury[];
 }>();
-
-const selectedTreasury = ref<SpaceMetadataTreasury | null>(null);
-const isSelectedTreasuryActive = ref(false);
 
 const {
   isPending,
@@ -37,7 +35,6 @@ const {
 
           return isEnabled ? 'ENABLED' : 'DISABLED';
         } catch {
-          console.log('chainId', treasury.chainId);
           return 'UNSUPPORTED';
         }
       })
@@ -45,12 +42,16 @@ const {
   }
 });
 
-function handleToggleTreasuryClick(
-  treasury: SpaceMetadataTreasury,
-  isActive: boolean
-) {
-  selectedTreasury.value = treasury;
-  isSelectedTreasuryActive.value = isActive;
+function getConfigureUrl(treasury: SpaceMetadataTreasury) {
+  console.log('treasury', treasury);
+  const spaceUrl = window.location.href.replaceAll(/\/settings\/\w+/g, '');
+
+  return makeConfigureOsnapUrl({
+    spaceUrl,
+    spaceName: props.space.name,
+    safeAddress: treasury.address,
+    network: treasury.chainId as number
+  });
 }
 </script>
 
@@ -112,35 +113,32 @@ function handleToggleTreasuryClick(
           </div>
           <UiButton
             v-else-if="oSnapAvailability && oSnapAvailability[i] === 'ENABLED'"
-            primary
+            :to="getConfigureUrl(treasury)"
             type="button"
-            class="flex items-center justify-center gap-2"
-            @click="handleToggleTreasuryClick(treasury, true)"
+            class="group hover:border-skin-danger hover:text-skin-danger"
           >
-            <span class="block size-2 rounded-full bg-skin-success" />
-            oSnap enabled
+            <div
+              class="flex items-center justify-center gap-2 group-hover:hidden"
+            >
+              <span class="block size-2 rounded-full bg-skin-success" />
+              Active
+            </div>
+            <div class="items-center justify-center hidden group-hover:flex">
+              Disable
+              <IH-arrow-sm-right class="-rotate-45 -mr-2" />
+            </div>
           </UiButton>
           <UiButton
             v-else-if="oSnapAvailability && oSnapAvailability[i] === 'DISABLED'"
+            :to="getConfigureUrl(treasury)"
             type="button"
-            class="flex items-center justify-center gap-2"
-            @click="handleToggleTreasuryClick(treasury, false)"
+            class="flex items-center justify-center"
           >
-            <span class="block size-2 rounded-full bg-skin-border" />
-            Activate oSnap
+            Enable
+            <IH-arrow-sm-right class="-rotate-45 -mr-2" />
           </UiButton>
         </div>
       </div>
     </div>
   </template>
-  <teleport to="#modal">
-    <ModalOSnapRedirect
-      v-if="selectedTreasury"
-      :open="!!selectedTreasury"
-      :space="space"
-      :treasury="selectedTreasury"
-      :is-active="isSelectedTreasuryActive"
-      @close="selectedTreasury = null"
-    />
-  </teleport>
 </template>
