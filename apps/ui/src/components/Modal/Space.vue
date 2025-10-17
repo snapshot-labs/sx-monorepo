@@ -42,16 +42,7 @@ watch(
   <UiModal :open="open" @close="$emit('close')">
     <template #header>
       <h3 v-text="'Select a space'" />
-      <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-        <IH-search class="mx-2" />
-        <input
-          ref="searchInput"
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search"
-          class="flex-auto bg-transparent text-skin-link"
-        />
-      </div>
+      <UiModalSearchInput v-model="searchQuery" />
     </template>
     <div>
       <UiLoading v-if="isPending" class="inline-block p-4" />
