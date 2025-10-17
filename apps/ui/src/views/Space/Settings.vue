@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
+import SpaceBilling from '@/components/SpaceBilling.vue';
 import {
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
@@ -87,6 +88,7 @@ type Tab = {
     | 'labels'
     | 'whitelabel'
     | 'advanced'
+    | 'billing'
     | 'controller';
   visible: boolean;
 };
@@ -144,6 +146,10 @@ const tabs = computed<Tab[]>(
       },
       {
         id: 'advanced',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'billing',
         visible: isOffchainNetwork.value
       },
       {
@@ -339,7 +345,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <div
       v-else
       class="flex-grow"
-      :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
+      :class="{
+        'px-4 pt-4': !['profile', 'billing'].includes(activeTab)
+      }"
     >
       <SpaceSettingsAlerts
         :space="pendingSpace"
@@ -556,6 +564,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           "
         />
       </UiContainerSettings>
+      <div v-if="activeTab === 'billing'">
+        <SpaceBilling :space="space" />
+      </div>
       <UiContainerSettings
         v-if="activeTab === 'controller'"
         title="Controller"
