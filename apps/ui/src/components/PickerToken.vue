@@ -62,7 +62,7 @@ function handlePick(token: Token) {
 async function fetchCustomToken(address) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
 
-  if (typeof props.network === 'string') {
+  if (String(props.network).startsWith('0x')) {
     console.log('network is not a number (starknet is not supported)');
     return;
   }
@@ -70,7 +70,7 @@ async function fetchCustomToken(address) {
   customTokenLoading.value = true;
 
   const network = props.network;
-  const provider = getProvider(network);
+  const provider = getProvider(Number(network));
   const tokens = [address];
 
   try {

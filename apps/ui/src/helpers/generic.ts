@@ -31,7 +31,8 @@ export function getGenericExplorerUrl(
   address: string,
   type: 'address' | 'token' | 'transaction'
 ) {
-  const isEvmNetwork = typeof chainId === 'number';
+  const isEvmNetwork =
+    typeof chainId === 'number' || !String(chainId).startsWith('0x');
 
   if (isEvmNetwork) {
     let mappedType = 'tx';
@@ -60,14 +61,15 @@ export async function waitForTransaction(
   chainId: ChainId,
   waitForIndexing = false
 ) {
-  const isEvmNetwork = typeof chainId === 'number';
+  const isEvmNetwork =
+    typeof chainId === 'number' || !String(chainId).startsWith('0x');
   let networkId: NetworkID;
 
   if (isEvmNetwork) {
     try {
       networkId = getEvmNetworkId(chainId);
     } catch {
-      const provider = getProvider(chainId);
+      const provider = getProvider(Number(chainId));
       return provider.waitForTransaction(txId);
     }
   } else {
