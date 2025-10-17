@@ -88,6 +88,7 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
   const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const ethSigClient = new clients.EvmEthereumSig({
     ...clientOpts,
@@ -251,6 +252,20 @@ export function createActions(
 
       if (space.protocol === 'governor-bravo') {
         return governorBravoClient.propose({
+          signer,
+          envelope: {
+            data: {
+              spaceId: space.id,
+              title,
+              body,
+              executions: executionInfo?.transactions ?? []
+            }
+          }
+        });
+      }
+
+      if (space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.propose({
           signer,
           envelope: {
             data: {
@@ -496,6 +511,20 @@ export function createActions(
         });
       }
 
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.vote({
+          signer,
+          envelope: {
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: proposal.proposal_id,
+              choice: getSdkChoice(choice),
+              reason
+            }
+          }
+        });
+      }
+
       const isContract = await getIsContract(account, connectorType);
 
       const relayer = await getRelayerInfo(
@@ -586,6 +615,17 @@ export function createActions(
         });
       }
 
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.queue({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          description: proposal.body,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
+        });
+      }
+
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
@@ -607,6 +647,17 @@ export function createActions(
           signer: getSigner(web3),
           spaceId: proposal.space.id,
           proposalId: Number(proposal.proposal_id)
+        });
+      }
+
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.execute({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          description: proposal.body,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
         });
       }
 
