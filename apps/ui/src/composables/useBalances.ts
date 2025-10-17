@@ -73,7 +73,7 @@ export function useBalances({
     };
   }
 
-  async function loadBalances(address: string, chainId: ChainId) {
+  async function loadBalances(address: string, chainId: string) {
     const metadata = METADATA_BY_CHAIN_ID.get(chainId);
     const baseToken = metadata?.ticker
       ? { name: metadata.name, symbol: metadata.ticker }

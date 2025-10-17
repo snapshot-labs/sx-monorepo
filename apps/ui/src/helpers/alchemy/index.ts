@@ -101,7 +101,7 @@ export async function batchRequest(
  */
 export async function getBalance(
   address: string,
-  chainId: ChainId
+  chainId: string
 ): Promise<string> {
   const provider = getProvider(Number(chainId));
   const balance = await provider.getBalance(address, 'latest');
@@ -118,15 +118,11 @@ export async function getBalance(
  */
 export async function getTokenBalances(
   address: string,
-  chainId: ChainId
+  chainId: string
 ): Promise<GetTokenBalancesResponse> {
   const results = { address, tokenBalances: [], pageKey: null };
 
-  if (
-    (MINIMAL_SUPPORTED_CHAIN_IDS as readonly string[]).includes(
-      chainId.toString()
-    )
-  ) {
+  if ((MINIMAL_SUPPORTED_CHAIN_IDS as readonly string[]).includes(chainId)) {
     return results;
   }
 
@@ -159,7 +155,7 @@ export async function getTokenBalances(
  */
 export async function getBalances(
   address: string,
-  chainId: ChainId,
+  chainId: string,
   baseToken: { name: string; symbol: string; logo?: string }
 ): Promise<GetBalancesResponse> {
   const [ethBalance, { tokenBalances }] = await Promise.all([
@@ -170,7 +166,7 @@ export async function getBalances(
   const contractAddresses = tokenBalances.map(
     balance => balance.contractAddress
   );
-  const metadata = await getTokensMetadata(Number(chainId), contractAddresses);
+  const metadata = await getTokensMetadata(chainId, contractAddresses);
 
   return [
     {

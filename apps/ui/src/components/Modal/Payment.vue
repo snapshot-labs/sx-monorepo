@@ -15,7 +15,7 @@ const props = withDefaults(
     open: boolean;
     unitPrice: number;
     tokens: Token[];
-    network: ChainId;
+    network: string;
     barcodePayload: BarcodePayload;
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;
@@ -44,7 +44,7 @@ const { isPending, assetsMap } = useBalances({
   treasury: toRef(() => {
     return auth.value
       ? {
-          chainId: String(props.network),
+          chainId: props.network,
           address: auth.value.account
         }
       : null;

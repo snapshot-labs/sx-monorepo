@@ -4,7 +4,7 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { createStakeTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, Transaction } from '@/types';
+import { Transaction } from '@/types';
 
 const STAKING_CONTRACTS = {
   1: {
@@ -42,7 +42,7 @@ const validator = getValidator({
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: ChainId;
+  network: string;
   initialState?: any;
 }>();
 
@@ -58,7 +58,7 @@ const form: {
 
 const { assetsMap } = useBalances({
   treasury: toRef(() => ({
-    chainId: String(props.network),
+    chainId: props.network,
     address: props.address
   }))
 });

@@ -2,7 +2,7 @@
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, Contact } from '@/types';
+import { Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -13,7 +13,7 @@ const DEFAULT_FORM_STATE = {
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: ChainId;
+  network: string;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
@@ -54,7 +54,7 @@ const form: { to: string; nft: string; amount: string | number } = reactive(
 
 const { isPending, nfts, nftsMap } = useNfts({
   treasury: toRef(() => ({
-    chainId: String(props.network),
+    chainId: props.network,
     address: props.address
   }))
 });
