@@ -189,7 +189,7 @@ watch(
       />
       <div v-else-if="votingPower" class="space-y-2.5">
         <div class="flex items-center justify-between">
-          <h4 class="eyebrow">Voting power</h4>
+          <UiEyebrow>Voting power</UiEyebrow>
           <span
             v-if="votingPower.votingPowers.length > 1"
             class="text-skin-link"

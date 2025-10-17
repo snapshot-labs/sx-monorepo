@@ -37,7 +37,7 @@ function handleTestStrategies(strategies: StrategyConfig[]) {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Strategies</h4>
+  <UiEyebrow class="mb-2 font-medium">Strategies</UiEyebrow>
   <div class="s-box">
     <UiSelectorNetwork
       v-model="snapshotChainId"

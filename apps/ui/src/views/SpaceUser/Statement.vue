@@ -107,7 +107,7 @@ watchEffect(() =>
             :body="statement.statement"
           />
           <div v-if="shouldShowSource && statement.source">
-            <h4 class="eyebrow text-skin-text mb-2">Source</h4>
+            <UiEyebrow class="text-skin-text mb-2">Source</UiEyebrow>
             <a
               :href="SOURCE_ICONS[statement.source].link"
               target="_blank"

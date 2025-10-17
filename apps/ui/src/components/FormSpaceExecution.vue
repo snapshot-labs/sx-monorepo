@@ -69,7 +69,7 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
     @click="enableOSnap = !enableOSnap"
   />
   <template v-if="isOSnapPluginEnabled && enableOSnap">
-    <h4 class="eyebrow font-medium mt-3 mb-2">Treasuries</h4>
+    <UiEyebrow class="font-medium mt-3 mb-2">Treasuries</UiEyebrow>
     <UiLoading v-if="isPending" />
     <div v-else-if="isError" class="flex items-center space-x-2">
       <IH-exclamation-circle class="inline-block" />

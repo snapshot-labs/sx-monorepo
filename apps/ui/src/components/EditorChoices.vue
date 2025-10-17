@@ -69,7 +69,7 @@ function shouldHaveDeleteButton(index: number) {
       's-error': showError
     }"
   >
-    <h4 class="eyebrow mb-2.5">Choices</h4>
+    <UiEyebrow class="mb-2.5">Choices</UiEyebrow>
     <div class="flex flex-col space-y-3">
       <Draggable
         v-model="proposal.choices"
