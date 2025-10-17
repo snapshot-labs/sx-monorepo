@@ -3,6 +3,7 @@ import Checkpoint from '@snapshot-labs/checkpoint';
 import {
   addEvmIndexers,
   ENABLE_GOVERNOR_BRAVO,
+  ENABLE_OPENZEPPELIN,
   ENABLE_SNAPSHOT_X
 } from './evm';
 import logger from './logger';
@@ -25,7 +26,7 @@ async function initializeCheckpoint(checkpoint: Checkpoint) {
     return;
   }
 
-  const currentVersionTag = `commit:${GIT_COMMIT}|snapshotX:${ENABLE_SNAPSHOT_X}|governorBravo:${ENABLE_GOVERNOR_BRAVO}`;
+  const currentVersionTag = `commit:${GIT_COMMIT}|snapshotX:${ENABLE_SNAPSHOT_X}|governorBravo:${ENABLE_GOVERNOR_BRAVO}|openZeppelin:${ENABLE_OPENZEPPELIN}`;
   const { knex } = checkpoint.getBaseContext();
 
   const isInitialized = await knex.schema.hasTable('_metadatas');
