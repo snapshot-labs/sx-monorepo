@@ -45,7 +45,7 @@ function toggleQuestion(id) {
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">
-      <div class="eyebrow mb-2">Key features</div>
+      <UiEyebrow class="mb-2">Key features</UiEyebrow>
       <h2 class="font-display text-[36px] mb-3">
         What the network plan offers
       </h2>
@@ -103,7 +103,7 @@ function toggleQuestion(id) {
     </UiContainer>
 
     <div class="text-center">
-      <div class="eyebrow mb-4">Trusted by</div>
+      <UiEyebrow class="mb-4">Trusted by</UiEyebrow>
       <UiCarousel>
         <div class="customer">
           <IC-blast />
@@ -148,7 +148,7 @@ function toggleQuestion(id) {
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">
-      <div class="eyebrow mb-2">Get started</div>
+      <UiEyebrow class="mb-2">Get started</UiEyebrow>
       <h2 class="font-display text-[36px] mb-5">Get network support today</h2>
       <a
         :href="LINK"
@@ -161,7 +161,7 @@ function toggleQuestion(id) {
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">
-      <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
+      <UiEyebrow class="mb-2 text-center">Frequently asked questions</UiEyebrow>
       <h2 class="text-[36px] font-display mb-5 text-center">Questions?</h2>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
         <button

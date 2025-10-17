@@ -168,19 +168,19 @@ onMounted(() => {
         default: `${space?.network || 'eth'}:${props.id || '0x2121212121212121212121212121212121212121212121212121212121212121'}`
       }"
     />
-    <h4 class="eyebrow mb-2 font-medium">Profile</h4>
+    <UiEyebrow class="mb-2 font-medium">Profile</UiEyebrow>
     <UiForm
       :model-value="form"
       :error="formErrors"
       :definition="profileDefinition"
     />
-    <h4 class="eyebrow mt-4 mb-2 font-medium">Voting power</h4>
+    <UiEyebrow class="mt-4 mb-2 font-medium">Voting power</UiEyebrow>
     <UiForm
       :model-value="form"
       :error="formErrors"
       :definition="votingPowerDefinition"
     />
-    <h4 class="eyebrow mt-4 mb-2 font-medium">Social accounts</h4>
+    <UiEyebrow class="mt-4 mb-2 font-medium">Social accounts</UiEyebrow>
     <UiForm
       :model-value="form"
       :error="formErrors"
