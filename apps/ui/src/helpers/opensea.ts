@@ -1,5 +1,3 @@
-import { ChainId } from '@/types';
-
 type ApiNft = {
   identifier: string;
   collection: string;
