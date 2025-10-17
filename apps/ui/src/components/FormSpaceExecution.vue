@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
+import { shorten } from '@/helpers/utils';
 import { Space, SpaceMetadataTreasury } from '@/types';
 import IHPencil from '~icons/heroicons-outline/pencil';
 
@@ -73,43 +74,62 @@ function handleToggleTreasuryClick(
       <IH-exclamation-circle class="inline-block" />
       <span>Failed to load treasuries.</span>
     </div>
-    <div
-      v-for="(treasury, i) in treasuries"
-      v-else
-      :key="treasury.address"
-      class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
-    >
-      <div class="flex items-center">
-        <div class="flex min-w-0">
-          <div class="truncate mr-3">{{ treasury.name }}</div>
+    <div v-else>
+      <div
+        v-for="(treasury, i) in treasuries"
+        :key="treasury.address"
+        class="flex justify-between items-center first-of-type:rounded-t-lg last-of-type:rounded-b-lg first-of-type:border-t border-b border-x px-4 py-3 text-skin-link"
+      >
+        <div class="flex items-center">
+          <UiBadgeNetwork
+            :chain-id="treasury.chainId"
+            class="mr-3 hidden sm:block"
+          >
+            <UiStamp
+              :id="treasury.address"
+              type="avatar"
+              :size="32"
+              class="rounded-md"
+            />
+          </UiBadgeNetwork>
+          <div class="flex-1 leading-[22px]">
+            <h4
+              class="text-skin-link"
+              v-text="treasury.name || shorten(treasury.address)"
+            />
+            <UiAddress
+              class="text-skin-text text-[17px]"
+              :address="treasury.address"
+            />
+          </div>
         </div>
-      </div>
-      <div class="flex gap-3">
-        <div
-          v-if="oSnapAvailability && oSnapAvailability[i] === 'UNSUPPORTED'"
-          class="text-skin-border"
-        >
-          oSnap unavailable
+        <div class="flex gap-3">
+          <div
+            v-if="oSnapAvailability && oSnapAvailability[i] === 'UNSUPPORTED'"
+            class="text-skin-border"
+          >
+            oSnap unavailable
+          </div>
+          <UiButton
+            v-else-if="oSnapAvailability && oSnapAvailability[i] === 'ENABLED'"
+            primary
+            type="button"
+            class="flex items-center justify-center gap-2"
+            @click="handleToggleTreasuryClick(treasury, true)"
+          >
+            <span class="block size-2 rounded-full bg-skin-success" />
+            oSnap enabled
+          </UiButton>
+          <UiButton
+            v-else-if="oSnapAvailability && oSnapAvailability[i] === 'DISABLED'"
+            type="button"
+            class="flex items-center justify-center gap-2"
+            @click="handleToggleTreasuryClick(treasury, false)"
+          >
+            <span class="block size-2 rounded-full bg-skin-border" />
+            Activate oSnap
+          </UiButton>
         </div>
-        <UiButton
-          v-else-if="oSnapAvailability && oSnapAvailability[i] === 'ENABLED'"
-          primary
-          type="button"
-          class="flex items-center justify-center gap-2"
-          @click="handleToggleTreasuryClick(treasury, true)"
-        >
-          <span class="block size-2 rounded-full bg-skin-success" />
-          oSnap enabled
-        </UiButton>
-        <UiButton
-          v-else-if="oSnapAvailability && oSnapAvailability[i] === 'DISABLED'"
-          type="button"
-          class="flex items-center justify-center gap-2"
-          @click="handleToggleTreasuryClick(treasury, false)"
-        >
-          <span class="block size-2 rounded-full bg-skin-border" />
-          Activate oSnap
-        </UiButton>
       </div>
     </div>
   </template>
