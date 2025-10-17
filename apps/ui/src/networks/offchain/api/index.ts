@@ -140,14 +140,12 @@ function formatSpace(
   constants: NetworkConstants
 ): Space {
   const treasuries: SpaceMetadataTreasury[] = space.treasuries.map(treasury => {
-    const chainId = treasury.network.startsWith('0x')
-      ? treasury.network
-      : parseInt(treasury.network, 10);
+    const chainId = treasury.network;
 
     return {
       name: treasury.name,
       address: treasury.address,
-      chainId: String(chainId)
+      chainId
     };
   });
 
@@ -465,21 +463,19 @@ function formatDelegations(
 
     const name = DELEGATION_TYPES_NAMES[apiType];
 
-    const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
-      ? space.delegationPortal.delegationNetwork
-      : parseInt(space.delegationPortal.delegationNetwork, 10);
+    const chainId = space.delegationPortal.delegationNetwork;
 
     delegations.push({
       name,
       apiType,
       apiUrl: space.delegationPortal.delegationApi,
       contractAddress: space.delegationPortal.delegationContract,
-      chainId: String(chainId)
+      chainId
     });
   }
 
   if (basicDelegationStrategy) {
-    const chainId = parseInt(space.network, 10);
+    const chainId = space.network;
 
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
@@ -488,7 +484,7 @@ function formatDelegations(
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,
-        chainId: String(chainId)
+        chainId
       });
     }
   }
