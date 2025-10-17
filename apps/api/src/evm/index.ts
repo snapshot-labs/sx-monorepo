@@ -11,12 +11,12 @@ import { applyProtocolPrefixToWriters } from './utils';
 export const ENABLE_SNAPSHOT_X = process.env.ENABLE_SNAPSHOT_X !== 'false';
 export const ENABLE_GOVERNOR_BRAVO =
   process.env.ENABLE_GOVERNOR_BRAVO === 'true';
-export const ENABLE_OPEN_ZEPPELIN = process.env.ENABLE_OPEN_ZEPPELIN === 'true';
+export const ENABLE_OPENZEPPELIN = process.env.ENABLE_OPENZEPPELIN === 'true';
 
 const protocols: Protocols = {
   snapshotX: ENABLE_SNAPSHOT_X,
   governorBravo: ENABLE_GOVERNOR_BRAVO,
-  openZeppelin: ENABLE_OPEN_ZEPPELIN
+  openZeppelin: ENABLE_OPENZEPPELIN
 };
 
 const ethConfig = createConfig('eth', protocols);
