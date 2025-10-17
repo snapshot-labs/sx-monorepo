@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/vue-query';
 import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { Space, SpaceMetadataTreasury } from '@/types';
+import IHPencil from '~icons/heroicons-outline/pencil';
 
 const enableOSnap = defineModel<boolean>('enableOSnap', { required: true });
 
@@ -53,13 +54,18 @@ function handleToggleTreasuryClick(
 </script>
 
 <template>
-  <h4 class="eyebrow font-medium">oSnap</h4>
-  <div class="mb-2">
-    oSnap uses Optimistic Governor to execute proposals on-chain.
-  </div>
-  <div class="s-box mt-3">
-    <UiSwitch v-model="enableOSnap" title="Enable oSnap-based execution" />
-  </div>
+  <ButtonStrategy
+    :is-active="enableOSnap"
+    :strategy="{
+      address: '',
+      name: 'oSnap by UMA',
+      about: `oSnap integrates with Snapshot and UMA's optimistic oracle to automatically execute transactions from governance proposals onchain for your Safe treasury.`,
+      link: 'https://uma.xyz/osnap',
+      icon: IHPencil,
+      paramsDefinition: {}
+    }"
+    @click="enableOSnap = !enableOSnap"
+  />
   <template v-if="isOSnapPluginEnabled && enableOSnap">
     <h4 class="eyebrow font-medium mt-3 mb-2">Treasuries</h4>
     <UiLoading v-if="isPending" />
