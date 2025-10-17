@@ -58,7 +58,7 @@ const form: {
 
 const { assetsMap } = useBalances({
   treasury: toRef(() => ({
-    chainId: props.network,
+    chainId: String(props.network),
     address: props.address
   }))
 });

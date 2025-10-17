@@ -54,7 +54,7 @@ const form: { to: string; nft: string; amount: string | number } = reactive(
 
 const { isPending, nfts, nftsMap } = useNfts({
   treasury: toRef(() => ({
-    chainId: props.network,
+    chainId: String(props.network),
     address: props.address
   }))
 });

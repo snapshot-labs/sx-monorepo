@@ -37,7 +37,7 @@ METADATA_BY_CHAIN_ID.set(42220, {
 });
 
 type Treasury = {
-  chainId: ChainId;
+  chainId: string;
   address: string;
 };
 

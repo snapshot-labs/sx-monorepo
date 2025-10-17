@@ -74,7 +74,7 @@ describe('utils', () => {
         treasuries: [
           {
             name: 'treasury 1',
-            chainId: 11155111,
+            chainId: '11155111',
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
@@ -92,7 +92,7 @@ describe('utils', () => {
             apiType: 'governor-subgraph',
             apiUrl:
               'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            chainId: 11155111,
+            chainId: '11155111',
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]

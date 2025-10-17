@@ -44,7 +44,7 @@ const formValidated = ref(false);
 const formErrors = ref({} as Record<string, any>);
 const { isPending, assets, assetsMap } = useBalances({
   treasury: toRef(() => ({
-    chainId: props.network,
+    chainId: String(props.network),
     address: props.address
   }))
 });

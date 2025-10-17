@@ -44,7 +44,7 @@ const { isPending, assetsMap } = useBalances({
   treasury: toRef(() => {
     return auth.value
       ? {
-          chainId: props.network,
+          chainId: String(props.network),
           address: auth.value.account
         }
       : null;

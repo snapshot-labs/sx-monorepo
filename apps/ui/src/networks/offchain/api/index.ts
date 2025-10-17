@@ -75,7 +75,7 @@ const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
   apiType: 'split-delegation',
   apiUrl: 'https://delegate-api.gnosisguild.org',
   contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
-  chainId: 1
+  chainId: '1'
 };
 
 const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
@@ -474,7 +474,7 @@ function formatDelegations(
       apiType,
       apiUrl: space.delegationPortal.delegationApi,
       contractAddress: space.delegationPortal.delegationContract,
-      chainId
+      chainId: String(chainId)
     });
   }
 
@@ -488,7 +488,7 @@ function formatDelegations(
         apiType: 'delegate-registry',
         apiUrl,
         contractAddress: space.id,
-        chainId
+        chainId: String(chainId)
       });
     }
   }
