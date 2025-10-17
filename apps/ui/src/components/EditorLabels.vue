@@ -19,7 +19,7 @@ const labels = defineModel<string[]>({
     >
       <template #button>
         <div class="flex justify-between items-center mb-2.5">
-          <h4 class="eyebrow" v-text="'Labels'" />
+          <UiEyebrow>Labels</UiEyebrow>
           <IH-pencil />
         </div>
       </template>

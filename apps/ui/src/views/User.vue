@@ -227,7 +227,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           </template>
         </div>
       </div>
-      <h4 class="mb-2 eyebrow leading-8">Activity</h4>
+      <UiEyebrow class="mb-2 leading-8">Activity</UiEyebrow>
     </div>
     <div class="border-b w-full">
       <div class="flex space-x-1 px-4 leading-8">

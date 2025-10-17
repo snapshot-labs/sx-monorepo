@@ -81,7 +81,7 @@ function formatVotingDuration(
 
 <template>
   <div>
-    <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
+    <UiEyebrow class="mb-2.5">Timeline</UiEyebrow>
     <ProposalTimeline
       :data="
         isOffchainSpace || !editable
