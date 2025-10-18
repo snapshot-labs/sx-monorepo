@@ -75,7 +75,7 @@ const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
   apiType: 'split-delegation',
   apiUrl: 'https://delegate-api.gnosisguild.org',
   contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
-  chainId: 1
+  chainId: '1'
 };
 
 const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
@@ -140,9 +140,7 @@ function formatSpace(
   constants: NetworkConstants
 ): Space {
   const treasuries: SpaceMetadataTreasury[] = space.treasuries.map(treasury => {
-    const chainId = treasury.network.startsWith('0x')
-      ? treasury.network
-      : parseInt(treasury.network, 10);
+    const chainId = treasury.network;
 
     return {
       name: treasury.name,
@@ -465,9 +463,7 @@ function formatDelegations(
 
     const name = DELEGATION_TYPES_NAMES[apiType];
 
-    const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
-      ? space.delegationPortal.delegationNetwork
-      : parseInt(space.delegationPortal.delegationNetwork, 10);
+    const chainId = space.delegationPortal.delegationNetwork;
 
     delegations.push({
       name,
@@ -479,7 +475,7 @@ function formatDelegations(
   }
 
   if (basicDelegationStrategy) {
-    const chainId = parseInt(space.network, 10);
+    const chainId = space.network;
 
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {

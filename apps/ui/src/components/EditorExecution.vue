@@ -79,7 +79,7 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    typeof treasury.value.network === 'string'
+    String(treasury.value.network).startsWith('0x')
   ) {
     return;
   }
@@ -87,7 +87,7 @@ async function handleSimulateClick() {
   simulationState.value = 'SIMULATING';
 
   const valid = await simulate(
-    treasury.value.network,
+    Number(treasury.value.network),
     treasury.value.wallet,
     model.value
   );

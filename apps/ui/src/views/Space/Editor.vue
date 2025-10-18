@@ -312,7 +312,7 @@ async function handleProposeClick() {
         destinationAddress: strategy.destinationAddress || '',
         transactions: strategy.transactions,
         treasuryName: strategy.treasury.name,
-        chainId: strategy.treasury.chainId as number
+        chainId: Number(strategy.treasury.chainId)
       }));
 
     let result;

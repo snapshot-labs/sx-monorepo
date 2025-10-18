@@ -8,25 +8,25 @@ export * from './types';
 const apiKey = import.meta.env.VITE_ALCHEMY_API_KEY;
 
 export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
-  1, // Ethereum,
-  10, // Optimism,
-  100, // Gnosis Safe
-  137, // Polygon,
-  324, // ZkSync Era
-  8453, // Base
-  33111, // Curtis
-  33139, // Apechain
-  42161, // Arbitrum
-  42170, // Arbitrum Nova
-  42220, // Celo
-  11155111 // Sepolia
+  '1', // Ethereum,
+  '10', // Optimism,
+  '100', // Gnosis Safe
+  '137', // Polygon,
+  '324', // ZkSync Era
+  '8453', // Base
+  '33111', // Curtis
+  '33139', // Apechain
+  '42161', // Arbitrum
+  '42170', // Arbitrum Nova
+  '42220', // Celo
+  '11155111' // Sepolia
 ] as const;
 
 /**
  * Those ChainIds will only show native token balance.
  */
 export const MINIMAL_SUPPORTED_CHAIN_IDS = [
-  5000 // Mantle
+  '5000' // Mantle
 ] as const;
 
 export const SUPPORTED_CHAIN_IDS = [
@@ -35,18 +35,18 @@ export const SUPPORTED_CHAIN_IDS = [
 ] as const;
 
 const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
-  1: 'eth-mainnet',
-  10: 'opt-mainnet',
-  100: 'gnosis-mainnet',
-  137: 'polygon-mainnet',
-  324: 'zksync-mainnet',
-  8453: 'base-mainnet',
-  33111: 'apechain-curtis',
-  33139: 'apechain-mainnet',
-  42161: 'arb-mainnet',
-  42170: 'arbnova-mainnet',
-  42220: 'celo-mainnet',
-  11155111: 'eth-sepolia'
+  '1': 'eth-mainnet',
+  '10': 'opt-mainnet',
+  '100': 'gnosis-mainnet',
+  '137': 'polygon-mainnet',
+  '324': 'zksync-mainnet',
+  '8453': 'base-mainnet',
+  '33111': 'apechain-curtis',
+  '33139': 'apechain-mainnet',
+  '42161': 'arb-mainnet',
+  '42170': 'arbnova-mainnet',
+  '42220': 'celo-mainnet',
+  '11155111': 'eth-sepolia'
 };
 
 function getApiUrl(chainId: ChainId) {
@@ -101,7 +101,7 @@ export async function batchRequest(
  */
 export async function getBalance(
   address: string,
-  chainId: ChainId
+  chainId: string
 ): Promise<string> {
   const provider = getProvider(Number(chainId));
   const balance = await provider.getBalance(address, 'latest');
@@ -118,11 +118,11 @@ export async function getBalance(
  */
 export async function getTokenBalances(
   address: string,
-  chainId: ChainId
+  chainId: string
 ): Promise<GetTokenBalancesResponse> {
   const results = { address, tokenBalances: [], pageKey: null };
 
-  if (MINIMAL_SUPPORTED_CHAIN_IDS.includes(chainId as any)) {
+  if ((MINIMAL_SUPPORTED_CHAIN_IDS as readonly string[]).includes(chainId)) {
     return results;
   }
 
@@ -155,7 +155,7 @@ export async function getTokenBalances(
  */
 export async function getBalances(
   address: string,
-  chainId: ChainId,
+  chainId: string,
   baseToken: { name: string; symbol: string; logo?: string }
 ): Promise<GetBalancesResponse> {
   const [ethBalance, { tokenBalances }] = await Promise.all([
@@ -166,7 +166,7 @@ export async function getBalances(
   const contractAddresses = tokenBalances.map(
     balance => balance.contractAddress
   );
-  const metadata = await getTokensMetadata(Number(chainId), contractAddresses);
+  const metadata = await getTokensMetadata(chainId, contractAddresses);
 
   return [
     {
