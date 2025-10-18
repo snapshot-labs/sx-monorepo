@@ -40,7 +40,7 @@ const {
 
 <template>
   <div>
-    <h4 class="eyebrow mt-4 mb-2 font-medium">Relayer Balance</h4>
+    <UiEyebrow class="mt-4 mb-2 font-medium">Relayer Balance</UiEyebrow>
     <div
       class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
     >

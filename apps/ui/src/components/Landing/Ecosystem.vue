@@ -2,7 +2,7 @@
   <div id="ecosystem" class="py-9 border-b relative overflow-hidden">
     <UiContainer class="!max-w-screen-lg">
       <div class="max-w-[600px]">
-        <div class="eyebrow mb-3">Ecosystem</div>
+        <UiEyebrow class="mb-3">Ecosystem</UiEyebrow>
         <h1 class="mb-5 font-display text-[36px] xs:text-[44px]">
           Supercharge your governance with integrations
         </h1>

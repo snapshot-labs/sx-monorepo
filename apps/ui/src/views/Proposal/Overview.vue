@@ -115,7 +115,11 @@ const proposalMetadataUrl = computed(() => {
 const proposalTransactionId = computed(() => {
   const network = getNetwork(props.proposal.network);
 
-  if (props.proposal.space.protocol === 'governor-bravo') {
+  if (
+    ['governor-bravo', '@openzeppelin/governor'].includes(
+      props.proposal.space.protocol
+    )
+  ) {
     return network.helpers.getExplorerUrl(props.proposal.tx, 'transaction');
   }
 
@@ -545,10 +549,10 @@ onBeforeUnmount(() => destroyAudio());
       </div>
 
       <div v-if="aiSummaryOpen" class="mb-6">
-        <h4 class="mb-2 eyebrow flex items-center gap-2">
+        <UiEyebrow class="mb-2 flex items-center gap-2">
           <IH-sparkles />
           <span>AI summary</span>
-        </h4>
+        </UiEyebrow>
         <div class="text-md text-skin-link mb-2">{{ aiSummaryContent }}</div>
         <div class="flex gap-2 items-center text-sm">
           <IH-exclamation />
@@ -557,10 +561,10 @@ onBeforeUnmount(() => destroyAudio());
       </div>
       <UiMarkdown v-if="proposal.body" class="mb-8" :body="proposal.body" />
       <div v-if="discussion">
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
+        <UiEyebrow class="mb-3 flex items-center gap-2">
           <IH-chat-alt />
           <span>Discussion</span>
-        </h4>
+        </UiEyebrow>
         <a :href="discussion" target="_blank" class="block mb-5">
           <UiLinkPreview :url="discussion" :show-default="true" />
         </a>
@@ -571,10 +575,10 @@ onBeforeUnmount(() => destroyAudio());
           proposal.execution_strategy_type === 'safeSnap'
         "
       >
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
+        <UiEyebrow class="mb-3 flex items-center gap-2">
           <IH-play />
           <span>Execution</span>
-        </h4>
+        </UiEyebrow>
         <div class="mb-4">
           <UiAlert
             v-if="proposal.execution_strategy_type === 'safeSnap'"

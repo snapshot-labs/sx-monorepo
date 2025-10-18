@@ -4,7 +4,6 @@ import { createPublicClient, getAddress, http } from 'viem';
 import GovernorModuleAbi from './abis/GovernorModule';
 import TimelockAbi from './abis/Timelock';
 import logger from './logger';
-import { convertChoice, getProposalTitle } from './utils';
 import {
   ExecutionStrategy,
   Leaderboard,
@@ -27,6 +26,7 @@ import {
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
+import { convertChoice, getProposalTitle } from '../openzeppelin/utils';
 
 type SpaceData = {
   name: string;
@@ -47,7 +47,7 @@ const spaceData: Record<string, SpaceData | undefined> = {
     decimals: 18,
     governanceToken: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     treasury: {
-      name: 'Uniswap Treasury',
+      name: 'Timelock',
       address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC',
       chain_id: 1
     }
@@ -58,7 +58,7 @@ const spaceData: Record<string, SpaceData | undefined> = {
     decimals: 18,
     governanceToken: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
     treasury: {
-      name: 'Compound Treasury',
+      name: 'Timelock',
       address: '0x6d903f6003cca6255D85CcA4D3B5E5146dC33925',
       chain_id: 1
     }
@@ -69,7 +69,7 @@ const spaceData: Record<string, SpaceData | undefined> = {
     decimals: 18,
     governanceToken: '0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546',
     treasury: {
-      name: 'MOCK',
+      name: 'Timelock',
       address: '0x52f26d07f8fEf1CF806A53159ce68bf1B4031baB',
       chain_id: 11155111
     }
@@ -306,7 +306,7 @@ export function createWriters(
     proposal.min_end_block_number = Number(event.args.endBlock);
     proposal.max_end = proposal.min_end;
     proposal.max_end_block_number = proposal.max_end;
-    proposal.snapshot = proposal.start;
+    proposal.snapshot = proposal.start_block_number;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
     proposal.strategies = space.strategies;
