@@ -13,11 +13,11 @@ defineProps<{
     class="flex items-center"
     :class="[isActive && 'border-b border-skin-link mb-[-1px]']"
   >
-    <h4
-      class="eyebrow py-2 cursor-pointer inline-block hover:text-skin-link"
+    <UiEyebrow
+      class="py-2 cursor-pointer inline-block hover:text-skin-link"
       :class="[isActive ? 'text-skin-link' : 'text-skin-text']"
-      v-text="text"
-    />
+      >{{ text }}</UiEyebrow
+    >
     <span
       v-if="count"
       class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-2"

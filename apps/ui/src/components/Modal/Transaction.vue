@@ -279,16 +279,7 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput v-model="searchValue" />
       </template>
     </template>
     <template v-if="showPicker">

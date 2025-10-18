@@ -28,7 +28,7 @@ const SOCIALS = [
     <UiContainer class="!max-w-screen-lg space-y-7">
       <div class="grid grid-col-2 md:grid-cols-4 space-y-4 md:space-y-0">
         <div class="space-y-2">
-          <div class="eyebrow">Snapshot</div>
+          <UiEyebrow>Snapshot</UiEyebrow>
           <div class="space-y-1">
             <div>
               <AppLink :to="{ name: 'my-explore' }"> Explore spaces </AppLink>
@@ -47,7 +47,7 @@ const SOCIALS = [
           </div>
         </div>
         <div class="space-y-2">
-          <div class="eyebrow">Resources</div>
+          <UiEyebrow>Resources</UiEyebrow>
           <div class="space-y-1">
             <div>
               <a :href="HELPDESK_URL" target="_blank">
@@ -69,7 +69,7 @@ const SOCIALS = [
           </div>
         </div>
         <div class="space-y-2">
-          <div class="eyebrow">Developers</div>
+          <UiEyebrow>Developers</UiEyebrow>
           <div class="space-y-1">
             <div>
               <a href="https://docs.snapshot.box" target="_blank">
@@ -92,7 +92,7 @@ const SOCIALS = [
           </div>
         </div>
         <div class="space-y-2">
-          <div class="eyebrow">Company</div>
+          <UiEyebrow>Company</UiEyebrow>
           <div>
             <AppLink :to="{ name: 'site-terms' }">Terms of use</AppLink>
           </div>

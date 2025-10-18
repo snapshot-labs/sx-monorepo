@@ -71,7 +71,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Proposal Validation</h4>
+  <UiEyebrow class="mb-2 font-medium">Proposal Validation</UiEyebrow>
   <div class="s-box">
     <UiWrapperInput
       :definition="{
@@ -92,7 +92,7 @@ watchEffect(() => {
       </button>
     </UiWrapperInput>
   </div>
-  <h4 class="eyebrow mb-2 font-medium">Proposal</h4>
+  <UiEyebrow class="mb-2 font-medium">Proposal</UiEyebrow>
   <div class="s-box">
     <UiInputString
       v-model="guidelines"

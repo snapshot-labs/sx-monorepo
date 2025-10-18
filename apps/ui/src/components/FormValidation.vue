@@ -89,7 +89,7 @@ function handleStrategySave(value: Record<string, any>) {
       />
     </div>
     <div v-else-if="model.type === 'VotingPower'">
-      <h3 class="eyebrow mb-2 font-medium">Included strategies</h3>
+      <UiEyebrow class="mb-2 font-medium">Included strategies</UiEyebrow>
       <span class="mb-3 inline-block">
         Select strategies that will be used to compute proposal
       </span>
