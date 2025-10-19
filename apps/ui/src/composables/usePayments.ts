@@ -14,6 +14,7 @@ export type Payment = {
   amount_decimal: string;
   token_symbol: string;
   timestamp?: number;
+  type: string;
 };
 
 const PAYMENTS_QUERY = gql`
@@ -30,6 +31,7 @@ const PAYMENTS_QUERY = gql`
       amount_decimal
       token_symbol
       timestamp
+      type
     }
   }
 `;

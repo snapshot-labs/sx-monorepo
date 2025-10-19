@@ -34,6 +34,11 @@ const statusText = computed(() => {
   if (!hasTurbo.value) return 'Free';
 
   const daysUntilExpiration = turboExpirationDate.value.diff(dayjs(), 'day');
+
+  if (daysUntilExpiration === 0) {
+    return 'Expires today';
+  }
+
   if (daysUntilExpiration < 30) {
     return `${daysUntilExpiration} day${daysUntilExpiration !== 1 ? 's' : ''} left`;
   }
@@ -70,11 +75,7 @@ const statusText = computed(() => {
                 </template>
               </p>
             </div>
-
-            <span
-              class="px-2.5 py-1 rounded-md border bg-skin-border/20 text-xs shrink-0"
-              >{{ statusText }}</span
-            >
+            {{ statusText }}
           </div>
 
           <UiButton
@@ -90,10 +91,12 @@ const statusText = computed(() => {
     <UiSectionHeader class="mt-4" label="Payment history" sticky />
 
     <div
-      class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium"
+      class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
     >
-      <div class="flex truncate pl-4">Date</div>
-      <div class="flex grow justify-end pr-4">Amount</div>
+      <div class="w-[190px] grow sm:grow-0">Date</div>
+      <div class="hidden sm:flex grow">Type</div>
+      <div class="w-[150px] flex justify-end">Amount</div>
+      <div class="w-[20px]" />
     </div>
 
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
@@ -107,25 +110,55 @@ const statusText = computed(() => {
     </div>
     <UiContainerInfiniteScroll
       v-else
+      class="px-4"
       :loading-more="isFetchingNextPage"
       @end-reached="hasNextPage && fetchNextPage()"
     >
-      <div v-for="payment in payments" :key="payment.id" class="border-b flex">
-        <div class="py-3 pl-4">
+      <div
+        v-for="payment in payments"
+        :key="payment.id"
+        class="border-b flex space-x-3 py-3"
+      >
+        <div class="flex grow sm:grow-0 w-[190px] items-center">
           {{ dayjs((payment.timestamp || 0) * 1000).format('MMM D, YYYY') }}
         </div>
-        <div class="flex grow justify-end py-3 pr-4">
-          <AppLink
-            :to="
-              getGenericExplorerUrl(chainId, payment.id, 'transaction') || ''
-            "
-            class="font-semibold flex gap-1"
-          >
+        <div class="hidden sm:flex grow w-0 text-[17px] capitalize">
+          {{ payment.type === 'turbo' ? 'snapshot pro' : payment.type }}
+        </div>
+        <div
+          class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center"
+        >
+          <h4 class="text-skin-link font-semibold">
             {{ _n(payment.amount_decimal) }}
             {{ payment.token_symbol }}
-            <IH-arrow-top-right-on-square class="size-3 mt-1 shrink-0" />
-          </AppLink>
+          </h4>
         </div>
+
+        <UiDropdown>
+          <template #button>
+            <div class="flex items-center h-full">
+              <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <IH-dots-horizontal class="text-skin-link" />
+              </UiButton>
+            </div>
+          </template>
+          <template #items>
+            <UiDropdownItem v-slot="{ active }">
+              <a
+                :href="
+                  getGenericExplorerUrl(chainId, payment.id, 'transaction') ||
+                  ''
+                "
+                target="_blank"
+                class="flex items-center gap-2"
+                :class="{ 'opacity-80': active }"
+              >
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View transaction
+              </a>
+            </UiDropdownItem>
+          </template>
+        </UiDropdown>
       </div>
     </UiContainerInfiniteScroll>
   </div>
