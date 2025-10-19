@@ -105,7 +105,7 @@ function handleSelect(value: string) {
     <div v-if="web3.account" class="space-y-4">
       <div class="space-y-3">
         <div class="flex justify-between items-center">
-          <h4 class="eyebrow">Domain names</h4>
+          <UiEyebrow>Domain names</UiEyebrow>
           <UiButton
             v-if="names"
             class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
@@ -181,7 +181,7 @@ function handleSelect(value: string) {
         >.
       </div>
       <div class="space-y-3">
-        <h4 class="eyebrow">Controller</h4>
+        <UiEyebrow>Controller</UiEyebrow>
         <UiMessage type="info">
           By default, the space's controller is the domain owner. You can change
           this later in your space setting.

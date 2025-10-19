@@ -4,6 +4,7 @@ import IHCode from '~icons/heroicons-outline/code';
 
 defineProps<{
   disabled?: boolean;
+  isActive?: boolean;
   strategy: StrategyTemplate;
 }>();
 </script>
@@ -14,7 +15,8 @@ defineProps<{
     :disabled="disabled"
     class="flex flex-col md:flex-row rounded-lg border cursor-pointer w-full text-left items-stretch overflow-hidden"
     :class="{
-      'opacity-50 cursor-not-allowed': disabled
+      'opacity-50 cursor-not-allowed': disabled,
+      'border-skin-primary': isActive
     }"
   >
     <div class="flex items-center justify-center min-h-[40px] bg-skin-border">

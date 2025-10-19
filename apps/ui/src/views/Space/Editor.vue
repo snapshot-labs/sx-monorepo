@@ -664,7 +664,7 @@ watchEffect(() => {
             </template>
           </template>
           <div v-if="guidelines">
-            <h4 class="mb-2 eyebrow">Guidelines</h4>
+            <UiEyebrow class="mb-2">Guidelines</UiEyebrow>
             <a :href="guidelines" target="_blank" class="block mb-4">
               <UiLinkPreview :url="guidelines" :show-default="true" />
             </a>
@@ -732,7 +732,7 @@ watchEffect(() => {
               strategiesWithTreasuries.length > 0
             "
           >
-            <h4 class="eyebrow mb-2 mt-4">Execution</h4>
+            <UiEyebrow class="mb-2 mt-4">Execution</UiEyebrow>
             <EditorExecution
               v-for="execution in editorExecutions"
               :key="execution.address"

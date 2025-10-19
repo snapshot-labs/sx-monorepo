@@ -161,6 +161,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const votingStrategies = ref([] as StrategyConfig[]);
   const initialExecutionStrategiesObjectHash = ref(null as string | null);
   const initialValidationStrategyObjectHash = ref(null as string | null);
+  const enableOSnap = ref(false);
 
   // Offchain properties
   const proposalValidation = ref({ name: 'basic', params: {} } as Validation);
@@ -573,6 +574,10 @@ export function useSpaceSettings(space: Ref<Space>) {
       };
     }
 
+    const plugins = enableOSnap.value
+      ? { ...space.value.additionalRawData.plugins, oSnap: {} }
+      : omit(space.value.additionalRawData.plugins, ['oSnap']);
+
     const saveData: OffchainSpaceSettings = {
       name: form.value.name ?? space.value.name,
       about: (form.value.description ?? space.value.about) || '',
@@ -617,7 +622,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       members: members.value
         .filter(member => member.role === 'author')
         .map(member => member.address),
-      plugins: space.value.additionalRawData.plugins,
+      plugins,
       delegationPortal: delegationPortal,
       filters: {
         ...space.value.additionalRawData.filters,
@@ -777,6 +782,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     initialExecutionStrategiesObjectHash.value = objectHash(
       executionStrategiesValue
     );
+    enableOSnap.value = !!space.value.additionalRawData?.plugins?.oSnap;
 
     if (offchainNetworks.includes(space.value.network)) {
       proposalValidation.value = getInitialProposalValidation(space.value);
@@ -851,6 +857,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       const customDomainValue = customDomain.value;
       const isPrivateValue = isPrivate.value;
       const skinSettingsValue = skinSettings.value;
+      const oSnapValue = enableOSnap.value;
 
       if (loading.value) {
         return false;
@@ -995,6 +1002,10 @@ export function useSpaceSettings(space: Ref<Space>) {
         ) {
           return true;
         }
+
+        if (!!space.value.additionalRawData.plugins?.oSnap !== oSnapValue) {
+          return true;
+        }
       } else {
         const [authenticatorsToAdd, authenticatorsToRemove] =
           await processChanges(
@@ -1056,6 +1067,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     authenticators,
     validationStrategy,
     votingStrategies,
+    enableOSnap,
     proposalValidation,
     executionStrategies,
     guidelines,

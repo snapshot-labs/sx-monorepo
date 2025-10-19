@@ -147,7 +147,7 @@ onMounted(() => emit('errors', formErrors.value));
         />
       </div>
       <div>
-        <h4 class="eyebrow font-medium">Skin colors</h4>
+        <UiEyebrow class="font-medium">Skin colors</UiEyebrow>
         <div class="mb-2">
           Empty colors value will fallback to the base theme color.
         </div>
@@ -159,7 +159,7 @@ onMounted(() => emit('errors', formErrors.value));
         />
       </div>
       <div>
-        <h4 class="eyebrow font-medium">Custom logo</h4>
+        <UiEyebrow class="font-medium">Custom logo</UiEyebrow>
         <div class="mb-2">
           You can replace your space name in the upper left corner by a custom
           logo. Max dimensions are 380x76 pixels.
@@ -186,7 +186,7 @@ onMounted(() => emit('errors', formErrors.value));
       <Affix :top="137" :bottom="100">
         <div>
           <div class="flex justify-between items-center mb-2">
-            <h4 class="eyebrow font-medium">Preview</h4>
+            <UiEyebrow class="font-medium">Preview</UiEyebrow>
             <AppLink :to="previewUrl" target="_blank">
               <IHArrowsExpand class="cursor-pointer" />
             </AppLink>
