@@ -506,7 +506,8 @@ watchEffect(() => {
           </UiButton>
         </UiTooltip>
         <UiButton
-          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          class="min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          primary
           :loading="isSubmitButtonLoading"
           :disabled="!canSubmit"
           @click="handleProposeClick"
