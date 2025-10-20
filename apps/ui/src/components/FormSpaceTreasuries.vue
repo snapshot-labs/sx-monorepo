@@ -155,6 +155,6 @@ function deleteTreasury(index: number) {
 
 <style scoped lang="scss">
 .sortable-chosen {
-  @apply border border-dashed rounded-none;
+  @apply border border-dashed rounded-none bg-skin-bg;
 }
 </style>
