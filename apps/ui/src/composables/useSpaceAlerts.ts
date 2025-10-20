@@ -15,7 +15,8 @@ type AlertType =
   | 'HAS_DISABLED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
-  | 'HAS_PRO_ONLY_WHITELABEL';
+  | 'HAS_PRO_ONLY_WHITELABEL'
+  | 'PRO_EXPIRING_SOON';
 
 export function useSpaceAlerts(
   space: Ref<Space>,
@@ -89,6 +90,26 @@ export function useSpaceAlerts(
       .filter(network => !!network);
   });
 
+  const isProExpiringSoon = computed(() => {
+    if (!space.value.turbo || !space.value.turbo_expiration) return false;
+
+    const now = Date.now();
+    const expirationTime = space.value.turbo_expiration * 1000; // Convert to milliseconds
+    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+
+    return expirationTime > now && expirationTime - now <= sevenDaysInMs;
+  });
+
+  const daysUntilExpiration = computed(() => {
+    if (!space.value.turbo || !space.value.turbo_expiration) return 0;
+
+    const now = Date.now();
+    const expirationTime = space.value.turbo_expiration * 1000;
+    const diff = expirationTime - now;
+
+    return Math.ceil(diff / (24 * 60 * 60 * 1000));
+  });
+
   const alerts = computed(() => {
     const alertsMap = new Map<AlertType, Record<string, any>>();
 
@@ -119,6 +140,12 @@ export function useSpaceAlerts(
     if (space.value.additionalRawData?.domain && !space.value.turbo) {
       alertsMap.set('HAS_PRO_ONLY_WHITELABEL', {
         domain: space.value.additionalRawData.domain
+      });
+    }
+
+    if (isProExpiringSoon.value) {
+      alertsMap.set('PRO_EXPIRING_SOON', {
+        daysUntilExpiration: daysUntilExpiration.value
       });
     }
 

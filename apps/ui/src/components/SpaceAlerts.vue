@@ -9,6 +9,17 @@ const { alerts } = useSpaceAlerts(toRef(props, 'space'));
 const pendingTasks = computed(() => {
   const _alerts: Task[] = [];
 
+  if (alerts.value.has('PRO_EXPIRING_SOON')) {
+    const data = alerts.value.get('PRO_EXPIRING_SOON');
+    const days = data?.daysUntilExpiration || 0;
+    const daysText = days === 1 ? '1 day' : `${days} days`;
+    _alerts.push({
+      description: `Your Pro plan expires in ${daysText}, renew now`,
+      link: { name: 'space-pro' },
+      type: 'warning'
+    });
+  }
+
   if (
     alerts.value.has('HAS_DEPRECATED_STRATEGIES') ||
     alerts.value.has('HAS_DISABLED_STRATEGIES') ||
