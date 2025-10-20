@@ -6,7 +6,7 @@ type PermissionLevel =
   (typeof TOWNHALL_PERMISSIONS)[keyof typeof TOWNHALL_PERMISSIONS];
 
 export type HighlightDomain = Required<TypedDataDomain> &
-  Pick<StarknetDomain, 'revision'>;
+  Partial<Pick<StarknetDomain, 'revision'>>;
 
 export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
