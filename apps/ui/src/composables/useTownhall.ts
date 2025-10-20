@@ -6,6 +6,7 @@ import {
 import { Web3Provider } from '@ethersproject/providers';
 import { clients, TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
 import gql from 'graphql-tag';
+import { validateAndParseAddress } from 'starknet';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { pinPineapple } from '@/helpers/pin';
 import { Alias } from '@/types';
@@ -88,7 +89,7 @@ export function useTownhall() {
 
   async function setStarknetAlias(web3: any, alias: string) {
     const signer = web3.provider.account;
-    const from = signer.address;
+    const from = validateAndParseAddress(signer.address);
 
     return highlightStarknetClient.setAlias({
       signer,

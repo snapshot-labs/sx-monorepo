@@ -1,4 +1,10 @@
-import { Account, StarknetDomain, StarknetType, TypedData } from 'starknet';
+import {
+  Account,
+  StarknetDomain,
+  StarknetType,
+  TypedData,
+  validateAndParseAddress
+} from 'starknet';
 import { Envelope, HighlightDomain, SetAlias } from './types';
 import {
   HIGHLIGHT_STARKNET_DOMAIN,
@@ -123,7 +129,7 @@ export class HighlightStarknetSigClient {
       domain: { ...domain.starknetDomain, ...domain.meta },
       message: data,
       primaryType,
-      signer: signer.address,
+      signer: validateAndParseAddress(signer.address),
       signature
     };
   }
