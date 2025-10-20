@@ -1,8 +1,10 @@
 import { TypedDataDomain } from '@ethersproject/abstract-signer';
+import { StarknetDomain } from 'starknet';
 
 export type PostMessageRequest = Message;
 
-export type Domain = Required<TypedDataDomain>;
+export type Domain = Required<TypedDataDomain> &
+  Pick<StarknetDomain, 'revision'>;
 
 export type Message = {
   domain: Domain;

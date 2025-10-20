@@ -1,5 +1,11 @@
-import { HIGHLIGHT_DOMAIN } from '@snapshot-labs/sx';
+import { TypedDataField } from '@ethersproject/abstract-signer';
+import {
+  HIGHLIGHT_DOMAIN,
+  HIGHLIGHT_STARKNET_DOMAIN,
+  STARKNET_DOMAIN_TYPE
+} from '@snapshot-labs/sx';
 import AsyncLock from 'async-lock';
+import { RpcProvider, StarknetDomain } from 'starknet';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';
 import Process from './process';
@@ -79,11 +85,11 @@ export default class Highlight {
   }
 
   async validateSignature(process: Process, request: PostMessageRequest) {
-    const { domain, signer, signature, message } = request;
+    const verifyingContract = request.domain.verifyingContract.toLowerCase();
 
-    const getAgent = this.agents[domain.verifyingContract.toLowerCase()];
+    const getAgent = this.agents[verifyingContract];
     if (!getAgent) {
-      throw new Error(`Agent not found: ${domain.verifyingContract}`);
+      throw new Error(`Agent not found: ${verifyingContract}`);
     }
 
     const agent = getAgent(process);
@@ -92,29 +98,11 @@ export default class Highlight {
     if (!entrypointTypes) {
       throw new Error(`Entrypoint not found: ${request.primaryType}`);
     }
+    const validationFn = request.domain.revision
+      ? this.validateStarknetSignature
+      : this.validateEvmSignature;
 
-    const verifyingDomain = {
-      ...HIGHLIGHT_DOMAIN,
-      chainId: domain.chainId,
-      salt: domain.salt.toString(),
-      verifyingContract: domain.verifyingContract
-    };
-
-    const isSignatureValid = await verifySignature(
-      verifyingDomain,
-      signer,
-      entrypointTypes,
-      message,
-      signature,
-      {
-        ecdsa: true,
-        eip1271: true
-      }
-    );
-
-    if (!isSignatureValid) {
-      throw new Error('Invalid signature');
-    }
+    return validationFn(request, entrypointTypes);
   }
 
   async invoke(process: Process, request: PostMessageRequest) {
@@ -153,5 +141,72 @@ export default class Highlight {
 
   async reset() {
     return await this.adapter.reset();
+  }
+
+  private async validateEvmSignature(
+    request: PostMessageRequest,
+    types: Record<string, TypedDataField[]>
+  ) {
+    const { domain, signature, signer, message } = request;
+    const verifyingDomain = {
+      ...HIGHLIGHT_DOMAIN,
+      chainId: domain.chainId,
+      salt: domain.salt.toString(),
+      verifyingContract: domain.verifyingContract
+    };
+
+    const isSignatureValid = await verifySignature(
+      verifyingDomain,
+      signer,
+      types,
+      message,
+      signature,
+      {
+        ecdsa: true,
+        eip1271: true
+      }
+    );
+
+    if (!isSignatureValid) {
+      throw new Error('Invalid signature');
+    }
+  }
+
+  private async validateStarknetSignature(
+    request: PostMessageRequest,
+    types: Record<string, TypedDataField[]>
+  ) {
+    const { domain, signature, signer, message, primaryType } = request;
+    const verifyingDomain: StarknetDomain = {
+      ...HIGHLIGHT_STARKNET_DOMAIN,
+      chainId: domain.chainId.toString()
+    };
+
+    try {
+      const provider = new RpcProvider({
+        // TODO: make the network support sn and sn-sep
+        nodeUrl: `https://rpc.snapshot.org/sn`
+      });
+
+      // Check if the contract is deployed
+      // Will throw on non-deployed contract
+      await provider.getClassAt(signer);
+
+      const data = {
+        domain: verifyingDomain,
+        // Re-injecting the StarknetDomain type, stripped by the agent
+        types: { ...types, StarknetDomain: STARKNET_DOMAIN_TYPE },
+        primaryType,
+        message
+      };
+
+      provider.verifyMessageInStarknet(data, signature.split(','), signer);
+    } catch (e: any) {
+      if (e.message.includes('Contract not found')) {
+        throw new Error('Invalid signature: contract not deployed');
+      }
+
+      throw e;
+    }
   }
 }

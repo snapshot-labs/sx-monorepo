@@ -1,12 +1,16 @@
 import { TypedDataDomain } from '@ethersproject/abstract-signer';
+import { StarknetDomain } from 'starknet';
 import { TOWNHALL_PERMISSIONS } from '../../highlightConstants';
 
 type PermissionLevel =
   (typeof TOWNHALL_PERMISSIONS)[keyof typeof TOWNHALL_PERMISSIONS];
 
+export type HighlightDomain = Required<TypedDataDomain> &
+  Pick<StarknetDomain, 'revision'>;
+
 export type Envelope = {
   type: 'HIGHLIGHT_ENVELOPE';
-  domain: Required<TypedDataDomain>;
+  domain: HighlightDomain;
   message: Record<string, unknown>;
   primaryType: string;
   signer: string;
