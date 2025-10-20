@@ -200,7 +200,7 @@ export default class Highlight {
         message
       };
 
-      provider.verifyMessageInStarknet(data, signature.split(','), signer);
+      await provider.verifyMessageInStarknet(data, signature.split(','), signer);
     } catch (e: any) {
       if (e.message.includes('Contract not found')) {
         throw new Error('Invalid signature: contract not deployed');
