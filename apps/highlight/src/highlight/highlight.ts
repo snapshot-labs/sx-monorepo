@@ -5,7 +5,11 @@ import {
   STARKNET_DOMAIN_TYPE
 } from '@snapshot-labs/sx';
 import AsyncLock from 'async-lock';
-import { RpcProvider, StarknetDomain } from 'starknet';
+import {
+  RpcProvider,
+  constants as StarknetConstants,
+  StarknetDomain
+} from 'starknet';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';
 import Process from './process';
@@ -183,9 +187,19 @@ export default class Highlight {
     };
 
     try {
+      let rpcId: string;
+
+      if (domain.chainId === StarknetConstants.StarknetChainId.SN_MAIN) {
+        rpcId = 'sn';
+      } else if (
+        domain.chainId === StarknetConstants.StarknetChainId.SN_SEPOLIA
+      ) {
+        rpcId = 'sn-sep';
+      } else {
+        throw new Error('Unsupported Starknet chainId');
+      }
       const provider = new RpcProvider({
-        // TODO: make the network support sn and sn-sep
-        nodeUrl: `https://rpc.snapshot.org/sn`
+        nodeUrl: `https://rpc.snapshot.org/${rpcId}`
       });
 
       // Check if the contract is deployed
@@ -200,7 +214,11 @@ export default class Highlight {
         message
       };
 
-      await provider.verifyMessageInStarknet(data, signature.split(','), signer);
+      await provider.verifyMessageInStarknet(
+        data,
+        signature.split(','),
+        signer
+      );
     } catch (e: any) {
       if (e.message.includes('Contract not found')) {
         throw new Error('Invalid signature: contract not deployed');
