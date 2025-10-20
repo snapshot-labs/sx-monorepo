@@ -4,7 +4,7 @@ import { keccak256 } from '@ethersproject/keccak256';
 import { pack } from '@ethersproject/solidity';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { Transaction } from '@/types';
-import { contractData } from './constants';
+import { contractData, SAFE_APP_URLS, SAFE_PREFIXES } from './constants';
 
 type SpaceConfigResponse =
   | {
@@ -235,4 +235,50 @@ export async function isConfigCompliant(safeAddress: string, chainId: number) {
   }
   const data = await res.json();
   return data as unknown as SpaceConfigResponse;
+}
+
+/**
+ * Returns the EIP-3770 prefix for a given network.
+ *
+ * @see SafeNetworkPrefix
+ */
+export function getSafeNetworkPrefix(chainId: number) {
+  return SAFE_PREFIXES[chainId];
+}
+
+/**
+ * Creates the url for the Safe app to configure oSnap.
+ *
+ * The data that the Safe app needs is encoded as URL search params.
+ */
+export function makeConfigureOsnapUrl(params: {
+  safeAddress: string;
+  network: number;
+  spaceName: string;
+  spaceUrl: string;
+  baseUrl?: string;
+  appUrl?: string;
+}) {
+  const {
+    safeAddress,
+    network,
+    spaceName,
+    spaceUrl,
+    appUrl = 'https://osnap.uma.xyz/'
+  } = params;
+  const baseUrl =
+    params.baseUrl ??
+    SAFE_APP_URLS[network] ??
+    'https://app.safe.global/apps/open';
+  const safeAddressPrefix = getSafeNetworkPrefix(network);
+  const appUrlSearchParams = new URLSearchParams();
+  appUrlSearchParams.set('spaceName', spaceName);
+  appUrlSearchParams.set('spaceUrl', spaceUrl);
+  const appUrlSearch = appUrlSearchParams.toString();
+  const safeAppSearchParams = new URLSearchParams();
+  safeAppSearchParams.set('safe', `${safeAddressPrefix}:${safeAddress}`);
+  safeAppSearchParams.set('appUrl', `${appUrl}?${appUrlSearch}`);
+  const safeAppSearch = safeAppSearchParams.toString();
+  const url = `${baseUrl}?${safeAppSearch}`;
+  return url;
 }

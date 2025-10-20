@@ -117,7 +117,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Voting</h4>
+  <UiEyebrow class="mb-2 font-medium">Voting</UiEyebrow>
   <div class="space-y-3">
     <div>
       <div class="s-label !mb-0">Voting delay</div>

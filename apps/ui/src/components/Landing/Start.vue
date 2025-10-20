@@ -5,7 +5,7 @@
     />
     <UiContainer class="!max-w-screen-lg">
       <div class="text-center max-w-[600px] mx-auto">
-        <div class="eyebrow mb-3">Join Snapshot</div>
+        <UiEyebrow class="mb-3">Join Snapshot</UiEyebrow>
         <h1 class="mb-4 font-display text-[36px] xs:text-[44px]">
           Ready to govern?
         </h1>

@@ -35,6 +35,8 @@ const { data: proposal, isPending } = useProposalQuery(
   id
 );
 
+const router = useRouter();
+
 const {
   data: votingPower,
   error: votingPowerError,
@@ -92,12 +94,20 @@ async function handleVoteSubmitted() {
 }
 
 watch(
-  [id, proposal],
-  async ([id, proposal]) => {
+  [id, proposal, isPending],
+  async ([id, proposal, isPending]) => {
     modalOpenVote.value = false;
     editMode.value = false;
     discourseTopic.value = null;
     boostCount.value = 0;
+
+    if (!isPending && !proposal) {
+      router.push({
+        name: 'space-overview',
+        params: { space: `${props.space.network}:${props.space.id}` }
+      });
+      return;
+    }
 
     if (!proposal) return;
 
@@ -228,7 +238,7 @@ watchEffect(() => {
                 target="_blank"
                 class="flex items-center"
               >
-                <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
+                <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
               </a>
             </template>
@@ -271,7 +281,7 @@ watchEffect(() => {
                 currentVote
               "
             >
-              <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
+              <UiEyebrow class="mb-2.5 flex items-center space-x-2">
                 <template v-if="editMode">
                   <IH-cursor-click />
                   <span>Edit your vote</span>
@@ -284,7 +294,7 @@ watchEffect(() => {
                   <IH-cursor-click />
                   <span>Cast your vote</span>
                 </template>
-              </h4>
+              </UiEyebrow>
               <div class="space-y-2">
                 <IndicatorVotingPower
                   v-if="
@@ -380,10 +390,10 @@ watchEffect(() => {
               </div>
             </div>
             <div v-if="!proposal.cancelled">
-              <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
                 <IH-chart-square-bar />
                 Results
-              </h4>
+              </UiEyebrow>
               <ProposalResults
                 with-details
                 :proposal="proposal"
@@ -391,10 +401,10 @@ watchEffect(() => {
               />
             </div>
             <div v-if="space.labels?.length && proposal.labels?.length">
-              <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
                 <IH-tag />
                 Labels
-              </h4>
+              </UiEyebrow>
               <ProposalLabels
                 :space-id="`${space.network}:${space.id}`"
                 :space-labels="space.labels"
@@ -403,10 +413,10 @@ watchEffect(() => {
               />
             </div>
             <div>
-              <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
                 <IH-clock />
                 Timeline
-              </h4>
+              </UiEyebrow>
               <ProposalTimeline :data="proposal" />
             </div>
           </div>

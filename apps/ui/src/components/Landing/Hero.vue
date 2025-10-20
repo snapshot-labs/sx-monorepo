@@ -9,7 +9,7 @@
       class="relative w-full !max-w-screen-lg flex items-center py-8"
     >
       <div class="max-w-[560px]">
-        <div class="eyebrow mb-3">Turn chaos to consensus</div>
+        <UiEyebrow class="mb-3">Turn chaos to consensus</UiEyebrow>
         <h1 class="mb-5 font-display text-[40px] xs:text-[56px]">
           The governance stack for your organization
         </h1>

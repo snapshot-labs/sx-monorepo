@@ -77,7 +77,7 @@ function deleteTreasury(index: number) {
 </script>
 
 <template>
-  <h4 v-bind="$attrs" class="eyebrow mb-2 font-medium">Treasuries</h4>
+  <UiEyebrow v-bind="$attrs" class="mb-2 font-medium">Treasuries</UiEyebrow>
   <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
     <template #item="{ element: treasury, index: i }">
       <div
