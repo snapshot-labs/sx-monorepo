@@ -91,8 +91,9 @@ export function useSpaceAlerts(
   });
 
   const isProExpiringSoon = computed(() => {
-    if (!space.value.turbo || !space.value.turbo_expiration) {
-      console.log('[SpaceAlerts] No turbo or expiration:', {
+    // Check if expiration date exists and is valid (greater than 0)
+    if (!space.value.turbo_expiration || space.value.turbo_expiration === 0) {
+      console.log('[SpaceAlerts] No expiration timestamp:', {
         turbo: space.value.turbo,
         turbo_expiration: space.value.turbo_expiration
       });
@@ -102,16 +103,24 @@ export function useSpaceAlerts(
     const now = Date.now();
     const expirationTime = space.value.turbo_expiration * 1000; // Convert to milliseconds
     const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
-    const isExpiring = expirationTime > now && expirationTime - now <= sevenDaysInMs;
+
+    // Check if expiration is in the future and within 7 days
+    const isInFuture = expirationTime > now;
+    const isWithinSevenDays = expirationTime - now <= sevenDaysInMs;
+    const isExpiring = isInFuture && isWithinSevenDays;
 
     console.log('[SpaceAlerts] Pro expiration check:', {
       turbo: space.value.turbo,
       turbo_expiration: space.value.turbo_expiration,
       expirationTime,
+      expirationDate: new Date(expirationTime).toISOString(),
       now,
+      nowDate: new Date(now).toISOString(),
       diff: expirationTime - now,
       diffDays: (expirationTime - now) / (24 * 60 * 60 * 1000),
       sevenDaysInMs,
+      isInFuture,
+      isWithinSevenDays,
       isExpiring
     });
 
@@ -119,7 +128,7 @@ export function useSpaceAlerts(
   });
 
   const daysUntilExpiration = computed(() => {
-    if (!space.value.turbo || !space.value.turbo_expiration) return 0;
+    if (!space.value.turbo_expiration || space.value.turbo_expiration === 0) return 0;
 
     const now = Date.now();
     const expirationTime = space.value.turbo_expiration * 1000;
