@@ -91,13 +91,31 @@ export function useSpaceAlerts(
   });
 
   const isProExpiringSoon = computed(() => {
-    if (!space.value.turbo || !space.value.turbo_expiration) return false;
+    if (!space.value.turbo || !space.value.turbo_expiration) {
+      console.log('[SpaceAlerts] No turbo or expiration:', {
+        turbo: space.value.turbo,
+        turbo_expiration: space.value.turbo_expiration
+      });
+      return false;
+    }
 
     const now = Date.now();
     const expirationTime = space.value.turbo_expiration * 1000; // Convert to milliseconds
     const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    const isExpiring = expirationTime > now && expirationTime - now <= sevenDaysInMs;
 
-    return expirationTime > now && expirationTime - now <= sevenDaysInMs;
+    console.log('[SpaceAlerts] Pro expiration check:', {
+      turbo: space.value.turbo,
+      turbo_expiration: space.value.turbo_expiration,
+      expirationTime,
+      now,
+      diff: expirationTime - now,
+      diffDays: (expirationTime - now) / (24 * 60 * 60 * 1000),
+      sevenDaysInMs,
+      isExpiring
+    });
+
+    return isExpiring;
   });
 
   const daysUntilExpiration = computed(() => {
