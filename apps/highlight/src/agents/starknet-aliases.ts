@@ -7,6 +7,8 @@ export default class StarknetAliases extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
 
+    // Stripping StarknetDomain from the types,
+    // for compatibility with the Agent system only supporting EVM types.
     const types = STARKNET_ALIASES_CONFIG.types.setAlias;
     this.addEntrypoint({ SetAlias: types.SetAlias });
   }
