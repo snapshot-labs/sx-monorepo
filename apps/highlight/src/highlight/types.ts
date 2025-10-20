@@ -4,7 +4,7 @@ import { StarknetDomain } from 'starknet';
 export type PostMessageRequest = Message;
 
 export type Domain = Required<TypedDataDomain> &
-  Pick<StarknetDomain, 'revision'>;
+  Partial<Pick<StarknetDomain, 'revision'>>;
 
 export type Message = {
   domain: Domain;
