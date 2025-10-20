@@ -122,7 +122,9 @@ function shouldHaveDeleteButton(index: number) {
               </div>
               <UiButton
                 v-if="shouldHaveDeleteButton(index)"
-                class="!border-0 !rounded-l-none !rounded-r-lg !bg-transparent !size-[40px] !px-0 !text-skin-text shrink-0"
+                class="!border-0 !rounded-l-none !rounded-r-lg !bg-transparent !text-skin-text shrink-0"
+                uniform
+                :size="40"
                 @click="proposal.choices.splice(index, 1)"
               >
                 <IH-trash class="inline-block" />

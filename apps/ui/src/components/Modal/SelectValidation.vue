@@ -308,7 +308,9 @@ watch(
             </div>
             <UiTooltip title="Test all custom strategies">
               <UiButton
-                class="!p-0 !border-0 !h-auto !w-[20px]"
+                class="!border-0"
+                uniform
+                :size="20"
                 :disabled="!customStrategies.length"
                 @click="handleTestStrategies(customStrategies)"
               >

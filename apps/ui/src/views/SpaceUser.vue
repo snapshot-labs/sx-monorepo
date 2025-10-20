@@ -201,18 +201,11 @@ watch(
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
-          <UiButton
-            :to="{ name: 'user', params: { user: user.id } }"
-            class="!px-0 w-[46px]"
-          >
+          <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>
         </UiTooltip>
-        <DropdownShare
-          :shareable="{ user, space }"
-          type="space-user"
-          class="!px-0 w-[46px]"
-        />
+        <DropdownShare :shareable="{ user, space }" type="space-user" uniform />
       </div>
     </div>
     <div class="px-4">

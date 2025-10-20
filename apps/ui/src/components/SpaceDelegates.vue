@@ -185,7 +185,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
       >
         <UiButton
-          class="!px-0 w-[46px]"
+          uniform
           @click="
             isUpdatableDelegation
               ? handleUpdateDelegatesClick()

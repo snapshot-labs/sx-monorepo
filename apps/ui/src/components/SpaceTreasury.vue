@@ -143,10 +143,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         v-if="!isReadOnly && EVM_CHAIN_IDS.includes(treasury.network)"
         title="Connect to apps"
       >
-        <UiButton
-          class="!px-0 w-[46px]"
-          @click="modalOpen.walletConnectLink = true"
-        >
+        <UiButton uniform @click="modalOpen.walletConnectLink = true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="480"
@@ -162,7 +159,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Copy address">
-        <UiButton class="!px-0 w-[46px]" @click="copy(treasury.wallet)">
+        <UiButton uniform @click="copy(treasury.wallet)">
           <IH-duplicate v-if="!copied" class="inline-block" />
           <IH-check v-else class="inline-block" />
         </UiButton>
@@ -171,7 +168,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         v-if="!isReadOnly"
         :title="page === 'tokens' ? 'Send token' : 'Send NFT'"
       >
-        <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
+        <UiButton uniform @click="openModal(page)">
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </UiButton>
       </UiTooltip>
@@ -314,10 +311,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 "
                 title="Stake with Lido"
               >
-                <UiButton
-                  class="!px-0 w-[46px]"
-                  @click.prevent="openModal('stake')"
-                >
+                <UiButton uniform @click.prevent="openModal('stake')">
                   <IC-stake class="inline-block" />
                 </UiButton>
               </UiTooltip>

@@ -51,7 +51,7 @@ watchEffect(() => setTitle(props.space.name));
               name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }
             }"
-            class="!px-0 w-[46px]"
+            uniform
           >
             <IH-pencil-alt />
           </UiButton>

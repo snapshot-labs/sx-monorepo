@@ -149,7 +149,7 @@ watch(
           <UiTooltip title="Send token">
             <UiButton
               :disabled="!treasury || disabled || !treasury.supportsTokens"
-              class="!px-0 w-[46px]"
+              uniform
               @click="openModal('sendToken')"
             >
               <IH-cash class="inline-block" />
@@ -158,7 +158,7 @@ watch(
           <UiTooltip title="Send NFT">
             <UiButton
               :disabled="!treasury || disabled || !treasury.supportsNfts"
-              class="!px-0 w-[46px]"
+              uniform
               @click="openModal('sendNft')"
             >
               <IH-photograph class="inline-block" />
@@ -167,7 +167,7 @@ watch(
           <UiTooltip title="Contract call">
             <UiButton
               :disabled="!treasury || disabled"
-              class="!px-0 w-[46px]"
+              uniform
               @click="openModal('contractCall')"
             >
               <IH-code class="inline-block" />

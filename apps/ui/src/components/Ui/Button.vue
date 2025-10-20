@@ -7,13 +7,17 @@ withDefaults(
     primary?: boolean;
     loading?: boolean;
     disabled?: boolean;
+    uniform?: boolean;
+    size?: number;
     to?: RouteLocationRaw;
   }>(),
   {
     type: 'button',
     primary: false,
     loading: false,
-    disabled: false
+    disabled: false,
+    uniform: false,
+    size: 46
   }
 );
 </script>
@@ -35,8 +39,9 @@ withDefaults(
     :disabled="disabled || loading"
     :class="{
       primary: primary,
-      'w-[46px] px-0': loading,
-      'px-3.5': !loading || ($attrs.class as 'string')?.includes('w-full')
+      [`size-[${size}px] px-0`]: loading || uniform,
+      'px-3.5':
+        (!loading && !uniform) || ($attrs.class as 'string')?.includes('w-full')
     }"
     class="button"
   >
