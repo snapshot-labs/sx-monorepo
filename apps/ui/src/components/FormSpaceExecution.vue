@@ -29,7 +29,7 @@ const {
 
         try {
           const isEnabled = await getIsOsnapEnabled(
-            treasury.chainId as number,
+            Number(treasury.chainId),
             treasury.address
           );
 
@@ -50,7 +50,7 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
     spaceUrl,
     spaceName: props.space.name,
     safeAddress: treasury.address,
-    network: treasury.chainId as number
+    network: Number(treasury.chainId)
   });
 }
 </script>
