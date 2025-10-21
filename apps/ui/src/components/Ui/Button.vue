@@ -25,7 +25,7 @@ const attrs = useAttrs();
 
 const classNames = computed(() => {
   return {
-    [`h-[${props.size}px] button`]: true,
+    [`h-[${props.size}px] min-w-[${props.size}px] button`]: true,
     primary: props.primary,
     [`w-[${props.size}px] px-0 shrink-0`]: props.loading || props.uniform,
     'px-3.5':
