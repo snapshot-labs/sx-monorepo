@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
+import { shorten } from '@/helpers/utils';
 import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
 const model = defineModel<SpaceMetadataTreasury[]>({
@@ -81,26 +82,56 @@ function deleteTreasury(index: number) {
   <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
     <template #item="{ element: treasury, index: i }">
       <div
-        class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
+        class="flex justify-between items-center first-of-type:rounded-t-lg last-of-type:rounded-b-lg first-of-type:border-t border-b border-x last-of-type:mb-3 px-4 py-3 text-skin-link"
       >
         <div class="flex items-center">
           <div
             v-if="model.length > 1"
-            class="handle mr-4 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+            class="handle mr-3 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
           >
             <IH-switch-vertical />
           </div>
-          <div class="flex min-w-0">
-            <div class="truncate mr-3">{{ treasury.name }}</div>
+          <div class="flex items-center">
+            <UiBadgeNetwork
+              :chain-id="treasury.chainId"
+              class="mr-3 hidden sm:block"
+            >
+              <UiStamp
+                :id="treasury.address"
+                type="avatar"
+                :size="32"
+                class="rounded-md"
+              />
+            </UiBadgeNetwork>
+            <div class="flex-1 leading-[22px]">
+              <h4
+                class="text-skin-link"
+                v-text="treasury.name || shorten(treasury.address)"
+              />
+              <UiAddress
+                class="text-skin-text text-[17px]"
+                :address="treasury.address"
+              />
+            </div>
           </div>
         </div>
-        <div class="flex gap-3">
-          <button type="button" @click="editTreasury(i)">
-            <IH-pencil />
-          </button>
-          <button type="button" @click="deleteTreasury(i)">
-            <IH-trash />
-          </button>
+        <div class="flex gap-2">
+          <UiTooltip title="Edit treasury">
+            <UiButton
+              class="!px-0 w-[46px] inline-flex items-center justify-center"
+              @click="editTreasury(i)"
+            >
+              <IH-pencil />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Delete treasury">
+            <UiButton
+              class="!px-0 w-[46px] inline-flex items-center justify-center"
+              @click="deleteTreasury(i)"
+            >
+              <IH-trash />
+            </UiButton>
+          </UiTooltip>
         </div>
       </div>
     </template>
@@ -121,3 +152,9 @@ function deleteTreasury(index: number) {
     />
   </teleport>
 </template>
+
+<style scoped lang="scss">
+.sortable-drag {
+  @apply rounded-lg border bg-skin-bg;
+}
+</style>

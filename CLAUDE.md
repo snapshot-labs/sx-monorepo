@@ -94,6 +94,21 @@ The codebase implements a unified interface for multiple blockchain networks:
 **Composables**: 30+ composables provide reusable logic (`useWeb3`, `useModal`, `useSpaceController`)
 **Form System**: Schema-driven forms with specialized input components
 
+**Auto-Imports**: The UI uses unplugin-auto-import and unplugin-vue-components for automatic imports:
+- **Vue APIs**: No need to import `ref`, `computed`, `watch`, `onMounted`, etc. from `vue`
+- **Vue Router**: `useRoute`, `useRouter` are auto-imported from `vue-router`
+- **VueUse**: All VueUse composables like `useEventListener`, `useLocalStorage` are auto-imported from `@vueuse/core`
+- **Composables**: All files in `src/composables/` are auto-imported (e.g., `useWeb3()`, `useModal()`)
+- **Stores**: All files in `src/stores/` are auto-imported
+- **Components**: All components in `src/components/` are auto-imported using directory-as-namespace pattern:
+  - `src/components/Ui/Button.vue` → `<UiButton />`
+  - `src/components/Modal/Vote.vue` → `<ModalVote />`
+  - `src/components/App/TopNavigation.vue` → `<AppTopNavigation />`
+- **Icons**: Heroicons are auto-imported with prefixes:
+  - `IH-` for heroicons-outline (e.g., `<IH-search />`, `<IH-exclamation-circle />`)
+  - `IS-` for heroicons-solid
+  - Custom icons from `src/assets/icons/` use `IC-` prefix
+
 ### Data Flow
 
 1. **UI** fetches governance data via GraphQL from **API**
