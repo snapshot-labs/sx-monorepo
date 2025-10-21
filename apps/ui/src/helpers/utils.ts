@@ -136,6 +136,12 @@ export function formatAddress(address: string) {
   }
 }
 
+export function getChainIdKind(chainId: ChainId): 'evm' | 'starknet' {
+  return typeof chainId === 'number' || !String(chainId).startsWith('0x')
+    ? 'evm'
+    : 'starknet';
+}
+
 export function getProposalId(proposal: Proposal) {
   const proposalId = proposal.proposal_id.toString();
 

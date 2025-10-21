@@ -6,7 +6,7 @@ import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
-import { _n, shorten } from '@/helpers/utils';
+import { _n, getChainIdKind, shorten } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
 const props = defineProps<{
@@ -62,7 +62,7 @@ function handlePick(token: Token) {
 async function fetchCustomToken(address) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
 
-  if (String(props.network).startsWith('0x')) {
+  if (getChainIdKind(props.network) === 'starknet') {
     console.log('network is not a number (starknet is not supported)');
     return;
   }

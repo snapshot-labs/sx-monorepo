@@ -5,6 +5,7 @@ import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm';
 import { METADATA as STARKNET_NETWORKS_METADATA } from '@/networks/starknet';
 import { ChainId, NetworkID } from '@/types';
 import { getProvider } from './provider';
+import { getChainIdKind } from './utils';
 
 function getStarknetNetworkId(chainId: ChainId): NetworkID {
   const network = Object.entries(STARKNET_NETWORKS_METADATA).find(
@@ -31,8 +32,7 @@ export function getGenericExplorerUrl(
   address: string,
   type: 'address' | 'token' | 'transaction'
 ) {
-  const isEvmNetwork =
-    typeof chainId === 'number' || !String(chainId).startsWith('0x');
+  const isEvmNetwork = getChainIdKind(chainId) === 'evm';
 
   if (isEvmNetwork) {
     let mappedType = 'tx';
@@ -61,8 +61,7 @@ export async function waitForTransaction(
   chainId: ChainId,
   waitForIndexing = false
 ) {
-  const isEvmNetwork =
-    typeof chainId === 'number' || !String(chainId).startsWith('0x');
+  const isEvmNetwork = getChainIdKind(chainId) === 'evm';
   let networkId: NetworkID;
 
   if (isEvmNetwork) {

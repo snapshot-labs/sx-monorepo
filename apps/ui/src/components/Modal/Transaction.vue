@@ -6,7 +6,7 @@ import { getABI } from '@/helpers/etherscan';
 import { getProvider } from '@/helpers/provider';
 import { resolver } from '@/helpers/resolver';
 import { createContractCallTransaction } from '@/helpers/transactions';
-import { abiToDefinition, clone } from '@/helpers/utils';
+import { abiToDefinition, clone, getChainIdKind } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { ChainId, Contact } from '@/types';
 
@@ -164,7 +164,7 @@ async function handleToChange(to: string) {
     return;
   }
 
-  if (String(props.network).startsWith('0x')) {
+  if (getChainIdKind(props.network) === 'starknet') {
     console.log('network is not a number (starknet is not supported)');
     return;
   }

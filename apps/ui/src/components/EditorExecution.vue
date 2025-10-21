@@ -3,7 +3,7 @@ import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
-import { shorten } from '@/helpers/utils';
+import { getChainIdKind, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
 
@@ -79,7 +79,7 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    String(treasury.value.network).startsWith('0x')
+    getChainIdKind(treasury.value.network) === 'starknet'
   ) {
     return;
   }
