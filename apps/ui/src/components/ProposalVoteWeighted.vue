@@ -91,7 +91,8 @@ watch(
     </div>
     <UiButton
       primary
-      class="!h-[48px] w-full"
+      class="w-full"
+      :size="48"
       @click="$emit('vote', selectedChoices)"
     >
       Vote
