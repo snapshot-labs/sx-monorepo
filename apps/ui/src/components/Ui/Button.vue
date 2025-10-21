@@ -52,7 +52,7 @@ const classNames = computed(() => {
 
 <style lang="scss" scoped>
 .button {
-  @apply rounded-full leading-[100%] border text-skin-link bg-skin-bg flex items-center justify-center gap-2;
+  @apply rounded-full leading-[100%] border text-skin-link bg-skin-bg inline-flex items-center justify-center gap-2;
 
   &:disabled:deep() {
     color: rgba(var(--border)) !important;
