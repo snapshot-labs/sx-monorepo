@@ -38,7 +38,7 @@ watch(open, val => {
   <transition name="fade">
     <div
       v-if="open"
-      class="modal mx-auto pt-electron-titlebar"
+      class="modal mx-auto pt-electron-titlebar-height"
       data-testid="modal"
     >
       <div class="backdrop" @click="closeable ? $emit('close') : null" />
