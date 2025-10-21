@@ -152,7 +152,7 @@ watchEffect(() => {
         v-bind="$attrs"
       >
         <UiScrollerHorizontal
-          class="z-40 sticky top-header-offset lg:top-header"
+          class="z-40 sticky top-header-height-with-offset lg:top-header-height"
           with-buttons
           gradient="xxl"
           data-testid="proposal-tabs"

@@ -100,7 +100,7 @@ watchEffect(() =>
 
 <template>
   <div
-    class="bg-skin-bg sticky top-header-with-section lg:top-header-with-section-offset z-40 border-b flex gap-3 font-medium leading-[18px] px-4 py-2"
+    class="bg-skin-bg sticky top-header-with-section-height lg:top-header-with-section-height-with-offset z-40 border-b flex gap-3 font-medium leading-[18px] px-4 py-2"
   >
     <div class="grow truncate">Proposal</div>
     <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>

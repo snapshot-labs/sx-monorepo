@@ -94,11 +94,11 @@ export default {
       12: '96px',
       maximum: '1900px',
       // Layout heights
-      header: `${TOTAL_NAV_HEIGHT}px`,
-      'electron-titlebar': `${ELECTRON_TITLEBAR_HEIGHT}px`,
-      'header-offset': `${TOTAL_NAV_HEIGHT - 1}px`,
-      'header-with-section': `${TOTAL_WITH_SECTION}px`,
-      'header-with-section-offset': `${TOTAL_WITH_SECTION + 1}px`
+      'header-height': `${TOTAL_NAV_HEIGHT}px`,
+      'electron-titlebar-height': `${ELECTRON_TITLEBAR_HEIGHT}px`,
+      'header-height-with-offset': `${TOTAL_NAV_HEIGHT - 1}px`,
+      'header-with-section-height': `${TOTAL_WITH_SECTION}px`,
+      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION + 1}px`
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
