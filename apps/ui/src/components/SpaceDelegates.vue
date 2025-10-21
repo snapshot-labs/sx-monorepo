@@ -243,9 +243,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div class="flex items-center justify-center">
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                  <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                <button class="text-skin-link">
+                  <IH-dots-horizontal />
+                </button>
               </template>
               <template #items>
                 <UiDropdownItem v-slot="{ active }">
@@ -429,9 +429,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
-                  <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                    <IH-dots-horizontal class="text-skin-link" />
-                  </UiButton>
+                  <button class="text-skin-link">
+                    <IH-dots-horizontal />
+                  </button>
                 </template>
                 <template #items>
                   <UiDropdownItem v-slot="{ active }">

@@ -93,15 +93,11 @@ async function handleTestStrategies(strategies: StrategyConfig[]) {
       <UiTooltip
         v-if="model.length && showTestButton"
         title="Test all custom strategies"
+        class="flex items-center"
       >
-        <UiButton
-          class="!border-0"
-          uniform
-          :size="20"
-          @click="handleTestStrategies(model)"
-        >
+        <button class="text-skin-link" @click="handleTestStrategies(model)">
           <IH-play />
-        </UiButton>
+        </button>
       </UiTooltip>
     </div>
     <div class="space-y-3 mb-4">

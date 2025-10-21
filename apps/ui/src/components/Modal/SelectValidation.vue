@@ -306,16 +306,17 @@ watch(
                 <IH-question-mark-circle class="shrink-0" />
               </UiTooltip>
             </div>
-            <UiTooltip title="Test all custom strategies">
-              <UiButton
-                class="!border-0"
-                uniform
-                :size="20"
+            <UiTooltip
+              class="flex items-center"
+              title="Test all custom strategies"
+            >
+              <button
                 :disabled="!customStrategies.length"
+                class="text-skin-link"
                 @click="handleTestStrategies(customStrategies)"
               >
                 <IH-play />
-              </UiButton>
+              </button>
             </UiTooltip>
           </div>
           <UiStrategiesConfiguratorOffchain

@@ -58,16 +58,14 @@ function handleTestStrategies(strategies: StrategyConfig[]) {
     class="!mx-0"
   >
     <template #actions>
-      <UiTooltip title="Test all custom strategies">
-        <UiButton
-          class="!border-0"
-          uniform
-          :size="20"
+      <UiTooltip class="flex items-center" title="Test all custom strategies">
+        <button
           :disabled="!strategies.length"
+          class="text-skin-link"
           @click="handleTestStrategies(strategies)"
         >
           <IH-play />
-        </UiButton>
+        </button>
       </UiTooltip>
     </template>
     <UiMessage

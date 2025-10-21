@@ -119,15 +119,16 @@ onMounted(() => {
         @test-strategies="handleTestStrategies"
       >
         <template v-if="strategies.length" #actions>
-          <UiTooltip title="Test all custom strategies">
-            <UiButton
-              class="!border-0"
-              uniform
-              :size="20"
+          <UiTooltip
+            class="flex items-center"
+            title="Test all custom strategies"
+          >
+            <button
+              class="text-skin-link"
               @click="handleTestStrategies(strategies)"
             >
               <IH-play />
-            </UiButton>
+            </button>
           </UiTooltip>
         </template>
         <template #empty>
@@ -137,7 +138,6 @@ onMounted(() => {
               <UiButton
                 v-for="(name, id) in POPULAR_STRATEGIES"
                 :key="id"
-                class="border py-2 px-3"
                 @click="handlePopularStrategyClick(id)"
               >
                 {{ id }}
