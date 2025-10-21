@@ -52,7 +52,6 @@ watch(open, () => (step.value = null));
       <template v-else>
         <UiButton
           :to="{ name: 'user', params: { user: web3.account } }"
-          class="gap-2"
           @click="emit('close')"
         >
           <UiStamp :id="user.id" :size="18" :cb="cb" />

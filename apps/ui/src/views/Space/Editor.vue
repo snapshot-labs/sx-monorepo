@@ -502,11 +502,11 @@ watchEffect(() => {
         <IndicatorPendingTransactions />
         <UiTooltip title="Drafts">
           <UiButton class="leading-3" uniform @click="modalOpen = true">
-            <IH-collection class="inline-block" />
+            <IH-collection />
           </UiButton>
         </UiTooltip>
         <UiButton
-          class="min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          class="min-w-[46px] !px-0 md:!px-3"
           primary
           :loading="isSubmitButtonLoading"
           :disabled="!canSubmit"

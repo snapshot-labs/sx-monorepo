@@ -149,7 +149,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             width="480"
             height="332"
             viewBox="0 0 480 332"
-            class="inline-block size-[26px]"
+            class="size-[26px]"
           >
             <path
               fill="rgba(var(--link))"
@@ -160,8 +160,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </UiTooltip>
       <UiTooltip title="Copy address">
         <UiButton uniform @click="copy(treasury.wallet)">
-          <IH-duplicate v-if="!copied" class="inline-block" />
-          <IH-check v-else class="inline-block" />
+          <IH-duplicate v-if="!copied" />
+          <IH-check v-else />
         </UiButton>
       </UiTooltip>
       <UiTooltip
@@ -169,7 +169,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :title="page === 'tokens' ? 'Send token' : 'Send NFT'"
       >
         <UiButton uniform @click="openModal(page)">
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
+          <IH-arrow-sm-right class="-rotate-45" />
         </UiButton>
       </UiTooltip>
     </div>
@@ -312,7 +312,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 title="Stake with Lido"
               >
                 <UiButton uniform @click.prevent="openModal('stake')">
-                  <IC-stake class="inline-block" />
+                  <IC-stake />
                 </UiButton>
               </UiTooltip>
             </div>

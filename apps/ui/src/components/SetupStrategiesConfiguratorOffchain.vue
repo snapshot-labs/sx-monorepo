@@ -137,7 +137,7 @@ onMounted(() => {
               <UiButton
                 v-for="(name, id) in POPULAR_STRATEGIES"
                 :key="id"
-                class="border py-2 px-3 text-center rounded-lg"
+                class="border py-2 px-3"
                 @click="handlePopularStrategyClick(id)"
               >
                 {{ id }}

@@ -402,7 +402,7 @@ onBeforeUnmount(() => destroyAudio());
               @click="handleAiSummaryClick"
             >
               <IH-sparkles
-                class="inline-block size-[22px]"
+                class="size-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
             </UiButton>
@@ -426,24 +426,22 @@ onBeforeUnmount(() => destroyAudio());
             >
               <IH-pause
                 v-if="audioState === 'playing'"
-                class="inline-block size-[22px] text-skin-link"
+                class="size-[22px] text-skin-link"
               />
-              <IH-play v-else class="inline-block text-skin-text size-[22px]" />
+              <IH-play v-else class="text-skin-text size-[22px]" />
             </UiButton>
           </UiTooltip>
           <DropdownShare :shareable="proposal" type="proposal">
             <template #button>
               <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-share class="text-skin-text inline-block size-[22px]" />
+                <IH-share class="text-skin-text size-[22px]" />
               </UiButton>
             </template>
           </DropdownShare>
           <UiDropdown>
             <template #button>
               <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-dots-vertical
-                  class="text-skin-text inline-block size-[22px]"
-                />
+                <IH-dots-vertical class="text-skin-text size-[22px]" />
               </UiButton>
             </template>
             <template #items>

@@ -20,8 +20,6 @@ const typeName = computed(() => {
     <UiAlert type="error">
       There was an error fetching your {{ typeName }}.
     </UiAlert>
-    <UiButton class="flex items-center gap-2" @click="$emit('fetch')">
-      <IH-refresh />Retry
-    </UiButton>
+    <UiButton @click="$emit('fetch')"> <IH-refresh />Retry </UiButton>
   </div>
 </template>

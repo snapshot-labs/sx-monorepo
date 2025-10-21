@@ -23,7 +23,7 @@ const emit = defineEmits<{
         :size="size"
         @click="emit('vote', 'for')"
       >
-        <IH-check class="inline-block" />
+        <IH-check />
       </UiButton>
     </UiTooltip>
     <UiTooltip :title="choices[1]">
@@ -33,7 +33,7 @@ const emit = defineEmits<{
         :size="size"
         @click="emit('vote', 'against')"
       >
-        <IH-x class="inline-block" />
+        <IH-x />
       </UiButton>
     </UiTooltip>
     <UiTooltip v-if="choices.length === 3" :title="choices[2]">
@@ -43,7 +43,7 @@ const emit = defineEmits<{
         :size="size"
         @click="emit('vote', 'abstain')"
       >
-        <IH-minus-sm class="inline-block" />
+        <IH-minus-sm />
       </UiButton>
     </UiTooltip>
   </div>

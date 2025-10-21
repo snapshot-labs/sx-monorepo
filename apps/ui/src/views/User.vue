@@ -181,7 +181,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           title="Edit profile"
         >
           <UiButton uniform @click="modalOpenEditUser = true">
-            <IH-cog class="inline-block" />
+            <IH-cog />
           </UiButton>
         </UiTooltip>
       </div>

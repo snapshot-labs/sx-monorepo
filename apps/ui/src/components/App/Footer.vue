@@ -24,14 +24,14 @@ const isSiteRoute = computed(() => {
       >
         <router-link :to="{ name: 'site-landing' }" tabindex="-1">
           <UiButton uniform>
-            <IC-zap class="inline-block size-[24px]" />
+            <IC-zap class="size-[24px]" />
           </UiButton>
         </router-link>
       </UiTooltip>
       <UiTooltip title="Get help">
         <a :href="HELPDESK_URL" target="_blank" tabindex="-1">
           <UiButton uniform>
-            <IH-chat class="inline-block" />
+            <IH-chat />
           </UiButton>
         </a>
       </UiTooltip>

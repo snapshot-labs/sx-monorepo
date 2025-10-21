@@ -32,9 +32,7 @@ const selectedChoices = ref<RankedChoice>(
       item-key="id"
     >
       <template #item="{ element, index }">
-        <UiButton
-          class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
-        >
+        <UiButton class="!h-[48px] text-left w-full handle cursor-grab">
           <IC-drag class="text-skin-text" />
           <UiTooltipOnTruncate :content="proposal.choices[element - 1]" />
           <div

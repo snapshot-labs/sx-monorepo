@@ -28,7 +28,7 @@ function handleContactEdit(contact) {
       <div class="flex-auto" />
       <div class="pt-4 px-4 space-x-2">
         <UiButton uniform @click="openModal('editContact')">
-          <IH-plus-sm class="inline-block" />
+          <IH-plus-sm />
         </UiButton>
       </div>
     </div>

@@ -159,7 +159,7 @@ onUnmounted(() => {
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
-        class="float-left sm:w-auto sm:!px-3 text-center"
+        class="float-left sm:w-auto sm:!px-3"
         uniform
         @click="modalAccountOpen = true"
       >
@@ -181,8 +181,8 @@ onUnmounted(() => {
       </UiButton>
       <IndicatorPendingTransactions />
       <UiButton v-if="!isWhiteLabel" uniform @click="toggleTheme()">
-        <IH-sun v-if="currentTheme === 'dark'" class="inline-block" />
-        <IH-moon v-else class="inline-block" />
+        <IH-sun v-if="currentTheme === 'dark'" />
+        <IH-moon v-else />
       </UiButton>
     </div>
   </UiTopnav>

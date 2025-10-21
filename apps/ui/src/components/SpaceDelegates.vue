@@ -192,7 +192,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               : handleDelegateToggle()
           "
         >
-          <IH-user-add class="inline-block" />
+          <IH-user-add />
         </UiButton>
       </UiTooltip>
     </div>

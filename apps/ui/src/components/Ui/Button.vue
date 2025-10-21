@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouteLocationRaw } from 'vue-router';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     type?: 'button' | 'submit' | 'reset';
     primary?: boolean;
@@ -20,30 +20,30 @@ withDefaults(
     size: 46
   }
 );
+
+const attrs = useAttrs();
+
+const classNames = computed(() => {
+  return {
+    [`h-[${props.size}px] button`]: true,
+    primary: props.primary,
+    [`w-[${props.size}px] px-0 shrink-0`]: props.loading || props.uniform,
+    'px-3.5':
+      (!props.loading && !props.uniform) ||
+      (attrs.class as 'string')?.includes('w-full')
+  };
+});
 </script>
 
 <template>
-  <AppLink
-    v-if="to"
-    :to="to"
-    :class="{
-      primary: primary
-    }"
-    class="button inline-flex items-center justify-center px-3.5"
-  >
+  <AppLink v-if="to" :to="to" :class="classNames">
     <slot />
   </AppLink>
   <button
     v-else
     :type="type"
     :disabled="disabled || loading"
-    :class="{
-      primary: primary,
-      [`size-[${size}px] px-0`]: loading || uniform,
-      'px-3.5':
-        (!loading && !uniform) || ($attrs.class as 'string')?.includes('w-full')
-    }"
-    class="button"
+    :class="classNames"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />
@@ -52,7 +52,7 @@ withDefaults(
 
 <style lang="scss" scoped>
 .button {
-  @apply rounded-full leading-[100%] border h-[46px] text-skin-link bg-skin-bg;
+  @apply rounded-full leading-[100%] border text-skin-link bg-skin-bg flex items-center justify-center gap-2;
 
   &:disabled:deep() {
     color: rgba(var(--border)) !important;

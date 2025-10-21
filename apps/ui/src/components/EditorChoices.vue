@@ -127,7 +127,7 @@ function shouldHaveDeleteButton(index: number) {
                 :size="40"
                 @click="proposal.choices.splice(index, 1)"
               >
-                <IH-trash class="inline-block" />
+                <IH-trash />
               </UiButton>
             </div>
           </div>
@@ -135,7 +135,7 @@ function shouldHaveDeleteButton(index: number) {
       </Draggable>
       <UiButton
         v-if="proposal.type !== 'basic'"
-        class="w-full flex items-center justify-center space-x-1"
+        class="w-full space-x-1"
         @click="handleAddChoice"
       >
         <IH-plus-sm />

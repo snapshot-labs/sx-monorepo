@@ -152,7 +152,7 @@ watch(
               uniform
               @click="openModal('sendToken')"
             >
-              <IH-cash class="inline-block" />
+              <IH-cash />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Send NFT">
@@ -161,7 +161,7 @@ watch(
               uniform
               @click="openModal('sendNft')"
             >
-              <IH-photograph class="inline-block" />
+              <IH-photograph />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Contract call">
@@ -170,7 +170,7 @@ watch(
               uniform
               @click="openModal('contractCall')"
             >
-              <IH-code class="inline-block" />
+              <IH-code />
             </UiButton>
           </UiTooltip>
         </div>

@@ -394,10 +394,7 @@ watch(
         <UiAlert type="error">
           Error loading delegates data. Please try again.
         </UiAlert>
-        <UiButton
-          class="flex w-full items-center gap-2 justify-center"
-          @click="fetchDelegatees"
-        >
+        <UiButton class="w-full" @click="fetchDelegatees">
           <IH-refresh />Retry
         </UiButton>
       </div>

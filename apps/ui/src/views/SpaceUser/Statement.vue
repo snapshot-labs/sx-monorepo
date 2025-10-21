@@ -97,7 +97,7 @@ watchEffect(() =>
             class="!absolute right-0"
           >
             <UiButton uniform @click="isEditMode = true">
-              <IH-pencil class="inline-block" />
+              <IH-pencil />
             </UiButton>
           </UiTooltip>
         </div>
