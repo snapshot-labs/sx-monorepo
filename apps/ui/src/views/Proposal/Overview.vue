@@ -392,6 +392,7 @@ onBeforeUnmount(() => destroyAudio());
               props.proposal.body.length > 500
             "
             :title="'AI summary'"
+            class="flex items-center"
           >
             <UiButton
               class="!border-0"
@@ -415,6 +416,7 @@ onBeforeUnmount(() => destroyAudio());
               props.proposal.body.length < 4096
             "
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
+            class="flex items-center"
           >
             <UiButton
               class="!border-0"

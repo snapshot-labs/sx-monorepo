@@ -42,7 +42,7 @@ function handleModalOpen() {
     <UiTooltip title="Your voting power" class="flex truncate">
       <UiButton
         :loading="isLoading"
-        class="flex-row !gap-1 truncate"
+        class="flex-row truncate"
         @click="handleModalOpen"
       >
         <IH-lightning-bolt class="-ml-1 shrink-0" />

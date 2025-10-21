@@ -81,7 +81,7 @@ const isEditable = computed(() => {
 <template>
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
     <UiButton
-      class="text-left w-full !justify-between !rounded-lg"
+      class="text-left w-full !justify-between"
       :size="48"
       :class="{
         'border-skin-link': isEditable

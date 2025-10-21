@@ -501,7 +501,7 @@ watchEffect(() => {
       <div class="flex gap-2 items-center">
         <IndicatorPendingTransactions />
         <UiTooltip title="Drafts">
-          <UiButton class="leading-3" uniform @click="modalOpen = true">
+          <UiButton uniform @click="modalOpen = true">
             <IH-collection />
           </UiButton>
         </UiTooltip>

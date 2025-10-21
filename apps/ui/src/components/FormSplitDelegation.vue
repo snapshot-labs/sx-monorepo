@@ -337,7 +337,7 @@ onMounted(() => {
             />
           </div>
         </div>
-        <UiButton class="w-full space-x-1" @click="handleAddDelegatee">
+        <UiButton class="w-full" @click="handleAddDelegatee">
           <IH-plus-sm />
           Add delegate
         </UiButton>

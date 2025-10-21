@@ -115,7 +115,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
     </div>
     <UiButton
       v-if="!props.limit || strategies.length < props.limit"
-      class="w-full !gap-1"
+      class="w-full"
       @click="isStrategiesModalOpen = true"
     >
       <IH-plus class="shrink-0 size-[16px]" />

@@ -35,7 +35,7 @@ const availableConnectors = computed(() => {
   <UiButton
     v-for="connector in availableConnectors"
     :key="connector.id"
-    class="w-full !px-3"
+    class="w-full"
     @click="emit('click', connector)"
   >
     <img

@@ -159,8 +159,7 @@ onUnmounted(() => {
       <UiButton v-if="loading || web3.authLoading" loading />
       <UiButton
         v-else
-        class="float-left sm:w-auto sm:!px-3"
-        uniform
+        class="sm:w-auto !px-0 sm:!px-3"
         @click="modalAccountOpen = true"
       >
         <span

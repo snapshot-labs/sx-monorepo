@@ -61,7 +61,7 @@ watch(
         <div class="flex gap-1 items-center">
           <UiButton
             :disabled="!selectedChoices[i + 1]"
-            class="rounded-full text-sm shrink-0"
+            class="text-sm shrink-0"
             uniform
             :size="28"
             @click.stop="decreaseChoice(i + 1)"
