@@ -21,22 +21,26 @@ const props = withDefaults(
   }
 );
 
-const attrs = useAttrs();
-
 const classNames = computed(() => {
   return {
-    [`h-[${props.size}px] min-w-[${props.size}px] button`]: true,
+    button: true,
     primary: props.primary,
-    [`w-[${props.size}px] px-0 shrink-0`]: props.loading || props.uniform,
-    'px-3.5':
-      (!props.loading && !props.uniform) ||
-      (attrs.class as 'string')?.includes('w-full')
+    'px-0 shrink-0': props.loading || props.uniform,
+    'px-3.5': !props.loading && !props.uniform
+  };
+});
+
+const buttonStyles = computed(() => {
+  return {
+    height: `${props.size}px`,
+    minWidth: `${props.size}px`,
+    width: props.loading || props.uniform ? `${props.size}px` : undefined
   };
 });
 </script>
 
 <template>
-  <AppLink v-if="to" :to="to" :class="classNames">
+  <AppLink v-if="to" :to="to" :class="classNames" :style="buttonStyles">
     <slot />
   </AppLink>
   <button
@@ -44,6 +48,7 @@ const classNames = computed(() => {
     :type="type"
     :disabled="disabled || loading"
     :class="classNames"
+    :style="buttonStyles"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />
