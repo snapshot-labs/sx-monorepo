@@ -12,7 +12,7 @@ defineEmits<{
 }>();
 
 const searchQuery = ref<string>('');
-const throttledSearchQuery = refThrottled(searchQuery, 500);
+const throttledSearchQuery = refDebounced(searchQuery, 500);
 
 const { data, isPending, isFetchingNextPage, hasNextPage, fetchNextPage } =
   useExploreSpacesQuery({
