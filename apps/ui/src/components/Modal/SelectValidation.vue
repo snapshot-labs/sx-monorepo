@@ -273,13 +273,9 @@ watch(
     </template>
     <div class="p-4 flex flex-col gap-2.5">
       <UiLoading v-if="isLoading" class="m-auto" />
-      <div
-        v-else-if="hasError"
-        class="flex w-full justify-center items-center gap-2 text-skin-text"
-      >
-        <IH-exclamation-circle class="inline-block shrink-0" />
-        <span>Failed to load strategies.</span>
-      </div>
+      <UiStateWarning v-else-if="hasError" class="justify-center">
+        Failed to load strategies.
+      </UiStateWarning>
       <div v-else-if="selectedValidation" class="s-box">
         <UiForm
           v-if="definition"
@@ -306,14 +302,17 @@ watch(
                 <IH-question-mark-circle class="shrink-0" />
               </UiTooltip>
             </div>
-            <UiTooltip title="Test all custom strategies">
-              <UiButton
-                class="!p-0 !border-0 !h-auto !w-[20px]"
+            <UiTooltip
+              class="flex items-center"
+              title="Test all custom strategies"
+            >
+              <button
                 :disabled="!customStrategies.length"
+                class="text-skin-link"
                 @click="handleTestStrategies(customStrategies)"
               >
                 <IH-play />
-              </UiButton>
+              </button>
             </UiTooltip>
           </div>
           <UiStrategiesConfiguratorOffchain

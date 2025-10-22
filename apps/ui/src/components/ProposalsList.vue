@@ -37,13 +37,9 @@ const currentLimit = computed(() => {
   <div>
     <UiSectionHeader v-if="title" :label="title" sticky />
     <UiLoading v-if="loading" class="block px-4 py-3" />
-    <div
-      v-else-if="isError"
-      class="px-4 py-3 flex items-center text-skin-link gap-2"
-    >
-      <IH-exclamation-circle />
-      <span v-text="'Failed to load proposals.'" />
-    </div>
+    <UiStateWarning v-else-if="isError" class="px-4 py-3">
+      Failed to load proposals.
+    </UiStateWarning>
     <div v-else>
       <UiContainerInfiniteScroll
         :loading-more="loadingMore"
@@ -57,13 +53,9 @@ const currentLimit = computed(() => {
           :show-author="showAuthor"
         />
       </UiContainerInfiniteScroll>
-      <div
-        v-if="!proposals.length"
-        class="px-4 py-3 flex items-center text-skin-link gap-2"
-      >
-        <IH-exclamation-circle />
-        <span v-text="'There are no proposals here.'" />
-      </div>
+      <UiStateWarning v-if="!proposals.length" class="px-4 py-3">
+        There are no proposals here.
+      </UiStateWarning>
       <AppLink
         v-else-if="route && proposals.length > currentLimit"
         :to="{ name: route.name }"

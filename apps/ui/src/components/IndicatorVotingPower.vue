@@ -40,13 +40,9 @@ function handleModalOpen() {
     v-bind="$attrs"
   >
     <UiTooltip title="Your voting power" class="flex truncate">
-      <UiButton
-        :loading="isLoading"
-        class="flex flex-row items-center justify-center gap-1 truncate"
-        @click="handleModalOpen"
-      >
-        <IH-lightning-bolt class="inline-block -ml-1 shrink-0" />
-        <IH-exclamation v-if="isError" class="inline-block text-rose-500" />
+      <UiButton :loading="isLoading" class="truncate" @click="handleModalOpen">
+        <IH-lightning-bolt class="-ml-1 shrink-0" />
+        <IH-exclamation v-if="isError" class="text-rose-500" />
         <span v-else class="truncate" v-text="formattedVotingPower" />
       </UiButton>
     </UiTooltip>

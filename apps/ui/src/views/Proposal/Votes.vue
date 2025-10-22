@@ -126,17 +126,12 @@ function handleScrollEvent(target: HTMLElement) {
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />
-      <div v-if="isError" class="px-4 py-3 flex items-center space-x-2">
-        <IH-exclamation-circle class="inline-block" />
-        <span>Failed to load votes.</span>
-      </div>
-      <div
-        v-if="data?.pages.flat().length === 0"
-        class="px-4 py-3 flex items-center space-x-2"
-      >
-        <IH-exclamation-circle class="inline-block" />
-        <span>There are no votes here.</span>
-      </div>
+      <UiStateWarning v-if="isError" class="px-4 py-3">
+        Failed to load votes.
+      </UiStateWarning>
+      <UiStateWarning v-if="data?.pages.flat().length === 0" class="px-4 py-3">
+        There are no votes here.
+      </UiStateWarning>
       <UiContainerInfiniteScroll
         v-if="data"
         :loading-more="isFetchingNextPage"
@@ -217,9 +212,9 @@ function handleScrollEvent(target: HTMLElement) {
           >
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <button type="button">
                   <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                </button>
               </template>
               <template #items>
                 <UiDropdownItem v-slot="{ active }">

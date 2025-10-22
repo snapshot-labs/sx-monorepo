@@ -12,7 +12,7 @@ defineEmits<{
 }>();
 
 const searchQuery = ref<string>('');
-const throttledSearchQuery = refThrottled(searchQuery, 500);
+const throttledSearchQuery = refDebounced(searchQuery, 500);
 
 const { data, isPending, isFetchingNextPage, hasNextPage, fetchNextPage } =
   useExploreSpacesQuery({
@@ -74,10 +74,9 @@ watch(
             </div>
           </button>
         </UiContainerInfiniteScroll>
-        <div v-else class="flex items-center space-x-2 m-4">
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>No results found for your search</span>
-        </div>
+        <UiStateWarning v-else class="m-4">
+          No results found for your search.
+        </UiStateWarning>
       </template>
     </div>
   </UiModal>

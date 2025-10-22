@@ -159,13 +159,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>
-  <div
-    v-if="!delegation.apiUrl"
-    class="px-4 py-3 flex items-center text-skin-link space-x-2"
-  >
-    <IH-exclamation-circle class="shrink-0" />
-    <span>Invalid delegation settings.</span>
-  </div>
+  <UiStateWarning v-if="!delegation.apiUrl" class="px-4 py-3">
+    Invalid delegation settings.
+  </UiStateWarning>
   <template v-else>
     <div v-if="delegation.contractAddress" class="p-4 space-x-2 flex">
       <UiButton
@@ -185,14 +181,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
       >
         <UiButton
-          class="!px-0 w-[46px]"
+          uniform
           @click="
             isUpdatableDelegation
               ? handleUpdateDelegatesClick()
               : handleDelegateToggle()
           "
         >
-          <IH-user-add class="inline-block" />
+          <IH-user-add />
         </UiButton>
       </UiTooltip>
     </div>
@@ -243,9 +239,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div class="flex items-center justify-center">
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                  <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                <button class="text-skin-link">
+                  <IH-dots-horizontal />
+                </button>
               </template>
               <template #items>
                 <UiDropdownItem v-slot="{ active }">
@@ -274,15 +270,12 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           </div>
         </div>
       </div>
-      <div v-else class="flex space-x-2 border-b py-3 mx-4">
-        <IH-exclamation-circle class="shrink-0 mt-[5px]" />
-        <div>
-          You are not delegating your voting power yet.
-          <span v-if="isUpdatableDelegation">
-            If you just delegated, it may take up to 5 minutes to show up.
-          </span>
-        </div>
-      </div>
+      <UiStateWarning v-else class="border-b py-3 mx-4">
+        You are not delegating your voting power yet.
+        <template v-if="true">
+          If you just delegated, it may take up to 5 minutes to show up.
+        </template>
+      </UiStateWarning>
     </div>
 
     <UiSectionHeader label="Delegates" sticky />
@@ -342,19 +335,16 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </div>
       <UiLoading v-if="isPending" class="px-4 py-3 block" />
       <template v-else>
-        <div
+        <UiStateWarning
           v-if="data?.pages.flat().length === 0 || isError"
-          class="px-4 py-3 flex items-center space-x-1"
+          class="px-4 py-3"
         >
-          <IH-exclamation-circle class="shrink-0" />
-          <span v-if="error?.message.includes('Row not found')">
+          <template v-if="error?.message.includes('Row not found')">
             Delegates are being computed, please come back later.
-          </span>
-          <span v-else-if="isError">Failed to load delegates.</span>
-          <span v-else-if="data?.pages.flat().length === 0">
-            There are no delegates.</span
-          >
-        </div>
+          </template>
+          <template v-else-if="isError"> Failed to load delegates. </template>
+          <template v-else> There are no delegates. </template>
+        </UiStateWarning>
         <UiContainerInfiniteScroll
           :loading-more="isFetchingNextPage"
           class="px-4"
@@ -429,9 +419,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
-                  <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                    <IH-dots-horizontal class="text-skin-link" />
-                  </UiButton>
+                  <button class="text-skin-link">
+                    <IH-dots-horizontal />
+                  </button>
                 </template>
                 <template #items>
                   <UiDropdownItem v-slot="{ active }">

@@ -230,8 +230,8 @@ onMounted(() => {
   <div class="space-y-8">
     <div class="shapes px-4 py-8 bg-skin-border/20 flex items-center">
       <div class="text-center w-full space-y-4">
-        <div class="inline-block text-skin-bg bg-skin-link rounded-full px-2">
-          <UiEyebrow>Snapshot Pro</UiEyebrow>
+        <div class="inline-block bg-skin-link rounded-full px-2">
+          <UiEyebrow class="text-skin-bg">Snapshot Pro</UiEyebrow>
         </div>
         <h1 class="pb-4">
           Level up your governance<br />
@@ -274,7 +274,7 @@ onMounted(() => {
       </div>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "
@@ -367,7 +367,7 @@ onMounted(() => {
       <h2 class="text-[32px]">Get started today</h2>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "

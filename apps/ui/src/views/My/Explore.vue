@@ -189,7 +189,7 @@ watchEffect(() => setTitle('Explore'));
           :to="{
             name: `create-space-${protocol}`
           }"
-          class="!px-0 w-[46px]"
+          uniform
         >
           <IH-plus-sm />
         </UiButton>
@@ -224,10 +224,9 @@ watchEffect(() => setTitle('Explore'));
             :space="space"
           />
         </UiContainerInfiniteScroll>
-        <div v-else class="px-4 py-3 flex items-center space-x-2">
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>No results found for your search</span>
-        </div>
+        <UiStateWarning v-else class="px-4 py-3">
+          No results found for your search
+        </UiStateWarning>
       </div>
     </div>
     <UiToolbarBottom
@@ -244,7 +243,8 @@ watchEffect(() => setTitle('Explore'));
       </h4>
       <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
         <UiButton
-          class="primary w-full sm:w-auto"
+          class="w-full sm:w-auto"
+          primary
           @click="modalAccountOpen = true"
         >
           Log in

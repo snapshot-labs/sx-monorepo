@@ -44,11 +44,11 @@ const { toggleTheme, currentTheme } = useTheme();
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">
-      <UiButton class="!px-0 w-[46px]" @click="toggleTheme">
+      <UiButton uniform @click="toggleTheme">
         <IH-sun v-if="currentTheme === 'dark'" class="inline-block" />
         <IH-moon v-else class="inline-block" />
       </UiButton>
-      <UiButton :to="{ name: 'my-home' }" class="primary">
+      <UiButton :to="{ name: 'my-home' }" primary>
         Launch
         <span class="hidden md:inline-block">&nbsp;app</span>
       </UiButton>

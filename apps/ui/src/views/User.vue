@@ -160,10 +160,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
 
 <template>
   <UiLoading v-if="!loaded" class="block p-4" />
-  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    <span>This user does not exist</span>
-  </div>
+  <UiStateWarning v-else-if="!user" class="px-4 py-3">
+    This user does not exist
+  </UiStateWarning>
   <div v-else>
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
@@ -180,8 +179,8 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-if="compareAddresses(web3.account, user.id)"
           title="Edit profile"
         >
-          <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
-            <IH-cog class="inline-block" />
+          <UiButton uniform @click="modalOpenEditUser = true">
+            <IH-cog />
           </UiButton>
         </UiTooltip>
       </div>
@@ -237,13 +236,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       </div>
     </div>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
-    <div
-      v-else-if="!activities.length"
-      class="px-4 py-3 flex items-center space-x-2"
-    >
-      <IH-exclamation-circle class="inline-block" />
-      <span>This user does not have any activities yet.</span>
-    </div>
+    <UiStateWarning v-else-if="!activities.length" class="px-4 py-3">
+      This user does not have any activities yet.
+    </UiStateWarning>
     <AppLink
       v-for="activity in activities"
       v-else

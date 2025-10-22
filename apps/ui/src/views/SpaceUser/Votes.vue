@@ -106,14 +106,10 @@ watchEffect(() =>
     <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
   </div>
   <UiLoading v-if="!loaded" class="block px-4 py-3" />
-  <div
-    v-else-if="!proposals.length || failed"
-    class="px-4 py-3 flex items-center text-skin-link gap-2"
-  >
-    <IH-exclamation-circle class="shrink-0" />
+  <UiStateWarning v-else-if="!proposals.length || failed" class="px-4 py-3">
     <template v-if="failed">Failed to load the votes.</template>
     <template v-else>There are no votes here.</template>
-  </div>
+  </UiStateWarning>
   <UiContainerInfiniteScroll
     v-else
     :loading-more="loadingMore"

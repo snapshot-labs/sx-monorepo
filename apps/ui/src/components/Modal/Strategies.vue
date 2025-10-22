@@ -75,13 +75,9 @@ watch(
     </template>
     <div class="p-4 flex">
       <UiLoading v-if="isLoading" class="m-auto" />
-      <div
-        v-else-if="hasError"
-        class="flex w-full justify-center items-center gap-2 text-skin-text"
-      >
-        <IH-exclamation-circle class="inline-block shrink-0" />
-        <span>Failed to load strategies.</span>
-      </div>
+      <UiStateWarning v-else-if="hasError" class="justify-center">
+        Failed to load strategies.
+      </UiStateWarning>
       <div v-else class="flex flex-col flex-1 gap-3 overflow-hidden">
         <button
           v-for="strategy in filteredStrategies"
