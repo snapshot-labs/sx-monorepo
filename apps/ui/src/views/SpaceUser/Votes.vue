@@ -99,12 +99,10 @@ watchEffect(() =>
 </script>
 
 <template>
-  <div
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b flex gap-3 font-medium leading-[18px] px-4 py-2"
-  >
+  <UiColumnHeader>
     <div class="grow truncate">Proposal</div>
     <div class="shrink-0 w-[35%] md:w-[220px] truncate">Choice</div>
-  </div>
+  </UiColumnHeader>
   <UiLoading v-if="!loaded" class="block px-4 py-3" />
   <UiStateWarning v-else-if="!proposals.length || failed" class="px-4 py-3">
     <template v-if="failed">Failed to load the votes.</template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useProposalVotesQuery } from '@/queries/votes';
@@ -15,8 +16,10 @@ const choiceFilter = ref('any' as 'any' | 'for' | 'against' | 'abstain');
 const modalOpen = ref(false);
 const selectedVote = ref<Vote | null>(null);
 
-const votesHeader = ref<HTMLElement | null>(null);
-const { x: votesHeaderX } = useScroll(votesHeader);
+const votesColumnHeader = ref<InstanceType<typeof UiColumnHeader> | null>(null);
+const { x: votesHeaderX } = useScroll(
+  () => votesColumnHeader.value?.votesHeader ?? null
+);
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
@@ -63,11 +66,8 @@ function handleScrollEvent(target: HTMLElement) {
 </script>
 
 <template>
-  <div
-    ref="votesHeader"
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b overflow-hidden"
-  >
-    <div class="flex space-x-3 font-medium min-w-[735px]">
+  <UiColumnHeader ref="votesColumnHeader" class="!px-0 z-40 overflow-hidden">
+    <div class="flex space-x-3 min-w-[735px] w-full">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
       <div class="grow w-[40%]">
         <template v-if="offchainNetworks.includes(proposal.network)"
@@ -76,7 +76,7 @@ function handleScrollEvent(target: HTMLElement) {
         <UiSelectDropdown
           v-else
           v-model="choiceFilter"
-          class="font-normal"
+          class="font-normal text-center"
           title="Choice"
           gap="12"
           placement="start"
@@ -122,7 +122,7 @@ function handleScrollEvent(target: HTMLElement) {
       </button>
       <div class="min-w-[44px] lg:w-[60px]" />
     </div>
-  </div>
+  </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />

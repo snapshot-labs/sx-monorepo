@@ -280,9 +280,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
     <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
-      <div
-        class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
-      >
+      <UiColumnHeader class="space-x-3">
         <div
           class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
         >
@@ -332,7 +330,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           />
         </button>
         <div class="w-[20px]" />
-      </div>
+      </UiColumnHeader>
       <UiLoading v-if="isPending" class="px-4 py-3 block" />
       <template v-else>
         <UiStateWarning
