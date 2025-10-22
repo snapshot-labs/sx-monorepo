@@ -21,6 +21,8 @@ const props = withDefaults(
   }
 );
 
+const attrs = useAttrs();
+
 const classNames = computed(() => {
   return {
     button: true,
@@ -34,7 +36,11 @@ const buttonStyles = computed(() => {
   return {
     height: `${props.size}px`,
     minWidth: `${props.size}px`,
-    width: props.loading || props.uniform ? `${props.size}px` : undefined
+    width:
+      (props.loading || props.uniform) &&
+      !(attrs.class as 'string')?.includes('w-full')
+        ? `${props.size}px`
+        : undefined
   };
 });
 </script>
