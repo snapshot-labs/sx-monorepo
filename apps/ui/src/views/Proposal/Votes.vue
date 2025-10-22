@@ -16,10 +16,8 @@ const choiceFilter = ref('any' as 'any' | 'for' | 'against' | 'abstain');
 const modalOpen = ref(false);
 const selectedVote = ref<Vote | null>(null);
 
-const votesColumnHeader = ref<InstanceType<typeof UiColumnHeader> | null>(null);
-const { x: votesHeaderX } = useScroll(
-  () => votesColumnHeader.value?.votesHeader ?? null
-);
+const votesHeader = ref<HTMLElement | null>(null);
+const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
@@ -66,7 +64,13 @@ function handleScrollEvent(target: HTMLElement) {
 </script>
 
 <template>
-  <UiColumnHeader ref="votesColumnHeader" class="!px-0 z-40 overflow-hidden">
+  <UiColumnHeader
+    :ref="
+      ref =>
+        (votesHeader = (ref as InstanceType<typeof UiColumnHeader>).container)
+    "
+    class="!px-0 z-40 overflow-hidden"
+  >
     <div class="flex space-x-3 min-w-[735px] w-full">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
       <div class="grow w-[40%]">
