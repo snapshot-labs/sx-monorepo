@@ -71,10 +71,9 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
   <template v-if="isOSnapPluginEnabled && enableOSnap">
     <UiEyebrow class="font-medium mt-3 mb-2">Treasuries</UiEyebrow>
     <UiLoading v-if="isPending" />
-    <div v-else-if="isError" class="flex items-center space-x-2">
-      <IH-exclamation-circle class="inline-block" />
-      <span>Failed to load treasuries.</span>
-    </div>
+    <UiStateWarning v-else-if="isError">
+      Failed to load treasuries.
+    </UiStateWarning>
     <div v-else>
       <div
         v-for="(treasury, i) in treasuries"

@@ -224,10 +224,9 @@ watchEffect(() => setTitle('Explore'));
             :space="space"
           />
         </UiContainerInfiniteScroll>
-        <div v-else class="px-4 py-3 flex items-center space-x-2">
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>No results found for your search</span>
-        </div>
+        <UiStateWarning v-else class="px-4 py-3">
+          No results found for your search
+        </UiStateWarning>
       </div>
     </div>
     <UiToolbarBottom

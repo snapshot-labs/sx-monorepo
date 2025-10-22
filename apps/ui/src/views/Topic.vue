@@ -77,13 +77,9 @@ onMounted(async () => {
     <div v-if="loading" class="text-center p-4">
       <UiLoading />
     </div>
-    <div
-      v-else-if="failed"
-      class="flex items-center text-skin-link space-x-2 p-4"
-    >
-      <IH-exclamation-circle class="shrink-0" />
-      <span>Error while loading the topic.</span>
-    </div>
+    <UiStateWarning v-else-if="failed" class="p-4">
+      Error while loading the topic.
+    </UiStateWarning>
     <div v-if="loaded && !failed" class="pt-5 max-w-[730px] mx-auto px-4">
       <h1 class="text-[40px] leading-[1.1em]">
         {{ topic?.title }}
