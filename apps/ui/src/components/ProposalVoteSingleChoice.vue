@@ -21,7 +21,7 @@ const selectedChoice = ref<number | null>(
       <UiButton
         v-for="(choice, index) in proposal.choices"
         :key="index"
-        class="text-left w-full"
+        class="text-left"
         :size="48"
         :class="{ 'border-skin-text': selectedChoice === index + 1 }"
         @click="selectedChoice = index + 1"
@@ -32,7 +32,6 @@ const selectedChoice = ref<number | null>(
     </div>
     <UiButton
       primary
-      class="w-full"
       :size="48"
       :disabled="!selectedChoice"
       @click="emit('vote', selectedChoice!)"

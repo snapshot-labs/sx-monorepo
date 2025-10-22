@@ -33,7 +33,7 @@ function toggleSelectedChoice(choice: number) {
       <UiButton
         v-for="(choice, index) in proposal.choices"
         :key="index"
-        class="text-left w-full"
+        class="text-left"
         :size="48"
         :class="{ 'border-skin-text': selectedChoices.includes(index + 1) }"
         @click="toggleSelectedChoice(index + 1)"
@@ -42,12 +42,7 @@ function toggleSelectedChoice(choice: number) {
         <IH-check v-if="selectedChoices.includes(index + 1)" class="shrink-0" />
       </UiButton>
     </div>
-    <UiButton
-      primary
-      class="w-full"
-      :size="48"
-      @click="emit('vote', selectedChoices)"
-    >
+    <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
       Vote
     </UiButton>
   </div>
