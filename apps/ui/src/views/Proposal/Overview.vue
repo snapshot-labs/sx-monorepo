@@ -392,15 +392,18 @@ onBeforeUnmount(() => destroyAudio());
               props.proposal.body.length > 500
             "
             :title="'AI summary'"
+            class="flex items-center"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto !w-[22px]"
+              class="!border-0"
+              uniform
+              :size="22"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
               <IH-sparkles
-                class="inline-block size-[22px]"
+                class="size-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
             </UiButton>
@@ -413,34 +416,39 @@ onBeforeUnmount(() => destroyAudio());
               props.proposal.body.length < 4096
             "
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
+            class="flex items-center"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto !w-[22px]"
+              class="!border-0"
+              uniform
+              :size="22"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
               <IH-pause
                 v-if="audioState === 'playing'"
-                class="inline-block size-[22px] text-skin-link"
+                class="size-[22px] text-skin-link"
               />
-              <IH-play v-else class="inline-block text-skin-text size-[22px]" />
+              <IH-play v-else class="text-skin-text size-[22px]" />
             </UiButton>
           </UiTooltip>
-          <DropdownShare :shareable="proposal" type="proposal">
+          <DropdownShare
+            :shareable="proposal"
+            type="proposal"
+            class="flex items-center"
+          >
             <template #button>
-              <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-share class="text-skin-text inline-block size-[22px]" />
-              </UiButton>
+              <button>
+                <IH-share class="size-[22px]" />
+              </button>
             </template>
           </DropdownShare>
-          <UiDropdown>
+          <UiDropdown class="flex items-center">
             <template #button>
-              <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-dots-vertical
-                  class="text-skin-text inline-block size-[22px]"
-                />
-              </UiButton>
+              <button>
+                <IH-dots-vertical class="size-[22px]" />
+              </button>
             </template>
             <template #items>
               <UiDropdownItem v-slot="{ active }">

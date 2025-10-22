@@ -189,7 +189,7 @@ watchEffect(() => setTitle('Explore'));
           :to="{
             name: `create-space-${protocol}`
           }"
-          class="!px-0 w-[46px]"
+          uniform
         >
           <IH-plus-sm />
         </UiButton>
@@ -243,7 +243,8 @@ watchEffect(() => setTitle('Explore'));
       </h4>
       <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
         <UiButton
-          class="primary w-full sm:w-auto"
+          class="w-full sm:w-auto"
+          primary
           @click="modalAccountOpen = true"
         >
           Log in

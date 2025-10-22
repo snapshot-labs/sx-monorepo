@@ -117,18 +117,12 @@ function deleteTreasury(index: number) {
         </div>
         <div class="flex gap-2">
           <UiTooltip title="Edit treasury">
-            <UiButton
-              class="!px-0 w-[46px] inline-flex items-center justify-center"
-              @click="editTreasury(i)"
-            >
+            <UiButton uniform @click="editTreasury(i)">
               <IH-pencil />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Delete treasury">
-            <UiButton
-              class="!px-0 w-[46px] inline-flex items-center justify-center"
-              @click="deleteTreasury(i)"
-            >
+            <UiButton uniform @click="deleteTreasury(i)">
               <IH-trash />
             </UiButton>
           </UiTooltip>

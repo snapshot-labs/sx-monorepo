@@ -113,7 +113,6 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
           <UiButton
             v-else-if="oSnapAvailability && oSnapAvailability[i] === 'ENABLED'"
             :to="getConfigureUrl(treasury)"
-            type="button"
             class="group hover:border-skin-danger hover:text-skin-danger"
           >
             <div
@@ -130,8 +129,6 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
           <UiButton
             v-else-if="oSnapAvailability && oSnapAvailability[i] === 'DISABLED'"
             :to="getConfigureUrl(treasury)"
-            type="button"
-            class="flex items-center justify-center"
           >
             Enable
             <IH-arrow-sm-right class="-rotate-45 -mr-2" />

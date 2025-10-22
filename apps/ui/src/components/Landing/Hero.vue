@@ -13,9 +13,7 @@
         <h1 class="mb-5 font-display text-[40px] xs:text-[56px]">
           The governance stack for your organization
         </h1>
-        <UiButton :to="{ name: 'my-home' }" class="primary">
-          Get started
-        </UiButton>
+        <UiButton :to="{ name: 'my-home' }" primary> Get started </UiButton>
       </div>
     </UiContainer>
   </div>

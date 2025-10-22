@@ -96,8 +96,8 @@ watchEffect(() =>
             title="Edit"
             class="!absolute right-0"
           >
-            <UiButton class="!px-0 w-[46px]" @click="isEditMode = true">
-              <IH-pencil class="inline-block" />
+            <UiButton uniform @click="isEditMode = true">
+              <IH-pencil />
             </UiButton>
           </UiTooltip>
         </div>

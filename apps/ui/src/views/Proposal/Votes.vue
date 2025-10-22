@@ -212,9 +212,9 @@ function handleScrollEvent(target: HTMLElement) {
           >
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <button type="button">
                   <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                </button>
               </template>
               <template #items>
                 <UiDropdownItem v-slot="{ active }">

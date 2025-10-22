@@ -181,14 +181,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
       >
         <UiButton
-          class="!px-0 w-[46px]"
+          uniform
           @click="
             isUpdatableDelegation
               ? handleUpdateDelegatesClick()
               : handleDelegateToggle()
           "
         >
-          <IH-user-add class="inline-block" />
+          <IH-user-add />
         </UiButton>
       </UiTooltip>
     </div>
@@ -239,9 +239,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div class="flex items-center justify-center">
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                  <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                <button class="text-skin-link">
+                  <IH-dots-horizontal />
+                </button>
               </template>
               <template #items>
                 <UiDropdownItem v-slot="{ active }">
@@ -419,9 +419,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
-                  <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                    <IH-dots-horizontal class="text-skin-link" />
-                  </UiButton>
+                  <button class="text-skin-link">
+                    <IH-dots-horizontal />
+                  </button>
                 </template>
                 <template #items>
                   <UiDropdownItem v-slot="{ active }">

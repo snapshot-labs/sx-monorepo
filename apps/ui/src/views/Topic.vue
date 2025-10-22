@@ -66,7 +66,7 @@ onMounted(async () => {
     <div v-if="discussion" class="bg-skin-bg border-b">
       <div class="max-w-[730px] mx-auto p-4">
         <a :href="discussion" target="_blank" tabindex="-1">
-          <UiButton class="flex items-center gap-2 w-full justify-center">
+          <UiButton class="w-full">
             <IC-discourse class="size-[22px] shrink-0" />
             Join the discussion
             <IH-arrow-sm-right class="-rotate-45 shrink-0" />
@@ -127,7 +127,7 @@ onMounted(async () => {
     <div v-if="loaded && !failed && discussion" class="bg-skin-bg border-t">
       <div class="max-w-[730px] mx-auto p-4 pb-0">
         <a :href="discussion" target="_blank" tabindex="-1">
-          <UiButton class="flex items-center gap-2 w-full justify-center">
+          <UiButton class="w-full">
             <IC-discourse class="size-[22px] shrink-0" />
             Reply
             <IH-arrow-sm-right class="-rotate-45 shrink-0" />

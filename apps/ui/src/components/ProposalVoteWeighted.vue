@@ -61,7 +61,9 @@ watch(
         <div class="flex gap-1 items-center">
           <UiButton
             :disabled="!selectedChoices[i + 1]"
-            class="rounded-full !p-0 !h-[28px] !w-[28px] text-sm shrink-0"
+            class="text-sm shrink-0"
+            uniform
+            :size="28"
             @click.stop="decreaseChoice(i + 1)"
           >
             -
@@ -73,7 +75,9 @@ watch(
             class="!w-[18px] !px-0 !m-0 text-center !rounded-none !border-0 shrink-0"
           />
           <UiButton
-            class="rounded-full !p-0 !h-[28px] !w-[28px] text-sm shrink-0"
+            class="text-sm shrink-0"
+            uniform
+            :size="28"
             @click.stop="increaseChoice(i + 1)"
           >
             +
@@ -87,7 +91,8 @@ watch(
     </div>
     <UiButton
       primary
-      class="!h-[48px] w-full"
+      class="w-full"
+      :size="48"
       @click="$emit('vote', selectedChoices)"
     >
       Vote
