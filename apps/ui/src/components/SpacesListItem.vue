@@ -12,10 +12,10 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
     :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
     class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
   >
-    <div class="grow flex items-center truncate">
+    <div class="grow flex items-center">
       <UiBadgeNetwork
         :id="space.network"
-        class="mr-2.5"
+        class="mr-2.5 shrink-0"
         :size="!offchainNetworks.includes(space.network) ? 16 : 0"
       >
         <SpaceAvatar :space="space" :size="32" class="rounded-md" />
