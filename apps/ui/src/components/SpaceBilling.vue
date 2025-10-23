@@ -80,7 +80,7 @@ const statusText = computed(() => {
 
           <UiButton
             :to="{ name: 'space-pro' }"
-            class="primary w-full sm:w-auto text-center"
+            class="primary w-full sm:w-auto"
           >
             {{ hasTurbo ? 'Extend plan' : 'Upgrade to Pro' }}
           </UiButton>
