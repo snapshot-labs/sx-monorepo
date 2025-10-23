@@ -10,13 +10,15 @@ const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
   '137' // Polygon
 ];
 
+const PRO_EXPIRATION_WARNING_DAYS = 7;
+
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
   | 'HAS_DISABLED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
   | 'HAS_PRO_ONLY_WHITELABEL'
-  | 'PRO_EXPIRING_SOON';
+  | 'IS_PRO_EXPIRING_SOON';
 
 export function useSpaceAlerts(
   space: Ref<Space>,
@@ -98,10 +100,10 @@ export function useSpaceAlerts(
 
     const now = Date.now();
     const expirationTime = space.value.turbo_expiration * 1000; // Convert to milliseconds
-    const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
+    const warningThresholdMs = PRO_EXPIRATION_WARNING_DAYS * 24 * 60 * 60 * 1000;
 
-    // Check if expiration is in the future and within 7 days
-    return expirationTime > now && expirationTime - now <= sevenDaysInMs;
+    // Check if expiration is in the future and within warning threshold
+    return expirationTime > now && expirationTime - now <= warningThresholdMs;
   });
 
   const daysUntilExpiration = computed(() => {
@@ -148,7 +150,7 @@ export function useSpaceAlerts(
     }
 
     if (isProExpiringSoon.value) {
-      alertsMap.set('PRO_EXPIRING_SOON', {
+      alertsMap.set('IS_PRO_EXPIRING_SOON', {
         daysUntilExpiration: daysUntilExpiration.value
       });
     }
