@@ -107,7 +107,9 @@ export function useSpaceAlerts(
   });
 
   const daysUntilExpiration = computed(() => {
-    if (!space.value.turbo_expiration || space.value.turbo_expiration === 0) return 0;
+    if (!space.value.turbo_expiration || space.value.turbo_expiration === 0) {
+      return 0;
+    }
 
     const now = Date.now();
     const expirationTime = space.value.turbo_expiration * 1000;
