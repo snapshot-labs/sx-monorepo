@@ -53,6 +53,39 @@ yarn changeset     # Create changeset for package releases
 yarn release       # Build and publish packages
 ```
 
+## Code Quality & Pre-Commit Checklist
+
+**CRITICAL: Before ANY commit, you MUST:**
+
+1. **Run linting**: `yarn lint`
+   - Fix all linting errors before committing
+   - Never commit code with lint errors
+   - Common issues: missing curly braces, unused variables, incorrect formatting
+
+2. **Run type checking** (if modifying TypeScript): `yarn typecheck`
+   - Ensure no TypeScript errors
+   - Verify all types are correct
+
+3. **Test your changes** (if applicable):
+   - Run relevant tests: `yarn test`
+   - Verify functionality works as expected
+
+**Pre-Commit Workflow:**
+```bash
+# ALWAYS run before committing:
+yarn lint                    # Fix all errors
+yarn typecheck              # Verify types (optional but recommended)
+git add .
+git commit -m "your message"
+git push
+```
+
+**Why this matters:**
+- CI will fail if lint errors exist
+- Prevents breaking the build for other developers
+- Maintains code quality and consistency
+- Saves time by catching errors early
+
 ## Architecture Overview
 
 This is a governance platform monorepo with three main services communicating across multiple blockchain networks.
