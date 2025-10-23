@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useProposalVotesQuery } from '@/queries/votes';
@@ -62,11 +63,14 @@ function handleScrollEvent(target: HTMLElement) {
 </script>
 
 <template>
-  <div
-    ref="votesHeader"
-    class="bg-skin-bg sticky top-header-with-section-height lg:top-header-with-section-height-with-offset z-40 border-b overflow-hidden"
+  <UiColumnHeader
+    :ref="
+      ref =>
+        (votesHeader = (ref as InstanceType<typeof UiColumnHeader>).container)
+    "
+    class="!px-0 z-40 overflow-hidden"
   >
-    <div class="flex space-x-3 font-medium min-w-[735px]">
+    <div class="flex space-x-3 min-w-[735px] w-full">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
       <div class="grow w-[40%]">
         <template v-if="offchainNetworks.includes(proposal.network)"
@@ -75,7 +79,7 @@ function handleScrollEvent(target: HTMLElement) {
         <UiSelectDropdown
           v-else
           v-model="choiceFilter"
-          class="font-normal"
+          class="font-normal text-center"
           title="Choice"
           gap="12"
           placement="start"
@@ -121,7 +125,7 @@ function handleScrollEvent(target: HTMLElement) {
       </button>
       <div class="min-w-[44px] lg:w-[60px]" />
     </div>
-  </div>
+  </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />
@@ -211,9 +215,9 @@ function handleScrollEvent(target: HTMLElement) {
           >
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <button type="button">
                   <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                </button>
               </template>
               <template #items>
                 <UiDropdownItem v-slot="{ active }">

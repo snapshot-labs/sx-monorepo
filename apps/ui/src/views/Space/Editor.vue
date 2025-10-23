@@ -487,7 +487,8 @@ watchEffect(() => {
       <div class="flex items-center gap-3 shrink truncate">
         <UiButton
           :to="{ name: 'space-overview', params: { space: spaceKey } }"
-          class="w-[46px] !px-0 ml-4 shrink-0"
+          class="ml-4 shrink-0"
+          uniform
         >
           <IH-arrow-narrow-left />
         </UiButton>
@@ -501,12 +502,13 @@ watchEffect(() => {
       <div class="flex gap-2 items-center">
         <IndicatorPendingTransactions />
         <UiTooltip title="Drafts">
-          <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-            <IH-collection class="inline-block" />
+          <UiButton uniform @click="modalOpen = true">
+            <IH-collection />
           </UiButton>
         </UiTooltip>
         <UiButton
-          class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
+          class="min-w-[46px] !px-0 md:!px-3"
+          primary
           :loading="isSubmitButtonLoading"
           :disabled="!canSubmit"
           @click="handleProposeClick"

@@ -181,14 +181,14 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         :title="isUpdatableDelegation ? 'Update delegates' : 'Delegate'"
       >
         <UiButton
-          class="!px-0 w-[46px]"
+          uniform
           @click="
             isUpdatableDelegation
               ? handleUpdateDelegatesClick()
               : handleDelegateToggle()
           "
         >
-          <IH-user-add class="inline-block" />
+          <IH-user-add />
         </UiButton>
       </UiTooltip>
     </div>
@@ -239,9 +239,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           <div class="flex items-center justify-center">
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                  <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                <button class="text-skin-link">
+                  <IH-dots-horizontal />
+                </button>
               </template>
               <template #items>
                 <UiDropdownItem v-slot="{ active }">
@@ -280,9 +280,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
     <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
-      <div
-        class="bg-skin-bg border-b sticky z-40 flex w-full font-medium space-x-3 px-4 top-header-with-section-height lg:top-header-with-section-height-with-offset"
-      >
+      <UiColumnHeader class="space-x-3">
         <div
           class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
         >
@@ -332,7 +330,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           />
         </button>
         <div class="w-[20px]" />
-      </div>
+      </UiColumnHeader>
       <UiLoading v-if="isPending" class="px-4 py-3 block" />
       <template v-else>
         <UiStateWarning
@@ -419,9 +417,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
             <div class="flex items-center justify-center">
               <UiDropdown>
                 <template #button>
-                  <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                    <IH-dots-horizontal class="text-skin-link" />
-                  </UiButton>
+                  <button class="text-skin-link">
+                    <IH-dots-horizontal />
+                  </button>
                 </template>
                 <template #items>
                   <UiDropdownItem v-slot="{ active }">

@@ -91,10 +91,8 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 <template>
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
-    <div
-      class="bg-skin-bg sticky z-40 border-b w-full flex font-medium space-x-1 top-header-with-section-height lg:top-header-with-section-height-with-offset"
-    >
-      <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
+    <UiColumnHeader>
+      <div class="w-[40%] lg:w-[50%] flex items-center truncate">User</div>
       <button
         type="button"
         class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link space-x-1 truncate"
@@ -112,7 +110,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
       </button>
       <button
         type="button"
-        class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] space-x-1 truncate"
+        class="flex justify-end items-center hover:text-skin-link w-[30%] lg:w-[25%] space-x-1 truncate"
         @click="handleSortChange('vote_count')"
       >
         <span class="truncate">Votes</span>
@@ -125,7 +123,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           class="shrink-0"
         />
       </button>
-    </div>
+    </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <template v-else>
       <UiStateWarning

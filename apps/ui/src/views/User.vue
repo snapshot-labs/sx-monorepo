@@ -179,8 +179,8 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-if="compareAddresses(web3.account, user.id)"
           title="Edit profile"
         >
-          <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
-            <IH-cog class="inline-block" />
+          <UiButton uniform @click="modalOpenEditUser = true">
+            <IH-cog />
           </UiButton>
         </UiTooltip>
       </div>
@@ -228,13 +228,11 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       </div>
       <UiEyebrow class="mb-2 leading-8">Activity</UiEyebrow>
     </div>
-    <div class="border-b w-full">
-      <div class="flex space-x-1 px-4 leading-8">
-        <span class="w-[60%] lg:w-[50%] truncate">Space</span>
-        <span class="w-[20%] lg:w-[25%] text-right truncate">Proposals</span>
-        <span class="w-[20%] lg:w-[25%] text-right truncate">Votes</span>
-      </div>
-    </div>
+    <UiColumnHeader class="text-right">
+      <span class="w-[60%] lg:w-[50%] text-left truncate">Space</span>
+      <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
+      <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
+    </UiColumnHeader>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
     <UiStateWarning v-else-if="!activities.length" class="px-4 py-3">
       This user does not have any activities yet.

@@ -106,12 +106,13 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       ),
       limit: 18
     },
-    'governor-bravo': {
-      key: 'governor-bravo',
-      label: 'Governor Bravo',
+    governor: {
+      key: 'governor',
+      label: 'Governor',
       apiNetwork: 'eth',
       networks: ['eth'],
+      protocols: ['governor-bravo', '@openzeppelin/governor'],
       limit: 18,
-      disabled: import.meta.env.VITE_ENABLE_GOVERNOR_BRAVO !== 'true'
+      disabled: import.meta.env.VITE_ENABLE_GOVERNOR !== 'true'
     }
   };

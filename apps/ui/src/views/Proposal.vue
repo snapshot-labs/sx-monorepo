@@ -267,7 +267,7 @@ watchEffect(() => {
         :max="440"
         :min="340"
         :class="[
-          'shrink-0 md:h-full z-40 border-l-0 md:border-l',
+          'shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg',
           {
             'hidden md:block': route.name === 'space-proposal-votes'
           }

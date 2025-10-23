@@ -58,19 +58,19 @@ watch(
           :items="protocols"
         />
       </div>
-      <UiTooltip v-if="protocol !== 'governor-bravo'" title="Create new space">
+      <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
         <UiButton
           :to="{
             name: `create-space-${protocol}`
           }"
-          class="!px-0 w-[46px]"
+          uniform
         >
           <IH-plus-sm />
         </UiButton>
       </UiTooltip>
     </div>
     <UiSectionHeader label="My spaces" sticky />
-    <UiColumnHeader class="hidden md:flex">
+    <UiColumnHeader class="hidden md:flex text-center">
       <div class="grow" />
       <div v-if="protocol === 'snapshot'" class="w-[100px]" v-text="'Active'" />
       <div class="w-[100px]" v-text="'Proposals'" />
