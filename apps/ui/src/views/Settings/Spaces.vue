@@ -88,9 +88,8 @@ watch(
         :space="space"
       />
     </div>
-    <div v-else class="px-4 py-3 flex items-center space-x-2">
-      <IH-exclamation-circle class="inline-block shrink-0" />
-      <span v-text="'There are no spaces here.'" />
-    </div>
+    <UiStateWarning v-else class="px-4 py-3">
+      There are no spaces here.
+    </UiStateWarning>
   </div>
 </template>

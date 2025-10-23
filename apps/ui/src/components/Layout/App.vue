@@ -186,7 +186,7 @@ router.afterEach(() => {
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex app-sidebar fixed inset-y-0`,
+          `hidden lg:flex app-sidebar fixed inset-y-0 top-electron-titlebar-height`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
@@ -210,7 +210,7 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'top-[72px] inset-y-0 z-10 hidden lg:flex fixed app-nav',
+          'top-header-height inset-y-0 z-10 hidden lg:flex fixed app-nav',
           {
             '!flex app-nav-open': uiStore.sideMenuOpen
           }
@@ -223,7 +223,7 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
+        <div class="flex-auto w-0" :class="{ 'mt-header-height': hasTopNav }">
           <router-view class="h-full pb-10" />
         </div>
         <div
@@ -350,7 +350,7 @@ $placeholderSidebarWidth: 240px;
 }
 
 .backdrop {
-  @apply fixed inset-0 z-[99];
+  @apply fixed inset-0 top-electron-titlebar-height z-[99];
   @apply bg-[black]/40 #{!important};
 }
 </style>

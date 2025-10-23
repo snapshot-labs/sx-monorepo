@@ -131,10 +131,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
-  <div v-if="!treasury" class="p-4 flex items-center text-skin-link space-x-2">
-    <IH-exclamation-circle class="inline-block shrink-0" />
-    <span>No treasury configured.</span>
-  </div>
+  <UiStateWarning v-if="!treasury" class="p-4">
+    No treasury configured.
+  </UiStateWarning>
   <template v-else>
     <div class="p-4 space-x-2 flex">
       <div class="flex-auto" />
@@ -255,32 +254,26 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <UiLabel :is-active="page === 'nfts'" text="NFTs" />
           </AppLink>
         </div>
-        <div
+        <UiStateWarning
           v-if="
             (page === 'tokens' && !treasury.supportsTokens) ||
             (page === 'nfts' && !treasury.supportsNfts)
           "
-          class="p-4 flex items-center text-skin-link space-x-2"
+          class="p-4"
         >
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>This treasury network is not supported.</span>
-        </div>
+          This treasury network is not supported.
+        </UiStateWarning>
         <div v-else-if="page === 'tokens'">
           <UiLoading v-if="isPending" class="px-4 py-3 block" />
-          <div
+          <UiStateWarning
             v-else-if="isSuccess && assets.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+            class="px-4 py-3"
           >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>There are no tokens in treasury.</span>
-          </div>
-          <div
-            v-else-if="isError"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
-          >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>Failed to load treasury tokens.</span>
-          </div>
+            There are no tokens in treasury.
+          </UiStateWarning>
+          <UiStateWarning v-else-if="isError" class="px-4 py-3">
+            Failed to load treasury tokens.
+          </UiStateWarning>
           <a
             v-for="(asset, i) in assets"
             v-else
@@ -372,20 +365,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           </a>
         </div>
         <div v-else-if="page === 'nfts'">
-          <div
+          <UiStateWarning
             v-if="isNftsSuccess && nfts.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+            class="px-4 py-3"
           >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>There are no NFTs in treasury.</span>
-          </div>
-          <div
-            v-else-if="isNftsError"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
-          >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>Failed to load treasury NFTs.</span>
-          </div>
+            There are no NFTs in treasury.
+          </UiStateWarning>
+          <UiStateWarning v-else-if="isNftsError" class="px-4 py-3">
+            Failed to load treasury NFTs.
+          </UiStateWarning>
           <UiLoading v-if="isNftsPending" class="px-4 py-3 block" />
           <div
             class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 max-w-fit mx-auto p-4"

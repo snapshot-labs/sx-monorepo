@@ -17,7 +17,6 @@ const selectedVote = ref<Vote | null>(null);
 
 const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
-
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
@@ -65,7 +64,7 @@ function handleScrollEvent(target: HTMLElement) {
 <template>
   <div
     ref="votesHeader"
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b overflow-hidden"
+    class="bg-skin-bg sticky top-header-with-section-height lg:top-header-with-section-height-with-offset z-40 border-b overflow-hidden"
   >
     <div class="flex space-x-3 font-medium min-w-[735px]">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
@@ -126,17 +125,12 @@ function handleScrollEvent(target: HTMLElement) {
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />
-      <div v-if="isError" class="px-4 py-3 flex items-center space-x-2">
-        <IH-exclamation-circle class="inline-block" />
-        <span>Failed to load votes.</span>
-      </div>
-      <div
-        v-if="data?.pages.flat().length === 0"
-        class="px-4 py-3 flex items-center space-x-2"
-      >
-        <IH-exclamation-circle class="inline-block" />
-        <span>There are no votes here.</span>
-      </div>
+      <UiStateWarning v-if="isError" class="px-4 py-3">
+        Failed to load votes.
+      </UiStateWarning>
+      <UiStateWarning v-if="data?.pages.flat().length === 0" class="px-4 py-3">
+        There are no votes here.
+      </UiStateWarning>
       <UiContainerInfiniteScroll
         v-if="data"
         :loading-more="isFetchingNextPage"

@@ -15,17 +15,13 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
 <template>
   <div>
-    <div
-      v-if="space.delegations.length === 0"
-      class="px-4 py-3 flex items-center text-skin-link space-x-2"
-    >
-      <IH-exclamation-circle class="inline-block" />
-      <span>No delegations configured.</span>
-    </div>
+    <UiStateWarning v-if="space.delegations.length === 0" class="px-4 py-3">
+      No delegations configured.
+    </UiStateWarning>
     <div v-else>
       <UiScrollerHorizontal
         v-if="space.delegations.length > 1"
-        class="z-40 sticky top-[71px] lg:top-[72px]"
+        class="z-40 sticky top-header-height-with-offset lg:top-header-height"
         with-buttons
         gradient="xxl"
       >

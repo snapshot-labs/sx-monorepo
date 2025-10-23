@@ -92,7 +92,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
     <div
-      class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b w-full flex font-medium space-x-1"
+      class="bg-skin-bg sticky z-40 border-b w-full flex font-medium space-x-1 top-header-with-section-height lg:top-header-with-section-height-with-offset"
     >
       <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
       <button
@@ -128,16 +128,15 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
     </div>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <template v-else>
-      <div
+      <UiStateWarning
         v-if="isError || data?.pages.flat().length === 0"
-        class="px-4 py-3 flex items-center space-x-2"
+        class="px-4 py-3"
       >
-        <IH-exclamation-circle class="inline-block" />
-        <span v-if="isError">Failed to load the leaderboard.</span>
-        <span v-else-if="data?.pages.flat().length === 0">
+        <template v-if="isError"> Failed to load the leaderboard. </template>
+        <template v-else>
           This space does not have any activities yet.
-        </span>
-      </div>
+        </template>
+      </UiStateWarning>
       <UiContainerInfiniteScroll
         :loading-more="isFetchingNextPage"
         class="px-4"

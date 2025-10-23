@@ -10,6 +10,7 @@ import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
+import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
 
@@ -519,7 +520,7 @@ watchEffect(() => {
       </div>
     </UiTopnav>
     <div
-      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-[72px]"
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-header-height"
     >
       <div
         class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
@@ -753,7 +754,11 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix :class="['shrink-0 md:w-[340px]']" :top="72" :bottom="64">
+      <Affix
+        :class="['shrink-0 md:w-[340px]']"
+        :top="TOTAL_NAV_HEIGHT"
+        :bottom="64"
+      >
         <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
           <EditorVotingType
             v-model="proposal"
