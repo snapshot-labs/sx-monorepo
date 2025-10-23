@@ -9,18 +9,10 @@ const { alerts } = useSpaceAlerts(toRef(props, 'space'));
 const pendingTasks = computed(() => {
   const _alerts: Task[] = [];
 
-  console.log('[SpaceAlerts] Computing pending tasks, alerts:', {
-    alertsMap: Array.from(alerts.value.entries()),
-    hasProExpiring: alerts.value.has('PRO_EXPIRING_SOON'),
-    isController: isController.value,
-    isAdmin: isAdmin.value
-  });
-
   if (alerts.value.has('PRO_EXPIRING_SOON')) {
     const data = alerts.value.get('PRO_EXPIRING_SOON');
     const days = data?.daysUntilExpiration || 0;
     const daysText = days === 1 ? '1 day' : `${days} days`;
-    console.log('[SpaceAlerts] Adding PRO_EXPIRING_SOON alert:', { data, days, daysText });
     _alerts.push({
       description: `Your Pro plan expires in ${daysText}, renew now`,
       link: { name: 'space-pro' },
