@@ -71,11 +71,7 @@ function handleDeleteLabel(id: string) {
         </button>
       </div>
     </div>
-    <UiButton
-      v-if="labels.length < 10"
-      class="w-full flex items-center justify-center gap-1"
-      @click="() => setModalStatus(true)"
-    >
+    <UiButton v-if="labels.length < 10" @click="() => setModalStatus(true)">
       <IH-plus class="shrink-0 size-[16px]" />
       Add label
     </UiButton>

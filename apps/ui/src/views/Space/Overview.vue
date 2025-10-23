@@ -51,7 +51,7 @@ watchEffect(() => setTitle(props.space.name));
               name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }
             }"
-            class="!px-0 w-[46px]"
+            uniform
           >
             <IH-pencil-alt />
           </UiButton>
@@ -142,7 +142,7 @@ watchEffect(() => setTitle(props.space.name));
     <OnboardingSpace :space="space" />
     <div v-if="showChildren" class="mb-4">
       <UiSectionHeader label="Sub-spaces" sticky />
-      <UiColumnHeader class="hidden md:flex">
+      <UiColumnHeader class="hidden md:flex text-center">
         <div class="grow" />
         <div
           v-if="space.protocol === 'snapshot'"

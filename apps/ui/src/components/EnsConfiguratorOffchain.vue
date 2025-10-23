@@ -73,11 +73,7 @@ function handleSelect(value: string) {
       An error happened while fetching the domain names associated to your
       wallet. Please try again
     </UiAlert>
-    <UiButton
-      class="flex items-center gap-2"
-      :loading="isRefreshing"
-      @click="load"
-    >
+    <UiButton :loading="isRefreshing" @click="load">
       <IH-refresh />
       Retry
     </UiButton>
@@ -108,7 +104,7 @@ function handleSelect(value: string) {
           <UiEyebrow>Domain names</UiEyebrow>
           <UiButton
             v-if="names"
-            class="flex items-center gap-1 !text-skin-text !p-0 !border-0 !h-auto !w-auto"
+            class="gap-1 !text-skin-text !p-0 !border-0 !h-auto"
             :disabled="isLoading"
             :loading="isRefreshing"
             @click="refresh"

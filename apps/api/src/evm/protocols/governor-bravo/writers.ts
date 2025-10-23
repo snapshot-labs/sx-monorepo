@@ -30,6 +30,12 @@ import { convertChoice, getProposalTitle } from '../openzeppelin/utils';
 
 type SpaceData = {
   name: string;
+  about?: string;
+  avatar?: string;
+  externalUrl?: string;
+  github?: string;
+  twitter?: string;
+  farcaster?: string;
   symbol: string;
   decimals: number;
   governanceToken: string;
@@ -43,6 +49,14 @@ type SpaceData = {
 const spaceData: Record<string, SpaceData | undefined> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': {
     name: 'Uniswap',
+    about:
+      'The largest onchain marketplace. Buy and sell crypto on Ethereum and 14+ other chains.',
+    avatar:
+      'ipfs://bafkreigzzj4yc3khx4mn2zmdrdgtvae3s36e5ae2sgry2azuqvxfakjuoa',
+    externalUrl: 'https://app.uniswap.org',
+    github: 'uniswap',
+    twitter: 'Uniswap',
+    farcaster: 'uniswap',
     symbol: 'UNI',
     decimals: 18,
     governanceToken: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
@@ -54,6 +68,12 @@ const spaceData: Record<string, SpaceData | undefined> = {
   },
   '0xc0Da02939E1441F497fd74F78cE7Decb17B66529': {
     name: 'Compound',
+    about: 'Building infrastructure for the future of finance.',
+    avatar:
+      'ipfs://bafkreia4lin2o6uux2375uhekvgqlr466tes7gsdzg6aldakw5jicylcd4',
+    externalUrl: 'https://compound.finance',
+    github: 'compound-finance',
+    twitter: 'compoundfinance',
     symbol: 'COMP',
     decimals: 18,
     governanceToken: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
@@ -224,6 +244,12 @@ export function createWriters(
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = name;
+    spaceMetadata.about = spaceDataEntry.about || '';
+    spaceMetadata.avatar = spaceDataEntry.avatar || '';
+    spaceMetadata.external_url = spaceDataEntry.externalUrl || '';
+    spaceMetadata.twitter = spaceDataEntry.twitter || '';
+    spaceMetadata.github = spaceDataEntry.github || '';
+    spaceMetadata.farcaster = spaceDataEntry.farcaster || '';
     spaceMetadata.voting_power_symbol = symbol;
     spaceMetadata.treasuries = [JSON.stringify(treasury)];
     spaceMetadata.executors_strategies = [executionStrategy.id];
@@ -305,7 +331,7 @@ export function createWriters(
     proposal.min_end = await getTimestampFromBlock(event.args.endBlock);
     proposal.min_end_block_number = Number(event.args.endBlock);
     proposal.max_end = proposal.min_end;
-    proposal.max_end_block_number = proposal.max_end;
+    proposal.max_end_block_number = proposal.min_end_block_number;
     proposal.snapshot = proposal.start_block_number;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;

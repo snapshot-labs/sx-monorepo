@@ -67,7 +67,8 @@ function goToStep(stepName: string) {
       </div>
       <UiButton
         v-if="stepper.isLast.value"
-        class="w-full primary"
+        class="w-full"
+        primary
         :loading="submitting"
         :disabled="submitDisabled"
         @click="emit('submit')"
@@ -76,7 +77,8 @@ function goToStep(stepName: string) {
       </UiButton>
       <UiButton
         v-else-if="stepper.next.value"
-        class="w-full primary"
+        class="w-full"
+        primary
         :disabled="!stepper.current.value.isValid()"
         @click="goToStep(stepper.next.value)"
       >

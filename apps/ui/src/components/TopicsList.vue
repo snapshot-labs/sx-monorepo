@@ -14,13 +14,9 @@ defineProps<{
     <UiLoading v-if="loading" class="block px-4 py-3" />
     <div v-else>
       <TopicsListItem v-for="(topic, i) in topics" :key="i" :topic="topic" />
-      <div
-        v-if="!topics.length"
-        class="px-4 py-3 flex items-center space-x-2 text-skin-link"
-      >
-        <IH-exclamation-circle class="shrink-0" />
-        <span v-text="'There are no topics here.'" />
-      </div>
+      <UiStateWarning v-if="!topics.length" class="px-4 py-3">
+        There are no topics here.
+      </UiStateWarning>
     </div>
   </div>
 </template>

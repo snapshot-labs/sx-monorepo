@@ -131,10 +131,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
-  <div v-if="!treasury" class="p-4 flex items-center text-skin-link space-x-2">
-    <IH-exclamation-circle class="inline-block shrink-0" />
-    <span>No treasury configured.</span>
-  </div>
+  <UiStateWarning v-if="!treasury" class="p-4">
+    No treasury configured.
+  </UiStateWarning>
   <template v-else>
     <div class="p-4 space-x-2 flex">
       <div class="flex-auto" />
@@ -143,16 +142,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         v-if="!isReadOnly && EVM_CHAIN_IDS.includes(treasury.network)"
         title="Connect to apps"
       >
-        <UiButton
-          class="!px-0 w-[46px]"
-          @click="modalOpen.walletConnectLink = true"
-        >
+        <UiButton uniform @click="modalOpen.walletConnectLink = true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="480"
             height="332"
             viewBox="0 0 480 332"
-            class="inline-block size-[26px]"
+            class="size-[26px]"
           >
             <path
               fill="rgba(var(--link))"
@@ -162,17 +158,17 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Copy address">
-        <UiButton class="!px-0 w-[46px]" @click="copy(treasury.wallet)">
-          <IH-duplicate v-if="!copied" class="inline-block" />
-          <IH-check v-else class="inline-block" />
+        <UiButton uniform @click="copy(treasury.wallet)">
+          <IH-duplicate v-if="!copied" />
+          <IH-check v-else />
         </UiButton>
       </UiTooltip>
       <UiTooltip
         v-if="!isReadOnly"
         :title="page === 'tokens' ? 'Send token' : 'Send NFT'"
       >
-        <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
+        <UiButton uniform @click="openModal(page)">
+          <IH-arrow-sm-right class="-rotate-45" />
         </UiButton>
       </UiTooltip>
     </div>
@@ -255,32 +251,26 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             <UiLabel :is-active="page === 'nfts'" text="NFTs" />
           </AppLink>
         </div>
-        <div
+        <UiStateWarning
           v-if="
             (page === 'tokens' && !treasury.supportsTokens) ||
             (page === 'nfts' && !treasury.supportsNfts)
           "
-          class="p-4 flex items-center text-skin-link space-x-2"
+          class="p-4"
         >
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>This treasury network is not supported.</span>
-        </div>
+          This treasury network is not supported.
+        </UiStateWarning>
         <div v-else-if="page === 'tokens'">
           <UiLoading v-if="isPending" class="px-4 py-3 block" />
-          <div
+          <UiStateWarning
             v-else-if="isSuccess && assets.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+            class="px-4 py-3"
           >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>There are no tokens in treasury.</span>
-          </div>
-          <div
-            v-else-if="isError"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
-          >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>Failed to load treasury tokens.</span>
-          </div>
+            There are no tokens in treasury.
+          </UiStateWarning>
+          <UiStateWarning v-else-if="isError" class="px-4 py-3">
+            Failed to load treasury tokens.
+          </UiStateWarning>
           <a
             v-for="(asset, i) in assets"
             v-else
@@ -314,11 +304,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 "
                 title="Stake with Lido"
               >
-                <UiButton
-                  class="!px-0 w-[46px]"
-                  @click.prevent="openModal('stake')"
-                >
-                  <IC-stake class="inline-block" />
+                <UiButton uniform @click.prevent="openModal('stake')">
+                  <IC-stake />
                 </UiButton>
               </UiTooltip>
             </div>
@@ -372,20 +359,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           </a>
         </div>
         <div v-else-if="page === 'nfts'">
-          <div
+          <UiStateWarning
             v-if="isNftsSuccess && nfts.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+            class="px-4 py-3"
           >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>There are no NFTs in treasury.</span>
-          </div>
-          <div
-            v-else-if="isNftsError"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
-          >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>Failed to load treasury NFTs.</span>
-          </div>
+            There are no NFTs in treasury.
+          </UiStateWarning>
+          <UiStateWarning v-else-if="isNftsError" class="px-4 py-3">
+            Failed to load treasury NFTs.
+          </UiStateWarning>
           <UiLoading v-if="isNftsPending" class="px-4 py-3 block" />
           <div
             class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 max-w-fit mx-auto p-4"

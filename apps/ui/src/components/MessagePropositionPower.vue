@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _n, prettyConcat } from '@/helpers/utils';
+import { _n, _vp, prettyConcat } from '@/helpers/utils';
 import { PropositionPowerItem } from '@/queries/propositionPower';
 import { VoteValidationPowerItem } from '@/queries/voteValidationPower';
 
@@ -12,6 +12,12 @@ const props = defineProps<{
 const actionName = computed(() => {
   return 'canPropose' in props.propositionPower ? 'create a proposal' : 'vote';
 });
+
+const thresholdDecimals = computed(() =>
+  Math.max(
+    ...props.propositionPower.strategies.map(s => s.params.decimals ?? 0)
+  )
+);
 
 const offchainErrors = computed(() => ({
   'only-members': () =>
@@ -63,7 +69,8 @@ function prettySymbolsList(symbols: string[]): string {
       </AppLink>
     </template>
     <template v-else>
-      You need at least {{ _n(propositionPower.threshold) }}
+      You need at least
+      {{ _vp(Number(propositionPower.threshold) / 10 ** thresholdDecimals) }}
       {{
         prettySymbolsList(
           propositionPower.strategies.map(

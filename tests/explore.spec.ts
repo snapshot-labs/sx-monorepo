@@ -48,9 +48,11 @@ test('should fetch more spaces on scroll', async ({ page, explorePage }) => {
 test('should load space overview page', async ({ explorePage, spacePage }) => {
   await explorePage.goto();
 
+  // Using dispatchEvent('click') instead of .click() to force click on the space link
+  // instead of Follow button that we show on hover
   await explorePage.exploreSpacesList
-    .getByRole('link', { name: 'Arbitrum DAO' })
-    .click();
+    .getByRole('link', { name: /Arbitrum DAO/ })
+    .dispatchEvent('click');
 
   await spacePage.isReady();
   await expect(spacePage.spaceName).toHaveText('Arbitrum DAO');
