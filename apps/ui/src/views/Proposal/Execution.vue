@@ -37,8 +37,7 @@ defineProps<{
       :executions="proposal.executions"
     />
   </UiContainer>
-  <div v-else class="px-4 py-3 flex items-center gap-2">
-    <IH-exclamation-circle class="shrink-0" />
+  <UiStateWarning v-else class="px-4 py-3">
     This proposal has no executions.
-  </div>
+  </UiStateWarning>
 </template>

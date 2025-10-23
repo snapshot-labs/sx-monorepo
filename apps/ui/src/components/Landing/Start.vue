@@ -9,9 +9,7 @@
         <h1 class="mb-4 font-display text-[36px] xs:text-[44px]">
           Ready to govern?
         </h1>
-        <UiButton :to="{ name: 'my-home' }" class="primary">
-          Get started
-        </UiButton>
+        <UiButton :to="{ name: 'my-home' }" primary> Get started </UiButton>
       </div>
     </UiContainer>
   </div>

@@ -180,9 +180,12 @@ export function useExploreSpacesQuery({
       }
     ],
     queryFn: async ({ pageParam }) => {
-      const filters: SpacesFilter = {
-        protocol: toValue(protocol)
-      };
+      const filters: SpacesFilter = {};
+      if (protocolConfig.value.protocols) {
+        filters.protocol_in = protocolConfig.value.protocols;
+      } else {
+        filters.protocol = toValue(protocol);
+      }
       if (network) filters.network = toValue(network);
       if (category) filters.category = toValue(category);
       if (searchQuery) filters.searchQuery = toValue(searchQuery);

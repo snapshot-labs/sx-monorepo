@@ -179,10 +179,9 @@ watch(
 
 <template>
   <UiLoading v-if="!loaded" class="block p-4" />
-  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    <span>This user does not exist</span>
-  </div>
+  <UiStateWarning v-else-if="!user" class="px-4 py-3">
+    This user does not exist
+  </UiStateWarning>
   <div v-else>
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
@@ -201,18 +200,11 @@ watch(
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
-          <UiButton
-            :to="{ name: 'user', params: { user: user.id } }"
-            class="!px-0 w-[46px]"
-          >
+          <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>
         </UiTooltip>
-        <DropdownShare
-          :shareable="{ user, space }"
-          type="space-user"
-          class="!px-0 w-[46px]"
-        />
+        <DropdownShare :shareable="{ user, space }" type="space-user" uniform />
       </div>
     </div>
     <div class="px-4">

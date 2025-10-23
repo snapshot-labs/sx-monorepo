@@ -96,8 +96,8 @@ watchEffect(() =>
             title="Edit"
             class="!absolute right-0"
           >
-            <UiButton class="!px-0 w-[46px]" @click="isEditMode = true">
-              <IH-pencil class="inline-block" />
+            <UiButton uniform @click="isEditMode = true">
+              <IH-pencil />
             </UiButton>
           </UiTooltip>
         </div>
@@ -123,15 +123,11 @@ watchEffect(() =>
             </a>
           </div>
         </template>
-        <div v-else class="flex items-center space-x-2">
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>This user does not have statement yet.</span>
-        </div>
+        <UiStateWarning v-else>
+          This user does not have statement yet.
+        </UiStateWarning>
       </div>
     </template>
-    <div v-else class="flex items-center space-x-2">
-      <IH-exclamation-circle class="inline-block" />
-      <span>Error while loading statement</span>
-    </div>
+    <UiStateWarning v-else> Error while loading statement </UiStateWarning>
   </div>
 </template>

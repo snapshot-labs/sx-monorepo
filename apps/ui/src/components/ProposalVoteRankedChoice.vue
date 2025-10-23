@@ -32,9 +32,7 @@ const selectedChoices = ref<RankedChoice>(
       item-key="id"
     >
       <template #item="{ element, index }">
-        <UiButton
-          class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
-        >
+        <UiButton :size="48" class="text-left handle cursor-grab">
           <IC-drag class="text-skin-text" />
           <UiTooltipOnTruncate :content="proposal.choices[element - 1]" />
           <div
@@ -45,11 +43,7 @@ const selectedChoices = ref<RankedChoice>(
         </UiButton>
       </template>
     </Draggable>
-    <UiButton
-      primary
-      class="!h-[48px] w-full"
-      @click="emit('vote', selectedChoices)"
-    >
+    <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
       Vote
     </UiButton>
   </div>

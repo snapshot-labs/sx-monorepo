@@ -10,17 +10,16 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 <template>
   <AppLink
     :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
-    class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-3.5 space-x-3"
+    class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
   >
-    <div class="shrink-0">
+    <div class="grow flex items-center">
       <UiBadgeNetwork
         :id="space.network"
+        class="mr-2.5 shrink-0"
         :size="!offchainNetworks.includes(space.network) ? 16 : 0"
       >
         <SpaceAvatar :space="space" :size="32" class="rounded-md" />
       </UiBadgeNetwork>
-    </div>
-    <div class="grow flex items-center truncate">
       <h3 class="truncate" v-text="space.name" />
       <UiBadgeVerified
         class="ml-1"

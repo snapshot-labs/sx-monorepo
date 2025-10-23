@@ -276,7 +276,7 @@ onMounted(() => {
       </div>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "
@@ -369,7 +369,7 @@ onMounted(() => {
       <h2 class="text-[32px]">Get started today</h2>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "
