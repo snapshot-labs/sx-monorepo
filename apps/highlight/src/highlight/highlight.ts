@@ -1,15 +1,12 @@
 import { TypedDataField } from '@ethersproject/abstract-signer';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import {
   HIGHLIGHT_DOMAIN,
   HIGHLIGHT_STARKNET_DOMAIN,
   STARKNET_DOMAIN_TYPE
 } from '@snapshot-labs/sx';
 import AsyncLock from 'async-lock';
-import {
-  RpcProvider,
-  constants as StarknetConstants,
-  StarknetDomain
-} from 'starknet';
+import { RpcProvider, StarknetDomain, StarknetType } from 'starknet';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';
 import Process from './process';
@@ -178,7 +175,7 @@ export default class Highlight {
 
   private async validateStarknetSignature(
     request: PostMessageRequest,
-    types: Record<string, TypedDataField[]>
+    types: Record<string, StarknetType[]>
   ) {
     const { domain, signature, signer, message, primaryType } = request;
     const verifyingDomain: StarknetDomain = {
@@ -187,19 +184,13 @@ export default class Highlight {
     };
 
     try {
-      let rpcId: string;
+      const broviderId = networks[domain.chainId.toString()]?.broviderId;
 
-      if (domain.chainId === StarknetConstants.StarknetChainId.SN_MAIN) {
-        rpcId = 'sn';
-      } else if (
-        domain.chainId === StarknetConstants.StarknetChainId.SN_SEPOLIA
-      ) {
-        rpcId = 'sn-sep';
-      } else {
+      if (!broviderId) {
         throw new Error('Unsupported Starknet chainId');
       }
       const provider = new RpcProvider({
-        nodeUrl: `https://rpc.snapshot.org/${rpcId}`
+        nodeUrl: `https://rpc.snapshot.org/${broviderId}`
       });
 
       // Check if the contract is deployed
