@@ -331,7 +331,7 @@ export function createWriters(
     proposal.min_end = await getTimestampFromBlock(event.args.endBlock);
     proposal.min_end_block_number = Number(event.args.endBlock);
     proposal.max_end = proposal.min_end;
-    proposal.max_end_block_number = proposal.max_end;
+    proposal.max_end_block_number = proposal.min_end_block_number;
     proposal.snapshot = proposal.start_block_number;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
