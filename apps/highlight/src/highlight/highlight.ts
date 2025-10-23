@@ -1,12 +1,5 @@
-import { TypedDataField } from '@ethersproject/abstract-signer';
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import {
-  HIGHLIGHT_DOMAIN,
-  HIGHLIGHT_STARKNET_DOMAIN,
-  STARKNET_DOMAIN_TYPE
-} from '@snapshot-labs/sx';
+import { HIGHLIGHT_DOMAIN, HIGHLIGHT_STARKNET_DOMAIN } from '@snapshot-labs/sx';
 import AsyncLock from 'async-lock';
-import { RpcProvider, StarknetDomain, StarknetType } from 'starknet';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';
 import Process from './process';
@@ -86,24 +79,46 @@ export default class Highlight {
   }
 
   async validateSignature(process: Process, request: PostMessageRequest) {
-    const verifyingContract = request.domain.verifyingContract.toLowerCase();
+    const { domain, signature, signer, message, primaryType } = request;
 
-    const getAgent = this.agents[verifyingContract];
+    const getAgent = this.agents[domain.verifyingContract.toLowerCase()];
     if (!getAgent) {
-      throw new Error(`Agent not found: ${verifyingContract}`);
+      throw new Error(`Agent not found: ${domain.verifyingContract}`);
     }
 
     const agent = getAgent(process);
 
-    const entrypointTypes = agent.entrypoints[request.primaryType];
+    const entrypointTypes = agent.entrypoints[primaryType];
     if (!entrypointTypes) {
-      throw new Error(`Entrypoint not found: ${request.primaryType}`);
+      throw new Error(`Entrypoint not found: ${primaryType}`);
     }
-    const validationFn = request.domain.revision
-      ? this.validateStarknetSignature
-      : this.validateEvmSignature;
 
-    return validationFn(request, entrypointTypes);
+    const verifyingDomain = domain.revision
+      ? { ...HIGHLIGHT_STARKNET_DOMAIN, chainId: domain.chainId }
+      : {
+          ...HIGHLIGHT_DOMAIN,
+          chainId: domain.chainId,
+          salt: domain.salt.toString(),
+          verifyingContract: domain.verifyingContract
+        };
+
+    const isSignatureValid = await verifySignature(
+      verifyingDomain,
+      signer,
+      entrypointTypes,
+      message,
+      signature,
+      primaryType,
+      {
+        ecdsa: true,
+        eip1271: true,
+        starknet: true
+      }
+    );
+
+    if (!isSignatureValid) {
+      throw new Error('Invalid signature');
+    }
   }
 
   async invoke(process: Process, request: PostMessageRequest) {
@@ -142,80 +157,5 @@ export default class Highlight {
 
   async reset() {
     return await this.adapter.reset();
-  }
-
-  private async validateEvmSignature(
-    request: PostMessageRequest,
-    types: Record<string, TypedDataField[]>
-  ) {
-    const { domain, signature, signer, message } = request;
-    const verifyingDomain = {
-      ...HIGHLIGHT_DOMAIN,
-      chainId: domain.chainId,
-      salt: domain.salt.toString(),
-      verifyingContract: domain.verifyingContract
-    };
-
-    const isSignatureValid = await verifySignature(
-      verifyingDomain,
-      signer,
-      types,
-      message,
-      signature,
-      {
-        ecdsa: true,
-        eip1271: true
-      }
-    );
-
-    if (!isSignatureValid) {
-      throw new Error('Invalid signature');
-    }
-  }
-
-  private async validateStarknetSignature(
-    request: PostMessageRequest,
-    types: Record<string, StarknetType[]>
-  ) {
-    const { domain, signature, signer, message, primaryType } = request;
-    const verifyingDomain: StarknetDomain = {
-      ...HIGHLIGHT_STARKNET_DOMAIN,
-      chainId: domain.chainId.toString()
-    };
-
-    try {
-      const broviderId = networks[domain.chainId.toString()]?.broviderId;
-
-      if (!broviderId) {
-        throw new Error('Unsupported Starknet chainId');
-      }
-      const provider = new RpcProvider({
-        nodeUrl: `https://rpc.snapshot.org/${broviderId}`
-      });
-
-      // Check if the contract is deployed
-      // Will throw on non-deployed contract
-      await provider.getClassAt(signer);
-
-      const data = {
-        domain: verifyingDomain,
-        // Re-injecting the StarknetDomain type, stripped by the agent
-        types: { ...types, StarknetDomain: STARKNET_DOMAIN_TYPE },
-        primaryType,
-        message
-      };
-
-      await provider.verifyMessageInStarknet(
-        data,
-        signature.split(','),
-        signer
-      );
-    } catch (e: any) {
-      if (e.message.includes('Contract not found')) {
-        throw new Error('Invalid signature: contract not deployed');
-      }
-
-      throw e;
-    }
   }
 }
