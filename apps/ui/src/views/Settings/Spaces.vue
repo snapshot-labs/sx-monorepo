@@ -58,7 +58,7 @@ watch(
           :items="protocols"
         />
       </div>
-      <UiTooltip v-if="protocol !== 'governor-bravo'" title="Create new space">
+      <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
         <UiButton
           :to="{
             name: `create-space-${protocol}`

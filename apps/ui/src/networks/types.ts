@@ -32,6 +32,7 @@ export type SpacesFilter = {
   category?: string;
   network?: string;
   protocol?: ExplorePageProtocol;
+  protocol_in?: string[];
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
@@ -477,13 +478,14 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor-bravo';
+export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
   apiNetwork: NetworkID;
   networks: NetworkID[];
+  protocols?: string[];
   limit: number;
   disabled?: boolean;
 };
