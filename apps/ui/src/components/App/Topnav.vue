@@ -12,7 +12,7 @@ const usersStore = useUsersStore();
 const uiStore = useUiStore();
 const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
-const { login, web3 } = useWeb3();
+const { login, logout, web3 } = useWeb3();
 const { toggleTheme, currentTheme } = useTheme();
 const { isWhiteLabel } = useWhiteLabel();
 
@@ -61,6 +61,10 @@ async function handleLogin(connector: Connector) {
   loading.value = true;
   await login(connector);
   loading.value = false;
+}
+
+async function handleLogout() {
+  await logout();
 }
 
 function handleSearchSubmit(e: Event) {
@@ -157,26 +161,69 @@ onUnmounted(() => {
 
     <div class="flex space-x-2 shrink-0">
       <UiButton v-if="loading || web3.authLoading" loading />
+      <UiDropdown v-else-if="web3.account" placement="end">
+        <template #button>
+          <UiButton class="sm:w-auto !px-0 sm:!px-3">
+            <span
+              class="sm:flex items-center space-x-2"
+              data-testid="profile-button"
+            >
+              <UiStamp :id="user.id" :size="18" :cb="cb" />
+              <span
+                class="hidden sm:block truncate max-w-[120px]"
+                v-text="user.name || shorten(user.id)"
+              />
+            </span>
+          </UiButton>
+        </template>
+        <template #items>
+          <UiDropdownItem v-slot="{ active }">
+            <router-link
+              :to="{ name: 'user', params: { user: web3.account } }"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+            >
+              My profile
+            </router-link>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <router-link
+              :to="{ name: 'settings-spaces' }"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+            >
+              Settings
+            </router-link>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <button
+              type="button"
+              class="flex items-center gap-2"
+              :class="{ 'opacity-80': active }"
+              @click="modalAccountOpen = true"
+            >
+              Change wallet
+            </button>
+          </UiDropdownItem>
+          <UiDropdownItem v-slot="{ active }">
+            <button
+              type="button"
+              class="flex items-center gap-2 !text-skin-danger"
+              :class="{ 'opacity-80': active }"
+              @click="handleLogout"
+            >
+              Log out
+            </button>
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
       <UiButton
         v-else
         class="sm:w-auto !px-0 sm:!px-3"
         @click="modalAccountOpen = true"
       >
-        <span
-          v-if="web3.account"
-          class="sm:flex items-center space-x-2"
-          data-testid="profile-button"
-        >
-          <UiStamp :id="user.id" :size="18" :cb="cb" />
-          <span
-            class="hidden sm:block truncate max-w-[120px]"
-            v-text="user.name || shorten(user.id)"
-          />
-        </span>
-        <template v-else>
-          <span class="hidden sm:block" v-text="'Log in'" />
-          <IH-login class="sm:hidden inline-block" />
-        </template>
+        <span class="hidden sm:block" v-text="'Log in'" />
+        <IH-login class="sm:hidden inline-block" />
       </UiButton>
       <IndicatorPendingTransactions />
       <UiButton v-if="!isWhiteLabel" uniform @click="toggleTheme()">
