@@ -18,6 +18,7 @@ const selectedVote = ref<Vote | null>(null);
 
 const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
+
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
