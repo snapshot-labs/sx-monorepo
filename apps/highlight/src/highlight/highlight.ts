@@ -79,7 +79,7 @@ export default class Highlight {
   }
 
   async validateSignature(process: Process, request: PostMessageRequest) {
-    const { domain, signature, signer, message, primaryType } = request;
+    const { domain, signer, signature, message, primaryType } = request;
 
     const getAgent = this.agents[domain.verifyingContract.toLowerCase()];
     if (!getAgent) {

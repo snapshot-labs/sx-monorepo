@@ -92,8 +92,7 @@ export const verifyStarknetSignature: SignatureVerifier = async (
   primaryType
 ): Promise<boolean> => {
   try {
-    const broviderId = networks[domain.chainId.toString()]?.broviderId;
-
+    const broviderId = (networks as any)[domain.chainId.toString()]?.broviderId;
     if (!broviderId) {
       throw new Error('Unsupported Starknet chainId');
     }
@@ -146,7 +145,7 @@ async function verifyEip1271SignatureWithAbi(
 }
 
 export async function verifySignature(
-  domain: Required<TypedDataDomain>,
+  domain: TypedDataDomain | StarknetDomain,
   address: string,
   types: Record<string, TypedDataField[]>,
   message: Record<string, any>,
@@ -154,27 +153,29 @@ export async function verifySignature(
   primaryType: string,
   options: VerifyOptions
 ) {
-  const params = [
-    domain,
-    address,
-    types,
-    message,
-    signature,
-    primaryType
-  ] as const;
+  const params = [address, types, message, signature, primaryType] as const;
+
+  if (options.starknet && 'revision' in domain) {
+    const valid = await verifyStarknetSignature(
+      domain as Required<StarknetDomain>,
+      ...params
+    );
+    return valid;
+  }
 
   if (options.ecdsa) {
-    const valid = await verifyEcdsaSignature(...params);
+    const valid = await verifyEcdsaSignature(
+      domain as Required<TypedDataDomain>,
+      ...params
+    );
     if (valid) return valid;
   }
 
   if (options.eip1271) {
-    const valid = await verifyEip1271Signature(...params);
-    if (valid) return valid;
-  }
-
-  if (options.starknet) {
-    const valid = await verifyStarknetSignature(...params);
+    const valid = await verifyEip1271Signature(
+      domain as Required<TypedDataDomain>,
+      ...params
+    );
     if (valid) return valid;
   }
 
