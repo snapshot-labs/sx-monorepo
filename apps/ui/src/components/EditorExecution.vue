@@ -79,7 +79,7 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    getChainIdKind(treasury.value.network) === 'starknet'
+    getChainIdKind(treasury.value.network) !== 'evm'
   ) {
     return;
   }

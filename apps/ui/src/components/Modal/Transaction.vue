@@ -164,8 +164,8 @@ async function handleToChange(to: string) {
     return;
   }
 
-  if (getChainIdKind(props.network) === 'starknet') {
-    console.log('network is not a number (starknet is not supported)');
+  if (getChainIdKind(props.network) !== 'evm') {
+    console.log('only evm networks are supported');
     return;
   }
 

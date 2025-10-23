@@ -62,8 +62,8 @@ function handlePick(token: Token) {
 async function fetchCustomToken(address) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
 
-  if (getChainIdKind(props.network) === 'starknet') {
-    console.log('network is not a number (starknet is not supported)');
+  if (getChainIdKind(props.network) !== 'evm') {
+    console.log('only evm networks are supported');
     return;
   }
 
