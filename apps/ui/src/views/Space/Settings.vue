@@ -564,9 +564,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           "
         />
       </UiContainerSettings>
-      <div v-if="activeTab === 'billing'">
-        <SpaceBilling :space="space" />
-      </div>
+      <SpaceBilling v-if="activeTab === 'billing'" :space="space" />
       <UiContainerSettings
         v-if="activeTab === 'controller'"
         title="Controller"

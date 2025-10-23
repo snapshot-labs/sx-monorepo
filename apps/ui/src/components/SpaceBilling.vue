@@ -8,14 +8,6 @@ import { Space } from '@/types';
 
 const props = defineProps<{ space: Space }>();
 
-const network = computed(() => props.space.network);
-const chainId = computed(() => getNetwork(network.value).chainId);
-
-const hasTurbo = computed(() => props.space.turbo);
-const turboExpirationDate = computed(() =>
-  dayjs(props.space.turbo_expiration * 1000)
-);
-
 const {
   data,
   isPending,
@@ -28,10 +20,13 @@ const {
   toRef(() => props.space.network)
 );
 
+const chainId = computed(() => getNetwork(props.space.network).chainId);
+const turboExpirationDate = computed(() =>
+  dayjs(props.space.turbo_expiration * 1000)
+);
 const payments = computed(() => data.value?.pages.flat() || []);
-
 const statusText = computed(() => {
-  if (!hasTurbo.value) return 'Free';
+  if (!props.space.turbo) return 'Free';
 
   const daysUntilExpiration = turboExpirationDate.value.diff(dayjs(), 'day');
 
@@ -54,7 +49,7 @@ const statusText = computed(() => {
       title="Billing"
       description="Manage your subscription and view billing information."
     >
-      <h4 class="eyebrow mb-3 font-medium">Current plan</h4>
+      <UiEyebrow class="mb-3 font-medium">Current plan</UiEyebrow>
 
       <div class="border rounded-xl p-4">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -80,24 +75,21 @@ const statusText = computed(() => {
 
           <UiButton
             :to="{ name: 'space-pro' }"
-            class="primary w-full sm:w-auto text-center"
+            class="primary w-full sm:w-auto"
           >
-            {{ hasTurbo ? 'Extend plan' : 'Upgrade to Pro' }}
+            {{ props.space.turbo ? 'Extend plan' : 'Upgrade to Pro' }}
           </UiButton>
         </div>
       </div>
     </UiContainerSettings>
 
     <UiSectionHeader class="mt-4" label="Payment history" sticky />
-
-    <div
-      class="bg-skin-bg border-b sticky top-[112px] lg:top-[113px] z-40 flex w-full font-medium space-x-3 px-4"
-    >
-      <div class="w-[190px] grow sm:grow-0">Date</div>
+    <UiColumnHeader class="space-x-3">
+      <div class="w-[190px] grow sm:grow-0 text-left">Date</div>
       <div class="hidden sm:flex grow">Type</div>
       <div class="w-[150px] flex justify-end">Amount</div>
-      <div class="w-[20px]" />
-    </div>
+      <div class="min-w-3.5" />
+    </UiColumnHeader>
 
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <div
@@ -128,18 +120,18 @@ const statusText = computed(() => {
         <div
           class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center"
         >
-          <h4 class="text-skin-link font-semibold">
+          <span class="text-skin-link font-semibold">
             {{ _n(payment.amount_decimal) }}
             {{ payment.token_symbol }}
-          </h4>
+          </span>
         </div>
 
         <UiDropdown>
           <template #button>
             <div class="flex items-center h-full">
-              <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+              <button type="button" class="text-skin-link">
                 <IH-dots-horizontal class="text-skin-link" />
-              </UiButton>
+              </button>
             </div>
           </template>
           <template #items>
