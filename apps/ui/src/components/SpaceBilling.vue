@@ -137,8 +137,8 @@ const statusText = computed(() => {
         <UiDropdown>
           <template #button>
             <div class="flex items-center h-full">
-              <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
-                <IH-dots-horizontal class="text-skin-link" />
+              <button type="button" class="text-skin-link">
+                <IH-dots-horizontal />
               </UiButton>
             </div>
           </template>
