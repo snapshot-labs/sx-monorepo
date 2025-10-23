@@ -128,10 +128,10 @@ const statusText = computed(() => {
         <div
           class="w-[150px] flex flex-col sm:shrink-0 text-right justify-center"
         >
-          <h4 class="text-skin-link font-semibold">
+          <span class="text-skin-link font-semibold">
             {{ _n(payment.amount_decimal) }}
             {{ payment.token_symbol }}
-          </h4>
+          </span>
         </div>
 
         <UiDropdown>
