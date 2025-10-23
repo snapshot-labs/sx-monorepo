@@ -130,7 +130,7 @@ const statusText = computed(() => {
           <template #button>
             <div class="flex items-center h-full">
               <button type="button" class="text-skin-link">
-                <IH-dots-horizontal class="text-skin-link" />
+                <IH-dots-horizontal />
               </button>
             </div>
           </template>
