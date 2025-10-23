@@ -161,7 +161,7 @@ onUnmounted(() => {
 
     <div class="flex space-x-2 shrink-0">
       <UiButton v-if="loading || web3.authLoading" loading />
-      <UiDropdown v-else-if="web3.account" placement="end">
+      <UiDropdown v-else-if="web3.account" placement="end" :z-index="60">
         <template #button>
           <UiButton class="sm:w-auto !px-0 sm:!px-3">
             <span
