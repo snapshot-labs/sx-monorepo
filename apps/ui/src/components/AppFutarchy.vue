@@ -24,17 +24,10 @@ interface TokenGroup {
   base: TokenInfo;
 }
 
-interface DisplayConfig {
-  main: number;
-  price: number;
-  amount: number;
-  balance: number;
-  company: number;
-  default: number;
-  currency: number;
-  swapPrice: number;
-  percentage: number;
-  smallNumbers: number;
+interface VolumeData {
+  status: string;
+  pool_id: string;
+  volume: string;
 }
 
 interface FutarchyResponse {
@@ -44,9 +37,15 @@ interface FutarchyResponse {
   conditional_yes: FutarchyPriceData;
   conditional_no: FutarchyPriceData;
   spot: FutarchyPriceData;
+  prediction_yes: FutarchyPriceData;
+  probability: number;
+  volume: {
+    conditional_yes: VolumeData;
+    conditional_no: VolumeData;
+  };
   company_tokens: TokenGroup;
   currency_tokens: TokenGroup;
-  display: DisplayConfig;
+  display: null;
 }
 
 const priceData = ref<FutarchyResponse | null>(null);
@@ -83,10 +82,11 @@ const fetchPrices = async () => {
       data.spot?.status === 'ok' &&
       data.spot?.pool_id &&
       data.spot?.price !== undefined &&
+      data.prediction_yes?.status === 'ok' &&
+      data.prediction_yes?.price !== undefined &&
+      data.probability !== undefined &&
       data.company_tokens?.base?.tokenSymbol &&
-      data.currency_tokens?.base?.tokenSymbol &&
-      data.display?.price !== undefined &&
-      typeof data.display?.price === 'number'
+      data.currency_tokens?.base?.tokenSymbol
     ) {
       priceData.value = data;
     } else {
@@ -109,51 +109,32 @@ watch(() => props.proposal.id, fetchPrices);
 
 <template>
   <div v-if="!isLoading && !hasError && priceData">
-    <h4 class="mb-2.5 eyebrow flex items-center gap-2">
-      <img
-        src="https://pbs.twimg.com/profile_images/1854253059095859212/AZPGrAaV_400x400.jpg"
-        class="size-[20px]"
-      />
-      <span>Futarchy.fi</span>
-    </h4>
-    <div class="leading-6">
-      <div class="mb-2.5">
-        Predict how this proposal will impact {{ priceData.company_tokens.base.tokenSymbol }}'s price through conditional
-        markets on Futarchy.fi.
-        <a href="https://futarchy.fi" target="_blank" rel="noopener noreferrer">Learn more</a>.
-      </div>
-      <div class="mb-3 rounded-lg border px-3 py-2.5">
-        <div class="flex justify-between">
-          <span><b>{{ priceData.company_tokens.base.tokenSymbol }}</b> price</span>
-          <span class="text-skin-link">{{ priceData.spot.price.toFixed(priceData.display.price) }} {{ priceData.currency_tokens.base.tokenSymbol }}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="flex items-center gap-2">
-            <span class="bg-skin-success size-2.5 rounded-full inline-block" />
-            <span>If approved</span>
-          </span>
-          <span class="text-skin-link">{{ priceData.conditional_yes.price.toFixed(priceData.display.price) }} {{ priceData.currency_tokens.base.tokenSymbol }}</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="flex items-center gap-2">
-            <span class="bg-skin-danger size-2.5 rounded-full inline-block" />
-            <span>If rejected</span>
-          </span>
-          <span class="text-skin-link">{{ priceData.conditional_no.price.toFixed(priceData.display.price) }} {{ priceData.currency_tokens.base.tokenSymbol }}</span>
-        </div>
-      </div>
-      <div>
-        <a
-          :href="`https://app.futarchy.fi/market?proposalId=${priceData.event_id}`"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <UiButton class="flex items-center justify-center gap-2 w-full">
-            <span>Trade on Futarchy.fi</span>
-            <IH-arrow-sm-right class="-rotate-45" />
-          </UiButton>
-        </a>
-      </div>
+    <div
+      class="block lg:flex lg:space-x-3 items-center border rounded-lg px-3.5 py-2.5 mb-4"
+    >
+    <div class="grow">
+      <UiEyebrow>Market</UiEyebrow>
+    </div>
+      <span class="flex items-center gap-1.5">
+      <span>{{ priceData.company_tokens.base.tokenSymbol }} price</span>
+      <span class="text-skin-link">
+        ${{ priceData.spot.price.toFixed(2) }}
+      </span>
+      </span>
+      <span class="flex items-center gap-1.5">
+        <span class="bg-skin-success size-2.5 rounded-full inline-block" />
+        <span>If approved</span>
+        <span class="text-skin-link">
+          ${{ priceData.conditional_yes.price.toFixed(2) }}
+        </span>
+      </span>
+      <span class="flex items-center gap-1.5">
+        <span class="bg-skin-danger size-2.5 rounded-full inline-block" />
+        <span>If rejected</span>
+        <span class="text-skin-link">
+          ${{ priceData.conditional_no.price.toFixed(2) }}
+        </span>
+      </span>
     </div>
   </div>
 </template>

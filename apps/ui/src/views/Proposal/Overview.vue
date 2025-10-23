@@ -345,6 +345,8 @@ onBeforeUnmount(() => destroyAudio());
 
       <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
 
+      <AppFutarchy :proposal="proposal" />
+
       <div class="flex justify-between items-center mb-4">
         <AppLink
           :to="{

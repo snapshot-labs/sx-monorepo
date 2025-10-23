@@ -400,7 +400,6 @@ watchEffect(() => {
                 :decimals="votingPowerDecimals"
               />
             </div>
-            <AppFutarchy :proposal="proposal" />
             <div v-if="space.labels?.length && proposal.labels?.length">
               <UiEyebrow class="mb-2.5 flex items-center gap-2">
                 <IH-tag />
