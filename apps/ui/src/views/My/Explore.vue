@@ -184,7 +184,7 @@ watchEffect(() => setTitle('Explore'));
           :items="categories"
         />
       </div>
-      <UiTooltip v-if="protocol !== 'governor-bravo'" title="Create new space">
+      <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
         <UiButton
           :to="{
             name: `create-space-${protocol}`
@@ -197,7 +197,7 @@ watchEffect(() => setTitle('Explore'));
     </div>
     <div class="flex-grow" v-bind="$attrs">
       <UiSectionHeader label="Spaces" sticky />
-      <UiColumnHeader class="hidden md:flex">
+      <UiColumnHeader class="hidden md:flex text-center">
         <div class="grow" />
         <div
           v-if="protocol === 'snapshot'"
