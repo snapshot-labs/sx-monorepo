@@ -178,22 +178,24 @@ onUnmounted(() => {
         </template>
         <template #items>
           <UiDropdownItem v-slot="{ active }">
-            <router-link
-              :to="{ name: 'user', params: { user: web3.account } }"
+            <button
+              type="button"
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
+              @click="router.push({ name: 'user', params: { user: web3.account } })"
             >
               My profile
-            </router-link>
+            </button>
           </UiDropdownItem>
           <UiDropdownItem v-slot="{ active }">
-            <router-link
-              :to="{ name: 'settings-spaces' }"
+            <button
+              type="button"
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
+              @click="router.push({ name: 'settings-spaces' })"
             >
               Settings
-            </router-link>
+            </button>
           </UiDropdownItem>
           <UiDropdownItem v-slot="{ active }">
             <button
@@ -233,7 +235,7 @@ onUnmounted(() => {
     </div>
   </UiTopnav>
   <teleport to="#modal">
-    <ModalAccount
+    <ModalChangeWallet
       :open="modalAccountOpen || modalAccountWithoutDismissOpen"
       :closeable="!modalAccountWithoutDismissOpen"
       @close="modalAccountOpen = false"
