@@ -68,7 +68,8 @@ function handleScrollEvent(target: HTMLElement) {
     :ref="
       ref =>
         (votesHeader =
-          (ref as InstanceType<typeof UiColumnHeader>)?.container ?? null)
+          (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
+          null)
     "
     class="!px-0 z-40 overflow-hidden"
   >
