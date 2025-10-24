@@ -27,9 +27,21 @@ function createWindow() {
     win.show();
   });
 
-  // Open external links in default browser
+  // Allow only WalletConnect and Argent Mobile, open in default browser
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith('http:') || url.startsWith('https:')) {
+    const allowedHosts = [
+      'sequence.app',
+      'keys.coinbase.com',
+      'web.argent.xyz'
+    ];
+    const isAllowedToOpenInElectron = allowedHosts.some(host =>
+      url.includes(host)
+    );
+
+    if (
+      !isAllowedToOpenInElectron &&
+      (url.startsWith('http:') || url.startsWith('https:'))
+    ) {
       shell.openExternal(url);
       return { action: 'deny' };
     }
