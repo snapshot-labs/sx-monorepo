@@ -263,11 +263,11 @@ router.afterEach(() => {
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
     />
-    <ModalAccount
+    <ModalConnector
       :open="modalAccountOpen || modalAccountWithoutDismissOpen"
       :closeable="!modalAccountWithoutDismissOpen"
       @close="modalAccountOpen = false"
-      @login="handleLogin"
+      @pick="handleLogin"
     />
   </div>
 </template>
