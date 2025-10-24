@@ -164,21 +164,23 @@ onUnmounted(() => {
           </UiButton>
         </template>
         <template v-if="web3.account" #items>
-          <UiDropdownItem v-slot="{ active }">
+          <UiDropdownItem v-slot="{ active, close }">
             <AppLink
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
               :to="{ name: 'user', params: { user: web3.account } }"
+              @click.capture="close"
             >
               <IH-user />
               My profile
             </AppLink>
           </UiDropdownItem>
-          <UiDropdownItem v-slot="{ active }">
+          <UiDropdownItem v-slot="{ active, close }">
             <AppLink
               class="flex items-center gap-2"
               :class="{ 'opacity-80': active }"
               :to="{ name: 'settings-spaces' }"
+              @click.capture="close"
             >
               <IH-cog />
               Settings
