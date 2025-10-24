@@ -228,7 +228,7 @@ function processExecutions(
     return (
       match.treasury &&
       compareAddresses(treasury.address, match.treasury) &&
-      match.treasury_chain === treasury.chainId
+      String(match.treasury_chain) === treasury.chainId
     );
   });
 

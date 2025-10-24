@@ -110,7 +110,9 @@ export function createConstants(
     SimpleQuorumAvatar: 'Safe module (Zodiac)',
     SimpleQuorumTimelock: 'Timelock',
     Axiom: 'Axiom',
-    Isokratia: 'Isokratia'
+    Isokratia: 'Isokratia',
+    GovernorBravoTimelock: 'Timelock',
+    OpenZeppelinTimelockController: 'Timelock'
   };
 
   const EDITOR_AUTHENTICATORS = [
