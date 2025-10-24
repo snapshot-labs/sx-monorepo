@@ -56,10 +56,10 @@ const statusText = computed(() => {
           <div class="flex items-start sm:items-center sm:flex-1">
             <div class="flex-1">
               <h5 class="text-lg font-semibold text-skin-heading">
-                {{ hasTurbo ? 'Snapshot Pro' : 'Basic plan' }}
+                {{ props.space.turbo ? 'Snapshot Pro' : 'Basic plan' }}
               </h5>
               <p class="text-sm text-skin-text">
-                <template v-if="hasTurbo">
+                <template v-if="props.space.turbo">
                   Valid until
                   <span class="font-semibold">{{
                     turboExpirationDate.format('MMM D, YYYY')
