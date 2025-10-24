@@ -34,3 +34,74 @@ export type ExecutionInput = {
   // ethRelayer
   destination?: string;
 };
+
+export type BaseTransaction = {
+  to: string;
+  data: string;
+  value: string;
+  salt: string;
+};
+
+export type SendTokenTransaction = BaseTransaction & {
+  _type: 'sendToken';
+  _form: {
+    recipient: string;
+    amount: string;
+    token: {
+      name: string;
+      decimals: number;
+      symbol: string;
+      address: string;
+    };
+  };
+};
+
+export type SendNftTransaction = BaseTransaction & {
+  _type: 'sendNft';
+  _form: {
+    recipient: string;
+    sender: string;
+    amount: string;
+    nft: {
+      type: string;
+      address: string;
+      id: string;
+      name: string;
+      collection?: string;
+    };
+  };
+};
+
+export type StakeTokenTransaction = BaseTransaction & {
+  _type: 'stakeToken';
+  _form: {
+    recipient: string;
+    args: any;
+    amount: string;
+  };
+};
+
+export type ContractCallTransaction = BaseTransaction & {
+  _type: 'contractCall';
+  _form: {
+    abi: any[];
+    recipient: string;
+    method: string;
+    args: any;
+    amount?: string;
+  };
+};
+
+export type RawTransaction = BaseTransaction & {
+  _type: 'raw';
+  _form: {
+    recipient: string;
+  };
+};
+
+export type Transaction =
+  | SendTokenTransaction
+  | SendNftTransaction
+  | StakeTokenTransaction
+  | ContractCallTransaction
+  | RawTransaction;
