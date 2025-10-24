@@ -195,6 +195,7 @@ onUnmounted(() => {
               Change wallet
             </button>
           </UiDropdownItem>
+          <hr class="bg-skin-text/20 h-[2px]" />
           <UiDropdownItem v-slot="{ active }">
             <button
               type="button"
