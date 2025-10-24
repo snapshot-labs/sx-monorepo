@@ -153,22 +153,21 @@ const parsedTitle = computedAsync(
 
 <template>
   <div class="w-full border-b last:border-b-0">
-    <div class="w-full px-4 py-3 gap-2 flex items-center">
+    <UiRow :gap="8" align="center" class="w-full px-4 py-3">
       <div v-if="$slots.left" class="shrink-0">
         <slot name="left" />
       </div>
-      <button
-        class="flex gap-2 truncate items-center flex-auto"
-        @click="expanded = !expanded"
-      >
-        <IH-cash v-if="tx._type === 'sendToken'" class="shrink-0" />
-        <IH-photograph v-else-if="tx._type === 'sendNft'" class="shrink-0" />
-        <IC-stake v-else-if="tx._type === 'stakeToken'" class="shrink-0" />
-        <IH-code v-else class="shrink-0" />
-        <div class="truncate text-skin-link" v-html="parsedTitle" />
+      <button class="flex-auto" @click="expanded = !expanded">
+        <UiRow :gap="8" align="center" class="truncate">
+          <IH-cash v-if="tx._type === 'sendToken'" class="shrink-0" />
+          <IH-photograph v-else-if="tx._type === 'sendNft'" class="shrink-0" />
+          <IC-stake v-else-if="tx._type === 'stakeToken'" class="shrink-0" />
+          <IH-code v-else class="shrink-0" />
+          <div class="truncate text-skin-link" v-html="parsedTitle" />
+        </UiRow>
       </button>
       <slot name="right" />
-    </div>
+    </UiRow>
     <div v-if="expanded" class="border-y last:border-b-0 px-4 py-3">
       <div v-if="call" class="text-skin-link">
         Call
@@ -203,7 +202,12 @@ const parsedTitle = computedAsync(
       </div>
       <template v-if="params.length > 0">
         <h4 class="font-medium mt-3">Parameters</h4>
-        <div v-for="param in params" :key="param.name" class="flex space-x-2">
+        <UiRow
+          v-for="param in params"
+          :key="param.name"
+          :gap="8"
+          class="space-x-2"
+        >
           <span class="text-skin-link">{{ param.name }}</span>
           <a
             v-if="param.type === 'address'"
@@ -218,7 +222,7 @@ const parsedTitle = computedAsync(
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </a>
           <div v-else class="truncate inline-block">{{ param.value }}</div>
-        </div>
+        </UiRow>
       </template>
       <div v-if="value" class="mt-3">
         <h4 class="font-medium">Value</h4>

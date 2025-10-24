@@ -283,7 +283,7 @@ watchEffect(async () => {
           class="s-input text-left h-[61px]"
           @click="handlePickerClick('token')"
         >
-          <div class="flex items-center">
+          <UiRow align="center">
             <UiStamp
               v-if="currentToken"
               :id="`eip155:${network}:${currentToken.contractAddress}`"
@@ -294,10 +294,10 @@ watchEffect(async () => {
             <div class="truncate">
               {{ currentToken?.symbol || 'Select token' }}
             </div>
-          </div>
+          </UiRow>
         </button>
       </div>
-      <div class="flex gap-2.5">
+      <UiRow :gap="10">
         <div class="relative w-full">
           <UiInputAmount
             :model-value="form.amount"
@@ -320,7 +320,7 @@ watchEffect(async () => {
             @update:model-value="handleValueUpdate"
           />
         </div>
-      </div>
+      </UiRow>
     </div>
     <template v-if="!showPicker" #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">

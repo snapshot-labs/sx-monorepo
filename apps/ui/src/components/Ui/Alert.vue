@@ -12,8 +12,11 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div
-    class="flex gap-3 justify-between items-center w-full py-2 px-3 rounded border text-[17px]"
+  <UiRow
+    :gap="12"
+    justify="between"
+    align="center"
+    class="w-full py-2 px-3 rounded border text-[17px]"
     :class="{
       'bg-rose-100 border-rose-300 text-rose-500 dark:bg-rose-700 dark:border-rose-700 dark:text-neutral-100':
         type === 'error',
@@ -38,5 +41,5 @@ const emit = defineEmits<{
     >
       <IH-x />
     </button>
-  </div>
+  </UiRow>
 </template>

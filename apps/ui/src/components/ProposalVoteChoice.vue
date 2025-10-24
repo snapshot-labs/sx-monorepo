@@ -15,14 +15,15 @@ withDefaults(
 </script>
 
 <template>
-  <div
+  <UiRow
     v-if="proposal.privacy !== 'none' && !proposal.completed"
-    class="flex gap-1 items-center"
+    :gap="4"
+    align="center"
   >
     <span class="text-skin-heading leading-[22px]">Encrypted choice</span>
     <IH-lock-closed class="size-[16px] shrink-0" />
-  </div>
-  <div v-else class="flex flex-col max-w-full truncate items-start">
+  </UiRow>
+  <UiCol v-else align="start" class="max-w-full truncate">
     <UiTooltip
       v-if="proposal.type !== 'basic'"
       :title="getChoiceText(proposal.choices, vote.choice)"
@@ -33,7 +34,7 @@ withDefaults(
         v-text="getChoiceText(proposal.choices, vote.choice)"
       />
     </UiTooltip>
-    <div v-else class="flex items-center gap-2 truncate">
+    <UiRow v-else :gap="8" align="center" class="truncate">
       <div
         class="shrink-0 rounded-full choice-bg inline-block size-[18px]"
         :class="`_${vote.choice}`"
@@ -55,9 +56,9 @@ withDefaults(
         class="truncate grow"
         v-text="proposal.choices[(vote.choice as number) - 1]"
       />
-    </div>
+    </UiRow>
     <div v-if="showReason" class="text-[17px] max-w-full truncate">
       {{ vote.reason }}
     </div>
-  </div>
+  </UiCol>
 </template>

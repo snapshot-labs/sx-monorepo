@@ -44,7 +44,7 @@ watch(open, () => (step.value = null));
     <template #header>
       <h3 v-text="isLoggedOut ? 'Log in' : 'Account'" />
     </template>
-    <div class="m-4 flex flex-col gap-2">
+    <UiCol :gap="8" class="m-4">
       <Connectors
         v-if="isLoggedOut"
         @click="(connector: Connector) => emit('login', connector)"
@@ -67,6 +67,6 @@ watch(open, () => (step.value = null));
           Log out
         </UiButton>
       </template>
-    </div>
+    </UiCol>
   </UiModal>
 </template>

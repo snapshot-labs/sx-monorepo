@@ -128,10 +128,10 @@ onMounted(() => {
 
 <template>
   <div v-if="isFinalizing && withDetails" class="border rounded-lg px-3 py-2.5">
-    <div class="flex items-center gap-2 text-skin-link">
+    <UiRow :gap="8" align="center" class="text-skin-link">
       <IH-exclamation-circle class="shrink-0" />
       Finalizing results
-    </div>
+    </UiRow>
     Please allow few minutes while final results are being calculated.
   </div>
   <div
@@ -152,11 +152,13 @@ onMounted(() => {
     </div>
   </div>
   <template v-else>
-    <div v-if="withDetails" class="flex flex-col gap-2">
-      <div
+    <UiCol v-if="withDetails" :gap="8">
+      <UiRow
         v-for="result in visibleResults"
         :key="result.choice"
-        class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center"
+        :gap="8"
+        align="center"
+        class="border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden"
         :class="{
           [`_${result.choice} choice-border`]: proposal.type === 'basic'
         }"
@@ -200,13 +202,18 @@ onMounted(() => {
           </div>
           <div v-text="_p(result.progress / 100)" />
         </template>
-      </div>
+      </UiRow>
       <button
         v-if="!displayAllChoices && otherResultsSummary.count > 0"
         type="button"
-        class="flex gap-2 border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden items-center text-left group"
+        class="text-left group"
         @click="displayAllChoices = true"
       >
+        <UiRow
+          :gap="8"
+          align="center"
+          class="border rounded-lg px-3 py-2.5 last:mb-0 text-skin-link relative overflow-hidden"
+        >
         <div
           class="absolute bg-skin-border inset-y-0 left-0 pointer-events-none -z-10"
           :style="{
@@ -224,18 +231,20 @@ onMounted(() => {
           class="group-hover:hidden"
           v-text="_p(otherResultsSummary.progress / 100)"
         />
-        <div class="hidden group-hover:flex items-center gap-1">
+        <UiRow :gap="4" align="center" class="hidden group-hover:flex">
           See all <IH-arrow-down class="size-[16px]" />
-        </div>
+        </UiRow>
+        </UiRow>
       </button>
       <div v-if="proposal.quorum">
         {{ quorumLabel(proposal.quorum_type) }}:
         <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
-    </div>
-    <div
+    </UiCol>
+    <UiRow
       v-else-if="props.proposal.privacy === 'none' || props.proposal.completed"
-      class="h-full flex items-center"
+      align="center"
+      class="h-full"
     >
       <div
         class="rounded-full h-[6px] overflow-hidden"
@@ -261,15 +270,17 @@ onMounted(() => {
           }"
         />
       </div>
-    </div>
+    </UiRow>
   </template>
   <a
     v-if="proposal.privacy == 'shutter' && withDetails"
     :href="SHUTTER_URL"
-    class="flex items-center text-skin-link mt-2.5"
     target="_blank"
+    class="mt-2.5"
   >
-    <IC-Shutter class="w-[80px]" />
-    <IH-arrow-sm-right class="-rotate-45" />
+    <UiRow align="center" class="text-skin-link">
+      <IC-Shutter class="w-[80px]" />
+      <IH-arrow-sm-right class="-rotate-45" />
+    </UiRow>
   </a>
 </template>
