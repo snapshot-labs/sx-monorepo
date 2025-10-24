@@ -164,13 +164,19 @@ function getNavigationConfig(
             tab: 'advanced',
             hidden: !isOffchainNetwork
           }),
+          billing: getSettingsRoute({
+            name: 'Billing',
+            tab: 'billing',
+            hidden: !isOffchainNetwork
+          }),
           controller: getSettingsRoute({
             name: 'Controller',
             tab: 'controller'
           }),
           snapshotPro: {
             name: 'Snapshot Pro',
-            link: { name: 'space-pro' }
+            link: { name: 'space-pro' },
+            hidden: !isOffchainNetwork
           }
         }
       };
