@@ -85,7 +85,7 @@ export type SelectedStrategy = {
 export type SpaceMetadataTreasury = {
   name: string;
   address: string;
-  chainId: ChainId | null;
+  chainId: string | null;
 };
 
 export type SpaceMetadataLabel = {
@@ -100,7 +100,7 @@ export type SpaceMetadataDelegation = {
   apiType: DelegationType | null;
   apiUrl: string | null;
   contractAddress: string | null;
-  chainId: ChainId | null;
+  chainId: string | null;
 };
 
 export type SpaceMetadata = {

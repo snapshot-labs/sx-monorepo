@@ -2,18 +2,12 @@
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
-import {
-  ChainId,
-  Contact,
-  Space,
-  SpaceMetadataTreasury,
-  Transaction
-} from '@/types';
+import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
-const STAKING_CHAIN_IDS: ChainId[] = [1, 11155111];
-const EVM_CHAIN_IDS: ChainId[] = evmNetworks
+const STAKING_CHAIN_IDS: string[] = ['1', '11155111'];
+const EVM_CHAIN_IDS: string[] = evmNetworks
   .filter(network => enabledNetworks.includes(network))
-  .map(network => getNetwork(network).chainId);
+  .map(network => String(getNetwork(network).chainId));
 
 const props = defineProps<{
   space: Space;

@@ -4,7 +4,6 @@ import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
 import { _n, clone, compareAddresses } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId } from '@/types';
 
 const FORM = {
   quantity: 1
@@ -15,7 +14,7 @@ const props = withDefaults(
     open: boolean;
     unitPrice: number;
     tokens: Token[];
-    network: ChainId;
+    network: string;
     barcodePayload: BarcodePayload;
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;

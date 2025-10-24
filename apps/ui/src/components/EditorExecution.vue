@@ -3,7 +3,7 @@ import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
-import { shorten } from '@/helpers/utils';
+import { getChainIdKind, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
 
@@ -79,7 +79,7 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    typeof treasury.value.network === 'string'
+    getChainIdKind(treasury.value.network) !== 'evm'
   ) {
     return;
   }
@@ -87,7 +87,7 @@ async function handleSimulateClick() {
   simulationState.value = 'SIMULATING';
 
   const valid = await simulate(
-    treasury.value.network,
+    Number(treasury.value.network),
     treasury.value.wallet,
     model.value
   );

@@ -105,7 +105,9 @@ const modalPaymentOpen = ref(false);
 const modalSpaceOpen = ref(false);
 const modalConnectorOpen = ref(false);
 
-const paymentNetwork = computed(() => (metadataNetwork === 's' ? 1 : 11155111));
+const paymentNetwork = computed(() =>
+  metadataNetwork === 's' ? '1' : '11155111'
+);
 
 const tokens = computed(() => {
   return TOKENS[paymentNetwork.value].filter(t =>
