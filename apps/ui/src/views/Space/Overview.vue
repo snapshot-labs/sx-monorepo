@@ -51,7 +51,7 @@ watchEffect(() => setTitle(props.space.name));
               name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }
             }"
-            class="!px-0 w-[46px]"
+            uniform
           >
             <IH-pencil-alt />
           </UiButton>
@@ -74,12 +74,6 @@ watchEffect(() => setTitle(props.space.name));
             :verified="space.verified"
             :turbo="space.turbo"
           />
-        </div>
-        <div v-if="space.protocol === 'governor-bravo'" class="mb-3">
-          <UiProposalLabel label="Governor Bravo space" color="#272727" />
-        </div>
-        <div v-if="space.protocol === '@openzeppelin/governor'" class="mb-3">
-          <UiProposalLabel label="OpenZeppelin space" color="#272727" />
         </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">
           <div>
@@ -142,7 +136,7 @@ watchEffect(() => setTitle(props.space.name));
     <OnboardingSpace :space="space" />
     <div v-if="showChildren" class="mb-4">
       <UiSectionHeader label="Sub-spaces" sticky />
-      <UiColumnHeader class="hidden md:flex">
+      <UiColumnHeader class="hidden md:flex text-center">
         <div class="grow" />
         <div
           v-if="space.protocol === 'snapshot'"

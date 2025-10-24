@@ -1,12 +1,11 @@
 import { skipToken, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getNfts } from '@/helpers/opensea';
-import { ChainId } from '@/types';
 
 export type Nft = Awaited<ReturnType<typeof getNfts>>[number];
 
 type Treasury = {
-  chainId: ChainId;
+  chainId: string;
   address: string;
 };
 

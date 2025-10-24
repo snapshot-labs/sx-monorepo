@@ -105,7 +105,9 @@ const modalPaymentOpen = ref(false);
 const modalSpaceOpen = ref(false);
 const modalConnectorOpen = ref(false);
 
-const paymentNetwork = computed(() => (metadataNetwork === 's' ? 1 : 11155111));
+const paymentNetwork = computed(() =>
+  metadataNetwork === 's' ? '1' : '11155111'
+);
 
 const tokens = computed(() => {
   return TOKENS[paymentNetwork.value].filter(t =>
@@ -274,7 +276,7 @@ onMounted(() => {
       </div>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "
@@ -367,7 +369,7 @@ onMounted(() => {
       <h2 class="text-[32px]">Get started today</h2>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "

@@ -237,6 +237,12 @@ export function createWriters(
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = governanceInfo.name;
+    spaceMetadata.about = governanceInfo.about || '';
+    spaceMetadata.avatar = governanceInfo.avatar || '';
+    spaceMetadata.external_url = governanceInfo.externalUrl || '';
+    spaceMetadata.github = governanceInfo.github || '';
+    spaceMetadata.twitter = governanceInfo.twitter || '';
+    spaceMetadata.farcaster = governanceInfo.farcaster || '';
     spaceMetadata.voting_power_symbol = symbol;
     spaceMetadata.treasuries = createTreasuries(timelock);
     spaceMetadata.executors_strategies = [executionStrategy.id];

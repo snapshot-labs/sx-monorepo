@@ -47,13 +47,9 @@ const {
       <div v-if="isPending" class="flex flex-col">
         <UiLoading class="text-skin-text" :size="16" :loading="true" />
       </div>
-      <div
-        v-else-if="isError || !relayerInfo"
-        class="flex items-center text-skin-link space-x-2"
-      >
-        <IH-exclamation-circle class="inline-block shrink-0" />
-        <span>Failed to load relayer balance.</span>
-      </div>
+      <UiStateWarning v-else-if="isError || !relayerInfo">
+        Failed to load relayer balance.
+      </UiStateWarning>
       <template v-else>
         <div class="flex flex-col">
           <a

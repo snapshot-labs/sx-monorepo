@@ -29,7 +29,7 @@ const {
 
         try {
           const isEnabled = await getIsOsnapEnabled(
-            treasury.chainId as number,
+            Number(treasury.chainId),
             treasury.address
           );
 
@@ -50,7 +50,7 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
     spaceUrl,
     spaceName: props.space.name,
     safeAddress: treasury.address,
-    network: treasury.chainId as number
+    network: Number(treasury.chainId)
   });
 }
 </script>
@@ -71,10 +71,9 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
   <template v-if="isOSnapPluginEnabled && enableOSnap">
     <UiEyebrow class="font-medium mt-3 mb-2">Treasuries</UiEyebrow>
     <UiLoading v-if="isPending" />
-    <div v-else-if="isError" class="flex items-center space-x-2">
-      <IH-exclamation-circle class="inline-block" />
-      <span>Failed to load treasuries.</span>
-    </div>
+    <UiStateWarning v-else-if="isError">
+      Failed to load treasuries.
+    </UiStateWarning>
     <div v-else>
       <div
         v-for="(treasury, i) in treasuries"
@@ -114,7 +113,6 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
           <UiButton
             v-else-if="oSnapAvailability && oSnapAvailability[i] === 'ENABLED'"
             :to="getConfigureUrl(treasury)"
-            type="button"
             class="group hover:border-skin-danger hover:text-skin-danger"
           >
             <div
@@ -131,8 +129,6 @@ function getConfigureUrl(treasury: SpaceMetadataTreasury) {
           <UiButton
             v-else-if="oSnapAvailability && oSnapAvailability[i] === 'DISABLED'"
             :to="getConfigureUrl(treasury)"
-            type="button"
-            class="flex items-center justify-center"
           >
             Enable
             <IH-arrow-sm-right class="-rotate-45 -mr-2" />
