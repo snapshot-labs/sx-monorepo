@@ -4,7 +4,12 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build", "codegen", "api#codegen"],
-      "outputs": ["dist/**", "dist.cjs/**"]
+      "outputs": ["dist/**", "dist.cjs/**"],
+      "env": ["ELECTRON"]
+    },
+    "build:electron": {
+      "dependsOn": ["build"],
+      "outputs": ["out/**"]
     },
     "lint": {},
     "//#lint:scripts": {},
@@ -29,6 +34,11 @@
         "ENABLE_OPENZEPPELIN",
         "VITE_MANA_URL"
       ]
+    },
+    "dev:electron": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["codegen", "^build"]
     },
     "codegen": {
       "outputs": [".checkpoint/**", "src/networks/common/graphqlApi/gql/**"],

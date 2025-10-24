@@ -1,5 +1,12 @@
 import { Config } from 'tailwindcss';
 
+const ELECTRON_TITLEBAR_HEIGHT = !!process.env.ELECTRON ? 32 : 0;
+const APP_TOPNAV_HEIGHT = 72;
+
+export const TOTAL_NAV_HEIGHT = ELECTRON_TITLEBAR_HEIGHT + APP_TOPNAV_HEIGHT;
+
+const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + 40;
+
 export default {
   future: {
     hoverOnlyWhenSupported: true
@@ -85,7 +92,13 @@ export default {
       10: '80px',
       11: '88px',
       12: '96px',
-      maximum: '1900px'
+      maximum: '1900px',
+      // Layout heights
+      'header-height': `${TOTAL_NAV_HEIGHT}px`,
+      'electron-titlebar-height': `${ELECTRON_TITLEBAR_HEIGHT}px`,
+      'header-height-with-offset': `${TOTAL_NAV_HEIGHT - 1}px`,
+      'header-with-section-height': `${TOTAL_WITH_SECTION}px`,
+      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION + 1}px`
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
