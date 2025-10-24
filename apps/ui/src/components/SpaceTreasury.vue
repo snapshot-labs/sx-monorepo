@@ -10,10 +10,10 @@ import {
   Transaction
 } from '@/types';
 
-const STAKING_CHAIN_IDS: ChainId[] = [1, 11155111];
-const EVM_CHAIN_IDS: ChainId[] = evmNetworks
+const STAKING_CHAIN_IDS: string[] = ['1', '11155111'];
+const EVM_CHAIN_IDS: string[] = evmNetworks
   .filter(network => enabledNetworks.includes(network))
-  .map(network => getNetwork(network).chainId);
+  .map(network => String(getNetwork(network).chainId));
 
 const props = defineProps<{
   space: Space;
