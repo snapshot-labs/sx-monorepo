@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, shell } = require('electron');
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -25,6 +25,15 @@ function createWindow() {
 
   win.once('ready-to-show', () => {
     win.show();
+  });
+
+  // Open external links in default browser
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http:') || url.startsWith('https:')) {
+      shell.openExternal(url);
+      return { action: 'deny' };
+    }
+    return { action: 'allow' };
   });
 }
 
