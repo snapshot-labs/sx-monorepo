@@ -22,7 +22,7 @@ withDefaults(
       :placement="`bottom-${placement}`"
       :offset="Number(gap)"
       portal
-      z-index="10"
+      z-index="60"
     >
       <MenuButton :disabled="disabled" as="template" class="cursor-pointer">
         <slot name="button" />
