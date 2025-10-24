@@ -107,14 +107,15 @@ const statusText = computed(() => {
     </UiColumnHeader>
 
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
-    <div
-      v-else-if="isError || !payments || payments.length === 0"
-      class="px-4 py-3 flex items-center text-skin-link space-x-2"
+    <UiStateWarning v-else-if="isError" class="px-4 py-3">
+      Failed to load payment history.
+    </UiStateWarning>
+    <UiStateWarning
+      v-else-if="!payments || payments.length === 0"
+      class="px-4 py-3"
     >
-      <IH-exclamation-circle class="shrink-0" />
-      <span v-if="isError">Failed to load payment history.</span>
-      <span v-else>No payment history available.</span>
-    </div>
+      No payment history available.
+    </UiStateWarning>
     <UiContainerInfiniteScroll
       v-else
       class="px-4"
