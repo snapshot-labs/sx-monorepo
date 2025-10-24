@@ -30,8 +30,16 @@ const statusText = computed(() => {
 
   const daysUntilExpiration = turboExpirationDate.value.diff(dayjs(), 'day');
 
+  if (!props.space.turbo_expiration) {
+    return '';
+  }
+
   if (daysUntilExpiration === 0) {
     return 'Expires today';
+  }
+
+  if (daysUntilExpiration < 0) {
+    return 'Expired';
   }
 
   if (daysUntilExpiration < 30) {
@@ -59,11 +67,18 @@ const statusText = computed(() => {
                 {{ props.space.turbo ? 'Snapshot Pro' : 'Basic plan' }}
               </h5>
               <p class="text-sm text-skin-text">
-                <template v-if="props.space.turbo">
+                <template
+                  v-if="props.space.turbo && props.space.turbo_expiration"
+                >
                   Valid until
                   <span class="font-semibold">{{
                     turboExpirationDate.format('MMM D, YYYY')
                   }}</span>
+                </template>
+                <template
+                  v-else-if="props.space.turbo && !props.space.turbo_expiration"
+                >
+                  Unknown expiration date
                 </template>
                 <template v-else>
                   Upgrade to Pro for premium features
