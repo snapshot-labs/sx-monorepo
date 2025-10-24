@@ -831,8 +831,8 @@ export function createActions(
         return null;
 
       const multi = new Multicaller(
-        delegation.chainId.toString(),
-        getProvider(delegation.chainId as number),
+        delegation.chainId,
+        getProvider(Number(delegation.chainId)),
         [
           'function decimals() view returns (uint8)',
           'function balanceOf(address account) view returns (uint256)',
