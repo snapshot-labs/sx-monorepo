@@ -164,50 +164,24 @@ onUnmounted(() => {
           </UiButton>
         </template>
         <template v-if="web3.account" #items>
-          <UiDropdownItem v-slot="{ active, close }">
-            <AppLink
-              class="flex items-center gap-2"
-              :class="{ 'opacity-80': active }"
-              :to="{ name: 'user', params: { user: web3.account } }"
-              @click.capture="close"
-            >
-              <IH-user />
-              My profile
-            </AppLink>
+          <UiDropdownItem
+            :to="{ name: 'user', params: { user: web3.account } }"
+          >
+            <IH-user />
+            My profile
           </UiDropdownItem>
-          <UiDropdownItem v-slot="{ active, close }">
-            <AppLink
-              class="flex items-center gap-2"
-              :class="{ 'opacity-80': active }"
-              :to="{ name: 'settings-spaces' }"
-              @click.capture="close"
-            >
-              <IH-cog />
-              Settings
-            </AppLink>
+          <UiDropdownItem :to="{ name: 'settings-spaces' }">
+            <IH-cog />
+            Settings
           </UiDropdownItem>
-          <UiDropdownItem v-slot="{ active }">
-            <button
-              type="button"
-              class="flex items-center gap-2"
-              :class="{ 'opacity-80': active }"
-              @click="modalAccountOpen = true"
-            >
-              <IH-switch-horizontal />
-              Change wallet
-            </button>
+          <UiDropdownItem @click="modalAccountOpen = true">
+            <IH-switch-horizontal />
+            Change wallet
           </UiDropdownItem>
           <hr class="bg-skin-text/20 h-[2px]" />
-          <UiDropdownItem v-slot="{ active }">
-            <button
-              type="button"
-              :class="{ 'opacity-80': active }"
-              class="flex items-center gap-2 !text-skin-danger"
-              @click="logout()"
-            >
-              <IH-logout />
-              Log out
-            </button>
+          <UiDropdownItem class="!text-skin-danger" @click="logout()">
+            <IH-logout />
+            Log out
           </UiDropdownItem>
         </template>
       </UiDropdown>
