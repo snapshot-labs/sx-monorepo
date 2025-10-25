@@ -21,10 +21,14 @@ const compositeSpaceId = `${props.space.network}:${props.space.id}`;
         <SpaceAvatar :space="space" :size="32" class="rounded-md" />
       </UiBadgeNetwork>
       <h3 class="truncate" v-text="space.name" />
-      <UiBadgeVerified
+      <UiBadgeSpace
         class="ml-1"
         :verified="space.verified"
         :turbo="space.turbo"
+        :flagged="
+          ('additionalRawData' in space && space.additionalRawData?.flagged) ||
+          false
+        "
       />
     </div>
     <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />

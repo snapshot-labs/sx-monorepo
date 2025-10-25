@@ -66,9 +66,10 @@ watch(
             </div>
             <div class="space-x-1 flex items-center truncate">
               <span class="truncate text-skin-link" v-text="space.name" />
-              <UiBadgeVerified
+              <UiBadgeSpace
                 :verified="space.verified"
                 :turbo="space.turbo"
+                :flagged="space.additionalRawData?.flagged || false"
                 class="shrink-0"
               />
             </div>

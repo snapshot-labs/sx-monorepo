@@ -1,14 +1,14 @@
 import { Meta, StoryObj } from '@storybook/vue3-vite';
-import BadgeVerified from './BadgeVerified.vue';
+import BadgeSpace from './BadgeSpace.vue';
 
 const meta = {
-  title: 'Ui/BadgeVerified',
-  component: BadgeVerified,
+  title: 'Ui/BadgeSpace',
+  component: BadgeSpace,
   tags: ['autodocs'],
   args: {
     verified: false
   }
-} satisfies Meta<typeof BadgeVerified>;
+} satisfies Meta<typeof BadgeSpace>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -16,13 +16,23 @@ type Story = StoryObj<typeof meta>;
 export const Verified: Story = {
   args: {
     verified: true,
-    turbo: false
+    turbo: false,
+    flagged: false
   }
 };
 
 export const Turbo: Story = {
   args: {
     verified: false,
-    turbo: true
+    turbo: true,
+    flagged: false
+  }
+};
+
+export const Flagged: Story = {
+  args: {
+    verified: false,
+    turbo: false,
+    flagged: true
   }
 };
