@@ -100,54 +100,32 @@ function deleteMember(index: number) {
             </button>
           </template>
           <template #items>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2 lg:min-w-[200px]"
-                :disabled="!isAbleToChangeAdmins"
-                :class="{
-                  'opacity-80': active && isAbleToChangeAdmins,
-                  'opacity-40 cursor-not-allowed': !isAbleToChangeAdmins
-                }"
-                @click="changeMemberRole(i, 'admin')"
+            <UiDropdownItem
+              :disabled="!isAbleToChangeAdmins"
+              @click="changeMemberRole(i, 'admin')"
+            >
+              Admin
+              <UiTooltip
+                :title="'Able to modify the space settings, manage the space\'s proposals and create proposals'"
               >
-                Admin
-                <UiTooltip
-                  :title="'Able to modify the space settings, manage the space\'s proposals and create proposals'"
-                >
-                  <IH-question-mark-circle />
-                </UiTooltip>
-              </button>
+                <IH-question-mark-circle />
+              </UiTooltip>
             </UiDropdownItem>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2 lg:min-w-[200px]"
-                :class="{ 'opacity-80': active }"
-                @click="changeMemberRole(i, 'moderator')"
+            <UiDropdownItem @click="changeMemberRole(i, 'moderator')">
+              Moderator
+              <UiTooltip
+                :title="'Able to manage the space\'s proposals and create proposals'"
               >
-                Moderator
-                <UiTooltip
-                  :title="'Able to manage the space\'s proposals and create proposals'"
-                >
-                  <IH-question-mark-circle />
-                </UiTooltip>
-              </button>
+                <IH-question-mark-circle />
+              </UiTooltip>
             </UiDropdownItem>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2 lg:min-w-[200px]"
-                :class="{ 'opacity-80': active }"
-                @click="changeMemberRole(i, 'author')"
+            <UiDropdownItem @click="changeMemberRole(i, 'author')">
+              Author
+              <UiTooltip
+                :title="'Able to create proposals without having to go through proposal validation'"
               >
-                Author
-                <UiTooltip
-                  :title="'Able to create proposals without having to go through proposal validation'"
-                >
-                  <IH-question-mark-circle />
-                </UiTooltip>
-              </button>
+                <IH-question-mark-circle />
+              </UiTooltip>
             </UiDropdownItem>
           </template>
         </UiDropdown>

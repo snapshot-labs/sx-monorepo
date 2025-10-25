@@ -57,6 +57,9 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
   <router-link v-else-if="props.to" :to="normalize(props.to)">
     <slot />
   </router-link>
+  <button v-else-if="$attrs.onClick" type="button" v-bind="$attrs">
+    <slot />
+  </button>
   <div v-else>
     <slot />
   </div>
