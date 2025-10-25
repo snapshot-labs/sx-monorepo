@@ -6,6 +6,7 @@ import {
   getStampUrl,
   whiteLabelAwareParams
 } from '@/helpers/utils';
+import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -19,13 +20,18 @@ const sidebarSwipeEnabled = ref(true);
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
-const { modalOpen } = useModal();
+const {
+  modalOpen,
+  modalAccountOpen,
+  modalAccountWithoutDismissOpen,
+  resetAccountModal
+} = useModal();
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
 const { setTheme } = useTheme();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
-const { web3 } = useWeb3();
+const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
     const noSideBarSwipe = (e.target as Element)?.closest(
@@ -74,6 +80,11 @@ const hasPlaceHolderSidebar = computed(
 const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
 });
+
+async function handleLogin(connector: Connector) {
+  resetAccountModal();
+  await login(connector);
+}
 
 async function handleTransactionAccept() {
   if (
@@ -251,6 +262,12 @@ router.afterEach(() => {
       :initial-state="transaction._form"
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
+    />
+    <ModalConnector
+      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
+      :closeable="!modalAccountWithoutDismissOpen"
+      @close="modalAccountOpen = false"
+      @pick="handleLogin"
     />
   </div>
 </template>
