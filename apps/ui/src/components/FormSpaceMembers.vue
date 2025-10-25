@@ -100,11 +100,13 @@ function deleteMember(index: number) {
             </button>
           </template>
           <template #items>
-            <UiDropdownItem :disabled="!isAbleToChangeAdmins">
+            <UiDropdownItem
+              :disabled="!isAbleToChangeAdmins"
+              @click="changeMemberRole(i, 'admin')"
+            >
               Admin
               <UiTooltip
                 :title="'Able to modify the space settings, manage the space\'s proposals and create proposals'"
-                @click="changeMemberRole(i, 'admin')"
               >
                 <IH-question-mark-circle />
               </UiTooltip>
