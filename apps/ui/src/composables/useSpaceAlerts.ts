@@ -100,7 +100,8 @@ export function useSpaceAlerts(
 
     const now = Date.now();
     const expirationTime = space.value.turbo_expiration * 1000; // Convert to milliseconds
-    const warningThresholdMs = PRO_EXPIRATION_WARNING_DAYS * 24 * 60 * 60 * 1000;
+    const warningThresholdMs =
+      PRO_EXPIRATION_WARNING_DAYS * 24 * 60 * 60 * 1000;
 
     // Check if expiration is in the future and within warning threshold
     return expirationTime > now && expirationTime - now <= warningThresholdMs;
