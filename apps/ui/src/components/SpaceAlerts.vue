@@ -20,6 +20,14 @@ const pendingTasks = computed(() => {
     });
   }
 
+  if (alerts.value.has('IS_PRO_JUST_EXPIRED')) {
+    _alerts.push({
+      description: 'Your Pro plan just expired, renew now',
+      link: { name: 'space-pro' },
+      type: 'error'
+    });
+  }
+
   if (
     alerts.value.has('HAS_DEPRECATED_STRATEGIES') ||
     alerts.value.has('HAS_DISABLED_STRATEGIES') ||

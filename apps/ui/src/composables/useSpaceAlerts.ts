@@ -11,6 +11,7 @@ const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
 ];
 
 const PRO_EXPIRATION_WARNING_DAYS = 7;
+const PRO_EXPIRED_GRACE_PERIOD_DAYS = 7;
 
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
@@ -18,7 +19,8 @@ type AlertType =
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
   | 'HAS_PRO_ONLY_WHITELABEL'
-  | 'IS_PRO_EXPIRING_SOON';
+  | 'IS_PRO_EXPIRING_SOON'
+  | 'IS_PRO_JUST_EXPIRED';
 
 export function useSpaceAlerts(
   space: Ref<Space>,
@@ -119,6 +121,21 @@ export function useSpaceAlerts(
     return Math.ceil(diff / (24 * 60 * 60 * 1000));
   });
 
+  const isProJustExpired = computed(() => {
+    // Check if expiration date exists and is valid (greater than 0)
+    if (!space.value.turbo_expiration || space.value.turbo_expiration === 0) {
+      return false;
+    }
+
+    const now = Date.now();
+    const expirationTime = space.value.turbo_expiration * 1000; // Convert to milliseconds
+    const graceThresholdMs =
+      PRO_EXPIRED_GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
+
+    // Check if expiration is in the past but within grace period
+    return expirationTime <= now && now - expirationTime <= graceThresholdMs;
+  });
+
   const alerts = computed(() => {
     const alertsMap = new Map<AlertType, Record<string, any>>();
 
@@ -156,6 +173,10 @@ export function useSpaceAlerts(
       alertsMap.set('IS_PRO_EXPIRING_SOON', {
         daysUntilExpiration: daysUntilExpiration.value
       });
+    }
+
+    if (isProJustExpired.value) {
+      alertsMap.set('IS_PRO_JUST_EXPIRED', {});
     }
 
     return alertsMap;
