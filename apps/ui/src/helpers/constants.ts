@@ -16,6 +16,9 @@ export const API_URL =
 export const API_TESTNET_URL =
   import.meta.env.VITE_API_TESTNET_URL ?? 'https://testnet-api.snapshot.box';
 
+export const FUTARCHY_API_URL =
+  import.meta.env.VITE_FUTARCHY_API_URL ?? 'https://stag.api.tickspread.com';
+
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
 export const VERIFIED_URL =
