@@ -219,7 +219,8 @@ const showToolbar = computed(() => {
     (isModified.value &&
       isAdvancedFormResolved.value &&
       canModifySettings.value) ||
-    error.value
+    error.value ||
+    props.space.additionalRawData?.hibernated
   );
 });
 
@@ -583,9 +584,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </div>
   <UiToolbarBottom v-if="showToolbar" ref="el">
     <div
-      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+      class="px-4 py-3 flex flex-col xs:flex-row items-center"
+      :class="error || isModified ? 'justify-between' : 'justify-end'"
     >
       <h4
+        v-if="error || isModified"
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
         :class="{ 'text-skin-danger': error }"
       >
@@ -606,7 +609,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           primary
           @click="handleSettingsSave"
         >
-          Save
+          <template v-if="isModified"> Save </template>
+          <template v-else-if="space.additionalRawData?.hibernated">
+            Reactivate space
+          </template>
         </UiButton>
       </div>
     </div>
