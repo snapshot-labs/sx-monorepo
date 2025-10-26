@@ -531,7 +531,7 @@ watchEffect(() => {
         <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto s-box">
           <UiAlert v-if="alerts.has('IS_HIBERNATED')" type="error" class="mb-4">
             This space has been hibernated and is in read-only mode. An
-            administrator needs to reactive it to create new proposals.
+            administrator needs to reactivate it to create new proposals.
           </UiAlert>
           <UiAlert
             v-else-if="nonPremiumNetworksList && !proposal?.originalProposal"
