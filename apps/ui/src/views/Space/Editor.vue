@@ -214,6 +214,7 @@ const canSubmit = computed(() => {
   const hasFormErrors = Object.keys(formErrors.value).length > 0;
 
   if (
+    alerts.value.has('IS_HIBERNATED') ||
     hasUnsupportedNetworks ||
     hasFormErrors ||
     disabledStrategiesList.value.length ||
@@ -528,8 +529,12 @@ watchEffect(() => {
         v-bind="$attrs"
       >
         <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto s-box">
+          <UiAlert v-if="alerts.has('IS_HIBERNATED')" type="error" class="mb-4">
+            This space has been hibernated and is in read-only mode. An
+            administrator needs to reactive it to create new proposals.
+          </UiAlert>
           <UiAlert
-            v-if="nonPremiumNetworksList && !proposal?.originalProposal"
+            v-else-if="nonPremiumNetworksList && !proposal?.originalProposal"
             type="error"
             class="mb-4"
           >
