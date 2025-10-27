@@ -49,7 +49,10 @@ const MAPPING = {
 const isWhiteLabel = ref(false);
 const isCustomDomain = ref(domain !== DEFAULT_DOMAIN);
 const failed = ref(false);
-const resolved = ref(domain === DEFAULT_DOMAIN);
+
+const isElectron = !!process.env.ELECTRON;
+
+const resolved = ref(domain === DEFAULT_DOMAIN || isElectron);
 const space = ref<Space | null>(null);
 const skinSettings = ref<SkinSettings>();
 
