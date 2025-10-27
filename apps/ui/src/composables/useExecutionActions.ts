@@ -12,6 +12,7 @@ import {
   getProposalHashFromTransactions,
   isConfigCompliant
 } from '@/helpers/osnap/getters';
+import { getChainIdKind } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Network } from '@/networks/types';
 import { Proposal, ProposalExecution } from '@/types';
@@ -149,21 +150,26 @@ export function useExecutionActions(
     try {
       if (
         !executionValue.chainId ||
-        typeof executionValue.chainId !== 'number'
+        getChainIdKind(executionValue.chainId) !== 'evm'
       ) {
-        throw new Error('Chain ID is required for oSnap execution');
+        throw new Error(
+          'Chain ID is required for oSnap execution and must be an EVM network'
+        );
       }
+
+      // Safe to cast to number since we verified it's an EVM network
+      const chainId = Number(executionValue.chainId);
 
       const proposalHash = getProposalHashFromTransactions(
         executionValue.transactions
       );
       const moduleAddress = await getModuleAddressForTreasury(
-        executionValue.chainId,
+        chainId,
         executionValue.safeAddress
       );
 
       const data = await getOgProposalGql({
-        chainId: executionValue.chainId,
+        chainId,
         explanation: toValue(proposal).metadata_uri,
         moduleAddress,
         proposalHash
@@ -172,7 +178,7 @@ export function useExecutionActions(
       if (!data) {
         const configCompliant = await isConfigCompliant(
           executionValue.safeAddress,
-          executionValue.chainId
+          chainId
         );
 
         message.value = configCompliant.automaticExecution

@@ -6,6 +6,7 @@ import {
   getStampUrl,
   whiteLabelAwareParams
 } from '@/helpers/utils';
+import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -19,13 +20,18 @@ const sidebarSwipeEnabled = ref(true);
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
-const { modalOpen } = useModal();
+const {
+  modalOpen,
+  modalAccountOpen,
+  modalAccountWithoutDismissOpen,
+  resetAccountModal
+} = useModal();
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
 const { setTheme } = useTheme();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
-const { web3 } = useWeb3();
+const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
     const noSideBarSwipe = (e.target as Element)?.closest(
@@ -74,6 +80,11 @@ const hasPlaceHolderSidebar = computed(
 const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
 });
+
+async function handleLogin(connector: Connector) {
+  resetAccountModal();
+  await login(connector);
+}
 
 async function handleTransactionAccept() {
   if (
@@ -186,7 +197,7 @@ router.afterEach(() => {
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex app-sidebar fixed inset-y-0`,
+          `hidden lg:flex app-sidebar fixed inset-y-0 top-electron-titlebar-height`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
@@ -210,7 +221,7 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'top-[72px] inset-y-0 z-10 hidden lg:flex fixed app-nav',
+          'top-header-height inset-y-0 z-10 hidden lg:flex fixed app-nav',
           {
             '!flex app-nav-open': uiStore.sideMenuOpen
           }
@@ -223,7 +234,7 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
+        <div class="flex-auto w-0" :class="{ 'mt-header-height': hasTopNav }">
           <router-view class="h-full pb-10" />
         </div>
         <div
@@ -251,6 +262,12 @@ router.afterEach(() => {
       :initial-state="transaction._form"
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
+    />
+    <ModalConnector
+      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
+      :closeable="!modalAccountWithoutDismissOpen"
+      @close="modalAccountOpen = false"
+      @pick="handleLogin"
     />
   </div>
 </template>
@@ -350,7 +367,7 @@ $placeholderSidebarWidth: 240px;
 }
 
 .backdrop {
-  @apply fixed inset-0 z-[99];
+  @apply fixed inset-0 top-electron-titlebar-height z-[99];
   @apply bg-[black]/40 #{!important};
 }
 </style>

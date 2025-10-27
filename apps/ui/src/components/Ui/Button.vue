@@ -23,12 +23,18 @@ const props = withDefaults(
 
 const attrs = useAttrs();
 
+const isCompact = computed(() => {
+  const isFullWidth = (attrs.class as 'string')?.includes('w-full');
+
+  return (props.loading || props.uniform) && !isFullWidth;
+});
+
 const classNames = computed(() => {
   return {
     button: true,
     primary: props.primary,
-    'px-0 shrink-0': props.loading || props.uniform,
-    'px-3.5': !props.loading && !props.uniform
+    'px-0 shrink-0': isCompact.value,
+    'px-3.5': !isCompact.value
   };
 });
 
@@ -36,11 +42,7 @@ const buttonStyles = computed(() => {
   return {
     height: `${props.size}px`,
     minWidth: `${props.size}px`,
-    width:
-      (props.loading || props.uniform) &&
-      !(attrs.class as 'string')?.includes('w-full')
-        ? `${props.size}px`
-        : undefined
+    width: isCompact.value ? `${props.size}px` : undefined
   };
 });
 </script>

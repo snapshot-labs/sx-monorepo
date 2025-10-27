@@ -149,14 +149,14 @@ function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
     return {
       name,
       address,
-      chainId: CHAIN_IDS[network]
+      chainId: String(CHAIN_IDS[network])
     };
   }
 
   return {
     name,
     address,
-    chainId: chain_id
+    chainId: String(chain_id)
   };
 }
 
@@ -228,7 +228,7 @@ function processExecutions(
     return (
       match.treasury &&
       compareAddresses(treasury.address, match.treasury) &&
-      match.treasury_chain === treasury.chainId
+      String(match.treasury_chain) === treasury.chainId
     );
   });
 
