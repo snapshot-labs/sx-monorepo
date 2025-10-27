@@ -103,10 +103,7 @@ export async function decodeExecution(
       _form: {
         abi,
         recipient: target,
-        method: functionFragment.name.slice(
-          0,
-          functionFragment.name.indexOf('(')
-        ),
+        method: functionFragment.format(),
         args: Object.fromEntries(
           functionFragment.inputs.map((input, index) => [
             input.name,

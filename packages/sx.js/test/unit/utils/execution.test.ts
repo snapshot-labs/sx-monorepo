@@ -81,7 +81,7 @@ describe('decodeExecution', () => {
           "args": {
             "delegatee": "0x8Bf6F9F91D70a9a3c2FCe45dF30EcE735C54D624",
           },
-          "method": "delegate",
+          "method": "delegate(address)",
           "recipient": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
         },
         "_type": "contractCall",
