@@ -18,7 +18,16 @@ type CallInfo = {
 
 const ABI_CACHE = new Map<`${number}:0x${string}`, Abi>();
 
-export async function getAbi(chainId: number, address: string): Promise<Abi> {
+export async function getAbi(
+  chainId: number,
+  address: `0x${string}`
+): Promise<Abi> {
+  const cachedAbi = ABI_CACHE.get(`${chainId}:${address}`);
+
+  if (cachedAbi) {
+    return cachedAbi;
+  }
+
   const res = await fetch(
     `https://sourcify.dev/server/v2/contract/${chainId}/${address}?fields=abi,proxyResolution`
   );
@@ -28,6 +37,8 @@ export async function getAbi(chainId: number, address: string): Promise<Abi> {
   const { abi, proxyResolution } = await res.json();
 
   if (!proxyResolution.isProxy) {
+    ABI_CACHE.set(`${chainId}:${address}`, abi);
+
     return abi;
   }
 
@@ -133,17 +144,8 @@ export async function convertToTransaction(
     });
   }
 
-  const cacheKey = `${chainId}:${data.target}` as const;
-
   try {
-    let contractAbi: Abi;
-    if (ABI_CACHE.has(cacheKey)) {
-      contractAbi = ABI_CACHE.get(cacheKey)!;
-    } else {
-      contractAbi = await getAbi(chainId, data.target);
-      ABI_CACHE.set(cacheKey, contractAbi);
-    }
-
+    const contractAbi = await getAbi(chainId, data.target);
     const decodedExecution = await decodeExecution(contractAbi, data, chainId);
 
     if (decodedExecution) {
