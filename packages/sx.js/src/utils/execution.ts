@@ -1,0 +1,167 @@
+import { Fragment, Interface, JsonFragment } from '@ethersproject/abi';
+import { BigNumber } from '@ethersproject/bignumber';
+import { Contract } from '@ethersproject/contracts';
+import { StaticJsonRpcProvider } from '@ethersproject/providers';
+import {
+  ContractCallTransaction,
+  SendTokenTransaction,
+  Transaction
+} from '../types';
+
+type Abi = (Fragment | JsonFragment | string)[];
+
+type CallInfo = {
+  target: `0x${string}`;
+  calldata: `0x${string}`;
+  value: string;
+};
+
+const ABI_CACHE = new Map<`${number}:0x${string}`, Abi>();
+
+export async function getAbi(chainId: number, address: string): Promise<Abi> {
+  const res = await fetch(
+    `https://sourcify.dev/server/v2/contract/${chainId}/${address}?fields=abi,proxyResolution`
+  );
+
+  if (!res.ok) throw new Error('Failed to fetch ABI from Sourcify');
+
+  const { abi, proxyResolution } = await res.json();
+
+  if (!proxyResolution.isProxy) {
+    return abi;
+  }
+
+  return getAbi(chainId, proxyResolution.implementations[0].address);
+}
+
+export async function createSendTokenTransaction(
+  data: CallInfo,
+  amount: string,
+  token: SendTokenTransaction['_form']['token']
+): Promise<SendTokenTransaction> {
+  return {
+    _type: 'sendToken',
+    _form: {
+      recipient: data.target,
+      token,
+      amount
+    },
+    to: data.target,
+    data: data.calldata,
+    value: data.value,
+    salt: '0'
+  };
+}
+
+export async function decodeExecution(
+  abi: Abi,
+  data: CallInfo,
+  chainId: number
+): Promise<ContractCallTransaction | SendTokenTransaction | null> {
+  const { target, calldata, value } = data;
+
+  const iface = new Interface(abi);
+  try {
+    const functionFragment = iface.getFunction(calldata.slice(0, 10));
+    const decoded = iface.decodeFunctionData(functionFragment, calldata);
+
+    const isErc20Transfer =
+      functionFragment.name === 'transfer' &&
+      functionFragment.inputs.length === 2 &&
+      functionFragment.inputs[0]?.type === 'address' &&
+      functionFragment.inputs[1]?.type === 'uint256';
+
+    if (isErc20Transfer) {
+      const provider = new StaticJsonRpcProvider(
+        `https://rpc.snapshot.org/${chainId}`,
+        chainId
+      );
+
+      const tokenContract = new Contract(target, abi, provider);
+
+      const [name, symbol, decimals]: [string, string, number] =
+        await Promise.all([
+          tokenContract.name(),
+          tokenContract.symbol(),
+          tokenContract.decimals()
+        ]);
+
+      return createSendTokenTransaction(data, decoded[1].toString(), {
+        name,
+        symbol,
+        decimals,
+        address: target
+      });
+    }
+
+    return {
+      _type: 'contractCall',
+      to: target,
+      data: calldata,
+      value,
+      salt: '0',
+      _form: {
+        abi,
+        recipient: target,
+        method: functionFragment.name.slice(
+          0,
+          functionFragment.name.indexOf('(')
+        ),
+        args: Object.fromEntries(
+          functionFragment.inputs.map((input, index) => [
+            input.name,
+            BigNumber.isBigNumber(decoded[index])
+              ? decoded[index].toString()
+              : decoded[index]
+          ])
+        ),
+        amount: value
+      }
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function convertToTransaction(
+  data: CallInfo,
+  chainId: number
+): Promise<Transaction> {
+  if (data.calldata === '0x') {
+    return createSendTokenTransaction(data, data.value, {
+      name: 'Ethereum',
+      decimals: 18,
+      symbol: 'ETH',
+      address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+    });
+  }
+
+  const cacheKey = `${chainId}:${data.target}` as const;
+
+  try {
+    let contractAbi: Abi;
+    if (ABI_CACHE.has(cacheKey)) {
+      contractAbi = ABI_CACHE.get(cacheKey)!;
+    } else {
+      contractAbi = await getAbi(chainId, data.target);
+      ABI_CACHE.set(cacheKey, contractAbi);
+    }
+
+    const decodedExecution = await decodeExecution(contractAbi, data, chainId);
+
+    if (decodedExecution) {
+      return decodedExecution;
+    }
+  } catch {}
+
+  return {
+    _type: 'raw',
+    _form: {
+      recipient: data.target
+    },
+    to: data.target,
+    data: data.calldata,
+    value: data.value,
+    salt: '0'
+  };
+}
