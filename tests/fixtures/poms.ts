@@ -25,7 +25,7 @@ export class AuthPage {
 
   async logout() {
     await this.profileButton.click();
-    await this.page.getByRole('button', { name: 'Log out' }).click();
+    await this.page.getByRole('menuitem', { name: 'Log out' }).click();
   }
 }
 export class ExplorePage {

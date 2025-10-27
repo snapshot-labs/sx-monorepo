@@ -3,7 +3,7 @@ import { Connector, ConnectorType } from '@/networks/types';
 
 const props = defineProps<{
   open: boolean;
-  supportedConnectors: ConnectorType[];
+  supportedConnectors?: ConnectorType[];
 }>();
 const emit = defineEmits<{
   (e: 'pick', connector: Connector): void;
@@ -11,12 +11,14 @@ const emit = defineEmits<{
 }>();
 
 const { open } = toRefs(props);
+
+const { web3 } = useWeb3();
 </script>
 
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="'Log in'" />
+      <h3 v-text="web3.account ? 'Change wallet' : 'Log in'" />
     </template>
     <div class="m-4 space-y-2 flex flex-col">
       <Connectors

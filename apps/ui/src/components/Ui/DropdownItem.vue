@@ -8,11 +8,11 @@ defineProps<{
 
 <template>
   <MenuItem
-    v-slot="{ active }"
+    v-slot="{ active, close }"
     :disabled="disabled"
     as="template"
     class="w-full px-3 py-2 text-[17px] whitespace-nowrap"
   >
-    <slot :active="active" :disabled="disabled" />
+    <slot :active="active" :disabled="disabled" :close="close" />
   </MenuItem>
 </template>
