@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint . --ext .ts",
+    "lint:fix": "yarn lint --fix",
     "build": "tsc",
     "migrate": "yarn knex migrate:latest",
     "predev": "yarn migrate",
