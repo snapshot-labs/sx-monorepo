@@ -217,7 +217,7 @@ const parsedTitle = computedAsync(
             {{ shorten(param.value) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </a>
-          <div v-else class="truncate inline-block">{{ param.value }}</div>
+          <div v-else class="break-all inline-block">{{ param.value }}</div>
         </div>
       </template>
       <div v-if="value" class="mt-3">
@@ -226,7 +226,7 @@ const parsedTitle = computedAsync(
       </div>
       <div v-if="data" class="mt-3">
         <h4 class="font-medium">Data</h4>
-        <div>{{ data }}</div>
+        <div class="break-all">{{ data }}</div>
       </div>
     </div>
   </div>
