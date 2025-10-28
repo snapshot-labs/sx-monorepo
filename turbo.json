@@ -12,8 +12,8 @@
       "outputs": ["out/**"]
     },
     "lint": {},
-    "//#lint:scripts": {},
     "lint:fix": {},
+    "//#lint:scripts": {},
     "typecheck": {
       "dependsOn": ["^build"]
     },
