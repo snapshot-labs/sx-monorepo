@@ -191,7 +191,7 @@ describe('convertToTransaction', () => {
     `);
   });
 
-  it.only('should handle Comptroller contract call (custom proxy resolver)', async () => {
+  it('should handle Comptroller contract call (custom proxy resolver)', async () => {
     const result = await convertToTransaction(
       {
         target: '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B',
