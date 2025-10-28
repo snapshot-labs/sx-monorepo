@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ContractCallTransaction } from '../../../src/types';
 import {
   convertToTransaction,
   createSendTokenTransaction,
@@ -185,6 +186,44 @@ describe('convertToTransaction', () => {
         "data": "0x0ae1b13d00000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000b48656c6c6f20576f726c64000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000474657374000000000000000000000000000000000000000000000000000000",
         "salt": "0",
         "to": "0x000000000000cd17345801aa8147b8D3950260FF",
+        "value": "0",
+      }
+    `);
+  });
+
+  it.only('should handle Comptroller contract call (custom proxy resolver)', async () => {
+    const result = await convertToTransaction(
+      {
+        target: '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B',
+        calldata:
+          '0x598ee1cb000000000000000000000000d20c9667bf0047f313228f9fe11f8b9f8dc29bba00000000000000000000000000000000000000000000000000171499d18b52d9',
+        value: '0'
+      },
+      1
+    );
+
+    const { _form, ...rest } = result;
+    // eslint-disable-next-line
+    const { abi, ...formRest } = _form as ContractCallTransaction['_form'];
+
+    expect({
+      ...rest,
+      _form: formRest
+    }).toMatchInlineSnapshot(`
+      {
+        "_form": {
+          "amount": "0",
+          "args": {
+            "compSpeed": "6496575342465753",
+            "contributor": "0xD20c9667bf0047F313228F9fE11F8b9F8Dc29bBa",
+          },
+          "method": "_setContributorCompSpeed(address,uint256)",
+          "recipient": "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B",
+        },
+        "_type": "contractCall",
+        "data": "0x598ee1cb000000000000000000000000d20c9667bf0047f313228f9fe11f8b9f8dc29bba00000000000000000000000000000000000000000000000000171499d18b52d9",
+        "salt": "0",
+        "to": "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B",
         "value": "0",
       }
     `);

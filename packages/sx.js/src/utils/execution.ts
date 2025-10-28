@@ -17,6 +17,34 @@ type CallInfo = {
 };
 
 const ABI_CACHE = new Map<`${number}:0x${string}`, Abi>();
+const CUSTOM_PROXY_RESOLVERS = {
+  // Compound Governor Bravo
+  // Unitroller proxy pattern (implementation available at comptrollerImplementation)
+  '0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B': async (
+    address: `0x${string}`,
+    provider: StaticJsonRpcProvider
+  ) => {
+    const contract = new Contract(
+      address,
+      ['function comptrollerImplementation() view returns (address)'],
+      provider
+    );
+
+    return contract.comptrollerImplementation() as Promise<`0x${string}`>;
+  },
+  '0xc0Da02939E1441F497fd74F78cE7Decb17B66529': async (
+    address: `0x${string}`,
+    provider: StaticJsonRpcProvider
+  ) => {
+    const contract = new Contract(
+      address,
+      ['function implementation() view returns (address)'],
+      provider
+    );
+
+    return contract.implementation() as Promise<`0x${string}`>;
+  }
+} as const;
 
 export async function getAbi(
   chainId: number,
@@ -28,11 +56,27 @@ export async function getAbi(
     return cachedAbi;
   }
 
+  if (address in CUSTOM_PROXY_RESOLVERS) {
+    const resolver =
+      CUSTOM_PROXY_RESOLVERS[address as keyof typeof CUSTOM_PROXY_RESOLVERS];
+
+    const provider = new StaticJsonRpcProvider(
+      `https://rpc.snapshot.org/${chainId}`,
+      chainId
+    );
+
+    const implementationAddress = await resolver(address, provider);
+
+    return getAbi(chainId, implementationAddress);
+  }
+
   const res = await fetch(
     `https://sourcify.dev/server/v2/contract/${chainId}/${address}?fields=abi,proxyResolution`
   );
 
-  if (!res.ok) throw new Error('Failed to fetch ABI from Sourcify');
+  if (!res.ok) {
+    throw new Error('Failed to fetch ABI from Sourcify');
+  }
 
   const { abi, proxyResolution } = await res.json();
 
