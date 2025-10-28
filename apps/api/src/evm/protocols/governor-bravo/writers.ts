@@ -1,6 +1,6 @@
 import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks, utils } from '@snapshot-labs/sx';
-import { createPublicClient, getAddress, http } from 'viem';
+import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
 import GovernorModuleAbi from './abis/GovernorModule';
 import TimelockAbi from './abis/Timelock';
 import logger from './logger';
@@ -356,16 +356,22 @@ export function createWriters(
     const proposalBody = event.args.description || '';
 
     const execution = await Promise.all(
-      event.args.targets.map((target, index) =>
-        utils.execution.convertToTransaction(
+      event.args.targets.map((target, index) => {
+        const calldataSignature = keccak256(
+          toHex(event.args.signatures[index] ?? '')
+        ).slice(0, 10) as `0x${string}`;
+
+        const calldata = (event.args.calldatas[index] ?? '').slice(2);
+
+        return utils.execution.convertToTransaction(
           {
             target,
-            calldata: event.args.calldatas[index] ?? '0x',
+            calldata: `${calldataSignature}${calldata}`,
             value: event.args.values[index]?.toString() ?? '0'
           },
           protocolConfig.chainId
-        )
-      )
+        );
+      })
     );
 
     proposalMetadata.title = getProposalTitle(proposalBody);
