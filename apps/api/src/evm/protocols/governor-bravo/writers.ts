@@ -357,16 +357,21 @@ export function createWriters(
 
     const execution = await Promise.all(
       event.args.targets.map((target, index) => {
-        const calldataSignature = keccak256(
-          toHex(event.args.signatures[index] ?? '')
-        ).slice(0, 10) as `0x${string}`;
+        const signature = event.args.signatures[index] ?? '';
 
-        const calldata = (event.args.calldatas[index] ?? '').slice(2);
+        let calldata: `0x${string}` | '';
+        if (signature) {
+          const sighash = keccak256(toHex(signature)).slice(0, 10);
+          calldata =
+            `${sighash}${(event.args.calldatas[index] ?? '').slice(2)}` as `0x${string}`;
+        } else {
+          calldata = event.args.calldatas[index] ?? '';
+        }
 
         return utils.execution.convertToTransaction(
           {
             target,
-            calldata: `${calldataSignature}${calldata}`,
+            calldata,
             value: event.args.values[index]?.toString() ?? '0'
           },
           protocolConfig.chainId
