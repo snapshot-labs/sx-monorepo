@@ -12,7 +12,7 @@ type Abi = (Fragment | JsonFragment | string)[];
 
 type CallInfo = {
   target: `0x${string}`;
-  calldata: `0x${string}`;
+  calldata: `0x${string}` | '';
   value: string;
 };
 
