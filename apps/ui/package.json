@@ -15,6 +15,7 @@
     "build": "vite build",
     "codegen": "graphql-codegen",
     "lint": "eslint \"./src/**/*.{ts,vue}\" --ignore-pattern \"**/gql/**\"",
+    "lint:fix": "yarn lint --fix",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
