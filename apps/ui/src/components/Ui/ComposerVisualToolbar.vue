@@ -34,7 +34,7 @@ function setLink() {
 </script>
 
 <template>
-  <bubble-menu
+  <BubbleMenu
     :editor="editor"
     :options="{
       shift: {
@@ -114,7 +114,7 @@ function setLink() {
         ”
       </button>
     </div>
-  </bubble-menu>
+  </BubbleMenu>
 </template>
 
 <style lang="scss" scoped>
