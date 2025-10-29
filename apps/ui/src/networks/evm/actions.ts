@@ -25,7 +25,11 @@ import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import {
+  createErc1155Metadata,
+  getChainIdKind,
+  verifyNetwork
+} from '@/helpers/utils';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   buildMetadata,
@@ -715,11 +719,11 @@ export function createActions(
       chainIdOverride?: ChainId,
       delegateesMetadata?: Record<string, any>
     ) => {
-      if (typeof chainIdOverride === 'string') {
+      if (chainIdOverride && getChainIdKind(chainIdOverride) !== 'evm') {
         throw new Error('Chain ID must be a number for EVM networks');
       }
 
-      const currentChainId = chainIdOverride || chainId;
+      const currentChainId = Number(chainIdOverride) || chainId;
       await verifyNetwork(web3, currentChainId);
 
       let contractParams: {

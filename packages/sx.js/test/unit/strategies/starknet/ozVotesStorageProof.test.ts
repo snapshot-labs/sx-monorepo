@@ -23,7 +23,7 @@ describe('ozVotesStorageProof', () => {
   });
 
   it('should throw for non-ethereum address', async () => {
-    expect(
+    await expect(
       ozVotesStorageProofStrategy.getParams(
         'vote',
         '0x06AbD599AB530c5b3bc603111Bdd20d77890Db330402dC870Fc9866f50eD6d2A',

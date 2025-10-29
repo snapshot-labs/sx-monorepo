@@ -1,14 +1,10 @@
-type Execution = {
-  to: string;
-  value: string;
-  data: string;
-};
+import { Transaction } from '../../types';
 
 export type Propose = {
   spaceId: string;
   title: string;
   body: string;
-  executions: Execution[];
+  executions: Transaction[];
 };
 
 export type Vote = {

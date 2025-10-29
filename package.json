@@ -10,12 +10,15 @@
   "scripts": {
     "dev": "turbo run dev --filter=!mana --filter=!api",
     "dev:interactive": "node --experimental-strip-types --no-warnings=ExperimentalWarning ./scripts/dev-interactive.ts",
+    "dev:electron": "turbo run dev:electron",
     "build": "turbo run build",
+    "build:electron": "ELECTRON=true turbo run build:electron",
     "test": "turbo run test",
     "test:integration": "turbo run test:integration",
     "test:e2e": "playwright test --config=playwright.config.ts",
     "test:e2e:headed": "playwright test --config=playwright.config.ts --headed",
     "lint": "turbo run lint lint:scripts",
+    "lint:fix": "turbo run lint:fix && yarn lint:scripts --fix",
     "lint:scripts": "eslint scripts/ --ext .ts",
     "typecheck": "turbo run typecheck",
     "release": "yarn build && changeset publish"
