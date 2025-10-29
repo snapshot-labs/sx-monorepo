@@ -1,5 +1,10 @@
 import { NetworkID } from '../../types';
 
+type AuthenticatorType =
+  | 'OpenZeppelinAuthenticator'
+  | 'OpenZeppelinAuthenticatorSignatureV4'
+  | 'OpenZeppelinAuthenticatorSignatureV5';
+
 type Governance = {
   name: string;
   about?: string;
@@ -9,6 +14,7 @@ type Governance = {
   twitter?: string;
   farcaster?: string;
   address: `0x${string}`;
+  authenticators: AuthenticatorType[];
   startBlock: number;
 };
 
@@ -26,6 +32,10 @@ export const GOVERNANCES: Partial<
       twitter: 'ensdomains',
       farcaster: 'ensdomains',
       address: '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3',
+      authenticators: [
+        'OpenZeppelinAuthenticator',
+        'OpenZeppelinAuthenticatorSignatureV4'
+      ],
       startBlock: 13533772
     }
   },
@@ -33,7 +43,11 @@ export const GOVERNANCES: Partial<
     Sekhmet: {
       name: 'Sekhmet',
       address: '0xB314FAC800bD0F5646e1a230b212Ed88936648e0',
-      startBlock: 9187848
+      startBlock: 9187848,
+      authenticators: [
+        'OpenZeppelinAuthenticator',
+        'OpenZeppelinAuthenticatorSignatureV5'
+      ]
     }
   }
 };
