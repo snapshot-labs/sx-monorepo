@@ -189,6 +189,12 @@ export async function getBalances(
         value: 0,
         change: 0
       }))
-      .filter(token => !token?.symbol?.includes('.'))
+      .filter(token => {
+        if (!token.name) return false;
+        if (!token.symbol) return false;
+        if (token.symbol.includes('.')) return false;
+
+        return true;
+      })
   ];
 }
