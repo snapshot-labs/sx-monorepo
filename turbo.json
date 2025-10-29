@@ -12,6 +12,7 @@
       "outputs": ["out/**"]
     },
     "lint": {},
+    "lint:fix": {},
     "//#lint:scripts": {},
     "typecheck": {
       "dependsOn": ["^build"]

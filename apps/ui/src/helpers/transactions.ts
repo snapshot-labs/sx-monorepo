@@ -1,18 +1,18 @@
 import { Interface } from '@ethersproject/abi';
 import { parseUnits } from '@ethersproject/units';
-import { utils } from '@snapshot-labs/sx';
-import { Nft } from '@/composables/useNfts';
-import { abis } from '@/helpers/abis';
-import { Token } from '@/helpers/alchemy';
-import { resolver } from '@/helpers/resolver';
-import { getSalt } from '@/helpers/utils';
 import {
   ContractCallTransaction,
   SendNftTransaction,
   SendTokenTransaction,
   StakeTokenTransaction,
-  Transaction
-} from '@/types';
+  Transaction,
+  utils
+} from '@snapshot-labs/sx';
+import { Nft } from '@/composables/useNfts';
+import { abis } from '@/helpers/abis';
+import { Token } from '@/helpers/alchemy';
+import { resolver } from '@/helpers/resolver';
+import { getSalt } from '@/helpers/utils';
 
 export async function createSendTokenTransaction({
   token,
