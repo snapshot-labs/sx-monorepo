@@ -25,8 +25,8 @@ type VerifyOptions = {
   ecdsa?: boolean;
   /** Allow EIP-1271 signatures. */
   eip1271?: boolean;
-  /** Allow Starknet signatures. */
-  starknet?: boolean;
+  /** Allow SNIP-6 signatures. */
+  snip6?: boolean;
 };
 
 const ERC1271_ABI = [
@@ -83,7 +83,7 @@ export const verifyEip1271Signature: SignatureVerifier = async (
   return false;
 };
 
-export const verifyStarknetSignature: SignatureVerifier = async (
+export const verifySnip6Signature: SignatureVerifier = async (
   domain,
   address,
   types,
@@ -155,8 +155,8 @@ export async function verifySignature(
 ) {
   const params = [address, types, message, signature, primaryType] as const;
 
-  if (options.starknet && 'revision' in domain) {
-    const valid = await verifyStarknetSignature(
+  if (options.snip6 && 'revision' in domain) {
+    const valid = await verifySnip6Signature(
       domain as Required<StarknetDomain>,
       ...params
     );

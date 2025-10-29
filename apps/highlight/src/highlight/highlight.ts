@@ -112,7 +112,7 @@ export default class Highlight {
       {
         ecdsa: true,
         eip1271: true,
-        starknet: true
+        snip6: true
       }
     );
 

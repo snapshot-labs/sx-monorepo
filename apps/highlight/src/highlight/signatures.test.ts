@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   verifyEcdsaSignature,
   verifyEip1271Signature,
-  verifyStarknetSignature
+  verifySnip6Signature
 } from './signatures';
 
 function createDomain(chainId: number, salt: string) {
@@ -112,7 +112,7 @@ describe('eip1271', () => {
   });
 });
 
-describe('Starknet', () => {
+describe('SNIP-6', () => {
   function createStarknetDomain(chainId: string) {
     return {
       name: 'highlight',
@@ -131,7 +131,7 @@ describe('Starknet', () => {
     const signature =
       '0x2,0x0,0xec31c589d1f36a04d2855cc464ce048bb925430653f146c3d5edc31282405d,0x3eec5cfade99ac1a53ce6da51f9d1898e73bd4e95dc96f10235356288eb1fc8,0x7cd0a64f646aa3e425605fabf14e59cb877654069a475751ed183e670afcbe9,0x0,0x424fd8e0158c9d744ca6c22e7c48a1b46914a98e0e2fc6e78e69a7d5a7b84b4,0x1b9669c4b965e2c4fa1d7b886b98aa14ec79bcd41505a3d7ec1c6f91a45587f,0x7998d0b6f4ecfaea77667a0abd40176fde7b9b81f61fdbd55985184a607da04';
 
-    const result = await verifyStarknetSignature(
+    const result = await verifySnip6Signature(
       createStarknetDomain('0x534e5f4d41494e'),
       message.from,
       STARKNET_ALIASES_CONFIG.types.setAlias,
@@ -152,7 +152,7 @@ describe('Starknet', () => {
     // Invalid signature format (not comma-separated)
     const signature = '0xinvalidsignature';
 
-    const result = await verifyStarknetSignature(
+    const result = await verifySnip6Signature(
       createStarknetDomain('0x534e5f4d41494e'),
       message.from,
       STARKNET_ALIASES_CONFIG.types.setAlias,
@@ -173,7 +173,7 @@ describe('Starknet', () => {
     const signature =
       '0x2,0x0,0xec31c589d1f36a04d2855cc464ce048bb925430653f146c3d5edc31282405d,0x3eec5cfade99ac1a53ce6da51f9d1898e73bd4e95dc96f10235356288eb1fc8,0x7cd0a64f646aa3e425605fabf14e59cb877654069a475751ed183e670afcbe9,0x0,0x424fd8e0158c9d744ca6c22e7c48a1b46914a98e0e2fc6e78e69a7d5a7b84b4,0x1b9669c4b965e2c4fa1d7b886b98aa14ec79bcd41505a3d7ec1c6f91a45587f,0x7998d0b6f4ecfaea77667a0abd40176fde7b9b81f61fdbd55985184a607da04';
 
-    const result = await verifyStarknetSignature(
+    const result = await verifySnip6Signature(
       createStarknetDomain('test'), // Unsupported chainId
       message.from,
       STARKNET_ALIASES_CONFIG.types.setAlias,
