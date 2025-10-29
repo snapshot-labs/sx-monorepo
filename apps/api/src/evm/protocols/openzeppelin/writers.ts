@@ -9,7 +9,7 @@ import IGovernorAbi from './abis/IGovernor';
 import TimelockControllerAbi from './abis/TimelockController';
 import { GOVERNANCES } from './governances';
 import logger from './logger';
-import { convertChoice, getProposalTitle } from './utils';
+import { convertChoice, getProposalBody, getProposalTitle } from './utils';
 import {
   ExecutionStrategy,
   Leaderboard,
@@ -376,7 +376,7 @@ export function createWriters(
     );
 
     proposalMetadata.title = getProposalTitle(proposalBody);
-    proposalMetadata.body = proposalBody;
+    proposalMetadata.body = getProposalBody(proposalBody);
     proposalMetadata.choices = ['For', 'Against', 'Abstain'];
     proposalMetadata.execution = JSON.stringify(execution);
 
