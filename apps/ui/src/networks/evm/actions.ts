@@ -307,6 +307,7 @@ export function createActions(
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
+          hasReason: false,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
@@ -417,6 +418,7 @@ export function createActions(
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
+        hasReason: false,
         ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
@@ -501,6 +503,25 @@ export function createActions(
       await verifyNetwork(web3, chainId);
       const signer = getSigner(web3);
 
+      const isContract = await getIsContract(account, connectorType);
+
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        provider
+      );
+
+      const { relayerType, authenticator, strategies } =
+        pickAuthenticatorAndStrategies({
+          authenticators: proposal.space.authenticators,
+          strategies: proposal.strategies,
+          strategiesIndices: proposal.strategies_indices,
+          connectorType,
+          isContract,
+          hasReason: !!reason,
+          ignoreRelayer: !relayer?.hasMinimumBalance
+        });
+
       if (proposal.space.protocol === 'governor-bravo') {
         return governorBravoClient.vote({
           signer,
@@ -528,24 +549,6 @@ export function createActions(
           }
         });
       }
-
-      const isContract = await getIsContract(account, connectorType);
-
-      const relayer = await getRelayerInfo(
-        proposal.space.id,
-        proposal.network,
-        provider
-      );
-
-      const { relayerType, authenticator, strategies } =
-        pickAuthenticatorAndStrategies({
-          authenticators: proposal.space.authenticators,
-          strategies: proposal.strategies,
-          strategiesIndices: proposal.strategies_indices,
-          connectorType,
-          isContract,
-          ignoreRelayer: !relayer?.hasMinimumBalance
-        });
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {

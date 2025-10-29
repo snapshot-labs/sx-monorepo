@@ -35,6 +35,7 @@ export function createConstants(
       [config.Authenticators.EthSigV2]: {
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
@@ -42,6 +43,7 @@ export function createConstants(
         priority: 1,
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
@@ -49,18 +51,44 @@ export function createConstants(
         priority: 2,
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
         connectors: EVM_CONNECTORS
       },
       // Governor Bravo
       GovernorBravoAuthenticator: {
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
+        connectors: EVM_CONNECTORS
+      },
+      GovernorBravoAuthenticatorSignature: {
+        isSupported: true,
+        isContractSupported: false,
+        isReasonSupported: false,
+        relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
       // OpenZeppelin
       OpenZeppelinAuthenticator: {
+        priority: 2,
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
+        connectors: EVM_CONNECTORS
+      },
+      OpenZeppelinAuthenticatorSignatureV4: {
+        priority: 1,
+        isSupported: true,
+        isContractSupported: false,
+        isReasonSupported: false,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      OpenZeppelinAuthenticatorSignatureV5: {
+        isSupported: true,
+        isContractSupported: true,
+        isReasonSupported: true,
+        relayerType: 'evm',
         connectors: EVM_CONNECTORS
       }
     };
