@@ -611,7 +611,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         >
           <template v-if="isModified"> Save </template>
           <template v-else-if="space.additionalRawData?.hibernated">
-            Reactivate space
+            Reactivate
           </template>
         </UiButton>
       </div>
