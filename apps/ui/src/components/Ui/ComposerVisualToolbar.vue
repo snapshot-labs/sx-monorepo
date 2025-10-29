@@ -36,11 +36,15 @@ function setLink() {
 <template>
   <BubbleMenu
     :editor="editor"
-    :options="{
-      shift: {
-        boundary: clippingContainer
-      }
-    }"
+    :options="
+      clippingContainer
+        ? {
+            shift: {
+              boundary: clippingContainer
+            }
+          }
+        : {}
+    "
   >
     <div class="bubble-menu" data-no-sidebar-swipe>
       <button
