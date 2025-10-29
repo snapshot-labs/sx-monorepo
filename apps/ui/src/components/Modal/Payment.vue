@@ -49,6 +49,7 @@ const { isPending, assetsMap } = useBalances({
       : null;
   })
 });
+const { isWhiteLabel } = useWhiteLabel();
 
 const selectedTokenAddress = ref<string>('');
 const showPicker = ref(false);
@@ -238,7 +239,14 @@ watch(
         <UiCheckbox v-model="isTermsAccepted" class="text-start">
           <div class="text-skin-text leading-[22px] top-[-1px] relative">
             I have read and agree to the
-            <AppLink is-external :to="{ name: 'site-terms' }" @click.stop
+            <AppLink
+              is-external
+              :to="
+                isWhiteLabel
+                  ? 'https://snapshot.box/#/terms-of-use'
+                  : { name: 'site-terms' }
+              "
+              @click.stop
               >Terms of service</AppLink
             >.
           </div>
