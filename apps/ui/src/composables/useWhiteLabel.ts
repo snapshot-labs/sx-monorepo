@@ -6,7 +6,7 @@ import { SkinSettings, Space } from '@/types';
 // when redirecting from whitelabel to main app
 const GLOBAL_PATHS = { contacts: 'settings/contacts' };
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
-const WHITE_LABEL_MAPPING = import.meta.env.VITE_WHITE_LABEL_MAPPING;
+const WHITELABEL_MAPPING = import.meta.env.VITE_WHITELABEL_MAPPING;
 const domain = window.location.hostname;
 
 // Hardcoded whitelabel mappings for onchain spaces
@@ -49,7 +49,7 @@ const MAPPING = {
 
 const isWhiteLabel = ref(false);
 const isCustomDomain = ref(
-  WHITE_LABEL_MAPPING ? true : domain !== DEFAULT_DOMAIN
+  WHITELABEL_MAPPING ? true : domain !== DEFAULT_DOMAIN
 );
 const failed = ref(false);
 
@@ -65,9 +65,9 @@ async function getSpace(domain: string): Promise<Space | null> {
 
   // Resolve white label domain locally if mapping is provided
   // for easier local testing
-  // e.g. VITE_WHITE_LABEL_MAPPING='localhost;s:snapshot.eth'
-  if (WHITE_LABEL_MAPPING) {
-    const [localDomain, localSpaceId] = WHITE_LABEL_MAPPING.split(';');
+  // e.g. VITEWHITE_LABEL_MAPPING='localhost;s:snapshot.eth'
+  if (WHITELABEL_MAPPING) {
+    const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
     if (domain === localDomain) {
       const [network, id] = localSpaceId.split(':');
       spaceNetwork = network;
