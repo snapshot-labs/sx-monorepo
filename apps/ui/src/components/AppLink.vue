@@ -5,6 +5,10 @@ const props = defineProps<
   Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; isExternal?: boolean }
 >();
 
+defineEmits<{
+  (e: 'click'): void;
+}>();
+
 const { isWhiteLabel } = useWhiteLabel();
 const router = useRouter();
 
@@ -51,16 +55,18 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
     v-if="isExternalLink(props.to)"
     :href="resolveToUrl(props.to)"
     target="_blank"
+    @click="$emit('click')"
   >
     <slot />
   </a>
-  <router-link v-else-if="props.to" :to="normalize(props.to)">
+  <router-link
+    v-else-if="props.to"
+    :to="normalize(props.to)"
+    @click="$emit('click')"
+  >
     <slot />
   </router-link>
-  <button v-else-if="$attrs.onClick" type="button" v-bind="$attrs">
+  <button v-else type="button" @click="$emit('click')">
     <slot />
   </button>
-  <div v-else>
-    <slot />
-  </div>
 </template>
