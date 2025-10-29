@@ -221,7 +221,7 @@ type Proposal {
   space: Space!
   "User who created the proposal"
   author: User!
-  "Hash for tracking proposal execution"
+  "Hash for tracking proposal execution. On OpenZeppelin it contains descriptionHash"
   execution_hash: String!
   "Proposal metadata containing title, body, and choices"
   metadata: ProposalMetadataItem

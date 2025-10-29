@@ -1,6 +1,6 @@
 import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks, utils } from '@snapshot-labs/sx';
-import { createPublicClient, getAddress, http } from 'viem';
+import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
 import ERC20VotesAbi from './abis/ERC20Votes';
 import GovernorSettingsAbi from './abis/GovernorSettings';
 import GovernorTimelockControlAbi from './abis/GovernorTimelockControl';
@@ -9,7 +9,7 @@ import IGovernorAbi from './abis/IGovernor';
 import TimelockControllerAbi from './abis/TimelockController';
 import { GOVERNANCES } from './governances';
 import logger from './logger';
-import { convertChoice, getProposalTitle } from './utils';
+import { convertChoice, getProposalBody, getProposalTitle } from './utils';
 import {
   ExecutionStrategy,
   Leaderboard,
@@ -376,9 +376,10 @@ export function createWriters(
     );
 
     proposalMetadata.title = getProposalTitle(proposalBody);
-    proposalMetadata.body = proposalBody;
+    proposalMetadata.body = getProposalBody(proposalBody);
     proposalMetadata.choices = ['For', 'Against', 'Abstain'];
     proposalMetadata.execution = JSON.stringify(execution);
+    proposal.execution_hash = keccak256(toHex(proposalBody));
 
     let leaderboardItem = await Leaderboard.loadEntity(
       leaderboardId,
