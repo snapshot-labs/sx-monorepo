@@ -48,20 +48,28 @@ export const createNetworkHandler = (chainId: number) => {
     provider
   });
   const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
+  const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const l1ExecutorClient = new clients.L1Executor();
 
   async function send(id: number, params: any, res: Response) {
     try {
       const { signatureData } = params.envelope;
-      const { types } = signatureData;
+      const { types, domain } = signatureData;
       let receipt;
 
       logger.info({ params }, 'Processing send request');
 
       if (signatureData.authenticatorType.startsWith('OpenZeppelin')) {
-        const signer = getWallet(params.envelope.data.spaceId);
+        const signer = getWallet(domain.verifyingContract);
 
         receipt = await openZeppelinClient.vote({
+          signer,
+          envelope: params.envelope
+        });
+      } else if (signatureData.authenticatorType.startsWith('GovernorBravo')) {
+        const signer = getWallet(domain.verifyingContract);
+
+        receipt = await governorBravoClient.vote({
           signer,
           envelope: params.envelope
         });

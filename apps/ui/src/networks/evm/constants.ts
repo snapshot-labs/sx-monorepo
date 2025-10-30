@@ -56,6 +56,7 @@ export function createConstants(
       },
       // Governor Bravo
       GovernorBravoAuthenticator: {
+        priority: 1,
         isSupported: true,
         isContractSupported: true,
         isReasonSupported: true,

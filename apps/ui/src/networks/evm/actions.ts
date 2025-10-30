@@ -16,6 +16,7 @@ import {
   evmPolygon,
   evmSepolia,
   getEvmStrategy,
+  GovernorBravoAuthenticator,
   OpenZeppelinAuthenticator
 } from '@snapshot-labs/sx';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
@@ -98,6 +99,9 @@ export function createActions(
     chainId
   });
   const governorBravoClient = new clients.GovernorBravoEthereumTx();
+  const governorBravoSigClient = new clients.GovernorBravoEthereumSig({
+    chainId
+  });
   const ethSigClient = new clients.EvmEthereumSig({
     ...clientOpts,
     manaUrl: MANA_URL
@@ -527,6 +531,19 @@ export function createActions(
         });
 
       if (proposal.space.protocol === 'governor-bravo') {
+        if (relayerType === 'evm') {
+          return governorBravoSigClient.vote({
+            signer,
+            authenticatorType: authenticator as GovernorBravoAuthenticator,
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: Number(proposal.proposal_id),
+              choice: getSdkChoice(choice),
+              reason
+            }
+          });
+        }
+
         return governorBravoClient.vote({
           signer,
           envelope: {

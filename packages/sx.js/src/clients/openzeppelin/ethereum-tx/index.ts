@@ -5,7 +5,11 @@ import { toUtf8Bytes } from '@ethersproject/strings';
 import { Envelope, Propose, Vote } from '../types';
 import IGovernorV4Abi from './abis/IGovernorV4.json';
 import IGovernorV5Abi from './abis/IGovernorV5.json';
-import { getRSVFromSig, MetaTransaction } from '../../../utils/encoding';
+import {
+  getRSVFromSig,
+  hexPadLeft,
+  MetaTransaction
+} from '../../../utils/encoding';
 
 type CallOptions = {
   noWait?: boolean;
@@ -33,8 +37,8 @@ export class EthereumTx {
           choice,
           signature,
           v,
-          r,
-          s
+          hexPadLeft(r.toHex()),
+          hexPadLeft(s.toHex())
         );
       } else if (authenticatorType === 'OpenZeppelinAuthenticatorSignatureV5') {
         promise = reason
