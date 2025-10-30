@@ -4810,6 +4810,16 @@
     "@stablelib/random" "^1.0.2"
     "@stablelib/wipe" "^1.0.1"
 
+"@starknet-io/starknet-types-07@npm:@starknet-io/types-js@~0.7.10":
+  version "0.7.10"
+  resolved "https://registry.yarnpkg.com/@starknet-io/types-js/-/types-js-0.7.10.tgz#d21dc973d0cd04d7b6293ce461f2f06a5873c760"
+  integrity sha512-1VtCqX4AHWJlRRSYGSn+4X1mqolI1Tdq62IwzoU2vUuEE72S1OlEeGhpvd6XsdqXcfHmVzYfj8k1XtKBQqwo9w==
+
+"@starknet-io/starknet-types-08@npm:@starknet-io/types-js@~0.8.4":
+  version "0.8.4"
+  resolved "https://registry.yarnpkg.com/@starknet-io/types-js/-/types-js-0.8.4.tgz#bbc07422e89cb5bac45da28e8457f0f17535950d"
+  integrity sha512-0RZ3TZHcLsUTQaq1JhDSCM8chnzO4/XNsSCozwDET64JK5bjFDIf2ZUkta+tl5Nlbf4usoU7uZiDI/Q57kt2SQ==
+
 "@starknet-io/types-js@^0.7.7":
   version "0.7.7"
   resolved "https://registry.yarnpkg.com/@starknet-io/types-js/-/types-js-0.7.7.tgz#444be5e4e585ec6f599d42d3407280d98b2dfdf8"
@@ -6339,6 +6349,16 @@ abbrev@^2.0.0:
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-2.0.0.tgz#cf59829b8b4f03f89dda2771cb7f3653828c89bf"
   integrity sha512-6/mh1E2u2YgEsCHdY0Yx5oW+61gZU+1vXaoiHHrpKeuRNNgFvS+/jrwHiQhB5apAf5oB7UB7E19ol2R2LKH8hQ==
 
+abi-wan-kanabi@2.2.4, abi-wan-kanabi@^2.2.3:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/abi-wan-kanabi/-/abi-wan-kanabi-2.2.4.tgz#47ebbafbb7f8df81773efbdcca60cdda8008c821"
+  integrity sha512-0aA81FScmJCPX+8UvkXLki3X1+yPQuWxEkqXBVKltgPAK79J+NB+Lp5DouMXa7L6f+zcRlIA/6XO7BN/q9fnvg==
+  dependencies:
+    ansicolors "^0.3.2"
+    cardinal "^2.1.1"
+    fs-extra "^10.0.0"
+    yargs "^17.7.2"
+
 abi-wan-kanabi@^1.0.1, abi-wan-kanabi@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/abi-wan-kanabi/-/abi-wan-kanabi-1.0.3.tgz#0d8607f2a2ccb2151a69debea1c3bb68b76c5aa2"
@@ -6366,16 +6386,6 @@ abi-wan-kanabi@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/abi-wan-kanabi/-/abi-wan-kanabi-2.2.2.tgz#82c48e8fa08d9016cf92d3d81d494cc60e934693"
   integrity sha512-sTCv2HyNIj1x2WFUoc9oL8ZT9liosrL+GoqEGZJK1kDND096CfA7lwx06vLxLWMocQ41FQXO3oliwoh/UZHYdQ==
-  dependencies:
-    ansicolors "^0.3.2"
-    cardinal "^2.1.1"
-    fs-extra "^10.0.0"
-    yargs "^17.7.2"
-
-abi-wan-kanabi@^2.2.3:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/abi-wan-kanabi/-/abi-wan-kanabi-2.2.4.tgz#47ebbafbb7f8df81773efbdcca60cdda8008c821"
-  integrity sha512-0aA81FScmJCPX+8UvkXLki3X1+yPQuWxEkqXBVKltgPAK79J+NB+Lp5DouMXa7L6f+zcRlIA/6XO7BN/q9fnvg==
   dependencies:
     ansicolors "^0.3.2"
     cardinal "^2.1.1"
@@ -14628,21 +14638,20 @@ starknet@6.11.0:
     ts-mixer "^6.0.3"
     url-join "^4.0.1"
 
-starknet@6.23.1:
-  version "6.23.1"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-6.23.1.tgz#c7096b202eafa2d09b748fc1a11751d050c20555"
-  integrity sha512-vQV9luXpmwZZs9RVZaRwm2iD8T0PYx1AzgZeQsCvD89tR0HwUF0paty27ZzuJrdPe0CmAs/ipAYFCE55jbj0RQ==
+starknet@7.6.4:
+  version "7.6.4"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-7.6.4.tgz#8ca2f3decbecde6316e7561b39f6a296a7fa33b5"
+  integrity sha512-FB20IaLCDbh/XomkB+19f5jmNxG+RzNdRO7QUhm7nfH81UPIt2C/MyWAlHCYkbv2wznSEb73wpxbp9tytokTgQ==
   dependencies:
     "@noble/curves" "1.7.0"
     "@noble/hashes" "1.6.0"
     "@scure/base" "1.2.1"
     "@scure/starknet" "1.1.0"
-    abi-wan-kanabi "^2.2.3"
-    fetch-cookie "~3.0.0"
-    isomorphic-fetch "~3.0.0"
+    "@starknet-io/starknet-types-07" "npm:@starknet-io/types-js@~0.7.10"
+    "@starknet-io/starknet-types-08" "npm:@starknet-io/types-js@~0.8.4"
+    abi-wan-kanabi "2.2.4"
     lossless-json "^4.0.1"
     pako "^2.0.4"
-    starknet-types-07 "npm:@starknet-io/types-js@^0.7.10"
     ts-mixer "^6.0.3"
 
 starknet@^5.19.3, starknet@~5.19.3:

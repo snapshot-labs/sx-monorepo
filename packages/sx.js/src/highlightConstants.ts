@@ -5,7 +5,7 @@ export const HIGHLIGHT_DOMAIN = {
 
 export const HIGHLIGHT_STARKNET_DOMAIN = {
   ...HIGHLIGHT_DOMAIN,
-  revision: '1'
+  revision: 1
 };
 
 export const STARKNET_DOMAIN_TYPE = [
