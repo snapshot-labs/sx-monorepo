@@ -145,7 +145,7 @@ async function verifyEip1271SignatureWithAbi(
 }
 
 export async function verifySignature(
-  domain: TypedDataDomain | StarknetDomain,
+  domain: Required<TypedDataDomain> | Required<StarknetDomain>,
   address: string,
   types: Record<string, TypedDataField[]>,
   message: Record<string, any>,

@@ -1,5 +1,7 @@
+import { TypedDataDomain } from '@ethersproject/abstract-signer';
 import { HIGHLIGHT_DOMAIN, HIGHLIGHT_STARKNET_DOMAIN } from '@snapshot-labs/sx';
 import AsyncLock from 'async-lock';
+import { StarknetDomain } from 'starknet';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';
 import Process from './process';
@@ -94,13 +96,16 @@ export default class Highlight {
     }
 
     const verifyingDomain = domain.revision
-      ? { ...HIGHLIGHT_STARKNET_DOMAIN, chainId: domain.chainId }
-      : {
+      ? ({
+          ...HIGHLIGHT_STARKNET_DOMAIN,
+          chainId: String(domain.chainId)
+        } as Required<StarknetDomain>)
+      : ({
           ...HIGHLIGHT_DOMAIN,
           chainId: domain.chainId,
           salt: domain.salt.toString(),
           verifyingContract: domain.verifyingContract
-        };
+        } as Required<TypedDataDomain>);
 
     const isSignatureValid = await verifySignature(
       verifyingDomain,
