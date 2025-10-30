@@ -6,6 +6,7 @@ import {
 import { Web3Provider } from '@ethersproject/providers';
 import { clients, TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
 import gql from 'graphql-tag';
+import { validateAndParseAddress } from 'starknet';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
 import { pinPineapple } from '@/helpers/pin';
 import { Alias } from '@/types';
@@ -43,6 +44,10 @@ export function useTownhall() {
     `${HIGHLIGHT_URL}/highlight`
   );
 
+  const highlightStarknetClient = new clients.HighlightStarknetSigClient(
+    `${HIGHLIGHT_URL}/highlight`
+  );
+
   function getSalt() {
     const buffer = new Uint8Array(32);
     crypto.getRandomValues(buffer);
@@ -71,7 +76,7 @@ export function useTownhall() {
     return aliases?.[0] ?? null;
   }
 
-  async function setAlias(web3: Web3Provider, alias: string) {
+  async function setEvmAlias(web3: Web3Provider, alias: string) {
     const signer = web3.getSigner();
     const address = await signer.getAddress();
 
@@ -82,19 +87,37 @@ export function useTownhall() {
     });
   }
 
-  async function wrapPromise(promise: Promise<any>) {
+  async function setStarknetAlias(web3: any, alias: string) {
+    const signer = web3.provider.account;
+    const from = validateAndParseAddress(signer.address);
+
+    return highlightStarknetClient.setAlias({
+      signer,
+      data: { from, alias },
+      salt: getSalt()
+    });
+  }
+
+  async function wrapPromise(
+    promise: Promise<any>,
+    client: any = highlightClient
+  ) {
     const envelope = await promise;
 
-    const receipt = await highlightClient.send(envelope);
+    const receipt = await client.send(envelope);
 
     console.log('receipt', receipt);
 
     return receipt;
   }
 
-  async function getAliasSigner(provider: Web3Provider) {
+  async function getAliasSigner(provider: any) {
+    const isStarknetSigner = auth.value?.connector.type === 'argentx';
+    const setAliasFn = isStarknetSigner ? setStarknetAlias : setEvmAlias;
+    const client = isStarknetSigner ? highlightStarknetClient : highlightClient;
+
     return alias.getAliasWallet(address =>
-      wrapPromise(setAlias(provider, address))
+      wrapPromise(setAliasFn(provider, address), client)
     );
   }
 

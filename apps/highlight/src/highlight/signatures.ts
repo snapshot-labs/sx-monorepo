@@ -7,13 +7,17 @@ import { Contract, ContractInterface } from '@ethersproject/contracts';
 import { _TypedDataEncoder } from '@ethersproject/hash';
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { verifyTypedData } from '@ethersproject/wallet';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { STARKNET_DOMAIN_TYPE } from '@snapshot-labs/sx';
+import { RpcProvider, StarknetDomain } from 'starknet';
 
 type SignatureVerifier = (
-  domain: Required<TypedDataDomain>,
+  domain: Required<TypedDataDomain> | Required<StarknetDomain>,
   address: string,
   types: Record<string, TypedDataField[]>,
   message: Record<string, any>,
-  signature: string
+  signature: string,
+  primaryType: string
 ) => Promise<boolean>;
 
 type VerifyOptions = {
@@ -21,6 +25,8 @@ type VerifyOptions = {
   ecdsa?: boolean;
   /** Allow EIP-1271 signatures. */
   eip1271?: boolean;
+  /** Allow SNIP-6 signatures. */
+  snip6?: boolean;
 };
 
 const ERC1271_ABI = [
@@ -77,6 +83,43 @@ export const verifyEip1271Signature: SignatureVerifier = async (
   return false;
 };
 
+export const verifySnip6Signature: SignatureVerifier = async (
+  domain,
+  address,
+  types,
+  message,
+  signature,
+  primaryType
+): Promise<boolean> => {
+  try {
+    const broviderId = (networks as any)[domain.chainId.toString()]?.broviderId;
+    if (!broviderId) {
+      throw new Error('Unsupported Starknet chainId');
+    }
+    const provider = new RpcProvider({
+      nodeUrl: `https://rpc.snapshot.org/${broviderId}`
+    });
+
+    // Check if the contract is deployed
+    // Will throw on non-deployed contract
+    await provider.getClassAt(address);
+
+    const data = {
+      domain: domain as StarknetDomain,
+      // Re-injecting the StarknetDomain type, stripped by the agent
+      types: { ...types, StarknetDomain: STARKNET_DOMAIN_TYPE },
+      primaryType,
+      message
+    };
+
+    await provider.verifyMessageInStarknet(data, signature.split(','), address);
+  } catch {
+    return false;
+  }
+
+  return true;
+};
+
 async function verifyEip1271SignatureWithAbi(
   chainId: BigNumberish,
   abi: ContractInterface,
@@ -102,22 +145,37 @@ async function verifyEip1271SignatureWithAbi(
 }
 
 export async function verifySignature(
-  domain: Required<TypedDataDomain>,
+  domain: Required<TypedDataDomain> | Required<StarknetDomain>,
   address: string,
   types: Record<string, TypedDataField[]>,
   message: Record<string, any>,
   signature: string,
+  primaryType: string,
   options: VerifyOptions
 ) {
-  const params = [domain, address, types, message, signature] as const;
+  const params = [address, types, message, signature, primaryType] as const;
+
+  if (options.snip6 && 'revision' in domain) {
+    const valid = await verifySnip6Signature(
+      domain as Required<StarknetDomain>,
+      ...params
+    );
+    return valid;
+  }
 
   if (options.ecdsa) {
-    const valid = await verifyEcdsaSignature(...params);
+    const valid = await verifyEcdsaSignature(
+      domain as Required<TypedDataDomain>,
+      ...params
+    );
     if (valid) return valid;
   }
 
   if (options.eip1271) {
-    const valid = await verifyEip1271Signature(...params);
+    const valid = await verifyEip1271Signature(
+      domain as Required<TypedDataDomain>,
+      ...params
+    );
     if (valid) return valid;
   }
 

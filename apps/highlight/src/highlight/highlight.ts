@@ -1,5 +1,7 @@
-import { HIGHLIGHT_DOMAIN } from '@snapshot-labs/sx';
+import { TypedDataDomain } from '@ethersproject/abstract-signer';
+import { HIGHLIGHT_DOMAIN, HIGHLIGHT_STARKNET_DOMAIN } from '@snapshot-labs/sx';
 import AsyncLock from 'async-lock';
+import { StarknetDomain } from 'starknet';
 import { Adapter } from './adapter/adapter';
 import Agent from './agent';
 import Process from './process';
@@ -79,7 +81,7 @@ export default class Highlight {
   }
 
   async validateSignature(process: Process, request: PostMessageRequest) {
-    const { domain, signer, signature, message } = request;
+    const { domain, signer, signature, message, primaryType } = request;
 
     const getAgent = this.agents[domain.verifyingContract.toLowerCase()];
     if (!getAgent) {
@@ -88,17 +90,22 @@ export default class Highlight {
 
     const agent = getAgent(process);
 
-    const entrypointTypes = agent.entrypoints[request.primaryType];
+    const entrypointTypes = agent.entrypoints[primaryType];
     if (!entrypointTypes) {
-      throw new Error(`Entrypoint not found: ${request.primaryType}`);
+      throw new Error(`Entrypoint not found: ${primaryType}`);
     }
 
-    const verifyingDomain = {
-      ...HIGHLIGHT_DOMAIN,
-      chainId: domain.chainId,
-      salt: domain.salt.toString(),
-      verifyingContract: domain.verifyingContract
-    };
+    const verifyingDomain = domain.revision
+      ? ({
+          ...HIGHLIGHT_STARKNET_DOMAIN,
+          chainId: String(domain.chainId)
+        } as Required<StarknetDomain>)
+      : ({
+          ...HIGHLIGHT_DOMAIN,
+          chainId: domain.chainId,
+          salt: domain.salt.toString(),
+          verifyingContract: domain.verifyingContract
+        } as Required<TypedDataDomain>);
 
     const isSignatureValid = await verifySignature(
       verifyingDomain,
@@ -106,9 +113,11 @@ export default class Highlight {
       entrypointTypes,
       message,
       signature,
+      primaryType,
       {
         ecdsa: true,
-        eip1271: true
+        eip1271: true,
+        snip6: true
       }
     );
 
