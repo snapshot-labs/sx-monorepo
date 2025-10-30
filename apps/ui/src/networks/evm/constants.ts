@@ -65,7 +65,7 @@ export function createConstants(
       GovernorBravoAuthenticatorSignature: {
         isSupported: true,
         isContractSupported: false,
-        isReasonSupported: false,
+        isReasonSupported: true,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },

@@ -23,13 +23,22 @@ export class EthereumTx {
       const { signature } = signatureData;
 
       const { r, s, v } = getRSVFromSig(signature);
-      promise = contract.castVoteBySig(
-        proposalId,
-        choice,
-        v,
-        hexPadLeft(r.toHex()),
-        hexPadLeft(s.toHex())
-      );
+      promise = reason
+        ? contract.castVoteWithReasonBySig(
+            proposalId,
+            choice,
+            reason,
+            v,
+            hexPadLeft(r.toHex()),
+            hexPadLeft(s.toHex())
+          )
+        : contract.castVoteBySig(
+            proposalId,
+            choice,
+            v,
+            hexPadLeft(r.toHex()),
+            hexPadLeft(s.toHex())
+          );
     } else {
       promise = reason
         ? contract.castVoteWithReason(proposalId, choice, reason)

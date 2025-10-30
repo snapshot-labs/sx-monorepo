@@ -5,7 +5,7 @@ import {
 } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import GovernorAbi from './abis/Governor.json';
-import { ballotTypes } from './types';
+import { ballotTypes, ballotWithReasonTypes } from './types';
 import { GovernorBravoAuthenticator } from '../../../types';
 import { EIP712Ballot, Envelope, SignatureData, Vote } from '../types';
 
@@ -67,19 +67,28 @@ export class EthereumSig {
     authenticatorType: GovernorBravoAuthenticator;
     data: Vote;
   }): Promise<Envelope<Vote>> {
-    const { spaceId, proposalId, choice: support } = data;
+    const { spaceId, proposalId, choice: support, reason } = data;
 
-    const message: EIP712Ballot = {
-      proposalId,
-      support
-    };
+    let message;
+    if (reason) {
+      message = {
+        proposalId,
+        support,
+        reason
+      };
+    } else {
+      message = {
+        proposalId,
+        support
+      };
+    }
 
     const signatureData = await this.sign(
       signer,
       authenticatorType,
       spaceId,
       message,
-      ballotTypes
+      reason ? ballotWithReasonTypes : ballotTypes
     );
 
     return {
