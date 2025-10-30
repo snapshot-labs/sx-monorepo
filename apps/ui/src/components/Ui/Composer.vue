@@ -2,7 +2,9 @@
 import UiLoading from '@/components/Ui/Loading.vue';
 import { lsGet, lsSet, stripHtmlTags } from '@/helpers/utils';
 
-const DEFAULT_EDITOR = 'markdown';
+type EditorType = 'visual' | 'markdown';
+
+const DEFAULT_EDITOR: EditorType = 'markdown';
 
 const model = defineModel<string>({ required: true });
 
@@ -13,9 +15,7 @@ defineProps<{
 }>();
 
 const previewEnabled = ref(false);
-const editorType = ref<'visual' | 'markdown'>(
-  lsGet('editor') ?? DEFAULT_EDITOR
-);
+const editorType = ref<EditorType>(lsGet('editor') ?? DEFAULT_EDITOR);
 
 function toggleEditor() {
   editorType.value = editorType.value === 'visual' ? 'markdown' : 'visual';
