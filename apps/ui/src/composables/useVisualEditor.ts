@@ -215,7 +215,9 @@ export function useVisualEditor(
       }
     }),
     Image,
+    // Allow non-text element to be selected, for visual feedback (e.g. image, table)
     Gapcursor,
+    // Color syntax highlighting in code blocks
     CodeBlockLowlight.configure({
       // prevent code blocks without language from showing as: ```null
       defaultLanguage: '',
@@ -304,11 +306,8 @@ export function useVisualEditor(
     isEdited.value = false;
   }
 
-  // FIXME: this is stripping all new lines
-  // FIXME: find a more efficient way to update the model
   const updateModelFn = useDebounceFn(updateModel, 1000);
 
-  // Watch for editor initialization and set up event listener
   watch(
     editor,
     newEditor => {
