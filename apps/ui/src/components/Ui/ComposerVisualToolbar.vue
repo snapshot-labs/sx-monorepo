@@ -48,6 +48,8 @@ function setLink() {
   >
     <div class="bubble-menu" data-no-sidebar-swipe>
       <button
+        type="button"
+        title="Bold"
         class="font-bold"
         :class="{ active: editor.isActive('bold') }"
         @click="editor.chain().focus().toggleBold().run()"
@@ -55,6 +57,8 @@ function setLink() {
         B
       </button>
       <button
+        type="button"
+        title="Italic"
         class="italic"
         :class="{ active: editor.isActive('italic') }"
         @click="editor.chain().focus().toggleItalic().run()"
@@ -62,6 +66,8 @@ function setLink() {
         I
       </button>
       <button
+        type="button"
+        title="Strikethrough"
         class="line-through"
         :class="{ active: editor.isActive('strike') }"
         @click="editor.chain().focus().toggleStrike().run()"
@@ -69,6 +75,8 @@ function setLink() {
         S
       </button>
       <button
+        type="button"
+        title="Heading 2"
         class="text-[16px]"
         :class="{ active: editor.isActive('heading', { level: 2 }) }"
         @click="editor.chain().focus().toggleHeading({ level: 2 }).run()"
@@ -76,41 +84,58 @@ function setLink() {
         H2
       </button>
       <button
+        type="button"
+        title="Heading 3"
         class="text-[16px]"
         :class="{ active: editor.isActive('heading', { level: 3 }) }"
         @click="editor.chain().focus().toggleHeading({ level: 3 }).run()"
       >
         H3
       </button>
-      <button :class="{ active: editor.isActive('link') }" @click="setLink">
+      <button
+        type="button"
+        title="Insert link"
+        :class="{ active: editor.isActive('link') }"
+        @click="setLink"
+      >
         <IH-link class="size-3" />
       </button>
 
       <button
+        type="button"
+        title="Bullet list"
         :class="{ active: editor.isActive('bulletList') }"
         @click="editor.chain().focus().toggleBulletList().run()"
       >
         <IH-list-bullet class="size-4" />
       </button>
       <button
+        type="button"
+        title="Numbered list"
         :class="{ active: editor.isActive('orderedList') }"
         @click="editor.chain().focus().toggleOrderedList().run()"
       >
         <IC-numbered-list class="size-3.5" />
       </button>
       <button
+        type="button"
+        title="Inline code"
         :class="{ active: editor.isActive('code') }"
         @click="editor.chain().focus().toggleCode().run()"
       >
         <IH-code-bracket />
       </button>
       <button
+        type="button"
+        title="Code block"
         :class="{ active: editor.isActive('codeBlock') }"
         @click="editor.chain().focus().toggleCodeBlock().run()"
       >
         <IH-code-bracket-square />
       </button>
       <button
+        type="button"
+        title="Blockquote"
         class="text-[28px] leading-none pt-2"
         :class="{ active: editor.isActive('blockquote') }"
         @click="editor.chain().focus().toggleBlockquote().run()"
