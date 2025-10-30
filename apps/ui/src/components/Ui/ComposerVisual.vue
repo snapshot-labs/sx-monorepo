@@ -50,9 +50,7 @@ const showError = computed<boolean>(
 
   // Style placeholder text
   p.is-editor-empty:first-child::before {
-    @apply opacity-60 float-left h-0 pointer-events-none;
-
-    content: attr(data-placeholder);
+    @apply opacity-60 float-left h-0 pointer-events-none content-[attr(data-placeholder)];
   }
 
   img {
@@ -62,10 +60,9 @@ const showError = computed<boolean>(
     }
   }
 
+  // Toolbar
   & ~ div[style*='position: absolute'] {
-    @apply z-20;
-
-    max-width: calc(100vw - 48px);
+    @apply z-20 max-w-[calc(100vw-48px)];
   }
 }
 </style>
