@@ -325,7 +325,6 @@ export function useVisualEditor(
   onUnmounted(() => {
     if (!editor.value) return;
 
-    editor.value.off('update', updateModelFn);
     updateModel();
     editor.value.destroy();
   });
