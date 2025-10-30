@@ -15,7 +15,8 @@ import {
   evmOptimism,
   evmPolygon,
   evmSepolia,
-  getEvmStrategy
+  getEvmStrategy,
+  OpenZeppelinAuthenticator
 } from '@snapshot-labs/sx';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
@@ -93,6 +94,9 @@ export function createActions(
 
   const client = new clients.EvmEthereumTx(clientOpts);
   const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
+  const openZeppelinSigClient = new clients.OpenZeppelinEthereumSig({
+    chainId
+  });
   const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const ethSigClient = new clients.EvmEthereumSig({
     ...clientOpts,
@@ -537,6 +541,19 @@ export function createActions(
       }
 
       if (proposal.space.protocol === '@openzeppelin/governor') {
+        if (relayerType === 'evm') {
+          return openZeppelinSigClient.vote({
+            signer,
+            authenticatorType: authenticator as OpenZeppelinAuthenticator,
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: proposal.proposal_id,
+              choice: getSdkChoice(choice),
+              reason
+            }
+          });
+        }
+
         return openZeppelinClient.vote({
           signer,
           envelope: {

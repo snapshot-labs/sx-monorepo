@@ -47,6 +47,7 @@ export const createNetworkHandler = (chainId: number) => {
     whitelistServerUrl: 'https://wls.snapshot.box',
     provider
   });
+  const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
   const l1ExecutorClient = new clients.L1Executor();
 
   async function send(id: number, params: any, res: Response) {
@@ -55,25 +56,34 @@ export const createNetworkHandler = (chainId: number) => {
       const { types } = signatureData;
       let receipt;
 
-      const signer = getWallet(params.envelope.data.space);
-
       logger.info({ params }, 'Processing send request');
 
-      if (types.Propose) {
-        receipt = await client.propose({
+      if (signatureData.authenticatorType.startsWith('OpenZeppelin')) {
+        const signer = getWallet(params.envelope.data.spaceId);
+
+        receipt = await openZeppelinClient.vote({
           signer,
           envelope: params.envelope
         });
-      } else if (types.updateProposal) {
-        receipt = await client.updateProposal({
-          signer,
-          envelope: params.envelope
-        });
-      } else if (types.Vote) {
-        receipt = await client.vote({
-          signer,
-          envelope: params.envelope
-        });
+      } else {
+        const signer = getWallet(params.envelope.data.space);
+
+        if (types.Propose) {
+          receipt = await client.propose({
+            signer,
+            envelope: params.envelope
+          });
+        } else if (types.updateProposal) {
+          receipt = await client.updateProposal({
+            signer,
+            envelope: params.envelope
+          });
+        } else if (types.Vote) {
+          receipt = await client.vote({
+            signer,
+            envelope: params.envelope
+          });
+        }
       }
 
       logger.info({ receipt }, 'Transaction broadcasted successfully');

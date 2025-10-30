@@ -1,9 +1,5 @@
+import { OpenZeppelinAuthenticator } from '@snapshot-labs/sx';
 import { NetworkID } from '../../types';
-
-type AuthenticatorType =
-  | 'OpenZeppelinAuthenticator'
-  | 'OpenZeppelinAuthenticatorSignatureV4'
-  | 'OpenZeppelinAuthenticatorSignatureV5';
 
 type Governance = {
   name: string;
@@ -14,7 +10,7 @@ type Governance = {
   twitter?: string;
   farcaster?: string;
   address: `0x${string}`;
-  authenticators: AuthenticatorType[];
+  authenticators: OpenZeppelinAuthenticator[];
   startBlock: number;
 };
 

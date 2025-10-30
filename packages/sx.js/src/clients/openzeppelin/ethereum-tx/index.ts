@@ -3,8 +3,9 @@ import { Contract } from '@ethersproject/contracts';
 import { keccak256 } from '@ethersproject/keccak256';
 import { toUtf8Bytes } from '@ethersproject/strings';
 import { Envelope, Propose, Vote } from '../types';
-import IGovernorAbi from './abis/IGovernor.json';
-import { MetaTransaction } from '../../../utils/encoding';
+import IGovernorV4Abi from './abis/IGovernorV4.json';
+import IGovernorV5Abi from './abis/IGovernorV5.json';
+import { getRSVFromSig, MetaTransaction } from '../../../utils/encoding';
 
 type CallOptions = {
   noWait?: boolean;
@@ -15,13 +16,43 @@ export class EthereumTx {
     { signer, envelope }: { signer: Signer; envelope: Envelope<Vote> },
     opts: CallOptions = {}
   ) {
+    const { signatureData } = envelope;
     const { spaceId, proposalId, choice, reason } = envelope.data;
 
-    const contract = new Contract(spaceId, IGovernorAbi, signer);
+    const contract = new Contract(spaceId, IGovernorV5Abi, signer);
 
-    const promise = reason
-      ? contract.castVoteWithReason(proposalId, choice, reason)
-      : contract.castVote(proposalId, choice);
+    let promise;
+    if (signatureData) {
+      const { authenticatorType, address, message, signature } = signatureData;
+      if (authenticatorType === 'OpenZeppelinAuthenticatorSignatureV4') {
+        const { r, s, v } = getRSVFromSig(signature);
+
+        const contract = new Contract(spaceId, IGovernorV4Abi, signer);
+        promise = contract.castVoteBySig(
+          proposalId,
+          choice,
+          signature,
+          v,
+          r,
+          s
+        );
+      } else if (authenticatorType === 'OpenZeppelinAuthenticatorSignatureV5') {
+        promise = reason
+          ? contract.castVoteWithReasonAndParamsBySig(
+              proposalId,
+              choice,
+              address,
+              reason,
+              message.params,
+              signature
+            )
+          : contract.castVoteBySig(proposalId, choice, address, signature);
+      }
+    } else {
+      promise = reason
+        ? contract.castVoteWithReason(proposalId, choice, reason)
+        : contract.castVote(proposalId, choice);
+    }
 
     return opts.noWait ? null : promise;
   }
@@ -32,7 +63,7 @@ export class EthereumTx {
   ) {
     const { spaceId, title, body, executions } = envelope.data;
 
-    const contract = new Contract(spaceId, IGovernorAbi, signer);
+    const contract = new Contract(spaceId, IGovernorV5Abi, signer);
 
     const promise = contract.propose(
       executions.map(execution => execution.to),
@@ -58,7 +89,7 @@ export class EthereumTx {
     },
     opts: CallOptions = {}
   ) {
-    const contract = new Contract(spaceId, IGovernorAbi, signer);
+    const contract = new Contract(spaceId, IGovernorV5Abi, signer);
 
     const promise = contract.queue(
       transactions.map(tx => tx.to),
@@ -84,7 +115,7 @@ export class EthereumTx {
     },
     opts: CallOptions = {}
   ) {
-    const contract = new Contract(spaceId, IGovernorAbi, signer);
+    const contract = new Contract(spaceId, IGovernorV5Abi, signer);
 
     const promise = contract.execute(
       transactions.map(tx => tx.to),
