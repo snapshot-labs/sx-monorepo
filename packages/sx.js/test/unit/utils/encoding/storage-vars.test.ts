@@ -3,7 +3,7 @@ import { getStorageVarAddress } from '../../../../src/utils/encoding';
 
 describe('storageVars', () => {
   describe('getStorageVarAddress', () => {
-    it('should calculate address for strage var with no arguments', () => {
+    it('should calculate address for storage var with no arguments', () => {
       const address = getStorageVarAddress(
         'Voting_num_voting_strategies_store'
       );
