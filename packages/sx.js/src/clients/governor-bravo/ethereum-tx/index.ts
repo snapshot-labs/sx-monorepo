@@ -46,7 +46,7 @@ export class EthereumTx {
           return `0x${execution.data.slice(10)}`;
         }
 
-        return execution;
+        return execution.data;
       }),
       `${title}\n\n${body}`
     );
