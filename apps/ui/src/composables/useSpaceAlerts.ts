@@ -10,12 +10,18 @@ const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
   '137' // Polygon
 ];
 
+const PRO_EXPIRATION_WARNING_DAYS = 7;
+const PRO_AFTER_EXPIRATION_WARNING_DAYS = 7;
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
   | 'HAS_DISABLED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
   | 'HAS_PRO_ONLY_WHITELABEL'
+  | 'IS_PRO_EXPIRING_SOON'
+  | 'IS_PRO_JUST_EXPIRED'
   | 'IS_HIBERNATED';
 
 export function useSpaceAlerts(
@@ -90,6 +96,28 @@ export function useSpaceAlerts(
       .filter(network => !!network);
   });
 
+  const warningDaysBeforeProExpiration = computed((): number => {
+    const now = Date.now();
+    const expirationTime = (space.value.turbo_expiration || 0) * 1000;
+    const warningThresholdMs = PRO_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
+
+    if (expirationTime < now || expirationTime > now + warningThresholdMs) {
+      return 0;
+    }
+
+    const diff = expirationTime - now;
+
+    return Math.ceil(diff / DAY_IN_MS);
+  });
+
+  const isProJustExpired = computed((): boolean => {
+    const now = Date.now();
+    const expirationTime = (space.value.turbo_expiration || 0) * 1000;
+    const graceThresholdMs = PRO_AFTER_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
+
+    return expirationTime < now && expirationTime >= now - graceThresholdMs;
+  });
+
   const alerts = computed(() => {
     const alertsMap = new Map<AlertType, Record<string, any>>();
 
@@ -121,6 +149,16 @@ export function useSpaceAlerts(
       alertsMap.set('HAS_PRO_ONLY_WHITELABEL', {
         domain: space.value.additionalRawData.domain
       });
+    }
+
+    if (warningDaysBeforeProExpiration.value) {
+      alertsMap.set('IS_PRO_EXPIRING_SOON', {
+        daysUntilExpiration: warningDaysBeforeProExpiration.value
+      });
+    }
+
+    if (isProJustExpired.value) {
+      alertsMap.set('IS_PRO_JUST_EXPIRED', {});
     }
 
     if (space.value.additionalRawData?.hibernated) {
