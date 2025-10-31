@@ -34,6 +34,7 @@ export function createConstants(
       [config.Authenticators.EthSig]: {
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
@@ -41,12 +42,14 @@ export function createConstants(
         priority: 2,
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
         relayerType: 'evm-tx',
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.StarkSig]: {
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         relayerType: 'starknet',
         connectors: STARKNET_CONNECTORS
       },
@@ -54,6 +57,7 @@ export function createConstants(
         priority: 1,
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         connectors: STARKNET_CONNECTORS
       }
     };

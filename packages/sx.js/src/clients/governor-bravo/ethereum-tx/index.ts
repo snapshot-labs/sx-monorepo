@@ -2,6 +2,7 @@ import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
 import { Envelope, Propose, Vote } from '../types';
 import GovernorBravoAbi from './abis/GovernorBravo.json';
+import { getRSVFromSig, hexPadLeft } from '../../../utils/encoding';
 
 type CallOptions = {
   noWait?: boolean;
@@ -12,13 +13,37 @@ export class EthereumTx {
     { signer, envelope }: { signer: Signer; envelope: Envelope<Vote> },
     opts: CallOptions = {}
   ) {
+    const { signatureData } = envelope;
     const { spaceId, proposalId, choice, reason } = envelope.data;
 
     const contract = new Contract(spaceId, GovernorBravoAbi, signer);
 
-    const promise = reason
-      ? contract.castVoteWithReason(proposalId, choice, reason)
-      : contract.castVote(proposalId, choice);
+    let promise;
+    if (signatureData) {
+      const { signature } = signatureData;
+
+      const { r, s, v } = getRSVFromSig(signature);
+      promise = reason
+        ? contract.castVoteWithReasonBySig(
+            proposalId,
+            choice,
+            reason,
+            v,
+            hexPadLeft(r.toHex()),
+            hexPadLeft(s.toHex())
+          )
+        : contract.castVoteBySig(
+            proposalId,
+            choice,
+            v,
+            hexPadLeft(r.toHex()),
+            hexPadLeft(s.toHex())
+          );
+    } else {
+      promise = reason
+        ? contract.castVoteWithReason(proposalId, choice, reason)
+        : contract.castVote(proposalId, choice);
+    }
 
     return opts.noWait ? null : promise;
   }
@@ -46,7 +71,7 @@ export class EthereumTx {
           return `0x${execution.data.slice(10)}`;
         }
 
-        return execution;
+        return execution.data;
       }),
       `${title}\n\n${body}`
     );

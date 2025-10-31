@@ -1,0 +1,4 @@
+[
+  "function name() view returns (string)",
+  "function version() view returns (string)"
+]

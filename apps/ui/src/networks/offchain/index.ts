@@ -44,6 +44,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     getAuthenticatorSupportInfo: () => ({
       isSupported: true,
       isContractSupported: false,
+      isReasonSupported: true,
       connectors: Array.from(
         new Set([...EVM_CONNECTORS, ...STARKNET_CONNECTORS])
       )
