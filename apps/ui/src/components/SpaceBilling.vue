@@ -151,19 +151,13 @@ const statusText = computed(() => {
             </div>
           </template>
           <template #items>
-            <UiDropdownItem v-slot="{ active }">
-              <a
-                :href="
-                  getGenericExplorerUrl(chainId, payment.id, 'transaction') ||
-                  ''
-                "
-                target="_blank"
-                class="flex items-center gap-2"
-                :class="{ 'opacity-80': active }"
-              >
-                <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                View transaction
-              </a>
+            <UiDropdownItem
+              :to="
+                getGenericExplorerUrl(chainId, payment.id, 'transaction') || ''
+              "
+            >
+              <IH-arrow-sm-right class="-rotate-45" :width="16" />
+              View transaction
             </UiDropdownItem>
           </template>
         </UiDropdown>

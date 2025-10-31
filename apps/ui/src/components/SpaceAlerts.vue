@@ -27,6 +27,14 @@ const pendingTasks = computed(() => {
       type: 'error'
     });
   }
+  
+  if (alerts.value.has('IS_HIBERNATED')) {
+    _alerts.push({
+      description: 'This space has been hibernated, reactivate it now',
+      link: { name: 'space-settings', params: { tab: 'profile' } },
+      type: 'error'
+    });
+  }
 
   if (
     alerts.value.has('HAS_DEPRECATED_STRATEGIES') ||
