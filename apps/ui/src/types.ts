@@ -165,6 +165,7 @@ export type OffchainAdditionalRawData = {
   | 'private'
   | 'flagged'
   | 'flagCode'
+  | 'hibernated'
   | 'domain'
   | 'skin'
   | 'skinSettings'

@@ -80,6 +80,7 @@ export type ApiSpace = {
   private: boolean;
   flagged: boolean;
   flagCode: number;
+  hibernated: boolean;
   domain: string | null;
   skin: string | null;
   skinSettings: SkinSettings;
