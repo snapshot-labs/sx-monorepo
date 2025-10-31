@@ -200,6 +200,7 @@ function formatSpace(
     private: space.private,
     flagged: space.flagged,
     flagCode: space.flagCode,
+    hibernated: space.hibernated,
     domain: space.domain,
     skin: space.skin,
     skinSettings: formatSkinSettings(space.skinSettings),
