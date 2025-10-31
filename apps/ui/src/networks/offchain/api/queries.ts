@@ -94,6 +94,7 @@ const SPACE_FRAGMENT = gql`
     private
     flagged
     flagCode
+    hibernated
     domain
     skin
     skinSettings {

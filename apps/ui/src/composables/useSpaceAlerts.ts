@@ -15,7 +15,8 @@ type AlertType =
   | 'HAS_DISABLED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
-  | 'HAS_PRO_ONLY_WHITELABEL';
+  | 'HAS_PRO_ONLY_WHITELABEL'
+  | 'IS_HIBERNATED';
 
 export function useSpaceAlerts(
   space: Ref<Space>,
@@ -120,6 +121,10 @@ export function useSpaceAlerts(
       alertsMap.set('HAS_PRO_ONLY_WHITELABEL', {
         domain: space.value.additionalRawData.domain
       });
+    }
+
+    if (space.value.additionalRawData?.hibernated) {
+      alertsMap.set('IS_HIBERNATED', {});
     }
 
     return alertsMap;
