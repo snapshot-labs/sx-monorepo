@@ -35,6 +35,7 @@ gql(`
       twitter
       discord
       farcaster
+      clanker
       voting_power_symbol
       treasuries
       labels
