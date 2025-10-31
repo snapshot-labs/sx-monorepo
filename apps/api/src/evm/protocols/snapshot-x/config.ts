@@ -12,7 +12,7 @@ import { NetworkID, SnapshotXConfig } from '../../types';
 
 const START_BLOCKS: Record<NetworkID, number> = {
   eth: 18962278,
-  sep: 4519171,
+  sep: 9532004,
   oeth: 118359200,
   matic: 50858232,
   arb1: 157825417,
@@ -46,7 +46,7 @@ export function createConfig(networkId: NetworkID): Config {
   if (networkId === 'sep') {
     sources.push({
       contract: '0x27981a29ec87f2fbf873a2dcb0325405648ffce1',
-      start: 6106288,
+      start: 9532004,
       abi: 'L1AvatarExecutionStrategyFactory',
       events: [
         {

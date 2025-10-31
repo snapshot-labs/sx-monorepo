@@ -65,12 +65,13 @@ describe('utils', () => {
         avatar: '',
         cover: '',
         description: 'Test description',
+        votingPowerSymbol: 'VOTE',
         externalUrl: 'https://test.com',
         github: 'snapshot-labs',
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
         farcaster: 'snapshot-labs',
-        votingPowerSymbol: 'VOTE',
+        clanker: 'snapshot-labs',
         treasuries: [
           {
             name: 'treasury 1',
@@ -109,6 +110,7 @@ describe('utils', () => {
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
           farcaster: 'snapshot-labs',
+          clanker: '0x000000000000000000000000000000000000dead',
           discord: 'snapshot',
           treasuries: [
             {
