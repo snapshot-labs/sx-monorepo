@@ -71,7 +71,7 @@ describe('utils', () => {
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
         farcaster: 'snapshot-labs',
-        clanker: 'snapshot-labs',
+        clanker: '0x000000000000000000000000000000000000dead',
         treasuries: [
           {
             name: 'treasury 1',
