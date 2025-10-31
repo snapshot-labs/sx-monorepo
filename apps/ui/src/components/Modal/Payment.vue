@@ -248,8 +248,8 @@ watch(
                     : { name: 'site-terms' }
                 "
                 @click.stop
-                >Terms of service
-              </AppLink></span
+                >Terms of service</AppLink
+              ></span
             >.
           </div>
         </UiCheckbox>
