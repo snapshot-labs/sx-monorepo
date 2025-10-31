@@ -1,3 +1,5 @@
+@use 'sass:meta';
+
 @tailwind base;
 @tailwind utilities;
 
@@ -444,14 +446,6 @@ div[data-tippy-root] {
 // Markdown rendered content
 
 .markdown-body {
-  @import '@/assets/styles/highlightjs/github.scss';
-}
-
-html.dark .markdown-body {
-  @import '@/assets/styles/highlightjs/github-dark-dimmed.scss';
-}
-
-.markdown-body {
   @apply text-skin-content text-[22px] leading-[1.3];
   word-wrap: break-word;
 
@@ -618,6 +612,14 @@ html.dark .markdown-body {
     > p {
       @apply m-0 p-0;
     }
+  }
+
+  @include meta.load-css('@/assets/styles/highlightjs/github.scss');
+
+  html.dark & {
+    @include meta.load-css(
+      '@/assets/styles/highlightjs/github-dark-dimmed.scss'
+    );
   }
 
   pre {
