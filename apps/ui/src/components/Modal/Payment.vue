@@ -238,8 +238,10 @@ watch(
         <UiCheckbox v-model="isTermsAccepted" class="text-start">
           <div class="text-skin-text leading-[22px] top-[-1px] relative">
             I have read and agree to the
-            <AppLink is-external :to="{ name: 'site-terms' }" @click.stop
-              >Terms of service</AppLink
+            <span @click.stop>
+              <AppLink is-external :to="{ name: 'site-terms' }">
+                Terms of service
+              </AppLink></span
             >.
           </div>
         </UiCheckbox>
