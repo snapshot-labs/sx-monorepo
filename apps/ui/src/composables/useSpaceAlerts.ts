@@ -20,8 +20,8 @@ type AlertType =
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
   | 'HAS_PRO_ONLY_WHITELABEL'
-  | 'IS_PRO_EXPIRING_SOON',
-  | 'IS_PRO_JUST_EXPIRED',
+  | 'IS_PRO_EXPIRING_SOON'
+  | 'IS_PRO_JUST_EXPIRED'
   | 'IS_HIBERNATED';
 
 export function useSpaceAlerts(
@@ -160,7 +160,7 @@ export function useSpaceAlerts(
     if (isProJustExpired.value) {
       alertsMap.set('IS_PRO_JUST_EXPIRED', {});
     }
-    
+
     if (space.value.additionalRawData?.hibernated) {
       alertsMap.set('IS_HIBERNATED', {});
     }
