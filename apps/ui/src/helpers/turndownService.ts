@@ -159,6 +159,13 @@ export default function (options: { discussion?: string } = {}) {
     });
   }
 
+  turndownService.addRule('strikethrough', {
+    filter: ['del', 's', 'strike'],
+    replacement: function (content) {
+      return `~~${content}~~`;
+    }
+  });
+
   turndownService.escape = string => string;
   return turndownService.turndown.bind(turndownService);
 }
