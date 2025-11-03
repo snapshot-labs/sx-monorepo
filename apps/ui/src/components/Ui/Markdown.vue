@@ -71,6 +71,7 @@ remarkable.inline.ruler.disable([
   'sup',
   'text'
 ]);
+remarkable.inline.ruler.enable(['del']);
 
 const parsed = computed(() => {
   const formattedBody = props.body.replace(
