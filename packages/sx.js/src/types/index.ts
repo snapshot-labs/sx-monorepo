@@ -6,6 +6,7 @@ import { Call, StarknetType } from 'starknet';
 import { MetaTransaction } from '../utils/encoding';
 
 export * from './networkConfig';
+export * from './governor';
 
 export enum Choice {
   Against = 0,
