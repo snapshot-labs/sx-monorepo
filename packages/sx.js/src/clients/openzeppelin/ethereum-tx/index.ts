@@ -1,7 +1,5 @@
 import { Signer } from '@ethersproject/abstract-signer';
 import { Contract } from '@ethersproject/contracts';
-import { keccak256 } from '@ethersproject/keccak256';
-import { toUtf8Bytes } from '@ethersproject/strings';
 import { Envelope, Propose, Vote } from '../types';
 import IGovernorV4Abi from './abis/IGovernorV4.json';
 import IGovernorV5Abi from './abis/IGovernorV5.json';
@@ -83,12 +81,12 @@ export class EthereumTx {
     {
       signer,
       spaceId,
-      description,
+      descriptionHash,
       transactions
     }: {
       signer: Signer;
       spaceId: string;
-      description: string;
+      descriptionHash: string;
       transactions: MetaTransaction[];
     },
     opts: CallOptions = {}
@@ -99,7 +97,7 @@ export class EthereumTx {
       transactions.map(tx => tx.to),
       transactions.map(tx => tx.value),
       transactions.map(tx => tx.data),
-      keccak256(toUtf8Bytes(description))
+      descriptionHash
     );
 
     return opts.noWait ? null : promise;
@@ -109,12 +107,12 @@ export class EthereumTx {
     {
       signer,
       spaceId,
-      description,
+      descriptionHash,
       transactions
     }: {
       signer: Signer;
       spaceId: string;
-      description: string;
+      descriptionHash: string;
       transactions: MetaTransaction[];
     },
     opts: CallOptions = {}
@@ -125,7 +123,7 @@ export class EthereumTx {
       transactions.map(tx => tx.to),
       transactions.map(tx => tx.value),
       transactions.map(tx => tx.data),
-      keccak256(toUtf8Bytes(description))
+      descriptionHash
     );
 
     return opts.noWait ? null : promise;

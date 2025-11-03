@@ -26,7 +26,11 @@ import {
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
-import { convertChoice, getProposalTitle } from '../openzeppelin/utils';
+import {
+  convertChoice,
+  getProposalBody,
+  getProposalTitle
+} from '../openzeppelin/utils';
 
 type SpaceData = {
   name: string;
@@ -383,7 +387,7 @@ export function createWriters(
     );
 
     proposalMetadata.title = getProposalTitle(proposalBody);
-    proposalMetadata.body = proposalBody;
+    proposalMetadata.body = getProposalBody(proposalBody);
     proposalMetadata.choices = ['For', 'Against', 'Abstain'];
     proposalMetadata.execution = JSON.stringify(execution);
 

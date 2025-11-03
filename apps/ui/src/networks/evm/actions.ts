@@ -660,7 +660,7 @@ export function createActions(
         return openZeppelinClient.queue({
           signer: getSigner(web3),
           spaceId: proposal.space.id,
-          description: proposal.body,
+          descriptionHash: proposal.execution_hash,
           transactions: convertToMetaTransactions(
             proposal.executions[0].transactions
           )
@@ -695,7 +695,7 @@ export function createActions(
         return openZeppelinClient.execute({
           signer: getSigner(web3),
           spaceId: proposal.space.id,
-          description: proposal.body,
+          descriptionHash: proposal.execution_hash,
           transactions: convertToMetaTransactions(
             proposal.executions[0].transactions
           )
