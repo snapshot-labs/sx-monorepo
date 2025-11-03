@@ -133,7 +133,7 @@ function getZodiacAppUrl(strategyAddress: string) {
             v-if="moduleEnabled[executionStrategy.address] === false"
             :to="getZodiacAppUrl(executionStrategy.address)"
           >
-            Enable module
+            Enable
             <IH-arrow-sm-right class="-rotate-45 -mr-2" />
           </UiButton>
           <div v-else class="text-skin-border">Safe module is enabled</div>
