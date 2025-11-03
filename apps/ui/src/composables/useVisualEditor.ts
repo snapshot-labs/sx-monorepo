@@ -8,7 +8,7 @@ import {
   TableHeader,
   TableRow
 } from '@tiptap/extension-table';
-import { Gapcursor, Placeholder } from '@tiptap/extensions';
+import { Placeholder } from '@tiptap/extensions';
 import { Node as ProseMirrorNode, Slice } from '@tiptap/pm/model';
 import StarterKit from '@tiptap/starter-kit';
 import { useEditor } from '@tiptap/vue-3';
@@ -179,7 +179,7 @@ export function useVisualEditor(
   const uiStore = useUiStore();
 
   const extensions = [
-    StarterKit,
+    StarterKit.configure({ codeBlock: false }),
     Table,
     TableRow,
     TableHeader.extend({
@@ -215,8 +215,6 @@ export function useVisualEditor(
       }
     }),
     Image,
-    // Allow non-text element to be selected, for visual feedback (e.g. image, table)
-    Gapcursor,
     // Color syntax highlighting in code blocks
     CodeBlockLowlight.configure({
       // prevent code blocks without language from showing as: ```null
