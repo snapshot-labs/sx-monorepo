@@ -26,7 +26,7 @@ import {
   imageUpload
 } from '@/helpers/utils';
 
-const cdnUrlsMapping = {};
+const cdnUrlsMapping = new Map<string, string>();
 
 const lowlight = createLowlight();
 lowlight.register('javascript', javascript);
@@ -140,14 +140,14 @@ function getCdnUrl(url: string) {
   const cdnUrl = getUrl(url);
 
   if (cdnUrl) {
-    cdnUrlsMapping[cdnUrl] = url;
+    cdnUrlsMapping.set(cdnUrl, url);
   }
 
   return cdnUrl || url;
 }
 
 function getOriginalUrl(cdnUrl: string) {
-  return cdnUrlsMapping[cdnUrl] || cdnUrl;
+  return cdnUrlsMapping.get(cdnUrl) || cdnUrl;
 }
 
 function markdownToHtml(markdown: string) {
@@ -326,6 +326,7 @@ export function useVisualEditor(
 
     updateModel();
     editor.value.destroy();
+    cdnUrlsMapping.clear();
   });
 
   return { editor };
