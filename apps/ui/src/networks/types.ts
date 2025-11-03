@@ -406,6 +406,10 @@ export type AuthenticatorSupportInfo = {
    */
   isContractSupported: boolean;
   /**
+   * Whether the authenticator supports providing a reason when voting.
+   */
+  isReasonSupported: boolean;
+  /**
    * Type of the relayer used by authenticator.
    * Determines how authenticator is interacted with.
    */
