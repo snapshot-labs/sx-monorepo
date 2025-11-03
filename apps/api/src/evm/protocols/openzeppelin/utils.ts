@@ -1,10 +1,35 @@
-export function getProposalTitle(body: string) {
+/**
+ * Extract raw title from proposal body.
+ * @param body proposal body
+ * @returns raw title or null if not found
+ */
+export function getRawProposalTitle(body: string) {
   // Some Uniswap proposals were created with body like this.
   if (body === '""') return null;
 
-  const title = body.split('\n');
+  return body.split('\n', 1)[0]!;
+}
 
-  return title[0] ? title[0].replace(/^#+ +/, '').slice(0, 200) : null;
+/**
+ * Extract and clean title from proposal body.
+ * @param body proposal body
+ * @returns cleaned title or null if not found
+ */
+export function getProposalTitle(body: string) {
+  const rawTitle = getRawProposalTitle(body);
+  return rawTitle?.replace(/^#+ +/, '').slice(0, 200) ?? null;
+}
+
+/**
+ * Extract proposal body without title.
+ * @param body proposal body
+ * @returns body without title
+ */
+export function getProposalBody(body: string) {
+  const title = getRawProposalTitle(body);
+  if (!title) return body;
+
+  return body.slice(title.length).trim();
 }
 
 /**
