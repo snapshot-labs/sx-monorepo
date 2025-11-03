@@ -474,12 +474,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
         >
           <div class="space-y-3">
-            <FormStrategiesStrategyActive
-              v-for="strategy in executionStrategies"
-              :key="strategy.id"
-              read-only
-              :network-id="space.network"
-              :strategy="strategy"
+            <FormSpaceExecutionStrategies
+              :space="space"
+              :execution-strategies="executionStrategies"
             />
             <UiButton
               v-if="evmNetworks.includes(space.network)"
