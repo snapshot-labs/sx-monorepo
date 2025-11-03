@@ -33,7 +33,7 @@ const showError = computed<boolean>(
     <span v-text="error" />
     <slot name="error-suffix" />
   </UiAlert>
-  <div ref="editorContainerRef">
+  <div ref="editorContainerRef" v-bind="$attrs">
     <template v-if="editor">
       <UiComposerVisualToolbar
         :clipping-container="editorContainerRef"
