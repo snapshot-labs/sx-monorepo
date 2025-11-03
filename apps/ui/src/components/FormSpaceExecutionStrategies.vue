@@ -59,7 +59,7 @@ const {
       const safeContract = new Contract(treasury, SAFE_ABI, provider);
 
       const isEnabled: boolean = await safeContract.isModuleEnabled(
-        props.space.id
+        strategy.address
       );
 
       results.push([strategy.address, isEnabled]);
