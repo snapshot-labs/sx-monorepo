@@ -34,8 +34,20 @@ export class EthereumTx {
     const promise = contract.propose(
       executions.map(execution => execution.to),
       executions.map(execution => execution.value),
-      executions.map(() => ''),
-      executions.map(execution => execution.data),
+      executions.map(execution => {
+        if ('method' in execution._form) {
+          return execution._form.method;
+        }
+
+        return '';
+      }),
+      executions.map(execution => {
+        if ('method' in execution._form) {
+          return `0x${execution.data.slice(10)}`;
+        }
+
+        return execution;
+      }),
       `${title}\n\n${body}`
     );
 
