@@ -223,22 +223,15 @@ function handleScrollEvent(target: HTMLElement) {
                 </button>
               </template>
               <template #items>
-                <UiDropdownItem v-slot="{ active }">
-                  <a
-                    :href="
-                      network.helpers.getExplorerUrl(vote.tx, 'transaction')
-                    "
-                    target="_blank"
-                    class="flex items-center gap-2"
-                    :class="{ 'opacity-80': active }"
-                  >
-                    <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                    {{
-                      offchainNetworks.includes(proposal.network)
-                        ? 'Verify signature'
-                        : 'View on block explorer'
-                    }}
-                  </a>
+                <UiDropdownItem
+                  :to="network.helpers.getExplorerUrl(vote.tx, 'transaction')"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  {{
+                    offchainNetworks.includes(proposal.network)
+                      ? 'Verify signature'
+                      : 'View on block explorer'
+                  }}
                 </UiDropdownItem>
               </template>
             </UiDropdown>
