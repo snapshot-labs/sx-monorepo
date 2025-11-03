@@ -226,9 +226,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           </template>
         </div>
       </div>
-      <UiEyebrow class="mb-2 leading-8">Activity</UiEyebrow>
     </div>
-    <UiColumnHeader sticky-behavior="without-section" class="text-right">
+    <UiSectionHeader label="Activity" sticky />
+    <UiColumnHeader class="text-right">
       <span class="w-[60%] lg:w-[50%] text-left truncate">Space</span>
       <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
       <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
