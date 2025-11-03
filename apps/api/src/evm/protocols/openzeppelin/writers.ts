@@ -222,8 +222,7 @@ export function createWriters(
     });
 
     const governanceInfo = getGovernanceInfo(contractAddress);
-
-    space.authenticators = ['OpenZeppelinAuthenticator'];
+    space.authenticators = governanceInfo.authenticators;
     space.strategies = [evmNetworks[config.indexerName].Strategies.OZVotes];
     space.strategies_params = [token];
     space.strategies_indices = [0];

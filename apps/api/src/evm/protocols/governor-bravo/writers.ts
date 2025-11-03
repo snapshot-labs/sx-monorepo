@@ -234,7 +234,10 @@ export function createWriters(
 
     const { name, symbol, treasury, governanceToken } = spaceDataEntry;
 
-    space.authenticators = ['GovernorBravoAuthenticator'];
+    space.authenticators = [
+      'GovernorBravoAuthenticator',
+      'GovernorBravoAuthenticatorSignature'
+    ];
     space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
     space.strategies_params = [governanceToken];
     space.strategies_indices = [0];
