@@ -68,11 +68,12 @@ watchEffect(() => setTitle(props.space.name));
         />
         <div class="flex items-center">
           <h1 data-testid="space-name" v-text="space.name" />
-          <UiBadgeVerified
+          <UiBadgeSpace
             v-if="!isWhiteLabel"
             class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
+            :flagged="space.additionalRawData?.flagged || false"
           />
         </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">

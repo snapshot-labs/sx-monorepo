@@ -244,26 +244,21 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 </button>
               </template>
               <template #items>
-                <UiDropdownItem v-slot="{ active }">
-                  <button
-                    type="button"
-                    class="flex items-center gap-2"
-                    :class="{ 'opacity-80': active }"
-                    @click="
-                      isUpdatableDelegation
-                        ? handleUpdateDelegatesClick()
-                        : handleUndelegateClick()
-                    "
-                  >
-                    <template v-if="isUpdatableDelegation">
-                      <IH-pencil />
-                      Edit delegation
-                    </template>
-                    <template v-else>
-                      <IH-user-remove />
-                      Undelegate
-                    </template>
-                  </button>
+                <UiDropdownItem
+                  @click="
+                    isUpdatableDelegation
+                      ? handleUpdateDelegatesClick()
+                      : handleUndelegateClick()
+                  "
+                >
+                  <template v-if="isUpdatableDelegation">
+                    <IH-pencil />
+                    Edit delegation
+                  </template>
+                  <template v-else>
+                    <IH-user-remove />
+                    Undelegate
+                  </template>
                 </UiDropdownItem>
               </template>
             </UiDropdown>
@@ -422,59 +417,45 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   </button>
                 </template>
                 <template #items>
-                  <UiDropdownItem v-slot="{ active }">
-                    <button
-                      type="button"
-                      class="flex items-center gap-2"
-                      :class="{ 'opacity-80': active }"
-                      @click="
-                        isUpdatableDelegation
-                          ? handleUpdateDelegatesClick(delegate.user)
-                          : handleDelegateToggle(delegate.user)
-                      "
-                    >
-                      <template v-if="getHasDelegatedTo(delegate.user)">
-                        <template v-if="isUpdatableDelegation">
-                          <IH-pencil />
-                          Edit delegation
-                        </template>
-                        <template v-else>
-                          <IH-user-remove />
-                          Undelegate
-                        </template>
+                  <UiDropdownItem
+                    @click="
+                      isUpdatableDelegation
+                        ? handleUpdateDelegatesClick(delegate.user)
+                        : handleDelegateToggle(delegate.user)
+                    "
+                  >
+                    <template v-if="getHasDelegatedTo(delegate.user)">
+                      <template v-if="isUpdatableDelegation">
+                        <IH-pencil />
+                        Edit delegation
                       </template>
                       <template v-else>
-                        <IH-user-add />
-                        Delegate
+                        <IH-user-remove />
+                        Undelegate
                       </template>
-                    </button>
+                    </template>
+                    <template v-else>
+                      <IH-user-add />
+                      Delegate
+                    </template>
                   </UiDropdownItem>
-                  <UiDropdownItem v-slot="{ active }">
-                    <AppLink
-                      :to="{
-                        name: 'space-user-statement',
-                        params: {
-                          space: spaceKey,
-                          user: delegate.user
-                        }
-                      }"
-                      class="flex items-center gap-2"
-                      :class="{ 'opacity-80': active }"
-                    >
-                      <IH-user-circle />
-                      View profile
-                    </AppLink>
+                  <UiDropdownItem
+                    :to="{
+                      name: 'space-user-statement',
+                      params: {
+                        space: spaceKey,
+                        user: delegate.user
+                      }
+                    }"
+                  >
+                    <IH-user-circle />
+                    View profile
                   </UiDropdownItem>
-                  <UiDropdownItem v-slot="{ active }">
-                    <a
-                      :href="getExplorerUrl(delegate.user, 'address') || ''"
-                      target="_blank"
-                      class="flex items-center gap-2"
-                      :class="{ 'opacity-80': active }"
-                    >
-                      <IH-arrow-sm-right class="-rotate-45" />
-                      View on block explorer
-                    </a>
+                  <UiDropdownItem
+                    :to="getExplorerUrl(delegate.user, 'address') || ''"
+                  >
+                    <IH-arrow-sm-right class="-rotate-45" />
+                    View on block explorer
                   </UiDropdownItem>
                 </template>
               </UiDropdown>

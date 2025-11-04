@@ -1,6 +1,6 @@
 import { evm } from '@snapshot-labs/checkpoint';
-import { evmNetworks } from '@snapshot-labs/sx';
-import { createPublicClient, getAddress, http } from 'viem';
+import { evmNetworks, utils } from '@snapshot-labs/sx';
+import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
 import GovernorModuleAbi from './abis/GovernorModule';
 import TimelockAbi from './abis/Timelock';
 import logger from './logger';
@@ -26,7 +26,11 @@ import {
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
-import { convertChoice, getProposalTitle } from '../openzeppelin/utils';
+import {
+  convertChoice,
+  getProposalBody,
+  getProposalTitle
+} from '../openzeppelin/utils';
 
 type SpaceData = {
   name: string;
@@ -230,7 +234,10 @@ export function createWriters(
 
     const { name, symbol, treasury, governanceToken } = spaceDataEntry;
 
-    space.authenticators = ['GovernorBravoAuthenticator'];
+    space.authenticators = [
+      'GovernorBravoAuthenticator',
+      'GovernorBravoAuthenticatorSignature'
+    ];
     space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
     space.strategies_params = [governanceToken];
     space.strategies_indices = [0];
@@ -355,19 +362,32 @@ export function createWriters(
 
     const proposalBody = event.args.description || '';
 
-    const execution = event.args.targets.map((target, index) => ({
-      _type: 'raw',
-      _form: {
-        recipient: target
-      },
-      to: target,
-      data: event.args.calldatas[index] ?? '0x',
-      value: event.args.values[index]?.toString() ?? '0',
-      salt: '0'
-    }));
+    const execution = await Promise.all(
+      event.args.targets.map((target, index) => {
+        const signature = event.args.signatures[index] ?? '';
+
+        let calldata: `0x${string}` | '';
+        if (signature) {
+          const sighash = keccak256(toHex(signature)).slice(0, 10);
+          calldata =
+            `${sighash}${(event.args.calldatas[index] ?? '').slice(2)}` as `0x${string}`;
+        } else {
+          calldata = event.args.calldatas[index] ?? '';
+        }
+
+        return utils.execution.convertToTransaction(
+          {
+            target,
+            calldata,
+            value: event.args.values[index]?.toString() ?? '0'
+          },
+          protocolConfig.chainId
+        );
+      })
+    );
 
     proposalMetadata.title = getProposalTitle(proposalBody);
-    proposalMetadata.body = proposalBody;
+    proposalMetadata.body = getProposalBody(proposalBody);
     proposalMetadata.choices = ['For', 'Against', 'Abstain'];
     proposalMetadata.execution = JSON.stringify(execution);
 

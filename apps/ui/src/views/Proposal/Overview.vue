@@ -453,16 +453,9 @@ onBeforeUnmount(() => destroyAudio());
               </button>
             </template>
             <template #items>
-              <UiDropdownItem v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="handleDuplicateClick"
-                >
-                  <IH-document-duplicate :width="16" />
-                  Duplicate proposal
-                </button>
+              <UiDropdownItem @click="handleDuplicateClick">
+                <IH-document-duplicate :width="16" />
+                Duplicate proposal
               </UiDropdownItem>
               <UiDropdownItem
                 v-if="
@@ -472,86 +465,50 @@ onBeforeUnmount(() => destroyAudio());
                     proposal.state
                   )
                 "
-                v-slot="{ active }"
+                @click="handleDownloadVotes"
               >
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="handleDownloadVotes"
-                >
-                  <template v-if="isDownloadingVotes">
-                    <UiLoading :size="18" />
-                    Downloading votes
-                  </template>
-                  <template v-else>
-                    <IS-arrow-down-tray />
-                    Download votes
-                  </template>
-                </button>
+                <template v-if="isDownloadingVotes">
+                  <UiLoading :size="18" />
+                  Downloading votes
+                </template>
+                <template v-else>
+                  <IS-arrow-down-tray />
+                  Download votes
+                </template>
               </UiDropdownItem>
-              <UiDropdownItem v-if="editable" v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="handleEditClick"
-                >
-                  <IS-pencil :width="16" />
-                  Edit proposal
-                </button>
+              <UiDropdownItem v-if="editable" @click="handleEditClick">
+                <IS-pencil :width="16" />
+                Edit proposal
               </UiDropdownItem>
               <UiDropdownItem
                 v-if="flaggable"
-                v-slot="{ active, disabled }"
                 :disabled="flagging"
+                @click="handleFlagClick"
               >
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                  @click="handleFlagClick"
-                >
-                  <IH-flag :width="16" />
-                  Flag proposal
-                </button>
+                <IH-flag :width="16" />
+                Flag proposal
               </UiDropdownItem>
               <UiDropdownItem
                 v-if="cancellable"
-                v-slot="{ active, disabled }"
                 :disabled="cancelling"
+                @click="handleCancelClick"
               >
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                  @click="handleCancelClick"
-                >
-                  <IS-x-mark :width="16" />
-                  Cancel proposal
-                </button>
+                <IS-x-mark :width="16" />
+                Cancel proposal
               </UiDropdownItem>
-              <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
-                <a
-                  :href="proposalMetadataUrl"
-                  target="_blank"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                >
-                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                  View metadata
-                </a>
+              <UiDropdownItem
+                v-if="proposalMetadataUrl"
+                :to="proposalMetadataUrl"
+              >
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View metadata
               </UiDropdownItem>
-              <UiDropdownItem v-if="proposalTransactionId" v-slot="{ active }">
-                <a
-                  :href="proposalTransactionId"
-                  target="_blank"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                >
-                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                  View on block explorer
-                </a>
+              <UiDropdownItem
+                v-if="proposalTransactionId"
+                :to="proposalTransactionId"
+              >
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View on block explorer
               </UiDropdownItem>
             </template>
           </UiDropdown>
