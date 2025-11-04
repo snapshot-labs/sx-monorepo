@@ -1,4 +1,4 @@
-import { ALIASES_CONFIG, STARKNET_ALIASES_CONFIG } from '@snapshot-labs/sx';
+import { ALIASES_CONFIG, ALIASES_CONFIG } from '@snapshot-labs/sx';
 import { describe, expect, it } from 'vitest';
 import {
   verifyEcdsaSignature,
@@ -134,10 +134,10 @@ describe('SNIP-6', () => {
     const result = await verifySnip6Signature(
       createStarknetDomain('0x534e5f4d41494e'),
       message.from,
-      STARKNET_ALIASES_CONFIG.types.setAlias,
+      ALIASES_CONFIG.types.setStarknetAlias,
       message,
       signature,
-      'SetAlias'
+      'SetStarknetAlias'
     );
 
     expect(result).toBe(true);
@@ -155,10 +155,10 @@ describe('SNIP-6', () => {
     const result = await verifySnip6Signature(
       createStarknetDomain('0x534e5f4d41494e'),
       message.from,
-      STARKNET_ALIASES_CONFIG.types.setAlias,
+      ALIASES_CONFIG.types.setStarknetAlias,
       message,
       signature,
-      'SetAlias'
+      'SetStarknetAlias'
     );
 
     expect(result).toBe(false);
@@ -176,10 +176,10 @@ describe('SNIP-6', () => {
     const result = await verifySnip6Signature(
       createStarknetDomain('test'), // Unsupported chainId
       message.from,
-      STARKNET_ALIASES_CONFIG.types.setAlias,
+      ALIASES_CONFIG.types.setStarknetAlias,
       message,
       signature,
-      'SetAlias'
+      'SetStarknetAlias'
     );
 
     expect(result).toBe(false);

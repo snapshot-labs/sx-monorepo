@@ -23,16 +23,10 @@ export const ALIASES_CONFIG = {
         { name: 'from', type: 'address' },
         { name: 'alias', type: 'address' }
       ]
-    }
-  }
-};
-
-export const STARKNET_ALIASES_CONFIG = {
-  address: '0x0000000000000000000000000000000000000003',
-  types: {
-    setAlias: {
+    },
+    setStarknetAlias: {
       StarknetDomain: STARKNET_DOMAIN_TYPE,
-      SetAlias: [
+      SetStarknetAlias: [
         { name: 'from', type: 'string' },
         { name: 'alias', type: 'string' }
       ]

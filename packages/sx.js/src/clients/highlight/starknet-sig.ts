@@ -7,8 +7,8 @@ import {
 } from 'starknet';
 import { Envelope, HighlightDomain, SetAlias } from './types';
 import {
-  HIGHLIGHT_STARKNET_DOMAIN,
-  STARKNET_ALIASES_CONFIG
+  ALIASES_CONFIG,
+  HIGHLIGHT_STARKNET_DOMAIN
 } from '../../highlightConstants';
 
 export class HighlightStarknetSigClient {
@@ -108,19 +108,15 @@ export class HighlightStarknetSigClient {
     data: SetAlias;
     salt: bigint;
   }): Promise<Envelope> {
-    const primaryType = 'SetAlias';
+    const primaryType = 'SetStarknetAlias';
 
-    const domain = await this.getDomain(
-      signer,
-      salt,
-      STARKNET_ALIASES_CONFIG.address
-    );
+    const domain = await this.getDomain(signer, salt, ALIASES_CONFIG.address);
 
     const signature = await this.sign(
       signer,
       domain.starknetDomain,
       primaryType,
-      STARKNET_ALIASES_CONFIG.types.setAlias,
+      ALIASES_CONFIG.types.setStarknetAlias,
       data
     );
 

@@ -3,17 +3,23 @@ import Agent from '../highlight/agent';
 import Process from '../highlight/process';
 import { Domain } from '../highlight/types';
 
+type Message = { from: string; alias: string };
+type Meta = { domain: Domain; signer: string };
+
 export default class Aliases extends Agent {
   constructor(id: string, process: Process) {
     super(id, process);
 
     this.addEntrypoint(ALIASES_CONFIG.types.setAlias);
+
+    // Stripping StarknetDomain from the types,
+    // for compatibility with the Agent system only supporting EVM types.
+    this.addEntrypoint({
+      SetStarknetAlias: ALIASES_CONFIG.types.setStarknetAlias.SetStarknetAlias
+    });
   }
 
-  async setAlias(
-    message: { from: string; alias: string },
-    meta: { domain: Domain; signer: string }
-  ) {
+  async setAlias(message: Message, meta: Meta) {
     const { salt } = meta.domain;
     const { from, alias } = message;
 
@@ -24,5 +30,9 @@ export default class Aliases extends Agent {
 
     this.write(`aliases:${alias}`, from);
     this.emit('setAlias', [from, alias, salt]);
+  }
+
+  async setStarknetAlias(message: Message, meta: Meta) {
+    this.setAlias(message, meta);
   }
 }
