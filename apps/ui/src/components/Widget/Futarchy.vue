@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { z } from 'zod';
-import { FUTARCHY_API_URL } from '@/helpers/constants';
 import { _n, getUrl } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
 const props = defineProps<{ proposal: Proposal }>();
+
+const FUTARCHY_API_URL =
+  import.meta.env.VITE_FUTARCHY_API_URL ?? 'https://stag.api.tickspread.com';
+const FUTARCHY_LOGO_URL =
+  'ipfs://bafkreigougs774ow3qwkb3kc5ftkpz43cfueputpmkii2l5meuaeivkiqq';
 
 const FutarchyResponseSchema = z.object({
   event_id: z.string(),
@@ -62,21 +66,14 @@ watch(() => props.proposal.id, fetchPrices);
       class="block xl:flex xl:space-x-3 items-center border rounded-lg px-3.5 py-2.5 mb-4"
     >
       <div class="grow flex items-center gap-2 xl:mb-0 mb-2">
-        <img
-          :src="
-            getUrl(
-              'ipfs://bafkreigougs774ow3qwkb3kc5ftkpz43cfueputpmkii2l5meuaeivkiqq'
-            )
-          "
-          class="size-3"
-        />
-        <UiEyebrow> Futarchy market </UiEyebrow>
+        <img :src="getUrl(FUTARCHY_LOGO_URL) as string" class="size-3" />
+        <UiEyebrow> Futarchy.fi </UiEyebrow>
       </div>
-      <span class="flex items-center gap-1.5">
+      <span v-if="data.spot.price_usd" class="flex items-center gap-1.5">
         <span>{{ data.company_tokens.base.tokenSymbol }} price</span>
-        <span class="text-skin-link">
+        <span class="text-skin-link font-bold">
           ${{
-            _n(data.spot.price_usd || 0, 'compact', {
+            _n(data.spot.price_usd, 'compact', {
               maximumFractionDigits: 2
             })
           }}
@@ -85,9 +82,9 @@ watch(() => props.proposal.id, fetchPrices);
       <span class="flex items-center gap-1.5">
         <span class="bg-skin-success size-2.5 rounded-full inline-block" />
         <span>If approved</span>
-        <span class="text-skin-link">
+        <span class="text-skin-link font-bold">
           ${{
-            _n(data.conditional_yes.price_usd || 0, 'compact', {
+            _n(data.conditional_yes.price_usd, 'compact', {
               maximumFractionDigits: 2
             })
           }}
@@ -96,9 +93,9 @@ watch(() => props.proposal.id, fetchPrices);
       <span class="flex items-center gap-1.5">
         <span class="bg-skin-danger size-2.5 rounded-full inline-block" />
         <span>If rejected</span>
-        <span class="text-skin-link">
+        <span class="text-skin-link font-bold">
           ${{
-            _n(data.conditional_no.price_usd || 0, 'compact', {
+            _n(data.conditional_no.price_usd, 'compact', {
               maximumFractionDigits: 2
             })
           }}
