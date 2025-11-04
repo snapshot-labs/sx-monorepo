@@ -107,6 +107,8 @@ type SpaceMetadataItem {
   discord: String!
   "Farcaster profile or channel"
   farcaster: String!
+  "Clanker token address"
+  clanker: String!
   "Symbol for voting power display (e.g., 'UNI', 'AAVE')"
   voting_power_symbol: String!
   "Unused field (legacy)"
