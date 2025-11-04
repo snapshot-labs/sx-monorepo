@@ -18,7 +18,7 @@ export default function (options: { discussion?: string } = {}) {
     replacement: function (content, node) {
       // Get headers from thead or first row with th elements
       let headers = Array.from(node.querySelectorAll('thead th')).map(
-        (th: any) => turndownService.turndown(th.innerHTML).trim()
+        (th: any) => turndownService.turndown(th.innerHTML)
       );
       let headerCells = Array.from(node.querySelectorAll('thead th'));
 
@@ -29,7 +29,7 @@ export default function (options: { discussion?: string } = {}) {
           const thElements = firstRow.querySelectorAll('th');
           if (thElements.length > 0) {
             headers = Array.from(thElements).map((th: any) =>
-              turndownService.turndown(th.innerHTML).trim()
+              turndownService.turndown(th.innerHTML)
             );
             headerCells = Array.from(thElements);
           }
@@ -80,7 +80,7 @@ export default function (options: { discussion?: string } = {}) {
 
       const rows = dataRows.map((tr: any) =>
         Array.from(tr.querySelectorAll('td, th')).map((cell: any) =>
-          turndownService.turndown(cell.innerHTML).trim()
+          turndownService.turndown(cell.innerHTML)
         )
       );
 
