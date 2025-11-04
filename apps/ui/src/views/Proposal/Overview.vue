@@ -14,6 +14,8 @@ import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
 
+const WHITELISTED_SPACES = ['gnosis.eth', 'kleros.eth'];
+
 const props = defineProps<{
   proposal: Proposal;
 }>();
@@ -345,7 +347,10 @@ onBeforeUnmount(() => destroyAudio());
 
       <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
 
-      <AppFutarchy :proposal="proposal" />
+      <WidgetFutarchy
+        v-if="WHITELISTED_SPACES.includes(proposal.space.id)"
+        :proposal="proposal"
+      />
 
       <div class="flex justify-between items-center mb-4">
         <AppLink

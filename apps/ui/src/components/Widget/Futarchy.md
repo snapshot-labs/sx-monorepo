@@ -1,8 +1,8 @@
-# AppFutarchy Widget
+# Futarchy Widget
 
 ## Overview
 
-The `AppFutarchy.vue` component integrates Futarchy.fi prediction market data into proposal pages. It displays real-time price predictions for how a proposal might impact token prices based on conditional markets.
+The `Futarchy.vue` component integrates Futarchy.fi prediction market data into proposal pages. It displays real-time price predictions for how a proposal might impact token prices based on conditional markets.
 
 ## Features
 
@@ -173,7 +173,7 @@ Example:
 The widget is integrated in `apps/ui/src/views/Proposal.vue`:
 
 ```vue
-<AppFutarchy :proposal="proposal" />
+<WidgetFutarchy :proposal="proposal" />
 ```
 
 Placed in the proposal sidebar **after the Results section**, before Labels and Timeline sections.
