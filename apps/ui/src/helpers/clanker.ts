@@ -3,6 +3,10 @@ import { getProvider } from '@/helpers/provider';
 
 export const SUPPORTED_NETWORKS = [1, 8453, 42161];
 
+const MAX_TWITTER_HANDLE_LENGTH = 15;
+const MAX_FARCASTER_HANDLE_LENGTH = 256;
+const MAX_URL_LENGTH = 256;
+
 const ABI = [
   'function name() view returns (string)',
   'function symbol() view returns (string)',
@@ -35,9 +39,12 @@ export async function getMetadata(
   const metadata = JSON.parse(result.metadata || '{}');
   const socialMediaUrls = {};
 
-  metadata.socialMediaUrls.forEach(
+  metadata.socialMediaUrls?.forEach(
     (meta: { platform: string; url: string }) => {
-      socialMediaUrls[meta.platform] = getHandle(meta.url, meta.platform);
+      const handle = getHandle(meta.url, meta.platform);
+      if (handle) {
+        socialMediaUrls[meta.platform] = handle;
+      }
     }
   );
 
@@ -57,12 +64,32 @@ export async function getMetadata(
 function getHandle(url: string, platform: string): string {
   switch (platform.toLowerCase()) {
     case 'twitter':
-    case 'x':
-      const match = url.match(/(?:twitter\.com|x\.com)\/(.+)/);
+    case 'x': {
+      const match = url.match(
+        new RegExp(
+          `(?:(?:twitter|x)\\.com)\\/([a-zA-Z0-9_]{1,${MAX_TWITTER_HANDLE_LENGTH}})`
+        )
+      );
       return match?.[1] || '';
-    case 'farcaster':
-      return url.split('farcaster.xyz/')[1] || '';
-    default:
-      return url;
+    }
+    case 'farcaster': {
+      const match = url.match(
+        new RegExp(
+          `farcaster\\.xyz\\/([a-z0-9-]{1,${MAX_FARCASTER_HANDLE_LENGTH}})`
+        )
+      );
+      return match?.[1] || '';
+    }
+    case 'website': {
+      try {
+        new URL(url);
+        return url.length <= MAX_URL_LENGTH ? url : '';
+      } catch {
+        return '';
+      }
+    }
+    default: {
+      return '';
+    }
   }
 }

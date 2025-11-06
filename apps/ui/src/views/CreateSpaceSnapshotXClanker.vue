@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import { BigNumber } from '@ethersproject/bignumber';
 import { getMetadata } from '@/helpers/clanker';
-import { clone, getSalt } from '@/helpers/utils';
+import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import {
+  clone,
+  getSalt,
+  imageUpload,
+  loadImageFromIpfs
+} from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
@@ -48,6 +54,11 @@ const EXTRA_DEFINITION = {
   }
 };
 const NETWORK_ID: NetworkID = 'base';
+const MAX_NAME_LENGTH = 32;
+const MAX_DESCRIPTION_LENGTH = 160;
+const PROPOSAL_THRESHOLD_DIVISOR = 1000n;
+const EXECUTION_QUORUM_DIVISOR = 100n;
+const MAX_VOTING_DURATION = 86400;
 
 const { current, goTo } = useStepper(['contract', 'profile', 'confirming']);
 const { predictSpaceAddress } = useActions();
@@ -72,7 +83,7 @@ const settingsForm: SpaceSettings = reactive(
   clone({
     votingDelay: 0,
     minVotingDuration: 0,
-    maxVotingDuration: 86400
+    maxVotingDuration: MAX_VOTING_DURATION
   })
 );
 const metadataForm: SpaceMetadata = reactive(
@@ -123,10 +134,29 @@ async function handleFetchContractInfo() {
       throw new Error('Invalid Clanker token data');
     }
 
-    metadataForm.name = contractMetadata.value.name;
-    metadataForm.votingPowerSymbol = contractMetadata.value.symbol;
-    metadataForm.description = contractMetadata.value.description;
-    metadataForm.avatar = contractMetadata.value.imageUrl;
+    metadataForm.name = contractMetadata.value.name.slice(0, MAX_NAME_LENGTH);
+    metadataForm.votingPowerSymbol = contractMetadata.value.symbol.slice(
+      0,
+      MAX_SYMBOL_LENGTH
+    );
+    metadataForm.description = contractMetadata.value.description.slice(
+      0,
+      MAX_DESCRIPTION_LENGTH
+    );
+
+    // Handle image URL based on whether it's already an IPFS URL
+    if (contractMetadata.value.imageUrl.startsWith('ipfs://')) {
+      metadataForm.avatar = contractMetadata.value.imageUrl;
+    } else {
+      const imageFile = await loadImageFromIpfs(
+        contractMetadata.value.imageUrl
+      );
+      const avatar = await imageUpload(imageFile);
+      if (!avatar) {
+        throw new Error('Failed to upload avatar');
+      }
+      metadataForm.avatar = avatar.url;
+    }
     metadataForm.externalUrl = contractMetadata.value.website;
     metadataForm.farcaster = contractMetadata.value.farcaster;
     metadataForm.twitter =
@@ -134,16 +164,17 @@ async function handleFetchContractInfo() {
     form.proposalThreshold = (
       contractMetadata.value.totalSupply /
       10n ** BigInt(contractMetadata.value.decimals) /
-      1000n
+      PROPOSAL_THRESHOLD_DIVISOR
     ).toString();
     form.executionQuorum = (
       contractMetadata.value.totalSupply /
       10n ** BigInt(contractMetadata.value.decimals) /
-      100n
+      EXECUTION_QUORUM_DIVISOR
     ).toString();
 
     goTo('profile');
-  } catch {
+  } catch (err) {
+    console.error(err);
     contractError.value =
       'Failed to fetch your Clanker token data. Please ensure it is a valid token deployed on Base.';
   } finally {
