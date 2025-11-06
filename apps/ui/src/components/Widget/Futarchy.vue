@@ -74,7 +74,7 @@ watch(() => props.proposal.id, fetchPrices);
         <span class="text-skin-link font-bold">
           ${{
             _n(data.spot.price_usd, 'compact', {
-              maximumFractionDigits: 2
+              maximumFractionDigits: 3
             })
           }}
         </span>
@@ -85,7 +85,7 @@ watch(() => props.proposal.id, fetchPrices);
         <span class="text-skin-link font-bold">
           ${{
             _n(data.conditional_yes.price_usd, 'compact', {
-              maximumFractionDigits: 2
+              maximumFractionDigits: 3
             })
           }}
         </span>
@@ -96,7 +96,7 @@ watch(() => props.proposal.id, fetchPrices);
         <span class="text-skin-link font-bold">
           ${{
             _n(data.conditional_no.price_usd, 'compact', {
-              maximumFractionDigits: 2
+              maximumFractionDigits: 3
             })
           }}
         </span>
