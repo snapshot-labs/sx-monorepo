@@ -1,11 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
-<defs>
-<mask id="clanker-mask">
-<path d="M512 256C512 397.385 397.385 512 256 512C114.615 512 0 397.385 0 256C0 114.615 114.615 0 256 0C397.385 0 512 114.615 512 256Z" fill="white"/>
-<path d="M280.621 223.172H231.379V391.041H280.621V223.172Z" fill="black"/>
-<path d="M383.207 120.958H333.966V391.041H383.207V120.958Z" fill="black"/>
-<path d="M178.407 325.385H129.166V391.041H178.407V325.385Z" fill="black"/>
-</mask>
-</defs>
-<path d="M512 256C512 397.385 397.385 512 256 512C114.615 512 0 397.385 0 256C0 114.615 114.615 0 256 0C397.385 0 512 114.615 512 256Z" fill="currentColor" mask="url(#clanker-mask)"/>
+<path d="M494.328 0H402V512H494.328V0Z" fill="currentColor"/>
+<path d="M301.976 193.766H209.648V511.998H301.976V193.766Z" fill="currentColor"/>
+<path d="M110.328 387.531H18V511.995H110.328V387.531Z" fill="currentColor"/>
 </svg>
