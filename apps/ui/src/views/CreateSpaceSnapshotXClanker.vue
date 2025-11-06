@@ -35,8 +35,7 @@ const EXTRA_DEFINITION = {
       type: 'string',
       format: 'ethAddress',
       title: 'Safe address',
-      tooltip:
-        'The Gnosis Safe address that will be used to execute proposals, and control the space.',
+      tooltip: 'The treasury and controller of the space.',
       examples: ['0x1234...'],
       showControls: false
     },
