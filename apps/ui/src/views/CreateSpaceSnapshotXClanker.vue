@@ -12,7 +12,7 @@ import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
-import ICClanker from '~icons/c/clanker';
+import ICClanker from '~icons/c/clanker-full';
 
 const CONTRACT_ADDRESS_DEFINITION = {
   type: 'object',
@@ -294,36 +294,33 @@ watch(
       :controller="form.safeAddress"
       @back="goTo('profile')"
     />
-    <div v-else class="flex flex-col s-box pt-5 px-4 gap-5">
-      <div class="flex flex-col gap-2 mt-5">
-        <div class="mb-1">
-          <ICClanker
-            class="size-12 text-skin-link inline-block bg-skin-bg rounded-full"
-          />
-          <IC-zap
-            class="size-12 border rounded-full text-skin-border border-skin-border -ml-5 inline-block relative z-[-1]"
-          />
+    <div v-else class="s-box pt-5 px-4">
+      <div class="flex items-center gap-3 mb-4 mt-5">
+        <ICClanker class="w-[210px] h-[40px] text-skin-link" />
+        <div
+          class="text-[42px] hidden md:block ml-3 -mt-3 leading-[28px] tracking-widest text-skin-border"
+        >
+          .....
         </div>
-        <div>
-          <h1 class="mb-0">Create a DAO for your Clanker</h1>
-          <p class="text-lg">
-            Create a governance space for your Clanker token deployed on Base.
-          </p>
-        </div>
-        <UiInputString
-          v-model="contractAddress"
-          :loading="loading"
-          :disabled="loading"
-          :definition="CONTRACT_ADDRESS_DEFINITION.properties.tokenAddress"
-          :error="contractFormErrors.tokenAddress"
-        />
-        <UiAlert v-if="contractError" type="error" class="mb-2">
-          {{ contractError }}
-          <button type="button" @click="handleFetchContractInfo">Retry.</button>
-        </UiAlert>
+        <IC-zap class="size-[50px] text-skin-link hidden md:block" />
       </div>
+      <h1 class="mb-0">Create a DAO for your Clanker</h1>
+      <p class="text-lg mb-2">
+        Create a governance space for your Clanker token deployed on Base.
+      </p>
+      <UiInputString
+        v-model="contractAddress"
+        :loading="loading"
+        :disabled="loading"
+        :definition="CONTRACT_ADDRESS_DEFINITION.properties.tokenAddress"
+        :error="contractFormErrors.tokenAddress"
+      />
+      <UiAlert v-if="contractError" type="error" class="mb-2">
+        {{ contractError }}
+        <button type="button" @click="handleFetchContractInfo">Retry.</button>
+      </UiAlert>
       <template v-if="validToken && contractMetadata.name">
-        <div class="flex w-full gap-4 items-start">
+        <div class="flex w-full gap-4 items-start my-4">
           <img
             :src="contractMetadata.imageUrl"
             :width="90"
@@ -336,7 +333,7 @@ watch(
               <h2>{{ contractMetadata.name }}</h2>
               <button><IH-Pencil /></button>
             </div>
-            <div class="leading-6">{{ contractMetadata.description }}</div>
+            <div class="leading-6" v-text="contractMetadata.description" />
           </div>
         </div>
 
