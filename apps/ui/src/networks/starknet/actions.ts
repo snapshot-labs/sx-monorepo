@@ -258,6 +258,7 @@ export function createActions(
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
+          hasReason: false,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
@@ -377,6 +378,7 @@ export function createActions(
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
+        hasReason: false,
         ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
@@ -472,6 +474,7 @@ export function createActions(
           strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
+          hasReason: !!reason,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
