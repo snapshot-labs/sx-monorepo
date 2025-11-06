@@ -1,4 +1,3 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 
@@ -49,7 +48,7 @@ export async function getMetadata(
     symbol: result.symbol || '',
     imageUrl: result.imageUrl || '',
     decimals: result.decimals || 18,
-    totalSupply: BigNumber.from(result.totalSupply || 0),
+    totalSupply: BigInt(result.totalSupply || 0),
     ...metadata,
     ...socialMediaUrls
   };

@@ -54,8 +54,8 @@ const { predictSpaceAddress } = useActions();
 useTitle('Create space');
 
 const form = reactive({
-  proposalThreshold: 1,
-  executionQuorum: 1,
+  proposalThreshold: '1',
+  executionQuorum: '1',
   safeAddress: ''
 });
 const contractAddress = ref('');
@@ -131,12 +131,16 @@ async function handleFetchContractInfo() {
     metadataForm.farcaster = contractMetadata.value.farcaster;
     metadataForm.twitter =
       contractMetadata.value.twitter || contractMetadata.value.x;
-    form.proposalThreshold = contractMetadata.value.totalSupply
-      .div(1000)
-      .toString();
-    form.executionQuorum = contractMetadata.value.totalSupply
-      .div(100)
-      .toString();
+    form.proposalThreshold = (
+      contractMetadata.value.totalSupply /
+      10n ** BigInt(contractMetadata.value.decimals) /
+      1000n
+    ).toString();
+    form.executionQuorum = (
+      contractMetadata.value.totalSupply /
+      10n ** BigInt(contractMetadata.value.decimals) /
+      100n
+    ).toString();
 
     goTo('profile');
   } catch {
