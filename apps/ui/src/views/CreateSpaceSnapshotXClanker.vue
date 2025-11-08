@@ -82,6 +82,10 @@ const NETWORK_ID: NetworkID = 'base';
 const PROPOSAL_THRESHOLD_DIVISOR = 1000n; // 0.1% of total supply
 const EXECUTION_QUORUM_DIVISOR = 100n; // 1% of total supply
 const MAX_VOTING_DURATION = 86400;
+const ETH_TX_AUTHENTICATOR = '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1';
+const OZ_VOTES_STRATEGY = '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe';
+const PROPOSAL_VALIDATION_VOTING_POWER =
+  '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311';
 
 const network = getNetwork(NETWORK_ID);
 
@@ -149,7 +153,7 @@ const authenticators = computed(() => {
       id: crypto.randomUUID(),
       params: {},
       ...network.constants.EDITOR_AUTHENTICATORS.find(
-        meta => meta.address === '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1'
+        meta => meta.address === ETH_TX_AUTHENTICATOR
       )!
     }
   ];
@@ -165,7 +169,7 @@ const votingStrategies = computed(() => {
         symbol: metadataForm.value.votingPowerSymbol
       },
       ...network.constants.EDITOR_VOTING_STRATEGIES.find(
-        meta => meta.address === '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe'
+        meta => meta.address === OZ_VOTES_STRATEGY
       )!
     }
   ];
@@ -179,8 +183,7 @@ const validationStrategy = computed(() => {
       strategies: [
         {
           ...network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES.find(
-            meta =>
-              meta.address === '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe'
+            meta => meta.address === OZ_VOTES_STRATEGY
           )!,
           params: {
             contractAddress: contractAddress.value,
@@ -191,7 +194,7 @@ const validationStrategy = computed(() => {
       ]
     },
     ...network.constants.EDITOR_PROPOSAL_VALIDATIONS.find(
-      meta => meta.address === '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+      meta => meta.address === PROPOSAL_VALIDATION_VOTING_POWER
     )!
   };
 });
@@ -241,11 +244,11 @@ async function handleFetchContractInfo() {
     }
     form.proposalThreshold = (
       totalSupply /
-      10n ** BigInt(decimals) /
-      PROPOSAL_THRESHOLD_DIVISOR
+      PROPOSAL_THRESHOLD_DIVISOR /
+      10n ** BigInt(decimals)
     ).toString();
     form.executionQuorum = Number(
-      totalSupply / 10n ** BigInt(decimals) / EXECUTION_QUORUM_DIVISOR
+      totalSupply / EXECUTION_QUORUM_DIVISOR / 10n ** BigInt(decimals)
     );
 
     isCreating.value = true;

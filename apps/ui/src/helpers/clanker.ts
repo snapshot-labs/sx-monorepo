@@ -6,6 +6,9 @@ export const SUPPORTED_NETWORKS = [1, 8453, 42161];
 const MAX_TWITTER_HANDLE_LENGTH = 15;
 const MAX_FARCASTER_HANDLE_LENGTH = 256;
 const MAX_URL_LENGTH = 256;
+const TWITTER_HANDLE_REGEX = new RegExp(
+  `(?:(?:twitter|x)\\.com)\\/([a-zA-Z0-9_]{1,${MAX_TWITTER_HANDLE_LENGTH}})`
+);
 
 const ABI = [
   'function name() view returns (string)',
@@ -37,7 +40,7 @@ export async function getMetadata(
 
   const result = await multi.execute();
   const metadata = JSON.parse(result.metadata || '{}');
-  const socialMediaUrls = {};
+  const socialMediaUrls: Record<string, string> = {};
 
   if (!result.symbol) {
     throw new Error('Invalid Clanker token data');
@@ -69,11 +72,7 @@ function getHandle(url: string, platform: string): string {
   switch (platform.toLowerCase()) {
     case 'twitter':
     case 'x': {
-      const match = url.match(
-        new RegExp(
-          `(?:(?:twitter|x)\\.com)\\/([a-zA-Z0-9_]{1,${MAX_TWITTER_HANDLE_LENGTH}})`
-        )
-      );
+      const match = url.match(TWITTER_HANDLE_REGEX);
       return match?.[1] || '';
     }
     case 'farcaster': {
