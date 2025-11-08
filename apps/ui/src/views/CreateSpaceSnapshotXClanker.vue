@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { BigNumber } from '@ethersproject/bignumber';
 import { getMetadata } from '@/helpers/clanker';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import {
@@ -10,13 +9,20 @@ import {
 } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
-import { StrategyConfig } from '@/networks/types';
-import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
+import { NetworkID, SpaceMetadata } from '@/types';
 import ICClanker from '~icons/c/clanker-full';
+
+const DEFAULT_FORM = {
+  name: '',
+  description: '',
+  avatar: '',
+  proposalThreshold: '',
+  safeAddress: '',
+  executionQuorum: 1
+};
 
 const CONTRACT_ADDRESS_DEFINITION = {
   type: 'object',
-  required: ['tokenAddress'],
   properties: {
     tokenAddress: {
       type: 'string',
@@ -27,10 +33,30 @@ const CONTRACT_ADDRESS_DEFINITION = {
   }
 };
 
-const EXTRA_DEFINITION = {
+const FORM_DEFINITION = {
   type: 'object',
-  required: ['proposalThreshold', 'safeAddress', 'executionQuorum'],
+  required: [
+    'name',
+    'description',
+    'proposalThreshold',
+    'safeAddress',
+    'executionQuorum'
+  ],
   properties: {
+    name: {
+      type: 'string',
+      title: 'Name',
+      minLength: 1,
+      maxLength: 32,
+      examples: ['Space name']
+    },
+    description: {
+      type: 'string',
+      format: 'long',
+      title: 'About',
+      maxLength: 160,
+      examples: ['Space description']
+    },
     proposalThreshold: {
       type: 'string',
       format: 'uint256',
@@ -46,69 +72,33 @@ const EXTRA_DEFINITION = {
       showControls: false
     },
     executionQuorum: {
-      type: 'string',
-      format: 'uint256',
+      type: 'integer',
       title: 'Execution quorum',
       tooltip: 'Minimum number of votes required for a proposal to be executed.'
     }
   }
 };
 const NETWORK_ID: NetworkID = 'base';
-const MAX_NAME_LENGTH = 32;
-const MAX_DESCRIPTION_LENGTH = 160;
-const PROPOSAL_THRESHOLD_DIVISOR = 1000n;
-const EXECUTION_QUORUM_DIVISOR = 100n;
+const PROPOSAL_THRESHOLD_DIVISOR = 1000n; // 0.1% of total supply
+const EXECUTION_QUORUM_DIVISOR = 100n; // 1% of total supply
 const MAX_VOTING_DURATION = 86400;
 
-const { current, goTo } = useStepper(['contract', 'profile', 'confirming']);
+const network = getNetwork(NETWORK_ID);
+
 const { predictSpaceAddress } = useActions();
 useTitle('Create space');
 
-const form = reactive({
-  proposalThreshold: '1',
-  executionQuorum: '1',
-  safeAddress: ''
-});
+const form = reactive(clone(DEFAULT_FORM));
 const contractAddress = ref('');
 const contractError = ref('');
 const contractMetadata = ref<Record<string, any>>({});
-const loading = ref(false);
+const isLoading = ref(false);
+const isCreating = ref(false);
 const salt: Ref<string | null> = ref(null);
 const predictedSpaceAddress: Ref<string | null> = ref(null);
-const authenticators = ref([] as StrategyConfig[]);
-const validationStrategy: Ref<StrategyConfig | null> = ref(null);
-const votingStrategies = ref([] as StrategyConfig[]);
-const executionStrategies = ref([] as StrategyConfig[]);
-const settingsForm: SpaceSettings = reactive(
-  clone({
-    votingDelay: 0,
-    minVotingDuration: 0,
-    maxVotingDuration: MAX_VOTING_DURATION
-  })
-);
-const metadataForm: SpaceMetadata = reactive(
-  clone({
-    name: '',
-    avatar: '',
-    cover: '',
-    description: '',
-    externalUrl: '',
-    twitter: '',
-    github: '',
-    discord: '',
-    farcaster: '',
-    terms: '',
-    votingPowerSymbol: '',
-    treasuries: [],
-    labels: [],
-    delegations: []
-  })
-);
-
-const selectedNetwork = computed(() => getNetwork(NETWORK_ID));
 
 const formErrors = computed(() => {
-  const validator = getValidator(EXTRA_DEFINITION);
+  const validator = getValidator(FORM_DEFINITION);
   return validator.validate(form);
 });
 
@@ -118,67 +108,153 @@ const contractFormErrors = computed(() => {
 });
 
 const validToken = computed(() => {
-  return !Object.keys(contractFormErrors.value).length && !contractError.value;
+  return (
+    contractAddress.value &&
+    !Object.keys(contractFormErrors.value).length &&
+    !contractError.value
+  );
+});
+
+const metadataForm = computed<SpaceMetadata>(() => {
+  return {
+    name: form.name,
+    avatar: form.avatar,
+    description: form.description,
+    cover: '',
+    externalUrl: contractMetadata.value.website,
+    twitter: contractMetadata.value.twitter || contractMetadata.value.x,
+    github: '',
+    discord: '',
+    farcaster: contractMetadata.value.farcaster,
+    terms: '',
+    votingPowerSymbol: contractMetadata.value.symbol.slice(
+      0,
+      MAX_SYMBOL_LENGTH
+    ),
+    treasuries: [
+      {
+        name: 'Clanker treasury',
+        chainId: network.chainId.toString(),
+        address: form.safeAddress
+      }
+    ],
+    labels: [],
+    delegations: []
+  };
+});
+
+const authenticators = computed(() => {
+  return [
+    {
+      id: crypto.randomUUID(),
+      params: {},
+      ...network.constants.EDITOR_AUTHENTICATORS.find(
+        meta => meta.address === '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1'
+      )!
+    }
+  ];
+});
+
+const votingStrategies = computed(() => {
+  return [
+    {
+      id: crypto.randomUUID(),
+      params: {
+        contractAddress: contractAddress.value,
+        decimals: contractMetadata.value.decimals,
+        symbol: metadataForm.value.votingPowerSymbol
+      },
+      ...network.constants.EDITOR_VOTING_STRATEGIES.find(
+        meta => meta.address === '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe'
+      )!
+    }
+  ];
+});
+
+const validationStrategy = computed(() => {
+  return {
+    id: crypto.randomUUID(),
+    params: {
+      threshold: form.proposalThreshold,
+      strategies: [
+        {
+          ...network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES.find(
+            meta =>
+              meta.address === '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe'
+          )!,
+          params: {
+            contractAddress: contractAddress.value,
+            decimals: contractMetadata.value.decimals,
+            symbol: metadataForm.value.votingPowerSymbol
+          }
+        }
+      ]
+    },
+    ...network.constants.EDITOR_PROPOSAL_VALIDATIONS.find(
+      meta => meta.address === '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
+    )!
+  };
+});
+
+const executionStrategies = computed(() => {
+  return [
+    {
+      id: crypto.randomUUID(),
+      params: {
+        quorum: form.executionQuorum,
+        controller: form.safeAddress,
+        contractAddress: form.safeAddress
+      },
+      ...network.constants.EDITOR_EXECUTION_STRATEGIES.find(
+        meta => meta.type === 'SimpleQuorumAvatar'
+      )!
+    }
+  ];
 });
 
 async function handleFetchContractInfo() {
   try {
-    loading.value = true;
+    isLoading.value = true;
+    isCreating.value = false;
     contractError.value = '';
 
     contractMetadata.value = await getMetadata(
       contractAddress.value,
-      Number(selectedNetwork.value.chainId)
-    );
-    if (!contractMetadata.value.symbol) {
-      throw new Error('Invalid Clanker token data');
-    }
-
-    metadataForm.name = contractMetadata.value.name.slice(0, MAX_NAME_LENGTH);
-    metadataForm.votingPowerSymbol = contractMetadata.value.symbol.slice(
-      0,
-      MAX_SYMBOL_LENGTH
-    );
-    metadataForm.description = contractMetadata.value.description.slice(
-      0,
-      MAX_DESCRIPTION_LENGTH
+      Number(network.chainId)
     );
 
-    // Handle image URL based on whether it's already an IPFS URL
-    if (contractMetadata.value.imageUrl.startsWith('ipfs://')) {
-      metadataForm.avatar = contractMetadata.value.imageUrl;
+    const { name, description, totalSupply, decimals, imageUrl } =
+      contractMetadata.value;
+
+    form.name = name;
+    form.description = description;
+
+    if (imageUrl.startsWith('ipfs://')) {
+      form.avatar = imageUrl;
     } else {
-      const imageFile = await loadImageFromIpfs(
-        contractMetadata.value.imageUrl
-      );
+      const imageFile = await loadImageFromIpfs(imageUrl);
       const avatar = await imageUpload(imageFile);
       if (!avatar) {
         throw new Error('Failed to upload avatar');
       }
-      metadataForm.avatar = avatar.url;
+      form.avatar = avatar.url;
     }
-    metadataForm.externalUrl = contractMetadata.value.website;
-    metadataForm.farcaster = contractMetadata.value.farcaster;
-    metadataForm.twitter =
-      contractMetadata.value.twitter || contractMetadata.value.x;
     form.proposalThreshold = (
-      contractMetadata.value.totalSupply /
-      10n ** BigInt(contractMetadata.value.decimals) /
+      totalSupply /
+      10n ** BigInt(decimals) /
       PROPOSAL_THRESHOLD_DIVISOR
     ).toString();
-    form.executionQuorum = (
-      contractMetadata.value.totalSupply /
-      10n ** BigInt(contractMetadata.value.decimals) /
-      EXECUTION_QUORUM_DIVISOR
-    ).toString();
+    form.executionQuorum = Number(
+      totalSupply / 10n ** BigInt(decimals) / EXECUTION_QUORUM_DIVISOR
+    );
 
-    goTo('profile');
+    isCreating.value = true;
   } catch (err) {
     console.error(err);
     contractError.value =
       'Failed to fetch your Clanker token data. Please ensure it is a valid token deployed on Base.';
   } finally {
-    loading.value = false;
+    isLoading.value = false;
   }
 }
 
@@ -188,77 +264,6 @@ async function handleCreateSpace() {
     NETWORK_ID,
     salt.value
   );
-
-  authenticators.value = [
-    {
-      id: crypto.randomUUID(),
-      params: {},
-      ...selectedNetwork.value.constants.EDITOR_AUTHENTICATORS.find(
-        meta => meta.address === '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1'
-      )!
-    }
-  ];
-
-  votingStrategies.value = [
-    {
-      id: crypto.randomUUID(),
-      params: {
-        contractAddress: contractAddress.value,
-        decimals: contractMetadata.value.decimals,
-        symbol: metadataForm.votingPowerSymbol
-      },
-      ...selectedNetwork.value.constants.EDITOR_VOTING_STRATEGIES.find(
-        meta => meta.address === '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe'
-      )!
-    }
-  ];
-
-  validationStrategy.value = {
-    id: crypto.randomUUID(),
-    params: {
-      threshold: BigNumber.from(form.proposalThreshold.toString()),
-      strategies: [
-        {
-          ...selectedNetwork.value.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES.find(
-            meta =>
-              meta.address === '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe'
-          )!,
-          params: {
-            contractAddress: contractAddress.value,
-            decimals: contractMetadata.value.decimals,
-            symbol: metadataForm.votingPowerSymbol
-          }
-        }
-      ]
-    },
-    ...selectedNetwork.value.constants.EDITOR_PROPOSAL_VALIDATIONS.find(
-      meta => meta.address === '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311'
-    )!
-  };
-
-  executionStrategies.value = [
-    {
-      id: crypto.randomUUID(),
-      params: {
-        quorum: BigNumber.from(form.executionQuorum.toString()),
-        controller: form.safeAddress,
-        contractAddress: form.safeAddress
-      },
-      ...selectedNetwork.value.constants.EDITOR_EXECUTION_STRATEGIES.find(
-        meta => meta.type === 'SimpleQuorumAvatar'
-      )!
-    }
-  ];
-
-  metadataForm.treasuries = [
-    {
-      name: 'Clanker treasury',
-      chainId: selectedNetwork.value.chainId.toString(),
-      address: form.safeAddress
-    }
-  ];
-
-  goTo('confirming');
 }
 
 watch(
@@ -266,6 +271,8 @@ watch(
   () => {
     contractMetadata.value = {};
     contractError.value = '';
+    isCreating.value = false;
+    Object.assign(form, clone(DEFAULT_FORM));
 
     if (validToken.value) {
       handleFetchContractInfo();
@@ -276,26 +283,25 @@ watch(
 <template>
   <div class="max-w-[592px] mx-auto">
     <CreateDeploymentProgress
-      v-if="
-        current === 'confirming' &&
-        salt &&
-        predictedSpaceAddress &&
-        validationStrategy
-      "
+      v-if="isCreating && salt && predictedSpaceAddress && validationStrategy"
       :network-id="NETWORK_ID"
       :salt="salt"
       :predicted-space-address="predictedSpaceAddress"
       :metadata="metadataForm"
-      :settings="settingsForm"
+      :settings="{
+        votingDelay: 0,
+        minVotingDuration: 0,
+        maxVotingDuration: MAX_VOTING_DURATION
+      }"
       :authenticators="authenticators"
       :validation-strategy="validationStrategy"
       :voting-strategies="votingStrategies"
       :execution-strategies="executionStrategies"
       :controller="form.safeAddress"
-      @back="goTo('profile')"
+      @back="isCreating = false"
     />
-    <div v-else class="s-box pt-5 px-4">
-      <div class="flex items-center gap-3 mb-4 mt-5">
+    <div v-else class="s-box space-y-3 pt-8 px-4">
+      <div class="flex items-center gap-3">
         <ICClanker class="w-[210px] h-[40px] text-skin-link" />
         <div
           class="text-[42px] hidden md:block ml-3 -mt-3 leading-[28px] tracking-widest text-skin-border"
@@ -304,54 +310,49 @@ watch(
         </div>
         <IC-zap class="size-[50px] text-skin-link hidden md:block" />
       </div>
-      <h1 class="mb-0">Create a DAO for your Clanker</h1>
-      <p class="text-lg mb-2">
-        Create a governance space for your Clanker token deployed on Base.
-      </p>
+      <div>
+        <h1 class="mb-0">Create a DAO for your Clanker</h1>
+        <p class="text-lg">
+          Create a governance space for your Clanker token deployed on Base.
+        </p>
+      </div>
       <UiInputString
         v-model="contractAddress"
-        :loading="loading"
-        :disabled="loading"
+        :loading="isLoading"
+        :disabled="isLoading"
         :definition="CONTRACT_ADDRESS_DEFINITION.properties.tokenAddress"
         :error="contractFormErrors.tokenAddress"
       />
-      <UiAlert v-if="contractError" type="error" class="mb-2">
+      <UiAlert v-if="contractError" type="error">
         {{ contractError }}
         <button type="button" @click="handleFetchContractInfo">Retry.</button>
       </UiAlert>
-      <template v-if="validToken && contractMetadata.name">
-        <div class="flex w-full gap-4 items-start my-4">
-          <img
-            :src="contractMetadata.imageUrl"
-            :width="90"
-            :height="90"
-            :alt="contractMetadata.name"
-            class="size-[90px] rounded-lg shrink-0"
-          />
-          <div class="w-full">
-            <div class="flex gap-1 items-center justify-between">
-              <h2>{{ contractMetadata.name }}</h2>
-              <button><IH-Pencil /></button>
-            </div>
-            <div class="leading-6" v-text="contractMetadata.description" />
-          </div>
-        </div>
-
-        <div class="space-y-4">
-          <UiForm
-            v-model="form"
-            :definition="EXTRA_DEFINITION"
-            :error="formErrors"
-          />
-          <UiButton
-            class="w-full primary"
-            :disabled="loading || Object.keys(formErrors).length > 0"
-            :loading="loading"
-            @click="handleCreateSpace"
-          >
-            Create space
-          </UiButton>
-        </div>
+      <template v-if="validToken && !isLoading">
+        <UiInputStamp
+          v-model="form.avatar"
+          class="mt-4 border-0"
+          :width="90"
+          :height="90"
+          :definition="{
+            type: 'string',
+            format: 'stamp',
+            title: 'Avatar',
+            default: `${NETWORK_ID}:${'0x2121212121212121212121212121212121212121212121212121212121212121'}`
+          }"
+        />
+        <UiForm
+          v-model="form"
+          :definition="FORM_DEFINITION"
+          :error="formErrors"
+        />
+        <UiButton
+          class="w-full primary"
+          :disabled="isLoading || Object.keys(formErrors).length > 0"
+          :loading="isLoading"
+          @click="handleCreateSpace"
+        >
+          Create space
+        </UiButton>
       </template>
     </div>
   </div>

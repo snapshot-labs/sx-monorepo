@@ -39,6 +39,10 @@ export async function getMetadata(
   const metadata = JSON.parse(result.metadata || '{}');
   const socialMediaUrls = {};
 
+  if (!result.symbol) {
+    throw new Error('Invalid Clanker token data');
+  }
+
   metadata.socialMediaUrls?.forEach(
     (meta: { platform: string; url: string }) => {
       const handle = getHandle(meta.url, meta.platform);
@@ -73,12 +77,11 @@ function getHandle(url: string, platform: string): string {
       return match?.[1] || '';
     }
     case 'farcaster': {
-      const match = url.match(
-        new RegExp(
-          `farcaster\\.xyz\\/([a-z0-9-]{1,${MAX_FARCASTER_HANDLE_LENGTH}})`
-        )
-      );
-      return match?.[1] || '';
+      const handle = url.split('farcaster.xyz/').pop();
+      if (handle && handle.length <= MAX_FARCASTER_HANDLE_LENGTH) {
+        return handle;
+      }
+      return '';
     }
     case 'website': {
       try {
