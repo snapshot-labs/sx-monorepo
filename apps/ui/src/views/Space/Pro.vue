@@ -449,7 +449,7 @@ onMounted(() => {
         >
           Upgraded to
           <div class="inline-block text-skin-bg bg-skin-link rounded-full px-2">
-            <UiEyebrow>Snapshot Pro</UiEyebrow>
+            <UiEyebrow class="text-skin-bg">Snapshot Pro</UiEyebrow>
           </div>
         </h4>
       </template>
