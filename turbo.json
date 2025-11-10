@@ -11,8 +11,12 @@
       "dependsOn": ["build"],
       "outputs": ["out/**"]
     },
-    "lint": {},
-    "lint:fix": {},
+    "lint": {
+      "cache": false
+    },
+    "lint:fix": {
+      "cache": false
+    },
     "//#lint:scripts": {},
     "typecheck": {
       "dependsOn": ["^build"]
