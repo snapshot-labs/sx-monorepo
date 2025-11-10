@@ -536,9 +536,7 @@ export function createApi(
 
   const apollo = new ApolloClient({
     link: httpLink,
-    cache: new InMemoryCache({
-      addTypename: false
-    }),
+    cache: new InMemoryCache(),
     defaultOptions: {
       query: {
         fetchPolicy: 'no-cache'

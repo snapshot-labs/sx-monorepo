@@ -119,9 +119,7 @@ export function useExecutionActions(
     const httpLink = createHttpLink({ uri: baseNetwork.api.apiUrl });
     const apollo = new ApolloClient({
       link: httpLink,
-      cache: new InMemoryCache({
-        addTypename: false
-      }),
+      cache: new InMemoryCache(),
       defaultOptions: {
         query: {
           fetchPolicy: 'no-cache'
