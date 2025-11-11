@@ -27,6 +27,7 @@ const props = defineProps<{
   path?: string;
 }>();
 
+const slots = useSlots();
 const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
@@ -89,6 +90,22 @@ const getComponent = (property: {
       return null;
   }
 };
+
+const getPropertySlots = (propertyName: string) => {
+  const propertySlots: Record<string, string> = {};
+  const prefix = `${propertyName}-`;
+
+  Object.keys(slots).forEach(slotName => {
+    if (slotName.startsWith(prefix)) {
+      const suffix = slotName.slice(prefix.length);
+      if (suffix) {
+        propertySlots[suffix] = slotName;
+      }
+    }
+  });
+
+  return propertySlots;
+};
 </script>
 
 <template>
@@ -104,14 +121,12 @@ const getComponent = (property: {
       :error="error?.[i]"
       :required="definition.required?.includes(i)"
     >
-      <template v-if="$slots[`${i}-input-prefix`]" #input-prefix="slotProps">
-        <slot :name="`${i}-input-prefix`" v-bind="slotProps" />
-      </template>
-      <template v-if="$slots[`${i}-input-suffix`]" #input-suffix="slotProps">
-        <slot :name="`${i}-input-suffix`" v-bind="slotProps" />
-      </template>
-      <template v-if="$slots[`${i}-suffix`]" #suffix="slotProps">
-        <slot :name="`${i}-suffix`" v-bind="slotProps" />
+      <template
+        v-for="(sourceSlot, targetSlot) in getPropertySlots(i.toString())"
+        :key="targetSlot"
+        #[targetSlot]="slotProps"
+      >
+        <slot :name="sourceSlot" v-bind="slotProps" />
       </template>
     </component>
   </div>
