@@ -324,34 +324,28 @@ input:placeholder-shown {
   }
 }
 
-.s-input-group {
-  &-title {
-    @apply mb-2.5;
-  }
+.s-fieldset {
+  @apply space-y-2.5;
 
   &-items {
-    @apply space-y-2;
-
-    .s-input,
-    .s-error {
-      @apply mb-0 #{!important};
-    }
-
-    .s-input {
-      @apply py-0 #{!important};
-      @apply flex items-center h-[40px] gap-2.5 px-2.5;
+    .s-input-wrapper {
+      @apply flex items-center h-[40px] gap-2.5 px-2.5 border bg-skin-border rounded-lg;
 
       * {
         @apply shrink-0;
       }
 
       input {
-        @apply flex-1;
+        @apply flex-1 h-[40px] py-[10px] bg-transparent text-skin-heading focus:outline-none;
       }
     }
 
-    + button {
-      @apply mt-3;
+    .s-form-wrapper {
+      @apply flex gap-2.5;
+    }
+
+    > .s-base {
+      @apply space-y-1;
     }
   }
 

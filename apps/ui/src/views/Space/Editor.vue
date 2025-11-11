@@ -807,7 +807,7 @@ watchEffect(() => {
               enforcedVoteType ? [enforcedVoteType] : space.voting_types
             "
           />
-          <UiArrayInputString
+          <UiInputArray
             v-model="proposal.choices"
             class="s-box"
             :definition="choicesDefinition"
@@ -817,7 +817,7 @@ watchEffect(() => {
               v-if="proposal.type === 'basic'"
               #input-prefix="{ index }"
             >
-              <UiIconBasicChoice :choice-index="index" class="shrink-0" />
+              <UiIconBasicChoice :choice-index="index" />
             </template>
             <template
               v-if="proposal.type === 'basic'"
@@ -849,7 +849,7 @@ watchEffect(() => {
                 >.
               </div>
             </template>
-          </UiArrayInputString>
+          </UiInputArray>
           <UiSwitch
             v-if="isOffchainSpace && space.privacy === 'any'"
             v-model="privacy"

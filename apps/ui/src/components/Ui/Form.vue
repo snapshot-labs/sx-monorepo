@@ -5,9 +5,9 @@ export default {
 </script>
 
 <script setup lang="ts">
-import ArrayInputString from './ArrayInputString.vue';
 import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
+import InputArray from './InputArray.vue';
 import InputCheckbox from './InputCheckbox.vue';
 import InputColor from './InputColor.vue';
 import InputDuration from './InputDuration.vue';
@@ -64,11 +64,8 @@ const getComponent = (property: {
     case 'array':
       if (property.items.enum) {
         return SelectMultiple;
-      } else if (property.items.type === 'string') {
-        return ArrayInputString;
       }
-
-      return null;
+      return InputArray;
     case 'string':
       if (property.format === 'long') return Textarea;
       if (property.format === 'addresses-with-voting-power') return Textarea;
