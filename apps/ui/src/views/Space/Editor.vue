@@ -3,8 +3,8 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { VERIFIED_URL } from '@/helpers/constants';
-import { _n, omit, prettyConcat } from '@/helpers/utils';
+import { BASIC_CHOICES, VERIFIED_URL } from '@/helpers/constants';
+import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
@@ -63,6 +63,7 @@ const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
 const { modalAccountOpen } = useModal();
+const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
@@ -161,13 +162,47 @@ const bodyDefinition = computed(() => ({
   examples: ['Propose something…']
 }));
 
+const choicesPlaceholders = computed<string[]>(() => {
+  if (proposal.value?.type === 'basic') {
+    return BASIC_CHOICES;
+  }
+
+  const placeholders: string[] = [];
+  for (
+    let i = 1;
+    i <= limits.value[`space.${spaceType.value}.choices_limit`];
+    i++
+  ) {
+    placeholders.push(`Choice ${i}`);
+  }
+
+  return placeholders;
+});
+
+const choicesMinItems = computed<number>(() => {
+  if (!offchainNetworks.includes(props.space.network)) {
+    return BASIC_CHOICES.length;
+  }
+
+  return proposal.value?.type === 'basic' ? 2 : 1;
+});
+
 const choicesDefinition = computed(() => ({
   type: 'array',
   title: 'Choices',
-  minItems: offchainNetworks.includes(props.space.network) ? 1 : 3,
-  maxItems: limits.value[`space.${spaceType.value}.choices_limit`],
-  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
-  additionalItems: { type: 'string', maxLength: 32 }
+  minItems: choicesMinItems.value,
+  maxItems:
+    proposal.value?.type === 'basic'
+      ? BASIC_CHOICES.length
+      : limits.value[`space.${spaceType.value}.choices_limit`],
+  items: {
+    type: 'string',
+    title: 'Choice',
+    examples: choicesPlaceholders.value,
+    minLength: 1,
+    maxLength: 32
+  },
+  sortable: proposal.value?.type !== 'basic'
 }));
 
 const formErrors = computed(() => {
@@ -190,7 +225,7 @@ const formErrors = computed(() => {
       title: proposal.value.title,
       body: proposal.value.body,
       discussion: proposal.value.discussion,
-      choices: proposal.value.choices.filter(choice => !!choice)
+      choices: proposal.value.choices
     },
     {
       skipEmptyOptionalFields: true
@@ -682,7 +717,29 @@ watchEffect(() => {
             :error="formErrors.title"
             :required="true"
           />
+          <div class="flex space-x-3">
+            <button type="button" @click="previewEnabled = false">
+              <UiLabel
+                :is-active="!previewEnabled"
+                text="Write"
+                class="border-transparent"
+              />
+            </button>
+            <button type="button" @click="previewEnabled = true">
+              <UiLabel
+                :is-active="previewEnabled"
+                text="Preview"
+                class="border-transparent"
+              />
+            </button>
+          </div>
+          <UiMarkdown
+            v-if="previewEnabled"
+            class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
+            :body="proposal.body"
+          />
           <UiComposer
+            v-else
             v-model="proposal.body"
             :definition="bodyDefinition"
             :error="formErrors.body"
@@ -750,26 +807,49 @@ watchEffect(() => {
               enforcedVoteType ? [enforcedVoteType] : space.voting_types
             "
           />
-          <EditorChoices
-            v-model="proposal"
-            :minimum-basic-choices="
-              offchainNetworks.includes(space.network) ? 2 : 3
-            "
+          <UiArrayInputString
+            v-model="proposal.choices"
+            class="s-box"
             :definition="choicesDefinition"
-            :error="
-              proposal.choices.length > choicesDefinition.maxItems
-                ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
-                : ''
-            "
+            :error="formErrors.choices"
           >
-            <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
-              <AppLink
-                :to="{ name: 'space-pro' }"
-                class="ml-1 text-skin-danger font-semibold"
-                >Increase limit</AppLink
-              >.
+            <template
+              v-if="proposal.type === 'basic'"
+              #input-prefix="{ index }"
+            >
+              <UiIconBasicChoice :choice-index="index" class="shrink-0" />
             </template>
-          </EditorChoices>
+            <template
+              v-if="proposal.type === 'basic'"
+              #input-suffix="{ index, itemName, deleteItem }"
+            >
+              <button
+                v-if="index > 1"
+                class="text-skin-text"
+                :title="`Delete ${itemName}`.trim()"
+                @click="deleteItem(index)"
+              >
+                <IH-trash />
+              </button>
+              <div v-else />
+            </template>
+            <template
+              v-if="
+                proposal.type !== 'basic' &&
+                proposal.choices.length >= choicesDefinition.maxItems
+              "
+              #suffix
+            >
+              <div class="text-skin-danger">
+                Maximum number of choices reached.
+                <AppLink
+                  :to="{ name: 'space-pro' }"
+                  class="text-skin-danger font-semibold"
+                  >Increase limit</AppLink
+                >.
+              </div>
+            </template>
+          </UiArrayInputString>
           <UiSwitch
             v-if="isOffchainSpace && space.privacy === 'any'"
             v-model="privacy"

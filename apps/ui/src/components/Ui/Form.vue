@@ -5,6 +5,7 @@ export default {
 </script>
 
 <script setup lang="ts">
+import ArrayInputString from './ArrayInputString.vue';
 import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
 import InputCheckbox from './InputCheckbox.vue';
@@ -62,6 +63,8 @@ const getComponent = (property: {
     case 'array':
       if (property.items.enum) {
         return SelectMultiple;
+      } else if (property.items.type === 'string') {
+        return ArrayInputString;
       }
 
       return null;
@@ -100,6 +103,16 @@ const getComponent = (property: {
       :definition="property"
       :error="error?.[i]"
       :required="definition.required?.includes(i)"
-    />
+    >
+      <template v-if="$slots[`${i}-input-prefix`]" #input-prefix="slotProps">
+        <slot :name="`${i}-input-prefix`" v-bind="slotProps" />
+      </template>
+      <template v-if="$slots[`${i}-input-suffix`]" #input-suffix="slotProps">
+        <slot :name="`${i}-input-suffix`" v-bind="slotProps" />
+      </template>
+      <template v-if="$slots[`${i}-suffix`]" #suffix="slotProps">
+        <slot :name="`${i}-suffix`" v-bind="slotProps" />
+      </template>
+    </component>
   </div>
 </template>
