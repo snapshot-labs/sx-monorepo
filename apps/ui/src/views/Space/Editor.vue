@@ -63,7 +63,6 @@ const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
 const { modalAccountOpen } = useModal();
-const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
@@ -683,29 +682,7 @@ watchEffect(() => {
             :error="formErrors.title"
             :required="true"
           />
-          <div class="flex space-x-3">
-            <button type="button" @click="previewEnabled = false">
-              <UiLabel
-                :is-active="!previewEnabled"
-                text="Write"
-                class="border-transparent"
-              />
-            </button>
-            <button type="button" @click="previewEnabled = true">
-              <UiLabel
-                :is-active="previewEnabled"
-                text="Preview"
-                class="border-transparent"
-              />
-            </button>
-          </div>
-          <UiMarkdown
-            v-if="previewEnabled"
-            class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
-            :body="proposal.body"
-          />
           <UiComposer
-            v-else
             v-model="proposal.body"
             :definition="bodyDefinition"
             :error="formErrors.body"
