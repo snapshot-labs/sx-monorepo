@@ -10,6 +10,7 @@ const props = defineProps<{
 }>();
 
 const itemsRef: Ref<any[]> = ref([]);
+const keydownOriginIndex = ref<number | null>(null);
 
 const itemType = computed<'string' | 'object'>(() => {
   return props.definition.items.type;
@@ -20,7 +21,10 @@ const defaultValue = computed<T>(() => {
   return {} as T;
 });
 
-const currentItems = computed<T[]>(() => items.value || [defaultValue.value]);
+const currentItems = computed<T[]>(
+  () =>
+    items.value || (props.definition.minItems > 0 ? [defaultValue.value] : [])
+);
 
 const inputValues = computed(() => {
   return currentItems.value.map((item, index) => ({
@@ -47,21 +51,32 @@ function handleAddItem() {
   const newItems = [...currentItems.value, defaultValue.value];
   items.value = newItems;
 
-  nextTick(() => itemsRef.value[newItems.length - 1].focus());
+  nextTick(() => itemsRef.value[newItems.length - 1]?.focus());
 }
 
 function deleteItem(index: number) {
   const newItems = [...currentItems.value];
   newItems.splice(index, 1);
   items.value = newItems;
+
+  if (newItems.length === 0) return;
+
+  nextTick(() => itemsRef.value[newItems.length - 1].focus());
 }
 
 function handlePressEnter(index: number) {
+  if (keydownOriginIndex.value !== index) {
+    return;
+  }
+
+  keydownOriginIndex.value = null;
+
   if (
     props.definition.maxItems &&
     currentItems.value.length >= props.definition.maxItems
-  )
+  ) {
     return;
+  }
 
   const nextItem = itemsRef.value[index + 1];
 
@@ -71,23 +86,35 @@ function handlePressEnter(index: number) {
 }
 
 function handlePressDelete(index: number) {
+  if (keydownOriginIndex.value !== index) {
+    return;
+  }
+
+  keydownOriginIndex.value = null;
+
   if (items.value?.[index] !== '') return;
 
-  if (currentItems.value.length > props.definition.minItems && index !== 0) {
+  if (
+    currentItems.value.length > (props.definition.minItems || 0) &&
+    index !== 0
+  ) {
     deleteItem(index);
     nextTick(() => itemsRef.value[index - 1].focus());
   }
 }
 
 onMounted(() => {
-  items.value ||= [defaultValue.value];
+  items.value ||= currentItems.value;
 });
 </script>
 
 <template>
   <fieldset class="s-fieldset">
     <legend v-if="definition.title" class="flex justify-between items-center">
-      <UiEyebrow>{{ definition.title }}{{ required ? '*' : '' }}</UiEyebrow>
+      <UiEyebrow
+        >{{ definition.title
+        }}{{ definition.minItems > 0 ? '*' : '' }}</UiEyebrow
+      >
       <UiTooltip v-if="definition.tooltip" :title="definition.tooltip">
         <IH-question-mark-circle class="shrink-0" />
       </UiTooltip>
@@ -132,8 +159,10 @@ onMounted(() => {
                 definition.items?.examples?.[0] ||
                 ''
               "
+              @keydown.enter="keydownOriginIndex = index"
               @keyup.enter="handlePressEnter(index)"
-              @keydown.delete="handlePressDelete(index)"
+              @keydown.delete="keydownOriginIndex = index"
+              @keyup.delete="handlePressDelete(index)"
             />
             <slot
               name="input-suffix"
