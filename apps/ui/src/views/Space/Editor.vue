@@ -189,7 +189,6 @@ const choicesMinItems = computed<number>(() => {
 
 const choicesDefinition = computed(() => ({
   type: 'array',
-  title: 'Choices',
   minItems: choicesMinItems.value,
   maxItems:
     proposal.value?.type === 'basic'
@@ -807,49 +806,52 @@ watchEffect(() => {
               enforcedVoteType ? [enforcedVoteType] : space.voting_types
             "
           />
-          <UiInputArray
-            v-model="proposal.choices"
-            class="s-box"
-            :definition="choicesDefinition"
-            :error="formErrors.choices"
-          >
-            <template
-              v-if="proposal.type === 'basic'"
-              #input-prefix="{ index }"
+          <div class="space-y-2.5">
+            <UiEyebrow>Choices</UiEyebrow>
+            <UiInputArray
+              v-model="proposal.choices"
+              class="s-box"
+              :definition="choicesDefinition"
+              :error="formErrors.choices"
             >
-              <UiIconBasicChoice :choice-index="index" />
-            </template>
-            <template
-              v-if="proposal.type === 'basic'"
-              #input-suffix="{ index, itemName, deleteItem }"
-            >
-              <button
-                v-if="index > 1"
-                class="text-skin-text"
-                :title="`Delete ${itemName}`.trim()"
-                @click="deleteItem(index)"
+              <template
+                v-if="proposal.type === 'basic'"
+                #input-prefix="{ index }"
               >
-                <IH-trash />
-              </button>
-              <div v-else />
-            </template>
-            <template
-              v-if="
-                proposal.type !== 'basic' &&
-                proposal.choices.length >= choicesDefinition.maxItems
-              "
-              #suffix
-            >
-              <div class="text-skin-danger">
-                Maximum number of choices reached.
-                <AppLink
-                  :to="{ name: 'space-pro' }"
-                  class="text-skin-danger font-semibold"
-                  >Increase limit</AppLink
-                >.
-              </div>
-            </template>
-          </UiInputArray>
+                <UiIconBasicChoice :choice-index="index" />
+              </template>
+              <template
+                v-if="proposal.type === 'basic'"
+                #input-suffix="{ index, itemName, deleteItem }"
+              >
+                <button
+                  v-if="index > 1"
+                  class="text-skin-text"
+                  :title="`Delete ${itemName}`.trim()"
+                  @click="deleteItem(index)"
+                >
+                  <IH-trash />
+                </button>
+                <div v-else />
+              </template>
+              <template
+                v-if="
+                  proposal.type !== 'basic' &&
+                  proposal.choices.length >= choicesDefinition.maxItems
+                "
+                #suffix
+              >
+                <div class="text-skin-danger">
+                  Maximum number of choices reached.
+                  <AppLink
+                    :to="{ name: 'space-pro' }"
+                    class="text-skin-danger font-semibold"
+                    >Increase limit</AppLink
+                  >.
+                </div>
+              </template>
+            </UiInputArray>
+          </div>
           <UiSwitch
             v-if="isOffchainSpace && space.privacy === 'any'"
             v-model="privacy"
