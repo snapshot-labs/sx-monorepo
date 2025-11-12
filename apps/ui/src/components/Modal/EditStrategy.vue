@@ -161,6 +161,9 @@ watch(
     if (props.initialState) {
       form.value = cloneInitialState(props.initialState);
       rawParams.value = JSON.stringify(props.initialState, null, 2);
+    } else {
+      form.value = {};
+      rawParams.value = '';
     }
   }
 );
