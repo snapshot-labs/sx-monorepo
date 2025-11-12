@@ -340,6 +340,10 @@ input:placeholder-shown {
       }
     }
 
+    .s-error .s-input-wrapper {
+      @apply border-skin-danger;
+    }
+
     .s-form-wrapper {
       @apply flex gap-2.5;
     }
