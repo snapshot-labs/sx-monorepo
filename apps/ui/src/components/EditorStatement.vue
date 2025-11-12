@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { stripHtmlTags } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Statement } from '@/types';
 
@@ -13,6 +14,7 @@ const emit = defineEmits<{
 const actions = useActions();
 
 const sending = ref(false);
+const previewEnabled = ref(false);
 const form = reactive({
   statement: model.value.statement,
   status: model.value.status
@@ -76,13 +78,35 @@ watchEffect(async () => {
       :definition="STATUS_DEFINITION"
       :error="formErrors.status"
     />
-    <UiComposer
-      v-model="form.statement"
-      :definition="STATEMENT_DEFINITION"
-      :error="formErrors.statement"
-      no-html-tags
-      class="mb-3"
-    />
+    <div class="mb-3">
+      <div class="flex space-x-3">
+        <button type="button" @click="previewEnabled = false">
+          <UiLabel
+            :is-active="!previewEnabled"
+            text="Write"
+            class="border-transparent"
+          />
+        </button>
+        <button type="button" @click="previewEnabled = true">
+          <UiLabel
+            :is-active="previewEnabled"
+            text="Preview"
+            class="border-transparent"
+          />
+        </button>
+      </div>
+      <UiMarkdown
+        v-if="previewEnabled"
+        class="px-3 py-2 mb-3 border rounded-lg min-h-[200px]"
+        :body="stripHtmlTags(form.statement)"
+      />
+      <UiComposer
+        v-else
+        v-model="form.statement"
+        :definition="STATEMENT_DEFINITION"
+        :error="formErrors.statement"
+      />
+    </div>
     <div class="flex items-center justify-between space-x-2.5">
       <UiButton class="w-full" @click="$emit('close')">Cancel</UiButton>
       <UiButton
