@@ -111,7 +111,7 @@ onMounted(() => {
 <template>
   <fieldset class="s-fieldset">
     <legend v-if="definition.title" class="flex justify-between items-center">
-      <UiEyebrow
+      <UiEyebrow class="font-medium"
         >{{ definition.title
         }}{{ definition.minItems > 0 ? '*' : '' }}</UiEyebrow
       >
