@@ -22,8 +22,6 @@
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
-    "@ethereumjs/block": "3.6.3",
-    "@ethereumjs/common": "2.6.5",
     "@ethersproject/contracts": "^5.8.0",
     "@ethersproject/experimental": "5.8.0",
     "@ethersproject/keccak256": "^5.8.0",
