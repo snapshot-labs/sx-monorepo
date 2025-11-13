@@ -13,14 +13,14 @@ export class AuthPage {
     this.profileButton = page.getByTestId('profile-button');
   }
 
-  async login() {
+  async login(connector: string = 'MetaMask') {
     await this.loginButton.click();
 
     await expect(
       this.page.getByRole('heading', { name: 'Log in', exact: true })
     ).toBeVisible();
 
-    await this.page.getByRole('button', { name: 'MetaMask' }).click();
+    await this.page.getByRole('button', { name: connector }).click();
   }
 
   async logout() {
