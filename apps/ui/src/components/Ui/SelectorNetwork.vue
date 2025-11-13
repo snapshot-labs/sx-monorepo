@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
-import { enabledNetworks, getNetwork, offchainNetworks } from '@/networks';
+import { enabledNetworks, getNetwork } from '@/networks';
 import { BaseDefinition, NetworkID } from '@/types';
 
 const network = defineModel<string | number | null>({
@@ -33,10 +33,7 @@ const allOptions = computed(() => {
         return true;
       })
       .map(network => ({
-        // NOTE: onchain networks should keep default chainId type
-        id: offchainNetworks.includes(props.definition.networkId)
-          ? String(network.chainId)
-          : network.chainId,
+        id: String(network.chainId),
         name: network.name,
         icon: h('img', {
           src: getUrl(network.logo),
