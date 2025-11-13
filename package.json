@@ -28,7 +28,7 @@
   },
   "prettier": "@snapshot-labs/prettier-config",
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
+    "@changesets/cli": "^2.29.7",
     "@inquirer/prompts": "^7.4.0",
     "@playwright/test": "^1.54.1",
     "@snapshot-labs/eslint-config": "^0.1.0-beta.21",
