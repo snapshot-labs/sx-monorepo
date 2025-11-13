@@ -48,6 +48,7 @@ watch(
   () => props.open,
   () => {
     showPicker.value = false;
+
     if (props.initialState) {
       form.controller = props.initialState.controller;
     } else {
