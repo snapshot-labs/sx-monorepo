@@ -510,7 +510,7 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
-        proposal: Number(proposal.id),
+        proposal: Number(proposal.proposal_id),
         choice: getSdkChoice(choice),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : ''
       };
