@@ -38,26 +38,29 @@ const qrCodeUrl = computedAsync(() => {
       <h3 v-text="title" />
     </template>
     <div class="p-4 space-y-3 text-center">
-      <img
-        :src="qrCodeUrl"
-        class="rounded-lg mx-auto"
-        :alt="formattedAddress"
-      />
-      <div class="space-y-1 py-2">
-        <h4 v-text="`${network.name} address`" />
-        <div class="text-lg break-all" v-text="formattedAddress" />
-      </div>
-      <UiButton class="w-full" primary @click="copy(formattedAddress)">
-        <IH-duplicate v-if="!copied" />
-        <IH-check v-else />
-        Copy address
-      </UiButton>
-      <UiButton
-        class="w-full"
-        :to="getGenericExplorerUrl(chainId, address, 'address') || ''"
-      >
-        View on block explorer
-      </UiButton>
+      <UiAlert v-if="!network" type="error">Invalid address</UiAlert>
+      <template v-else>
+        <img
+          :src="qrCodeUrl"
+          class="rounded-lg mx-auto"
+          :alt="formattedAddress"
+        />
+        <div class="space-y-1 py-2">
+          <h4 v-text="`${network.name} address`" />
+          <div class="text-lg break-all" v-text="formattedAddress" />
+        </div>
+        <UiButton class="w-full" primary @click="copy(formattedAddress)">
+          <IH-duplicate v-if="!copied" />
+          <IH-check v-else />
+          Copy address
+        </UiButton>
+        <UiButton
+          class="w-full"
+          :to="getGenericExplorerUrl(chainId, address, 'address') || ''"
+        >
+          View on block explorer
+        </UiButton>
+      </template>
     </div>
     <template #footer>
       <UiButton class="w-full" @click="emit('close')"> Close </UiButton>
