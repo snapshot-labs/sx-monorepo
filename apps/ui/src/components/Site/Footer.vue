@@ -6,7 +6,7 @@ import ICGithub from '~icons/c/github';
 import ICX from '~icons/c/x';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
-const repositoryUrl = repository.url.replace('git+', '').replace('.git', '');
+const repositoryUrl = repository.url.replace(/^git\+/, '').replace(/\.git$/, '');
 
 const SOCIALS = [
   {
