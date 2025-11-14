@@ -11,7 +11,7 @@ const props = defineProps<{
   definition: BaseDefinition<string | number | null> & {
     networkId: NetworkID;
     networksListKind?: 'full' | 'builtin';
-    networksFilter?: unknown[];
+    networksFilter?: string[];
   };
 }>();
 
