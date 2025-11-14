@@ -6,6 +6,7 @@ import ICGithub from '~icons/c/github';
 import ICX from '~icons/c/x';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
+const repositoryUrl = repository.url.replace('git+', '').replace('.git', '');
 
 const SOCIALS = [
   {
@@ -113,7 +114,7 @@ const SOCIALS = [
           />
           © {{ new Date().getFullYear() }} Snapshot Labs
           <a
-            :href="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
+            :href="`${repositoryUrl}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
             target="_blank"
             class="ml-1.5"
           >
