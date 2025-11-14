@@ -74,11 +74,13 @@ async function handleSubmit() {
   }
 }
 
-watchEffect(() => {
-  if (props.open) {
+watch(
+  () => props.open,
+  () => {
+    showPicker.value = false;
     contractAddress.value = '';
   }
-});
+);
 </script>
 
 <template>

@@ -142,7 +142,10 @@ function deleteMember(index: number) {
         </button>
       </div>
     </div>
-    <UiButton class="w-full" @click="modalOpen = true">Add members</UiButton>
+    <UiButton class="w-full" @click="modalOpen = true">
+      <IH-plus class="shrink-0 size-[16px]" />
+      Add members
+    </UiButton>
   </div>
   <teleport to="#modal">
     <ModalAddMembers
