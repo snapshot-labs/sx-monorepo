@@ -56,7 +56,9 @@ const qrCodeUrl = computedAsync(() => {
         </UiButton>
         <UiButton
           class="w-full"
-          :to="getGenericExplorerUrl(chainId, address, 'address') || ''"
+          :to="
+            getGenericExplorerUrl(chainId, formattedAddress, 'address') || ''
+          "
         >
           View on block explorer
         </UiButton>
