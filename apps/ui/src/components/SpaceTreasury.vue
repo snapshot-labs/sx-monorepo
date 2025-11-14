@@ -23,6 +23,8 @@ const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
+const isAddressModalOpen = ref(false);
+
 const balancesTreasury = computed(() => {
   if (!treasury.value?.network) return null;
 
@@ -155,6 +157,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         <UiButton uniform @click="copy(treasury.wallet)">
           <IH-duplicate v-if="!copied" />
           <IH-check v-else />
+        </UiButton>
+      </UiTooltip>
+      <UiTooltip title="Fund treasury">
+        <UiButton uniform @click="isAddressModalOpen = true">
+          <IH-library />
         </UiButton>
       </UiTooltip>
       <UiTooltip
@@ -417,6 +424,14 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :space-key="spaceKey"
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"
+      />
+      <ModalAddress
+        v-if="treasuryData.chainId"
+        :open="isAddressModalOpen"
+        :address="treasuryData.address"
+        :chain-id="treasuryData.chainId"
+        title="Fund Treasury"
+        @close="isAddressModalOpen = false"
       />
     </teleport>
   </template>

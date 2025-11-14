@@ -87,6 +87,7 @@
     "lodash.set": "^4.3.2",
     "object-hash": "^3.0.0",
     "pinia": "^2.1.6",
+    "qrcode": "^1.5.4",
     "remarkable": "^2.0.1",
     "remove-markdown": "^0.5.2",
     "scrollmonitor": "^1.2.11",

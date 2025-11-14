@@ -16,6 +16,8 @@ const props = defineProps<{
   network: Network;
 }>();
 
+const isAddressModalOpen = ref(false);
+
 const {
   data: relayerInfo,
   isPending,
@@ -40,7 +42,16 @@ const {
 
 <template>
   <div>
-    <UiEyebrow class="mt-4 mb-2 font-medium">Relayer Balance</UiEyebrow>
+    <div class="flex justify-between items-center mt-4 mb-2">
+      <UiEyebrow class="font-medium">Relayer Balance</UiEyebrow>
+      <button
+        class="flex items-center gap-1"
+        @click="isAddressModalOpen = true"
+      >
+        <IH-currency-dollar />
+        Top up
+      </button>
+    </div>
     <div
       class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
     >
@@ -77,5 +88,15 @@ const {
         </div>
       </template>
     </div>
+    <teleport to="#modal">
+      <ModalAddress
+        v-if="relayerInfo"
+        :open="isAddressModalOpen"
+        :address="relayerInfo.address"
+        :chain-id="network.chainId"
+        title="Fund relayer account"
+        @close="isAddressModalOpen = false"
+      />
+    </teleport>
   </div>
 </template>
