@@ -153,12 +153,20 @@ watchEffect(() => {
   }
 });
 
-watchEffect(() => {
-  if (props.open && props.initialState) {
-    form.value = cloneInitialState(props.initialState);
-    rawParams.value = JSON.stringify(props.initialState, null, 2);
+watch(
+  () => props.open,
+  () => {
+    showPicker.value = false;
+
+    if (props.initialState) {
+      form.value = cloneInitialState(props.initialState);
+      rawParams.value = JSON.stringify(props.initialState, null, 2);
+    } else {
+      form.value = {};
+      rawParams.value = '';
+    }
   }
-});
+);
 </script>
 
 <template>
