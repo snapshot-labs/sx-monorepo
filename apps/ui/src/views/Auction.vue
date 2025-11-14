@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
+import { METADATA as EVM_METADATA } from '@/networks/evm';
 
 const route = useRoute();
 
@@ -146,21 +148,28 @@ const timelineStates = computed(() => {
 </script>
 
 <template>
-  <UiLoading v-if="isLoading" class="block p-4" />
-  <UiStateWarning
-    v-else-if="error || !auctionData?.auctionDetail"
-    class="px-4 py-3"
-  >
-    {{
-      error
-        ? `Failed to load auction data: ${error.message}`
-        : 'Auction not found'
-    }}
-  </UiStateWarning>
-  <div v-else class="flex justify-center w-full">
-    <div class="w-full max-w-[660px] space-y-4">
+  <div class="pt-5 max-w-[50rem] mx-auto px-4">
+    <UiLoading v-if="isLoading" class="block p-4" />
+    <UiStateWarning
+      v-else-if="error || !auctionData?.auctionDetail"
+      class="px-4 py-3"
+    >
+      {{
+        error
+          ? `Failed to load auction data: ${error.message}`
+          : 'Auction not found'
+      }}
+    </UiStateWarning>
+    <div v-else class="space-y-4">
       <div class="mb-4">
-        <h1 class="text-[40px] leading-10">Auction #{{ params.id }}</h1>
+        <div class="flex items-center gap-2 mb-2">
+          <h1 class="text-[40px] leading-10">Auction #{{ params.id }}</h1>
+          <span
+            class="inline-block px-2 py-1 text-xs rounded-full bg-skin-border text-skin-text"
+          >
+            {{ EVM_METADATA[params.network]?.name || 'Unknown' }}
+          </span>
+        </div>
       </div>
 
       <div>
@@ -171,12 +180,24 @@ const timelineStates = computed(() => {
         <div
           class="border border-skin-border rounded-lg divide-y divide-skin-border"
         >
-          <div class="flex justify-between px-4 py-3">
-            <div>
+          <div
+            class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3"
+          >
+            <div class="flex-1">
               <div class="text-skin-text text-sm mb-2">
                 Auctioning token address
               </div>
-              <div class="flex items-center gap-2">
+              <a
+                :href="
+                  getGenericExplorerUrl(
+                    EVM_METADATA[params.network]?.chainId,
+                    auctionData.auctionDetail.addressAuctioningToken,
+                    'token'
+                  ) || '#'
+                "
+                target="_blank"
+                class="flex items-center gap-2"
+              >
                 <UiStamp
                   :id="auctionData.auctionDetail.addressAuctioningToken"
                   type="token"
@@ -195,9 +216,9 @@ const timelineStates = computed(() => {
                     />
                   </div>
                 </div>
-              </div>
+              </a>
             </div>
-            <div class="text-right">
+            <div class="sm:text-right">
               <div class="text-skin-text text-sm mb-1">Total auctioned</div>
               <div class="text-skin-link text-xl">
                 {{
@@ -211,12 +232,24 @@ const timelineStates = computed(() => {
             </div>
           </div>
 
-          <div class="flex justify-between px-4 py-3">
-            <div>
+          <div
+            class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3"
+          >
+            <div class="flex-1">
               <div class="text-skin-text text-sm mb-2">
                 Bidding token address
               </div>
-              <div class="flex items-center gap-2">
+              <a
+                :href="
+                  getGenericExplorerUrl(
+                    EVM_METADATA[params.network]?.chainId,
+                    auctionData.auctionDetail.addressBiddingToken,
+                    'token'
+                  ) || '#'
+                "
+                target="_blank"
+                class="flex items-center gap-2"
+              >
                 <UiStamp
                   :id="auctionData.auctionDetail.addressBiddingToken"
                   type="token"
@@ -233,9 +266,9 @@ const timelineStates = computed(() => {
                     />
                   </div>
                 </div>
-              </div>
+              </a>
             </div>
-            <div class="text-right">
+            <div class="sm:text-right">
               <div class="text-skin-text text-sm mb-1">
                 Minimal funding threshold
               </div>

@@ -56,6 +56,11 @@ export default [
     component: CreateSpaceSnapshot
   },
   {
+    path: '/auction/:id',
+    name: 'auction',
+    component: Auction
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: Settings,
@@ -81,8 +86,7 @@ export default [
         component: Notifications
       },
       { path: '/profile/:user', name: 'user', component: User },
-      { path: '/pro', name: 'pro', component: SpacePro },
-      { path: '/auction/:id', name: 'auction', component: Auction }
+      { path: '/pro', name: 'pro', component: SpacePro }
     ]
   }
 ];
