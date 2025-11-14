@@ -44,7 +44,7 @@ const inputErrors = computed<Record<string, string>>(() => {
 });
 
 const itemName = computed<string>(() => {
-  return props.definition.items.title?.toLowerCase() || '';
+  return props.definition.items.title?.toLowerCase() || 'item';
 });
 
 function handleAddItem() {
@@ -124,7 +124,7 @@ onMounted(() => {
         v-if="currentItems.length < (definition.minItems || 0)"
         class="rounded-lg border border-skin-danger text-skin-danger px-3 py-1.5"
       >
-        At least {{ definition.minItems || 1 }} {{ itemName || 'item'
+        At least {{ definition.minItems || 1 }} {{ itemName
         }}{{ definition.minItems > 1 ? 's' : '' }}
         {{ definition.minItems > 1 ? 'are' : 'is' }} required.
       </div>
@@ -167,12 +167,12 @@ onMounted(() => {
             <slot
               name="input-suffix"
               :index="index"
-              :item-name="itemName"
+              :item-name="definition.items.title"
               :delete-item="deleteItem"
             >
               <button
                 class="text-skin-text"
-                :title="`Delete ${itemName}`.trim()"
+                :title="`Delete ${itemName}`"
                 @click="deleteItem(index)"
               >
                 <IH-trash />
@@ -198,12 +198,12 @@ onMounted(() => {
           <slot
             name="input-suffix"
             :index="index"
-            :item-name="itemName"
+            :item-name="definition.items.title"
             :delete-item="deleteItem"
           >
             <button
               class="shrink-0 text-skin-text self-start"
-              :title="`Delete ${itemName}`.trim()"
+              :title="`Delete ${itemName}`"
               @click="deleteItem(index)"
             >
               <IH-trash />
