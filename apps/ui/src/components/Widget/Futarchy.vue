@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { z } from 'zod';
-import { _n, getUrl } from '@/helpers/utils';
+import { _n } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
 const props = defineProps<{ proposal: Proposal }>();
 
 const FUTARCHY_API_URL =
   import.meta.env.VITE_FUTARCHY_API_URL ?? 'https://stag.api.tickspread.com';
-const FUTARCHY_LOGO_URL =
-  'ipfs://bafkreigougs774ow3qwkb3kc5ftkpz43cfueputpmkii2l5meuaeivkiqq';
 
 const FutarchyResponseSchema = z.object({
   event_id: z.string(),
@@ -59,48 +57,27 @@ watch(() => props.proposal.id, fetchPrices);
 </script>
 
 <template>
-  <div v-if="!loading && !error && data">
-    <a
-      :href="`https://app.futarchy.fi/markets/${data.event_id}?utm_source=snapshot`"
-      target="_blank"
-      class="block xl:flex xl:space-x-3 items-center border rounded-lg px-3.5 py-2.5 mb-4"
-    >
-      <div class="grow flex items-center gap-2 xl:mb-0 mb-2">
-        <img :src="getUrl(FUTARCHY_LOGO_URL) as string" class="size-3" />
-        <UiEyebrow> Futarchy.fi </UiEyebrow>
+  <div
+    v-if="!loading && !error && data"
+    class="block items-center border rounded-lg p-4 mb-4"
+  >
+    <div class="grow flex items-center gap-2 xl:mb-0 mb-2">
+      <UiEyebrow>Futarchy.fi market</UiEyebrow>
+    </div>
+    <div>
+      <UiChart class="h-[300px] -mb-1" />
+      <div class="flex justify-between items-center">
+        ${{ _n(22345) }} Vol.
+        <a
+          :href="`https://app.futarchy.fi/markets/${data.event_id}?utm_source=snapshot`"
+          target="_blank"
+        >
+          <UiButton primary>
+            Trade
+            <IH-arrow-sm-right class="-rotate-45" />
+          </UiButton>
+        </a>
       </div>
-      <span v-if="data.spot.price_usd" class="flex items-center gap-1.5">
-        <span>{{ data.company_tokens.base.tokenSymbol }} price</span>
-        <span class="text-skin-link font-bold">
-          ${{
-            _n(data.spot.price_usd, 'compact', {
-              maximumFractionDigits: 4
-            })
-          }}
-        </span>
-      </span>
-      <span class="flex items-center gap-1.5">
-        <span class="bg-skin-success size-2.5 rounded-full inline-block" />
-        <span>If approved</span>
-        <span class="text-skin-link font-bold">
-          ${{
-            _n(data.conditional_yes.price_usd, 'compact', {
-              maximumFractionDigits: 4
-            })
-          }}
-        </span>
-      </span>
-      <span class="flex items-center gap-1.5">
-        <span class="bg-skin-danger size-2.5 rounded-full inline-block" />
-        <span>If rejected</span>
-        <span class="text-skin-link font-bold">
-          ${{
-            _n(data.conditional_no.price_usd, 'compact', {
-              maximumFractionDigits: 4
-            })
-          }}
-        </span>
-      </span>
-    </a>
+    </div>
   </div>
 </template>
