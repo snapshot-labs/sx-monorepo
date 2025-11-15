@@ -44,7 +44,7 @@ const inputErrors = computed<Record<string, string>>(() => {
 });
 
 const itemName = computed<string>(() => {
-  return props.definition.items.title?.toLowerCase() || 'item';
+  return props.definition.items.title?.toLowerCase() || 'Item';
 });
 
 function handleAddItem() {
@@ -124,7 +124,7 @@ onMounted(() => {
         v-if="currentItems.length < (definition.minItems || 0)"
         class="rounded-lg border border-skin-danger text-skin-danger px-3 py-1.5"
       >
-        At least {{ definition.minItems || 1 }} {{ itemName
+        At least {{ definition.minItems || 1 }} {{ itemName.toLowerCase()
         }}{{ definition.minItems > 1 ? 's' : '' }}
         {{ definition.minItems > 1 ? 'are' : 'is' }} required.
       </div>
@@ -138,7 +138,7 @@ onMounted(() => {
       :item-key="(_: T, index: any) => index"
       :class="{
         'space-y-2': itemType === 'string',
-        'space-y-4': itemType === 'object'
+        'space-y-2.5': itemType === 'object'
       }"
     >
       <template #item="{ index }">
@@ -172,7 +172,7 @@ onMounted(() => {
             >
               <button
                 class="text-skin-text"
-                :title="`Delete ${itemName}`"
+                :title="`Delete ${itemName.toLowerCase()}`"
                 @click="deleteItem(index)"
               >
                 <IH-trash />
@@ -186,29 +186,34 @@ onMounted(() => {
           />
         </div>
         <div v-else class="s-form-wrapper">
-          <div class="bg-skin-text rounded-sm p-1"></div>
-          <div class="flex-1">
-            <UiForm
-              v-model="inputValues[index].value"
-              :definition="definition.items"
-              :error="inputErrors[index]"
+          <div class="flex items-center gap-1">
+            <IC-drag v-if="definition.sortable" class="handle cursor-grab" />
+            <slot name="input-prefix" :index="index" />
+            <div
+              class="flex-1 text-skin-link"
+              v-text="`${itemName} #${index + 1}`"
+            />
+            <slot
+              name="input-suffix"
+              :index="index"
+              :item-name="definition.items.title"
+              :delete-item="deleteItem"
             >
-            </UiForm>
+              <button
+                class="shrink-0 text-skin-text"
+                :title="`Delete ${itemName.toLowerCase()}`"
+                @click="deleteItem(index)"
+              >
+                <IH-trash />
+              </button>
+            </slot>
           </div>
-          <slot
-            name="input-suffix"
-            :index="index"
-            :item-name="definition.items.title"
-            :delete-item="deleteItem"
+          <UiForm
+            v-model="inputValues[index].value"
+            :definition="definition.items"
+            :error="inputErrors[index]"
           >
-            <button
-              class="shrink-0 text-skin-text self-start"
-              :title="`Delete ${itemName}`"
-              @click="deleteItem(index)"
-            >
-              <IH-trash />
-            </button>
-          </slot>
+          </UiForm>
         </div>
       </template>
     </Draggable>
@@ -218,7 +223,7 @@ onMounted(() => {
       @click="handleAddItem"
     >
       <IH-plus-sm />
-      Add {{ itemName }}
+      Add {{ itemName.toLowerCase() }}
     </UiButton>
     <slot name="suffix" />
   </fieldset>

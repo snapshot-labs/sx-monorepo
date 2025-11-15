@@ -343,7 +343,7 @@ input:placeholder-shown {
     }
 
     .s-form-wrapper {
-      @apply flex gap-2.5;
+      @apply border border-skin-border rounded-lg p-3 pt-2 space-y-2.5;
     }
 
     > .s-base {
