@@ -92,7 +92,7 @@ function handlePressDelete(index: number) {
 
   keydownOriginIndex.value = null;
 
-  if (items.value?.[index] !== '') return;
+  if (currentItems.value[index] !== '') return;
 
   if (
     currentItems.value.length > (props.definition.minItems || 0) &&
