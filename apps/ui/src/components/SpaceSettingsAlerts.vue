@@ -43,14 +43,25 @@ const hasVotingStrategiesAlerts = computed(
       unsupportedProOnlyNetworks.value.length > 0)
 );
 
+const isRelayerBalanceLow = computed(() =>
+  alerts.value.has('IS_RELAYER_BALANCE_LOW')
+);
+
 const hasWhitelabelAlerts = computed(
   () =>
     props.activeTab === 'whitelabel' &&
     alerts.value.has('HAS_PRO_ONLY_WHITELABEL')
 );
 
+const hasAuthenticatorsAlerts = computed(
+  () => props.activeTab === 'authenticators' && isRelayerBalanceLow.value
+);
+
 const hasAnyAlerts = computed(
-  () => hasVotingStrategiesAlerts.value || hasWhitelabelAlerts.value
+  () =>
+    hasVotingStrategiesAlerts.value ||
+    hasWhitelabelAlerts.value ||
+    hasAuthenticatorsAlerts.value
 );
 </script>
 
@@ -117,6 +128,12 @@ const hasAnyAlerts = computed(
           change to a premium network
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
+      </UiAlert>
+    </template>
+    <template v-if="hasAuthenticatorsAlerts">
+      <UiAlert v-if="isRelayerBalanceLow" type="error">
+        Your relayer balance is low. Ensure sufficient funds to maintain gasless
+        voting.
       </UiAlert>
     </template>
     <template v-if="hasWhitelabelAlerts">

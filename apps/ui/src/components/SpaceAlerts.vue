@@ -57,6 +57,14 @@ const pendingTasks = computed(() => {
     });
   }
 
+  if (alerts.value.has('IS_RELAYER_BALANCE_LOW')) {
+    _alerts.push({
+      description: 'Relayer balance is low, please top up',
+      link: { name: 'space-settings', params: { tab: 'authenticators' } },
+      type: 'error'
+    });
+  }
+
   return _alerts;
 });
 
