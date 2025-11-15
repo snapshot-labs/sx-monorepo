@@ -14,10 +14,8 @@ export function useRelayerInfoQuery(space: MaybeRefOrGetter<Space>) {
   return useQuery({
     queryKey: [
       'relayerBalance',
-      () => ({
-        spaceId: toValue(space).id,
-        networkId: toValue(space).network
-      })
+      () => toValue(space).id,
+      () => toValue(space).network
     ],
     queryFn: async () => {
       return getNetwork(toValue(space).network).helpers.getRelayerInfo(
