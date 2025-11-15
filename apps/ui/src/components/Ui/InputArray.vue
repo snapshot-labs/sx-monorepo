@@ -44,7 +44,7 @@ const inputErrors = computed<Record<string, string>>(() => {
 });
 
 const itemName = computed<string>(() => {
-  return props.definition.items.title?.toLowerCase() || 'Item';
+  return props.definition.items.title || 'Item';
 });
 
 function handleAddItem() {
@@ -124,7 +124,7 @@ onMounted(() => {
         v-if="currentItems.length < (definition.minItems || 0)"
         class="rounded-lg border border-skin-danger text-skin-danger px-3 py-1.5"
       >
-        At least {{ definition.minItems || 1 }} {{ itemName.toLowerCase()
+        At least {{ definition.minItems }} {{ itemName.toLowerCase()
         }}{{ definition.minItems > 1 ? 's' : '' }}
         {{ definition.minItems > 1 ? 'are' : 'is' }} required.
       </div>
@@ -186,7 +186,7 @@ onMounted(() => {
           />
         </div>
         <div v-else class="s-form-wrapper">
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-2.5">
             <IC-drag v-if="definition.sortable" class="handle cursor-grab" />
             <slot name="input-prefix" :index="index" />
             <div
