@@ -822,12 +822,12 @@ watchEffect(() => {
               </template>
               <template
                 v-if="proposal.type === 'basic'"
-                #input-suffix="{ index, itemName, deleteItem }"
+                #input-suffix="{ index, deleteItem }"
               >
                 <button
                   v-if="index > 1"
                   class="text-skin-text"
-                  :title="`Delete ${itemName}`.trim()"
+                  title="Delete choice"
                   @click="deleteItem(index)"
                 >
                   <IH-trash />
