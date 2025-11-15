@@ -132,8 +132,8 @@ const hasAnyAlerts = computed(
     </template>
     <template v-if="hasAuthenticatorsAlerts">
       <UiAlert v-if="isRelayerBalanceLow" type="error">
-        Your relayer balance is low. Ensure sufficient funds to maintain gasless
-        voting.
+        Your relayer balance is running low. Please top up to keep gasless
+        voting active.
       </UiAlert>
     </template>
     <template v-if="hasWhitelabelAlerts">
