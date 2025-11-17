@@ -5,7 +5,9 @@ import { getProvider } from '@/helpers/provider';
 import { compareAddresses, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';
-import { Space } from '@/types';
+import { NetworkID, Space } from '@/types';
+
+const NETWORKS_WITHOUT_ZODIAC_APP: NetworkID[] = ['ape', 'curtis'];
 
 const SAFE_ABI = [
   'function isModuleEnabled(address module) view returns (bool)'
@@ -129,14 +131,19 @@ function getZodiacAppUrl(strategyAddress: string) {
             moduleEnabled && executionStrategy.type === 'SimpleQuorumAvatar'
           "
         >
+          <div
+            v-if="moduleEnabled[executionStrategy.address]"
+            class="text-skin-border"
+          >
+            Safe module is enabled
+          </div>
           <UiButton
-            v-if="moduleEnabled[executionStrategy.address] === false"
+            v-else-if="!NETWORKS_WITHOUT_ZODIAC_APP.includes(space.network)"
             :to="getZodiacAppUrl(executionStrategy.address)"
           >
             Enable
             <IH-arrow-sm-right class="-rotate-45 -mr-2" />
           </UiButton>
-          <div v-else class="text-skin-border">Safe module is enabled</div>
         </template>
       </div>
     </div>
