@@ -325,10 +325,14 @@ watch(
         :definition="CONTRACT_ADDRESS_DEFINITION.properties.tokenAddress"
         :error="contractFormErrors.tokenAddress"
       />
-      <UiAlert v-if="contractError" type="error">
-        {{ contractError }}
-        <button type="button" @click="handleFetchContractInfo">Retry.</button>
-      </UiAlert>
+      <div v-if="contractError" class="space-y-3">
+        <UiAlert type="error">
+          {{ contractError }}
+        </UiAlert>
+        <UiButton @click="handleFetchContractInfo">
+          <IH-refresh />Retry
+        </UiButton>
+      </div>
       <template v-if="validToken && !isLoading">
         <UiInputStamp
           v-model="form.avatar"
