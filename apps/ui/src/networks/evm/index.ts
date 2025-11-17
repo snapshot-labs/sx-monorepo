@@ -1,7 +1,7 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
-import { pinGraph, pinPineapple } from '@/helpers/pin';
+import { pinPineapple } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
@@ -88,7 +88,7 @@ export const METADATA: Record<string, Metadata> = {
 export function createEvmNetwork(networkId: NetworkID): Network {
   const { name, chainId, currentChainId, apiUrl, avatar } = METADATA[networkId];
 
-  const pin = networkId === 'mnt' ? pinPineapple : pinGraph;
+  const pin = pinPineapple;
 
   const provider = getProvider(chainId);
   const constants = createConstants(networkId, { pin });
