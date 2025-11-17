@@ -86,21 +86,16 @@ function handlePressEnter(index: number) {
 }
 
 function handlePressDelete(index: number) {
-  if (keydownOriginIndex.value !== index) {
+  if (
+    currentItems.value[index] !== '' ||
+    currentItems.value.length <= (props.definition.minItems || 0) ||
+    index === 0
+  ) {
     return;
   }
 
-  keydownOriginIndex.value = null;
-
-  if (currentItems.value[index] !== '') return;
-
-  if (
-    currentItems.value.length > (props.definition.minItems || 0) &&
-    index !== 0
-  ) {
-    deleteItem(index);
-    nextTick(() => itemsRef.value[index - 1].focus());
-  }
+  deleteItem(index);
+  nextTick(() => itemsRef.value[index - 1].focus());
 }
 
 onMounted(() => {
@@ -161,8 +156,7 @@ onMounted(() => {
               "
               @keydown.enter="keydownOriginIndex = index"
               @keyup.enter="handlePressEnter(index)"
-              @keydown.delete="keydownOriginIndex = index"
-              @keyup.delete="handlePressDelete(index)"
+              @keydown.delete="handlePressDelete(index)"
             />
             <slot
               name="input-suffix"
