@@ -10,6 +10,7 @@ const props = defineProps<{
 }>();
 
 const itemsRef: Ref<any[]> = ref([]);
+const isDirty = ref(false);
 
 const itemType = computed<'string' | 'object'>(() => {
   return props.definition.items.type;
@@ -34,6 +35,7 @@ const inputValues = computed(() => {
       const newItems = [...currentItems.value];
       newItems[index] = newValue;
       items.value = newItems;
+      isDirty.value = true;
     }
   }));
 });
@@ -46,9 +48,14 @@ const itemName = computed<string>(() => {
   return props.definition.items.title || 'Item';
 });
 
+const shouldShowErrors = computed<boolean>(() => {
+  return isDirty.value || currentItems.value.length > 1;
+});
+
 function handleAddItem() {
   const newItems = [...currentItems.value, defaultValue.value];
   items.value = newItems;
+  isDirty.value = true;
 
   nextTick(() => itemsRef.value[newItems.length - 1]?.focus());
 }
@@ -57,6 +64,7 @@ function deleteItem(index: number) {
   const newItems = [...currentItems.value];
   newItems.splice(index, 1);
   items.value = newItems;
+  isDirty.value = true;
 
   if (newItems.length === 0) return;
 
@@ -133,7 +141,9 @@ onMounted(() => {
         <div
           v-if="itemType === 'string'"
           class="s-base"
-          :class="{ 's-error': inputErrors[index] }"
+          :class="{
+            's-error': inputErrors[index] && shouldShowErrors
+          }"
         >
           <div class="s-input-wrapper">
             <IC-drag v-if="definition.sortable" class="handle cursor-grab" />
@@ -166,7 +176,7 @@ onMounted(() => {
             </slot>
           </div>
           <div
-            v-if="inputErrors[index]"
+            v-if="inputErrors[index] && shouldShowErrors"
             class="s-input-error-message"
             v-text="inputErrors[index]"
           />
