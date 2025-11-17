@@ -10,7 +10,6 @@ const props = defineProps<{
 }>();
 
 const itemsRef: Ref<any[]> = ref([]);
-const keydownOriginIndex = ref<number | null>(null);
 
 const itemType = computed<'string' | 'object'>(() => {
   return props.definition.items.type;
@@ -65,12 +64,6 @@ function deleteItem(index: number) {
 }
 
 function handlePressEnter(index: number) {
-  if (keydownOriginIndex.value !== index) {
-    return;
-  }
-
-  keydownOriginIndex.value = null;
-
   if (
     props.definition.maxItems &&
     currentItems.value.length >= props.definition.maxItems
@@ -154,8 +147,7 @@ onMounted(() => {
                 definition.items?.examples?.[0] ||
                 ''
               "
-              @keydown.enter="keydownOriginIndex = index"
-              @keyup.enter="handlePressEnter(index)"
+              @keydown.enter="handlePressEnter(index)"
               @keydown.delete="handlePressDelete(index)"
             />
             <slot
