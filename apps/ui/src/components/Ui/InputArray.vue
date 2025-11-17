@@ -64,7 +64,7 @@ function deleteItem(index: number) {
 
   if (newItems.length === 0) return;
 
-  nextTick(() => itemsRef.value[newItems.length - 1].focus());
+  nextTick(() => itemsRef.value[newItems.length - 1]?.focus());
 }
 
 function handlePressEnter(index: number) {
