@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
+import { getAuction } from '@/helpers/auction';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
@@ -13,66 +14,13 @@ const params = computed(() => {
   return { network, id };
 });
 
-const SUBGRAPH_URLS = {
-  sep: 'https://api.studio.thegraph.com/query/24302/test-auction-graph/version/latest',
-  eth: 'https://api.studio.thegraph.com/query/24302/auction-graph-mainnet/version/latest'
-} as const;
-
-type AuctionDetail = {
-  addressAuctioningToken: string;
-  addressBiddingToken: string;
-  symbolAuctioningToken: string;
-  symbolBiddingToken: string;
-  decimalsAuctioningToken: string;
-  decimalsBiddingToken: string;
-  orderCancellationEndDate: string;
-  endTimeTimestamp: string;
-  startingTimeStamp: string;
-  minimumBiddingAmountPerOrder: string;
-  minFundingThreshold: string;
-  currentClearingPrice: string;
-  isAtomicClosureAllowed: boolean;
-  isPrivateAuction: boolean;
-  allowListSigner: string;
-  exactOrder: { sellAmount: string; price: string };
-};
-
-async function fetchAuction(
-  id: string,
-  network: string
-): Promise<{ auctionDetail: AuctionDetail } | null> {
-  const subgraphUrl = SUBGRAPH_URLS[network];
-  if (!subgraphUrl) throw new Error(`Unknown network: ${network}`);
-
-  const result = await fetch(subgraphUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: `query GetAuction($id: ID!) {
-        auctionDetail(id: $id) {
-          addressAuctioningToken addressBiddingToken symbolAuctioningToken symbolBiddingToken
-          decimalsAuctioningToken decimalsBiddingToken orderCancellationEndDate endTimeTimestamp
-          startingTimeStamp minimumBiddingAmountPerOrder minFundingThreshold currentClearingPrice
-          isAtomicClosureAllowed isPrivateAuction allowListSigner
-          exactOrder { sellAmount price }
-        }
-      }`,
-      variables: { id }
-    })
-  }).then(res => res.json());
-
-  if (result.errors)
-    throw new Error(result.errors[0]?.message || 'Query failed');
-  return result.data || null;
-}
-
 const {
   data: auctionData,
   isLoading,
   error
 } = useQuery({
   queryKey: computed(() => ['auction', params.value.network, params.value.id]),
-  queryFn: () => fetchAuction(params.value.id, params.value.network),
+  queryFn: () => getAuction(params.value.id, params.value.network),
   enabled: computed(() => !!params.value.id)
 });
 
