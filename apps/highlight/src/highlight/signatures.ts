@@ -92,10 +92,15 @@ export const verifySnip6Signature: SignatureVerifier = async (
   primaryType
 ): Promise<boolean> => {
   try {
-    const broviderId = (networks as any)[domain.chainId.toString()]?.broviderId;
-    if (!broviderId) {
-      throw new Error('Unsupported Starknet chainId');
+    const chainId = domain.chainId.toString();
+
+    if (!(chainId in networks)) {
+      throw new Error('Unsupported Starknet network');
     }
+
+    const network = networks[chainId as keyof typeof networks];
+    const broviderId = 'broviderId' in network ? network.broviderId : chainId;
+
     const provider = new RpcProvider({
       nodeUrl: `https://rpc.snapshot.org/${broviderId}`
     });
