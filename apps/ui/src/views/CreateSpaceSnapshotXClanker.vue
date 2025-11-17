@@ -10,7 +10,6 @@ import {
 import { getValidator } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
 import { NetworkID, SpaceMetadata } from '@/types';
-import ICClanker from '~icons/c/clanker-full';
 
 const DEFAULT_FORM = {
   name: '',
@@ -305,7 +304,7 @@ watch(
     />
     <div v-else class="s-box space-y-3 pt-8 px-4">
       <div class="flex items-center gap-3">
-        <ICClanker class="w-[210px] h-[40px] text-skin-link" />
+        <IC-clanker-full class="w-[210px] h-[40px] text-skin-link" />
         <div
           class="text-[42px] hidden md:block ml-3 -mt-3 leading-[28px] tracking-widest text-skin-border"
         >
