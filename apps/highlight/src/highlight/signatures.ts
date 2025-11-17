@@ -9,7 +9,11 @@ import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { verifyTypedData } from '@ethersproject/wallet';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { STARKNET_DOMAIN_TYPE } from '@snapshot-labs/sx';
-import { RpcProvider, StarknetDomain } from 'starknet';
+import {
+  RpcProvider,
+  constants as starknetConstants,
+  StarknetDomain
+} from 'starknet';
 
 type SignatureVerifier = (
   domain: Required<TypedDataDomain> | Required<StarknetDomain>,
@@ -160,7 +164,12 @@ export async function verifySignature(
 ) {
   const params = [address, types, message, signature, primaryType] as const;
 
-  if (options.snip6 && 'revision' in domain) {
+  const chainIdStr = domain.chainId.toString();
+  const isStarknetChain = Object.values(starknetConstants.StarknetChainId).some(
+    starknetChainId => starknetChainId === chainIdStr
+  );
+
+  if (options.snip6 && isStarknetChain) {
     const valid = await verifySnip6Signature(
       domain as Required<StarknetDomain>,
       ...params
