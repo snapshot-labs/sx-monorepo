@@ -158,6 +158,8 @@ watch(
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.value = clone(props.initialState);
     } else {

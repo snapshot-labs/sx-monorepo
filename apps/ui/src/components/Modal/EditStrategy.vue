@@ -61,7 +61,7 @@ const formErrors = computed(() => {
     errors.network = 'Network is required';
   }
 
-  if (!props.definition) {
+  if (!definition.value) {
     try {
       JSON.parse(rawParams.value);
     } catch {
@@ -73,10 +73,10 @@ const formErrors = computed(() => {
   const customError = props.customErrorValidation?.(value, network.value);
   if (customError) errors[CUSTOM_ERROR_SYMBOL] = customError;
 
-  if (props.definition) {
+  if (definition.value) {
     return {
       ...errors,
-      ...validateForm(props.definition, form.value, {
+      ...validateForm(definition.value, form.value, {
         skipEmptyOptionalFields: true
       })
     };
@@ -153,12 +153,20 @@ watchEffect(() => {
   }
 });
 
-watchEffect(() => {
-  if (props.open && props.initialState) {
-    form.value = cloneInitialState(props.initialState);
-    rawParams.value = JSON.stringify(props.initialState, null, 2);
+watch(
+  () => props.open,
+  () => {
+    showPicker.value = false;
+
+    if (props.initialState) {
+      form.value = cloneInitialState(props.initialState);
+      rawParams.value = JSON.stringify(props.initialState, null, 2);
+    } else {
+      form.value = {};
+      rawParams.value = '';
+    }
   }
-});
+);
 </script>
 
 <template>
