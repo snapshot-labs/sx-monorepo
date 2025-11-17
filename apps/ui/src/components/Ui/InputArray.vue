@@ -48,10 +48,6 @@ const itemName = computed<string>(() => {
   return props.definition.items.title || 'Item';
 });
 
-const shouldShowErrors = computed<boolean>(() => {
-  return isDirty.value || currentItems.value.length > 1;
-});
-
 function handleAddItem() {
   const newItems = [...currentItems.value, defaultValue.value];
   items.value = newItems;
@@ -142,7 +138,7 @@ onMounted(() => {
           v-if="itemType === 'string'"
           class="s-base"
           :class="{
-            's-error': inputErrors[index] && shouldShowErrors
+            's-error': inputErrors[index] && isDirty
           }"
         >
           <div class="s-input-wrapper">
@@ -176,7 +172,7 @@ onMounted(() => {
             </slot>
           </div>
           <div
-            v-if="inputErrors[index] && shouldShowErrors"
+            v-if="inputErrors[index] && isDirty"
             class="s-input-error-message"
             v-text="inputErrors[index]"
           />
