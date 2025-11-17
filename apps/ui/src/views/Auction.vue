@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { getAuction } from '@/helpers/auction';
@@ -92,6 +93,12 @@ const timelineStates = computed(() => {
     toTimeline(orderCancellationEndDate, 'Last order cancellation date'),
     toTimeline(endTimeTimestamp, 'Auction end date')
   ].sort((a, b) => a.timestamp - b.timestamp);
+});
+
+const normalizedSignerAddress = computed(() => {
+  const signer = auctionData.value?.auctionDetail?.allowListSigner;
+  if (!signer || signer === '0x') return null;
+  return signer.length > 42 ? `0x${signer.slice(26)}` : signer;
 });
 </script>
 
@@ -272,13 +279,19 @@ const timelineStates = computed(() => {
           <div class="flex justify-between px-4 py-3">
             <div class="text-skin-text">Signer address</div>
             <div class="text-skin-link">
-              <UiAddress
-                v-if="
-                  auctionData.auctionDetail.allowListSigner &&
-                  auctionData.auctionDetail.allowListSigner !== '0x'
+              <a
+                v-if="normalizedSignerAddress"
+                :href="
+                  getGenericExplorerUrl(
+                    EVM_METADATA[params.network]?.chainId,
+                    normalizedSignerAddress,
+                    'address'
+                  ) || '#'
                 "
-                :address="auctionData.auctionDetail.allowListSigner"
-              />
+                target="_blank"
+              >
+                <UiAddress :address="getAddress(normalizedSignerAddress)" />
+              </a>
               <span v-else>None</span>
             </div>
           </div>
