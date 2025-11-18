@@ -82,12 +82,11 @@ const {
       </template>
     </div>
     <teleport to="#modal">
-      <ModalAddress
+      <ModalDeposit
         v-if="relayerInfo"
         :open="isAddressModalOpen"
         :address="relayerInfo.address"
         :chain-id="network.chainId"
-        title="Fund relayer account"
         @close="isAddressModalOpen = false"
       />
     </teleport>

@@ -425,12 +425,11 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"
       />
-      <ModalAddress
+      <ModalDeposit
         v-if="treasuryData.chainId"
         :open="isAddressModalOpen"
         :address="treasuryData.address"
         :chain-id="treasuryData.chainId"
-        title="Fund Treasury"
         @close="isAddressModalOpen = false"
       />
     </teleport>

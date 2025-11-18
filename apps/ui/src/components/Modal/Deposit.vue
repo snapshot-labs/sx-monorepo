@@ -4,15 +4,11 @@ import QRCode from 'qrcode';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { formatAddress } from '@/helpers/utils';
 
-const props = withDefaults(
-  defineProps<{
-    open: boolean;
-    address: string;
-    chainId: number | string;
-    title?: string;
-  }>(),
-  { title: 'Address info' }
-);
+const props = defineProps<{
+  open: boolean;
+  address: string;
+  chainId: number | string;
+}>();
 
 const emit = defineEmits<{
   (e: 'close');
@@ -35,7 +31,7 @@ const qrCodeUrl = computedAsync(() => {
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="title" />
+      <h3 v-text="'Deposit'" />
     </template>
     <div class="p-4 space-y-1 text-center">
       <UiAlert v-if="!network" type="error">Invalid address</UiAlert>
