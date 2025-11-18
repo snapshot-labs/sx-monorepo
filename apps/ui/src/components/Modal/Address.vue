@@ -37,18 +37,20 @@ const qrCodeUrl = computedAsync(() => {
     <template #header>
       <h3 v-text="title" />
     </template>
-    <div class="p-4 space-y-3 text-center">
+    <div class="p-4 space-y-1 text-center">
       <UiAlert v-if="!network" type="error">Invalid address</UiAlert>
       <template v-else>
         <img
           :src="qrCodeUrl"
-          class="rounded-lg mx-auto"
+          class="rounded-lg mx-auto mb-4"
           :alt="formattedAddress"
         />
-        <div class="space-y-1 py-2">
-          <h4 v-text="`${network.name} address`" />
-          <div class="text-lg break-all" v-text="formattedAddress" />
-        </div>
+        <h4 v-text="`${network.name} address`" />
+        <div class="text-lg break-all" v-text="formattedAddress" />
+      </template>
+    </div>
+    <template #footer>
+      <div class="space-y-3">
         <UiButton class="w-full" primary @click="copy(formattedAddress)">
           <IH-duplicate v-if="!copied" />
           <IH-check v-else />
@@ -62,10 +64,7 @@ const qrCodeUrl = computedAsync(() => {
         >
           View on block explorer
         </UiButton>
-      </template>
-    </div>
-    <template #footer>
-      <UiButton class="w-full" @click="emit('close')"> Close </UiButton>
+      </div>
     </template>
   </UiModal>
 </template>
