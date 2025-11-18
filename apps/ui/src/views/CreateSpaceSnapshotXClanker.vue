@@ -232,7 +232,6 @@ const executionStrategies = computed(() => {
 async function handleFetchContractInfo() {
   try {
     isLoading.value = true;
-    isCreating.value = false;
     contractError.value = '';
 
     contractMetadata.value = await getMetadata(
@@ -264,8 +263,6 @@ async function handleFetchContractInfo() {
     form.executionQuorum = Number(
       totalSupply / EXECUTION_QUORUM_DIVISOR / 10n ** BigInt(decimals)
     );
-
-    isCreating.value = true;
   } catch (err) {
     console.error(err);
     contractError.value =
@@ -281,6 +278,7 @@ async function handleCreateSpace() {
     NETWORK_ID,
     salt.value
   );
+  isCreating.value = true;
 }
 
 watch(
