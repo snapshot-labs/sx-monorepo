@@ -18,7 +18,6 @@ const props = defineProps<{
 const { setTitle } = useTitle();
 const route = useRoute();
 const router = useRouter();
-const { copy, copied } = useClipboard();
 const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
@@ -153,13 +152,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           </svg>
         </UiButton>
       </UiTooltip>
-      <UiTooltip title="Copy address">
-        <UiButton uniform @click="copy(treasury.wallet)">
-          <IH-duplicate v-if="!copied" />
-          <IH-check v-else />
-        </UiButton>
-      </UiTooltip>
-      <UiTooltip title="Fund treasury">
+      <UiTooltip title="Deposit">
         <UiButton uniform @click="isAddressModalOpen = true">
           <IH-library />
         </UiButton>
