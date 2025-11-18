@@ -44,16 +44,9 @@ const {
   <div>
     <div class="flex justify-between items-center mt-4 mb-2">
       <UiEyebrow class="font-medium">Relayer Balance</UiEyebrow>
-      <button
-        class="flex items-center gap-1"
-        @click="isAddressModalOpen = true"
-      >
-        <IH-currency-dollar />
-        Top up
-      </button>
     </div>
     <div
-      class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
+      class="flex flex-wrap md:flex-nowrap justify-between items-center rounded-lg border px-4 py-3 gap-3 text-skin-link"
     >
       <div v-if="isPending" class="flex flex-col">
         <UiLoading class="text-skin-text" :size="16" :loading="true" />
@@ -62,30 +55,30 @@ const {
         Failed to load relayer balance.
       </UiStateWarning>
       <template v-else>
-        <div class="flex flex-col">
-          <a
-            :href="
-              network.helpers.getExplorerUrl(relayerInfo.address, 'address')
-            "
-            target="_blank"
-            class="flex items-center text-skin-text leading-5"
-          >
-            <UiStamp
-              :id="relayerInfo.address"
-              type="avatar"
-              :size="18"
-              class="mr-2 !rounded"
-            />
-            {{ shorten(relayerInfo.address) }}
-            <IH-arrow-sm-right class="-rotate-45" />
-          </a>
-        </div>
-        <div class="flex items-center">
+        <a
+          :href="network.helpers.getExplorerUrl(relayerInfo.address, 'address')"
+          target="_blank"
+          class="flex flex-1 items-center text-skin-text"
+        >
+          <UiStamp
+            :id="relayerInfo.address"
+            type="avatar"
+            :size="18"
+            class="mr-2 !rounded"
+          />
+          {{ shorten(relayerInfo.address) }}
+          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
+        </a>
+        <div>
           {{
             _n(relayerInfo.balance, 'standard', { maximumFractionDigits: 6 })
           }}
           {{ relayerInfo.ticker }}
         </div>
+        <UiButton class="w-full md:w-auto" @click="isAddressModalOpen = true">
+          <IH-currency-dollar />
+          Top up
+        </UiButton>
       </template>
     </div>
     <teleport to="#modal">
