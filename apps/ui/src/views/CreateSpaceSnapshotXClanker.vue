@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { evmNetworks } from '@snapshot-labs/sx';
 import { getMetadata } from '@/helpers/clanker';
 import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
 import {
@@ -81,10 +82,6 @@ const NETWORK_ID: NetworkID = 'base';
 const PROPOSAL_THRESHOLD_DIVISOR = 1000n; // 0.1% of total supply
 const EXECUTION_QUORUM_DIVISOR = 100n; // 1% of total supply
 const MAX_VOTING_DURATION = 86400;
-const ETH_TX_AUTHENTICATOR = '0xBA06E6cCb877C332181A6867c05c8b746A21Aed1';
-const OZ_VOTES_STRATEGY = '0x2c8631584474E750CEdF2Fb6A904f2e84777Aefe';
-const PROPOSAL_VALIDATION_VOTING_POWER =
-  '0x6D9d6D08EF6b26348Bd18F1FC8D953696b7cf311';
 
 const network = getNetwork(NETWORK_ID);
 
@@ -147,18 +144,29 @@ const metadataForm = computed<SpaceMetadata>(() => {
 });
 
 const authenticators = computed(() => {
+  const template = network.constants.EDITOR_AUTHENTICATORS.find(
+    template =>
+      template.address === evmNetworks[NETWORK_ID].Authenticators.EthTx
+  );
+
+  if (!template) return null;
+
   return [
     {
       id: crypto.randomUUID(),
       params: {},
-      ...network.constants.EDITOR_AUTHENTICATORS.find(
-        meta => meta.address === ETH_TX_AUTHENTICATOR
-      )!
+      ...template
     }
   ];
 });
 
 const votingStrategies = computed(() => {
+  const template = network.constants.EDITOR_VOTING_STRATEGIES.find(
+    template => template.address === evmNetworks[NETWORK_ID].Strategies.OZVotes
+  );
+
+  if (!template) return null;
+
   return [
     {
       id: crypto.randomUUID(),
@@ -167,23 +175,32 @@ const votingStrategies = computed(() => {
         decimals: contractMetadata.value.decimals,
         symbol: metadataForm.value.votingPowerSymbol
       },
-      ...network.constants.EDITOR_VOTING_STRATEGIES.find(
-        meta => meta.address === OZ_VOTES_STRATEGY
-      )!
+      ...template
     }
   ];
 });
 
 const validationStrategy = computed(() => {
+  const template = network.constants.EDITOR_PROPOSAL_VALIDATIONS.find(
+    template =>
+      template.address ===
+      evmNetworks[NETWORK_ID].ProposalValidations.VotingPower
+  );
+  const votingStrategiesTemplate =
+    network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES.find(
+      template =>
+        template.address === evmNetworks[NETWORK_ID].Strategies.OZVotes
+    );
+
+  if (!template || !votingStrategiesTemplate) return null;
+
   return {
     id: crypto.randomUUID(),
     params: {
       threshold: form.proposalThreshold,
       strategies: [
         {
-          ...network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES.find(
-            meta => meta.address === OZ_VOTES_STRATEGY
-          )!,
+          ...votingStrategiesTemplate,
           params: {
             contractAddress: contractAddress.value,
             decimals: contractMetadata.value.decimals,
@@ -192,9 +209,7 @@ const validationStrategy = computed(() => {
         }
       ]
     },
-    ...network.constants.EDITOR_PROPOSAL_VALIDATIONS.find(
-      meta => meta.address === PROPOSAL_VALIDATION_VOTING_POWER
-    )!
+    ...template
   };
 });
 
@@ -285,7 +300,15 @@ watch(
 <template>
   <div class="max-w-[592px] mx-auto">
     <CreateDeploymentProgress
-      v-if="isCreating && salt && predictedSpaceAddress && validationStrategy"
+      v-if="
+        isCreating &&
+        salt &&
+        predictedSpaceAddress &&
+        validationStrategy &&
+        authenticators &&
+        votingStrategies &&
+        executionStrategies
+      "
       :network-id="NETWORK_ID"
       :salt="salt"
       :predicted-space-address="predictedSpaceAddress"
