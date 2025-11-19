@@ -98,7 +98,11 @@ const timelineStates = computed(() => {
 const normalizedSignerAddress = computed(() => {
   const signer = auctionData.value?.auctionDetail?.allowListSigner;
   if (!signer || signer === '0x') return null;
-  return signer.length > 42 ? `0x${signer.slice(26)}` : signer;
+  try {
+    return getAddress(signer.length > 42 ? `0x${signer.slice(26)}` : signer);
+  } catch {
+    return null;
+  }
 });
 </script>
 
