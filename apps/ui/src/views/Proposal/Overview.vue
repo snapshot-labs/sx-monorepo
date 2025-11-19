@@ -14,7 +14,7 @@ import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
 
-const WHITELISTED_SPACES = ['kleros.eth', 'paraswap-dao.eth', 'gnosis.eth'];
+const WHITELISTED_SPACES = ['kleros.eth', 'paraswap-dao.eth'];
 
 const props = defineProps<{
   proposal: Proposal;
