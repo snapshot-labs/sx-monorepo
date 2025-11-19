@@ -2,7 +2,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { clients, starknetNetworks } from '@snapshot-labs/sx';
 import { CallData, uint256 } from 'starknet';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { _n, getUrl, shorten, sleep, verifyNetwork } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
@@ -254,7 +254,7 @@ export function createConstants(
             if (!strategy.generateMetadata) return;
 
             const metadata = await strategy.generateMetadata(strategy.params);
-            const pinned = await pinPineapple(metadata);
+            const pinned = await pin(metadata);
 
             return `ipfs://${pinned.cid}`;
           })
@@ -344,7 +344,7 @@ export function createConstants(
             };
           });
 
-        const pinned = await pinPineapple({ tree });
+        const pinned = await pin({ tree });
 
         return {
           name: 'Whitelist',
