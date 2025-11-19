@@ -45,7 +45,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'back');
+  (e: 'back'): void;
 }>();
 
 const { deployDependency, createSpace } = useActions();

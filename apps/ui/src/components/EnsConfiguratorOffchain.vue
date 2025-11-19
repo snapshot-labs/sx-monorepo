@@ -5,7 +5,7 @@ import { NetworkID } from '@/types';
 const spaceId = defineModel<string>();
 
 const emit = defineEmits<{
-  (e: 'select');
+  (e: 'select'): void;
 }>();
 
 const props = defineProps<{

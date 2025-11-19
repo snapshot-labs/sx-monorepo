@@ -11,8 +11,8 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'fetch');
+  (e: 'close'): void;
+  (e: 'fetch'): void;
 }>();
 </script>
 

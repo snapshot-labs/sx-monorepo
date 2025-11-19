@@ -27,8 +27,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'save', value: Record<string, any>, network: ChainId);
+  (e: 'close'): void;
+  (e: 'save', value: Record<string, any>, network: ChainId): void;
 }>();
 
 const network: Ref<ChainId> = ref('');

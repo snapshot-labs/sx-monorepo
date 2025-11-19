@@ -15,7 +15,7 @@ const props = defineProps<{
   initialState?: SpaceMetadataTreasury;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataTreasury);
+  (e: 'add', config: SpaceMetadataTreasury): void;
   (e: 'close'): void;
 }>();
 

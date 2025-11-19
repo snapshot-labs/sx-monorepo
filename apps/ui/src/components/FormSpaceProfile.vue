@@ -16,8 +16,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'errors', value: any);
-  (e: 'pick', field: any);
+  (e: 'errors', value: any): void;
+  (e: 'pick', field: any): void;
 }>();
 
 const isOffchainNetwork = computed(

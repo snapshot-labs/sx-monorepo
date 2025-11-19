@@ -44,7 +44,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'updateValidity', valid: boolean, resolved: boolean): void;
-  (e: 'deleteSpace');
+  (e: 'deleteSpace'): void;
 }>();
 
 const {
