@@ -33,6 +33,6 @@ export default class Aliases extends Agent {
   }
 
   async setStarknetAlias(message: Message, meta: Meta) {
-    this.setAlias(message, meta);
+    await this.setAlias(message, meta);
   }
 }
