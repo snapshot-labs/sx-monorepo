@@ -111,7 +111,7 @@ const definition = computed(() => {
               networkId: props.networkId,
               networksListKind: 'full',
               networksFilter: isApeChainDelegateRegistry.value
-                ? [33139, 33111]
+                ? ['33139', '33111']
                 : undefined,
               title: 'Delegation contract network',
               nullable: true
