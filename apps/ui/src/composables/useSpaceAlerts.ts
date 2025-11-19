@@ -1,3 +1,4 @@
+import { evmNetworks, starknetNetworks } from '@snapshot-labs/sx';
 import {
   DEPRECATED_STRATEGIES,
   DISABLED_STRATEGIES,
@@ -7,8 +8,6 @@ import { offchainNetworks } from '@/networks';
 import { useRelayerInfoQuery } from '@/queries/relayerInfo';
 import { Space } from '@/types';
 
-const ETH_SIGNATURE_AUTHENTICATOR =
-  '0x95CF9B585fDb12DeB78002B5643dFF8fe67a496D';
 const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
   '137' // Polygon
 ];
@@ -124,12 +123,26 @@ export function useSpaceAlerts(
     return expirationTime < now && expirationTime >= now - graceThresholdMs;
   });
 
+  const sigAuthenticatorAddresses = computed<string[]>(() => {
+    const authenticators =
+      { ...evmNetworks, ...starknetNetworks }[space.value.network]
+        ?.Authenticators || {};
+
+    return [
+      authenticators.EthSig,
+      authenticators.EthSigV2,
+      authenticators.StarkSig
+    ].filter(Boolean);
+  });
+
   const isRelayerBalanceLow = computed(() => {
-    if (isOffchainSpace.value) return false;
+    if (isOffchainSpace.value || !space.value.authenticators.length) {
+      return false;
+    }
+
     if (
-      !(
-        space.value.authenticators.includes(ETH_SIGNATURE_AUTHENTICATOR) &&
-        space.value.authenticators.length === 1
+      !space.value.authenticators.every(a =>
+        sigAuthenticatorAddresses.value.includes(a)
       )
     ) {
       return false;
