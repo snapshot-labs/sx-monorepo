@@ -2,7 +2,7 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import QRCode from 'qrcode';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { formatAddress } from '@/helpers/utils';
+import { formatAddress, getUrl } from '@/helpers/utils';
 
 const props = defineProps<{
   open: boolean;
@@ -26,6 +26,12 @@ const qrCodeUrl = computedAsync(() => {
     margin: 3
   });
 });
+
+const networkLogoUrl = computed<string | null>(() => {
+  if (!network.value) return null;
+
+  return getUrl(network.value.logo);
+});
 </script>
 
 <template>
@@ -41,8 +47,28 @@ const qrCodeUrl = computedAsync(() => {
           class="rounded-lg mx-auto mb-4"
           :alt="formattedAddress"
         />
-        <h4 v-text="`${network.name} address`" />
-        <div class="text-lg break-all" v-text="formattedAddress" />
+        <div class="flex justify-center items-center gap-2">
+          <img
+            v-if="networkLogoUrl"
+            :src="networkLogoUrl"
+            class="size-[20px] rounded-sm"
+            :alt="network.name"
+          />
+          <h4 v-text="network.name" />
+        </div>
+        <div class="text-lg break-all leading-7">
+          <span
+            class="text-skin-link"
+            v-text="formattedAddress.substring(0, 6)"
+          />
+          <span
+            v-text="formattedAddress.substring(6, formattedAddress.length - 4)"
+          />
+          <span
+            class="text-skin-link"
+            v-text="formattedAddress.substring(formattedAddress.length - 4)"
+          />
+        </div>
       </template>
     </div>
     <template #footer>
