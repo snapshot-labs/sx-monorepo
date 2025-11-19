@@ -1,7 +1,7 @@
 import { LibraryError, constants as starknetConstants } from 'starknet';
 import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -80,7 +80,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_EXECUTORS[executor],
     isExecutorActionsSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
-    pin: pinPineapple,
+    pin,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: txId => provider.getTransactionReceipt(txId),
     getRelayerInfo: (space: string, network: NetworkID) =>

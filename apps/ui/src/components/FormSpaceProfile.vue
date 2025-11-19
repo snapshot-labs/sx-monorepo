@@ -86,6 +86,12 @@ const socialAccountsDefinition = computed(() => {
       format: 'discord-handle',
       title: 'Discord',
       examples: ['Discord handle or invite code']
+    },
+    clanker: {
+      type: 'string',
+      title: 'Clanker',
+      format: 'ethAddress',
+      examples: ['Clanker address']
     }
   };
 

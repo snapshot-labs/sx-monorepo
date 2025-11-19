@@ -261,6 +261,7 @@ function formatSpace(
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     farcaster: space.metadata.farcaster,
+    clanker: space.metadata.clanker,
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
