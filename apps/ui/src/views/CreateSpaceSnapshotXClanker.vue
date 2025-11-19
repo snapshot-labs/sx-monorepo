@@ -186,13 +186,13 @@ const validationStrategy = computed(() => {
       template.address ===
       evmNetworks[NETWORK_ID].ProposalValidations.VotingPower
   );
-  const votingStrategiesTemplate =
+  const votingStrategyTemplate =
     network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES.find(
       template =>
         template.address === evmNetworks[NETWORK_ID].Strategies.OZVotes
     );
 
-  if (!template || !votingStrategiesTemplate) return null;
+  if (!template || !votingStrategyTemplate) return null;
 
   return {
     id: crypto.randomUUID(),
@@ -200,7 +200,7 @@ const validationStrategy = computed(() => {
       threshold: form.proposalThreshold,
       strategies: [
         {
-          ...votingStrategiesTemplate,
+          ...votingStrategyTemplate,
           params: {
             contractAddress: contractAddress.value,
             decimals: contractMetadata.value.decimals,
