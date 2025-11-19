@@ -165,7 +165,12 @@ const normalizedSignerAddress = computed(() => {
                 <div class="flex flex-col leading-[22px] min-w-0">
                   <h4
                     class="truncate"
-                    v-text="auctionData.auctionDetail.symbolAuctioningToken"
+                    v-text="
+                      auctionData.auctionDetail.symbolAuctioningToken.slice(
+                        0,
+                        9
+                      )
+                    "
                   />
                   <div class="text-[17px] truncate text-skin-text">
                     <UiAddress
@@ -186,7 +191,9 @@ const normalizedSignerAddress = computed(() => {
                     auctionData.auctionDetail.decimalsAuctioningToken
                   )
                 }}
-                {{ auctionData.auctionDetail.symbolAuctioningToken }}
+                {{
+                  auctionData.auctionDetail.symbolAuctioningToken.slice(0, 9)
+                }}
               </div>
             </div>
           </div>
@@ -217,7 +224,9 @@ const normalizedSignerAddress = computed(() => {
                 <div class="flex flex-col leading-[22px] min-w-0">
                   <h4
                     class="truncate"
-                    v-text="auctionData.auctionDetail.symbolBiddingToken"
+                    v-text="
+                      auctionData.auctionDetail.symbolBiddingToken.slice(0, 9)
+                    "
                   />
                   <div class="text-[17px] truncate text-skin-text">
                     <UiAddress
@@ -238,7 +247,7 @@ const normalizedSignerAddress = computed(() => {
                     auctionData.auctionDetail.decimalsBiddingToken
                   )
                 }}
-                {{ auctionData.auctionDetail.symbolBiddingToken }}
+                {{ auctionData.auctionDetail.symbolBiddingToken.slice(0, 9) }}
               </div>
             </div>
           </div>
