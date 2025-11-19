@@ -1,9 +1,11 @@
+import { evmNetworks, starknetNetworks } from '@snapshot-labs/sx';
 import {
   DEPRECATED_STRATEGIES,
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
 } from '@/helpers/constants';
 import { offchainNetworks } from '@/networks';
+import { useRelayerInfoQuery } from '@/queries/relayerInfo';
 import { Space } from '@/types';
 
 const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
@@ -22,7 +24,8 @@ type AlertType =
   | 'HAS_PRO_ONLY_WHITELABEL'
   | 'IS_PRO_EXPIRING_SOON'
   | 'IS_PRO_JUST_EXPIRED'
-  | 'IS_HIBERNATED';
+  | 'IS_HIBERNATED'
+  | 'IS_RELAYER_BALANCE_LOW';
 
 export function useSpaceAlerts(
   space: Ref<Space>,
@@ -39,6 +42,8 @@ export function useSpaceAlerts(
   const isOffchainSpace = computed(() =>
     offchainNetworks.includes(space.value.network)
   );
+
+  const { data: relayerInfo } = useRelayerInfoQuery(space);
 
   const unsupportedProOnlyStrategies = computed(() => {
     if (!isOffchainSpace.value) return [];
@@ -118,6 +123,34 @@ export function useSpaceAlerts(
     return expirationTime < now && expirationTime >= now - graceThresholdMs;
   });
 
+  const sigAuthenticatorAddresses = computed<string[]>(() => {
+    const authenticators =
+      { ...evmNetworks, ...starknetNetworks }[space.value.network]
+        ?.Authenticators || {};
+
+    return [
+      authenticators.EthSig,
+      authenticators.EthSigV2,
+      authenticators.StarkSig
+    ].filter(Boolean);
+  });
+
+  const isRelayerBalanceLow = computed(() => {
+    if (isOffchainSpace.value || !space.value.authenticators.length) {
+      return false;
+    }
+
+    if (
+      !space.value.authenticators.every(a =>
+        sigAuthenticatorAddresses.value.includes(a)
+      )
+    ) {
+      return false;
+    }
+
+    return !relayerInfo.value?.hasMinimumBalance;
+  });
+
   const alerts = computed(() => {
     const alertsMap = new Map<AlertType, Record<string, any>>();
 
@@ -163,6 +196,10 @@ export function useSpaceAlerts(
 
     if (space.value.additionalRawData?.hibernated) {
       alertsMap.set('IS_HIBERNATED', {});
+    }
+
+    if (isRelayerBalanceLow.value) {
+      alertsMap.set('IS_RELAYER_BALANCE_LOW', {});
     }
 
     return alertsMap;
