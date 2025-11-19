@@ -85,6 +85,7 @@ function deleteDelegation(index: number) {
     class="w-full"
     @click="addDelegation"
   >
+    <IH-plus class="shrink-0 size-[16px]" />
     Add delegation
   </UiButton>
   <teleport to="#modal">
