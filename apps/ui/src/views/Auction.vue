@@ -294,7 +294,7 @@ const normalizedSignerAddress = computed(() => {
                 "
                 target="_blank"
               >
-                <UiAddress :address="getAddress(normalizedSignerAddress)" />
+                <UiAddress :address="normalizedSignerAddress" />
               </a>
               <span v-else>None</span>
             </div>
