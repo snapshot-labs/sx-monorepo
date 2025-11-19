@@ -134,8 +134,10 @@ function deleteTreasury(index: number) {
     v-if="limit ? model.length < limit : true"
     class="w-full"
     @click="addTreasury"
-    >Add treasury</UiButton
   >
+    <IH-plus class="shrink-0 size-[16px]" />
+    Add treasury
+  </UiButton>
   <teleport to="#modal">
     <ModalTreasuryConfig
       :open="modalOpen"
