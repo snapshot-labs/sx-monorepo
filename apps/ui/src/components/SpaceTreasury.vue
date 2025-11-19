@@ -154,7 +154,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
       </UiTooltip>
       <UiTooltip title="Deposit">
         <UiButton uniform @click="isAddressModalOpen = true">
-          <IH-library />
+          <IH-qrcode />
         </UiButton>
       </UiTooltip>
       <UiTooltip
