@@ -284,7 +284,7 @@ function formatSpace(
           apiType: api_type,
           apiUrl: api_url,
           contractAddress: address === 'null' ? null : address,
-          chainId: CHAIN_IDS[network]
+          chainId: String(CHAIN_IDS[network])
         };
       }
 
@@ -293,7 +293,7 @@ function formatSpace(
         apiType: api_type,
         apiUrl: api_url,
         contractAddress: contract,
-        chainId: chain_id
+        chainId: String(chain_id)
       };
     }),
     executors: space.metadata.executors,
