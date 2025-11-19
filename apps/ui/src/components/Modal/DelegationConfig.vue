@@ -19,7 +19,7 @@ const props = defineProps<{
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataDelegation);
+  (e: 'add', config: SpaceMetadataDelegation): void;
   (e: 'close'): void;
 }>();
 

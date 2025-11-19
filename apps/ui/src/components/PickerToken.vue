@@ -18,8 +18,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'pick', value: string);
-  (e: 'add', token: Token);
+  (e: 'pick', value: string): void;
+  (e: 'add', token: Token): void;
 }>();
 
 const customTokenLoading = ref(false);

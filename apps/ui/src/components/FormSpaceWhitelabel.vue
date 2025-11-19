@@ -71,7 +71,7 @@ const skinSettings = defineModel<SkinSettings>('skinSettings', {
 const props = defineProps<{ space: Space }>();
 
 const emit = defineEmits<{
-  (e: 'errors', value: any);
+  (e: 'errors', value: any): void;
 }>();
 
 const { encodeSkin } = useSkin();

@@ -47,8 +47,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', transaction: Transaction);
-  (e: 'close');
+  (e: 'add', transaction: Transaction): void;
+  (e: 'close'): void;
 }>();
 
 const form: {
