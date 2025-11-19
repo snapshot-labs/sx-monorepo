@@ -67,8 +67,15 @@ const {
         );
 
         results.push([strategy.address, isEnabled]);
-      } catch {
-        misconfiguredStrategies.push(strategy.address);
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message.includes('call revert exception')
+        ) {
+          misconfiguredStrategies.push(strategy.address);
+        } else {
+          throw err;
+        }
       }
     }
 
