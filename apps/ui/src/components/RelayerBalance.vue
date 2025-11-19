@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
-import { _n, shorten } from '@/helpers/utils';
+import { _n } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { Space } from '@/types';
 
@@ -42,11 +42,9 @@ const {
 
 <template>
   <div>
-    <div class="flex justify-between items-center mt-4 mb-2">
-      <UiEyebrow class="font-medium">Relayer Balance</UiEyebrow>
-    </div>
+    <UiEyebrow class="font-medium mt-4 mb-2">Relayer Balance</UiEyebrow>
     <div
-      class="flex flex-wrap md:flex-nowrap justify-between items-center rounded-lg border px-4 py-3 gap-3 text-skin-link"
+      class="flex justify-between items-center rounded-lg border px-4 py-3 gap-3 text-skin-link"
     >
       <div v-if="isPending" class="flex flex-col">
         <UiLoading class="text-skin-text" :size="16" :loading="true" />
@@ -55,30 +53,38 @@ const {
         Failed to load relayer balance.
       </UiStateWarning>
       <template v-else>
-        <a
-          :href="network.helpers.getExplorerUrl(relayerInfo.address, 'address')"
-          target="_blank"
-          class="flex flex-1 items-center text-skin-text"
+        <AppLink
+          :to="network.helpers.getExplorerUrl(relayerInfo.address, 'address')"
+          class="flex items-center gap-3 truncate"
         >
-          <UiStamp
-            :id="relayerInfo.address"
-            type="avatar"
-            :size="18"
-            class="mr-2 !rounded"
-          />
-          {{ shorten(relayerInfo.address) }}
-          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
-        </a>
-        <div>
-          {{
-            _n(relayerInfo.balance, 'standard', { maximumFractionDigits: 6 })
-          }}
-          {{ relayerInfo.ticker }}
-        </div>
-        <UiButton class="w-full md:w-auto" @click="isAddressModalOpen = true">
-          <IH-currency-dollar />
-          Top up
-        </UiButton>
+          <UiBadgeNetwork :chain-id="network.chainId" class="hidden sm:block">
+            <UiStamp
+              :id="relayerInfo.address"
+              type="avatar"
+              :size="32"
+              class="rounded-md"
+            />
+          </UiBadgeNetwork>
+          <div class="leading-[22px] truncate">
+            <h4 class="text-skin-link truncate">
+              {{
+                _n(relayerInfo.balance, 'standard', {
+                  maximumFractionDigits: 6
+                })
+              }}
+              {{ relayerInfo.ticker }}
+            </h4>
+            <UiAddress
+              class="text-skin-text text-[17px]"
+              :address="relayerInfo.address"
+            />
+          </div>
+        </AppLink>
+        <UiTooltip title="Deposit" class="shrink-0">
+          <UiButton uniform @click="isAddressModalOpen = true">
+            <IH-qrcode />
+          </UiButton>
+        </UiTooltip>
       </template>
     </div>
     <teleport to="#modal">
