@@ -114,6 +114,7 @@ export type SpaceMetadata = {
   github: string;
   discord: string;
   farcaster: string;
+  clanker: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
   labels: SpaceMetadataLabel[];
@@ -203,6 +204,7 @@ export type Space = {
   github: string;
   discord: string;
   farcaster: string;
+  clanker?: string;
   coingecko?: string;
   terms: string;
   privacy: SpacePrivacy;
