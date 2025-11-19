@@ -147,16 +147,14 @@ function cloneInitialState(state: any) {
   return clone(state);
 }
 
-watchEffect(() => {
-  if (props.open && props.initialNetwork) {
-    network.value = props.initialNetwork;
-  }
-});
-
 watch(
   () => props.open,
   () => {
     showPicker.value = false;
+
+    if (props.initialNetwork) {
+      network.value = props.initialNetwork;
+    }
 
     if (props.initialState) {
       form.value = cloneInitialState(props.initialState);
@@ -165,7 +163,8 @@ watch(
       form.value = {};
       rawParams.value = '';
     }
-  }
+  },
+  { immediate: true }
 );
 </script>
 
