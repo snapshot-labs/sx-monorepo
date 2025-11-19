@@ -37,7 +37,7 @@ const treasuryMap = computed(() => {
 const {
   isPending,
   isError,
-  data: moduleEnabled
+  data: modulesInfo
 } = useQuery({
   queryKey: [
     'executionStrategiesInfo',
@@ -53,6 +53,7 @@ const {
     );
 
     const results: [string, boolean][] = [];
+    const misconfiguredStrategies: string[] = [];
 
     for (const strategy of avararExecutionStrategies) {
       const treasury = treasuryMap.value[strategy.address];
@@ -60,14 +61,21 @@ const {
 
       const safeContract = new Contract(treasury, SAFE_ABI, provider);
 
-      const isEnabled: boolean = await safeContract.isModuleEnabled(
-        strategy.address
-      );
+      try {
+        const isEnabled: boolean = await safeContract.isModuleEnabled(
+          strategy.address
+        );
 
-      results.push([strategy.address, isEnabled]);
+        results.push([strategy.address, isEnabled]);
+      } catch {
+        misconfiguredStrategies.push(strategy.address);
+      }
     }
 
-    return Object.fromEntries(results);
+    return {
+      modulesEnabled: Object.fromEntries(results),
+      misconfiguredStrategies
+    };
   }
 });
 
@@ -88,7 +96,7 @@ function getZodiacAppUrl(strategyAddress: string) {
       v-for="executionStrategy in executionStrategies"
       v-else
       :key="executionStrategy.address"
-      class="flex justify-between items-center first-of-type:rounded-t-lg last-of-type:rounded-b-lg first-of-type:border-t border-b border-x px-4 py-3 text-skin-link"
+      class="flex justify-between items-center gap-2 first-of-type:rounded-t-lg last-of-type:rounded-b-lg first-of-type:border-t border-b border-x px-4 py-3 text-skin-link"
     >
       <div class="flex items-center">
         <UiBadgeNetwork
@@ -126,24 +134,32 @@ function getZodiacAppUrl(strategyAddress: string) {
         </div>
       </div>
       <div class="flex gap-3">
-        <template
-          v-if="
-            moduleEnabled && executionStrategy.type === 'SimpleQuorumAvatar'
-          "
-        >
+        <template v-if="modulesInfo">
           <div
-            v-if="moduleEnabled[executionStrategy.address]"
-            class="text-skin-border"
+            v-if="
+              modulesInfo.misconfiguredStrategies.includes(
+                executionStrategy.address
+              )
+            "
+            class="text-skin-danger"
           >
-            Safe module is enabled
+            Execution target is not a Safe module
           </div>
-          <UiButton
-            v-else-if="!NETWORKS_WITHOUT_ZODIAC_APP.includes(space.network)"
-            :to="getZodiacAppUrl(executionStrategy.address)"
-          >
-            Enable
-            <IH-arrow-sm-right class="-rotate-45 -mr-2" />
-          </UiButton>
+          <template v-else-if="executionStrategy.type === 'SimpleQuorumAvatar'">
+            <div
+              v-if="modulesInfo.modulesEnabled[executionStrategy.address]"
+              class="text-skin-border"
+            >
+              Safe module is enabled
+            </div>
+            <UiButton
+              v-else-if="!NETWORKS_WITHOUT_ZODIAC_APP.includes(space.network)"
+              :to="getZodiacAppUrl(executionStrategy.address)"
+            >
+              Enable
+              <IH-arrow-sm-right class="-rotate-45 -mr-2" />
+            </UiButton>
+          </template>
         </template>
       </div>
     </div>
