@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
-import { AuctionNetworkId } from '@/helpers/auction';
+import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
@@ -15,13 +15,6 @@ const props = defineProps<{
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
-
-const formatPrice = (price: string | undefined) =>
-  price
-    ? parseFloat(price)
-        .toFixed(8)
-        .replace(/\.?0+$/, '')
-    : '0';
 
 const biddingParameters = computed(() => {
   const {
