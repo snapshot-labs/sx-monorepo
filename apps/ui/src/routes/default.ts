@@ -1,4 +1,5 @@
 import App from '@/views/App.vue';
+import Auction from '@/views/Auction.vue';
 import CreateSpaceSnapshot from '@/views/CreateSpaceSnapshot.vue';
 import CreateSpaceSnapshotX from '@/views/CreateSpaceSnapshotX.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
@@ -53,6 +54,11 @@ export default [
     path: '/create/snapshot',
     name: 'create-space-snapshot',
     component: CreateSpaceSnapshot
+  },
+  {
+    path: '/auction/:id',
+    name: 'auction',
+    component: Auction
   },
   {
     path: '/settings',
