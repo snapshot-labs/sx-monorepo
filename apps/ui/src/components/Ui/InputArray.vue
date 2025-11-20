@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 const itemsRef: Ref<any[]> = ref([]);
-const isDirty = ref(false);
+const dirtyItems = ref<boolean[]>([]);
 
 const itemType = computed<'string' | 'object'>(() => {
   return props.definition.items.type;
@@ -32,7 +32,7 @@ const inputValues = computed(() => {
       const newItems = [...currentItems.value];
       newItems[index] = newValue;
       items.value = newItems;
-      isDirty.value = true;
+      dirtyItems.value[index] = true;
     }
   }));
 });
@@ -45,10 +45,13 @@ const itemName = computed<string>(() => {
   return props.definition.items.title || 'Item';
 });
 
+function shouldShowError(index: number): boolean {
+  return !!(inputErrors.value[index] && dirtyItems.value[index]);
+}
+
 function handleAddItem() {
   const newItems = [...currentItems.value, getDefaultValue()];
   items.value = newItems;
-  isDirty.value = true;
 
   nextTick(() => itemsRef.value[newItems.length - 1]?.focus());
 }
@@ -56,8 +59,8 @@ function handleAddItem() {
 function deleteItem(index: number) {
   const newItems = [...currentItems.value];
   newItems.splice(index, 1);
+  dirtyItems.value.splice(index, 1);
   items.value = newItems;
-  isDirty.value = true;
 
   if (newItems.length === 0) return;
 
@@ -135,7 +138,7 @@ onMounted(() => {
           v-if="itemType === 'string'"
           class="s-base"
           :class="{
-            's-error': inputErrors[index] && isDirty
+            's-error': shouldShowError(index)
           }"
         >
           <div class="s-input-wrapper">
@@ -169,7 +172,7 @@ onMounted(() => {
             </slot>
           </div>
           <div
-            v-if="inputErrors[index] && isDirty"
+            v-if="shouldShowError(index)"
             class="s-input-error-message"
             v-text="inputErrors[index]"
           />
