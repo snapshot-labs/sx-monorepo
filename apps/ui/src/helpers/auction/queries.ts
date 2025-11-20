@@ -45,9 +45,11 @@ export const auctionQuery = gql(`
 `);
 
 export const ordersQuery = gql(`
-  query GetOrders($id: BigInt!, $skip: Int, $first: Int, $orderBy: Order_orderBy, $orderDirection: OrderDirection) {
-    orders(where: { auctionId: $id }, orderBy: $orderBy, orderDirection: $orderDirection, skip: $skip, first: $first) {
-      ...orderDetail
+  query GetOrders($id: ID!, $skip: Int, $first: Int, $orderBy: Order_orderBy, $orderDirection: OrderDirection) {
+    auctionDetail(id: $id) {
+      orders(orderBy: $orderBy, orderDirection: $orderDirection, skip: $skip, first: $first) {
+        ...orderDetail
+      }
     }
   }
 `);

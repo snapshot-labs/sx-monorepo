@@ -54,9 +54,11 @@ export async function getOrders(
     variables: { id, skip, first, orderBy: 'price', orderDirection: 'desc' }
   });
 
-  const names = await getNames(data.orders.map(order => order.userAddress));
+  const orders = data.auctionDetail?.orders ?? [];
 
-  return data.orders.map(order => ({
+  const names = await getNames(orders.map(order => order.userAddress));
+
+  return orders.map(order => ({
     ...order,
     name: names[order.userAddress.toLocaleLowerCase()] || null
   }));
