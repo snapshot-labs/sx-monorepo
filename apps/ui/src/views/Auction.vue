@@ -38,6 +38,7 @@ const formatPrice = (price: string | undefined) =>
 const biddingParameters = computed(() => {
   const auction = auctionData.value?.auctionDetail;
   if (!auction) return [];
+
   const {
     symbolBiddingToken: symbol,
     decimalsBiddingToken,
@@ -45,6 +46,7 @@ const biddingParameters = computed(() => {
     exactOrder,
     minimumBiddingAmountPerOrder
   } = auction;
+
   return [
     {
       label: 'Current price',
@@ -64,6 +66,7 @@ const biddingParameters = computed(() => {
 const auctionSettings = computed(() => {
   const auction = auctionData.value?.auctionDetail;
   if (!auction) return [];
+
   return [
     {
       label: 'Is atomic closure allowed?',
@@ -79,15 +82,18 @@ const auctionSettings = computed(() => {
 const timelineStates = computed(() => {
   const auction = auctionData.value?.auctionDetail;
   if (!auction) return [];
+
   const now = Math.floor(Date.now() / 1000);
-  const { startingTimeStamp, orderCancellationEndDate, endTimeTimestamp } =
-    auction;
   const toTimeline = (ts: string, label: string) => ({
     label,
     value: _t(parseInt(ts)),
     timestamp: parseInt(ts),
     isPast: parseInt(ts) <= now
   });
+
+  const { startingTimeStamp, orderCancellationEndDate, endTimeTimestamp } =
+    auction;
+
   return [
     toTimeline(startingTimeStamp, 'Auction start date'),
     toTimeline(orderCancellationEndDate, 'Last order cancellation date'),
