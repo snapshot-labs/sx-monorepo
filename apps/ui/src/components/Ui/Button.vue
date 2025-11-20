@@ -67,7 +67,8 @@ const buttonStyles = computed(() => {
 .button {
   @apply rounded-full leading-[100%] border text-skin-link bg-skin-bg inline-flex items-center justify-center;
 
-  &:has(svg) {
+  &:has(svg),
+  &:has(img) {
     @apply gap-2;
   }
 
