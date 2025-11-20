@@ -1,0 +1,1 @@
+<template>Bids</template>
