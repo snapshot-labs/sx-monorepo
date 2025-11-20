@@ -1,6 +1,6 @@
 import { ApolloClient, gql, InMemoryCache } from '@apollo/client/core';
 
-type AuctionSubgraph = {
+export type AuctionDetail = {
   addressAuctioningToken: string;
   addressBiddingToken: string;
   symbolAuctioningToken: string;
@@ -53,7 +53,7 @@ const auctionQuery = gql`
 export async function getAuction(
   id: string,
   network: string
-): Promise<{ auctionDetail: AuctionSubgraph } | null> {
+): Promise<{ auctionDetail: AuctionDetail } | null> {
   const subgraphUrl = SUBGRAPH_URLS[network];
   if (!subgraphUrl) throw new Error(`Unknown network: ${network}`);
 
