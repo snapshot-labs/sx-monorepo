@@ -25,8 +25,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'voted');
+  (e: 'close'): void;
+  (e: 'voted'): void;
 }>();
 
 const queryClient = useQueryClient();

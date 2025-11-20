@@ -6,7 +6,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const route = useRoute();

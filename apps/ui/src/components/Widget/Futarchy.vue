@@ -5,6 +5,10 @@ import { Proposal } from '@/types';
 
 const props = defineProps<{ proposal: Proposal }>();
 
+const proposalIsClosed = computed(
+  () => props.proposal.max_end < Date.now() / 1000
+);
+
 const FUTARCHY_API_URL =
   import.meta.env.VITE_FUTARCHY_API_URL ?? 'https://stag.api.tickspread.com';
 const FUTARCHY_LOGO_URL =
@@ -69,38 +73,41 @@ watch(() => props.proposal.id, fetchPrices);
         <img :src="getUrl(FUTARCHY_LOGO_URL) as string" class="size-3" />
         <UiEyebrow> Futarchy.fi </UiEyebrow>
       </div>
-      <span v-if="data.spot.price_usd" class="flex items-center gap-1.5">
-        <span>{{ data.company_tokens.base.tokenSymbol }} price</span>
-        <span class="text-skin-link font-bold">
-          ${{
-            _n(data.spot.price_usd, 'compact', {
-              maximumFractionDigits: 4
-            })
-          }}
+      <template v-if="!proposalIsClosed">
+        <span v-if="data.spot.price_usd" class="flex items-center gap-1.5">
+          <span>{{ data.company_tokens.base.tokenSymbol }} price</span>
+          <span class="text-skin-link font-bold">
+            ${{
+              _n(data.spot.price_usd, 'compact', {
+                maximumFractionDigits: 4
+              })
+            }}
+          </span>
         </span>
-      </span>
-      <span class="flex items-center gap-1.5">
-        <span class="bg-skin-success size-2.5 rounded-full inline-block" />
-        <span>If approved</span>
-        <span class="text-skin-link font-bold">
-          ${{
-            _n(data.conditional_yes.price_usd, 'compact', {
-              maximumFractionDigits: 4
-            })
-          }}
+        <span class="flex items-center gap-1.5">
+          <span class="bg-skin-success size-2.5 rounded-full inline-block" />
+          <span>If approved</span>
+          <span class="text-skin-link font-bold">
+            ${{
+              _n(data.conditional_yes.price_usd, 'compact', {
+                maximumFractionDigits: 4
+              })
+            }}
+          </span>
         </span>
-      </span>
-      <span class="flex items-center gap-1.5">
-        <span class="bg-skin-danger size-2.5 rounded-full inline-block" />
-        <span>If rejected</span>
-        <span class="text-skin-link font-bold">
-          ${{
-            _n(data.conditional_no.price_usd, 'compact', {
-              maximumFractionDigits: 4
-            })
-          }}
+        <span class="flex items-center gap-1.5">
+          <span class="bg-skin-danger size-2.5 rounded-full inline-block" />
+          <span>If rejected</span>
+          <span class="text-skin-link font-bold">
+            ${{
+              _n(data.conditional_no.price_usd, 'compact', {
+                maximumFractionDigits: 4
+              })
+            }}
+          </span>
         </span>
-      </span>
+      </template>
+      <span v-else class="italic"> The futarchy market is closed. </span>
     </a>
   </div>
 </template>

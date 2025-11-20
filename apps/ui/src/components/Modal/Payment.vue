@@ -28,8 +28,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'confirmed');
+  (e: 'close'): void;
+  (e: 'confirmed'): void;
 }>();
 
 const { auth } = useWeb3();

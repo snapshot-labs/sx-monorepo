@@ -4,7 +4,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (e: 'fetch');
+  (e: 'fetch'): void;
 }>();
 
 const typeName = computed(() => {
