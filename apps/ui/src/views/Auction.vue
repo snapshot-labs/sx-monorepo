@@ -104,6 +104,12 @@ const normalizedSignerAddress = computed(() => {
     return null;
   }
 });
+
+const isAuctionOpen = computed(() => {
+  const auction = auctionData.value?.auctionDetail;
+  if (!auction) return false;
+  return parseInt(auction.endTimeTimestamp) > Date.now() / 1000;
+});
 </script>
 
 <template>
@@ -253,6 +259,12 @@ const normalizedSignerAddress = computed(() => {
           </div>
         </div>
       </div>
+
+      <AuctionBidForm
+        v-if="isAuctionOpen"
+        :auction="auctionData.auctionDetail"
+        :network="params.network"
+      />
 
       <div>
         <h4 class="mb-3 eyebrow flex items-center gap-2">
