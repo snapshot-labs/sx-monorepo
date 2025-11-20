@@ -98,7 +98,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <fieldset class="s-fieldset">
+  <fieldset class="s-array">
     <legend v-if="definition.title" class="flex justify-between items-center">
       <UiEyebrow class="font-medium"
         >{{ definition.title
@@ -123,7 +123,7 @@ onMounted(() => {
       v-model="items"
       v-bind="{ animation: 200 }"
       handle=".handle"
-      class="s-fieldset-items"
+      class="s-array-items"
       :item-key="(_: T, index: number) => index"
       :class="{
         'space-y-2': itemType === 'string',
