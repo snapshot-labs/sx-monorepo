@@ -16,14 +16,11 @@ const itemType = computed<'string' | 'object'>(() => {
   return props.definition.items.type;
 });
 
-const defaultValue = computed<T>(() => {
-  if (itemType.value === 'string') return '' as T;
-  return {} as T;
-});
+const getDefaultValue = (): T => (itemType.value === 'string' ? '' : {}) as T;
 
 const currentItems = computed<T[]>(
   () =>
-    items.value || (props.definition.minItems > 0 ? [defaultValue.value] : [])
+    items.value || (props.definition.minItems > 0 ? [getDefaultValue()] : [])
 );
 
 const inputValues = computed(() => {
@@ -49,7 +46,7 @@ const itemName = computed<string>(() => {
 });
 
 function handleAddItem() {
-  const newItems = [...currentItems.value, defaultValue.value];
+  const newItems = [...currentItems.value, getDefaultValue()];
   items.value = newItems;
   isDirty.value = true;
 
