@@ -127,7 +127,7 @@ onMounted(() => {
       v-bind="{ animation: 200 }"
       handle=".handle"
       class="s-fieldset-items"
-      :item-key="(_: T, index: any) => index"
+      :item-key="(_: T, index: number) => index"
       :class="{
         'space-y-2': itemType === 'string',
         'space-y-2.5': itemType === 'object'
