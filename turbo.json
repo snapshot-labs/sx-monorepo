@@ -15,7 +15,7 @@
     "lint:fix": {},
     "//#lint:scripts": {},
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "codegen"]
     },
     "test": {
       "dependsOn": ["^build"]

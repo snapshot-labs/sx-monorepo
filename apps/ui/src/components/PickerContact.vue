@@ -14,7 +14,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'pick', value: string);
+  (e: 'pick', value: string): void;
 }>();
 
 const { account } = useAccount();

@@ -8,7 +8,7 @@ const model = defineModel<Statement>({
 });
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const actions = useActions();

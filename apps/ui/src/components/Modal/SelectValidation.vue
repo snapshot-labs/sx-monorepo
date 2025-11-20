@@ -41,8 +41,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'save', type: Validation);
-  (e: 'close');
+  (e: 'save', type: Validation): void;
+  (e: 'close'): void;
 }>();
 
 const isLoading = ref(false);
