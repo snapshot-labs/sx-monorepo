@@ -28,7 +28,15 @@ const config: CodegenConfig = {
       schema:
         'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH',
       documents: ['src/helpers/auction/queries.ts'],
-      ...baseConfig
+      ...baseConfig,
+      config: {
+        ...baseConfig.config,
+        scalars: {
+          BigInt: 'string',
+          Bytes: 'string',
+          BigDecimal: 'string'
+        }
+      }
     }
   }
 };
