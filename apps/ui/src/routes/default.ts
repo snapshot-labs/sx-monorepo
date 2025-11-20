@@ -1,6 +1,7 @@
 import App from '@/views/App.vue';
 import CreateSpaceSnapshot from '@/views/CreateSpaceSnapshot.vue';
 import CreateSpaceSnapshotX from '@/views/CreateSpaceSnapshotX.vue';
+import CreateSpaceSnapshotXClanker from '@/views/CreateSpaceSnapshotXClanker.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
@@ -53,6 +54,11 @@ export default [
     path: '/create/snapshot',
     name: 'create-space-snapshot',
     component: CreateSpaceSnapshot
+  },
+  {
+    path: '/create/snapshot-x/clanker',
+    name: 'create-space-snapshot-x-clanker',
+    component: CreateSpaceSnapshotXClanker
   },
   {
     path: '/settings',
