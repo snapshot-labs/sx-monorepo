@@ -47,12 +47,8 @@ async function handleEndReached() {
     <UiColumnHeader class="z-40 overflow-hidden gap-3">
       <div class="max-w-[218px] w-[218px] truncate">Bidder</div>
       <div class="grow w-[40%] truncate">Amount</div>
-      <div class="flex max-w-[144px] w-[144px] items-center truncate">Date</div>
-      <div
-        class="max-w-[144px] w-[144px] flex items-center justify-end truncate"
-      >
-        Price
-      </div>
+      <div class="max-w-[144px] w-[144px] truncate">Date</div>
+      <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <UiStateWarning v-else-if="isError" class="px-4 py-3">
@@ -70,12 +66,12 @@ async function handleEndReached() {
         <UiLoading class="px-4 py-3 block" />
       </template>
       <div
-        class="divide-y divide-skin-border flex flex-col justify-center border-b"
+        class="divide-y divide-skin-border flex flex-col justify-center mx-4 border-b"
       >
         <div
           v-for="order in data?.pages.flat()"
           :key="order.id"
-          class="flex justify-between items-center gap-3 mx-4 py-3 last-of-type:border-b"
+          class="flex justify-between items-center gap-3 py-3"
         >
           <div
             class="leading-[22px] max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
