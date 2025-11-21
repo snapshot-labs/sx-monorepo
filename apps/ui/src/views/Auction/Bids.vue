@@ -123,17 +123,6 @@ async function handleEndReached() {
             {{ formatPrice(order.price) }}
             {{ auction.symbolBiddingToken }}
           </h4>
-          <div v-if="false">
-            Wants to buy at
-            <span class="text-skin-link"
-              >{{ formatPrice(order.price) }}
-              {{ auction.symbolBiddingToken }}</span
-            >
-            with
-            <span class="text-skin-link"
-              >{{ order.volume }} {{ auction.symbolBiddingToken }}</span
-            >
-          </div>
         </div>
       </div>
     </UiContainerInfiniteScroll>
