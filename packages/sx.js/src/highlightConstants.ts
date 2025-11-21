@@ -3,6 +3,18 @@ export const HIGHLIGHT_DOMAIN = {
   version: '0.1.0'
 };
 
+export const HIGHLIGHT_STARKNET_DOMAIN = {
+  ...HIGHLIGHT_DOMAIN,
+  revision: 1
+};
+
+export const STARKNET_DOMAIN_TYPE = [
+  { name: 'name', type: 'shortstring' },
+  { name: 'version', type: 'shortstring' },
+  { name: 'chainId', type: 'shortstring' },
+  { name: 'revision', type: 'shortstring' }
+];
+
 export const ALIASES_CONFIG = {
   address: '0x0000000000000000000000000000000000000001',
   types: {
@@ -10,6 +22,13 @@ export const ALIASES_CONFIG = {
       SetAlias: [
         { name: 'from', type: 'address' },
         { name: 'alias', type: 'address' }
+      ]
+    },
+    setStarknetAlias: {
+      StarknetDomain: STARKNET_DOMAIN_TYPE,
+      SetStarknetAlias: [
+        { name: 'from', type: 'string' },
+        { name: 'alias', type: 'string' }
       ]
     }
   }

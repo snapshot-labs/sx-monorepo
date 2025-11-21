@@ -8,3 +8,4 @@ export { EthereumTx as EvmEthereumTx } from './evm/ethereum-tx';
 export { EthereumSig as EvmEthereumSig } from './evm/ethereum-sig';
 export { EthereumSig as OffchainEthereumSig } from './offchain/ethereum-sig';
 export { HighlightEthereumSigClient } from './highlight/ethereum-sig';
+export { HighlightStarknetSigClient } from './highlight/starknet-sig';

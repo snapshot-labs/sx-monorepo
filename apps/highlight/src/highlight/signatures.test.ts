@@ -1,6 +1,10 @@
-import { ALIASES_CONFIG } from '@snapshot-labs/sx';
+import { ALIASES_CONFIG, ALIASES_CONFIG } from '@snapshot-labs/sx';
 import { describe, expect, it } from 'vitest';
-import { verifyEcdsaSignature, verifyEip1271Signature } from './signatures';
+import {
+  verifyEcdsaSignature,
+  verifyEip1271Signature,
+  verifySnip6Signature
+} from './signatures';
 
 function createDomain(chainId: number, salt: string) {
   return {
@@ -29,7 +33,8 @@ describe('ECDSA', () => {
       message.from,
       ALIASES_CONFIG.types.setAlias,
       message,
-      signature
+      signature,
+      'SetAlias'
     );
 
     expect(result).toBe(true);
@@ -51,7 +56,8 @@ describe('ECDSA', () => {
       message.from,
       ALIASES_CONFIG.types.setAlias,
       message,
-      signature
+      signature,
+      'SetAlias'
     );
 
     expect(result).toBe(false);
@@ -75,7 +81,8 @@ describe('eip1271', () => {
       message.from,
       ALIASES_CONFIG.types.setAlias,
       message,
-      signature
+      signature,
+      'SetAlias'
     );
 
     expect(result).toBe(true);
@@ -97,7 +104,82 @@ describe('eip1271', () => {
       message.from,
       ALIASES_CONFIG.types.setAlias,
       message,
-      signature
+      signature,
+      'SetAlias'
+    );
+
+    expect(result).toBe(false);
+  });
+});
+
+describe('SNIP-6', () => {
+  function createStarknetDomain(chainId: string) {
+    return {
+      name: 'highlight',
+      version: '0.1.0',
+      chainId: chainId,
+      revision: '1'
+    };
+  }
+
+  it('should return true for valid signature', async () => {
+    const message = {
+      from: '0x03c56e9437c23bbfce260b1e6ae45eee4cf808cfef4b5e767d1a2a5e152a71df',
+      alias: '0x6343839849E5396917d83Ac99F893E932D7359Da'
+    };
+
+    const signature =
+      '0x2,0x0,0xec31c589d1f36a04d2855cc464ce048bb925430653f146c3d5edc31282405d,0x3eec5cfade99ac1a53ce6da51f9d1898e73bd4e95dc96f10235356288eb1fc8,0x7cd0a64f646aa3e425605fabf14e59cb877654069a475751ed183e670afcbe9,0x0,0x424fd8e0158c9d744ca6c22e7c48a1b46914a98e0e2fc6e78e69a7d5a7b84b4,0x1b9669c4b965e2c4fa1d7b886b98aa14ec79bcd41505a3d7ec1c6f91a45587f,0x7998d0b6f4ecfaea77667a0abd40176fde7b9b81f61fdbd55985184a607da04';
+
+    const result = await verifySnip6Signature(
+      createStarknetDomain('0x534e5f4d41494e'),
+      message.from,
+      ALIASES_CONFIG.types.setStarknetAlias,
+      message,
+      signature,
+      'SetStarknetAlias'
+    );
+
+    expect(result).toBe(true);
+  });
+
+  it('should return false for invalid signature', async () => {
+    const message = {
+      from: '0x03c56e9437c23bbfce260b1e6ae45eee4cf808cfef4b5e767d1a2a5e152a71df',
+      alias: '0x6343839849E5396917d83Ac99F893E932D7359Da'
+    };
+
+    // Invalid signature format (not comma-separated)
+    const signature = '0xinvalidsignature';
+
+    const result = await verifySnip6Signature(
+      createStarknetDomain('0x534e5f4d41494e'),
+      message.from,
+      ALIASES_CONFIG.types.setStarknetAlias,
+      message,
+      signature,
+      'SetStarknetAlias'
+    );
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for unsupported chainId', async () => {
+    const message = {
+      from: '0x03c56e9437c23bbfce260b1e6ae45eee4cf808cfef4b5e767d1a2a5e152a71df',
+      alias: '0x6343839849E5396917d83Ac99F893E932D7359Da'
+    };
+
+    const signature =
+      '0x2,0x0,0xec31c589d1f36a04d2855cc464ce048bb925430653f146c3d5edc31282405d,0x3eec5cfade99ac1a53ce6da51f9d1898e73bd4e95dc96f10235356288eb1fc8,0x7cd0a64f646aa3e425605fabf14e59cb877654069a475751ed183e670afcbe9,0x0,0x424fd8e0158c9d744ca6c22e7c48a1b46914a98e0e2fc6e78e69a7d5a7b84b4,0x1b9669c4b965e2c4fa1d7b886b98aa14ec79bcd41505a3d7ec1c6f91a45587f,0x7998d0b6f4ecfaea77667a0abd40176fde7b9b81f61fdbd55985184a607da04';
+
+    const result = await verifySnip6Signature(
+      createStarknetDomain('test'), // Unsupported chainId
+      message.from,
+      ALIASES_CONFIG.types.setStarknetAlias,
+      message,
+      signature,
+      'SetStarknetAlias'
     );
 
     expect(result).toBe(false);
