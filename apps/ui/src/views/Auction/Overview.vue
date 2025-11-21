@@ -6,12 +6,31 @@ import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
+import {
+  useBiddingTokenPriceQuery,
+  useRecentBidsQuery
+} from '@/queries/auction';
 
 const props = defineProps<{
   network: AuctionNetworkId;
   auctionId: string;
   auction: AuctionDetailFragment;
 }>();
+
+const {
+  data: recentOrders,
+  isError: isRecentOrdersError,
+  isLoading: isRecentOrdersLoading
+} = useRecentBidsQuery({
+  network: () => props.network,
+  auction: () => props.auction
+});
+
+const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
+  useBiddingTokenPriceQuery({
+    network: () => props.network,
+    auction: () => props.auction
+  });
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
@@ -261,6 +280,52 @@ const normalizedSignerAddress = computed(() => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div>
+        <UiEyebrow class="mb-3">Recent bids</UiEyebrow>
+        <div class="border rounded-lg overflow-hidden">
+          <UiColumnHeader class="py-2 gap-3" :sticky="false">
+            <div class="flex-1 truncate">Bidder</div>
+            <div class="max-w-[168px] w-[168px] truncate">Date</div>
+            <div class="max-w-[168px] w-[168px] truncate">Amount</div>
+            <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
+          </UiColumnHeader>
+          <UiLoading
+            v-if="isRecentOrdersLoading || isBiddingTokenPriceLoading"
+            class="px-4 py-3 block"
+          />
+          <UiStateWarning v-else-if="isRecentOrdersError" class="px-4 py-3">
+            Failed to load bids.
+          </UiStateWarning>
+          <UiStateWarning
+            v-else-if="recentOrders?.length === 0"
+            class="px-4 py-3"
+          >
+            There are no bids here.
+          </UiStateWarning>
+          <div
+            v-else-if="recentOrders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center"
+          >
+            <AuctionBid
+              v-for="order in recentOrders"
+              :key="order.id"
+              :auction-id="auctionId"
+              :auction="auction"
+              :order="order"
+              :bidding-token-price="biddingTokenPrice"
+            />
+          </div>
+        </div>
+        <UiButton
+          v-if="recentOrders?.length"
+          primary
+          :to="{ name: 'auction-bids' }"
+          class="w-full mt-3"
+        >
+          View all bids
+        </UiButton>
       </div>
 
       <div>

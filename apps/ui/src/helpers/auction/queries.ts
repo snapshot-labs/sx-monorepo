@@ -2,6 +2,7 @@ import { gql } from './gql';
 
 gql(`
   fragment auctionDetail on AuctionDetail {
+    id
     addressAuctioningToken
     addressBiddingToken
     symbolAuctioningToken
@@ -25,7 +26,7 @@ gql(`
 `);
 
 gql(`
-  fragment orderDetail on Order {
+  fragment order on Order {
     id
     sellAmount
     buyAmount
@@ -48,7 +49,7 @@ export const ordersQuery = gql(`
   query GetOrders($id: ID!, $skip: Int, $first: Int, $orderBy: Order_orderBy, $orderDirection: OrderDirection) {
     auctionDetail(id: $id) {
       orders(orderBy: $orderBy, orderDirection: $orderDirection, skip: $skip, first: $first) {
-        ...orderDetail
+        ...order
       }
     }
   }
