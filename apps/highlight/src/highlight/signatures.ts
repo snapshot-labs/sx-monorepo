@@ -122,7 +122,8 @@ export const verifySnip6Signature: SignatureVerifier = async (
     };
 
     await provider.verifyMessageInStarknet(data, signature.split(','), address);
-  } catch {
+  } catch (e) {
+    console.error(e);
     return false;
   }
 
