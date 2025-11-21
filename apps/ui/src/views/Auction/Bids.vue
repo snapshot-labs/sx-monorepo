@@ -55,14 +55,10 @@ async function handleEndReached() {
     <UiSectionHeader label="Bids" sticky />
     <UiColumnHeader class="!px-3 z-40 overflow-hidden gap-3">
       <div class="max-w-[218px] w-[218px] truncate">Bidder</div>
-      <div class="grow w-[40%]">Amount</div>
+      <div class="grow w-[40%] truncate">Amount</div>
+      <div class="flex max-w-[144px] w-[144px] items-center truncate">Date</div>
       <div
-        class="flex max-w-[144px] w-[144px] items-center hover:text-skin-link truncate"
-      >
-        Date
-      </div>
-      <div
-        class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link truncate"
+        class="max-w-[144px] w-[144px] flex items-center justify-end truncate"
       >
         Price
       </div>
@@ -109,10 +105,7 @@ async function handleEndReached() {
               />
             </div>
           </div>
-          <div
-            type="button"
-            class="grow w-[40%] flex flex-col items-start justify-center truncate leading-[22px] text-skin-link"
-          >
+          <div class="grow w-[40%] text-skin-link truncate">
             {{ getAmount(order) }} {{ auction.symbolAuctioningToken }}
           </div>
           <div
@@ -128,14 +121,12 @@ async function handleEndReached() {
               {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
             </div>
           </div>
-          <div
-            class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center text-right truncate"
+          <h4
+            class="text-skin-link max-w-[144px] w-[144px] truncate text-right"
           >
-            <h4 class="text-skin-link truncate">
-              {{ formatPrice(order.price) }}
-              {{ auction.symbolBiddingToken }}
-            </h4>
-          </div>
+            {{ formatPrice(order.price) }}
+            {{ auction.symbolBiddingToken }}
+          </h4>
           <div v-if="false">
             Wants to buy at
             <span class="text-skin-link"
