@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import { AuctionNetworkId, formatPrice, getOrders } from '@/helpers/auction';
-import {
-  AuctionDetailFragment,
-  OrderDetailFragment
-} from '@/helpers/auction/gql/graphql';
-import { _n, _t, shortenAddress } from '@/helpers/utils';
+import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { _c, _t, shortenAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 
@@ -36,12 +33,6 @@ const {
     return pages.length * LIMIT;
   }
 });
-
-function getAmount(order: OrderDetailFragment) {
-  const auctionedTokenAmount = Number(order.volume) / Number(order.price);
-
-  return _n(auctionedTokenAmount);
-}
 
 async function handleEndReached() {
   if (!hasNextPage.value) return;
@@ -102,7 +93,8 @@ async function handleEndReached() {
             </div>
           </div>
           <div class="grow w-[40%] text-skin-link truncate">
-            {{ getAmount(order) }} {{ auction.symbolAuctioningToken }}
+            {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
+            {{ auction.symbolAuctioningToken }}
           </div>
           <div
             class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
