@@ -56,7 +56,7 @@ async function handleEndReached() {
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <UiStateWarning v-else-if="isError" class="px-4 py-3">
-      Failed to load votes.
+      Failed to load bids.
     </UiStateWarning>
     <UiStateWarning v-if="data?.pages.flat().length === 0" class="px-4 py-3">
       There are no bids here.
