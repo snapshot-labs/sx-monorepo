@@ -3,7 +3,8 @@ import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
-import { AuctionDetail } from '@/helpers/auction';
+import { AuctionNetworkId } from '@/helpers/auction';
+import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
 import { _n, _t } from '@/helpers/utils';
@@ -13,8 +14,8 @@ const PRICE_DECIMALS = 4;
 const INVERTED_PRICE_DECIMALS = 8;
 
 const props = defineProps<{
-  auction: AuctionDetail;
-  network: string;
+  auction: AuctionDetailFragment;
+  network: AuctionNetworkId;
 }>();
 
 const { web3Account } = useWeb3();
@@ -165,11 +166,11 @@ function togglePriceMode() {
       Failed to load balance or token supply. Please try again.
     </UiMessage>
 
-    <div class="border border-skin-border rounded-lg">
-      <div class="px-4 py-4">
-        <div class="flex justify-between items-center mb-2 text-skin-text">
-          <div>Amount to bid</div>
-          <div v-if="web3Account && userBalance" class="text-sm">
+    <div class="s-box p-4 space-y-3">
+      <div class="s-base">
+        <div class="flex justify-between items-center">
+          <div class="s-label">Amount to bid</div>
+          <div v-if="web3Account && userBalance" class="text-xs text-skin-text">
             Balance: {{ _n(parseFloat(formattedBalance)) }}
             {{ props.auction.symbolBiddingToken }}
           </div>
@@ -189,8 +190,10 @@ function togglePriceMode() {
             max
           </button>
         </div>
+      </div>
 
-        <div class="mb-2 text-skin-text">
+      <div class="s-base">
+        <div class="s-label">
           {{ showPriceInverted ? 'Min bidding price' : 'Max bidding price' }}
         </div>
         <div class="relative">
@@ -213,42 +216,39 @@ function togglePriceMode() {
             </button>
           </div>
         </div>
-        <div class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5">
-          <div class="flex justify-between">
-            <div>Max market cap</div>
-            <div class="flex items-center gap-1 text-skin-heading">
-              <UiStamp
-                :id="props.auction.addressBiddingToken"
-                :size="18"
-                type="token"
-              />
-              {{ maxMarketCap }} {{ props.auction.symbolBiddingToken }}
-            </div>
+      </div>
+
+      <div class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5">
+        <div class="flex justify-between">
+          <div>Max market cap</div>
+          <div class="flex items-center gap-1 text-skin-heading">
+            <UiStamp
+              :id="props.auction.addressBiddingToken"
+              :size="18"
+              type="token"
+            />
+            {{ maxMarketCap }} {{ props.auction.symbolBiddingToken }}
           </div>
         </div>
       </div>
 
-      <div class="px-4 pb-3">
-        <UiButton
-          v-if="!web3Account"
-          class="w-full"
-          @click="modalAccountOpen = true"
-        >
-          Connect wallet
-        </UiButton>
-        <UiButton v-else class="w-full" disabled>
-          Place order (Coming soon)
-        </UiButton>
-        <div
-          class="text-xs text-center mt-2.5 flex items-center justify-center gap-1.5"
-        >
-          <IH-information-circle class="inline-block shrink-0" :size="16" />
-          <span v-if="canCancelOrder">
-            Can cancel until
-            {{ _t(parseInt(props.auction.orderCancellationEndDate)) }}
-          </span>
-          <span v-else> Cannot be canceled once the order is placed </span>
-        </div>
+      <UiButton
+        v-if="!web3Account"
+        class="w-full"
+        @click="modalAccountOpen = true"
+      >
+        Connect wallet
+      </UiButton>
+      <UiButton v-else class="w-full" disabled>
+        Place order (Coming soon)
+      </UiButton>
+      <div class="text-xs text-center flex items-center justify-center gap-1.5">
+        <IH-information-circle class="inline-block shrink-0" :size="16" />
+        <span v-if="canCancelOrder">
+          Can cancel until
+          {{ _t(parseInt(props.auction.orderCancellationEndDate)) }}
+        </span>
+        <span v-else> Cannot be canceled once the order is placed </span>
       </div>
     </div>
   </div>
