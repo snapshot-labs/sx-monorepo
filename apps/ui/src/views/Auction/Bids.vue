@@ -75,7 +75,7 @@ async function handleEndReached() {
         <div
           v-for="order in data?.pages.flat()"
           :key="order.id"
-          class="flex justify-between items-center gap-3 px-4 py-3 last-of-type:border-b"
+          class="flex justify-between items-center gap-3 mx-4 py-3 last-of-type:border-b"
         >
           <div
             class="leading-[22px] max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
