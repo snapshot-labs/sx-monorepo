@@ -63,6 +63,13 @@ async function handleEndReached() {
         Price
       </div>
     </UiColumnHeader>
+    <UiLoading v-if="isPending" class="px-4 py-3 block" />
+    <UiStateWarning v-else-if="isError" class="px-4 py-3">
+      Failed to load votes.
+    </UiStateWarning>
+    <UiStateWarning v-if="data?.pages.flat().length === 0" class="px-4 py-3">
+      There are no bids here.
+    </UiStateWarning>
     <UiContainerInfiniteScroll
       v-if="data"
       :loading-more="isFetchingNextPage"
@@ -74,21 +81,10 @@ async function handleEndReached() {
       <div
         class="divide-y divide-skin-border flex flex-col justify-center border-b"
       >
-        <UiLoading v-if="isPending" class="px-4 py-3 block" />
-        <UiStateWarning v-if="isError" class="px-4 py-3">
-          Failed to load votes.
-        </UiStateWarning>
-        <UiStateWarning
-          v-if="data?.pages.flat().length === 0"
-          class="px-4 py-3"
-        >
-          There are no bids here.
-        </UiStateWarning>
         <div
           v-for="order in data?.pages.flat()"
-          v-else
           :key="order.id"
-          class="flex justify-between items-center gap-3 p-3"
+          class="flex justify-between items-center gap-3 p-3 last-of-type:border-b"
         >
           <div
             class="leading-[22px] max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
