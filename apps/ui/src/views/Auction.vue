@@ -23,7 +23,7 @@ const {
 </script>
 
 <template>
-  <div class="pt-5 max-w-[50rem] mx-auto px-4">
+  <div>
     <UiLoading v-if="isLoading" class="block p-4" />
     <UiStateWarning
       v-else-if="error || !auctionData?.auctionDetail"
