@@ -3,8 +3,8 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import { VERIFIED_URL } from '@/helpers/constants';
-import { _n, omit, prettyConcat } from '@/helpers/utils';
+import { BASIC_CHOICES, VERIFIED_URL } from '@/helpers/constants';
+import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
@@ -162,13 +162,46 @@ const bodyDefinition = computed(() => ({
   examples: ['Propose something…']
 }));
 
+const choicesPlaceholders = computed<string[]>(() => {
+  if (proposal.value?.type === 'basic') {
+    return BASIC_CHOICES;
+  }
+
+  const placeholders: string[] = [];
+  for (
+    let i = 1;
+    i <= limits.value[`space.${spaceType.value}.choices_limit`];
+    i++
+  ) {
+    placeholders.push(`Choice ${i}`);
+  }
+
+  return placeholders;
+});
+
+const choicesMinItems = computed<number>(() => {
+  if (!offchainNetworks.includes(props.space.network)) {
+    return BASIC_CHOICES.length;
+  }
+
+  return proposal.value?.type === 'basic' ? 2 : 1;
+});
+
 const choicesDefinition = computed(() => ({
   type: 'array',
-  title: 'Choices',
-  minItems: offchainNetworks.includes(props.space.network) ? 1 : 3,
-  maxItems: limits.value[`space.${spaceType.value}.choices_limit`],
-  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
-  additionalItems: { type: 'string', maxLength: 32 }
+  minItems: choicesMinItems.value,
+  maxItems:
+    proposal.value?.type === 'basic'
+      ? BASIC_CHOICES.length
+      : limits.value[`space.${spaceType.value}.choices_limit`],
+  items: {
+    type: 'string',
+    title: 'Choice',
+    examples: choicesPlaceholders.value,
+    minLength: 1,
+    maxLength: 32
+  },
+  sortable: proposal.value?.type !== 'basic'
 }));
 
 const formErrors = computed(() => {
@@ -191,7 +224,7 @@ const formErrors = computed(() => {
       title: proposal.value.title,
       body: proposal.value.body,
       discussion: proposal.value.discussion,
-      choices: proposal.value.choices.filter(choice => !!choice)
+      choices: proposal.value.choices
     },
     {
       skipEmptyOptionalFields: true
@@ -773,26 +806,52 @@ watchEffect(() => {
               enforcedVoteType ? [enforcedVoteType] : space.voting_types
             "
           />
-          <EditorChoices
-            v-model="proposal"
-            :minimum-basic-choices="
-              offchainNetworks.includes(space.network) ? 2 : 3
-            "
-            :definition="choicesDefinition"
-            :error="
-              proposal.choices.length > choicesDefinition.maxItems
-                ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
-                : ''
-            "
-          >
-            <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
-              <AppLink
-                :to="{ name: 'space-pro' }"
-                class="ml-1 text-skin-danger font-semibold"
-                >Increase limit</AppLink
-              >.
-            </template>
-          </EditorChoices>
+          <div class="space-y-2.5">
+            <UiEyebrow>Choices</UiEyebrow>
+            <UiInputArray
+              v-model="proposal.choices"
+              class="s-box"
+              :definition="choicesDefinition"
+              :error="formErrors.choices"
+            >
+              <template
+                v-if="proposal.type === 'basic'"
+                #input-prefix="{ index }"
+              >
+                <UiIconBasicChoice :choice-index="index" />
+              </template>
+              <template
+                v-if="proposal.type === 'basic'"
+                #input-suffix="{ index, deleteItem }"
+              >
+                <button
+                  v-if="index > 1"
+                  class="text-skin-text"
+                  title="Delete choice"
+                  @click="deleteItem(index)"
+                >
+                  <IH-trash />
+                </button>
+                <div v-else />
+              </template>
+              <template
+                v-if="
+                  proposal.type !== 'basic' &&
+                  proposal.choices.length >= choicesDefinition.maxItems
+                "
+                #suffix
+              >
+                <div class="text-skin-danger">
+                  Maximum number of choices reached.
+                  <AppLink
+                    :to="{ name: 'space-pro' }"
+                    class="text-skin-danger font-semibold"
+                    >Increase limit</AppLink
+                  >.
+                </div>
+              </template>
+            </UiInputArray>
+          </div>
           <UiSwitch
             v-if="isOffchainSpace && space.privacy === 'any'"
             v-model="privacy"

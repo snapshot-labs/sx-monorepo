@@ -7,6 +7,7 @@ export default {
 <script setup lang="ts">
 import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
+import InputArray from './InputArray.vue';
 import InputCheckbox from './InputCheckbox.vue';
 import InputColor from './InputColor.vue';
 import InputDuration from './InputDuration.vue';
@@ -26,6 +27,7 @@ const props = defineProps<{
   path?: string;
 }>();
 
+const slots = useSlots();
 const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
@@ -63,8 +65,7 @@ const getComponent = (property: {
       if (property.items.enum) {
         return SelectMultiple;
       }
-
-      return null;
+      return InputArray;
     case 'string':
       if (property.format === 'long') return Textarea;
       if (property.format === 'addresses-with-voting-power') return Textarea;
@@ -86,6 +87,22 @@ const getComponent = (property: {
       return null;
   }
 };
+
+const getPropertySlots = (propertyName: string) => {
+  const propertySlots: Record<string, string> = {};
+  const prefix = `${propertyName}-`;
+
+  Object.keys(slots).forEach(slotName => {
+    if (slotName.startsWith(prefix)) {
+      const suffix = slotName.slice(prefix.length);
+      if (suffix) {
+        propertySlots[suffix] = slotName;
+      }
+    }
+  });
+
+  return propertySlots;
+};
 </script>
 
 <template>
@@ -100,6 +117,14 @@ const getComponent = (property: {
       :definition="property"
       :error="error?.[i]"
       :required="definition.required?.includes(i)"
-    />
+    >
+      <template
+        v-for="(sourceSlot, targetSlot) in getPropertySlots(i.toString())"
+        :key="targetSlot"
+        #[targetSlot]="slotProps"
+      >
+        <slot :name="sourceSlot" v-bind="slotProps" />
+      </template>
+    </component>
   </div>
 </template>
