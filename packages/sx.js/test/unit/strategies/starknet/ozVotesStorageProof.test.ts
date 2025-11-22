@@ -41,7 +41,7 @@ describe('ozVotesStorageProof', () => {
     it('should compute live voting power', async () => {
       const votingPower = await ozVotesStorageProofStrategy.getVotingPower(
         '0x16aa0c2eda8ff56fa9922a4858d4d91e3b01cf21d2aecd01e1c95d296362218',
-        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        '0xdead4f50e4aefd8dd7f41b9f8072bdfb42420aad',
         {
           contractAddress: '0x6Fd821e79cDf212aD8b06C59B28FE8C2185291d4',
           slotIndex: 8
