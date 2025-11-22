@@ -5,7 +5,7 @@ const APP_TOPNAV_HEIGHT = 72;
 
 export const TOTAL_NAV_HEIGHT = ELECTRON_TITLEBAR_HEIGHT + APP_TOPNAV_HEIGHT;
 
-const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + 40;
+const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + 41;
 
 export default {
   future: {
@@ -98,7 +98,7 @@ export default {
       'electron-titlebar-height': `${ELECTRON_TITLEBAR_HEIGHT}px`,
       'header-height-with-offset': `${TOTAL_NAV_HEIGHT - 1}px`,
       'header-with-section-height': `${TOTAL_WITH_SECTION}px`,
-      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION + 1}px`
+      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION - 1}px`
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
