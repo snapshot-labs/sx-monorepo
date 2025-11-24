@@ -45,9 +45,9 @@ async function handleEndReached() {
   <div>
     <UiSectionHeader label="Bids" sticky />
     <UiColumnHeader class="z-40 overflow-hidden gap-3">
-      <div class="max-w-[218px] w-[218px] truncate">Bidder</div>
-      <div class="grow w-[40%] truncate">Amount</div>
+      <div class="flex-1 truncate">Bidder</div>
       <div class="max-w-[144px] w-[144px] truncate">Date</div>
+      <div class="max-w-[218px] w-[218px] truncate">Amount</div>
       <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
@@ -74,7 +74,7 @@ async function handleEndReached() {
           class="flex justify-between items-center gap-3 py-3"
         >
           <div
-            class="leading-[22px] max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
+            class="leading-[22px] flex-1 flex items-center space-x-3 truncate"
           >
             <UiStamp :id="order.userAddress" :size="32" />
             <div class="flex flex-col truncate">
@@ -87,10 +87,6 @@ async function handleEndReached() {
                 class="text-[17px] text-skin-text truncate"
               />
             </div>
-          </div>
-          <div class="grow w-[40%] text-skin-link truncate">
-            {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
-            {{ auction.symbolAuctioningToken }}
           </div>
           <div
             class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
@@ -105,6 +101,10 @@ async function handleEndReached() {
               {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
             </div>
           </div>
+          <h4 class="max-w-[218px] w-[218px] text-skin-link truncate">
+            {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
+            {{ auction.symbolAuctioningToken }}
+          </h4>
           <h4
             class="text-skin-link max-w-[144px] w-[144px] truncate text-right"
           >
