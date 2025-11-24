@@ -65,11 +65,7 @@ const amountError = computed(() => {
   const amount = parseFloat(bidAmount.value);
   if (amount <= 0) return 'Invalid amount';
 
-  if (
-    web3Account.value &&
-    userBalance.value &&
-    amount > parseFloat(formattedBalance.value)
-  ) {
+  if (showBalance.value && amount > parseFloat(formattedBalance.value)) {
     return 'Insufficient balance';
   }
 
