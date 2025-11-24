@@ -6,6 +6,7 @@ import {
   OrderDetailFragment
 } from '@/helpers/auction/gql/graphql';
 import { getTokenPrices } from '@/helpers/coingecko';
+import { CHAIN_IDS, COINGECKO_ASSET_PLATFORMS } from '@/helpers/constants';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
@@ -47,7 +48,17 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
       'pricing'
     ],
     queryFn: async () => {
-      const coins = await getTokenPrices('ethereum', [
+      const chainId = CHAIN_IDS[props.network];
+      if (!(chainId in COINGECKO_ASSET_PLATFORMS)) {
+        return 0;
+      }
+
+      const coingeckoAssetPlatform =
+        COINGECKO_ASSET_PLATFORMS[
+          chainId as keyof typeof COINGECKO_ASSET_PLATFORMS
+        ];
+
+      const coins = await getTokenPrices(coingeckoAssetPlatform, [
         props.auction.addressBiddingToken
       ]);
 
