@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import { AuctionNetworkId, formatPrice, getOrders } from '@/helpers/auction';
-import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import {
+  AuctionDetailFragment,
+  OrderDetailFragment
+} from '@/helpers/auction/gql/graphql';
 import { _c, _p, _t, shortenAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
@@ -21,7 +24,7 @@ const {
   isError
 } = useInfiniteQuery({
   initialPageParam: 0,
-  queryKey: ['auction', props.network, props.auctionId, 'orders'],
+  queryKey: ['auction', () => props.network, () => props.auctionId, 'orders'],
   queryFn: ({ pageParam }) =>
     getOrders(props.auctionId, props.network, {
       first: LIMIT,
@@ -39,6 +42,10 @@ async function handleEndReached() {
 
   fetchNextPage();
 }
+
+function getOrderPercantage(order: OrderDetailFragment) {
+  return Number(order.buyAmount) / Number(props.auction.exactOrder.sellAmount);
+}
 </script>
 
 <template>
@@ -46,9 +53,9 @@ async function handleEndReached() {
     <UiSectionHeader label="Bids" sticky />
     <UiColumnHeader class="z-40 overflow-hidden gap-3">
       <div class="flex-1 truncate">Bidder</div>
-      <div class="max-w-[144px] w-[144px] truncate">Date</div>
-      <div class="max-w-[144px] w-[144px] truncate">Amount</div>
-      <div class="max-w-[218px] w-[218px] text-right truncate">Price</div>
+      <div class="max-w-[168px] w-[168px] truncate">Date</div>
+      <div class="max-w-[168px] w-[168px] truncate">Amount</div>
+      <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <UiStateWarning v-else-if="isError" class="px-4 py-3">
@@ -66,13 +73,19 @@ async function handleEndReached() {
         <UiLoading class="px-4 py-3 block" />
       </template>
       <div
-        class="divide-y divide-skin-border flex flex-col justify-center mx-4 border-b"
+        class="divide-y divide-skin-border flex flex-col justify-center border-b"
       >
         <div
           v-for="order in data?.pages.flat()"
           :key="order.id"
-          class="flex justify-between items-center gap-3 py-3"
+          class="flex justify-between items-center gap-3 py-3 px-4 relative"
         >
+          <div
+            class="right-0 top-0 h-[8px] absolute choice-bg opacity-20 _1"
+            :style="{
+              width: `${Math.min(getOrderPercantage(order) * 100, 100).toFixed(2)}%`
+            }"
+          />
           <div
             class="leading-[22px] flex-1 flex items-center space-x-3 truncate"
           >
@@ -89,7 +102,7 @@ async function handleEndReached() {
             </div>
           </div>
           <div
-            class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
+            class="leading-[22px] max-w-[168px] w-[168px] flex flex-col justify-center truncate"
           >
             <TimeRelative
               v-slot="{ relativeTime }"
@@ -101,21 +114,16 @@ async function handleEndReached() {
               {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
             </div>
           </div>
-          <div class="max-w-[144px] w-[144px] truncate">
+          <div class="max-w-[168px] w-[168px] truncate">
             <h4 class="text-skin-link truncate">
               {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
               {{ auction.symbolAuctioningToken }}
             </h4>
             <div class="text-[17px] truncate">
-              {{
-                _p(
-                  Number(order.buyAmount) /
-                    Number(auction.exactOrder.sellAmount)
-                )
-              }}
+              {{ _p(getOrderPercantage(order)) }}
             </div>
           </div>
-          <div class="max-w-[218px] w-[218px] truncate text-right">
+          <div class="max-w-[168px] w-[168px] truncate text-right">
             <h4 class="text-skin-link truncate">
               {{ formatPrice(order.price) }}
               {{ auction.symbolBiddingToken }}
