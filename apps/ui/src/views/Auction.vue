@@ -20,12 +20,6 @@ const {
   queryFn: () => getAuction(params.value.id, params.value.network),
   enabled: computed(() => !!params.value.id)
 });
-
-const isAuctionOpen = computed(() => {
-  const auction = auctionData.value?.auctionDetail;
-  if (!auction) return false;
-  return parseInt(auction.endTimeTimestamp) > Date.now() / 1000;
-});
 </script>
 
 <template>
@@ -46,7 +40,6 @@ const isAuctionOpen = computed(() => {
       :auction="auctionData.auctionDetail"
       :network="params.network"
       :auction-id="params.id"
-      :is-auction-open="isAuctionOpen"
     />
   </div>
 </template>

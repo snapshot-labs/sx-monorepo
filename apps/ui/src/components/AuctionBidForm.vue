@@ -58,7 +58,7 @@ const maxMarketCap = computed(() => {
   const pricePerToken = showPriceInverted.value
     ? 1 / parsedBidPrice.value
     : parsedBidPrice.value;
-  return _n(formattedTotalSupply * pricePerToken);
+  return _n(Math.floor(formattedTotalSupply * pricePerToken));
 });
 
 const amountError = computed(() => {

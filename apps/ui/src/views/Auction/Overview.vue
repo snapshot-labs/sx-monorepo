@@ -11,8 +11,11 @@ const props = defineProps<{
   network: AuctionNetworkId;
   auctionId: string;
   auction: AuctionDetailFragment;
-  isAuctionOpen: boolean;
 }>();
+
+const isAuctionOpen = computed(
+  () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
+);
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
