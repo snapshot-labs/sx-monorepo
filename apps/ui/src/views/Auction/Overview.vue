@@ -217,7 +217,7 @@ const normalizedSignerAddress = computed(() => {
         </div>
       </div>
 
-      <AuctionBidForm
+      <FormAuctionBid
         v-if="isAuctionOpen"
         :auction="auction"
         :network="network"

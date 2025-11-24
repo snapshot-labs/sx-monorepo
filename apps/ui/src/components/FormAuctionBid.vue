@@ -3,7 +3,7 @@ import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
-import { AuctionNetworkId } from '@/helpers/auction';
+import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
@@ -32,10 +32,6 @@ const showPriceInverted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
-const clearingPrice = computed(() =>
-  parseFloat(props.auction.currentClearingPrice)
-);
-
 const formattedBalance = computed(() =>
   userBalance.value
     ? formatUnits(userBalance.value, props.auction.decimalsBiddingToken)
@@ -48,21 +44,22 @@ const priceLabel = computed(() =>
     : `${props.auction.symbolBiddingToken} per ${props.auction.symbolAuctioningToken}`
 );
 
-const parsedBidPrice = computed(() => parseFloat(bidPrice.value) || 0);
-
 const maxMarketCap = computed(() => {
-  if (!parsedBidPrice.value || !totalSupply.value) return '0';
-  const formattedTotalSupply = parseFloat(
+  const price = parseFloat(bidPrice.value) || 0;
+  if (!price || !totalSupply.value) return '0';
+
+  const totalSupplyFormatted = parseFloat(
     formatUnits(totalSupply.value, props.auction.decimalsAuctioningToken)
   );
-  const pricePerToken = showPriceInverted.value
-    ? 1 / parsedBidPrice.value
-    : parsedBidPrice.value;
-  return _n(Math.floor(formattedTotalSupply * pricePerToken));
+  const pricePerToken = showPriceInverted.value ? 1 / price : price;
+  const marketCapValue = Math.floor(totalSupplyFormatted * pricePerToken);
+
+  return _n(marketCapValue);
 });
 
 const amountError = computed(() => {
   if (!bidAmount.value) return undefined;
+
   const amount = parseFloat(bidAmount.value);
   if (amount <= 0) return 'Invalid amount';
 
@@ -73,23 +70,29 @@ const amountError = computed(() => {
   ) {
     return 'Insufficient balance';
   }
+
   return undefined;
 });
 
 const priceError = computed(() => {
   if (!bidPrice.value) return undefined;
-  const price = parsedBidPrice.value;
+
+  const price = parseFloat(bidPrice.value) || 0;
   if (price <= 0) return 'Invalid price';
 
   const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
   const limit = showPriceInverted.value
     ? 1 / minimumSellPrice
     : minimumSellPrice;
-  const isInvalid = showPriceInverted.value ? price >= limit : price <= limit;
+  const isAboveLimit = showPriceInverted.value
+    ? price >= limit
+    : price <= limit;
 
-  if (isInvalid) {
-    return `${showPriceInverted.value ? 'Maximum' : 'Minimum'} ${_n(limit)} ${priceLabel.value}`;
+  if (isAboveLimit) {
+    const limitType = showPriceInverted.value ? 'Maximum' : 'Minimum';
+    return `${limitType} ${_n(limit)} ${priceLabel.value}`;
   }
+
   return undefined;
 });
 
@@ -98,50 +101,53 @@ const canCancelOrder = computed(
 );
 
 const { data: userBalance, isError: isBalanceError } = useQuery({
-  queryKey: computed(() => [
-    'balance',
-    web3Account.value,
-    props.auction.addressBiddingToken
-  ]),
+  queryKey: ['balance', web3Account, props.auction.addressBiddingToken],
   queryFn: async () => {
     if (!web3Account.value) return '0';
-    return (
-      await new Contract(
-        props.auction.addressBiddingToken,
-        abis.erc20,
-        provider.value
-      ).balanceOf(web3Account.value)
-    ).toString();
+
+    const contract = new Contract(
+      props.auction.addressBiddingToken,
+      abis.erc20,
+      provider.value
+    );
+
+    const balance = await contract.balanceOf(web3Account.value);
+
+    return balance.toString();
   },
   enabled: computed(() => !!web3Account.value)
 });
 
 const { data: totalSupply, isError: isSupplyError } = useQuery({
-  queryKey: computed(() => ['supply', props.auction.addressAuctioningToken]),
-  queryFn: async () =>
-    (
-      await new Contract(
-        props.auction.addressAuctioningToken,
-        abis.erc20,
-        provider.value
-      ).totalSupply()
-    ).toString()
+  queryKey: ['supply', props.auction.addressAuctioningToken],
+  queryFn: async () => {
+    const contract = new Contract(
+      props.auction.addressAuctioningToken,
+      abis.erc20,
+      provider.value
+    );
+
+    const totalSupply = await contract.totalSupply();
+
+    return totalSupply.toString();
+  }
 });
 
 onMounted(() => {
-  if (clearingPrice.value > 0) {
-    bidPrice.value = (clearingPrice.value * DEFAULT_PRICE_PREMIUM).toFixed(
-      PRICE_DECIMALS
-    );
-  }
+  const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+  if (clearingPrice <= 0) return;
+
+  bidPrice.value = (clearingPrice * DEFAULT_PRICE_PREMIUM).toFixed(
+    PRICE_DECIMALS
+  );
 });
 
 function togglePriceMode() {
-  if (parsedBidPrice.value) {
-    bidPrice.value = (1 / parsedBidPrice.value)
-      .toFixed(INVERTED_PRICE_DECIMALS)
-      .replace(/\.?0+$/, '');
-  }
+  const currentPrice = parseFloat(bidPrice.value) || 0;
+  if (!currentPrice) return;
+
+  const invertedPrice = 1 / currentPrice;
+  bidPrice.value = formatPrice(invertedPrice, INVERTED_PRICE_DECIMALS);
   showPriceInverted.value = !showPriceInverted.value;
 }
 </script>
