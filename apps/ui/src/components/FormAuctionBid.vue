@@ -38,6 +38,8 @@ const formattedBalance = computed(() =>
     : '0'
 );
 
+const showBalance = computed(() => !!(web3Account.value && userBalance.value));
+
 const priceLabel = computed(() =>
   showPriceInverted.value
     ? `${props.auction.symbolAuctioningToken} per ${props.auction.symbolBiddingToken}`
@@ -170,7 +172,7 @@ function togglePriceMode() {
       <div class="relative">
         <div
           class="absolute -top-5 right-0 text-xs text-skin-text"
-          :class="{ invisible: !(web3Account && userBalance) }"
+          :class="{ invisible: !showBalance }"
         >
           Balance: {{ _n(parseFloat(formattedBalance)) }}
           {{ props.auction.symbolBiddingToken }}
@@ -182,7 +184,7 @@ function togglePriceMode() {
             :error="amountError"
           />
           <button
-            v-if="web3Account && userBalance"
+            v-if="showBalance"
             type="button"
             class="absolute right-3 top-[18px] text-skin-link"
             @click="bidAmount = formattedBalance"
