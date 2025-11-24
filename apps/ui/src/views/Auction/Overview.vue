@@ -31,6 +31,14 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     network: () => props.network,
     auction: () => props.auction
   });
+const isModalTransactionProgressOpen = ref(false);
+const sellAmount = ref(2);
+const buyAmount = ref(17);
+
+const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
+  toRef(props, 'auctionId'),
+  toRef(props, 'network')
+);
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
@@ -101,10 +109,43 @@ const normalizedSignerAddress = computed(() => {
     return null;
   }
 });
+
+async function moveToNextStep() {
+  if (isLastStep.value) {
+    return;
+  }
+
+  isModalTransactionProgressOpen.value = false;
+
+  if (await goToNextStep()) {
+    isModalTransactionProgressOpen.value = true;
+  }
+}
+
+async function handleTest() {
+  start();
+
+  isModalTransactionProgressOpen.value = true;
+}
 </script>
 
 <template>
   <div class="pt-5 max-w-[50rem] mx-auto px-4">
+    <div class="border p-3 s-box rounded-md mb-3">
+      <UiInputNumber
+        v-model="sellAmount"
+        :definition="{ title: 'Sell amount' }"
+        label="Sell Amount"
+      />
+      <UiInputNumber
+        v-model="buyAmount"
+        :definition="{ title: 'Buy amount' }"
+        label="Sell Amount"
+      />
+      <UiButton primary class="w-full" @click="handleTest"
+        >Place order</UiButton
+      >
+    </div>
     <div class="space-y-4">
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-2">
@@ -363,5 +404,16 @@ const normalizedSignerAddress = computed(() => {
         </div>
       </div>
     </div>
+    <teleport to="#modal">
+      <ModalTransactionProgress
+        :open="isModalTransactionProgressOpen"
+        :execute="() => currentStep.execute({ sellAmount, buyAmount })"
+        :chain-id="EVM_METADATA[network].chainId"
+        :messages="currentStep.messages"
+        @close="isModalTransactionProgressOpen = false"
+        @confirmed="moveToNextStep"
+        @cancelled="isModalTransactionProgressOpen = false"
+      />
+    </teleport>
   </div>
 </template>

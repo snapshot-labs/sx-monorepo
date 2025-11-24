@@ -6,9 +6,19 @@ import { Order_OrderBy, OrderFragment } from './gql/graphql';
 export type AuctionNetworkId = 'eth' | 'sep';
 export type Order = OrderFragment & { name: string | null };
 
+export type Auction = {
+  id: string;
+  network: AuctionNetworkId;
+} & AuctionDetailFragment;
+
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
   eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH'
+};
+
+export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
+  sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C',
+  eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101'
 };
 
 export function formatPrice(
