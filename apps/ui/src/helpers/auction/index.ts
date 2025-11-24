@@ -1,6 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { auctionQuery, ordersQuery } from './queries';
 import { getNames } from '../stamp';
+import { AuctionDetailFragment } from './gql/graphql';
 
 export type AuctionNetworkId = 'eth' | 'sep';
 
