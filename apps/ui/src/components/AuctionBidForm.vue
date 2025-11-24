@@ -13,6 +13,11 @@ const DEFAULT_PRICE_PREMIUM = 1.001; // 0.1% above clearing price
 const PRICE_DECIMALS = 4;
 const INVERTED_PRICE_DECIMALS = 8;
 
+const inputDefinition = {
+  type: 'string',
+  examples: ['0.0']
+};
+
 const props = defineProps<{
   auction: AuctionDetailFragment;
   network: AuctionNetworkId;
@@ -25,19 +30,10 @@ const bidAmount = ref('');
 const bidPrice = ref('');
 const showPriceInverted = ref(false);
 
-const provider = computed(() => getProvider(CHAIN_IDS[props.network]));
+const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
 const clearingPrice = computed(() =>
   parseFloat(props.auction.currentClearingPrice)
-);
-
-const minBiddingAmount = computed(() =>
-  parseFloat(
-    formatUnits(
-      props.auction.minimumBiddingAmountPerOrder,
-      props.auction.decimalsBiddingToken
-    )
-  )
 );
 
 const formattedBalance = computed(() =>
@@ -52,24 +48,23 @@ const priceLabel = computed(() =>
     : `${props.auction.symbolBiddingToken} per ${props.auction.symbolAuctioningToken}`
 );
 
+const parsedBidPrice = computed(() => parseFloat(bidPrice.value) || 0);
+
 const maxMarketCap = computed(() => {
-  const price = parseFloat(bidPrice.value);
-  if (!price || !totalSupply.value) return '0';
-  const supply = parseFloat(
+  if (!parsedBidPrice.value || !totalSupply.value) return '0';
+  const formattedTotalSupply = parseFloat(
     formatUnits(totalSupply.value, props.auction.decimalsAuctioningToken)
   );
-  const pricePerToken = showPriceInverted.value ? 1 / price : price;
-  return _n(supply * pricePerToken);
+  const pricePerToken = showPriceInverted.value
+    ? 1 / parsedBidPrice.value
+    : parsedBidPrice.value;
+  return _n(formattedTotalSupply * pricePerToken);
 });
 
 const amountError = computed(() => {
   if (!bidAmount.value) return undefined;
   const amount = parseFloat(bidAmount.value);
   if (amount <= 0) return 'Invalid amount';
-
-  if (amount <= minBiddingAmount.value) {
-    return `Minimum ${_n(minBiddingAmount.value)} ${props.auction.symbolBiddingToken}`;
-  }
 
   if (
     web3Account.value &&
@@ -83,12 +78,13 @@ const amountError = computed(() => {
 
 const priceError = computed(() => {
   if (!bidPrice.value) return undefined;
-  const price = parseFloat(bidPrice.value);
+  const price = parsedBidPrice.value;
   if (price <= 0) return 'Invalid price';
 
+  const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
   const limit = showPriceInverted.value
-    ? 1 / clearingPrice.value
-    : clearingPrice.value;
+    ? 1 / minimumSellPrice
+    : minimumSellPrice;
   const isInvalid = showPriceInverted.value ? price >= limit : price <= limit;
 
   if (isInvalid) {
@@ -141,9 +137,8 @@ onMounted(() => {
 });
 
 function togglePriceMode() {
-  const price = parseFloat(bidPrice.value);
-  if (price) {
-    bidPrice.value = (1 / price)
+  if (parsedBidPrice.value) {
+    bidPrice.value = (1 / parsedBidPrice.value)
       .toFixed(INVERTED_PRICE_DECIMALS)
       .replace(/\.?0+$/, '');
   }
@@ -158,33 +153,32 @@ function togglePriceMode() {
       Place bid
     </h4>
 
-    <UiMessage
-      v-if="web3Account && (isBalanceError || isSupplyError)"
-      type="danger"
-      class="mb-3"
-    >
-      Failed to load balance or token supply. Please try again.
-    </UiMessage>
-
-    <div class="s-box p-4 space-y-3">
-      <div class="s-base">
-        <div class="flex justify-between items-center">
-          <div class="s-label">Amount to bid</div>
-          <div v-if="web3Account && userBalance" class="text-xs text-skin-text">
-            Balance: {{ _n(parseFloat(formattedBalance)) }}
-            {{ props.auction.symbolBiddingToken }}
-          </div>
+    <div class="border border-skin-border rounded-lg s-box p-4 space-y-3 pt-6">
+      <UiMessage
+        v-if="web3Account && (isBalanceError || isSupplyError)"
+        type="danger"
+        class="mb-3"
+      >
+        Failed to load balance or token supply. Please try again.
+      </UiMessage>
+      <div class="relative">
+        <div
+          class="absolute -top-5 right-0 text-xs text-skin-text"
+          :class="{ invisible: !(web3Account && userBalance) }"
+        >
+          Balance: {{ _n(parseFloat(formattedBalance)) }}
+          {{ props.auction.symbolBiddingToken }}
         </div>
         <div class="relative">
           <UiInputAmount
             v-model="bidAmount"
-            :definition="{ type: 'number', title: '', examples: ['0.0'] }"
+            :definition="{ ...inputDefinition, title: 'Amount to bid' }"
             :error="amountError"
           />
           <button
             v-if="web3Account && userBalance"
             type="button"
-            class="absolute top-[2px] right-3 h-[46px] flex items-center text-skin-link hover:text-skin-link-hover"
+            class="absolute right-3 top-[18px] text-skin-link"
             @click="bidAmount = formattedBalance"
           >
             max
@@ -192,36 +186,29 @@ function togglePriceMode() {
         </div>
       </div>
 
-      <div class="s-base">
-        <div class="s-label">
-          {{ showPriceInverted ? 'Min bidding price' : 'Max bidding price' }}
-        </div>
-        <div class="relative">
-          <UiInputAmount
-            v-model="bidPrice"
-            :definition="{ type: 'number', title: '', examples: ['0.0'] }"
-            :error="priceError"
-          />
-          <div
-            class="absolute top-[2px] right-3 h-[46px] flex items-center gap-2"
-          >
-            <div class="text-sm text-skin-text">{{ priceLabel }}</div>
-            <button
-              type="button"
-              class="text-skin-link hover:text-skin-link-hover"
-              title="Switch price mode"
-              @click="togglePriceMode"
-            >
-              <IH-switch-horizontal class="inline-block" />
-            </button>
+      <div class="relative">
+        <UiInputAmount
+          v-model="bidPrice"
+          :definition="{
+            ...inputDefinition,
+            title: showPriceInverted ? 'Min bidding price' : 'Max bidding price'
+          }"
+          :error="priceError"
+        />
+        <div class="absolute right-3 top-[18px] flex items-center gap-2">
+          <div class="text-sm text-skin-text hidden sm:block">
+            {{ priceLabel }}
           </div>
+          <button type="button" class="text-skin-link" @click="togglePriceMode">
+            <IH-switch-horizontal />
+          </button>
         </div>
       </div>
 
       <div class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5">
         <div class="flex justify-between">
-          <div>Max market cap</div>
-          <div class="flex items-center gap-1 text-skin-heading">
+          <div class="text-skin-text">Max market cap</div>
+          <div class="flex items-center gap-1 text-skin-link">
             <UiStamp
               :id="props.auction.addressBiddingToken"
               :size="18"

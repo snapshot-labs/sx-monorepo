@@ -214,6 +214,12 @@ const normalizedSignerAddress = computed(() => {
         </div>
       </div>
 
+      <AuctionBidForm
+        v-if="isAuctionOpen"
+        :auction="auction"
+        :network="network"
+      />
+
       <div>
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-currency-dollar />
@@ -270,12 +276,6 @@ const normalizedSignerAddress = computed(() => {
           </div>
         </div>
       </div>
-
-      <AuctionBidForm
-        v-if="isAuctionOpen"
-        :auction="auction"
-        :network="network"
-      />
 
       <div>
         <h4 class="mb-3 eyebrow flex items-center gap-2">
