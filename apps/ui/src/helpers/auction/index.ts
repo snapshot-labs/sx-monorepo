@@ -1,7 +1,11 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { auctionQuery, ordersQuery } from './queries';
 import { getNames } from '../stamp';
-import { Order_OrderBy, OrderFragment } from './gql/graphql';
+import {
+  AuctionDetailFragment,
+  Order_OrderBy,
+  OrderFragment
+} from './gql/graphql';
 
 export type AuctionNetworkId = 'eth' | 'sep';
 export type Order = OrderFragment & { name: string | null };
