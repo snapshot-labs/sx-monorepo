@@ -9,10 +9,15 @@ const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH'
 };
 
-export function formatPrice(price: string | undefined) {
-  return price
-    ? parseFloat(price)
-        .toFixed(8)
+export function formatPrice(
+  price: string | number | undefined,
+  fractionDigits = 8
+) {
+  const value = typeof price === 'number' ? price.toString() : price;
+
+  return value
+    ? parseFloat(value)
+        .toFixed(fractionDigits)
         .replace(/\.?0+$/, '')
     : '0';
 }

@@ -2,7 +2,7 @@
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import { AuctionNetworkId, formatPrice, getOrders } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import { _c, _t, shortenAddress } from '@/helpers/utils';
+import { _c, _p, _t, shortenAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 
@@ -47,8 +47,8 @@ async function handleEndReached() {
     <UiColumnHeader class="z-40 overflow-hidden gap-3">
       <div class="flex-1 truncate">Bidder</div>
       <div class="max-w-[144px] w-[144px] truncate">Date</div>
-      <div class="max-w-[218px] w-[218px] truncate">Amount</div>
-      <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
+      <div class="max-w-[144px] w-[144px] truncate">Amount</div>
+      <div class="max-w-[218px] w-[218px] text-right truncate">Price</div>
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <UiStateWarning v-else-if="isError" class="px-4 py-3">
@@ -101,16 +101,31 @@ async function handleEndReached() {
               {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
             </div>
           </div>
-          <h4 class="max-w-[218px] w-[218px] text-skin-link truncate">
-            {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
-            {{ auction.symbolAuctioningToken }}
-          </h4>
-          <h4
-            class="text-skin-link max-w-[144px] w-[144px] truncate text-right"
-          >
-            {{ formatPrice(order.price) }}
-            {{ auction.symbolBiddingToken }}
-          </h4>
+          <div class="max-w-[144px] w-[144px] truncate">
+            <h4 class="text-skin-link truncate">
+              {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
+              {{ auction.symbolAuctioningToken }}
+            </h4>
+            <div class="text-[17px] truncate">
+              {{
+                _p(
+                  Number(order.buyAmount) /
+                    Number(auction.exactOrder.sellAmount)
+                )
+              }}
+            </div>
+          </div>
+          <div class="max-w-[218px] w-[218px] truncate text-right">
+            <h4 class="text-skin-link truncate">
+              {{ formatPrice(order.price) }}
+              {{ auction.symbolBiddingToken }}
+            </h4>
+            <div class="truncate">
+              {{ formatPrice(1 / Number(order.price), 4) }}
+              {{ auction.symbolAuctioningToken }} per
+              {{ auction.symbolBiddingToken }}
+            </div>
+          </div>
         </div>
       </div>
     </UiContainerInfiniteScroll>
