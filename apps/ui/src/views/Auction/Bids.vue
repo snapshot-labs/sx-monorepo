@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { useInfiniteQuery } from '@tanstack/vue-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import { AuctionNetworkId, formatPrice, getOrders } from '@/helpers/auction';
 import {
   AuctionDetailFragment,
   OrderDetailFragment
 } from '@/helpers/auction/gql/graphql';
-import { _c, _p, _t, shortenAddress } from '@/helpers/utils';
+import { getTokenPrices } from '@/helpers/coingecko';
+import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 
@@ -37,6 +38,25 @@ const {
   }
 });
 
+const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
+  useQuery({
+    queryKey: [
+      'auction',
+      () => props.network,
+      () => props.auctionId,
+      'pricing'
+    ],
+    queryFn: async () => {
+      const coins = await getTokenPrices('ethereum', [
+        props.auction.addressBiddingToken
+      ]);
+
+      return (
+        coins[props.auction.addressBiddingToken.toLocaleLowerCase()]?.usd ?? 0
+      );
+    }
+  });
+
 async function handleEndReached() {
   if (!hasNextPage.value) return;
 
@@ -57,15 +77,21 @@ function getOrderPercantage(order: OrderDetailFragment) {
       <div class="max-w-[168px] w-[168px] truncate">Amount</div>
       <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
     </UiColumnHeader>
-    <UiLoading v-if="isPending" class="px-4 py-3 block" />
+    <UiLoading
+      v-if="isPending || isBiddingTokenPriceLoading"
+      class="px-4 py-3 block"
+    />
     <UiStateWarning v-else-if="isError" class="px-4 py-3">
       Failed to load bids.
     </UiStateWarning>
-    <UiStateWarning v-if="data?.pages.flat().length === 0" class="px-4 py-3">
+    <UiStateWarning
+      v-else-if="data?.pages.flat().length === 0"
+      class="px-4 py-3"
+    >
       There are no bids here.
     </UiStateWarning>
     <UiContainerInfiniteScroll
-      v-if="data"
+      v-else-if="data && typeof biddingTokenPrice === 'number'"
       :loading-more="isFetchingNextPage"
       @end-reached="handleEndReached"
     >
@@ -129,9 +155,11 @@ function getOrderPercantage(order: OrderDetailFragment) {
               {{ auction.symbolBiddingToken }}
             </h4>
             <div class="truncate">
-              {{ formatPrice(1 / Number(order.price), 4) }}
-              {{ auction.symbolAuctioningToken }} per
-              {{ auction.symbolBiddingToken }}
+              ${{
+                _n(Number(order.price) * biddingTokenPrice, 'standard', {
+                  maximumFractionDigits: 2
+                })
+              }}
             </div>
           </div>
         </div>
