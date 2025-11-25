@@ -8,13 +8,17 @@ import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
 import { _n, _t } from '@/helpers/utils';
+import { getValidator } from '@/helpers/validation';
 
 const DEFAULT_PRICE_PREMIUM = 1.001; // 0.1% above clearing price
 const PRICE_DECIMALS = 4;
 const INVERTED_PRICE_DECIMALS = 8;
 
-const INPUT_DEFINITION = {
+const AMOUNT_DEFINITION = {
   type: 'string',
+  format: 'ethValue',
+  title: 'Amount to bid',
+  tooltip: 'The total amount of tokens you want to use for this bid',
   examples: ['0.0']
 };
 
@@ -26,11 +30,47 @@ const props = defineProps<{
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 
+const isPriceInverted = ref(false);
 const bidAmount = ref('');
 const bidPrice = ref('');
-const isPriceInverted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
+
+const priceDefinition = computed(() => ({
+  ...AMOUNT_DEFINITION,
+  title: isPriceInverted.value ? 'Min bidding price' : 'Max bidding price',
+  tooltip: isPriceInverted.value
+    ? 'Minimum price you are willing to accept per token'
+    : 'Maximum price you are willing to pay per token'
+}));
+
+const formValidator = computed(() =>
+  getValidator({
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      amount: AMOUNT_DEFINITION,
+      price: priceDefinition.value
+    }
+  })
+);
+
+const formatErrors = computed(() =>
+  formValidator.value.validate({
+    amount: bidAmount.value,
+    price: bidPrice.value
+  })
+);
+
+const priceUnit = computed(() =>
+  isPriceInverted.value
+    ? `${props.auction.symbolAuctioningToken} per ${props.auction.symbolBiddingToken}`
+    : `${props.auction.symbolBiddingToken} per ${props.auction.symbolAuctioningToken}`
+);
+
+const canCancelOrder = computed(
+  () => parseInt(props.auction.orderCancellationEndDate) > Date.now() / 1000
+);
 
 const { data: userBalance, isError: isBalanceError } = useQuery({
   queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
@@ -74,12 +114,6 @@ const formattedBalance = computed(() => {
 
 const hasBalance = computed(() => !!(web3Account.value && userBalance.value));
 
-const priceLabel = computed(() =>
-  isPriceInverted.value
-    ? `${props.auction.symbolAuctioningToken} per ${props.auction.symbolBiddingToken}`
-    : `${props.auction.symbolBiddingToken} per ${props.auction.symbolAuctioningToken}`
-);
-
 const maxMarketCap = computed(() => {
   const displayPrice = parseFloat(bidPrice.value) || 0;
   if (!displayPrice || !totalSupply.value) return '0';
@@ -102,9 +136,9 @@ const maxMarketCap = computed(() => {
 
 const amountError = computed(() => {
   if (!bidAmount.value) return undefined;
+  if (formatErrors.value.amount) return formatErrors.value.amount;
 
   const amount = parseFloat(bidAmount.value);
-  if (amount <= 0) return 'Invalid amount';
 
   const minBiddingAmount = parseFloat(
     formatUnits(
@@ -126,27 +160,27 @@ const amountError = computed(() => {
 
 const priceError = computed(() => {
   if (!bidPrice.value) return undefined;
+  if (formatErrors.value.price) return formatErrors.value.price;
 
-  const price = parseFloat(bidPrice.value) || 0;
-  if (price <= 0) return 'Invalid price';
+  const price = parseFloat(bidPrice.value);
 
   const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
-  if (!minimumSellPrice) return undefined;
+  if (minimumSellPrice) {
+    const limit = isPriceInverted.value
+      ? 1 / minimumSellPrice
+      : minimumSellPrice;
+    const isAboveLimit = isPriceInverted.value
+      ? price >= limit
+      : price <= limit;
 
-  const limit = isPriceInverted.value ? 1 / minimumSellPrice : minimumSellPrice;
-  const isAboveLimit = isPriceInverted.value ? price >= limit : price <= limit;
-
-  if (isAboveLimit) {
-    const limitType = isPriceInverted.value ? 'Maximum' : 'Minimum';
-    return `${limitType} ${_n(limit)} ${priceLabel.value}`;
+    if (isAboveLimit) {
+      const limitType = isPriceInverted.value ? 'Maximum' : 'Minimum';
+      return `${limitType} ${_n(limit)} ${priceUnit.value}`;
+    }
   }
 
   return undefined;
 });
-
-const canCancelOrder = computed(
-  () => parseInt(props.auction.orderCancellationEndDate) > Date.now() / 1000
-);
 
 onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
@@ -159,10 +193,10 @@ onMounted(() => {
 
 function togglePriceMode() {
   const currentPrice = parseFloat(bidPrice.value) || 0;
-  if (!currentPrice) return;
-
-  const invertedPrice = 1 / currentPrice;
-  bidPrice.value = formatPrice(invertedPrice, INVERTED_PRICE_DECIMALS);
+  if (currentPrice) {
+    const invertedPrice = 1 / currentPrice;
+    bidPrice.value = formatPrice(invertedPrice, INVERTED_PRICE_DECIMALS);
+  }
   isPriceInverted.value = !isPriceInverted.value;
 }
 </script>
@@ -193,7 +227,7 @@ function togglePriceMode() {
         <div class="relative">
           <UiInputAmount
             v-model="bidAmount"
-            :definition="{ ...INPUT_DEFINITION, title: 'Amount to bid' }"
+            :definition="AMOUNT_DEFINITION"
             :error="amountError"
           />
           <button
@@ -210,15 +244,12 @@ function togglePriceMode() {
       <div class="relative">
         <UiInputAmount
           v-model="bidPrice"
-          :definition="{
-            ...INPUT_DEFINITION,
-            title: isPriceInverted ? 'Min bidding price' : 'Max bidding price'
-          }"
+          :definition="priceDefinition"
           :error="priceError"
         />
         <div class="absolute right-3 top-[18px] flex items-center gap-2">
           <div class="text-sm text-skin-text hidden sm:block">
-            {{ priceLabel }}
+            {{ priceUnit }}
           </div>
           <button type="button" class="text-skin-link" @click="togglePriceMode">
             <IH-switch-horizontal />
