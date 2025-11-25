@@ -98,6 +98,8 @@ const priceError = computed(() => {
   if (price <= 0) return 'Invalid price';
 
   const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
+  if (!minimumSellPrice) return undefined;
+
   const limit = isPriceInverted.value ? 1 / minimumSellPrice : minimumSellPrice;
   const isAboveLimit = isPriceInverted.value ? price >= limit : price <= limit;
 
