@@ -110,7 +110,7 @@ const canCancelOrder = computed(
 );
 
 const { data: userBalance, isError: isBalanceError } = useQuery({
-  queryKey: ['balance', web3Account, props.auction.addressBiddingToken],
+  queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
   queryFn: async () => {
     if (!web3Account.value) return '0';
 
@@ -128,7 +128,7 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
 });
 
 const { data: totalSupply, isError: isSupplyError } = useQuery({
-  queryKey: ['supply', props.auction.addressAuctioningToken],
+  queryKey: ['supply', () => props.auction.addressAuctioningToken],
   queryFn: async () => {
     const contract = new Contract(
       props.auction.addressAuctioningToken,
