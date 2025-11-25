@@ -318,14 +318,13 @@ const normalizedSignerAddress = computed(() => {
             />
           </div>
         </div>
-        <UiButton
+        <AppLink
           v-if="recentOrders?.length"
-          primary
           :to="{ name: 'auction-bids' }"
-          class="w-full mt-3"
+          class="mt-3 inline-block"
         >
           View all bids
-        </UiButton>
+        </AppLink>
       </div>
 
       <div>
