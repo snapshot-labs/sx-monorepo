@@ -32,11 +32,12 @@ const showPriceInverted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
-const formattedBalance = computed(() =>
-  userBalance.value
-    ? formatUnits(userBalance.value, props.auction.decimalsBiddingToken)
-    : '0'
-);
+const formattedBalance = computed(() => {
+  if (!userBalance.value) return 0;
+  return parseFloat(
+    formatUnits(userBalance.value, props.auction.decimalsBiddingToken)
+  );
+});
 
 const showBalance = computed(() => !!(web3Account.value && userBalance.value));
 
@@ -47,14 +48,23 @@ const priceLabel = computed(() =>
 );
 
 const maxMarketCap = computed(() => {
-  const price = parseFloat(bidPrice.value) || 0;
-  if (!price || !totalSupply.value) return '0';
+  const displayPrice = parseFloat(bidPrice.value) || 0;
+  if (!displayPrice || !totalSupply.value) return '0';
 
   const totalSupplyFormatted = parseFloat(
     formatUnits(totalSupply.value, props.auction.decimalsAuctioningToken)
   );
-  const pricePerToken = showPriceInverted.value ? 1 / price : price;
-  const marketCapValue = Math.floor(totalSupplyFormatted * pricePerToken);
+  const pricePerToken = showPriceInverted.value
+    ? 1 / displayPrice
+    : displayPrice;
+
+  const precision = showPriceInverted.value
+    ? INVERTED_PRICE_DECIMALS
+    : PRICE_DECIMALS;
+
+  const marketCapValue = Math.floor(
+    totalSupplyFormatted * +pricePerToken.toFixed(precision)
+  );
 
   return _n(marketCapValue);
 });
@@ -76,7 +86,7 @@ const amountError = computed(() => {
     return `Minimum ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
   }
 
-  if (showBalance.value && amount > parseFloat(formattedBalance.value)) {
+  if (showBalance.value && amount > formattedBalance.value) {
     return 'Insufficient balance';
   }
 
@@ -181,7 +191,7 @@ function togglePriceMode() {
           class="absolute -top-5 right-0 text-xs text-skin-text"
           :class="{ invisible: !showBalance }"
         >
-          Balance: {{ _n(parseFloat(formattedBalance)) }}
+          Balance: {{ _n(formattedBalance) }}
           {{ props.auction.symbolBiddingToken }}
         </div>
         <div class="relative">
@@ -194,7 +204,7 @@ function togglePriceMode() {
             v-if="showBalance"
             type="button"
             class="absolute right-3 top-[18px] text-skin-link"
-            @click="bidAmount = formattedBalance"
+            @click="bidAmount = String(formattedBalance)"
           >
             max
           </button>
