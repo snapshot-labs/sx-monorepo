@@ -28,6 +28,7 @@ gql(`
 gql(`
   fragment order on Order {
     id
+    userId
     sellAmount
     buyAmount
     userAddress
@@ -49,6 +50,16 @@ export const ordersQuery = gql(`
   query GetOrders($id: ID!, $skip: Int, $first: Int, $orderBy: Order_orderBy, $orderDirection: OrderDirection) {
     auctionDetail(id: $id) {
       orders(orderBy: $orderBy, orderDirection: $orderDirection, skip: $skip, first: $first) {
+        ...order
+      }
+    }
+  }
+`);
+
+export const previousOrderQuery = gql(`
+  query GetPreviousOrder($id: ID!, $price: BigDecimal) {
+    auctionDetail(id: $id) {
+      ordersWithoutClaimed(orderBy: price, orderDirection: asc, where: {price_gt: $price}) {
         ...order
       }
     }
