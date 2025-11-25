@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { abis } from './abis';
-import { Auction, AUCTION_CONTRACT_ADDRESSES } from './index';
+import { Auction, AUCTION_CONTRACT_ADDRESSES, getPreviousOrder } from './index';
 
 export async function placeSellOrder(
   signer: JsonRpcSigner,
@@ -12,20 +12,29 @@ export async function placeSellOrder(
 ) {
   const contractAddress = AUCTION_CONTRACT_ADDRESSES[auction.network];
   const contract = new Contract(contractAddress, abis, signer);
-  const lastSellOrderId =
-    '0x0000000000000000000000000000000000000000000000000000000000000001';
   const rawSellAmount = BigNumber.from(
     sellAmount * 10 ** Number(auction.decimalsBiddingToken)
   );
   const rawBuyAmount = BigNumber.from(
     buyAmount * 10 ** Number(auction.decimalsAuctioningToken)
   );
+  const price = sellAmount / buyAmount;
+  let previousOrder = '';
+
+  try {
+    previousOrder = await getPreviousOrder(auction.id, auction.network, price);
+  } catch (e) {
+    console.log(
+      `Error trying to get previous order for auctionId ${auction.id}`,
+      e
+    );
+  }
 
   return contract.placeSellOrders(
     auction.id,
     [rawBuyAmount],
     [rawSellAmount],
-    [lastSellOrderId],
+    [previousOrder],
     auction.allowListSigner
   );
 }

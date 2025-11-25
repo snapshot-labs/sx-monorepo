@@ -1,5 +1,6 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { auctionQuery, ordersQuery } from './queries';
+import { BigNumber } from '@ethersproject/bignumber';
+import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
 import { getNames } from '../stamp';
 import {
   AuctionDetailFragment,
@@ -93,4 +94,53 @@ export async function getOrders(
     ...order,
     name: names[order.userAddress.toLocaleLowerCase()] || null
   }));
+}
+
+export async function getPreviousOrder(
+  id: string,
+  network: AuctionNetworkId,
+  price: number
+): Promise<string> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: previousOrderQuery,
+    variables: { id, price: price.toString() }
+  });
+
+  const orders: OrderFragment[] =
+    data.auctionDetail?.ordersWithoutClaimed || [];
+
+  if (!orders.length) {
+    return '0x0000000000000000000000000000000000000000000000000000000000000001';
+  }
+
+  const sortedOrders: OrderFragment[] = [...orders].sort((a, b) => {
+    if (Number(a.price) === Number(b.price))
+      return Number(a.volume) - Number(b.volume);
+    return Number(a.price) - Number(b.price);
+  });
+
+  return encodeOrder({
+    userId: BigNumber.from(sortedOrders[0].userId),
+    buyAmount: BigNumber.from(sortedOrders[0].buyAmount),
+    sellAmount: BigNumber.from(sortedOrders[0].sellAmount)
+  });
+}
+
+export function encodeOrder(order: {
+  sellAmount: BigNumber;
+  buyAmount: BigNumber;
+  userId: BigNumber;
+}): string {
+  return `0x${order.userId
+    .toHexString()
+    .slice(2)
+    .padStart(16, '0')}${order.buyAmount
+    .toHexString()
+    .slice(2)
+    .padStart(
+      24,
+      '0'
+    )}${order.sellAmount.toHexString().slice(2).padStart(24, '0')}`;
 }
