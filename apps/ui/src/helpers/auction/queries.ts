@@ -24,10 +24,32 @@ gql(`
   }
 `);
 
+gql(`
+  fragment orderDetail on Order {
+    id
+    sellAmount
+    buyAmount
+    userAddress
+    price
+    volume
+    timestamp
+  }
+`);
+
 export const auctionQuery = gql(`
   query GetAuction($id: ID!) {
     auctionDetail(id: $id) {
       ...auctionDetail
+    }
+  }
+`);
+
+export const ordersQuery = gql(`
+  query GetOrders($id: ID!, $skip: Int, $first: Int, $orderBy: Order_orderBy, $orderDirection: OrderDirection) {
+    auctionDetail(id: $id) {
+      orders(orderBy: $orderBy, orderDirection: $orderDirection, skip: $skip, first: $first) {
+        ...orderDetail
+      }
     }
   }
 `);

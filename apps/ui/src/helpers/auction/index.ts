@@ -1,6 +1,6 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { AuctionDetailFragment } from './gql/graphql';
-import { auctionQuery } from './queries';
+import { auctionQuery, ordersQuery } from './queries';
+import { getNames } from '../stamp';
 
 export type AuctionNetworkId = 'eth' | 'sep';
 
@@ -9,17 +9,31 @@ const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH'
 };
 
-export async function getAuction(
-  id: string,
-  network: AuctionNetworkId
-): Promise<{ auctionDetail: AuctionDetailFragment } | null> {
+export function formatPrice(
+  price: string | number | undefined,
+  fractionDigits = 8
+) {
+  const value = typeof price === 'number' ? price.toString() : price;
+
+  return value
+    ? parseFloat(value)
+        .toFixed(fractionDigits)
+        .replace(/\.?0+$/, '')
+    : '0';
+}
+
+function getClient(network: AuctionNetworkId) {
   const subgraphUrl = SUBGRAPH_URLS[network];
   if (!subgraphUrl) throw new Error(`Unknown network: ${network}`);
 
-  const client = new ApolloClient({
+  return new ApolloClient({
     uri: subgraphUrl,
     cache: new InMemoryCache()
   });
+}
+
+export async function getAuction(id: string, network: AuctionNetworkId) {
+  const client = getClient(network);
 
   const { data } = await client.query({
     query: auctionQuery,
@@ -31,4 +45,26 @@ export async function getAuction(
   if (!auctionDetail) return null;
 
   return { auctionDetail };
+}
+
+export async function getOrders(
+  id: string,
+  network: AuctionNetworkId,
+  { skip = 0, first = 20 } = {}
+) {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: ordersQuery,
+    variables: { id, skip, first, orderBy: 'price', orderDirection: 'desc' }
+  });
+
+  const orders = data.auctionDetail?.orders ?? [];
+
+  const names = await getNames(orders.map(order => order.userAddress));
+
+  return orders.map(order => ({
+    ...order,
+    name: names[order.userAddress.toLocaleLowerCase()] || null
+  }));
 }
