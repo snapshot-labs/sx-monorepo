@@ -3,7 +3,7 @@ import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
-import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
+import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
@@ -17,6 +17,10 @@ const INPUT_DEFINITION = {
   type: 'string',
   examples: ['0.0']
 };
+
+const emit = defineEmits<{
+  (e: 'submit', sellOrder: SellOrder): void;
+}>();
 
 const props = defineProps<{
   auction: AuctionDetailFragment;
@@ -148,6 +152,23 @@ const { data: totalSupply, isError: isSupplyError } = useQuery({
   }
 });
 
+const isFormValid = computed(() => {
+  return !!(
+    amountError.value ||
+    priceError.value ||
+    !bidAmount.value ||
+    !bidPrice.value
+  );
+});
+
+function handlePlaceOrder() {
+  const price = isPriceInverted.value
+    ? 1 / parseFloat(bidPrice.value)
+    : parseFloat(bidPrice.value);
+
+  emit('submit', { sellAmount: parseFloat(bidAmount.value), price });
+}
+
 onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
   if (clearingPrice <= 0) return;
@@ -247,8 +268,14 @@ function togglePriceMode() {
       >
         Connect wallet
       </UiButton>
-      <UiButton v-else class="w-full" disabled>
-        Place order (Coming soon)
+      <UiButton
+        v-else
+        primary
+        class="w-full"
+        :disabled="isFormValid"
+        @click="handlePlaceOrder"
+      >
+        Place order
       </UiButton>
       <div class="text-xs text-center flex items-center justify-center gap-1.5">
         <IH-information-circle class="inline-block shrink-0" :size="16" />

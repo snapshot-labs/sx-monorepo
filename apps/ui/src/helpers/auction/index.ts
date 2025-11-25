@@ -10,6 +10,7 @@ import {
 
 export type AuctionNetworkId = 'eth' | 'sep';
 export type Order = OrderFragment & { name: string | null };
+export type SellOrder = { sellAmount: number; price: number };
 
 export type Auction = {
   id: string;

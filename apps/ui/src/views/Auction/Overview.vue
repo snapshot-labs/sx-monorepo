@@ -2,7 +2,12 @@
 import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
-import { AuctionNetworkId, formatPrice, getOrders } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  formatPrice,
+  getOrders,
+  SellOrder
+} from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
@@ -15,8 +20,6 @@ const props = defineProps<{
 }>();
 
 const isModalTransactionProgressOpen = ref(false);
-const sellAmount = ref(2);
-const buyAmount = ref(17);
 
 const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
   toRef(props, 'auctionId'),
@@ -36,6 +39,7 @@ const {
     });
   }
 });
+
 const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
 );
@@ -122,8 +126,8 @@ async function moveToNextStep() {
   }
 }
 
-async function handleTest() {
-  start();
+async function handlePlaceSellOrder(sellOrder: SellOrder) {
+  start(sellOrder);
 
   isModalTransactionProgressOpen.value = true;
 }
@@ -131,21 +135,6 @@ async function handleTest() {
 
 <template>
   <div class="pt-5 max-w-[50rem] mx-auto px-4">
-    <div class="border p-3 s-box rounded-md mb-3">
-      <UiInputNumber
-        v-model="sellAmount"
-        :definition="{ title: 'Sell amount' }"
-        label="Sell Amount"
-      />
-      <UiInputNumber
-        v-model="buyAmount"
-        :definition="{ title: 'Buy amount' }"
-        label="Sell Amount"
-      />
-      <UiButton primary class="w-full" @click="handleTest"
-        >Place order</UiButton
-      >
-    </div>
     <div class="space-y-4">
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-2">
@@ -270,6 +259,7 @@ async function handleTest() {
         v-if="isAuctionOpen"
         :auction="auction"
         :network="network"
+        @submit="handlePlaceSellOrder"
       />
 
       <div>
@@ -412,7 +402,7 @@ async function handleTest() {
     <teleport to="#modal">
       <ModalTransactionProgress
         :open="isModalTransactionProgressOpen"
-        :execute="() => currentStep.execute({ sellAmount, buyAmount })"
+        :execute="() => currentStep.execute()"
         :chain-id="EVM_METADATA[network].chainId"
         :messages="currentStep.messages"
         @close="isModalTransactionProgressOpen = false"
