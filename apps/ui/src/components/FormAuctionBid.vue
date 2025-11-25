@@ -65,6 +65,17 @@ const amountError = computed(() => {
   const amount = parseFloat(bidAmount.value);
   if (amount <= 0) return 'Invalid amount';
 
+  const minBiddingAmount = parseFloat(
+    formatUnits(
+      props.auction.minimumBiddingAmountPerOrder,
+      props.auction.decimalsBiddingToken
+    )
+  );
+
+  if (amount < minBiddingAmount) {
+    return `Minimum ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
+  }
+
   if (showBalance.value && amount > parseFloat(formattedBalance.value)) {
     return 'Insufficient balance';
   }
@@ -163,7 +174,7 @@ function togglePriceMode() {
         type="danger"
         class="mb-3"
       >
-        Failed to load balance or token supply. Please try again.
+        Failed to load balance or token supply.
       </UiMessage>
       <div class="relative">
         <div
@@ -209,17 +220,17 @@ function togglePriceMode() {
         </div>
       </div>
 
-      <div class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5">
-        <div class="flex justify-between">
-          <div class="text-skin-text">Max market cap</div>
-          <div class="flex items-center gap-1 text-skin-link">
-            <UiStamp
-              :id="props.auction.addressBiddingToken"
-              :size="18"
-              type="token"
-            />
-            {{ maxMarketCap }} {{ props.auction.symbolBiddingToken }}
-          </div>
+      <div
+        class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex justify-between flex-wrap"
+      >
+        <div class="text-skin-text">Max market cap</div>
+        <div class="flex items-center gap-1 text-skin-link">
+          <UiStamp
+            :id="props.auction.addressAuctioningToken"
+            :size="18"
+            type="token"
+          />
+          {{ maxMarketCap }} {{ props.auction.symbolAuctioningToken }}
         </div>
       </div>
 
