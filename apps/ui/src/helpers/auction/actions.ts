@@ -38,3 +38,14 @@ export async function placeSellOrder(
     auction.allowListSigner
   );
 }
+
+export async function cancelSellOrder(
+  signer: JsonRpcSigner,
+  auction: Auction,
+  orderId: string
+) {
+  const contractAddress = AUCTION_CONTRACT_ADDRESSES[auction.network];
+  const contract = new Contract(contractAddress, abis, signer);
+
+  return contract.cancelSellOrders(auction.id, [orderId]);
+}
