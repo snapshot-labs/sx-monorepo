@@ -3,17 +3,28 @@ import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
-const props = defineProps<{
-  auctionId: string;
-  auction: AuctionDetailFragment;
-  order: Order;
-  biddingTokenPrice: number;
-}>();
-
-const orderPercentage = computed(
-  () =>
-    Number(props.order.buyAmount) / Number(props.auction.exactOrder.sellAmount)
+const props = withDefaults(
+  defineProps<{
+    auctionId: string;
+    auction: AuctionDetailFragment;
+    order: Order;
+    biddingTokenPrice: number;
+    withActions?: boolean;
+  }>(),
+  {
+    withActions: false
+  }
 );
+
+const isCancellable = computed(() => {
+  return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
+});
+
+const orderPercentage = computed(() => {
+  return (
+    Number(props.order.buyAmount) / Number(props.auction.exactOrder.sellAmount)
+  );
+});
 </script>
 
 <template>
@@ -73,6 +84,24 @@ const orderPercentage = computed(
           })
         }}
       </div>
+    </div>
+    <div
+      v-if="withActions"
+      class="min-w-[44px] lg:w-[60px] flex items-center justify-center -mr-4"
+    >
+      <UiDropdown>
+        <template #button>
+          <button type="button">
+            <IH-dots-horizontal class="text-skin-link" />
+          </button>
+        </template>
+        <template #items>
+          <UiDropdownItem :disabled="!isCancellable">
+            <IS-x-mark :width="16" />
+            Cancel bid
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
     </div>
   </div>
 </template>
