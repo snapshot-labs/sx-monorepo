@@ -123,20 +123,23 @@ function getOrderPercentage(order: OrderDetailFragment) {
               width: `${Math.min(getOrderPercentage(order) * 100, 100).toFixed(2)}%`
             }"
           />
-          <div
-            class="leading-[22px] flex-1 flex min-w-12 items-center space-x-3 truncate"
-          >
-            <UiStamp :id="order.userAddress" :size="32" />
-            <div class="flex flex-col truncate">
-              <h4
-                class="truncate"
-                v-text="order.name || shortenAddress(order.userAddress)"
-              />
-              <UiAddress
-                :address="order.userAddress"
-                class="text-[17px] text-skin-text truncate"
-              />
-            </div>
+          <div class="flex-1 min-w-12 truncate">
+            <AppLink
+              class="leading-[22px] w-fit flex items-center space-x-3 truncate"
+              :to="{ name: 'user', params: { user: order.userAddress } }"
+            >
+              <UiStamp :id="order.userAddress" :size="32" />
+              <div class="flex flex-col truncate">
+                <h4
+                  class="truncate"
+                  v-text="order.name || shortenAddress(order.userAddress)"
+                />
+                <UiAddress
+                  :address="order.userAddress"
+                  class="text-[17px] text-skin-text truncate"
+                />
+              </div>
+            </AppLink>
           </div>
           <div
             class="leading-[22px] max-w-[168px] w-[168px] flex flex-col justify-center truncate"
