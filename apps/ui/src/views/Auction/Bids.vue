@@ -83,7 +83,7 @@ function getOrderPercentage(order: OrderDetailFragment) {
   <div>
     <UiSectionHeader label="Bids" sticky />
     <UiColumnHeader class="z-40 overflow-hidden gap-3">
-      <div class="flex-1 truncate">Bidder</div>
+      <div class="flex-1 min-w-12 truncate">Bidder</div>
       <div class="max-w-[168px] w-[168px] truncate">Date</div>
       <div class="max-w-[168px] w-[168px] truncate">Amount</div>
       <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
@@ -124,7 +124,7 @@ function getOrderPercentage(order: OrderDetailFragment) {
             }"
           />
           <div
-            class="leading-[22px] flex-1 flex items-center space-x-3 truncate"
+            class="leading-[22px] flex-1 flex min-w-12 items-center space-x-3 truncate"
           >
             <UiStamp :id="order.userAddress" :size="32" />
             <div class="flex flex-col truncate">
