@@ -100,7 +100,6 @@ html {
 body {
   @apply overflow-y-scroll font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
   scrollbar-gutter: stable;
-
 }
 
 .font-display {
@@ -227,7 +226,7 @@ input[type='number'] {
   appearance: textfield;
 }
 
-input[type="time"]::-webkit-calendar-picker-indicator {
+input[type='time']::-webkit-calendar-picker-indicator {
   display: none;
 }
 
@@ -315,12 +314,47 @@ input:placeholder-shown {
   }
 }
 
-.s-form > .s-base:last-child, .s-input-pb-0 .s-base {
-    .s-input, &.s-error {
-      @apply mb-0;
-    }
+.s-form > .s-base:last-child,
+.s-input-pb-0 .s-base {
+  .s-input,
+  &.s-error {
+    @apply mb-0;
+  }
 }
 
+.s-array {
+  @apply space-y-2.5;
+
+  &-items {
+    .s-input-wrapper {
+      @apply flex items-center h-[40px] gap-2.5 px-2.5 border bg-skin-border rounded-lg;
+
+      * {
+        @apply shrink-0;
+      }
+
+      input {
+        @apply flex-1 h-[40px] py-[10px] bg-transparent text-skin-heading focus:outline-none;
+      }
+    }
+
+    .s-error .s-input-wrapper {
+      @apply border-skin-danger;
+    }
+
+    .s-form-wrapper {
+      @apply border border-skin-border rounded-lg p-3 pt-2 space-y-2.5;
+    }
+
+    > .s-base {
+      @apply space-y-1;
+    }
+  }
+
+  + .s-base {
+    @apply mt-4;
+  }
+}
 
 .s-error {
   @apply mb-2;
@@ -371,7 +405,7 @@ input:placeholder-shown {
 
   .s-label {
     @apply absolute px-3 mt-1 text-[17px];
-    &:has(+ input[type="checkbox"]) {
+    &:has(+ input[type='checkbox']) {
       @apply px-0 m-0 ml-3.5;
     }
   }
