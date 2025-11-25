@@ -314,7 +314,7 @@ const normalizedSignerAddress = computed(() => {
             <div class="max-w-[168px] w-[168px] truncate">Date</div>
             <div class="max-w-[168px] w-[168px] truncate">Amount</div>
             <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
-            <div class="min-w-[44px] lg:w-[60px]" />
+            <div class="min-w-[44px] lg:w-[60px] -mr-4" />
           </UiColumnHeader>
           <UiLoading
             v-if="isUserOrdersLoading || isBiddingTokenPriceLoading"
