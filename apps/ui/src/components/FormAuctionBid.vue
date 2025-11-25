@@ -13,7 +13,7 @@ const DEFAULT_PRICE_PREMIUM = 1.001; // 0.1% above clearing price
 const PRICE_DECIMALS = 4;
 const INVERTED_PRICE_DECIMALS = 8;
 
-const inputDefinition = {
+const INPUT_DEFINITION = {
   type: 'string',
   examples: ['0.0']
 };
@@ -28,7 +28,7 @@ const { modalAccountOpen } = useModal();
 
 const bidAmount = ref('');
 const bidPrice = ref('');
-const showPriceInverted = ref(false);
+const isPriceInverted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
@@ -39,10 +39,10 @@ const formattedBalance = computed(() => {
   );
 });
 
-const showBalance = computed(() => !!(web3Account.value && userBalance.value));
+const hasBalance = computed(() => !!(web3Account.value && userBalance.value));
 
 const priceLabel = computed(() =>
-  showPriceInverted.value
+  isPriceInverted.value
     ? `${props.auction.symbolAuctioningToken} per ${props.auction.symbolBiddingToken}`
     : `${props.auction.symbolBiddingToken} per ${props.auction.symbolAuctioningToken}`
 );
@@ -54,11 +54,9 @@ const maxMarketCap = computed(() => {
   const totalSupplyFormatted = parseFloat(
     formatUnits(totalSupply.value, props.auction.decimalsAuctioningToken)
   );
-  const pricePerToken = showPriceInverted.value
-    ? 1 / displayPrice
-    : displayPrice;
+  const pricePerToken = isPriceInverted.value ? 1 / displayPrice : displayPrice;
 
-  const precision = showPriceInverted.value
+  const precision = isPriceInverted.value
     ? INVERTED_PRICE_DECIMALS
     : PRICE_DECIMALS;
 
@@ -86,7 +84,7 @@ const amountError = computed(() => {
     return `Minimum ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
   }
 
-  if (showBalance.value && amount > formattedBalance.value) {
+  if (hasBalance.value && amount > formattedBalance.value) {
     return 'Insufficient balance';
   }
 
@@ -100,15 +98,11 @@ const priceError = computed(() => {
   if (price <= 0) return 'Invalid price';
 
   const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
-  const limit = showPriceInverted.value
-    ? 1 / minimumSellPrice
-    : minimumSellPrice;
-  const isAboveLimit = showPriceInverted.value
-    ? price >= limit
-    : price <= limit;
+  const limit = isPriceInverted.value ? 1 / minimumSellPrice : minimumSellPrice;
+  const isAboveLimit = isPriceInverted.value ? price >= limit : price <= limit;
 
   if (isAboveLimit) {
-    const limitType = showPriceInverted.value ? 'Maximum' : 'Minimum';
+    const limitType = isPriceInverted.value ? 'Maximum' : 'Minimum';
     return `${limitType} ${_n(limit)} ${priceLabel.value}`;
   }
 
@@ -167,7 +161,7 @@ function togglePriceMode() {
 
   const invertedPrice = 1 / currentPrice;
   bidPrice.value = formatPrice(invertedPrice, INVERTED_PRICE_DECIMALS);
-  showPriceInverted.value = !showPriceInverted.value;
+  isPriceInverted.value = !isPriceInverted.value;
 }
 </script>
 
@@ -189,7 +183,7 @@ function togglePriceMode() {
       <div class="relative">
         <div
           class="absolute -top-5 right-0 text-xs text-skin-text"
-          :class="{ invisible: !showBalance }"
+          :class="{ invisible: !hasBalance }"
         >
           Balance: {{ _n(formattedBalance) }}
           {{ props.auction.symbolBiddingToken }}
@@ -197,11 +191,11 @@ function togglePriceMode() {
         <div class="relative">
           <UiInputAmount
             v-model="bidAmount"
-            :definition="{ ...inputDefinition, title: 'Amount to bid' }"
+            :definition="{ ...INPUT_DEFINITION, title: 'Amount to bid' }"
             :error="amountError"
           />
           <button
-            v-if="showBalance"
+            v-if="hasBalance"
             type="button"
             class="absolute right-3 top-[18px] text-skin-link"
             @click="bidAmount = String(formattedBalance)"
@@ -215,8 +209,8 @@ function togglePriceMode() {
         <UiInputAmount
           v-model="bidPrice"
           :definition="{
-            ...inputDefinition,
-            title: showPriceInverted ? 'Min bidding price' : 'Max bidding price'
+            ...INPUT_DEFINITION,
+            title: isPriceInverted ? 'Min bidding price' : 'Max bidding price'
           }"
           :error="priceError"
         />
