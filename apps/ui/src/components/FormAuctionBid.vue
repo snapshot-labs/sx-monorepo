@@ -236,7 +236,7 @@ function togglePriceMode() {
         <div class="text-skin-text">Max market cap</div>
         <div class="flex items-center gap-1 text-skin-link">
           <UiStamp
-            :id="props.auction.addressAuctioningToken"
+            :id="auction.addressAuctioningToken"
             :size="18"
             type="token"
           />
