@@ -11,7 +11,12 @@ import {
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
+import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
+import {
+  useBiddingTokenPriceQuery,
+  useBidsSummaryQuery
+} from '@/queries/auction';
 
 const props = defineProps<{
   network: AuctionNetworkId;
@@ -25,20 +30,43 @@ const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
   toRef(props, 'auctionId'),
   toRef(props, 'network')
 );
+const { auth } = useWeb3();
+const { web3 } = useWeb3();
+
+const isAccountSupported = computed(() => {
+  const connectorType = auth.value?.connector.type;
+  if (!web3.value.account || !connectorType) return false;
+
+  return EVM_CONNECTORS.includes(connectorType);
+});
+
 const {
   data: recentOrders,
   isError: isRecentOrdersError,
   isLoading: isRecentOrdersLoading
-} = useQuery({
-  queryKey: ['auction', props.network, props.auctionId, 'recentOrders'],
-  queryFn: () => {
-    return getOrders(props.auctionId, props.network, {
-      first: 10,
-      orderBy: 'timestamp',
-      orderDirection: 'desc'
-    });
-  }
+} = useBidsSummaryQuery({
+  network: () => props.network,
+  auction: () => props.auction
 });
+
+const {
+  data: userOrders,
+  isError: isUserOrdersError,
+  isLoading: isUserOrdersLoading
+} = useBidsSummaryQuery({
+  network: () => props.network,
+  auction: () => props.auction,
+  limit: 100,
+  where: () => ({
+    userAddress: web3.value.account?.toLowerCase()
+  }),
+  enabled: isAccountSupported
+});
+const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
+  useBiddingTokenPriceQuery({
+    network: () => props.network,
+    auction: () => props.auction
+  });
 
 const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
@@ -317,6 +345,91 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-if="isAccountSupported">
+        <UiEyebrow class="mb-3">Your bids</UiEyebrow>
+        <div class="border rounded-lg overflow-hidden">
+          <UiColumnHeader class="py-2 gap-3" :sticky="false">
+            <div class="flex-1 truncate">Bidder</div>
+            <div class="max-w-[144px] w-[144px] truncate">Date</div>
+            <div class="max-w-[144px] w-[144px] truncate">Amount</div>
+            <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
+            <div class="min-w-[44px] lg:w-[60px] -mr-4" />
+          </UiColumnHeader>
+          <UiLoading
+            v-if="isUserOrdersLoading || isBiddingTokenPriceLoading"
+            class="px-4 py-3 block"
+          />
+          <UiStateWarning v-else-if="isUserOrdersError" class="px-4 py-3">
+            Failed to load bids.
+          </UiStateWarning>
+          <UiStateWarning
+            v-else-if="userOrders?.length === 0"
+            class="px-4 py-3"
+          >
+            You don't have any bids yet.
+          </UiStateWarning>
+          <div
+            v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center"
+          >
+            <AuctionBid
+              v-for="order in userOrders"
+              :key="order.id"
+              with-actions
+              :auction-id="auctionId"
+              :auction="auction"
+              :order="order"
+              :bidding-token-price="biddingTokenPrice"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <UiEyebrow class="mb-3">Recent bids</UiEyebrow>
+        <div class="border rounded-lg overflow-hidden">
+          <UiColumnHeader class="py-2 gap-3" :sticky="false">
+            <div class="flex-1 truncate">Bidder</div>
+            <div class="max-w-[168px] w-[168px] truncate">Date</div>
+            <div class="max-w-[168px] w-[168px] truncate">Amount</div>
+            <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
+          </UiColumnHeader>
+          <UiLoading
+            v-if="isRecentOrdersLoading || isBiddingTokenPriceLoading"
+            class="px-4 py-3 block"
+          />
+          <UiStateWarning v-else-if="isRecentOrdersError" class="px-4 py-3">
+            Failed to load bids.
+          </UiStateWarning>
+          <UiStateWarning
+            v-else-if="recentOrders?.length === 0"
+            class="px-4 py-3"
+          >
+            There are no bids here.
+          </UiStateWarning>
+          <div
+            v-else-if="recentOrders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center"
+          >
+            <AuctionBid
+              v-for="order in recentOrders"
+              :key="order.id"
+              :auction-id="auctionId"
+              :auction="auction"
+              :order="order"
+              :bidding-token-price="biddingTokenPrice"
+            />
+          </div>
+        </div>
+        <AppLink
+          v-if="recentOrders?.length"
+          :to="{ name: 'auction-bids' }"
+          class="mt-3 inline-block"
+        >
+          View all bids
+        </AppLink>
       </div>
 
       <div>

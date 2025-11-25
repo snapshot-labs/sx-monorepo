@@ -4,6 +4,7 @@ import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
 import { getNames } from '../stamp';
 import {
   AuctionDetailFragment,
+  Order_Filter,
   Order_OrderBy,
   OrderFragment
 } from './gql/graphql';
@@ -72,19 +73,21 @@ export async function getOrders(
     skip = 0,
     first = 20,
     orderBy = 'price',
-    orderDirection = 'desc'
+    orderDirection = 'desc',
+    orderFilter
   }: {
     skip?: number;
     first?: number;
     orderBy?: Order_OrderBy;
     orderDirection?: 'desc' | 'asc';
+    orderFilter?: Order_Filter;
   } = {}
 ): Promise<Order[]> {
   const client = getClient(network);
 
   const { data } = await client.query({
     query: ordersQuery,
-    variables: { id, skip, first, orderBy, orderDirection }
+    variables: { id, skip, first, orderBy, orderDirection, orderFilter }
   });
 
   const orders = data.auctionDetail?.orders ?? [];

@@ -1,20 +1,47 @@
 <script setup lang="ts">
 import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import { _c, _t, shortenAddress } from '@/helpers/utils';
+import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
-defineProps<{
-  auctionId: string;
-  auction: AuctionDetailFragment;
-  order: Order;
-}>();
+const props = withDefaults(
+  defineProps<{
+    auctionId: string;
+    auction: AuctionDetailFragment;
+    order: Order;
+    biddingTokenPrice: number;
+    withActions?: boolean;
+  }>(),
+  {
+    withActions: false
+  }
+);
+
+const isCancellable = computed(() => {
+  return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
+});
+
+const orderPercentage = computed(() => {
+  return (
+    Number(props.order.buyAmount) / Number(props.auction.exactOrder.sellAmount)
+  );
+});
+
+const columnSize = computed(() => {
+  return props.withActions
+    ? 'w-[144px] max-w-[144px]'
+    : 'w-[168px] max-w-[168px]';
+});
 </script>
 
 <template>
-  <div class="flex justify-between items-center gap-3 py-3">
+  <div class="flex justify-between items-center gap-3 py-3 px-4 relative">
     <div
-      class="leading-[22px] max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
-    >
+      class="right-0 top-0 h-[8px] absolute choice-bg opacity-20 _1"
+      :style="{
+        width: `${Math.min(orderPercentage * 100, 100).toFixed(2)}%`
+      }"
+    />
+    <div class="leading-[22px] flex-1 flex items-center space-x-3 truncate">
       <UiStamp :id="order.userAddress" :size="32" />
       <div class="flex flex-col truncate">
         <h4
@@ -27,12 +54,9 @@ defineProps<{
         />
       </div>
     </div>
-    <div class="grow w-[20%] text-skin-link truncate">
-      {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
-      {{ auction.symbolAuctioningToken }}
-    </div>
     <div
-      class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
+      class="leading-[22px] flex flex-col justify-center truncate"
+      :class="columnSize"
     >
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
         <h4>{{ relativeTime }}</h4>
@@ -41,9 +65,45 @@ defineProps<{
         {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
-    <h4 class="text-skin-link max-w-[144px] w-[144px] truncate text-right">
-      {{ formatPrice(order.price) }}
-      {{ auction.symbolBiddingToken }}
-    </h4>
+    <div class="truncate" :class="columnSize">
+      <h4 class="text-skin-link truncate">
+        {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
+        {{ auction.symbolAuctioningToken }}
+      </h4>
+      <div class="text-[17px] truncate">
+        {{ _p(orderPercentage) }}
+      </div>
+    </div>
+    <div class="truncate text-right" :class="columnSize">
+      <h4 class="text-skin-link truncate">
+        {{ formatPrice(order.price) }}
+        {{ auction.symbolBiddingToken }}
+      </h4>
+      <div class="truncate">
+        ${{
+          _n(Number(order.price) * biddingTokenPrice, 'standard', {
+            maximumFractionDigits: 2
+          })
+        }}
+      </div>
+    </div>
+    <div
+      v-if="withActions"
+      class="min-w-[44px] lg:w-[60px] flex items-center justify-center -mr-4"
+    >
+      <UiDropdown>
+        <template #button>
+          <button type="button">
+            <IH-dots-horizontal class="text-skin-link" />
+          </button>
+        </template>
+        <template #items>
+          <UiDropdownItem :disabled="!isCancellable">
+            <IS-x-mark :width="16" />
+            Cancel bid
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
+    </div>
   </div>
 </template>
