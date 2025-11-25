@@ -25,6 +25,12 @@ const orderPercentage = computed(() => {
     Number(props.order.buyAmount) / Number(props.auction.exactOrder.sellAmount)
   );
 });
+
+const columnSize = computed(() => {
+  return props.withActions
+    ? 'w-[144px] max-w-[144px]'
+    : 'w-[168px] max-w-[168px]';
+});
 </script>
 
 <template>
@@ -54,7 +60,8 @@ const orderPercentage = computed(() => {
       </AppLink>
     </div>
     <div
-      class="leading-[22px] max-w-[168px] w-[168px] flex flex-col justify-center truncate"
+      class="leading-[22px] flex flex-col justify-center truncate"
+      :class="columnSize"
     >
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
         <h4>{{ relativeTime }}</h4>
@@ -63,7 +70,7 @@ const orderPercentage = computed(() => {
         {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
-    <div class="max-w-[168px] w-[168px] truncate">
+    <div class="truncate" :class="columnSize">
       <h4 class="text-skin-link truncate">
         {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
         {{ auction.symbolAuctioningToken }}
@@ -72,7 +79,7 @@ const orderPercentage = computed(() => {
         {{ _p(orderPercentage) }}
       </div>
     </div>
-    <div class="max-w-[168px] w-[168px] truncate text-right">
+    <div class="truncate text-right" :class="columnSize">
       <h4 class="text-skin-link truncate">
         {{ formatPrice(order.price) }}
         {{ auction.symbolBiddingToken }}
