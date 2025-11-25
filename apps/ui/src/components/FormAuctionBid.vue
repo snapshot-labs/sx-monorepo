@@ -188,7 +188,7 @@ function togglePriceMode() {
           :class="{ invisible: !hasBalance }"
         >
           Balance: {{ _n(formattedBalance) }}
-          {{ props.auction.symbolBiddingToken }}
+          {{ auction.symbolBiddingToken }}
         </div>
         <div class="relative">
           <UiInputAmount
@@ -232,11 +232,11 @@ function togglePriceMode() {
         <div class="text-skin-text">Max market cap</div>
         <div class="flex items-center gap-1 text-skin-link">
           <UiStamp
-            :id="props.auction.addressAuctioningToken"
+            :id="auction.addressAuctioningToken"
             :size="18"
             type="token"
           />
-          {{ maxMarketCap }} {{ props.auction.symbolAuctioningToken }}
+          {{ maxMarketCap }} {{ auction.symbolAuctioningToken }}
         </div>
       </div>
 
@@ -254,7 +254,7 @@ function togglePriceMode() {
         <IH-information-circle class="inline-block shrink-0" :size="16" />
         <span v-if="canCancelOrder">
           Can cancel until
-          {{ _t(parseInt(props.auction.orderCancellationEndDate)) }}
+          {{ _t(parseInt(auction.orderCancellationEndDate)) }}
         </span>
         <span v-else> Cannot be canceled once the order is placed </span>
       </div>
