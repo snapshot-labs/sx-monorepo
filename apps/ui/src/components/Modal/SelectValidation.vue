@@ -145,6 +145,7 @@ const definition = computed(() => {
 
   if (selectedValidation.value.key === 'basic') {
     updated.properties.minScore.examples = ['e.g. 1.23'];
+    delete updated.properties.strategies;
   }
 
   return updated;
