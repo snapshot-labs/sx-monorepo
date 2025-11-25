@@ -36,6 +36,9 @@ const {
     });
   }
 });
+const isAuctionOpen = computed(
+  () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
+);
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
@@ -262,6 +265,12 @@ async function handleTest() {
           </div>
         </div>
       </div>
+
+      <FormAuctionBid
+        v-if="isAuctionOpen"
+        :auction="auction"
+        :network="network"
+      />
 
       <div>
         <h4 class="mb-3 eyebrow flex items-center gap-2">
