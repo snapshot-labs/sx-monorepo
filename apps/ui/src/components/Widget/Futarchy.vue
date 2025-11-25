@@ -65,7 +65,7 @@ watch(() => props.proposal.id, fetchPrices);
       <UiEyebrow>Futarchy.fi market</UiEyebrow>
     </div>
     <div>
-      <UiChart class="h-[300px] -mb-1" />
+      <UiChart class="h-[280px] -mb-1" />
       <div class="flex justify-between items-center">
         ${{ _n(22345) }} Vol.
         <a
