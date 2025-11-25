@@ -41,7 +41,6 @@ const {
   votingType,
   privacy,
   voteValidation,
-  ignoreAbstainVotes,
   snapshotChainId,
   strategies,
   members,
@@ -437,7 +436,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           v-model:voting-type="votingType"
           v-model:privacy="privacy"
           v-model:vote-validation="voteValidation"
-          v-model:ignore-abstain-votes="ignoreAbstainVotes"
           :snapshot-chain-id="snapshotChainId"
           :space="space"
           @update-validity="v => (hasVotingErrors = !v)"

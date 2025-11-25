@@ -10,7 +10,7 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'vote', value: Choice);
+  (e: 'vote', value: Choice): void;
 }>();
 </script>
 

@@ -19,7 +19,7 @@ const props = defineProps<{
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataDelegation);
+  (e: 'add', config: SpaceMetadataDelegation): void;
   (e: 'close'): void;
 }>();
 
@@ -111,7 +111,7 @@ const definition = computed(() => {
               networkId: props.networkId,
               networksListKind: 'full',
               networksFilter: isApeChainDelegateRegistry.value
-                ? [33139, 33111]
+                ? ['33139', '33111']
                 : undefined,
               title: 'Delegation contract network',
               nullable: true
@@ -158,6 +158,8 @@ watch(
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.value = clone(props.initialState);
     } else {

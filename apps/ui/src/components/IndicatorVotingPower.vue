@@ -12,7 +12,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'fetch');
+  (e: 'fetch'): void;
 }>();
 
 const { auth } = useWeb3();

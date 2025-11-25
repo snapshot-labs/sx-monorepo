@@ -16,8 +16,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'save', strategy: { address: string; type: string });
+  (e: 'close'): void;
+  (e: 'save', strategy: { address: string; type: string }): void;
 }>();
 
 const uiStore = useUiStore();
@@ -74,11 +74,13 @@ async function handleSubmit() {
   }
 }
 
-watchEffect(() => {
-  if (props.open) {
+watch(
+  () => props.open,
+  () => {
+    showPicker.value = false;
     contractAddress.value = '';
   }
-});
+);
 </script>
 
 <template>

@@ -16,7 +16,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'submit');
+  (e: 'submit'): void;
 }>();
 
 const stepper = useStepper(props.steps);
@@ -38,7 +38,7 @@ function goToStep(stepName: string) {
 </script>
 
 <template>
-  <div class="flex">
+  <div class="flex justify-center">
     <div
       class="flex fixed lg:sticky top-header-height inset-x-0 p-3 border-b z-10 bg-skin-bg lg:top-auto lg:inset-x-auto lg:p-0 lg:pr-5 lg:border-0 lg:flex-col gap-1 min-w-[180px] overflow-auto"
     >
@@ -57,7 +57,7 @@ function goToStep(stepName: string) {
         {{ step.title }}
       </button>
     </div>
-    <div class="flex-1 space-y-4">
+    <div class="flex-1 space-y-4 max-w-[592px]">
       <div class="mt-8 lg:mt-0">
         <slot
           name="content"

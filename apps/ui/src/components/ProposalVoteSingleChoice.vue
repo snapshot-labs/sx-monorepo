@@ -7,7 +7,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'vote', value: number);
+  (e: 'vote', value: number): void;
 }>();
 
 const selectedChoice = ref<number | null>(

@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'add', value: Member[]): void;
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const form: Ref<{

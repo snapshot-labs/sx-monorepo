@@ -9,7 +9,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataLabel);
+  (e: 'add', config: SpaceMetadataLabel): void;
   (e: 'close'): void;
 }>();
 

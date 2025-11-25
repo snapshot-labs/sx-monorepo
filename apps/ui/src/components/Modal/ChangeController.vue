@@ -14,8 +14,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', value: string);
-  (e: 'close');
+  (e: 'save', value: string): void;
+  (e: 'close'): void;
 }>();
 
 const controllerDefinition = computed(() => ({
@@ -47,6 +47,8 @@ const formErrors = ref({} as Record<string, any>);
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.controller = props.initialState.controller;
     } else {
