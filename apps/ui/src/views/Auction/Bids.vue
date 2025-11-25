@@ -68,7 +68,7 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     }
   });
 
-async function handleEndReached() {
+function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
