@@ -32,6 +32,39 @@ const isPriceInverted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
+const { data: userBalance, isError: isBalanceError } = useQuery({
+  queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
+  queryFn: async () => {
+    if (!web3Account.value) return '0';
+
+    const contract = new Contract(
+      props.auction.addressBiddingToken,
+      abis.erc20,
+      provider.value
+    );
+
+    const balance = await contract.balanceOf(web3Account.value);
+
+    return balance.toString();
+  },
+  enabled: computed(() => !!web3Account.value)
+});
+
+const { data: totalSupply, isError: isSupplyError } = useQuery({
+  queryKey: ['supply', () => props.auction.addressAuctioningToken],
+  queryFn: async () => {
+    const contract = new Contract(
+      props.auction.addressAuctioningToken,
+      abis.erc20,
+      provider.value
+    );
+
+    const totalSupply = await contract.totalSupply();
+
+    return totalSupply.toString();
+  }
+});
+
 const formattedBalance = computed(() => {
   if (!userBalance.value) return 0;
   return parseFloat(
@@ -114,39 +147,6 @@ const priceError = computed(() => {
 const canCancelOrder = computed(
   () => parseInt(props.auction.orderCancellationEndDate) > Date.now() / 1000
 );
-
-const { data: userBalance, isError: isBalanceError } = useQuery({
-  queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
-  queryFn: async () => {
-    if (!web3Account.value) return '0';
-
-    const contract = new Contract(
-      props.auction.addressBiddingToken,
-      abis.erc20,
-      provider.value
-    );
-
-    const balance = await contract.balanceOf(web3Account.value);
-
-    return balance.toString();
-  },
-  enabled: computed(() => !!web3Account.value)
-});
-
-const { data: totalSupply, isError: isSupplyError } = useQuery({
-  queryKey: ['supply', () => props.auction.addressAuctioningToken],
-  queryFn: async () => {
-    const contract = new Contract(
-      props.auction.addressAuctioningToken,
-      abis.erc20,
-      provider.value
-    );
-
-    const totalSupply = await contract.totalSupply();
-
-    return totalSupply.toString();
-  }
-});
 
 onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
