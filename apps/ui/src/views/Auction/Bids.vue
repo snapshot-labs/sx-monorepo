@@ -74,7 +74,7 @@ function handleEndReached() {
   fetchNextPage();
 }
 
-function getOrderPercantage(order: OrderDetailFragment) {
+function getOrderPercentage(order: OrderDetailFragment) {
   return Number(order.buyAmount) / Number(props.auction.exactOrder.sellAmount);
 }
 </script>
@@ -120,7 +120,7 @@ function getOrderPercantage(order: OrderDetailFragment) {
           <div
             class="right-0 top-0 h-[8px] absolute choice-bg opacity-20 _1"
             :style="{
-              width: `${Math.min(getOrderPercantage(order) * 100, 100).toFixed(2)}%`
+              width: `${Math.min(getOrderPercentage(order) * 100, 100).toFixed(2)}%`
             }"
           />
           <div
@@ -157,7 +157,7 @@ function getOrderPercantage(order: OrderDetailFragment) {
               {{ auction.symbolAuctioningToken }}
             </h4>
             <div class="text-[17px] truncate">
-              {{ _p(getOrderPercantage(order)) }}
+              {{ _p(getOrderPercentage(order)) }}
             </div>
           </div>
           <div class="max-w-[168px] w-[168px] truncate text-right">
