@@ -5,7 +5,9 @@ import { abis } from './abis';
 import {
   Auction,
   AUCTION_CONTRACT_ADDRESSES,
+  encodeOrder,
   getPreviousOrder,
+  Order,
   SellOrder
 } from './index';
 
@@ -55,10 +57,16 @@ export async function placeSellOrder(
 export async function cancelSellOrder(
   signer: JsonRpcSigner,
   auction: Auction,
-  orderId: string
+  order: Order
 ) {
   const contractAddress = AUCTION_CONTRACT_ADDRESSES[auction.network];
   const contract = new Contract(contractAddress, abis, signer);
-
-  return contract.cancelSellOrders(auction.id, [orderId]);
+  console.log(order);
+  return contract.cancelSellOrders(auction.id, [
+    encodeOrder({
+      sellAmount: BigNumber.from(order.sellAmount),
+      buyAmount: BigNumber.from(order.buyAmount),
+      userId: BigNumber.from(order.userId)
+    })
+  ]);
 }

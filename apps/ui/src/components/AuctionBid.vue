@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatPrice, Order } from '@/helpers/auction';
+import { cancelSellOrder } from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
@@ -16,6 +17,12 @@ const props = withDefaults(
   }
 );
 
+const isModalTransactionProgressOpen = ref(false);
+const cancelFn = ref<any>(() => {});
+
+const { getSigner } = useNetworkSigner('sep');
+const uiStore = useUiStore();
+
 const isCancellable = computed(() => {
   return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
 });
@@ -31,6 +38,24 @@ const columnSize = computed(() => {
     ? 'w-[144px] max-w-[144px]'
     : 'w-[168px] max-w-[168px]';
 });
+
+async function handleCancelBid(order: Order) {
+  const signer = await getSigner();
+  if (!signer) return;
+
+  cancelFn.value = async () => {
+    const tx = await cancelSellOrder(
+      signer,
+      { network: 'sep', ...props.auction },
+      order
+    );
+    uiStore.addPendingTransaction(tx.hash, 11155111);
+
+    return tx.hash;
+  };
+
+  isModalTransactionProgressOpen.value = true;
+}
 </script>
 
 <template>
@@ -98,12 +123,24 @@ const columnSize = computed(() => {
           </button>
         </template>
         <template #items>
-          <UiDropdownItem :disabled="!isCancellable">
+          <UiDropdownItem
+            :disabled="!isCancellable"
+            @click="handleCancelBid(order)"
+          >
             <IS-x-mark :width="16" />
             Cancel bid
           </UiDropdownItem>
         </template>
       </UiDropdown>
     </div>
+    <teleport to="#modal">
+      <ModalTransactionProgress
+        :open="isModalTransactionProgressOpen"
+        :execute="cancelFn"
+        :chain-id="'11155111'"
+        @close="isModalTransactionProgressOpen = false"
+        @cancelled="isModalTransactionProgressOpen = false"
+      />
+    </teleport>
   </div>
 </template>
