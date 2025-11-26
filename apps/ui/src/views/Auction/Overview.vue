@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
+import { AuctionState } from '@/components/AuctionStatus.vue';
 import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
@@ -20,6 +21,22 @@ const props = defineProps<{
 
 const { auth } = useWeb3();
 const { web3 } = useWeb3();
+
+const auctionState = computed<AuctionState>(() => {
+  const now = Math.floor(Date.now() / 1000);
+  const endTime = parseInt(props.auction.endTimeTimestamp);
+
+  if (now < endTime) return 'active';
+
+  const currentBiddingAmount = BigInt(props.auction.currentBiddingAmount);
+  const minFundingThreshold = BigInt(props.auction.minFundingThreshold);
+
+  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
+
+  if (props.auction.ordersWithoutClaimed?.length) return 'claiming';
+
+  return 'claimed';
+});
 
 const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
@@ -143,6 +160,7 @@ const normalizedSignerAddress = computed(() => {
             {{ EVM_METADATA[network]?.name || 'Unknown' }}
           </span>
         </div>
+        <AuctionStatus :state="auctionState" />
       </div>
 
       <div>
