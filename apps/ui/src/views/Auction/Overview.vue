@@ -38,6 +38,10 @@ const auctionState = computed<AuctionState>(() => {
   return 'claimed';
 });
 
+const isAuctionOpen = computed(
+  () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
+);
+
 const isAccountSupported = computed(() => {
   const connectorType = auth.value?.connector.type;
   if (!web3.value.account || !connectorType) return false;
@@ -266,6 +270,12 @@ const normalizedSignerAddress = computed(() => {
           </div>
         </div>
       </div>
+
+      <FormAuctionBid
+        v-if="isAuctionOpen"
+        :auction="auction"
+        :network="network"
+      />
 
       <div>
         <h4 class="mb-3 eyebrow flex items-center gap-2">
