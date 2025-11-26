@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
-import { useQuery } from '@tanstack/vue-query';
-import {
-  AuctionNetworkId,
-  formatPrice,
-  getOrders,
-  SellOrder
-} from '@/helpers/auction';
+import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
@@ -455,6 +449,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
             There are no bids here.
           </UiStateWarning>
           <div
+            v-else-if="recentOrders && typeof biddingTokenPrice === 'number'"
             class="divide-y divide-skin-border flex flex-col justify-center mx-4"
           >
             <AuctionBid
@@ -463,6 +458,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
               :auction-id="auctionId"
               :auction="auction"
               :order="order"
+              :bidding-token-price="biddingTokenPrice"
             />
           </div>
         </div>

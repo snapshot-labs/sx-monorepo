@@ -164,7 +164,6 @@ export function useAuctionOrderFlow(
 
     if (auctionDetails) {
       auction.value = {
-        id: toValue(auctionId),
         network: toValue(networkId),
         ...auctionDetails
       };
