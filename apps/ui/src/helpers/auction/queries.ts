@@ -13,6 +13,7 @@ gql(`
     startingTimeStamp
     minimumBiddingAmountPerOrder
     minFundingThreshold
+    currentBiddingAmount
     currentClearingPrice
     isAtomicClosureAllowed
     isPrivateAuction
@@ -20,6 +21,9 @@ gql(`
     exactOrder {
       sellAmount
       price
+    }
+    ordersWithoutClaimed {
+      id
     }
   }
 `);
