@@ -32,7 +32,9 @@ export async function placeSellOrder(
   }
 
   const rawSellAmount = BigNumber.from(
-    sellOrder.sellAmount * 10 ** Number(auction.decimalsBiddingToken)
+    Math.floor(
+      sellOrder.sellAmount * 10 ** Number(auction.decimalsBiddingToken)
+    )
   );
   const rawBuyAmount = BigNumber.from(
     Math.floor(
