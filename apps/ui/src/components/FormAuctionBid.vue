@@ -282,7 +282,7 @@ function togglePriceMode() {
           Can cancel until
           {{ _t(parseInt(auction.orderCancellationEndDate)) }}
         </span>
-        <span v-else> Cannot be canceled once the order is placed </span>
+        <span v-else>Cannot be canceled once the order is placed</span>
       </div>
     </div>
   </div>
