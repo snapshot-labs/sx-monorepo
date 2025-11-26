@@ -427,52 +427,6 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
       </div>
 
       <div>
-        <UiEyebrow class="mb-3">Recent bids</UiEyebrow>
-        <div class="border rounded-lg overflow-hidden">
-          <UiColumnHeader class="py-2 gap-3" :sticky="false">
-            <div class="max-w-[218px] w-[218px] truncate">Bidder</div>
-            <div class="grow w-[20%] truncate">Amount</div>
-            <div class="flex max-w-[144px] w-[144px] items-center truncate">
-              Date
-            </div>
-            <div
-              class="max-w-[144px] w-[144px] flex items-center justify-end truncate"
-            >
-              Price
-            </div>
-          </UiColumnHeader>
-          <UiLoading v-if="isRecentOrdersLoading" class="px-4 py-3 block" />
-          <UiStateWarning v-else-if="isRecentOrdersError" class="px-4 py-3">
-            Failed to load bids.
-          </UiStateWarning>
-          <UiStateWarning v-if="recentOrders?.length === 0" class="px-4 py-3">
-            There are no bids here.
-          </UiStateWarning>
-          <div
-            v-else-if="recentOrders && typeof biddingTokenPrice === 'number'"
-            class="divide-y divide-skin-border flex flex-col justify-center mx-4"
-          >
-            <AuctionBid
-              v-for="order in recentOrders"
-              :key="order.id"
-              :auction-id="auctionId"
-              :auction="auction"
-              :order="order"
-              :bidding-token-price="biddingTokenPrice"
-            />
-          </div>
-        </div>
-        <UiButton
-          v-if="recentOrders?.length"
-          primary
-          :to="{ name: 'auction-bids' }"
-          class="w-full mt-3"
-        >
-          View all bids
-        </UiButton>
-      </div>
-
-      <div>
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-clock />
           Timeline
