@@ -5,10 +5,11 @@ import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t } from '@/helpers/utils';
+import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
   useBiddingTokenPriceQuery,
-  useRecentBidsQuery
+  useBidsSummaryQuery
 } from '@/queries/auction';
 
 const props = defineProps<{
@@ -17,19 +18,42 @@ const props = defineProps<{
   auction: AuctionDetailFragment;
 }>();
 
+const { auth } = useWeb3();
+const { web3 } = useWeb3();
+
 const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
 );
+
+const isAccountSupported = computed(() => {
+  const connectorType = auth.value?.connector.type;
+  if (!web3.value.account || !connectorType) return false;
+
+  return EVM_CONNECTORS.includes(connectorType);
+});
 
 const {
   data: recentOrders,
   isError: isRecentOrdersError,
   isLoading: isRecentOrdersLoading
-} = useRecentBidsQuery({
+} = useBidsSummaryQuery({
   network: () => props.network,
   auction: () => props.auction
 });
 
+const {
+  data: userOrders,
+  isError: isUserOrdersError,
+  isLoading: isUserOrdersLoading
+} = useBidsSummaryQuery({
+  network: () => props.network,
+  auction: () => props.auction,
+  limit: 100,
+  where: () => ({
+    userAddress: web3.value.account?.toLowerCase()
+  }),
+  enabled: isAccountSupported
+});
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
@@ -288,6 +312,46 @@ const normalizedSignerAddress = computed(() => {
               </a>
               <span v-else>None</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="isAccountSupported">
+        <UiEyebrow class="mb-3">Your bids</UiEyebrow>
+        <div class="border rounded-lg overflow-hidden">
+          <UiColumnHeader class="py-2 gap-3" :sticky="false">
+            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
+            <div class="max-w-[144px] w-[144px] truncate">Date</div>
+            <div class="max-w-[144px] w-[144px] truncate">Amount</div>
+            <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
+            <div class="min-w-[44px] lg:w-[60px] -mr-4" />
+          </UiColumnHeader>
+          <UiLoading
+            v-if="isUserOrdersLoading || isBiddingTokenPriceLoading"
+            class="px-4 py-3 block"
+          />
+          <UiStateWarning v-else-if="isUserOrdersError" class="px-4 py-3">
+            Failed to load bids.
+          </UiStateWarning>
+          <UiStateWarning
+            v-else-if="userOrders?.length === 0"
+            class="px-4 py-3"
+          >
+            You don't have any bids yet.
+          </UiStateWarning>
+          <div
+            v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center"
+          >
+            <AuctionBid
+              v-for="order in userOrders"
+              :key="order.id"
+              with-actions
+              :auction-id="auctionId"
+              :auction="auction"
+              :order="order"
+              :bidding-token-price="biddingTokenPrice"
+            />
           </div>
         </div>
       </div>
