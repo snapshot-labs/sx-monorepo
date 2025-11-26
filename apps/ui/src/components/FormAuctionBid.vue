@@ -118,20 +118,18 @@ const maxMarketCap = computed(() => {
   const displayPrice = parseFloat(bidPrice.value) || 0;
   if (!displayPrice || !totalSupply.value) return '0';
 
+  const decimals = isPriceInverted.value
+    ? parseInt(props.auction.decimalsBiddingToken)
+    : parseInt(props.auction.decimalsAuctioningToken);
+  const normalizedPrice = isPriceInverted.value
+    ? parseFloat((1 / displayPrice).toFixed(decimals))
+    : displayPrice;
+
   const totalSupplyFormatted = parseFloat(
     formatUnits(totalSupply.value, props.auction.decimalsAuctioningToken)
   );
-  const pricePerToken = isPriceInverted.value ? 1 / displayPrice : displayPrice;
 
-  const precision = isPriceInverted.value
-    ? INVERTED_PRICE_DECIMALS
-    : PRICE_DECIMALS;
-
-  const marketCapValue = Math.floor(
-    totalSupplyFormatted * +pricePerToken.toFixed(precision)
-  );
-
-  return _n(marketCapValue);
+  return _n(Math.floor(totalSupplyFormatted * normalizedPrice));
 });
 
 const amountError = computed(() => {
@@ -193,11 +191,13 @@ onMounted(() => {
 
 function togglePriceMode() {
   const currentPrice = parseFloat(bidPrice.value) || 0;
-  if (currentPrice) {
-    const invertedPrice = 1 / currentPrice;
-    bidPrice.value = formatPrice(invertedPrice, INVERTED_PRICE_DECIMALS);
-  }
   isPriceInverted.value = !isPriceInverted.value;
+  if (currentPrice) {
+    const decimals = isPriceInverted.value
+      ? INVERTED_PRICE_DECIMALS
+      : PRICE_DECIMALS;
+    bidPrice.value = formatPrice(1 / currentPrice, decimals);
+  }
 }
 </script>
 
