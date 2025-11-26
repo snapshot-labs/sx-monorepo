@@ -47,7 +47,7 @@ async function fetchGovernorSubgraphDelegatees(
       orderDirection: 'desc',
       where: {
         // NOTE: This is subgraph, needs to be lowercase
-        user: delegateeData.address.toLocaleLowerCase()
+        user: delegateeData.address.toLowerCase()
       }
     })
   ]);
@@ -92,7 +92,7 @@ async function fetchApeChainDelegatees(
       orderDirection: 'desc',
       where: {
         // NOTE: This is subgraph, needs to be lowercase
-        user: accountDelegation.delegate.toLocaleLowerCase()
+        user: accountDelegation.delegate.toLowerCase()
       }
     })
   ]);
