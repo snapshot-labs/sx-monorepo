@@ -22,7 +22,7 @@ export async function getIsApproved(
   );
 
   return BigNumber.from(allowance).gte(
-    BigNumber.from(amount * 10 ** token.decimals)
+    BigNumber.from(Math.floor(amount * 10 ** token.decimals))
   );
 }
 
@@ -35,6 +35,6 @@ export async function approve(
   const contract = new Contract(token.contractAddress, abis.erc20, signer);
   return contract.approve(
     spenderAddress,
-    BigNumber.from(amount * 10 ** token.decimals)
+    BigNumber.from(Math.floor(amount * 10 ** token.decimals))
   );
 }

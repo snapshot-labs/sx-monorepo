@@ -3,17 +3,34 @@ import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
-const props = defineProps<{
-  auctionId: string;
-  auction: AuctionDetailFragment;
-  order: Order;
-  biddingTokenPrice: number;
-}>();
-
-const orderPercentage = computed(
-  () =>
-    Number(props.order.buyAmount) / Number(props.auction.exactOrder.sellAmount)
+const props = withDefaults(
+  defineProps<{
+    auctionId: string;
+    auction: AuctionDetailFragment;
+    order: Order;
+    biddingTokenPrice: number;
+    withActions?: boolean;
+  }>(),
+  {
+    withActions: false
+  }
 );
+
+const isCancellable = computed(() => {
+  return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
+});
+
+const orderPercentage = computed(() => {
+  return (
+    Number(props.order.buyAmount) / Number(props.auction.exactOrder.sellAmount)
+  );
+});
+
+const columnSize = computed(() => {
+  return props.withActions
+    ? 'w-[144px] max-w-[144px]'
+    : 'w-[168px] max-w-[168px]';
+});
 </script>
 
 <template>
@@ -24,26 +41,22 @@ const orderPercentage = computed(
         width: `${Math.min(orderPercentage * 100, 100).toFixed(2)}%`
       }"
     />
-    <div class="flex-1 min-w-[168px] truncate">
-      <AppLink
-        class="leading-[22px] w-fit flex items-center space-x-3 truncate"
-        :to="{ name: 'user', params: { user: order.userAddress } }"
-      >
-        <UiStamp :id="order.userAddress" :size="32" />
-        <div class="flex flex-col truncate">
-          <h4
-            class="truncate"
-            v-text="order.name || shortenAddress(order.userAddress)"
-          />
-          <UiAddress
-            :address="order.userAddress"
-            class="text-[17px] text-skin-text truncate"
-          />
-        </div>
-      </AppLink>
+    <div class="leading-[22px] flex-1 flex items-center space-x-3 truncate">
+      <UiStamp :id="order.userAddress" :size="32" />
+      <div class="flex flex-col truncate">
+        <h4
+          class="truncate"
+          v-text="order.name || shortenAddress(order.userAddress)"
+        />
+        <UiAddress
+          :address="order.userAddress"
+          class="text-[17px] text-skin-text truncate"
+        />
+      </div>
     </div>
     <div
-      class="leading-[22px] max-w-[168px] w-[168px] flex flex-col justify-center truncate"
+      class="leading-[22px] flex flex-col justify-center truncate"
+      :class="columnSize"
     >
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
         <h4>{{ relativeTime }}</h4>
@@ -52,7 +65,7 @@ const orderPercentage = computed(
         {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
-    <div class="max-w-[168px] w-[168px] truncate">
+    <div class="truncate" :class="columnSize">
       <h4 class="text-skin-link truncate">
         {{ _c(order.buyAmount, Number(auction.decimalsAuctioningToken)) }}
         {{ auction.symbolAuctioningToken }}
@@ -61,7 +74,7 @@ const orderPercentage = computed(
         {{ _p(orderPercentage) }}
       </div>
     </div>
-    <div class="max-w-[168px] w-[168px] truncate text-right">
+    <div class="truncate text-right" :class="columnSize">
       <h4 class="text-skin-link truncate">
         {{ formatPrice(order.price) }}
         {{ auction.symbolBiddingToken }}
@@ -73,6 +86,24 @@ const orderPercentage = computed(
           })
         }}
       </div>
+    </div>
+    <div
+      v-if="withActions"
+      class="min-w-[44px] lg:w-[60px] flex items-center justify-center -mr-4"
+    >
+      <UiDropdown>
+        <template #button>
+          <button type="button">
+            <IH-dots-horizontal class="text-skin-link" />
+          </button>
+        </template>
+        <template #items>
+          <UiDropdownItem :disabled="!isCancellable">
+            <IS-x-mark :width="16" />
+            Cancel bid
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
     </div>
   </div>
 </template>

@@ -3,7 +3,8 @@ import {
   Auction,
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
-  getAuction
+  getAuction,
+  SellOrder
 } from '@/helpers/auction';
 import { placeSellOrder } from '@/helpers/auction/actions';
 import { approve, getIsApproved } from '@/helpers/token';
@@ -22,10 +23,7 @@ type Step = {
     failSubtitle?: string;
   };
   nextStep: () => StepId | false;
-  execute: (payload: {
-    sellAmount: number;
-    buyAmount?: number;
-  }) => Promise<string | null>;
+  execute: () => Promise<string | null>;
 };
 
 const FIRST_STEP: StepId = 'check_approval';
@@ -49,6 +47,7 @@ export function useAuctionOrderFlow(
   const uiStore = useUiStore();
 
   const auction = ref<Auction>();
+  const sellOrder = ref<SellOrder>({ sellAmount: 0, price: 0 });
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
@@ -61,7 +60,7 @@ export function useAuctionOrderFlow(
       },
       nextStep: () =>
         stepExecuteResults.value.get('check_approval') ? 'bid' : 'approve',
-      execute: async payload => {
+      execute: async () => {
         const signer = await getSigner();
         if (!signer) return null;
 
@@ -69,7 +68,7 @@ export function useAuctionOrderFlow(
           getBiddingToken(auction.value),
           signer,
           contractAddress.value,
-          payload.sellAmount
+          sellOrder.value.sellAmount
         );
 
         if (result === undefined) {
@@ -87,7 +86,7 @@ export function useAuctionOrderFlow(
         confirmingTitle: 'Waiting for token allowance'
       },
       nextStep: () => 'check_approval',
-      execute: async payload => {
+      execute: async () => {
         const signer = await getSigner();
         if (!signer) return null;
 
@@ -96,7 +95,7 @@ export function useAuctionOrderFlow(
             getBiddingToken(auction.value),
             signer,
             contractAddress.value,
-            payload.sellAmount
+            sellOrder.value.sellAmount
           )
         );
       }
@@ -108,19 +107,14 @@ export function useAuctionOrderFlow(
         successTitle: 'Order successful'
       },
       nextStep: () => false,
-      execute: async payload => {
+      execute: async () => {
         if (!auction.value) throw new Error('Missing auction details');
 
         const signer = await getSigner();
         if (!signer) return null;
 
         return wrapPromise(
-          placeSellOrder(
-            signer,
-            auction.value,
-            payload.buyAmount!,
-            payload.sellAmount
-          )
+          placeSellOrder(signer, auction.value, sellOrder.value)
         );
       }
     }
@@ -157,8 +151,9 @@ export function useAuctionOrderFlow(
     return tx.hash;
   }
 
-  function start() {
+  function start(order: SellOrder) {
     currentStepId.value = FIRST_STEP;
+    sellOrder.value = order;
     stepExecuteResults.value.clear();
   }
 
@@ -169,7 +164,6 @@ export function useAuctionOrderFlow(
 
     if (auctionDetails) {
       auction.value = {
-        id: toValue(auctionId),
         network: toValue(networkId),
         ...auctionDetails
       };

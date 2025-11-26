@@ -1,7 +1,10 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { AuctionNetworkId, getOrders } from '@/helpers/auction';
-import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import {
+  AuctionDetailFragment,
+  Order_Filter
+} from '@/helpers/auction/gql/graphql';
 import { getTokenPrices } from '@/helpers/coingecko';
 import { CHAIN_IDS, COINGECKO_ASSET_PLATFORMS } from '@/helpers/constants';
 
@@ -30,21 +33,35 @@ export function useBidsQuery({
   });
 }
 
-export function useRecentBidsQuery({
+export function useBidsSummaryQuery({
   network,
-  auction
+  auction,
+  limit = 5,
+  where,
+  enabled
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  limit?: MaybeRefOrGetter<number>;
+  where?: MaybeRefOrGetter<Order_Filter>;
+  enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
-    queryKey: ['auction', network, () => toValue(auction).id, 'recentOrders'],
+    queryKey: [
+      'auction',
+      network,
+      () => toValue(auction).id,
+      'bidsSummary',
+      { limit, where }
+    ],
     queryFn: () =>
       getOrders(toValue(auction).id, toValue(network), {
-        first: 5,
+        first: toValue(limit),
         orderBy: 'timestamp',
-        orderDirection: 'desc'
-      })
+        orderDirection: 'desc',
+        orderFilter: toValue(where)
+      }),
+    enabled
   });
 }
 

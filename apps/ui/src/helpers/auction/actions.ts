@@ -2,33 +2,46 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { JsonRpcSigner } from '@ethersproject/providers';
 import { abis } from './abis';
-import { Auction, AUCTION_CONTRACT_ADDRESSES, getPreviousOrder } from './index';
+import {
+  Auction,
+  AUCTION_CONTRACT_ADDRESSES,
+  getPreviousOrder,
+  SellOrder
+} from './index';
 
 export async function placeSellOrder(
   signer: JsonRpcSigner,
   auction: Auction,
-  buyAmount: number,
-  sellAmount: number
+  sellOrder: SellOrder
 ) {
   const contractAddress = AUCTION_CONTRACT_ADDRESSES[auction.network];
   const contract = new Contract(contractAddress, abis, signer);
-  const rawSellAmount = BigNumber.from(
-    sellAmount * 10 ** Number(auction.decimalsBiddingToken)
-  );
-  const rawBuyAmount = BigNumber.from(
-    buyAmount * 10 ** Number(auction.decimalsAuctioningToken)
-  );
-  const price = sellAmount / buyAmount;
   let previousOrder = '';
 
   try {
-    previousOrder = await getPreviousOrder(auction.id, auction.network, price);
+    previousOrder = await getPreviousOrder(
+      auction.id,
+      auction.network,
+      sellOrder.price
+    );
   } catch (e) {
     console.log(
       `Error trying to get previous order for auctionId ${auction.id}`,
       e
     );
   }
+
+  const rawSellAmount = BigNumber.from(
+    Math.floor(
+      sellOrder.sellAmount * 10 ** Number(auction.decimalsBiddingToken)
+    )
+  );
+  const rawBuyAmount = BigNumber.from(
+    Math.floor(
+      (sellOrder.sellAmount / sellOrder.price) *
+        10 ** Number(auction.decimalsAuctioningToken)
+    )
+  );
 
   return contract.placeSellOrders(
     auction.id,
