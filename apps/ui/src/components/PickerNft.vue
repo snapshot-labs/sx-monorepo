@@ -14,8 +14,8 @@ const emit = defineEmits<{
 const filteredNfts = computed(() =>
   props.nfts.filter(nft => {
     return nft.displayTitle
-      .toLocaleLowerCase()
-      .includes(props.searchValue.toLocaleLowerCase());
+      .toLowerCase()
+      .includes(props.searchValue.toLowerCase());
   })
 );
 </script>

@@ -77,6 +77,6 @@ export async function getOrders(
 
   return orders.map(order => ({
     ...order,
-    name: names[order.userAddress.toLocaleLowerCase()] || null
+    name: names[order.userAddress.toLowerCase()] || null
   }));
 }

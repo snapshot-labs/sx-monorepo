@@ -32,7 +32,7 @@ function createResolver() {
 
     return {
       networkId: ENS_NETWORK_ID,
-      address: resolvedAddress.toLocaleLowerCase()
+      address: resolvedAddress.toLowerCase()
     };
   }
 

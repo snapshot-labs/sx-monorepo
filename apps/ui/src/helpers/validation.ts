@@ -330,9 +330,9 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     return `Must be at most ${_n(errorObject.params.limit)}.`;
   }
 
-  return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
+  return `${errorObject.message.charAt(0).toUpperCase()}${errorObject.message
     .slice(1)
-    .toLocaleLowerCase()}.`;
+    .toLowerCase()}.`;
 }
 
 const getFormValues = (schema: any, form: any, opts: Opts) => {

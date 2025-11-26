@@ -225,7 +225,7 @@ export class EthereumTx {
     const hash = await this.getProposeHash(address, data);
 
     return this.getMessageFee(data.authenticator, [
-      address.toLocaleLowerCase(),
+      address.toLowerCase(),
       hash
     ]);
   }
@@ -234,7 +234,7 @@ export class EthereumTx {
     const hash = await this.getVoteHash(address, data);
 
     return this.getMessageFee(data.authenticator, [
-      address.toLocaleLowerCase(),
+      address.toLowerCase(),
       hash
     ]);
   }
@@ -243,7 +243,7 @@ export class EthereumTx {
     const hash = await this.getUpdateProposalHash(address, data);
 
     return this.getMessageFee(data.authenticator, [
-      address.toLocaleLowerCase(),
+      address.toLowerCase(),
       hash
     ]);
   }
