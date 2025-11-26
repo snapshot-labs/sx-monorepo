@@ -27,7 +27,7 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     auction: () => props.auction
   });
 
-async function handleEndReached() {
+function handleEndReached() {
   if (!hasNextPage.value) return;
 
   fetchNextPage();
@@ -38,7 +38,7 @@ async function handleEndReached() {
   <div>
     <UiSectionHeader label="Bids" sticky />
     <UiColumnHeader class="z-40 overflow-hidden gap-3">
-      <div class="flex-1 truncate">Bidder</div>
+      <div class="flex-1 min-w-[168px] truncate">Bidder</div>
       <div class="max-w-[168px] w-[168px] truncate">Date</div>
       <div class="max-w-[168px] w-[168px] truncate">Amount</div>
       <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>

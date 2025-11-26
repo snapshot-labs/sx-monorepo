@@ -97,9 +97,7 @@ export function useBiddingTokenPriceQuery({
         auctionValue.addressBiddingToken
       ]);
 
-      return (
-        coins[auctionValue.addressBiddingToken.toLocaleLowerCase()]?.usd ?? 0
-      );
+      return coins[auctionValue.addressBiddingToken.toLowerCase()]?.usd ?? 0;
     }
   });
 }

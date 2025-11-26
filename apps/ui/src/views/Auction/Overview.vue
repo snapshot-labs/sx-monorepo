@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
+import { AuctionState } from '@/components/AuctionStatus.vue';
 import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
@@ -26,6 +27,26 @@ const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
 );
 const { auth } = useWeb3();
 const { web3 } = useWeb3();
+
+const auctionState = computed<AuctionState>(() => {
+  const now = Math.floor(Date.now() / 1000);
+  const endTime = parseInt(props.auction.endTimeTimestamp);
+
+  if (now < endTime) return 'active';
+
+  const currentBiddingAmount = BigInt(props.auction.currentBiddingAmount);
+  const minFundingThreshold = BigInt(props.auction.minFundingThreshold);
+
+  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
+
+  if (props.auction.ordersWithoutClaimed?.length) return 'claiming';
+
+  return 'claimed';
+});
+
+const isAuctionOpen = computed(
+  () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
+);
 
 const isAccountSupported = computed(() => {
   const connectorType = auth.value?.connector.type;
@@ -61,10 +82,6 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     network: () => props.network,
     auction: () => props.auction
   });
-
-const isAuctionOpen = computed(
-  () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
-);
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
@@ -167,6 +184,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
             {{ EVM_METADATA[network]?.name || 'Unknown' }}
           </span>
         </div>
+        <AuctionStatus :state="auctionState" />
       </div>
 
       <div>
@@ -345,7 +363,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         <UiEyebrow class="mb-3">Your bids</UiEyebrow>
         <div class="border rounded-lg overflow-hidden">
           <UiColumnHeader class="py-2 gap-3" :sticky="false">
-            <div class="flex-1 truncate">Bidder</div>
+            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
             <div class="max-w-[144px] w-[144px] truncate">Date</div>
             <div class="max-w-[144px] w-[144px] truncate">Amount</div>
             <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
@@ -385,7 +403,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         <UiEyebrow class="mb-3">Recent bids</UiEyebrow>
         <div class="border rounded-lg overflow-hidden">
           <UiColumnHeader class="py-2 gap-3" :sticky="false">
-            <div class="flex-1 truncate">Bidder</div>
+            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
             <div class="max-w-[168px] w-[168px] truncate">Date</div>
             <div class="max-w-[168px] w-[168px] truncate">Amount</div>
             <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
