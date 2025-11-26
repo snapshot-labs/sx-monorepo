@@ -29,6 +29,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   auction: AuctionDetailFragment;
   network: AuctionNetworkId;
+  isLoading?: boolean;
 }>();
 
 const { web3Account } = useWeb3();
@@ -184,21 +185,22 @@ const priceError = computed(() => {
   return undefined;
 });
 
-const isFormValid = computed(() => {
-  return !!(
-    amountError.value ||
-    priceError.value ||
-    !bidAmount.value ||
-    !bidPrice.value
+const isFormValid = computed<boolean>(() => {
+  return (
+    !Object.keys(formatErrors.value).length &&
+    !amountError.value &&
+    !priceError.value
   );
 });
 
 function handlePlaceOrder() {
-  const price = isPriceInverted.value
-    ? 1 / parseFloat(bidPrice.value)
-    : parseFloat(bidPrice.value);
+  if (!isFormValid.value) return;
 
-  emit('submit', { sellAmount: parseFloat(bidAmount.value), price });
+  const price = isPriceInverted.value
+    ? (1 / parseFloat(bidPrice.value)).toString()
+    : bidPrice.value;
+
+  emit('submit', { sellAmount: bidAmount.value, price });
 }
 
 onMounted(() => {
@@ -298,7 +300,8 @@ function togglePriceMode() {
         v-else
         primary
         class="w-full"
-        :disabled="isFormValid"
+        :disabled="!isFormValid || isLoading"
+        :loading="isLoading"
         @click="handlePlaceOrder"
       >
         Place order

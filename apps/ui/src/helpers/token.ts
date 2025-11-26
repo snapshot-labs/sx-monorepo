@@ -1,40 +1,42 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
-import { JsonRpcSigner } from '@ethersproject/providers';
+import { Web3Provider } from '@ethersproject/providers';
+import { parseUnits } from '@ethersproject/units';
 import { abis } from '@/helpers/abis';
 
-export type Token = {
+export type BaseToken = {
   contractAddress: string;
   decimals: number;
   symbol: string;
+  name?: string;
 };
 
 export async function getIsApproved(
-  token: Token,
-  signer: JsonRpcSigner,
+  token: BaseToken,
+  web3: Web3Provider,
   spenderAddress: string,
-  amount: number
+  amount: string
 ): Promise<boolean> {
+  const signer = web3.getSigner();
   const contract = new Contract(token.contractAddress, abis.erc20, signer);
   const allowance = await contract.allowance(
     await signer.getAddress(),
     spenderAddress
   );
 
-  return BigNumber.from(allowance).gte(
-    BigNumber.from(Math.floor(amount * 10 ** token.decimals))
-  );
+  return BigNumber.from(allowance).gte(parseUnits(amount, token.decimals));
 }
 
 export async function approve(
-  token: Token,
-  signer: JsonRpcSigner,
+  token: BaseToken,
+  web3: Web3Provider,
   spenderAddress: string,
-  amount: number
+  amount: string
 ) {
-  const contract = new Contract(token.contractAddress, abis.erc20, signer);
-  return contract.approve(
-    spenderAddress,
-    BigNumber.from(Math.floor(amount * 10 ** token.decimals))
+  const contract = new Contract(
+    token.contractAddress,
+    abis.erc20,
+    web3.getSigner()
   );
+  return contract.approve(spenderAddress, parseUnits(amount, token.decimals));
 }

@@ -1,27 +1,32 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
-import { JsonRpcSigner } from '@ethersproject/providers';
+import { Web3Provider } from '@ethersproject/providers';
+import { parseUnits } from '@ethersproject/units';
 import { abis } from './abis';
+import { AuctionDetailFragment } from './gql/graphql';
 import {
-  Auction,
   AUCTION_CONTRACT_ADDRESSES,
-  getPreviousOrder,
+  AuctionNetworkId,
+  getPreviousOrderId,
   SellOrder
 } from './index';
 
 export async function placeSellOrder(
-  signer: JsonRpcSigner,
-  auction: Auction,
+  web3: Web3Provider,
+  auction: AuctionDetailFragment,
+  networkId: AuctionNetworkId,
   sellOrder: SellOrder
 ) {
-  const contractAddress = AUCTION_CONTRACT_ADDRESSES[auction.network];
-  const contract = new Contract(contractAddress, abis, signer);
-  let previousOrder = '';
+  const contract = new Contract(
+    AUCTION_CONTRACT_ADDRESSES[networkId],
+    abis,
+    web3.getSigner()
+  );
+  let previousOrderId = '';
 
   try {
-    previousOrder = await getPreviousOrder(
+    previousOrderId = await getPreviousOrderId(
       auction.id,
-      auction.network,
+      networkId,
       sellOrder.price
     );
   } catch (e) {
@@ -31,23 +36,18 @@ export async function placeSellOrder(
     );
   }
 
-  const rawSellAmount = BigNumber.from(
-    Math.floor(
-      sellOrder.sellAmount * 10 ** Number(auction.decimalsBiddingToken)
-    )
-  );
-  const rawBuyAmount = BigNumber.from(
-    Math.floor(
-      (sellOrder.sellAmount / sellOrder.price) *
-        10 ** Number(auction.decimalsAuctioningToken)
-    )
-  );
-
   return contract.placeSellOrders(
     auction.id,
-    [rawBuyAmount],
-    [rawSellAmount],
-    [previousOrder],
+    [parseUnits(sellOrder.sellAmount, auction.decimalsBiddingToken)],
+    [
+      parseUnits(
+        (
+          parseFloat(sellOrder.sellAmount) / parseFloat(sellOrder.price)
+        ).toString(),
+        auction.decimalsAuctioningToken
+      )
+    ],
+    [previousOrderId],
     auction.allowListSigner
   );
 }

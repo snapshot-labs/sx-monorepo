@@ -20,13 +20,13 @@ const props = defineProps<{
 }>();
 
 const isModalTransactionProgressOpen = ref(false);
+const isPlacingOrder = ref(false);
 
 const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
-  toRef(props, 'auctionId'),
-  toRef(props, 'network')
+  toRef(props, 'network'),
+  toRef(props, 'auction')
 );
-const { auth } = useWeb3();
-const { web3 } = useWeb3();
+const { auth, web3 } = useWeb3();
 
 const auctionState = computed<AuctionState>(() => {
   const now = Math.floor(Date.now() / 1000);
@@ -48,11 +48,8 @@ const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
 );
 
-const isAccountSupported = computed(() => {
-  const connectorType = auth.value?.connector.type;
-  if (!web3.value.account || !connectorType) return false;
-
-  return EVM_CONNECTORS.includes(connectorType);
+const isAccountSupported = computed<boolean>(() => {
+  return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
 });
 
 const {
@@ -155,6 +152,7 @@ const normalizedSignerAddress = computed(() => {
 
 async function moveToNextStep() {
   if (isLastStep.value) {
+    isPlacingOrder.value = false;
     return;
   }
 
@@ -168,6 +166,7 @@ async function moveToNextStep() {
 async function handlePlaceSellOrder(sellOrder: SellOrder) {
   start(sellOrder);
 
+  isPlacingOrder.value = true;
   isModalTransactionProgressOpen.value = true;
 }
 </script>
@@ -299,6 +298,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         v-if="isAuctionOpen"
         :auction="auction"
         :network="network"
+        :is-loading="isPlacingOrder"
         @submit="handlePlaceSellOrder"
       />
 
@@ -486,9 +486,15 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         :execute="() => currentStep.execute()"
         :chain-id="EVM_METADATA[network].chainId"
         :messages="currentStep.messages"
-        @close="isModalTransactionProgressOpen = false"
+        @close="
+          isModalTransactionProgressOpen = false;
+          isPlacingOrder = false;
+        "
         @confirmed="moveToNextStep"
-        @cancelled="isModalTransactionProgressOpen = false"
+        @cancelled="
+          isModalTransactionProgressOpen = false;
+          isPlacingOrder = false;
+        "
       />
     </teleport>
   </div>

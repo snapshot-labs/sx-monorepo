@@ -1,13 +1,13 @@
 import { MaybeRefOrGetter } from 'vue';
 import {
-  Auction,
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
-  getAuction,
   SellOrder
 } from '@/helpers/auction';
 import { placeSellOrder } from '@/helpers/auction/actions';
-import { approve, getIsApproved } from '@/helpers/token';
+import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { approve, BaseToken, getIsApproved } from '@/helpers/token';
+import { verifyNetwork } from '@/helpers/utils';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 
 type StepId = 'check_approval' | 'approve' | 'bid';
@@ -28,26 +28,23 @@ type Step = {
 
 const FIRST_STEP: StepId = 'check_approval';
 
-function getBiddingToken(auction?: Auction) {
-  if (!auction) throw new Error('Missing auction details');
-
+function getBiddingToken(auction: AuctionDetailFragment): BaseToken {
   return {
     contractAddress: auction.addressBiddingToken,
     decimals: Number(auction.decimalsBiddingToken),
-    symbol: auction.symbolBiddingToken,
-    name: auction.symbolBiddingToken
+    symbol: auction.symbolBiddingToken
   };
 }
 
 export function useAuctionOrderFlow(
-  auctionId: MaybeRefOrGetter<string>,
-  networkId: MaybeRefOrGetter<AuctionNetworkId>
+  networkId: MaybeRefOrGetter<AuctionNetworkId>,
+  auction: MaybeRefOrGetter<AuctionDetailFragment>
 ) {
-  const { getSigner } = useNetworkSigner(networkId);
   const uiStore = useUiStore();
+  const { auth } = useWeb3();
+  const { modalAccountOpen } = useModal();
 
-  const auction = ref<Auction>();
-  const sellOrder = ref<SellOrder>({ sellAmount: 0, price: 0 });
+  const sellOrder = ref<SellOrder>({ sellAmount: '0', price: '0' });
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
@@ -61,12 +58,16 @@ export function useAuctionOrderFlow(
       nextStep: () =>
         stepExecuteResults.value.get('check_approval') ? 'bid' : 'approve',
       execute: async () => {
-        const signer = await getSigner();
-        if (!signer) return null;
+        if (!auth.value) {
+          modalAccountOpen.value = true;
+          return null;
+        }
+
+        await verifyNetwork(auth.value.provider, chainId.value);
 
         const result = await getIsApproved(
-          getBiddingToken(auction.value),
-          signer,
+          getBiddingToken(toValue(auction)),
+          auth.value.provider,
           contractAddress.value,
           sellOrder.value.sellAmount
         );
@@ -87,13 +88,17 @@ export function useAuctionOrderFlow(
       },
       nextStep: () => 'check_approval',
       execute: async () => {
-        const signer = await getSigner();
-        if (!signer) return null;
+        if (!auth.value) {
+          modalAccountOpen.value = true;
+          return null;
+        }
+
+        await verifyNetwork(auth.value.provider, chainId.value);
 
         return wrapPromise(
           approve(
-            getBiddingToken(auction.value),
-            signer,
+            getBiddingToken(toValue(auction)),
+            auth.value.provider,
             contractAddress.value,
             sellOrder.value.sellAmount
           )
@@ -108,13 +113,20 @@ export function useAuctionOrderFlow(
       },
       nextStep: () => false,
       execute: async () => {
-        if (!auction.value) throw new Error('Missing auction details');
+        if (!auth.value) {
+          modalAccountOpen.value = true;
+          return null;
+        }
 
-        const signer = await getSigner();
-        if (!signer) return null;
+        await verifyNetwork(auth.value.provider, chainId.value);
 
         return wrapPromise(
-          placeSellOrder(signer, auction.value, sellOrder.value)
+          placeSellOrder(
+            auth.value.provider,
+            toValue(auction),
+            toValue(networkId),
+            sellOrder.value
+          )
         );
       }
     }
@@ -123,6 +135,10 @@ export function useAuctionOrderFlow(
   const contractAddress = computed<string>(
     () => AUCTION_CONTRACT_ADDRESSES[toValue(networkId)]
   );
+
+  const chainId = computed<number>(() => {
+    return EVM_METADATA[toValue(networkId)].chainId;
+  });
 
   const currentStep = computed<Step>(() => STEPS.value[currentStepId.value]);
 
@@ -143,32 +159,16 @@ export function useAuctionOrderFlow(
 
   async function wrapPromise(promise: Promise<any>): Promise<string> {
     const tx = await promise;
-    uiStore.addPendingTransaction(
-      tx.hash,
-      EVM_METADATA[toValue(networkId)].chainId
-    );
+    uiStore.addPendingTransaction(tx.hash, chainId.value);
 
     return tx.hash;
   }
 
   function start(order: SellOrder) {
     currentStepId.value = FIRST_STEP;
-    sellOrder.value = order;
     stepExecuteResults.value.clear();
+    sellOrder.value = order;
   }
-
-  watchEffect(async () => {
-    const auctionDetails = (
-      await getAuction(toValue(auctionId), toValue(networkId))
-    )?.auctionDetail;
-
-    if (auctionDetails) {
-      auction.value = {
-        network: toValue(networkId),
-        ...auctionDetails
-      };
-    }
-  });
 
   return { start, goToNextStep, isLastStep, currentStep };
 }
