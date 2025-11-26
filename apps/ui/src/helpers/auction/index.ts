@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { auctionQuery, ordersQuery } from './queries';
 import { getNames } from '../stamp';
-import { Order_OrderBy, OrderFragment } from './gql/graphql';
+import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
 
 export type AuctionNetworkId = 'eth' | 'sep';
 export type Order = OrderFragment & { name: string | null };
@@ -56,19 +56,21 @@ export async function getOrders(
     skip = 0,
     first = 20,
     orderBy = 'price',
-    orderDirection = 'desc'
+    orderDirection = 'desc',
+    orderFilter
   }: {
     skip?: number;
     first?: number;
     orderBy?: Order_OrderBy;
     orderDirection?: 'desc' | 'asc';
+    orderFilter?: Order_Filter;
   } = {}
 ): Promise<Order[]> {
   const client = getClient(network);
 
   const { data } = await client.query({
     query: ordersQuery,
-    variables: { id, skip, first, orderBy, orderDirection }
+    variables: { id, skip, first, orderBy, orderDirection, orderFilter }
   });
 
   const orders = data.auctionDetail?.orders ?? [];
