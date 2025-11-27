@@ -51,7 +51,6 @@ export async function placeSellOrder(
     [rawSellAmount],
     [rawBuyAmount],
     [previousOrderId],
-
     auction.allowListSigner
   );
 }
