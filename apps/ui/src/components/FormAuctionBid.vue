@@ -153,6 +153,14 @@ const amountError = computed(() => {
     return 'Insufficient balance';
   }
 
+  const decimalMatch = bidAmount.value.match(/\.(\d+)$/);
+  if (
+    decimalMatch &&
+    decimalMatch[1].length > parseInt(props.auction.decimalsBiddingToken)
+  ) {
+    return `Maximum ${props.auction.decimalsBiddingToken} decimal places allowed`;
+  }
+
   return undefined;
 });
 
@@ -174,6 +182,14 @@ const priceError = computed(() => {
     if (isAboveLimit) {
       const limitType = isPriceInverted.value ? 'Maximum' : 'Minimum';
       return `${limitType} ${_n(limit)} ${priceUnit.value}`;
+    }
+  }
+
+  if (!isPriceInverted.value) {
+    const decimalMatch = bidPrice.value.match(/\.(\d+)$/);
+    const maxDecimals = parseInt(props.auction.decimalsBiddingToken);
+    if (decimalMatch && decimalMatch[1].length > maxDecimals) {
+      return `Maximum ${maxDecimals} decimal places allowed`;
     }
   }
 
