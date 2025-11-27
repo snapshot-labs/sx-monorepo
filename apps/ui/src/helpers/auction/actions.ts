@@ -26,10 +26,15 @@ export async function placeSellOrder(
     sellOrder.sellAmount,
     auction.decimalsBiddingToken
   );
-  const rawBuyAmount = parseUnits(
-    (parseFloat(sellOrder.sellAmount) / parseFloat(sellOrder.price)).toString(),
-    auction.decimalsAuctioningToken
-  );
+  const price = parseFloat(sellOrder.price);
+  const buyAmount = (
+    price
+      ? (parseFloat(sellOrder.sellAmount) / price).toFixed(
+          Number(auction.decimalsAuctioningToken)
+        )
+      : 0
+  ).toString();
+  const rawBuyAmount = parseUnits(buyAmount, auction.decimalsAuctioningToken);
 
   try {
     previousOrderId = await getPreviousOrderId(
@@ -48,8 +53,8 @@ export async function placeSellOrder(
 
   return contract.placeSellOrders(
     auction.id,
-    [rawSellAmount],
     [rawBuyAmount],
+    [rawSellAmount],
     [previousOrderId],
     auction.allowListSigner
   );

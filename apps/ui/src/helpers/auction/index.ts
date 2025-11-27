@@ -141,8 +141,8 @@ export function encodeOrder(order: {
     .padStart(16, '0')}${order.buyAmount
     .toHexString()
     .slice(2)
-    .padStart(
-      24,
-      '0'
-    )}${order.sellAmount.toHexString().slice(2).padStart(24, '0')}`;
+    .padStart(24, '0')}${order.sellAmount
+    .toHexString()
+    .slice(2)
+    .padStart(24, '0')}`;
 }

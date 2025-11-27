@@ -186,7 +186,7 @@ const priceError = computed(() => {
 });
 
 const hasErrors = computed<boolean>(() => {
-  return (
+  return !!(
     Object.keys(formatErrors.value).length ||
     amountError.value ||
     priceError.value

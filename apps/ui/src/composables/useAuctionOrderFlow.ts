@@ -27,6 +27,7 @@ type Step = {
 };
 
 const FIRST_STEP: StepId = 'check_approval';
+const LAST_STEP: StepId = 'bid';
 
 function getBiddingToken(auction: AuctionDetailFragment): Token {
   return {
@@ -143,7 +144,7 @@ export function useAuctionOrderFlow(
   const currentStep = computed<Step>(() => STEPS.value[currentStepId.value]);
 
   const isLastStep = computed<boolean>(() => {
-    return currentStepId.value === Object.keys(STEPS.value).pop();
+    return currentStepId.value === LAST_STEP;
   });
 
   function goToNextStep(): boolean {
