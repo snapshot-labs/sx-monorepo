@@ -1,5 +1,5 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { auctionQuery, ordersQuery } from './queries';
+import { auctionQuery, ordersQuery, unclaimedOrdersQuery } from './queries';
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy } from './gql/graphql';
 import { AuctionNetworkId, Order } from './types';
@@ -81,4 +81,25 @@ export async function getOrders(
     ...order,
     name: names[order.userAddress.toLowerCase()] || null
   }));
+}
+
+export async function getUnclaimedOrders(
+  id: string,
+  network: AuctionNetworkId,
+  {
+    orderFilter
+  }: {
+    orderFilter?: Order_Filter;
+  } = {}
+): Promise<Set<string>> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: unclaimedOrdersQuery,
+    variables: { id, orderFilter }
+  });
+
+  return new Set(
+    data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
+  );
 }

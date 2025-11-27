@@ -63,3 +63,13 @@ export const ordersQuery = gql(`
     }
   }
 `);
+
+export const unclaimedOrdersQuery = gql(`
+  query GetUnclaimedOrders($id: ID!, $orderFilter: Order_filter) {
+    auctionDetail(id: $id) {
+      ordersWithoutClaimed(where: $orderFilter) {
+        id
+      }
+    }
+  }
+`);
