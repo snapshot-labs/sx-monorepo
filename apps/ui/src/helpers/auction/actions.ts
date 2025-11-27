@@ -21,7 +21,7 @@ export async function placeSellOrder(
     abis,
     web3.getSigner()
   );
-  let previousOrderId = '';
+  let previousOrderId: string;
   const rawSellAmount = parseUnits(
     sellOrder.sellAmount,
     auction.decimalsBiddingToken
