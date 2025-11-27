@@ -4,7 +4,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { parseUnits } from '@ethersproject/units';
 import { abis } from '@/helpers/abis';
 
-export type BaseToken = {
+export type Token = {
   contractAddress: string;
   decimals: number;
   symbol: string;
@@ -12,7 +12,7 @@ export type BaseToken = {
 };
 
 export async function getIsApproved(
-  token: BaseToken,
+  token: Token,
   web3: Web3Provider,
   spenderAddress: string,
   amount: string
@@ -28,7 +28,7 @@ export async function getIsApproved(
 }
 
 export async function approve(
-  token: BaseToken,
+  token: Token,
   web3: Web3Provider,
   spenderAddress: string,
   amount: string

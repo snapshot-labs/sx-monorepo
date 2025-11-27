@@ -6,7 +6,7 @@ import {
 } from '@/helpers/auction';
 import { placeSellOrder } from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import { approve, BaseToken, getIsApproved } from '@/helpers/token';
+import { approve, getIsApproved, Token } from '@/helpers/token';
 import { verifyNetwork } from '@/helpers/utils';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 
@@ -28,7 +28,7 @@ type Step = {
 
 const FIRST_STEP: StepId = 'check_approval';
 
-function getBiddingToken(auction: AuctionDetailFragment): BaseToken {
+function getBiddingToken(auction: AuctionDetailFragment): Token {
   return {
     contractAddress: auction.addressBiddingToken,
     decimals: Number(auction.decimalsBiddingToken),

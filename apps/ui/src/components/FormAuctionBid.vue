@@ -185,16 +185,16 @@ const priceError = computed(() => {
   return undefined;
 });
 
-const isFormValid = computed<boolean>(() => {
+const hasErrors = computed<boolean>(() => {
   return (
-    !Object.keys(formatErrors.value).length &&
-    !amountError.value &&
-    !priceError.value
+    Object.keys(formatErrors.value).length ||
+    amountError.value ||
+    priceError.value
   );
 });
 
 function handlePlaceOrder() {
-  if (!isFormValid.value) return;
+  if (hasErrors.value) return;
 
   const price = isPriceInverted.value
     ? (1 / parseFloat(bidPrice.value)).toString()
@@ -300,7 +300,7 @@ function togglePriceMode() {
         v-else
         primary
         class="w-full"
-        :disabled="!isFormValid || isLoading"
+        :disabled="hasErrors || isLoading"
         :loading="isLoading"
         @click="handlePlaceOrder"
       >

@@ -89,7 +89,7 @@ export async function getOrders(
 
   return orders.map(order => ({
     ...order,
-    name: names[order.userAddress.toLocaleLowerCase()] || null
+    name: names[order.userAddress.toLowerCase()] || null
   }));
 }
 
@@ -100,10 +100,12 @@ export async function getPreviousOrderId(
 ): Promise<string> {
   const client = getClient(network);
 
-  const { data } = await client.query({
+  const { data, error } = await client.query({
     query: previousOrderQuery,
     variables: { id, price }
   });
+
+  if (error) throw error;
 
   const orders: OrderFragment[] =
     data.auctionDetail?.ordersWithoutClaimed || [];
@@ -111,11 +113,14 @@ export async function getPreviousOrderId(
   if (!orders.length) return DEFAULT_ORDER_ID;
 
   const sortedOrders: OrderFragment[] = [...orders].sort((a, b) => {
-    if (Number(a.price) === Number(b.price)) {
+    const aPrice = Number(a.price);
+    const bPrice = Number(b.price);
+
+    if (aPrice === bPrice) {
       return Number(a.volume) - Number(b.volume);
     }
 
-    return Number(a.price) - Number(b.price);
+    return aPrice - bPrice;
   });
 
   return encodeOrder({

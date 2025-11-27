@@ -22,6 +22,14 @@ export async function placeSellOrder(
     web3.getSigner()
   );
   let previousOrderId = '';
+  const rawSellAmount = parseUnits(
+    sellOrder.sellAmount,
+    auction.decimalsBiddingToken
+  );
+  const rawBuyAmount = parseUnits(
+    (parseFloat(sellOrder.sellAmount) / parseFloat(sellOrder.price)).toString(),
+    auction.decimalsAuctioningToken
+  );
 
   try {
     previousOrderId = await getPreviousOrderId(
@@ -30,24 +38,20 @@ export async function placeSellOrder(
       sellOrder.price
     );
   } catch (e) {
-    console.log(
+    console.error(
       `Error trying to get previous order for auctionId ${auction.id}`,
       e
     );
+
+    throw new Error('Unable to get previous order ID');
   }
 
   return contract.placeSellOrders(
     auction.id,
-    [parseUnits(sellOrder.sellAmount, auction.decimalsBiddingToken)],
-    [
-      parseUnits(
-        (
-          parseFloat(sellOrder.sellAmount) / parseFloat(sellOrder.price)
-        ).toString(),
-        auction.decimalsAuctioningToken
-      )
-    ],
+    [rawSellAmount],
+    [rawBuyAmount],
     [previousOrderId],
+
     auction.allowListSigner
   );
 }
