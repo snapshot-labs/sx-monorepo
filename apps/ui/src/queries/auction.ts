@@ -3,7 +3,8 @@ import { MaybeRefOrGetter } from 'vue';
 import { AuctionNetworkId, getOrders } from '@/helpers/auction';
 import {
   AuctionDetailFragment,
-  Order_Filter
+  Order_Filter,
+  Order_OrderBy
 } from '@/helpers/auction/gql/graphql';
 import { getTokenPrices } from '@/helpers/coingecko';
 import { CHAIN_IDS, COINGECKO_ASSET_PLATFORMS } from '@/helpers/constants';
@@ -61,12 +62,16 @@ export function useBidsSummaryQuery({
   auction,
   limit = SUMMARY_LIMIT,
   where,
+  orderBy = 'timestamp',
+  orderDirection = 'desc',
   enabled
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
   limit?: MaybeRefOrGetter<number>;
   where?: MaybeRefOrGetter<Order_Filter>;
+  orderBy?: MaybeRefOrGetter<Order_OrderBy>;
+  orderDirection?: MaybeRefOrGetter<'asc' | 'desc'>;
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
@@ -74,8 +79,8 @@ export function useBidsSummaryQuery({
     queryFn: () =>
       getOrders(toValue(auction).id, toValue(network), {
         first: toValue(limit),
-        orderBy: 'timestamp',
-        orderDirection: 'desc',
+        orderBy: toValue(orderBy),
+        orderDirection: toValue(orderDirection),
         orderFilter: toValue(where)
       }),
     enabled

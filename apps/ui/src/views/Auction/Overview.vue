@@ -95,8 +95,11 @@ const {
   where: () => ({
     userAddress: web3.value.account?.toLowerCase()
   }),
+  orderBy: 'price',
+  orderDirection: 'desc',
   enabled: isAccountSupported
 });
+
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
