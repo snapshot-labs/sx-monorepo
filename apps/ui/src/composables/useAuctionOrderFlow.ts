@@ -83,7 +83,7 @@ export function useAuctionOrderFlow(
         approveTitle: 'Setting token allowance',
         confirmingTitle: 'Waiting for token allowance'
       },
-      nextStep: () => 'check_approval',
+      nextStep: () => 'bid',
       execute: async () => {
         if (!auth.value) {
           modalAccountOpen.value = true;
