@@ -73,10 +73,6 @@ export function useAuctionOrderFlow(
           sellOrder.value.sellAmount
         );
 
-        if (result === undefined) {
-          throw new Error('wallet not found');
-        }
-
         stepExecuteResults.value.set('check_approval', result);
 
         return null;
