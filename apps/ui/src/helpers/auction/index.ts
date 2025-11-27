@@ -1,10 +1,10 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { auctionQuery, ordersQuery } from './queries';
 import { getNames } from '../stamp';
-import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import { Order_Filter, Order_OrderBy } from './gql/graphql';
+import { AuctionNetworkId, Order } from './types';
 
-export type AuctionNetworkId = 'eth' | 'sep';
-export type Order = OrderFragment & { name: string | null };
+export * from './types';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
