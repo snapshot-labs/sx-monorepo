@@ -1,5 +1,4 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { BigNumber } from '@ethersproject/bignumber';
 import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
@@ -124,25 +123,18 @@ export async function getPreviousOrderId(
   });
 
   return encodeOrder({
-    userId: BigNumber.from(sortedOrders[0].userId),
-    buyAmount: BigNumber.from(sortedOrders[0].buyAmount),
-    sellAmount: BigNumber.from(sortedOrders[0].sellAmount)
+    userId: BigInt(sortedOrders[0].userId),
+    buyAmount: BigInt(sortedOrders[0].buyAmount),
+    sellAmount: BigInt(sortedOrders[0].sellAmount)
   });
 }
 
 export function encodeOrder(order: {
-  sellAmount: BigNumber;
-  buyAmount: BigNumber;
-  userId: BigNumber;
+  sellAmount: bigint;
+  buyAmount: bigint;
+  userId: bigint;
 }): string {
-  return `0x${order.userId
-    .toHexString()
-    .slice(2)
-    .padStart(16, '0')}${order.buyAmount
-    .toHexString()
-    .slice(2)
-    .padStart(24, '0')}${order.sellAmount
-    .toHexString()
-    .slice(2)
-    .padStart(24, '0')}`;
+  return `0x${order.userId.toString(16).padStart(16, '0')}${order.buyAmount
+    .toString(16)
+    .padStart(24, '0')}${order.sellAmount.toString(16).padStart(24, '0')}`;
 }
