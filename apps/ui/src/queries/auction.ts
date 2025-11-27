@@ -1,6 +1,10 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
-import { AuctionNetworkId, getOrders } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  getOrders,
+  getUnclaimedOrders
+} from '@/helpers/auction';
 import {
   AuctionDetailFragment,
   Order_Filter,
@@ -81,6 +85,35 @@ export function useBidsSummaryQuery({
         first: toValue(limit),
         orderBy: toValue(orderBy),
         orderDirection: toValue(orderDirection),
+        orderFilter: toValue(where)
+      }),
+    enabled
+  });
+}
+
+export function useUnclaimedOrdersQuery({
+  network,
+  auction,
+  limit = 100,
+  where,
+  enabled
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  limit?: MaybeRefOrGetter<number>;
+  where?: MaybeRefOrGetter<Order_Filter>;
+  enabled?: MaybeRefOrGetter<boolean>;
+}) {
+  return useQuery({
+    queryKey: [
+      'auction',
+      network,
+      () => toValue(auction).id,
+      'unclaimedBids',
+      { limit, where }
+    ],
+    queryFn: () =>
+      getUnclaimedOrders(toValue(auction).id, toValue(network), {
         orderFilter: toValue(where)
       }),
     enabled

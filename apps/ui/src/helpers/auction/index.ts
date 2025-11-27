@@ -1,5 +1,10 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
+import {
+  auctionQuery,
+  ordersQuery,
+  previousOrderQuery,
+  unclaimedOrdersQuery
+} from './queries';
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
 import { AuctionNetworkId, Order } from './types';
@@ -136,4 +141,25 @@ export function encodeOrder(order: {
   return `0x${order.userId.toString(16).padStart(16, '0')}${order.buyAmount
     .toString(16)
     .padStart(24, '0')}${order.sellAmount.toString(16).padStart(24, '0')}`;
+}
+
+export async function getUnclaimedOrders(
+  id: string,
+  network: AuctionNetworkId,
+  {
+    orderFilter
+  }: {
+    orderFilter?: Order_Filter;
+  } = {}
+): Promise<Set<string>> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: unclaimedOrdersQuery,
+    variables: { id, orderFilter }
+  });
+
+  return new Set(
+    data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
+  );
 }

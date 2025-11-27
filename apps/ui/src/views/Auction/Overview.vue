@@ -18,7 +18,8 @@ import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
   AUCTION_KEYS,
   useBiddingTokenPriceQuery,
-  useBidsSummaryQuery
+  useBidsSummaryQuery,
+  useUnclaimedOrdersQuery
 } from '@/queries/auction';
 
 const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
@@ -101,6 +102,19 @@ const {
   enabled: isAccountSupported
 });
 
+const {
+  data: unclaimedOrders,
+  isError: isUnclaimedOrdersError,
+  isLoading: isUnclaimedOrdersLoading
+} = useUnclaimedOrdersQuery({
+  network: () => props.network,
+  auction: () => props.auction,
+  where: () => ({
+    userAddress: web3.value.account?.toLowerCase()
+  }),
+  enabled: () => isAccountSupported.value && auctionState.value !== 'active'
+});
+
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
@@ -113,11 +127,12 @@ const userOrdersSummary = computed(() => {
 
   const statuses: Record<
     string,
-    'open' | 'filled' | 'partially-filled' | 'rejected'
+    'open' | 'filled' | 'partially-filled' | 'rejected' | 'claimed'
   > = {};
   const { clearingPriceOrder, volumeClearingPriceOrder } = props.auction;
 
   if (
+    !unclaimedOrders.value ||
     !userOrders.value ||
     clearingPriceOrder === null ||
     volumeClearingPriceOrder === null
@@ -142,6 +157,11 @@ const userOrdersSummary = computed(() => {
       // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
       statuses[order.id] = 'rejected';
       biddingTokenToClaim += orderSellAmount;
+      return;
+    }
+
+    if (!unclaimedOrders.value.has(order.id)) {
+      statuses[order.id] = 'claimed';
       return;
     }
 
@@ -202,7 +222,7 @@ const claimText = computed(() => {
     );
   }
 
-  return parts.length > 0 ? `Claim ${parts.join(' and ')}` : 'Nothing to claim';
+  return parts.length > 0 ? `Claim ${parts.join(' and ')}` : null;
 });
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
@@ -544,10 +564,17 @@ function handleTransactionConfirmed() {
             <div class="min-w-[44px] lg:w-[60px] -mr-4" />
           </UiColumnHeader>
           <UiLoading
-            v-if="isUserOrdersLoading || isBiddingTokenPriceLoading"
+            v-if="
+              isUserOrdersLoading ||
+              isUnclaimedOrdersLoading ||
+              isBiddingTokenPriceLoading
+            "
             class="px-4 py-3 block"
           />
-          <UiStateWarning v-else-if="isUserOrdersError" class="px-4 py-3">
+          <UiStateWarning
+            v-else-if="isUserOrdersError || isUnclaimedOrdersError"
+            class="px-4 py-3"
+          >
             Failed to load bids.
           </UiStateWarning>
           <UiStateWarning
@@ -573,7 +600,9 @@ function handleTransactionConfirmed() {
             />
           </div>
         </div>
-        <UiButton class="w-full mt-4" primary>{{ claimText }}</UiButton>
+        <UiButton v-if="claimText" class="w-full mt-4" primary>
+          {{ claimText }}
+        </UiButton>
       </div>
 
       <div>

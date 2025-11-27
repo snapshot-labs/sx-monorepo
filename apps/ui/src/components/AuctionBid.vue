@@ -8,7 +8,12 @@ const props = withDefaults(
     auctionId: string;
     auction: AuctionDetailFragment;
     order: Order;
-    orderStatus?: 'open' | 'filled' | 'partially-filled' | 'rejected';
+    orderStatus?:
+      | 'open'
+      | 'filled'
+      | 'partially-filled'
+      | 'rejected'
+      | 'claimed';
     biddingTokenPrice: number;
     isUserOrder?: boolean;
   }>(),
@@ -46,6 +51,9 @@ const columnSize = computed(() => {
     />
     <div v-if="isUserOrder" class="min-w-[100px] text-skin-link truncate">
       <span v-if="orderStatus === 'open'">Open</span>
+      <span v-else-if="orderStatus === 'claimed'" class="text-skin-success">
+        Claimed
+      </span>
       <span v-else-if="orderStatus === 'filled'" class="text-skin-success">
         Filled
       </span>
