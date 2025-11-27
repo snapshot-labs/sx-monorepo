@@ -16,7 +16,10 @@ gql(`
     minFundingThreshold
     currentBiddingAmount
     currentClearingPrice
+    currentClearingOrderBuyAmount
+    currentClearingOrderSellAmount
     clearingPriceOrder
+    volumeClearingPriceOrder
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
@@ -36,6 +39,7 @@ gql(`
     userId
     sellAmount
     buyAmount
+    userId
     userAddress
     price
     volume

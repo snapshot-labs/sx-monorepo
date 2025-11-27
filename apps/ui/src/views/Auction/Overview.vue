@@ -10,6 +10,7 @@ import {
   SellOrder
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
@@ -105,6 +106,104 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     network: () => props.network,
     auction: () => props.auction
   });
+
+const userOrdersSummary = computed(() => {
+  let auctioningTokenToClaim = 0n;
+  let biddingTokenToClaim = 0n;
+
+  const statuses: Record<
+    string,
+    'open' | 'filled' | 'partially-filled' | 'rejected'
+  > = {};
+  const { clearingPriceOrder, volumeClearingPriceOrder } = props.auction;
+
+  if (
+    !userOrders.value ||
+    clearingPriceOrder === null ||
+    volumeClearingPriceOrder === null
+  ) {
+    return { statuses, auctioningTokenToClaim, biddingTokenToClaim };
+  }
+  const clearingPriceOrderDecoded = decodeOrder(clearingPriceOrder);
+
+  const auctioningTokensPerBiddingToken =
+    BigInt(props.auction.currentClearingOrderBuyAmount) /
+    BigInt(props.auction.currentClearingOrderSellAmount);
+
+  userOrders.value.forEach(order => {
+    if (auctionState.value === 'active') {
+      statuses[order.id] = 'open';
+      return;
+    }
+
+    const orderSellAmount = BigInt(order.sellAmount);
+
+    if (auctionState.value === 'canceled') {
+      // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
+      statuses[order.id] = 'rejected';
+      biddingTokenToClaim += orderSellAmount;
+      return;
+    }
+
+    const orderComparison = compareOrders(
+      {
+        userId: order.userId,
+        buyAmount: order.buyAmount,
+        sellAmount: order.sellAmount
+      },
+      clearingPriceOrderDecoded
+    );
+
+    if (orderComparison === 0) {
+      // [25]: Order is partially filled. User gets refund for unfilled bidding tokens and gets auctioning tokens based on filled amount
+      const settledBuyAmount =
+        auctioningTokensPerBiddingToken * BigInt(volumeClearingPriceOrder);
+
+      statuses[order.id] = 'partially-filled';
+      biddingTokenToClaim += orderSellAmount - BigInt(volumeClearingPriceOrder);
+      auctioningTokenToClaim += settledBuyAmount;
+    } else if (orderComparison > 0) {
+      // [17]: Order is fully filled. User doesn't get bidding tokens back, but gets auctioning tokens
+      // equal to their sellAmount * currentClearingPrice
+      const settledBuyAmount =
+        auctioningTokensPerBiddingToken * orderSellAmount;
+
+      statuses[order.id] = 'filled';
+      auctioningTokenToClaim += settledBuyAmount;
+    } else {
+      // [24]: No amount left to claim, all remaining orders are rejected and users get their bidding tokens back
+      statuses[order.id] = 'rejected';
+      biddingTokenToClaim += orderSellAmount;
+    }
+  });
+
+  return { statuses, auctioningTokenToClaim, biddingTokenToClaim };
+});
+
+const claimText = computed(() => {
+  const { auctioningTokenToClaim, biddingTokenToClaim } =
+    userOrdersSummary.value;
+
+  const parts: string[] = [];
+  if (auctioningTokenToClaim > 0n) {
+    parts.push(
+      `${formatTokenAmount(
+        auctioningTokenToClaim.toString(),
+        props.auction.decimalsAuctioningToken
+      )} ${props.auction.symbolAuctioningToken}`
+    );
+  }
+  if (biddingTokenToClaim > 0n) {
+    parts.push(
+      `${formatTokenAmount(
+        biddingTokenToClaim.toString(),
+        props.auction.decimalsBiddingToken
+      )} ${props.auction.symbolBiddingToken}`
+    );
+  }
+
+  return parts.length > 0 ? `Claim ${parts.join(' and ')}` : 'Nothing to claim';
+});
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
@@ -438,10 +537,10 @@ function handleTransactionConfirmed() {
         <UiEyebrow class="mb-3">Your bids</UiEyebrow>
         <div class="border rounded-lg overflow-hidden">
           <UiColumnHeader class="py-2 gap-3" :sticky="false">
-            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-            <div class="max-w-[144px] w-[144px] truncate">Date</div>
-            <div class="max-w-[144px] w-[144px] truncate">Amount</div>
-            <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
+            <div class="min-w-[100px] truncate">Status</div>
+            <div class="max-w-[168px] w-[168px] truncate">Date</div>
+            <div class="max-w-[168px] w-[168px] truncate">Amount</div>
+            <div class="flex-1 min-w-[168px] text-right truncate">Price</div>
             <div class="min-w-[44px] lg:w-[60px] -mr-4" />
           </UiColumnHeader>
           <UiLoading
@@ -464,7 +563,8 @@ function handleTransactionConfirmed() {
             <AuctionBid
               v-for="order in userOrders"
               :key="order.id"
-              with-actions
+              is-user-order
+              :order-status="userOrdersSummary.statuses[order.id]"
               :auction-id="auctionId"
               :auction="auction"
               :order="order"
@@ -473,6 +573,7 @@ function handleTransactionConfirmed() {
             />
           </div>
         </div>
+        <UiButton class="w-full mt-4" primary>{{ claimText }}</UiButton>
       </div>
 
       <div>

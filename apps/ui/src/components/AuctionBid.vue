@@ -8,11 +8,12 @@ const props = withDefaults(
     auctionId: string;
     auction: AuctionDetailFragment;
     order: Order;
+    orderStatus?: 'open' | 'filled' | 'partially-filled' | 'rejected';
     biddingTokenPrice: number;
-    withActions?: boolean;
+    isUserOrder?: boolean;
   }>(),
   {
-    withActions: false
+    isUserOrder: false
   }
 );
 
@@ -31,9 +32,7 @@ const orderPercentage = computed(() => {
 });
 
 const columnSize = computed(() => {
-  return props.withActions
-    ? 'w-[144px] max-w-[144px]'
-    : 'w-[168px] max-w-[168px]';
+  return 'w-[168px] max-w-[168px]';
 });
 </script>
 
@@ -45,7 +44,22 @@ const columnSize = computed(() => {
         width: `${Math.min(orderPercentage * 100, 100).toFixed(2)}%`
       }"
     />
-    <div class="flex-1 min-w-[168px] truncate">
+    <div v-if="isUserOrder" class="min-w-[100px] text-skin-link truncate">
+      <span v-if="orderStatus === 'open'">Open</span>
+      <span v-else-if="orderStatus === 'filled'" class="text-skin-success">
+        Filled
+      </span>
+      <span
+        v-else-if="orderStatus === 'partially-filled'"
+        class="text-skin-success opacity-70"
+      >
+        Partially-filled
+      </span>
+      <span v-else-if="orderStatus === 'rejected'" class="text-skin-danger">
+        Rejected
+      </span>
+    </div>
+    <div v-else class="flex-1 min-w-[168px] truncate">
       <AppLink
         class="leading-[22px] w-fit flex items-center space-x-3 truncate"
         :to="{ name: 'user', params: { user: order.userAddress } }"
@@ -83,7 +97,10 @@ const columnSize = computed(() => {
         {{ _p(orderPercentage) }}
       </div>
     </div>
-    <div class="truncate text-right" :class="columnSize">
+    <div
+      class="truncate text-right"
+      :class="isUserOrder ? 'flex-1 min-w-[144px]' : columnSize"
+    >
       <h4 class="text-skin-link truncate">
         {{ formatPrice(order.price) }}
         {{ auction.symbolBiddingToken }}
@@ -97,7 +114,7 @@ const columnSize = computed(() => {
       </div>
     </div>
     <div
-      v-if="withActions"
+      v-if="isUserOrder"
       class="min-w-[44px] lg:w-[60px] flex items-center justify-center -mr-4"
     >
       <UiDropdown>

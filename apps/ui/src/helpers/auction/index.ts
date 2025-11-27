@@ -2,10 +2,9 @@ import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import { AuctionNetworkId, Order } from './types';
 
-export type AuctionNetworkId = 'eth' | 'sep';
-export type Order = OrderFragment & { name: string | null };
-export type SellOrder = Pick<Order, 'sellAmount' | 'price'>;
+export * from './types';
 
 const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
