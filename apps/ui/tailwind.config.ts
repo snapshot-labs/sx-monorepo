@@ -7,6 +7,10 @@ export const TOTAL_NAV_HEIGHT = ELECTRON_TITLEBAR_HEIGHT + APP_TOPNAV_HEIGHT;
 
 const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + 41;
 
+// On some mobile devices (reproduced on Android only) consecutive sticky elements sometimes get out of sync when scrolling.
+// To prevent that we offset those elements by 1px so they overlap slightly preventing gaps.
+const STICKY_ELEMENT_BUFFER = 1;
+
 export default {
   future: {
     hoverOnlyWhenSupported: true
@@ -96,9 +100,12 @@ export default {
       // Layout heights
       'header-height': `${TOTAL_NAV_HEIGHT}px`,
       'electron-titlebar-height': `${ELECTRON_TITLEBAR_HEIGHT}px`,
-      'header-height-with-offset': `${TOTAL_NAV_HEIGHT - 1}px`,
+      'header-height-with-offset': `${TOTAL_NAV_HEIGHT - STICKY_ELEMENT_BUFFER}px`,
       'header-with-section-height': `${TOTAL_WITH_SECTION}px`,
-      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION - 2}px`
+      // This offset is used on elements that have two preceeding fixed/sticky elements.
+      // Second fixed/sticky element is already shifted by STICKY_ELEMENT_BUFFER, so for third element
+      // we need to shift it again by the same amount so they overlap again.
+      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION - 2 * STICKY_ELEMENT_BUFFER}px`
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']
