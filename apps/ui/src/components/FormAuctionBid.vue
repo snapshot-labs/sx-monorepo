@@ -3,7 +3,12 @@ import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
-import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  formatPrice,
+  Order,
+  SellOrder
+} from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
@@ -29,6 +34,7 @@ const emit = defineEmits<{
 const props = defineProps<{
   auction: AuctionDetailFragment;
   network: AuctionNetworkId;
+  previousOrders?: Order[];
   isLoading?: boolean;
 }>();
 
@@ -182,6 +188,20 @@ const priceError = computed(() => {
     }
   }
 
+  const maxBiddingPrice = (isPriceInverted.value ? 1 / price : price).toFixed(
+    Number(props.auction.decimalsBiddingToken)
+  );
+
+  if (
+    props.previousOrders?.find(
+      order =>
+        parseFloat(order.price).toFixed(
+          Number(props.auction.decimalsBiddingToken)
+        ) === maxBiddingPrice
+    )
+  ) {
+    return 'You already have an order at this price';
+  }
   return undefined;
 });
 

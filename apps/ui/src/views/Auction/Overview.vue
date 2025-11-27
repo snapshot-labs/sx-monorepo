@@ -299,6 +299,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         :auction="auction"
         :network="network"
         :is-loading="isPlacingOrder"
+        :previous-orders="userOrders"
         @submit="handlePlaceSellOrder"
       />
 
