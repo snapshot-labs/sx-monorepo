@@ -71,7 +71,7 @@ function handleScrollEvent(target: HTMLElement) {
           (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
           null)
     "
-    class="!px-0 z-40 overflow-hidden"
+    class="!px-0 overflow-hidden"
   >
     <div class="flex space-x-3 min-w-[735px] w-full">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
