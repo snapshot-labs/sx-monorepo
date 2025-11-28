@@ -408,6 +408,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
               with-actions
               :auction-id="auctionId"
               :auction="auction"
+              :network-id="network"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
             />
@@ -446,6 +447,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
               :key="order.id"
               :auction-id="auctionId"
               :auction="auction"
+              :network-id="network"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
             />

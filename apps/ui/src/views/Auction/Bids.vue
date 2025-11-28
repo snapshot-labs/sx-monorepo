@@ -72,6 +72,7 @@ function handleEndReached() {
           :key="order.id"
           :auction-id="auctionId"
           :auction="auction"
+          :network-id="network"
           :order="order"
           :bidding-token-price="biddingTokenPrice"
         />

@@ -63,18 +63,19 @@ export async function placeSellOrder(
 }
 
 export async function cancelSellOrder(
-  signer: JsonRpcSigner,
-  auction: Auction,
+  web3: Web3Provider,
+  auction: AuctionDetailFragment,
+  networkId: AuctionNetworkId,
   order: Order
 ) {
-  const contractAddress = AUCTION_CONTRACT_ADDRESSES[auction.network];
-  const contract = new Contract(contractAddress, abis, signer);
-  console.log(order);
+  const contractAddress = AUCTION_CONTRACT_ADDRESSES[networkId];
+  const contract = new Contract(contractAddress, abis, web3.getSigner());
+
   return contract.cancelSellOrders(auction.id, [
     encodeOrder({
-      sellAmount: BigNumber.from(order.sellAmount),
-      buyAmount: BigNumber.from(order.buyAmount),
-      userId: BigNumber.from(order.userId)
+      sellAmount: BigInt(order.sellAmount),
+      buyAmount: BigInt(order.buyAmount),
+      userId: BigInt(order.userId)
     })
   ]);
 }

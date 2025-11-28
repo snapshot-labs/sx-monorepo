@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { formatPrice, Order } from '@/helpers/auction';
-import { cancelSellOrder } from '@/helpers/auction/actions';
+import { AuctionNetworkId, formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
@@ -8,6 +7,7 @@ const props = withDefaults(
   defineProps<{
     auctionId: string;
     auction: AuctionDetailFragment;
+    networkId: AuctionNetworkId;
     order: Order;
     biddingTokenPrice: number;
     withActions?: boolean;
@@ -18,10 +18,8 @@ const props = withDefaults(
 );
 
 const isModalTransactionProgressOpen = ref(false);
-const cancelFn = ref<any>(() => {});
 
-const { getSigner } = useNetworkSigner('sep');
-const uiStore = useUiStore();
+const { cancelSellOrder } = useAuctionActions(props.networkId, props.auction);
 
 const isCancellable = computed(() => {
   return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
@@ -38,24 +36,6 @@ const columnSize = computed(() => {
     ? 'w-[144px] max-w-[144px]'
     : 'w-[168px] max-w-[168px]';
 });
-
-async function handleCancelBid(order: Order) {
-  const signer = await getSigner();
-  if (!signer) return;
-
-  cancelFn.value = async () => {
-    const tx = await cancelSellOrder(
-      signer,
-      { network: 'sep', ...props.auction },
-      order
-    );
-    uiStore.addPendingTransaction(tx.hash, 11155111);
-
-    return tx.hash;
-  };
-
-  isModalTransactionProgressOpen.value = true;
-}
 </script>
 
 <template>
@@ -130,7 +110,7 @@ async function handleCancelBid(order: Order) {
         <template #items>
           <UiDropdownItem
             :disabled="!isCancellable"
-            @click="handleCancelBid(order)"
+            @click="isModalTransactionProgressOpen = true"
           >
             <IS-x-mark :width="16" />
             Cancel bid
@@ -141,7 +121,7 @@ async function handleCancelBid(order: Order) {
     <teleport to="#modal">
       <ModalTransactionProgress
         :open="isModalTransactionProgressOpen"
-        :execute="cancelFn"
+        :execute="() => cancelSellOrder(order)"
         :chain-id="'11155111'"
         @close="isModalTransactionProgressOpen = false"
         @cancelled="isModalTransactionProgressOpen = false"
