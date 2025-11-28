@@ -40,11 +40,8 @@ const allContacts = computed(() => {
 const filteredContacts = computed(() =>
   allContacts.value.filter(contact => {
     return (
-      contact.name
-        .toLocaleLowerCase()
-        .includes(props.searchValue.toLocaleLowerCase()) ||
-      contact.address.toLocaleLowerCase() ===
-        props.searchValue.toLocaleLowerCase()
+      contact.name.toLowerCase().includes(props.searchValue.toLowerCase()) ||
+      contact.address.toLowerCase() === props.searchValue.toLowerCase()
     );
   })
 );

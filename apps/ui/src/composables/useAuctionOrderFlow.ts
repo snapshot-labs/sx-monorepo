@@ -1,14 +1,6 @@
 import { MaybeRefOrGetter } from 'vue';
-import {
-  Auction,
-  AUCTION_CONTRACT_ADDRESSES,
-  AuctionNetworkId,
-  getAuction,
-  SellOrder
-} from '@/helpers/auction';
-import { placeSellOrder } from '@/helpers/auction/actions';
-import { approve, getIsApproved } from '@/helpers/token';
-import { METADATA as EVM_METADATA } from '@/networks/evm';
+import { AuctionNetworkId, SellOrder } from '@/helpers/auction';
+import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 
 type StepId = 'check_approval' | 'approve' | 'bid';
 
@@ -27,27 +19,16 @@ type Step = {
 };
 
 const FIRST_STEP: StepId = 'check_approval';
-
-function getBiddingToken(auction?: Auction) {
-  if (!auction) throw new Error('Missing auction details');
-
-  return {
-    contractAddress: auction.addressBiddingToken,
-    decimals: Number(auction.decimalsBiddingToken),
-    symbol: auction.symbolBiddingToken,
-    name: auction.symbolBiddingToken
-  };
-}
+const LAST_STEP: StepId = 'bid';
 
 export function useAuctionOrderFlow(
-  auctionId: MaybeRefOrGetter<string>,
-  networkId: MaybeRefOrGetter<AuctionNetworkId>
+  networkId: MaybeRefOrGetter<AuctionNetworkId>,
+  auction: MaybeRefOrGetter<AuctionDetailFragment>
 ) {
-  const { getSigner } = useNetworkSigner(networkId);
-  const uiStore = useUiStore();
+  const { getIsTokenApproved, approveToken, placeSellOrder } =
+    useAuctionActions(networkId, auction);
 
-  const auction = ref<Auction>();
-  const sellOrder = ref<SellOrder>({ sellAmount: 0, price: 0 });
+  const sellOrder = ref<SellOrder>({ sellAmount: '0', price: '0' });
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
@@ -61,18 +42,10 @@ export function useAuctionOrderFlow(
       nextStep: () =>
         stepExecuteResults.value.get('check_approval') ? 'bid' : 'approve',
       execute: async () => {
-        const signer = await getSigner();
-        if (!signer) return null;
+        const result = await getIsTokenApproved(sellOrder.value);
 
-        const result = await getIsApproved(
-          getBiddingToken(auction.value),
-          signer,
-          contractAddress.value,
-          sellOrder.value.sellAmount
-        );
-
-        if (result === undefined) {
-          throw new Error('wallet not found');
+        if (result === null) {
+          return null;
         }
 
         stepExecuteResults.value.set('check_approval', result);
@@ -85,20 +58,8 @@ export function useAuctionOrderFlow(
         approveTitle: 'Setting token allowance',
         confirmingTitle: 'Waiting for token allowance'
       },
-      nextStep: () => 'check_approval',
-      execute: async () => {
-        const signer = await getSigner();
-        if (!signer) return null;
-
-        return wrapPromise(
-          approve(
-            getBiddingToken(auction.value),
-            signer,
-            contractAddress.value,
-            sellOrder.value.sellAmount
-          )
-        );
-      }
+      nextStep: () => 'bid',
+      execute: async () => approveToken(sellOrder.value)
     },
     bid: {
       messages: {
@@ -107,27 +68,14 @@ export function useAuctionOrderFlow(
         successTitle: 'Order successful'
       },
       nextStep: () => false,
-      execute: async () => {
-        if (!auction.value) throw new Error('Missing auction details');
-
-        const signer = await getSigner();
-        if (!signer) return null;
-
-        return wrapPromise(
-          placeSellOrder(signer, auction.value, sellOrder.value)
-        );
-      }
+      execute: async () => placeSellOrder(sellOrder.value)
     }
   });
-
-  const contractAddress = computed<string>(
-    () => AUCTION_CONTRACT_ADDRESSES[toValue(networkId)]
-  );
 
   const currentStep = computed<Step>(() => STEPS.value[currentStepId.value]);
 
   const isLastStep = computed<boolean>(() => {
-    return currentStepId.value === Object.keys(STEPS.value).pop();
+    return currentStepId.value === LAST_STEP;
   });
 
   function goToNextStep(): boolean {
@@ -141,34 +89,11 @@ export function useAuctionOrderFlow(
     return false;
   }
 
-  async function wrapPromise(promise: Promise<any>): Promise<string> {
-    const tx = await promise;
-    uiStore.addPendingTransaction(
-      tx.hash,
-      EVM_METADATA[toValue(networkId)].chainId
-    );
-
-    return tx.hash;
-  }
-
   function start(order: SellOrder) {
     currentStepId.value = FIRST_STEP;
-    sellOrder.value = order;
     stepExecuteResults.value.clear();
+    sellOrder.value = order;
   }
-
-  watchEffect(async () => {
-    const auctionDetails = (
-      await getAuction(toValue(auctionId), toValue(networkId))
-    )?.auctionDetail;
-
-    if (auctionDetails) {
-      auction.value = {
-        network: toValue(networkId),
-        ...auctionDetails
-      };
-    }
-  });
 
   return { start, goToNextStep, isLastStep, currentStep };
 }

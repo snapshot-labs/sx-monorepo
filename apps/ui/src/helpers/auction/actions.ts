@@ -1,55 +1,63 @@
-import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
-import { JsonRpcSigner } from '@ethersproject/providers';
+import { Web3Provider } from '@ethersproject/providers';
+import { parseUnits } from '@ethersproject/units';
 import { abis } from './abis';
+import { AuctionDetailFragment } from './gql/graphql';
 import {
-  Auction,
   AUCTION_CONTRACT_ADDRESSES,
+  AuctionNetworkId,
   encodeOrder,
-  getPreviousOrder,
+  getPreviousOrderId,
   Order,
   SellOrder
 } from './index';
 
 export async function placeSellOrder(
-  signer: JsonRpcSigner,
-  auction: Auction,
+  web3: Web3Provider,
+  auction: AuctionDetailFragment,
+  networkId: AuctionNetworkId,
   sellOrder: SellOrder
 ) {
-  const contractAddress = AUCTION_CONTRACT_ADDRESSES[auction.network];
-  const contract = new Contract(contractAddress, abis, signer);
-  let previousOrder = '';
+  const contract = new Contract(
+    AUCTION_CONTRACT_ADDRESSES[networkId],
+    abis,
+    web3.getSigner()
+  );
+  let previousOrderId: string;
+  const rawSellAmount = parseUnits(
+    sellOrder.sellAmount,
+    auction.decimalsBiddingToken
+  );
+  const price = parseFloat(sellOrder.price);
+  const buyAmount = (
+    price
+      ? (parseFloat(sellOrder.sellAmount) / price).toFixed(
+          Number(auction.decimalsAuctioningToken)
+        )
+      : 0
+  ).toString();
+  const rawBuyAmount = parseUnits(buyAmount, auction.decimalsAuctioningToken);
 
   try {
-    previousOrder = await getPreviousOrder(
+    previousOrderId = await getPreviousOrderId(
       auction.id,
-      auction.network,
+      networkId,
       sellOrder.price
     );
   } catch (e) {
-    console.log(
+    console.error(
       `Error trying to get previous order for auctionId ${auction.id}`,
       e
     );
-  }
 
-  const rawSellAmount = BigNumber.from(
-    Math.floor(
-      sellOrder.sellAmount * 10 ** Number(auction.decimalsBiddingToken)
-    )
-  );
-  const rawBuyAmount = BigNumber.from(
-    Math.floor(
-      (sellOrder.sellAmount / sellOrder.price) *
-        10 ** Number(auction.decimalsAuctioningToken)
-    )
-  );
+    throw new Error('Unable to get previous order ID');
+  }
 
   return contract.placeSellOrders(
     auction.id,
     [rawBuyAmount],
     [rawSellAmount],
-    [previousOrder],
+    [previousOrderId],
     auction.allowListSigner
   );
 }

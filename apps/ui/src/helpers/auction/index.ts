@@ -1,22 +1,14 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { BigNumber } from '@ethersproject/bignumber';
 import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
 import { getNames } from '../stamp';
-import {
-  AuctionDetailFragment,
-  Order_Filter,
-  Order_OrderBy,
-  OrderFragment
-} from './gql/graphql';
+import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
 
 export type AuctionNetworkId = 'eth' | 'sep';
 export type Order = OrderFragment & { name: string | null };
-export type SellOrder = { sellAmount: number; price: number };
+export type SellOrder = Pick<Order, 'sellAmount' | 'price'>;
 
-export type Auction = {
-  id: string;
-  network: AuctionNetworkId;
-} & AuctionDetailFragment;
+const DEFAULT_ORDER_ID =
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
@@ -96,55 +88,53 @@ export async function getOrders(
 
   return orders.map(order => ({
     ...order,
-    name: names[order.userAddress.toLocaleLowerCase()] || null
+    name: names[order.userAddress.toLowerCase()] || null
   }));
 }
 
-export async function getPreviousOrder(
+export async function getPreviousOrderId(
   id: string,
   network: AuctionNetworkId,
-  price: number
+  price: string
 ): Promise<string> {
   const client = getClient(network);
 
-  const { data } = await client.query({
+  const { data, error } = await client.query({
     query: previousOrderQuery,
-    variables: { id, price: price.toString() }
+    variables: { id, price }
   });
+
+  if (error) throw error;
 
   const orders: OrderFragment[] =
     data.auctionDetail?.ordersWithoutClaimed || [];
 
-  if (!orders.length) {
-    return '0x0000000000000000000000000000000000000000000000000000000000000001';
-  }
+  if (!orders.length) return DEFAULT_ORDER_ID;
 
   const sortedOrders: OrderFragment[] = [...orders].sort((a, b) => {
-    if (Number(a.price) === Number(b.price))
+    const aPrice = Number(a.price);
+    const bPrice = Number(b.price);
+
+    if (aPrice === bPrice) {
       return Number(a.volume) - Number(b.volume);
-    return Number(a.price) - Number(b.price);
+    }
+
+    return aPrice - bPrice;
   });
 
   return encodeOrder({
-    userId: BigNumber.from(sortedOrders[0].userId),
-    buyAmount: BigNumber.from(sortedOrders[0].buyAmount),
-    sellAmount: BigNumber.from(sortedOrders[0].sellAmount)
+    userId: BigInt(sortedOrders[0].userId),
+    buyAmount: BigInt(sortedOrders[0].buyAmount),
+    sellAmount: BigInt(sortedOrders[0].sellAmount)
   });
 }
 
 export function encodeOrder(order: {
-  sellAmount: BigNumber;
-  buyAmount: BigNumber;
-  userId: BigNumber;
+  sellAmount: bigint;
+  buyAmount: bigint;
+  userId: bigint;
 }): string {
-  return `0x${order.userId
-    .toHexString()
-    .slice(2)
-    .padStart(16, '0')}${order.buyAmount
-    .toHexString()
-    .slice(2)
-    .padStart(
-      24,
-      '0'
-    )}${order.sellAmount.toHexString().slice(2).padStart(24, '0')}`;
+  return `0x${order.userId.toString(16).padStart(16, '0')}${order.buyAmount
+    .toString(16)
+    .padStart(24, '0')}${order.sellAmount.toString(16).padStart(24, '0')}`;
 }
