@@ -153,10 +153,7 @@ const amountError = computed(() => {
     return 'Insufficient balance';
   }
 
-  return getDecimalValidationError(
-    bidAmount.value,
-    parseInt(props.auction.decimalsBiddingToken)
-  );
+  return undefined;
 });
 
 const priceError = computed(() => {
@@ -180,26 +177,8 @@ const priceError = computed(() => {
     }
   }
 
-  if (!isPriceInverted.value) {
-    return getDecimalValidationError(
-      bidPrice.value,
-      parseInt(props.auction.decimalsBiddingToken)
-    );
-  }
-
   return undefined;
 });
-
-function getDecimalValidationError(
-  value: string,
-  maxDecimals: number
-): string | undefined {
-  const decimalMatch = value.match(/\.(\d+)$/);
-  if (decimalMatch && decimalMatch[1].length > maxDecimals) {
-    return `Maximum ${maxDecimals} decimal places allowed`;
-  }
-  return undefined;
-}
 
 function togglePriceMode() {
   const currentPrice = parseFloat(bidPrice.value) || 0;
@@ -211,6 +190,46 @@ function togglePriceMode() {
     bidPrice.value = formatPrice(1 / currentPrice, decimals);
   }
 }
+
+function truncateDecimals(value: string, maxDecimals: number): string {
+  const parts = value.split('.');
+
+  if (parts.length > 1 && parts[1].length > maxDecimals) {
+    return `${parts[0]}.${parts[1].substring(0, maxDecimals)}`;
+  }
+
+  return value;
+}
+
+watch(bidAmount, (newValue, oldValue) => {
+  if (!newValue || newValue === oldValue) return;
+
+  const truncated = truncateDecimals(
+    newValue,
+    parseInt(props.auction.decimalsBiddingToken)
+  );
+
+  if (truncated !== newValue) {
+    nextTick(() => {
+      bidAmount.value = truncated;
+    });
+  }
+});
+
+watch(bidPrice, (newValue, oldValue) => {
+  if (!newValue || newValue === oldValue || isPriceInverted.value) return;
+
+  const truncated = truncateDecimals(
+    newValue,
+    parseInt(props.auction.decimalsBiddingToken)
+  );
+
+  if (truncated !== newValue) {
+    nextTick(() => {
+      bidPrice.value = truncated;
+    });
+  }
+});
 
 onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
