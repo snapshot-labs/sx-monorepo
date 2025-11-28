@@ -40,6 +40,7 @@ export function useExecutionActions(
   const fetchingDetails = ref(false);
   const executionTx = ref<string | null>(null);
   const message: Ref<string | null> = ref(null);
+  const warningMessage: Ref<string | null> = ref(null);
   const executionNetwork = ref<Network>(getNetwork(toValue(proposal).network));
   const finalizeProposalSending = ref(false);
   const executeProposalSending = ref(false);
@@ -176,14 +177,19 @@ export function useExecutionActions(
       });
 
       if (!data) {
-        const configCompliant = await isConfigCompliant(
-          executionValue.safeAddress,
-          chainId
-        );
-
-        message.value = configCompliant.automaticExecution
-          ? 'Waiting for execution to be initiated.'
-          : 'Space is not configured for automatic execution.';
+        try {
+          const configCompliant = await isConfigCompliant(
+            executionValue.safeAddress,
+            chainId
+          );
+          message.value = configCompliant.automaticExecution
+            ? 'Waiting for execution to be initiated.'
+            : 'Space is not configured for automatic execution.';
+        } catch {
+          message.value = 'Waiting for execution to be initiated.';
+          warningMessage.value =
+            'oSnap service may be temporarily unavailable to check automatic execution status.';
+        }
       } else if (data.executionTransactionHash) {
         try {
           executionTx.value = data.executionTransactionHash;
@@ -276,6 +282,7 @@ export function useExecutionActions(
     hasExecuteQueued,
     fetchingDetails,
     message,
+    warningMessage,
     executionTx,
     executionTxUrl,
     finalizeProposalSending,
