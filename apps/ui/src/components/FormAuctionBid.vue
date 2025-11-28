@@ -205,29 +205,36 @@ function truncateDecimals(value: string, maxDecimals: number): string {
   return value;
 }
 
-watch(bidAmount, (newValue, oldValue) => {
-  if (!newValue || newValue === oldValue) return;
+watch(
+  bidAmount,
+  (newValue, oldValue) => {
+    if (!newValue || newValue === oldValue) return;
 
-  const truncated = truncateDecimals(newValue, biddingTokenDecimals.value);
+    const truncated = truncateDecimals(newValue, biddingTokenDecimals.value);
 
-  if (truncated !== newValue) {
-    nextTick(() => {
+    if (truncated !== newValue) {
       bidAmount.value = truncated;
-    });
-  }
-});
+    }
+  },
+  { flush: 'post' }
+);
 
-watch(bidPrice, (newValue, oldValue) => {
-  if (!newValue || newValue === oldValue || isPriceInverted.value) return;
+watch(
+  bidPrice,
+  (newValue, oldValue) => {
+    if (!newValue || newValue === oldValue || isPriceInverted.value) return;
 
-  const truncated = truncateDecimals(newValue, biddingTokenDecimals.value);
+    const truncated = truncateDecimals(
+      newValue,
+      parseInt(props.auction.decimalsAuctioningToken)
+    );
 
-  if (truncated !== newValue) {
-    nextTick(() => {
+    if (truncated !== newValue) {
       bidPrice.value = truncated;
-    });
-  }
-});
+    }
+  },
+  { flush: 'post' }
+);
 
 onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
