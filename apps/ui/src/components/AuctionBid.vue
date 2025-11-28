@@ -17,6 +17,10 @@ const props = withDefaults(
   }
 );
 
+const emit = defineEmits<{
+  (e: 'cancelled'): void;
+}>();
+
 const isModalTransactionProgressOpen = ref(false);
 
 const { cancelSellOrder } = useAuctionActions(props.networkId, props.auction);
@@ -125,6 +129,7 @@ const columnSize = computed(() => {
         :chain-id="'11155111'"
         @close="isModalTransactionProgressOpen = false"
         @cancelled="isModalTransactionProgressOpen = false"
+        @confirmed="emit('cancelled')"
       />
     </teleport>
   </div>
