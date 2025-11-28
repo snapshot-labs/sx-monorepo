@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
+import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionState } from '@/components/AuctionStatus.vue';
-import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
+import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { _n, _t } from '@/helpers/utils';
+import { _n, _t, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
+  AUCTION_KEYS,
   useBiddingTokenPriceQuery,
   useBidsSummaryQuery
 } from '@/queries/auction';
@@ -19,8 +21,15 @@ const props = defineProps<{
   auction: AuctionDetailFragment;
 }>();
 
-const { auth } = useWeb3();
-const { web3 } = useWeb3();
+const isModalTransactionProgressOpen = ref(false);
+const isPlacingOrder = ref(false);
+
+const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
+  toRef(props, 'network'),
+  toRef(props, 'auction')
+);
+const { auth, web3 } = useWeb3();
+const queryClient = useQueryClient();
 
 const auctionState = computed<AuctionState>(() => {
   const now = Math.floor(Date.now() / 1000);
@@ -42,11 +51,8 @@ const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
 );
 
-const isAccountSupported = computed(() => {
-  const connectorType = auth.value?.connector.type;
-  if (!web3.value.account || !connectorType) return false;
-
-  return EVM_CONNECTORS.includes(connectorType);
+const isAccountSupported = computed<boolean>(() => {
+  return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
 });
 
 const {
@@ -146,6 +152,38 @@ const normalizedSignerAddress = computed(() => {
     return null;
   }
 });
+
+async function moveToNextStep() {
+  if (isLastStep.value) {
+    isPlacingOrder.value = false;
+
+    await sleep(2000);
+
+    queryClient.invalidateQueries({
+      queryKey: AUCTION_KEYS.summary(props.network, props.auction)
+    });
+    queryClient.invalidateQueries({
+      queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
+        userAddress: web3.value.account?.toLowerCase()
+      })
+    });
+
+    return;
+  }
+
+  isModalTransactionProgressOpen.value = false;
+
+  if (await goToNextStep()) {
+    isModalTransactionProgressOpen.value = true;
+  }
+}
+
+async function handlePlaceSellOrder(sellOrder: SellOrder) {
+  start(sellOrder);
+
+  isPlacingOrder.value = true;
+  isModalTransactionProgressOpen.value = true;
+}
 </script>
 
 <template>
@@ -275,6 +313,9 @@ const normalizedSignerAddress = computed(() => {
         v-if="isAuctionOpen"
         :auction="auction"
         :network="network"
+        :is-loading="isPlacingOrder"
+        :previous-orders="userOrders"
+        @submit="handlePlaceSellOrder"
       />
 
       <div>
@@ -455,5 +496,22 @@ const normalizedSignerAddress = computed(() => {
         </div>
       </div>
     </div>
+    <teleport to="#modal">
+      <ModalTransactionProgress
+        :open="isModalTransactionProgressOpen"
+        :execute="currentStep.execute"
+        :chain-id="EVM_METADATA[network].chainId"
+        :messages="currentStep.messages"
+        @close="
+          isModalTransactionProgressOpen = false;
+          isPlacingOrder = false;
+        "
+        @confirmed="moveToNextStep"
+        @cancelled="
+          isModalTransactionProgressOpen = false;
+          isPlacingOrder = false;
+        "
+      />
+    </teleport>
   </div>
 </template>
