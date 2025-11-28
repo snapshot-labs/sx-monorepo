@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
+import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionState } from '@/components/AuctionStatus.vue';
 import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { _n, _t } from '@/helpers/utils';
+import { _n, _t, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
+  AUCTION_KEYS,
   useBiddingTokenPriceQuery,
   useBidsSummaryQuery
 } from '@/queries/auction';
@@ -27,6 +29,7 @@ const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
   toRef(props, 'auction')
 );
 const { auth, web3 } = useWeb3();
+const queryClient = useQueryClient();
 
 const auctionState = computed<AuctionState>(() => {
   const now = Math.floor(Date.now() / 1000);
@@ -153,6 +156,18 @@ const normalizedSignerAddress = computed(() => {
 async function moveToNextStep() {
   if (isLastStep.value) {
     isPlacingOrder.value = false;
+
+    await sleep(2000);
+
+    queryClient.invalidateQueries({
+      queryKey: AUCTION_KEYS.summary(props.network, props.auction)
+    });
+    queryClient.invalidateQueries({
+      queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
+        userAddress: web3.value.account?.toLowerCase()
+      })
+    });
+
     return;
   }
 
