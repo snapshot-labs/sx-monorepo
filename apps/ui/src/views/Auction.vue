@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
 import { AuctionNetworkId, getAuction } from '@/helpers/auction';
+import AUCTION_METADATA from '@/helpers/auction-metadata.json';
 
 const route = useRoute();
 
@@ -38,6 +39,7 @@ const {
     <router-view
       v-else-if="auctionData"
       :auction="auctionData.auctionDetail"
+      :metadata="AUCTION_METADATA"
       :network="params.network"
       :auction-id="params.id"
     />

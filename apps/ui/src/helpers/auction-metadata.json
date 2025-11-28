@@ -1,0 +1,29 @@
+{
+  "name": "Boorger DAO",
+  "description": "Boorger DAO is a decentralized collective reimagining the future of food governance. Our mission is to empower communities to own, operate, and govern local food ecosystems through transparent onchain coordination.",
+  "image": "ipfs://bafkreicwmnppr2o3pq3qskltjhrz47tn6htx3bklk4ljqlkgqbrig4jrqm",
+  "external_url": "https://boorger.dao",
+  "properties": {
+    "funding_rounds": [
+      {
+        "name": "Seed round",
+        "amount": 5000000,
+        "valuation": 20000000,
+        "investors": [
+         {
+          "name": "Tomato VC",
+          "logo": "https://pbs.twimg.com/profile_images/1919488160125616128/QAZXTMEj_400x400.png"
+         },
+         {
+          "name": "Salad DAO",
+          "logo": "https://pbs.twimg.com/profile_images/1841154134546006018/GUtoBcom_400x400.jpg"
+         },
+         {
+          "name": "Cheese Ventures",
+          "logo": "https://pbs.twimg.com/profile_images/1621329560183930881/MVsKQV4m_400x400.jpg"
+         }
+        ]
+      }
+    ]
+  }
+}

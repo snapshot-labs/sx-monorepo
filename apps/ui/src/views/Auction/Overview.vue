@@ -5,7 +5,7 @@ import { AuctionState } from '@/components/AuctionStatus.vue';
 import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import { _n, _t } from '@/helpers/utils';
+import { _n, _t, getUrl } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
@@ -17,6 +17,7 @@ const props = defineProps<{
   network: AuctionNetworkId;
   auctionId: string;
   auction: AuctionDetailFragment;
+  metadata: any;
 }>();
 
 const { auth } = useWeb3();
@@ -153,14 +154,38 @@ const normalizedSignerAddress = computed(() => {
     <div class="space-y-4">
       <div class="mb-4">
         <div class="flex items-center gap-2 mb-2">
-          <h1 class="text-[40px] leading-10">Auction #{{ auctionId }}</h1>
-          <span
-            class="inline-block px-2 py-1 text-xs rounded-full bg-skin-border text-skin-text"
-          >
+          <h1 class="text-[40px] leading-10">
+            {{ metadata.name }} #{{ auctionId }}
+          </h1>
+          <span class="inline-block px-2 py-1 text-xs rounded-full bg-skin-border text-skin-text">
             {{ EVM_METADATA[network]?.name || 'Unknown' }}
           </span>
         </div>
         <AuctionStatus :state="auctionState" />
+
+        <div class="flex flex-col gap-2">
+          <div class="text-md leading-6">
+            {{ metadata.description }}
+          </div>
+          <div>
+            <div class="text-skin-link font-bold mb-1">Previous funding rounds</div>
+            <div v-for="round in metadata.properties.funding_rounds" :key="round.name">
+              <div>
+                {{ round.name }}
+              </div>
+              <div>
+                ${{ _n(round.amount) }}
+              </div>
+              <div>
+                <img
+                  v-for="(investor, i) in round.investors"
+                  :key="i"
+                  :src="investor.logo"
+                  class="size-[32px] inline-block rounded-lg -mr-2" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>
@@ -168,37 +193,21 @@ const normalizedSignerAddress = computed(() => {
           <IH-collection />
           Token information
         </h4>
-        <div
-          class="border border-skin-border rounded-lg divide-y divide-skin-border"
-        >
-          <div
-            class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3"
-          >
+        <div class="border border-skin-border rounded-lg divide-y divide-skin-border">
+          <div class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3">
             <div class="flex-1">
               <div class="text-skin-text text-sm mb-2">
                 Auctioning token address
               </div>
-              <a
-                :href="
-                  getGenericExplorerUrl(
-                    EVM_METADATA[network]?.chainId,
-                    auction.addressAuctioningToken,
-                    'token'
-                  ) || '#'
-                "
-                target="_blank"
-                class="flex items-center gap-2"
-              >
-                <UiStamp
-                  :id="auction.addressAuctioningToken"
-                  type="token"
-                  :size="32"
-                />
+              <a :href="getGenericExplorerUrl(
+                EVM_METADATA[network]?.chainId,
+                auction.addressAuctioningToken,
+                'token'
+              ) || '#'
+                " target="_blank" class="flex items-center gap-2">
+                <img :src="getUrl(metadata.image)" class="size-[32px] rounded-full">
                 <div class="flex flex-col leading-[22px] min-w-0">
-                  <h4
-                    class="truncate"
-                    v-text="auction.symbolAuctioningToken.slice(0, 9)"
-                  />
+                  <h4 class="truncate" v-text="auction.symbolAuctioningToken.slice(0, 9)" />
                   <div class="text-[17px] truncate text-skin-text">
                     <UiAddress :address="auction.addressAuctioningToken" />
                   </div>
@@ -219,34 +228,20 @@ const normalizedSignerAddress = computed(() => {
             </div>
           </div>
 
-          <div
-            class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3"
-          >
+          <div class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3">
             <div class="flex-1">
               <div class="text-skin-text text-sm mb-2">
                 Bidding token address
               </div>
-              <a
-                :href="
-                  getGenericExplorerUrl(
-                    EVM_METADATA[network]?.chainId,
-                    auction.addressBiddingToken,
-                    'token'
-                  ) || '#'
-                "
-                target="_blank"
-                class="flex items-center gap-2"
-              >
-                <UiStamp
-                  :id="auction.addressBiddingToken"
-                  type="token"
-                  :size="32"
-                />
+              <a :href="getGenericExplorerUrl(
+                EVM_METADATA[network]?.chainId,
+                auction.addressBiddingToken,
+                'token'
+              ) || '#'
+                " target="_blank" class="flex items-center gap-2">
+                <UiStamp :id="auction.addressBiddingToken" type="token" :size="32" />
                 <div class="flex flex-col leading-[22px] min-w-0">
-                  <h4
-                    class="truncate"
-                    v-text="auction.symbolBiddingToken.slice(0, 9)"
-                  />
+                  <h4 class="truncate" v-text="auction.symbolBiddingToken.slice(0, 9)" />
                   <div class="text-[17px] truncate text-skin-text">
                     <UiAddress :address="auction.addressBiddingToken" />
                   </div>
@@ -271,25 +266,15 @@ const normalizedSignerAddress = computed(() => {
         </div>
       </div>
 
-      <FormAuctionBid
-        v-if="isAuctionOpen"
-        :auction="auction"
-        :network="network"
-      />
+      <FormAuctionBid v-if="isAuctionOpen" :auction="auction" :network="network" />
 
       <div>
         <h4 class="mb-3 eyebrow flex items-center gap-2">
           <IH-currency-dollar />
           Bidding parameters
         </h4>
-        <div
-          class="border border-skin-border rounded-lg divide-y divide-skin-border"
-        >
-          <div
-            v-for="item in biddingParameters"
-            :key="item.label"
-            class="flex justify-between px-4 py-3"
-          >
+        <div class="border border-skin-border rounded-lg divide-y divide-skin-border">
+          <div v-for="item in biddingParameters" :key="item.label" class="flex justify-between px-4 py-3">
             <div class="text-skin-text">{{ item.label }}</div>
             <div class="text-skin-link">{{ item.value }}</div>
           </div>
@@ -301,31 +286,20 @@ const normalizedSignerAddress = computed(() => {
           <IH-cog />
           Auction settings
         </h4>
-        <div
-          class="border border-skin-border rounded-lg divide-y divide-skin-border"
-        >
-          <div
-            v-for="item in auctionSettings"
-            :key="item.label"
-            class="flex justify-between px-4 py-3"
-          >
+        <div class="border border-skin-border rounded-lg divide-y divide-skin-border">
+          <div v-for="item in auctionSettings" :key="item.label" class="flex justify-between px-4 py-3">
             <div class="text-skin-text">{{ item.label }}</div>
             <div class="text-skin-link">{{ item.value }}</div>
           </div>
           <div class="flex justify-between px-4 py-3">
             <div class="text-skin-text">Signer address</div>
             <div class="text-skin-link">
-              <a
-                v-if="normalizedSignerAddress"
-                :href="
-                  getGenericExplorerUrl(
-                    EVM_METADATA[network]?.chainId,
-                    normalizedSignerAddress,
-                    'address'
-                  ) || '#'
-                "
-                target="_blank"
-              >
+              <a v-if="normalizedSignerAddress" :href="getGenericExplorerUrl(
+                EVM_METADATA[network]?.chainId,
+                normalizedSignerAddress,
+                'address'
+              ) || '#'
+                " target="_blank">
                 <UiAddress :address="normalizedSignerAddress" />
               </a>
               <span v-else>None</span>
@@ -344,32 +318,17 @@ const normalizedSignerAddress = computed(() => {
             <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
             <div class="min-w-[44px] lg:w-[60px] -mr-4" />
           </UiColumnHeader>
-          <UiLoading
-            v-if="isUserOrdersLoading || isBiddingTokenPriceLoading"
-            class="px-4 py-3 block"
-          />
+          <UiLoading v-if="isUserOrdersLoading || isBiddingTokenPriceLoading" class="px-4 py-3 block" />
           <UiStateWarning v-else-if="isUserOrdersError" class="px-4 py-3">
             Failed to load bids.
           </UiStateWarning>
-          <UiStateWarning
-            v-else-if="userOrders?.length === 0"
-            class="px-4 py-3"
-          >
+          <UiStateWarning v-else-if="userOrders?.length === 0" class="px-4 py-3">
             You don't have any bids yet.
           </UiStateWarning>
-          <div
-            v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
-            class="divide-y divide-skin-border flex flex-col justify-center"
-          >
-            <AuctionBid
-              v-for="order in userOrders"
-              :key="order.id"
-              with-actions
-              :auction-id="auctionId"
-              :auction="auction"
-              :order="order"
-              :bidding-token-price="biddingTokenPrice"
-            />
+          <div v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center">
+            <AuctionBid v-for="order in userOrders" :key="order.id" with-actions :auction-id="auctionId"
+              :auction="auction" :order="order" :bidding-token-price="biddingTokenPrice" />
           </div>
         </div>
       </div>
@@ -383,38 +342,20 @@ const normalizedSignerAddress = computed(() => {
             <div class="max-w-[168px] w-[168px] truncate">Amount</div>
             <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
           </UiColumnHeader>
-          <UiLoading
-            v-if="isRecentOrdersLoading || isBiddingTokenPriceLoading"
-            class="px-4 py-3 block"
-          />
+          <UiLoading v-if="isRecentOrdersLoading || isBiddingTokenPriceLoading" class="px-4 py-3 block" />
           <UiStateWarning v-else-if="isRecentOrdersError" class="px-4 py-3">
             Failed to load bids.
           </UiStateWarning>
-          <UiStateWarning
-            v-else-if="recentOrders?.length === 0"
-            class="px-4 py-3"
-          >
+          <UiStateWarning v-else-if="recentOrders?.length === 0" class="px-4 py-3">
             There are no bids here.
           </UiStateWarning>
-          <div
-            v-else-if="recentOrders && typeof biddingTokenPrice === 'number'"
-            class="divide-y divide-skin-border flex flex-col justify-center"
-          >
-            <AuctionBid
-              v-for="order in recentOrders"
-              :key="order.id"
-              :auction-id="auctionId"
-              :auction="auction"
-              :order="order"
-              :bidding-token-price="biddingTokenPrice"
-            />
+          <div v-else-if="recentOrders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center">
+            <AuctionBid v-for="order in recentOrders" :key="order.id" :auction-id="auctionId" :auction="auction"
+              :order="order" :bidding-token-price="biddingTokenPrice" />
           </div>
         </div>
-        <AppLink
-          v-if="recentOrders?.length"
-          :to="{ name: 'auction-bids' }"
-          class="mt-3 inline-block"
-        >
+        <AppLink v-if="recentOrders?.length" :to="{ name: 'auction-bids' }" class="mt-3 inline-block">
           View all bids
         </AppLink>
       </div>
@@ -426,28 +367,15 @@ const normalizedSignerAddress = computed(() => {
         </h4>
         <div class="flex">
           <div class="mt-1 ml-2">
-            <div
-              v-for="(state, i) in timelineStates"
-              :key="state.label"
-              class="flex relative h-[60px] last:h-0"
-            >
-              <div
-                class="absolute size-[15px] inline-block rounded-full left-[-7px] border-4 border-skin-bg"
-                :class="state.isPast ? 'bg-skin-heading' : 'bg-skin-border'"
-              />
-              <div
-                v-if="i < timelineStates.length - 1"
-                class="border-l pr-4 mt-3"
-                :class="timelineStates[i + 1].isPast && 'border-skin-heading'"
-              />
+            <div v-for="(state, i) in timelineStates" :key="state.label" class="flex relative h-[60px] last:h-0">
+              <div class="absolute size-[15px] inline-block rounded-full left-[-7px] border-4 border-skin-bg"
+                :class="state.isPast ? 'bg-skin-heading' : 'bg-skin-border'" />
+              <div v-if="i < timelineStates.length - 1" class="border-l pr-4 mt-3"
+                :class="timelineStates[i + 1].isPast && 'border-skin-heading'" />
             </div>
           </div>
           <div class="flex-auto leading-6">
-            <div
-              v-for="state in timelineStates"
-              :key="state.label"
-              class="mb-3 last:mb-0 h-[44px]"
-            >
+            <div v-for="state in timelineStates" :key="state.label" class="mb-3 last:mb-0 h-[44px]">
               <h4 v-text="state.label" />
               <div v-text="state.value" />
             </div>
