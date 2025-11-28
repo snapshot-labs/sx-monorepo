@@ -499,7 +499,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
     <teleport to="#modal">
       <ModalTransactionProgress
         :open="isModalTransactionProgressOpen"
-        :execute="() => currentStep.execute()"
+        :execute="currentStep.execute"
         :chain-id="EVM_METADATA[network].chainId"
         :messages="currentStep.messages"
         @close="
