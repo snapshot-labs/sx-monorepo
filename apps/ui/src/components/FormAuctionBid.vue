@@ -196,6 +196,8 @@ function togglePriceMode() {
 }
 
 function truncateDecimals(value: string, maxDecimals: number): string {
+  if (isNaN(parseFloat(value))) return value;
+
   const parts = value.split('.');
 
   if (parts.length > 1 && parts[1].length > maxDecimals) {
