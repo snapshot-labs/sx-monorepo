@@ -112,7 +112,7 @@ const {
   where: () => ({
     userAddress: web3.value.account?.toLowerCase()
   }),
-  enabled: () => isAccountSupported.value && auctionState.value !== 'active'
+  enabled: () => isAccountSupported.value
 });
 
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
@@ -131,32 +131,34 @@ const userOrdersSummary = computed(() => {
   > = {};
   const { clearingPriceOrder, volumeClearingPriceOrder } = props.auction;
 
-  if (
-    !unclaimedOrders.value ||
-    !userOrders.value ||
-    clearingPriceOrder === null ||
-    volumeClearingPriceOrder === null
-  ) {
+  if (!unclaimedOrders.value || !userOrders.value) {
     return { statuses, auctioningTokenToClaim, biddingTokenToClaim };
   }
-  const clearingPriceOrderDecoded = decodeOrder(clearingPriceOrder);
+
+  const clearingPriceOrderDecoded = clearingPriceOrder
+    ? decodeOrder(clearingPriceOrder)
+    : null;
 
   const auctioningTokensPerBiddingToken =
     BigInt(props.auction.currentClearingOrderBuyAmount) /
     BigInt(props.auction.currentClearingOrderSellAmount);
 
   userOrders.value.forEach(order => {
-    if (auctionState.value === 'active') {
-      statuses[order.id] = 'open';
-      return;
-    }
-
     const orderSellAmount = BigInt(order.sellAmount);
 
     if (auctionState.value === 'canceled') {
       // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
       statuses[order.id] = 'rejected';
       biddingTokenToClaim += orderSellAmount;
+      return;
+    }
+
+    if (
+      auctionState.value === 'active' ||
+      !clearingPriceOrderDecoded ||
+      !volumeClearingPriceOrder
+    ) {
+      statuses[order.id] = 'open';
       return;
     }
 
