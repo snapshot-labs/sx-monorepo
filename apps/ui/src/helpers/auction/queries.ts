@@ -16,6 +16,10 @@ gql(`
     minFundingThreshold
     currentBiddingAmount
     currentClearingPrice
+    currentClearingOrderBuyAmount
+    currentClearingOrderSellAmount
+    clearingPriceOrder
+    volumeClearingPriceOrder
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
@@ -34,6 +38,7 @@ gql(`
     id
     sellAmount
     buyAmount
+    userId
     userAddress
     price
     volume
@@ -54,6 +59,16 @@ export const ordersQuery = gql(`
     auctionDetail(id: $id) {
       orders(orderBy: $orderBy, orderDirection: $orderDirection, skip: $skip, first: $first, where: $orderFilter) {
         ...order
+      }
+    }
+  }
+`);
+
+export const unclaimedOrdersQuery = gql(`
+  query GetUnclaimedOrders($id: ID!, $orderFilter: Order_filter) {
+    auctionDetail(id: $id) {
+      ordersWithoutClaimed(where: $orderFilter) {
+        id
       }
     }
   }

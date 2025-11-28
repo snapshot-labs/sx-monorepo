@@ -1,10 +1,10 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { auctionQuery, ordersQuery } from './queries';
+import { auctionQuery, ordersQuery, unclaimedOrdersQuery } from './queries';
 import { getNames } from '../stamp';
-import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import { Order_Filter, Order_OrderBy } from './gql/graphql';
+import { AuctionNetworkId, Order } from './types';
 
-export type AuctionNetworkId = 'eth' | 'sep';
-export type Order = OrderFragment & { name: string | null };
+export * from './types';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
@@ -81,4 +81,25 @@ export async function getOrders(
     ...order,
     name: names[order.userAddress.toLowerCase()] || null
   }));
+}
+
+export async function getUnclaimedOrders(
+  id: string,
+  network: AuctionNetworkId,
+  {
+    orderFilter
+  }: {
+    orderFilter?: Order_Filter;
+  } = {}
+): Promise<Set<string>> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: unclaimedOrdersQuery,
+    variables: { id, orderFilter }
+  });
+
+  return new Set(
+    data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
+  );
 }
