@@ -1,14 +1,23 @@
 <script setup lang="ts">
 import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
+import { _c, _n, _p, _t } from '@/helpers/utils';
 
 const props = defineProps<{
   auctionId: string;
   auction: AuctionDetailFragment;
   order: Order;
+  orderStatus?: 'open' | 'filled' | 'partially-filled' | 'rejected' | 'claimed';
   biddingTokenPrice: number;
 }>();
+
+const emit = defineEmits<{
+  (e: 'cancel', order: Order): void;
+}>();
+
+const isCancellable = computed(() => {
+  return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
+});
 
 const orderPercentage = computed(() => {
   return (
@@ -25,23 +34,23 @@ const orderPercentage = computed(() => {
         width: `${Math.min(orderPercentage * 100, 100).toFixed(2)}%`
       }"
     />
-    <div class="flex-1 min-w-[168px] truncate">
-      <AppLink
-        class="leading-[22px] w-fit flex items-center space-x-3 truncate"
-        :to="{ name: 'user', params: { user: order.userAddress } }"
+    <div class="min-w-[100px] text-skin-link truncate">
+      <span v-if="orderStatus === 'open'">Open</span>
+      <span v-else-if="orderStatus === 'claimed'" class="text-skin-success">
+        Claimed
+      </span>
+      <span v-else-if="orderStatus === 'filled'" class="text-skin-success">
+        Filled
+      </span>
+      <span
+        v-else-if="orderStatus === 'partially-filled'"
+        class="text-skin-success opacity-70"
       >
-        <UiStamp :id="order.userAddress" :size="32" />
-        <div class="flex flex-col truncate">
-          <h4
-            class="truncate"
-            v-text="order.name || shortenAddress(order.userAddress)"
-          />
-          <UiAddress
-            :address="order.userAddress"
-            class="text-[17px] text-skin-text truncate"
-          />
-        </div>
-      </AppLink>
+        Partially-filled
+      </span>
+      <span v-else-if="orderStatus === 'rejected'" class="text-skin-danger">
+        Rejected
+      </span>
     </div>
     <div
       class="leading-[22px] w-[168px] max-w-[168px] flex flex-col justify-center truncate"
@@ -62,7 +71,7 @@ const orderPercentage = computed(() => {
         {{ _p(orderPercentage) }}
       </div>
     </div>
-    <div class="w-[168px] max-w-[168px] truncate text-right">
+    <div class="flex-1 min-w-[144px] text-right truncate">
       <h4 class="text-skin-link truncate">
         {{ formatPrice(order.price) }}
         {{ auction.symbolBiddingToken }}
@@ -74,6 +83,26 @@ const orderPercentage = computed(() => {
           })
         }}
       </div>
+    </div>
+    <div
+      class="min-w-[44px] lg:w-[60px] flex items-center justify-center -mr-4"
+    >
+      <UiDropdown>
+        <template #button>
+          <button type="button">
+            <IH-dots-horizontal class="text-skin-link" />
+          </button>
+        </template>
+        <template #items>
+          <UiDropdownItem
+            :disabled="!isCancellable"
+            @click="emit('cancel', order)"
+          >
+            <IS-x-mark :width="16" />
+            Cancel bid
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
     </div>
   </div>
 </template>
