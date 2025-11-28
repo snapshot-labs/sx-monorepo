@@ -2,6 +2,7 @@
 import { AuctionNetworkId, formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
+import { METADATA as EVM_METADATA } from '@/networks/evm';
 
 const props = withDefaults(
   defineProps<{
@@ -126,7 +127,7 @@ const columnSize = computed(() => {
       <ModalTransactionProgress
         :open="isModalTransactionProgressOpen"
         :execute="() => cancelSellOrder(order)"
-        :chain-id="'11155111'"
+        :chain-id="EVM_METADATA[networkId].chainId"
         @close="isModalTransactionProgressOpen = false"
         @cancelled="isModalTransactionProgressOpen = false"
         @confirmed="emit('cancelled')"
