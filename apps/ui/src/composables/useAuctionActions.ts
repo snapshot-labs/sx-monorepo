@@ -2,9 +2,13 @@ import { MaybeRefOrGetter } from 'vue';
 import {
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
+  Order,
   SellOrder
 } from '@/helpers/auction';
-import { placeSellOrder as placeOrder } from '@/helpers/auction/actions';
+import {
+  cancelSellOrder as cancelOrder,
+  placeSellOrder as placeOrder
+} from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { approve, getIsApproved, Token } from '@/helpers/token';
 import {
@@ -98,6 +102,17 @@ export function useAuctionActions(
     );
   }
 
+  async function cancelSellOrder(order: Order) {
+    return wrapPromise(
+      cancelOrder(
+        auth.value!.provider,
+        toValue(auction),
+        toValue(networkId),
+        order
+      )
+    );
+  }
+
   async function wrapPromise(promise: Promise<any>): Promise<string> {
     const tx = await promise;
     uiStore.addPendingTransaction(tx.hash, chainId.value);
@@ -110,6 +125,7 @@ export function useAuctionActions(
       wrapWithAuthAndNetwork(getIsTokenApproved)
     ),
     approveToken: wrapWithErrors(wrapWithAuthAndNetwork(approveToken)),
-    placeSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(placeSellOrder))
+    placeSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(placeSellOrder)),
+    cancelSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(cancelSellOrder))
   };
 }

@@ -153,20 +153,24 @@ const normalizedSignerAddress = computed(() => {
   }
 });
 
+async function refreshBidsList() {
+  await sleep(2000);
+
+  queryClient.invalidateQueries({
+    queryKey: AUCTION_KEYS.summary(props.network, props.auction)
+  });
+  queryClient.invalidateQueries({
+    queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
+      userAddress: web3.value.account?.toLowerCase()
+    })
+  });
+}
+
 async function moveToNextStep() {
   if (isLastStep.value) {
     isPlacingOrder.value = false;
 
-    await sleep(2000);
-
-    queryClient.invalidateQueries({
-      queryKey: AUCTION_KEYS.summary(props.network, props.auction)
-    });
-    queryClient.invalidateQueries({
-      queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
-        userAddress: web3.value.account?.toLowerCase()
-      })
-    });
+    refreshBidsList();
 
     return;
   }
@@ -176,6 +180,10 @@ async function moveToNextStep() {
   if (await goToNextStep()) {
     isModalTransactionProgressOpen.value = true;
   }
+}
+
+function handleSellOrderCancelled() {
+  refreshBidsList();
 }
 
 async function handlePlaceSellOrder(sellOrder: SellOrder) {
@@ -408,8 +416,10 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
               with-actions
               :auction-id="auctionId"
               :auction="auction"
+              :network-id="network"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
+              @cancelled="handleSellOrderCancelled"
             />
           </div>
         </div>
@@ -446,6 +456,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
               :key="order.id"
               :auction-id="auctionId"
               :auction="auction"
+              :network-id="network"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
             />

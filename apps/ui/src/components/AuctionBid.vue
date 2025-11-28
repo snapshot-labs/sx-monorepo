@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { formatPrice, Order } from '@/helpers/auction';
+import { AuctionNetworkId, formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
+import { METADATA as EVM_METADATA } from '@/networks/evm';
 
 const props = withDefaults(
   defineProps<{
     auctionId: string;
     auction: AuctionDetailFragment;
+    networkId: AuctionNetworkId;
     order: Order;
     biddingTokenPrice: number;
     withActions?: boolean;
@@ -15,6 +17,14 @@ const props = withDefaults(
     withActions: false
   }
 );
+
+const emit = defineEmits<{
+  (e: 'cancelled'): void;
+}>();
+
+const isModalTransactionProgressOpen = ref(false);
+
+const { cancelSellOrder } = useAuctionActions(props.networkId, props.auction);
 
 const isCancellable = computed(() => {
   return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
@@ -103,12 +113,25 @@ const columnSize = computed(() => {
           </button>
         </template>
         <template #items>
-          <UiDropdownItem :disabled="!isCancellable">
+          <UiDropdownItem
+            :disabled="!isCancellable"
+            @click="isModalTransactionProgressOpen = true"
+          >
             <IS-x-mark :width="16" />
             Cancel bid
           </UiDropdownItem>
         </template>
       </UiDropdown>
     </div>
+    <teleport to="#modal">
+      <ModalTransactionProgress
+        :open="isModalTransactionProgressOpen"
+        :execute="() => cancelSellOrder(order)"
+        :chain-id="EVM_METADATA[networkId].chainId"
+        @close="isModalTransactionProgressOpen = false"
+        @cancelled="isModalTransactionProgressOpen = false"
+        @confirmed="emit('cancelled')"
+      />
+    </teleport>
   </div>
 </template>
