@@ -27,7 +27,9 @@ const orderPercentage = computed(() => {
 </script>
 
 <template>
-  <div class="flex justify-between items-center gap-3 py-3 px-4 relative">
+  <div
+    class="flex justify-between items-center gap-3 py-3 px-4 relative leading-[22px]"
+  >
     <div
       class="right-0 top-0 h-[8px] absolute choice-bg opacity-20 _1"
       :style="{
@@ -52,9 +54,7 @@ const orderPercentage = computed(() => {
         Rejected
       </span>
     </div>
-    <div
-      class="leading-[22px] w-[168px] max-w-[168px] flex flex-col justify-center truncate"
-    >
+    <div class="w-[168px] max-w-[168px] flex flex-col justify-center truncate">
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
         <h4>{{ relativeTime }}</h4>
       </TimeRelative>

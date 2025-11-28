@@ -18,7 +18,9 @@ const orderPercentage = computed(() => {
 </script>
 
 <template>
-  <div class="flex justify-between items-center gap-3 py-3 px-4 relative">
+  <div
+    class="flex justify-between items-center gap-3 py-3 px-4 relative leading-[22px]"
+  >
     <div
       class="right-0 top-0 h-[8px] absolute choice-bg opacity-20 _1"
       :style="{
@@ -27,7 +29,7 @@ const orderPercentage = computed(() => {
     />
     <div class="flex-1 min-w-[168px] truncate">
       <AppLink
-        class="leading-[22px] w-fit flex items-center space-x-3 truncate"
+        class="w-fit flex items-center space-x-3 truncate"
         :to="{ name: 'user', params: { user: order.userAddress } }"
       >
         <UiStamp :id="order.userAddress" :size="32" />
@@ -43,9 +45,7 @@ const orderPercentage = computed(() => {
         </div>
       </AppLink>
     </div>
-    <div
-      class="leading-[22px] w-[168px] max-w-[168px] flex flex-col justify-center truncate"
-    >
+    <div class="w-[168px] max-w-[168px] flex flex-col justify-center truncate">
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
         <h4>{{ relativeTime }}</h4>
       </TimeRelative>
