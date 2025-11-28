@@ -492,10 +492,9 @@ const normalizedSignerAddress = computed(() => {
             v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
             class="divide-y divide-skin-border flex flex-col justify-center"
           >
-            <AuctionBid
+            <AuctionUserBid
               v-for="order in userOrders"
               :key="order.id"
-              is-user-order
               :order-status="userOrdersSummary.statuses[order.id]"
               :auction-id="auctionId"
               :auction="auction"
