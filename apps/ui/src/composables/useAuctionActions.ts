@@ -34,7 +34,7 @@ export function useAuctionActions(
   const { auth } = useWeb3();
   const { modalAccountOpen } = useModal();
 
-  function wrapWithErrors<T extends any[], U>(fn: (...args: T) => U) {
+  function wrapWithErrors<T extends any[], U>(fn: (...args: T) => Promise<U>) {
     return async (...args: T): Promise<U> => {
       try {
         return await fn(...args);
