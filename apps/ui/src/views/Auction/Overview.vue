@@ -173,9 +173,11 @@ async function moveToNextStep() {
 
   isModalTransactionProgressOpen.value = false;
 
-  if (await goToNextStep()) {
+  goToNextStep();
+
+  nextTick(() => {
     isModalTransactionProgressOpen.value = true;
-  }
+  });
 }
 
 async function handlePlaceSellOrder(sellOrder: SellOrder) {
