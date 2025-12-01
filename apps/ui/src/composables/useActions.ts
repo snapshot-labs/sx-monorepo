@@ -138,11 +138,13 @@ export function useActions() {
 
       console.log('Receipt', receipt);
 
-      if (envelope.signatureData.signature === '0x')
+      if (envelope.signatureData.signature === '0x') {
+        const safeContext = opts.safeAppContext ?? 'transaction';
         uiStore.addNotification(
           'success',
-          'Your vote is pending! waiting for other signers'
+          `Your ${safeContext} is pending! waiting for other signers`
         );
+      }
 
       if (hash) {
         uiStore.addPendingTransaction(hash, network.chainId);
