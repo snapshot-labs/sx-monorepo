@@ -140,10 +140,15 @@ export function useActions() {
 
       if (envelope.signatureData.signature === '0x') {
         const safeContext = opts.safeAppContext ?? 'transaction';
-        uiStore.addNotification(
-          'success',
-          `Your ${safeContext} is pending! waiting for other signers`
-        );
+        const PENDING_MESSAGES: Record<
+          'vote' | 'propose' | 'transaction',
+          string
+        > = {
+          vote: 'Your vote is pending! waiting for other signers',
+          propose: 'Your proposal is pending! waiting for other signers',
+          transaction: 'Your transaction is pending! waiting for other signers'
+        };
+        uiStore.addNotification('success', PENDING_MESSAGES[safeContext]);
       }
 
       if (hash) {

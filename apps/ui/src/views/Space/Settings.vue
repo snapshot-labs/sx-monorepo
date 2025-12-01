@@ -265,12 +265,14 @@ async function handleSettingsSave() {
 
   if (isOffchainNetwork.value) {
     try {
-      await save();
+      const result = await save();
       reloadSpaceAndReset();
-      uiStore.addNotification(
-        'success',
-        'Your changes were successfully saved.'
-      );
+      if (result) {
+        uiStore.addNotification(
+          'success',
+          'Your changes were successfully saved.'
+        );
+      }
     } catch {
     } finally {
       saving.value = false;
