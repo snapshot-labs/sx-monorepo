@@ -34,17 +34,18 @@ const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
   toRef(props, 'network'),
   toRef(props, 'auction')
 );
-const { cancelSellOrder } = useAuctionActions(
+const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
   toRef(props, 'network'),
   toRef(props, 'auction')
 );
+
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
 
 const isModalTransactionProgressOpen = ref(false);
-const transactionProgressType = ref<'place-order' | 'cancel-order' | null>(
-  null
-);
+const transactionProgressType = ref<
+  'place-order' | 'cancel-order' | 'claim-orders' | null
+>(null);
 const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
@@ -259,9 +260,15 @@ const transactionProgressFn = computed<() => Promise<string | null>>(() => {
   if (transactionProgressType.value === 'place-order') {
     return currentStep.value.execute;
   }
+
   if (transactionProgressType.value === 'cancel-order') {
     return cancelOrderFn.value;
   }
+
+  if (transactionProgressType.value === 'claim-orders') {
+    return () => claimFromParticipantOrder(userOrders.value ?? []);
+  }
+
   return DEFAULT_TRANSACTION_PROGRESS_FN;
 });
 
@@ -307,22 +314,17 @@ const normalizedSignerAddress = computed(() => {
   }
 });
 
-async function refreshOrdersList() {
-  await sleep(2000);
+async function invalidateQueries() {
+  await sleep(5000);
 
   queryClient.invalidateQueries({
-    queryKey: AUCTION_KEYS.summary(props.network, props.auction)
-  });
-  queryClient.invalidateQueries({
-    queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
-      userAddress: web3.value.account?.toLowerCase()
-    })
+    queryKey: AUCTION_KEYS.auction(props.network, props.auction)
   });
 }
 
 async function moveToNextStep() {
   if (isLastStep.value) {
-    refreshOrdersList();
+    invalidateQueries();
     resetTransactionProgress();
     return;
   }
@@ -356,12 +358,18 @@ async function handleCancelSellOrder(order: Order) {
   isModalTransactionProgressOpen.value = true;
 }
 
+function handleClaimOrders() {
+  transactionProgressType.value = 'claim-orders';
+
+  isModalTransactionProgressOpen.value = true;
+}
+
 function handleTransactionConfirmed() {
   if (transactionProgressType.value === 'place-order') {
     return moveToNextStep();
   }
 
-  refreshOrdersList();
+  invalidateQueries();
   resetTransactionProgress();
 }
 </script>
@@ -601,7 +609,12 @@ function handleTransactionConfirmed() {
             />
           </div>
         </div>
-        <UiButton v-if="claimText" class="w-full mt-4" primary>
+        <UiButton
+          v-if="claimText"
+          class="w-full mt-4"
+          primary
+          @click="handleClaimOrders"
+        >
           {{ claimText }}
         </UiButton>
       </div>

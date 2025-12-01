@@ -5,10 +5,7 @@ import {
   Order,
   SellOrder
 } from '@/helpers/auction';
-import {
-  cancelSellOrder as cancelOrder,
-  placeSellOrder as placeOrder
-} from '@/helpers/auction/actions';
+import * as actions from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { approve, getIsApproved, Token } from '@/helpers/token';
 import {
@@ -93,7 +90,7 @@ export function useAuctionActions(
 
   async function placeSellOrder(sellOrder: SellOrder) {
     return wrapPromise(
-      placeOrder(
+      actions.placeSellOrder(
         auth.value!.provider,
         toValue(auction),
         toValue(networkId),
@@ -104,11 +101,22 @@ export function useAuctionActions(
 
   async function cancelSellOrder(order: Order) {
     return wrapPromise(
-      cancelOrder(
+      actions.cancelSellOrder(
         auth.value!.provider,
         toValue(auction),
         toValue(networkId),
         order
+      )
+    );
+  }
+
+  async function claimFromParticipantOrder(orders: Order[]) {
+    return wrapPromise(
+      actions.claimFromParticipantOrder(
+        auth.value!.provider,
+        toValue(networkId),
+        toValue(auction),
+        orders
       )
     );
   }
@@ -126,6 +134,9 @@ export function useAuctionActions(
     ),
     approveToken: wrapWithErrors(wrapWithAuthAndNetwork(approveToken)),
     placeSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(placeSellOrder)),
-    cancelSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(cancelSellOrder))
+    cancelSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(cancelSellOrder)),
+    claimFromParticipantOrder: wrapWithErrors(
+      wrapWithAuthAndNetwork(claimFromParticipantOrder)
+    )
   };
 }
