@@ -3,7 +3,12 @@ import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
-import { AuctionNetworkId, formatPrice } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  formatPrice,
+  Order,
+  SellOrder
+} from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
@@ -22,9 +27,15 @@ const AMOUNT_DEFINITION = {
   examples: ['0.0']
 };
 
+const emit = defineEmits<{
+  (e: 'submit', payload: SellOrder): void;
+}>();
+
 const props = defineProps<{
   auction: AuctionDetailFragment;
   network: AuctionNetworkId;
+  previousOrders?: Order[];
+  isLoading?: boolean;
 }>();
 
 const { web3Account } = useWeb3();
@@ -177,12 +188,44 @@ const priceError = computed(() => {
     }
   }
 
+  const maxBiddingPrice = (isPriceInverted.value ? 1 / price : price).toFixed(
+    Number(props.auction.decimalsBiddingToken)
+  );
+
+  if (
+    props.previousOrders?.find(
+      order =>
+        parseFloat(order.price).toFixed(
+          Number(props.auction.decimalsBiddingToken)
+        ) === maxBiddingPrice
+    )
+  ) {
+    return 'You already have an order at this price';
+  }
   return undefined;
 });
 
 const biddingTokenDecimals = computed(() =>
   parseInt(props.auction.decimalsBiddingToken)
 );
+
+const hasErrors = computed<boolean>(() => {
+  return !!(
+    Object.keys(formatErrors.value).length ||
+    amountError.value ||
+    priceError.value
+  );
+});
+
+function handlePlaceOrder() {
+  if (hasErrors.value) return;
+
+  const price = isPriceInverted.value
+    ? (1 / parseFloat(bidPrice.value)).toString()
+    : bidPrice.value;
+
+  emit('submit', { sellAmount: bidAmount.value, price });
+}
 
 function togglePriceMode() {
   const currentPrice = parseFloat(bidPrice.value) || 0;
@@ -320,8 +363,15 @@ onMounted(() => {
       >
         Connect wallet
       </UiButton>
-      <UiButton v-else class="w-full" disabled>
-        Place order (Coming soon)
+      <UiButton
+        v-else
+        primary
+        class="w-full"
+        :disabled="hasErrors || isLoading"
+        :loading="isLoading"
+        @click="handlePlaceOrder"
+      >
+        Place order
       </UiButton>
       <div class="text-xs text-center flex items-center justify-center gap-1.5">
         <IH-information-circle class="inline-block shrink-0" :size="16" />

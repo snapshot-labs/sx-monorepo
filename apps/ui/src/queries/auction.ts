@@ -9,6 +9,29 @@ import { getTokenPrices } from '@/helpers/coingecko';
 import { CHAIN_IDS, COINGECKO_ASSET_PLATFORMS } from '@/helpers/constants';
 
 const LIMIT = 20;
+const SUMMARY_LIMIT = 5;
+
+export const AUCTION_KEYS = {
+  all: ['auction'] as const,
+  auction: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>
+  ) => [AUCTION_KEYS.all, network, () => toValue(auction).id],
+  orders: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>
+  ) => [AUCTION_KEYS.auction(network, auction), 'orders'],
+  summary: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    limit?: MaybeRefOrGetter<number>,
+    where?: MaybeRefOrGetter<Order_Filter>
+  ) => [
+    AUCTION_KEYS.auction(network, auction),
+    'bidsSummary',
+    { limit: limit ?? SUMMARY_LIMIT, where }
+  ]
+};
 
 export function useBidsQuery({
   network,
@@ -19,7 +42,7 @@ export function useBidsQuery({
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: ['auction', network, () => toValue(auction).id, 'orders'],
+    queryKey: AUCTION_KEYS.orders(network, auction),
     queryFn: ({ pageParam }) =>
       getOrders(toValue(auction).id, toValue(network), {
         first: LIMIT,
@@ -36,7 +59,7 @@ export function useBidsQuery({
 export function useBidsSummaryQuery({
   network,
   auction,
-  limit = 5,
+  limit = SUMMARY_LIMIT,
   where,
   enabled
 }: {
@@ -47,13 +70,7 @@ export function useBidsSummaryQuery({
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
-    queryKey: [
-      'auction',
-      network,
-      () => toValue(auction).id,
-      'bidsSummary',
-      { limit, where }
-    ],
+    queryKey: AUCTION_KEYS.summary(network, auction, limit, where),
     queryFn: () =>
       getOrders(toValue(auction).id, toValue(network), {
         first: toValue(limit),
