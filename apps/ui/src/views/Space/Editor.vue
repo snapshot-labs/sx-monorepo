@@ -59,6 +59,10 @@ const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
   isEditor: true
 });
 const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
+const { isInvalidNetwork: isSafeInvalidNetwork } = useSafeWallet(
+  props.space.network,
+  props.space.snapshot_chain_id
+);
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -252,7 +256,8 @@ const canSubmit = computed(() => {
     hasUnsupportedNetworks ||
     hasFormErrors ||
     disabledStrategiesList.value.length ||
-    unsupportedPremiumStrategiesList.value.length
+    unsupportedPremiumStrategiesList.value.length ||
+    isSafeInvalidNetwork.value
   ) {
     return false;
   }
@@ -657,6 +662,11 @@ watchEffect(() => {
               Learn more
               <IH-arrow-sm-right class="-rotate-45" /> </AppLink
             >.
+          </UiAlert>
+          <UiAlert v-else-if="isSafeInvalidNetwork" type="error" class="mb-4">
+            Your Safe wallet's network does not match this space's network.
+            Please use a Safe on the same network as the space to create
+            proposals.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
