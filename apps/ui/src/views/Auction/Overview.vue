@@ -169,9 +169,7 @@ async function refreshBidsList() {
 async function moveToNextStep() {
   if (isLastStep.value) {
     isPlacingOrder.value = false;
-
     refreshBidsList();
-
     return;
   }
 

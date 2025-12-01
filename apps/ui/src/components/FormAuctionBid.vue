@@ -156,8 +156,8 @@ const amountError = computed(() => {
     )
   );
 
-  if (amount < minBiddingAmount) {
-    return `Minimum ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
+  if (amount <= minBiddingAmount) {
+    return `Amount must be bigger than ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
   }
 
   if (hasBalance.value && amount > formattedBalance.value) {
