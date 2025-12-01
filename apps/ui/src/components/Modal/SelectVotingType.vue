@@ -17,8 +17,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'save', type: AvailableVotingTypes);
-  (e: 'close');
+  (e: 'save', type: AvailableVotingTypes): void;
+  (e: 'close'): void;
 }>();
 
 const availableVotingTypes = computed(() =>

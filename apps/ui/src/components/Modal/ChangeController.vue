@@ -14,8 +14,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', value: string);
-  (e: 'close');
+  (e: 'save', value: string): void;
+  (e: 'close'): void;
 }>();
 
 const controllerDefinition = computed(() => ({

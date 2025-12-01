@@ -5,7 +5,7 @@ import { NetworkID } from '@/types';
 const spaceId = defineModel<string>();
 
 const emit = defineEmits<{
-  (e: 'select');
+  (e: 'select'): void;
 }>();
 
 const props = defineProps<{
@@ -104,7 +104,7 @@ function handleSelect(value: string) {
           <UiEyebrow>Domain names</UiEyebrow>
           <UiButton
             v-if="names"
-            class="gap-1 !text-skin-text !p-0 !border-0 !h-auto"
+            class="!gap-1 !text-skin-text !p-0 !border-0 !h-auto"
             :disabled="isLoading"
             :loading="isRefreshing"
             @click="refresh"

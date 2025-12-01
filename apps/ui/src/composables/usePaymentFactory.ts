@@ -1,5 +1,5 @@
 import { MaybeRefOrGetter } from 'vue';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { ChainId } from '@/types';
 import { Token } from './usePayment';
 
@@ -34,7 +34,7 @@ const BARCODE_VERSION = '0.1';
 const FIRST_STEP: StepId = 'check_approval';
 
 async function getBarcode(contents: BarcodePayload): Promise<string> {
-  const receipt = await pinPineapple({
+  const receipt = await pin({
     version: BARCODE_VERSION,
     ...contents
   });

@@ -16,8 +16,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'errors', value: any);
-  (e: 'pick', field: any);
+  (e: 'errors', value: any): void;
+  (e: 'pick', field: any): void;
 }>();
 
 const isOffchainNetwork = computed(
@@ -86,6 +86,12 @@ const socialAccountsDefinition = computed(() => {
       format: 'discord-handle',
       title: 'Discord',
       examples: ['Discord handle or invite code']
+    },
+    clanker: {
+      type: 'string',
+      title: 'Clanker',
+      format: 'ethAddress',
+      examples: ['Clanker address']
     }
   };
 

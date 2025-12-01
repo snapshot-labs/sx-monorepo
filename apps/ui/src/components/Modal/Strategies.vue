@@ -15,8 +15,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'addStrategy', strategy: StrategyTemplate);
-  (e: 'close');
+  (e: 'addStrategy', strategy: StrategyTemplate): void;
+  (e: 'close'): void;
 }>();
 
 const searchValue = ref('');

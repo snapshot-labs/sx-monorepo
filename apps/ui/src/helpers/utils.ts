@@ -27,6 +27,7 @@ import {
 import { getProvider } from './provider';
 import { getOwner } from './stamp';
 import pkg from '@/../package.json';
+import ICClanker from '~icons/c/clanker';
 import ICCoingecko from '~icons/c/coingecko';
 import ICDiscord from '~icons/c/discord';
 import ICFarcaster from '~icons/c/farcaster';
@@ -479,6 +480,7 @@ export function createErc1155Metadata(
       twitter: metadata.twitter,
       discord: metadata.discord,
       farcaster: metadata.farcaster,
+      clanker: metadata.clanker,
       treasuries: metadata.treasuries.map(treasury => ({
         name: treasury.name,
         chain_id: treasury.chainId,
@@ -757,7 +759,16 @@ export function getSocialNetworksLink(data: any) {
     },
     { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
     { key: 'lens', icon: ICLens, urlFormat: 'https://hey.xyz/u/$' },
-    { key: 'farcaster', icon: ICFarcaster, urlFormat: 'https://warpcast.com/$' }
+    {
+      key: 'farcaster',
+      icon: ICFarcaster,
+      urlFormat: 'https://warpcast.com/$'
+    },
+    {
+      key: 'clanker',
+      icon: ICClanker,
+      urlFormat: 'https://www.clanker.world/clanker/$'
+    }
   ]
     .map(({ key, icon, urlFormat }) => {
       const value = data[key];

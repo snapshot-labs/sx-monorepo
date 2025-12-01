@@ -41,8 +41,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'save', type: Validation);
-  (e: 'close');
+  (e: 'save', type: Validation): void;
+  (e: 'close'): void;
 }>();
 
 const isLoading = ref(false);
@@ -145,6 +145,7 @@ const definition = computed(() => {
 
   if (selectedValidation.value.key === 'basic') {
     updated.properties.minScore.examples = ['e.g. 1.23'];
+    delete updated.properties.strategies;
   }
 
   return updated;
