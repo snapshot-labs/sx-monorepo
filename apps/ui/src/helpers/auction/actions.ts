@@ -6,11 +6,11 @@ import { AuctionDetailFragment } from './gql/graphql';
 import {
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
-  encodeOrder,
   getPreviousOrderId,
   Order,
   SellOrder
 } from './index';
+import { encodeOrder } from './orders';
 
 export async function placeSellOrder(
   web3: Web3Provider,

@@ -7,6 +7,7 @@ import {
 } from './queries';
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import { encodeOrder } from './orders';
 import { AuctionNetworkId, Order } from './types';
 
 export * from './types';
@@ -131,16 +132,6 @@ export async function getPreviousOrderId(
     buyAmount: BigInt(sortedOrders[0].buyAmount),
     sellAmount: BigInt(sortedOrders[0].sellAmount)
   });
-}
-
-export function encodeOrder(order: {
-  sellAmount: bigint;
-  buyAmount: bigint;
-  userId: bigint;
-}): string {
-  return `0x${order.userId.toString(16).padStart(16, '0')}${order.buyAmount
-    .toString(16)
-    .padStart(24, '0')}${order.sellAmount.toString(16).padStart(24, '0')}`;
 }
 
 export async function getUnclaimedOrders(

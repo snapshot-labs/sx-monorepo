@@ -36,6 +36,16 @@ export function compareOrders(
   return 0;
 }
 
+export function encodeOrder(order: {
+  userId: bigint;
+  buyAmount: bigint;
+  sellAmount: bigint;
+}): string {
+  return `0x${order.userId.toString(16).padStart(16, '0')}${order.buyAmount
+    .toString(16)
+    .padStart(24, '0')}${order.sellAmount.toString(16).padStart(24, '0')}`;
+}
+
 export function decodeOrder(bytes: string) {
   return {
     userId: BigInt(`0x${bytes.substring(2, 18)}`).toString(),
