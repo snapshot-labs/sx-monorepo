@@ -250,7 +250,7 @@ export const OVERRIDING_STRATEGIES: readonly string[] = [
   'sonic-staked-balance'
 ] as const;
 export const DISABLED_STRATEGIES: readonly string[] = ['multichain'];
-export const DEPRECATED_STRATEGIES = [] as const;
+export const DEPRECATED_STRATEGIES: readonly string[] = [];
 export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',

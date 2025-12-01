@@ -49,9 +49,7 @@ export function useSpaceAlerts(
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(
-      strategy =>
-        (OVERRIDING_STRATEGIES as readonly string[]).includes(strategy) &&
-        !space.value.turbo
+      strategy => OVERRIDING_STRATEGIES.includes(strategy) && !space.value.turbo
     );
   });
 
@@ -59,7 +57,7 @@ export function useSpaceAlerts(
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(strategy =>
-      (DEPRECATED_STRATEGIES as readonly string[]).includes(strategy)
+      DEPRECATED_STRATEGIES.includes(strategy)
     );
   });
 
@@ -67,7 +65,7 @@ export function useSpaceAlerts(
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(strategy =>
-      (DISABLED_STRATEGIES as readonly string[]).includes(strategy)
+      DISABLED_STRATEGIES.includes(strategy)
     );
   });
 
@@ -101,7 +99,7 @@ export function useSpaceAlerts(
       .filter(network => !!network);
   });
 
-  const warningDaysBeforeProExpiration = computed((): number => {
+  const warningDaysBeforeProExpiration = computed(() => {
     const now = Date.now();
     const expirationTime = (space.value.turbo_expiration || 0) * 1000;
     const warningThresholdMs = PRO_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
@@ -115,7 +113,7 @@ export function useSpaceAlerts(
     return Math.ceil(diff / DAY_IN_MS);
   });
 
-  const isProJustExpired = computed((): boolean => {
+  const isProJustExpired = computed(() => {
     const now = Date.now();
     const expirationTime = (space.value.turbo_expiration || 0) * 1000;
     const graceThresholdMs = PRO_AFTER_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
@@ -123,8 +121,8 @@ export function useSpaceAlerts(
     return expirationTime < now && expirationTime >= now - graceThresholdMs;
   });
 
-  const sigAuthenticatorAddresses = computed<string[]>(() => {
-    const authenticators =
+  const sigAuthenticatorAddresses = computed(() => {
+    const authenticators: Record<string, string | undefined> =
       { ...evmNetworks, ...starknetNetworks }[space.value.network]
         ?.Authenticators || {};
 
@@ -132,7 +130,7 @@ export function useSpaceAlerts(
       authenticators.EthSig,
       authenticators.EthSigV2,
       authenticators.StarkSig
-    ].filter(Boolean);
+    ].filter(v => typeof v !== 'undefined');
   });
 
   const isRelayerBalanceLow = computed(() => {
