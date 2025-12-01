@@ -105,15 +105,12 @@ export default function usePaymentFactory(network: MaybeRefOrGetter<ChainId>) {
     return currentStepId.value === Object.keys(STEPS.value).pop();
   });
 
-  function goToNextStep(): boolean {
+  function goToNextStep() {
     const nextStep = currentStep.value.nextStep();
 
     if (nextStep) {
       currentStepId.value = nextStep;
-      return true;
     }
-
-    return false;
   }
 
   async function wrapPromise(
