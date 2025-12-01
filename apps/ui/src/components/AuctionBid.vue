@@ -16,6 +16,10 @@ const props = withDefaults(
   }
 );
 
+const emit = defineEmits<{
+  (e: 'cancel', order: Order): void;
+}>();
+
 const isCancellable = computed(() => {
   return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
 });
@@ -103,7 +107,10 @@ const columnSize = computed(() => {
           </button>
         </template>
         <template #items>
-          <UiDropdownItem :disabled="!isCancellable">
+          <UiDropdownItem
+            :disabled="!isCancellable"
+            @click="emit('cancel', order)"
+          >
             <IS-x-mark :width="16" />
             Cancel bid
           </UiDropdownItem>
