@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AuctionNetworkId, formatPrice, Order } from '@/helpers/auction';
+import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _p, _t, shortenAddress } from '@/helpers/utils';
 
@@ -7,7 +7,6 @@ const props = withDefaults(
   defineProps<{
     auctionId: string;
     auction: AuctionDetailFragment;
-    networkId: AuctionNetworkId;
     order: Order;
     biddingTokenPrice: number;
     withActions?: boolean;

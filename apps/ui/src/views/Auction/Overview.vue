@@ -458,7 +458,6 @@ function handleTransactionConfirmed() {
               with-actions
               :auction-id="auctionId"
               :auction="auction"
-              :network-id="network"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
               @cancel="handleCancelSellOrder"
@@ -498,7 +497,6 @@ function handleTransactionConfirmed() {
               :key="order.id"
               :auction-id="auctionId"
               :auction="auction"
-              :network-id="network"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
             />
