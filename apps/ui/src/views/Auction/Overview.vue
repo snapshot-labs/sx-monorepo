@@ -201,9 +201,11 @@ async function moveToNextStep() {
 
   isModalTransactionProgressOpen.value = false;
 
-  if (await goToNextStep()) {
+  goToNextStep();
+
+  nextTick(() => {
     isModalTransactionProgressOpen.value = true;
-  }
+  });
 }
 
 function resetTransactionProgress() {

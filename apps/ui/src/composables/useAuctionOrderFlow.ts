@@ -78,15 +78,12 @@ export function useAuctionOrderFlow(
     return currentStepId.value === LAST_STEP;
   });
 
-  function goToNextStep(): boolean {
+  function goToNextStep() {
     const nextStep = currentStep.value.nextStep();
 
     if (nextStep) {
       currentStepId.value = nextStep;
-      return true;
     }
-
-    return false;
   }
 
   function start(order: SellOrder) {
