@@ -58,7 +58,11 @@ const auctionState = computed<AuctionState>(() => {
 
   if (currentBiddingAmount < minFundingThreshold) return 'canceled';
 
-  if (props.auction.ordersWithoutClaimed?.length) return 'claiming';
+  if (props.auction.ordersWithoutClaimed?.length) {
+    if (!props.auction.clearingPriceOrder) return 'finalizing';
+
+    return 'claiming';
+  }
 
   return 'claimed';
 });

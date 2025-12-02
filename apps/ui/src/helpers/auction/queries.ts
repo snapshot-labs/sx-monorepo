@@ -16,6 +16,7 @@ gql(`
     minFundingThreshold
     currentBiddingAmount
     currentClearingPrice
+    clearingPriceOrder
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
