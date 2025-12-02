@@ -6,7 +6,9 @@ import { AuctionDetailFragment } from './gql/graphql';
 import {
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
+  encodeOrder,
   getPreviousOrderId,
+  Order,
   SellOrder
 } from './index';
 
@@ -58,4 +60,22 @@ export async function placeSellOrder(
     [previousOrderId],
     auction.allowListSigner
   );
+}
+
+export async function cancelSellOrder(
+  web3: Web3Provider,
+  auction: AuctionDetailFragment,
+  networkId: AuctionNetworkId,
+  order: Order
+) {
+  const contractAddress = AUCTION_CONTRACT_ADDRESSES[networkId];
+  const contract = new Contract(contractAddress, abis, web3.getSigner());
+
+  return contract.cancelSellOrders(auction.id, [
+    encodeOrder({
+      sellAmount: BigInt(order.sellAmount),
+      buyAmount: BigInt(order.buyAmount),
+      userId: BigInt(order.userId)
+    })
+  ]);
 }

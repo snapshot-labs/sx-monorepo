@@ -3,7 +3,12 @@ import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionState } from '@/components/AuctionStatus.vue';
-import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  formatPrice,
+  Order,
+  SellOrder
+} from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t, sleep } from '@/helpers/utils';
@@ -15,21 +20,32 @@ import {
   useBidsSummaryQuery
 } from '@/queries/auction';
 
+const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
+
 const props = defineProps<{
   network: AuctionNetworkId;
   auctionId: string;
   auction: AuctionDetailFragment;
 }>();
 
-const isModalTransactionProgressOpen = ref(false);
-const isPlacingOrder = ref(false);
-
 const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
+  toRef(props, 'network'),
+  toRef(props, 'auction')
+);
+const { cancelSellOrder } = useAuctionActions(
   toRef(props, 'network'),
   toRef(props, 'auction')
 );
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
+
+const isModalTransactionProgressOpen = ref(false);
+const transactionProgressType = ref<'place-order' | 'cancel-order' | null>(
+  null
+);
+const cancelOrderFn = ref<() => Promise<string | null>>(
+  DEFAULT_TRANSACTION_PROGRESS_FN
+);
 
 const auctionState = computed<AuctionState>(() => {
   const now = Math.floor(Date.now() / 1000);
@@ -111,6 +127,16 @@ const biddingParameters = computed(() => {
   ];
 });
 
+const transactionProgressFn = computed<() => Promise<string | null>>(() => {
+  if (transactionProgressType.value === 'place-order') {
+    return currentStep.value.execute;
+  }
+  if (transactionProgressType.value === 'cancel-order') {
+    return cancelOrderFn.value;
+  }
+  return DEFAULT_TRANSACTION_PROGRESS_FN;
+});
+
 const auctionSettings = computed(() => {
   return [
     {
@@ -153,36 +179,62 @@ const normalizedSignerAddress = computed(() => {
   }
 });
 
+async function refreshOrdersList() {
+  await sleep(2000);
+
+  queryClient.invalidateQueries({
+    queryKey: AUCTION_KEYS.summary(props.network, props.auction)
+  });
+  queryClient.invalidateQueries({
+    queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
+      userAddress: web3.value.account?.toLowerCase()
+    })
+  });
+}
+
 async function moveToNextStep() {
   if (isLastStep.value) {
-    isPlacingOrder.value = false;
-
-    await sleep(2000);
-
-    queryClient.invalidateQueries({
-      queryKey: AUCTION_KEYS.summary(props.network, props.auction)
-    });
-    queryClient.invalidateQueries({
-      queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
-        userAddress: web3.value.account?.toLowerCase()
-      })
-    });
-
+    refreshOrdersList();
+    resetTransactionProgress();
     return;
   }
 
   isModalTransactionProgressOpen.value = false;
 
-  if (await goToNextStep()) {
+  goToNextStep();
+
+  nextTick(() => {
     isModalTransactionProgressOpen.value = true;
-  }
+  });
+}
+
+function resetTransactionProgress() {
+  isModalTransactionProgressOpen.value = false;
+  transactionProgressType.value = null;
+  cancelOrderFn.value = DEFAULT_TRANSACTION_PROGRESS_FN;
 }
 
 async function handlePlaceSellOrder(sellOrder: SellOrder) {
-  start(sellOrder);
+  transactionProgressType.value = 'place-order';
 
-  isPlacingOrder.value = true;
+  start(sellOrder);
   isModalTransactionProgressOpen.value = true;
+}
+
+async function handleCancelSellOrder(order: Order) {
+  transactionProgressType.value = 'cancel-order';
+  cancelOrderFn.value = () => cancelSellOrder(order);
+
+  isModalTransactionProgressOpen.value = true;
+}
+
+function handleTransactionConfirmed() {
+  if (transactionProgressType.value === 'place-order') {
+    return moveToNextStep();
+  }
+
+  refreshOrdersList();
+  resetTransactionProgress();
 }
 </script>
 
@@ -313,7 +365,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         v-if="isAuctionOpen"
         :auction="auction"
         :network="network"
-        :is-loading="isPlacingOrder"
+        :is-loading="isModalTransactionProgressOpen"
         :previous-orders="userOrders"
         @submit="handlePlaceSellOrder"
       />
@@ -410,6 +462,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
               :auction="auction"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
+              @cancel="handleCancelSellOrder"
             />
           </div>
         </div>
@@ -499,18 +552,16 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
     <teleport to="#modal">
       <ModalTransactionProgress
         :open="isModalTransactionProgressOpen"
-        :execute="currentStep.execute"
+        :execute="transactionProgressFn"
         :chain-id="EVM_METADATA[network].chainId"
-        :messages="currentStep.messages"
-        @close="
-          isModalTransactionProgressOpen = false;
-          isPlacingOrder = false;
+        :messages="
+          transactionProgressType === 'place-order'
+            ? currentStep.messages
+            : undefined
         "
-        @confirmed="moveToNextStep"
-        @cancelled="
-          isModalTransactionProgressOpen = false;
-          isPlacingOrder = false;
-        "
+        @close="resetTransactionProgress"
+        @confirmed="handleTransactionConfirmed"
+        @cancelled="resetTransactionProgress"
       />
     </teleport>
   </div>
