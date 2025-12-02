@@ -215,9 +215,10 @@ const hasErrors = computed<boolean>(() => {
 });
 
 function truncateDecimals(value: string) {
-  const parts = value.split('.');
-  if (parts.length === 1) return value;
-  return `${parts[0]}.${parts[1].slice(0, MAX_PRICE_DECIMALS)}`;
+  const num = parseFloat(value);
+  if (isNaN(num)) return value;
+  const factor = 10 ** PRICE_DECIMALS;
+  return (Math.round(num * factor) / factor).toString();
 }
 
 function handlePlaceOrder() {
