@@ -25,6 +25,12 @@ import {
   VoteType
 } from '@/types';
 
+const PENDING_MESSAGES: Record<'vote' | 'propose' | 'transaction', string> = {
+  vote: 'Your vote is pending! Waiting for other signers',
+  propose: 'Your proposal is pending! Waiting for other signers',
+  transaction: 'Your transaction is pending! Waiting for other signers'
+};
+
 export function useActions() {
   const uiStore = useUiStore();
   const alias = useAlias();
@@ -140,14 +146,6 @@ export function useActions() {
 
       if (envelope.signatureData.signature === '0x') {
         const safeContext = opts.safeAppContext ?? 'transaction';
-        const PENDING_MESSAGES: Record<
-          'vote' | 'propose' | 'transaction',
-          string
-        > = {
-          vote: 'Your vote is pending! waiting for other signers',
-          propose: 'Your proposal is pending! waiting for other signers',
-          transaction: 'Your transaction is pending! waiting for other signers'
-        };
         uiStore.addNotification('success', PENDING_MESSAGES[safeContext]);
       }
 
