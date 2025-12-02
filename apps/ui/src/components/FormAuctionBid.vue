@@ -217,7 +217,8 @@ const hasErrors = computed<boolean>(() => {
 function truncateDecimals(value: string) {
   const num = parseFloat(value);
   if (isNaN(num)) return value;
-  const factor = 10 ** PRICE_DECIMALS;
+
+  const factor = 10 ** MAX_PRICE_DECIMALS;
   return (Math.round(num * factor) / factor).toString();
 }
 
