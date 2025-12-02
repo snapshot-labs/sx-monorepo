@@ -17,6 +17,7 @@ import { getValidator } from '@/helpers/validation';
 
 const DEFAULT_PRICE_PREMIUM = 1.001; // 0.1% above clearing price
 const PRICE_DECIMALS = 4;
+const MAX_PRICE_DECIMALS = 6;
 const INVERTED_PRICE_DECIMALS = 8;
 
 const AMOUNT_DEFINITION = {
@@ -213,6 +214,12 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
+function truncateDecimals(value: string) {
+  const parts = value.split('.');
+  if (parts.length === 1) return value;
+  return `${parts[0]}.${parts[1].slice(0, MAX_PRICE_DECIMALS)}`;
+}
+
 function handlePlaceOrder() {
   if (hasErrors.value) return;
 
@@ -220,7 +227,10 @@ function handlePlaceOrder() {
     ? (1 / parseFloat(bidPrice.value)).toString()
     : bidPrice.value;
 
-  emit('submit', { sellAmount: bidAmount.value, price });
+  emit('submit', {
+    sellAmount: bidAmount.value,
+    price: truncateDecimals(price)
+  });
 }
 
 onMounted(() => {

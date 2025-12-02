@@ -28,15 +28,15 @@ export async function placeSellOrder(
     sellOrder.sellAmount,
     auction.decimalsBiddingToken
   );
-  const price = parseFloat(sellOrder.price);
-  const buyAmount = (
-    price
-      ? (parseFloat(sellOrder.sellAmount) / price).toFixed(
-          Number(auction.decimalsAuctioningToken)
-        )
-      : 0
-  ).toString();
-  const rawBuyAmount = parseUnits(buyAmount, auction.decimalsAuctioningToken);
+  const rawPrice = parseUnits(sellOrder.price, auction.decimalsBiddingToken);
+
+  if (rawPrice.isZero()) {
+    throw new Error('Price cannot be zero');
+  }
+
+  const rawBuyAmount = rawSellAmount
+    .mul(10 ** Number(auction.decimalsBiddingToken))
+    .div(rawPrice);
 
   try {
     previousOrderId = await getPreviousOrderId(
