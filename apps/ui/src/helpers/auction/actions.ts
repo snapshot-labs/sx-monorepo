@@ -35,7 +35,7 @@ export async function placeSellOrder(
   }
 
   const rawBuyAmount = rawSellAmount
-    .mul(10 ** Number(auction.decimalsBiddingToken))
+    .mul(10 ** Number(auction.decimalsAuctioningToken))
     .div(rawPrice);
 
   try {
