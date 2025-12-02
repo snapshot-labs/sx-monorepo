@@ -35,6 +35,25 @@ export const AUCTION_KEYS = {
     AUCTION_KEYS.auction(network, auction),
     'bidsSummary',
     { limit: limit ?? SUMMARY_LIMIT, where }
+  ],
+  unclaimedBids: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    limit?: MaybeRefOrGetter<number>,
+    where?: MaybeRefOrGetter<Order_Filter>
+  ) => [
+    AUCTION_KEYS.auction(network, auction),
+    'unclaimedBids',
+    { limit: limit ?? SUMMARY_LIMIT, where }
+  ],
+  biddingTokenPrice: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>
+  ) => [
+    AUCTION_KEYS.all,
+    network,
+    () => toValue(auction).id,
+    'biddingTokenPrice'
   ]
 };
 
@@ -105,13 +124,7 @@ export function useUnclaimedOrdersQuery({
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
-    queryKey: [
-      'auction',
-      network,
-      () => toValue(auction).id,
-      'unclaimedBids',
-      { limit, where }
-    ],
+    queryKey: AUCTION_KEYS.unclaimedBids(network, auction, limit, where),
     queryFn: () =>
       getUnclaimedOrders(toValue(auction).id, toValue(network), {
         orderFilter: toValue(where)
@@ -128,12 +141,7 @@ export function useBiddingTokenPriceQuery({
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
 }) {
   return useQuery({
-    queryKey: [
-      'auction',
-      network,
-      () => toValue(auction).id,
-      'biddingTokenPrice'
-    ],
+    queryKey: AUCTION_KEYS.biddingTokenPrice(network, auction),
     queryFn: async () => {
       const networkValue = toValue(network);
       const auctionValue = toValue(auction);
