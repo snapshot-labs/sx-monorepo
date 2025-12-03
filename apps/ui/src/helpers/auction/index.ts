@@ -1,11 +1,16 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
+import {
+  auctionQuery,
+  ordersQuery,
+  previousOrderQuery,
+  unclaimedOrdersQuery
+} from './queries';
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import { encodeOrder } from './orders';
+import { AuctionNetworkId, Order } from './types';
 
-export type AuctionNetworkId = 'eth' | 'sep';
-export type Order = OrderFragment & { name: string | null };
-export type SellOrder = Pick<Order, 'sellAmount' | 'price'>;
+export * from './types';
 
 const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
@@ -129,12 +134,23 @@ export async function getPreviousOrderId(
   });
 }
 
-export function encodeOrder(order: {
-  sellAmount: bigint;
-  buyAmount: bigint;
-  userId: bigint;
-}): string {
-  return `0x${order.userId.toString(16).padStart(16, '0')}${order.buyAmount
-    .toString(16)
-    .padStart(24, '0')}${order.sellAmount.toString(16).padStart(24, '0')}`;
+export async function getUnclaimedOrders(
+  id: string,
+  network: AuctionNetworkId,
+  {
+    orderFilter
+  }: {
+    orderFilter?: Order_Filter;
+  } = {}
+): Promise<Set<string>> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: unclaimedOrdersQuery,
+    variables: { id, orderFilter }
+  });
+
+  return new Set(
+    data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
+  );
 }

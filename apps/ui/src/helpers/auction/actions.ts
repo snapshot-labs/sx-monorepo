@@ -1,16 +1,16 @@
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
 import { parseUnits } from '@ethersproject/units';
-import { abis } from './abis';
-import { AuctionDetailFragment } from './gql/graphql';
 import {
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
-  encodeOrder,
   getPreviousOrderId,
   Order,
   SellOrder
-} from './index';
+} from './';
+import { abis } from './abis';
+import { AuctionDetailFragment } from './gql/graphql';
+import { encodeOrder } from './orders';
 
 export async function placeSellOrder(
   web3: Web3Provider,
@@ -78,4 +78,28 @@ export async function cancelSellOrder(
       userId: BigInt(order.userId)
     })
   ]);
+}
+
+export async function claimFromParticipantOrder(
+  web3: Web3Provider,
+  networkId: AuctionNetworkId,
+  auction: AuctionDetailFragment,
+  orders: Order[]
+) {
+  const contract = new Contract(
+    AUCTION_CONTRACT_ADDRESSES[networkId],
+    abis,
+    web3.getSigner()
+  );
+
+  return contract.claimFromParticipantOrder(
+    auction.id,
+    orders.map(order =>
+      encodeOrder({
+        userId: BigInt(order.userId),
+        buyAmount: BigInt(order.buyAmount),
+        sellAmount: BigInt(order.sellAmount)
+      })
+    )
+  );
 }
