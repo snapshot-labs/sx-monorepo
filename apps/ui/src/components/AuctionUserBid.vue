@@ -46,7 +46,7 @@ const orderPercentage = computed(() => {
       </span>
       <span
         v-else-if="orderStatus === 'partially-filled'"
-        class="text-skin-success opacity-70"
+        class="text-yellow-500"
       >
         Partially-filled
       </span>
