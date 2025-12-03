@@ -1,5 +1,65 @@
 import { describe, expect, it } from 'vitest';
-import { decodeOrder, encodeOrder } from './orders';
+import { compareOrders, decodeOrder, encodeOrder } from './orders';
+
+describe('compareOrders', () => {
+  it('should compare by price first', () => {
+    const orderA = {
+      userId: '1',
+      buyAmount: '50',
+      sellAmount: '100'
+    };
+    const orderB = {
+      userId: '1',
+      buyAmount: '100',
+      sellAmount: '100'
+    };
+
+    expect(compareOrders(orderA, orderB)).toBe(1);
+    expect(compareOrders(orderB, orderA)).toBe(-1);
+  });
+
+  it('should compare by sellAmount second', () => {
+    const orderA = {
+      userId: '1',
+      buyAmount: '100',
+      sellAmount: '200'
+    };
+    const orderB = {
+      userId: '1',
+      buyAmount: '50',
+      sellAmount: '100'
+    };
+
+    expect(compareOrders(orderA, orderB)).toBe(1);
+    expect(compareOrders(orderB, orderA)).toBe(-1);
+  });
+
+  it('should compare by userId third', () => {
+    const orderA = {
+      userId: '2',
+      buyAmount: '100',
+      sellAmount: '200'
+    };
+    const orderB = {
+      userId: '1',
+      buyAmount: '100',
+      sellAmount: '200'
+    };
+
+    expect(compareOrders(orderA, orderB)).toBe(1);
+    expect(compareOrders(orderB, orderA)).toBe(-1);
+  });
+
+  it('should return 0 if price/sellAmount/userId are the same', () => {
+    const order = {
+      userId: '1',
+      buyAmount: '100',
+      sellAmount: '200'
+    };
+
+    expect(compareOrders(order, order)).toBe(0);
+  });
+});
 
 describe('encodeOrder', () => {
   it('should decode encoded order correctly', () => {
