@@ -49,7 +49,7 @@ export function encodeOrder(order: {
 export function decodeOrder(bytes: string) {
   return {
     userId: BigInt(`0x${bytes.substring(2, 18)}`).toString(),
-    buyAmount: BigInt(`0x${bytes.substring(19, 42)}`).toString(),
-    sellAmount: BigInt(`0x${bytes.substring(43, 66)}`).toString()
+    buyAmount: BigInt(`0x${bytes.substring(18, 42)}`).toString(),
+    sellAmount: BigInt(`0x${bytes.substring(42, 66)}`).toString()
   };
 }
