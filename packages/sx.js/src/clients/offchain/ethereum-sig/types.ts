@@ -38,7 +38,7 @@ export const encryptedVoteTypes = {
     { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
-    { name: 'proposal', type: 'bytes32' },
+    { name: 'proposal', type: 'string' },
     { name: 'choice', type: 'string' },
     { name: 'reason', type: 'string' },
     { name: 'app', type: 'string' },
@@ -110,7 +110,7 @@ export const cancelProposalTypes = {
     { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
-    { name: 'proposal', type: 'bytes32' }
+    { name: 'proposal', type: 'string' }
   ]
 };
 
