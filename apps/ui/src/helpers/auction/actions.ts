@@ -29,7 +29,7 @@ export async function placeSellOrder(
   );
   let previousOrderId: string;
 
-  const computedPrice = new Decimal(sellOrder.sellAmount).div(
+  const price = new Decimal(sellOrder.sellAmount).div(
     new Decimal(sellOrder.buyAmount)
   );
 
@@ -37,7 +37,7 @@ export async function placeSellOrder(
     previousOrderId = await getPreviousOrderId(
       auction.id,
       networkId,
-      computedPrice.toFixed(PRICE_PRECISION)
+      price.toFixed(PRICE_PRECISION)
     );
   } catch (e) {
     console.error(
