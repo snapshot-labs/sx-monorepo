@@ -1,6 +1,5 @@
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
-import { parseUnits } from '@ethersproject/units';
 import Decimal from 'decimal.js';
 import {
   AUCTION_CONTRACT_ADDRESSES,
@@ -29,22 +28,9 @@ export async function placeSellOrder(
     web3.getSigner()
   );
   let previousOrderId: string;
-  const rawSellAmount = parseUnits(
-    sellOrder.sellAmount,
-    auction.decimalsBiddingToken
-  );
-  const price = parseFloat(sellOrder.price);
-  const buyAmount = (
-    price
-      ? (parseFloat(sellOrder.sellAmount) / price).toFixed(
-          Number(auction.decimalsAuctioningToken)
-        )
-      : 0
-  ).toString();
-  const rawBuyAmount = parseUnits(buyAmount, auction.decimalsAuctioningToken);
 
   const computedPrice = new Decimal(sellOrder.sellAmount).div(
-    new Decimal(buyAmount)
+    new Decimal(sellOrder.buyAmount)
   );
 
   try {
@@ -64,8 +50,8 @@ export async function placeSellOrder(
 
   return contract.placeSellOrders(
     auction.id,
-    [rawBuyAmount],
-    [rawSellAmount],
+    [sellOrder.buyAmount],
+    [sellOrder.sellAmount],
     [previousOrderId],
     auction.allowListSigner
   );

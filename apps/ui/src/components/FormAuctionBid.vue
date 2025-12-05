@@ -213,14 +213,30 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
+function toRawUnits(value: number, decimals: number): bigint {
+  return BigInt(Math.floor(value * 10 ** decimals));
+}
+
 function handlePlaceOrder() {
   if (hasErrors.value) return;
 
-  const price = isPriceInverted.value
-    ? (1 / parseFloat(bidPrice.value)).toString()
-    : bidPrice.value;
+  const bidPriceValue = parseFloat(bidPrice.value);
 
-  emit('submit', { sellAmount: bidAmount.value, price });
+  const price = isPriceInverted.value ? 1 / bidPriceValue : bidPriceValue;
+
+  const sellAmount = parseFloat(bidAmount.value);
+  const buyAmount = price ? sellAmount / price : 0;
+
+  emit('submit', {
+    sellAmount: toRawUnits(
+      sellAmount,
+      Number(props.auction.decimalsBiddingToken)
+    ),
+    buyAmount: toRawUnits(
+      buyAmount,
+      Number(props.auction.decimalsAuctioningToken)
+    )
+  });
 }
 
 onMounted(() => {
