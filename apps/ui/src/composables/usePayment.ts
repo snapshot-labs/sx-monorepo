@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { MaybeRefOrGetter } from 'vue';
-import { approve as _approve, getTokenAllowance } from '@/helpers/token';
+import { approve as approveToken, getTokenAllowance } from '@/helpers/token';
 import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
@@ -88,7 +88,7 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
 
     await verifyNetwork(auth.value.provider, Number(toValue(network)));
 
-    return _approve(
+    return approveToken(
       auth.value!.provider,
       token.contractAddress,
       PAYMENT_CONTRACT_ADDRESSES[toValue(network)],
