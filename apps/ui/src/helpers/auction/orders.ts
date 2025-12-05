@@ -7,8 +7,8 @@ type ComparableOrder = Pick<Order, 'userId' | 'buyAmount' | 'sellAmount'>;
  * Returns -1 if a < b, 1 if a > b, 0 if equal.
  * Criteria are:
  * 1. Price (buyAmount / sellAmount), higher price is better
- * 2. Sell amount, higher sell amount is better
- * 3. User ID, higher user ID is better
+ * 2. Buy amount, lower buy amount is better
+ * 3. User ID, lower user ID is better
  */
 export function compareOrders(
   a: ComparableOrder,
@@ -27,11 +27,11 @@ export function compareOrders(
   if (priceA < priceB) return 1;
   if (priceA > priceB) return -1;
 
-  if (sellAmountA > sellAmountB) return 1;
-  if (sellAmountA < sellAmountB) return -1;
+  if (buyAmountA < buyAmountB) return 1;
+  if (buyAmountA > buyAmountB) return -1;
 
-  if (userIdA > userIdB) return 1;
-  if (userIdA < userIdB) return -1;
+  if (userIdA < userIdB) return 1;
+  if (userIdA > userIdB) return -1;
 
   return 0;
 }

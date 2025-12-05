@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { compareOrders, decodeOrder, encodeOrder } from './orders';
 
 describe('compareOrders', () => {
-  it('should compare by price first', () => {
+  it('should compare by price first (higher is better)', () => {
     const orderA = {
       userId: '1',
       buyAmount: '50',
@@ -18,7 +18,7 @@ describe('compareOrders', () => {
     expect(compareOrders(orderB, orderA)).toBe(-1);
   });
 
-  it('should compare by sellAmount second', () => {
+  it('should compare by buyAmount second (smaller is better)', () => {
     const orderA = {
       userId: '1',
       buyAmount: '100',
@@ -30,11 +30,11 @@ describe('compareOrders', () => {
       sellAmount: '100'
     };
 
-    expect(compareOrders(orderA, orderB)).toBe(1);
-    expect(compareOrders(orderB, orderA)).toBe(-1);
+    expect(compareOrders(orderA, orderB)).toBe(-1);
+    expect(compareOrders(orderB, orderA)).toBe(1);
   });
 
-  it('should compare by userId third', () => {
+  it('should compare by userId third (smaller is better)', () => {
     const orderA = {
       userId: '2',
       buyAmount: '100',
@@ -46,8 +46,8 @@ describe('compareOrders', () => {
       sellAmount: '200'
     };
 
-    expect(compareOrders(orderA, orderB)).toBe(1);
-    expect(compareOrders(orderB, orderA)).toBe(-1);
+    expect(compareOrders(orderA, orderB)).toBe(-1);
+    expect(compareOrders(orderB, orderA)).toBe(1);
   });
 
   it('should return 0 if price/sellAmount/userId are the same', () => {
