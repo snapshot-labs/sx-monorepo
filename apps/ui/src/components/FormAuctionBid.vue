@@ -130,7 +130,7 @@ const maxMarketCap = computed(() => {
   if (!displayPrice || !totalSupply.value) return '0';
 
   const decimals = isPriceInverted.value
-    ? parseInt(props.auction.decimalsBiddingToken)
+    ? biddingTokenDecimals.value
     : parseInt(props.auction.decimalsAuctioningToken);
   const normalizedPrice = isPriceInverted.value
     ? parseFloat((1 / displayPrice).toFixed(decimals))
@@ -205,6 +205,10 @@ const priceError = computed(() => {
   return undefined;
 });
 
+const biddingTokenDecimals = computed(() =>
+  parseInt(props.auction.decimalsBiddingToken)
+);
+
 const hasErrors = computed<boolean>(() => {
   return !!(
     Object.keys(formatErrors.value).length ||
@@ -239,15 +243,6 @@ function handlePlaceOrder() {
   });
 }
 
-onMounted(() => {
-  const clearingPrice = parseFloat(props.auction.currentClearingPrice);
-  if (clearingPrice <= 0) return;
-
-  bidPrice.value = (clearingPrice * DEFAULT_PRICE_PREMIUM).toFixed(
-    PRICE_DECIMALS
-  );
-});
-
 function togglePriceMode() {
   const currentPrice = parseFloat(bidPrice.value) || 0;
   isPriceInverted.value = !isPriceInverted.value;
@@ -258,6 +253,58 @@ function togglePriceMode() {
     bidPrice.value = formatPrice(1 / currentPrice, decimals);
   }
 }
+
+function truncateDecimals(value: string, maxDecimals: number): string {
+  if (isNaN(parseFloat(value))) return value;
+
+  const parts = value.split('.');
+
+  if (parts.length > 1 && parts[1].length > maxDecimals) {
+    return `${parts[0]}.${parts[1].substring(0, maxDecimals)}`;
+  }
+
+  return value;
+}
+
+watch(
+  bidAmount,
+  (newValue, oldValue) => {
+    if (!newValue || newValue === oldValue) return;
+
+    const truncated = truncateDecimals(newValue, biddingTokenDecimals.value);
+
+    if (truncated !== newValue) {
+      bidAmount.value = truncated;
+    }
+  },
+  { flush: 'post' }
+);
+
+watch(
+  bidPrice,
+  (newValue, oldValue) => {
+    if (!newValue || newValue === oldValue || isPriceInverted.value) return;
+
+    const truncated = truncateDecimals(
+      newValue,
+      parseInt(props.auction.decimalsAuctioningToken)
+    );
+
+    if (truncated !== newValue) {
+      bidPrice.value = truncated;
+    }
+  },
+  { flush: 'post' }
+);
+
+onMounted(() => {
+  const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+  if (clearingPrice <= 0) return;
+
+  bidPrice.value = (clearingPrice * DEFAULT_PRICE_PREMIUM).toFixed(
+    PRICE_DECIMALS
+  );
+});
 </script>
 
 <template>
