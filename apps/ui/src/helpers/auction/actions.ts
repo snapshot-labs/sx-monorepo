@@ -2,15 +2,15 @@ import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
 import { parseUnits } from '@ethersproject/units';
 import Decimal from 'decimal.js';
-import { abis } from './abis';
-import { AuctionDetailFragment } from './gql/graphql';
 import {
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
   getPreviousOrderId,
   Order,
   SellOrder
-} from './index';
+} from './';
+import { abis } from './abis';
+import { AuctionDetailFragment } from './gql/graphql';
 import { encodeOrder } from './orders';
 
 const PRICE_PRECISION = 34;
