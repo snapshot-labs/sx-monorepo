@@ -7,21 +7,13 @@ import {
 } from '@/helpers/auction';
 import * as actions from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import { approve, getIsApproved, Token } from '@/helpers/token';
+import { approve, getTokenAllowance } from '@/helpers/token';
 import {
   getUserFacingErrorMessage,
   isUserAbortError,
   verifyNetwork
 } from '@/helpers/utils';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
-
-function getBiddingToken(auction: AuctionDetailFragment): Token {
-  return {
-    contractAddress: auction.addressBiddingToken,
-    decimals: Number(auction.decimalsBiddingToken),
-    symbol: auction.symbolBiddingToken
-  };
-}
 
 export function useAuctionActions(
   networkId: MaybeRefOrGetter<AuctionNetworkId>,
@@ -69,19 +61,20 @@ export function useAuctionActions(
   );
 
   async function getIsTokenApproved(sellOrder: SellOrder) {
-    return getIsApproved(
-      getBiddingToken(toValue(auction)),
+    const allowance = await getTokenAllowance(
       auth.value!.provider,
-      contractAddress.value,
-      sellOrder.sellAmount
+      toValue(auction).addressBiddingToken,
+      contractAddress.value
     );
+
+    return allowance >= sellOrder.sellAmount;
   }
 
   async function approveToken(sellOrder: SellOrder) {
     return wrapPromise(
       approve(
-        getBiddingToken(toValue(auction)),
         auth.value!.provider,
+        toValue(auction).addressBiddingToken,
         contractAddress.value,
         sellOrder.sellAmount
       )
