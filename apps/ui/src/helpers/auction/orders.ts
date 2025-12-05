@@ -21,11 +21,11 @@ export function compareOrders(
   const userIdA = BigInt(a.userId);
   const userIdB = BigInt(b.userId);
 
-  const priceA = buyAmountA * sellAmountB;
-  const priceB = buyAmountB * sellAmountA;
+  const priceA = sellAmountA * buyAmountB;
+  const priceB = sellAmountB * buyAmountA;
 
-  if (priceA < priceB) return 1;
-  if (priceA > priceB) return -1;
+  if (priceA > priceB) return 1;
+  if (priceA < priceB) return -1;
 
   if (buyAmountA < buyAmountB) return 1;
   if (buyAmountA > buyAmountB) return -1;
