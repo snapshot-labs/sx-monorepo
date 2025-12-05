@@ -1,5 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
 import { Web3Provider } from '@ethersproject/providers';
+import Decimal from 'decimal.js';
 import {
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
@@ -10,6 +11,10 @@ import {
 import { abis } from './abis';
 import { AuctionDetailFragment } from './gql/graphql';
 import { encodeOrder } from './orders';
+
+const PRICE_PRECISION = 34;
+
+Decimal.set({ precision: PRICE_PRECISION });
 
 export async function placeSellOrder(
   web3: Web3Provider,
@@ -24,13 +29,15 @@ export async function placeSellOrder(
   );
   let previousOrderId: string;
 
-  const price = Number(sellOrder.sellAmount) / Number(sellOrder.buyAmount);
+  const price = new Decimal(sellOrder.sellAmount).div(
+    new Decimal(sellOrder.buyAmount)
+  );
 
   try {
     previousOrderId = await getPreviousOrderId(
       auction.id,
       networkId,
-      price.toFixed(34)
+      price.toFixed(PRICE_PRECISION)
     );
   } catch (e) {
     console.error(
