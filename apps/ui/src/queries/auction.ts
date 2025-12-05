@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   AuctionNetworkId,
+  getAuctionPriceHistory,
   getOrders,
   getUnclaimedOrders
 } from '@/helpers/auction';
@@ -54,7 +55,12 @@ export const AUCTION_KEYS = {
     network,
     () => toValue(auction).id,
     'biddingTokenPrice'
-  ]
+  ],
+  priceHistory: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    granularity: MaybeRefOrGetter<'minute' | 'hour'>
+  ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity]
 };
 
 export function useBidsQuery({
@@ -162,5 +168,43 @@ export function useBiddingTokenPriceQuery({
 
       return coins[auctionValue.addressBiddingToken.toLowerCase()]?.usd ?? 0;
     }
+  });
+}
+
+export function useAuctionPriceDataQuery({
+  network,
+  auction,
+  granularity = 'hour'
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  granularity?: MaybeRefOrGetter<'minute' | 'hour'>;
+}) {
+  const pageLimit = 1000;
+
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: AUCTION_KEYS.priceHistory(network, auction, granularity),
+    queryFn: async ({ pageParam }) => {
+      const auctionValue = toValue(auction);
+      const networkValue = toValue(network);
+      const granularityValue = toValue(granularity);
+
+      return getAuctionPriceHistory(
+        auctionValue.id,
+        networkValue,
+        granularityValue,
+        { skip: pageParam, first: pageLimit }
+      );
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (!Array.isArray(lastPage) || lastPage.length < pageLimit) return null;
+      return pages.length * pageLimit;
+    },
+    enabled: computed(() => {
+      const auctionValue = toValue(auction);
+      const networkValue = toValue(network);
+      return !!(auctionValue?.id && networkValue);
+    })
   });
 }

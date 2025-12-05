@@ -1,5 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import {
+  auctionPriceHourDataQuery,
+  auctionPriceMinuteDataQuery,
   auctionQuery,
   ordersQuery,
   previousOrderQuery,
@@ -8,7 +10,7 @@ import {
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
 import { encodeOrder } from './orders';
-import { AuctionNetworkId, Order } from './types';
+import { AuctionNetworkId, AuctionPriceHistoryData, Order } from './types';
 
 export * from './types';
 
@@ -16,8 +18,8 @@ const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
-  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
-  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH'
+  sep: 'https://api.thegraph.com/subgraphs/id/QmeQ1yHALXBeFgNDdkF9PScMiZb8jAtZt7v8Kpy97KyAKg',
+  eth: 'https://gateway.thegraph.com/api/af06c420ff943c55b9e85c16b93b67ec/deployments/id/QmddSTyY1eGx38Wz8rUMUWdqZ14F6b2bYwNsL82LgoW5J9'
 };
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
@@ -153,4 +155,29 @@ export async function getUnclaimedOrders(
   return new Set(
     data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
   );
+}
+
+export async function getAuctionPriceHistory(
+  auctionId: string,
+  network: AuctionNetworkId,
+  granularity: 'minute' | 'hour',
+  { skip = 0, first = 1000 }: { skip?: number; first?: number } = {}
+): Promise<AuctionPriceHistoryData[]> {
+  const client = getClient(network);
+
+  const query =
+    granularity === 'hour'
+      ? auctionPriceHourDataQuery
+      : auctionPriceMinuteDataQuery;
+  const dataKey =
+    granularity === 'hour'
+      ? 'auctionPriceHourDatas'
+      : 'auctionPriceMinuteDatas';
+
+  const { data } = await client.query({
+    query,
+    variables: { where: { auction: auctionId }, first, skip }
+  });
+
+  return data[dataKey] || [];
 }
