@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Contract } from '@ethersproject/contracts';
-import { formatUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
 import {
@@ -214,20 +214,24 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
-function toRawUnits(value: number, decimals: number): bigint {
-  return BigInt(Math.floor(value * 10 ** decimals));
+// TODO: decide what to do with this function.
+// We could write our own variant and use it throughout the codebase.
+// Or we could just use ethers.js parseUnits directly.
+// Plain parseFloat() * 10 ** decimals could lead to precision issues.
+function toRawUnits(value: string, decimals: number): bigint {
+  return parseUnits(value, decimals).toBigInt();
 }
 
 function handlePlaceOrder() {
   if (hasErrors.value) return;
 
   const sellAmount = toRawUnits(
-    parseFloat(bidAmount.value),
+    bidAmount.value,
     Number(props.auction.decimalsBiddingToken)
   );
 
   const price = toRawUnits(
-    parseFloat(bidPrice.value),
+    bidPrice.value,
     Number(props.auction.decimalsBiddingToken)
   );
 
