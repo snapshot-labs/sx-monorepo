@@ -10,6 +10,7 @@ import {
   SellOrder
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
 import { _n, _t } from '@/helpers/utils';
@@ -220,22 +221,23 @@ function toRawUnits(value: number, decimals: number): bigint {
 function handlePlaceOrder() {
   if (hasErrors.value) return;
 
-  const bidPriceValue = parseFloat(bidPrice.value);
+  const sellAmount = toRawUnits(
+    parseFloat(bidAmount.value),
+    Number(props.auction.decimalsBiddingToken)
+  );
 
-  const price = isPriceInverted.value ? 1 / bidPriceValue : bidPriceValue;
-
-  const sellAmount = parseFloat(bidAmount.value);
-  const buyAmount = price ? sellAmount / price : 0;
+  const price = toRawUnits(
+    parseFloat(bidPrice.value),
+    Number(props.auction.decimalsBiddingToken)
+  );
 
   emit('submit', {
-    sellAmount: toRawUnits(
+    sellAmount,
+    buyAmount: getOrderBuyAmount({
       sellAmount,
-      Number(props.auction.decimalsBiddingToken)
-    ),
-    buyAmount: toRawUnits(
-      buyAmount,
-      Number(props.auction.decimalsAuctioningToken)
-    )
+      price,
+      buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
+    })
   });
 }
 

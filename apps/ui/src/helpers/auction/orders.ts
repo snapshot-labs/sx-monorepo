@@ -53,3 +53,24 @@ export function decodeOrder(bytes: string) {
     sellAmount: BigInt(`0x${bytes.substring(42, 66)}`).toString()
   };
 }
+
+/**
+ * Computes the buy amount for an order given the sell amount and price.
+ * Rounds up to ensure the price is not violated.
+ * @param sellAmount The amount being sold
+ * @param price The price (amount of sell token per buy token)
+ * @param buyAmountDecimals The number of decimals for the buy token
+ */
+export function getOrderBuyAmount({
+  sellAmount,
+  price,
+  buyAmountDecimals
+}: {
+  sellAmount: bigint;
+  price: bigint;
+  buyAmountDecimals: bigint;
+}): bigint {
+  const numerator = sellAmount * 10n ** buyAmountDecimals;
+
+  return (numerator + price - 1n) / price;
+}
