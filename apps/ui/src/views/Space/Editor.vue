@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
@@ -663,10 +664,14 @@ watchEffect(() => {
               <IH-arrow-sm-right class="-rotate-45" /> </AppLink
             >.
           </UiAlert>
-          <UiAlert v-else-if="isSafeInvalidNetwork" type="error" class="mb-4">
-            Your Safe wallet's network does not match this space's network.
-            Please use a Safe on the same network as the space to create
-            proposals.
+          <UiAlert
+            v-else-if="space.snapshot_chain_id && isSafeInvalidNetwork"
+            type="error"
+            class="mb-4"
+          >
+            Please use a Safe on
+            {{ networks[space.snapshot_chain_id]?.name ?? 'this network' }} to
+            create proposals.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
