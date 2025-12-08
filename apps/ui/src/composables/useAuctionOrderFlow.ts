@@ -28,7 +28,7 @@ export function useAuctionOrderFlow(
   const { getIsTokenApproved, approveToken, placeSellOrder } =
     useAuctionActions(networkId, auction);
 
-  const sellOrder = ref<SellOrder>({ sellAmount: '0', price: '0' });
+  const sellOrder = ref<SellOrder>({ sellAmount: 0n, buyAmount: 0n });
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
@@ -78,15 +78,12 @@ export function useAuctionOrderFlow(
     return currentStepId.value === LAST_STEP;
   });
 
-  function goToNextStep(): boolean {
+  function goToNextStep() {
     const nextStep = currentStep.value.nextStep();
 
     if (nextStep) {
       currentStepId.value = nextStep;
-      return true;
     }
-
-    return false;
   }
 
   function start(order: SellOrder) {

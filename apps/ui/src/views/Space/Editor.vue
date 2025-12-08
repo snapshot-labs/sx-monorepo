@@ -371,7 +371,9 @@ async function handleProposeClick() {
         executions
       );
 
-      uiStore.addNotification('success', 'Proposal updated successfully.');
+      if (result) {
+        uiStore.addNotification('success', 'Proposal updated successfully.');
+      }
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
 
@@ -395,7 +397,9 @@ async function handleProposeClick() {
         executions
       );
 
-      uiStore.addNotification('success', 'Proposal created successfully.');
+      if (result) {
+        uiStore.addNotification('success', 'Proposal created successfully.');
+      }
     }
     if (result) {
       queryClient.invalidateQueries({

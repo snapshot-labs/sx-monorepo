@@ -3,8 +3,14 @@ import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionState } from '@/components/AuctionStatus.vue';
-import { AuctionNetworkId, formatPrice, SellOrder } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  formatPrice,
+  Order,
+  SellOrder
+} from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _t, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
@@ -12,8 +18,11 @@ import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
   AUCTION_KEYS,
   useBiddingTokenPriceQuery,
-  useBidsSummaryQuery
+  useBidsSummaryQuery,
+  useUnclaimedOrdersQuery
 } from '@/queries/auction';
+
+const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
 
 const props = defineProps<{
   network: AuctionNetworkId;
@@ -21,15 +30,25 @@ const props = defineProps<{
   auction: AuctionDetailFragment;
 }>();
 
-const isModalTransactionProgressOpen = ref(false);
-const isPlacingOrder = ref(false);
-
 const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
   toRef(props, 'network'),
   toRef(props, 'auction')
 );
+const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
+  toRef(props, 'network'),
+  toRef(props, 'auction')
+);
+
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
+
+const isModalTransactionProgressOpen = ref(false);
+const transactionProgressType = ref<
+  'place-order' | 'cancel-order' | 'claim-orders' | null
+>(null);
+const cancelOrderFn = ref<() => Promise<string | null>>(
+  DEFAULT_TRANSACTION_PROGRESS_FN
+);
 
 const auctionState = computed<AuctionState>(() => {
   const now = Math.floor(Date.now() / 1000);
@@ -42,7 +61,11 @@ const auctionState = computed<AuctionState>(() => {
 
   if (currentBiddingAmount < minFundingThreshold) return 'canceled';
 
-  if (props.auction.ordersWithoutClaimed?.length) return 'claiming';
+  if (props.auction.ordersWithoutClaimed?.length) {
+    if (!props.auction.clearingPriceOrder) return 'finalizing';
+
+    return 'claiming';
+  }
 
   return 'claimed';
 });
@@ -75,13 +98,135 @@ const {
   where: () => ({
     userAddress: web3.value.account?.toLowerCase()
   }),
+  orderBy: 'price',
+  orderDirection: 'desc',
   enabled: isAccountSupported
 });
+
+const {
+  data: unclaimedOrders,
+  isError: isUnclaimedOrdersError,
+  isLoading: isUnclaimedOrdersLoading
+} = useUnclaimedOrdersQuery({
+  network: () => props.network,
+  auction: () => props.auction,
+  where: () => ({
+    userAddress: web3.value.account?.toLowerCase()
+  }),
+  enabled: () => isAccountSupported.value
+});
+
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
     auction: () => props.auction
   });
+
+const userOrdersSummary = computed(() => {
+  let auctioningTokenToClaim = 0n;
+  let biddingTokenToClaim = 0n;
+
+  const statuses: Record<
+    string,
+    'open' | 'filled' | 'partially-filled' | 'rejected' | 'claimed'
+  > = {};
+  const { clearingPriceOrder, volumeClearingPriceOrder } = props.auction;
+
+  if (!unclaimedOrders.value || !userOrders.value) {
+    return { statuses, auctioningTokenToClaim, biddingTokenToClaim };
+  }
+
+  const clearingPriceOrderDecoded = clearingPriceOrder
+    ? decodeOrder(clearingPriceOrder)
+    : null;
+
+  const auctioningTokensPerBiddingToken =
+    BigInt(props.auction.currentClearingOrderBuyAmount) /
+    BigInt(props.auction.currentClearingOrderSellAmount);
+
+  userOrders.value.forEach(order => {
+    const orderSellAmount = BigInt(order.sellAmount);
+
+    if (auctionState.value === 'canceled') {
+      // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
+      statuses[order.id] = 'rejected';
+      biddingTokenToClaim += orderSellAmount;
+      return;
+    }
+
+    if (
+      auctionState.value === 'active' ||
+      !clearingPriceOrderDecoded ||
+      !volumeClearingPriceOrder
+    ) {
+      statuses[order.id] = 'open';
+      return;
+    }
+
+    if (!unclaimedOrders.value.has(order.id)) {
+      statuses[order.id] = 'claimed';
+      return;
+    }
+
+    const orderComparison = compareOrders(
+      {
+        userId: order.userId,
+        buyAmount: order.buyAmount,
+        sellAmount: order.sellAmount
+      },
+      clearingPriceOrderDecoded
+    );
+
+    if (orderComparison === 0) {
+      // [25]: Order is partially filled. User gets refund for unfilled bidding tokens and gets auctioning tokens based on filled amount
+      const settledBuyAmount =
+        auctioningTokensPerBiddingToken * BigInt(volumeClearingPriceOrder);
+
+      statuses[order.id] = 'partially-filled';
+      biddingTokenToClaim += orderSellAmount - BigInt(volumeClearingPriceOrder);
+      auctioningTokenToClaim += settledBuyAmount;
+    } else if (orderComparison > 0) {
+      // [17]: Order is fully filled. User doesn't get bidding tokens back, but gets auctioning tokens
+      // equal to their sellAmount * currentClearingPrice
+      const settledBuyAmount =
+        auctioningTokensPerBiddingToken * orderSellAmount;
+
+      statuses[order.id] = 'filled';
+      auctioningTokenToClaim += settledBuyAmount;
+    } else {
+      // [24]: No amount left to claim, all remaining orders are rejected and users get their bidding tokens back
+      statuses[order.id] = 'rejected';
+      biddingTokenToClaim += orderSellAmount;
+    }
+  });
+
+  return { statuses, auctioningTokenToClaim, biddingTokenToClaim };
+});
+
+const claimText = computed(() => {
+  const { auctioningTokenToClaim, biddingTokenToClaim } =
+    userOrdersSummary.value;
+
+  const parts: string[] = [];
+  if (auctioningTokenToClaim > 0n) {
+    parts.push(
+      `${formatTokenAmount(
+        auctioningTokenToClaim.toString(),
+        props.auction.decimalsAuctioningToken
+      )} ${props.auction.symbolAuctioningToken}`
+    );
+  }
+  if (biddingTokenToClaim > 0n) {
+    parts.push(
+      `${formatTokenAmount(
+        biddingTokenToClaim.toString(),
+        props.auction.decimalsBiddingToken
+      )} ${props.auction.symbolBiddingToken}`
+    );
+  }
+
+  return parts.length > 0 ? `Claim ${parts.join(' and ')}` : null;
+});
 
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
@@ -109,6 +254,22 @@ const biddingParameters = computed(() => {
       value: `${formatTokenAmount(minimumBiddingAmountPerOrder, decimalsBiddingToken)} ${symbol}`
     }
   ];
+});
+
+const transactionProgressFn = computed<() => Promise<string | null>>(() => {
+  if (transactionProgressType.value === 'place-order') {
+    return currentStep.value.execute;
+  }
+
+  if (transactionProgressType.value === 'cancel-order') {
+    return cancelOrderFn.value;
+  }
+
+  if (transactionProgressType.value === 'claim-orders') {
+    return () => claimFromParticipantOrder(userOrders.value ?? []);
+  }
+
+  return DEFAULT_TRANSACTION_PROGRESS_FN;
 });
 
 const auctionSettings = computed(() => {
@@ -153,36 +314,63 @@ const normalizedSignerAddress = computed(() => {
   }
 });
 
+async function invalidateQueries() {
+  await sleep(5000);
+
+  queryClient.invalidateQueries({
+    queryKey: AUCTION_KEYS.auction(props.network, props.auction)
+  });
+}
+
 async function moveToNextStep() {
   if (isLastStep.value) {
-    isPlacingOrder.value = false;
-
-    await sleep(2000);
-
-    queryClient.invalidateQueries({
-      queryKey: AUCTION_KEYS.summary(props.network, props.auction)
-    });
-    queryClient.invalidateQueries({
-      queryKey: AUCTION_KEYS.summary(props.network, props.auction, 100, {
-        userAddress: web3.value.account?.toLowerCase()
-      })
-    });
-
+    invalidateQueries();
+    resetTransactionProgress();
     return;
   }
 
   isModalTransactionProgressOpen.value = false;
 
-  if (await goToNextStep()) {
+  goToNextStep();
+
+  nextTick(() => {
     isModalTransactionProgressOpen.value = true;
-  }
+  });
+}
+
+function resetTransactionProgress() {
+  isModalTransactionProgressOpen.value = false;
+  transactionProgressType.value = null;
+  cancelOrderFn.value = DEFAULT_TRANSACTION_PROGRESS_FN;
 }
 
 async function handlePlaceSellOrder(sellOrder: SellOrder) {
-  start(sellOrder);
+  transactionProgressType.value = 'place-order';
 
-  isPlacingOrder.value = true;
+  start(sellOrder);
   isModalTransactionProgressOpen.value = true;
+}
+
+async function handleCancelSellOrder(order: Order) {
+  transactionProgressType.value = 'cancel-order';
+  cancelOrderFn.value = () => cancelSellOrder(order);
+
+  isModalTransactionProgressOpen.value = true;
+}
+
+function handleClaimOrders() {
+  transactionProgressType.value = 'claim-orders';
+
+  isModalTransactionProgressOpen.value = true;
+}
+
+function handleTransactionConfirmed() {
+  if (transactionProgressType.value === 'place-order') {
+    return moveToNextStep();
+  }
+
+  invalidateQueries();
+  resetTransactionProgress();
 }
 </script>
 
@@ -313,7 +501,7 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         v-if="isAuctionOpen"
         :auction="auction"
         :network="network"
-        :is-loading="isPlacingOrder"
+        :is-loading="isModalTransactionProgressOpen"
         :previous-orders="userOrders"
         @submit="handlePlaceSellOrder"
       />
@@ -379,17 +567,24 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
         <UiEyebrow class="mb-3">Your bids</UiEyebrow>
         <div class="border rounded-lg overflow-hidden">
           <UiColumnHeader class="py-2 gap-3" :sticky="false">
-            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-            <div class="max-w-[144px] w-[144px] truncate">Date</div>
-            <div class="max-w-[144px] w-[144px] truncate">Amount</div>
-            <div class="max-w-[144px] w-[144px] text-right truncate">Price</div>
+            <div class="min-w-[100px] truncate">Status</div>
+            <div class="max-w-[168px] w-[168px] truncate">Date</div>
+            <div class="max-w-[168px] w-[168px] truncate">Amount</div>
+            <div class="flex-1 min-w-[168px] text-right truncate">Price</div>
             <div class="min-w-[44px] lg:w-[60px] -mr-4" />
           </UiColumnHeader>
           <UiLoading
-            v-if="isUserOrdersLoading || isBiddingTokenPriceLoading"
+            v-if="
+              isUserOrdersLoading ||
+              isUnclaimedOrdersLoading ||
+              isBiddingTokenPriceLoading
+            "
             class="px-4 py-3 block"
           />
-          <UiStateWarning v-else-if="isUserOrdersError" class="px-4 py-3">
+          <UiStateWarning
+            v-else-if="isUserOrdersError || isUnclaimedOrdersError"
+            class="px-4 py-3"
+          >
             Failed to load bids.
           </UiStateWarning>
           <UiStateWarning
@@ -402,17 +597,26 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
             v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
             class="divide-y divide-skin-border flex flex-col justify-center"
           >
-            <AuctionBid
+            <AuctionUserBid
               v-for="order in userOrders"
               :key="order.id"
-              with-actions
+              :order-status="userOrdersSummary.statuses[order.id]"
               :auction-id="auctionId"
               :auction="auction"
               :order="order"
               :bidding-token-price="biddingTokenPrice"
+              @cancel="handleCancelSellOrder"
             />
           </div>
         </div>
+        <UiButton
+          v-if="claimText"
+          class="w-full mt-4"
+          primary
+          @click="handleClaimOrders"
+        >
+          {{ claimText }}
+        </UiButton>
       </div>
 
       <div>
@@ -499,18 +703,16 @@ async function handlePlaceSellOrder(sellOrder: SellOrder) {
     <teleport to="#modal">
       <ModalTransactionProgress
         :open="isModalTransactionProgressOpen"
-        :execute="currentStep.execute"
+        :execute="transactionProgressFn"
         :chain-id="EVM_METADATA[network].chainId"
-        :messages="currentStep.messages"
-        @close="
-          isModalTransactionProgressOpen = false;
-          isPlacingOrder = false;
+        :messages="
+          transactionProgressType === 'place-order'
+            ? currentStep.messages
+            : undefined
         "
-        @confirmed="moveToNextStep"
-        @cancelled="
-          isModalTransactionProgressOpen = false;
-          isPlacingOrder = false;
-        "
+        @close="resetTransactionProgress"
+        @confirmed="handleTransactionConfirmed"
+        @cancelled="resetTransactionProgress"
       />
     </teleport>
   </div>

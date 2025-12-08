@@ -76,6 +76,7 @@
     "autolinker": "^3.11.0",
     "buffer": "^6.0.3",
     "dayjs": "^1.11.10",
+    "decimal.js": "^10.6.0",
     "ethers": "^6.13.5",
     "events": "^3.3.0",
     "graphql": "^16.8.1",
