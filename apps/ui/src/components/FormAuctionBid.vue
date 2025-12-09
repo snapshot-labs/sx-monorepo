@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Contract } from '@ethersproject/contracts';
-import { formatUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
 import {
@@ -10,6 +10,7 @@ import {
   SellOrder
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
 import { _n, _t } from '@/helpers/utils';
@@ -213,29 +214,34 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
-function toRawUnits(value: number, decimals: number): bigint {
-  return BigInt(Math.floor(value * 10 ** decimals));
+// TODO: decide what to do with this function.
+// We could write our own variant and use it throughout the codebase.
+// Or we could just use ethers.js parseUnits directly.
+// Plain parseFloat() * 10 ** decimals could lead to precision issues.
+function toRawUnits(value: string, decimals: number): bigint {
+  return parseUnits(value, decimals).toBigInt();
 }
 
 function handlePlaceOrder() {
   if (hasErrors.value) return;
 
-  const bidPriceValue = parseFloat(bidPrice.value);
+  const sellAmount = toRawUnits(
+    bidAmount.value,
+    Number(props.auction.decimalsBiddingToken)
+  );
 
-  const price = isPriceInverted.value ? 1 / bidPriceValue : bidPriceValue;
-
-  const sellAmount = parseFloat(bidAmount.value);
-  const buyAmount = price ? sellAmount / price : 0;
+  const price = toRawUnits(
+    bidPrice.value,
+    Number(props.auction.decimalsBiddingToken)
+  );
 
   emit('submit', {
-    sellAmount: toRawUnits(
+    sellAmount,
+    buyAmount: getOrderBuyAmount({
       sellAmount,
-      Number(props.auction.decimalsBiddingToken)
-    ),
-    buyAmount: toRawUnits(
-      buyAmount,
-      Number(props.auction.decimalsAuctioningToken)
-    )
+      price,
+      buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
+    })
   });
 }
 

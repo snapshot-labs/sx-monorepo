@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { compareOrders, decodeOrder, encodeOrder } from './orders';
+import {
+  compareOrders,
+  decodeOrder,
+  encodeOrder,
+  getOrderBuyAmount
+} from './orders';
 
 describe('compareOrders', () => {
   it('should compare by price first (higher is better)', () => {
@@ -96,5 +101,64 @@ describe('decodeOrder', () => {
       buyAmount: '68915867919823583802853023405',
       sellAmount: '59014614376040491945202532015'
     });
+  });
+});
+
+describe('getOrderBuyAmount', () => {
+  it('should compute buy amount correctly', () => {
+    // Decimals: SELL 6, BUY 6
+    // Selling 1 SELL at price 0.1 SELL/BUY
+    // Expected: 10 BUY
+    expect(
+      getOrderBuyAmount({
+        sellAmount: 1000000n,
+        price: 100000n,
+        buyAmountDecimals: 6n
+      })
+    ).toBe(10000000n);
+
+    // Decimals: SELL 6, BUY 6
+    // Selling 1 SELL at price 0.3 SELL/BUY
+    // Expected: 3.333334 BUY (rounded up)
+    expect(
+      getOrderBuyAmount({
+        sellAmount: 1000000n,
+        price: 300000n,
+        buyAmountDecimals: 6n
+      })
+    ).toBe(3333334n);
+
+    // Decimals: SELL 6, BUY 6
+    // Selling 1 SELL at price 0.6 SELL/BUY
+    // Expected: 1.666667 BUY (rounded up)
+    expect(
+      getOrderBuyAmount({
+        sellAmount: 1000000n,
+        price: 600000n,
+        buyAmountDecimals: 6n
+      })
+    ).toBe(1666667n);
+
+    // Decimals: SELL 6, BUY 18
+    // Selling 1 SELL at price 10 SELL/BUY
+    // Expected: 0.1 BUY
+    expect(
+      getOrderBuyAmount({
+        sellAmount: 1000000n,
+        price: 10000000n,
+        buyAmountDecimals: 18n
+      })
+    ).toBe(100000000000000000n);
+
+    // Decimals: SELL 6, BUY 18
+    // Selling 0.1 SELL at price 0.3 SELL/BUY
+    // Expected: 0.033333333333333334 BUY
+    expect(
+      getOrderBuyAmount({
+        sellAmount: 100000n,
+        price: 300000n,
+        buyAmountDecimals: 18n
+      })
+    ).toBe(333333333333333334n);
   });
 });
