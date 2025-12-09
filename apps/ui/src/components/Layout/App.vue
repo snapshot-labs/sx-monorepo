@@ -29,6 +29,7 @@ const {
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
 const { setTheme } = useTheme();
+const { isStandaloneLayout } = useLayout();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
 const { login, web3 } = useWeb3();
@@ -63,7 +64,7 @@ const hasAppNav = computed(
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
-const hasSidebar = computed(() => !isWhiteLabel.value);
+const hasSidebar = computed(() => !isStandaloneLayout.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
@@ -186,10 +187,10 @@ router.afterEach(() => {
     <div
       v-else
       class="flex min-h-screen maximum:border-r"
-      :class="{ 'maximum:border-l': isWhiteLabel }"
+      :class="{ 'maximum:border-l': isStandaloneLayout }"
     >
       <AppBottomNav
-        v-if="web3.account && !isWhiteLabel"
+        v-if="web3.account && !isStandaloneLayout"
         :class="[
           `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
           { 'app-bottom-nav-open': uiStore.sideMenuOpen }
@@ -204,7 +205,7 @@ router.afterEach(() => {
       />
       <AppTopnav
         :has-app-nav="hasAppNav"
-        :class="{ hidden: !hasTopNav, 'maximum:border-l': isWhiteLabel }"
+        :class="{ hidden: !hasTopNav, 'maximum:border-l': isStandaloneLayout }"
         class="maximum:border-r"
       >
         <template #toggle-sidebar-button>
