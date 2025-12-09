@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Contract } from '@ethersproject/contracts';
-import { formatUnits, parseUnits } from '@ethersproject/units';
+import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
 import {
@@ -13,6 +13,7 @@ import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
+import { parseUnits } from '@/helpers/token';
 import { _n, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
@@ -214,23 +215,15 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
-// TODO: decide what to do with this function.
-// We could write our own variant and use it throughout the codebase.
-// Or we could just use ethers.js parseUnits directly.
-// Plain parseFloat() * 10 ** decimals could lead to precision issues.
-function toRawUnits(value: string, decimals: number): bigint {
-  return parseUnits(value, decimals).toBigInt();
-}
-
 function handlePlaceOrder() {
   if (hasErrors.value) return;
 
-  const sellAmount = toRawUnits(
+  const sellAmount = parseUnits(
     bidAmount.value,
     Number(props.auction.decimalsBiddingToken)
   );
 
-  const price = toRawUnits(
+  const price = parseUnits(
     bidPrice.value,
     Number(props.auction.decimalsBiddingToken)
   );

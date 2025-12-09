@@ -1,5 +1,4 @@
 import { Interface } from '@ethersproject/abi';
-import { parseUnits } from '@ethersproject/units';
 import {
   ContractCallTransaction,
   SendNftTransaction,
@@ -12,6 +11,7 @@ import { Nft } from '@/composables/useNfts';
 import { abis } from '@/helpers/abis';
 import { Token } from '@/helpers/alchemy';
 import { resolver } from '@/helpers/resolver';
+import { parseUnits } from '@/helpers/token';
 import { getSalt } from '@/helpers/utils';
 
 export async function createSendTokenTransaction({
