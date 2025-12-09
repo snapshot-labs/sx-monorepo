@@ -38,7 +38,7 @@ defineProps<{ state: AuctionState }>();
 <template>
   <div
     :class="STATE_CONFIG[state].class"
-    class="inline-flex items-center gap-1 rounded-full pl-2 pr-[10px] py-0.5 text-white mt-3 mb-5"
+    class="inline-flex items-center gap-1 rounded-full pl-2 pr-[10px] py-0.5 text-white"
   >
     <component :is="STATE_CONFIG[state].icon" class="size-[17px]" />
     {{ STATE_CONFIG[state].label }}

@@ -268,12 +268,7 @@ function togglePriceMode() {
 
 <template>
   <div>
-    <h4 class="mb-3 eyebrow flex items-center gap-2">
-      <IH-cash />
-      Place bid
-    </h4>
-
-    <div class="border border-skin-border rounded-lg s-box p-4 space-y-3 pt-6">
+    <div class="s-box p-4 space-y-3 pt-6">
       <UiMessage
         v-if="web3Account && (isBalanceError || isSupplyError)"
         type="danger"

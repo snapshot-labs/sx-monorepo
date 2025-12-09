@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { getAddress } from '@ethersproject/address';
 import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionState } from '@/components/AuctionStatus.vue';
@@ -11,8 +10,7 @@ import {
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { getGenericExplorerUrl } from '@/helpers/generic';
-import { _n, _t, sleep } from '@/helpers/utils';
+import { _n, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
@@ -21,6 +19,7 @@ import {
   useBidsSummaryQuery,
   useUnclaimedOrdersQuery
 } from '@/queries/auction';
+import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
 
@@ -50,6 +49,9 @@ const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
 
+const chartType = ref<'price' | 'depth'>('price');
+const sidebarType = ref<'bid' | 'referral'>('bid');
+
 const auctionState = computed<AuctionState>(() => {
   const now = Math.floor(Date.now() / 1000);
   const endTime = parseInt(props.auction.endTimeTimestamp);
@@ -76,15 +78,6 @@ const isAuctionOpen = computed(
 
 const isAccountSupported = computed<boolean>(() => {
   return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
-});
-
-const {
-  data: recentOrders,
-  isError: isRecentOrdersError,
-  isLoading: isRecentOrdersLoading
-} = useBidsSummaryQuery({
-  network: () => props.network,
-  auction: () => props.auction
 });
 
 const {
@@ -231,31 +224,6 @@ const claimText = computed(() => {
 const formatTokenAmount = (amount: string | undefined, decimals: string) =>
   amount ? _n(parseFloat(formatUnits(amount, decimals))) : '0';
 
-const biddingParameters = computed(() => {
-  const {
-    symbolBiddingToken: symbol,
-    decimalsBiddingToken,
-    currentClearingPrice,
-    exactOrder,
-    minimumBiddingAmountPerOrder
-  } = props.auction;
-
-  return [
-    {
-      label: 'Current price',
-      value: `${formatPrice(currentClearingPrice)} ${symbol}`
-    },
-    {
-      label: 'Minimum sell price',
-      value: `${formatPrice(exactOrder?.price)} ${symbol}`
-    },
-    {
-      label: 'Minimal bidding amount per order',
-      value: `${formatTokenAmount(minimumBiddingAmountPerOrder, decimalsBiddingToken)} ${symbol}`
-    }
-  ];
-});
-
 const transactionProgressFn = computed<() => Promise<string | null>>(() => {
   if (transactionProgressType.value === 'place-order') {
     return currentStep.value.execute;
@@ -270,48 +238,6 @@ const transactionProgressFn = computed<() => Promise<string | null>>(() => {
   }
 
   return DEFAULT_TRANSACTION_PROGRESS_FN;
-});
-
-const auctionSettings = computed(() => {
-  return [
-    {
-      label: 'Is atomic closure allowed?',
-      value: props.auction.isAtomicClosureAllowed ? 'Yes' : 'No'
-    },
-    {
-      label: 'Is private auction?',
-      value: props.auction.isPrivateAuction ? 'Yes' : 'No'
-    }
-  ];
-});
-
-const timelineStates = computed(() => {
-  const now = Math.floor(Date.now() / 1000);
-  const toTimeline = (ts: string, label: string) => ({
-    label,
-    value: _t(parseInt(ts)),
-    timestamp: parseInt(ts),
-    isPast: parseInt(ts) <= now
-  });
-
-  const { startingTimeStamp, orderCancellationEndDate, endTimeTimestamp } =
-    props.auction;
-
-  return [
-    toTimeline(startingTimeStamp, 'Auction start date'),
-    toTimeline(orderCancellationEndDate, 'Last order cancellation date'),
-    toTimeline(endTimeTimestamp, 'Auction end date')
-  ].sort((a, b) => a.timestamp - b.timestamp);
-});
-
-const normalizedSignerAddress = computed(() => {
-  const signer = props.auction.allowListSigner;
-  if (!signer || signer === '0x') return null;
-  try {
-    return getAddress(signer.length > 42 ? `0x${signer.slice(26)}` : signer);
-  } catch {
-    return null;
-  }
 });
 
 async function invalidateQueries() {
@@ -375,197 +301,58 @@ function handleTransactionConfirmed() {
 </script>
 
 <template>
-  <div class="pt-5 max-w-[50rem] mx-auto px-4">
+  <div class="flex-1 grow min-w-0">
+    <div class="border-b px-4 py-3 flex justify-between items-center">
+      <div class="flex flex-col">
+        <h1 class="text-[24px]">Auction #{{ auctionId }}</h1>
+        <AuctionStatus class="max-w-fit" :state="auctionState" />
+      </div>
+      <div class="flex flex-col">
+        <span class="text-sm font-medium tracking-wider uppercase">
+          Clearing price
+        </span>
+        <span class="text-[19px] font-medium text-skin-link">
+          {{ formatPrice(auction.currentClearingPrice) }}
+          {{ auction.symbolBiddingToken }}
+        </span>
+      </div>
+    </div>
+
+    <UiScrollerHorizontal with-buttons gradient="xxl">
+      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+        <AppLink
+          aria-active="chartType === 'price'"
+          @click="chartType = 'price'"
+        >
+          <UiLabel :is-active="chartType === 'price'" text="Clearing price" />
+        </AppLink>
+        <AppLink
+          aria-active="chartType === 'depth'"
+          @click="chartType = 'depth'"
+        >
+          <UiLabel :is-active="chartType === 'depth'" text="Depth" />
+        </AppLink>
+      </div>
+    </UiScrollerHorizontal>
+
+    <div class="w-full h-[355px] flex items-center justify-center">
+      Graph is not available yet
+    </div>
+
+    <UiScrollerHorizontal with-buttons gradient="xxl">
+      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+        <AppLink v-if="isAccountSupported" aria-active="true">
+          <UiLabel is-active text="My bids" />
+        </AppLink>
+        <AppLink :to="{ name: 'auction-bids' }">
+          <UiLabel text="Bids" />
+        </AppLink>
+      </div>
+    </UiScrollerHorizontal>
+
     <div class="space-y-4">
-      <div class="mb-4">
-        <div class="flex items-center gap-2 mb-2">
-          <h1 class="text-[40px] leading-10">Auction #{{ auctionId }}</h1>
-          <span
-            class="inline-block px-2 py-1 text-xs rounded-full bg-skin-border text-skin-text"
-          >
-            {{ EVM_METADATA[network]?.name || 'Unknown' }}
-          </span>
-        </div>
-        <AuctionStatus :state="auctionState" />
-      </div>
-
-      <div>
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
-          <IH-collection />
-          Token information
-        </h4>
-        <div
-          class="border border-skin-border rounded-lg divide-y divide-skin-border"
-        >
-          <div
-            class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3"
-          >
-            <div class="flex-1">
-              <div class="text-skin-text text-sm mb-2">
-                Auctioning token address
-              </div>
-              <a
-                :href="
-                  getGenericExplorerUrl(
-                    EVM_METADATA[network]?.chainId,
-                    auction.addressAuctioningToken,
-                    'token'
-                  ) || '#'
-                "
-                target="_blank"
-                class="flex items-center gap-2"
-              >
-                <UiStamp
-                  :id="auction.addressAuctioningToken"
-                  type="token"
-                  :size="32"
-                />
-                <div class="flex flex-col leading-[22px] min-w-0">
-                  <h4
-                    class="truncate"
-                    v-text="auction.symbolAuctioningToken.slice(0, 9)"
-                  />
-                  <div class="text-[17px] truncate text-skin-text">
-                    <UiAddress :address="auction.addressAuctioningToken" />
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="sm:text-right">
-              <div class="text-skin-text text-sm mb-1">Total auctioned</div>
-              <div class="text-skin-link text-xl">
-                {{
-                  formatTokenAmount(
-                    auction.exactOrder?.sellAmount,
-                    auction.decimalsAuctioningToken
-                  )
-                }}
-                {{ auction.symbolAuctioningToken.slice(0, 9) }}
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="flex flex-col sm:flex-row sm:justify-between px-4 py-3 gap-3"
-          >
-            <div class="flex-1">
-              <div class="text-skin-text text-sm mb-2">
-                Bidding token address
-              </div>
-              <a
-                :href="
-                  getGenericExplorerUrl(
-                    EVM_METADATA[network]?.chainId,
-                    auction.addressBiddingToken,
-                    'token'
-                  ) || '#'
-                "
-                target="_blank"
-                class="flex items-center gap-2"
-              >
-                <UiStamp
-                  :id="auction.addressBiddingToken"
-                  type="token"
-                  :size="32"
-                />
-                <div class="flex flex-col leading-[22px] min-w-0">
-                  <h4
-                    class="truncate"
-                    v-text="auction.symbolBiddingToken.slice(0, 9)"
-                  />
-                  <div class="text-[17px] truncate text-skin-text">
-                    <UiAddress :address="auction.addressBiddingToken" />
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="sm:text-right">
-              <div class="text-skin-text text-sm mb-1">
-                Minimal funding threshold
-              </div>
-              <div class="text-skin-link text-xl">
-                {{
-                  formatTokenAmount(
-                    auction.minFundingThreshold,
-                    auction.decimalsBiddingToken
-                  )
-                }}
-                {{ auction.symbolBiddingToken.slice(0, 9) }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <FormAuctionBid
-        v-if="isAuctionOpen"
-        :auction="auction"
-        :network="network"
-        :is-loading="isModalTransactionProgressOpen"
-        :previous-orders="userOrders"
-        @submit="handlePlaceSellOrder"
-      />
-
-      <div>
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
-          <IH-currency-dollar />
-          Bidding parameters
-        </h4>
-        <div
-          class="border border-skin-border rounded-lg divide-y divide-skin-border"
-        >
-          <div
-            v-for="item in biddingParameters"
-            :key="item.label"
-            class="flex justify-between px-4 py-3"
-          >
-            <div class="text-skin-text">{{ item.label }}</div>
-            <div class="text-skin-link">{{ item.value }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
-          <IH-cog />
-          Auction settings
-        </h4>
-        <div
-          class="border border-skin-border rounded-lg divide-y divide-skin-border"
-        >
-          <div
-            v-for="item in auctionSettings"
-            :key="item.label"
-            class="flex justify-between px-4 py-3"
-          >
-            <div class="text-skin-text">{{ item.label }}</div>
-            <div class="text-skin-link">{{ item.value }}</div>
-          </div>
-          <div class="flex justify-between px-4 py-3">
-            <div class="text-skin-text">Signer address</div>
-            <div class="text-skin-link">
-              <a
-                v-if="normalizedSignerAddress"
-                :href="
-                  getGenericExplorerUrl(
-                    EVM_METADATA[network]?.chainId,
-                    normalizedSignerAddress,
-                    'address'
-                  ) || '#'
-                "
-                target="_blank"
-              >
-                <UiAddress :address="normalizedSignerAddress" />
-              </a>
-              <span v-else>None</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div v-if="isAccountSupported">
-        <UiEyebrow class="mb-3">Your bids</UiEyebrow>
-        <div class="border rounded-lg overflow-hidden">
+        <div class="overflow-hidden">
           <UiColumnHeader class="py-2 gap-3" :sticky="false">
             <div class="min-w-[100px] truncate">Status</div>
             <div class="max-w-[168px] w-[168px] truncate">Date</div>
@@ -618,102 +405,63 @@ function handleTransactionConfirmed() {
           {{ claimText }}
         </UiButton>
       </div>
-
-      <div>
-        <UiEyebrow class="mb-3">Recent bids</UiEyebrow>
-        <div class="border rounded-lg overflow-hidden">
-          <UiColumnHeader class="py-2 gap-3" :sticky="false">
-            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-            <div class="max-w-[168px] w-[168px] truncate">Date</div>
-            <div class="max-w-[168px] w-[168px] truncate">Amount</div>
-            <div class="max-w-[168px] w-[168px] text-right truncate">Price</div>
-          </UiColumnHeader>
-          <UiLoading
-            v-if="isRecentOrdersLoading || isBiddingTokenPriceLoading"
-            class="px-4 py-3 block"
-          />
-          <UiStateWarning v-else-if="isRecentOrdersError" class="px-4 py-3">
-            Failed to load bids.
-          </UiStateWarning>
-          <UiStateWarning
-            v-else-if="recentOrders?.length === 0"
-            class="px-4 py-3"
-          >
-            There are no bids here.
-          </UiStateWarning>
-          <div
-            v-else-if="recentOrders && typeof biddingTokenPrice === 'number'"
-            class="divide-y divide-skin-border flex flex-col justify-center"
-          >
-            <AuctionBid
-              v-for="order in recentOrders"
-              :key="order.id"
-              :auction-id="auctionId"
-              :auction="auction"
-              :order="order"
-              :bidding-token-price="biddingTokenPrice"
-            />
-          </div>
-        </div>
-        <AppLink
-          v-if="recentOrders?.length"
-          :to="{ name: 'auction-bids' }"
-          class="mt-3 inline-block"
-        >
-          View all bids
-        </AppLink>
-      </div>
-
-      <div>
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
-          <IH-clock />
-          Timeline
-        </h4>
-        <div class="flex">
-          <div class="mt-1 ml-2">
-            <div
-              v-for="(state, i) in timelineStates"
-              :key="state.label"
-              class="flex relative h-[60px] last:h-0"
-            >
-              <div
-                class="absolute size-[15px] inline-block rounded-full left-[-7px] border-4 border-skin-bg"
-                :class="state.isPast ? 'bg-skin-heading' : 'bg-skin-border'"
-              />
-              <div
-                v-if="i < timelineStates.length - 1"
-                class="border-l pr-4 mt-3"
-                :class="timelineStates[i + 1].isPast && 'border-skin-heading'"
-              />
-            </div>
-          </div>
-          <div class="flex-auto leading-6">
-            <div
-              v-for="state in timelineStates"
-              :key="state.label"
-              class="mb-3 last:mb-0 h-[44px]"
-            >
-              <h4 v-text="state.label" />
-              <div v-text="state.value" />
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-    <teleport to="#modal">
-      <ModalTransactionProgress
-        :open="isModalTransactionProgressOpen"
-        :execute="transactionProgressFn"
-        :chain-id="EVM_METADATA[network].chainId"
-        :messages="
-          transactionProgressType === 'place-order'
-            ? currentStep.messages
-            : undefined
-        "
-        @close="resetTransactionProgress"
-        @confirmed="handleTransactionConfirmed"
-        @cancelled="resetTransactionProgress"
-      />
-    </teleport>
   </div>
+
+  <teleport to="#modal">
+    <ModalTransactionProgress
+      :open="isModalTransactionProgressOpen"
+      :execute="transactionProgressFn"
+      :chain-id="EVM_METADATA[network].chainId"
+      :messages="
+        transactionProgressType === 'place-order'
+          ? currentStep.messages
+          : undefined
+      "
+      @close="resetTransactionProgress"
+      @confirmed="handleTransactionConfirmed"
+      @cancelled="resetTransactionProgress"
+    />
+  </teleport>
+
+  <UiResizableHorizontal
+    id="proposal-sidebar"
+    :default="340"
+    :max="440"
+    :min="340"
+    class="shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
+  >
+    <Affix data-testid="proposal-sidebar" :top="TOTAL_NAV_HEIGHT" :bottom="64">
+      <div>
+        <UiScrollerHorizontal with-buttons gradient="xxl">
+          <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
+            <AppLink
+              :aria-active="sidebarType === 'bid'"
+              @click="sidebarType = 'bid'"
+            >
+              <UiLabel :is-active="sidebarType === 'bid'" text="Place bid" />
+            </AppLink>
+            <AppLink
+              :aria-active="sidebarType === 'referral'"
+              @click="sidebarType = 'referral'"
+            >
+              <UiLabel
+                :is-active="sidebarType === 'referral'"
+                text="Referral"
+              />
+            </AppLink>
+          </div>
+        </UiScrollerHorizontal>
+
+        <FormAuctionBid
+          v-if="isAuctionOpen"
+          :auction="auction"
+          :network="network"
+          :is-loading="isModalTransactionProgressOpen"
+          :previous-orders="userOrders"
+          @submit="handlePlaceSellOrder"
+        />
+      </div>
+    </Affix>
+  </UiResizableHorizontal>
 </template>
