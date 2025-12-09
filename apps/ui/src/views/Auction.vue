@@ -2,6 +2,8 @@
 import { useQuery } from '@tanstack/vue-query';
 import { AuctionNetworkId, getAuction } from '@/helpers/auction';
 
+defineOptions({ inheritAttrs: false });
+
 const route = useRoute();
 
 const params = computed(() => {
@@ -23,7 +25,7 @@ const {
 </script>
 
 <template>
-  <div>
+  <div class="flex items-stretch md:flex-row flex-col w-full h-full">
     <UiLoading v-if="isLoading" class="block p-4" />
     <UiStateWarning
       v-else-if="error || !auctionData?.auctionDetail"
@@ -40,6 +42,7 @@ const {
       :auction="auctionData.auctionDetail"
       :network="params.network"
       :auction-id="params.id"
+      v-bind="$attrs"
     />
   </div>
 </template>

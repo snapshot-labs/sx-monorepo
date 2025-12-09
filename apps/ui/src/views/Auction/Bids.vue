@@ -35,7 +35,7 @@ function handleEndReached() {
 </script>
 
 <template>
-  <div>
+  <div class="w-full">
     <UiSectionHeader label="Bids" sticky />
     <UiColumnHeader class="overflow-hidden gap-3">
       <div class="flex-1 min-w-[168px] truncate">Bidder</div>
