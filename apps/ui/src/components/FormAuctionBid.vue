@@ -35,6 +35,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   auction: AuctionDetailFragment;
+  totalSupply: bigint;
   network: AuctionNetworkId;
   previousOrders?: Order[];
   isLoading?: boolean;
@@ -103,21 +104,6 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
   enabled: computed(() => !!web3Account.value)
 });
 
-const { data: totalSupply, isError: isSupplyError } = useQuery({
-  queryKey: ['supply', () => props.auction.addressAuctioningToken],
-  queryFn: async () => {
-    const contract = new Contract(
-      props.auction.addressAuctioningToken,
-      abis.erc20,
-      provider.value
-    );
-
-    const totalSupply = await contract.totalSupply();
-
-    return totalSupply.toString();
-  }
-});
-
 const formattedBalance = computed(() => {
   if (!userBalance.value) return 0;
   return parseFloat(
@@ -129,7 +115,7 @@ const hasBalance = computed(() => !!(web3Account.value && userBalance.value));
 
 const maxMarketCap = computed(() => {
   const displayPrice = parseFloat(bidPrice.value) || 0;
-  if (!displayPrice || !totalSupply.value) return '0';
+  if (!displayPrice || !props.totalSupply) return '0';
 
   const decimals = isPriceInverted.value
     ? parseInt(props.auction.decimalsBiddingToken)
@@ -139,7 +125,7 @@ const maxMarketCap = computed(() => {
     : displayPrice;
 
   const totalSupplyFormatted = parseFloat(
-    formatUnits(totalSupply.value, props.auction.decimalsAuctioningToken)
+    formatUnits(props.totalSupply, props.auction.decimalsAuctioningToken)
   );
 
   return _n(Math.floor(totalSupplyFormatted * normalizedPrice));
@@ -263,11 +249,11 @@ function togglePriceMode() {
   <div>
     <div class="s-box p-4 space-y-3 pt-6">
       <UiMessage
-        v-if="web3Account && (isBalanceError || isSupplyError)"
+        v-if="web3Account && isBalanceError"
         type="danger"
         class="mb-3"
       >
-        Failed to load balance or token supply.
+        Failed to load balance.
       </UiMessage>
       <div class="relative">
         <div
