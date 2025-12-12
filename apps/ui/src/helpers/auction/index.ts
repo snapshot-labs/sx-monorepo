@@ -1,5 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import {
+  auctionPriceHourDataQuery,
+  auctionPriceMinuteDataQuery,
   auctionQuery,
   ordersQuery,
   previousOrderQuery,
@@ -8,7 +10,7 @@ import {
 import { getNames } from '../stamp';
 import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
 import { encodeOrder } from './orders';
-import { AuctionNetworkId, Order } from './types';
+import { AuctionNetworkId, AuctionPriceHistoryData, Order } from './types';
 
 export * from './types';
 
@@ -153,4 +155,29 @@ export async function getUnclaimedOrders(
   return new Set(
     data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
   );
+}
+
+export async function getAuctionPriceHistory(
+  auctionId: string,
+  network: AuctionNetworkId,
+  granularity: 'minute' | 'hour',
+  { skip = 0, first = 1000 }: { skip?: number; first?: number } = {}
+): Promise<AuctionPriceHistoryData[]> {
+  const client = getClient(network);
+
+  const query =
+    granularity === 'hour'
+      ? auctionPriceHourDataQuery
+      : auctionPriceMinuteDataQuery;
+  const dataKey =
+    granularity === 'hour'
+      ? 'auctionPriceHourDatas'
+      : 'auctionPriceMinuteDatas';
+
+  const { data } = await client.query({
+    query,
+    variables: { where: { auction: auctionId }, first, skip }
+  });
+
+  return data[dataKey] || [];
 }
