@@ -37,7 +37,8 @@ export function useUserReferralQuery(account: MaybeRefOrGetter<string | null>) {
         refereeName: names[referral.referee] || null
       };
     },
-    enabled: computed(() => !!toValue(account))
+    enabled: computed(() => !!toValue(account)),
+    retry: false
   });
 }
 

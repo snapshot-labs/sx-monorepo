@@ -1,12 +1,15 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { executionCall } from '@/helpers/mana';
 import { pin } from '@/helpers/pin';
+import { verifyNetwork } from '@/helpers/utils';
 import { AUCTION_TAG, CHAIN_ID, EIP712_DOMAIN, POSTER_TAG } from './referral';
 
 export async function setReferral(
   web3: Web3Provider,
   referee: string
 ): Promise<{ hash: string }> {
+  await verifyNetwork(web3, CHAIN_ID);
+
   const signer = web3.getSigner();
   const signerAddress = await signer.getAddress();
 
