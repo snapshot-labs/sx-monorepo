@@ -454,13 +454,15 @@ function handleTransactionConfirmed() {
         </UiScrollerHorizontal>
 
         <FormAuctionBid
-          v-if="isAuctionOpen"
+          v-if="sidebarType === 'bid' && isAuctionOpen"
           :auction="auction"
           :network="network"
           :is-loading="isModalTransactionProgressOpen"
           :previous-orders="userOrders"
           @submit="handlePlaceSellOrder"
         />
+
+        <FormAuctionReferral v-else-if="sidebarType === 'referral'" />
       </div>
     </Affix>
   </UiResizableHorizontal>
