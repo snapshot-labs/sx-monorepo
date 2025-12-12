@@ -410,7 +410,7 @@ function handleScrollEvent(target: HTMLElement) {
               <div class="w-[200px] max-w-[200px] truncate">Max. price</div>
               <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
               <div class="w-[200px] max-w-[200px] truncate">Status</div>
-              <div class="min-w-[44px] lg:w-[60px] -mr-4" />
+              <div class="min-w-[44px] lg:w-[60px]" />
             </div>
           </UiColumnHeader>
           <UiScrollerHorizontal @scroll="handleScrollEvent">
@@ -485,7 +485,7 @@ function handleScrollEvent(target: HTMLElement) {
             <div class="w-[200px] max-w-[200px] truncate">Max. price</div>
             <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
             <div class="w-[200px] max-w-[200px] truncate">Status</div>
-            <div class="min-w-[44px] lg:w-[60px] -mr-4" />
+            <div class="min-w-[44px] lg:w-[60px]" />
           </div>
         </UiColumnHeader>
         <UiScrollerHorizontal @scroll="handleScrollEvent">
