@@ -1,3 +1,4 @@
+import { Contract } from '@ethersproject/contracts';
 import {
   clients,
   evmApe,
@@ -16,6 +17,16 @@ import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 import logger from './logger';
+
+const POSTER_CONFIG = {
+  contract: '0x000000000000cd17345801aa8147b8D3950260FF',
+  abi: ['function post(string calldata content, string calldata tag)']
+};
+
+const POSTER_SUPPORTED_NETWORKS = [11155111];
+
+const BROKESTER_API_URL =
+  process.env.BROKESTER_API_URL || 'https://api.brokester.box';
 
 const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
@@ -234,12 +245,86 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
+  async function postReferral(id: number, params: any, res: Response) {
+    try {
+      const { metadataUri, posterTag } = params;
+
+      if (!metadataUri || !posterTag) {
+        return rpcError(res, 400, 'Missing metadataUri or posterTag', id);
+      }
+
+      if (!POSTER_SUPPORTED_NETWORKS.includes(chainId)) {
+        return rpcError(res, 400, 'Unsupported chain', id);
+      }
+
+      const ipfsUrl = metadataUri.replace(
+        'ipfs://',
+        'https://pineapple.fyi/ipfs/'
+      );
+      const metadataRes = await fetch(ipfsUrl);
+      if (!metadataRes.ok) {
+        return rpcError(res, 400, 'Failed to fetch IPFS metadata', id);
+      }
+
+      const metadata = await metadataRes.json();
+      const { signer, message } = metadata;
+
+      if (!signer || !message?.auction_tag) {
+        return rpcError(
+          res,
+          400,
+          'Invalid metadata: missing signer or auction_tag',
+          id
+        );
+      }
+
+      const referralId = `${message.auction_tag}/${signer.toLowerCase()}`;
+
+      const response = await fetch(BROKESTER_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `{ referral(id: "${referralId}") { id } }`
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data?.data?.referral) {
+          return rpcError(
+            res,
+            400,
+            'Referral already registered for this address',
+            id
+          );
+        }
+      }
+
+      const wallet = getWallet('poster');
+      const contract = new Contract(
+        POSTER_CONFIG.contract,
+        POSTER_CONFIG.abi,
+        wallet
+      );
+
+      const tx = await contract.post(metadataUri, posterTag);
+      await tx.wait();
+
+      return rpcSuccess(res, { hash: tx.hash }, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to post referral');
+      return rpcError(res, 500, err, id);
+    }
+  }
+
   return {
     send,
     finalizeProposal,
     execute,
     executeQueuedProposal,
     executeStarknetProposal,
-    registerApeGasProposal
+    registerApeGasProposal,
+    postReferral,
+    getWallet
   };
 };

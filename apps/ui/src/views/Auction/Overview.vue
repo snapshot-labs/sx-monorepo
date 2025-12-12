@@ -577,7 +577,7 @@ function handleScrollEvent(target: HTMLElement) {
         </UiScrollerHorizontal>
 
         <FormAuctionBid
-          v-if="isAuctionOpen"
+          v-if="sidebarType === 'bid' && isAuctionOpen"
           :auction="auction"
           :network="network"
           :total-supply="totalSupply"
@@ -585,6 +585,8 @@ function handleScrollEvent(target: HTMLElement) {
           :previous-orders="userOrders"
           @submit="handlePlaceSellOrder"
         />
+
+        <FormAuctionReferral v-else-if="sidebarType === 'referral'" />
       </div>
     </Affix>
   </UiResizableHorizontal>
