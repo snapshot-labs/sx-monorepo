@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import { ChartSeries } from '@/components/Ui/Chart.vue';
+import { ChartSeries } from '@/components/Ui/ChartTime.vue';
 import { AuctionNetworkId } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { ChartGranularity, normalizeTimeSeriesData } from '@/helpers/charts';
 import { useAuctionPriceDataQuery } from '@/queries/auction';
 
-// in seconds
 const TIME_OFFSET = {
   All: 0,
   '1H': 3600,
@@ -67,7 +66,7 @@ const chartSeries = computed<ChartSeries[]>(() => [
     data: normalizedData.value,
     type: 'area',
     options: {
-      lineType: 1, // step
+      lineType: 1,
       priceFormat: {
         type: 'price',
         precision: 4,
@@ -96,7 +95,7 @@ function updateTimeRange(targetOffset: number) {
       <div v-else-if="isError" class="text-center space-y-2">
         Error loading chart
       </div>
-      <UiChart
+      <UiChartTime
         v-else-if="!hasNextPage"
         class="h-[355px] w-full"
         :series="chartSeries"

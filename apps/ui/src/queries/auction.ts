@@ -65,10 +65,12 @@ export const AUCTION_KEYS = {
 
 export function useBidsQuery({
   network,
-  auction
+  auction,
+  enabled
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
@@ -82,7 +84,8 @@ export function useBidsQuery({
       if (lastPage.length < LIMIT) return null;
 
       return pages.length * LIMIT;
-    }
+    },
+    enabled
   });
 }
 

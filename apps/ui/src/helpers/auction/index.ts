@@ -18,8 +18,8 @@ const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
-  sep: 'https://api.thegraph.com/subgraphs/id/QmeQ1yHALXBeFgNDdkF9PScMiZb8jAtZt7v8Kpy97KyAKg',
-  eth: 'https://gateway.thegraph.com/api/af06c420ff943c55b9e85c16b93b67ec/deployments/id/QmddSTyY1eGx38Wz8rUMUWdqZ14F6b2bYwNsL82LgoW5J9'
+  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
+  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR'
 };
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {

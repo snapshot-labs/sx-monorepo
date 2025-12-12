@@ -26,7 +26,7 @@ const config: CodegenConfig = {
     },
     './src/helpers/auction/gql/': {
       schema:
-        'https://api.thegraph.com/subgraphs/id/QmeQ1yHALXBeFgNDdkF9PScMiZb8jAtZt7v8Kpy97KyAKg',
+        'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
       documents: ['src/helpers/auction/queries.ts'],
       ...baseConfig,
       config: {

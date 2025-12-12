@@ -7,15 +7,23 @@ export type ChartDataPoint = {
 
 export type ChartGranularity = 'hour' | 'minute';
 
+type RawDataPoint = {
+  startTimestamp: string;
+  close: string;
+};
+
 const GRANULARITY_STEP_SIZE: Record<ChartGranularity, number> = {
   hour: 3600,
   minute: 60
 };
 
-type RawDataPoint = {
-  startTimestamp: string;
-  close: string;
-};
+function roundTimestampToGranularity(
+  timestamp: number,
+  granularity: ChartGranularity
+): number {
+  const stepSize = GRANULARITY_STEP_SIZE[granularity];
+  return Math.floor(timestamp / stepSize) * stepSize;
+}
 
 /**
  * Normalizes time series data to regular intervals and fills missing data points
@@ -41,9 +49,10 @@ export function normalizeTimeSeriesData(
     .sort((a, b) => a.timestamp - b.timestamp);
 
   const filledData: ChartDataPoint[] = [];
-  const stepSize = GRANULARITY_STEP_SIZE[granularity];
-  const firstDataTimestamp =
-    Math.floor(parsedData[0].timestamp / stepSize) * stepSize;
+  const firstDataTimestamp = roundTimestampToGranularity(
+    parsedData[0].timestamp,
+    granularity
+  );
 
   let dataIndex = 0;
   let currentValue = parsedData[0].value;
@@ -51,7 +60,7 @@ export function normalizeTimeSeriesData(
   for (
     let timestamp = firstDataTimestamp;
     timestamp <= endTimestamp;
-    timestamp += stepSize
+    timestamp += GRANULARITY_STEP_SIZE[granularity]
   ) {
     if (
       dataIndex < parsedData.length &&
