@@ -29,9 +29,14 @@ export async function placeSellOrder(
   );
   let previousOrderId: string;
 
-  const price = new Decimal(sellOrder.sellAmount).div(
-    new Decimal(sellOrder.buyAmount)
+  const sellAmount = new Decimal(sellOrder.sellAmount).div(
+    10n ** BigInt(auction.decimalsBiddingToken)
   );
+  const buyAmount = new Decimal(sellOrder.buyAmount).div(
+    10n ** BigInt(auction.decimalsAuctioningToken)
+  );
+
+  const price = sellAmount.div(buyAmount);
 
   try {
     previousOrderId = await getPreviousOrderId(
