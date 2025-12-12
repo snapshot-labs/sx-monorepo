@@ -1,12 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { executionCall } from '@/helpers/mana';
 import { pin } from '@/helpers/pin';
-import {
-  AUCTION_TAG,
-  CHAIN_ID,
-  EIP712_DOMAIN,
-  POSTER_TAG
-} from './referral';
+import { AUCTION_TAG, CHAIN_ID, EIP712_DOMAIN, POSTER_TAG } from './referral';
 
 export async function setReferral(
   web3: Web3Provider,
