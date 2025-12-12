@@ -80,128 +80,125 @@ async function handleSetReferral() {
 </script>
 
 <template>
-  <div>
-    <div class="s-box p-4 space-y-3">
-      <UiLoading v-if="isUserReferralLoading" class="py-3 block" />
-      <template v-else-if="web3Account">
-        <div
-          v-if="userReferral"
-          class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
-        >
-          <div class="text-skin-text">Referee</div>
-          <div class="flex items-center gap-3">
-            <UiStamp :id="userReferral.referee" :size="24" />
-            <div class="flex flex-col leading-[22px] truncate">
-              <h4
-                class="truncate"
-                v-text="
-                  userReferral.refereeName ||
-                  shortenAddress(userReferral.referee)
-                "
-              />
-              <UiAddress
-                :address="userReferral.referee"
-                class="text-[17px] text-skin-text truncate"
-              />
-            </div>
+  <div class="s-box p-4 space-y-3">
+    <UiLoading v-if="isUserReferralLoading" class="py-3 block" />
+    <template v-else-if="web3Account">
+      <div
+        v-if="userReferral"
+        class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
+      >
+        <div class="text-skin-text">Referee</div>
+        <div class="flex items-center gap-3">
+          <UiStamp :id="userReferral.referee" :size="24" />
+          <div class="flex flex-col leading-[22px] truncate">
+            <h4
+              class="truncate"
+              v-text="
+                userReferral.refereeName || shortenAddress(userReferral.referee)
+              "
+            />
+            <UiAddress
+              :address="userReferral.referee"
+              class="text-[17px] text-skin-text truncate"
+            />
           </div>
         </div>
-
-        <template v-else>
-          <p class="text-skin-text text-sm">
-            Set your referral to support whoever referred you. This can only be
-            set once.
-          </p>
-
-          <UiInputAddress
-            v-model="referralInput"
-            :definition="{
-              type: 'string',
-              format: 'address',
-              title: 'Referee address',
-              examples: ['Enter the address of who referred you'],
-              showControls: false
-            }"
-            :error="isSelfReferral ? 'You cannot refer yourself' : errorMessage"
-          />
-
-          <UiButton
-            primary
-            class="w-full"
-            :disabled="!canSubmit || isSubmitting"
-            :loading="isSubmitting"
-            @click="handleSetReferral"
-          >
-            Set referee
-          </UiButton>
-        </template>
-      </template>
+      </div>
 
       <template v-else>
         <p class="text-skin-text text-sm">
-          Connect your wallet to set a referral.
+          Set your referral to support whoever referred you. This can only be
+          set once.
         </p>
-        <UiButton class="w-full" @click="modalAccountOpen = true">
-          Connect wallet
+
+        <UiInputAddress
+          v-model="referralInput"
+          :definition="{
+            type: 'string',
+            format: 'address',
+            title: 'Referee address',
+            examples: ['Enter the address of who referred you'],
+            showControls: false
+          }"
+          :error="isSelfReferral ? 'You cannot refer yourself' : errorMessage"
+        />
+
+        <UiButton
+          primary
+          class="w-full"
+          :disabled="!canSubmit || isSubmitting"
+          :loading="isSubmitting"
+          @click="handleSetReferral"
+        >
+          Set referee
         </UiButton>
       </template>
-    </div>
+    </template>
 
-    <div class="border-t border-skin-border">
-      <h4 class="eyebrow px-4 py-2">Leaderboard</h4>
+    <template v-else>
+      <p class="text-skin-text text-sm">
+        Connect your wallet to set a referral.
+      </p>
+      <UiButton class="w-full" @click="modalAccountOpen = true">
+        Connect wallet
+      </UiButton>
+    </template>
+  </div>
 
-      <UiColumnHeader class="overflow-hidden gap-3">
-        <div class="flex-1 min-w-0 truncate">Referee</div>
-        <div class="w-[80px] text-right truncate">Referrals</div>
-      </UiColumnHeader>
+  <div class="border-t border-skin-border">
+    <h4 class="eyebrow px-4 py-2">Leaderboard</h4>
 
-      <div class="px-4">
-        <UiLoading v-if="isRefereesLoading" class="py-3 block" />
+    <UiColumnHeader class="overflow-hidden gap-3">
+      <div class="flex-1 min-w-0 truncate">Referee</div>
+      <div class="w-[80px] text-right truncate">Referrals</div>
+    </UiColumnHeader>
 
-        <UiStateWarning v-else-if="isRefereesError" class="py-3">
-          Failed to load leaderboard.
-        </UiStateWarning>
+    <div class="px-4">
+      <UiLoading v-if="isRefereesLoading" class="py-3 block" />
 
-        <UiStateWarning v-else-if="referees.length === 0" class="py-3">
-          No referees yet.
-        </UiStateWarning>
+      <UiStateWarning v-else-if="isRefereesError" class="py-3">
+        Failed to load leaderboard.
+      </UiStateWarning>
 
-        <UiContainerInfiniteScroll
-          v-else
-          :loading-more="isFetchingNextPage"
-          @end-reached="handleEndReached"
+      <UiStateWarning v-else-if="referees.length === 0" class="py-3">
+        No referees yet.
+      </UiStateWarning>
+
+      <UiContainerInfiniteScroll
+        v-else
+        :loading-more="isFetchingNextPage"
+        @end-reached="handleEndReached"
+      >
+        <div
+          class="divide-y divide-skin-border flex flex-col justify-center border-b"
         >
           <div
-            class="divide-y divide-skin-border flex flex-col justify-center border-b"
+            v-for="referee in referees"
+            :key="referee.id"
+            class="flex items-center gap-3 py-3"
           >
-            <div
-              v-for="referee in referees"
-              :key="referee.id"
-              class="flex items-center gap-3 py-3"
-            >
-              <div class="flex-1 min-w-0 flex items-center gap-3 truncate">
-                <UiStamp :id="referee.referee" :size="32" />
-                <div class="flex flex-col truncate">
-                  <h4
-                    class="truncate"
-                    v-text="referee.name || shortenAddress(referee.referee)"
-                  />
-                  <UiAddress
-                    :address="referee.referee"
-                    class="text-[17px] text-skin-text truncate"
-                  />
-                </div>
-              </div>
-              <div class="w-[80px] text-right">
-                <h4 class="text-skin-link">{{ referee.referral_count }}</h4>
+            <div class="flex-1 min-w-0 flex items-center gap-3 truncate">
+              <UiStamp :id="referee.referee" :size="32" />
+              <div class="flex flex-col truncate">
+                <h4
+                  class="truncate"
+                  v-text="referee.name || shortenAddress(referee.referee)"
+                />
+                <UiAddress
+                  :address="referee.referee"
+                  class="text-[17px] text-skin-text truncate"
+                />
               </div>
             </div>
+            <div class="w-[80px] text-right">
+              <h4 class="text-skin-link">{{ referee.referral_count }}</h4>
+            </div>
           </div>
-          <template #loading>
-            <UiLoading class="py-3 block" />
-          </template>
-        </UiContainerInfiniteScroll>
-      </div>
+        </div>
+        <template #loading>
+          <UiLoading class="py-3 block" />
+        </template>
+      </UiContainerInfiniteScroll>
     </div>
   </div>
 </template>
