@@ -35,22 +35,9 @@ const {
   granularity
 });
 
-async function fetchAllPages() {
-  while (hasNextPage.value && !isFetchingNextPage.value) {
-    await fetchNextPage();
-  }
-}
-
-onMounted(() => {
-  fetchAllPages();
-});
-
-const allData = computed(() => {
-  if (!data.value) return [];
-  return data.value.pages.flat();
-});
-
 const normalizedData = computed(() => {
+  if (!data.value) return [];
+
   const end = Math.min(
     Math.floor(Date.now() / 1000),
     Number(props.auction.endTimeTimestamp)
@@ -58,12 +45,29 @@ const normalizedData = computed(() => {
   const start = offset.value
     ? end - offset.value
     : Number(props.auction.startingTimeStamp);
-  return normalizeTimeSeriesData(allData.value, granularity.value, start, end);
+
+  return normalizeTimeSeriesData(
+    data.value.pages.flat(),
+    granularity.value,
+    start,
+    end
+  );
+});
+
+const clampedData = computed(() => {
+  if (offset.value === 0) {
+    return normalizedData.value;
+  }
+
+  const start =
+    normalizedData.value[normalizedData.value.length - 1].time - offset.value;
+
+  return normalizedData.value.filter(point => point.time >= start);
 });
 
 const chartSeries = computed<ChartSeries[]>(() => [
   {
-    data: normalizedData.value,
+    data: clampedData.value,
     type: 'area',
     options: {
       lineType: 1,
@@ -86,6 +90,12 @@ function updateTimeRange(targetOffset: number) {
 
   granularity.value = 'minute';
 }
+
+onMounted(async () => {
+  while (hasNextPage.value && !isFetchingNextPage.value) {
+    await fetchNextPage();
+  }
+});
 </script>
 
 <template>

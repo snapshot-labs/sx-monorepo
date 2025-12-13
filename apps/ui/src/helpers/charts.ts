@@ -26,18 +26,18 @@ function roundTimestampToGranularity(
 }
 
 /**
- * Normalizes time series data to regular intervals and fills missing data points
+ * Normalizes time series data to regular intervals, fills gaps, and clamps to time range
  * @param rawData - Array of raw data points with string timestamps and values
  * @param granularity - Time granularity ('hour' or 'minute')
- * @param startTimestamp - Start timestamp in seconds (inclusive)
- * @param endTimestamp - End timestamp in seconds (inclusive)
- * @returns Array of ChartDataPoint normalized to regular intervals within the specified time range
+ * @param startTime - Start timestamp in seconds (inclusive)
+ * @param endTime - End timestamp in seconds (inclusive)
+ * @returns Array of ChartDataPoint normalized, filled, and clamped to the time range
  */
 export function normalizeTimeSeriesData(
   rawData: RawDataPoint[],
   granularity: ChartGranularity,
-  startTimestamp: number,
-  endTimestamp: number
+  startTime: number,
+  endTime: number
 ): ChartDataPoint[] {
   if (!rawData || rawData.length === 0) return [];
 
@@ -48,35 +48,49 @@ export function normalizeTimeSeriesData(
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
 
-  const filledData: ChartDataPoint[] = [];
-  const firstDataTimestamp = roundTimestampToGranularity(
-    parsedData[0].timestamp,
+  const stepSize = GRANULARITY_STEP_SIZE[granularity];
+  const normalizedStartTime = roundTimestampToGranularity(
+    startTime,
     granularity
   );
+  const normalizedEndTime = roundTimestampToGranularity(endTime, granularity);
 
+  const result: ChartDataPoint[] = [];
   let dataIndex = 0;
-  let currentValue = parsedData[0].value;
+  let lastValue = 0;
 
-  for (
-    let timestamp = firstDataTimestamp;
-    timestamp <= endTimestamp;
-    timestamp += GRANULARITY_STEP_SIZE[granularity]
+  // Find the first data point that could affect our range
+  while (
+    dataIndex < parsedData.length &&
+    parsedData[dataIndex].timestamp < normalizedStartTime
   ) {
+    lastValue = parsedData[dataIndex].value;
+    dataIndex++;
+  }
+
+  // Single loop through the time range
+  for (
+    let timestamp = normalizedStartTime;
+    timestamp <= normalizedEndTime;
+    timestamp += stepSize
+  ) {
+    let value = lastValue;
+
+    // Check if we have a data point at this timestamp
     if (
       dataIndex < parsedData.length &&
       parsedData[dataIndex].timestamp === timestamp
     ) {
-      currentValue = parsedData[dataIndex].value;
+      value = parsedData[dataIndex].value;
+      lastValue = value;
       dataIndex++;
     }
 
-    if (timestamp < startTimestamp) continue;
-
-    filledData.push({
+    result.push({
       time: timestamp as UTCTimestamp,
-      value: currentValue
+      value
     });
   }
 
-  return filledData;
+  return result;
 }
