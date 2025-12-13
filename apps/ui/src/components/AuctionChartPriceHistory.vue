@@ -73,10 +73,21 @@ const {
 });
 
 const normalizedData = computed(() => {
-  if (!data.value) return [];
+  const defaultData = [
+    {
+      startTimestamp: granularityMinTimestamp.value.toString(),
+      close: props.auction.currentClearingPrice
+    },
+    {
+      startTimestamp: chartEndTimestamp.value.toString(),
+      close: props.auction.currentClearingPrice
+    }
+  ];
+
+  const series = data.value?.pages?.flat() || [];
 
   return normalizeTimeSeriesData(
-    data.value.pages.flat(),
+    series.length ? series : defaultData,
     granularity.value,
     granularityMinTimestamp.value,
     chartEndTimestamp.value
@@ -115,9 +126,20 @@ function updateTimeRange(targetOffset: number) {
   granularity.value = 'minute';
 }
 
-onMounted(async () => {
+async function fetchAllPages() {
   while (hasNextPage.value && !isFetchingNextPage.value) {
     await fetchNextPage();
+  }
+}
+
+onMounted(() => {
+  fetchAllPages();
+});
+
+// Watch for data changes and fetch all pages
+watch(data, () => {
+  if (data.value && hasNextPage.value) {
+    fetchAllPages();
   }
 });
 </script>

@@ -57,7 +57,7 @@ export function normalizeTimeSeriesData(
 
   const result: ChartDataPoint[] = [];
   let dataIndex = 0;
-  let lastValue = 0;
+  let lastValue = parsedData[0].value;
 
   // Find the first data point that could affect our range
   while (
