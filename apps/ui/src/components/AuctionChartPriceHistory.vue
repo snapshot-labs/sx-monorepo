@@ -3,19 +3,21 @@ import { ChartSeries } from '@/components/Ui/ChartTime.vue';
 import { AuctionNetworkId } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import {
-  ChartGranularity,
   normalizeTimeSeriesData,
   roundTimestampToGranularity
 } from '@/helpers/charts';
 import { useAuctionPriceDataQuery } from '@/queries/auction';
 
+const ONE_HOUR = 3600;
+const ONE_DAY = ONE_HOUR * 24;
+
 const TIME_OFFSET = {
-  All: 0,
-  '1H': 3600,
-  '3H': 3600 * 3,
-  '6H': 3600 * 6,
-  '1D': 3600 * 24,
-  '7D': 3600 * 24 * 7
+  All: null,
+  '1H': ONE_HOUR,
+  '3H': ONE_HOUR * 3,
+  '6H': ONE_HOUR * 6,
+  '1D': ONE_DAY,
+  '7D': ONE_DAY * 7
 };
 
 const props = defineProps<{
@@ -23,8 +25,19 @@ const props = defineProps<{
   network: AuctionNetworkId;
 }>();
 
-const granularity = ref<ChartGranularity>('hour');
-const offset = ref(0);
+const offset = ref<number | null>(null);
+
+const granularity = computed(() => {
+  const auctionDuration =
+    Number(props.auction.endTimeTimestamp) -
+    Number(props.auction.startingTimeStamp);
+
+  if ((offset.value && offset.value <= ONE_DAY) || auctionDuration <= ONE_DAY) {
+    return 'minute';
+  }
+
+  return 'hour';
+});
 
 const chartEndTimestamp = computed(() => {
   return roundTimestampToGranularity(
@@ -37,19 +50,18 @@ const chartEndTimestamp = computed(() => {
 });
 
 const chartStartTimestamp = computed(() => {
-  if (offset.value === 0) {
-    return roundTimestampToGranularity(
+  return Math.max(
+    offset.value ? chartEndTimestamp.value - offset.value : 0,
+    roundTimestampToGranularity(
       Number(props.auction.startingTimeStamp),
       granularity.value
-    );
-  }
-
-  return chartEndTimestamp.value - offset.value;
+    )
+  );
 });
 
 const granularityMinTimestamp = computed(() => {
   if (granularity.value === 'minute') {
-    return chartEndTimestamp.value - 3600 * 24; // 24 hours
+    return chartEndTimestamp.value - ONE_DAY;
   }
 
   return roundTimestampToGranularity(
@@ -115,17 +127,6 @@ const chartSeries = computed<ChartSeries[]>(() => [
   }
 ]);
 
-function updateTimeRange(targetOffset: number) {
-  offset.value = targetOffset;
-
-  if (targetOffset === 0 || offset.value > 3600 * 24) {
-    granularity.value = 'hour';
-    return;
-  }
-
-  granularity.value = 'minute';
-}
-
 async function fetchAllPages() {
   while (hasNextPage.value && !isFetchingNextPage.value) {
     await fetchNextPage();
@@ -136,7 +137,6 @@ onMounted(() => {
   fetchAllPages();
 });
 
-// Watch for data changes and fetch all pages
 watch(data, () => {
   if (data.value && hasNextPage.value) {
     fetchAllPages();
@@ -168,7 +168,7 @@ watch(data, () => {
           'text-white bg-skin-text': offset === targetOffset,
           'opacity-50 cursor-not-allowed': isPending || isFetchingNextPage
         }"
-        @click="updateTimeRange(targetOffset)"
+        @click="offset = targetOffset"
         v-text="label"
       />
     </div>
