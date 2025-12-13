@@ -17,7 +17,7 @@ const GRANULARITY_STEP_SIZE: Record<ChartGranularity, number> = {
   minute: 60
 };
 
-function roundTimestampToGranularity(
+export function roundTimestampToGranularity(
   timestamp: number,
   granularity: ChartGranularity
 ): number {

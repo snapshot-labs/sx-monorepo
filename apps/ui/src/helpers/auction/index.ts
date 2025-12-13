@@ -158,9 +158,9 @@ export async function getUnclaimedOrders(
 }
 
 export async function getAuctionPriceHistory(
-  auctionId: string,
   network: AuctionNetworkId,
   granularity: 'minute' | 'hour',
+  filters: Record<string, any> = {},
   { skip = 0, first = 1000 }: { skip?: number; first?: number } = {}
 ): Promise<AuctionPriceHistoryData[]> {
   const client = getClient(network);
@@ -176,7 +176,7 @@ export async function getAuctionPriceHistory(
 
   const { data } = await client.query({
     query,
-    variables: { where: { auction: auctionId }, first, skip }
+    variables: { where: filters, first, skip }
   });
 
   return data[dataKey] || [];

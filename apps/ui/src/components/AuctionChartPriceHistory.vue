@@ -2,7 +2,11 @@
 import { ChartSeries } from '@/components/Ui/ChartTime.vue';
 import { AuctionNetworkId } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import { ChartGranularity, normalizeTimeSeriesData } from '@/helpers/charts';
+import {
+  ChartGranularity,
+  normalizeTimeSeriesData,
+  roundTimestampToGranularity
+} from '@/helpers/charts';
 import { useAuctionPriceDataQuery } from '@/queries/auction';
 
 const TIME_OFFSET = {
@@ -22,6 +26,38 @@ const props = defineProps<{
 const granularity = ref<ChartGranularity>('hour');
 const offset = ref(0);
 
+const chartEndTimestamp = computed(() => {
+  return roundTimestampToGranularity(
+    Math.min(
+      Math.floor(Date.now() / 1000),
+      Number(props.auction.endTimeTimestamp)
+    ),
+    granularity.value
+  );
+});
+
+const chartStartTimestamp = computed(() => {
+  if (offset.value === 0) {
+    return roundTimestampToGranularity(
+      Number(props.auction.startingTimeStamp),
+      granularity.value
+    );
+  }
+
+  return chartEndTimestamp.value - offset.value;
+});
+
+const granularityMinTimestamp = computed(() => {
+  if (granularity.value === 'minute') {
+    return chartEndTimestamp.value - 3600 * 24; // 24 hours
+  }
+
+  return roundTimestampToGranularity(
+    Number(props.auction.startingTimeStamp),
+    granularity.value
+  );
+});
+
 const {
   data,
   isPending,
@@ -32,37 +68,25 @@ const {
 } = useAuctionPriceDataQuery({
   network: () => props.network,
   auction: () => props.auction,
+  start: granularityMinTimestamp,
   granularity
 });
 
 const normalizedData = computed(() => {
   if (!data.value) return [];
 
-  const end = Math.min(
-    Math.floor(Date.now() / 1000),
-    Number(props.auction.endTimeTimestamp)
-  );
-  const start = offset.value
-    ? end - offset.value
-    : Number(props.auction.startingTimeStamp);
-
   return normalizeTimeSeriesData(
     data.value.pages.flat(),
     granularity.value,
-    start,
-    end
+    granularityMinTimestamp.value,
+    chartEndTimestamp.value
   );
 });
 
 const clampedData = computed(() => {
-  if (offset.value === 0) {
-    return normalizedData.value;
-  }
-
-  const start =
-    normalizedData.value[normalizedData.value.length - 1].time - offset.value;
-
-  return normalizedData.value.filter(point => point.time >= start);
+  return normalizedData.value.filter(
+    point => point.time >= chartStartTimestamp.value
+  );
 });
 
 const chartSeries = computed<ChartSeries[]>(() => [

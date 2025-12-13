@@ -177,10 +177,12 @@ export function useBiddingTokenPriceQuery({
 export function useAuctionPriceDataQuery({
   network,
   auction,
+  start,
   granularity = 'hour'
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  start: MaybeRefOrGetter<number>;
   granularity?: MaybeRefOrGetter<'minute' | 'hour'>;
 }) {
   const pageLimit = 1000;
@@ -194,20 +196,18 @@ export function useAuctionPriceDataQuery({
       const granularityValue = toValue(granularity);
 
       return getAuctionPriceHistory(
-        auctionValue.id,
         networkValue,
         granularityValue,
+        {
+          auction: auctionValue.id,
+          startTimestamp_gte: toValue(start)
+        },
         { skip: pageParam, first: pageLimit }
       );
     },
     getNextPageParam: (lastPage, pages) => {
       if (!Array.isArray(lastPage) || lastPage.length < pageLimit) return null;
       return pages.length * pageLimit;
-    },
-    enabled: computed(() => {
-      const auctionValue = toValue(auction);
-      const networkValue = toValue(network);
-      return !!(auctionValue?.id && networkValue);
-    })
+    }
   });
 }

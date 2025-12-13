@@ -148,7 +148,7 @@ watch(
       // Update data for existing series
       newSeries.forEach((seriesConfig, index) => {
         const instance = seriesInstances.value[index];
-        if (instance && seriesConfig.data.length > 0) {
+        if (instance) {
           instance.setData(seriesConfig.data);
         }
       });
