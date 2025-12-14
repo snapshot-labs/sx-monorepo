@@ -167,10 +167,13 @@ onUnmounted(() => {
 });
 
 useResizeObserver(chartContainer, entries => {
+  if (!chart.value) return;
+
   const entry = entries[0];
-  if (entry && chart.value) {
+  if (entry) {
     chart.value.applyOptions({ width: entry.contentRect.width });
   }
+  chart.value.timeScale().fitContent();
 });
 </script>
 
