@@ -118,10 +118,9 @@ const chartSeries = computed<ChartSeries[]>(() => [
     type: 'area',
     options: {
       lineType: 1,
+      lineWidth: 2,
       priceFormat: {
-        type: 'price',
-        precision: 4,
-        minMove: 0.0001
+        precision: 4
       }
     }
   }
@@ -138,7 +137,7 @@ onMounted(() => {
 });
 
 watch(data, () => {
-  if (data.value && hasNextPage.value) {
+  if (hasNextPage.value) {
     fetchAllPages();
   }
 });
