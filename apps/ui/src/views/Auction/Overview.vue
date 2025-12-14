@@ -369,7 +369,7 @@ function handleScrollEvent(target: HTMLElement) {
       v-if="chartType === 'price'"
       :auction="auction"
       :network="network"
-      class="m-4"
+      class="m-4 mr-3"
     />
     <div
       v-else

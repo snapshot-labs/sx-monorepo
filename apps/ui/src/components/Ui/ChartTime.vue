@@ -34,6 +34,24 @@ const CHART_COLORS = {
   bottomColor: 'rgba(59, 130, 246, 0.04)'
 };
 
+// Convert UTC timestamp to local timezone offset
+// (effectively makes the chart interpret UTC timestamps as local time)
+// see https://github.com/tradingview/lightweight-charts/blob/7104e9a4fb399f18db7a2868a91b3246014c4324/docs/time-zones.md
+const timeToLocale = computed(() => {
+  const timezoneOffset = new Date().getTimezoneOffset() * 60; // offset in seconds
+  return (utcTimestamp: number) => utcTimestamp - timezoneOffset;
+});
+
+const localizedSeries = computed<ChartSeries[]>(() => {
+  return props.series.map(seriesConfig => ({
+    ...seriesConfig,
+    data: seriesConfig.data.map(point => ({
+      ...point,
+      time: timeToLocale.value(point.time as number) as ChartDataPoint['time']
+    }))
+  }));
+});
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function createSeriesInstance(seriesConfig: ChartSeries): ISeriesApi<any, any> {
   if (!chart.value) throw new Error('Chart not initialized');
@@ -78,7 +96,10 @@ function initChart() {
     },
     grid: {
       vertLines: { color: 'transparent' },
-      horzLines: { color: 'rgba(156, 163, 175, 0.1)' }
+      horzLines: {
+        color: 'rgba(156, 163, 175, 0.1)',
+        style: 1 // LineStyle.Dotted
+      }
     },
     width: chartContainer.value.clientWidth,
     height: chartContainer.value.clientHeight,
@@ -100,16 +121,48 @@ function initChart() {
     },
     crosshair: {
       horzLine: { visible: true },
-      vertLine: { visible: true }
+      vertLine: {
+        visible: true,
+        style: 3, // LineStyle.Dotted
+        color: 'rgba(156, 163, 175, 0.5)'
+      }
     },
     timeScale: {
       timeVisible: true,
-      secondsVisible: false
+      secondsVisible: false,
+      tickMarkMaxCharacterLength: 23,
+      tickMarkFormatter: (time: number, tickMarkType: number) => {
+        const date = new Date(time * 1000);
+
+        if (tickMarkType === 1 || tickMarkType === 2) {
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            timeZone: 'UTC'
+          });
+        }
+
+        return null;
+      }
+    },
+    localization: {
+      timeFormatter: (time: number) => {
+        const date = new Date(time * 1000);
+        return date.toLocaleString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+          timeZone: 'UTC'
+        });
+      }
     }
   });
 
   // Create all series
-  seriesInstances.value = props.series.map(seriesConfig => {
+  seriesInstances.value = localizedSeries.value.map(seriesConfig => {
     const instance = createSeriesInstance(seriesConfig);
     if (seriesConfig.data.length > 0) {
       instance.setData(seriesConfig.data);
@@ -125,7 +178,7 @@ function recreateSeries() {
 
   // Remove old series and recreate
   seriesInstances.value.forEach(s => chart.value?.removeSeries(s));
-  seriesInstances.value = props.series.map(seriesConfig => {
+  seriesInstances.value = localizedSeries.value.map(seriesConfig => {
     const instance = createSeriesInstance(seriesConfig);
     if (seriesConfig.data.length > 0) {
       instance.setData(seriesConfig.data);
@@ -137,7 +190,7 @@ function recreateSeries() {
 }
 
 watch(
-  () => props.series,
+  localizedSeries,
   newSeries => {
     if (!chart.value) return;
 
