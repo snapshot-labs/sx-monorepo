@@ -8,6 +8,7 @@ import {
 import { getNames } from '@/helpers/stamp';
 
 const LIMIT = 20;
+const RETRY_COUNT = 3;
 
 export const REFERRAL_KEYS = {
   all: ['referral'] as const,
@@ -38,7 +39,11 @@ export function useUserReferralQuery(account: MaybeRefOrGetter<string | null>) {
       };
     },
     enabled: computed(() => !!toValue(account)),
-    retry: false
+    retry: (failureCount, error) => {
+      if (error?.message.includes('Row not found')) return false;
+
+      return failureCount < RETRY_COUNT;
+    }
   });
 }
 
