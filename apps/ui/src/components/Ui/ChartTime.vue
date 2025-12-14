@@ -101,8 +101,7 @@ function initChart() {
         style: 1 // LineStyle.Dotted
       }
     },
-    width: chartContainer.value.clientWidth,
-    height: chartContainer.value.clientHeight,
+    autoSize: true,
     rightPriceScale: {
       borderVisible: false
     },
@@ -219,13 +218,9 @@ onUnmounted(() => {
   chart.value?.remove();
 });
 
-useResizeObserver(chartContainer, entries => {
+useResizeObserver(chartContainer, () => {
   if (!chart.value) return;
 
-  const entry = entries[0];
-  if (entry) {
-    chart.value.applyOptions({ width: entry.contentRect.width });
-  }
   chart.value.timeScale().fitContent();
 });
 </script>
