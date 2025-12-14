@@ -26,7 +26,6 @@ gql(`
     exactOrder {
       sellAmount
       price
-      volume
     }
     ordersWithoutClaimed {
       id
