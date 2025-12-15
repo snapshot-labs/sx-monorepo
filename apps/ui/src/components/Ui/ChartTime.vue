@@ -39,15 +39,13 @@ const CHART_COLORS = {
     textColor: 'rgb(87, 96, 106)',
     gridLineColor: 'rgba(229, 229, 230, 0.7)',
     axisLineColor: 'rgb(229, 229, 230)',
-    crosshairLabelBackgroundColor: 'rgb(17, 17, 17)',
-    crosshairColor: 'rgb(229, 229, 230)'
+    crosshairLabelBackgroundColor: 'rgb(17, 17, 17)'
   },
   dark: {
     textColor: 'rgb(160, 159, 164)',
     gridLineColor: 'rgba(47, 46, 51, 0.7)',
     axisLineColor: 'rgb(47, 46, 51)',
-    crosshairLabelBackgroundColor: 'rgb(251, 251, 251)',
-    crosshairColor: 'rgb(47, 46, 51)'
+    crosshairLabelBackgroundColor: 'rgb(251, 251, 251)'
   }
 };
 
@@ -59,6 +57,10 @@ const OPTIONS = {
   grid: {
     vertLines: { color: 'transparent' },
     horzLines: { style: LineStyle.Dotted }
+  },
+  crosshair: {
+    vertLine: { color: 'transparent' },
+    horzLine: { color: 'transparent' }
   },
   autoSize: true,
   rightPriceScale: { borderVisible: false },
@@ -196,13 +198,11 @@ function updateChartColors() {
     crosshair: {
       horzLine: {
         labelBackgroundColor:
-          CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor,
-        color: CHART_COLORS[currentTheme.value].crosshairColor
+          CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor
       },
       vertLine: {
         labelBackgroundColor:
-          CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor,
-        color: CHART_COLORS[currentTheme.value].crosshairColor
+          CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor
       }
     }
   });
