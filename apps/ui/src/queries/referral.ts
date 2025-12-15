@@ -39,6 +39,7 @@ export function useUserReferralQuery(account: MaybeRefOrGetter<string | null>) {
       };
     },
     enabled: computed(() => !!toValue(account)),
+    refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
       if (error?.message.includes('Row not found')) return false;
 
