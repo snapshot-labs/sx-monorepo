@@ -80,6 +80,7 @@ const OPTIONS = {
   timeScale: {
     timeVisible: true,
     secondsVisible: false,
+    allowBoldLabels: false,
     fixLeftEdge: true,
     fixRightEdge: true,
     tickMarkMaxCharacterLength: 23,
