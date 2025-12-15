@@ -11,11 +11,13 @@ import {
   Order_Filter,
   Order_OrderBy
 } from '@/helpers/auction/gql/graphql';
+import { ChartGranularity } from '@/helpers/charts';
 import { getTokenPrices } from '@/helpers/coingecko';
 import { CHAIN_IDS, COINGECKO_ASSET_PLATFORMS } from '@/helpers/constants';
 
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
+const PRICE_HISTORY_LIMIT = 1000;
 
 export const AUCTION_KEYS = {
   all: ['auction'] as const,
@@ -59,7 +61,7 @@ export const AUCTION_KEYS = {
   priceHistory: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
-    granularity: MaybeRefOrGetter<'minute' | 'hour'>
+    granularity: MaybeRefOrGetter<ChartGranularity>
   ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity]
 };
 
@@ -183,31 +185,25 @@ export function useAuctionPriceDataQuery({
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
   start: MaybeRefOrGetter<number>;
-  granularity?: MaybeRefOrGetter<'minute' | 'hour'>;
+  granularity?: MaybeRefOrGetter<ChartGranularity>;
 }) {
-  const pageLimit = 1000;
-
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: AUCTION_KEYS.priceHistory(network, auction, granularity),
     queryFn: async ({ pageParam }) => {
-      const auctionValue = toValue(auction);
-      const networkValue = toValue(network);
-      const granularityValue = toValue(granularity);
-
-      return getAuctionPriceHistory(
-        networkValue,
-        granularityValue,
-        {
-          auction: auctionValue.id,
+      return getAuctionPriceHistory(toValue(network), toValue(granularity), {
+        skip: pageParam,
+        first: PRICE_HISTORY_LIMIT,
+        filter: {
+          auction: toValue(auction).id,
           startTimestamp_gte: toValue(start)
-        },
-        { skip: pageParam, first: pageLimit }
-      );
+        }
+      });
     },
     getNextPageParam: (lastPage, pages) => {
-      if (!Array.isArray(lastPage) || lastPage.length < pageLimit) return null;
-      return pages.length * pageLimit;
+      if (lastPage.length < PRICE_HISTORY_LIMIT) return null;
+
+      return pages.length * PRICE_HISTORY_LIMIT;
     }
   });
 }

@@ -1,16 +1,7 @@
-import { UTCTimestamp } from 'lightweight-charts';
-
-export type ChartDataPoint = {
-  time: UTCTimestamp;
-  value: number;
-};
+import { SingleValueData, UTCTimestamp } from 'lightweight-charts';
+import { AuctionPriceHistoryData } from './auction';
 
 export type ChartGranularity = 'hour' | 'minute';
-
-type RawDataPoint = {
-  startTimestamp: string;
-  close: string;
-};
 
 const GRANULARITY_STEP_SIZE: Record<ChartGranularity, number> = {
   hour: 3600,
@@ -27,21 +18,21 @@ export function roundTimestampToGranularity(
 
 /**
  * Normalizes time series data to regular intervals, fills gaps, and clamps to time range
- * @param rawData - Array of raw data points with string timestamps and values
+ * @param data - Array of raw data points with string timestamps and values
  * @param granularity - Time granularity ('hour' or 'minute')
  * @param startTime - Start timestamp in seconds (inclusive)
  * @param endTime - End timestamp in seconds (inclusive)
- * @returns Array of ChartDataPoint normalized, filled, and clamped to the time range
+ * @returns Array of SingleValueData normalized, filled, and clamped to the time range
  */
 export function normalizeTimeSeriesData(
-  rawData: RawDataPoint[],
+  data: AuctionPriceHistoryData[],
   granularity: ChartGranularity,
   startTime: number,
   endTime: number
-): ChartDataPoint[] {
-  if (!rawData || rawData.length === 0) return [];
+): SingleValueData[] {
+  if (!data || data.length === 0) return [];
 
-  const parsedData = rawData
+  const parsedData = data
     .map(point => ({
       timestamp: parseInt(point.startTimestamp),
       value: parseFloat(point.close)
@@ -55,40 +46,38 @@ export function normalizeTimeSeriesData(
   );
   const normalizedEndTime = roundTimestampToGranularity(endTime, granularity);
 
-  const result: ChartDataPoint[] = [];
+  const result: SingleValueData[] = [];
   let dataIndex = 0;
-  let lastValue = parsedData[0].value;
+  let lastKnownValue = parsedData[0].value;
 
-  // Find the first data point that could affect our range
+  // Find the last known value before the start time
+  // Will be used as starting value for filling gaps when the data starts after startTime
+  // In case there is no data before startTime, the first data point's value will be used
+  // which may result in incorrect values for the filled gaps
   while (
     dataIndex < parsedData.length &&
     parsedData[dataIndex].timestamp < normalizedStartTime
   ) {
-    lastValue = parsedData[dataIndex].value;
+    lastKnownValue = parsedData[dataIndex].value;
     dataIndex++;
   }
 
-  // Single loop through the time range
   for (
     let timestamp = normalizedStartTime;
     timestamp <= normalizedEndTime;
     timestamp += stepSize
   ) {
-    let value = lastValue;
-
-    // Check if we have a data point at this timestamp
     if (
       dataIndex < parsedData.length &&
       parsedData[dataIndex].timestamp === timestamp
     ) {
-      value = parsedData[dataIndex].value;
-      lastValue = value;
+      lastKnownValue = parsedData[dataIndex].value;
       dataIndex++;
     }
 
     result.push({
       time: timestamp as UTCTimestamp,
-      value
+      value: lastKnownValue
     });
   }
 

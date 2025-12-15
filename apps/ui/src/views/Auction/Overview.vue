@@ -369,12 +369,12 @@ function handleScrollEvent(target: HTMLElement) {
       v-if="chartType === 'price'"
       :auction="auction"
       :network="network"
-      class="m-4 mr-3"
+      class="min-h-[355px] p-4 pr-3"
     />
     <div
       v-else
-      class="m-4 h-[382px] flex items-center justify-center"
-      v-text="'Graph coming soon'"
+      class="min-h-[355px] flex items-center justify-center"
+      v-text="'Graph coming soon ...'"
     />
 
     <UiScrollerHorizontal with-buttons gradient="xxl">

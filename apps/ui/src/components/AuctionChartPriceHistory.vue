@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import { SingleValueData } from 'lightweight-charts';
 import { ChartSeries } from '@/components/Ui/ChartTime.vue';
-import { AuctionNetworkId } from '@/helpers/auction';
+import { AuctionNetworkId, AuctionPriceHistoryData } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import {
+  ChartGranularity,
   normalizeTimeSeriesData,
   roundTimestampToGranularity
 } from '@/helpers/charts';
@@ -27,7 +29,7 @@ const props = defineProps<{
 
 const offset = ref<number | null>(null);
 
-const granularity = computed(() => {
+const granularity = computed<ChartGranularity>(() => {
   const auctionDuration =
     Number(props.auction.endTimeTimestamp) -
     Number(props.auction.startingTimeStamp);
@@ -39,7 +41,7 @@ const granularity = computed(() => {
   return 'hour';
 });
 
-const chartEndTimestamp = computed(() => {
+const chartEndTimestamp = computed<number>(() => {
   return roundTimestampToGranularity(
     Math.min(
       Math.floor(Date.now() / 1000),
@@ -49,7 +51,7 @@ const chartEndTimestamp = computed(() => {
   );
 });
 
-const chartStartTimestamp = computed(() => {
+const chartStartTimestamp = computed<number>(() => {
   return Math.max(
     offset.value ? chartEndTimestamp.value - offset.value : 0,
     roundTimestampToGranularity(
@@ -59,7 +61,8 @@ const chartStartTimestamp = computed(() => {
   );
 });
 
-const granularityMinTimestamp = computed(() => {
+// Dataset min timestamp based on granularity
+const granularityMinDataTimestamp = computed<number>(() => {
   if (granularity.value === 'minute') {
     return chartEndTimestamp.value - ONE_DAY;
   }
@@ -80,14 +83,16 @@ const {
 } = useAuctionPriceDataQuery({
   network: () => props.network,
   auction: () => props.auction,
-  start: granularityMinTimestamp,
+  start: granularityMinDataTimestamp,
   granularity
 });
 
-const normalizedData = computed(() => {
-  const defaultData = [
+const normalizedData = computed<SingleValueData[]>(() => {
+  if (!data.value || hasNextPage.value) return [];
+
+  const defaultData: AuctionPriceHistoryData[] = [
     {
-      startTimestamp: granularityMinTimestamp.value.toString(),
+      startTimestamp: granularityMinDataTimestamp.value.toString(),
       close: props.auction.currentClearingPrice
     },
     {
@@ -96,19 +101,19 @@ const normalizedData = computed(() => {
     }
   ];
 
-  const series = data.value?.pages?.flat() || [];
+  const series = data.value.pages.flat() || [];
 
   return normalizeTimeSeriesData(
     series.length ? series : defaultData,
     granularity.value,
-    granularityMinTimestamp.value,
+    granularityMinDataTimestamp.value,
     chartEndTimestamp.value
   );
 });
 
-const clampedData = computed(() => {
+const clampedData = computed<SingleValueData[]>(() => {
   return normalizedData.value.filter(
-    point => point.time >= chartStartTimestamp.value
+    point => (point.time as number) >= chartStartTimestamp.value
   );
 });
 
@@ -120,6 +125,7 @@ const chartSeries = computed<ChartSeries[]>(() => [
       lineType: 1,
       lineWidth: 2,
       priceFormat: {
+        // TODO: better dynamic precision based on price range
         precision: 4
       }
     }
@@ -144,18 +150,19 @@ watch(data, () => {
 </script>
 
 <template>
-  <div>
-    <div class="flex items-center justify-center min-h-[355px]">
+  <div class="flex flex-col">
+    <div
+      v-if="isPending || isError"
+      class="flex items-center justify-center flex-1"
+    >
       <UiLoading v-if="isPending" />
-      <div v-else-if="isError" class="text-center space-y-2">
-        Error loading chart
-      </div>
-      <UiChartTime
-        v-else-if="!hasNextPage"
-        class="h-[355px] w-full"
-        :series="chartSeries"
-      />
+      <template v-else-if="isError">Error while loading chart</template>
     </div>
+    <UiChartTime
+      v-else-if="!hasNextPage"
+      class="flex-1"
+      :series="chartSeries"
+    />
     <div class="space-x-2">
       <button
         v-for="(targetOffset, label) in TIME_OFFSET"

@@ -8,9 +8,16 @@ import {
   unclaimedOrdersQuery
 } from './queries';
 import { getNames } from '../stamp';
-import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import {
+  AuctionPriceHourData_Filter,
+  AuctionPriceMinuteData_Filter,
+  Order_Filter,
+  Order_OrderBy,
+  OrderFragment
+} from './gql/graphql';
 import { encodeOrder } from './orders';
 import { AuctionNetworkId, AuctionPriceHistoryData, Order } from './types';
+import { ChartGranularity } from '../charts';
 
 export * from './types';
 
@@ -159,9 +166,16 @@ export async function getUnclaimedOrders(
 
 export async function getAuctionPriceHistory(
   network: AuctionNetworkId,
-  granularity: 'minute' | 'hour',
-  filters: Record<string, any> = {},
-  { skip = 0, first = 1000 }: { skip?: number; first?: number } = {}
+  granularity: ChartGranularity,
+  {
+    skip = 0,
+    first = 1000,
+    filter
+  }: {
+    skip?: number;
+    first?: number;
+    filter?: AuctionPriceHourData_Filter | AuctionPriceMinuteData_Filter;
+  } = {}
 ): Promise<AuctionPriceHistoryData[]> {
   const client = getClient(network);
 
@@ -176,7 +190,7 @@ export async function getAuctionPriceHistory(
 
   const { data } = await client.query({
     query,
-    variables: { where: filters, first, skip }
+    variables: { where: filter, first, skip }
   });
 
   return data[dataKey] || [];

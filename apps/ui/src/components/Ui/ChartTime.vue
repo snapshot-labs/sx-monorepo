@@ -7,19 +7,19 @@ import {
   ISeriesApi,
   LineSeries,
   LineSeriesPartialOptions,
-  SeriesType
+  SeriesType,
+  SingleValueData
 } from 'lightweight-charts';
-import { ChartDataPoint } from '@/helpers/charts';
 
 export type ChartSeriesType = 'line' | 'area';
 
-export interface ChartSeries {
-  data: ChartDataPoint[];
+export type ChartSeries = {
+  data: SingleValueData[];
   type?: ChartSeriesType;
   options?: LineSeriesPartialOptions | AreaSeriesPartialOptions;
-}
+};
 
-const SERIES_COLORS = {
+const SERIE_COLORS = {
   light: {
     lineColor: 'rgba(17, 17, 17, 0.8)',
     areaTopColor: 'rgba(17, 17, 17, 0.4)',
@@ -56,14 +56,10 @@ const OPTIONS = {
   },
   grid: {
     vertLines: { color: 'transparent' },
-    horzLines: {
-      style: 1 // LineStyle.Dotted
-    }
+    horzLines: { style: 1 }
   },
   autoSize: true,
-  rightPriceScale: {
-    borderVisible: false
-  },
+  rightPriceScale: { borderVisible: false },
   handleScroll: {
     vertTouchDrag: false,
     mouseWheel: false,
@@ -118,8 +114,7 @@ const props = defineProps<{
 
 const chartContainer = ref<HTMLElement | null>(null);
 const chart = shallowRef<IChartApi | null>(null);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const seriesInstances = shallowRef<ISeriesApi<SeriesType, any>[]>([]);
+const seriesInstances = shallowRef<ISeriesApi<SeriesType>[]>([]);
 
 const { currentTheme } = useTheme();
 
@@ -132,48 +127,39 @@ const timeToLocale = computed(() => {
 });
 
 const localizedSeries = computed<ChartSeries[]>(() => {
-  return props.series.map(seriesConfig => ({
-    ...seriesConfig,
-    data: seriesConfig.data.map(point => ({
+  return props.series.map(config => ({
+    ...config,
+    data: config.data.map(point => ({
       ...point,
-      time: timeToLocale.value(point.time as number) as ChartDataPoint['time']
+      time: timeToLocale.value(point.time as number) as SingleValueData['time']
     }))
   }));
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createSeriesInstance(seriesConfig: ChartSeries): ISeriesApi<any, any> {
-  if (!chart.value) throw new Error('Chart not initialized');
-
-  if (seriesConfig.type === 'area') {
-    return chart.value.addSeries(
-      AreaSeries,
-      seriesConfig.options as AreaSeriesPartialOptions
-    );
-  }
-
-  return chart.value.addSeries(
-    LineSeries,
-    seriesConfig.options as LineSeriesPartialOptions
-  );
-}
-
 function createSeries(series: ChartSeries[], options?: { reset: true }) {
+  if (!chart.value) return;
+
   if (options?.reset) {
-    seriesInstances.value.forEach(s => chart.value?.removeSeries(s));
+    seriesInstances.value.forEach(s => chart.value!.removeSeries(s));
   }
 
   seriesInstances.value = series.map(config => {
-    const instance = createSeriesInstance(config);
-    instance.setData(config.data);
-    return instance;
+    return chart.value!.addSeries(
+      config.type === 'area' ? AreaSeries : LineSeries,
+      config.options
+    );
   });
 }
 
-function updateSeries(series: ChartSeries[]) {
+function updateSeriesData(series: ChartSeries[]) {
+  if (!chart.value) return;
+
   series.forEach((config, index) => {
     seriesInstances.value[index]?.setData(config.data);
   });
+
+  chart.value.timeScale().fitContent();
+  updateChartColors();
 }
 
 function initChart() {
@@ -182,20 +168,10 @@ function initChart() {
   chart.value = createChart(chartContainer.value, OPTIONS);
 
   createSeries(localizedSeries.value);
-
-  chart.value.timeScale().fitContent();
-  updateChartTheme();
+  updateSeriesData(localizedSeries.value);
 }
 
-function recreateSeries() {
-  if (!chart.value) return;
-
-  createSeries(localizedSeries.value, { reset: true });
-
-  chart.value?.timeScale().fitContent();
-}
-
-function updateChartTheme() {
+function updateChartColors() {
   if (!chart.value) return;
 
   chart.value.applyOptions({
@@ -229,29 +205,26 @@ function updateChartTheme() {
 
   seriesInstances.value.forEach(instance => {
     instance.applyOptions({
-      color: SERIES_COLORS[currentTheme.value].lineColor,
-      lineColor: SERIES_COLORS[currentTheme.value].lineColor,
-      topColor: SERIES_COLORS[currentTheme.value].areaTopColor,
-      bottomColor: SERIES_COLORS[currentTheme.value].areaBottomColor
+      color: SERIE_COLORS[currentTheme.value].lineColor,
+      lineColor: SERIE_COLORS[currentTheme.value].lineColor,
+      topColor: SERIE_COLORS[currentTheme.value].areaTopColor,
+      bottomColor: SERIE_COLORS[currentTheme.value].areaBottomColor
     });
   });
 }
 
-watch(currentTheme, updateChartTheme);
+watch(currentTheme, updateChartColors);
 
 watch(
   localizedSeries,
   newSeries => {
     if (!chart.value) return;
 
-    // Update existing series data or recreate if count changed
     if (newSeries.length !== seriesInstances.value.length) {
-      recreateSeries();
-    } else {
-      // Update data for existing series
-      updateSeries(newSeries);
-      chart.value?.timeScale().fitContent();
+      createSeries(localizedSeries.value, { reset: true });
     }
+
+    updateSeriesData(newSeries);
   },
   { deep: true }
 );

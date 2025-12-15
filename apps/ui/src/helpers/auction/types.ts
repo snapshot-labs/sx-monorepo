@@ -7,7 +7,3 @@ export type AuctionPriceHistoryData = {
   startTimestamp: string;
   close: string;
 };
-export type AuctionPriceDepthData = {
-  price: string;
-  volume: string;
-};
