@@ -144,12 +144,8 @@ const localizedSeries = computed<ChartSeries[]>(() => {
   }));
 });
 
-function createSeries(series: ChartSeries[], options?: { reset: true }) {
+function createSeries(series: ChartSeries[]) {
   if (!chart.value) return;
-
-  if (options?.reset) {
-    seriesInstances.value.forEach(s => chart.value!.removeSeries(s));
-  }
 
   seriesInstances.value = series.map(config => {
     return chart.value!.addSeries(
@@ -223,19 +219,13 @@ function updateChartColors() {
 
 watch(currentTheme, updateChartColors);
 
-watch(
-  localizedSeries,
-  newSeries => {
-    if (!chart.value) return;
+watch(localizedSeries, newSeries => {
+  if (!chart.value) return;
 
-    if (newSeries.length !== seriesInstances.value.length) {
-      createSeries(localizedSeries.value, { reset: true });
-    }
-
-    updateSeriesData(newSeries);
-  },
-  { deep: true }
-);
+  // Assuming that series did not change, only its data
+  // TODO: Support dynamic series addition/removal
+  updateSeriesData(newSeries);
+});
 
 onMounted(() => {
   initChart();
