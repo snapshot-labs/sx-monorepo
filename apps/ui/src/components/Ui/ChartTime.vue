@@ -21,7 +21,7 @@ export type ChartSeries = {
   options?: LineSeriesPartialOptions | AreaSeriesPartialOptions;
 };
 
-const SERIE_COLORS = {
+const SERIES_COLORS = {
   light: {
     lineColor: 'rgba(17, 17, 17, 0.8)',
     areaTopColor: 'rgba(17, 17, 17, 0.4)',
@@ -210,10 +210,10 @@ function updateChartColors() {
 
   seriesInstances.value.forEach(instance => {
     instance.applyOptions({
-      color: SERIE_COLORS[currentTheme.value].lineColor,
-      lineColor: SERIE_COLORS[currentTheme.value].lineColor,
-      topColor: SERIE_COLORS[currentTheme.value].areaTopColor,
-      bottomColor: SERIE_COLORS[currentTheme.value].areaBottomColor
+      color: SERIES_COLORS[currentTheme.value].lineColor,
+      lineColor: SERIES_COLORS[currentTheme.value].lineColor,
+      topColor: SERIES_COLORS[currentTheme.value].areaTopColor,
+      bottomColor: SERIES_COLORS[currentTheme.value].areaBottomColor
     });
   });
 }
