@@ -123,11 +123,7 @@ const chartSeries = computed<ChartSeries[]>(() => [
     type: 'area',
     options: {
       lineType: LineType.WithSteps,
-      lineWidth: 2,
-      priceFormat: {
-        // TODO: better dynamic precision based on price range
-        precision: 4
-      }
+      lineWidth: 2
     }
   }
 ]);

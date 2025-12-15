@@ -8,6 +8,7 @@ import {
   LineSeries,
   LineSeriesPartialOptions,
   LineStyle,
+  PriceFormat,
   SeriesType,
   SingleValueData,
   TickMarkType
@@ -158,10 +159,40 @@ function createSeries(series: ChartSeries[]) {
   });
 }
 
+function getPriceFormat(highestValue: number): Partial<PriceFormat> {
+  let precision: number;
+
+  if (highestValue === 0) {
+    precision = 2;
+  } else if (highestValue >= 5) {
+    precision = 0;
+  } else if (highestValue >= 1) {
+    precision = 2;
+  } else {
+    const [, exponent] = highestValue.toExponential().split('e');
+    const exp = parseInt(exponent);
+    precision = Math.abs(exp) + 2; // show last 3 significant digits
+  }
+
+  return { precision, minMove: Math.pow(10, -precision) };
+}
+
 function updateSeriesData(series: ChartSeries[]) {
   if (!chart.value) return;
 
+  let highestValue = 0;
+
+  series.forEach(config => {
+    highestValue = Math.max(
+      highestValue,
+      ...config.data.map(point => point.value)
+    );
+  });
+
+  const priceFormat = getPriceFormat(highestValue);
+
   series.forEach((config, index) => {
+    seriesInstances.value[index]?.applyOptions({ priceFormat });
     seriesInstances.value[index]?.setData(config.data);
   });
 
