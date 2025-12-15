@@ -16,7 +16,7 @@ import {
   OrderFragment
 } from './gql/graphql';
 import { encodeOrder } from './orders';
-import { AuctionNetworkId, AuctionPriceHistoryData, Order } from './types';
+import { AuctionNetworkId, AuctionPriceHistoryPoint, Order } from './types';
 import { ChartGranularity } from '../charts';
 
 export * from './types';
@@ -176,7 +176,7 @@ export async function getAuctionPriceHistory(
     first?: number;
     filter?: AuctionPriceHourData_Filter | AuctionPriceMinuteData_Filter;
   } = {}
-): Promise<AuctionPriceHistoryData[]> {
+): Promise<AuctionPriceHistoryPoint[]> {
   const client = getClient(network);
 
   const query =

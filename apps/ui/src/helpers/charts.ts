@@ -1,5 +1,5 @@
 import { SingleValueData, UTCTimestamp } from 'lightweight-charts';
-import { AuctionPriceHistoryData } from './auction';
+import { AuctionPriceHistoryPoint } from './auction';
 
 export type ChartGranularity = 'hour' | 'minute';
 
@@ -25,7 +25,7 @@ export function roundTimestampToGranularity(
  * @returns Array of SingleValueData normalized, filled, and clamped to the time range
  */
 export function normalizeTimeSeriesData(
-  data: AuctionPriceHistoryData[],
+  data: AuctionPriceHistoryPoint[],
   granularity: ChartGranularity,
   startTime: number,
   endTime: number
