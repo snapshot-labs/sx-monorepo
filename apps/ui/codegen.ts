@@ -37,6 +37,11 @@ const config: CodegenConfig = {
           BigDecimal: 'string'
         }
       }
+    },
+    './src/helpers/auction/referral/gql/': {
+      schema: 'https://api.brokester.box',
+      documents: ['src/helpers/auction/referral/queries.ts'],
+      ...baseConfig
     }
   }
 };

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { isAddress } from '@ethersproject/address';
 import { useQueryClient } from '@tanstack/vue-query';
-import { setReferral } from '@/helpers/auction/referralActions';
 import { compareAddresses, shortenAddress, sleep } from '@/helpers/utils';
 import {
   REFERRAL_KEYS,
@@ -9,7 +8,11 @@ import {
   useUserReferralQuery
 } from '@/queries/referral';
 
-const { web3Account, auth } = useWeb3();
+const props = defineProps<{
+  setReferral: (referee: string) => Promise<{ hash: string } | null>;
+}>();
+
+const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 const queryClient = useQueryClient();
 
@@ -53,18 +56,13 @@ function handleEndReached() {
 }
 
 async function handleSetReferral() {
-  if (!auth.value) {
-    modalAccountOpen.value = true;
-    return;
-  }
-
   if (!canSubmit.value) return;
 
   isSubmitting.value = true;
   errorMessage.value = '';
 
   try {
-    await setReferral(auth.value.provider, referralInput.value);
+    await props.setReferral(referralInput.value);
 
     referralInput.value = '';
 
