@@ -24,18 +24,18 @@ export const AUCTION_KEYS = {
   auction: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [AUCTION_KEYS.all, network, () => toValue(auction).id],
+  ) => [...AUCTION_KEYS.all, network, () => toValue(auction).id],
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [AUCTION_KEYS.auction(network, auction), 'orders'],
+  ) => [...AUCTION_KEYS.auction(network, auction), 'orders'],
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
     limit?: MaybeRefOrGetter<number>,
     where?: MaybeRefOrGetter<Order_Filter>
   ) => [
-    AUCTION_KEYS.auction(network, auction),
+    ...AUCTION_KEYS.auction(network, auction),
     'bidsSummary',
     { limit: limit ?? SUMMARY_LIMIT, where }
   ],
@@ -45,7 +45,7 @@ export const AUCTION_KEYS = {
     limit?: MaybeRefOrGetter<number>,
     where?: MaybeRefOrGetter<Order_Filter>
   ) => [
-    AUCTION_KEYS.auction(network, auction),
+    ...AUCTION_KEYS.auction(network, auction),
     'unclaimedBids',
     { limit: limit ?? SUMMARY_LIMIT, where }
   ],
@@ -53,7 +53,7 @@ export const AUCTION_KEYS = {
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>
   ) => [
-    AUCTION_KEYS.all,
+    ...AUCTION_KEYS.all,
     network,
     () => toValue(auction).id,
     'biddingTokenPrice'
