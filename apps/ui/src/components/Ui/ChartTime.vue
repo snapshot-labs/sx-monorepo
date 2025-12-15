@@ -126,6 +126,7 @@ const { currentTheme } = useTheme();
 // Convert UTC timestamp to local timezone offset
 // (effectively makes the chart interpret UTC timestamps as local time)
 // see https://github.com/tradingview/lightweight-charts/blob/7104e9a4fb399f18db7a2868a91b3246014c4324/docs/time-zones.md
+// All further data manipulations should be done in UTC, to avoid double offsets
 const timeToLocale = computed(() => {
   const timezoneOffset = new Date().getTimezoneOffset() * 60; // offset in seconds
   return (utcTimestamp: number) => utcTimestamp - timezoneOffset;
