@@ -132,21 +132,15 @@ const chartSeries = computed<ChartSeries[]>(() => [
   }
 ]);
 
-async function fetchAllPages() {
-  while (hasNextPage.value && !isFetchingNextPage.value) {
-    await fetchNextPage();
-  }
-}
-
-onMounted(() => {
-  fetchAllPages();
-});
-
-watch(data, () => {
-  if (hasNextPage.value) {
-    fetchAllPages();
-  }
-});
+watch(
+  data,
+  async () => {
+    while (hasNextPage.value && !isError.value) {
+      await fetchNextPage();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -158,11 +152,7 @@ watch(data, () => {
       <UiLoading v-if="isPending" />
       <template v-else-if="isError">Error while loading chart</template>
     </div>
-    <UiChartTime
-      v-else-if="!hasNextPage"
-      class="flex-1"
-      :series="chartSeries"
-    />
+    <UiChartTime v-else class="flex-1" :series="chartSeries" />
     <div class="space-x-2">
       <button
         v-for="(targetOffset, label) in TIME_OFFSET"
