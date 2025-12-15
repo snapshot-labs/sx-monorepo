@@ -8,8 +8,8 @@ import {
   useUserReferralQuery
 } from '@/queries/referral';
 
-const props = defineProps<{
-  setReferral: (referee: string) => Promise<{ hash: string } | null>;
+const emit = defineEmits<{
+  submit: [referee: string];
 }>();
 
 const { web3Account } = useWeb3();
@@ -35,7 +35,7 @@ const canSubmit = computed(() => {
   }
 });
 
-const { data: userReferral, isLoading: isUserReferralLoading } =
+const { data: userReferral, isPending: isUserReferralPending } =
   useUserReferralQuery(web3Account);
 
 const {
@@ -62,7 +62,7 @@ async function handleSetReferral() {
   errorMessage.value = '';
 
   try {
-    await props.setReferral(referralInput.value);
+    await emit('submit', referralInput.value);
 
     referralInput.value = '';
 
@@ -79,7 +79,7 @@ async function handleSetReferral() {
 
 <template>
   <div class="s-box p-4 space-y-3">
-    <UiLoading v-if="isUserReferralLoading" class="py-3 block" />
+    <UiLoading v-if="isUserReferralPending" class="py-3 block" />
     <template v-else-if="web3Account">
       <div
         v-if="userReferral"
