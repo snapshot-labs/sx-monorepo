@@ -16,8 +16,8 @@ const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
-  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
-  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH'
+  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
+  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR'
 };
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {

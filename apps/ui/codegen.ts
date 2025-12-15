@@ -26,7 +26,7 @@ const config: CodegenConfig = {
     },
     './src/helpers/auction/gql/': {
       schema:
-        'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
+        'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
       documents: ['src/helpers/auction/queries.ts'],
       ...baseConfig,
       config: {

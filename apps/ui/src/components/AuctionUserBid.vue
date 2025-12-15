@@ -109,9 +109,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         Rejected
       </span>
     </div>
-    <div
-      class="min-w-[44px] lg:w-[60px] flex items-center justify-center -mr-4"
-    >
+    <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
       <UiDropdown>
         <template #button>
           <button type="button">
