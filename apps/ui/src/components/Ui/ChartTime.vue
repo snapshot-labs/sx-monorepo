@@ -78,6 +78,8 @@ const OPTIONS = {
   timeScale: {
     timeVisible: true,
     secondsVisible: false,
+    fixLeftEdge: true,
+    fixRightEdge: true,
     tickMarkMaxCharacterLength: 23,
     tickMarkFormatter: (time: number, tickMarkType: number) => {
       const date = new Date(time * 1000);
