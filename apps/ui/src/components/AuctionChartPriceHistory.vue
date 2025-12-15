@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { SingleValueData } from 'lightweight-charts';
+import { LineType, SingleValueData } from 'lightweight-charts';
 import { ChartSeries } from '@/components/Ui/ChartTime.vue';
 import { AuctionNetworkId, AuctionPriceHistoryData } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
@@ -122,7 +122,7 @@ const chartSeries = computed<ChartSeries[]>(() => [
     data: clampedData.value,
     type: 'area',
     options: {
-      lineType: 1,
+      lineType: LineType.WithSteps,
       lineWidth: 2,
       priceFormat: {
         // TODO: better dynamic precision based on price range

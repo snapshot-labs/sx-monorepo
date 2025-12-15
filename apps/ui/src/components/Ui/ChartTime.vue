@@ -7,8 +7,10 @@ import {
   ISeriesApi,
   LineSeries,
   LineSeriesPartialOptions,
+  LineStyle,
   SeriesType,
-  SingleValueData
+  SingleValueData,
+  TickMarkType
 } from 'lightweight-charts';
 
 export type ChartSeriesType = 'line' | 'area';
@@ -56,7 +58,7 @@ const OPTIONS = {
   },
   grid: {
     vertLines: { color: 'transparent' },
-    horzLines: { style: 1 }
+    horzLines: { style: LineStyle.Dotted }
   },
   autoSize: true,
   rightPriceScale: { borderVisible: false },
@@ -80,7 +82,10 @@ const OPTIONS = {
     tickMarkFormatter: (time: number, tickMarkType: number) => {
       const date = new Date(time * 1000);
 
-      if (tickMarkType === 1 || tickMarkType === 2) {
+      if (
+        tickMarkType === TickMarkType.Month ||
+        tickMarkType === TickMarkType.DayOfMonth
+      ) {
         return date.toLocaleDateString('en-US', {
           month: 'short',
           day: 'numeric',
