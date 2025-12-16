@@ -29,7 +29,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   auction: AuctionDetailFragment;
-  biddingTokenPrice: number;
+  biddingTokenPrice?: number;
   totalSupply: bigint;
   network: AuctionNetworkId;
   previousOrders?: Order[];
@@ -299,7 +299,9 @@ onMounted(() => {
           <div>
             ~${{
               _n(
-                bidAmount ? parseFloat(bidAmount) * biddingTokenPrice : 0,
+                bidAmount && biddingTokenPrice
+                  ? parseFloat(bidAmount) * biddingTokenPrice
+                  : 0,
                 'standard',
                 {
                   maximumFractionDigits: 2
@@ -346,7 +348,9 @@ onMounted(() => {
         <div class="text-[17px]">
           ~${{
             _n(
-              bidPrice ? parseFloat(bidPrice) * biddingTokenPrice : 0,
+              bidPrice && biddingTokenPrice
+                ? parseFloat(bidPrice) * biddingTokenPrice
+                : 0,
               'standard',
               {
                 maximumFractionDigits: 2
@@ -373,7 +377,9 @@ onMounted(() => {
         <div class="text-[17px]">
           ~${{
             _n(
-              bidFdv ? parseFloat(bidFdv) * biddingTokenPrice : 0,
+              bidFdv && biddingTokenPrice
+                ? parseFloat(bidFdv) * biddingTokenPrice
+                : 0,
               'standard',
               {
                 maximumFractionDigits: 0
