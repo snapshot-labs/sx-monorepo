@@ -234,7 +234,7 @@ onMounted(() => {
   <div>
     <div class="s-box p-4 space-y-3 pt-6">
       <div
-        class="px-3 py-2 bg-skin-border rounded-lg"
+        class="px-3 py-2 bg-skin-border rounded-lg overflow-hidden"
         :class="amountError ? 'border-skin-danger' : ''"
       >
         <div class="flex flex-col text-skin-link">
@@ -282,7 +282,7 @@ onMounted(() => {
         </div>
       </div>
       <div
-        class="px-3 py-2 bg-skin-border border rounded-lg"
+        class="px-3 py-2 bg-skin-border border rounded-lg overflow-hidden"
         :class="priceError ? 'border-skin-danger' : ''"
       >
         <div class="flex flex-col text-skin-link">
