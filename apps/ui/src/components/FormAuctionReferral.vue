@@ -96,7 +96,7 @@ async function handleSetReferral() {
               "
             />
             <UiAddress
-              :address="userReferral.referee"
+            :address="getChecksumAddress(userReferral.referee)"
               class="text-[17px] text-skin-text truncate"
             />
           </div>
@@ -183,7 +183,7 @@ async function handleSetReferral() {
                   v-text="referee.name || shortenAddress(referee.referee)"
                 />
                 <UiAddress
-                  :address="referee.referee"
+                  :address="getChecksumAddress(referee.referee)"
                   class="text-[17px] text-skin-text truncate"
                 />
               </div>
