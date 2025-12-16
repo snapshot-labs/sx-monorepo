@@ -580,6 +580,7 @@ function handleScrollEvent(target: HTMLElement) {
           v-if="isAuctionOpen"
           :auction="auction"
           :network="network"
+          :bidding-token-price="biddingTokenPrice"
           :total-supply="totalSupply"
           :is-loading="isModalTransactionProgressOpen"
           :previous-orders="userOrders"

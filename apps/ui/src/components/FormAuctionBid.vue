@@ -29,6 +29,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   auction: AuctionDetailFragment;
+  biddingTokenPrice: number;
   totalSupply: bigint;
   network: AuctionNetworkId;
   previousOrders?: Order[];
@@ -259,7 +260,17 @@ onMounted(() => {
           amountError
         }}</span>
         <div class="relative text-[17px]">
-          <div>$3,456</div>
+          <div>
+            ~${{
+              _n(
+                bidAmount ? parseFloat(bidAmount) * biddingTokenPrice : 0,
+                'standard',
+                {
+                  maximumFractionDigits: 2
+                }
+              )
+            }}
+          </div>
           <button
             class="absolute top-0 right-0 text-skin-link"
             @click="bidAmount = String(formattedBalance)"
@@ -297,7 +308,15 @@ onMounted(() => {
         </div>
         <span v-if="priceError" class="text-skin-danger">{{ priceError }}</span>
         <div class="text-[17px]">
-          <div>$3,456</div>
+          ~${{
+            _n(
+              bidPrice ? parseFloat(bidPrice) * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 2
+              }
+            )
+          }}
         </div>
         <div class="flex flex-col text-skin-link mt-2">
           <label for="bid-fdv" class="text-[17px] truncate">Max. FDV</label>
@@ -316,7 +335,15 @@ onMounted(() => {
           </div>
         </div>
         <div class="text-[17px]">
-          <div>$3,456</div>
+          ~${{
+            _n(
+              bidFdv ? parseFloat(bidFdv) * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )
+          }}
         </div>
       </div>
       <UiMessage
