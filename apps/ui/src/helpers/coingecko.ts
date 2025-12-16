@@ -1,6 +1,6 @@
 import { ETH_CONTRACT } from './constants';
 
-const COINGECKO_API_KEY = 'CG-1z19sMoCC6LoqR4b6avyLi3U';
+const COINGECKO_API_KEY = 'CG-o41PzYqjLPSWSJdMEyDELEpB';
 const COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3/simple';
 const COINGECKO_PARAMS = '&vs_currencies=usd&include_24hr_change=true';
 
