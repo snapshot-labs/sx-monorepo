@@ -36,8 +36,10 @@ const { start, goToNextStep, isLastStep, currentStep } = useAuctionOrderFlow(
   toRef(props, 'network'),
   toRef(props, 'auction')
 );
-const { cancelSellOrder, claimFromParticipantOrder, setReferral } =
-  useAuctionActions(toRef(props, 'network'), toRef(props, 'auction'));
+const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
+  toRef(props, 'network'),
+  toRef(props, 'auction')
+);
 
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
@@ -586,7 +588,8 @@ function handleScrollEvent(target: HTMLElement) {
 
         <FormAuctionReferral
           v-else-if="sidebarType === 'referral'"
-          @submit="setReferral"
+          :network="network"
+          :auction="auction"
         />
       </div>
     </Affix>

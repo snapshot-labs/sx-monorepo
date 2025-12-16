@@ -1,39 +1,43 @@
 <script setup lang="ts">
 import { isAddress } from '@ethersproject/address';
 import { useQueryClient } from '@tanstack/vue-query';
-import { compareAddresses, shortenAddress, sleep } from '@/helpers/utils';
+import { AuctionNetworkId } from '@/helpers/auction';
+import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { REFERRAL_CHAIN_ID } from '@/helpers/auction/referral';
+import {
+  compareAddresses,
+  formatAddress,
+  shortenAddress
+} from '@/helpers/utils';
 import {
   REFERRAL_KEYS,
   useRefereesQuery,
   useUserReferralQuery
 } from '@/queries/referral';
 
-const emit = defineEmits<{
-  submit: [referee: string];
+const ADDRESS_INPUT_DEFINITION = {
+  type: 'string',
+  format: 'address',
+  title: 'Referee address',
+  examples: ['Enter the address of who referred you'],
+  showControls: false
+};
+
+const props = defineProps<{
+  network: AuctionNetworkId;
+  auction: AuctionDetailFragment;
 }>();
 
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
+const { setReferral } = useAuctionActions(
+  toRef(props, 'network'),
+  toRef(props, 'auction')
+);
 const queryClient = useQueryClient();
 
 const referralInput = ref('');
-const isSubmitting = ref(false);
-const errorMessage = ref('');
-
-const isSelfReferral = computed(
-  () =>
-    web3Account.value &&
-    compareAddresses(referralInput.value, web3Account.value)
-);
-
-const canSubmit = computed(() => {
-  if (!web3Account.value || !referralInput.value) return false;
-  try {
-    return isAddress(referralInput.value) && !isSelfReferral.value;
-  } catch {
-    return false;
-  }
-});
+const isModalOpen = ref(false);
 
 const { data: userReferral, isPending: isUserReferralPending } =
   useUserReferralQuery(web3Account);
@@ -47,101 +51,99 @@ const {
   isError: isRefereesError
 } = useRefereesQuery();
 
+const inputError = computed(() => {
+  if (!referralInput.value) return '';
+
+  if (!isAddress(referralInput.value)) return 'Invalid address';
+
+  if (
+    web3Account.value &&
+    compareAddresses(referralInput.value, web3Account.value)
+  ) {
+    return 'You cannot refer yourself';
+  }
+
+  return '';
+});
+
 const referees = computed(() => refereesData.value?.pages.flat() ?? []);
 
-function handleEndReached() {
-  if (!hasNextPage.value) return;
+function handleSetReferral() {
+  if (!web3Account.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
 
-  fetchNextPage();
+  isModalOpen.value = true;
 }
 
-async function handleSetReferral() {
-  if (!canSubmit.value) return;
+function handleConfirmed() {
+  referralInput.value = '';
+  isModalOpen.value = false;
 
-  isSubmitting.value = true;
-  errorMessage.value = '';
-
-  try {
-    await emit('submit', referralInput.value);
-
-    referralInput.value = '';
-
-    await sleep(5000);
-
-    queryClient.invalidateQueries({ queryKey: REFERRAL_KEYS.all });
-  } catch (e) {
-    errorMessage.value = (e as Error).message || 'Failed to set referee';
-  } finally {
-    isSubmitting.value = false;
-  }
+  queryClient.invalidateQueries({ queryKey: REFERRAL_KEYS.all });
 }
 </script>
 
 <template>
   <div class="s-box p-4 space-y-3">
-    <UiLoading v-if="isUserReferralPending" class="py-3 block" />
-    <template v-else-if="web3Account">
-      <div
-        v-if="userReferral"
-        class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
-      >
-        <div class="text-skin-text">Referee</div>
-        <div class="flex items-center gap-3">
-          <UiStamp :id="userReferral.referee" :size="24" />
-          <div class="flex flex-col leading-[22px] truncate">
-            <h4
-              class="truncate"
-              v-text="
-                userReferral.refereeName || shortenAddress(userReferral.referee)
-              "
-            />
-            <UiAddress
-            :address="getChecksumAddress(userReferral.referee)"
-              class="text-[17px] text-skin-text truncate"
-            />
-          </div>
+    <UiLoading v-if="web3Account && isUserReferralPending" class="py-3 block" />
+
+    <div
+      v-else-if="userReferral"
+      class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
+    >
+      <div class="text-skin-text">Referee</div>
+      <div class="flex items-center gap-3">
+        <UiStamp :id="userReferral.referee" :size="24" />
+        <div class="flex flex-col leading-[22px] truncate">
+          <h4
+            class="truncate"
+            v-text="
+              userReferral.refereeName || shortenAddress(userReferral.referee)
+            "
+          />
+          <UiAddress
+            :address="formatAddress(userReferral.referee)"
+            class="text-[17px] text-skin-text truncate"
+          />
         </div>
       </div>
-
-      <template v-else>
-        <p class="text-skin-text text-sm">
-          Set your referral to support whoever referred you. This can only be
-          set once.
-        </p>
-
-        <UiInputAddress
-          v-model="referralInput"
-          :definition="{
-            type: 'string',
-            format: 'address',
-            title: 'Referee address',
-            examples: ['Enter the address of who referred you'],
-            showControls: false
-          }"
-          :error="isSelfReferral ? 'You cannot refer yourself' : errorMessage"
-        />
-
-        <UiButton
-          primary
-          class="w-full"
-          :disabled="!canSubmit || isSubmitting"
-          :loading="isSubmitting"
-          @click="handleSetReferral"
-        >
-          Set referee
-        </UiButton>
-      </template>
-    </template>
+    </div>
 
     <template v-else>
       <p class="text-skin-text text-sm">
-        Connect your wallet to set a referral.
+        Set your referral to support whoever referred you. This can only be set
+        once.
       </p>
-      <UiButton class="w-full" @click="modalAccountOpen = true">
-        Connect wallet
+
+      <UiInputAddress
+        v-model="referralInput"
+        :definition="ADDRESS_INPUT_DEFINITION"
+        :error="inputError"
+      />
+
+      <UiButton
+        primary
+        class="w-full"
+        :disabled="!referralInput || !!inputError"
+        @click="handleSetReferral"
+      >
+        Set referee
       </UiButton>
     </template>
   </div>
+
+  <teleport to="#modal">
+    <ModalTransactionProgress
+      :open="isModalOpen"
+      :chain-id="REFERRAL_CHAIN_ID"
+      :execute="() => setReferral(referralInput)"
+      @confirmed="handleConfirmed"
+      @close="isModalOpen = false"
+      @cancelled="isModalOpen = false"
+    />
+  </teleport>
 
   <div class="border-t border-skin-border">
     <h4 class="eyebrow px-4 py-2">Leaderboard</h4>
@@ -165,7 +167,7 @@ async function handleSetReferral() {
       <UiContainerInfiniteScroll
         v-else
         :loading-more="isFetchingNextPage"
-        @end-reached="handleEndReached"
+        @end-reached="() => hasNextPage && fetchNextPage()"
       >
         <div
           class="divide-y divide-skin-border flex flex-col justify-center border-b"
@@ -183,7 +185,7 @@ async function handleSetReferral() {
                   v-text="referee.name || shortenAddress(referee.referee)"
                 />
                 <UiAddress
-                  :address="getChecksumAddress(referee.referee)"
+                  :address="formatAddress(referee.referee)"
                   class="text-[17px] text-skin-text truncate"
                 />
               </div>
