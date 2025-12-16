@@ -267,7 +267,14 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="s-box p-4 space-y-3 pt-6">
+    <div class="s-box p-4 space-y-3">
+      <UiMessage
+        v-if="web3Account && isBalanceError"
+        type="danger"
+        class="mb-3"
+      >
+        Failed to load balance.
+      </UiMessage>
       <div
         class="px-3 py-2 bg-skin-border rounded-lg overflow-hidden"
         :class="amountError ? 'border-skin-danger' : ''"
@@ -421,14 +428,6 @@ onMounted(() => {
           {{ _p(sliderValue / 100) }} likely to pass
         </div>
       </div>
-      <UiMessage
-        v-if="web3Account && isBalanceError"
-        type="danger"
-        class="mb-3"
-      >
-        Failed to load balance.
-      </UiMessage>
-
       <UiButton
         v-if="!web3Account"
         class="w-full"
