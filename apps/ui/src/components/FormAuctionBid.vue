@@ -183,6 +183,12 @@ function convertPriceToPercentage(price: number) {
 }
 
 function handlePlaceOrder() {
+  if (!web3Account.value) {
+    modalAccountOpen.value = true;
+
+    return;
+  }
+
   if (hasErrors.value) return;
 
   const sellAmount = parseUnits(
@@ -460,9 +466,7 @@ onMounted(() => {
         class="w-full"
         :disabled="hasErrors || isLoading"
         :loading="isLoading"
-        @click="
-          !web3Account ? () => (modalAccountOpen = true) : handlePlaceOrder
-        "
+        @click="handlePlaceOrder"
       >
         Place order
       </UiButton>
