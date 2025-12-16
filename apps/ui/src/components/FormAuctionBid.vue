@@ -42,6 +42,7 @@ const { modalAccountOpen } = useModal();
 const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
+const sliderValue = ref(95);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
@@ -345,6 +346,36 @@ onMounted(() => {
             )
           }}
         </div>
+        <div class="relative flex my-2">
+          <div
+            class="absolute inset-0 pointer-events-none h-fit bg-skin-text/30 rounded-full overflow-hidden"
+          >
+            <div
+              class="flex justify-between w-full h-[7px] bg-gradient-to-r bg-no-repeat"
+              :class="{
+                'from-skin-success to-skin-success': sliderValue > 50,
+                'from-skin-danger to-skin-danger': sliderValue <= 50
+              }"
+              :style="{
+                backgroundSize: `${sliderValue}% 100%`
+              }"
+            >
+              <div class="w-0 h-full"></div>
+              <div class="w-[3px] bg-skin-border h-full"></div>
+              <div class="w-[3px] bg-skin-border h-full"></div>
+              <div class="w-[3px] bg-skin-border h-full"></div>
+              <div class="w-0 bg-red-500 h-full"></div>
+            </div>
+          </div>
+          <input
+            v-model="sliderValue"
+            type="range"
+            min="0"
+            max="100"
+            class="range-slider relative w-full h-[7px] appearance-none bg-transparent"
+          />
+        </div>
+        <div class="text-[17px]">{{ sliderValue }}% likely to pass</div>
       </div>
       <UiMessage
         v-if="web3Account && isBalanceError"
@@ -382,3 +413,22 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style lang="scss">
+@mixin slider-thumb {
+  @apply bg-skin-link rounded-sm outline-skin-border;
+  appearance: none;
+  outline-width: 2px;
+  outline-style: solid;
+  height: 18px;
+  width: 6px;
+}
+
+.range-slider::-webkit-slider-thumb {
+  @include slider-thumb;
+}
+
+.range-slider::-moz-range-thumb {
+  @include slider-thumb;
+}
+</style>
