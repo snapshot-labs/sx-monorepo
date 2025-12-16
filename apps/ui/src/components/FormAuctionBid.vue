@@ -430,10 +430,11 @@ onMounted(() => {
       </div>
       <UiButton
         v-if="!web3Account"
+        primary
         class="w-full"
         @click="modalAccountOpen = true"
       >
-        Connect wallet
+        Place order
       </UiButton>
       <UiButton
         v-else
