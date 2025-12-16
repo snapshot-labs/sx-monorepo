@@ -21,7 +21,8 @@
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
-    "@apollo/server": "^4.2.2",
+    "@apollo/server": "^5.1.0",
+    "@as-integrations/express4": "^1.1.2",
     "@faker-js/faker": "^7.4.0",
     "@logtail/pino": "^0.5.5",
     "@snapshot-labs/checkpoint": "^0.1.0-beta.67",
@@ -32,7 +33,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.21.2",
-    "graphql": "^16.8.1",
+    "graphql": "^16.11.0",
     "micro-starknet": "^0.2.3",
     "pino": "^9.9.0",
     "pino-pretty": "^13.1.1",

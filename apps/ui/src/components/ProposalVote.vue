@@ -12,7 +12,7 @@ const props = withDefaults(
 );
 
 defineEmits<{
-  (e: 'enterEditMode');
+  (e: 'enterEditMode'): void;
 }>();
 
 const { auth } = useWeb3();

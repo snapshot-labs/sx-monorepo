@@ -18,7 +18,7 @@ exports[`EthereumSig > should create cancelProposal envelope 1`] = `
       "space": "test.eth",
       "timestamp": 1705795200,
     },
-    "signature": "0x4269fbcb1f8ec9f716402267a6c23172660c46d07759ffe3a1a45e1e7f697d3c7ca553243db96ba4d5ee94b62ab4561bc07c0ada2a3bc651d2be1d5f64d9d8d41c",
+    "signature": "0xb0d9374069983281b54ca07c4822d7cb1ac60c45d852dd4216575a87375774f44bc7422668bf000df1f4e0ae60b2221afdc92948fb936341560652ba588935251c",
     "types": {
       "CancelProposal": [
         {
@@ -35,7 +35,7 @@ exports[`EthereumSig > should create cancelProposal envelope 1`] = `
         },
         {
           "name": "proposal",
-          "type": "bytes32",
+          "type": "string",
         },
       ],
     },

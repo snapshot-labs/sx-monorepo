@@ -8,7 +8,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', value: string);
+  (e: 'save', value: string): void;
 }>();
 
 const changeControllerModalOpen = ref(false);

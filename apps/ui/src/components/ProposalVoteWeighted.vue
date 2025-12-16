@@ -10,7 +10,7 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (e: 'vote', value: Choice);
+  (e: 'vote', value: Choice): void;
 }>();
 
 const selectedChoices = ref<WeightedChoice>(

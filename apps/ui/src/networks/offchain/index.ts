@@ -1,5 +1,5 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
 import { formatAddress, getSpaceController } from '@/helpers/utils';
 import { Network } from '@/networks/types';
@@ -52,7 +52,7 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
     isStrategySupported: () => true,
     isExecutorSupported: isExecutorSupported,
     isExecutorActionsSupported: isExecutorActionsSupported,
-    pin: pinPineapple,
+    pin,
     getSpaceController: async (space: Space) =>
       getSpaceController(space.id, networkId),
     getRelayerInfo: () => Promise.resolve(null),

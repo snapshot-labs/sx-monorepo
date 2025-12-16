@@ -15,6 +15,7 @@ const {
   hasExecuteQueued,
   fetchingDetails,
   message,
+  warningMessage,
   executionTx,
   executionTxUrl,
   finalizeProposalSending,
@@ -39,8 +40,11 @@ const network = computed(() => getNetwork(props.proposal.network));
     <div v-if="fetchingDetails" class="flex justify-center">
       <UiLoading class="text-center" />
     </div>
-    <div v-else-if="message">
-      {{ message }}
+    <div v-else-if="message" class="space-y-2">
+      <div>{{ message }}</div>
+      <UiAlert v-if="warningMessage" type="warning">
+        {{ warningMessage }}
+      </UiAlert>
     </div>
     <div v-else-if="executionTx">
       Proposal has been already executed at

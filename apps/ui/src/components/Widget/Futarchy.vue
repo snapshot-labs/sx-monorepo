@@ -5,6 +5,10 @@ import { Proposal } from '@/types';
 
 const props = defineProps<{ proposal: Proposal }>();
 
+const proposalIsClosed = computed(
+  () => props.proposal.max_end < Date.now() / 1000
+);
+
 const FUTARCHY_API_URL =
   import.meta.env.VITE_FUTARCHY_API_URL ?? 'https://stag.api.tickspread.com';
 

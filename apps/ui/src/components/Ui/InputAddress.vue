@@ -20,7 +20,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'pick', path: string);
+  (e: 'pick', path: string): void;
 }>();
 
 const networkDetails = computed<NetworkDetails | null>(() => {

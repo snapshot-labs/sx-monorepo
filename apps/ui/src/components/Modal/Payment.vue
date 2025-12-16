@@ -28,8 +28,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'confirmed');
+  (e: 'close'): void;
+  (e: 'confirmed'): void;
 }>();
 
 const { auth } = useWeb3();
@@ -135,9 +135,11 @@ async function moveToNextStep() {
 
   isModalTransactionProgressOpen.value = false;
 
-  if (await goToNextStep()) {
+  goToNextStep();
+
+  nextTick(() => {
     isModalTransactionProgressOpen.value = true;
-  }
+  });
 }
 
 function handleSubmit() {
