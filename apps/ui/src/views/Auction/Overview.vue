@@ -575,22 +575,23 @@ function handleScrollEvent(target: HTMLElement) {
             </AppLink>
           </div>
         </UiScrollerHorizontal>
+        <KeepAlive>
+          <FormAuctionBid
+            v-if="sidebarType === 'bid' && isAuctionOpen"
+            :auction="auction"
+            :network="network"
+            :total-supply="totalSupply"
+            :is-loading="isModalTransactionProgressOpen"
+            :previous-orders="userOrders"
+            @submit="handlePlaceSellOrder"
+          />
 
-        <FormAuctionBid
-          v-if="sidebarType === 'bid' && isAuctionOpen"
-          :auction="auction"
-          :network="network"
-          :total-supply="totalSupply"
-          :is-loading="isModalTransactionProgressOpen"
-          :previous-orders="userOrders"
-          @submit="handlePlaceSellOrder"
-        />
-
-        <FormAuctionReferral
-          v-else-if="sidebarType === 'referral'"
-          :network="network"
-          :auction="auction"
-        />
+          <FormAuctionReferral
+            v-else-if="sidebarType === 'referral'"
+            :network="network"
+            :auction="auction"
+          />
+        </KeepAlive>
       </div>
     </Affix>
   </UiResizableHorizontal>
