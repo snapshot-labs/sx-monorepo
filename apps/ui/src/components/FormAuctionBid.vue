@@ -456,20 +456,13 @@ onMounted(() => {
         </div>
       </div>
       <UiButton
-        v-if="!web3Account"
-        primary
-        class="w-full"
-        @click="modalAccountOpen = true"
-      >
-        Place order
-      </UiButton>
-      <UiButton
-        v-else
         primary
         class="w-full"
         :disabled="hasErrors || isLoading"
         :loading="isLoading"
-        @click="handlePlaceOrder"
+        @click="
+          !web3Account ? () => (modalAccountOpen = true) : handlePlaceOrder
+        "
       >
         Place order
       </UiButton>
