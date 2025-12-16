@@ -127,7 +127,7 @@ export function useAuctionActions(
     );
   }
 
-  async function setReferral(referee: string) {
+  async function setReferee(referee: string) {
     const signer = auth.value!.provider.getSigner();
     const signerAddress = await signer.getAddress();
 
@@ -153,15 +153,21 @@ export function useAuctionActions(
 
     const { cid } = await pin(metadata);
 
-    return executionCall('eth', REFERRAL_CHAIN_ID, 'postReferral', {
-      metadataUri: `ipfs://${cid}`,
-      posterTag: POSTER_TAG
-    });
+    return wrapPromise(
+      executionCall('eth', REFERRAL_CHAIN_ID, 'postReferral', {
+        metadataUri: `ipfs://${cid}`,
+        posterTag: POSTER_TAG
+      }),
+      REFERRAL_CHAIN_ID
+    );
   }
 
-  async function wrapPromise(promise: Promise<any>): Promise<string> {
+  async function wrapPromise(
+    promise: Promise<any>,
+    txChainId?: number
+  ): Promise<string> {
     const tx = await promise;
-    uiStore.addPendingTransaction(tx.hash, chainId.value);
+    uiStore.addPendingTransaction(tx.hash, txChainId ?? chainId.value);
 
     return tx.hash;
   }
@@ -176,8 +182,8 @@ export function useAuctionActions(
     claimFromParticipantOrder: wrapWithErrors(
       wrapWithAuthAndNetwork(claimFromParticipantOrder)
     ),
-    setReferral: wrapWithErrors(
-      wrapWithAuthAndNetwork(setReferral, REFERRAL_CHAIN_ID)
+    setReferee: wrapWithErrors(
+      wrapWithAuthAndNetwork(setReferee, REFERRAL_CHAIN_ID)
     )
   };
 }

@@ -30,7 +30,7 @@ const props = defineProps<{
 
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
-const { setReferral } = useAuctionActions(
+const { setReferee } = useAuctionActions(
   toRef(props, 'network'),
   toRef(props, 'auction')
 );
@@ -138,7 +138,7 @@ function handleConfirmed() {
     <ModalTransactionProgress
       :open="isModalOpen"
       :chain-id="REFERRAL_CHAIN_ID"
-      :execute="() => setReferral(referralInput)"
+      :execute="() => setReferee(referralInput)"
       @confirmed="handleConfirmed"
       @close="isModalOpen = false"
       @cancelled="isModalOpen = false"
