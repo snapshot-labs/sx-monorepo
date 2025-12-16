@@ -53,7 +53,9 @@ const CHART_COLORS = {
 const OPTIONS = {
   layout: {
     background: { color: 'transparent' },
-    attributionLogo: false
+    attributionLogo: false,
+    fontFamily: 'Calibre',
+    fontSize: 14
   },
   grid: {
     vertLines: { color: 'transparent' },
