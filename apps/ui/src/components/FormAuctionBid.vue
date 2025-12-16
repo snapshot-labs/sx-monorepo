@@ -420,7 +420,7 @@ onMounted(() => {
             type="range"
             min="0"
             max="100"
-            class="range-slider relative w-full h-[7px] appearance-none bg-transparent"
+            class="range-slider relative w-full h-[7px] appearance-none bg-transparent hover:cursor-pointer"
             @input="handleSliderChange"
           />
         </div>
@@ -459,7 +459,7 @@ onMounted(() => {
 
 <style lang="scss">
 @mixin slider-thumb {
-  @apply bg-skin-link rounded-sm outline-skin-border;
+  @apply bg-skin-link rounded-full outline-skin-border;
   appearance: none;
   outline-width: 2px;
   outline-style: solid;
