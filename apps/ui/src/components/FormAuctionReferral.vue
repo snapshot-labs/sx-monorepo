@@ -7,7 +7,8 @@ import { REFERRAL_CHAIN_ID } from '@/helpers/auction/referral';
 import {
   compareAddresses,
   formatAddress,
-  shortenAddress
+  shortenAddress,
+  sleep
 } from '@/helpers/utils';
 import {
   REFERRAL_KEYS,
@@ -77,11 +78,13 @@ function handleSetReferral() {
   isModalOpen.value = true;
 }
 
-function handleConfirmed() {
+async function handleConfirmed() {
   referralInput.value = '';
-  isModalOpen.value = false;
+  await sleep(5000);
 
   queryClient.invalidateQueries({ queryKey: REFERRAL_KEYS.all });
+
+  isModalOpen.value = false;
 }
 </script>
 

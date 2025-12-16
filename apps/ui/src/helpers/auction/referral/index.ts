@@ -40,7 +40,8 @@ export async function getReferees(
 
   const { data } = await client.query({
     query: RefereesDocument,
-    variables: { tag, first, skip }
+    variables: { tag, first, skip },
+    fetchPolicy: 'network-only'
   });
 
   return data?.referees ?? [];
@@ -54,7 +55,8 @@ export async function getUserReferral(
 
   const { data } = await client.query({
     query: UserReferralDocument,
-    variables: { id }
+    variables: { id },
+    fetchPolicy: 'network-only'
   });
 
   return data?.referral ?? null;
