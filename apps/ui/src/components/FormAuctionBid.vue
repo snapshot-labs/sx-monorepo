@@ -310,7 +310,7 @@ onMounted(() => {
         Failed to load balance.
       </UiMessage>
       <div
-        class="px-3 py-2 bg-skin-border rounded-lg overflow-hidden"
+        class="px-3 py-2 bg-skin-border rounded-lg border overflow-hidden"
         :class="amountError ? 'border-skin-danger' : ''"
       >
         <div class="flex flex-col text-skin-link">
