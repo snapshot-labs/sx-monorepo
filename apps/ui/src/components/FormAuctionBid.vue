@@ -9,7 +9,7 @@ import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { getProvider } from '@/helpers/provider';
 import { parseUnits } from '@/helpers/token';
-import { _n, _t } from '@/helpers/utils';
+import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
 const DEFAULT_PRICE_PREMIUM = 1.001; // 0.1% above clearing price
@@ -161,6 +161,27 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
+// TODO: Replace with something that makes sense UX-wise
+// and use it across the entire app.
+function convertPercentageToPrice(percentage: number) {
+  const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+
+  const premiumRange = clearingPrice * 0.5;
+  const premiumPrice =
+    clearingPrice + ((percentage - 50) / 50) * (premiumRange / 2);
+
+  return premiumPrice;
+}
+
+function convertPriceToPercentage(price: number) {
+  const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+
+  const premiumRange = clearingPrice * 0.5;
+  const percentage = ((price - clearingPrice) / (premiumRange / 2)) * 50 + 50;
+
+  return Math.min(Math.max(percentage, 0), 100);
+}
+
 function handlePlaceOrder() {
   if (hasErrors.value) return;
 
@@ -184,7 +205,7 @@ function handlePlaceOrder() {
   });
 }
 
-function handlePriceUpdate(value: string) {
+function handlePriceUpdate(value: string, fromSlider = false) {
   bidPrice.value = value;
 
   const price = parseFloat(value);
@@ -200,6 +221,10 @@ function handlePriceUpdate(value: string) {
   const fdv = price * totalSupplyFormatted;
 
   bidFdv.value = fdv.toFixed(AMOUNT_DECIMALS);
+
+  if (!fromSlider) {
+    sliderValue.value = convertPriceToPercentage(price);
+  }
 }
 
 function handleFdvUpdate(value: string) {
@@ -216,8 +241,18 @@ function handleFdvUpdate(value: string) {
   );
 
   const price = fdv / totalSupplyFormatted;
+  sliderValue.value = convertPriceToPercentage(price);
 
   bidPrice.value = price.toFixed(AMOUNT_DECIMALS);
+}
+
+function handleSliderChange(event: Event) {
+  if (event.target instanceof HTMLInputElement === false) return;
+
+  sliderValue.value = Number(event.target.value);
+
+  const price = convertPercentageToPrice(sliderValue.value);
+  handlePriceUpdate(price.toFixed(AMOUNT_DECIMALS), true);
 }
 
 onMounted(() => {
@@ -368,14 +403,17 @@ onMounted(() => {
             </div>
           </div>
           <input
-            v-model="sliderValue"
+            :value="sliderValue"
             type="range"
             min="0"
             max="100"
             class="range-slider relative w-full h-[7px] appearance-none bg-transparent"
+            @input="handleSliderChange"
           />
         </div>
-        <div class="text-[17px]">{{ sliderValue }}% likely to pass</div>
+        <div class="text-[17px]">
+          {{ _p(sliderValue / 100) }} likely to pass
+        </div>
       </div>
       <UiMessage
         v-if="web3Account && isBalanceError"
