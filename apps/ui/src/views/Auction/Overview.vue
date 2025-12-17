@@ -547,13 +547,7 @@ function handleScrollEvent(target: HTMLElement) {
     />
   </teleport>
 
-  <UiResizableHorizontal
-    id="proposal-sidebar"
-    :default="340"
-    :max="440"
-    :min="340"
-    class="shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
-  >
+  <div class="w-[400px] md:h-full z-40 border-l-0 md:border-l bg-skin-bg">
     <Affix data-testid="proposal-sidebar" :top="TOTAL_NAV_HEIGHT" :bottom="64">
       <div>
         <UiScrollerHorizontal with-buttons gradient="xxl">
@@ -579,6 +573,7 @@ function handleScrollEvent(target: HTMLElement) {
           v-if="sidebarType === 'bid' && isAuctionOpen"
           :auction="auction"
           :network="network"
+          :bidding-token-price="biddingTokenPrice"
           :total-supply="totalSupply"
           :is-loading="isModalTransactionProgressOpen"
           :previous-orders="userOrders"
@@ -592,5 +587,5 @@ function handleScrollEvent(target: HTMLElement) {
         />
       </div>
     </Affix>
-  </UiResizableHorizontal>
+  </div>
 </template>
