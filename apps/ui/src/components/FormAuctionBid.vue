@@ -442,9 +442,9 @@ onMounted(() => {
               }"
             >
               <div class="w-0 h-full"></div>
-              <div class="w-[3px] bg-skin-border h-full"></div>
-              <div class="w-[3px] bg-skin-border h-full"></div>
-              <div class="w-[3px] bg-skin-border h-full"></div>
+              <div class="w-0.5 bg-skin-border h-full"></div>
+              <div class="w-0.5 bg-skin-border h-full"></div>
+              <div class="w-0.5 bg-skin-border h-full"></div>
               <div class="w-0 bg-red-500 h-full"></div>
             </div>
           </div>
