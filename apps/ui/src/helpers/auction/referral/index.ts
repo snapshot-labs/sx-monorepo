@@ -41,7 +41,7 @@ export async function getReferees(
   const { data } = await client.query({
     query: RefereesDocument,
     variables: { tag, first, skip },
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'no-cache'
   });
 
   return data?.referees ?? [];
@@ -56,7 +56,7 @@ export async function getUserReferral(
   const { data } = await client.query({
     query: UserReferralDocument,
     variables: { id },
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'no-cache'
   });
 
   return data?.referral ?? null;
