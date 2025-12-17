@@ -66,7 +66,13 @@ const OPTIONS = {
     horzLine: { color: 'transparent' }
   },
   autoSize: true,
-  rightPriceScale: { borderVisible: false },
+  rightPriceScale: {
+    borderVisible: false,
+    scaleMargins: {
+      top: 0.2,
+      bottom: 0.2
+    }
+  },
   handleScroll: {
     vertTouchDrag: false,
     mouseWheel: false,
