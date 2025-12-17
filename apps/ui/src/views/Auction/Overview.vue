@@ -135,6 +135,14 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     auction: () => props.auction
   });
 
+const fdv = computed(
+  () =>
+    Number(props.auction.currentClearingPrice) *
+    Number(
+      props.totalSupply / 10n ** BigInt(props.auction.decimalsAuctioningToken)
+    )
+);
+
 const userOrdersSummary = computed(() => {
   let auctioningTokenToClaim = 0n;
   let biddingTokenToClaim = 0n;
@@ -332,19 +340,49 @@ function handleScrollEvent(target: HTMLElement) {
 
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
-    <div class="border-b px-4 py-3 flex justify-between items-center">
-      <div class="flex flex-col">
-        <h1 class="text-[24px]">Auction #{{ auctionId }}</h1>
-        <AuctionStatus class="max-w-fit" :state="auctionState" />
+    <div
+      class="border-b px-4 py-3 flex gap-4 flex-col xl:flex-row justify-between xl:items-center"
+    >
+      <div class="flex gap-3">
+        <div class="size-8 bg-violet-700 rounded-full shrink-0" />
+        <div class="flex flex-col">
+          <h1 class="text-[24px]">Auction #{{ auctionId }}</h1>
+          <AuctionStatus class="max-w-fit" :state="auctionState" />
+        </div>
       </div>
-      <div class="flex flex-col">
-        <span class="text-sm font-medium tracking-wider uppercase">
-          Clearing price
-        </span>
-        <span class="text-[19px] font-medium text-skin-link">
-          {{ formatPrice(auction.currentClearingPrice) }}
-          {{ auction.symbolBiddingToken }}
-        </span>
+      <div class="flex gap-2 lg:gap-8 flex-col lg:flex-row">
+        <AuctionCounter
+          title="Current price"
+          :amount="formatPrice(auction.currentClearingPrice)"
+          :symbol="auction.symbolBiddingToken"
+          :subamount="`$${_n(
+            biddingTokenPrice
+              ? Number(auction.currentClearingPrice) * biddingTokenPrice
+              : 0,
+            'standard',
+            {
+              maximumFractionDigits: 2
+            }
+          )}`"
+        />
+        <AuctionCounter
+          title="Current FDV"
+          :amount="_n(fdv, 'compact')"
+          :symbol="auction.symbolBiddingToken"
+          :subamount="`$${_n(
+            biddingTokenPrice ? fdv * biddingTokenPrice : 0,
+            'standard',
+            {
+              maximumFractionDigits: 2
+            }
+          )}`"
+        />
+        <AuctionCounter
+          title="Current volume"
+          amount="N/A"
+          :symbol="auction.symbolBiddingToken"
+          subamount="N/A"
+        />
       </div>
     </div>
 
