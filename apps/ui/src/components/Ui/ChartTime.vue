@@ -182,7 +182,13 @@ function getPriceFormat(highestValue: number): Partial<PriceFormat> {
     precision = Math.abs(exp) + 2; // show last 3 significant digits
   }
 
-  return { precision, minMove: Math.pow(10, -precision) };
+  return {
+    type: 'custom',
+    minMove: Math.pow(10, -precision),
+    formatter: (price: number) => {
+      return String(parseFloat(price.toFixed(precision)));
+    }
+  };
 }
 
 function updateSeriesData(series: ChartSeries[]) {
