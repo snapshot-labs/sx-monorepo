@@ -12,7 +12,7 @@ import { parseUnits } from '@/helpers/token';
 import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
-const DEFAULT_PRICE_PREMIUM = 1.001; // 0.1% above clearing price
+const PRICE_PREMIUM = 0.25; // 25% above clearing price will show as 100% chance to pass
 const AMOUNT_DECIMALS = 4;
 
 const AMOUNT_DEFINITION = {
@@ -166,9 +166,8 @@ const hasErrors = computed<boolean>(() => {
 function convertPercentageToPrice(percentage: number) {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
 
-  const premiumRange = clearingPrice * 0.5;
-  const premiumPrice =
-    clearingPrice + ((percentage - 50) / 50) * (premiumRange / 2);
+  const premium = clearingPrice * PRICE_PREMIUM;
+  const premiumPrice = clearingPrice + (percentage / 100) * premium;
 
   return premiumPrice;
 }
@@ -176,8 +175,9 @@ function convertPercentageToPrice(percentage: number) {
 function convertPriceToPercentage(price: number) {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
 
-  const premiumRange = clearingPrice * 0.5;
-  const percentage = ((price - clearingPrice) / (premiumRange / 2)) * 50 + 50;
+  const premium = clearingPrice * PRICE_PREMIUM;
+  const difference = price - clearingPrice;
+  const percentage = (difference / premium) * 100;
 
   return Math.min(Math.max(percentage, 0), 100);
 }
@@ -280,10 +280,8 @@ function handleFdvUpdate(value: string) {
   bidPrice.value = price.toFixed(AMOUNT_DECIMALS);
 }
 
-function handleSliderChange(event: Event) {
-  if (event.target instanceof HTMLInputElement === false) return;
-
-  sliderValue.value = Number(event.target.value);
+function handleSliderChange(value: number) {
+  sliderValue.value = value;
 
   const price = convertPercentageToPrice(sliderValue.value);
   handlePriceUpdate(price.toFixed(AMOUNT_DECIMALS), true);
@@ -293,9 +291,7 @@ onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
   if (clearingPrice <= 0) return;
 
-  handlePriceUpdate(
-    (clearingPrice * DEFAULT_PRICE_PREMIUM).toFixed(AMOUNT_DECIMALS)
-  );
+  handleSliderChange(50);
 });
 </script>
 
@@ -454,7 +450,10 @@ onMounted(() => {
             min="0"
             max="100"
             class="range-slider relative w-full h-[7px] appearance-none bg-transparent hover:cursor-pointer"
-            @input="handleSliderChange"
+            @input="
+              e =>
+                handleSliderChange(Number((e.target as HTMLInputElement).value))
+            "
           />
         </div>
         <div class="text-[17px]">
