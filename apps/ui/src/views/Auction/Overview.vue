@@ -555,12 +555,8 @@ function handleScrollEvent(target: HTMLElement) {
     />
   </teleport>
 
-  <UiResizableHorizontal
-    id="proposal-sidebar"
-    :default="340"
-    :max="440"
-    :min="340"
-    class="shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
+  <div
+    class="w-full max-w-[400px] md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
   >
     <Affix data-testid="proposal-sidebar" :top="TOTAL_NAV_HEIGHT" :bottom="64">
       <div>
@@ -583,17 +579,23 @@ function handleScrollEvent(target: HTMLElement) {
             </AppLink>
           </div>
         </UiScrollerHorizontal>
-
         <FormAuctionBid
-          v-if="isAuctionOpen"
+          v-if="sidebarType === 'bid' && isAuctionOpen"
           :auction="auction"
           :network="network"
+          :bidding-token-price="biddingTokenPrice"
           :total-supply="totalSupply"
           :is-loading="isModalTransactionProgressOpen"
           :previous-orders="userOrders"
           @submit="handlePlaceSellOrder"
         />
+
+        <FormAuctionReferral
+          v-else-if="sidebarType === 'referral'"
+          :network="network"
+          :auction="auction"
+        />
       </div>
     </Affix>
-  </UiResizableHorizontal>
+  </div>
 </template>
