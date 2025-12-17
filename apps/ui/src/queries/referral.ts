@@ -3,12 +3,12 @@ import { MaybeRefOrGetter } from 'vue';
 import {
   AUCTION_TAG,
   getReferees,
-  getUserReferral
+  getUserReferral,
+  Referral
 } from '@/helpers/auction/referral';
 import { getNames } from '@/helpers/stamp';
 
 const LIMIT = 20;
-const RETRY_COUNT = 3;
 
 export const REFERRAL_KEYS = {
   all: ['referral'] as const,
@@ -28,7 +28,17 @@ export function useUserReferralQuery(account: MaybeRefOrGetter<string | null>) {
       const accountValue = toValue(account);
       if (!accountValue) return null;
 
-      const referral = await getUserReferral(AUCTION_TAG, accountValue);
+      let referral: Referral | null;
+      try {
+        referral = await getUserReferral(AUCTION_TAG, accountValue);
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('Row not found')) {
+          return null;
+        }
+
+        throw err;
+      }
+
       if (!referral) return null;
 
       const names = await getNames([referral.referee]);
@@ -38,13 +48,7 @@ export function useUserReferralQuery(account: MaybeRefOrGetter<string | null>) {
         refereeName: names[referral.referee] || null
       };
     },
-    enabled: computed(() => !!toValue(account)),
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (error?.message.includes('Row not found')) return false;
-
-      return failureCount < RETRY_COUNT;
-    }
+    enabled: computed(() => !!toValue(account))
   });
 }
 
