@@ -17,6 +17,7 @@ const props = withDefaults(
     id?: NetworkID | null;
     chainId?: ChainId | null;
     size?: number;
+    badgeClass?: string;
   }>(),
   {
     size: 16
@@ -66,6 +67,7 @@ const networkData = computed<NetworkData | null>(() => {
       }"
       :alt="networkData.name"
       class="absolute rounded-full -bottom-1 -right-1 border-2 bg-skin-border border-skin-bg"
+      :class="badgeClass"
     />
   </div>
 </template>

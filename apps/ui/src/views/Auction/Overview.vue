@@ -342,9 +342,20 @@ function handleScrollEvent(target: HTMLElement) {
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
       <div class="flex gap-3">
-        <div class="size-8 bg-violet-700 rounded-full shrink-0" />
+        <UiBadgeNetwork
+          :id="network"
+          badge-class="border-2 rounded-md"
+          :size="16"
+        >
+          <UiStamp
+            :id="auction.addressAuctioningToken"
+            :size="64"
+            type="token"
+            class="rounded-full"
+          />
+        </UiBadgeNetwork>
         <div class="flex flex-col">
-          <h1 class="text-[24px]">Auction #{{ auctionId }}</h1>
+          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
           <AuctionStatus class="max-w-fit" :state="auctionState" />
         </div>
       </div>
