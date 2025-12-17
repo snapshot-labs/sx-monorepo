@@ -547,7 +547,9 @@ function handleScrollEvent(target: HTMLElement) {
     />
   </teleport>
 
-  <div class="w-[400px] md:h-full z-40 border-l-0 md:border-l bg-skin-bg">
+  <div
+    class="w-full max-w-[400px] md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
+  >
     <Affix data-testid="proposal-sidebar" :top="TOTAL_NAV_HEIGHT" :bottom="64">
       <div>
         <UiScrollerHorizontal with-buttons gradient="xxl">
