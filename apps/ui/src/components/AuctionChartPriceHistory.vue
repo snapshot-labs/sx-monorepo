@@ -28,6 +28,7 @@ const props = defineProps<{
 }>();
 
 const offset = ref<number | null>(null);
+const areDataReady = ref(false);
 
 const granularity = computed<ChartGranularity>(() => {
   const auctionDuration =
@@ -131,9 +132,13 @@ const chartSeries = computed<ChartSeries[]>(() => [
 watch(
   data,
   async () => {
+    areDataReady.value = false;
+
     while (hasNextPage.value && !isError.value) {
       await fetchNextPage();
     }
+
+    areDataReady.value = true;
   },
   { immediate: true }
 );
@@ -148,7 +153,11 @@ watch(
       <UiLoading v-if="isPending" />
       <template v-else-if="isError">Error while loading chart</template>
     </div>
-    <UiChartTime v-else class="flex-1" :series="chartSeries" />
+    <UiChartTime
+      v-else-if="areDataReady"
+      class="flex-1"
+      :series="chartSeries"
+    />
     <div class="space-x-2">
       <button
         v-for="(targetOffset, label) in TIME_OFFSET"
