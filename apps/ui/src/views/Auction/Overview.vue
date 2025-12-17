@@ -382,7 +382,7 @@ function handleScrollEvent(target: HTMLElement) {
             biddingTokenPrice ? fdv * biddingTokenPrice : 0,
             'standard',
             {
-              maximumFractionDigits: 2
+              maximumFractionDigits: 0
             }
           )}`"
         />
