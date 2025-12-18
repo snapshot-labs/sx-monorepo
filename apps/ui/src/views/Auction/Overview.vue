@@ -371,7 +371,7 @@ function handleScrollEvent(target: HTMLElement) {
       <div
         class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
       >
-        <div class="flex gap-2 lg:gap-8 flex-col lg:flex-row">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
             title="Current price"
             :amount="formatPrice(auction.currentClearingPrice)"
