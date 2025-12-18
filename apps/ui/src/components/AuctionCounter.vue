@@ -13,7 +13,7 @@ defineProps<{
       {{ title }}
     </span>
     <div class="flex gap-1 items-baseline font-medium text-skin-link leading-9">
-      <span class="text-[36px]">
+      <span class="text-[32px]">
         {{ amount }}
       </span>
       <span class="text-md">
