@@ -3,15 +3,10 @@ import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionState } from '@/components/AuctionStatus.vue';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
-import {
-  AuctionNetworkId,
-  formatPrice,
-  Order,
-  SellOrder
-} from '@/helpers/auction';
+import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { _n, sleep } from '@/helpers/utils';
+import { _n, partitionDuration, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
@@ -43,6 +38,7 @@ const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
 
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
+const currentTimestamp = useTimestamp({ interval: 1000 });
 
 const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
@@ -60,7 +56,7 @@ const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
 const auctionState = computed<AuctionState>(() => {
-  const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(currentTimestamp.value / 1000);
   const endTime = parseInt(props.auction.endTimeTimestamp);
 
   if (now < endTime) return 'active';
@@ -80,8 +76,20 @@ const auctionState = computed<AuctionState>(() => {
 });
 
 const isAuctionOpen = computed(
-  () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
+  () => parseInt(props.auction.endTimeTimestamp) > currentTimestamp.value / 1000
 );
+
+const countdown = computed(() => {
+  if (isAuctionOpen.value === false) {
+    return null;
+  }
+
+  const diff =
+    parseInt(props.auction.endTimeTimestamp) -
+    Math.floor(currentTimestamp.value / 1000);
+
+  return partitionDuration(diff);
+});
 
 const isAccountSupported = computed<boolean>(() => {
   return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
@@ -134,6 +142,14 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     network: () => props.network,
     auction: () => props.auction
   });
+
+const fdv = computed(
+  () =>
+    Number(props.auction.currentClearingPrice) *
+    Number(
+      props.totalSupply / 10n ** BigInt(props.auction.decimalsAuctioningToken)
+    )
+);
 
 const userOrdersSummary = computed(() => {
   let auctioningTokenToClaim = 0n;
@@ -332,19 +348,91 @@ function handleScrollEvent(target: HTMLElement) {
 
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
-    <div class="border-b px-4 py-3 flex justify-between items-center">
-      <div class="flex flex-col">
-        <h1 class="text-[24px]">Auction #{{ auctionId }}</h1>
-        <AuctionStatus class="max-w-fit" :state="auctionState" />
+    <div class="border-b p-4 flex flex-col gap-4">
+      <div class="flex gap-3">
+        <UiBadgeNetwork :id="network" :size="24">
+          <UiStamp
+            :id="auction.addressAuctioningToken"
+            :size="64"
+            type="token"
+            class="rounded-full"
+          />
+        </UiBadgeNetwork>
+        <div class="flex flex-col">
+          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+          <AuctionStatus class="max-w-fit" :state="auctionState" />
+        </div>
       </div>
-      <div class="flex flex-col">
-        <span class="text-sm font-medium tracking-wider uppercase">
-          Clearing price
-        </span>
-        <span class="text-[19px] font-medium text-skin-link">
-          {{ formatPrice(auction.currentClearingPrice) }}
-          {{ auction.symbolBiddingToken }}
-        </span>
+      <div
+        class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
+          <AuctionCounter
+            title="Current price"
+            :amount="
+              _n(auction.currentClearingPrice, 'standard', {
+                maximumFractionDigits: 6
+              })
+            "
+            :symbol="auction.symbolBiddingToken"
+            :subamount="`$${_n(
+              biddingTokenPrice
+                ? Number(auction.currentClearingPrice) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 2
+              }
+            )}`"
+          />
+          <AuctionCounter
+            title="Current FDV"
+            :amount="_n(fdv, 'compact')"
+            :symbol="auction.symbolBiddingToken"
+            :subamount="`$${_n(
+              biddingTokenPrice ? fdv * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
+          />
+          <AuctionCounter
+            title="Current volume"
+            amount="N/A"
+            :symbol="auction.symbolBiddingToken"
+            subamount="N/A"
+          />
+        </div>
+        <div v-if="countdown" class="flex gap-3.5">
+          <div
+            v-if="countdown.days > 0"
+            class="flex flex-col items-center uppercase min-w-6"
+          >
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.days).padStart(2, '0') }}
+            </span>
+            <span>days</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.hours).padStart(2, '0') }}
+            </span>
+            <span>hrs.</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.minutes).padStart(2, '0') }}
+            </span>
+            <span>min.</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.seconds).padStart(2, '0') }}
+            </span>
+            <span>sec.</span>
+          </div>
+        </div>
       </div>
     </div>
 
