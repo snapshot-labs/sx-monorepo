@@ -501,29 +501,26 @@ function handleScrollEvent(target: HTMLElement) {
               v-else-if="allOrders?.pages.flat().length === 0"
               class="px-4 py-3"
             >
-              You don't have any bids yet.
+              There are no bids yet.
             </UiStateWarning>
             <UiContainerInfiniteScroll
               v-else-if="allOrders && typeof biddingTokenPrice === 'number'"
+              class="divide-y divide-skin-border flex flex-col justify-center border-b"
               :loading-more="isAllOrdersFetchingNextPage"
               @end-reached="handleAllOrdersEndReached"
             >
               <template #loading>
                 <UiLoading class="px-4 py-3 block" />
               </template>
-              <div
-                class="divide-y divide-skin-border flex flex-col justify-center border-b"
-              >
-                <AuctionBid
-                  v-for="order in allOrders?.pages.flat()"
-                  :key="order.id"
-                  :auction-id="auctionId"
-                  :auction="auction"
-                  :order="order"
-                  :bidding-token-price="biddingTokenPrice"
-                  :total-supply="totalSupply"
-                />
-              </div>
+              <AuctionBid
+                v-for="order in allOrders?.pages.flat()"
+                :key="order.id"
+                :auction-id="auctionId"
+                :auction="auction"
+                :order="order"
+                :bidding-token-price="biddingTokenPrice"
+                :total-supply="totalSupply"
+              />
             </UiContainerInfiniteScroll>
           </div>
         </UiScrollerHorizontal>
