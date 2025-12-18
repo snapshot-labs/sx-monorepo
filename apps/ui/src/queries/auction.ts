@@ -11,10 +11,28 @@ import {
   Order_OrderBy
 } from '@/helpers/auction/gql/graphql';
 import { getTokenPrices } from '@/helpers/coingecko';
-import { CHAIN_IDS, COINGECKO_ASSET_PLATFORMS } from '@/helpers/constants';
+import {
+  CHAIN_IDS,
+  COINGECKO_ASSET_PLATFORMS,
+  ETH_CONTRACT
+} from '@/helpers/constants';
+import { formatAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
+
+const TOKEN_PRICE_OVERRIDES = {
+  // SNUSDC -> USDC
+  '0x8EC1409bF214893aEA175C9C00c711593277F1C3': {
+    chainId: 1,
+    address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+  },
+  // WETH -> ETH
+  '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14': {
+    chainId: 1,
+    address: ETH_CONTRACT
+  }
+} as const;
 
 export const AUCTION_KEYS = {
   all: ['auction'] as const,
@@ -149,7 +167,18 @@ export function useBiddingTokenPriceQuery({
       const networkValue = toValue(network);
       const auctionValue = toValue(auction);
 
-      const chainId = CHAIN_IDS[networkValue];
+      let tokenAddress = formatAddress(auctionValue.addressBiddingToken);
+      let chainId = CHAIN_IDS[networkValue];
+
+      if (tokenAddress in TOKEN_PRICE_OVERRIDES) {
+        const override =
+          TOKEN_PRICE_OVERRIDES[
+            tokenAddress as keyof typeof TOKEN_PRICE_OVERRIDES
+          ];
+        tokenAddress = override.address;
+        chainId = override.chainId;
+      }
+
       if (!(chainId in COINGECKO_ASSET_PLATFORMS)) {
         return 0;
       }
@@ -160,10 +189,10 @@ export function useBiddingTokenPriceQuery({
         ];
 
       const coins = await getTokenPrices(coingeckoAssetPlatform, [
-        auctionValue.addressBiddingToken
+        tokenAddress
       ]);
 
-      return coins[auctionValue.addressBiddingToken.toLowerCase()]?.usd ?? 0;
+      return coins[tokenAddress.toLowerCase()]?.usd ?? 0;
     }
   });
 }
