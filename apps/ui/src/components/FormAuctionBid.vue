@@ -132,7 +132,7 @@ const priceError = computed(() => {
 
   const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
   if (minimumSellPrice && price <= minimumSellPrice) {
-    return `Minimum ${_n(minimumSellPrice)} ${priceUnit.value}`;
+    return `Minimum ${_n(minimumSellPrice, 'standard', { maximumFractionDigits: Number(props.auction.decimalsBiddingToken) })} ${priceUnit.value}`;
   }
 
   const maxBiddingPrice = price.toFixed(
