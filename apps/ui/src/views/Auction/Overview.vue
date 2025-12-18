@@ -374,7 +374,11 @@ function handleScrollEvent(target: HTMLElement) {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
             title="Current price"
-            :amount="formatPrice(auction.currentClearingPrice)"
+            :amount="
+              _n(auction.currentClearingPrice, 'standard', {
+                maximumFractionDigits: 6
+              })
+            "
             :symbol="auction.symbolBiddingToken"
             :subamount="`$${_n(
               biddingTokenPrice
