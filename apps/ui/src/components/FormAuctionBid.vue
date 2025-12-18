@@ -64,11 +64,6 @@ const formatErrors = computed(() =>
   })
 );
 
-const priceUnit = computed(
-  () =>
-    `${props.auction.symbolBiddingToken} per ${props.auction.symbolAuctioningToken}`
-);
-
 const canCancelOrder = computed(
   () => parseInt(props.auction.orderCancellationEndDate) > Date.now() / 1000
 );
@@ -132,7 +127,7 @@ const priceError = computed(() => {
 
   const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
   if (minimumSellPrice && price <= minimumSellPrice) {
-    return `Minimum ${_n(minimumSellPrice)} ${priceUnit.value}`;
+    return `Must be higher than ${_n(minimumSellPrice, 'standard', { maximumFractionDigits: Number(props.auction.decimalsBiddingToken) })} ${props.auction.symbolBiddingToken}`;
   }
 
   const maxBiddingPrice = price.toFixed(
