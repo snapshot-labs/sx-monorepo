@@ -355,11 +355,7 @@ function handleScrollEvent(target: HTMLElement) {
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
       <div class="flex gap-3">
-        <UiBadgeNetwork
-          :id="network"
-          badge-class="border-2 rounded-md"
-          :size="16"
-        >
+        <UiBadgeNetwork :id="network" :size="24">
           <UiStamp
             :id="auction.addressAuctioningToken"
             :size="64"
