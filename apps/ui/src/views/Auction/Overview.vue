@@ -3,12 +3,7 @@ import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionState } from '@/components/AuctionStatus.vue';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
-import {
-  AuctionNetworkId,
-  formatPrice,
-  Order,
-  SellOrder
-} from '@/helpers/auction';
+import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import { _n, partitionDuration, sleep } from '@/helpers/utils';
