@@ -3,13 +3,13 @@ import { isAddress } from '@ethersproject/address';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionNetworkId } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import { REFERRAL_CHAIN_ID } from '@/helpers/auction/referral';
 import {
   compareAddresses,
   formatAddress,
   shortenAddress,
   sleep
 } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
 import {
   REFERRAL_KEYS,
   useRefereesQuery,
@@ -41,7 +41,10 @@ const referralInput = ref('');
 const isModalOpen = ref(false);
 
 const { data: userReferral, isPending: isUserReferralPending } =
-  useUserReferralQuery(web3Account);
+  useUserReferralQuery({
+    networkId: toRef(props, 'network'),
+    account: web3Account
+  });
 
 const {
   data: refereesData,
@@ -50,7 +53,9 @@ const {
   isPending: isRefereesLoading,
   isFetchingNextPage,
   isError: isRefereesError
-} = useRefereesQuery();
+} = useRefereesQuery({
+  networkId: toRef(props, 'network')
+});
 
 const inputError = computed(() => {
   if (!referralInput.value) return '';
@@ -140,7 +145,7 @@ async function handleConfirmed() {
   <teleport to="#modal">
     <ModalTransactionProgress
       :open="isModalOpen"
-      :chain-id="REFERRAL_CHAIN_ID"
+      :chain-id="getNetwork(props.network).chainId"
       :execute="() => setReferee(referralInput)"
       @confirmed="handleConfirmed"
       @close="isModalOpen = false"

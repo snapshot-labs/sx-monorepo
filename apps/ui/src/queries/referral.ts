@@ -7,30 +7,46 @@ import {
   Referral
 } from '@/helpers/auction/referral';
 import { getNames } from '@/helpers/stamp';
+import { NetworkID } from '@/types';
 
 const LIMIT = 20;
 
 export const REFERRAL_KEYS = {
   all: ['referral'] as const,
-  userReferral: (tag: string, account: MaybeRefOrGetter<string | null>) => [
-    ...REFERRAL_KEYS.all,
-    'user',
-    tag,
-    account
-  ],
-  referees: (tag: string) => [...REFERRAL_KEYS.all, 'referees', tag]
+  network: (networkId: MaybeRefOrGetter<NetworkID>) =>
+    [...REFERRAL_KEYS.all, networkId] as const,
+  userReferral: (
+    networkId: MaybeRefOrGetter<NetworkID>,
+    tag: string,
+    account: MaybeRefOrGetter<string | null>
+  ) => [...REFERRAL_KEYS.network(networkId), 'user', tag, account],
+  referees: (networkId: MaybeRefOrGetter<NetworkID>, tag: string) => [
+    ...REFERRAL_KEYS.network(networkId),
+    'referees',
+    tag
+  ]
 };
 
-export function useUserReferralQuery(account: MaybeRefOrGetter<string | null>) {
+export function useUserReferralQuery({
+  networkId,
+  account
+}: {
+  networkId: MaybeRefOrGetter<NetworkID>;
+  account: MaybeRefOrGetter<string | null>;
+}) {
   return useQuery({
-    queryKey: REFERRAL_KEYS.userReferral(AUCTION_TAG, account),
+    queryKey: REFERRAL_KEYS.userReferral(networkId, AUCTION_TAG, account),
     queryFn: async () => {
       const accountValue = toValue(account);
       if (!accountValue) return null;
 
       let referral: Referral | null;
       try {
-        referral = await getUserReferral(AUCTION_TAG, accountValue);
+        referral = await getUserReferral(
+          toValue(networkId),
+          AUCTION_TAG,
+          accountValue
+        );
       } catch (err) {
         if (err instanceof Error && err.message.includes('Row not found')) {
           return null;
@@ -52,12 +68,16 @@ export function useUserReferralQuery(account: MaybeRefOrGetter<string | null>) {
   });
 }
 
-export function useRefereesQuery() {
+export function useRefereesQuery({
+  networkId
+}: {
+  networkId: MaybeRefOrGetter<NetworkID>;
+}) {
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: REFERRAL_KEYS.referees(AUCTION_TAG),
+    queryKey: REFERRAL_KEYS.referees(networkId, AUCTION_TAG),
     queryFn: async ({ pageParam }) => {
-      const referees = await getReferees(AUCTION_TAG, {
+      const referees = await getReferees(toValue(networkId), AUCTION_TAG, {
         first: LIMIT,
         skip: pageParam
       });

@@ -16,13 +16,15 @@ const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
-  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
-  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR'
+  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR',
+  base: '',
+  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d'
 };
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
-  sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C',
-  eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101'
+  eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101',
+  base: '',
+  sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C'
 };
 
 export function formatPrice(
