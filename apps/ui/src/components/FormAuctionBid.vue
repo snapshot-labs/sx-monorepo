@@ -142,7 +142,7 @@ const priceError = computed(() => {
         ) === maxBiddingPrice
     )
   ) {
-    return 'You already have an order at this price';
+    return 'You already have a bid at this price';
   }
 
   return undefined;
@@ -462,7 +462,7 @@ onMounted(() => {
         :loading="isLoading"
         @click="handlePlaceOrder"
       >
-        Place order
+        Place bid
       </UiButton>
       <div class="text-xs text-center flex items-center justify-center gap-1.5">
         <IH-information-circle class="inline-block shrink-0" :size="16" />
@@ -470,7 +470,7 @@ onMounted(() => {
           Can cancel until
           {{ _t(parseInt(auction.orderCancellationEndDate)) }}
         </span>
-        <span v-else>Cannot be canceled once the order is placed</span>
+        <span v-else>Cannot be canceled once the bid is placed</span>
       </div>
     </div>
   </div>
