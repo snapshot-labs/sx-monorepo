@@ -38,5 +38,11 @@ function handleInput(event: Event) {
 </script>
 
 <template>
-  <input :value="model" type="text" inputmode="decimal" @input="handleInput" />
+  <input
+    :value="model"
+    type="text"
+    inputmode="decimal"
+    autocomplete="off"
+    @input="handleInput"
+  />
 </template>
