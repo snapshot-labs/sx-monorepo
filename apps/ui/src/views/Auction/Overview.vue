@@ -368,7 +368,7 @@ function handleScrollEvent(target: HTMLElement) {
       >
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
-            title="Current price"
+            :title="isAuctionOpen ? 'Current price' : 'Clearing price'"
             :amount="
               _n(auction.currentClearingPrice, 'standard', {
                 maximumFractionDigits: 6
@@ -386,7 +386,7 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
           <AuctionCounter
-            title="Current FDV"
+            :title="isAuctionOpen ? 'Current FDV' : 'Clearing FDV'"
             :amount="_n(fdv, 'compact')"
             :symbol="auction.symbolBiddingToken"
             :subamount="`$${_n(
@@ -398,7 +398,7 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
           <AuctionCounter
-            title="Current volume"
+            :title="isAuctionOpen ? 'Current volume' : 'Total volume'"
             amount="N/A"
             :symbol="auction.symbolBiddingToken"
             subamount="N/A"
