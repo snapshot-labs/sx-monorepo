@@ -13,11 +13,6 @@ import {
 import { constants as starknetConstants } from 'starknet';
 import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
-import {
-  getModuleAddressForTreasury,
-  OSnapPlugin,
-  parseInternalTransaction
-} from '@/helpers/osnap';
 import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
@@ -110,10 +105,9 @@ export function createActions(
     executions: ExecutionInfo[] | null,
     originalProposal: Proposal | null
   ) {
-    const supportedPlugins = ['oSnap', 'readOnlyExecution'];
+    const supportedPlugins = ['readOnlyExecution'];
 
     const plugins = {} as {
-      oSnap?: OSnapPlugin;
       readOnlyExecution?: ReadOnlyExecutionPlugin;
     };
 
@@ -127,28 +121,11 @@ export function createActions(
 
     if (!executions) return plugins;
 
-    const oSnapSafes = [] as OSnapPlugin['safes'];
     const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
     for (const info of executions) {
       if (!info.transactions.length) continue;
 
-      if (info.strategyType === 'oSnap') {
-        const treasuryAddress = info.strategyAddress;
-        const moduleAddress = await getModuleAddressForTreasury(
-          info.chainId,
-          treasuryAddress
-        );
-
-        oSnapSafes.push({
-          safeName: info.treasuryName,
-          safeAddress: treasuryAddress,
-          network: info.chainId.toString(),
-          transactions: info.transactions.map(tx =>
-            parseInternalTransaction(tx)
-          ),
-          moduleAddress
-        });
-      } else if (info.strategyType === 'ReadOnlyExecution') {
+      if (info.strategyType === 'ReadOnlyExecution') {
         readOnlyExecutionSafes.push({
           safeName: info.treasuryName,
           safeAddress: info.strategyAddress,
@@ -156,10 +133,6 @@ export function createActions(
           transactions: info.transactions
         });
       }
-    }
-
-    if (oSnapSafes.length > 0) {
-      plugins.oSnap = { safes: oSnapSafes };
     }
 
     if (readOnlyExecutionSafes.length > 0) {
