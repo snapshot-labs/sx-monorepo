@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   AuctionNetworkId,
+  getAuctionPriceHistory,
   getOrders,
   getUnclaimedOrders
 } from '@/helpers/auction';
@@ -10,11 +11,31 @@ import {
   Order_Filter,
   Order_OrderBy
 } from '@/helpers/auction/gql/graphql';
+import { ChartGranularity } from '@/helpers/charts';
 import { getTokenPrices } from '@/helpers/coingecko';
-import { CHAIN_IDS, COINGECKO_ASSET_PLATFORMS } from '@/helpers/constants';
+import {
+  CHAIN_IDS,
+  COINGECKO_ASSET_PLATFORMS,
+  ETH_CONTRACT
+} from '@/helpers/constants';
+import { formatAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
+const PRICE_HISTORY_LIMIT = 1000;
+
+const TOKEN_PRICE_OVERRIDES = {
+  // USDCTEST -> USDC
+  '0xF7DcC8870b25B02e5AC5e9f3A43E44b2c27f9E38': {
+    chainId: 1,
+    address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+  },
+  // WETH -> ETH
+  '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14': {
+    chainId: 1,
+    address: ETH_CONTRACT
+  }
+} as const;
 
 export const AUCTION_KEYS = {
   all: ['auction'] as const,
@@ -54,7 +75,12 @@ export const AUCTION_KEYS = {
     network,
     () => toValue(auction).id,
     'biddingTokenPrice'
-  ]
+  ],
+  priceHistory: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    granularity: MaybeRefOrGetter<ChartGranularity>
+  ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity]
 };
 
 export function useBidsQuery({
@@ -149,7 +175,18 @@ export function useBiddingTokenPriceQuery({
       const networkValue = toValue(network);
       const auctionValue = toValue(auction);
 
-      const chainId = CHAIN_IDS[networkValue];
+      let tokenAddress = formatAddress(auctionValue.addressBiddingToken);
+      let chainId = CHAIN_IDS[networkValue];
+
+      if (tokenAddress in TOKEN_PRICE_OVERRIDES) {
+        const override =
+          TOKEN_PRICE_OVERRIDES[
+            tokenAddress as keyof typeof TOKEN_PRICE_OVERRIDES
+          ];
+        tokenAddress = override.address;
+        chainId = override.chainId;
+      }
+
       if (!(chainId in COINGECKO_ASSET_PLATFORMS)) {
         return 0;
       }
@@ -160,10 +197,42 @@ export function useBiddingTokenPriceQuery({
         ];
 
       const coins = await getTokenPrices(coingeckoAssetPlatform, [
-        auctionValue.addressBiddingToken
+        tokenAddress
       ]);
 
-      return coins[auctionValue.addressBiddingToken.toLowerCase()]?.usd ?? 0;
+      return coins[tokenAddress.toLowerCase()]?.usd ?? 0;
+    }
+  });
+}
+
+export function useAuctionPriceDataQuery({
+  network,
+  auction,
+  start,
+  granularity = 'hour'
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  start: MaybeRefOrGetter<number>;
+  granularity?: MaybeRefOrGetter<ChartGranularity>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: AUCTION_KEYS.priceHistory(network, auction, granularity),
+    queryFn: async ({ pageParam }) => {
+      return getAuctionPriceHistory(toValue(network), toValue(granularity), {
+        skip: pageParam,
+        first: PRICE_HISTORY_LIMIT,
+        filter: {
+          auction: toValue(auction).id,
+          startTimestamp_gte: toValue(start)
+        }
+      });
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < PRICE_HISTORY_LIMIT) return null;
+
+      return pages.length * PRICE_HISTORY_LIMIT;
     }
   });
 }

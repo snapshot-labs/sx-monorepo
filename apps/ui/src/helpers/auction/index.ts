@@ -1,14 +1,23 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import {
+  auctionPriceHourDataQuery,
+  auctionPriceMinuteDataQuery,
   auctionQuery,
   ordersQuery,
   previousOrderQuery,
   unclaimedOrdersQuery
 } from './queries';
 import { getNames } from '../stamp';
-import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import {
+  AuctionPriceHourData_Filter,
+  AuctionPriceMinuteData_Filter,
+  Order_Filter,
+  Order_OrderBy,
+  OrderFragment
+} from './gql/graphql';
 import { encodeOrder } from './orders';
-import { AuctionNetworkId, Order } from './types';
+import { AuctionNetworkId, AuctionPriceHistoryPoint, Order } from './types';
+import { ChartGranularity } from '../charts';
 
 export * from './types';
 
@@ -16,13 +25,15 @@ const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
-  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
-  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR'
+  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR',
+  base: '',
+  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d'
 };
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
-  sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C',
-  eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101'
+  eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101',
+  base: '',
+  sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C'
 };
 
 export function formatPrice(
@@ -153,4 +164,36 @@ export async function getUnclaimedOrders(
   return new Set(
     data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
   );
+}
+
+export async function getAuctionPriceHistory(
+  network: AuctionNetworkId,
+  granularity: ChartGranularity,
+  {
+    skip = 0,
+    first = 1000,
+    filter
+  }: {
+    skip?: number;
+    first?: number;
+    filter?: AuctionPriceHourData_Filter | AuctionPriceMinuteData_Filter;
+  } = {}
+): Promise<AuctionPriceHistoryPoint[]> {
+  const client = getClient(network);
+
+  const query =
+    granularity === 'hour'
+      ? auctionPriceHourDataQuery
+      : auctionPriceMinuteDataQuery;
+  const dataKey =
+    granularity === 'hour'
+      ? 'auctionPriceHourDatas'
+      : 'auctionPriceMinuteDatas';
+
+  const { data } = await client.query({
+    query,
+    variables: { where: filter, first, skip }
+  });
+
+  return data[dataKey] || [];
 }

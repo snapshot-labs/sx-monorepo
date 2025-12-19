@@ -10,7 +10,6 @@ import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import {
   AUCTION_TAG,
   POSTER_TAG,
-  REFERRAL_CHAIN_ID,
   REFERRAL_EIP712_DOMAIN,
   REFERRAL_EIP712_TYPES
 } from '@/helpers/auction/referral';
@@ -131,13 +130,18 @@ export function useAuctionActions(
     const signer = auth.value!.provider.getSigner();
     const signerAddress = await signer.getAddress();
 
+    const domain = {
+      ...REFERRAL_EIP712_DOMAIN,
+      chainId: chainId.value
+    };
+
     const message = {
       auction_tag: AUCTION_TAG,
       referee: referee.toLowerCase()
     };
 
     const signature = await signer._signTypedData(
-      REFERRAL_EIP712_DOMAIN,
+      domain,
       REFERRAL_EIP712_TYPES,
       message
     );
@@ -146,7 +150,7 @@ export function useAuctionActions(
       method: 'SetAuctionReferee',
       signer: signerAddress.toLowerCase(),
       signature,
-      domain: REFERRAL_EIP712_DOMAIN,
+      domain,
       types: REFERRAL_EIP712_TYPES,
       message
     };
@@ -154,11 +158,11 @@ export function useAuctionActions(
     const { cid } = await pin(metadata);
 
     return wrapPromise(
-      executionCall('eth', REFERRAL_CHAIN_ID, 'postReferral', {
+      executionCall('eth', domain.chainId, 'postReferral', {
         metadataUri: `ipfs://${cid}`,
         posterTag: POSTER_TAG
       }),
-      REFERRAL_CHAIN_ID
+      domain.chainId
     );
   }
 
@@ -182,8 +186,6 @@ export function useAuctionActions(
     claimFromParticipantOrder: wrapWithErrors(
       wrapWithAuthAndNetwork(claimFromParticipantOrder)
     ),
-    setReferee: wrapWithErrors(
-      wrapWithAuthAndNetwork(setReferee, REFERRAL_CHAIN_ID)
-    )
+    setReferee: wrapWithErrors(wrapWithAuthAndNetwork(setReferee))
   };
 }

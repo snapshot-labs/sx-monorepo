@@ -84,3 +84,33 @@ export const unclaimedOrdersQuery = gql(`
     }
   }
 `);
+
+export const auctionPriceMinuteDataQuery = gql(`
+  query GetAuctionPriceMinuteData($first: Int, $skip: Int, $where: AuctionPriceMinuteData_filter) {
+    auctionPriceMinuteDatas(
+      first: $first
+      skip: $skip
+      orderBy: startTimestamp
+      orderDirection: asc
+      where: $where
+    ) {
+      startTimestamp
+      close
+    }
+  }
+`);
+
+export const auctionPriceHourDataQuery = gql(`
+  query GetAuctionPriceHourData($first: Int, $skip: Int, $where: AuctionPriceHourData_filter) {
+    auctionPriceHourDatas(
+      first: $first
+      skip: $skip
+      orderBy: startTimestamp
+      orderDirection: asc
+      where: $where
+    ) {
+      startTimestamp
+      close
+    }
+  }
+`);
