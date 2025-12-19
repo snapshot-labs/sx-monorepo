@@ -33,6 +33,7 @@ app.get('/', (req, res) =>
     version,
     port: PORT,
     posterWallets: {
+      base: ethHandlers[8453]?.getWallet('poster').address,
       sep: ethHandlers[11155111]?.getWallet('poster').address
     }
   })

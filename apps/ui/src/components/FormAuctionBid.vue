@@ -7,13 +7,15 @@ import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { removeTrailingZeroes } from '@/helpers/format';
 import { getProvider } from '@/helpers/provider';
 import { parseUnits } from '@/helpers/token';
 import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
+const MIN_PRICE_PREMIUM = 0.01; // 1% above minimum price
 const PRICE_PREMIUM = 0.25; // 25% above clearing price will show as 100% chance to pass
-const AMOUNT_DECIMALS = 4;
+const AMOUNT_DECIMALS = 6;
 
 const AMOUNT_DEFINITION = {
   type: 'string',
@@ -142,7 +144,7 @@ const priceError = computed(() => {
         ) === maxBiddingPrice
     )
   ) {
-    return 'You already have an order at this price';
+    return 'You already have a bid at this price';
   }
 
   return undefined;
@@ -160,18 +162,24 @@ const hasErrors = computed<boolean>(() => {
 // and use it across the entire app.
 function convertPercentageToPrice(percentage: number) {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+  const minPrice = parseFloat(props.auction.exactOrder?.price || '0');
+
+  const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
 
   const premium = clearingPrice * PRICE_PREMIUM;
-  const premiumPrice = clearingPrice + (percentage / 100) * premium;
+  const premiumPrice = basePrice + (percentage / 100) * premium;
 
   return premiumPrice;
 }
 
 function convertPriceToPercentage(price: number) {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+  const minPrice = parseFloat(props.auction.exactOrder?.price || '0');
+
+  const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
 
   const premium = clearingPrice * PRICE_PREMIUM;
-  const difference = price - clearingPrice;
+  const difference = price - basePrice;
   const percentage = (difference / premium) * 100;
 
   return Math.min(Math.max(percentage, 0), 100);
@@ -206,28 +214,6 @@ function handlePlaceOrder() {
   });
 }
 
-function handlePriceUpdate(value: string, fromSlider = false) {
-  bidPrice.value = value;
-
-  const price = parseFloat(value);
-  if (!price || !props.totalSupply) {
-    bidFdv.value = '';
-    return;
-  }
-
-  const totalSupplyFormatted = parseFloat(
-    formatUnits(props.totalSupply, props.auction.decimalsAuctioningToken)
-  );
-
-  const fdv = price * totalSupplyFormatted;
-
-  bidFdv.value = fdv.toFixed(AMOUNT_DECIMALS);
-
-  if (!fromSlider) {
-    sliderValue.value = convertPriceToPercentage(price);
-  }
-}
-
 function getColor(progress: number) {
   // Hardcoded colors for the gradient.
   // Could be computed from the config, but we define those in RGBA so we would need to add code to convert them to HSL.
@@ -256,6 +242,28 @@ function getColor(progress: number) {
   return `hsl(${hue}deg ${saturation}% ${lightness}%)`;
 }
 
+function handlePriceUpdate(value: string, fromSlider = false) {
+  bidPrice.value = value;
+
+  const price = parseFloat(value);
+  if (!price || !props.totalSupply) {
+    bidFdv.value = '';
+    return;
+  }
+
+  const totalSupplyFormatted = parseFloat(
+    formatUnits(props.totalSupply, props.auction.decimalsAuctioningToken)
+  );
+
+  const fdv = price * totalSupplyFormatted;
+
+  bidFdv.value = removeTrailingZeroes(fdv, AMOUNT_DECIMALS);
+
+  if (!fromSlider) {
+    sliderValue.value = convertPriceToPercentage(price);
+  }
+}
+
 function handleFdvUpdate(value: string) {
   bidFdv.value = value;
 
@@ -272,14 +280,14 @@ function handleFdvUpdate(value: string) {
   const price = fdv / totalSupplyFormatted;
   sliderValue.value = convertPriceToPercentage(price);
 
-  bidPrice.value = price.toFixed(AMOUNT_DECIMALS);
+  bidPrice.value = removeTrailingZeroes(price, AMOUNT_DECIMALS);
 }
 
 function handleSliderChange(value: number) {
   sliderValue.value = value;
 
   const price = convertPercentageToPrice(sliderValue.value);
-  handlePriceUpdate(price.toFixed(AMOUNT_DECIMALS), true);
+  handlePriceUpdate(removeTrailingZeroes(price, AMOUNT_DECIMALS), true);
 }
 
 onMounted(() => {
@@ -462,7 +470,7 @@ onMounted(() => {
         :loading="isLoading"
         @click="handlePlaceOrder"
       >
-        Place order
+        Place bid
       </UiButton>
       <div class="text-xs text-center flex items-center justify-center gap-1.5">
         <IH-information-circle class="inline-block shrink-0" :size="16" />
@@ -470,7 +478,7 @@ onMounted(() => {
           Can cancel until
           {{ _t(parseInt(auction.orderCancellationEndDate)) }}
         </span>
-        <span v-else>Cannot be canceled once the order is placed</span>
+        <span v-else>Cannot be canceled once the bid is placed</span>
       </div>
     </div>
   </div>

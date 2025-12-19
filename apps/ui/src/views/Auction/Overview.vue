@@ -40,8 +40,8 @@ const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
 const currentTimestamp = useTimestamp({ interval: 1000 });
 
-const votesHeader = ref<HTMLElement | null>(null);
-const { x: votesHeaderX } = useScroll(votesHeader);
+const bidsHeader = ref<HTMLElement | null>(null);
+const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const isModalTransactionProgressOpen = ref(false);
 const transactionProgressType = ref<
@@ -149,6 +149,12 @@ const fdv = computed(
     Number(
       props.totalSupply / 10n ** BigInt(props.auction.decimalsAuctioningToken)
     )
+);
+
+const volume = computed(
+  () =>
+    Number(props.auction.currentBiddingAmount) /
+    10 ** Number(props.auction.decimalsBiddingToken)
 );
 
 const userOrdersSummary = computed(() => {
@@ -342,7 +348,7 @@ function handleAllOrdersEndReached() {
 }
 
 function handleScrollEvent(target: HTMLElement) {
-  votesHeaderX.value = target.scrollLeft;
+  bidsHeaderX.value = target.scrollLeft;
 }
 </script>
 
@@ -368,7 +374,7 @@ function handleScrollEvent(target: HTMLElement) {
       >
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
-            title="Current price"
+            :title="isAuctionOpen ? 'Current price' : 'Clearing price'"
             :amount="
               _n(auction.currentClearingPrice, 'standard', {
                 maximumFractionDigits: 6
@@ -386,7 +392,7 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
           <AuctionCounter
-            title="Current FDV"
+            :title="isAuctionOpen ? 'Current FDV' : 'Clearing FDV'"
             :amount="_n(fdv, 'compact')"
             :symbol="auction.symbolBiddingToken"
             :subamount="`$${_n(
@@ -398,10 +404,16 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
           <AuctionCounter
-            title="Current volume"
-            amount="N/A"
+            :title="isAuctionOpen ? 'Current volume' : 'Total volume'"
+            :amount="_n(volume, 'compact')"
             :symbol="auction.symbolBiddingToken"
-            subamount="N/A"
+            :subamount="`$${_n(
+              biddingTokenPrice ? volume * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
           />
         </div>
         <div v-if="countdown" class="flex gap-3.5">
@@ -491,7 +503,7 @@ function handleScrollEvent(target: HTMLElement) {
           <UiColumnHeader
             :ref="
               ref =>
-                (votesHeader =
+                (bidsHeader =
                   (ref as InstanceType<typeof UiColumnHeader> | null)
                     ?.container ?? null)
             "
@@ -565,7 +577,7 @@ function handleScrollEvent(target: HTMLElement) {
         <UiColumnHeader
           :ref="
             ref =>
-              (votesHeader =
+              (bidsHeader =
                 (ref as InstanceType<typeof UiColumnHeader> | null)
                   ?.container ?? null)
           "

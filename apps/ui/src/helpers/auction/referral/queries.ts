@@ -1,8 +1,9 @@
 import { gql } from './gql';
 
 gql(`
-  query Referees($tag: String!, $first: Int!, $skip: Int!) {
+  query Referees($indexer: String!, $tag: String!, $first: Int!, $skip: Int!) {
     referees(
+      indexer: $indexer
       where: { tag: $tag }
       first: $first
       skip: $skip
@@ -18,8 +19,8 @@ gql(`
 `);
 
 gql(`
-  query UserReferral($id: String!) {
-    referral(id: $id) {
+  query UserReferral($indexer: String!, $id: String!) {
+    referral(indexer: $indexer, id: $id) {
       id
       tag
       referral
