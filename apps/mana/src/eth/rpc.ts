@@ -321,7 +321,6 @@ export const createNetworkHandler = (chainId: number) => {
       );
 
       const tx = await contract.post(metadataUri, posterTag);
-      await tx.wait();
 
       return rpcSuccess(res, { hash: tx.hash }, id);
     } catch (err) {
