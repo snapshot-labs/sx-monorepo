@@ -40,11 +40,20 @@ const props = defineProps<{
 
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
+const { isVerified: isZKPassportVerified } = useZKPassport(
+  `${props.network}:${props.auction.id}`
+);
 
 const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
 const sliderValue = ref(95);
+
+const requiresZKPassport = computed(
+  () =>
+    // props.auction.isPrivateAuction &&
+    !isZKPassportVerified.value
+);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
@@ -154,7 +163,8 @@ const hasErrors = computed<boolean>(() => {
   return !!(
     Object.keys(formatErrors.value).length ||
     amountError.value ||
-    priceError.value
+    priceError.value ||
+    requiresZKPassport.value
   );
 });
 
@@ -300,7 +310,12 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="s-box p-4 space-y-3">
+    <ZKPassportVerification
+      v-if="requiresZKPassport"
+      :auction-id="`${network}:${auction.id}`"
+      class="mb-4"
+    />
+    <div v-else class="s-box p-4 space-y-3">
       <UiMessage
         v-if="web3Account && isBalanceError"
         type="danger"
