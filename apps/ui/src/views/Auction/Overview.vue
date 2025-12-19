@@ -151,6 +151,12 @@ const fdv = computed(
     )
 );
 
+const volume = computed(
+  () =>
+    Number(props.auction.currentBiddingAmount) /
+    10 ** Number(props.auction.decimalsBiddingToken)
+);
+
 const userOrdersSummary = computed(() => {
   let auctioningTokenToClaim = 0n;
   let biddingTokenToClaim = 0n;
@@ -368,7 +374,7 @@ function handleScrollEvent(target: HTMLElement) {
       >
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
-            title="Current price"
+            :title="isAuctionOpen ? 'Current price' : 'Clearing price'"
             :amount="
               _n(auction.currentClearingPrice, 'standard', {
                 maximumFractionDigits: 6
@@ -386,7 +392,7 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
           <AuctionCounter
-            title="Current FDV"
+            :title="isAuctionOpen ? 'Current FDV' : 'Clearing FDV'"
             :amount="_n(fdv, 'compact')"
             :symbol="auction.symbolBiddingToken"
             :subamount="`$${_n(
@@ -398,10 +404,16 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
           <AuctionCounter
-            title="Current volume"
-            amount="N/A"
+            :title="isAuctionOpen ? 'Current volume' : 'Total volume'"
+            :amount="_n(volume, 'compact')"
             :symbol="auction.symbolBiddingToken"
-            subamount="N/A"
+            :subamount="`$${_n(
+              biddingTokenPrice ? volume * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
           />
         </div>
         <div v-if="countdown" class="flex gap-3.5">
