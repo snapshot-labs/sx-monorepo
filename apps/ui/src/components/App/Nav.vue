@@ -135,7 +135,8 @@ function getNavigationConfig(
           }),
           execution: getSettingsRoute({
             name: 'Execution',
-            tab: 'execution'
+            tab: 'execution',
+            hidden: isOffchainNetwork
           }),
           authenticators: getSettingsRoute({
             name: 'Authenticators',
