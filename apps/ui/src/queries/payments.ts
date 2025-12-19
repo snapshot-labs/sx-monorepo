@@ -9,7 +9,6 @@ const SCHNAPS_URLS: Record<string, string> = {
 };
 
 const PAYMENTS_LIMIT = 20;
-const RETRY_COUNT = 3;
 
 export type Payment = {
   id: string;
@@ -87,11 +86,6 @@ export function usePaymentsQuery(
       if (lastPage.length < PAYMENTS_LIMIT) return null;
 
       return pages.length * PAYMENTS_LIMIT;
-    },
-    retry: (failureCount, error) => {
-      if (error?.message.includes('Row not found')) return false;
-
-      return failureCount < RETRY_COUNT;
     }
   });
 }
