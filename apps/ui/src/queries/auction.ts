@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   AuctionNetworkId,
+  getAuctionPriceHistory,
   getOrders,
   getUnclaimedOrders
 } from '@/helpers/auction';
@@ -10,6 +11,7 @@ import {
   Order_Filter,
   Order_OrderBy
 } from '@/helpers/auction/gql/graphql';
+import { ChartGranularity } from '@/helpers/charts';
 import { getTokenPrices } from '@/helpers/coingecko';
 import {
   CHAIN_IDS,
@@ -20,6 +22,7 @@ import { formatAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
+const PRICE_HISTORY_LIMIT = 1000;
 
 const TOKEN_PRICE_OVERRIDES = {
   // USDCTEST -> USDC
@@ -72,7 +75,12 @@ export const AUCTION_KEYS = {
     network,
     () => toValue(auction).id,
     'biddingTokenPrice'
-  ]
+  ],
+  priceHistory: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    granularity: MaybeRefOrGetter<ChartGranularity>
+  ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity]
 };
 
 export function useBidsQuery({
@@ -193,6 +201,38 @@ export function useBiddingTokenPriceQuery({
       ]);
 
       return coins[tokenAddress.toLowerCase()]?.usd ?? 0;
+    }
+  });
+}
+
+export function useAuctionPriceDataQuery({
+  network,
+  auction,
+  start,
+  granularity = 'hour'
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  start: MaybeRefOrGetter<number>;
+  granularity?: MaybeRefOrGetter<ChartGranularity>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: AUCTION_KEYS.priceHistory(network, auction, granularity),
+    queryFn: async ({ pageParam }) => {
+      return getAuctionPriceHistory(toValue(network), toValue(granularity), {
+        skip: pageParam,
+        first: PRICE_HISTORY_LIMIT,
+        filter: {
+          auction: toValue(auction).id,
+          startTimestamp_gte: toValue(start)
+        }
+      });
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < PRICE_HISTORY_LIMIT) return null;
+
+      return pages.length * PRICE_HISTORY_LIMIT;
     }
   });
 }

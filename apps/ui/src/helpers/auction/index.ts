@@ -1,14 +1,23 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import {
+  auctionPriceHourDataQuery,
+  auctionPriceMinuteDataQuery,
   auctionQuery,
   ordersQuery,
   previousOrderQuery,
   unclaimedOrdersQuery
 } from './queries';
 import { getNames } from '../stamp';
-import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import {
+  AuctionPriceHourData_Filter,
+  AuctionPriceMinuteData_Filter,
+  Order_Filter,
+  Order_OrderBy,
+  OrderFragment
+} from './gql/graphql';
 import { encodeOrder } from './orders';
-import { AuctionNetworkId, Order } from './types';
+import { AuctionNetworkId, AuctionPriceHistoryPoint, Order } from './types';
+import { ChartGranularity } from '../charts';
 
 export * from './types';
 
@@ -155,4 +164,36 @@ export async function getUnclaimedOrders(
   return new Set(
     data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
   );
+}
+
+export async function getAuctionPriceHistory(
+  network: AuctionNetworkId,
+  granularity: ChartGranularity,
+  {
+    skip = 0,
+    first = 1000,
+    filter
+  }: {
+    skip?: number;
+    first?: number;
+    filter?: AuctionPriceHourData_Filter | AuctionPriceMinuteData_Filter;
+  } = {}
+): Promise<AuctionPriceHistoryPoint[]> {
+  const client = getClient(network);
+
+  const query =
+    granularity === 'hour'
+      ? auctionPriceHourDataQuery
+      : auctionPriceMinuteDataQuery;
+  const dataKey =
+    granularity === 'hour'
+      ? 'auctionPriceHourDatas'
+      : 'auctionPriceMinuteDatas';
+
+  const { data } = await client.query({
+    query,
+    variables: { where: filter, first, skip }
+  });
+
+  return data[dataKey] || [];
 }
