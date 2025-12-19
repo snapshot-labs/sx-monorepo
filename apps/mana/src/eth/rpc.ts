@@ -23,7 +23,11 @@ const POSTER_CONFIG = {
   abi: ['function post(string calldata content, string calldata tag)']
 };
 
-const POSTER_SUPPORTED_NETWORKS = [11155111];
+const POSTER_SUPPORTED_NETWORKS = [8453, 11155111] as const;
+const BROKESTER_INDEXER_MAPPINGS = {
+  8453: 'base',
+  11155111: 'sepolia'
+} as const satisfies Record<(typeof POSTER_SUPPORTED_NETWORKS)[number], string>;
 
 const BROKESTER_API_URL =
   process.env.BROKESTER_API_URL || 'https://api.brokester.box';
@@ -253,7 +257,11 @@ export const createNetworkHandler = (chainId: number) => {
         return rpcError(res, 400, 'Missing metadataUri or posterTag', id);
       }
 
-      if (!POSTER_SUPPORTED_NETWORKS.includes(chainId)) {
+      if (
+        !POSTER_SUPPORTED_NETWORKS.includes(
+          chainId as (typeof POSTER_SUPPORTED_NETWORKS)[number]
+        )
+      ) {
         return rpcError(res, 400, 'Unsupported chain', id);
       }
 
@@ -280,11 +288,16 @@ export const createNetworkHandler = (chainId: number) => {
 
       const referralId = `${message.auction_tag}/${signer.toLowerCase()}`;
 
+      const indexer =
+        BROKESTER_INDEXER_MAPPINGS[
+          chainId as keyof typeof BROKESTER_INDEXER_MAPPINGS
+        ];
+
       const response = await fetch(BROKESTER_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          query: `{ referral(id: "${referralId}") { id } }`
+          query: `{ referral(indexer: "${indexer}", id: "${referralId}") { id } }`
         })
       });
 

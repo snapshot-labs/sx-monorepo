@@ -1,4 +1,5 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
+import { NetworkID } from '@/types';
 import {
   RefereesDocument,
   RefereesQuery,
@@ -7,13 +8,11 @@ import {
 } from './gql/graphql';
 
 export const POSTER_TAG = 'brokester/1';
-export const REFERRAL_CHAIN_ID = 11155111;
 export const AUCTION_TAG = 'token/1';
 
 export const REFERRAL_EIP712_DOMAIN = {
   name: 'brokester',
   version: '0.1',
-  chainId: REFERRAL_CHAIN_ID,
   verifyingContract: '0x000000000000cd17345801aa8147b8D3950260FF'
 };
 
@@ -33,6 +32,7 @@ const client = new ApolloClient({
 });
 
 export async function getReferees(
+  networkId: NetworkID,
   tag: string,
   options: { first?: number; skip?: number } = {}
 ): Promise<Referee[]> {
@@ -40,7 +40,7 @@ export async function getReferees(
 
   const { data } = await client.query({
     query: RefereesDocument,
-    variables: { tag, first, skip },
+    variables: { indexer: networkId, tag, first, skip },
     fetchPolicy: 'no-cache'
   });
 
@@ -48,6 +48,7 @@ export async function getReferees(
 }
 
 export async function getUserReferral(
+  networkId: NetworkID,
   tag: string,
   referral: string
 ): Promise<Referral | null> {
@@ -55,7 +56,7 @@ export async function getUserReferral(
 
   const { data } = await client.query({
     query: UserReferralDocument,
-    variables: { id },
+    variables: { indexer: networkId, id },
     fetchPolicy: 'no-cache'
   });
 
