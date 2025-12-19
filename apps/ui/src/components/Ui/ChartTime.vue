@@ -68,9 +68,10 @@ const OPTIONS = {
   autoSize: true,
   rightPriceScale: {
     borderVisible: false,
+    entireTextOnly: true,
     scaleMargins: {
-      top: 0.2,
-      bottom: 0.2
+      top: 0.1,
+      bottom: 0.1
     }
   },
   handleScroll: {
