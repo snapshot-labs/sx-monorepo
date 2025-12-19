@@ -40,8 +40,8 @@ const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
 const currentTimestamp = useTimestamp({ interval: 1000 });
 
-const votesHeader = ref<HTMLElement | null>(null);
-const { x: votesHeaderX } = useScroll(votesHeader);
+const bidsHeader = ref<HTMLElement | null>(null);
+const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const isModalTransactionProgressOpen = ref(false);
 const transactionProgressType = ref<
@@ -342,7 +342,7 @@ function handleAllOrdersEndReached() {
 }
 
 function handleScrollEvent(target: HTMLElement) {
-  votesHeaderX.value = target.scrollLeft;
+  bidsHeaderX.value = target.scrollLeft;
 }
 </script>
 
@@ -483,7 +483,7 @@ function handleScrollEvent(target: HTMLElement) {
           <UiColumnHeader
             :ref="
               ref =>
-                (votesHeader =
+                (bidsHeader =
                   (ref as InstanceType<typeof UiColumnHeader> | null)
                     ?.container ?? null)
             "
@@ -557,7 +557,7 @@ function handleScrollEvent(target: HTMLElement) {
         <UiColumnHeader
           :ref="
             ref =>
-              (votesHeader =
+              (bidsHeader =
                 (ref as InstanceType<typeof UiColumnHeader> | null)
                   ?.container ?? null)
           "
