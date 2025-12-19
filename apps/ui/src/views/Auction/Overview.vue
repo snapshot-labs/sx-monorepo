@@ -151,6 +151,12 @@ const fdv = computed(
     )
 );
 
+const volume = computed(
+  () =>
+    Number(props.auction.currentBiddingAmount) /
+    10 ** Number(props.auction.decimalsBiddingToken)
+);
+
 const userOrdersSummary = computed(() => {
   let auctioningTokenToClaim = 0n;
   let biddingTokenToClaim = 0n;
@@ -399,9 +405,15 @@ function handleScrollEvent(target: HTMLElement) {
           />
           <AuctionCounter
             :title="isAuctionOpen ? 'Current volume' : 'Total volume'"
-            amount="N/A"
+            :amount="_n(volume, 'compact')"
             :symbol="auction.symbolBiddingToken"
-            subamount="N/A"
+            :subamount="`$${_n(
+              biddingTokenPrice ? volume * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
           />
         </div>
         <div v-if="countdown" class="flex gap-3.5">
