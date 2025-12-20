@@ -74,14 +74,14 @@ export const createNetworkHandler = (chainId: number) => {
 
       logger.info({ params }, 'Processing send request');
 
-      if (signatureData.authenticatorType.startsWith('OpenZeppelin')) {
+      if (signatureData.authenticatorType?.startsWith('OpenZeppelin')) {
         const signer = getWallet(domain.verifyingContract);
 
         receipt = await openZeppelinClient.vote({
           signer,
           envelope: params.envelope
         });
-      } else if (signatureData.authenticatorType.startsWith('GovernorBravo')) {
+      } else if (signatureData.authenticatorType?.startsWith('GovernorBravo')) {
         const signer = getWallet(domain.verifyingContract);
 
         receipt = await governorBravoClient.vote({
