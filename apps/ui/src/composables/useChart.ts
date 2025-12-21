@@ -204,6 +204,8 @@ export function useChart(options: UseChartOptions) {
     seriesInstances.value.forEach((instance, index) => {
       const seriesConfig = seriesValue[index];
 
+      if (!seriesConfig) return;
+
       if (seriesConfig.type === 'line') {
         const lineOptions = seriesConfig.options || {};
         instance.applyOptions({
