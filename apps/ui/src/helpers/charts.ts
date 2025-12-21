@@ -86,14 +86,16 @@ export function normalizeTimeSeriesData(
 
 export function getPriceFormat(highestValue: number): Partial<PriceFormat> {
   let precision: number;
-  if (highestValue === 0) {
+  const value = Math.abs(highestValue);
+
+  if (value === 0) {
     precision = 2;
-  } else if (highestValue >= 5) {
+  } else if (value >= 5) {
     precision = 0;
-  } else if (highestValue >= 1) {
+  } else if (value >= 1) {
     precision = 2;
   } else {
-    const [, exponent] = highestValue.toExponential().split('e');
+    const [, exponent] = value.toExponential().split('e');
     const exp = parseInt(exponent);
     precision = Math.abs(exp) + 2; // show last 3 significant digits
   }
