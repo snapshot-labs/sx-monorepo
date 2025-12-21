@@ -245,6 +245,7 @@ export function useChart(options: UseChartOptions) {
     if (!seriesConfigs.length) return;
 
     const highestValue = Math.max(
+      0,
       ...seriesConfigs.flatMap(config => config.data.map(point => point.value))
     );
     const valueFormat = getPriceFormat(highestValue);
