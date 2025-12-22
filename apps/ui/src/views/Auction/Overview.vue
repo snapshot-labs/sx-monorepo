@@ -51,7 +51,7 @@ const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
 
-const chartType = ref<'price' | 'depth'>('price');
+const chartType = ref<'price' | 'depth'>('depth');
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
@@ -470,6 +470,12 @@ function handleScrollEvent(target: HTMLElement) {
       :auction="auction"
       :network="network"
       class="min-h-[355px] p-4 pr-3"
+    />
+    <AuctionChartPriceDepth
+      v-else-if="chartType === 'depth'"
+      :auction="auction"
+      :network="network"
+      class="min-h-[355px] p-4"
     />
     <div
       v-else

@@ -7,3 +7,7 @@ export type AuctionPriceHistoryPoint = {
   startTimestamp: string;
   close: string;
 };
+export type AuctionPriceLevelPoint = {
+  volume: string;
+  price: string;
+};

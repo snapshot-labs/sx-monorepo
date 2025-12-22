@@ -3,10 +3,8 @@ import {
   AreaSeriesPartialOptions,
   ChartOptions,
   createChart,
-  createOptionsChart,
   DeepPartial,
   IChartApi,
-  IChartApiBase,
   ISeriesApi,
   LineSeries,
   LineSeriesPartialOptions,
@@ -46,7 +44,7 @@ const CHART_COLORS = {
   }
 };
 
-const CHART_DEFAULT_OPTIONS = {
+export const CHART_DEFAULT_OPTIONS = {
   layout: {
     background: { color: 'transparent' },
     attributionLogo: false,
@@ -56,10 +54,6 @@ const CHART_DEFAULT_OPTIONS = {
   grid: {
     vertLines: { color: 'transparent' },
     horzLines: { style: LineStyle.Dotted }
-  },
-  crosshair: {
-    vertLine: { color: 'transparent' },
-    horzLine: { color: 'transparent' }
   },
   autoSize: true,
   rightPriceScale: {
@@ -124,24 +118,12 @@ const CHART_DEFAULT_OPTIONS = {
   }
 };
 
-const CHART_INITIALIZER_MAPPING = {
-  time: createChart,
-  options: createOptionsChart
-};
-
 const SERIES_TYPE_MAPPING = {
   area: AreaSeries,
   line: LineSeries
 };
 
-type SupportedSeriesTypes = 'Area' | 'Line';
-
-type ChartSeriesInstance =
-  | ISeriesApi<SupportedSeriesTypes, Time>
-  | ISeriesApi<SupportedSeriesTypes, number>;
-
 type UseChartOptions = {
-  type?: 'time' | 'options';
   series: MaybeRef<ChartSeries[]>;
   chartOptions?: MaybeRef<DeepPartial<ChartOptions>>;
 };
@@ -158,12 +140,14 @@ export type ChartSeries =
       options?: AreaSeriesPartialOptions;
     };
 
+export type SupportedSeries = ISeriesApi<'Area' | 'Line', Time>;
+
 export function useChart(options: UseChartOptions) {
-  const { type = 'time', series, chartOptions = {} } = options;
+  const { series, chartOptions = {} } = options;
 
   const chartContainer = ref<HTMLElement | null>(null);
-  const chart = shallowRef<IChartApi | IChartApiBase<number> | null>(null);
-  const seriesInstances = shallowRef<ChartSeriesInstance[]>([]);
+  const chart = shallowRef<IChartApi | null>(null);
+  const seriesInstances = shallowRef<SupportedSeries[]>([]);
 
   const { currentTheme } = useTheme();
 
@@ -190,11 +174,13 @@ export function useChart(options: UseChartOptions) {
       crosshair: {
         horzLine: {
           labelBackgroundColor:
-            CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor
+            CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor,
+          color: CHART_COLORS[currentTheme.value].axisLineColor
         },
         vertLine: {
           labelBackgroundColor:
-            CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor
+            CHART_COLORS[currentTheme.value].crosshairLabelBackgroundColor,
+          color: CHART_COLORS[currentTheme.value].axisLineColor
         }
       }
     });
@@ -244,7 +230,7 @@ export function useChart(options: UseChartOptions) {
   function updateSeriesData() {
     const seriesConfigs = toValue(series);
 
-    if (!seriesConfigs.length) return;
+    if (!seriesConfigs.length || !chart.value) return;
 
     const highestValue = Math.max(
       0,
@@ -256,9 +242,7 @@ export function useChart(options: UseChartOptions) {
       if (!seriesInstances.value[index]) return;
 
       seriesInstances.value[index].applyOptions({ priceFormat: valueFormat });
-      (
-        seriesInstances.value[index] as ISeriesApi<SupportedSeriesTypes>
-      ).setData(config.data);
+      seriesInstances.value[index].setData(config.data);
     });
 
     fitContent();
@@ -267,7 +251,7 @@ export function useChart(options: UseChartOptions) {
   function initChart() {
     if (!chartContainer.value) return;
 
-    chart.value = CHART_INITIALIZER_MAPPING[type](chartContainer.value, {
+    chart.value = createChart(chartContainer.value, {
       ...CHART_DEFAULT_OPTIONS,
       ...toValue(chartOptions)
     });
@@ -297,6 +281,7 @@ export function useChart(options: UseChartOptions) {
   useResizeObserver(chartContainer, fitContent);
 
   return {
-    chartContainer
+    chartContainer,
+    chart
   };
 }
