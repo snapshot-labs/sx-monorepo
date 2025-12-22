@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { LineType, SingleValueData } from 'lightweight-charts';
-import { ChartSeries } from '@/components/Ui/ChartTime.vue';
+import { ChartSeries } from '@/composables/useChart';
 import { AuctionNetworkId, AuctionPriceHistoryPoint } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import {

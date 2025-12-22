@@ -1,4 +1,4 @@
-import { SingleValueData, UTCTimestamp } from 'lightweight-charts';
+import { PriceFormat, SingleValueData, UTCTimestamp } from 'lightweight-charts';
 import { AuctionPriceHistoryPoint } from './auction';
 
 export type ChartGranularity = 'hour' | 'minute';
@@ -82,4 +82,29 @@ export function normalizeTimeSeriesData(
   }
 
   return result;
+}
+
+export function getPriceFormat(highestValue: number): Partial<PriceFormat> {
+  let precision: number;
+  const value = Math.abs(highestValue);
+
+  if (value === 0) {
+    precision = 2;
+  } else if (value >= 5) {
+    precision = 0;
+  } else if (value >= 1) {
+    precision = 2;
+  } else {
+    const [, exponent] = value.toExponential().split('e');
+    const exp = parseInt(exponent);
+    precision = Math.abs(exp) + 2; // show last 3 significant digits
+  }
+
+  return {
+    type: 'custom',
+    minMove: Math.pow(10, -precision),
+    formatter: (price: number) => {
+      return String(parseFloat(price.toFixed(precision)));
+    }
+  };
 }
