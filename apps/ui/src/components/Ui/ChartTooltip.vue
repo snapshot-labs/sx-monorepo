@@ -23,6 +23,8 @@ const data = ref<SingleValueData>({
   value: 0
 });
 
+// Return the first series that has data at the crosshair position
+// NOTE: This only supports single-series tooltips for now
 function findActiveSeriesData(param: MouseEventParams<Time>): {
   series: SupportedSeries;
   data: SingleValueData;

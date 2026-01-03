@@ -135,14 +135,14 @@ export function getPriceFormat(highestValue: number): PriceFormatCustom {
 /**
  * Buckets auction price level data into consistent intervals with aggregated volume
  * @param data - Array of auction price level points with price and volume
- * @param intervals - Number of intervals to divide the price range into (default: DEFAULT_PRICE_BUCKET_INTERVALS)
  * @param clearingPrice - Optional clearing price to ensure it falls on a bucket boundary
+ * @param intervals - Number of intervals to divide the price range into (default: DEFAULT_PRICE_BUCKET_INTERVALS)
  * @returns Array of price buckets with aggregated volume
  */
 export function bucketPriceDepthData(
   data: AuctionPriceLevelPoint[],
-  intervals: number = DEFAULT_PRICE_BUCKET_INTERVALS,
-  clearingPrice?: number
+  clearingPrice?: number,
+  intervals: number = DEFAULT_PRICE_BUCKET_INTERVALS
 ): PriceBucket[] {
   if (!data || data.length === 0) return [];
 
@@ -153,6 +153,14 @@ export function bucketPriceDepthData(
       volume: parseFloat(item.volume)
     }))
     .sort((a, b) => a.price - b.price);
+
+  if (clearingPrice) {
+    if (clearingPrice < sortedData[0].price) {
+      sortedData.unshift({ price: clearingPrice, volume: 0 });
+    } else if (clearingPrice > sortedData[sortedData.length - 1].price) {
+      sortedData.push({ price: clearingPrice, volume: 0 });
+    }
+  }
 
   let minPrice = sortedData[0].price;
   let maxPrice = sortedData[sortedData.length - 1].price;

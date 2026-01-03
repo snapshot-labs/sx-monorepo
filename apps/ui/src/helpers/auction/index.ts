@@ -11,6 +11,7 @@ import {
 import { getNames } from '../stamp';
 import {
   AuctionPriceHourData_Filter,
+  AuctionPriceLevel_Filter,
   AuctionPriceMinuteData_Filter,
   Order_Filter,
   Order_OrderBy,
@@ -213,7 +214,7 @@ export async function getAuctionPriceLevels(
   }: {
     skip?: number;
     first?: number;
-    filter?: AuctionPriceHourData_Filter | AuctionPriceMinuteData_Filter;
+    filter?: AuctionPriceLevel_Filter;
   } = {}
 ): Promise<AuctionPriceLevelPoint[]> {
   const client = getClient(network);
