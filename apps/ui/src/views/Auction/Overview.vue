@@ -55,7 +55,7 @@ const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
 
-const chartType = ref<'price' | 'depth'>('depth');
+const chartType = ref<'price' | 'depth'>('price');
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
