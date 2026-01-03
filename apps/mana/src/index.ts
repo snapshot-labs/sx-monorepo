@@ -2,7 +2,7 @@ import 'dotenv/config';
 import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
-import ethRpc from './eth';
+import ethRpc, { handlers as ethHandlers } from './eth';
 import pkg from '../package.json';
 import { registeredApeGasProposalsLoop } from './eth/registered';
 import logger from './logger';
@@ -31,7 +31,11 @@ app.use('/stark_rpc', starkRpc);
 app.get('/', (req, res) =>
   res.json({
     version,
-    port: PORT
+    port: PORT,
+    posterWallets: {
+      base: ethHandlers[8453]?.getWallet('poster').address,
+      sep: ethHandlers[11155111]?.getWallet('poster').address
+    }
   })
 );
 

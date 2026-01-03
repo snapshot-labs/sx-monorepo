@@ -1,6 +1,7 @@
 import express from 'express';
 import z from 'zod';
 import { generateSpaceEvmWallet } from './dependencies';
+import logger from './logger';
 import { createNetworkHandler, NETWORK_IDS } from './rpc';
 import { rpcError } from '../utils';
 
@@ -13,12 +14,13 @@ const jsonRpcRequestSchema = z.object({
     'execute',
     'executeQueuedProposal',
     'executeStarknetProposal',
-    'registerApeGasProposal'
+    'registerApeGasProposal',
+    'postReferral'
   ]),
   params: z.any()
 });
 
-const handlers = Object.fromEntries(
+export const handlers = Object.fromEntries(
   Array.from(NETWORK_IDS.keys()).map(chainId => [
     chainId,
     createNetworkHandler(chainId)
@@ -33,6 +35,8 @@ router.post('/:chainId?', (req, res) => {
   const parsed = jsonRpcRequestSchema.safeParse(req.body);
   if (!parsed.success) return rpcError(res, 400, parsed.error, 0);
   const { id, method, params } = parsed.data;
+
+  logger.info({ chainId, method }, 'Received RPC request');
 
   const handler = handlers[chainId];
   if (!handler) return rpcError(res, 404, new Error('Unsupported chainId'), id);

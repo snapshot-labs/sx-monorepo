@@ -1,6 +1,14 @@
-import { ETH_CONTRACT } from './constants';
+import {
+  COINGECKO_ASSET_PLATFORMS,
+  COINGECKO_BASE_ASSETS,
+  ETH_CONTRACT
+} from './constants';
 
-const COINGECKO_API_KEY = 'CG-1z19sMoCC6LoqR4b6avyLi3U';
+type AssetPlatforms = typeof COINGECKO_ASSET_PLATFORMS;
+type AssetPlatform = AssetPlatforms[keyof AssetPlatforms];
+type PriceInfo = { usd: number; usd_24h_change: number };
+
+const COINGECKO_API_KEY = 'CG-o41PzYqjLPSWSJdMEyDELEpB';
 const COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3/simple';
 const COINGECKO_PARAMS = '&vs_currencies=usd&include_24hr_change=true';
 
@@ -10,32 +18,38 @@ async function callCoinGecko(apiUrl: string) {
 }
 
 export async function getTokenPrices(
-  assetPlatform: string,
-  contractAddresses: string[]
-): Promise<
-  Record<string, { usd: number; usd_24h_change: number } | undefined>
-> {
-  return callCoinGecko(
-    `${COINGECKO_API_URL}/token_price/${assetPlatform}?contract_addresses=${contractAddresses
-      .slice(0, 100)
-      .join(',')}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
-  );
-}
-
-export async function getCoins(
-  assetPlatform: string,
-  baseToken: string,
+  assetPlatform: AssetPlatform,
   contractAddresses: string[]
 ) {
-  const [baseTokenData, tokenData] = await Promise.all([
-    callCoinGecko(
-      `${COINGECKO_API_URL}/price?ids=${baseToken}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
-    ),
-    getTokenPrices(assetPlatform, contractAddresses)
-  ]);
+  const baseAsset = COINGECKO_BASE_ASSETS[assetPlatform];
+  const tokenAddresses = contractAddresses.filter(
+    address => address !== ETH_CONTRACT
+  );
 
-  return {
-    [ETH_CONTRACT]: baseTokenData[baseToken],
-    ...tokenData
-  };
+  const tokensCall: Promise<Record<string, PriceInfo | undefined>> =
+    callCoinGecko(
+      `${COINGECKO_API_URL}/token_price/${assetPlatform}?contract_addresses=${tokenAddresses
+        .slice(0, 100)
+        .join(',')}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
+    );
+
+  let baseTokenCall: Promise<{
+    [baseAsset]: PriceInfo;
+  }> | null = null;
+  if (contractAddresses.includes(ETH_CONTRACT)) {
+    baseTokenCall = callCoinGecko(
+      `${COINGECKO_API_URL}/price?ids=${baseAsset}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
+    );
+  }
+
+  const [data, baseTokenData] = await Promise.all([tokensCall, baseTokenCall]);
+
+  if (baseTokenData) {
+    return {
+      ...data,
+      [ETH_CONTRACT]: baseTokenData[COINGECKO_BASE_ASSETS[assetPlatform]]
+    };
+  }
+
+  return data;
 }

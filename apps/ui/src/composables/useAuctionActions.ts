@@ -7,6 +7,14 @@ import {
 } from '@/helpers/auction';
 import * as actions from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import {
+  AUCTION_TAG,
+  POSTER_TAG,
+  REFERRAL_EIP712_DOMAIN,
+  REFERRAL_EIP712_TYPES
+} from '@/helpers/auction/referral';
+import { executionCall } from '@/helpers/mana';
+import { pin } from '@/helpers/pin';
 import { approve, getTokenAllowance } from '@/helpers/token';
 import {
   getUserFacingErrorMessage,
@@ -39,7 +47,8 @@ export function useAuctionActions(
   }
 
   function wrapWithAuthAndNetwork<T extends any[], U>(
-    fn: (...args: T) => Promise<U>
+    fn: (...args: T) => Promise<U>,
+    overrideChainId?: number
   ) {
     return async (...args: T): Promise<U | null> => {
       if (!auth.value) {
@@ -47,7 +56,10 @@ export function useAuctionActions(
         return null;
       }
 
-      await verifyNetwork(auth.value.provider, chainId.value);
+      await verifyNetwork(
+        auth.value.provider,
+        overrideChainId ?? chainId.value
+      );
       return fn(...args);
     };
   }
@@ -114,9 +126,52 @@ export function useAuctionActions(
     );
   }
 
-  async function wrapPromise(promise: Promise<any>): Promise<string> {
+  async function setReferee(referee: string) {
+    const signer = auth.value!.provider.getSigner();
+    const signerAddress = await signer.getAddress();
+
+    const domain = {
+      ...REFERRAL_EIP712_DOMAIN,
+      chainId: chainId.value
+    };
+
+    const message = {
+      auction_tag: AUCTION_TAG,
+      referee: referee.toLowerCase()
+    };
+
+    const signature = await signer._signTypedData(
+      domain,
+      REFERRAL_EIP712_TYPES,
+      message
+    );
+
+    const metadata = {
+      method: 'SetAuctionReferee',
+      signer: signerAddress.toLowerCase(),
+      signature,
+      domain,
+      types: REFERRAL_EIP712_TYPES,
+      message
+    };
+
+    const { cid } = await pin(metadata);
+
+    return wrapPromise(
+      executionCall('eth', domain.chainId, 'postReferral', {
+        metadataUri: `ipfs://${cid}`,
+        posterTag: POSTER_TAG
+      }),
+      domain.chainId
+    );
+  }
+
+  async function wrapPromise(
+    promise: Promise<any>,
+    txChainId?: number
+  ): Promise<string> {
     const tx = await promise;
-    uiStore.addPendingTransaction(tx.hash, chainId.value);
+    uiStore.addPendingTransaction(tx.hash, txChainId ?? chainId.value);
 
     return tx.hash;
   }
@@ -130,6 +185,7 @@ export function useAuctionActions(
     cancelSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(cancelSellOrder)),
     claimFromParticipantOrder: wrapWithErrors(
       wrapWithAuthAndNetwork(claimFromParticipantOrder)
-    )
+    ),
+    setReferee: wrapWithErrors(wrapWithAuthAndNetwork(setReferee))
   };
 }

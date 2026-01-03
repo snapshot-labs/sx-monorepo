@@ -8,7 +8,7 @@ import {
   DELEGATE_REGISTRY_STRATEGIES,
   DELEGATION_TYPES_NAMES
 } from '@/helpers/constants';
-import { parseOSnapTransaction } from '@/helpers/osnap';
+import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
