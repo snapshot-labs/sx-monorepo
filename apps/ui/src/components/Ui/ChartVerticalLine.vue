@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Coordinate, IChartApi, Time } from 'lightweight-charts';
+import { IChartApi, Time } from 'lightweight-charts';
 import { Coordinates, getSmartPosition } from '@/helpers/charts';
 
 type LinePosition = Coordinates & {
@@ -17,7 +17,7 @@ const props = defineProps<{
 const linePosition = ref<LinePosition>({ x: 0, y: 0, height: 0 });
 const labelPosition = ref<Coordinates>({ x: 0, y: 0 });
 const isLineVisible = ref(false);
-const isLabelVisible = ref(true);
+const isLabelVisible = ref(false);
 const labelRef = ref<HTMLDivElement>();
 
 const chartContainer = computed(() => {
@@ -33,7 +33,7 @@ const {
   width: chartCanvasWidth,
   height: chartCanvasHeight
 } = useElementBounding(chartCanvas);
-const { top: chartContainerY } = useElementBounding(chartContainer);
+const { y: chartContainerY } = useElementBounding(chartContainer);
 
 function updateLabelPosition() {
   if (!labelRef.value || !chartCanvas.value) {
@@ -52,10 +52,6 @@ function updateLabelPosition() {
   isLabelVisible.value = labelPosition.value.x > LABEL_MARGIN;
 }
 
-function getChartCoordinate(): Coordinate | null {
-  return props.chart.timeScale().timeToCoordinate(props.value as Time) || null;
-}
-
 function updatePositions() {
   isLineVisible.value = false;
   isLabelVisible.value = false;
@@ -68,7 +64,9 @@ function updatePositions() {
     return;
   }
 
-  const xCoordinate = getChartCoordinate();
+  const xCoordinate = props.chart
+    .timeScale()
+    .timeToCoordinate(props.value as Time);
 
   if (xCoordinate === null || xCoordinate < 0) {
     return;
@@ -79,8 +77,6 @@ function updatePositions() {
     y: chartCanvasY.value - chartContainerY.value,
     height: chartCanvasHeight.value
   };
-
-  labelPosition.value.y = chartCanvasY.value - chartContainerY.value;
 
   isLineVisible.value = true;
   isLabelVisible.value = true;
@@ -94,10 +90,11 @@ watch(
   () => props.value,
   () => {
     updatePositions();
-  }
+  },
+  { immediate: true }
 );
 
-useResizeObserver(() => chartContainer.value, updatePositions);
+useResizeObserver(chartContainer, updatePositions);
 </script>
 
 <template>

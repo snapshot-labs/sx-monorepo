@@ -19,6 +19,11 @@ export type PriceBucket = {
   volume: number;
 };
 
+type PriceData = {
+  price: number;
+  volume: number;
+};
+
 const GRANULARITY_STEP_SIZE: Record<ChartGranularity, number> = {
   hour: 3600,
   minute: 60
@@ -133,154 +138,172 @@ export function getPriceFormat(highestValue: number): PriceFormatCustom {
 }
 
 /**
- * Buckets auction price level data into consistent intervals with aggregated volume
- * @param data - Array of auction price level points with price and volume
- * @param intervals - Number of intervals to divide the price range into (default: DEFAULT_PRICE_BUCKET_INTERVALS)
- * @param clearingPrice - Optional clearing price to ensure it falls on a bucket boundary
- * @returns Array of price buckets with aggregated volume
+ * Calculates bucket configuration for price data visualization with reference price alignment.
+ *
+ * Creates a bucketing strategy that ensures a reference price (e.g., clearing price) falls
+ * exactly on a bucket boundary for visual emphasis. The data range is expanded by 10% on
+ * each side for better chart visualization, and may result in empty buckets on the edges.
+ *
+ * @param sortedData - Array of price data sorted by price in ascending order
+ * @param targetBucketCount - Target number of buckets to create (actual count may vary slightly due to alignment requirements)
+ * @param referencePrice - Price value to align with bucket boundaries for visual emphasis
+ * @returns Configuration object containing bucket start price, uniform interval size, and total bucket count
+ */
+function calculateBucketConfig(
+  sortedData: PriceData[],
+  targetBucketCount: number,
+  referencePrice: number
+): {
+  bucketStartPrice: number;
+  intervalSize: number;
+  bucketCount: number;
+} {
+  const dataMinPrice = sortedData[0].price;
+  const dataMaxPrice = sortedData[sortedData.length - 1].price;
+  const priceRange = dataMaxPrice - dataMinPrice;
+
+  if (priceRange === 0) {
+    return {
+      bucketStartPrice: dataMinPrice,
+      intervalSize: 0,
+      bucketCount: 1
+    };
+  }
+
+  // Add extra range at start and end (10% of range on each side)
+  const extraRange = priceRange * 0.1;
+  const expandedMinPrice = Math.max(0, dataMinPrice - extraRange);
+  const expandedMaxPrice = dataMaxPrice + extraRange;
+  const expandedRange = expandedMaxPrice - expandedMinPrice;
+
+  // Calculate the number of buckets below and above the reference price
+  const referenceRatio = (referencePrice - expandedMinPrice) / expandedRange;
+  const bucketsBelow = Math.round(referenceRatio * targetBucketCount);
+  const bucketsAbove = targetBucketCount - bucketsBelow;
+
+  // Calculate interval sizes for regions below and above reference price
+  const belowRange = referencePrice - expandedMinPrice;
+  const aboveRange = expandedMaxPrice - referencePrice;
+  const belowIntervalSize = belowRange / bucketsBelow;
+  const aboveIntervalSize = aboveRange / bucketsAbove;
+
+  // Use the average interval size to maintain reasonable bucket sizes
+  // This may lead to slight deviations in total bucket count
+  const intervalSize = (belowIntervalSize + aboveIntervalSize) / 2;
+
+  // Calculate bucket start to align reference price with a bucket boundary
+  const referenceBucketIndex = Math.round(
+    (referencePrice - expandedMinPrice) / intervalSize
+  );
+  const bucketStartPrice = referencePrice - referenceBucketIndex * intervalSize;
+
+  // Calculate how many buckets we need to cover the expanded range
+  const bucketCount = Math.ceil(
+    (expandedMaxPrice - bucketStartPrice) / intervalSize
+  );
+
+  return {
+    bucketStartPrice,
+    intervalSize,
+    bucketCount
+  };
+}
+
+/**
+ * Groups price data into uniform intervals (buckets) with aggregated volume for chart visualization.
+ *
+ * Prices falling exactly on bucket boundaries are assigned to the higher bucket.
+ * The data range is automatically expanded by 10% on each side for better visualization.
+ *
+ * @param data - Array of price level points containing price and volume data
+ * @param clearingPrice - Optional reference price to align with bucket boundaries (typically clearing price)
+ * @param targetBucketCount - Target number of buckets to create (default: 100). Actual count may vary due to reference price alignment
+ * @returns Array of price buckets with aggregated volume, ordered by price
  */
 export function bucketPriceDepthData(
   data: AuctionPriceLevelPoint[],
-  intervals: number = DEFAULT_PRICE_BUCKET_INTERVALS,
-  clearingPrice?: number
+  clearingPrice?: number,
+  targetBucketCount: number = DEFAULT_PRICE_BUCKET_INTERVALS
 ): PriceBucket[] {
-  if (!data || data.length === 0) return [];
+  if (data.length === 0) return [];
 
-  // Convert strings to numbers and sort by price
-  const sortedData = [...data]
+  const sortedData: PriceData[] = data
     .map(item => ({
       price: parseFloat(item.price),
       volume: parseFloat(item.volume)
     }))
     .sort((a, b) => a.price - b.price);
 
-  let minPrice = sortedData[0].price;
-  let maxPrice = sortedData[sortedData.length - 1].price;
-  let priceRange = maxPrice - minPrice;
+  // Include clearing price in data range if provided and outside bounds
+  if (clearingPrice !== undefined) {
+    const clearingPriceData = { price: clearingPrice, volume: 0 };
 
-  if (priceRange === 0) {
+    if (clearingPrice < sortedData[0].price) {
+      sortedData.unshift(clearingPriceData);
+    } else if (clearingPrice > sortedData[sortedData.length - 1].price) {
+      sortedData.push(clearingPriceData);
+    }
+  }
+
+  // Handle single data point case
+  if (sortedData.length === 1) {
     return [
       {
-        priceStart: minPrice,
-        priceEnd: minPrice,
-        volume: sortedData.reduce((sum, d) => sum + d.volume, 0)
+        priceStart: sortedData[0].price,
+        priceEnd: sortedData[0].price,
+        volume: sortedData[0].volume
       }
     ];
   }
 
-  let actualIntervals = intervals;
-  let intervalSize = priceRange / intervals;
-  let startPrice = minPrice;
+  const effectiveClearingPrice =
+    clearingPrice ??
+    (sortedData[0].price + sortedData[sortedData.length - 1].price) / 2;
 
-  // If clearing price is provided, adjust bucket boundaries to align with it
-  if (clearingPrice !== undefined) {
-    // Add extra range at start and end (10% of range on each side)
-    const extraRange = priceRange * 0.1;
-    const expandedMinPrice = Math.max(0, minPrice - extraRange); // Ensure price stays positive
-    const expandedMaxPrice = maxPrice + extraRange;
-    const expandedRange = expandedMaxPrice - expandedMinPrice;
-
-    // Calculate how many buckets should be below clearing price
-    const clearingRatio = (clearingPrice - expandedMinPrice) / expandedRange;
-    const bucketsBelow = Math.round(clearingRatio * intervals);
-    const bucketsAbove = intervals - bucketsBelow;
-
-    if (bucketsBelow > 0 && bucketsAbove > 0) {
-      // Adjust intervals to make clearing price fall exactly on boundary
-      const belowRange = clearingPrice - expandedMinPrice;
-      const aboveRange = expandedMaxPrice - clearingPrice;
-      const belowIntervalSize = belowRange / bucketsBelow;
-      const aboveIntervalSize = aboveRange / bucketsAbove;
-
-      // Use the average interval size to maintain reasonable bucket sizes
-      intervalSize = (belowIntervalSize + aboveIntervalSize) / 2;
-      actualIntervals = Math.round(expandedRange / intervalSize);
-
-      // Adjust start price so clearing price aligns with a boundary
-      const clearingBucketIndex = Math.round(
-        (clearingPrice - expandedMinPrice) / intervalSize
-      );
-      startPrice = clearingPrice - clearingBucketIndex * intervalSize;
-
-      // Update working range
-      minPrice = expandedMinPrice;
-      maxPrice = expandedMaxPrice;
-      priceRange = expandedRange;
-    }
-  }
+  const { bucketStartPrice, intervalSize, bucketCount } = calculateBucketConfig(
+    sortedData,
+    targetBucketCount,
+    effectiveClearingPrice
+  );
 
   const buckets: PriceBucket[] = [];
 
-  // First, generate all buckets
-  for (let i = 0; i < actualIntervals; i++) {
-    const priceStart = startPrice + i * intervalSize;
-    const priceEnd = startPrice + (i + 1) * intervalSize;
-
-    // Skip buckets that are completely outside our data range
-    if (priceEnd <= minPrice || priceStart >= maxPrice) continue;
-
+  // Creating empty buckets
+  for (let i = 0; i < bucketCount; i++) {
     buckets.push({
-      priceStart: Math.max(priceStart, minPrice),
-      priceEnd: Math.min(priceEnd, maxPrice),
+      priceStart: bucketStartPrice + i * intervalSize,
+      priceEnd: bucketStartPrice + (i + 1) * intervalSize,
       volume: 0
     });
   }
 
-  // If clearing price is defined and no bucket ends at the clearing price, add an extra bucket
-  if (clearingPrice !== undefined && buckets.length > 0) {
-    const hasExactMatch = buckets.some(
-      bucket => bucket.priceEnd === clearingPrice
+  // Populating buckets with aggregated volume
+  for (const dataPoint of sortedData) {
+    const bucketIndex = Math.floor(
+      (dataPoint.price - bucketStartPrice) / intervalSize
     );
 
-    if (!hasExactMatch) {
-      // Find where to insert a bucket that ends at clearing price
-      const insertIndex = buckets.findIndex(
-        bucket => bucket.priceEnd > clearingPrice
-      );
-
-      if (insertIndex === 0) {
-        // Clearing price is before all buckets, add a bucket at the beginning
-        buckets.unshift({
-          priceStart: Math.max(0, clearingPrice - intervalSize),
-          priceEnd: clearingPrice,
-          volume: 0
-        });
-      } else if (insertIndex === -1) {
-        // Clearing price is after all buckets, add a bucket at the end
-        const lastBucket = buckets[buckets.length - 1];
-        buckets.push({
-          priceStart: lastBucket.priceEnd,
-          priceEnd: clearingPrice,
-          volume: 0
-        });
-      }
+    if (bucketIndex >= 0 && bucketIndex < buckets.length) {
+      buckets[bucketIndex].volume += dataPoint.volume;
     }
   }
-
-  sortedData.forEach(dataPoint => {
-    // Find the bucket that contains this data point
-    const bucketIndex = buckets.findIndex(
-      bucket =>
-        dataPoint.price >= bucket.priceStart &&
-        dataPoint.price < bucket.priceEnd
-    );
-
-    // If no bucket found, assign to the last bucket if price equals maxPrice
-    const finalBucketIndex =
-      bucketIndex >= 0
-        ? bucketIndex
-        : dataPoint.price === maxPrice && buckets.length > 0
-          ? buckets.length - 1
-          : -1;
-
-    if (finalBucketIndex >= 0) {
-      buckets[finalBucketIndex].volume += dataPoint.volume;
-    }
-  });
 
   return buckets;
 }
 
+/**
+ * Calculates optimal positioning for an element within a container to prevent overflow.
+ *
+ * Automatically adjusts element position to ensure it remains fully visible within the
+ * container boundaries. If the element would overflow on the right or bottom, it's
+ * repositioned to the left or top of the target coordinates.
+ *
+ * @param coordinates - Target position coordinates for the element
+ * @param element - HTML element to be positioned
+ * @param container - Container element that defines the boundaries
+ * @param margin - Minimum margin from container edges (default: 0)
+ * @returns Adjusted coordinates that keep the element within container bounds
+ */
 export function getSmartPosition(
   coordinates: Coordinates,
   element: HTMLElement,

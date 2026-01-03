@@ -10,37 +10,29 @@ const props = defineProps<{
   auction: AuctionDetailFragment;
 }>();
 
+const isFetchingPages = ref(false);
+
 const { data, isError, isPending, fetchNextPage, hasNextPage } =
   useAuctionPriceLevelQuery({
     network: () => props.network,
     auction: () => props.auction
   });
 
-const isFetchingPages = ref(false);
+watch(
+  data,
+  async () => {
+    if (!isFetchingPages.value && hasNextPage.value && !isError.value) {
+      isFetchingPages.value = true;
 
-// Watch for initial data load, then fetch remaining pages
-watchEffect(async () => {
-  // Wait for initial data and avoid duplicate fetches
-  if (
-    data.value &&
-    hasNextPage.value &&
-    !isError.value &&
-    !isFetchingPages.value
-  ) {
-    isFetchingPages.value = true;
+      while (hasNextPage.value && !isError.value) {
+        await fetchNextPage();
+      }
 
-    while (hasNextPage.value && !isError.value) {
-      await fetchNextPage();
+      isFetchingPages.value = false;
     }
-
-    isFetchingPages.value = false;
-  }
-});
-
-// Reset fetching state when props change
-watch([() => props.network, () => props.auction], () => {
-  isFetchingPages.value = false;
-});
+  },
+  { immediate: true }
+);
 
 const normalizedData = computed<SingleValueData[]>(() => {
   if (!data.value || hasNextPage.value) return [];
@@ -48,29 +40,12 @@ const normalizedData = computed<SingleValueData[]>(() => {
   const items = data.value.pages.flat();
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
 
-  // Check if clearing price is within the data range
-  const prices = items.map(item => parseFloat(item.price));
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
-
-  let adjustedItems = items;
-
-  // If clearing price is out of bounds, add it to the series
-  if (clearingPrice < minPrice || clearingPrice > maxPrice) {
-    adjustedItems = [
-      ...items,
-      {
-        price: clearingPrice.toString(),
-        volume: '0' // Zero volume for the clearing price point
-      }
-    ];
-  }
-
-  const buckets = bucketPriceDepthData(adjustedItems, 100, clearingPrice);
-  const sortedDesc = [...buckets].sort((a, b) => b.priceStart - a.priceStart);
+  const buckets = bucketPriceDepthData(items, clearingPrice).sort(
+    (a, b) => b.priceStart - a.priceStart
+  );
   let cumulativeVolume = 0;
 
-  return sortedDesc
+  return buckets
     .map(bucket => {
       cumulativeVolume += bucket.volume;
       return {

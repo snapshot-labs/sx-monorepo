@@ -87,6 +87,8 @@ const {
   granularity
 });
 
+const isFetchingPages = ref(false);
+
 const normalizedData = computed<SingleValueData[]>(() => {
   if (!data.value || hasNextPage.value) return [];
 
@@ -131,8 +133,14 @@ const chartSeries = computed<ChartSeries[]>(() => [
 watch(
   data,
   async () => {
-    while (hasNextPage.value && !isError.value) {
-      await fetchNextPage();
+    if (!isFetchingPages.value && hasNextPage.value && !isError.value) {
+      isFetchingPages.value = true;
+
+      while (hasNextPage.value && !isError.value) {
+        await fetchNextPage();
+      }
+
+      isFetchingPages.value = false;
     }
   },
   { immediate: true }
