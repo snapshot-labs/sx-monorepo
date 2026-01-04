@@ -471,6 +471,12 @@ function handleScrollEvent(target: HTMLElement) {
       :network="network"
       class="min-h-[355px] p-4 pr-3"
     />
+    <AuctionChartPriceDepth
+      v-else-if="chartType === 'depth'"
+      :auction="auction"
+      :network="network"
+      class="min-h-[355px] p-4"
+    />
     <div
       v-else
       class="min-h-[355px] flex items-center justify-center"

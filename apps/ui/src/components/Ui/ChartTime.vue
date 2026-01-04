@@ -16,7 +16,15 @@ const localizedSeries = computed<ChartSeries[]>(() => {
   }));
 });
 
-const { chartContainer } = useChart({ series: localizedSeries });
+const { chartContainer } = useChart({
+  series: localizedSeries,
+  chartOptions: {
+    crosshair: {
+      vertLine: { visible: false },
+      horzLine: { visible: false }
+    }
+  }
+});
 
 // Convert UTC timestamp to local timezone offset
 // (effectively makes the chart interpret UTC timestamps as local time)

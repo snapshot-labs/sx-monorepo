@@ -114,3 +114,18 @@ export const auctionPriceHourDataQuery = gql(`
     }
   }
 `);
+
+export const auctionPriceLevelQuery = gql(`
+  query GetAuctionPriceLevels($first: Int, $skip: Int, $where: AuctionPriceLevel_filter) {
+    auctionPriceLevels(
+      first: $first
+      skip: $skip
+      orderBy: price
+      orderDirection: desc
+      where: $where
+    ) {
+      price
+      volume
+    }
+  }
+`);

@@ -3,6 +3,7 @@ import { MaybeRefOrGetter } from 'vue';
 import {
   AuctionNetworkId,
   getAuctionPriceHistory,
+  getAuctionPriceLevels,
   getOrders,
   getUnclaimedOrders
 } from '@/helpers/auction';
@@ -23,6 +24,7 @@ import { formatAddress } from '@/helpers/utils';
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
 const PRICE_HISTORY_LIMIT = 1000;
+const PRICE_LEVEL_LIMIT = 1000;
 
 const TOKEN_PRICE_OVERRIDES = {
   // USDCTEST -> USDC
@@ -80,7 +82,11 @@ export const AUCTION_KEYS = {
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
     granularity: MaybeRefOrGetter<ChartGranularity>
-  ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity]
+  ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity],
+  priceLevel: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>
+  ) => [...AUCTION_KEYS.auction(network, auction), 'priceLevel']
 };
 
 export function useBidsQuery({
@@ -233,6 +239,33 @@ export function useAuctionPriceDataQuery({
       if (lastPage.length < PRICE_HISTORY_LIMIT) return null;
 
       return pages.length * PRICE_HISTORY_LIMIT;
+    }
+  });
+}
+
+export function useAuctionPriceLevelQuery({
+  network,
+  auction
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: AUCTION_KEYS.priceLevel(network, auction),
+    queryFn: async ({ pageParam }) => {
+      return getAuctionPriceLevels(toValue(network), {
+        skip: pageParam,
+        first: PRICE_LEVEL_LIMIT,
+        filter: {
+          auction: toValue(auction).id
+        }
+      });
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < PRICE_LEVEL_LIMIT) return null;
+
+      return pages.length * PRICE_LEVEL_LIMIT;
     }
   });
 }
