@@ -155,7 +155,7 @@ function formatNumber(value: number, range?: number): string {
       :value="clearingPrice"
       :color="CLEARING_PRICE_COLOR"
     >
-      Clearing: {{ formatNumber(clearingPrice) }}
+      Clearing: {{ formatNumber(clearingPrice, priceDelta) }}
       {{ props.auction.symbolBiddingToken }}
     </UiChartVerticalLine>
   </div>
