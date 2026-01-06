@@ -34,7 +34,7 @@ export function normalizeTimeSeriesData(
 
   const parsedData = data
     .map(point => ({
-      timestamp: parseInt(point.startTimestamp),
+      timestamp: point.startTimestamp,
       value: parseFloat(point.close)
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
