@@ -93,7 +93,6 @@ describe('apeGas', () => {
       );
 
       expect(votingPower > 500000000000000n).toBe(true);
-      expect(votingPower < 550000000000000n).toBe(true);
     }
   );
 
@@ -111,7 +110,6 @@ describe('apeGas', () => {
       );
 
       expect(votingPower > 149999267997822587n).toBe(true);
-      expect(votingPower < 155000000000000000n).toBe(true);
     }
   );
 

@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { FunctionalComponent } from 'vue';
+import { AuctionState } from '@/helpers/auction';
 import ISCheckCircle from '~icons/heroicons-solid/check-circle';
 import ISClock from '~icons/heroicons-solid/clock';
 import ISCursorClick from '~icons/heroicons-solid/cursor-click';
 import ISStatusOnline from '~icons/heroicons-solid/status-online';
 import ISXCircle from '~icons/heroicons-solid/x-circle';
-
-export type AuctionState =
-  | 'active'
-  | 'finalizing'
-  | 'claiming'
-  | 'claimed'
-  | 'canceled';
 
 const STATE_CONFIG: Record<
   AuctionState,

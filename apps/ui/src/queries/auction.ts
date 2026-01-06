@@ -4,6 +4,7 @@ import {
   AuctionNetworkId,
   getAuctionPriceHistory,
   getAuctionPriceLevels,
+  getAuctions,
   getOrders,
   getUnclaimedOrders
 } from '@/helpers/auction';
@@ -41,10 +42,15 @@ const TOKEN_PRICE_OVERRIDES = {
 
 export const AUCTION_KEYS = {
   all: ['auction'] as const,
+  list: (network: MaybeRefOrGetter<AuctionNetworkId>) => [
+    ...AUCTION_KEYS.all,
+    network,
+    'list'
+  ],
   auction: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [...AUCTION_KEYS.all, network, () => toValue(auction).id],
+  ) => [...AUCTION_KEYS.all, network, 'detail', () => toValue(auction).id],
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>
@@ -88,6 +94,27 @@ export const AUCTION_KEYS = {
     auction: MaybeRefOrGetter<AuctionDetailFragment>
   ) => [...AUCTION_KEYS.auction(network, auction), 'priceLevel']
 };
+
+export function useAuctionsQuery({
+  network
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: AUCTION_KEYS.list(network),
+    queryFn: ({ pageParam }) =>
+      getAuctions(toValue(network), {
+        first: LIMIT,
+        skip: pageParam
+      }),
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < LIMIT) return null;
+
+      return pages.length * LIMIT;
+    }
+  });
+}
 
 export function useBidsQuery({
   network,

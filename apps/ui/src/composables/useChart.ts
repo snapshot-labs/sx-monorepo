@@ -230,7 +230,7 @@ export function useChart(options: UseChartOptions) {
   function updateSeriesData() {
     const seriesConfigs = toValue(series);
 
-    if (!seriesConfigs.length || !chart.value) return;
+    if (!seriesConfigs.length) return;
 
     const highestValue = Math.max(
       0,

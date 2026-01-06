@@ -4,12 +4,14 @@ import {
   auctionPriceLevelQuery,
   auctionPriceMinuteDataQuery,
   auctionQuery,
+  auctionsQuery,
   ordersQuery,
   previousOrderQuery,
   unclaimedOrdersQuery
 } from './queries';
 import { getNames } from '../stamp';
 import {
+  AuctionDetailFragment,
   AuctionPriceHourData_Filter,
   AuctionPriceMinuteData_Filter,
   Order_Filter,
@@ -21,6 +23,7 @@ import {
   AuctionNetworkId,
   AuctionPriceHistoryPoint,
   AuctionPriceLevelPoint,
+  AuctionState,
   Order
 } from './types';
 import { ChartGranularity } from '../charts';
@@ -32,13 +35,13 @@ const DEFAULT_ORDER_ID =
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR',
-  base: '',
+  base: 'https://subgrapher.snapshot.org/subgraph/arbitrum/A3pxMtQ3i2oL2PmqKfJP8kKuPV71FftggoLU29TGqnN2',
   sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d'
 };
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
   eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101',
-  base: '',
+  base: '0x5e9DC9694f6103dA5d5B9038c090040E3A6E4Bf8',
   sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C'
 };
 
@@ -55,6 +58,29 @@ export function formatPrice(
     : '0';
 }
 
+export function getAuctionState(
+  auction: AuctionDetailFragment,
+  timestamp = Date.now()
+): AuctionState {
+  const now = Math.floor(timestamp / 1000);
+  const endTime = parseInt(auction.endTimeTimestamp);
+
+  if (now < endTime) return 'active';
+
+  const currentBiddingAmount = BigInt(auction.currentBiddingAmount);
+  const minFundingThreshold = BigInt(auction.minFundingThreshold);
+
+  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
+
+  if (auction.ordersWithoutClaimed?.length) {
+    if (!auction.clearingPriceOrder) return 'finalizing';
+
+    return 'claiming';
+  }
+
+  return 'claimed';
+}
+
 function getClient(network: AuctionNetworkId) {
   const subgraphUrl = SUBGRAPH_URLS[network];
   if (!subgraphUrl) throw new Error(`Unknown network: ${network}`);
@@ -63,6 +89,26 @@ function getClient(network: AuctionNetworkId) {
     uri: subgraphUrl,
     cache: new InMemoryCache()
   });
+}
+
+export async function getAuctions(
+  network: AuctionNetworkId,
+  {
+    skip,
+    first
+  }: {
+    skip: number;
+    first: number;
+  }
+) {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: auctionsQuery,
+    variables: { first, skip }
+  });
+
+  return data.auctionDetails;
 }
 
 export async function getAuction(id: string, network: AuctionNetworkId) {
@@ -191,17 +237,13 @@ export async function getAuctionPriceHistory(
     granularity === 'hour'
       ? auctionPriceHourDataQuery
       : auctionPriceMinuteDataQuery;
-  const dataKey =
-    granularity === 'hour'
-      ? 'auctionPriceHourDatas'
-      : 'auctionPriceMinuteDatas';
 
   const { data } = await client.query({
     query,
     variables: { where: filter, first, skip }
   });
 
-  return data[dataKey] || [];
+  return data.priceData;
 }
 
 export async function getAuctionPriceLevels(
