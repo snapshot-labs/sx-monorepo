@@ -53,36 +53,41 @@ function updateLabelPosition() {
 }
 
 function updatePositions() {
-  isLineVisible.value = false;
-  isLabelVisible.value = false;
-
   if (
     !chartContainer.value ||
     chartCanvasHeight.value === 0 ||
     chartCanvasWidth.value === 0
   ) {
+    isLineVisible.value = false;
+    isLabelVisible.value = false;
     return;
   }
 
-  const xCoordinate = props.chart
-    .timeScale()
-    .timeToCoordinate(props.value as Time);
+  // Wait for the next frame to ensure chart has finished resizing
+  // before calculating positions, and avoid line drawn at wrong position
+  requestAnimationFrame(() => {
+    const xCoordinate = props.chart
+      .timeScale()
+      .timeToCoordinate(props.value as Time);
 
-  if (xCoordinate === null || xCoordinate < 0) {
-    return;
-  }
+    if (xCoordinate === null || xCoordinate < 0) {
+      isLineVisible.value = false;
+      isLabelVisible.value = false;
+      return;
+    }
 
-  linePosition.value = {
-    x: xCoordinate,
-    y: chartCanvasY.value - chartContainerY.value,
-    height: chartCanvasHeight.value
-  };
+    linePosition.value = {
+      x: xCoordinate,
+      y: chartCanvasY.value - chartContainerY.value,
+      height: chartCanvasHeight.value
+    };
 
-  isLineVisible.value = true;
-  isLabelVisible.value = true;
+    isLineVisible.value = true;
+    isLabelVisible.value = true;
 
-  nextTick(() => {
-    updateLabelPosition();
+    nextTick(() => {
+      updateLabelPosition();
+    });
   });
 }
 
