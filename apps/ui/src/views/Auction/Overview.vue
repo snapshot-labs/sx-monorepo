@@ -465,11 +465,6 @@ function handleScrollEvent(target: HTMLElement) {
       :network="network"
       class="min-h-[355px] p-4"
     />
-    <div
-      v-else
-      class="min-h-[355px] flex items-center justify-center"
-      v-text="'Graph coming soon ...'"
-    />
 
     <UiScrollerHorizontal with-buttons gradient="xxl">
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
