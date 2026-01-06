@@ -1,4 +1,8 @@
-import { GetAuctionPriceHourDataQuery, OrderFragment } from './gql/graphql';
+import {
+  GetAuctionPriceHourDataQuery,
+  GetAuctionPriceLevelsQuery,
+  OrderFragment
+} from './gql/graphql';
 
 export type AuctionNetworkId = 'eth' | 'base' | 'sep';
 export type AuctionState =
@@ -10,9 +14,7 @@ export type AuctionState =
 
 export type Order = OrderFragment & { name: string | null };
 export type SellOrder = { buyAmount: bigint; sellAmount: bigint };
-export type AuctionPriceLevelPoint = {
-  volume: string;
-  price: string;
-};
+export type AuctionPriceLevelPoint =
+  GetAuctionPriceLevelsQuery['auctionPriceLevels'][number];
 export type AuctionPriceHistoryPoint =
   GetAuctionPriceHourDataQuery['priceData'][number];
