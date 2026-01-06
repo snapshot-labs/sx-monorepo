@@ -9,7 +9,7 @@ const AVAILABLE_NETWORKS = NETWORK_IDS.filter(networkId =>
   enabledNetworks.includes(networkId)
 );
 
-const network = ref<AuctionNetworkId>(NETWORK_IDS[0]);
+const network = ref<AuctionNetworkId>(AVAILABLE_NETWORKS[0]);
 
 const currentTimestamp = useTimestamp({ interval: 1000 });
 const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
