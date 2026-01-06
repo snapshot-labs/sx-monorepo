@@ -1,5 +1,7 @@
 import 'dotenv/config';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { writeHeapSnapshot } from 'v8';
 import cors from 'cors';
 import express from 'express';
@@ -48,7 +50,7 @@ app.get('/debug/heapdump', (req, res) => {
     return;
   }
 
-  const filename = `/tmp/heap-${Date.now()}.heapsnapshot`;
+  const filename = path.join(os.tmpdir(), `heap-${Date.now()}.heapsnapshot`);
   writeHeapSnapshot(filename);
 
   res.download(filename, err => {
