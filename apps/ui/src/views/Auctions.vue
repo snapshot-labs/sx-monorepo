@@ -41,75 +41,77 @@ function handleEndReached() {
 </script>
 
 <template>
-  <div class="p-4">
-    <Combobox
-      v-model="network"
-      class="mb-0"
-      inline
-      :gap="12"
-      :definition="{
-        type: 'string',
-        title: 'Network',
-        enum: networks.map(c => c.id),
-        options: networks
-      }"
-    />
-  </div>
-
-  <UiSectionHeader label="Auctions" sticky />
-  <UiColumnHeader class="hidden md:flex text-center">
-    <div class="grow" />
-    <div class="w-[100px]" v-text="'Selling'" />
-    <div class="w-[100px]" v-text="'Buying'" />
-    <div class="w-[100px]" v-text="'Status'" />
-    <div class="w-[100px]" v-text="'Volume'" />
-    <div class="w-[170px]" v-text="'End date'" />
-  </UiColumnHeader>
-  <UiLoading v-if="isPending" class="block m-4" />
-  <div v-else-if="data">
-    <UiContainerInfiniteScroll
-      v-if="data.pages.flat().length"
-      :loading-more="isFetchingNextPage"
-      @end-reached="handleEndReached"
-    >
-      <AppLink
-        v-for="auction in data.pages.flat()"
-        :key="auction.id"
-        :to="{
-          name: 'auction-overview',
-          params: { id: `${network}:${auction.id}` }
+  <div>
+    <div class="p-4">
+      <Combobox
+        v-model="network"
+        class="mb-0"
+        inline
+        :gap="12"
+        :definition="{
+          type: 'string',
+          title: 'Network',
+          enum: networks.map(c => c.id),
+          options: networks
         }"
-        class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
+      />
+    </div>
+
+    <UiSectionHeader label="Auctions" sticky />
+    <UiColumnHeader class="hidden md:flex text-center">
+      <div class="grow" />
+      <div class="w-[100px]" v-text="'Selling'" />
+      <div class="w-[100px]" v-text="'Buying'" />
+      <div class="w-[100px]" v-text="'Status'" />
+      <div class="w-[100px]" v-text="'Volume'" />
+      <div class="w-[170px]" v-text="'End date'" />
+    </UiColumnHeader>
+    <UiLoading v-if="isPending" class="block m-4" />
+    <div v-else-if="data">
+      <UiContainerInfiniteScroll
+        v-if="data.pages.flat().length"
+        :loading-more="isFetchingNextPage"
+        @end-reached="handleEndReached"
       >
-        <h3 class="truncate grow" v-text="`Auction #${auction.id}`" />
-        <div class="hidden md:flex font-bold text-center text-skin-link">
-          <div class="w-[100px] truncate px-2">
-            {{ auction.symbolAuctioningToken }}
+        <AppLink
+          v-for="auction in data.pages.flat()"
+          :key="auction.id"
+          :to="{
+            name: 'auction-overview',
+            params: { id: `${network}:${auction.id}` }
+          }"
+          class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
+        >
+          <h3 class="truncate grow" v-text="`Auction #${auction.id}`" />
+          <div class="hidden md:flex font-bold text-center text-skin-link">
+            <div class="w-[100px] truncate px-2">
+              {{ auction.symbolAuctioningToken }}
+            </div>
+            <div class="w-[100px] truncate px-2">
+              {{ auction.symbolBiddingToken }}
+            </div>
+            <div class="w-[100px]">
+              {{ getAuctionState(auction, currentTimestamp) }}
+            </div>
+            <div class="w-[100px] truncate px-2">
+              {{
+                _n(
+                  Number(auction.currentBiddingAmount) /
+                    10 ** Number(auction.decimalsBiddingToken),
+                  'compact'
+                )
+              }}
+              {{ auction.symbolBiddingToken }}
+            </div>
+            <div class="w-[170px]">
+              {{ _t(auction.endTimeTimestamp) }}
+            </div>
           </div>
-          <div class="w-[100px] truncate px-2">
-            {{ auction.symbolBiddingToken }}
-          </div>
-          <div class="w-[100px]">
-            {{ getAuctionState(auction, currentTimestamp) }}
-          </div>
-          <div class="w-[100px] truncate px-2">
-            {{
-              _n(
-                Number(auction.currentBiddingAmount) /
-                  10 ** Number(auction.decimalsBiddingToken),
-                'compact'
-              )
-            }}
-            {{ auction.symbolBiddingToken }}
-          </div>
-          <div class="w-[170px]">
-            {{ _t(auction.endTimeTimestamp) }}
-          </div>
-        </div>
-      </AppLink>
-    </UiContainerInfiniteScroll>
-    <UiStateWarning v-else class="px-4 py-3">
-      No results found for your search
-    </UiStateWarning>
+        </AppLink>
+      </UiContainerInfiniteScroll>
+      <UiStateWarning v-else class="px-4 py-3">
+        No results found for your search
+      </UiStateWarning>
+    </div>
   </div>
 </template>
