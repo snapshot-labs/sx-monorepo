@@ -3,12 +3,14 @@ import {
   auctionPriceHourDataQuery,
   auctionPriceMinuteDataQuery,
   auctionQuery,
+  auctionsQuery,
   ordersQuery,
   previousOrderQuery,
   unclaimedOrdersQuery
 } from './queries';
 import { getNames } from '../stamp';
 import {
+  AuctionDetailFragment,
   AuctionPriceHourData_Filter,
   AuctionPriceMinuteData_Filter,
   Order_Filter,
@@ -16,7 +18,12 @@ import {
   OrderFragment
 } from './gql/graphql';
 import { encodeOrder } from './orders';
-import { AuctionNetworkId, AuctionPriceHistoryPoint, Order } from './types';
+import {
+  AuctionNetworkId,
+  AuctionPriceHistoryPoint,
+  AuctionState,
+  Order
+} from './types';
 import { ChartGranularity } from '../charts';
 
 export * from './types';
@@ -49,6 +56,29 @@ export function formatPrice(
     : '0';
 }
 
+export function getAuctionState(
+  auction: AuctionDetailFragment,
+  timestamp = Date.now()
+): AuctionState {
+  const now = Math.floor(timestamp / 1000);
+  const endTime = parseInt(auction.endTimeTimestamp);
+
+  if (now < endTime) return 'active';
+
+  const currentBiddingAmount = BigInt(auction.currentBiddingAmount);
+  const minFundingThreshold = BigInt(auction.minFundingThreshold);
+
+  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
+
+  if (auction.ordersWithoutClaimed?.length) {
+    if (!auction.clearingPriceOrder) return 'finalizing';
+
+    return 'claiming';
+  }
+
+  return 'claimed';
+}
+
 function getClient(network: AuctionNetworkId) {
   const subgraphUrl = SUBGRAPH_URLS[network];
   if (!subgraphUrl) throw new Error(`Unknown network: ${network}`);
@@ -57,6 +87,26 @@ function getClient(network: AuctionNetworkId) {
     uri: subgraphUrl,
     cache: new InMemoryCache()
   });
+}
+
+export async function getAuctions(
+  network: AuctionNetworkId,
+  {
+    skip,
+    first
+  }: {
+    skip: number;
+    first: number;
+  }
+) {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: auctionsQuery,
+    variables: { first, skip }
+  });
+
+  return data.auctionDetails;
 }
 
 export async function getAuction(id: string, network: AuctionNetworkId) {
