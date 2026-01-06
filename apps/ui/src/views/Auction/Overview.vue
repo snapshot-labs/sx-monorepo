@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
-import { AuctionState } from '@/components/AuctionStatus.vue';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
-import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  getAuctionState,
+  Order,
+  SellOrder
+} from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import { _n, partitionDuration, sleep } from '@/helpers/utils';
@@ -55,25 +59,9 @@ const chartType = ref<'price' | 'depth'>('price');
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
-const auctionState = computed<AuctionState>(() => {
-  const now = Math.floor(currentTimestamp.value / 1000);
-  const endTime = parseInt(props.auction.endTimeTimestamp);
-
-  if (now < endTime) return 'active';
-
-  const currentBiddingAmount = BigInt(props.auction.currentBiddingAmount);
-  const minFundingThreshold = BigInt(props.auction.minFundingThreshold);
-
-  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
-
-  if (props.auction.ordersWithoutClaimed?.length) {
-    if (!props.auction.clearingPriceOrder) return 'finalizing';
-
-    return 'claiming';
-  }
-
-  return 'claimed';
-});
+const auctionState = computed(() =>
+  getAuctionState(props.auction, currentTimestamp.value)
+);
 
 const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > currentTimestamp.value / 1000

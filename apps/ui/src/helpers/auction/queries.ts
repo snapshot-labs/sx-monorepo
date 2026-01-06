@@ -47,6 +47,14 @@ gql(`
   }
 `);
 
+export const auctionsQuery = gql(`
+  query GetAuctions($first: Int!, $skip: Int!) {
+    auctionDetails(first: $first, skip: $skip, orderBy: startingTimeStamp, orderDirection: desc) {
+      ...auctionDetail
+    }
+  }
+`);
+
 export const auctionQuery = gql(`
   query GetAuction($id: ID!) {
     auctionDetail(id: $id) {
