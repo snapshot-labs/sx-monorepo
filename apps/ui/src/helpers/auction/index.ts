@@ -33,7 +33,7 @@ const DEFAULT_ORDER_ID =
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
   eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR',
-  base: '',
+  base: 'https://subgrapher.snapshot.org/subgraph/arbitrum/A3pxMtQ3i2oL2PmqKfJP8kKuPV71FftggoLU29TGqnN2',
   sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d'
 };
 
