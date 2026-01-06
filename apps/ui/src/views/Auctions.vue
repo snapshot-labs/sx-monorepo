@@ -3,14 +3,13 @@ import { AuctionNetworkId, getAuctionState } from '@/helpers/auction';
 import { _n, _t, getUrl } from '@/helpers/utils';
 import { enabledNetworks, getNetwork } from '@/networks';
 import { useAuctionsQuery } from '@/queries/auction';
-import { NetworkID } from '@/types';
 
-const NETWORK_IDS: NetworkID[] = ['eth', 'base', 'sep'];
+const NETWORK_IDS: AuctionNetworkId[] = ['eth', 'base', 'sep'];
 const AVAILABLE_NETWORKS = NETWORK_IDS.filter(networkId =>
   enabledNetworks.includes(networkId)
 );
 
-const network = ref<AuctionNetworkId>('eth');
+const network = ref<AuctionNetworkId>(NETWORK_IDS[0]);
 
 const currentTimestamp = useTimestamp({ interval: 1000 });
 const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
