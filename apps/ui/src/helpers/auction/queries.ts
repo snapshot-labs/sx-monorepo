@@ -87,7 +87,7 @@ export const unclaimedOrdersQuery = gql(`
 
 export const auctionPriceMinuteDataQuery = gql(`
   query GetAuctionPriceMinuteData($first: Int, $skip: Int, $where: AuctionPriceMinuteData_filter) {
-    auctionPriceMinuteDatas(
+    priceData: auctionPriceMinuteDatas(
       first: $first
       skip: $skip
       orderBy: startTimestamp
@@ -102,7 +102,7 @@ export const auctionPriceMinuteDataQuery = gql(`
 
 export const auctionPriceHourDataQuery = gql(`
   query GetAuctionPriceHourData($first: Int, $skip: Int, $where: AuctionPriceHourData_filter) {
-    auctionPriceHourDatas(
+    priceData: auctionPriceHourDatas(
       first: $first
       skip: $skip
       orderBy: startTimestamp

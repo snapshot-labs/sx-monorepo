@@ -92,11 +92,11 @@ const normalizedData = computed<SingleValueData[]>(() => {
 
   const defaultData: AuctionPriceHistoryPoint[] = [
     {
-      startTimestamp: granularityMinDataTimestamp.value.toString(),
+      startTimestamp: granularityMinDataTimestamp.value,
       close: props.auction.currentClearingPrice
     },
     {
-      startTimestamp: chartEndTimestamp.value.toString(),
+      startTimestamp: chartEndTimestamp.value,
       close: props.auction.currentClearingPrice
     }
   ];

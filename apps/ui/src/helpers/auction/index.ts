@@ -185,15 +185,11 @@ export async function getAuctionPriceHistory(
     granularity === 'hour'
       ? auctionPriceHourDataQuery
       : auctionPriceMinuteDataQuery;
-  const dataKey =
-    granularity === 'hour'
-      ? 'auctionPriceHourDatas'
-      : 'auctionPriceMinuteDatas';
 
   const { data } = await client.query({
     query,
     variables: { where: filter, first, skip }
   });
 
-  return data[dataKey] || [];
+  return data.priceData;
 }
