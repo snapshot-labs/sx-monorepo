@@ -39,7 +39,7 @@ const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
   eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101',
-  base: '',
+  base: '0x5e9DC9694f6103dA5d5B9038c090040E3A6E4Bf8',
   sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C'
 };
 
