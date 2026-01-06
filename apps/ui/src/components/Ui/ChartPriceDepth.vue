@@ -6,7 +6,8 @@ import {
   LineSeriesPartialOptions,
   LineStyle,
   LineType,
-  SingleValueData
+  SingleValueData,
+  Time
 } from 'lightweight-charts';
 import { CHART_DEFAULT_OPTIONS, ChartSeries } from '@/composables/useChart';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
@@ -53,6 +54,40 @@ const clearingPrice = computed(() => {
   return parseFloat(props.auction.currentClearingPrice);
 });
 
+const partitionedData = computed(() => {
+  const below: SingleValueData[] = [];
+  const above: SingleValueData[] = [];
+  const clearing = clearingPrice.value;
+
+  for (const item of props.data) {
+    const time = item.time as number;
+    if (time <= clearing) {
+      below.push(item);
+    }
+    if (time >= clearing) {
+      above.push(item);
+    }
+  }
+
+  // lightweight-charts is showing single point series as a line around the point,
+  // overlapping with other series. To avoid that, we add a dummy point before/after
+  if (below.length === 1) {
+    below.unshift({
+      value: below[0].value,
+      time: 0 as Time
+    });
+  }
+
+  if (above.length === 1) {
+    above.push({
+      value: above[0].value,
+      time: ((above[0].time as number) * 1.1) as Time
+    });
+  }
+
+  return { below, above };
+});
+
 const series = computed<ChartSeries[]>(() => {
   const supplyCap = parseFloat(
     formatUnits(
@@ -65,16 +100,12 @@ const series = computed<ChartSeries[]>(() => {
     {
       type: 'area',
       options: BELOW_CLEARING_PRICE_SERIES_OPTIONS,
-      data: props.data.filter(
-        item => (item.time as number) <= clearingPrice.value
-      )
+      data: partitionedData.value.below
     },
     {
       type: 'area',
       options: ABOVE_CLEARING_PRICE_SERIES_OPTIONS,
-      data: props.data.filter(
-        item => (item.time as number) >= clearingPrice.value
-      )
+      data: partitionedData.value.above
     },
     {
       type: 'line',
