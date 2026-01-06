@@ -10,29 +10,28 @@ const props = defineProps<{
   auction: AuctionDetailFragment;
 }>();
 
-const isFetchingPages = ref(false);
-
-const { data, isError, isPending, fetchNextPage, hasNextPage } =
-  useAuctionPriceLevelQuery({
-    network: () => props.network,
-    auction: () => props.auction
-  });
-
-watch(
+const {
   data,
-  async () => {
-    if (!isFetchingPages.value && hasNextPage.value && !isError.value) {
-      isFetchingPages.value = true;
+  isError,
+  isPending,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage
+} = useAuctionPriceLevelQuery({
+  network: () => props.network,
+  auction: () => props.auction
+});
 
-      while (hasNextPage.value && !isError.value) {
-        await fetchNextPage();
-      }
-
-      isFetchingPages.value = false;
-    }
-  },
-  { immediate: true }
-);
+watchEffect(async () => {
+  if (
+    hasNextPage.value &&
+    !isError.value &&
+    !isFetchingNextPage.value &&
+    !isPending.value
+  ) {
+    await fetchNextPage();
+  }
+});
 
 const normalizedData = computed<SingleValueData[]>(() => {
   if (!data.value || hasNextPage.value) return [];
@@ -63,11 +62,11 @@ const normalizedData = computed<SingleValueData[]>(() => {
 <template>
   <div class="flex flex-col">
     <div
-      v-if="isPending || isError || hasNextPage"
+      v-if="isPending || isError || hasNextPage || isFetchingNextPage"
       class="flex items-center justify-center flex-1"
     >
       <template v-if="isError">Error while loading chart</template>
-      <UiLoading v-else-if="isPending || hasNextPage" />
+      <UiLoading v-else-if="isPending || hasNextPage || isFetchingNextPage" />
     </div>
     <UiChartPriceDepth
       v-else
