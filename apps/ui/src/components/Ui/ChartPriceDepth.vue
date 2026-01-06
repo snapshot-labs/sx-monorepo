@@ -12,6 +12,7 @@ import {
 import { CHART_DEFAULT_OPTIONS, ChartSeries } from '@/composables/useChart';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { getPriceFormat } from '@/helpers/charts';
+import { _n } from '@/helpers/utils';
 
 const BELOW_CLEARING_PRICE_SERIES_OPTIONS: AreaSeriesPartialOptions = {
   lineColor: 'rgba(239, 68, 68, 0.8)', // red-500
@@ -186,7 +187,12 @@ function formatNumber(value: number, range?: number): string {
       :value="clearingPrice"
       :color="CLEARING_PRICE_COLOR"
     >
-      Clearing: {{ formatNumber(clearingPrice, priceDelta) }}
+      Clearing:
+      {{
+        _n(clearingPrice, 'standard', {
+          maximumFractionDigits: 6
+        })
+      }}
       {{ props.auction.symbolBiddingToken }}
     </UiChartVerticalLine>
   </div>
