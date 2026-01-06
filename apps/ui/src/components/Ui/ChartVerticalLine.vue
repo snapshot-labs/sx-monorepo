@@ -82,6 +82,7 @@ function updatePositions() {
       height: chartCanvasHeight.value
     };
 
+    isLineVisible.value = true;
     isLabelVisible.value = true;
 
     nextTick(() => {
