@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import fs from 'fs';
+import { writeHeapSnapshot } from 'v8';
 import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
@@ -19,6 +21,7 @@ if (!process.env.WALLET_SECRET) {
 
 const app = express();
 
+const debugSecret = process.env.DEBUG_SECRET;
 const commit = process.env.COMMIT_HASH || '';
 const version = commit ? `${pkg.version}#${commit.substr(0, 7)}` : pkg.version;
 
@@ -38,6 +41,21 @@ app.get('/', (req, res) =>
     }
   })
 );
+
+app.get('/debug/heapdump', (req, res) => {
+  if (!debugSecret || req.header('secret') !== debugSecret) {
+    res.status(403).send('Forbidden');
+    return;
+  }
+
+  const filename = `/tmp/heap-${Date.now()}.heapsnapshot`;
+  writeHeapSnapshot(filename);
+
+  res.download(filename, err => {
+    if (err) logger.error({ err }, 'Error sending heap snapshot');
+    fs.unlinkSync(filename);
+  });
+});
 
 async function start() {
   registeredTransactionsLoop();
