@@ -14,6 +14,7 @@ const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
 const { logout, web3 } = useWeb3();
 const { toggleTheme, currentTheme } = useTheme();
 const { isWhiteLabel } = useWhiteLabel();
+const { isAuctionApp } = useApp();
 
 const SEARCH_CONFIG = {
   space: {
@@ -165,12 +166,16 @@ onUnmounted(() => {
         </template>
         <template v-if="web3.account" #items>
           <UiDropdownItem
+            v-if="!isAuctionApp"
             :to="{ name: 'user', params: { user: web3.account } }"
           >
             <IH-user />
             My profile
           </UiDropdownItem>
-          <UiDropdownItem :to="{ name: 'settings-spaces' }">
+          <UiDropdownItem
+            v-if="!isAuctionApp"
+            :to="{ name: 'settings-spaces' }"
+          >
             <IH-cog />
             Settings
           </UiDropdownItem>
