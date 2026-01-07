@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { LineType, SingleValueData } from 'lightweight-charts';
-import { ChartSeries } from '@/components/Ui/ChartTime.vue';
+import { ChartSeries } from '@/composables/useChart';
 import { AuctionNetworkId, AuctionPriceHistoryPoint } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import {
@@ -92,11 +92,11 @@ const normalizedData = computed<SingleValueData[]>(() => {
 
   const defaultData: AuctionPriceHistoryPoint[] = [
     {
-      startTimestamp: granularityMinDataTimestamp.value.toString(),
+      startTimestamp: granularityMinDataTimestamp.value,
       close: props.auction.currentClearingPrice
     },
     {
-      startTimestamp: chartEndTimestamp.value.toString(),
+      startTimestamp: chartEndTimestamp.value,
       close: props.auction.currentClearingPrice
     }
   ];
