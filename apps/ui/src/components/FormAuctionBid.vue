@@ -47,7 +47,7 @@ const auctionId = computed(() => `${props.network}:${props.auction.id}`);
 
 const { isVerified, getAttestation } = useAuctionVerification(
   auctionId.value,
-  computed(() => props.auction.allowListSigner)
+  props.auction.allowListSigner
 );
 
 const bidAmount = ref('');

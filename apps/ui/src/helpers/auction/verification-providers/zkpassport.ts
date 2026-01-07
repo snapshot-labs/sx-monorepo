@@ -68,7 +68,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
       try {
         await context.rpcCall('verify', {
           network: context.network,
-          bidder: context.web3Account.value,
+          user: context.web3Account.value,
           proofs,
           queryResult,
           devMode: context.devMode

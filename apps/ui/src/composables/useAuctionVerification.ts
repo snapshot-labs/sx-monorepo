@@ -111,7 +111,7 @@ export function useAuctionVerification(
     try {
       const result = await rpcCall<AttestationResponse>('get_attestation', {
         auctionId,
-        bidder: web3Account.value,
+        user: web3Account.value,
         provider: verificationType.value
       });
 

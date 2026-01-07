@@ -8,7 +8,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
 
   try {
     const result = await context.rpcCall<{ url: string }>('generate_link', {
-      bidder: context.web3Account.value,
+      user: context.web3Account.value,
       provider: 'sumsub'
     });
 
