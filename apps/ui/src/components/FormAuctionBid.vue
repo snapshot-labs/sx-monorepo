@@ -2,6 +2,8 @@
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
+import { computed } from 'vue';
+import { useAuctionVerification } from '@/composables/useAuctionVerification';
 import { abis } from '@/helpers/abis';
 import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
@@ -40,20 +42,18 @@ const props = defineProps<{
 
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
-const { isVerified: isZKPassportVerified } = useZKPassport(
-  `${props.network}:${props.auction.id}`
+
+const auctionId = computed(() => `${props.network}:${props.auction.id}`);
+
+const { isVerified, getAttestation } = useAuctionVerification(
+  auctionId.value,
+  computed(() => props.auction.allowListSigner)
 );
 
 const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
 const sliderValue = ref(95);
-
-const requiresZKPassport = computed(
-  () =>
-    // props.auction.isPrivateAuction &&
-    !isZKPassportVerified.value
-);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
@@ -163,8 +163,7 @@ const hasErrors = computed<boolean>(() => {
   return !!(
     Object.keys(formatErrors.value).length ||
     amountError.value ||
-    priceError.value ||
-    requiresZKPassport.value
+    priceError.value
   );
 });
 
@@ -195,7 +194,7 @@ function convertPriceToPercentage(price: number) {
   return Math.min(Math.max(percentage, 0), 100);
 }
 
-function handlePlaceOrder() {
+async function handlePlaceOrder() {
   if (!web3Account.value) {
     modalAccountOpen.value = true;
 
@@ -214,13 +213,16 @@ function handlePlaceOrder() {
     Number(props.auction.decimalsBiddingToken)
   );
 
+  const attestation = isVerified.value ? await getAttestation() : undefined;
+
   emit('submit', {
     sellAmount,
     buyAmount: getOrderBuyAmount({
       sellAmount,
       price,
       buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
-    })
+    }),
+    attestation
   });
 }
 
@@ -310,12 +312,11 @@ onMounted(() => {
 
 <template>
   <div>
-    <ZKPassportVerification
-      v-if="requiresZKPassport"
-      :auction-id="`${network}:${auction.id}`"
-      class="mb-4"
+    <AuctionVerification
+      :auction-id="auctionId"
+      :allow-list-signer="auction.allowListSigner"
     />
-    <div v-else class="s-box p-4 space-y-3">
+    <div v-if="isVerified" class="s-box p-4 space-y-3">
       <UiMessage
         v-if="web3Account && isBalanceError"
         type="danger"
