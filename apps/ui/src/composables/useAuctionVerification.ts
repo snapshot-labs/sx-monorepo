@@ -130,6 +130,12 @@ export function useAuctionVerification(
 
     isCheckingStatus.value = true;
     try {
+      await rpcCall('verify', {
+        network,
+        user: web3Account.value,
+        provider: verificationType.value
+      });
+
       await getAttestation();
     } catch {
     } finally {
