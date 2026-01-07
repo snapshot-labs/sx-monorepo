@@ -14,6 +14,7 @@ import {
   evmSepolia
 } from '@snapshot-labs/sx';
 import { Response } from 'express';
+import fetch from 'node-fetch';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
 import logger from './logger';

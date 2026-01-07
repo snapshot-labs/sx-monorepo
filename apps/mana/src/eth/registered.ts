@@ -1,4 +1,5 @@
 import { Contract } from '@ethersproject/contracts';
+import fetch from 'node-fetch';
 import * as db from '../db';
 import { sleep } from '../utils';
 import { createWalletProxy } from './dependencies';
