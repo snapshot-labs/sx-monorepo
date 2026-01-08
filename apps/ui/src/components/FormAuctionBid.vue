@@ -45,6 +45,7 @@ const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
 const sliderValue = ref(95);
+const tosAccepted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
@@ -463,10 +464,14 @@ onMounted(() => {
           {{ _p(sliderValue / 100) }} likely to pass
         </div>
       </div>
+      <UiSwitch
+        v-model="tosAccepted"
+        title='By clicking "Place bid" you accept the Token Sale Privacy Policy'
+      />
       <UiButton
         primary
         class="w-full"
-        :disabled="hasErrors || isLoading"
+        :disabled="hasErrors || isLoading || !tosAccepted"
         :loading="isLoading"
         @click="handlePlaceOrder"
       >
