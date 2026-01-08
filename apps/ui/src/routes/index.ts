@@ -1,10 +1,12 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Splash from '@/components/Layout/Splash.vue';
 import aliases from '@/helpers/aliases.json';
 import { metadataNetwork } from '@/networks';
+import auctionRoutes from '@/routes/auction';
 import defaultRoutes from '@/routes/default';
 
 const { resolved, isWhiteLabel } = useWhiteLabel();
+const { isAuctionApp } = useApp();
 
 const splashRoute = {
   path: '/:catchAll(.*)*',
@@ -12,8 +14,14 @@ const splashRoute = {
   component: Splash
 };
 
-// At this stage, we're not sure whether the app is a whitelabel
-const routes = !resolved.value ? [splashRoute] : defaultRoutes;
+let routes: RouteRecordRaw[] = [];
+
+if (isAuctionApp.value) {
+  routes = auctionRoutes;
+} else {
+  // At this stage, we're not sure whether the app is a whitelabel
+  routes = !resolved.value ? [splashRoute] : defaultRoutes;
+}
 
 const router = createRouter({
   history: createWebHashHistory(),
