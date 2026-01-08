@@ -11,8 +11,6 @@ function getZKPassportInstance(): ZKPassport {
 }
 
 async function startVerification(context: VerificationContext): Promise<void> {
-  if (!context.checkWalletConnected()) return;
-
   context.status.value = 'pending';
   context.error.value = null;
 
@@ -25,7 +23,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
       purpose: 'Verify to participate in private auctions on Snapshot',
       scope: 'auction',
       mode: 'fast' as const,
-      devMode: context.devMode
+      devMode: context.network === 'sep'
     });
 
     queryBuilder.bind(
@@ -66,28 +64,34 @@ async function startVerification(context: VerificationContext): Promise<void> {
       }
 
       try {
-        await context.rpcCall('verify', {
-          network: context.network,
+        const result = await context.rpcCall<{
+          verified: boolean;
+          allowListCallData: `0x${string}`;
+        }>('verify', {
+          auctionId: context.auctionId,
           user: context.web3Account.value,
-          proofs,
-          queryResult,
-          devMode: context.devMode
+          provider: 'zkpassport',
+          metadata: {
+            zkpassport: {
+              proofs,
+              queryResult
+            }
+          }
         });
 
         context.status.value = 'verified';
-        context.uiStore.addNotification(
-          'success',
-          'ZKPassport verification complete'
-        );
+        context.allowListCallData.value = result.allowListCallData;
+        context.addNotification('success', 'ZKPassport verification complete');
       } catch (err) {
         context.handleError(err, 'Failed to verify');
       }
     });
 
     onReject(() => {
-      context.status.value = 'rejected';
-      context.error.value = 'Verification was rejected';
-      context.uiStore.addNotification('error', context.error.value);
+      context.handleError(
+        new Error('Verification was rejected'),
+        'Verification was rejected'
+      );
     });
 
     onError(errorMessage => {
@@ -106,6 +110,6 @@ async function startVerification(context: VerificationContext): Promise<void> {
 export const zkpassportProvider: VerificationProvider = {
   id: 'zkpassport',
   name: 'ZKPassport',
-  signer: import.meta.env.VITE_ZKPASSPORT_AUCTION_SIGNER?.toLowerCase() || '',
+  signer: import.meta.env.VITE_ZKPASSPORT_AUCTION_SIGNER?.toLowerCase() ?? '',
   startVerification
 };

@@ -3,7 +3,6 @@ import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { computed } from 'vue';
-import { useAuctionVerification } from '@/composables/useAuctionVerification';
 import { abis } from '@/helpers/abis';
 import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
@@ -45,9 +44,20 @@ const { modalAccountOpen } = useModal();
 
 const auctionId = computed(() => `${props.network}:${props.auction.id}`);
 
-const { isVerified, getAttestation } = useAuctionVerification(
-  auctionId.value,
-  props.auction.allowListSigner
+const {
+  verificationProvider,
+  status: verificationStatus,
+  isVerified,
+  isCheckingStatus,
+  verificationUrl,
+  error: verificationError,
+  allowListCallData,
+  startVerification,
+  checkStatus,
+  reset: resetVerification
+} = useAuctionVerification(
+  auctionId,
+  computed(() => props.auction.allowListSigner)
 );
 
 const bidAmount = ref('');
@@ -213,8 +223,6 @@ async function handlePlaceOrder() {
     Number(props.auction.decimalsBiddingToken)
   );
 
-  const attestation = isVerified.value ? await getAttestation() : undefined;
-
   emit('submit', {
     sellAmount,
     buyAmount: getOrderBuyAmount({
@@ -222,7 +230,7 @@ async function handlePlaceOrder() {
       price,
       buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
     }),
-    attestation
+    attestation: allowListCallData.value || undefined
   });
 }
 
@@ -313,10 +321,17 @@ onMounted(() => {
 <template>
   <div>
     <AuctionVerification
-      :auction-id="auctionId"
-      :allow-list-signer="auction.allowListSigner"
+      v-if="!isVerified"
+      :verification-provider="verificationProvider"
+      :status="verificationStatus"
+      :is-checking-status="isCheckingStatus"
+      :verification-url="verificationUrl"
+      :error="verificationError"
+      @start-verification="startVerification"
+      @check-status="checkStatus"
+      @reset="resetVerification"
     />
-    <div v-if="isVerified" class="s-box p-4 space-y-3">
+    <div v-else class="s-box p-4 space-y-3">
       <UiMessage
         v-if="web3Account && isBalanceError"
         type="danger"

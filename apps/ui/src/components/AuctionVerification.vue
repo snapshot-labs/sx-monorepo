@@ -1,54 +1,33 @@
 <script setup lang="ts">
-import { VERIFICATION_PENDING_STATUSES } from '@/helpers/auction/types';
-import { VERIFICATION_PROVIDER_CONFIG } from '@/helpers/auction/verification-providers';
+import {
+  AuctionVerificationType,
+  VERIFICATION_PENDING_STATUSES,
+  VerificationStatus
+} from '@/helpers/auction/types';
+import { PROVIDERS } from '@/helpers/auction/verification-providers';
 
 const props = defineProps<{
-  auctionId: string;
-  allowListSigner: string;
+  verificationProvider: AuctionVerificationType;
+  status: VerificationStatus;
+  isCheckingStatus: boolean;
+  verificationUrl: string | null;
+  error: string | null;
 }>();
 
-const {
-  verificationType,
-  status,
-  isVerified,
-  isCheckingStatus,
-  verificationUrl,
-  error,
-  startVerification,
-  getAttestation,
-  checkStatus,
-  reset
-} = useAuctionVerification(props.auctionId, props.allowListSigner);
+const emit = defineEmits<{
+  (e: 'startVerification'): void;
+  (e: 'checkStatus'): void;
+  (e: 'reset'): void;
+}>();
 
 const isPending = computed(() =>
-  VERIFICATION_PENDING_STATUSES.includes(status.value)
+  VERIFICATION_PENDING_STATUSES.includes(props.status)
 );
-
-defineExpose({
-  isVerified,
-  getAttestation
-});
 </script>
 
 <template>
-  <div
-    v-if="verificationType !== 'public' && !isVerified"
-    class="s-box overflow-hidden"
-  >
-    <div v-if="verificationType === 'private'" class="p-4">
-      <div class="flex items-center gap-3">
-        <div class="bg-skin-danger/10 rounded-full p-2.5 shrink-0">
-          <IH-lock-closed class="text-skin-danger" />
-        </div>
-        <div>
-          <p class="text-skin-text text-sm">
-            This auction uses a verification method that is not supported
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <div v-else-if="status === 'start'" class="p-4 space-y-3">
+  <div v-if="PROVIDERS[verificationProvider]" class="s-box overflow-hidden">
+    <div v-if="status === 'start'" class="p-4 space-y-3">
       <div class="flex items-center gap-3">
         <div class="bg-skin-border rounded-full p-2.5 shrink-0">
           <IH-shield-check class="text-skin-link" />
@@ -57,24 +36,24 @@ defineExpose({
           <h4 class="font-semibold leading-5">Verification required</h4>
         </div>
       </div>
-      <UiButton class="w-full" primary @click="startVerification">
-        Verify with {{ VERIFICATION_PROVIDER_CONFIG[verificationType]?.name }}
+      <UiButton class="w-full" primary @click="emit('startVerification')">
+        Verify with {{ PROVIDERS[verificationProvider]?.name }}
       </UiButton>
     </div>
 
     <ZKPassportVerification
       v-else-if="
-        isPending && verificationType === 'zkpassport' && verificationUrl
+        isPending && verificationProvider === 'zkpassport' && verificationUrl
       "
       :status="status"
       :verification-url="verificationUrl"
     />
     <SumsubVerification
-      v-else-if="isPending && verificationType === 'sumsub'"
+      v-else-if="isPending && verificationProvider === 'sumsub'"
       :status="status"
       :is-checking-status="isCheckingStatus"
       :verification-url="verificationUrl"
-      @check-status="checkStatus"
+      @check-status="emit('checkStatus')"
     />
 
     <div
@@ -113,7 +92,7 @@ defineExpose({
           </p>
         </div>
       </div>
-      <UiButton class="w-full" @click="reset">Try again</UiButton>
+      <UiButton class="w-full" @click="emit('reset')">Try again</UiButton>
     </div>
   </div>
 </template>
