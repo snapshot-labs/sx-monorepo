@@ -13,7 +13,11 @@ export type AuctionState =
   | 'canceled';
 
 export type Order = OrderFragment & { name: string | null };
-export type SellOrder = { buyAmount: bigint; sellAmount: bigint };
+export type SellOrder = {
+  buyAmount: bigint;
+  sellAmount: bigint;
+  attestation?: `0x${string}`;
+};
 export type AuctionPriceLevelPoint =
   GetAuctionPriceLevelsQuery['auctionPriceLevels'][number];
 export type AuctionPriceHistoryPoint =
@@ -34,10 +38,3 @@ export type VerificationStatus =
   | 'verified'
   | 'rejected'
   | 'error';
-
-export const VERIFICATION_PENDING_STATUSES: readonly VerificationStatus[] = [
-  'loading',
-  'pending',
-  'scanning',
-  'generating'
-];

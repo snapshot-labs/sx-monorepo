@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import {
   AuctionVerificationType,
-  VERIFICATION_PENDING_STATUSES,
   VerificationStatus
 } from '@/helpers/auction/types';
 import { PROVIDERS } from '@/helpers/auction/verification-providers';
 
+const VERIFICATION_PENDING_STATUSES: readonly VerificationStatus[] = [
+  'loading',
+  'pending',
+  'scanning',
+  'generating'
+];
+
 const props = defineProps<{
   verificationProvider: AuctionVerificationType;
   status: VerificationStatus;
-  isCheckingStatus: boolean;
   verificationUrl: string | null;
   error: string | null;
 }>();
@@ -27,7 +32,15 @@ const isPending = computed(() =>
 
 <template>
   <div v-if="PROVIDERS[verificationProvider]" class="s-box overflow-hidden">
-    <div v-if="status === 'start'" class="p-4 space-y-3">
+    <div
+      v-if="status === 'loading'"
+      class="flex flex-col text-center p-6 space-y-3"
+    >
+      <UiLoading :size="24" />
+      <p class="text-sm text-skin-text">Checking verification status</p>
+    </div>
+
+    <div v-else-if="status === 'start'" class="p-4 space-y-3">
       <div class="flex items-center gap-3">
         <div class="bg-skin-border rounded-full p-2.5 shrink-0">
           <IH-shield-check class="text-skin-link" />
@@ -51,7 +64,6 @@ const isPending = computed(() =>
     <SumsubVerification
       v-else-if="isPending && verificationProvider === 'sumsub'"
       :status="status"
-      :is-checking-status="isCheckingStatus"
       :verification-url="verificationUrl"
       @check-status="emit('checkStatus')"
     />

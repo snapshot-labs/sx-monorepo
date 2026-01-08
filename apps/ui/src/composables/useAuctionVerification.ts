@@ -51,7 +51,6 @@ export function useAuctionVerification(
   const status = ref<VerificationStatus>('start');
   const verificationUrl = ref<string | null>(null);
   const error = ref<string | null>(null);
-  const isCheckingStatus = ref(false);
   const allowListCallData = ref<`0x${string}` | null>(null);
 
   const verificationProvider = computed((): AuctionVerificationType => {
@@ -70,7 +69,6 @@ export function useAuctionVerification(
     verificationUrl.value = null;
     error.value = null;
     allowListCallData.value = null;
-    isCheckingStatus.value = false;
   }
 
   function handleError(err: unknown, message?: string) {
@@ -112,13 +110,15 @@ export function useAuctionVerification(
   }
 
   async function checkExistingAttestation() {
-    if (!web3Account.value || isCheckingStatus.value) {
+    if (!web3Account.value || status.value === 'loading') {
       return;
     }
 
     const currentAuctionId = auctionId.value;
     const currentProvider = verificationProvider.value;
-    isCheckingStatus.value = true;
+    const previousStatus = status.value;
+
+    status.value = 'loading';
     try {
       const result = await rpcCall<AttestationResponse>('verify', {
         auctionId: currentAuctionId,
@@ -137,8 +137,7 @@ export function useAuctionVerification(
       allowListCallData.value = result.allowListCallData;
     } catch (err) {
       console.error('Attestation check failed', err);
-    } finally {
-      isCheckingStatus.value = false;
+      status.value = previousStatus;
     }
   }
 
@@ -165,7 +164,6 @@ export function useAuctionVerification(
     verificationProvider,
     status,
     isVerified,
-    isCheckingStatus,
     verificationUrl,
     error,
     allowListCallData,

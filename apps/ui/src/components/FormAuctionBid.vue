@@ -48,7 +48,6 @@ const {
   verificationProvider,
   status: verificationStatus,
   isVerified,
-  isCheckingStatus,
   verificationUrl,
   error: verificationError,
   allowListCallData,
@@ -324,7 +323,6 @@ onMounted(() => {
       v-if="!isVerified"
       :verification-provider="verificationProvider"
       :status="verificationStatus"
-      :is-checking-status="isCheckingStatus"
       :verification-url="verificationUrl"
       :error="verificationError"
       @start-verification="startVerification"

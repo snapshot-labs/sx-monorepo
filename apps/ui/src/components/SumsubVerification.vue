@@ -3,7 +3,6 @@ import { VerificationStatus } from '@/helpers/auction/types';
 
 defineProps<{
   status: VerificationStatus;
-  isCheckingStatus: boolean;
   verificationUrl: string | null;
 }>();
 
@@ -36,11 +35,7 @@ const emit = defineEmits<{
             <IH-arrow-sm-right class="-rotate-45 size-4 ml-1" />
           </UiButton>
         </a>
-        <UiButton
-          class="w-full text-skin-link"
-          :loading="isCheckingStatus"
-          @click="emit('checkStatus')"
-        >
+        <UiButton class="w-full text-skin-link" @click="emit('checkStatus')">
           <IH-arrow-path class="size-4 mr-1.5" />
           Check status
         </UiButton>
