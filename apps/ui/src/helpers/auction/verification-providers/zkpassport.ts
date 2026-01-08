@@ -1,11 +1,12 @@
 import { ZKPassport } from '@zkpassport/sdk';
+import { getUrl } from '@/helpers/utils';
 import { VerificationContext, VerificationProvider } from './index';
 
 let zkPassportInstance: ZKPassport | null = null;
 
 function getZKPassportInstance(): ZKPassport {
   if (!zkPassportInstance) {
-    zkPassportInstance = new ZKPassport('snapshot.box');
+    zkPassportInstance = new ZKPassport();
   }
   return zkPassportInstance;
 }
@@ -18,11 +19,13 @@ async function startVerification(context: VerificationContext): Promise<void> {
     const zkPassport = getZKPassportInstance();
 
     const queryBuilder = await zkPassport.request({
-      name: 'Snapshot Auction Verification',
-      logo: 'https://snapshot.org/favicon.png',
-      purpose: 'Verify to participate in private auctions on Snapshot',
+      name: 'Snapshot auction verification',
+      logo:
+        getUrl('bafkreigd2gaip56bkg5xt4xkwcpa4uhrlpljg7vsuzumzctte57leh75ra') ||
+        '',
+      purpose: 'Verify to participate in private auctions',
       scope: 'auction',
-      mode: 'fast' as const,
+      mode: 'fast',
       devMode: context.network === 'sep'
     });
 
