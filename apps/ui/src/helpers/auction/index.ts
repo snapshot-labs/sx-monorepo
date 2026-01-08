@@ -266,5 +266,5 @@ export async function getAuctionPriceLevels(
     variables: { where: filter, first, skip }
   });
 
-  return data.auctionPriceLevels || [];
+  return data.auctionPriceLevels;
 }
