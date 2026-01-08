@@ -1,6 +1,7 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
 import {
   auctionPriceHourDataQuery,
+  auctionPriceLevelQuery,
   auctionPriceMinuteDataQuery,
   auctionQuery,
   auctionsQuery,
@@ -12,6 +13,7 @@ import { getNames } from '../stamp';
 import {
   AuctionDetailFragment,
   AuctionPriceHourData_Filter,
+  AuctionPriceLevel_Filter,
   AuctionPriceMinuteData_Filter,
   Order_Filter,
   Order_OrderBy,
@@ -21,6 +23,7 @@ import { encodeOrder } from './orders';
 import {
   AuctionNetworkId,
   AuctionPriceHistoryPoint,
+  AuctionPriceLevelPoint,
   AuctionState,
   Order
 } from './types';
@@ -242,4 +245,26 @@ export async function getAuctionPriceHistory(
   });
 
   return data.priceData;
+}
+
+export async function getAuctionPriceLevels(
+  network: AuctionNetworkId,
+  {
+    skip = 0,
+    first = 1000,
+    filter
+  }: {
+    skip?: number;
+    first?: number;
+    filter?: AuctionPriceLevel_Filter;
+  } = {}
+): Promise<AuctionPriceLevelPoint[]> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: auctionPriceLevelQuery,
+    variables: { where: filter, first, skip }
+  });
+
+  return data.auctionPriceLevels;
 }

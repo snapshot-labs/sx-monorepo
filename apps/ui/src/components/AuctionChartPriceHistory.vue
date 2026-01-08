@@ -128,25 +128,26 @@ const chartSeries = computed<ChartSeries[]>(() => [
   }
 ]);
 
-watch(
-  data,
-  async () => {
-    while (hasNextPage.value && !isError.value) {
-      await fetchNextPage();
-    }
-  },
-  { immediate: true }
-);
+watchEffect(async () => {
+  if (
+    hasNextPage.value &&
+    !isError.value &&
+    !isFetchingNextPage.value &&
+    !isPending.value
+  ) {
+    await fetchNextPage();
+  }
+});
 </script>
 
 <template>
   <div class="flex flex-col">
     <div
-      v-if="isPending || isError || hasNextPage"
+      v-if="isPending || isError || hasNextPage || isFetchingNextPage"
       class="flex items-center justify-center flex-1"
     >
       <template v-if="isError">Error while loading chart</template>
-      <UiLoading v-else-if="isPending || hasNextPage" />
+      <UiLoading v-else-if="isPending || hasNextPage || isFetchingNextPage" />
     </div>
     <UiChartTime v-else class="flex-1" :series="chartSeries" />
     <div class="space-x-2">
