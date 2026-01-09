@@ -679,7 +679,6 @@ function handleScrollEvent(target: HTMLElement) {
         <FormAuctionReferral
           v-else-if="sidebarType === 'referral'"
           :network="network"
-          :auction="auction"
         />
       </div>
     </Affix>

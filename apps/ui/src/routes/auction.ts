@@ -1,5 +1,5 @@
-import AuctionIncoming from '@/views/Auction/Incoming.vue';
 import AuctionOverview from '@/views/Auction/Overview.vue';
+import AuctionUpcoming from '@/views/Auction/Upcoming.vue';
 import Auction from '@/views/Auction.vue';
 import Auctions from '@/views/Auctions.vue';
 
@@ -18,8 +18,8 @@ export default [
     ]
   },
   {
-    path: '/auction/incoming/:id',
-    name: 'auction-incoming',
-    component: AuctionIncoming
+    path: '/auction/upcoming/:id',
+    name: 'auction-upcoming',
+    component: AuctionUpcoming
   }
 ];

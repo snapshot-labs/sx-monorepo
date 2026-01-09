@@ -1,14 +1,31 @@
 {
-  "1": {
-    "auctionId": "sep:105",
-    "decimalsAuctioningToken": 6,
+  "boor-test": {
+    "network": "sep",
+    "addressAuctioningToken": "0x34185a6dfc26a82375f7dfa781df509cb74bc7bc",
+    "addressBiddingToken": "0xf7dcc8870b25b02e5ac5e9f3a43e44b2c27f9e38",
+    "symbolAuctioningToken": "BORR",
+    "symbolBiddingToken": "USDC",
+    "decimalsAuctioningToken": 18,
     "decimalsBiddingToken": 6,
-    "symbolAuctioningToken": "USDC",
-    "symbolBiddingToken": "SNUSDC",
-    "exactOrder": { "price": "0.1", "sellAmount": "1000000" },
-    "startingTimeStamp": 1763938224,
-    "endTimeTimestamp": 1766552400,
-    "soldSupplyPercentage": "0.15",
-    "minFundingThreshold": "1000000"
+    "auctionedSellAmount": "200000000000000000000000000",
+    "startTimestamp": 1783656873,
+    "duration": 2592000,
+    "soldSupplyPercentage": 0.2,
+    "minFundingThreshold": "2000000000000"
+  },
+  "boor-sep-105": {
+    "network": "sep",
+    "auctionId": "105",
+    "addressAuctioningToken": "0x34185a6dfc26a82375f7dfa781df509cb74bc7bc",
+    "addressBiddingToken": "0xf7dcc8870b25b02e5ac5e9f3a43e44b2c27f9e38",
+    "symbolAuctioningToken": "BORR",
+    "symbolBiddingToken": "USDC",
+    "decimalsAuctioningToken": 18,
+    "decimalsBiddingToken": 6,
+    "auctionedSellAmount": "200000000000000000000000000",
+    "startTimestamp": 1783656873,
+    "duration": 2592000,
+    "soldSupplyPercentage": 0.2,
+    "minFundingThreshold": "2000000000000"
   }
 }
