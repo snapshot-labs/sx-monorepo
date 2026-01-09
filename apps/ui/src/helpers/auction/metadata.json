@@ -1,0 +1,14 @@
+{
+  "1": {
+    "auctionId": "sep:105",
+    "decimalsAuctioningToken": 6,
+    "decimalsBiddingToken": 6,
+    "symbolAuctioningToken": "USDC",
+    "symbolBiddingToken": "SNUSDC",
+    "exactOrder": { "price": "0.1", "sellAmount": "1000000" },
+    "startingTimeStamp": 1763938224,
+    "endTimeTimestamp": 1766552400,
+    "soldSupplyPercentage": "0.15",
+    "minFundingThreshold": "1000000"
+  }
+}
