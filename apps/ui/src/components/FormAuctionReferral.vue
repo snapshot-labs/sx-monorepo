@@ -3,16 +3,21 @@ import { isAddress } from '@ethersproject/address';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionNetworkId } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
+import { REFERRAL_SHARE } from '@/helpers/auction/referral';
 import {
+  _n,
   compareAddresses,
   formatAddress,
   shortenAddress,
   sleep
 } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
+import { useBidsSummaryQuery } from '@/queries/auction';
 import {
   REFERRAL_KEYS,
   useRefereesQuery,
+  useUserRefereesQuery,
   useUserReferralQuery
 } from '@/queries/referral';
 
@@ -47,6 +52,30 @@ const { data: userReferral, isPending: isUserReferralPending } =
   });
 
 const {
+  data: userReferees,
+  isError: isUserRefereesError,
+  isPending: isUserRefereesPending
+} = useUserRefereesQuery({
+  networkId: toRef(props, 'network'),
+  account: web3Account
+});
+
+const {
+  data: userRefereesOrders,
+  isError: isUserRefereesOrdersError,
+  isLoading: isUserRefereesOrdersLoading
+} = useBidsSummaryQuery({
+  network: () => props.network,
+  auction: () => props.auction,
+  where: () => ({
+    userAddress_in: userReferees.value?.map(r => r.referral.toLowerCase()) ?? []
+  }),
+  orderBy: 'price',
+  orderDirection: 'desc',
+  enabled: () => web3Account.value !== null
+});
+
+const {
   data: refereesData,
   fetchNextPage,
   hasNextPage,
@@ -74,6 +103,49 @@ const inputError = computed(() => {
 
 const referees = computed(() => refereesData.value?.pages.flat() ?? []);
 
+const refereesOrdersTotal = computed(() => {
+  let totalVolume = 0n;
+
+  const clearingPriceOrderDecoded = props.auction.clearingPriceOrder
+    ? decodeOrder(props.auction.clearingPriceOrder)
+    : null;
+
+  for (const order of userRefereesOrders.value ?? []) {
+    const orderComparison = compareOrders(
+      {
+        userId: order.userId,
+        buyAmount: order.buyAmount,
+        sellAmount: order.sellAmount
+      },
+      // Until auction is cleared we are missing userId for clearing price order.
+      // If our referee has order with the same price, buyAmount and sellAmount as the (last) clearig order
+      // it might be or not be included in the total.
+      // This might not be a huge deal as for open auctions last clearing order might be changing often.
+      clearingPriceOrderDecoded ?? {
+        userId: order.userId,
+        buyAmount: props.auction.currentClearingOrderBuyAmount,
+        sellAmount: props.auction.currentClearingOrderSellAmount
+      }
+    );
+
+    if (orderComparison > 0) {
+      totalVolume += BigInt(order.sellAmount);
+    } else if (orderComparison === 0) {
+      totalVolume += BigInt(props.auction.currentVolume);
+    }
+  }
+
+  return totalVolume;
+});
+
+const rewards = computed(() => {
+  const sellAmountShare =
+    (REFERRAL_SHARE * Number(refereesOrdersTotal.value)) /
+    10 ** Number(props.auction.decimalsBiddingToken);
+
+  return sellAmountShare * Number(props.auction.currentClearingPrice);
+});
+
 function handleSetReferral() {
   if (!web3Account.value) {
     modalAccountOpen.value = true;
@@ -95,50 +167,84 @@ async function handleConfirmed() {
 
 <template>
   <div class="s-box p-4 space-y-3">
-    <UiLoading v-if="web3Account && isUserReferralPending" class="py-3 block" />
-
-    <div
-      v-else-if="userReferral"
-      class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
-    >
-      <div class="text-skin-text">Referee</div>
-      <div class="flex items-center gap-3">
-        <UiStamp :id="userReferral.referee" :size="24" />
-        <div class="flex flex-col leading-[22px] truncate">
-          <h4
-            class="truncate"
-            v-text="
-              userReferral.refereeName || shortenAddress(userReferral.referee)
-            "
-          />
-          <UiAddress
-            :address="formatAddress(userReferral.referee)"
-            class="text-[17px] text-skin-text truncate"
-          />
-        </div>
-      </div>
-    </div>
+    <UiLoading
+      v-if="web3Account && (isUserReferralPending || isUserRefereesPending)"
+      class="py-3 block"
+    />
 
     <template v-else>
-      <p class="text-skin-text text-sm">
-        Set your referral to support whoever referred you. This can only be set
-        once.
-      </p>
-
-      <UiInputAddress
-        v-model="referralInput"
-        :definition="ADDRESS_INPUT_DEFINITION"
-        :error="inputError"
-      />
-
-      <UiButton
-        primary
-        class="w-full"
-        :disabled="!referralInput || !!inputError"
-        @click="handleSetReferral"
+      <div
+        v-if="userReferral"
+        class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
       >
-        Set referee
-      </UiButton>
+        <div class="text-skin-text">Referee</div>
+        <div class="flex items-center gap-3">
+          <UiStamp :id="userReferral.referee" :size="24" />
+          <div class="flex flex-col leading-[22px] truncate">
+            <h4
+              class="truncate"
+              v-text="
+                userReferral.refereeName || shortenAddress(userReferral.referee)
+              "
+            />
+            <UiAddress
+              :address="formatAddress(userReferral.referee)"
+              class="text-[17px] text-skin-text truncate"
+            />
+          </div>
+        </div>
+      </div>
+
+      <template v-else>
+        <p class="text-skin-text text-sm">
+          Set your referral to support whoever referred you. This can only be
+          set once.
+        </p>
+
+        <UiInputAddress
+          v-model="referralInput"
+          :definition="ADDRESS_INPUT_DEFINITION"
+          :error="inputError"
+        />
+
+        <UiButton
+          primary
+          class="w-full"
+          :disabled="!referralInput || !!inputError"
+          @click="handleSetReferral"
+        >
+          Set referee
+        </UiButton>
+      </template>
+
+      <div v-if="web3Account && userReferees">
+        <h4 class="py-2">Your rewards</h4>
+        <UiLoading
+          v-if="
+            web3Account &&
+            (isUserRefereesPending || isUserRefereesOrdersLoading)
+          "
+          class="py-3 block"
+        />
+        <UiStateWarning
+          v-else-if="isUserRefereesError || isUserRefereesOrdersError"
+          class="py-3"
+        >
+          Failed to load your rewards.
+        </UiStateWarning>
+        <div v-else-if="userReferees && userRefereesOrders">
+          <div
+            class="flex gap-1 items-baseline font-medium text-skin-link leading-9"
+          >
+            <span class="text-[32px]">
+              {{ _n(rewards) }}
+            </span>
+            <span class="text-md">{{
+              props.auction.symbolAuctioningToken
+            }}</span>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 
@@ -154,7 +260,7 @@ async function handleConfirmed() {
   </teleport>
 
   <div class="border-t border-skin-border">
-    <h4 class="eyebrow px-4 py-2">Leaderboard</h4>
+    <h4 class="px-4 py-2">Leaderboard</h4>
 
     <UiColumnHeader class="overflow-hidden gap-3">
       <div class="flex-1 min-w-0 truncate">Referee</div>
