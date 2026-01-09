@@ -45,7 +45,7 @@ const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
 const sliderValue = ref(95);
-const tosAccepted = ref(false);
+const isTermsAccepted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
@@ -465,13 +465,13 @@ onMounted(() => {
         </div>
       </div>
       <UiSwitch
-        v-model="tosAccepted"
+        v-model="isTermsAccepted"
         title='By clicking "Place bid" you accept the Token Sale Privacy Policy'
       />
       <UiButton
         primary
         class="w-full"
-        :disabled="hasErrors || isLoading || !tosAccepted"
+        :disabled="hasErrors || isLoading || !isTermsAccepted"
         :loading="isLoading"
         @click="handlePlaceOrder"
       >
