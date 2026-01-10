@@ -6,6 +6,7 @@ import {
 
 export type AuctionNetworkId = 'eth' | 'base' | 'sep';
 export type AuctionState =
+  | 'upcoming'
   | 'active'
   | 'finalizing'
   | 'claiming'

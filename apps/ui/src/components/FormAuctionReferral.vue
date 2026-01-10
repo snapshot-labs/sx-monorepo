@@ -2,7 +2,6 @@
 import { isAddress } from '@ethersproject/address';
 import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionNetworkId } from '@/helpers/auction';
-import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import {
   compareAddresses,
   formatAddress,
@@ -26,15 +25,11 @@ const ADDRESS_INPUT_DEFINITION = {
 
 const props = defineProps<{
   network: AuctionNetworkId;
-  auction: AuctionDetailFragment;
 }>();
 
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
-const { setReferee } = useAuctionActions(
-  toRef(props, 'network'),
-  toRef(props, 'auction')
-);
+const { setReferee } = useReferrals(toRef(props, 'network'));
 const queryClient = useQueryClient();
 
 const referralInput = ref('');

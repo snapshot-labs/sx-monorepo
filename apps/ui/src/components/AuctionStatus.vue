@@ -11,6 +11,11 @@ const STATE_CONFIG: Record<
   AuctionState,
   { label: string; class: string; icon: FunctionalComponent }
 > = {
+  upcoming: {
+    label: 'Upcoming',
+    class: 'bg-skin-border',
+    icon: ISClock
+  },
   active: { label: 'Active', class: 'bg-skin-success', icon: ISStatusOnline },
   finalizing: {
     label: 'Finalizing',

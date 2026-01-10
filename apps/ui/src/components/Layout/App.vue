@@ -26,7 +26,7 @@ const {
   modalAccountWithoutDismissOpen,
   resetAccountModal
 } = useModal();
-const { init, setAppName, app } = useApp();
+const { init, setAppName, app, isAuctionApp } = useApp();
 const { setSkin } = useSkin();
 const { setTheme } = useTheme();
 const { isStandaloneLayout } = useLayout();
@@ -73,11 +73,12 @@ const hasPlaceHolderSidebar = computed(
     ![
       'space-proposal',
       'create-space-snapshot',
-      'create-space-snapshot-x',
-      'auction',
-      'auctions'
+      'create-space-snapshot-x'
     ].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+    !['space-editor', 'space-proposal'].includes(
+      String(route.matched[1]?.name)
+    ) &&
+    !isAuctionApp.value
 );
 
 const hasTopNav = computed(() => {
