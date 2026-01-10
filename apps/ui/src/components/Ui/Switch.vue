@@ -25,7 +25,7 @@ defineProps<{
           <IC-switch-disabled v-else class="text-skin-text" />
         </span>
       </Switch>
-      <SwitchLabel class="text-skin-link truncate flex items-center gap-1">
+      <SwitchLabel class="text-skin-link flex items-center gap-1">
         {{ title }}
         <UiTooltip v-if="tooltip" :title="tooltip">
           <IH-question-mark-circle class="shrink-0" />
