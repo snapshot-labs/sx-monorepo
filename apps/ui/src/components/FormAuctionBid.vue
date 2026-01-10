@@ -464,10 +464,11 @@ onMounted(() => {
           {{ _p(sliderValue / 100) }} likely to pass
         </div>
       </div>
-      <UiSwitch
-        v-model="isTermsAccepted"
-        title='By clicking "Place bid" you accept the Token Sale Privacy Policy'
-      />
+      <UiCheckbox v-model="isTermsAccepted" class="text-start">
+        <div class="text-skin-text leading-[22px] top-[-1px] relative">
+          By clicking "Place bid" you accept the Token Sale Privacy Policy
+        </div>
+      </UiCheckbox>
       <UiButton
         primary
         class="w-full"
