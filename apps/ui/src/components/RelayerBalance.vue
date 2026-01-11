@@ -1,15 +1,8 @@
 <script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query';
 import { _n } from '@/helpers/utils';
 import { Network } from '@/networks/types';
+import { useRelayerInfoQuery } from '@/queries/relayerInfo';
 import { Space } from '@/types';
-
-type RelayerInfo = {
-  address: string;
-  balance: number;
-  ticker: string;
-  hasMinimumBalance: boolean;
-};
 
 const props = defineProps<{
   space: Space;
@@ -22,22 +15,7 @@ const {
   data: relayerInfo,
   isPending,
   isError
-} = useQuery({
-  queryKey: [
-    'relayerBalance',
-    () => ({
-      spaceId: props.space.id,
-      networkId: props.space.network
-    })
-  ],
-  queryFn: async () => {
-    return props.network.helpers.getRelayerInfo(
-      props.space.id,
-      props.space.network
-    ) as Promise<RelayerInfo>;
-  },
-  staleTime: Infinity
-});
+} = useRelayerInfoQuery(toRef(() => props.space));
 </script>
 
 <template>
