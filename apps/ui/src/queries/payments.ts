@@ -47,9 +47,7 @@ async function fetchPayments(
 
   const client = new ApolloClient({
     uri,
-    cache: new InMemoryCache({
-      addTypename: false
-    }),
+    cache: new InMemoryCache(),
     defaultOptions: {
       query: {
         fetchPolicy: 'no-cache'
