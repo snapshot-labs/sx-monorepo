@@ -29,3 +29,15 @@ gql(`
     }
   }
 `);
+
+gql(`
+  query UserReferees($indexer: String!, $tag: String!, $referee: String!, $first: Int!, $skip: Int!) {
+    referrals(indexer: $indexer, first: $first, skip: $skip, where: { tag: $tag, referee: $referee }) {
+      id
+      tag
+      referral
+      referee
+      created
+    }
+  }
+`);
