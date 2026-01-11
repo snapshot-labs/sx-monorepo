@@ -1,10 +1,7 @@
 <script lang="ts" setup>
-import { formatUnits } from '@ethersproject/units';
 import {
   AreaSeriesPartialOptions,
   BarPrice,
-  LineSeriesPartialOptions,
-  LineStyle,
   LineType,
   SingleValueData,
   Time
@@ -32,16 +29,6 @@ const ABOVE_CLEARING_PRICE_SERIES_OPTIONS: AreaSeriesPartialOptions = {
   lineType: LineType.WithSteps,
   lastValueVisible: false,
   priceLineVisible: false
-};
-
-const SUPPLY_CAP_LINE_SERIES_OPTIONS: LineSeriesPartialOptions = {
-  color: '#3b82f6',
-  lineWidth: 1,
-  lineStyle: LineStyle.Dashed,
-  lastValueVisible: false,
-  priceLineVisible: true,
-  title: 'Supply cap',
-  crosshairMarkerVisible: false
 };
 
 const CLEARING_PRICE_COLOR = '#f59e0b';
@@ -90,13 +77,6 @@ const partitionedData = computed(() => {
 });
 
 const series = computed<ChartSeries[]>(() => {
-  const supplyCap = parseFloat(
-    formatUnits(
-      props.auction.exactOrder.sellAmount,
-      props.auction.decimalsAuctioningToken
-    )
-  );
-
   return [
     {
       type: 'area',
@@ -107,14 +87,6 @@ const series = computed<ChartSeries[]>(() => {
       type: 'area',
       options: ABOVE_CLEARING_PRICE_SERIES_OPTIONS,
       data: partitionedData.value.above
-    },
-    {
-      type: 'line',
-      options: SUPPLY_CAP_LINE_SERIES_OPTIONS,
-      data: props.data.map(datum => ({
-        time: datum.time,
-        value: supplyCap
-      }))
     }
   ];
 });
