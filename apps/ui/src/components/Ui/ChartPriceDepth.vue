@@ -176,7 +176,7 @@ function formatNumber(value: number, range?: number): string {
         Bid volume @ this level:
         <span class="text-skin-link">
           {{ formatNumber(customValues.bucketVolume as number) }}
-          {{ props.auction.symbolAuctioningToken }}
+          {{ props.auction.symbolBiddingToken }}
         </span>
       </div>
     </UiChartTooltip>
