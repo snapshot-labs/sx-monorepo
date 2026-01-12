@@ -169,7 +169,7 @@ function formatNumber(value: number, range?: number): string {
       <div class="text-sm text-skin-text">
         Cumulative demand:
         <span class="text-skin-link">
-          {{ formatNumber(value) }} {{ props.auction.symbolAuctioningToken }}
+          {{ formatNumber(value) }} {{ props.auction.symbolBiddingToken }}
         </span>
       </div>
       <div v-if="customValues?.bucketVolume" class="text-xs text-skin-text">
