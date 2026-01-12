@@ -343,24 +343,63 @@ function handleScrollEvent(target: HTMLElement) {
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
-      <div class="flex gap-3">
-        <UiBadgeNetwork :id="network" :size="24">
-          <UiStamp
-            :id="auction.addressAuctioningToken"
-            :size="64"
-            type="token"
-            class="rounded-full"
-          />
-        </UiBadgeNetwork>
-        <div class="flex flex-col">
-          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-          <AuctionStatus class="max-w-fit" :state="auctionState" />
+      <div class="flex justify-between flex-wrap gap-4 items-center">
+        <div class="flex gap-3">
+          <UiBadgeNetwork :id="network" class="shrink-0" :size="24">
+            <UiStamp
+              :id="auction.addressAuctioningToken"
+              :size="64"
+              type="token"
+              class="rounded-full"
+            />
+          </UiBadgeNetwork>
+          <div class="flex flex-col">
+            <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+            <AuctionStatus class="max-w-fit" :state="auctionState" />
+          </div>
+        </div>
+        <div v-if="countdown" class="flex gap-3.5">
+          <div
+            v-if="countdown.days > 0"
+            class="flex flex-col items-center uppercase min-w-6"
+          >
+            <span
+              class="text-[32px] leading-[36px] tracking-wider text-rose-500"
+            >
+              {{ String(countdown.days).padStart(2, '0') }}
+            </span>
+            <span>days</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span
+              class="text-[32px] leading-[36px] tracking-wider text-rose-500"
+            >
+              {{ String(countdown.hours).padStart(2, '0') }}
+            </span>
+            <span>hrs.</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span
+              class="text-[32px] leading-[36px] tracking-wider text-rose-500"
+            >
+              {{ String(countdown.minutes).padStart(2, '0') }}
+            </span>
+            <span>min.</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span
+              class="text-[32px] leading-[36px] tracking-wider text-rose-500"
+            >
+              {{ String(countdown.seconds).padStart(2, '0') }}
+            </span>
+            <span>sec.</span>
+          </div>
         </div>
       </div>
       <div
         class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
       >
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-2 lg:gap-8">
           <AuctionCounter
             :title="isAuctionOpen ? 'Current price' : 'Clearing price'"
             :amount="
@@ -403,35 +442,60 @@ function handleScrollEvent(target: HTMLElement) {
               }
             )}`"
           />
-        </div>
-        <div v-if="countdown" class="flex gap-3.5">
-          <div
-            v-if="countdown.days > 0"
-            class="flex flex-col items-center uppercase min-w-6"
-          >
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.days).padStart(2, '0') }}
-            </span>
-            <span>days</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.hours).padStart(2, '0') }}
-            </span>
-            <span>hrs.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.minutes).padStart(2, '0') }}
-            </span>
-            <span>min.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.seconds).padStart(2, '0') }}
-            </span>
-            <span>sec.</span>
-          </div>
+          <AuctionCounter
+            :title="'Minimum funding'"
+            :symbol="auction.symbolBiddingToken"
+            :amount="`${_n(
+              parseFloat(
+                formatUnits(
+                  auction.minFundingThreshold,
+                  auction.decimalsBiddingToken
+                )
+              ),
+              'compact'
+            )}`"
+            :subamount="`$${_n(
+              biddingTokenPrice
+                ? parseFloat(
+                    formatUnits(
+                      auction.minFundingThreshold,
+                      auction.decimalsBiddingToken
+                    )
+                  ) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
+          />
+          <AuctionCounter
+            :title="'Minimum bidding'"
+            :symbol="auction.symbolBiddingToken"
+            :amount="`${_n(
+              parseFloat(
+                formatUnits(
+                  auction.minimumBiddingAmountPerOrder,
+                  auction.decimalsBiddingToken
+                )
+              ),
+              'compact'
+            )}`"
+            :subamount="`$${_n(
+              biddingTokenPrice
+                ? parseFloat(
+                    formatUnits(
+                      auction.minimumBiddingAmountPerOrder,
+                      auction.decimalsBiddingToken
+                    )
+                  ) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
+          />
         </div>
       </div>
     </div>
