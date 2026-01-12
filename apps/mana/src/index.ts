@@ -8,7 +8,6 @@ import express from 'express';
 import { PORT } from './constants';
 import ethRpc, { handlers as ethHandlers } from './eth';
 import pkg from '../package.json';
-import { registeredApeGasProposalsLoop } from './eth/registered';
 import logger from './logger';
 import starkRpc from './stark';
 import {
@@ -62,7 +61,8 @@ app.get('/debug/heapdump', (req, res) => {
 async function start() {
   registeredTransactionsLoop();
   registeredProposalsLoop();
-  registeredApeGasProposalsLoop();
+  // Removed for now as it's not used. Investigating memory leak issue.
+  // registeredApeGasProposalsLoop();
 
   const server = app.listen(PORT, () =>
     logger.info(`Listening at http://localhost:${PORT}`)
