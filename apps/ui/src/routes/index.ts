@@ -22,11 +22,7 @@ if (isAuctionApp.value) {
   // At this stage, we're not sure whether the app is a whitelabel
   const baseRoutes = !resolved.value ? [splashRoute] : defaultRoutes;
   // In dev mode, include auction routes
-  routes =
-    import.meta.env.DEV &&
-    import.meta.env.VITE_BROKESTER_URL === 'https://brokester.box'
-      ? [...baseRoutes, ...auctionRoutes]
-      : baseRoutes;
+  routes = import.meta.env.DEV ? [...baseRoutes, ...auctionRoutes] : baseRoutes;
 }
 
 const router = createRouter({
