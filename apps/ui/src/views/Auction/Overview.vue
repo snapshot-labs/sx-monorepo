@@ -172,7 +172,7 @@ const userOrdersSummary = computed(() => {
     }
 
     if (auctionState.value === 'canceled') {
-    // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
+      // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
       statuses[order.id] = 'rejected';
       biddingTokenToClaim += orderSellAmount;
       return;
