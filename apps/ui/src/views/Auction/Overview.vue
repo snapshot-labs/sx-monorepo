@@ -551,14 +551,16 @@ function handleScrollEvent(target: HTMLElement) {
             </div>
           </UiScrollerHorizontal>
         </div>
-        <UiButton
-          v-if="claimText"
-          class="w-full mt-4"
-          primary
-          @click="handleClaimOrders"
-        >
-          {{ claimText }}
-        </UiButton>
+        <div class="px-4">
+          <UiButton
+            v-if="claimText"
+            class="w-full"
+            primary
+            @click="handleClaimOrders"
+          >
+            {{ claimText }}
+          </UiButton>
+        </div>
       </template>
     </div>
     <div v-else-if="bidsType === 'allBids'" class="space-y-4">
