@@ -220,10 +220,7 @@ async function handleConfirmed() {
       <div v-if="web3Account && userReferees">
         <h4 class="py-2">Your rewards</h4>
         <UiLoading
-          v-if="
-            web3Account &&
-            (isUserRefereesPending || isUserRefereesOrdersLoading)
-          "
+          v-if="isUserRefereesPending || isUserRefereesOrdersLoading"
           class="py-3 block"
         />
         <UiStateWarning
