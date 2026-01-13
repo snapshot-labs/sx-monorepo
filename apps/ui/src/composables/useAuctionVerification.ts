@@ -60,7 +60,7 @@ export function useAuctionVerification({
     if (!allowListSigner.value) return 'public';
 
     const provider = getProviderBySigner(allowListSigner.value);
-    return provider ? (provider.id as VerificationProviderId) : 'private';
+    return provider ? (provider.id as VerificationProviderId) : 'public';
   });
 
   const isVerified = computed(
