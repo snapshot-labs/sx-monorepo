@@ -87,7 +87,7 @@ watchEffect(() => {
           :title="'Duration'"
           :symbol="''"
           :amount="`${_d(auction.duration)}`"
-          :subamount="``"
+          :subamount="''"
         />
       </div>
 
