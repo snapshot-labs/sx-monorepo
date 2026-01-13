@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computedAsync } from '@vueuse/core';
 import QRCode from 'qrcode';
 import { VerificationStatus } from '@/helpers/auction/types';
 

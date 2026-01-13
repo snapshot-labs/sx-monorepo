@@ -1,4 +1,4 @@
-import { VerificationContext, VerificationProvider } from './index';
+import { VerificationContext, VerificationProvider } from './';
 
 async function startVerification(context: VerificationContext): Promise<void> {
   context.status.value = 'loading';

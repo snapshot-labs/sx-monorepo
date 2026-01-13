@@ -1,6 +1,6 @@
 import { ZKPassport } from '@zkpassport/sdk';
 import { getUrl } from '@/helpers/utils';
-import { VerificationContext, VerificationProvider } from './index';
+import { VerificationContext, VerificationProvider } from './';
 
 let zkPassportInstance: ZKPassport | null = null;
 
