@@ -4,13 +4,15 @@ import { useQueryClient } from '@tanstack/vue-query';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import {
   AuctionNetworkId,
+  AuctionWithMetadata,
   getAuctionState,
   Order,
   SellOrder
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import metadata from '@/helpers/auction/metadata.json';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { _n, partitionDuration, sleep } from '@/helpers/utils';
+import { _n, _p, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
@@ -67,18 +69,6 @@ const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > currentTimestamp.value / 1000
 );
 
-const countdown = computed(() => {
-  if (isAuctionOpen.value === false) {
-    return null;
-  }
-
-  const diff =
-    parseInt(props.auction.endTimeTimestamp) -
-    Math.floor(currentTimestamp.value / 1000);
-
-  return partitionDuration(diff);
-});
-
 const isAccountSupported = computed<boolean>(() => {
   return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
 });
@@ -128,8 +118,14 @@ const {
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
-    auction: () => props.auction
+    tokenAddress: () => props.auction.addressBiddingToken
   });
+
+const auctionMetadata = computed<AuctionWithMetadata | undefined>(() => {
+  return Object.values(metadata).find(
+    m => m.id === props.auction.id
+  ) as AuctionWithMetadata;
+});
 
 const fdv = computed(
   () =>
@@ -343,18 +339,106 @@ function handleScrollEvent(target: HTMLElement) {
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
-      <div class="flex gap-3">
-        <UiBadgeNetwork :id="network" :size="24">
-          <UiStamp
-            :id="auction.addressAuctioningToken"
-            :size="64"
-            type="token"
-            class="rounded-full"
+      <div
+        class="flex justify-between flex-col lg:flex-row gap-4 lg:items-center items-start"
+      >
+        <div class="flex gap-3">
+          <UiBadgeNetwork :id="network" class="shrink-0" :size="24">
+            <UiImagePreview
+              v-if="auctionMetadata?.image_url"
+              :src="auctionMetadata.image_url"
+              :width="64"
+              :height="64"
+              alt=""
+              class="rounded-full"
+            />
+            <UiStamp
+              v-else
+              :id="auction.addressAuctioningToken"
+              :size="64"
+              type="token"
+              class="rounded-full"
+            />
+          </UiBadgeNetwork>
+          <div class="flex flex-col">
+            <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+            <AuctionStatus class="max-w-fit" :state="auctionState" />
+          </div>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-2 lg:gap-4">
+          <AuctionCounter
+            :title="'Min. funding'"
+            :symbol="auction.symbolBiddingToken"
+            :amount="`${_n(
+              parseFloat(
+                formatUnits(
+                  auction.minFundingThreshold,
+                  auction.decimalsBiddingToken
+                )
+              ),
+              'compact'
+            )}`"
+            :subamount="`$${_n(
+              biddingTokenPrice
+                ? parseFloat(
+                    formatUnits(
+                      auction.minFundingThreshold,
+                      auction.decimalsBiddingToken
+                    )
+                  ) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 2
+              }
+            )}`"
           />
-        </UiBadgeNetwork>
-        <div class="flex flex-col">
-          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-          <AuctionStatus class="max-w-fit" :state="auctionState" />
+          <AuctionCounter
+            :title="'Total auctioned'"
+            :symbol="auction.symbolAuctioningToken"
+            :amount="`${_n(
+              parseFloat(
+                formatUnits(
+                  auction.exactOrder.sellAmount,
+                  auction.decimalsAuctioningToken
+                )
+              ),
+              'compact'
+            )}`"
+            :subamount="
+              auctionMetadata?.soldSupplyPercentage
+                ? `(${_p(auctionMetadata.soldSupplyPercentage)} of supply)`
+                : ''
+            "
+          />
+          <AuctionCounter
+            :title="'Min. bidding amount'"
+            :symbol="auction.symbolBiddingToken"
+            :amount="`${_n(
+              parseFloat(
+                formatUnits(
+                  auction.minimumBiddingAmountPerOrder,
+                  auction.decimalsBiddingToken
+                )
+              ),
+              'compact'
+            )}`"
+            :subamount="`$${_n(
+              biddingTokenPrice
+                ? parseFloat(
+                    formatUnits(
+                      auction.minimumBiddingAmountPerOrder,
+                      auction.decimalsBiddingToken
+                    )
+                  ) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 2
+              }
+            )}`"
+          />
         </div>
       </div>
       <div
@@ -404,35 +488,8 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
         </div>
-        <div v-if="countdown" class="flex gap-3.5">
-          <div
-            v-if="countdown.days > 0"
-            class="flex flex-col items-center uppercase min-w-6"
-          >
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.days).padStart(2, '0') }}
-            </span>
-            <span>days</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.hours).padStart(2, '0') }}
-            </span>
-            <span>hrs.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.minutes).padStart(2, '0') }}
-            </span>
-            <span>min.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.seconds).padStart(2, '0') }}
-            </span>
-            <span>sec.</span>
-          </div>
-        </div>
+
+        <UiCountdown :timestamp="parseInt(props.auction.endTimeTimestamp)" />
       </div>
     </div>
 
@@ -681,7 +738,6 @@ function handleScrollEvent(target: HTMLElement) {
         <FormAuctionReferral
           v-else-if="sidebarType === 'referral'"
           :network="network"
-          :auction="auction"
         />
       </div>
     </Affix>
