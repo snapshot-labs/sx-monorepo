@@ -72,7 +72,10 @@ const {
   }),
   orderBy: 'price',
   orderDirection: 'desc',
-  enabled: () => web3Account.value !== null && !!userReferees.value
+  enabled: () =>
+    web3Account.value !== null &&
+    !!userReferees.value &&
+    userReferees.value.length > 0
 });
 
 const {
@@ -229,7 +232,7 @@ async function handleConfirmed() {
         >
           Failed to load your rewards.
         </UiStateWarning>
-        <div v-else-if="userReferees && userRefereesOrders">
+        <div v-else>
           <div
             class="flex gap-1 items-baseline font-medium text-skin-link leading-9"
           >
