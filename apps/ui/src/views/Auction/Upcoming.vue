@@ -8,18 +8,18 @@ import { useBiddingTokenPriceQuery } from '@/queries/auction';
 const route = useRoute();
 const router = useRouter();
 
-const auction = computed<AuctionWithMetadata>(() => {
-  return metadata[route.params['id'] as string] || null;
+const auction = computed<AuctionWithMetadata | undefined>(() => {
+  return metadata[route.params['id'] as string];
 });
 
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
-    network: () => auction.value.network,
-    tokenAddress: () => auction.value.addressBiddingToken
+    network: () => auction.value!.network,
+    tokenAddress: () => auction.value!.addressBiddingToken
   });
 
 watchEffect(() => {
-  if (auction.value.id) {
+  if (auction.value?.id) {
     router.push({
       name: 'auction-overview',
       params: { id: `${auction.value.network}:${auction.value.id}` }
