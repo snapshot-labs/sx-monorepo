@@ -4,8 +4,9 @@ import { VerificationContext, VerificationProvider } from './index';
 
 let zkPassportInstance: ZKPassport | null = null;
 
-function getZKPassportInstance(): ZKPassport {
+async function getZKPassportInstance() {
   if (!zkPassportInstance) {
+    const { ZKPassport } = await import('@zkpassport/sdk');
     zkPassportInstance = new ZKPassport();
   }
   return zkPassportInstance;
@@ -16,7 +17,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
   context.error.value = null;
 
   try {
-    const zkPassport = getZKPassportInstance();
+    const zkPassport = await getZKPassportInstance();
 
     const queryBuilder = await zkPassport.request({
       name: 'Snapshot auction verification',

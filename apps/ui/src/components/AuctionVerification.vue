@@ -40,7 +40,7 @@ const isPending = computed(() =>
       <p class="text-sm text-skin-text">Checking verification status</p>
     </div>
 
-    <div v-else-if="status === 'start'" class="p-4 space-y-3">
+    <div v-else-if="status === 'started'" class="p-4 space-y-3">
       <div class="flex items-center gap-3">
         <div class="bg-skin-border rounded-full p-2.5 shrink-0">
           <IH-shield-check class="text-skin-link" />

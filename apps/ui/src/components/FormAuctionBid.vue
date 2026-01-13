@@ -41,8 +41,6 @@ const props = defineProps<{
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 
-const auctionId = computed(() => `${props.network}:${props.auction.id}`);
-
 const {
   verificationProvider,
   status: verificationStatus,
@@ -53,10 +51,10 @@ const {
   startVerification,
   checkStatus,
   reset: resetVerification
-} = useAuctionVerification(
-  auctionId,
-  computed(() => props.auction.allowListSigner)
-);
+} = useAuctionVerification({
+  auctionId: computed(() => `${props.network}:${props.auction.id}`),
+  allowListSigner: computed(() => props.auction.allowListSigner)
+});
 
 const bidAmount = ref('');
 const bidPrice = ref('');

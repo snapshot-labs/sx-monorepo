@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computedAsync } from '@vueuse/core';
 import QRCode from 'qrcode';
 import { VerificationStatus } from '@/helpers/auction/types';
 
@@ -18,26 +19,22 @@ const STATUS_MESSAGES = {
   }
 };
 
-const qrCodeUrl = ref<string>('');
 const statusMessage = computed(() => STATUS_MESSAGES[props.status]);
 
-async function generateQRCode() {
-  if (props.status !== 'pending' || !props.verificationUrl) return;
+const qrCodeUrl = computedAsync(async () => {
+  if (props.status !== 'pending' || !props.verificationUrl) return '';
 
   try {
-    qrCodeUrl.value = await QRCode.toDataURL(props.verificationUrl, {
+    return await QRCode.toDataURL(props.verificationUrl, {
       errorCorrectionLevel: 'H',
       width: 280,
       margin: 4
     });
   } catch (err) {
     console.error('Failed to generate QR code:', err);
+    return '';
   }
-}
-
-watch([() => props.verificationUrl, () => props.status], generateQRCode, {
-  immediate: true
-});
+}, '');
 </script>
 
 <template>

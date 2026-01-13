@@ -38,17 +38,20 @@ function parseAuctionNetwork(auctionId: string): string {
   return auctionId.split(':')[0] || '';
 }
 
-export function useAuctionVerification(
-  auctionId: ComputedRef<string>,
-  allowListSigner: ComputedRef<string>
-) {
+export function useAuctionVerification({
+  auctionId,
+  allowListSigner
+}: {
+  auctionId: ComputedRef<string>;
+  allowListSigner: ComputedRef<string>;
+}) {
   const { web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
   const network = computed(() => parseAuctionNetwork(auctionId.value));
 
-  const status = ref<VerificationStatus>('start');
+  const status = ref<VerificationStatus>('started');
   const verificationUrl = ref<string | null>(null);
   const error = ref<string | null>(null);
   const allowListCallData = ref<`0x${string}` | null>(null);
@@ -65,7 +68,7 @@ export function useAuctionVerification(
   );
 
   function reset() {
-    status.value = 'start';
+    status.value = 'started';
     verificationUrl.value = null;
     error.value = null;
     allowListCallData.value = null;
@@ -153,7 +156,7 @@ export function useAuctionVerification(
         reset();
       }
 
-      if (status.value === 'start') {
+      if (status.value === 'started') {
         checkExistingAttestation();
       }
     },

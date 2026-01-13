@@ -30,7 +30,7 @@ export type AuctionVerificationType =
   | 'private';
 
 export type VerificationStatus =
-  | 'start'
+  | 'started'
   | 'loading'
   | 'pending'
   | 'scanning'
