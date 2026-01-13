@@ -20,7 +20,9 @@ if (isAuctionApp.value) {
   routes = auctionRoutes;
 } else {
   // At this stage, we're not sure whether the app is a whitelabel
-  routes = !resolved.value ? [splashRoute] : defaultRoutes;
+  const baseRoutes = !resolved.value ? [splashRoute] : defaultRoutes;
+  // In dev mode, include auction routes
+  routes = import.meta.env.DEV ? [...baseRoutes, ...auctionRoutes] : baseRoutes;
 }
 
 const router = createRouter({
