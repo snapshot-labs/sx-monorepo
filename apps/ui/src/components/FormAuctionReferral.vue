@@ -72,7 +72,7 @@ const {
   }),
   orderBy: 'price',
   orderDirection: 'desc',
-  enabled: () => web3Account.value !== null
+  enabled: () => web3Account.value !== null && !!userReferees.value
 });
 
 const {
