@@ -164,11 +164,12 @@ const userOrdersSummary = computed(() => {
     : null;
 
   userOrders.value.forEach(order => {
-    const auctioningTokensPerBiddingToken =
-      BigInt(props.auction.currentClearingOrderBuyAmount) /
-      BigInt(props.auction.currentClearingOrderSellAmount);
-
     const orderSellAmount = BigInt(order.sellAmount);
+
+    if (!unclaimedOrders.value.has(order.id)) {
+      statuses[order.id] = 'claimed';
+      return;
+    }
 
     if (auctionState.value === 'canceled') {
       // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
@@ -186,10 +187,9 @@ const userOrdersSummary = computed(() => {
       return;
     }
 
-    if (!unclaimedOrders.value.has(order.id)) {
-      statuses[order.id] = 'claimed';
-      return;
-    }
+    const auctioningTokensPerBiddingToken =
+      BigInt(props.auction.currentClearingOrderBuyAmount) /
+      BigInt(props.auction.currentClearingOrderSellAmount);
 
     const orderComparison = compareOrders(
       {
