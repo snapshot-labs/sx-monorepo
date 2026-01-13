@@ -118,7 +118,7 @@ const refereesOrdersTotal = computed(() => {
         sellAmount: order.sellAmount
       },
       // Until auction is cleared we are missing userId for clearing price order.
-      // If our referee has order with the same price, buyAmount and sellAmount as the (last) clearig order
+      // If our referee has order with the same price, buyAmount and sellAmount as the (last) clearing order
       // it might be or not be included in the total.
       // This might not be a huge deal as for open auctions last clearing order might be changing often.
       clearingPriceOrderDecoded ?? {
