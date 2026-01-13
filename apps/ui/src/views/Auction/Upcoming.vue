@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { formatUnits } from 'ethers';
-import { AuctionNetworkId } from '@/helpers/auction';
 import metadata from '@/helpers/auction/metadata.json';
 import { AuctionWithMetadata } from '@/helpers/auction/types';
 import { _d, _n, _p } from '@/helpers/utils';
+import { useBiddingTokenPriceQuery } from '@/queries/auction';
 
 const route = useRoute();
 const router = useRouter();
@@ -11,6 +11,12 @@ const router = useRouter();
 const auction = computed<AuctionWithMetadata>(() => {
   return metadata[route.params['id'] as string] || null;
 });
+
+const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
+  useBiddingTokenPriceQuery({
+    network: () => auction.value.network,
+    tokenAddress: () => auction.value.addressBiddingToken
+  });
 
 watchEffect(() => {
   if (auction.value.id) {
@@ -62,7 +68,24 @@ watchEffect(() => {
             ),
             'compact'
           )}`"
-          :subamount="''"
+          :subamount="
+            isBiddingTokenPriceLoading
+              ? ''
+              : `$${_n(
+                  biddingTokenPrice
+                    ? parseFloat(
+                        formatUnits(
+                          auction.minFundingThreshold,
+                          Number(auction.decimalsBiddingToken)
+                        )
+                      ) * biddingTokenPrice
+                    : 0,
+                  'standard',
+                  {
+                    maximumFractionDigits: 2
+                  }
+                )}`
+          "
         />
         <AuctionCounter
           :title="'Total auctioned'"
@@ -96,7 +119,7 @@ watchEffect(() => {
       <div class="space-y-2">
         <UiEyebrow>Referrals</UiEyebrow>
         <div class="border rounded-md">
-          <FormAuctionReferral :network="auction.network as AuctionNetworkId" />
+          <FormAuctionReferral :network="auction.network" :sticky="false" />
         </div>
       </div>
     </div>

@@ -77,13 +77,8 @@ export const AUCTION_KEYS = {
   ],
   biddingTokenPrice: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
-    auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [
-    ...AUCTION_KEYS.all,
-    network,
-    () => toValue(auction).id,
-    'biddingTokenPrice'
-  ],
+    tokenAddress: MaybeRefOrGetter<string>
+  ) => [...AUCTION_KEYS.all, network, tokenAddress, 'biddingTokenPrice'],
   priceHistory: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -197,26 +192,25 @@ export function useUnclaimedOrdersQuery({
 
 export function useBiddingTokenPriceQuery({
   network,
-  auction
+  tokenAddress
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
-  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  tokenAddress: MaybeRefOrGetter<string>;
 }) {
   return useQuery({
-    queryKey: AUCTION_KEYS.biddingTokenPrice(network, auction),
+    queryKey: AUCTION_KEYS.biddingTokenPrice(network, tokenAddress),
     queryFn: async () => {
       const networkValue = toValue(network);
-      const auctionValue = toValue(auction);
 
-      let tokenAddress = formatAddress(auctionValue.addressBiddingToken);
+      let tokenAddressValue = formatAddress(toValue(tokenAddress));
       let chainId = CHAIN_IDS[networkValue];
 
-      if (tokenAddress in TOKEN_PRICE_OVERRIDES) {
+      if (tokenAddressValue in TOKEN_PRICE_OVERRIDES) {
         const override =
           TOKEN_PRICE_OVERRIDES[
-            tokenAddress as keyof typeof TOKEN_PRICE_OVERRIDES
+            tokenAddressValue as keyof typeof TOKEN_PRICE_OVERRIDES
           ];
-        tokenAddress = override.address;
+        tokenAddressValue = override.address;
         chainId = override.chainId;
       }
 
@@ -230,10 +224,10 @@ export function useBiddingTokenPriceQuery({
         ];
 
       const coins = await getTokenPrices(coingeckoAssetPlatform, [
-        tokenAddress
+        tokenAddressValue
       ]);
 
-      return coins[tokenAddress.toLowerCase()]?.usd ?? 0;
+      return coins[tokenAddressValue.toLowerCase()]?.usd ?? 0;
     }
   });
 }

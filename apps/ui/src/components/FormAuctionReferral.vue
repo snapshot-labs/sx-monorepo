@@ -23,9 +23,13 @@ const ADDRESS_INPUT_DEFINITION = {
   showControls: false
 };
 
-const props = defineProps<{
-  network: AuctionNetworkId;
-}>();
+const props = withDefaults(
+  defineProps<{
+    network: AuctionNetworkId;
+    sticky?: boolean;
+  }>(),
+  { sticky: true }
+);
 
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
@@ -151,7 +155,7 @@ async function handleConfirmed() {
   <div class="border-t border-skin-border">
     <h4 class="eyebrow px-4 py-2">Leaderboard</h4>
 
-    <UiColumnHeader class="overflow-hidden gap-3">
+    <UiColumnHeader :sticky="sticky" class="overflow-hidden gap-3">
       <div class="flex-1 min-w-0 truncate">Referee</div>
       <div class="w-[80px] text-right truncate">Referrals</div>
     </UiColumnHeader>
@@ -172,9 +176,7 @@ async function handleConfirmed() {
         :loading-more="isFetchingNextPage"
         @end-reached="() => hasNextPage && fetchNextPage()"
       >
-        <div
-          class="divide-y divide-skin-border flex flex-col justify-center border-b"
-        >
+        <div class="divide-y divide-skin-border flex flex-col justify-center">
           <div
             v-for="referee in referees"
             :key="referee.id"

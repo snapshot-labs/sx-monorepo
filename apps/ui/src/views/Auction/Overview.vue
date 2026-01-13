@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/vue-query';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import {
   AuctionNetworkId,
+  AuctionWithMetadata,
   getAuctionState,
   Order,
   SellOrder
@@ -117,11 +118,13 @@ const {
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
-    auction: () => props.auction
+    tokenAddress: () => props.auction.addressBiddingToken
   });
 
-const auctionMetadata = computed(() => {
-  return Object.values(metadata).find(m => m.auctionId === props.auction.id);
+const auctionMetadata = computed<AuctionWithMetadata | undefined>(() => {
+  return Object.values(metadata).find(
+    m => m.id === props.auction.id
+  ) as AuctionWithMetadata;
 });
 
 const fdv = computed(
@@ -341,7 +344,16 @@ function handleScrollEvent(target: HTMLElement) {
       >
         <div class="flex gap-3">
           <UiBadgeNetwork :id="network" class="shrink-0" :size="24">
+            <UiImagePreview
+              v-if="auctionMetadata?.image_url"
+              :src="auctionMetadata.image_url"
+              :width="64"
+              :height="64"
+              alt=""
+              class="rounded-full"
+            />
             <UiStamp
+              v-else
               :id="auction.addressAuctioningToken"
               :size="64"
               type="token"
