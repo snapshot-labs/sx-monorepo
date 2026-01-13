@@ -2,35 +2,21 @@
 import { formatUnits } from 'ethers';
 import { AuctionNetworkId } from '@/helpers/auction';
 import metadata from '@/helpers/auction/metadata.json';
-import { _d, _n, _p, partitionDuration } from '@/helpers/utils';
+import { AuctionWithMetadata } from '@/helpers/auction/types';
+import { _d, _n, _p } from '@/helpers/utils';
 
 const route = useRoute();
 const router = useRouter();
-const currentTimestamp = useTimestamp({ interval: 1000 });
 
-const id = computed(() => route.params['id'] as string);
-
-const auction = computed(() => {
-  return metadata[id.value] || null;
-});
-
-const countdown = computed(() => {
-  const currentTimestampSeconds = Math.floor(currentTimestamp.value / 1000);
-
-  if (auction.value.startTimestamp < currentTimestampSeconds) {
-    return null;
-  }
-
-  const diff = parseInt(auction.value.startTimestamp) - currentTimestampSeconds;
-
-  return partitionDuration(diff);
+const auction = computed<AuctionWithMetadata>(() => {
+  return metadata[route.params['id'] as string] || null;
 });
 
 watchEffect(() => {
-  if (auction.value.auctionId) {
+  if (auction.value.id) {
     router.push({
       name: 'auction-overview',
-      params: { id: `${auction.value.network}:${auction.value.auctionId}` }
+      params: { id: `${auction.value.network}:${auction.value.id}` }
     });
   }
 });
@@ -41,7 +27,16 @@ watchEffect(() => {
     <div v-if="auction" class="space-y-4">
       <div class="flex gap-3">
         <UiBadgeNetwork :id="auction.network" :size="24">
+          <UiImagePreview
+            v-if="auction.image_url"
+            :src="auction.image_url"
+            :width="64"
+            :height="64"
+            alt=""
+            class="rounded-full"
+          />
           <UiStamp
+            v-else
             :id="auction.addressAuctioningToken"
             :size="64"
             type="token"
@@ -62,7 +57,7 @@ watchEffect(() => {
             parseFloat(
               formatUnits(
                 auction.minFundingThreshold,
-                auction.decimalsBiddingToken
+                Number(auction.decimalsBiddingToken)
               )
             ),
             'compact'
@@ -70,13 +65,13 @@ watchEffect(() => {
           :subamount="''"
         />
         <AuctionCounter
-          :title="'Raising target'"
+          :title="'Total auctioned'"
           :symbol="auction.symbolAuctioningToken"
           :amount="`${_n(
             parseFloat(
               formatUnits(
-                auction.auctionedSellAmount,
-                auction.decimalsAuctioningToken
+                auction.exactOrder.sellAmount,
+                Number(auction.decimalsAuctioningToken)
               )
             ),
             'compact'
@@ -86,7 +81,7 @@ watchEffect(() => {
         <AuctionCounter
           :title="'Duration'"
           :symbol="''"
-          :amount="`${_d(auction.duration)}`"
+          :amount="`${_d(parseInt(auction.endTimeTimestamp) - parseInt(auction.startingTimeStamp))}`"
           :subamount="''"
         />
       </div>
@@ -95,38 +90,7 @@ watchEffect(() => {
         class="items-center flex flex-col border rounded-md py-3 px-4 gap-2 bg-skin-border"
       >
         <UiEyebrow>Starting in</UiEyebrow>
-
-        <div class="flex justify-between gap-3">
-          <div v-if="countdown" class="flex gap-3.5">
-            <div
-              v-if="countdown.days > 0"
-              class="flex flex-col items-center uppercase min-w-6"
-            >
-              <span class="text-[32px] tracking-wider text-rose-500">
-                {{ String(countdown.days).padStart(2, '0') }}
-              </span>
-              <span>days</span>
-            </div>
-            <div class="flex flex-col items-center uppercase min-w-6">
-              <span class="text-[32px] tracking-wider text-rose-500">
-                {{ String(countdown.hours).padStart(2, '0') }}
-              </span>
-              <span>hrs.</span>
-            </div>
-            <div class="flex flex-col items-center uppercase min-w-6">
-              <span class="text-[32px] tracking-wider text-rose-500">
-                {{ String(countdown.minutes).padStart(2, '0') }}
-              </span>
-              <span>min.</span>
-            </div>
-            <div class="flex flex-col items-center uppercase min-w-6">
-              <span class="text-[32px] tracking-wider text-rose-500">
-                {{ String(countdown.seconds).padStart(2, '0') }}
-              </span>
-              <span>sec.</span>
-            </div>
-          </div>
-        </div>
+        <UiCountdown :timestamp="parseInt(auction.startingTimeStamp)" />
       </div>
 
       <div class="space-y-2">

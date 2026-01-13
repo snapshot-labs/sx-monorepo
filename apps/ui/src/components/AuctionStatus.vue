@@ -13,7 +13,7 @@ const STATE_CONFIG: Record<
 > = {
   upcoming: {
     label: 'Upcoming',
-    class: 'bg-skin-border',
+    class: 'bg-gray-500',
     icon: ISClock
   },
   active: { label: 'Active', class: 'bg-skin-success', icon: ISStatusOnline },
