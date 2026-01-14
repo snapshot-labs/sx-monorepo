@@ -28,6 +28,7 @@ import {
   AuctionState,
   Order
 } from './types';
+
 export * from './types';
 
 const DEFAULT_ORDER_ID =
@@ -75,11 +76,10 @@ export function getAuctionState(
   const currentBiddingAmount = BigInt(auction.currentBiddingAmount);
   const minFundingThreshold = BigInt(auction.minFundingThreshold);
 
+  if (!auction.clearingPriceOrder) return 'finalizing';
   if (currentBiddingAmount < minFundingThreshold) return 'canceled';
 
   if (auction.ordersWithoutClaimed?.length) {
-    if (!auction.clearingPriceOrder) return 'finalizing';
-
     return 'claiming';
   }
 
