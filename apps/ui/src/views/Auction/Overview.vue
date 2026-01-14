@@ -90,7 +90,6 @@ const {
 } = useBidsSummaryQuery({
   network: () => props.network,
   auction: () => props.auction,
-  limit: 100,
   where: () => ({
     userAddress: web3.value.account?.toLowerCase()
   }),

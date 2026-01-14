@@ -3,10 +3,12 @@ import { NetworkID } from '@/types';
 import {
   RefereesDocument,
   RefereesQuery,
+  UserRefereesDocument,
   UserReferralDocument,
   UserReferralQuery
 } from './gql/graphql';
 
+export const REFERRAL_SHARE = 0.05;
 export const POSTER_TAG = 'brokester/1';
 export const AUCTION_TAG = 'token/1';
 
@@ -44,7 +46,7 @@ export async function getReferees(
     fetchPolicy: 'no-cache'
   });
 
-  return data?.referees ?? [];
+  return data.referees;
 }
 
 export async function getUserReferral(
@@ -60,5 +62,28 @@ export async function getUserReferral(
     fetchPolicy: 'no-cache'
   });
 
-  return data?.referral ?? null;
+  return data.referral;
+}
+
+export async function getUserReferees(
+  networkId: NetworkID,
+  tag: string,
+  referee: string,
+  options: { first?: number; skip?: number } = {}
+): Promise<Referral[]> {
+  const { first = 1000, skip = 0 } = options;
+
+  const { data } = await client.query({
+    query: UserRefereesDocument,
+    variables: {
+      indexer: networkId,
+      tag,
+      referee: referee.toLowerCase(),
+      first,
+      skip
+    },
+    fetchPolicy: 'no-cache'
+  });
+
+  return data.referrals;
 }

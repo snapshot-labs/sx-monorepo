@@ -20,6 +20,7 @@ gql(`
     currentClearingOrderSellAmount
     clearingPriceOrder
     volumeClearingPriceOrder
+    currentVolume
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
