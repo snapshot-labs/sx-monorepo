@@ -9,6 +9,7 @@ import {
   previousOrderQuery,
   unclaimedOrdersQuery
 } from './queries';
+import { ChartGranularity } from '../charts';
 import { getNames } from '../stamp';
 import {
   AuctionDetailFragment,
@@ -27,7 +28,6 @@ import {
   AuctionState,
   Order
 } from './types';
-import { ChartGranularity } from '../charts';
 
 export * from './types';
 
@@ -71,11 +71,10 @@ export function getAuctionState(
   const currentBiddingAmount = BigInt(auction.currentBiddingAmount);
   const minFundingThreshold = BigInt(auction.minFundingThreshold);
 
+  if (!auction.clearingPriceOrder) return 'finalizing';
   if (currentBiddingAmount < minFundingThreshold) return 'canceled';
 
   if (auction.ordersWithoutClaimed?.length) {
-    if (!auction.clearingPriceOrder) return 'finalizing';
-
     return 'claiming';
   }
 
