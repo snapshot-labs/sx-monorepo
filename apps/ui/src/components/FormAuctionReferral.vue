@@ -63,7 +63,7 @@ const {
 const {
   data: userRefereesOrders,
   isError: isUserRefereesOrdersError,
-  isLoading: isUserRefereesOrdersLoading
+  isPending: isUserRefereesOrdersPending
 } = useBidsSummaryQuery({
   network: () => props.network,
   auction: () => props.auction,
@@ -82,7 +82,7 @@ const {
   data: refereesData,
   fetchNextPage,
   hasNextPage,
-  isPending: isRefereesLoading,
+  isPending: isRefereesPending,
   isFetchingNextPage,
   isError: isRefereesError
 } = useRefereesQuery({
@@ -223,7 +223,7 @@ async function handleConfirmed() {
       <div v-if="web3Account && userReferees">
         <h4 class="py-2">Your rewards</h4>
         <UiLoading
-          v-if="isUserRefereesPending || isUserRefereesOrdersLoading"
+          v-if="isUserRefereesPending || isUserRefereesOrdersPending"
           class="py-3 block"
         />
         <UiStateWarning
@@ -268,7 +268,7 @@ async function handleConfirmed() {
     </UiColumnHeader>
 
     <div class="px-4">
-      <UiLoading v-if="isRefereesLoading" class="py-3 block" />
+      <UiLoading v-if="isRefereesPending" class="py-3 block" />
 
       <UiStateWarning v-else-if="isRefereesError" class="py-3">
         Failed to load leaderboard.
