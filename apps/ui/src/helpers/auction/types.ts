@@ -24,7 +24,10 @@ export type AuctionPriceHistoryPoint =
   GetAuctionPriceHourDataQuery['priceData'][number];
 
 export type VerificationProviderId = 'zkpassport' | 'sumsub';
-export type AuctionVerificationType = VerificationProviderId | 'public';
+export type AuctionVerificationType =
+  | VerificationProviderId
+  | 'public'
+  | 'private';
 
 export type VerificationStatus =
   | 'started'
