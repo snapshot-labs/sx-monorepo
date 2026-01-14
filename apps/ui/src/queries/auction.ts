@@ -6,7 +6,8 @@ import {
   getAuctionPriceLevels,
   getAuctions,
   getOrders,
-  getUnclaimedOrders
+  getUnclaimedOrders,
+  Order
 } from '@/helpers/auction';
 import {
   AuctionDetailFragment,
@@ -24,6 +25,7 @@ import { formatAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
+const ORDERS_LIMIT = 1000;
 const PRICE_HISTORY_LIMIT = 1000;
 const PRICE_LEVEL_LIMIT = 1000;
 
@@ -58,13 +60,8 @@ export const AUCTION_KEYS = {
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
-    limit?: MaybeRefOrGetter<number>,
     where?: MaybeRefOrGetter<Order_Filter>
-  ) => [
-    ...AUCTION_KEYS.auction(network, auction),
-    'bidsSummary',
-    { limit: limit ?? SUMMARY_LIMIT, where }
-  ],
+  ) => [...AUCTION_KEYS.auction(network, auction), 'bidsSummary', { where }],
   unclaimedBids: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -145,7 +142,6 @@ export function useBidsQuery({
 export function useBidsSummaryQuery({
   network,
   auction,
-  limit = SUMMARY_LIMIT,
   where,
   orderBy = 'timestamp',
   orderDirection = 'desc',
@@ -153,21 +149,36 @@ export function useBidsSummaryQuery({
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
-  limit?: MaybeRefOrGetter<number>;
   where?: MaybeRefOrGetter<Order_Filter>;
   orderBy?: MaybeRefOrGetter<Order_OrderBy>;
   orderDirection?: MaybeRefOrGetter<'asc' | 'desc'>;
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
-    queryKey: AUCTION_KEYS.summary(network, auction, limit, where),
-    queryFn: () =>
-      getOrders(toValue(auction).id, toValue(network), {
-        first: toValue(limit),
-        orderBy: toValue(orderBy),
-        orderDirection: toValue(orderDirection),
-        orderFilter: toValue(where)
-      }),
+    queryKey: AUCTION_KEYS.summary(network, auction, where),
+    queryFn: async () => {
+      let orders: Order[] = [];
+      let hasMore = true;
+
+      while (hasMore) {
+        const newOrders = await getOrders(
+          toValue(auction).id,
+          toValue(network),
+          {
+            first: ORDERS_LIMIT,
+            skip: orders.length,
+            orderBy: toValue(orderBy),
+            orderDirection: toValue(orderDirection),
+            orderFilter: toValue(where)
+          }
+        );
+
+        orders = orders.concat(newOrders);
+        hasMore = newOrders.length === ORDERS_LIMIT;
+      }
+
+      return orders;
+    },
     enabled
   });
 }
