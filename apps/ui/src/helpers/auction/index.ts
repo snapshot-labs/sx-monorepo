@@ -9,6 +9,7 @@ import {
   previousOrderQuery,
   unclaimedOrdersQuery
 } from './queries';
+import { ChartGranularity } from '../charts';
 import { getNames } from '../stamp';
 import {
   AuctionDetailFragment,
@@ -27,8 +28,6 @@ import {
   AuctionState,
   Order
 } from './types';
-import { ChartGranularity } from '../charts';
-
 export * from './types';
 
 const DEFAULT_ORDER_ID =
@@ -45,6 +44,11 @@ export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
   base: '0x5e9DC9694f6103dA5d5B9038c090040E3A6E4Bf8',
   sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C'
 };
+
+export const VERIFICATION_PROVIDER_SIGNERS = {
+  zkpassport: '0x7d76be8cadcaa06ca91dcbfaa7c42534e7e113d3',
+  sumsub: '0x59ca9c3e79f08699b4f33184267fb61d3fb4d427'
+} as const;
 
 export function formatPrice(
   price: string | number | undefined,

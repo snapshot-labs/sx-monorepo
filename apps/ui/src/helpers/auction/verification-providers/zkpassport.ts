@@ -1,4 +1,5 @@
 import { ZKPassport } from '@zkpassport/sdk';
+import { VERIFICATION_PROVIDER_SIGNERS } from '@/helpers/auction';
 import { getUrl } from '@/helpers/utils';
 import { VerificationContext, VerificationProvider } from './';
 
@@ -114,6 +115,6 @@ async function startVerification(context: VerificationContext): Promise<void> {
 export const zkpassportProvider: VerificationProvider = {
   id: 'zkpassport',
   name: 'ZKPassport',
-  signer: import.meta.env.VITE_ZKPASSPORT_AUCTION_SIGNER?.toLowerCase() ?? '',
+  signer: VERIFICATION_PROVIDER_SIGNERS.zkpassport,
   startVerification
 };

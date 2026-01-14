@@ -1,3 +1,4 @@
+import { VERIFICATION_PROVIDER_SIGNERS } from '@/helpers/auction';
 import { VerificationContext, VerificationProvider } from './';
 
 async function startVerification(context: VerificationContext): Promise<void> {
@@ -20,6 +21,6 @@ async function startVerification(context: VerificationContext): Promise<void> {
 export const sumsubProvider: VerificationProvider = {
   id: 'sumsub',
   name: 'Sumsub',
-  signer: import.meta.env.VITE_SUMSUB_AUCTION_SIGNER?.toLowerCase() ?? '',
+  signer: VERIFICATION_PROVIDER_SIGNERS.sumsub,
   startVerification
 };
