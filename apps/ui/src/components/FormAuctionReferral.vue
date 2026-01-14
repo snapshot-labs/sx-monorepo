@@ -63,7 +63,7 @@ const {
 const {
   data: userRefereesOrders,
   isError: isUserRefereesOrdersError,
-  isPending: isUserRefereesOrdersPending
+  isLoading: isUserRefereesOrdersLoading
 } = useBidsSummaryQuery({
   network: () => props.network,
   auction: () => props.auction,
@@ -223,7 +223,7 @@ async function handleConfirmed() {
       <div v-if="web3Account && userReferees">
         <h4 class="py-2">Your rewards</h4>
         <UiLoading
-          v-if="isUserRefereesPending || isUserRefereesOrdersPending"
+          v-if="isUserRefereesPending || isUserRefereesOrdersLoading"
           class="py-3 block"
         />
         <UiStateWarning
