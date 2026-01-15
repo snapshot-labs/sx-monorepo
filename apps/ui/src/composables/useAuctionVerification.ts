@@ -113,7 +113,12 @@ export function useAuctionVerification({
   }
 
   async function checkExistingAttestation() {
-    if (!web3Account.value || status.value === 'loading') {
+    if (
+      !web3Account.value ||
+      status.value === 'loading' ||
+      verificationProvider.value === 'public' ||
+      verificationProvider.value === 'private'
+    ) {
       return;
     }
 
