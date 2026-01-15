@@ -41,5 +41,7 @@ export function getProviderBySigner(
   signer: string
 ): VerificationProvider | undefined {
   const normalized = `0x${signer.slice(-40).toLowerCase()}`;
-  return Object.values(PROVIDERS).find(p => p.signer === normalized);
+  return Object.values(PROVIDERS).find(
+    p => p.signer.toLowerCase() === normalized
+  );
 }
