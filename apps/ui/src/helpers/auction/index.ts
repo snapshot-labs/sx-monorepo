@@ -47,8 +47,8 @@ export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
 };
 
 export const VERIFICATION_PROVIDER_SIGNERS = {
-  zkpassport: '0x7d76be8cadcaa06ca91dcbfaa7c42534e7e113d3',
-  sumsub: '0x59ca9c3e79f08699b4f33184267fb61d3fb4d427'
+  zkpassport: '0xf131a5d781150b8104a855811a1eAEcea44f3082',
+  sumsub: '0x691D5D0b726A3cD30fed72C4Dc6BdD1b34695089'
 } as const;
 
 export function formatPrice(
