@@ -3,8 +3,11 @@ import { MaybeRefOrGetter } from 'vue';
 import {
   AuctionNetworkId,
   getAuctionPriceHistory,
+  getAuctionPriceLevels,
+  getAuctions,
   getOrders,
-  getUnclaimedOrders
+  getUnclaimedOrders,
+  Order
 } from '@/helpers/auction';
 import {
   AuctionDetailFragment,
@@ -22,7 +25,9 @@ import { formatAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
+const ORDERS_LIMIT = 1000;
 const PRICE_HISTORY_LIMIT = 1000;
+const PRICE_LEVEL_LIMIT = 1000;
 
 const TOKEN_PRICE_OVERRIDES = {
   // USDCTEST -> USDC
@@ -39,10 +44,15 @@ const TOKEN_PRICE_OVERRIDES = {
 
 export const AUCTION_KEYS = {
   all: ['auction'] as const,
+  list: (network: MaybeRefOrGetter<AuctionNetworkId>) => [
+    ...AUCTION_KEYS.all,
+    network,
+    'list'
+  ],
   auction: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [...AUCTION_KEYS.all, network, () => toValue(auction).id],
+  ) => [...AUCTION_KEYS.all, network, 'detail', () => toValue(auction).id],
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>
@@ -50,13 +60,8 @@ export const AUCTION_KEYS = {
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
-    limit?: MaybeRefOrGetter<number>,
     where?: MaybeRefOrGetter<Order_Filter>
-  ) => [
-    ...AUCTION_KEYS.auction(network, auction),
-    'bidsSummary',
-    { limit: limit ?? SUMMARY_LIMIT, where }
-  ],
+  ) => [...AUCTION_KEYS.auction(network, auction), 'bidsSummary', { where }],
   unclaimedBids: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -80,8 +85,33 @@ export const AUCTION_KEYS = {
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
     granularity: MaybeRefOrGetter<ChartGranularity>
-  ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity]
+  ) => [...AUCTION_KEYS.auction(network, auction), 'priceHistory', granularity],
+  priceLevel: (
+    network: MaybeRefOrGetter<AuctionNetworkId>,
+    auction: MaybeRefOrGetter<AuctionDetailFragment>
+  ) => [...AUCTION_KEYS.auction(network, auction), 'priceLevel']
 };
+
+export function useAuctionsQuery({
+  network
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: AUCTION_KEYS.list(network),
+    queryFn: ({ pageParam }) =>
+      getAuctions(toValue(network), {
+        first: LIMIT,
+        skip: pageParam
+      }),
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < LIMIT) return null;
+
+      return pages.length * LIMIT;
+    }
+  });
+}
 
 export function useBidsQuery({
   network,
@@ -112,7 +142,6 @@ export function useBidsQuery({
 export function useBidsSummaryQuery({
   network,
   auction,
-  limit = SUMMARY_LIMIT,
   where,
   orderBy = 'timestamp',
   orderDirection = 'desc',
@@ -120,21 +149,36 @@ export function useBidsSummaryQuery({
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
-  limit?: MaybeRefOrGetter<number>;
   where?: MaybeRefOrGetter<Order_Filter>;
   orderBy?: MaybeRefOrGetter<Order_OrderBy>;
   orderDirection?: MaybeRefOrGetter<'asc' | 'desc'>;
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
   return useQuery({
-    queryKey: AUCTION_KEYS.summary(network, auction, limit, where),
-    queryFn: () =>
-      getOrders(toValue(auction).id, toValue(network), {
-        first: toValue(limit),
-        orderBy: toValue(orderBy),
-        orderDirection: toValue(orderDirection),
-        orderFilter: toValue(where)
-      }),
+    queryKey: AUCTION_KEYS.summary(network, auction, where),
+    queryFn: async () => {
+      let orders: Order[] = [];
+      let hasMore = true;
+
+      while (hasMore) {
+        const newOrders = await getOrders(
+          toValue(auction).id,
+          toValue(network),
+          {
+            first: ORDERS_LIMIT,
+            skip: orders.length,
+            orderBy: toValue(orderBy),
+            orderDirection: toValue(orderDirection),
+            orderFilter: toValue(where)
+          }
+        );
+
+        orders = orders.concat(newOrders);
+        hasMore = newOrders.length === ORDERS_LIMIT;
+      }
+
+      return orders;
+    },
     enabled
   });
 }
@@ -233,6 +277,33 @@ export function useAuctionPriceDataQuery({
       if (lastPage.length < PRICE_HISTORY_LIMIT) return null;
 
       return pages.length * PRICE_HISTORY_LIMIT;
+    }
+  });
+}
+
+export function useAuctionPriceLevelQuery({
+  network,
+  auction
+}: {
+  network: MaybeRefOrGetter<AuctionNetworkId>;
+  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+}) {
+  return useInfiniteQuery({
+    initialPageParam: 0,
+    queryKey: AUCTION_KEYS.priceLevel(network, auction),
+    queryFn: async ({ pageParam }) => {
+      return getAuctionPriceLevels(toValue(network), {
+        skip: pageParam,
+        first: PRICE_LEVEL_LIMIT,
+        filter: {
+          auction: toValue(auction).id
+        }
+      });
+    },
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.length < PRICE_LEVEL_LIMIT) return null;
+
+      return pages.length * PRICE_LEVEL_LIMIT;
     }
   });
 }

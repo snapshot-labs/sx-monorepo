@@ -45,6 +45,7 @@ const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
 const sliderValue = ref(95);
+const isTermsAccepted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
 
@@ -463,10 +464,15 @@ onMounted(() => {
           {{ _p(sliderValue / 100) }} likely to pass
         </div>
       </div>
+      <UiCheckbox v-model="isTermsAccepted" class="text-start">
+        <div class="text-skin-text leading-[22px] top-[-1px] relative">
+          By clicking "Place bid" you accept the Token Sale Privacy Policy
+        </div>
+      </UiCheckbox>
       <UiButton
         primary
         class="w-full"
-        :disabled="hasErrors || isLoading"
+        :disabled="hasErrors || isLoading || !isTermsAccepted"
         :loading="isLoading"
         @click="handlePlaceOrder"
       >

@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
-import { AuctionState } from '@/components/AuctionStatus.vue';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
-import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
+import {
+  AuctionNetworkId,
+  getAuctionState,
+  Order,
+  SellOrder
+} from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import { _n, partitionDuration, sleep } from '@/helpers/utils';
@@ -55,25 +59,9 @@ const chartType = ref<'price' | 'depth'>('price');
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
-const auctionState = computed<AuctionState>(() => {
-  const now = Math.floor(currentTimestamp.value / 1000);
-  const endTime = parseInt(props.auction.endTimeTimestamp);
-
-  if (now < endTime) return 'active';
-
-  const currentBiddingAmount = BigInt(props.auction.currentBiddingAmount);
-  const minFundingThreshold = BigInt(props.auction.minFundingThreshold);
-
-  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
-
-  if (props.auction.ordersWithoutClaimed?.length) {
-    if (!props.auction.clearingPriceOrder) return 'finalizing';
-
-    return 'claiming';
-  }
-
-  return 'claimed';
-});
+const auctionState = computed(() =>
+  getAuctionState(props.auction, currentTimestamp.value)
+);
 
 const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > currentTimestamp.value / 1000
@@ -102,7 +90,6 @@ const {
 } = useBidsSummaryQuery({
   network: () => props.network,
   auction: () => props.auction,
-  limit: 100,
   where: () => ({
     userAddress: web3.value.account?.toLowerCase()
   }),
@@ -176,11 +163,12 @@ const userOrdersSummary = computed(() => {
     : null;
 
   userOrders.value.forEach(order => {
-    const auctioningTokensPerBiddingToken =
-      BigInt(props.auction.currentClearingOrderBuyAmount) /
-      BigInt(props.auction.currentClearingOrderSellAmount);
-
     const orderSellAmount = BigInt(order.sellAmount);
+
+    if (!unclaimedOrders.value.has(order.id)) {
+      statuses[order.id] = 'claimed';
+      return;
+    }
 
     if (auctionState.value === 'canceled') {
       // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
@@ -198,10 +186,9 @@ const userOrdersSummary = computed(() => {
       return;
     }
 
-    if (!unclaimedOrders.value.has(order.id)) {
-      statuses[order.id] = 'claimed';
-      return;
-    }
+    const auctioningTokensPerBiddingToken =
+      BigInt(props.auction.currentClearingOrderBuyAmount) /
+      BigInt(props.auction.currentClearingOrderSellAmount);
 
     const orderComparison = compareOrders(
       {
@@ -471,10 +458,11 @@ function handleScrollEvent(target: HTMLElement) {
       :network="network"
       class="min-h-[355px] p-4 pr-3"
     />
-    <div
-      v-else
-      class="min-h-[355px] flex items-center justify-center"
-      v-text="'Graph coming soon ...'"
+    <AuctionChartPriceDepth
+      v-else-if="chartType === 'depth'"
+      :auction="auction"
+      :network="network"
+      class="min-h-[355px] p-4"
     />
 
     <UiScrollerHorizontal with-buttons gradient="xxl">
@@ -562,14 +550,16 @@ function handleScrollEvent(target: HTMLElement) {
             </div>
           </UiScrollerHorizontal>
         </div>
-        <UiButton
-          v-if="claimText"
-          class="w-full mt-4"
-          primary
-          @click="handleClaimOrders"
-        >
-          {{ claimText }}
-        </UiButton>
+        <div class="px-4">
+          <UiButton
+            v-if="claimText"
+            class="w-full"
+            primary
+            @click="handleClaimOrders"
+          >
+            {{ claimText }}
+          </UiButton>
+        </div>
       </template>
     </div>
     <div v-else-if="bidsType === 'allBids'" class="space-y-4">
