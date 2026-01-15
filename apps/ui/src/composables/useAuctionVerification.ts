@@ -51,7 +51,7 @@ export function useAuctionVerification({
 
   const network = computed(() => parseAuctionNetwork(auctionId.value));
 
-  const status = ref<VerificationStatus>('started');
+  const status = ref<VerificationStatus>('loading');
   const verificationUrl = ref<string | null>(null);
   const error = ref<string | null>(null);
   const allowListCallData = ref<`0x${string}` | null>(null);

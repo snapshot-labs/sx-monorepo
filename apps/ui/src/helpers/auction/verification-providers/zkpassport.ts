@@ -14,7 +14,7 @@ async function getZKPassportInstance() {
 }
 
 async function startVerification(context: VerificationContext): Promise<void> {
-  context.status.value = 'pending';
+  context.status.value = 'loading';
   context.error.value = null;
 
   try {
@@ -47,6 +47,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
     } = queryBuilder.done();
 
     context.verificationUrl.value = url;
+    context.status.value = 'pending';
     const proofs: any[] = [];
 
     onRequestReceived(() => {
