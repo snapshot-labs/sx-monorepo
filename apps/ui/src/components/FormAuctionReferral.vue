@@ -63,7 +63,7 @@ const {
 const {
   data: userRefereesOrders,
   isError: isUserRefereesOrdersError,
-  isPending: isUserRefereesOrdersPending
+  isLoading: isUserRefereesOrdersLoading
 } = useBidsSummaryQuery({
   network: () => props.network,
   auction: () => props.auction,
@@ -223,7 +223,7 @@ async function handleConfirmed() {
       <div v-if="web3Account && userReferees">
         <h4 class="py-2">Your rewards</h4>
         <UiLoading
-          v-if="isUserRefereesPending || isUserRefereesOrdersPending"
+          v-if="isUserRefereesPending || isUserRefereesOrdersLoading"
           class="py-3 block"
         />
         <UiStateWarning
@@ -262,7 +262,9 @@ async function handleConfirmed() {
   <div class="border-t border-skin-border">
     <h4 class="px-4 py-2">Leaderboard</h4>
 
-    <UiColumnHeader class="overflow-hidden gap-3">
+    <UiColumnHeader
+      class="overflow-hidden gap-3 !top-header-height-with-offset"
+    >
       <div class="flex-1 min-w-0 truncate">Referee</div>
       <div class="w-[80px] text-right truncate">Referrals</div>
     </UiColumnHeader>
