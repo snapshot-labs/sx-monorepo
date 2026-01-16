@@ -34,7 +34,7 @@ const emit = defineEmits<{
           <IH-arrow-sm-right class="-rotate-45 size-4 ml-1" />
         </UiButton>
         <UiButton class="w-full text-skin-link" @click="emit('checkStatus')">
-          <IH-arrow-path class="size-4 mr-1.5" />
+          <IH-refresh class="size-4 mr-1.5" />
           Check status
         </UiButton>
       </div>
