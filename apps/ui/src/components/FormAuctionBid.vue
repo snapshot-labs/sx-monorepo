@@ -41,6 +41,21 @@ const props = defineProps<{
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 
+const {
+  verificationProvider,
+  status: verificationStatus,
+  isVerified,
+  verificationUrl,
+  error: verificationError,
+  allowListCallData,
+  startVerification,
+  checkStatus,
+  reset: resetVerification
+} = useAuctionVerification({
+  network: computed(() => props.network),
+  auction: computed(() => props.auction)
+});
+
 const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
@@ -186,7 +201,7 @@ function convertPriceToPercentage(price: number) {
   return Math.min(Math.max(percentage, 0), 100);
 }
 
-function handlePlaceOrder() {
+async function handlePlaceOrder() {
   if (!web3Account.value) {
     modalAccountOpen.value = true;
 
@@ -211,7 +226,8 @@ function handlePlaceOrder() {
       sellAmount,
       price,
       buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
-    })
+    }),
+    attestation: allowListCallData.value || undefined
   });
 }
 
@@ -301,7 +317,17 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="s-box p-4 space-y-3">
+    <AuctionVerification
+      v-if="!isVerified"
+      :verification-provider="verificationProvider"
+      :status="verificationStatus"
+      :verification-url="verificationUrl"
+      :error="verificationError"
+      @start-verification="startVerification"
+      @check-status="checkStatus"
+      @reset="resetVerification"
+    />
+    <div v-else class="s-box p-4 space-y-3">
       <UiMessage
         v-if="web3Account && isBalanceError"
         type="danger"
