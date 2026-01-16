@@ -31,10 +31,8 @@ const isPending = computed(() =>
 </script>
 
 <template>
-  <div v-if="verificationProvider === 'private'" class="s-box overflow-hidden">
-    <div class="p-4 text-skin-text text-sm">
-      This auction uses an unsupported verification provider
-    </div>
+  <div v-if="verificationProvider === 'private'" class="p-4 text-skin-text text-sm">
+    This auction uses an unsupported verification provider
   </div>
 
   <div
