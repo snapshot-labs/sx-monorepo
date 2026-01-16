@@ -5,8 +5,8 @@ import {
   VerificationStatus
 } from '@/helpers/auction/types';
 import {
-  getProvider,
   getProviderBySigner,
+  PROVIDERS,
   VerificationContext
 } from '@/helpers/auction/verification-providers';
 
@@ -93,7 +93,7 @@ export function useAuctionVerification({
       return;
     }
 
-    const provider = getProvider(verificationProvider.value);
+    const provider = PROVIDERS[verificationProvider.value];
     if (!provider) return;
 
     const context: VerificationContext = {

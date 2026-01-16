@@ -29,12 +29,10 @@ const emit = defineEmits<{
         </div>
       </div>
       <div class="space-y-2">
-        <a :href="verificationUrl" target="_blank" rel="noopener noreferrer">
-          <UiButton class="w-full" primary>
-            Open verification page
-            <IH-arrow-sm-right class="-rotate-45 size-4 ml-1" />
-          </UiButton>
-        </a>
+        <UiButton class="w-full" primary :to="verificationUrl">
+          Open verification page
+          <IH-arrow-sm-right class="-rotate-45 size-4 ml-1" />
+        </UiButton>
         <UiButton class="w-full text-skin-link" @click="emit('checkStatus')">
           <IH-arrow-path class="size-4 mr-1.5" />
           Check status

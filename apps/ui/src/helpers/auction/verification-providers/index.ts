@@ -33,10 +33,6 @@ export type VerificationContext = {
   ) => void;
 };
 
-export function getProvider(id: ProviderId): VerificationProvider | undefined {
-  return PROVIDERS[id];
-}
-
 export function getProviderBySigner(
   signer: string
 ): VerificationProvider | undefined {
