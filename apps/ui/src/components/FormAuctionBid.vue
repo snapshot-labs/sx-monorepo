@@ -52,8 +52,8 @@ const {
   checkStatus,
   reset: resetVerification
 } = useAuctionVerification({
-  auctionId: computed(() => `${props.network}:${props.auction.id}`),
-  allowListSigner: computed(() => props.auction.allowListSigner)
+  network: computed(() => props.network),
+  auction: computed(() => props.auction)
 });
 
 const bidAmount = ref('');

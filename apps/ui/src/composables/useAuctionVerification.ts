@@ -34,22 +34,19 @@ async function rpcCall<T>(method: string, params: object): Promise<T> {
   return data.result;
 }
 
-function parseAuctionNetwork(auctionId: string): string {
-  return auctionId.split(':')[0] || '';
-}
-
 export function useAuctionVerification({
-  auctionId,
-  allowListSigner
+  network,
+  auction
 }: {
-  auctionId: ComputedRef<string>;
-  allowListSigner: ComputedRef<string>;
+  network: ComputedRef<string>;
+  auction: ComputedRef<{ id: string; allowListSigner: string }>;
 }) {
   const { web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
-  const network = computed(() => parseAuctionNetwork(auctionId.value));
+  const auctionId = computed(() => `${network.value}:${auction.value.id}`);
+  const allowListSigner = computed(() => auction.value.allowListSigner);
 
   const status = ref<VerificationStatus>('loading');
   const verificationUrl = ref<string | null>(null);
