@@ -54,7 +54,12 @@ export function useAuctionVerification({
   const allowListCallData = ref<`0x${string}` | null>(null);
 
   const verificationProvider = computed((): AuctionVerificationType => {
-    if (!allowListSigner.value) return 'public';
+    if (
+      !allowListSigner.value ||
+      allowListSigner.value.toLowerCase() === '0x'
+    ) {
+      return 'public';
+    }
 
     const provider = getProviderBySigner(allowListSigner.value);
     return provider ? (provider.id as VerificationProviderId) : 'private';
