@@ -58,7 +58,7 @@ export async function placeSellOrder(
     [sellOrder.buyAmount],
     [sellOrder.sellAmount],
     [previousOrderId],
-    sellOrder.attestation || ''
+    sellOrder.attestation || '0x'
   );
 }
 
