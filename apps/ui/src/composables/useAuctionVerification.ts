@@ -39,7 +39,11 @@ export function useAuctionVerification({
   auction
 }: {
   network: ComputedRef<string>;
-  auction: ComputedRef<{ id: string; allowListSigner: string }>;
+  auction: ComputedRef<{
+    id: string;
+    allowListSigner: string;
+    isPrivateAuction: boolean;
+  }>;
 }) {
   const { web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
@@ -54,12 +58,7 @@ export function useAuctionVerification({
   const allowListCallData = ref<`0x${string}` | null>(null);
 
   const verificationProvider = computed((): AuctionVerificationType => {
-    if (
-      !allowListSigner.value ||
-      allowListSigner.value.toLowerCase() === '0x'
-    ) {
-      return 'public';
-    }
+    if (!auction.value.isPrivateAuction) return 'public';
 
     const provider = getProviderBySigner(allowListSigner.value);
     return provider ? (provider.id as VerificationProviderId) : 'private';
