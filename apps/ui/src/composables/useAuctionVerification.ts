@@ -144,7 +144,15 @@ export function useAuctionVerification({
       status.value = 'verified';
       allowListCallData.value = result.allowListCallData;
     } catch (err) {
-      console.error('Attestation check failed', err);
+      const isExpectedError =
+        /Missing proofs or queryResult|Applicant not found/.test(
+          (err as Error).message
+        );
+
+      if (!isExpectedError) {
+        console.error('Attestation check failed', err);
+      }
+
       status.value = previousStatus;
     }
   }
