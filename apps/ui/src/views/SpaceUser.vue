@@ -160,8 +160,8 @@ async function getVotingPower() {
 }
 
 watch(
-  userId,
-  async id => {
+  [userId, () => props.space.id],
+  async ([id]) => {
     loaded.value = false;
 
     if (isValidAddress(id)) {
