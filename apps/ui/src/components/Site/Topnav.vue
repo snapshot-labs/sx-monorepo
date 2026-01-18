@@ -9,15 +9,11 @@ const { toggleTheme, currentTheme } = useTheme();
     <div class="grow">
       <AppLink
         :to="{ name: 'site-landing' }"
-        class="text-[26px] text-skin-link inline-block"
+        class="text-[29px] text-skin-link inline-block"
       >
         <div class="flex items-center space-x-2.5">
-          <img
-            src="@/assets/snapshot.svg"
-            alt="Snapshot"
-            class="w-[24px] relative top-[2px]"
-          />
-          <span>snapshot</span>
+          <IC-shot class="size-[32px]" />
+          <span class="mb-1">snapshot</span>
         </div>
       </AppLink>
     </div>

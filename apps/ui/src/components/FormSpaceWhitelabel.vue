@@ -198,7 +198,10 @@ onMounted(() => emit('errors', formErrors.value));
             <div
               class="browser-content-container flex items-center justify-center"
             >
-              <IC-zap v-if="isDisabled" class="size-[126px] text-skin-border" />
+              <IC-shot
+                v-if="isDisabled"
+                class="size-[126px] text-skin-border"
+              />
               <div v-else-if="!isWhiteLabel">
                 Preview only available on
                 <AppLink
