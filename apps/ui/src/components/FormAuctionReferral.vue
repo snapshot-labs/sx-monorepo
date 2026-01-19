@@ -24,7 +24,7 @@ import {
 const ADDRESS_INPUT_DEFINITION = {
   type: 'string',
   format: 'address',
-  title: 'Referee address',
+  title: 'Partner address',
   examples: ['Enter the address of who referred you'],
   showControls: false
 };
@@ -183,7 +183,7 @@ async function handleConfirmed() {
         v-if="userInvite"
         class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
       >
-        <div class="text-skin-text">Referee</div>
+        <div class="text-skin-text">Partner</div>
         <div class="flex items-center gap-3">
           <UiStamp :id="userInvite.partner" :size="24" />
           <div class="flex flex-col leading-[22px] truncate">
@@ -203,8 +203,8 @@ async function handleConfirmed() {
 
       <template v-else>
         <p class="text-skin-text text-sm">
-          Set your referral to support whoever referred you. This can only be
-          set once.
+          Set your partner to support whoever referred you. This can only be set
+          once.
         </p>
 
         <UiInputAddress
@@ -219,7 +219,7 @@ async function handleConfirmed() {
           :disabled="!partnerInput || !!inputError"
           @click="handleSetReferral"
         >
-          Set referee
+          Set partner
         </UiButton>
       </template>
 
