@@ -302,6 +302,8 @@ function resetTransactionProgress() {
   isModalTransactionProgressOpen.value = false;
   transactionProgressType.value = null;
   cancelOrderFn.value = DEFAULT_TRANSACTION_PROGRESS_FN;
+  sellOrder.value = null;
+  txId.value = null;
 }
 
 async function handlePlaceSellOrder(order: SellOrder) {
