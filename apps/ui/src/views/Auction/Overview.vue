@@ -708,7 +708,11 @@ function handleScrollEvent(target: HTMLElement) {
         title: 'Bid success!'
       }"
       :type="'bid'"
-      @close="isModalShareOpen = false; sellOrder = null; txId = null"
+      @close="
+        isModalShareOpen = false;
+        sellOrder = null;
+        txId = null;
+      "
     />
   </teleport>
 </template>
