@@ -109,7 +109,8 @@ const { chartContainer, chart } = useChart({
     localization: {
       ...CHART_DEFAULT_OPTIONS.localization,
       // Format the x-axis time as price
-      timeFormatter: (time: number) => formatNumber(time, priceDelta.value)
+      timeFormatter: (time: number) => formatNumber(time, priceDelta.value),
+      priceFormatter: (price: number) => (price < 0 ? '' : formatNumber(price))
     },
     timeScale: {
       ...CHART_DEFAULT_OPTIONS.timeScale,
