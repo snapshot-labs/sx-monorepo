@@ -2,10 +2,10 @@ import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   AUCTION_TAG,
-  getReferees,
-  getUserReferees,
-  getUserReferral,
-  Referral
+  getPartnerStatistics,
+  getUserInvite,
+  getUserInvites,
+  Invite
 } from '@/helpers/auction/referral';
 import { getNames } from '@/helpers/stamp';
 import { NetworkID } from '@/types';
@@ -17,24 +17,24 @@ export const REFERRAL_KEYS = {
   all: ['referral'] as const,
   network: (networkId: MaybeRefOrGetter<NetworkID>) =>
     [...REFERRAL_KEYS.all, networkId] as const,
-  userReferral: (
+  userInvite: (
     networkId: MaybeRefOrGetter<NetworkID>,
     tag: string,
     account: MaybeRefOrGetter<string | null>
-  ) => [...REFERRAL_KEYS.network(networkId), 'user', tag, account],
-  userReferees: (
+  ) => [...REFERRAL_KEYS.network(networkId), 'userInvite', tag, account],
+  userInvites: (
     networkId: MaybeRefOrGetter<NetworkID>,
     tag: string,
     account: MaybeRefOrGetter<string | null>
-  ) => [...REFERRAL_KEYS.network(networkId), 'user-referees', tag, account],
-  referees: (networkId: MaybeRefOrGetter<NetworkID>, tag: string) => [
+  ) => [...REFERRAL_KEYS.network(networkId), 'userInvites', tag, account],
+  partnerStatistics: (networkId: MaybeRefOrGetter<NetworkID>, tag: string) => [
     ...REFERRAL_KEYS.network(networkId),
-    'referees',
+    'partnerStatistics',
     tag
   ]
 };
 
-export function useUserReferralQuery({
+export function useUserInviteQuery({
   networkId,
   account
 }: {
@@ -42,14 +42,14 @@ export function useUserReferralQuery({
   account: MaybeRefOrGetter<string | null>;
 }) {
   return useQuery({
-    queryKey: REFERRAL_KEYS.userReferral(networkId, AUCTION_TAG, account),
+    queryKey: REFERRAL_KEYS.userInvite(networkId, AUCTION_TAG, account),
     queryFn: async () => {
       const accountValue = toValue(account);
       if (!accountValue) return null;
 
-      let referral: Referral | null;
+      let invite: Invite | null;
       try {
-        referral = await getUserReferral(
+        invite = await getUserInvite(
           toValue(networkId),
           AUCTION_TAG,
           accountValue
@@ -62,40 +62,44 @@ export function useUserReferralQuery({
         throw err;
       }
 
-      if (!referral) return null;
+      if (!invite) return null;
 
-      const names = await getNames([referral.referee]);
+      const names = await getNames([invite.partner]);
 
       return {
-        ...referral,
-        refereeName: names[referral.referee] || null
+        ...invite,
+        partnerName: names[invite.partner] || null
       };
     },
     enabled: computed(() => !!toValue(account))
   });
 }
 
-export function useRefereesQuery({
+export function usePartnerStatisticsQuery({
   networkId
 }: {
   networkId: MaybeRefOrGetter<NetworkID>;
 }) {
   return useInfiniteQuery({
     initialPageParam: 0,
-    queryKey: REFERRAL_KEYS.referees(networkId, AUCTION_TAG),
+    queryKey: REFERRAL_KEYS.partnerStatistics(networkId, AUCTION_TAG),
     queryFn: async ({ pageParam }) => {
-      const referees = await getReferees(toValue(networkId), AUCTION_TAG, {
-        first: LIMIT,
-        skip: pageParam
-      });
+      const partnerStatistics = await getPartnerStatistics(
+        toValue(networkId),
+        AUCTION_TAG,
+        {
+          first: LIMIT,
+          skip: pageParam
+        }
+      );
 
-      if (!referees.length) return [];
+      if (!partnerStatistics.length) return [];
 
-      const names = await getNames(referees.map(r => r.referee));
+      const names = await getNames(partnerStatistics.map(r => r.partner));
 
-      return referees.map(referee => ({
-        ...referee,
-        name: names[referee.referee] || null
+      return partnerStatistics.map(statistic => ({
+        ...statistic,
+        name: names[statistic.partner] || null
       }));
     },
     getNextPageParam: (lastPage, pages) => {
@@ -106,7 +110,7 @@ export function useRefereesQuery({
   });
 }
 
-export function useUserRefereesQuery({
+export function useUserInvitesQuery({
   networkId,
   account
 }: {
@@ -114,27 +118,27 @@ export function useUserRefereesQuery({
   account: MaybeRefOrGetter<string | null>;
 }) {
   return useQuery({
-    queryKey: REFERRAL_KEYS.userReferees(networkId, AUCTION_TAG, account),
+    queryKey: REFERRAL_KEYS.userInvites(networkId, AUCTION_TAG, account),
     queryFn: async () => {
       const accountValue = toValue(account);
       if (!accountValue) return null;
 
-      let referees: Referral[] = [];
+      let invites: Invite[] = [];
       let hasMore = true;
 
       while (hasMore) {
-        const newReferees = await getUserReferees(
+        const newInvites = await getUserInvites(
           toValue(networkId),
           AUCTION_TAG,
           accountValue,
-          { first: USER_REFEREES_LIMIT, skip: referees.length }
+          { first: USER_REFEREES_LIMIT, skip: invites.length }
         );
 
-        referees = referees.concat(newReferees);
-        hasMore = newReferees.length === USER_REFEREES_LIMIT;
+        invites = invites.concat(newInvites);
+        hasMore = newInvites.length === USER_REFEREES_LIMIT;
       }
 
-      return referees;
+      return invites;
     },
     enabled: computed(() => !!toValue(account))
   });
