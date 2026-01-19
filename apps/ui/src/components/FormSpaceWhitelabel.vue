@@ -198,7 +198,7 @@ onMounted(() => emit('errors', formErrors.value));
             <div
               class="browser-content-container flex items-center justify-center"
             >
-              <IC-shot
+              <IC-snapshot
                 v-if="isDisabled"
                 class="size-[126px] text-skin-border"
               />

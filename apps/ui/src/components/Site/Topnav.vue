@@ -12,7 +12,7 @@ const { toggleTheme, currentTheme } = useTheme();
         class="text-[29px] text-skin-link inline-block"
       >
         <div class="flex items-center space-x-2.5">
-          <IC-shot class="size-[32px]" />
+          <IC-snapshot class="size-[32px]" />
           <span class="mb-1">snapshot</span>
         </div>
       </AppLink>

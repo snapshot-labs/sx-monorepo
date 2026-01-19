@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { getCacheHash, shorten } from '@/helpers/utils';
 
-defineProps<{ hasAppNav: boolean }>();
+defineProps<{
+  hasAppNav: boolean;
+}>();
 
 const route = useRoute();
 const router = useRouter();
@@ -105,7 +107,9 @@ watchEffect(onCleanup => {
   }
 });
 
-onUnmounted(() => resetAccountModal());
+onUnmounted(() => {
+  resetAccountModal();
+});
 </script>
 
 <template>
@@ -145,7 +149,7 @@ onUnmounted(() => resetAccountModal());
     </form>
 
     <div v-if="isAuctionApp" class="flex-grow flex items-center space-x-2.5">
-      <IC-shot class="size-[28px] text-skin-link" />
+      <IC-snapshot class="size-[28px] text-skin-link" />
       <span class="text-[25px] text-skin-link mb-1">snapshot</span>
     </div>
 

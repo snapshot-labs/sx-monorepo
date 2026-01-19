@@ -109,7 +109,7 @@ const SOCIALS = [
       </div>
       <div class="flex">
         <div class="flex-grow">
-          <IC-shot class="size-[32px] inline-block text-skin-link mr-3" />
+          <IC-snapshot class="size-[32px] inline-block text-skin-link mr-3" />
           © {{ new Date().getFullYear() }} Snapshot Labs
           <a
             :href="`${repositoryUrl}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
