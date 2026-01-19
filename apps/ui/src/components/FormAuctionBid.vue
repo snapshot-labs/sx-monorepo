@@ -45,12 +45,7 @@ const {
   verificationProvider,
   status: verificationStatus,
   isVerified,
-  verificationUrl,
-  error: verificationError,
-  allowListCallData,
-  startVerification,
-  checkStatus,
-  reset: resetVerification
+  allowListCallData
 } = useAuctionVerification({
   network: computed(() => props.network),
   auction: computed(() => props.auction)
@@ -317,15 +312,10 @@ onMounted(() => {
 
 <template>
   <div>
-    <AuctionVerification
+    <AuctionVerificationInfo
       v-if="!isVerified"
       :verification-provider="verificationProvider"
       :status="verificationStatus"
-      :verification-url="verificationUrl"
-      :error="verificationError"
-      @start-verification="startVerification"
-      @check-status="checkStatus"
-      @reset="resetVerification"
     />
     <div v-else class="s-box p-4 space-y-3">
       <UiMessage
