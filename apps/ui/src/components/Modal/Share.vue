@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { Vote } from '@/composables/useSharing';
+import { PayloadType, Vote } from '@/composables/useSharing';
+import { AuctionNetworkId, SellOrder } from '@/helpers/auction';
 import { getNetwork } from '@/networks';
+import { NetworkID } from '@/types';
 
 type Messages = {
   title?: string;
@@ -10,7 +12,9 @@ type Messages = {
 const props = withDefaults(
   defineProps<{
     open: boolean;
-    shareable: Vote;
+    shareable: Vote | SellOrder;
+    network: NetworkID | AuctionNetworkId;
+    type: PayloadType;
     txId: string | null;
     messages?: Messages;
     showIcon?: boolean;
@@ -27,12 +31,12 @@ const emit = defineEmits<{
 
 const { SOCIAL_NETWORKS, getShareUrl } = useSharing();
 
-const network = computed(() => getNetwork(props.shareable.proposal.network));
+const network = computed(() => getNetwork(props.network));
 
 watch(
   () => props.shareable,
   async (to, from) => {
-    if (props.open && to.proposal.id !== from?.proposal.id) emit('close');
+    if (props.open && to !== from) emit('close');
   },
   { immediate: true }
 );
@@ -59,14 +63,14 @@ watch(
       </div>
 
       <div class="flex flex-col">
-        <div class="my-2">Share your vote</div>
+        <div class="my-2">Share your {{ type }}</div>
         <div class="flex space-x-2">
           <a
             v-for="(socialNetwork, i) in SOCIAL_NETWORKS"
             :key="i"
             class="rounded-full leading-[100%] border text-skin-link size-[46px] flex items-center justify-center"
             :title="`Share on ${socialNetwork.name}`"
-            :href="getShareUrl(socialNetwork.id, 'vote', shareable)"
+            :href="getShareUrl(socialNetwork.id, type, shareable)"
             target="_blank"
           >
             <component :is="socialNetwork.icon" />
