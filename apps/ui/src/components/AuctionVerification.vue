@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   AuctionVerificationType,
+  SubProviderId,
   VerificationStatus
 } from '@/helpers/auction/types';
 import { PROVIDERS } from '@/helpers/auction/verification-providers';
@@ -20,13 +21,19 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'startVerification'): void;
+  (e: 'startVerification', provider?: SubProviderId): void;
   (e: 'checkStatus'): void;
   (e: 'reset'): void;
 }>();
 
 const isPending = computed(() =>
   VERIFICATION_PENDING_STATUSES.includes(props.status)
+);
+
+const isWaitingForSelection = computed(
+  () =>
+    props.status === 'started' &&
+    props.verificationProvider === 'zkpassportOrSumsub'
 );
 </script>
 
@@ -54,9 +61,36 @@ const isPending = computed(() =>
         </div>
         <div>
           <h4 class="font-semibold leading-5">Verification required</h4>
+          <p v-if="isWaitingForSelection" class="text-skin-text text-sm">
+            Choose your verification method
+          </p>
+          <p v-else class="text-skin-text text-sm">
+            We need to verify your identity to proceed
+          </p>
         </div>
       </div>
-      <UiButton class="w-full" primary @click="emit('startVerification')">
+      <template v-if="isWaitingForSelection">
+        <UiButton
+          class="w-full"
+          primary
+          @click="emit('startVerification', 'zkpassport')"
+        >
+          Verify with ZKPassport
+        </UiButton>
+        <UiButton
+          class="w-full"
+          primary
+          @click="emit('startVerification', 'sumsub')"
+        >
+          Verify with ID
+        </UiButton>
+      </template>
+      <UiButton
+        v-else
+        class="w-full"
+        primary
+        @click="emit('startVerification')"
+      >
         Verify with {{ PROVIDERS[verificationProvider]?.name }}
       </UiButton>
     </div>

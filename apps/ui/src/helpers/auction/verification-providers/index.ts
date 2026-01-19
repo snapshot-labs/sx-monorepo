@@ -1,20 +1,23 @@
 import { ComputedRef } from 'vue';
-import { VerificationStatus } from '../types';
+import { SubProviderId, VerificationStatus } from '../types';
 import { sumsubProvider } from './sumsub';
 import { zkpassportProvider } from './zkpassport';
+import { zkpassportOrSumsubProvider } from './zkpassportOrSumsub';
 
 export const PROVIDERS = {
+  zkpassportOrSumsub: zkpassportOrSumsubProvider,
   zkpassport: zkpassportProvider,
   sumsub: sumsubProvider
 } as const;
 
-export type ProviderId = keyof typeof PROVIDERS;
-
 export type VerificationProvider = {
-  id: ProviderId;
+  id: keyof typeof PROVIDERS;
   name: string;
   signer: string;
-  startVerification: (context: VerificationContext) => Promise<void>;
+  startVerification: (
+    context: VerificationContext,
+    subProviderId?: SubProviderId
+  ) => Promise<void>;
 };
 
 export type VerificationContext = {
