@@ -36,7 +36,10 @@ const network = computed(() => getNetwork(props.network));
 watch(
   () => props.shareable,
   async (to, from) => {
-    if (props.open && to !== from) emit('close');
+    if (props.type !== 'vote') return;
+
+    if (props.open && (to as Vote).proposal.id !== (from as Vote)?.proposal.id)
+      emit('close');
   },
   { immediate: true }
 );
