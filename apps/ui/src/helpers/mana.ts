@@ -52,7 +52,7 @@ export async function executionCall(
     | 'execute'
     | 'executeQueuedProposal'
     | 'executeStarknetProposal'
-    | 'postReferral',
+    | 'sendAuctionPartner',
   params: any
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);
