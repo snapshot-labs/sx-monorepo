@@ -20,6 +20,7 @@ gql(`
     currentClearingOrderSellAmount
     clearingPriceOrder
     volumeClearingPriceOrder
+    currentVolume
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
@@ -44,6 +45,15 @@ gql(`
     price
     volume
     timestamp
+    transactionId
+  }
+`);
+
+export const auctionsQuery = gql(`
+  query GetAuctions($first: Int!, $skip: Int!) {
+    auctionDetails(first: $first, skip: $skip, orderBy: startingTimeStamp, orderDirection: desc) {
+      ...auctionDetail
+    }
   }
 `);
 
@@ -81,6 +91,51 @@ export const unclaimedOrdersQuery = gql(`
       ordersWithoutClaimed(where: $orderFilter) {
         id
       }
+    }
+  }
+`);
+
+export const auctionPriceMinuteDataQuery = gql(`
+  query GetAuctionPriceMinuteData($first: Int, $skip: Int, $where: AuctionPriceMinuteData_filter) {
+    priceData: auctionPriceMinuteDatas(
+      first: $first
+      skip: $skip
+      orderBy: startTimestamp
+      orderDirection: asc
+      where: $where
+    ) {
+      startTimestamp
+      close
+    }
+  }
+`);
+
+export const auctionPriceHourDataQuery = gql(`
+  query GetAuctionPriceHourData($first: Int, $skip: Int, $where: AuctionPriceHourData_filter) {
+    priceData: auctionPriceHourDatas(
+      first: $first
+      skip: $skip
+      orderBy: startTimestamp
+      orderDirection: asc
+      where: $where
+    ) {
+      startTimestamp
+      close
+    }
+  }
+`);
+
+export const auctionPriceLevelQuery = gql(`
+  query GetAuctionPriceLevels($first: Int, $skip: Int, $where: AuctionPriceLevel_filter) {
+    auctionPriceLevels(
+      first: $first
+      skip: $skip
+      orderBy: price
+      orderDirection: desc
+      where: $where
+    ) {
+      price
+      volume
     }
   }
 `);

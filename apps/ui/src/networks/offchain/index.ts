@@ -31,13 +31,12 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const api = createApi(hubUrl, networkId, constants);
 
   const isExecutorSupported = (executorType: string) => {
-    if (executorType === 'oSnap') return true;
     if (executorType === 'ReadOnlyExecution') return true;
     return false;
   };
 
-  const isExecutorActionsSupported = (executorType: string) => {
-    return executorType === 'oSnap';
+  const isExecutorActionsSupported = () => {
+    return false;
   };
 
   const helpers = {

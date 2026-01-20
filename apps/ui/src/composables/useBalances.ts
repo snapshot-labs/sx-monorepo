@@ -2,12 +2,8 @@ import { formatUnits } from '@ethersproject/units';
 import { skipToken, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getBalances, Token } from '@/helpers/alchemy';
-import { getCoins } from '@/helpers/coingecko';
-import {
-  COINGECKO_ASSET_PLATFORMS,
-  COINGECKO_BASE_ASSETS,
-  ETH_CONTRACT
-} from '@/helpers/constants';
+import { getTokenPrices } from '@/helpers/coingecko';
+import { COINGECKO_ASSET_PLATFORMS, ETH_CONTRACT } from '@/helpers/constants';
 import { METADATA } from '@/networks/evm';
 import { ChainId } from '@/types';
 
@@ -57,18 +53,13 @@ export function useBalances({
     );
 
     const coingeckoAssetPlatform = COINGECKO_ASSET_PLATFORMS[chainId];
-    const coingeckoBaseAsset = COINGECKO_BASE_ASSETS[chainId];
 
-    const coins =
-      coingeckoBaseAsset && coingeckoAssetPlatform
-        ? await getCoins(
-            coingeckoAssetPlatform,
-            coingeckoBaseAsset,
-            tokensWithBalance
-              .filter(asset => asset.contractAddress !== ETH_CONTRACT)
-              .map(token => token.contractAddress)
-          )
-        : [];
+    const coins = coingeckoAssetPlatform
+      ? await getTokenPrices(
+          coingeckoAssetPlatform,
+          tokensWithBalance.map(token => token.contractAddress)
+        )
+      : {};
 
     return tokensWithBalance
       .map(asset => {

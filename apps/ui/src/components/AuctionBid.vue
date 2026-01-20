@@ -2,14 +2,19 @@
 import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _t, shortenAddress } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
+  networkId: NetworkID;
   auctionId: string;
   auction: AuctionDetailFragment;
   order: Order;
   biddingTokenPrice: number;
   totalSupply: bigint;
 }>();
+
+const network = computed(() => getNetwork(props.networkId));
 
 const amountValue = computed(
   () =>
@@ -36,10 +41,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
 <template>
   <div class="flex justify-between items-center gap-3 py-3 px-4 leading-[22px]">
     <div class="flex-1 min-w-[168px] truncate">
-      <AppLink
-        class="w-fit flex items-center space-x-3 truncate"
-        :to="{ name: 'user', params: { user: order.userAddress } }"
-      >
+      <div class="w-fit flex items-center space-x-3 truncate">
         <UiStamp :id="order.userAddress" :size="32" />
         <div class="flex flex-col truncate">
           <h4
@@ -51,7 +53,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
             class="text-[17px] text-skin-text truncate"
           />
         </div>
-      </AppLink>
+      </div>
     </div>
     <div class="w-[200px] max-w-[200px] flex flex-col justify-center truncate">
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
@@ -109,7 +111,11 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
           </button>
         </template>
         <template #items>
-          <UiDropdownItem disabled>
+          <UiDropdownItem
+            :to="
+              network.helpers.getExplorerUrl(order.transactionId, 'transaction')
+            "
+          >
             <IH-arrow-sm-right class="-rotate-45" :width="16" />
             View on block explorer
           </UiDropdownItem>

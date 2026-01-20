@@ -494,21 +494,6 @@ watch(
 );
 
 watchEffect(() => {
-  if (!proposal.value) return;
-
-  const hasOSnap = editorExecutions.value.find(
-    strategy => strategy.type === 'oSnap' && strategy.transactions.length > 0
-  );
-
-  if (hasOSnap) {
-    enforcedVoteType.value = 'basic';
-    proposal.value.type = 'basic';
-  } else {
-    enforcedVoteType.value = null;
-  }
-});
-
-watchEffect(() => {
   const title = proposal.value?.originalProposal
     ? 'Update proposal'
     : 'New proposal';

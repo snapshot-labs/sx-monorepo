@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
 import { useQueryClient } from '@tanstack/vue-query';
-import { AuctionState } from '@/components/AuctionStatus.vue';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import {
   AuctionNetworkId,
-  formatPrice,
+  getAuctionState,
   Order,
   SellOrder
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { _n, sleep } from '@/helpers/utils';
+import { _n, partitionDuration, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
@@ -43,9 +42,10 @@ const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
 
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
+const currentTimestamp = useTimestamp({ interval: 1000 });
 
-const votesHeader = ref<HTMLElement | null>(null);
-const { x: votesHeaderX } = useScroll(votesHeader);
+const bidsHeader = ref<HTMLElement | null>(null);
+const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const isModalTransactionProgressOpen = ref(false);
 const transactionProgressType = ref<
@@ -59,29 +59,25 @@ const chartType = ref<'price' | 'depth'>('price');
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
-const auctionState = computed<AuctionState>(() => {
-  const now = Math.floor(Date.now() / 1000);
-  const endTime = parseInt(props.auction.endTimeTimestamp);
-
-  if (now < endTime) return 'active';
-
-  const currentBiddingAmount = BigInt(props.auction.currentBiddingAmount);
-  const minFundingThreshold = BigInt(props.auction.minFundingThreshold);
-
-  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
-
-  if (props.auction.ordersWithoutClaimed?.length) {
-    if (!props.auction.clearingPriceOrder) return 'finalizing';
-
-    return 'claiming';
-  }
-
-  return 'claimed';
-});
+const auctionState = computed(() =>
+  getAuctionState(props.auction, currentTimestamp.value)
+);
 
 const isAuctionOpen = computed(
-  () => parseInt(props.auction.endTimeTimestamp) > Date.now() / 1000
+  () => parseInt(props.auction.endTimeTimestamp) > currentTimestamp.value / 1000
 );
+
+const countdown = computed(() => {
+  if (isAuctionOpen.value === false) {
+    return null;
+  }
+
+  const diff =
+    parseInt(props.auction.endTimeTimestamp) -
+    Math.floor(currentTimestamp.value / 1000);
+
+  return partitionDuration(diff);
+});
 
 const isAccountSupported = computed<boolean>(() => {
   return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
@@ -94,7 +90,6 @@ const {
 } = useBidsSummaryQuery({
   network: () => props.network,
   auction: () => props.auction,
-  limit: 100,
   where: () => ({
     userAddress: web3.value.account?.toLowerCase()
   }),
@@ -135,6 +130,20 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     auction: () => props.auction
   });
 
+const fdv = computed(
+  () =>
+    Number(props.auction.currentClearingPrice) *
+    Number(
+      props.totalSupply / 10n ** BigInt(props.auction.decimalsAuctioningToken)
+    )
+);
+
+const volume = computed(
+  () =>
+    Number(props.auction.currentBiddingAmount) /
+    10 ** Number(props.auction.decimalsBiddingToken)
+);
+
 const userOrdersSummary = computed(() => {
   let auctioningTokenToClaim = 0n;
   let biddingTokenToClaim = 0n;
@@ -154,11 +163,12 @@ const userOrdersSummary = computed(() => {
     : null;
 
   userOrders.value.forEach(order => {
-    const auctioningTokensPerBiddingToken =
-      BigInt(props.auction.currentClearingOrderBuyAmount) /
-      BigInt(props.auction.currentClearingOrderSellAmount);
-
     const orderSellAmount = BigInt(order.sellAmount);
+
+    if (!unclaimedOrders.value.has(order.id)) {
+      statuses[order.id] = 'claimed';
+      return;
+    }
 
     if (auctionState.value === 'canceled') {
       // [10]: All orders are rejected in canceled auctions, everyone gets their bidding tokens back
@@ -176,10 +186,9 @@ const userOrdersSummary = computed(() => {
       return;
     }
 
-    if (!unclaimedOrders.value.has(order.id)) {
-      statuses[order.id] = 'claimed';
-      return;
-    }
+    const auctioningTokensPerBiddingToken =
+      BigInt(props.auction.currentClearingOrderBuyAmount) /
+      BigInt(props.auction.currentClearingOrderSellAmount);
 
     const orderComparison = compareOrders(
       {
@@ -326,25 +335,103 @@ function handleAllOrdersEndReached() {
 }
 
 function handleScrollEvent(target: HTMLElement) {
-  votesHeaderX.value = target.scrollLeft;
+  bidsHeaderX.value = target.scrollLeft;
 }
 </script>
 
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
-    <div class="border-b px-4 py-3 flex justify-between items-center">
-      <div class="flex flex-col">
-        <h1 class="text-[24px]">Auction #{{ auctionId }}</h1>
-        <AuctionStatus class="max-w-fit" :state="auctionState" />
+    <div class="border-b p-4 flex flex-col gap-4">
+      <div class="flex gap-3">
+        <UiBadgeNetwork :id="network" :size="24">
+          <UiStamp
+            :id="auction.addressAuctioningToken"
+            :size="64"
+            type="token"
+            class="rounded-full"
+          />
+        </UiBadgeNetwork>
+        <div class="flex flex-col">
+          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+          <AuctionStatus class="max-w-fit" :state="auctionState" />
+        </div>
       </div>
-      <div class="flex flex-col">
-        <span class="text-sm font-medium tracking-wider uppercase">
-          Clearing price
-        </span>
-        <span class="text-[19px] font-medium text-skin-link">
-          {{ formatPrice(auction.currentClearingPrice) }}
-          {{ auction.symbolBiddingToken }}
-        </span>
+      <div
+        class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
+      >
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
+          <AuctionCounter
+            :title="isAuctionOpen ? 'Current price' : 'Clearing price'"
+            :amount="
+              _n(auction.currentClearingPrice, 'standard', {
+                maximumFractionDigits: 6
+              })
+            "
+            :symbol="auction.symbolBiddingToken"
+            :subamount="`$${_n(
+              biddingTokenPrice
+                ? Number(auction.currentClearingPrice) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 2
+              }
+            )}`"
+          />
+          <AuctionCounter
+            :title="isAuctionOpen ? 'Current FDV' : 'Clearing FDV'"
+            :amount="_n(fdv, 'compact')"
+            :symbol="auction.symbolBiddingToken"
+            :subamount="`$${_n(
+              biddingTokenPrice ? fdv * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
+          />
+          <AuctionCounter
+            :title="isAuctionOpen ? 'Current volume' : 'Total volume'"
+            :amount="_n(volume, 'compact')"
+            :symbol="auction.symbolBiddingToken"
+            :subamount="`$${_n(
+              biddingTokenPrice ? volume * biddingTokenPrice : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )}`"
+          />
+        </div>
+        <div v-if="countdown" class="flex gap-3.5">
+          <div
+            v-if="countdown.days > 0"
+            class="flex flex-col items-center uppercase min-w-6"
+          >
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.days).padStart(2, '0') }}
+            </span>
+            <span>days</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.hours).padStart(2, '0') }}
+            </span>
+            <span>hrs.</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.minutes).padStart(2, '0') }}
+            </span>
+            <span>min.</span>
+          </div>
+          <div class="flex flex-col items-center uppercase min-w-6">
+            <span class="text-[32px] tracking-wider text-rose-500">
+              {{ String(countdown.seconds).padStart(2, '0') }}
+            </span>
+            <span>sec.</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -365,9 +452,18 @@ function handleScrollEvent(target: HTMLElement) {
       </div>
     </UiScrollerHorizontal>
 
-    <div class="w-full h-[355px] flex items-center justify-center">
-      Graph is not available yet
-    </div>
+    <AuctionChartPriceHistory
+      v-if="chartType === 'price'"
+      :auction="auction"
+      :network="network"
+      class="min-h-[355px] p-4 pr-3"
+    />
+    <AuctionChartPriceDepth
+      v-else-if="chartType === 'depth'"
+      :auction="auction"
+      :network="network"
+      class="min-h-[355px] p-4"
+    />
 
     <UiScrollerHorizontal with-buttons gradient="xxl">
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
@@ -395,7 +491,7 @@ function handleScrollEvent(target: HTMLElement) {
           <UiColumnHeader
             :ref="
               ref =>
-                (votesHeader =
+                (bidsHeader =
                   (ref as InstanceType<typeof UiColumnHeader> | null)
                     ?.container ?? null)
             "
@@ -442,10 +538,11 @@ function handleScrollEvent(target: HTMLElement) {
                 <AuctionUserBid
                   v-for="order in userOrders"
                   :key="order.id"
-                  :order-status="userOrdersSummary.statuses[order.id]"
+                  :network-id="network"
                   :auction-id="auctionId"
                   :auction="auction"
                   :order="order"
+                  :order-status="userOrdersSummary.statuses[order.id]"
                   :bidding-token-price="biddingTokenPrice"
                   :total-supply="totalSupply"
                   @cancel="handleCancelSellOrder"
@@ -454,14 +551,16 @@ function handleScrollEvent(target: HTMLElement) {
             </div>
           </UiScrollerHorizontal>
         </div>
-        <UiButton
-          v-if="claimText"
-          class="w-full mt-4"
-          primary
-          @click="handleClaimOrders"
-        >
-          {{ claimText }}
-        </UiButton>
+        <div class="px-4">
+          <UiButton
+            v-if="claimText"
+            class="w-full"
+            primary
+            @click="handleClaimOrders"
+          >
+            {{ claimText }}
+          </UiButton>
+        </div>
       </template>
     </div>
     <div v-else-if="bidsType === 'allBids'" class="space-y-4">
@@ -469,7 +568,7 @@ function handleScrollEvent(target: HTMLElement) {
         <UiColumnHeader
           :ref="
             ref =>
-              (votesHeader =
+              (bidsHeader =
                 (ref as InstanceType<typeof UiColumnHeader> | null)
                   ?.container ?? null)
           "
@@ -501,29 +600,27 @@ function handleScrollEvent(target: HTMLElement) {
               v-else-if="allOrders?.pages.flat().length === 0"
               class="px-4 py-3"
             >
-              You don't have any bids yet.
+              There are no bids yet.
             </UiStateWarning>
             <UiContainerInfiniteScroll
               v-else-if="allOrders && typeof biddingTokenPrice === 'number'"
+              class="divide-y divide-skin-border flex flex-col justify-center border-b"
               :loading-more="isAllOrdersFetchingNextPage"
               @end-reached="handleAllOrdersEndReached"
             >
               <template #loading>
                 <UiLoading class="px-4 py-3 block" />
               </template>
-              <div
-                class="divide-y divide-skin-border flex flex-col justify-center border-b"
-              >
-                <AuctionBid
-                  v-for="order in allOrders?.pages.flat()"
-                  :key="order.id"
-                  :auction-id="auctionId"
-                  :auction="auction"
-                  :order="order"
-                  :bidding-token-price="biddingTokenPrice"
-                  :total-supply="totalSupply"
-                />
-              </div>
+              <AuctionBid
+                v-for="order in allOrders?.pages.flat()"
+                :key="order.id"
+                :network-id="network"
+                :auction-id="auctionId"
+                :auction="auction"
+                :order="order"
+                :bidding-token-price="biddingTokenPrice"
+                :total-supply="totalSupply"
+              />
             </UiContainerInfiniteScroll>
           </div>
         </UiScrollerHorizontal>
@@ -547,12 +644,8 @@ function handleScrollEvent(target: HTMLElement) {
     />
   </teleport>
 
-  <UiResizableHorizontal
-    id="proposal-sidebar"
-    :default="340"
-    :max="440"
-    :min="340"
-    class="shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
+  <div
+    class="w-full max-w-[400px] md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
   >
     <Affix data-testid="proposal-sidebar" :top="TOTAL_NAV_HEIGHT" :bottom="64">
       <div>
@@ -575,17 +668,23 @@ function handleScrollEvent(target: HTMLElement) {
             </AppLink>
           </div>
         </UiScrollerHorizontal>
-
         <FormAuctionBid
-          v-if="isAuctionOpen"
+          v-if="sidebarType === 'bid' && isAuctionOpen"
           :auction="auction"
           :network="network"
+          :bidding-token-price="biddingTokenPrice"
           :total-supply="totalSupply"
           :is-loading="isModalTransactionProgressOpen"
           :previous-orders="userOrders"
           @submit="handlePlaceSellOrder"
         />
+
+        <FormAuctionReferral
+          v-else-if="sidebarType === 'referral'"
+          :network="network"
+          :auction="auction"
+        />
       </div>
     </Affix>
-  </UiResizableHorizontal>
+  </div>
 </template>
