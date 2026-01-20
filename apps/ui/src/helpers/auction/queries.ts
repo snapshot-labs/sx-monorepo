@@ -45,6 +45,7 @@ gql(`
     price
     volume
     timestamp
+    transactionId
   }
 `);
 
