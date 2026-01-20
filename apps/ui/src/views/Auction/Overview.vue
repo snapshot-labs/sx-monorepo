@@ -283,7 +283,7 @@ async function invalidateQueries() {
 async function moveToNextStep() {
   if (isLastStep.value) {
     invalidateQueries();
-    resetTransactionProgress();
+    isModalTransactionProgressOpen.value = false;
 
     isModalShareOpen.value = true;
     return;
@@ -709,9 +709,8 @@ function handleScrollEvent(target: HTMLElement) {
       }"
       :type="'bid'"
       @close="
+        resetTransactionProgress();
         isModalShareOpen = false;
-        sellOrder = null;
-        txId = null;
       "
     />
   </teleport>
