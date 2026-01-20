@@ -45,7 +45,7 @@ export function useAuctionVerification({
     isPrivateAuction: boolean;
   }>;
 }) {
-  const { web3Account } = useWeb3();
+  const { web3, web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
@@ -179,7 +179,7 @@ export function useAuctionVerification({
 
   return {
     verificationProvider,
-    status,
+    status: computed(() => (web3.value.authLoading ? 'loading' : status.value)),
     isVerified,
     verificationUrl,
     error,
