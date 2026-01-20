@@ -2,14 +2,19 @@
 import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _t, shortenAddress } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
+  networkId: NetworkID;
   auctionId: string;
   auction: AuctionDetailFragment;
   order: Order;
   biddingTokenPrice: number;
   totalSupply: bigint;
 }>();
+
+const network = computed(() => getNetwork(props.networkId));
 
 const amountValue = computed(
   () =>
@@ -106,7 +111,11 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
           </button>
         </template>
         <template #items>
-          <UiDropdownItem disabled>
+          <UiDropdownItem
+            :to="
+              network.helpers.getExplorerUrl(order.transactionId, 'transaction')
+            "
+          >
             <IH-arrow-sm-right class="-rotate-45" :width="16" />
             View on block explorer
           </UiDropdownItem>
