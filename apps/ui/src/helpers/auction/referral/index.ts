@@ -28,7 +28,12 @@ export type Invite = NonNullable<UserInviteQuery['invite']>;
 
 const client = new ApolloClient({
   uri: import.meta.env.VITE_BROKESTER_API_URL || 'https://api.brokester.box',
-  cache: new InMemoryCache()
+  cache: new InMemoryCache(),
+  defaultOptions: {
+    query: {
+      fetchPolicy: 'no-cache'
+    }
+  }
 });
 
 export async function getPartnerStatistics(
@@ -40,8 +45,7 @@ export async function getPartnerStatistics(
 
   const { data } = await client.query({
     query: PartnerStatisticsDocument,
-    variables: { indexer: networkId, tag, first, skip },
-    fetchPolicy: 'no-cache'
+    variables: { indexer: networkId, tag, first, skip }
   });
 
   return data.partnerstatistics;
@@ -56,8 +60,7 @@ export async function getUserInvite(
 
   const { data } = await client.query({
     query: UserInviteDocument,
-    variables: { indexer: networkId, id },
-    fetchPolicy: 'no-cache'
+    variables: { indexer: networkId, id }
   });
 
   return data.invite;
@@ -79,8 +82,7 @@ export async function getUserInvites(
       partner: partner.toLowerCase(),
       first,
       skip
-    },
-    fetchPolicy: 'no-cache'
+    }
   });
 
   return data.invites;
