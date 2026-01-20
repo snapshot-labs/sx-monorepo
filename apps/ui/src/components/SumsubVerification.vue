@@ -42,15 +42,5 @@ const emit = defineEmits<{
         Complete verification on Sumsub, then return here to place your bid.
       </p>
     </div>
-
-    <div
-      v-else-if="status === 'loading'"
-      class="flex flex-col items-center text-center p-6 space-y-3"
-    >
-      <div class="bg-skin-border rounded-full p-3">
-        <UiLoading :size="24" />
-      </div>
-      <p class="text-sm text-skin-text">Please wait...</p>
-    </div>
   </div>
 </template>

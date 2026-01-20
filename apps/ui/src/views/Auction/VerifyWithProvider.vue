@@ -49,10 +49,15 @@ watch(
 <template>
   <UiContainer class="pt-5 w-full !max-w-[730px] mx-0 md:mx-auto text-center">
     <h2>Verify yourself with {{ PROVIDERS[provider].name }}</h2>
-    <UiLoading
-      v-if="verificationStatus === 'loading' && provider !== 'sumsub'"
-      class="block mt-4"
-    />
+    <div
+      v-if="verificationStatus === 'loading'"
+      class="flex flex-col items-center text-center p-6 space-y-3"
+    >
+      <div class="bg-skin-border rounded-full p-3">
+        <UiLoading :size="24" />
+      </div>
+      <p class="text-sm text-skin-text">Please wait...</p>
+    </div>
     <div v-if="isVerified" class="mt-4">
       <UiAlert type="success">
         You have been successfully verified and can now participate in the
