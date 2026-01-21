@@ -444,6 +444,7 @@ function handleScrollEvent(target: HTMLElement) {
           <UiLabel :is-active="chartType === 'price'" text="Clearing price" />
         </AppLink>
         <AppLink
+          v-if="volume"
           :aria-active="chartType === 'depth'"
           @click="chartType = 'depth'"
         >
