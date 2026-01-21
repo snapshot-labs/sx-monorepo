@@ -51,8 +51,16 @@ export const AUCTION_KEYS = {
   ],
   auction: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
-    auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [...AUCTION_KEYS.all, network, 'detail', () => toValue(auction).id],
+    auction: MaybeRefOrGetter<AuctionDetailFragment | string>
+  ) => [
+    ...AUCTION_KEYS.all,
+    network,
+    () => {
+      const auctionValue = toValue(auction);
+
+      return typeof auctionValue === 'string' ? auctionValue : auctionValue.id;
+    }
+  ],
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>

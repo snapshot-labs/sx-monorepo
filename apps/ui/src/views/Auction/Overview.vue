@@ -272,7 +272,7 @@ const transactionProgressFn = computed<() => Promise<string | null>>(() => {
 async function invalidateQueries() {
   await sleep(5000);
 
-  queryClient.invalidateQueries({
+  await queryClient.invalidateQueries({
     queryKey: AUCTION_KEYS.auction(props.network, props.auction)
   });
 }
