@@ -44,6 +44,13 @@ const isPending = computed(() =>
     <p class="text-sm text-skin-text">Checking verification status</p>
   </div>
 
+  <div
+    v-else-if="isConnected && verificationType === 'unknownSigner'"
+    class="p-4 text-skin-text text-sm"
+  >
+    This auction uses an unsupported verification provider
+  </div>
+
   <div v-else-if="!isConnected || status === 'started'" class="p-4 space-y-3">
     <div class="flex items-center gap-3">
       <div class="bg-skin-border rounded-full p-2.5 shrink-0">
@@ -74,13 +81,6 @@ const isPending = computed(() =>
     >
       Verify with {{ PROVIDERS[providerId]?.name }}
     </UiButton>
-  </div>
-
-  <div
-    v-else-if="verificationType === 'unknownSigner'"
-    class="p-4 text-skin-text text-sm"
-  >
-    This auction uses an unsupported verification provider
   </div>
 
   <template v-else>
