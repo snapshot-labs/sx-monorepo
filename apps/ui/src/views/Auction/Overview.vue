@@ -275,6 +275,9 @@ async function invalidateQueries() {
   queryClient.invalidateQueries({
     queryKey: AUCTION_KEYS.auction(props.network, props.auction)
   });
+  queryClient.invalidateQueries({
+    queryKey: ['auction', props.network, props.auction.id]
+  });
 }
 
 async function moveToNextStep() {
