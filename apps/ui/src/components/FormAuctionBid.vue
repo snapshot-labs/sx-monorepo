@@ -377,11 +377,12 @@ onMounted(() => {
             }}
           </div>
           <button
-            class="absolute top-0 right-0 text-skin-link"
+            class="absolute top-0 right-0 text-skin-link flex items-center gap-0.5"
             @click="bidAmount = String(formattedBalance)"
           >
             {{ _n(formattedBalance) }}
             {{ auction.symbolBiddingToken }}
+            <IC-wallet class="inline-block shrink-0 size-[16px]" />
           </button>
         </div>
       </div>
