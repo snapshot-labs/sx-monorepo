@@ -57,9 +57,7 @@ export function useAuctionVerification({
 
   const verificationType = computed((): AuctionVerificationType => {
     if (!auction.value.isPrivateAuction) return 'public';
-    if (acceptedProviders.value.length === 0) return 'private';
-    if (acceptedProviders.value.length > 1) return 'multi';
-    return acceptedProviders.value[0];
+    return acceptedProviders.value[0] ?? 'private';
   });
 
   const activeProviderId = computed(

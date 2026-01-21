@@ -27,7 +27,6 @@ export type VerificationProviderId = 'zkpassport' | 'sumsub';
 
 export type AuctionVerificationType =
   | VerificationProviderId
-  | 'multi'
   | 'public'
   | 'private';
 
