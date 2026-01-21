@@ -538,10 +538,11 @@ function handleScrollEvent(target: HTMLElement) {
                 <AuctionUserBid
                   v-for="order in userOrders"
                   :key="order.id"
-                  :order-status="userOrdersSummary.statuses[order.id]"
+                  :network-id="network"
                   :auction-id="auctionId"
                   :auction="auction"
                   :order="order"
+                  :order-status="userOrdersSummary.statuses[order.id]"
                   :bidding-token-price="biddingTokenPrice"
                   :total-supply="totalSupply"
                   @cancel="handleCancelSellOrder"
@@ -613,6 +614,7 @@ function handleScrollEvent(target: HTMLElement) {
               <AuctionBid
                 v-for="order in allOrders?.pages.flat()"
                 :key="order.id"
+                :network-id="network"
                 :auction-id="auctionId"
                 :auction="auction"
                 :order="order"

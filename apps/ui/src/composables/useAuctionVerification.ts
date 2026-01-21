@@ -1,8 +1,6 @@
 import { ComputedRef } from 'vue';
 import {
-  AttestationResponse,
   AuctionVerificationType,
-  SubProviderId,
   VerificationProviderId,
   VerificationStatus
 } from '@/helpers/auction/types';
@@ -13,6 +11,11 @@ import {
 } from '@/helpers/auction/verification-providers';
 
 const ATTESTATION_API_URL = import.meta.env.VITE_ATTESTATION_URL;
+
+type AttestationResponse = {
+  verified: boolean;
+  allowListCallData: `0x${string}`;
+};
 
 async function rpcCall<T>(method: string, params: object): Promise<T> {
   if (!ATTESTATION_API_URL) {
@@ -42,7 +45,7 @@ export function useAuctionVerification({
     isPrivateAuction: boolean;
   }>;
 }) {
-  const { web3Account } = useWeb3();
+  const { web3, web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
@@ -53,7 +56,6 @@ export function useAuctionVerification({
   const verificationUrl = ref<string | null>(null);
   const error = ref<string | null>(null);
   const allowListCallData = ref<`0x${string}` | null>(null);
-  const subProviderId = ref<SubProviderId | null>(null);
 
   const verificationProvider = computed((): AuctionVerificationType => {
     if (!auction.value.isPrivateAuction) return 'public';
@@ -61,11 +63,6 @@ export function useAuctionVerification({
     const provider = getProviderBySigner(allowListSigner.value);
     return provider ? (provider.id as VerificationProviderId) : 'private';
   });
-
-  const activeProvider = computed(
-    (): AuctionVerificationType =>
-      subProviderId.value || verificationProvider.value
-  );
 
   const isVerified = computed(
     () => verificationProvider.value === 'public' || status.value === 'verified'
@@ -76,7 +73,6 @@ export function useAuctionVerification({
     verificationUrl.value = null;
     error.value = null;
     allowListCallData.value = null;
-    subProviderId.value = null;
   }
 
   function handleError(err: unknown, message?: string) {
@@ -86,7 +82,7 @@ export function useAuctionVerification({
     uiStore.addNotification('error', error.value);
   }
 
-  async function startVerification(id?: SubProviderId) {
+  async function startVerification() {
     if (!web3Account.value) {
       modalAccountOpen.value = true;
       return;
@@ -96,10 +92,6 @@ export function useAuctionVerification({
       verificationProvider.value === 'private'
     ) {
       return;
-    }
-
-    if (id) {
-      subProviderId.value = id;
     }
 
     const provider = PROVIDERS[verificationProvider.value];
@@ -118,7 +110,7 @@ export function useAuctionVerification({
       addNotification: uiStore.addNotification
     };
 
-    await provider.startVerification(context, id);
+    await provider.startVerification(context);
   }
 
   async function checkExistingAttestation() {
@@ -140,12 +132,7 @@ export function useAuctionVerification({
       const result = await rpcCall<AttestationResponse>('verify', {
         auctionId: currentAuctionId,
         user: web3Account.value,
-        provider: currentProvider,
-        ...(subProviderId.value && {
-          metadata: {
-            zkpassportOrSumsub: { subProviderId: subProviderId.value }
-          }
-        })
+        provider: currentProvider
       });
 
       if (
@@ -159,7 +146,7 @@ export function useAuctionVerification({
       allowListCallData.value = result.allowListCallData;
     } catch (err) {
       const isExpectedError =
-        /Missing proofs or queryResult|Applicant not found|Not Verified/.test(
+        /Missing proofs or queryResult|Applicant not found/.test(
           (err as Error).message
         );
 
@@ -191,8 +178,8 @@ export function useAuctionVerification({
   );
 
   return {
-    verificationProvider: activeProvider,
-    status,
+    verificationProvider,
+    status: computed(() => (web3.value.authLoading ? 'loading' : status.value)),
     isVerified,
     verificationUrl,
     error,

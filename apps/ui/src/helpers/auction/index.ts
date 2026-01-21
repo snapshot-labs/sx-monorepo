@@ -92,7 +92,12 @@ function getClient(network: AuctionNetworkId) {
 
   return new ApolloClient({
     uri: subgraphUrl,
-    cache: new InMemoryCache()
+    cache: new InMemoryCache(),
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'no-cache'
+      }
+    }
   });
 }
 
