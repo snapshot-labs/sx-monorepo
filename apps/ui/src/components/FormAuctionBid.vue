@@ -42,12 +42,14 @@ const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 
 const {
-  verificationProvider,
+  verificationType,
+  acceptedProviders,
+  activeProviderId,
   status: verificationStatus,
   isVerified,
   verificationUrl,
   error: verificationError,
-  allowListCallData,
+  generateSignature,
   startVerification,
   checkStatus,
   reset: resetVerification
@@ -204,11 +206,12 @@ function convertPriceToPercentage(price: number) {
 async function handlePlaceOrder() {
   if (!web3Account.value) {
     modalAccountOpen.value = true;
-
     return;
   }
 
   if (hasErrors.value) return;
+
+  const attestation = await generateSignature();
 
   const sellAmount = parseUnits(
     bidAmount.value,
@@ -227,7 +230,7 @@ async function handlePlaceOrder() {
       price,
       buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
     }),
-    attestation: allowListCallData.value || undefined
+    attestation: attestation || undefined
   });
 }
 
@@ -319,7 +322,9 @@ onMounted(() => {
   <div>
     <AuctionVerification
       v-if="!isVerified"
-      :verification-provider="verificationProvider"
+      :verification-type="verificationType"
+      :accepted-providers="acceptedProviders"
+      :active-provider-id="activeProviderId"
       :status="verificationStatus"
       :verification-url="verificationUrl"
       :error="verificationError"

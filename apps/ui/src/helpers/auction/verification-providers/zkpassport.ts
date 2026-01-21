@@ -1,5 +1,4 @@
 import { ZKPassport } from '@zkpassport/sdk';
-import { VERIFICATION_PROVIDER_SIGNERS } from '@/helpers/auction';
 import { getUrl } from '@/helpers/utils';
 import { VerificationContext, VerificationProvider } from './';
 
@@ -70,13 +69,11 @@ async function startVerification(context: VerificationContext): Promise<void> {
       }
 
       try {
-        const result = await context.rpcCall<{
-          verified: boolean;
-          allowListCallData: `0x${string}`;
-        }>('verify', {
-          auctionId: context.auctionId,
+        await context.rpcCall<{ verified: boolean }>('verify', {
+          network: context.network,
           user: context.web3Account.value,
-          provider: 'zkpassport',
+          signer: context.signer,
+          provider: context.providerId,
           metadata: {
             zkpassport: {
               proofs,
@@ -86,7 +83,6 @@ async function startVerification(context: VerificationContext): Promise<void> {
         });
 
         context.status.value = 'verified';
-        context.allowListCallData.value = result.allowListCallData;
         context.addNotification('success', 'ZKPassport verification complete');
       } catch (err) {
         context.handleError(err, 'Failed to verify');
@@ -116,6 +112,5 @@ async function startVerification(context: VerificationContext): Promise<void> {
 export const zkpassportProvider: VerificationProvider = {
   id: 'zkpassport',
   name: 'ZKPassport',
-  signer: VERIFICATION_PROVIDER_SIGNERS.zkpassport,
   startVerification
 };

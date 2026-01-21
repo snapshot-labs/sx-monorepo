@@ -1,3 +1,4 @@
+import { getAddress } from '@ethersproject/address';
 import { ComputedRef } from 'vue';
 import {
   AuctionVerificationType,
@@ -5,17 +6,11 @@ import {
   VerificationStatus
 } from '@/helpers/auction/types';
 import {
-  getProviderBySigner,
   PROVIDERS,
   VerificationContext
 } from '@/helpers/auction/verification-providers';
 
 const ATTESTATION_API_URL = import.meta.env.VITE_ATTESTATION_URL;
-
-type AttestationResponse = {
-  verified: boolean;
-  allowListCallData: `0x${string}`;
-};
 
 async function rpcCall<T>(method: string, params: object): Promise<T> {
   if (!ATTESTATION_API_URL) {
@@ -25,7 +20,7 @@ async function rpcCall<T>(method: string, params: object): Promise<T> {
   const response = await fetch(ATTESTATION_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', method, params })
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
   });
 
   const data = await response.json();
@@ -50,29 +45,55 @@ export function useAuctionVerification({
   const uiStore = useUiStore();
 
   const auctionId = computed(() => `${network.value}:${auction.value.id}`);
-  const allowListSigner = computed(() => auction.value.allowListSigner);
+  const signer = computed(() =>
+    getAddress(`0x${auction.value.allowListSigner.slice(-40)}`)
+  );
 
   const status = ref<VerificationStatus>('loading');
   const verificationUrl = ref<string | null>(null);
   const error = ref<string | null>(null);
-  const allowListCallData = ref<`0x${string}` | null>(null);
+  const selectedProviderId = ref<VerificationProviderId | null>(null);
+  const acceptedProviders = ref<VerificationProviderId[]>([]);
 
-  const verificationProvider = computed((): AuctionVerificationType => {
+  const verificationType = computed((): AuctionVerificationType => {
     if (!auction.value.isPrivateAuction) return 'public';
-
-    const provider = getProviderBySigner(allowListSigner.value);
-    return provider ? (provider.id as VerificationProviderId) : 'private';
+    if (acceptedProviders.value.length === 0) return 'private';
+    if (acceptedProviders.value.length > 1) return 'multi';
+    return acceptedProviders.value[0];
   });
 
+  const activeProviderId = computed(
+    (): VerificationProviderId | null =>
+      selectedProviderId.value ?? acceptedProviders.value[0] ?? null
+  );
   const isVerified = computed(
-    () => verificationProvider.value === 'public' || status.value === 'verified'
+    () => verificationType.value === 'public' || status.value === 'verified'
   );
 
   function reset() {
-    status.value = 'started';
+    status.value = 'loading';
     verificationUrl.value = null;
     error.value = null;
-    allowListCallData.value = null;
+    selectedProviderId.value = null;
+    acceptedProviders.value = [];
+  }
+
+  type VerifyResponse = {
+    verified: boolean;
+    acceptedProviders: VerificationProviderId[];
+  };
+
+  async function checkVerificationStatus(provider?: VerificationProviderId) {
+    const result = await rpcCall<VerifyResponse>('verify', {
+      network: network.value,
+      user: web3Account.value,
+      signer: signer.value,
+      ...(provider && { provider })
+    });
+
+    acceptedProviders.value = result.acceptedProviders;
+
+    return result;
   }
 
   function handleError(err: unknown, message?: string) {
@@ -82,29 +103,37 @@ export function useAuctionVerification({
     uiStore.addNotification('error', error.value);
   }
 
-  async function startVerification() {
+  async function startVerification(providerId?: VerificationProviderId) {
     if (!web3Account.value) {
       modalAccountOpen.value = true;
       return;
     }
+
     if (
-      verificationProvider.value === 'public' ||
-      verificationProvider.value === 'private'
+      verificationType.value === 'public' ||
+      verificationType.value === 'private'
     ) {
       return;
     }
 
-    const provider = PROVIDERS[verificationProvider.value];
+    const targetProviderId = providerId ?? activeProviderId.value;
+    if (!targetProviderId) return;
+
+    if (providerId) {
+      selectedProviderId.value = providerId;
+    }
+
+    const provider = PROVIDERS[targetProviderId];
     if (!provider) return;
 
     const context: VerificationContext = {
       web3Account,
-      auctionId: auctionId.value,
       network: network.value,
+      providerId: targetProviderId,
+      signer: signer.value,
       status,
       verificationUrl,
       error,
-      allowListCallData,
       handleError,
       rpcCall,
       addNotification: uiStore.addNotification
@@ -113,48 +142,71 @@ export function useAuctionVerification({
     await provider.startVerification(context);
   }
 
-  async function checkExistingAttestation() {
+  async function generateSignature(): Promise<`0x${string}` | null> {
     if (
       !web3Account.value ||
-      status.value === 'loading' ||
-      verificationProvider.value === 'public' ||
-      verificationProvider.value === 'private'
+      !isVerified.value ||
+      verificationType.value === 'public'
     ) {
+      return null;
+    }
+
+    try {
+      const result = await rpcCall<{ allowListCallData: `0x${string}` }>(
+        'generate_signature',
+        {
+          auctionId: auctionId.value,
+          user: web3Account.value,
+          signer: signer.value
+        }
+      );
+
+      return result.allowListCallData;
+    } catch (err) {
+      handleError(err, 'Failed to generate signature');
+      return null;
+    }
+  }
+
+  async function checkExistingAttestation() {
+    if (!web3Account.value || !auction.value.isPrivateAuction) {
+      status.value = 'started';
       return;
     }
 
-    const currentAuctionId = auctionId.value;
-    const currentProvider = verificationProvider.value;
-    const previousStatus = status.value;
-
     status.value = 'loading';
-    try {
-      const result = await rpcCall<AttestationResponse>('verify', {
-        auctionId: currentAuctionId,
-        user: web3Account.value,
-        provider: currentProvider
-      });
 
-      if (
-        auctionId.value !== currentAuctionId ||
-        verificationProvider.value !== currentProvider
-      ) {
+    try {
+      const result = await checkVerificationStatus();
+
+      if (result.verified) {
+        status.value = 'verified';
         return;
       }
 
-      status.value = 'verified';
-      allowListCallData.value = result.allowListCallData;
-    } catch (err) {
-      const isExpectedError =
-        /Missing proofs or queryResult|Applicant not found/.test(
-          (err as Error).message
-        );
+      status.value = 'started';
+    } catch {
+      status.value = 'started';
+    }
+  }
 
-      if (!isExpectedError) {
-        console.error('Attestation check failed', err);
+  async function checkProviderStatus() {
+    if (!web3Account.value || !activeProviderId.value) return;
+
+    status.value = 'loading';
+
+    try {
+      const result = await checkVerificationStatus(activeProviderId.value);
+
+      if (result.verified) {
+        status.value = 'verified';
+        uiStore.addNotification('success', 'Verification complete');
+        return;
       }
 
-      status.value = previousStatus;
+      status.value = 'pending';
+    } catch (err) {
+      handleError(err, 'Verification check failed');
     }
   }
 
@@ -170,7 +222,7 @@ export function useAuctionVerification({
         reset();
       }
 
-      if (status.value === 'started') {
+      if (status.value === 'loading') {
         checkExistingAttestation();
       }
     },
@@ -178,14 +230,16 @@ export function useAuctionVerification({
   );
 
   return {
-    verificationProvider,
+    verificationType,
+    acceptedProviders,
+    activeProviderId,
     status: computed(() => (web3.value.authLoading ? 'loading' : status.value)),
     isVerified,
     verificationUrl,
     error,
-    allowListCallData,
+    generateSignature,
     startVerification,
-    checkStatus: checkExistingAttestation,
+    checkStatus: checkProviderStatus,
     reset
   };
 }

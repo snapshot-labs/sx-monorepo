@@ -1,4 +1,3 @@
-import { VERIFICATION_PROVIDER_SIGNERS } from '@/helpers/auction';
 import { VerificationContext, VerificationProvider } from './';
 
 async function startVerification(context: VerificationContext): Promise<void> {
@@ -8,7 +7,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
   try {
     const result = await context.rpcCall<{ url: string }>('generate_link', {
       user: context.web3Account.value,
-      provider: 'sumsub'
+      provider: context.providerId
     });
 
     context.verificationUrl.value = result.url;
@@ -21,6 +20,5 @@ async function startVerification(context: VerificationContext): Promise<void> {
 export const sumsubProvider: VerificationProvider = {
   id: 'sumsub',
   name: 'Sumsub',
-  signer: VERIFICATION_PROVIDER_SIGNERS.sumsub,
   startVerification
 };

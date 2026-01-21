@@ -23,12 +23,11 @@ export type AuctionPriceLevelPoint =
 export type AuctionPriceHistoryPoint =
   GetAuctionPriceHourDataQuery['priceData'][number];
 
-export type SubProviderId = 'zkpassport' | 'sumsub';
-
-export type VerificationProviderId = SubProviderId | 'zkpassportOrSumsub';
+export type VerificationProviderId = 'zkpassport' | 'sumsub';
 
 export type AuctionVerificationType =
   | VerificationProviderId
+  | 'multi'
   | 'public'
   | 'private';
 
@@ -41,8 +40,3 @@ export type VerificationStatus =
   | 'verified'
   | 'rejected'
   | 'error';
-
-export type AttestationResponse = {
-  verified: boolean;
-  allowListCallData: `0x${string}`;
-};
