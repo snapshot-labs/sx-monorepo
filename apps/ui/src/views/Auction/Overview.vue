@@ -403,33 +403,38 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
         </div>
-        <div v-if="countdown" class="flex gap-3.5">
-          <div
-            v-if="countdown.days > 0"
-            class="flex flex-col items-center uppercase min-w-6"
-          >
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.days).padStart(2, '0') }}
-            </span>
-            <span>days</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.hours).padStart(2, '0') }}
-            </span>
-            <span>hrs.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.minutes).padStart(2, '0') }}
-            </span>
-            <span>min.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.seconds).padStart(2, '0') }}
-            </span>
-            <span>sec.</span>
+        <div v-if="countdown" class="flex flex-col">
+          <span class="text-sm font-medium tracking-wider uppercase">
+            Ending in
+          </span>
+          <div class="flex gap-3">
+            <div
+              v-if="countdown.days > 0"
+              class="flex flex-col items-center min-w-6 leading-9"
+            >
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.days).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">days</span>
+            </div>
+            <div class="flex flex-col items-center min-w-6 leading-9">
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.hours).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">hrs.</span>
+            </div>
+            <div class="flex flex-col items-center min-w-6 leading-9">
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.minutes).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">min.</span>
+            </div>
+            <div class="flex flex-col items-center min-w-6 leading-9">
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.seconds).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">sec.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -480,7 +485,7 @@ function handleScrollEvent(target: HTMLElement) {
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabelLarge :is-active="bidsType === 'allBids'" text="Bids" />
+          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
