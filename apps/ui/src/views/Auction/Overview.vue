@@ -324,7 +324,7 @@ function handleTransactionConfirmed() {
   if (transactionProgressType.value === 'place-order') {
     return moveToNextStep();
   } else if (transactionProgressType.value === 'cancel-order') {
-    uiStore.addNotification('success', 'Your bid has been cancelled');
+    uiStore.addNotification('success', 'Your bid has been cancelled.');
   }
   invalidateQueries();
   resetTransactionProgress();
