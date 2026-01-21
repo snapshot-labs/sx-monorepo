@@ -273,7 +273,7 @@ const transactionProgressFn = computed<() => Promise<string | null>>(() => {
 async function invalidateQueries() {
   await sleep(5000);
 
-  await queryClient.invalidateQueries({
+  queryClient.invalidateQueries({
     queryKey: AUCTION_KEYS.auction(props.network, props.auction)
   });
 }
@@ -320,18 +320,13 @@ function handleClaimOrders() {
   isModalTransactionProgressOpen.value = true;
 }
 
-async function handleTransactionConfirmed() {
+function handleTransactionConfirmed() {
   if (transactionProgressType.value === 'place-order') {
     return moveToNextStep();
   }
 
+  invalidateQueries();
   resetTransactionProgress();
-
-  await invalidateQueries();
-
-  if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
-    chartType.value = DEFAULT_CHART_TYPE;
-  }
 }
 
 function handleAllOrdersEndReached() {
@@ -343,6 +338,12 @@ function handleAllOrdersEndReached() {
 function handleScrollEvent(target: HTMLElement) {
   bidsHeaderX.value = target.scrollLeft;
 }
+
+watch(volume, () => {
+  if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
+    chartType.value = DEFAULT_CHART_TYPE;
+  }
+});
 </script>
 
 <template>
