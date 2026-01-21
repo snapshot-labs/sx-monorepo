@@ -202,25 +202,27 @@ async function handleConfirmed() {
       </div>
 
       <template v-else>
-        <p class="text-skin-text text-sm">
+        <div>
           Set your partner to support whoever referred you. This can only be set
           once.
-        </p>
+        </div>
 
-        <UiInputAddress
-          v-model="partnerInput"
-          :definition="ADDRESS_INPUT_DEFINITION"
-          :error="inputError"
-        />
+        <div>
+          <UiInputAddress
+            v-model="partnerInput"
+            :definition="ADDRESS_INPUT_DEFINITION"
+            :error="inputError"
+          />
 
-        <UiButton
-          primary
-          class="w-full"
-          :disabled="!partnerInput || !!inputError"
-          @click="handleSetReferral"
-        >
-          Set partner
-        </UiButton>
+          <UiButton
+            primary
+            class="w-full"
+            :disabled="!partnerInput || !!inputError"
+            @click="handleSetReferral"
+          >
+            Set partner
+          </UiButton>
+        </div>
       </template>
 
       <div v-if="web3Account && userInvites">
@@ -262,7 +264,7 @@ async function handleConfirmed() {
     />
   </teleport>
 
-  <div class="border-t border-skin-border">
+  <div>
     <h4 class="px-4 py-2">Leaderboard</h4>
 
     <UiColumnHeader
