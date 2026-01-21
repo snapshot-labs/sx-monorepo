@@ -320,13 +320,14 @@ function handleClaimOrders() {
   isModalTransactionProgressOpen.value = true;
 }
 
-function handleTransactionConfirmed() {
+async function handleTransactionConfirmed() {
   if (transactionProgressType.value === 'place-order') {
     return moveToNextStep();
   }
 
-  invalidateQueries();
   resetTransactionProgress();
+
+  await invalidateQueries();
 
   if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
     chartType.value = DEFAULT_CHART_TYPE;
