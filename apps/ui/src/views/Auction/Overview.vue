@@ -23,6 +23,7 @@ import {
 import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
+const DEFAULT_CHART_TYPE = 'price';
 
 const props = defineProps<{
   network: AuctionNetworkId;
@@ -55,7 +56,7 @@ const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
 
-const chartType = ref<'price' | 'depth'>('price');
+const chartType = ref<'price' | 'depth'>(DEFAULT_CHART_TYPE);
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
@@ -326,6 +327,10 @@ function handleTransactionConfirmed() {
 
   invalidateQueries();
   resetTransactionProgress();
+
+  if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
+    chartType.value = DEFAULT_CHART_TYPE;
+  }
 }
 
 function handleAllOrdersEndReached() {
