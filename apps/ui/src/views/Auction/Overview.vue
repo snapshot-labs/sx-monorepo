@@ -441,13 +441,16 @@ function handleScrollEvent(target: HTMLElement) {
           :aria-active="chartType === 'price'"
           @click="chartType = 'price'"
         >
-          <UiLabel :is-active="chartType === 'price'" text="Clearing price" />
+          <UiLabelLarge
+            :is-active="chartType === 'price'"
+            text="Clearing price"
+          />
         </AppLink>
         <AppLink
           :aria-active="chartType === 'depth'"
           @click="chartType = 'depth'"
         >
-          <UiLabel :is-active="chartType === 'depth'" text="Depth" />
+          <UiLabelLarge :is-active="chartType === 'depth'" text="Depth" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -471,13 +474,13 @@ function handleScrollEvent(target: HTMLElement) {
           :aria-active="bidsType === 'userBids'"
           @click="bidsType = 'userBids'"
         >
-          <UiLabel :is-active="bidsType === 'userBids'" text="My bids" />
+          <UiLabelLarge :is-active="bidsType === 'userBids'" text="My bids" />
         </AppLink>
         <AppLink
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" />
+          <UiLabelLarge :is-active="bidsType === 'allBids'" text="Bids" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -655,13 +658,16 @@ function handleScrollEvent(target: HTMLElement) {
               :aria-active="sidebarType === 'bid'"
               @click="sidebarType = 'bid'"
             >
-              <UiLabel :is-active="sidebarType === 'bid'" text="Place bid" />
+              <UiLabelLarge
+                :is-active="sidebarType === 'bid'"
+                text="Place bid"
+              />
             </AppLink>
             <AppLink
               :aria-active="sidebarType === 'referral'"
               @click="sidebarType = 'referral'"
             >
-              <UiLabel
+              <UiLabelLarge
                 :is-active="sidebarType === 'referral'"
                 text="Referral"
               />
