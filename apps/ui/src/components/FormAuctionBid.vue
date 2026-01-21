@@ -377,7 +377,7 @@ onMounted(() => {
             }}
           </div>
           <button
-            class="absolute top-0 right-0 text-skin-link flex items-center gap-0.5"
+            class="absolute top-0 right-0 text-skin-link flex items-center gap-1"
             @click="bidAmount = String(formattedBalance)"
           >
             {{ _n(formattedBalance) }}
