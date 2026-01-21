@@ -49,7 +49,7 @@ export function useAuctionVerification({
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
-  const auctionId = computed(() => `${network.value}:${auction.value.id}`);
+  const auctionId = computed(() => auction.value.id);
   const signer = computed(() =>
     getAddress(`0x${auction.value.allowListSigner.slice(-40)}`)
   );
@@ -152,6 +152,7 @@ export function useAuctionVerification({
       const result = await rpcCall<{ allowListCallData: `0x${string}` }>(
         'generate_signature',
         {
+          network: network.value,
           auctionId: auctionId.value,
           user: web3Account.value,
           signer: signer.value
@@ -210,13 +211,7 @@ export function useAuctionVerification({
   watch(
     [web3Account, auctionId],
     ([newAccount, newAuctionId], [oldAccount, oldAuctionId]) => {
-      const hasAuctionChanged = newAuctionId !== oldAuctionId;
-      if (
-        hasAuctionChanged ||
-        !oldAccount ||
-        !newAccount ||
-        (oldAccount && newAccount !== oldAccount)
-      ) {
+      if (newAuctionId !== oldAuctionId || oldAccount !== newAccount) {
         reset();
       }
 
