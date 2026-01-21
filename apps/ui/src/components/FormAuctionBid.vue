@@ -322,12 +322,14 @@ onMounted(() => {
   <div>
     <AuctionVerification
       v-if="!isVerified"
+      :is-connected="!!web3Account"
       :verification-type="verificationType"
       :accepted-providers="acceptedProviders"
       :active-provider-id="activeProviderId"
       :status="verificationStatus"
       :verification-url="verificationUrl"
       :error="verificationError"
+      @connect="modalAccountOpen = true"
       @start-verification="startVerification"
       @check-status="checkStatus"
       @reset="resetVerification"

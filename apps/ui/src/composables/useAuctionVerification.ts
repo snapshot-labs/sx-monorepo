@@ -12,6 +12,11 @@ import {
 
 const ATTESTATION_API_URL = import.meta.env.VITE_ATTESTATION_URL;
 
+type VerifyResponse = {
+  verified: boolean;
+  acceptedProviders: VerificationProviderId[];
+};
+
 async function rpcCall<T>(method: string, params: object): Promise<T> {
   if (!ATTESTATION_API_URL) {
     throw new Error('ATTESTATION_API_URL is not defined');
@@ -57,7 +62,7 @@ export function useAuctionVerification({
 
   const verificationType = computed((): AuctionVerificationType => {
     if (!auction.value.isPrivateAuction) return 'public';
-    return acceptedProviders.value[0] ?? 'private';
+    return acceptedProviders.value[0] ?? 'unknownSigner';
   });
 
   const activeProviderId = computed(
@@ -76,11 +81,6 @@ export function useAuctionVerification({
     acceptedProviders.value = [];
   }
 
-  type VerifyResponse = {
-    verified: boolean;
-    acceptedProviders: VerificationProviderId[];
-  };
-
   async function checkVerificationStatus(provider?: VerificationProviderId) {
     const result = await rpcCall<VerifyResponse>('verify', {
       network: network.value,
@@ -90,7 +90,6 @@ export function useAuctionVerification({
     });
 
     acceptedProviders.value = result.acceptedProviders;
-
     return result;
   }
 
@@ -109,7 +108,7 @@ export function useAuctionVerification({
 
     if (
       verificationType.value === 'public' ||
-      verificationType.value === 'private'
+      verificationType.value === 'unknownSigner'
     ) {
       return;
     }
@@ -214,6 +213,7 @@ export function useAuctionVerification({
       const hasAuctionChanged = newAuctionId !== oldAuctionId;
       if (
         hasAuctionChanged ||
+        !oldAccount ||
         !newAccount ||
         (oldAccount && newAccount !== oldAccount)
       ) {

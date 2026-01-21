@@ -14,6 +14,7 @@ const VERIFICATION_PENDING_STATUSES: readonly VerificationStatus[] = [
 ];
 
 const props = defineProps<{
+  isConnected: boolean;
   verificationType: AuctionVerificationType;
   acceptedProviders: VerificationProviderId[];
   activeProviderId: VerificationProviderId | null;
@@ -23,6 +24,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
+  (e: 'connect'): void;
   (e: 'startVerification', provider?: VerificationProviderId): void;
   (e: 'checkStatus'): void;
   (e: 'reset'): void;
@@ -42,40 +44,48 @@ const isPending = computed(() =>
     <p class="text-sm text-skin-text">Checking verification status</p>
   </div>
 
+  <div v-else-if="!isConnected || status === 'started'" class="p-4 space-y-3">
+    <div class="flex items-center gap-3">
+      <div class="bg-skin-border rounded-full p-2.5 shrink-0">
+        <IH-shield-check class="text-skin-link" />
+      </div>
+      <div>
+        <h4 class="font-semibold leading-5">Verification required</h4>
+        <p class="text-skin-text text-sm">
+          We need to verify your identity to proceed
+        </p>
+      </div>
+    </div>
+    <UiButton
+      v-if="!isConnected"
+      class="w-full"
+      primary
+      @click="emit('connect')"
+    >
+      Connect wallet
+    </UiButton>
+    <UiButton
+      v-for="providerId in acceptedProviders"
+      v-else
+      :key="providerId"
+      class="w-full"
+      primary
+      @click="emit('startVerification', providerId)"
+    >
+      Verify with {{ PROVIDERS[providerId]?.name }}
+    </UiButton>
+  </div>
+
   <div
-    v-else-if="verificationType === 'private'"
+    v-else-if="verificationType === 'unknownSigner'"
     class="p-4 text-skin-text text-sm"
   >
     This auction uses an unsupported verification provider
   </div>
-  <template v-else>
-    <div v-if="status === 'started'" class="p-4 space-y-3">
-      <div class="flex items-center gap-3">
-        <div class="bg-skin-border rounded-full p-2.5 shrink-0">
-          <IH-shield-check class="text-skin-link" />
-        </div>
-        <div>
-          <h4 class="font-semibold leading-5">Verification required</h4>
-          <p class="text-skin-text text-sm">
-            We need to verify your identity to proceed
-          </p>
-        </div>
-      </div>
-      <UiButton
-        v-for="providerId in acceptedProviders"
-        :key="providerId"
-        class="w-full"
-        primary
-        @click="emit('startVerification', providerId)"
-      >
-        Verify with {{ PROVIDERS[providerId]?.name }}
-      </UiButton>
-    </div>
 
+  <template v-else>
     <ZKPassportVerification
-      v-else-if="
-        isPending && activeProviderId === 'zkpassport' && verificationUrl
-      "
+      v-if="isPending && activeProviderId === 'zkpassport' && verificationUrl"
       :status="status"
       :verification-url="verificationUrl"
     />
