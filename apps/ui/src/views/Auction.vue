@@ -24,8 +24,8 @@ const {
   error
 } = useQuery({
   queryKey: AUCTION_KEYS.auction(
-    toRef(params.value.network),
-    toRef(params.value.id)
+    () => params.value.network,
+    () => params.value.id
   ),
   queryFn: () => getAuction(params.value.id, params.value.network),
   enabled: computed(() => !!params.value.id)
