@@ -275,7 +275,7 @@ async function invalidateQueries() {
   queryClient.invalidateQueries({
     queryKey: AUCTION_KEYS.auction(props.network, props.auction)
   });
-  queryClient.invalidateQueries({
+  await queryClient.refetchQueries({
     queryKey: ['auction', props.network, props.auction.id]
   });
 }
