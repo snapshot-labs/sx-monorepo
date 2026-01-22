@@ -45,7 +45,10 @@ const partnerAddress = computed(
   () => userInvite.value?.partner ?? inviteAddress.value
 );
 const partnerName = computed(
-  () => inviteName.value ?? shortenAddress(partnerAddress.value)
+  () =>
+    userInvite.value?.partnerName ??
+    inviteName.value ??
+    shortenAddress(partnerAddress.value)
 );
 
 async function handleConfirmed() {
