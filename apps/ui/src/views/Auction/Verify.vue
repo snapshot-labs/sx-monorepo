@@ -30,8 +30,12 @@ const {
   reset,
   checkStatus
 } = useAuctionVerification({
-  network: computed(() => props.network ?? 'sep'),
-  auction: props.auction ? computed(() => props.auction!) : undefined
+  network: computed(
+    () =>
+      props.network ??
+      (import.meta.env.VITE_METADATA_NETWORK === 's' ? 'base' : 'sep')
+  ),
+  auction: computed(() => props.auction)
 });
 
 const isConnected = computed(() => !!web3Account.value);
@@ -102,9 +106,9 @@ const isPending = computed(() =>
 
     <div
       v-else-if="['rejected', 'error'].includes(verificationStatus)"
-      class="p-4 space-y-4"
+      class="p-4 space-y-2 max-w-[400px] mx-auto"
     >
-      <div class="flex items-center gap-3">
+      <div class="inline-flex items-center gap-3">
         <div class="bg-skin-danger text-white rounded-full p-2 shrink-0">
           <IH-x-mark class="size-4" />
         </div>
@@ -121,7 +125,13 @@ const isPending = computed(() =>
           </p>
         </div>
       </div>
-      <UiButton class="w-full" @click="reset">Try again</UiButton>
+      <UiButton
+        class="w-full"
+        @click="
+          activeProviderId ? startVerification(activeProviderId) : reset()
+        "
+        >Try again</UiButton
+      >
     </div>
   </UiContainer>
 </template>

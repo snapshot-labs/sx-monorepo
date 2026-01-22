@@ -39,19 +39,22 @@ export function useAuctionVerification({
   auction
 }: {
   network: ComputedRef<string>;
-  auction?: ComputedRef<{
-    id: string;
-    allowListSigner: string;
-    isPrivateAuction: boolean;
-  }>;
+  auction?: ComputedRef<
+    | {
+        id: string;
+        allowListSigner: string;
+        isPrivateAuction: boolean;
+      }
+    | undefined
+  >;
 }) {
   const { web3, web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
-  const auctionId = computed(() => auction?.value.id);
+  const auctionId = computed(() => auction?.value?.id);
   const signer = computed(() =>
-    auction?.value.allowListSigner
+    auction?.value?.allowListSigner
       ? getAddress(`0x${auction.value.allowListSigner.slice(-40)}`)
       : null
   );
@@ -63,7 +66,7 @@ export function useAuctionVerification({
   const acceptedProviders = ref<VerificationProviderId[]>([]);
 
   const verificationType = computed((): AuctionVerificationType => {
-    if (auction && !auction.value.isPrivateAuction) return 'public';
+    if (auction?.value && !auction.value.isPrivateAuction) return 'public';
     return acceptedProviders.value[0] ?? 'unknownSigner';
   });
 
@@ -169,7 +172,10 @@ export function useAuctionVerification({
   }
 
   async function checkExistingAttestation() {
-    if (!web3Account.value || (auction && !auction.value.isPrivateAuction)) {
+    if (
+      !web3Account.value ||
+      (auction?.value && !auction.value.isPrivateAuction)
+    ) {
       status.value = 'started';
       return;
     }
