@@ -12,10 +12,7 @@ defineProps<{
 </script>
 
 <template>
-  <div
-    v-if="verificationProvider === 'private'"
-    class="p-4 text-skin-text text-sm"
-  >
+  <div v-if="verificationProvider === 'private'" class="p-4 text-skin-text">
     This auction uses an unsupported verification provider
   </div>
 
