@@ -86,16 +86,46 @@ export function useAuctionVerification({
     acceptedProviders.value = [];
   }
 
-  async function checkVerificationStatus(provider?: VerificationProviderId) {
-    const result = await rpcCall<VerifyResponse>('verify', {
-      network: network.value,
-      user: web3Account.value,
-      ...(signer.value && { signer: signer.value }),
-      ...(provider && { provider })
-    });
+  async function checkStatus(options?: {
+    showNotification?: boolean;
+    metadata?: object;
+  }) {
+    const showNotification = options?.showNotification ?? false;
+    const provider = activeProviderId.value;
 
-    acceptedProviders.value = result.acceptedProviders;
-    return result;
+    if (
+      !web3Account.value ||
+      (auction?.value && !auction.value.isPrivateAuction)
+    ) {
+      status.value = 'started';
+      return;
+    }
+
+    status.value = 'loading';
+
+    try {
+      const result = await rpcCall<VerifyResponse>('verify', {
+        network: network.value,
+        user: web3Account.value,
+        ...(signer.value && { signer: signer.value }),
+        ...(provider && { provider }),
+        ...(options?.metadata && { metadata: options.metadata })
+      });
+
+      acceptedProviders.value = result.acceptedProviders ?? [];
+
+      if (result.verified) {
+        status.value = 'verified';
+        if (showNotification) {
+          uiStore.addNotification('success', 'Verification complete');
+        }
+        return;
+      }
+
+      status.value = provider ? 'pending' : 'started';
+    } catch (err) {
+      handleError(err, 'Verification check failed');
+    }
   }
 
   function handleError(err: unknown, message?: string) {
@@ -132,13 +162,12 @@ export function useAuctionVerification({
       web3Account,
       network: network.value,
       providerId: targetProviderId,
-      signer: signer.value ?? '',
       status,
       verificationUrl,
       error,
       handleError,
       rpcCall,
-      addNotification: uiStore.addNotification
+      checkStatus
     };
 
     await provider.startVerification(context);
@@ -171,51 +200,6 @@ export function useAuctionVerification({
     }
   }
 
-  async function checkExistingAttestation() {
-    if (
-      !web3Account.value ||
-      (auction?.value && !auction.value.isPrivateAuction)
-    ) {
-      status.value = 'started';
-      return;
-    }
-
-    status.value = 'loading';
-
-    try {
-      const result = await checkVerificationStatus();
-
-      if (result.verified) {
-        status.value = 'verified';
-        return;
-      }
-
-      status.value = 'started';
-    } catch {
-      status.value = 'started';
-    }
-  }
-
-  async function checkProviderStatus() {
-    if (!web3Account.value || !activeProviderId.value) return;
-
-    status.value = 'loading';
-
-    try {
-      const result = await checkVerificationStatus(activeProviderId.value);
-
-      if (result.verified) {
-        status.value = 'verified';
-        uiStore.addNotification('success', 'Verification complete');
-        return;
-      }
-
-      status.value = 'pending';
-    } catch (err) {
-      handleError(err, 'Verification check failed');
-    }
-  }
-
   watch(
     [web3Account, auctionId],
     ([newAccount, newAuctionId], [oldAccount, oldAuctionId]) => {
@@ -224,7 +208,7 @@ export function useAuctionVerification({
       }
 
       if (status.value === 'loading') {
-        checkExistingAttestation();
+        checkStatus();
       }
     },
     { immediate: true }
@@ -240,7 +224,7 @@ export function useAuctionVerification({
     error,
     generateSignature,
     startVerification,
-    checkStatus: checkProviderStatus,
+    checkStatus: () => checkStatus({ showNotification: true }),
     reset
   };
 }

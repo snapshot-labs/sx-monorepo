@@ -5,6 +5,10 @@ defineProps<{
   verificationType: AuctionVerificationType;
   isLoading: boolean;
 }>();
+
+const { web3Account } = useWeb3();
+
+const isConnected = computed(() => !!web3Account.value);
 </script>
 
 <template>
@@ -12,7 +16,12 @@ defineProps<{
     <UiLoading :size="24" />
     <p class="text-sm text-skin-text">Checking verification status</p>
   </div>
-
+  <div
+    v-else-if="isConnected && verificationType === 'unknownSigner'"
+    class="p-4 text-skin-text text-sm"
+  >
+    This auction uses an unsupported verification provider
+  </div>
   <div v-else class="p-4 space-y-3">
     <div class="flex items-center gap-3">
       <div class="bg-skin-border rounded-full p-2.5 shrink-0">

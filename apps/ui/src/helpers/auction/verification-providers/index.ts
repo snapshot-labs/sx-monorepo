@@ -18,14 +18,13 @@ export type VerificationContext = {
   web3Account: ComputedRef<string>;
   network: string;
   providerId: VerificationProviderId;
-  signer: string;
   status: { value: VerificationStatus };
   verificationUrl: { value: string | null };
   error: { value: string | null };
   handleError: (err: unknown, message?: string) => void;
   rpcCall: <T>(method: string, params: object) => Promise<T>;
-  addNotification: (
-    type: 'success' | 'warning' | 'error',
-    message: string
-  ) => void;
+  checkStatus: (options?: {
+    metadata?: object;
+    showNotification?: boolean;
+  }) => Promise<void>;
 };

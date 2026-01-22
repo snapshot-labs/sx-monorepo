@@ -22,7 +22,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
     const queryBuilder = await zkPassport.request({
       name: 'Snapshot auction verification',
       logo:
-        getUrl('bafkreigd2gaip56bkg5xt4xkwcpa4uhrlpljg7vsuzumzctte57leh75ra') ||
+        getUrl('bafkreiaucrdvpalghwnvtcczpw5td7ejxj3pna6rtuk6jbzzny3nqdfoba') ||
         '',
       purpose: 'Verify to participate in private auctions',
       scope: 'auction',
@@ -68,25 +68,15 @@ async function startVerification(context: VerificationContext): Promise<void> {
         return;
       }
 
-      try {
-        await context.rpcCall<{ verified: boolean }>('verify', {
-          network: context.network,
-          user: context.web3Account.value,
-          signer: context.signer,
-          provider: context.providerId,
-          metadata: {
-            zkpassport: {
-              proofs,
-              queryResult
-            }
+      await context.checkStatus({
+        showNotification: true,
+        metadata: {
+          zkpassport: {
+            proofs,
+            queryResult
           }
-        });
-
-        context.status.value = 'verified';
-        context.addNotification('success', 'ZKPassport verification complete');
-      } catch (err) {
-        context.handleError(err, 'Failed to verify');
-      }
+        }
+      });
     });
 
     onReject(() => {
