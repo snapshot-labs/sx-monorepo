@@ -676,6 +676,13 @@ watch(volume, () => {
             </AppLink>
           </div>
         </UiScrollerHorizontal>
+        <div class="p-4 m-4 rounded bg-skin-border">
+          <AuctionChartPriceDistribution
+            :auction="auction"
+            :network="network"
+          />
+        </div>
+
         <FormAuctionBid
           v-if="sidebarType === 'bid' && isAuctionOpen"
           :auction="auction"
