@@ -317,6 +317,7 @@ onMounted(() => {
       v-if="!isVerified"
       :verification-type="verificationType"
       :is-loading="verificationStatus === 'loading'"
+      :is-error="verificationStatus === 'error'"
     />
     <div v-else class="s-box p-4 space-y-3">
       <UiMessage

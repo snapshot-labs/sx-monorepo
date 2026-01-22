@@ -4,6 +4,7 @@ import { AuctionVerificationType } from '@/helpers/auction/types';
 defineProps<{
   verificationType: AuctionVerificationType;
   isLoading: boolean;
+  isError: boolean;
 }>();
 
 const { web3Account } = useWeb3();
@@ -15,6 +16,10 @@ const isConnected = computed(() => !!web3Account.value);
   <div v-if="isLoading" class="flex flex-col text-center p-6 space-y-3">
     <UiLoading :size="24" />
     <p class="text-sm text-skin-text">Checking verification status</p>
+  </div>
+  <div v-if="isError" class="p-4 text-skin-danger text-sm text-center">
+    An error occurred while checking verification status. Please try again
+    later.
   </div>
   <div
     v-else-if="isConnected && verificationType === 'unknownSigner'"
