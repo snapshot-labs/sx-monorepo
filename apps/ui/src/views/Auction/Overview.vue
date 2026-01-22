@@ -23,6 +23,7 @@ import {
 import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
+const DEFAULT_CHART_TYPE = 'price';
 
 const props = defineProps<{
   network: AuctionNetworkId;
@@ -55,7 +56,7 @@ const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
 
-const chartType = ref<'price' | 'depth'>('price');
+const chartType = ref<'price' | 'depth'>(DEFAULT_CHART_TYPE);
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
@@ -272,7 +273,7 @@ const transactionProgressFn = computed<() => Promise<string | null>>(() => {
 async function invalidateQueries() {
   await sleep(5000);
 
-  await queryClient.invalidateQueries({
+  queryClient.invalidateQueries({
     queryKey: AUCTION_KEYS.auction(props.network, props.auction)
   });
 }
@@ -337,6 +338,12 @@ function handleAllOrdersEndReached() {
 function handleScrollEvent(target: HTMLElement) {
   bidsHeaderX.value = target.scrollLeft;
 }
+
+watch(volume, () => {
+  if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
+    chartType.value = DEFAULT_CHART_TYPE;
+  }
+});
 </script>
 
 <template>
@@ -444,6 +451,7 @@ function handleScrollEvent(target: HTMLElement) {
           <UiLabel :is-active="chartType === 'price'" text="Clearing price" />
         </AppLink>
         <AppLink
+          v-if="volume"
           :aria-active="chartType === 'depth'"
           @click="chartType = 'depth'"
         >
