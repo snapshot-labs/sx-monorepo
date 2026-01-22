@@ -485,7 +485,7 @@ function handleScrollEvent(target: HTMLElement) {
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" />
+          <UiLabelLarge :is-active="bidsType === 'allBids'" text="Bids" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
