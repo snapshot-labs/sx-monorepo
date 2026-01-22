@@ -1,4 +1,5 @@
 import {
+  AuctionDetailFragment,
   GetAuctionPriceHourDataQuery,
   GetAuctionPriceLevelsQuery,
   OrderFragment
@@ -16,6 +17,7 @@ export type Order = OrderFragment & { name: string | null };
 export type SellOrder = {
   buyAmount: bigint;
   sellAmount: bigint;
+  auction: AuctionDetailFragment;
   attestation?: `0x${string}`;
 };
 export type AuctionPriceLevelPoint =
