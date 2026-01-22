@@ -373,7 +373,7 @@ watch(volume, () => {
         <AuctionStatus :state="auctionState" />
       </div>
       <div
-        class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
+        class="flex flex-col xl:flex-row xl:justify-between xl:items-start gap-3"
       >
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
@@ -462,9 +462,10 @@ watch(volume, () => {
           :aria-active="chartType === 'price'"
           @click="chartType = 'price'"
         >
-          <UiLabelLarge
+          <UiLabel
             :is-active="chartType === 'price'"
             text="Clearing price"
+            size="lg"
           />
         </AppLink>
         <AppLink
@@ -472,7 +473,7 @@ watch(volume, () => {
           :aria-active="chartType === 'depth'"
           @click="chartType = 'depth'"
         >
-          <UiLabelLarge :is-active="chartType === 'depth'" text="Depth" />
+          <UiLabel :is-active="chartType === 'depth'" text="Depth" size="lg" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -496,13 +497,17 @@ watch(volume, () => {
           :aria-active="bidsType === 'userBids'"
           @click="bidsType = 'userBids'"
         >
-          <UiLabelLarge :is-active="bidsType === 'userBids'" text="My bids" />
+          <UiLabel
+            :is-active="bidsType === 'userBids'"
+            text="My bids"
+            size="lg"
+          />
         </AppLink>
         <AppLink
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabelLarge :is-active="bidsType === 'allBids'" text="Bids" />
+          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" size="lg" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -680,18 +685,20 @@ watch(volume, () => {
               :aria-active="sidebarType === 'bid'"
               @click="sidebarType = 'bid'"
             >
-              <UiLabelLarge
+              <UiLabel
                 :is-active="sidebarType === 'bid'"
                 text="Place bid"
+                size="lg"
               />
             </AppLink>
             <AppLink
               :aria-active="sidebarType === 'referral'"
               @click="sidebarType = 'referral'"
             >
-              <UiLabelLarge
+              <UiLabel
                 :is-active="sidebarType === 'referral'"
                 text="Referral"
+                size="lg"
               />
             </AppLink>
           </div>
