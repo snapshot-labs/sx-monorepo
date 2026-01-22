@@ -11,7 +11,7 @@ export default [
     component: Auctions
   },
   {
-    path: '/auction/invite/:auctionTag/:partner',
+    path: '/auction/invite/:auctionTag/:partner(0x[a-fA-F0-9]{40})',
     name: 'auction-invite',
     component: AuctionInvite
   },
