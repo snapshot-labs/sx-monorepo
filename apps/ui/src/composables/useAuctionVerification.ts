@@ -25,7 +25,7 @@ async function rpcCall<T>(method: string, params: object): Promise<T> {
   const response = await fetch(ATTESTATION_API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+    body: JSON.stringify({ jsonrpc: '2.0', method, params })
   });
 
   const data = await response.json();
@@ -39,7 +39,7 @@ export function useAuctionVerification({
   auction
 }: {
   network: ComputedRef<string>;
-  auction: ComputedRef<{
+  auction?: ComputedRef<{
     id: string;
     allowListSigner: string;
     isPrivateAuction: boolean;
@@ -49,9 +49,11 @@ export function useAuctionVerification({
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
-  const auctionId = computed(() => auction.value.id);
+  const auctionId = computed(() => auction?.value.id);
   const signer = computed(() =>
-    getAddress(`0x${auction.value.allowListSigner.slice(-40)}`)
+    auction?.value.allowListSigner
+      ? getAddress(`0x${auction.value.allowListSigner.slice(-40)}`)
+      : null
   );
 
   const status = ref<VerificationStatus>('loading');
@@ -61,7 +63,7 @@ export function useAuctionVerification({
   const acceptedProviders = ref<VerificationProviderId[]>([]);
 
   const verificationType = computed((): AuctionVerificationType => {
-    if (!auction.value.isPrivateAuction) return 'public';
+    if (auction && !auction.value.isPrivateAuction) return 'public';
     return acceptedProviders.value[0] ?? 'unknownSigner';
   });
 
@@ -85,7 +87,7 @@ export function useAuctionVerification({
     const result = await rpcCall<VerifyResponse>('verify', {
       network: network.value,
       user: web3Account.value,
-      signer: signer.value,
+      ...(signer.value && { signer: signer.value }),
       ...(provider && { provider })
     });
 
@@ -127,7 +129,7 @@ export function useAuctionVerification({
       web3Account,
       network: network.value,
       providerId: targetProviderId,
-      signer: signer.value,
+      signer: signer.value ?? '',
       status,
       verificationUrl,
       error,
@@ -167,7 +169,7 @@ export function useAuctionVerification({
   }
 
   async function checkExistingAttestation() {
-    if (!web3Account.value || !auction.value.isPrivateAuction) {
+    if (!web3Account.value || (auction && !auction.value.isPrivateAuction)) {
       status.value = 'started';
       return;
     }

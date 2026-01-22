@@ -10,6 +10,11 @@ export default [
     component: Auctions
   },
   {
+    path: '/auction/verify',
+    name: 'auction-verify-standalone',
+    component: AuctionVerify
+  },
+  {
     path: '/auction/:id',
     name: 'auction',
     component: Auction,

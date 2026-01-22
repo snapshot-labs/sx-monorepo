@@ -11,8 +11,8 @@ const VERIFICATION_PENDING_STATUSES: readonly VerificationStatus[] = [
 ];
 
 const props = defineProps<{
-  network: AuctionNetworkId;
-  auction: AuctionDetailFragment;
+  network?: AuctionNetworkId;
+  auction?: AuctionDetailFragment;
 }>();
 
 const {
@@ -27,8 +27,8 @@ const {
   reset,
   checkStatus
 } = useAuctionVerification({
-  network: computed(() => props.network),
-  auction: computed(() => props.auction)
+  network: computed(() => props.network ?? 'sep'),
+  auction: props.auction ? computed(() => props.auction!) : undefined
 });
 
 const isPending = computed(() =>
@@ -43,18 +43,13 @@ const isPending = computed(() =>
       process.
     </div>
     <UiLoading v-if="verificationStatus === 'loading'" class="block mt-4" />
-    <div
-      v-else-if="verificationType === 'unknownSigner'"
-      class="p-4 text-skin-text text-sm"
-    >
-      This auction uses an unsupported verification provider
-    </div>
     <div v-else-if="isVerified" class="mt-4">
       <UiAlert type="success">
         You have been successfully verified and can now participate in the
         auction.
       </UiAlert>
       <UiButton
+        v-if="auction"
         class="w-full mt-4"
         primary
         :to="{
@@ -63,6 +58,12 @@ const isPending = computed(() =>
       >
         Go back to auction
       </UiButton>
+    </div>
+    <div
+      v-else-if="verificationType === 'unknownSigner'"
+      class="p-4 text-skin-text text-sm"
+    >
+      This auction uses an unsupported verification provider
     </div>
     <div v-else-if="verificationStatus === 'started'" class="mt-4 space-y-3">
       <UiButton
