@@ -74,7 +74,7 @@ async function handleConfirmed() {
     </UiAlert>
     <div
       v-else
-      class="mx-auto mt-9 flex flex-col md:border rounded-none md:rounded-lg md:h-fit md:max-w-[440px]"
+      class="mx-auto md:mt-9 flex flex-col md:border rounded-none md:rounded-lg md:h-fit md:max-w-[440px]"
     >
       <div class="border-b py-3 text-center">
         <h3>{{ userInvite ? 'Your partner' : 'Confirm partner' }}</h3>
