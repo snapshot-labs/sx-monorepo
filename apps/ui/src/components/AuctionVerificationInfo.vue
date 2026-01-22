@@ -8,14 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div
-    v-if="verificationType === 'unknownSigner'"
-    class="p-4 text-skin-text text-sm"
-  >
-    This auction uses an unsupported verification provider
-  </div>
-
-  <div v-else-if="isLoading" class="flex flex-col text-center p-6 space-y-3">
+  <div v-if="isLoading" class="flex flex-col text-center p-6 space-y-3">
     <UiLoading :size="24" />
     <p class="text-sm text-skin-text">Checking verification status</p>
   </div>

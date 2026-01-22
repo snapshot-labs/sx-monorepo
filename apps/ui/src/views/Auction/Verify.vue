@@ -15,6 +15,9 @@ const props = defineProps<{
   auction?: AuctionDetailFragment;
 }>();
 
+const { web3Account } = useWeb3();
+const { modalAccountOpen } = useModal();
+
 const {
   verificationType,
   acceptedProviders,
@@ -31,6 +34,7 @@ const {
   auction: props.auction ? computed(() => props.auction!) : undefined
 });
 
+const isConnected = computed(() => !!web3Account.value);
 const isPending = computed(() =>
   VERIFICATION_PENDING_STATUSES.includes(verificationStatus.value)
 );
@@ -43,6 +47,11 @@ const isPending = computed(() =>
       process.
     </div>
     <UiLoading v-if="verificationStatus === 'loading'" class="block mt-4" />
+    <div v-else-if="!isConnected" class="mt-4 space-y-3">
+      <UiButton class="w-full" primary @click="modalAccountOpen = true">
+        Connect wallet
+      </UiButton>
+    </div>
     <div v-else-if="isVerified" class="mt-4">
       <UiAlert type="success">
         You have been successfully verified and can now participate in the
