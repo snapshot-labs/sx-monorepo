@@ -359,7 +359,7 @@ watch(volume, () => {
           />
         </UiBadgeNetwork>
         <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-        <AuctionStatus class="max-w-fit" :state="auctionState" />
+        <AuctionStatus :state="auctionState" />
       </div>
       <div
         class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
