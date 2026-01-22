@@ -7,13 +7,6 @@ import {
 } from '@/helpers/auction';
 import * as actions from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import {
-  EIP712_DOMAIN,
-  POSTER_TAG,
-  SET_PARTNER_EIP712_TYPES
-} from '@/helpers/auction/referral';
-import { executionCall } from '@/helpers/mana';
-import { pin } from '@/helpers/pin';
 import { approve, getTokenAllowance } from '@/helpers/token';
 import {
   getUserFacingErrorMessage,
@@ -125,46 +118,6 @@ export function useAuctionActions(
     );
   }
 
-  async function setPartner(auctionTag: string, partner: string) {
-    const signer = auth.value!.provider.getSigner();
-    const signerAddress = await signer.getAddress();
-
-    const domain = {
-      ...EIP712_DOMAIN,
-      chainId: chainId.value
-    };
-
-    const message = {
-      auction_tag: auctionTag,
-      partner: partner.toLowerCase()
-    };
-
-    const signature = await signer._signTypedData(
-      domain,
-      SET_PARTNER_EIP712_TYPES,
-      message
-    );
-
-    const metadata = {
-      method: 'SetAuctionPartner',
-      signer: signerAddress.toLowerCase(),
-      signature,
-      domain,
-      types: SET_PARTNER_EIP712_TYPES,
-      message
-    };
-
-    const { cid } = await pin(metadata);
-
-    return wrapPromise(
-      executionCall('eth', domain.chainId, 'sendAuctionPartner', {
-        metadataUri: `ipfs://${cid}`,
-        posterTag: POSTER_TAG
-      }),
-      domain.chainId
-    );
-  }
-
   async function wrapPromise(
     promise: Promise<any>,
     txChainId?: number
@@ -184,7 +137,6 @@ export function useAuctionActions(
     cancelSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(cancelSellOrder)),
     claimFromParticipantOrder: wrapWithErrors(
       wrapWithAuthAndNetwork(claimFromParticipantOrder)
-    ),
-    setPartner: wrapWithErrors(wrapWithAuthAndNetwork(setPartner))
+    )
   };
 }

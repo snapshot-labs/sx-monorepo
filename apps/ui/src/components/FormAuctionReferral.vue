@@ -39,10 +39,7 @@ const props = defineProps<{
 
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
-const { setPartner } = useAuctionActions(
-  toRef(props, 'network'),
-  toRef(props, 'auction')
-);
+const { setPartner } = useAuctionReferralActions(toRef(props, 'network'));
 const queryClient = useQueryClient();
 
 const partnerInput = ref('');
