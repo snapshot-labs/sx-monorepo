@@ -349,19 +349,17 @@ watch(volume, () => {
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
-      <div class="flex gap-3">
-        <UiBadgeNetwork :id="network" :size="24">
+      <div class="flex gap-2.5">
+        <UiBadgeNetwork :id="network" :size="18">
           <UiStamp
             :id="auction.addressAuctioningToken"
-            :size="64"
+            :size="32"
             type="token"
             class="rounded-full"
           />
         </UiBadgeNetwork>
-        <div class="flex flex-col">
-          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-          <AuctionStatus class="max-w-fit" :state="auctionState" />
-        </div>
+        <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+        <AuctionStatus class="max-w-fit" :state="auctionState" />
       </div>
       <div
         class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
