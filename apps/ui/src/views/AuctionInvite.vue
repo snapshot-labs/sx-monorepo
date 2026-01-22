@@ -78,7 +78,7 @@ async function handleConfirmed() {
       class="mx-auto mt-9 flex flex-col md:border rounded-none md:rounded-lg md:h-fit md:max-w-[440px]"
     >
       <div class="border-b py-3 text-center">
-        <h4>{{ userInvite ? 'Your partner' : 'Confirm partner' }}</h4>
+        <h3>{{ userInvite ? 'Your partner' : 'Confirm partner' }}</h3>
       </div>
       <div class="flex-auto">
         <div class="bg-skin-border w-full h-[140px]" />
