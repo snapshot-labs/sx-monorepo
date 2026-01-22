@@ -8,7 +8,6 @@ import {
 import * as actions from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import {
-  AUCTION_TAG,
   EIP712_DOMAIN,
   POSTER_TAG,
   SET_PARTNER_EIP712_TYPES
@@ -126,7 +125,7 @@ export function useAuctionActions(
     );
   }
 
-  async function setPartner(partner: string) {
+  async function setPartner(auctionTag: string, partner: string) {
     const signer = auth.value!.provider.getSigner();
     const signerAddress = await signer.getAddress();
 
@@ -136,7 +135,7 @@ export function useAuctionActions(
     };
 
     const message = {
-      auction_tag: AUCTION_TAG,
+      auction_tag: auctionTag,
       partner: partner.toLowerCase()
     };
 

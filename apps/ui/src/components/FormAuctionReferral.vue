@@ -4,7 +4,10 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionNetworkId } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { REFERRAL_SHARE } from '@/helpers/auction/referral';
+import {
+  DEFAULT_AUCTION_TAG,
+  REFERRAL_SHARE
+} from '@/helpers/auction/referral';
 import {
   _n,
   compareAddresses,
@@ -48,7 +51,8 @@ const isModalOpen = ref(false);
 const { data: userInvite, isPending: isUserInvitePending } = useUserInviteQuery(
   {
     networkId: toRef(props, 'network'),
-    account: web3Account
+    account: web3Account,
+    auctionTag: () => DEFAULT_AUCTION_TAG
   }
 );
 
@@ -58,7 +62,8 @@ const {
   isPending: isUserInvitesPending
 } = useUserInvitesQuery({
   networkId: toRef(props, 'network'),
-  account: web3Account
+  account: web3Account,
+  auctionTag: () => DEFAULT_AUCTION_TAG
 });
 
 const {
@@ -87,7 +92,8 @@ const {
   isFetchingNextPage,
   isError: isPartnerStatisticsError
 } = usePartnerStatisticsQuery({
-  networkId: toRef(props, 'network')
+  networkId: toRef(props, 'network'),
+  auctionTag: () => DEFAULT_AUCTION_TAG
 });
 
 const inputError = computed(() => {
@@ -255,7 +261,7 @@ async function handleConfirmed() {
     <ModalTransactionProgress
       :open="isModalOpen"
       :chain-id="getNetwork(props.network).chainId"
-      :execute="() => setPartner(partnerInput)"
+      :execute="() => setPartner(DEFAULT_AUCTION_TAG, partnerInput)"
       @confirmed="handleConfirmed"
       @close="isModalOpen = false"
       @cancelled="isModalOpen = false"
