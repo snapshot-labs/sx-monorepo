@@ -111,6 +111,7 @@ async function handleConfirmed() {
       <div v-if="!userInvite" class="border-t p-4 text-center">
         <UiButton
           v-if="!web3Account"
+          primary
           class="w-full"
           @click="modalAccountOpen = true"
         >
