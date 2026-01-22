@@ -10,8 +10,8 @@ defineProps<{
 
 <template>
   <div
-    class="flex items-center"
-    :class="[isActive && 'border-b-2 border-skin-link mb-[-2px]']"
+    class="flex items-center border-b-[2px] mb-[-1px]"
+    :class="[isActive ? 'border-skin-link' : 'border-transparent']"
   >
     <span
       class="py-2 text-[19px] font-bold cursor-pointer inline-block hover:text-skin-link"
