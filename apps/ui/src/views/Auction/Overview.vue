@@ -350,7 +350,7 @@ watch(volume, () => {
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
       <div class="flex gap-2.5">
-        <UiBadgeNetwork :id="network" :size="18">
+        <UiBadgeNetwork :id="network" :size="18" class="shrink-0">
           <UiStamp
             :id="auction.addressAuctioningToken"
             :size="32"
