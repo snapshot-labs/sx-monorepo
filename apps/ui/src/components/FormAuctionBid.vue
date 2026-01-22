@@ -43,16 +43,9 @@ const { modalAccountOpen } = useModal();
 
 const {
   verificationType,
-  acceptedProviders,
-  activeProviderId,
   status: verificationStatus,
   isVerified,
-  verificationUrl,
-  error: verificationError,
-  generateSignature,
-  startVerification,
-  checkStatus,
-  reset: resetVerification
+  generateSignature
 } = useAuctionVerification({
   network: computed(() => props.network),
   auction: computed(() => props.auction)
@@ -320,19 +313,10 @@ onMounted(() => {
 
 <template>
   <div>
-    <AuctionVerification
+    <AuctionVerificationInfo
       v-if="!isVerified"
-      :is-connected="!!web3Account"
       :verification-type="verificationType"
-      :accepted-providers="acceptedProviders"
-      :active-provider-id="activeProviderId"
-      :status="verificationStatus"
-      :verification-url="verificationUrl"
-      :error="verificationError"
-      @connect="modalAccountOpen = true"
-      @start-verification="startVerification"
-      @check-status="checkStatus"
-      @reset="resetVerification"
+      :is-loading="verificationStatus === 'loading'"
     />
     <div v-else class="s-box p-4 space-y-3">
       <UiMessage
