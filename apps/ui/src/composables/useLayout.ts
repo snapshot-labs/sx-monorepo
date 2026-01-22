@@ -1,4 +1,4 @@
-const AUCTION_ROUTES = ['auctions', 'auction'];
+const AUCTION_ROUTES = ['auctions', 'auction', 'auction-invite'];
 
 export function useLayout() {
   const route = useRoute();
