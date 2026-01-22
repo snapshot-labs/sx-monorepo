@@ -50,6 +50,9 @@ const partnerName = computed(
     inviteName.value ??
     shortenAddress(partnerAddress.value)
 );
+const isUserInvitePartner = computed(() =>
+  compareAddresses(web3Account.value, partnerAddress.value)
+);
 
 async function handleConfirmed() {
   await sleep(5000);
@@ -68,13 +71,6 @@ async function handleConfirmed() {
     />
     <UiAlert v-else-if="isUserInviteError" type="error" class="mb-3 m-4 h-fit">
       Failed to load invite information. Please check the link and try again.
-    </UiAlert>
-    <UiAlert
-      v-else-if="compareAddresses(web3Account, inviteAddress)"
-      type="error"
-      class="mb-3 m-4 h-fit"
-    >
-      You cannot invite yourself as a partner.
     </UiAlert>
     <div
       v-else
@@ -120,8 +116,14 @@ async function handleConfirmed() {
         >
           Connect wallet
         </UiButton>
-        <UiButton v-else primary class="w-full" @click="isModalOpen = true">
-          Confirm
+        <UiButton
+          v-else
+          :disabled="isUserInvitePartner"
+          primary
+          class="w-full"
+          @click="isModalOpen = true"
+        >
+          {{ isUserInvitePartner ? "You can't add yourself" : 'Confirm' }}
         </UiButton>
       </div>
     </div>
