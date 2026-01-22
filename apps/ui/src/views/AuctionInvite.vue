@@ -92,7 +92,7 @@ async function handleConfirmed() {
             :address="partnerAddress"
             class="text-[17px] text-skin-text truncate"
           />
-          <div class="px-4 text-center text-skin-link pb-4">
+          <div class="px-4 text-center text-skin-link pb-6">
             <template v-if="userInvite">
               You have added <b>{{ partnerName }}</b> as partner for the
               <b>{{ auctionTag }}</b> auction. You will get
