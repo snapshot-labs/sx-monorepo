@@ -249,7 +249,7 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
-  async function postReferral(id: number, params: any, res: Response) {
+  async function sendAuctionPartner(id: number, params: any, res: Response) {
     try {
       const { metadataUri, posterTag } = params;
 
@@ -286,7 +286,7 @@ export const createNetworkHandler = (chainId: number) => {
         );
       }
 
-      const referralId = `${message.auction_tag}/${signer.toLowerCase()}`;
+      const inviteId = `${message.auction_tag}/${signer.toLowerCase()}`;
 
       const indexer =
         BROKESTER_INDEXER_MAPPINGS[
@@ -297,17 +297,17 @@ export const createNetworkHandler = (chainId: number) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          query: `{ referral(indexer: "${indexer}", id: "${referralId}") { id } }`
+          query: `{ invite(indexer: "${indexer}", id: "${inviteId}") { id } }`
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data?.data?.referral) {
+        if (data?.data?.invite) {
           return rpcError(
             res,
             400,
-            'Referral already registered for this address',
+            'Invite already registered for this address',
             id
           );
         }
@@ -336,7 +336,7 @@ export const createNetworkHandler = (chainId: number) => {
     executeQueuedProposal,
     executeStarknetProposal,
     registerApeGasProposal,
-    postReferral,
+    sendAuctionPartner,
     getWallet
   };
 };

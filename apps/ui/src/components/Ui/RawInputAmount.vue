@@ -9,10 +9,10 @@ const props = defineProps<{
 
 const pattern = computed(() => {
   if (!props.decimals) {
-    return /^[0-9]*[.]?[0-9]*$/;
+    return /^[0-9]+[.]?[0-9]*$/;
   }
 
-  return new RegExp(`^[0-9]*[.]?[0-9]{0,${props.decimals}}$`);
+  return new RegExp(`^[0-9]+[.]?[0-9]{0,${props.decimals}}$`);
 });
 
 function handleInput(event: Event) {

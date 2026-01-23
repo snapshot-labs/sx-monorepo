@@ -9,6 +9,7 @@ import {
   previousOrderQuery,
   unclaimedOrdersQuery
 } from './queries';
+import { ChartGranularity } from '../charts';
 import { getNames } from '../stamp';
 import {
   AuctionDetailFragment,
@@ -27,7 +28,6 @@ import {
   AuctionState,
   Order
 } from './types';
-import { ChartGranularity } from '../charts';
 
 export * from './types';
 
@@ -45,6 +45,11 @@ export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
   base: '0x5e9DC9694f6103dA5d5B9038c090040E3A6E4Bf8',
   sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C'
 };
+
+export const VERIFICATION_PROVIDER_SIGNERS = {
+  zkpassport: '0xf131a5d781150b8104a855811a1eAEcea44f3082',
+  sumsub: '0x691D5D0b726A3cD30fed72C4Dc6BdD1b34695089'
+} as const;
 
 export function formatPrice(
   price: string | number | undefined,
@@ -71,11 +76,10 @@ export function getAuctionState(
   const currentBiddingAmount = BigInt(auction.currentBiddingAmount);
   const minFundingThreshold = BigInt(auction.minFundingThreshold);
 
+  if (!auction.clearingPriceOrder) return 'finalizing';
   if (currentBiddingAmount < minFundingThreshold) return 'canceled';
 
   if (auction.ordersWithoutClaimed?.length) {
-    if (!auction.clearingPriceOrder) return 'finalizing';
-
     return 'claiming';
   }
 
@@ -88,7 +92,12 @@ function getClient(network: AuctionNetworkId) {
 
   return new ApolloClient({
     uri: subgraphUrl,
-    cache: new InMemoryCache()
+    cache: new InMemoryCache(),
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'no-cache'
+      }
+    }
   });
 }
 

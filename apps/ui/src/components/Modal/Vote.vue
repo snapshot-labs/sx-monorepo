@@ -315,9 +315,11 @@ watchEffect(async () => {
       :tx-id="txId"
       :show-icon="true"
       :shareable="{ proposal, choice: selectedChoice! }"
+      :network="proposal.network"
       :messages="{
         title: 'Vote success!'
       }"
+      :type="'vote'"
       @close="modalShareOpen = false"
     />
   </teleport>

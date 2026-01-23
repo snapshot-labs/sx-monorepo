@@ -5,6 +5,7 @@ import { abis } from '@/helpers/abis';
 import { AuctionNetworkId, getAuction } from '@/helpers/auction';
 import { getProvider } from '@/helpers/provider';
 import { getNetwork } from '@/networks';
+import { AUCTION_KEYS } from '@/queries/auction';
 
 defineOptions({ inheritAttrs: false });
 
@@ -22,7 +23,10 @@ const {
   isLoading,
   error
 } = useQuery({
-  queryKey: computed(() => ['auction', params.value.network, params.value.id]),
+  queryKey: AUCTION_KEYS.auction(
+    () => params.value.network,
+    () => params.value.id
+  ),
   queryFn: () => getAuction(params.value.id, params.value.network),
   enabled: computed(() => !!params.value.id)
 });

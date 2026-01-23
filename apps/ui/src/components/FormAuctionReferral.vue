@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { isAddress } from '@ethersproject/address';
-import { useQueryClient } from '@tanstack/vue-query';
 import { AuctionNetworkId } from '@/helpers/auction';
+import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import {
-  compareAddresses,
-  formatAddress,
-  shortenAddress,
-  sleep
-} from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+  DEFAULT_AUCTION_TAG,
+  REFERRAL_SHARE
+} from '@/helpers/auction/referral';
+import { _n, formatAddress, shortenAddress } from '@/helpers/utils';
+import { useBidsSummaryQuery } from '@/queries/auction';
 import {
-  REFERRAL_KEYS,
-  useRefereesQuery,
-  useUserReferralQuery
+  usePartnerStatisticsQuery,
+  useUserInvitesQuery
 } from '@/queries/referral';
 
 const ADDRESS_INPUT_DEFINITION = {
@@ -36,138 +34,140 @@ const { modalAccountOpen } = useModal();
 const { setReferee } = useReferrals(toRef(props, 'network'));
 const queryClient = useQueryClient();
 
-const referralInput = ref('');
-const isModalOpen = ref(false);
-
-const { data: userReferral, isPending: isUserReferralPending } =
-  useUserReferralQuery({
-    networkId: toRef(props, 'network'),
-    account: web3Account
-  });
+const {
+  data: userInvites,
+  isError: isUserInvitesError,
+  isPending: isUserInvitesPending
+} = useUserInvitesQuery({
+  networkId: toRef(props, 'network'),
+  account: web3Account,
+  auctionTag: () => DEFAULT_AUCTION_TAG
+});
 
 const {
-  data: refereesData,
+  data: userBuyersOrders,
+  isError: isUserBuyersOrdersError,
+  isLoading: isUserBuyersOrdersLoading
+} = useBidsSummaryQuery({
+  network: () => props.network,
+  auction: () => props.auction,
+  where: () => ({
+    userAddress_in: userInvites.value?.map(r => r.buyer.toLowerCase()) ?? []
+  }),
+  orderBy: 'price',
+  orderDirection: 'desc',
+  enabled: () =>
+    web3Account.value !== null &&
+    !!userInvites.value &&
+    userInvites.value.length > 0
+});
+
+const {
+  data: partnerStatisticsData,
   fetchNextPage,
   hasNextPage,
-  isPending: isRefereesLoading,
+  isPending: isPartnerStatisticsPending,
   isFetchingNextPage,
-  isError: isRefereesError
-} = useRefereesQuery({
-  networkId: toRef(props, 'network')
+  isError: isPartnerStatisticsError
+} = usePartnerStatisticsQuery({
+  networkId: toRef(props, 'network'),
+  auctionTag: () => DEFAULT_AUCTION_TAG
 });
 
-const inputError = computed(() => {
-  if (!referralInput.value) return '';
+const partnerStatistics = computed(
+  () => partnerStatisticsData.value?.pages.flat() ?? []
+);
 
-  if (!isAddress(referralInput.value)) return 'Invalid address';
+const userBuyersOrdersTotal = computed(() => {
+  let totalVolume = 0n;
 
-  if (
-    web3Account.value &&
-    compareAddresses(referralInput.value, web3Account.value)
-  ) {
-    return 'You cannot refer yourself';
+  const clearingPriceOrderDecoded = props.auction.clearingPriceOrder
+    ? decodeOrder(props.auction.clearingPriceOrder)
+    : null;
+
+  for (const order of userBuyersOrders.value ?? []) {
+    const orderComparison = compareOrders(
+      {
+        userId: order.userId,
+        buyAmount: order.buyAmount,
+        sellAmount: order.sellAmount
+      },
+      // Until auction is cleared we are missing userId for clearing price order.
+      // If our referee has order with the same price, buyAmount and sellAmount as the (last) clearing order
+      // it might be or not be included in the total.
+      // This might not be a huge deal as for open auctions last clearing order might be changing often.
+      clearingPriceOrderDecoded ?? {
+        userId: order.userId,
+        buyAmount: props.auction.currentClearingOrderBuyAmount,
+        sellAmount: props.auction.currentClearingOrderSellAmount
+      }
+    );
+
+    if (orderComparison > 0) {
+      totalVolume += BigInt(order.sellAmount);
+    } else if (orderComparison === 0) {
+      totalVolume += BigInt(props.auction.currentVolume);
+    }
   }
 
-  return '';
+  return totalVolume;
 });
 
-const referees = computed(() => refereesData.value?.pages.flat() ?? []);
+const rewards = computed(() => {
+  const sellAmountShare =
+    (REFERRAL_SHARE * Number(userBuyersOrdersTotal.value)) /
+    10 ** Number(props.auction.decimalsBiddingToken);
 
-function handleSetReferral() {
-  if (!web3Account.value) {
-    modalAccountOpen.value = true;
-    return;
-  }
-
-  isModalOpen.value = true;
-}
-
-async function handleConfirmed() {
-  referralInput.value = '';
-  await sleep(5000);
-
-  queryClient.invalidateQueries({ queryKey: REFERRAL_KEYS.all });
-
-  isModalOpen.value = false;
-}
+  return sellAmountShare * Number(props.auction.currentClearingPrice);
+});
 </script>
 
 <template>
   <div class="s-box p-4 space-y-3">
-    <UiLoading v-if="web3Account && isUserReferralPending" class="py-3 block" />
-
-    <div
-      v-else-if="userReferral"
-      class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex gap-2 flex-col"
-    >
-      <div class="text-skin-text">Referee</div>
-      <div class="flex items-center gap-3">
-        <UiStamp :id="userReferral.referee" :size="24" />
-        <div class="flex flex-col leading-[22px] truncate">
-          <h4
-            class="truncate"
-            v-text="
-              userReferral.refereeName || shortenAddress(userReferral.referee)
-            "
-          />
-          <UiAddress
-            :address="formatAddress(userReferral.referee)"
-            class="text-[17px] text-skin-text truncate"
-          />
+    <div v-if="web3Account">
+      <h4 class="pb-2">Your rewards</h4>
+      <UiLoading
+        v-if="isUserInvitesPending || isUserBuyersOrdersLoading"
+        class="py-3 block"
+      />
+      <UiStateWarning
+        v-else-if="isUserInvitesError || isUserBuyersOrdersError"
+        class="py-3"
+      >
+        Failed to load your rewards.
+      </UiStateWarning>
+      <div v-else>
+        <div
+          class="flex gap-1 items-baseline font-medium text-skin-link leading-9"
+        >
+          <span class="text-[32px]">
+            {{ _n(rewards) }}
+          </span>
+          <span class="text-md">{{ props.auction.symbolAuctioningToken }}</span>
         </div>
       </div>
     </div>
-
-    <template v-else>
-      <p class="text-skin-text text-sm">
-        Set your referral to support whoever referred you. This can only be set
-        once.
-      </p>
-
-      <UiInputAddress
-        v-model="referralInput"
-        :definition="ADDRESS_INPUT_DEFINITION"
-        :error="inputError"
-      />
-
-      <UiButton
-        primary
-        class="w-full"
-        :disabled="!referralInput || !!inputError"
-        @click="handleSetReferral"
-      >
-        Set referee
-      </UiButton>
-    </template>
   </div>
 
-  <teleport to="#modal">
-    <ModalTransactionProgress
-      :open="isModalOpen"
-      :chain-id="getNetwork(props.network).chainId"
-      :execute="() => setReferee(referralInput)"
-      @confirmed="handleConfirmed"
-      @close="isModalOpen = false"
-      @cancelled="isModalOpen = false"
-    />
-  </teleport>
-
   <div class="border-t border-skin-border">
-    <h4 class="eyebrow px-4 py-2">Leaderboard</h4>
+    <h4 class="px-4 py-2">Leaderboard</h4>
 
     <UiColumnHeader :sticky="sticky" class="overflow-hidden gap-3">
+    <UiColumnHeader
+      class="overflow-hidden gap-3 !top-header-height-with-offset"
+    >
       <div class="flex-1 min-w-0 truncate">Referee</div>
       <div class="w-[80px] text-right truncate">Referrals</div>
     </UiColumnHeader>
 
     <div class="px-4">
-      <UiLoading v-if="isRefereesLoading" class="py-3 block" />
+      <UiLoading v-if="isPartnerStatisticsPending" class="py-3 block" />
 
-      <UiStateWarning v-else-if="isRefereesError" class="py-3">
+      <UiStateWarning v-else-if="isPartnerStatisticsError" class="py-3">
         Failed to load leaderboard.
       </UiStateWarning>
 
-      <UiStateWarning v-else-if="referees.length === 0" class="py-3">
+      <UiStateWarning v-else-if="partnerStatistics.length === 0" class="py-3">
         No referees yet.
       </UiStateWarning>
 
@@ -178,25 +178,25 @@ async function handleConfirmed() {
       >
         <div class="divide-y divide-skin-border flex flex-col justify-center">
           <div
-            v-for="referee in referees"
-            :key="referee.id"
+            v-for="entry in partnerStatistics"
+            :key="entry.id"
             class="flex items-center gap-3 py-3"
           >
             <div class="flex-1 min-w-0 flex items-center gap-3 truncate">
-              <UiStamp :id="referee.referee" :size="32" />
+              <UiStamp :id="entry.partner" :size="32" />
               <div class="flex flex-col truncate">
                 <h4
                   class="truncate"
-                  v-text="referee.name || shortenAddress(referee.referee)"
+                  v-text="entry.name || shortenAddress(entry.partner)"
                 />
                 <UiAddress
-                  :address="formatAddress(referee.referee)"
+                  :address="formatAddress(entry.partner)"
                   class="text-[17px] text-skin-text truncate"
                 />
               </div>
             </div>
             <div class="w-[80px] text-right">
-              <h4 class="text-skin-link">{{ referee.referral_count }}</h4>
+              <h4 class="text-skin-link">{{ entry.buyer_count }}</h4>
             </div>
           </div>
         </div>

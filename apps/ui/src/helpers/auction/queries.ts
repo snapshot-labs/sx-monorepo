@@ -20,6 +20,7 @@ gql(`
     currentClearingOrderSellAmount
     clearingPriceOrder
     volumeClearingPriceOrder
+    currentVolume
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
@@ -44,6 +45,7 @@ gql(`
     price
     volume
     timestamp
+    transactionId
   }
 `);
 

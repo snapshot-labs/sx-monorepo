@@ -28,7 +28,11 @@ export function useAuctionOrderFlow(
   const { getIsTokenApproved, approveToken, placeSellOrder } =
     useAuctionActions(networkId, auction);
 
-  const sellOrder = ref<SellOrder>({ sellAmount: 0n, buyAmount: 0n });
+  const sellOrder = ref<SellOrder>({
+    sellAmount: 0n,
+    buyAmount: 0n,
+    auction: toValue(auction)
+  });
   const currentStepId = ref<StepId>(FIRST_STEP);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
