@@ -169,7 +169,7 @@ const hasErrors = computed<boolean>(() => {
 
 const pricePremium = computed(() => {
   const price = parseFloat(bidPrice.value);
-  if (!price) return 0;
+  if (!price) return null;
 
   return convertPriceToPercentage(price);
 });
@@ -472,7 +472,7 @@ onMounted(() => {
             "
           />
         </div>
-        <div class="text-[17px]">
+        <div v-if="pricePremium !== null" class="text-[17px]">
           <template v-if="pricePremium === 0">
             Equal to current clearing price
           </template>
