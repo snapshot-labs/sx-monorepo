@@ -666,6 +666,8 @@ watch(volume, () => {
         <FormAuctionReferral
           v-else-if="sidebarType === 'referral'"
           :network="network"
+          :auction="auction"
+          class="mb-4"
         />
       </div>
     </Affix>

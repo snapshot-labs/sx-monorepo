@@ -119,7 +119,7 @@ watchEffect(() => {
       <div class="space-y-2">
         <UiEyebrow>Referrals</UiEyebrow>
         <div class="border rounded-md">
-          <FormAuctionReferral :network="auction.network" :sticky="false" />
+          <FormAuctionReferral :network="auction.network" />
         </div>
       </div>
     </div>
