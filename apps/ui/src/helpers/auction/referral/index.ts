@@ -9,7 +9,7 @@ import {
 
 export const REFERRAL_SHARE = 0.05;
 export const POSTER_TAG = 'brokester/1';
-export const AUCTION_TAG = 'token/1';
+export const DEFAULT_AUCTION_TAG = 'token-1';
 
 export const EIP712_DOMAIN = {
   name: 'brokester',
