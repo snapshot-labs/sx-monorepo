@@ -64,7 +64,7 @@ async function handleConfirmed() {
 </script>
 
 <template>
-  <div class="flex !pb-0">
+  <div class="flex !pb-0 md:!pb-10">
     <UiLoading
       v-if="isPartnerNamePending || (isUserInvitePending && web3Account)"
       class="mx-auto mt-4"
