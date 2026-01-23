@@ -7,7 +7,7 @@ import {
 
 export type AuctionWithMetadata = AuctionDetailFragment & {
   network: AuctionNetworkId;
-  image_url?: string;
+  imageUrl?: string;
   soldSupplyPercentage: number;
   referralId: string;
 };

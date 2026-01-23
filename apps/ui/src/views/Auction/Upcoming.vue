@@ -34,8 +34,8 @@ watchEffect(() => {
       <div class="flex gap-3">
         <UiBadgeNetwork :id="auction.network" :size="24">
           <UiImagePreview
-            v-if="auction.image_url"
-            :src="auction.image_url"
+            v-if="auction.imageUrl"
+            :src="auction.imageUrl"
             :width="64"
             :height="64"
             alt=""

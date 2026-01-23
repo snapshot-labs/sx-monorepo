@@ -24,7 +24,7 @@
     "exactOrder": { "sellAmount": "200000000000000000000000000", "price": "0" },
     "ordersWithoutClaimed": [],
     "network": "sep",
-    "image_url": "ipfs://bafkreia3nc6gccifb2rmwblwemdf2xnpcihpa6ko37vcjb2nt6ienymry4",
+    "imageUrl": "ipfs://bafkreia3nc6gccifb2rmwblwemdf2xnpcihpa6ko37vcjb2nt6ienymry4",
     "soldSupplyPercentage": 0.2,
     "referralId": "borr-sep"
   },
@@ -53,7 +53,7 @@
     "exactOrder": { "sellAmount": "200000000000000000000000000", "price": "0" },
     "ordersWithoutClaimed": [],
     "network": "sep",
-    "image_url": "ipfs://bafkreia3nc6gccifb2rmwblwemdf2xnpcihpa6ko37vcjb2nt6ienymry4",
+    "imageUrl": "ipfs://bafkreia3nc6gccifb2rmwblwemdf2xnpcihpa6ko37vcjb2nt6ienymry4",
     "soldSupplyPercentage": 0.2,
     "referralId": "borr-sep-136"
   }
