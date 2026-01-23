@@ -4,15 +4,13 @@ import { useQueryClient } from '@tanstack/vue-query';
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import {
   AuctionNetworkId,
-  AuctionWithMetadata,
   getAuctionState,
   Order,
   SellOrder
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import metadata from '@/helpers/auction/metadata.json';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { _n, _p, sleep } from '@/helpers/utils';
+import { _n, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
@@ -123,12 +121,6 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     network: () => props.network,
     tokenAddress: () => props.auction.addressBiddingToken
   });
-
-const auctionMetadata = computed<AuctionWithMetadata | undefined>(() => {
-  return Object.values(metadata).find(
-    m => m.id === props.auction.id
-  ) as AuctionWithMetadata;
-});
 
 const fdv = computed(
   () =>
@@ -360,17 +352,8 @@ watch(volume, () => {
         class="flex justify-between flex-col lg:flex-row gap-4 lg:items-center items-start"
       >
         <div class="flex gap-3">
-          <UiBadgeNetwork :id="network" class="shrink-0" :size="24">
-            <UiImagePreview
-              v-if="auctionMetadata?.image_url"
-              :src="auctionMetadata.image_url"
-              :width="64"
-              :height="64"
-              alt=""
-              class="rounded-full"
-            />
+          <UiBadgeNetwork :id="network" :size="24">
             <UiStamp
-              v-else
               :id="auction.addressAuctioningToken"
               :size="64"
               type="token"
@@ -381,81 +364,6 @@ watch(volume, () => {
             <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
             <AuctionStatus class="max-w-fit" :state="auctionState" />
           </div>
-        </div>
-
-        <div class="flex flex-col lg:flex-row gap-2 lg:gap-4">
-          <AuctionCounter
-            :title="'Min. funding'"
-            :symbol="auction.symbolBiddingToken"
-            :amount="`${_n(
-              parseFloat(
-                formatUnits(
-                  auction.minFundingThreshold,
-                  auction.decimalsBiddingToken
-                )
-              ),
-              'compact'
-            )}`"
-            :subamount="`$${_n(
-              biddingTokenPrice
-                ? parseFloat(
-                    formatUnits(
-                      auction.minFundingThreshold,
-                      auction.decimalsBiddingToken
-                    )
-                  ) * biddingTokenPrice
-                : 0,
-              'standard',
-              {
-                maximumFractionDigits: 2
-              }
-            )}`"
-          />
-          <AuctionCounter
-            :title="'Total auctioned'"
-            :symbol="auction.symbolAuctioningToken"
-            :amount="`${_n(
-              parseFloat(
-                formatUnits(
-                  auction.exactOrder.sellAmount,
-                  auction.decimalsAuctioningToken
-                )
-              ),
-              'compact'
-            )}`"
-            :subamount="
-              auctionMetadata?.soldSupplyPercentage
-                ? `(${_p(auctionMetadata.soldSupplyPercentage)} of supply)`
-                : ''
-            "
-          />
-          <AuctionCounter
-            :title="'Min. bidding amount'"
-            :symbol="auction.symbolBiddingToken"
-            :amount="`${_n(
-              parseFloat(
-                formatUnits(
-                  auction.minimumBiddingAmountPerOrder,
-                  auction.decimalsBiddingToken
-                )
-              ),
-              'compact'
-            )}`"
-            :subamount="`$${_n(
-              biddingTokenPrice
-                ? parseFloat(
-                    formatUnits(
-                      auction.minimumBiddingAmountPerOrder,
-                      auction.decimalsBiddingToken
-                    )
-                  ) * biddingTokenPrice
-                : 0,
-              'standard',
-              {
-                maximumFractionDigits: 2
-              }
-            )}`"
-          />
         </div>
       </div>
       <div
