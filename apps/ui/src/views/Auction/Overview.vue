@@ -49,12 +49,15 @@ const bidsHeader = ref<HTMLElement | null>(null);
 const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const isModalTransactionProgressOpen = ref(false);
+const isModalShareOpen = ref(false);
 const transactionProgressType = ref<
   'place-order' | 'cancel-order' | 'claim-orders' | null
 >(null);
 const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
+const txId = ref<string | null>(null);
+const sellOrder = ref<SellOrder | null>(null);
 
 const chartType = ref<'price' | 'depth'>(DEFAULT_CHART_TYPE);
 const sidebarType = ref<'bid' | 'referral'>('bid');
@@ -281,7 +284,9 @@ async function invalidateQueries() {
 async function moveToNextStep() {
   if (isLastStep.value) {
     invalidateQueries();
-    resetTransactionProgress();
+    isModalTransactionProgressOpen.value = false;
+
+    isModalShareOpen.value = true;
     return;
   }
 
@@ -298,12 +303,15 @@ function resetTransactionProgress() {
   isModalTransactionProgressOpen.value = false;
   transactionProgressType.value = null;
   cancelOrderFn.value = DEFAULT_TRANSACTION_PROGRESS_FN;
+  sellOrder.value = null;
+  txId.value = null;
 }
 
-async function handlePlaceSellOrder(sellOrder: SellOrder) {
+async function handlePlaceSellOrder(order: SellOrder) {
   transactionProgressType.value = 'place-order';
+  sellOrder.value = order;
 
-  start(sellOrder);
+  start(order);
   isModalTransactionProgressOpen.value = true;
 }
 
@@ -320,8 +328,11 @@ function handleClaimOrders() {
   isModalTransactionProgressOpen.value = true;
 }
 
-function handleTransactionConfirmed() {
+function handleTransactionConfirmed(tx: string | null) {
   if (transactionProgressType.value === 'place-order') {
+    if (tx) {
+      txId.value = tx;
+    }
     return moveToNextStep();
   }
 
@@ -695,4 +706,22 @@ watch(volume, () => {
       </div>
     </Affix>
   </div>
+  <teleport to="#modal">
+    <ModalShare
+      v-if="sellOrder"
+      :open="isModalShareOpen"
+      :tx-id="txId"
+      :show-icon="true"
+      :shareable="sellOrder"
+      :network="network"
+      :messages="{
+        title: 'Bid success!'
+      }"
+      :type="'bid'"
+      @close="
+        resetTransactionProgress();
+        isModalShareOpen = false;
+      "
+    />
+  </teleport>
 </template>
