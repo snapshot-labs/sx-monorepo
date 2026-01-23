@@ -100,9 +100,9 @@ async function handleConfirmed() {
             </template>
             <template v-else>
               Do you want to add <b>{{ partnerName }}</b> as partner for the
-              <b>{{ auctionTag }}</b> auction and get
-              {{ _p(REFERRAL_SHARE) }} extra tokens? The partner can only be set
-              once.
+              <b>{{ auctionTag }}</b> auction and
+              <b>get {{ _p(REFERRAL_SHARE) }} extra tokens</b>? The partner can
+              only be set once.
             </template>
           </div>
         </div>
