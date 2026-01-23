@@ -14,7 +14,6 @@ import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
 const MIN_PRICE_PREMIUM = 0.01; // 1% above minimum price
-const PRICE_PREMIUM = 0.25; // 25% above clearing price will show as 100% chance to pass
 const AMOUNT_DECIMALS = 6;
 
 const AMOUNT_DEFINITION = {
@@ -54,7 +53,6 @@ const {
 const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
-const sliderValue = ref(95);
 const isTermsAccepted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
@@ -169,16 +167,24 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
-// TODO: Replace with something that makes sense UX-wise
-// and use it across the entire app.
+const pricePremium = computed(() => {
+  const price = parseFloat(bidPrice.value);
+  if (!price) return 0;
+
+  return convertPriceToPercentage(price);
+});
+
+const sliderValue = computed(() => {
+  return Math.min(Math.max(pricePremium.value, 0), 100);
+});
+
 function convertPercentageToPrice(percentage: number) {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
   const minPrice = parseFloat(props.auction.exactOrder?.price || '0');
 
   const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
 
-  const premium = clearingPrice * PRICE_PREMIUM;
-  const premiumPrice = basePrice + (percentage / 100) * premium;
+  const premiumPrice = basePrice * (1 + percentage / 100);
 
   return premiumPrice;
 }
@@ -189,11 +195,7 @@ function convertPriceToPercentage(price: number) {
 
   const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
 
-  const premium = clearingPrice * PRICE_PREMIUM;
-  const difference = price - basePrice;
-  const percentage = (difference / premium) * 100;
-
-  return Math.min(Math.max(percentage, 0), 100);
+  return ((price - basePrice) / basePrice) * 100;
 }
 
 async function handlePlaceOrder() {
@@ -255,7 +257,7 @@ function getColor(progress: number) {
   return `hsl(${hue}deg ${saturation}% ${lightness}%)`;
 }
 
-function handlePriceUpdate(value: string, fromSlider = false) {
+function handlePriceUpdate(value: string) {
   bidPrice.value = value;
 
   const price = parseFloat(value);
@@ -271,10 +273,6 @@ function handlePriceUpdate(value: string, fromSlider = false) {
   const fdv = price * totalSupplyFormatted;
 
   bidFdv.value = removeTrailingZeroes(fdv, AMOUNT_DECIMALS);
-
-  if (!fromSlider) {
-    sliderValue.value = convertPriceToPercentage(price);
-  }
 }
 
 function handleFdvUpdate(value: string) {
@@ -291,16 +289,13 @@ function handleFdvUpdate(value: string) {
   );
 
   const price = fdv / totalSupplyFormatted;
-  sliderValue.value = convertPriceToPercentage(price);
 
   bidPrice.value = removeTrailingZeroes(price, AMOUNT_DECIMALS);
 }
 
 function handleSliderChange(value: number) {
-  sliderValue.value = value;
-
-  const price = convertPercentageToPrice(sliderValue.value);
-  handlePriceUpdate(removeTrailingZeroes(price, AMOUNT_DECIMALS), true);
+  const price = convertPercentageToPrice(value);
+  handlePriceUpdate(removeTrailingZeroes(price, AMOUNT_DECIMALS));
 }
 
 onMounted(() => {
@@ -478,7 +473,15 @@ onMounted(() => {
           />
         </div>
         <div class="text-[17px]">
-          {{ _p(sliderValue / 100) }} likely to pass
+          <template v-if="pricePremium === 0">
+            Equal to current clearing price
+          </template>
+          <template v-else-if="pricePremium > 0">
+            {{ _p(pricePremium / 100) }} above current clearing price
+          </template>
+          <template v-else>
+            {{ _p(-pricePremium / 100) }} below current clearing price
+          </template>
         </div>
       </div>
       <UiCheckbox v-model="isTermsAccepted" class="text-start">
