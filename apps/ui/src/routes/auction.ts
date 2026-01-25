@@ -1,6 +1,7 @@
 import AuctionOverview from '@/views/Auction/Overview.vue';
 import AuctionVerify from '@/views/Auction/Verify.vue';
 import Auction from '@/views/Auction.vue';
+import AuctionInvite from '@/views/AuctionInvite.vue';
 import Auctions from '@/views/Auctions.vue';
 
 export default [
@@ -13,6 +14,11 @@ export default [
     path: '/auction/verify',
     name: 'auction-verify-standalone',
     component: AuctionVerify
+  },
+  {
+    path: '/auction/invite/:auctionTag/:partner(0x[a-fA-F0-9]{40})',
+    name: 'auction-invite',
+    component: AuctionInvite
   },
   {
     path: '/auction/:id',

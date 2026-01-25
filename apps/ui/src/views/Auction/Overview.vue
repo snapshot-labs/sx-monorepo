@@ -23,6 +23,7 @@ import {
 import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
+const DEFAULT_CHART_TYPE = 'price';
 
 const props = defineProps<{
   network: AuctionNetworkId;
@@ -40,6 +41,7 @@ const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
   toRef(props, 'auction')
 );
 
+const uiStore = useUiStore();
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
 const currentTimestamp = useTimestamp({ interval: 1000 });
@@ -48,14 +50,17 @@ const bidsHeader = ref<HTMLElement | null>(null);
 const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const isModalTransactionProgressOpen = ref(false);
+const isModalShareOpen = ref(false);
 const transactionProgressType = ref<
   'place-order' | 'cancel-order' | 'claim-orders' | null
 >(null);
 const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
+const txId = ref<string | null>(null);
+const sellOrder = ref<SellOrder | null>(null);
 
-const chartType = ref<'price' | 'depth'>('price');
+const chartType = ref<'price' | 'depth'>(DEFAULT_CHART_TYPE);
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
@@ -272,7 +277,7 @@ const transactionProgressFn = computed<() => Promise<string | null>>(() => {
 async function invalidateQueries() {
   await sleep(5000);
 
-  await queryClient.invalidateQueries({
+  queryClient.invalidateQueries({
     queryKey: AUCTION_KEYS.auction(props.network, props.auction)
   });
 }
@@ -280,7 +285,9 @@ async function invalidateQueries() {
 async function moveToNextStep() {
   if (isLastStep.value) {
     invalidateQueries();
-    resetTransactionProgress();
+    isModalTransactionProgressOpen.value = false;
+
+    isModalShareOpen.value = true;
     return;
   }
 
@@ -297,12 +304,15 @@ function resetTransactionProgress() {
   isModalTransactionProgressOpen.value = false;
   transactionProgressType.value = null;
   cancelOrderFn.value = DEFAULT_TRANSACTION_PROGRESS_FN;
+  sellOrder.value = null;
+  txId.value = null;
 }
 
-async function handlePlaceSellOrder(sellOrder: SellOrder) {
+async function handlePlaceSellOrder(order: SellOrder) {
   transactionProgressType.value = 'place-order';
+  sellOrder.value = order;
 
-  start(sellOrder);
+  start(order);
   isModalTransactionProgressOpen.value = true;
 }
 
@@ -319,11 +329,15 @@ function handleClaimOrders() {
   isModalTransactionProgressOpen.value = true;
 }
 
-function handleTransactionConfirmed() {
+function handleTransactionConfirmed(tx: string | null) {
   if (transactionProgressType.value === 'place-order') {
+    if (tx) {
+      txId.value = tx;
+    }
     return moveToNextStep();
+  } else if (transactionProgressType.value === 'cancel-order') {
+    uiStore.addNotification('success', 'Your bid has been cancelled.');
   }
-
   invalidateQueries();
   resetTransactionProgress();
 }
@@ -337,6 +351,12 @@ function handleAllOrdersEndReached() {
 function handleScrollEvent(target: HTMLElement) {
   bidsHeaderX.value = target.scrollLeft;
 }
+
+watch(volume, () => {
+  if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
+    chartType.value = DEFAULT_CHART_TYPE;
+  }
+});
 </script>
 
 <template>
@@ -444,6 +464,7 @@ function handleScrollEvent(target: HTMLElement) {
           <UiLabel :is-active="chartType === 'price'" text="Clearing price" />
         </AppLink>
         <AppLink
+          v-if="volume"
           :aria-active="chartType === 'depth'"
           @click="chartType = 'depth'"
         >
@@ -687,4 +708,22 @@ function handleScrollEvent(target: HTMLElement) {
       </div>
     </Affix>
   </div>
+  <teleport to="#modal">
+    <ModalShare
+      v-if="sellOrder"
+      :open="isModalShareOpen"
+      :tx-id="txId"
+      :show-icon="true"
+      :shareable="sellOrder"
+      :network="network"
+      :messages="{
+        title: 'Bid success!'
+      }"
+      :type="'bid'"
+      @close="
+        resetTransactionProgress();
+        isModalShareOpen = false;
+      "
+    />
+  </teleport>
 </template>
