@@ -211,9 +211,8 @@ export function useAuctionVerification({
     ([newAccount, newAuctionId], [oldAccount, oldAuctionId]) => {
       if (newAuctionId !== oldAuctionId || oldAccount !== newAccount) {
         reset();
-      }
-
-      if (status.value === 'loading') {
+        checkStatus();
+      } else if (status.value === 'loading') {
         checkStatus();
       }
     },
