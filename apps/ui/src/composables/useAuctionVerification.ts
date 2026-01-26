@@ -124,6 +124,12 @@ export function useAuctionVerification({
       }
 
       status.value = provider ? 'pending' : 'started';
+      if (showNotification) {
+        uiStore.addNotification(
+          'warning',
+          'Verification not complete yet. Please complete the verification process.'
+        );
+      }
     } catch (err) {
       handleError(err, 'Verification check failed');
     }
