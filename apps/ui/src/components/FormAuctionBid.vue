@@ -175,6 +175,8 @@ const pricePremium = computed(() => {
 });
 
 const sliderValue = computed(() => {
+  if (pricePremium.value === null) return 0;
+
   return Math.min(Math.max(pricePremium.value, 0), 100);
 });
 
