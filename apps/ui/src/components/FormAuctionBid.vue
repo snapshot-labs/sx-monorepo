@@ -231,34 +231,6 @@ async function handlePlaceOrder() {
   });
 }
 
-function getColor(progress: number) {
-  // Hardcoded colors for the gradient.
-  // Could be computed from the config, but we define those in RGBA so we would need to add code to convert them to HSL.
-
-  // Danger: hsl(354.34deg 79.9% 60.98%)
-  // Success: hsl(139.57deg 37.7% 52.16%)
-
-  const startHue = 354.34;
-  const startSaturation = 79.9;
-  const startLightness = 60.98;
-
-  const endHue = 139.57;
-  const endSaturation = 37.7;
-  const endLightness = 52.16;
-
-  let hueDiff = endHue - startHue;
-  if (hueDiff > 180) hueDiff -= 360;
-  if (hueDiff < -180) hueDiff += 360;
-
-  const hue = startHue + (hueDiff * progress) / 100;
-  const saturation =
-    startSaturation + ((endSaturation - startSaturation) * progress) / 100;
-  const lightness =
-    startLightness + ((endLightness - startLightness) * progress) / 100;
-
-  return `hsl(${hue}deg ${saturation}% ${lightness}%)`;
-}
-
 function handlePriceUpdate(value: string) {
   bidPrice.value = value;
 
@@ -447,11 +419,8 @@ onMounted(() => {
             class="absolute inset-0 pointer-events-none h-fit bg-skin-text/30 rounded-full overflow-hidden"
           >
             <div
-              class="flex justify-between w-full h-[7px] bg-no-repeat"
+              class="flex justify-between w-full h-[7px] bg-gradient-to-r from-skin-link to-skin-link bg-no-repeat"
               :style="{
-                backgroundImage: `linear-gradient(to right, ${getColor(
-                  sliderValue
-                )}, ${getColor(sliderValue)})`,
                 backgroundSize: `${sliderValue}% 100%`
               }"
             >
