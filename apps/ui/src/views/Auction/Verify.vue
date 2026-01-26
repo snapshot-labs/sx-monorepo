@@ -109,9 +109,9 @@ const isPending = computed(() =>
 
     <div
       v-else-if="['rejected', 'error'].includes(verificationStatus)"
-      class="p-4 space-y-2 max-w-[400px] mx-auto"
+      class="mt-4 space-y-3 max-w-[400px] mx-auto text-left"
     >
-      <div class="inline-flex items-center gap-3">
+      <div class="flex items-center gap-3">
         <div class="bg-skin-danger text-white rounded-full p-2 shrink-0">
           <IH-x-mark class="size-4" />
         </div>

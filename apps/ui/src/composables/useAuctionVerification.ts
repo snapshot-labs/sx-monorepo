@@ -1,5 +1,6 @@
 import { getAddress } from '@ethersproject/address';
 import { ComputedRef } from 'vue';
+import { AuctionNetworkId } from '@/helpers/auction';
 import {
   AuctionVerificationType,
   VerificationProviderId,
@@ -38,7 +39,7 @@ export function useAuctionVerification({
   network,
   auction
 }: {
-  network: ComputedRef<string>;
+  network: ComputedRef<AuctionNetworkId>;
   auction?: ComputedRef<
     | {
         id: string;
