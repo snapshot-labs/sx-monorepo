@@ -304,7 +304,7 @@ onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
   if (clearingPrice <= 0) return;
 
-  handleSliderChange(50);
+  handleSliderChange(25);
 });
 </script>
 
