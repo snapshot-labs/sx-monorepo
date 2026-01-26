@@ -33,7 +33,7 @@ const {
   network: computed(
     () =>
       props.network ??
-      (import.meta.env.VITE_METADATA_NETWORK === 's' ? 'base' : 'sep')
+      (import.meta.env.VITE_METADATA_NETWORK === 's' ? 'eth' : 'sep')
   ),
   auction: computed(() => props.auction)
 });
@@ -51,11 +51,14 @@ const isPending = computed(() =>
       process.
     </div>
     <UiLoading v-if="verificationStatus === 'loading'" class="block mt-4" />
-    <div v-else-if="!isConnected" class="mt-4 space-y-3">
-      <UiButton class="w-full" primary @click="modalAccountOpen = true">
-        Connect wallet
-      </UiButton>
-    </div>
+    <UiButton
+      v-else-if="!isConnected"
+      class="w-full mt-4"
+      primary
+      @click="modalAccountOpen = true"
+    >
+      Connect wallet
+    </UiButton>
     <div v-else-if="isVerified" class="mt-4">
       <UiAlert type="success">
         You have been successfully verified and can now participate in the

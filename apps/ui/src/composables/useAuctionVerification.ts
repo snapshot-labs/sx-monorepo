@@ -173,13 +173,13 @@ export function useAuctionVerification({
     await provider.startVerification(context);
   }
 
-  async function generateSignature(): Promise<`0x${string}` | null> {
+  async function generateSignature(): Promise<`0x${string}` | undefined> {
     if (
       !web3Account.value ||
       !isVerified.value ||
       verificationType.value === 'public'
     ) {
-      return null;
+      return undefined;
     }
 
     try {
@@ -196,7 +196,7 @@ export function useAuctionVerification({
       return result.allowListCallData;
     } catch (err) {
       handleError(err, 'Failed to generate signature');
-      return null;
+      return undefined;
     }
   }
 

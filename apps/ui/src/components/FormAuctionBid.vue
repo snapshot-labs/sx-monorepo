@@ -223,7 +223,7 @@ async function handlePlaceOrder() {
       price,
       buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
     }),
-    attestation: attestation || undefined,
+    attestation,
     auction: props.auction
   });
 }

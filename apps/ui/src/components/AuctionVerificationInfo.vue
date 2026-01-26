@@ -32,9 +32,7 @@ const isConnected = computed(() => !!web3Account.value);
       <div class="bg-skin-border rounded-full p-2.5 shrink-0">
         <IH-shield-check class="text-skin-link" />
       </div>
-      <div>
-        <h4 class="font-semibold leading-5">Verification required</h4>
-      </div>
+      <h4 class="font-semibold leading-5">Verification required</h4>
     </div>
     <UiButton class="w-full" primary :to="{ name: 'auction-verify' }">
       Verify
