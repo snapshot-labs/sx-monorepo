@@ -80,11 +80,10 @@ export function useAuctionVerification({
   );
 
   function reset() {
-    status.value = 'loading';
+    status.value = acceptedProviders.value.length > 0 ? 'started' : 'loading';
     verificationUrl.value = null;
     error.value = null;
     selectedProviderId.value = null;
-    acceptedProviders.value = [];
   }
 
   async function checkStatus(options?: {
@@ -186,7 +185,7 @@ export function useAuctionVerification({
       !isVerified.value ||
       verificationType.value === 'public'
     ) {
-      return undefined;
+      return;
     }
 
     try {
@@ -203,7 +202,7 @@ export function useAuctionVerification({
       return result.allowListCallData;
     } catch (err) {
       handleError(err, 'Failed to generate signature');
-      return undefined;
+      return;
     }
   }
 

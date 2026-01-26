@@ -89,7 +89,7 @@ const isPending = computed(() =>
         primary
         @click="startVerification(providerId)"
       >
-        Verify with {{ PROVIDERS[providerId]?.name }}
+        Verify with {{ PROVIDERS[providerId].name }}
       </UiButton>
     </div>
 
@@ -106,6 +106,14 @@ const isPending = computed(() =>
       :verification-url="verificationUrl"
       @check-status="checkStatus"
     />
+
+    <UiButton
+      v-if="isPending && acceptedProviders.length > 1"
+      class="mt-4"
+      @click="reset"
+    >
+      Use different provider
+    </UiButton>
 
     <div
       v-else-if="['rejected', 'error'].includes(verificationStatus)"
