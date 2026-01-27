@@ -28,7 +28,8 @@ const FutarchyResponseSchema = z.object({
     pool_id: z.string()
   }),
   spot: z.object({
-    price_usd: z.number().nullable()
+    price_usd: z.number().nullable(),
+    pool_ticker: z.string().nullable().optional()
   }),
   company_tokens: z.object({
     base: z.object({
@@ -58,6 +59,7 @@ const CANDLES_QUERY = gql`
     $noPoolId: String!
     $minTimestamp: Int!
     $maxTimestamp: Int!
+    $poolTicker: String
   ) {
     yesCandles: candles(
       first: 1000
@@ -119,17 +121,41 @@ export function useFutarchy(
 
   async function fetchCandleData(
     yesPoolId: string,
-    noPoolId: string
+    noPoolId: string,
+    poolTicker: string | null,
+    chartStartRange: number | null
   ): Promise<{ candles: CandleDataPoint[]; scaleFactor: number; hasYes: boolean; hasNo: boolean; hasSpot: boolean }> {
-    const { data } = await candlesApollo.query({
-      query: CANDLES_QUERY,
-      variables: {
-        yesPoolId: yesPoolId.toLowerCase(),
-        noPoolId: noPoolId.toLowerCase(),
-        minTimestamp: startTimestamp.value,
-        maxTimestamp: maxTimestamp.value
+    // Use direct fetch instead of Apollo to ensure all variables (including poolTicker) are sent
+    const query = `
+      query GetCandles($yesPoolId: String!, $noPoolId: String!, $minTimestamp: Int!, $maxTimestamp: Int!) {
+        yesCandles: candles(
+          first: 1000, orderBy: periodStartUnix, orderDirection: asc,
+          where: { pool: $yesPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
+        ) { periodStartUnix, close }
+        noCandles: candles(
+          first: 1000, orderBy: periodStartUnix, orderDirection: asc,
+          where: { pool: $noPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
+        ) { periodStartUnix, close }
       }
+    `;
+
+    const response = await fetch(CANDLES_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query,
+        variables: {
+          yesPoolId: yesPoolId.toLowerCase(),
+          noPoolId: noPoolId.toLowerCase(),
+          minTimestamp: chartStartRange || startTimestamp.value,
+          maxTimestamp: maxTimestamp.value,
+          poolTicker
+        }
+      })
     });
+
+    const result = await response.json();
+    const data = result.data;
 
     const yesMap = new Map<number, number>();
     const noMap = new Map<number, number>();
@@ -192,7 +218,9 @@ export function useFutarchy(
 
       const result = await fetchCandleData(
         market.conditional_yes.pool_id,
-        market.conditional_no.pool_id
+        market.conditional_no.pool_id,
+        market.spot?.pool_ticker || null,
+        (market as any).timeline?.chart_start_range || null  // Optional chart start override
       );
 
       // Error if missing YES or NO candles (conditional pools required)
