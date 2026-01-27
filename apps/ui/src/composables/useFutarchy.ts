@@ -56,13 +56,14 @@ const CANDLES_QUERY = gql`
   query GetCandles(
     $yesPoolId: String!
     $noPoolId: String!
+    $minTimestamp: Int!
     $maxTimestamp: Int!
   ) {
     yesCandles: candles(
       first: 1000
       orderBy: periodStartUnix
       orderDirection: asc
-      where: { pool: $yesPoolId, periodStartUnix_lte: $maxTimestamp, period: "3600" }
+      where: { pool: $yesPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
     ) {
       periodStartUnix
       close
@@ -71,7 +72,7 @@ const CANDLES_QUERY = gql`
       first: 1000
       orderBy: periodStartUnix
       orderDirection: asc
-      where: { pool: $noPoolId, periodStartUnix_lte: $maxTimestamp, period: "3600" }
+      where: { pool: $noPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
     ) {
       periodStartUnix
       close
@@ -87,6 +88,7 @@ const candlesApollo = new ApolloClient({
 
 export function useFutarchy(
   proposalId: Ref<string>,
+  startTimestamp: Ref<number>,
   maxTimestamp: Ref<number>
 ) {
   const marketData = ref<FutarchyMarketData | null>(null);
@@ -118,12 +120,13 @@ export function useFutarchy(
   async function fetchCandleData(
     yesPoolId: string,
     noPoolId: string
-  ): Promise<{ candles: CandleDataPoint[]; scaleFactor: number }> {
+  ): Promise<{ candles: CandleDataPoint[]; scaleFactor: number; hasYes: boolean; hasNo: boolean; hasSpot: boolean }> {
     const { data } = await candlesApollo.query({
       query: CANDLES_QUERY,
       variables: {
         yesPoolId: yesPoolId.toLowerCase(),
         noPoolId: noPoolId.toLowerCase(),
+        minTimestamp: startTimestamp.value,
         maxTimestamp: maxTimestamp.value
       }
     });
@@ -154,13 +157,6 @@ export function useFutarchy(
       spotMap.set(time, rawPrice);
       allTimestamps.add(time);
     }
-
-    console.log('[useFutarchy] 📥 Received from server:', {
-      yesCandles: data.yesCandles?.length || 0,
-      noCandles: data.noCandles?.length || 0,
-      spotCandles: data.spotCandles?.length || 0
-    });
-
     // Express server already handles forward-fill, just merge YES and NO data
     const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
 
@@ -182,7 +178,7 @@ export function useFutarchy(
       return { time, yes: lastYes, no: lastNo, spot: lastSpot };
     });
 
-    return { candles, scaleFactor };
+    return { candles, scaleFactor, hasYes: yesMap.size > 0, hasNo: noMap.size > 0, hasSpot: spotMap.size > 0 };
   }
 
   async function load() {
@@ -194,12 +190,27 @@ export function useFutarchy(
       if (!market) throw new Error('Failed to fetch market data');
       marketData.value = market;
 
-      const { candles, scaleFactor } = await fetchCandleData(
+      const result = await fetchCandleData(
         market.conditional_yes.pool_id,
         market.conditional_no.pool_id
       );
-      candleData.value = candles;
-      priceScaleFactor.value = scaleFactor;
+
+      // Error if missing YES or NO candles (conditional pools required)
+      if (!result.hasYes || !result.hasNo) {
+        console.error('[useFutarchy] ❌ Missing conditional pool data:', {
+          hasYes: result.hasYes,
+          hasNo: result.hasNo
+        });
+        throw new Error('Missing conditional pool candle data');
+      }
+
+      // Alert if missing SPOT candles (still show chart)
+      if (!result.hasSpot) {
+        console.warn('[useFutarchy] ⚠️ Missing spot candle data - chart will show without spot line');
+      }
+
+      candleData.value = result.candles;
+      priceScaleFactor.value = result.scaleFactor;
     } catch (e) {
       console.error('Error fetching Futarchy data', e);
       error.value = true;

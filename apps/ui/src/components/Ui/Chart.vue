@@ -13,6 +13,7 @@ import { _n } from '@/helpers/utils';
 const props = defineProps<{
   candleData: CandleDataPoint[];
   priceScaleFactor: number;
+  startTimestamp: number;
   maxTimestamp: number;
 }>();
 
@@ -203,15 +204,23 @@ function initializeChart() {
     greySeriesApis.set(series.id, greySeries);
   });
 
+  let isUpdatingData = false;  // Guard to prevent infinite loop when setData triggers crosshair move
+  
   chart.subscribeCrosshairMove(param => {
+    if (isUpdatingData) return;  // Skip if we're in the middle of updating data
+    
     if (!param.time) {
       hoveredDataIndex.value = null;
       lastUpdateIndex = -1;
       updatePending = false;
+      
+      isUpdatingData = true;
       dataSeries.value.forEach(s => {
         seriesApis.get(s.id)?.setData(toChartTime(s.data));
         greySeriesApis.get(s.id)?.setData([]);
       });
+      isUpdatingData = false;
+      
       showDefaultMarkers.value = true;
       requestAnimationFrame(() => updateMarkerPositionsFn?.());
       return;
@@ -235,25 +244,25 @@ function initializeChart() {
 
     requestAnimationFrame(() => {
       updatePending = false;
+      isUpdatingData = true;
       dataSeries.value.forEach(s => {
         seriesApis
           .get(s.id)
           ?.setData(toChartTime(s.data.slice(0, dataIndex + 1)));
         greySeriesApis.get(s.id)?.setData(toChartTime(s.data.slice(dataIndex)));
       });
+      isUpdatingData = false;
     });
   });
 
   if (props.candleData.length > 0) {
-    // Hardcoded date range: Jan 25 to Jan 30, 2026
-    // TODO: Use proposal start/end from API when available
-    const jan25 = new Date('2026-01-25T00:00:00Z').getTime() / 1000;
-    const jan30 = new Date('2026-01-30T00:00:00Z').getTime() / 1000;
+    // Use actual candle data range (candle trading may start after proposal voting period)
+    const firstCandleTime = props.candleData[0].time / 1000;  // ms to seconds
+    const lastCandleTime = props.candleData[props.candleData.length - 1].time / 1000;
     
-    console.log('[Chart.vue] 📐 setVisibleRange:', { from: jan25, to: jan30 });
     chart.timeScale().setVisibleRange({
-      from: jan25 as Time,
-      to: jan30 as Time
+      from: firstCandleTime as Time,
+      to: lastCandleTime as Time
     });
   }
 

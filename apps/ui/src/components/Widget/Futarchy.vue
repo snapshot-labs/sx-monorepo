@@ -6,6 +6,7 @@ import { Proposal } from '@/types';
 const props = defineProps<{ proposal: Proposal }>();
 
 const proposalId = computed(() => props.proposal.id);
+const startTimestamp = computed(() => props.proposal.start);
 const maxTimestamp = computed(() => props.proposal.max_end);
 
 const {
@@ -15,22 +16,17 @@ const {
   totalVolumeUsd,
   loadingChart,
   error
-} = useFutarchy(proposalId, maxTimestamp);
+} = useFutarchy(proposalId, startTimestamp, maxTimestamp);
 </script>
 
 <template>
-  <div v-if="!error && marketData" class="border rounded-lg p-4 mb-4">
-    <div
-      v-if="loadingChart || candleData.length === 0"
-      class="flex items-center justify-center h-[280px] mb-2"
-    >
-      <UiLoading />
-    </div>
+  <!-- Only show when we have valid market + candle data, hide on error or during loading -->
+  <div v-if="!error && !loadingChart && marketData && candleData.length > 0" class="border rounded-lg p-4 mb-4">
     <UiChart
-      v-else
       class="!h-[280px] mb-2"
       :candle-data="candleData"
       :price-scale-factor="priceScaleFactor"
+      :start-timestamp="proposal.start"
       :max-timestamp="proposal.max_end"
     />
     <div class="flex justify-between items-center">
