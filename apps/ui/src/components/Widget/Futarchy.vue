@@ -6,6 +6,7 @@ import { Proposal } from '@/types';
 const props = defineProps<{ proposal: Proposal }>();
 
 const proposalId = computed(() => props.proposal.id);
+const startTimestamp = computed(() => props.proposal.start);
 const maxTimestamp = computed(() => props.proposal.max_end);
 
 const {
@@ -13,28 +14,47 @@ const {
   candleData,
   priceScaleFactor,
   totalVolumeUsd,
+  currencyInfo,
   loadingChart,
   error
-} = useFutarchy(proposalId, maxTimestamp);
+} = useFutarchy(proposalId, startTimestamp, maxTimestamp);
+
+// Track toggle state from Chart component
+const useStableRate = ref(true);
+const currentRate = ref(1);
+
+function handleRateToggle(useStable: boolean, rate: number) {
+  useStableRate.value = useStable;
+  currentRate.value = rate;
+}
+
+// Computed volume based on toggle state
+const displayVolume = computed(() => {
+  return Math.round(totalVolumeUsd.value * currentRate.value);
+});
+
+// Currency symbol for volume based on toggle
+const volumeSymbol = computed(() => {
+  if (!currencyInfo.value) return '$';
+  return useStableRate.value ? '$' : currencyInfo.value.tokenSymbol;
+});
 </script>
 
 <template>
-  <div v-if="!error && marketData" class="border rounded-lg p-4 mb-4">
-    <div
-      v-if="loadingChart || candleData.length === 0"
-      class="flex items-center justify-center h-[280px] mb-2"
-    >
-      <UiLoading />
-    </div>
+  <!-- Only show when we have valid market + candle data, hide on error or during loading -->
+  <div v-if="!error && !loadingChart && marketData && candleData.length > 0" class="border rounded-lg p-4 mb-4">
     <UiChart
-      v-else
       class="!h-[280px] mb-2"
       :candle-data="candleData"
       :price-scale-factor="priceScaleFactor"
+      :start-timestamp="proposal.start"
       :max-timestamp="proposal.max_end"
+      :price-precision="(marketData as any).timeline?.price_precision ?? 6"
+      :currency-info="currencyInfo"
+      @rate-toggle="handleRateToggle"
     />
     <div class="flex justify-between items-center">
-      ${{ _n(Math.round(totalVolumeUsd), 'standard') }} Vol.
+      {{ volumeSymbol === '$' ? '$' : '' }}{{ _n(displayVolume, 'standard') }}{{ volumeSymbol !== '$' ? ` ${volumeSymbol}` : '' }} Vol.
       <a
         :href="`https://app.futarchy.fi/markets/${marketData.event_id}?utm_source=snapshot`"
         target="_blank"

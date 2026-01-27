@@ -10,11 +10,51 @@ import {
 import { CandleDataPoint } from '@/composables/useFutarchy';
 import { _n } from '@/helpers/utils';
 
-const props = defineProps<{
+// Currency info for toggle (from useFutarchy)
+interface CurrencyInfo {
+  rate: number | null;
+  tokenSymbol: string;
+  stableSymbol: string | null;
+}
+
+const props = withDefaults(defineProps<{
   candleData: CandleDataPoint[];
   priceScaleFactor: number;
+  startTimestamp: number;
   maxTimestamp: number;
+  pricePrecision?: number;
+  currencyInfo?: CurrencyInfo | null;  // For currency toggle
+}>(), {
+  pricePrecision: 6,
+  currencyInfo: null
+});
+
+// Emit for toggle state so parent can update volume
+const emit = defineEmits<{
+  (e: 'rateToggle', useStable: boolean, rate: number): void
 }>();
+
+// Toggle state: true = use stable rate (xDAI), false = raw (sDAI)
+const useStableRate = ref(true);
+
+// Computed: effective rate to apply based on toggle
+const effectiveRate = computed(() => {
+  if (!props.currencyInfo?.rate || !props.currencyInfo?.stableSymbol) return 1;
+  return useStableRate.value ? props.currencyInfo.rate : 1;
+});
+
+// Computed: current currency symbol based on toggle
+const currentSymbol = computed(() => {
+  if (!props.currencyInfo) return '';
+  if (!props.currencyInfo.stableSymbol) return props.currencyInfo.tokenSymbol;
+  return useStableRate.value ? props.currencyInfo.stableSymbol : props.currencyInfo.tokenSymbol;
+});
+
+// Check if toggle should be shown (only if both symbols available)
+const showCurrencyToggle = computed(() => {
+  console.log('[Chart] currencyInfo:', props.currencyInfo);
+  return props.currencyInfo?.rate && props.currencyInfo?.stableSymbol;
+});
 
 const chartContainer = ref<HTMLElement | null>(null);
 const hoveredDataIndex = ref<number | null>(null);
@@ -32,23 +72,32 @@ let updateMarkerPositionsFn: (() => void) | null = null;
 
 const seriesConfig = [
   { id: 'yes', label: 'Yes', color: '#22c55e' },
-  { id: 'no', label: 'No', color: '#ef4444' }
+  { id: 'no', label: 'No', color: '#ef4444' },
+  { id: 'spot', label: 'Spot', color: '#f59e0b' }  // Amber/orange for spot
 ];
 
 const toChartTime = (data: { time: number; value: number }[]) =>
   data.map(p => ({
-    time: (p.time / 1000) as Time,
+    time: p.time as Time,  // time is already in seconds from dataSeries
     value: p.value * props.priceScaleFactor
   }));
 
 const dataSeries = computed(() =>
-  seriesConfig.map(config => ({
-    ...config,
-    data: props.candleData.map(point => ({
-      time: point.time,
-      value: point[config.id as keyof CandleDataPoint] as number
+  seriesConfig
+    .map(config => ({
+      ...config,
+      data: props.candleData.map(point => {
+        const rawValue = point[config.id as keyof CandleDataPoint] as number;
+        // Apply rate to all series (yes, no, and spot)
+        const displayValue = rawValue * effectiveRate.value;
+        return {
+          time: (point.time / 1000) as Time,  // Convert ms to seconds for chart library
+          value: displayValue
+        };
+      })
     }))
-  }))
+    // Filter out series with no data (e.g., spot when not available)
+    .filter(series => series.data.some(d => d.value > 0))
 );
 
 type TimeFormatMode = 'time' | 'day' | 'month';
@@ -79,11 +128,11 @@ const currentDate = computed(() => {
   const idx = hoveredDataIndex.value ?? props.candleData.length - 1;
   const timestamp = props.candleData[idx]?.time;
   if (!timestamp) return '';
+  // Show hour only (no minutes) for hourly candles
   return new Date(timestamp).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
-    minute: '2-digit',
     hour12: true
   });
 });
@@ -93,10 +142,18 @@ const currentValues = computed(() => {
   const idx = hoveredDataIndex.value ?? props.candleData.length - 1;
   const point = props.candleData[idx];
   if (!point) return [];
-  return seriesConfig.map(s => ({
-    ...s,
-    value: point[s.id as keyof CandleDataPoint] as number
-  }));
+  return seriesConfig
+    .map(s => {
+      const rawValue = point[s.id as keyof CandleDataPoint] as number;
+      // Apply rate to all series (yes, no, and spot)
+      const displayValue = rawValue * effectiveRate.value;
+      return {
+        ...s,
+        value: displayValue
+      };
+    })
+    // Hide legend entries for series with 0 value (e.g., Spot when not available)
+    .filter(s => s.value > 0);
 });
 
 function initializeChart() {
@@ -202,15 +259,23 @@ function initializeChart() {
     greySeriesApis.set(series.id, greySeries);
   });
 
+  let isUpdatingData = false;  // Guard to prevent infinite loop when setData triggers crosshair move
+  
   chart.subscribeCrosshairMove(param => {
+    if (isUpdatingData) return;  // Skip if we're in the middle of updating data
+    
     if (!param.time) {
       hoveredDataIndex.value = null;
       lastUpdateIndex = -1;
       updatePending = false;
+      
+      isUpdatingData = true;
       dataSeries.value.forEach(s => {
         seriesApis.get(s.id)?.setData(toChartTime(s.data));
         greySeriesApis.get(s.id)?.setData([]);
       });
+      isUpdatingData = false;
+      
       showDefaultMarkers.value = true;
       requestAnimationFrame(() => updateMarkerPositionsFn?.());
       return;
@@ -234,19 +299,25 @@ function initializeChart() {
 
     requestAnimationFrame(() => {
       updatePending = false;
+      isUpdatingData = true;
       dataSeries.value.forEach(s => {
         seriesApis
           .get(s.id)
           ?.setData(toChartTime(s.data.slice(0, dataIndex + 1)));
         greySeriesApis.get(s.id)?.setData(toChartTime(s.data.slice(dataIndex)));
       });
+      isUpdatingData = false;
     });
   });
 
   if (props.candleData.length > 0) {
+    // Use actual candle data range (candle trading may start after proposal voting period)
+    const firstCandleTime = props.candleData[0].time / 1000;  // ms to seconds
+    const lastCandleTime = props.candleData[props.candleData.length - 1].time / 1000;
+    
     chart.timeScale().setVisibleRange({
-      from: (props.candleData[0].time / 1000) as Time,
-      to: props.maxTimestamp as Time
+      from: firstCandleTime as Time,
+      to: lastCandleTime as Time
     });
   }
 
@@ -316,6 +387,12 @@ onMounted(() => {
   }
 });
 
+// Re-initialize chart when currency toggle changes and emit to parent
+watch(useStableRate, () => {
+  initializeChart();
+  emit('rateToggle', useStableRate.value, effectiveRate.value);
+}, { immediate: true });
+
 onUnmounted(() => chart?.remove());
 </script>
 
@@ -334,11 +411,21 @@ onUnmounted(() => chart?.remove());
           />
           {{ series.label }}
           <span class="font-semibold">
-            {{ _n(series.value, 'standard', { maximumFractionDigits: 6 }) }}
+            {{ _n(series.value, 'standard', { maximumFractionDigits: pricePrecision }) }}
           </span>
         </div>
       </div>
-      <span class="text-skin-text">{{ currentDate }}</span>
+      <div class="flex items-center gap-2">
+        <!-- Currency toggle (only shown if both symbols available) -->
+        <button
+          v-if="showCurrencyToggle"
+          class="text-xs px-2 py-0.5 rounded border border-skin-border hover:bg-skin-border transition-colors"
+          @click="useStableRate = !useStableRate"
+        >
+          {{ currentSymbol }}
+        </button>
+        <span class="text-skin-text">{{ currentDate }}</span>
+      </div>
     </div>
     <div ref="chartContainer" class="flex-1 relative">
       <div
