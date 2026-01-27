@@ -1,20 +1,21 @@
+import { getAddress } from '@ethersproject/address';
 import { ComputedRef } from 'vue';
+import { AuctionNetworkId } from '@/helpers/auction';
 import {
   AuctionVerificationType,
   VerificationProviderId,
   VerificationStatus
 } from '@/helpers/auction/types';
 import {
-  getProviderBySigner,
   PROVIDERS,
   VerificationContext
 } from '@/helpers/auction/verification-providers';
 
 const ATTESTATION_API_URL = import.meta.env.VITE_ATTESTATION_URL;
 
-type AttestationResponse = {
+type VerifyResponse = {
   verified: boolean;
-  allowListCallData: `0x${string}`;
+  acceptedProviders: VerificationProviderId[];
 };
 
 async function rpcCall<T>(method: string, params: object): Promise<T> {
@@ -38,41 +39,101 @@ export function useAuctionVerification({
   network,
   auction
 }: {
-  network: ComputedRef<string>;
-  auction: ComputedRef<{
-    id: string;
-    allowListSigner: string;
-    isPrivateAuction: boolean;
-  }>;
+  network: ComputedRef<AuctionNetworkId>;
+  auction?: ComputedRef<
+    | {
+        id: string;
+        allowListSigner: string;
+        isPrivateAuction: boolean;
+      }
+    | undefined
+  >;
 }) {
   const { web3, web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
-  const auctionId = computed(() => `${network.value}:${auction.value.id}`);
-  const allowListSigner = computed(() => auction.value.allowListSigner);
+  const auctionId = computed(() => auction?.value?.id);
+  const signer = computed(() =>
+    auction?.value?.allowListSigner
+      ? getAddress(`0x${auction.value.allowListSigner.slice(-40)}`)
+      : null
+  );
 
   const status = ref<VerificationStatus>('loading');
   const verificationUrl = ref<string | null>(null);
   const error = ref<string | null>(null);
-  const allowListCallData = ref<`0x${string}` | null>(null);
+  const selectedProviderId = ref<VerificationProviderId | null>(null);
+  const acceptedProviders = ref<VerificationProviderId[]>([]);
 
-  const verificationProvider = computed((): AuctionVerificationType => {
-    if (!auction.value.isPrivateAuction) return 'public';
-
-    const provider = getProviderBySigner(allowListSigner.value);
-    return provider ? (provider.id as VerificationProviderId) : 'private';
+  const verificationType = computed((): AuctionVerificationType => {
+    if (auction?.value && !auction.value.isPrivateAuction) return 'public';
+    return acceptedProviders.value[0] ?? 'unknownSigner';
   });
 
+  const activeProviderId = computed(
+    (): VerificationProviderId | null =>
+      selectedProviderId.value ?? acceptedProviders.value[0] ?? null
+  );
   const isVerified = computed(
-    () => verificationProvider.value === 'public' || status.value === 'verified'
+    () => verificationType.value === 'public' || status.value === 'verified'
   );
 
   function reset() {
-    status.value = 'started';
+    status.value = 'loading';
+    acceptedProviders.value = [];
     verificationUrl.value = null;
     error.value = null;
-    allowListCallData.value = null;
+    selectedProviderId.value = null;
+    checkStatus();
+  }
+
+  async function checkStatus(options?: {
+    showNotification?: boolean;
+    metadata?: object;
+  }) {
+    const showNotification = options?.showNotification ?? false;
+    const provider = activeProviderId.value;
+
+    if (
+      !web3Account.value ||
+      (auction?.value && !auction.value.isPrivateAuction)
+    ) {
+      status.value = 'started';
+      return;
+    }
+
+    status.value = 'loading';
+
+    try {
+      const result = await rpcCall<VerifyResponse>('verify', {
+        network: network.value,
+        user: web3Account.value,
+        ...(signer.value && { signer: signer.value }),
+        ...(provider && { provider }),
+        ...(options?.metadata && { metadata: options.metadata })
+      });
+
+      acceptedProviders.value = result.acceptedProviders ?? [];
+
+      if (result.verified) {
+        status.value = 'verified';
+        if (showNotification) {
+          uiStore.addNotification('success', 'Verification complete');
+        }
+        return;
+      }
+
+      status.value = provider ? 'pending' : 'started';
+      if (showNotification) {
+        uiStore.addNotification(
+          'warning',
+          'Verification not complete yet. Please complete the verification process.'
+        );
+      }
+    } catch (err) {
+      handleError(err, 'Verification check failed');
+    }
   }
 
   function handleError(err: unknown, message?: string) {
@@ -82,110 +143,92 @@ export function useAuctionVerification({
     uiStore.addNotification('error', error.value);
   }
 
-  async function startVerification() {
+  async function startVerification(providerId?: VerificationProviderId) {
     if (!web3Account.value) {
       modalAccountOpen.value = true;
       return;
     }
+
     if (
-      verificationProvider.value === 'public' ||
-      verificationProvider.value === 'private'
+      verificationType.value === 'public' ||
+      verificationType.value === 'unknownSigner'
     ) {
       return;
     }
 
-    const provider = PROVIDERS[verificationProvider.value];
+    const targetProviderId = providerId ?? activeProviderId.value;
+    if (!targetProviderId) return;
+
+    if (providerId) {
+      selectedProviderId.value = providerId;
+    }
+
+    const provider = PROVIDERS[targetProviderId];
     if (!provider) return;
 
     const context: VerificationContext = {
       web3Account,
-      auctionId: auctionId.value,
       network: network.value,
+      providerId: targetProviderId,
       status,
       verificationUrl,
       error,
-      allowListCallData,
       handleError,
       rpcCall,
-      addNotification: uiStore.addNotification
+      checkStatus
     };
 
     await provider.startVerification(context);
   }
 
-  async function checkExistingAttestation() {
+  async function generateSignature(): Promise<`0x${string}` | undefined> {
     if (
       !web3Account.value ||
-      status.value === 'loading' ||
-      verificationProvider.value === 'public' ||
-      verificationProvider.value === 'private'
+      !isVerified.value ||
+      verificationType.value === 'public'
     ) {
       return;
     }
 
-    const currentAuctionId = auctionId.value;
-    const currentProvider = verificationProvider.value;
-    const previousStatus = status.value;
-
-    status.value = 'loading';
     try {
-      const result = await rpcCall<AttestationResponse>('verify', {
-        auctionId: currentAuctionId,
-        user: web3Account.value,
-        provider: currentProvider
-      });
+      const result = await rpcCall<{ allowListCallData: `0x${string}` }>(
+        'generate_signature',
+        {
+          network: network.value,
+          auctionId: auctionId.value,
+          user: web3Account.value,
+          signer: signer.value
+        }
+      );
 
-      if (
-        auctionId.value !== currentAuctionId ||
-        verificationProvider.value !== currentProvider
-      ) {
-        return;
-      }
-
-      status.value = 'verified';
-      allowListCallData.value = result.allowListCallData;
+      return result.allowListCallData;
     } catch (err) {
-      const isExpectedError =
-        /Missing proofs or queryResult|Applicant not found/.test(
-          (err as Error).message
-        );
-
-      if (!isExpectedError) {
-        console.error('Attestation check failed', err);
-      }
-
-      status.value = previousStatus;
+      handleError(err, 'Failed to generate signature');
+      return;
     }
   }
 
   watch(
     [web3Account, auctionId],
     ([newAccount, newAuctionId], [oldAccount, oldAuctionId]) => {
-      const hasAuctionChanged = newAuctionId !== oldAuctionId;
-      if (
-        hasAuctionChanged ||
-        !newAccount ||
-        (oldAccount && newAccount !== oldAccount)
-      ) {
+      if (newAuctionId !== oldAuctionId || oldAccount !== newAccount) {
         reset();
-      }
-
-      if (status.value === 'started') {
-        checkExistingAttestation();
       }
     },
     { immediate: true }
   );
 
   return {
-    verificationProvider,
+    verificationType,
+    acceptedProviders,
+    activeProviderId,
     status: computed(() => (web3.value.authLoading ? 'loading' : status.value)),
     isVerified,
     verificationUrl,
     error,
-    allowListCallData,
+    generateSignature,
     startVerification,
-    checkStatus: checkExistingAttestation,
+    checkStatus: () => checkStatus({ showNotification: true }),
     reset
   };
 }

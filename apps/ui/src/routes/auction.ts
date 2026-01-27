@@ -12,6 +12,11 @@ export default [
     component: Auctions
   },
   {
+    path: '/auction/verify',
+    name: 'auction-verify-standalone',
+    component: AuctionVerify
+  },
+  {
     path: '/auction/invite/:auctionTag/:partner(0x[a-fA-F0-9]{40})',
     name: 'auction-invite',
     component: AuctionInvite

@@ -1,5 +1,4 @@
 import { ZKPassport } from '@zkpassport/sdk';
-import { VERIFICATION_PROVIDER_SIGNERS } from '@/helpers/auction';
 import { getUrl } from '@/helpers/utils';
 import { VerificationContext, VerificationProvider } from './';
 
@@ -23,7 +22,7 @@ async function startVerification(context: VerificationContext): Promise<void> {
     const queryBuilder = await zkPassport.request({
       name: 'Snapshot auction verification',
       logo:
-        getUrl('bafkreigd2gaip56bkg5xt4xkwcpa4uhrlpljg7vsuzumzctte57leh75ra') ||
+        getUrl('bafkreiaucrdvpalghwnvtcczpw5td7ejxj3pna6rtuk6jbzzny3nqdfoba') ||
         '',
       purpose: 'Verify to participate in private auctions',
       scope: 'auction',
@@ -69,28 +68,15 @@ async function startVerification(context: VerificationContext): Promise<void> {
         return;
       }
 
-      try {
-        const result = await context.rpcCall<{
-          verified: boolean;
-          allowListCallData: `0x${string}`;
-        }>('verify', {
-          auctionId: context.auctionId,
-          user: context.web3Account.value,
-          provider: 'zkpassport',
-          metadata: {
-            zkpassport: {
-              proofs,
-              queryResult
-            }
+      await context.checkStatus({
+        showNotification: true,
+        metadata: {
+          zkpassport: {
+            proofs,
+            queryResult
           }
-        });
-
-        context.status.value = 'verified';
-        context.allowListCallData.value = result.allowListCallData;
-        context.addNotification('success', 'ZKPassport verification complete');
-      } catch (err) {
-        context.handleError(err, 'Failed to verify');
-      }
+        }
+      });
     });
 
     onReject(() => {
@@ -116,6 +102,5 @@ async function startVerification(context: VerificationContext): Promise<void> {
 export const zkpassportProvider: VerificationProvider = {
   id: 'zkpassport',
   name: 'ZKPassport',
-  signer: VERIFICATION_PROVIDER_SIGNERS.zkpassport,
   startVerification
 };
