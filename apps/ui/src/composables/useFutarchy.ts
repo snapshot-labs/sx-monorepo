@@ -49,6 +49,7 @@ export interface CandleDataPoint {
   time: number;
   yes: number;
   no: number;
+  spot: number;
 }
 
 const CANDLES_QUERY = gql`
@@ -61,7 +62,7 @@ const CANDLES_QUERY = gql`
       first: 1000
       orderBy: periodStartUnix
       orderDirection: asc
-      where: { pool: $yesPoolId, periodStartUnix_lte: $maxTimestamp }
+      where: { pool: $yesPoolId, periodStartUnix_lte: $maxTimestamp, period: "3600" }
     ) {
       periodStartUnix
       close
@@ -70,7 +71,7 @@ const CANDLES_QUERY = gql`
       first: 1000
       orderBy: periodStartUnix
       orderDirection: asc
-      where: { pool: $noPoolId, periodStartUnix_lte: $maxTimestamp }
+      where: { pool: $noPoolId, periodStartUnix_lte: $maxTimestamp, period: "3600" }
     ) {
       periodStartUnix
       close
@@ -129,6 +130,7 @@ export function useFutarchy(
 
     const yesMap = new Map<number, number>();
     const noMap = new Map<number, number>();
+    const spotMap = new Map<number, number>();
     const allTimestamps = new Set<number>();
 
     for (const candle of data.yesCandles) {
@@ -145,13 +147,28 @@ export function useFutarchy(
       allTimestamps.add(time);
     }
 
+    // Process spot candles from Express server
+    for (const candle of data.spotCandles || []) {
+      const time = parseInt(candle.periodStartUnix) * 1000;
+      const rawPrice = parseFloat(candle.close);
+      spotMap.set(time, rawPrice);
+      allTimestamps.add(time);
+    }
+
+    console.log('[useFutarchy] 📥 Received from server:', {
+      yesCandles: data.yesCandles?.length || 0,
+      noCandles: data.noCandles?.length || 0,
+      spotCandles: data.spotCandles?.length || 0
+    });
+
     // Express server already handles forward-fill, just merge YES and NO data
     const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
 
     let lastYes = 0;
     let lastNo = 0;
+    let lastSpot = 0;
 
-    const allValues = [...yesMap.values(), ...noMap.values()].filter(
+    const allValues = [...yesMap.values(), ...noMap.values(), ...spotMap.values()].filter(
       v => v > 0
     );
     const maxValue = allValues.length > 0 ? Math.max(...allValues) : 1;
@@ -161,7 +178,8 @@ export function useFutarchy(
     const candles = sortedTimestamps.map(time => {
       if (yesMap.has(time)) lastYes = yesMap.get(time)!;
       if (noMap.has(time)) lastNo = noMap.get(time)!;
-      return { time, yes: lastYes, no: lastNo };
+      if (spotMap.has(time)) lastSpot = spotMap.get(time)!;
+      return { time, yes: lastYes, no: lastNo, spot: lastSpot };
     });
 
     return { candles, scaleFactor };

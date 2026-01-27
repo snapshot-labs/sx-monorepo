@@ -32,7 +32,8 @@ let updateMarkerPositionsFn: (() => void) | null = null;
 
 const seriesConfig = [
   { id: 'yes', label: 'Yes', color: '#22c55e' },
-  { id: 'no', label: 'No', color: '#ef4444' }
+  { id: 'no', label: 'No', color: '#ef4444' },
+  { id: 'spot', label: 'Spot', color: '#f59e0b' }  // Amber/orange for spot
 ];
 
 const toChartTime = (data: { time: number; value: number }[]) =>
@@ -79,11 +80,11 @@ const currentDate = computed(() => {
   const idx = hoveredDataIndex.value ?? props.candleData.length - 1;
   const timestamp = props.candleData[idx]?.time;
   if (!timestamp) return '';
+  // Show hour only (no minutes) for hourly candles
   return new Date(timestamp).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
-    minute: '2-digit',
     hour12: true
   });
 });
@@ -244,11 +245,15 @@ function initializeChart() {
   });
 
   if (props.candleData.length > 0) {
-    const firstTime = props.candleData[0].time / 1000;  // ms to seconds
-    const lastTime = props.candleData[props.candleData.length - 1].time / 1000;
+    // Hardcoded date range: Jan 25 to Jan 30, 2026
+    // TODO: Use proposal start/end from API when available
+    const jan25 = new Date('2026-01-25T00:00:00Z').getTime() / 1000;
+    const jan30 = new Date('2026-01-30T00:00:00Z').getTime() / 1000;
+    
+    console.log('[Chart.vue] 📐 setVisibleRange:', { from: jan25, to: jan30 });
     chart.timeScale().setVisibleRange({
-      from: firstTime as Time,
-      to: lastTime as Time
+      from: jan25 as Time,
+      to: jan30 as Time
     });
   }
 
