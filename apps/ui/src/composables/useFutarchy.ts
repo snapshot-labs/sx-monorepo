@@ -6,9 +6,11 @@ import {
 import gql from 'graphql-tag';
 import { z } from 'zod';
 
-const FUTARCHY_API_URL = 'http://localhost:3030';
+// ⚡ Change this to switch between Local and Remote API
+const BASE_API_URL = import.meta.env.VITE_FUTARCHY_API_URL || 'https://rwh1qtmir9.execute-api.eu-north-1.amazonaws.com';
 
-const CANDLES_API_URL = 'http://localhost:3030/subgraphs/name/algebra-proposal-candles-v1';
+const FUTARCHY_API_URL = BASE_API_URL;
+const CANDLES_API_URL = `${BASE_API_URL}/subgraphs/name/algebra-proposal-candles-v1`;
 
 const VolumeMarketSchema = z.object({
   status: z.string(),
