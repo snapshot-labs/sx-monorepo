@@ -80,10 +80,12 @@ export function useAuctionVerification({
   );
 
   function reset() {
-    status.value = acceptedProviders.value.length > 0 ? 'started' : 'loading';
+    status.value = 'loading';
+    acceptedProviders.value = [];
     verificationUrl.value = null;
     error.value = null;
     selectedProviderId.value = null;
+    checkStatus();
   }
 
   async function checkStatus(options?: {
@@ -211,9 +213,6 @@ export function useAuctionVerification({
     ([newAccount, newAuctionId], [oldAccount, oldAuctionId]) => {
       if (newAuctionId !== oldAuctionId || oldAccount !== newAccount) {
         reset();
-        checkStatus();
-      } else if (status.value === 'loading') {
-        checkStatus();
       }
     },
     { immediate: true }

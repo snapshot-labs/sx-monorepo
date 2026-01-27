@@ -108,7 +108,7 @@ const isPending = computed(() =>
     />
 
     <UiButton
-      v-if="isPending && acceptedProviders.length > 1"
+      v-if="isPending && verificationStatus !== 'loading'"
       class="mt-4"
       @click="reset"
     >
