@@ -17,11 +17,13 @@ export type PriceBucket = {
   priceStart: number;
   priceEnd: number;
   volume: number;
+  buyAmount: bigint;
 };
 
 type PriceData = {
   price: number;
   volume: number;
+  buyAmount: bigint;
 };
 
 const GRANULARITY_STEP_SIZE: Record<ChartGranularity, number> = {
@@ -217,7 +219,8 @@ function createPriceBuckets(
     buckets.push({
       priceStart: Math.max(0, priceStart), // Ensure first bucket starts at 0 minimum
       priceEnd,
-      volume: 0
+      volume: 0,
+      buyAmount: 0n
     });
   }
 
@@ -225,7 +228,8 @@ function createPriceBuckets(
     buckets.push({
       priceStart: clearingPrice + i * intervalSize,
       priceEnd: clearingPrice + (i + 1) * intervalSize,
-      volume: 0
+      volume: 0,
+      buyAmount: 0n
     });
   }
 
@@ -241,7 +245,6 @@ function createPriceBuckets(
  * @param data - Array of price level points containing price and volume data
  * @param clearingPrice - Reference price to align with bucket boundaries (typically clearing price)
  * @param targetBucketCount - Target number of buckets to create (default: 100). Actual count may vary due to reference price alignment
- * @returns Array of price buckets with aggregated volume, ordered by price
  */
 export function bucketPriceDepthData(
   data: AuctionPriceLevelPoint[],
@@ -251,16 +254,17 @@ export function bucketPriceDepthData(
   const sortedData: PriceData[] = data
     .map(item => ({
       price: parseFloat(item.price),
-      volume: parseFloat(item.volume)
+      volume: parseFloat(item.volume),
+      buyAmount: BigInt(item.buyAmount)
     }))
     .sort((a, b) => a.price - b.price);
 
   if (sortedData.length === 0) {
-    sortedData.push({ price: clearingPrice, volume: 0 });
+    sortedData.push({ price: clearingPrice, volume: 0, buyAmount: 0n });
   } else if (clearingPrice < sortedData[0].price) {
-    sortedData.unshift({ price: clearingPrice, volume: 0 });
+    sortedData.unshift({ price: clearingPrice, volume: 0, buyAmount: 0n });
   } else if (clearingPrice > sortedData[sortedData.length - 1].price) {
-    sortedData.push({ price: clearingPrice, volume: 0 });
+    sortedData.push({ price: clearingPrice, volume: 0, buyAmount: 0n });
   }
 
   const buckets = createPriceBuckets(
@@ -280,6 +284,7 @@ export function bucketPriceDepthData(
       dataIndex++;
     } else if (dataPoint.price < bucket.priceEnd) {
       bucket.volume += dataPoint.volume;
+      bucket.buyAmount += dataPoint.buyAmount;
       dataIndex++;
     } else {
       bucketIndex++;
