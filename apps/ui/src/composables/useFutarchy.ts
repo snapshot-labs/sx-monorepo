@@ -35,7 +35,7 @@ const FutarchyResponseSchema = z.object({
     base: z.object({
       tokenSymbol: z.string()
     })
-  }),
+  }).passthrough(),  // Allow currency field to pass through
   volume: z
     .object({
       conditional_yes: VolumeMarketSchema.optional(),
@@ -110,6 +110,20 @@ export function useFutarchy(
     return yesVolume + noVolume;
   });
 
+  // Expose currency info for Chart toggle (sDAI/xDAI switch)
+  const currencyInfo = computed(() => {
+    if (!marketData.value) return null;
+    const timeline = (marketData.value as any).timeline;
+    const tokens = (marketData.value as any).company_tokens;
+    console.log('[useFutarchy] company_tokens:', tokens);
+    console.log('[useFutarchy] tokens.currency:', tokens?.currency);
+    return {
+      rate: timeline?.currency_rate || null,  // Rate to apply (e.g., 1.22)
+      tokenSymbol: tokens?.currency?.tokenSymbol || 'sDAI',  // Native symbol
+      stableSymbol: tokens?.currency?.stableSymbol || null  // Converted symbol (e.g., xDAI)
+    };
+  });
+
   async function fetchMarketData(): Promise<FutarchyMarketData | null> {
     const res = await fetch(
       `${FUTARCHY_API_URL}/api/v1/market-events/proposals/${proposalId.value}/prices`
@@ -163,19 +177,17 @@ export function useFutarchy(
     const spotMap = new Map<number, number>();
     const allTimestamps = new Set<number>();
 
-    // Apply currency rate to YES/NO prices (sDAI → USD conversion)
-    const rate = currencyRate || 1;
-
+    // Store RAW prices without rate - rate will be applied in Chart.vue based on toggle
     for (const candle of data.yesCandles) {
       const time = parseInt(candle.periodStartUnix) * 1000;
-      const rawPrice = parseFloat(candle.close) * rate;  // Apply rate
+      const rawPrice = parseFloat(candle.close);  // Raw price, no rate applied here
       yesMap.set(time, rawPrice);
       allTimestamps.add(time);
     }
 
     for (const candle of data.noCandles) {
       const time = parseInt(candle.periodStartUnix) * 1000;
-      const rawPrice = parseFloat(candle.close) * rate;  // Apply rate
+      const rawPrice = parseFloat(candle.close);  // Raw price, no rate applied here
       noMap.set(time, rawPrice);
       allTimestamps.add(time);
     }
@@ -260,6 +272,7 @@ export function useFutarchy(
     candleData,
     priceScaleFactor,
     totalVolumeUsd,
+    currencyInfo,
     loadingChart,
     error
   };

@@ -10,14 +10,50 @@ import {
 import { CandleDataPoint } from '@/composables/useFutarchy';
 import { _n } from '@/helpers/utils';
 
+// Currency info for toggle (from useFutarchy)
+interface CurrencyInfo {
+  rate: number | null;
+  tokenSymbol: string;
+  stableSymbol: string | null;
+}
+
 const props = withDefaults(defineProps<{
   candleData: CandleDataPoint[];
   priceScaleFactor: number;
   startTimestamp: number;
   maxTimestamp: number;
-  pricePrecision?: number;  // Controls decimal places in legend (default: 6)
+  pricePrecision?: number;
+  currencyInfo?: CurrencyInfo | null;  // For currency toggle
 }>(), {
-  pricePrecision: 6
+  pricePrecision: 6,
+  currencyInfo: null
+});
+
+// Emit for toggle state so parent can update volume
+const emit = defineEmits<{
+  (e: 'rateToggle', useStable: boolean, rate: number): void
+}>();
+
+// Toggle state: true = use stable rate (xDAI), false = raw (sDAI)
+const useStableRate = ref(true);
+
+// Computed: effective rate to apply based on toggle
+const effectiveRate = computed(() => {
+  if (!props.currencyInfo?.rate || !props.currencyInfo?.stableSymbol) return 1;
+  return useStableRate.value ? props.currencyInfo.rate : 1;
+});
+
+// Computed: current currency symbol based on toggle
+const currentSymbol = computed(() => {
+  if (!props.currencyInfo) return '';
+  if (!props.currencyInfo.stableSymbol) return props.currencyInfo.tokenSymbol;
+  return useStableRate.value ? props.currencyInfo.stableSymbol : props.currencyInfo.tokenSymbol;
+});
+
+// Check if toggle should be shown (only if both symbols available)
+const showCurrencyToggle = computed(() => {
+  console.log('[Chart] currencyInfo:', props.currencyInfo);
+  return props.currencyInfo?.rate && props.currencyInfo?.stableSymbol;
 });
 
 const chartContainer = ref<HTMLElement | null>(null);
@@ -50,10 +86,15 @@ const dataSeries = computed(() =>
   seriesConfig
     .map(config => ({
       ...config,
-      data: props.candleData.map(point => ({
-        time: (point.time / 1000) as Time,  // Convert ms to seconds for chart library
-        value: point[config.id as keyof CandleDataPoint] as number
-      }))
+      data: props.candleData.map(point => {
+        const rawValue = point[config.id as keyof CandleDataPoint] as number;
+        // Apply rate to all series (yes, no, and spot)
+        const displayValue = rawValue * effectiveRate.value;
+        return {
+          time: (point.time / 1000) as Time,  // Convert ms to seconds for chart library
+          value: displayValue
+        };
+      })
     }))
     // Filter out series with no data (e.g., spot when not available)
     .filter(series => series.data.some(d => d.value > 0))
@@ -102,10 +143,15 @@ const currentValues = computed(() => {
   const point = props.candleData[idx];
   if (!point) return [];
   return seriesConfig
-    .map(s => ({
-      ...s,
-      value: point[s.id as keyof CandleDataPoint] as number
-    }))
+    .map(s => {
+      const rawValue = point[s.id as keyof CandleDataPoint] as number;
+      // Apply rate to all series (yes, no, and spot)
+      const displayValue = rawValue * effectiveRate.value;
+      return {
+        ...s,
+        value: displayValue
+      };
+    })
     // Hide legend entries for series with 0 value (e.g., Spot when not available)
     .filter(s => s.value > 0);
 });
@@ -341,6 +387,12 @@ onMounted(() => {
   }
 });
 
+// Re-initialize chart when currency toggle changes and emit to parent
+watch(useStableRate, () => {
+  initializeChart();
+  emit('rateToggle', useStableRate.value, effectiveRate.value);
+}, { immediate: true });
+
 onUnmounted(() => chart?.remove());
 </script>
 
@@ -363,7 +415,17 @@ onUnmounted(() => chart?.remove());
           </span>
         </div>
       </div>
-      <span class="text-skin-text">{{ currentDate }}</span>
+      <div class="flex items-center gap-2">
+        <!-- Currency toggle (only shown if both symbols available) -->
+        <button
+          v-if="showCurrencyToggle"
+          class="text-xs px-2 py-0.5 rounded border border-skin-border hover:bg-skin-border transition-colors"
+          @click="useStableRate = !useStableRate"
+        >
+          {{ currentSymbol }}
+        </button>
+        <span class="text-skin-text">{{ currentDate }}</span>
+      </div>
     </div>
     <div ref="chartContainer" class="flex-1 relative">
       <div
