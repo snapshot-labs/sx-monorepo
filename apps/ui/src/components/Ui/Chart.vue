@@ -44,13 +44,16 @@ const toChartTime = (data: { time: number; value: number }[]) =>
   }));
 
 const dataSeries = computed(() =>
-  seriesConfig.map(config => ({
-    ...config,
-    data: props.candleData.map(point => ({
-      time: (point.time / 1000) as Time,  // Convert ms to seconds for chart library
-      value: point[config.id as keyof CandleDataPoint] as number
+  seriesConfig
+    .map(config => ({
+      ...config,
+      data: props.candleData.map(point => ({
+        time: (point.time / 1000) as Time,  // Convert ms to seconds for chart library
+        value: point[config.id as keyof CandleDataPoint] as number
+      }))
     }))
-  }))
+    // Filter out series with no data (e.g., spot when not available)
+    .filter(series => series.data.some(d => d.value > 0))
 );
 
 type TimeFormatMode = 'time' | 'day' | 'month';
@@ -95,10 +98,13 @@ const currentValues = computed(() => {
   const idx = hoveredDataIndex.value ?? props.candleData.length - 1;
   const point = props.candleData[idx];
   if (!point) return [];
-  return seriesConfig.map(s => ({
-    ...s,
-    value: point[s.id as keyof CandleDataPoint] as number
-  }));
+  return seriesConfig
+    .map(s => ({
+      ...s,
+      value: point[s.id as keyof CandleDataPoint] as number
+    }))
+    // Hide legend entries for series with 0 value (e.g., Spot when not available)
+    .filter(s => s.value > 0);
 });
 
 function initializeChart() {
