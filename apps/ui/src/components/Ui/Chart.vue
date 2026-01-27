@@ -37,7 +37,7 @@ const seriesConfig = [
 
 const toChartTime = (data: { time: number; value: number }[]) =>
   data.map(p => ({
-    time: (p.time / 1000) as Time,
+    time: p.time as Time,  // time is already in seconds from dataSeries
     value: p.value * props.priceScaleFactor
   }));
 
@@ -45,7 +45,7 @@ const dataSeries = computed(() =>
   seriesConfig.map(config => ({
     ...config,
     data: props.candleData.map(point => ({
-      time: point.time,
+      time: (point.time / 1000) as Time,  // Convert ms to seconds for chart library
       value: point[config.id as keyof CandleDataPoint] as number
     }))
   }))
@@ -244,9 +244,11 @@ function initializeChart() {
   });
 
   if (props.candleData.length > 0) {
+    const firstTime = props.candleData[0].time / 1000;  // ms to seconds
+    const lastTime = props.candleData[props.candleData.length - 1].time / 1000;
     chart.timeScale().setVisibleRange({
-      from: (props.candleData[0].time / 1000) as Time,
-      to: props.maxTimestamp as Time
+      from: firstTime as Time,
+      to: lastTime as Time
     });
   }
 

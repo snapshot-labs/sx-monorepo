@@ -6,11 +6,9 @@ import {
 import gql from 'graphql-tag';
 import { z } from 'zod';
 
-const FUTARCHY_API_URL =
-  import.meta.env.VITE_FUTARCHY_API_URL ?? 'https://stag.api.tickspread.com';
+const FUTARCHY_API_URL = 'http://localhost:3030';
 
-const CANDLES_API_URL =
-  'https://api.studio.thegraph.com/query/1718249/algebra-candles/version/latest';
+const CANDLES_API_URL = 'http://localhost:3030/subgraphs/name/algebra-proposal-candles-v1';
 
 const VolumeMarketSchema = z.object({
   status: z.string(),
@@ -43,7 +41,7 @@ const FutarchyResponseSchema = z.object({
       conditional_no: VolumeMarketSchema.optional()
     })
     .optional()
-});
+}).passthrough();  // Allow extra fields like timeline
 
 export type FutarchyMarketData = z.infer<typeof FutarchyResponseSchema>;
 
@@ -114,24 +112,11 @@ export function useFutarchy(
     return FutarchyResponseSchema.parse(await res.json());
   }
 
-  function shouldInvert(
-    candles: { periodStartUnix: string; close: string }[],
-    currentPrice: number
-  ): boolean {
-    if (candles.length === 0 || currentPrice === 0) return false;
-    const rawPrice = parseFloat(candles[candles.length - 1].close);
-    if (rawPrice === 0) return false;
-    const invertedPrice = 1 / rawPrice;
-    const rawDiff = Math.abs(rawPrice - currentPrice) / currentPrice;
-    const invertedDiff = Math.abs(invertedPrice - currentPrice) / currentPrice;
-    return invertedDiff < rawDiff;
-  }
+  // shouldInvert removed - Algebra subgraph handles inversion via isInverted field on Pool
 
   async function fetchCandleData(
     yesPoolId: string,
-    noPoolId: string,
-    yesCurrentPrice: number,
-    noCurrentPrice: number
+    noPoolId: string
   ): Promise<{ candles: CandleDataPoint[]; scaleFactor: number }> {
     const { data } = await candlesApollo.query({
       query: CANDLES_QUERY,
@@ -142,9 +127,6 @@ export function useFutarchy(
       }
     });
 
-    const invertYes = shouldInvert(data.yesCandles, yesCurrentPrice);
-    const invertNo = shouldInvert(data.noCandles, noCurrentPrice);
-
     const yesMap = new Map<number, number>();
     const noMap = new Map<number, number>();
     const allTimestamps = new Set<number>();
@@ -152,21 +134,19 @@ export function useFutarchy(
     for (const candle of data.yesCandles) {
       const time = parseInt(candle.periodStartUnix) * 1000;
       const rawPrice = parseFloat(candle.close);
-      yesMap.set(time, invertYes && rawPrice > 0 ? 1 / rawPrice : rawPrice);
+      yesMap.set(time, rawPrice);
       allTimestamps.add(time);
     }
 
     for (const candle of data.noCandles) {
       const time = parseInt(candle.periodStartUnix) * 1000;
       const rawPrice = parseFloat(candle.close);
-      noMap.set(time, invertNo && rawPrice > 0 ? 1 / rawPrice : rawPrice);
+      noMap.set(time, rawPrice);
       allTimestamps.add(time);
     }
 
-    const maxTimestampMs = maxTimestamp.value * 1000;
-    const sortedTimestamps = Array.from(allTimestamps)
-      .filter(t => t <= maxTimestampMs)
-      .sort((a, b) => a - b);
+    // Express server already handles forward-fill, just merge YES and NO data
+    const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
 
     let lastYes = 0;
     let lastNo = 0;
@@ -198,9 +178,7 @@ export function useFutarchy(
 
       const { candles, scaleFactor } = await fetchCandleData(
         market.conditional_yes.pool_id,
-        market.conditional_no.pool_id,
-        market.conditional_yes.price_usd,
-        market.conditional_no.price_usd
+        market.conditional_no.pool_id
       );
       candleData.value = candles;
       priceScaleFactor.value = scaleFactor;
