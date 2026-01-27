@@ -28,6 +28,7 @@ const {
       :price-scale-factor="priceScaleFactor"
       :start-timestamp="proposal.start"
       :max-timestamp="proposal.max_end"
+      :price-precision="(marketData as any).timeline?.price_precision ?? 6"
     />
     <div class="flex justify-between items-center">
       ${{ _n(Math.round(totalVolumeUsd), 'standard') }} Vol.

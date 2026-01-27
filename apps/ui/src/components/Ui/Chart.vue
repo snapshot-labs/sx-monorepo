@@ -10,12 +10,15 @@ import {
 import { CandleDataPoint } from '@/composables/useFutarchy';
 import { _n } from '@/helpers/utils';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   candleData: CandleDataPoint[];
   priceScaleFactor: number;
   startTimestamp: number;
   maxTimestamp: number;
-}>();
+  pricePrecision?: number;  // Controls decimal places in legend (default: 6)
+}>(), {
+  pricePrecision: 6
+});
 
 const chartContainer = ref<HTMLElement | null>(null);
 const hoveredDataIndex = ref<number | null>(null);
@@ -356,7 +359,7 @@ onUnmounted(() => chart?.remove());
           />
           {{ series.label }}
           <span class="font-semibold">
-            {{ _n(series.value, 'standard', { maximumFractionDigits: 6 }) }}
+            {{ _n(series.value, 'standard', { maximumFractionDigits: pricePrecision }) }}
           </span>
         </div>
       </div>
