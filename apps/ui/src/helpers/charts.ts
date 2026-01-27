@@ -245,6 +245,7 @@ function createPriceBuckets(
  * @param data - Array of price level points containing price and volume data
  * @param clearingPrice - Reference price to align with bucket boundaries (typically clearing price)
  * @param targetBucketCount - Target number of buckets to create (default: 100). Actual count may vary due to reference price alignment
+ * @returns Array of price buckets with aggregated volume, ordered by price
  */
 export function bucketPriceDepthData(
   data: AuctionPriceLevelPoint[],
