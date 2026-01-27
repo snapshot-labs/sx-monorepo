@@ -41,10 +41,10 @@ const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 
 const {
-  verificationProvider,
+  verificationType,
   status: verificationStatus,
   isVerified,
-  allowListCallData
+  generateSignature
 } = useAuctionVerification({
   network: computed(() => props.network),
   auction: computed(() => props.auction)
@@ -203,11 +203,12 @@ function convertPriceToPercentage(price: number) {
 async function handlePlaceOrder() {
   if (!web3Account.value) {
     modalAccountOpen.value = true;
-
     return;
   }
 
   if (hasErrors.value) return;
+
+  const attestation = await generateSignature();
 
   const sellAmount = parseUnits(
     bidAmount.value,
@@ -226,7 +227,7 @@ async function handlePlaceOrder() {
       price,
       buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
     }),
-    attestation: allowListCallData.value || undefined,
+    attestation,
     auction: props.auction
   });
 }
@@ -284,8 +285,9 @@ onMounted(() => {
   <div>
     <AuctionVerificationInfo
       v-if="!isVerified"
-      :verification-provider="verificationProvider"
-      :status="verificationStatus"
+      :verification-type="verificationType"
+      :is-loading="verificationStatus === 'loading'"
+      :is-error="verificationStatus === 'error'"
     />
     <div v-else class="s-box p-4 space-y-3">
       <UiMessage

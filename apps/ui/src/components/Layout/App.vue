@@ -76,6 +76,7 @@ const hasPlaceHolderSidebar = computed(
       'create-space-snapshot-x',
       'auction',
       'auctions',
+      'auction-verify-standalone',
       'auction-invite'
     ].includes(String(route.matched[0]?.name)) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
