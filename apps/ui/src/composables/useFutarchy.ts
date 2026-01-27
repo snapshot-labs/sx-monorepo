@@ -123,7 +123,8 @@ export function useFutarchy(
     yesPoolId: string,
     noPoolId: string,
     poolTicker: string | null,
-    chartStartRange: number | null
+    chartStartRange: number | null,
+    currencyRate: number | null  // Rate to apply to YES/NO prices for USD conversion
   ): Promise<{ candles: CandleDataPoint[]; scaleFactor: number; hasYes: boolean; hasNo: boolean; hasSpot: boolean }> {
     // Use direct fetch instead of Apollo to ensure all variables (including poolTicker) are sent
     const query = `
@@ -162,16 +163,19 @@ export function useFutarchy(
     const spotMap = new Map<number, number>();
     const allTimestamps = new Set<number>();
 
+    // Apply currency rate to YES/NO prices (sDAI → USD conversion)
+    const rate = currencyRate || 1;
+
     for (const candle of data.yesCandles) {
       const time = parseInt(candle.periodStartUnix) * 1000;
-      const rawPrice = parseFloat(candle.close);
+      const rawPrice = parseFloat(candle.close) * rate;  // Apply rate
       yesMap.set(time, rawPrice);
       allTimestamps.add(time);
     }
 
     for (const candle of data.noCandles) {
       const time = parseInt(candle.periodStartUnix) * 1000;
-      const rawPrice = parseFloat(candle.close);
+      const rawPrice = parseFloat(candle.close) * rate;  // Apply rate
       noMap.set(time, rawPrice);
       allTimestamps.add(time);
     }
@@ -220,7 +224,8 @@ export function useFutarchy(
         market.conditional_yes.pool_id,
         market.conditional_no.pool_id,
         market.spot?.pool_ticker || null,
-        (market as any).timeline?.chart_start_range || null  // Optional chart start override
+        (market as any).timeline?.chart_start_range || null,
+        (market as any).timeline?.currency_rate || null  // sDAI→USD rate for YES/NO prices
       );
 
       // Error if missing YES or NO candles (conditional pools required)
