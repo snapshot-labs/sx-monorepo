@@ -123,5 +123,8 @@ watchEffect(() => {
         </div>
       </div>
     </div>
+    <UiStateWarning v-else class="px-4 py-3">
+      Auction not found
+    </UiStateWarning>
   </UiContainer>
 </template>
