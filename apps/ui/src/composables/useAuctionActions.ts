@@ -89,7 +89,7 @@ export function useAuctionActions(
     const missingBalance = sellOrder.sellAmount - balance.toBigInt();
 
     if (missingBalance <= 0n) {
-      return;
+      return null;
     }
 
     return wrapPromise(
