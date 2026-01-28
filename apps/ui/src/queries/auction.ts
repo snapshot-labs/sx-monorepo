@@ -23,6 +23,8 @@ import {
 } from '@/helpers/constants';
 import { formatAddress } from '@/helpers/utils';
 
+export const WETH_CONTRACT = '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14';
+
 const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
 const ORDERS_LIMIT = 1000;
@@ -36,7 +38,7 @@ const TOKEN_PRICE_OVERRIDES = {
     address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
   },
   // WETH -> ETH
-  '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14': {
+  [WETH_CONTRACT]: {
     chainId: 1,
     address: ETH_CONTRACT
   }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
@@ -10,9 +11,11 @@ import { CHAIN_IDS } from '@/helpers/constants';
 import { removeTrailingZeroes } from '@/helpers/format';
 import { getProvider } from '@/helpers/provider';
 import { parseUnits } from '@/helpers/token';
-import { _n, _p, _t } from '@/helpers/utils';
+import { _n, _p, _t, compareAddresses } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { WETH_CONTRACT } from '@/queries/auction';
 
+const ETH_MIN_BALANCE = 0.01;
 const MIN_PRICE_PREMIUM = 0.01; // 1% above minimum price
 const AMOUNT_DECIMALS = 6;
 
@@ -79,6 +82,10 @@ const canCancelOrder = computed(
   () => parseInt(props.auction.orderCancellationEndDate) > Date.now() / 1000
 );
 
+const isBiddingWithWeth = computed(() =>
+  compareAddresses(props.auction.addressBiddingToken, WETH_CONTRACT)
+);
+
 const { data: userBalance, isError: isBalanceError } = useQuery({
   queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
   queryFn: async () => {
@@ -90,9 +97,17 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
       provider.value
     );
 
-    const balance = await contract.balanceOf(web3Account.value);
+    let balance: BigNumber = await contract.balanceOf(web3Account.value);
 
-    return balance.toString();
+    if (isBiddingWithWeth.value) {
+      const nativeTokenBalance = await provider.value.getBalance(
+        web3Account.value
+      );
+
+      balance = balance.add(nativeTokenBalance);
+    }
+
+    return balance;
   },
   enabled: computed(() => !!web3Account.value)
 });
@@ -232,6 +247,22 @@ async function handlePlaceOrder() {
   });
 }
 
+function handleSetMaxAmount() {
+  if (!userBalance.value) return 0;
+
+  let availableBalance = userBalance.value;
+  if (isBiddingWithWeth.value) {
+    availableBalance = userBalance.value.sub(
+      parseUnits(ETH_MIN_BALANCE.toString(), 18)
+    );
+  }
+
+  bidAmount.value = formatUnits(
+    availableBalance,
+    props.auction.decimalsBiddingToken
+  );
+}
+
 function handlePriceUpdate(value: string) {
   bidPrice.value = value;
 
@@ -340,7 +371,7 @@ onMounted(() => {
           </div>
           <button
             class="absolute top-0 right-0 text-skin-link flex items-center gap-1"
-            @click="bidAmount = String(formattedBalance)"
+            @click="handleSetMaxAmount"
           >
             {{ _n(formattedBalance) }}
             {{ auction.symbolBiddingToken }}
