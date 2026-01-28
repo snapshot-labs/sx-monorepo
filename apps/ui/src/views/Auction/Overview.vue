@@ -10,7 +10,7 @@ import {
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { _n, partitionDuration, sleep } from '@/helpers/utils';
+import { _n, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
@@ -72,18 +72,6 @@ const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > currentTimestamp.value / 1000
 );
 
-const countdown = computed(() => {
-  if (isAuctionOpen.value === false) {
-    return null;
-  }
-
-  const diff =
-    parseInt(props.auction.endTimeTimestamp) -
-    Math.floor(currentTimestamp.value / 1000);
-
-  return partitionDuration(diff);
-});
-
 const isAccountSupported = computed<boolean>(() => {
   return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
 });
@@ -132,7 +120,7 @@ const {
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
-    auction: () => props.auction
+    tokenAddress: () => props.auction.addressBiddingToken
   });
 
 const fdv = computed(
@@ -423,35 +411,8 @@ watch(volume, () => {
             )}`"
           />
         </div>
-        <div v-if="countdown" class="flex gap-3.5">
-          <div
-            v-if="countdown.days > 0"
-            class="flex flex-col items-center uppercase min-w-6"
-          >
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.days).padStart(2, '0') }}
-            </span>
-            <span>days</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.hours).padStart(2, '0') }}
-            </span>
-            <span>hrs.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.minutes).padStart(2, '0') }}
-            </span>
-            <span>min.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.seconds).padStart(2, '0') }}
-            </span>
-            <span>sec.</span>
-          </div>
-        </div>
+
+        <UiCountdown :timestamp="parseInt(props.auction.endTimeTimestamp)" />
       </div>
     </div>
 
@@ -704,6 +665,7 @@ watch(volume, () => {
           v-else-if="sidebarType === 'referral'"
           :network="network"
           :auction="auction"
+          class="mb-4"
         />
       </div>
     </Affix>
