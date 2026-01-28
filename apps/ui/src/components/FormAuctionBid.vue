@@ -260,7 +260,10 @@ async function handlePlaceOrder() {
 }
 
 function handleSetMaxAmount() {
-  if (!userBalance.value) return 0;
+  if (!userBalance.value) {
+    bidAmount.value = '0';
+    return;
+  }
 
   bidAmount.value = formatUnits(
     availableBalance.value,
