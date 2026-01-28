@@ -64,8 +64,16 @@ export const AUCTION_KEYS = {
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
-    page: MaybeRefOrGetter<number>
-  ) => [...AUCTION_KEYS.auction(network, auction), page, 'orders'],
+    page: MaybeRefOrGetter<number>,
+    orderBy: MaybeRefOrGetter<Order_OrderBy>,
+    orderDirection: MaybeRefOrGetter<'asc' | 'desc'>
+  ) => [
+    ...AUCTION_KEYS.auction(network, auction),
+    page,
+    orderBy,
+    orderDirection,
+    'orders'
+  ],
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -126,21 +134,30 @@ export function useBidsQuery({
   network,
   auction,
   page,
-  enabled
+  orderBy,
+  orderDirection
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
   page: MaybeRefOrGetter<number>;
-  enabled?: MaybeRefOrGetter<boolean>;
+  orderBy: MaybeRefOrGetter<Order_OrderBy>;
+  orderDirection: MaybeRefOrGetter<'asc' | 'desc'>;
 }) {
   return useQuery({
-    queryKey: AUCTION_KEYS.orders(network, auction, page),
+    queryKey: AUCTION_KEYS.orders(
+      network,
+      auction,
+      page,
+      orderBy,
+      orderDirection
+    ),
     queryFn: () =>
       getOrders(toValue(auction).id, toValue(network), {
         first: LIMIT,
-        skip: (toValue(page) - 1) * LIMIT
-      }),
-    enabled
+        skip: (toValue(page) - 1) * LIMIT,
+        orderBy: toValue(orderBy),
+        orderDirection: toValue(orderDirection)
+      })
   });
 }
 

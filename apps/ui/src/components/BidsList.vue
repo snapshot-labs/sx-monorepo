@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import { AuctionNetworkId } from '@/helpers/auction';
-import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import {
+  AuctionDetailFragment,
+  Order_OrderBy
+} from '@/helpers/auction/gql/graphql';
 import { _n } from '@/helpers/utils';
 import {
   LIMIT,
   useBiddingTokenPriceQuery,
   useBidsQuery
 } from '@/queries/auction';
+
+const DEFAULT_SORT_DIRECTION = 'desc';
 
 const props = defineProps<{
   network: AuctionNetworkId;
@@ -16,17 +21,21 @@ const props = defineProps<{
 }>();
 
 const bidsHeader = ref<HTMLElement | null>(null);
-const allOrdersPage = ref(1);
+const page = ref(1);
 const { x: bidsHeaderX } = useScroll(bidsHeader);
+const orderBy = ref<Order_OrderBy>('timestamp');
+const orderDirection = ref<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
 const {
-  data: allOrders,
-  isLoading: isAllOrdersLoading,
-  isError: isAllOrdersError
+  data: orders,
+  isLoading: isOrdersLoading,
+  isError: isOrdersError
 } = useBidsQuery({
   network: () => props.network,
   auction: () => props.auction,
-  page: allOrdersPage
+  page: page,
+  orderBy,
+  orderDirection
 });
 
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
@@ -35,19 +44,27 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     auction: () => props.auction
   });
 
-const allOrdersTotalPages = computed(() => {
-  if (!allOrders.value) {
-    return 1;
-  }
+const totalPageCount = computed(() => {
   return Math.ceil(props.auction.orderCount / LIMIT);
 });
 
 function handleScrollEvent(target: HTMLElement) {
   bidsHeaderX.value = target.scrollLeft;
 }
+
+function handleSortChange(field: Order_OrderBy) {
+  if (orderBy.value === field) {
+    orderDirection.value = orderDirection.value === 'asc' ? 'desc' : 'asc';
+  } else {
+    orderBy.value = field;
+    orderDirection.value = DEFAULT_SORT_DIRECTION;
+  }
+
+  page.value = 1;
+}
 </script>
 <template>
-  <div class="space-y-4">
+  <div class="divide-y divide-skin-border">
     <div class="overflow-hidden">
       <UiColumnHeader
         :ref="
@@ -63,9 +80,30 @@ function handleScrollEvent(target: HTMLElement) {
           class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[880px] w-full"
         >
           <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-          <div class="w-[200px] max-w-[200px] truncate">Created</div>
-          <div class="w-[200px] max-w-[200px] truncate">Amount</div>
-          <div class="w-[200px] max-w-[200px] truncate">Max. price</div>
+          <UiColumnHeaderItemSortable
+            class="w-[200px] max-w-[200px]"
+            :is-ordered="orderBy === 'timestamp'"
+            :order-direction="orderDirection"
+            @sort-change="handleSortChange('timestamp')"
+          >
+            Created
+          </UiColumnHeaderItemSortable>
+          <UiColumnHeaderItemSortable
+            class="w-[200px] max-w-[200px]"
+            :is-ordered="orderBy === 'sellAmount'"
+            :order-direction="orderDirection"
+            @sort-change="handleSortChange('sellAmount')"
+          >
+            Amount
+          </UiColumnHeaderItemSortable>
+          <UiColumnHeaderItemSortable
+            class="w-[200px] max-w-[200px]"
+            :is-ordered="orderBy === 'price'"
+            :order-direction="orderDirection"
+            @sort-change="handleSortChange('price')"
+          >
+            Max. price
+          </UiColumnHeaderItemSortable>
           <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
           <div class="w-[200px] max-w-[200px] truncate">Status</div>
           <div class="min-w-[44px] lg:w-[60px]" />
@@ -74,10 +112,10 @@ function handleScrollEvent(target: HTMLElement) {
       <UiScrollerHorizontal @scroll="handleScrollEvent">
         <div class="min-w-[880px]">
           <UiLoading
-            v-if="isAllOrdersLoading || isBiddingTokenPriceLoading"
+            v-if="isOrdersLoading || isBiddingTokenPriceLoading"
             class="px-4 py-3 block"
           />
-          <UiStateWarning v-else-if="isAllOrdersError" class="px-4 py-3">
+          <UiStateWarning v-else-if="isOrdersError" class="px-4 py-3">
             Failed to load bids.
           </UiStateWarning>
           <UiStateWarning
@@ -87,11 +125,11 @@ function handleScrollEvent(target: HTMLElement) {
             There are no bids yet.
           </UiStateWarning>
           <div
-            v-else-if="allOrders && typeof biddingTokenPrice === 'number'"
-            class="divide-y divide-skin-border flex flex-col justify-center border-b"
+            v-else-if="orders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center"
           >
             <AuctionBid
-              v-for="order in allOrders"
+              v-for="order in orders"
               :key="order.id"
               :network-id="network"
               :auction-id="auction.id"
@@ -103,27 +141,29 @@ function handleScrollEvent(target: HTMLElement) {
           </div>
         </div>
       </UiScrollerHorizontal>
-      <div class="flex justify-between px-4 py-3">
-        <span>{{ _n(auction.orderCount) }} bids</span>
-        <div class="space-x-2">
-          <UiButton
-            v-if="allOrdersTotalPages > 1"
-            :disabled="allOrdersPage === 1"
-            @click="allOrdersPage = Math.max(allOrdersPage - 1, 1)"
-          >
-            Previous
-          </UiButton>
-          <span>
-            Page {{ _n(allOrdersPage) }} of {{ _n(allOrdersTotalPages) }}</span
-          >
-          <UiButton
-            v-if="allOrdersTotalPages > 1"
-            :disabled="allOrdersPage >= allOrdersTotalPages"
-            @click="allOrdersPage += 1"
-          >
-            Next
-          </UiButton>
-        </div>
+    </div>
+    <div class="flex justify-between items-center px-4 py-3">
+      <span>{{ _n(auction.orderCount) }} bids</span>
+      <div class="space-x-3 flex items-center">
+        <UiButton
+          v-if="totalPageCount > 1"
+          uniform
+          :disabled="page === 1"
+          title="Previous Page"
+          @click="page = Math.max(page - 1, 1)"
+        >
+          <IH-chevron-left />
+        </UiButton>
+        <span> Page {{ _n(page) }} of {{ _n(totalPageCount) }}</span>
+        <UiButton
+          v-if="totalPageCount > 1"
+          uniform
+          :disabled="page >= totalPageCount"
+          title="Next Page"
+          @click="page += 1"
+        >
+          <IH-chevron-right />
+        </UiButton>
       </div>
     </div>
   </div>
