@@ -41,6 +41,7 @@ const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
   toRef(props, 'auction')
 );
 
+const uiStore = useUiStore();
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
 const currentTimestamp = useTimestamp({ interval: 1000 });
@@ -334,8 +335,9 @@ function handleTransactionConfirmed(tx: string | null) {
       txId.value = tx;
     }
     return moveToNextStep();
+  } else if (transactionProgressType.value === 'cancel-order') {
+    uiStore.addNotification('success', 'Your bid has been cancelled.');
   }
-
   invalidateQueries();
   resetTransactionProgress();
 }
