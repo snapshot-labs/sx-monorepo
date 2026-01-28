@@ -69,10 +69,10 @@ export const AUCTION_KEYS = {
     orderDirection: MaybeRefOrGetter<'asc' | 'desc'>
   ) => [
     ...AUCTION_KEYS.auction(network, auction),
+    'orders',
     page,
     orderBy,
-    orderDirection,
-    'orders'
+    orderDirection
   ],
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,

@@ -45,7 +45,8 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   });
 
 const totalPageCount = computed(() => {
-  return Math.ceil(props.auction.orderCount / LIMIT);
+  const pages = Math.ceil(props.auction.orderCount / LIMIT);
+  return pages === 0 ? 1 : pages;
 });
 
 function handleScrollEvent(target: HTMLElement) {
@@ -142,7 +143,10 @@ function handleSortChange(field: Order_OrderBy) {
         </div>
       </UiScrollerHorizontal>
     </div>
-    <div class="flex justify-between items-center px-4 py-3">
+    <div
+      v-if="auction.orderCount"
+      class="flex justify-between items-center px-4 py-3"
+    >
       <span>{{ _n(auction.orderCount) }} bids</span>
       <div class="space-x-3 flex items-center">
         <UiButton

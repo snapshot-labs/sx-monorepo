@@ -12,7 +12,6 @@ defineProps<{
 <template>
   <button
     v-bind="$attrs"
-    role="button"
     class="flex items-center space-x-1 hover:text-skin-link uppercase truncate"
     @click="emit('sortChange')"
   >
