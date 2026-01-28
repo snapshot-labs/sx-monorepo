@@ -10,10 +10,9 @@ import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { removeTrailingZeroes } from '@/helpers/format';
 import { getProvider } from '@/helpers/provider';
-import { parseUnits } from '@/helpers/token';
-import { _n, _p, _t, compareAddresses } from '@/helpers/utils';
+import { isWethContract, parseUnits } from '@/helpers/token';
+import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { WETH_CONTRACT } from '@/queries/auction';
 
 const ETH_MIN_BALANCE = 0.01;
 const MIN_PRICE_PREMIUM = 0.01; // 1% above minimum price
@@ -83,7 +82,7 @@ const canCancelOrder = computed(
 );
 
 const isBiddingWithWeth = computed(() =>
-  compareAddresses(props.auction.addressBiddingToken, WETH_CONTRACT)
+  isWethContract(props.auction.addressBiddingToken)
 );
 
 const { data: userBalance, isError: isBalanceError } = useQuery({
