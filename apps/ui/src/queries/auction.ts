@@ -44,6 +44,11 @@ const TOKEN_PRICE_OVERRIDES = {
   '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14': {
     chainId: 1,
     address: ETH_CONTRACT
+  },
+  // Optimism predeploy WETH -> ETH
+  '0x4200000000000000000000000000000000000006': {
+    chainId: 1,
+    address: ETH_CONTRACT
   }
 } as const;
 
