@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { formatUnits } from '@ethersproject/units';
 import { SingleValueData, UTCTimestamp } from 'lightweight-charts';
 import { AuctionNetworkId } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
@@ -42,16 +43,23 @@ const normalizedData = computed<SingleValueData[]>(() => {
   const buckets = bucketPriceDepthData(items, clearingPrice).sort(
     (a, b) => b.priceStart - a.priceStart
   );
-  let cumulativeVolume = 0;
+  let cumulativeBuyAmount = 0n;
 
   return buckets
     .map(bucket => {
-      cumulativeVolume += bucket.volume;
+      cumulativeBuyAmount += bucket.buyAmount;
       return {
         time: bucket.priceEnd as UTCTimestamp,
-        value: cumulativeVolume,
+        value: Number(
+          formatUnits(
+            cumulativeBuyAmount,
+            props.auction.decimalsAuctioningToken
+          )
+        ),
         customValues: {
-          bucketVolume: bucket.volume
+          bucketBuyAmount: Number(
+            formatUnits(bucket.buyAmount, props.auction.decimalsAuctioningToken)
+          )
         }
       };
     })
