@@ -15,6 +15,7 @@ import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
   AUCTION_KEYS,
+  LIMIT,
   useBiddingTokenPriceQuery,
   useBidsQuery,
   useBidsSummaryQuery,
@@ -63,6 +64,7 @@ const sellOrder = ref<SellOrder | null>(null);
 const chartType = ref<'price' | 'depth'>(DEFAULT_CHART_TYPE);
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
+const allOrdersPage = ref(1);
 
 const auctionState = computed(() =>
   getAuctionState(props.auction, currentTimestamp.value)
@@ -105,14 +107,12 @@ const {
 
 const {
   data: allOrders,
-  fetchNextPage: fetchAllOrdersNextPage,
-  hasNextPage: hasAllOrdersNextPage,
-  isPending: isAllOrdersPending,
-  isFetchingNextPage: isAllOrdersFetchingNextPage,
+  isLoading: isAllOrdersLoading,
   isError: isAllOrdersError
 } = useBidsQuery({
   network: () => props.network,
   auction: () => props.auction,
+  page: allOrdersPage,
   enabled: () => bidsType.value === 'allBids'
 });
 
@@ -134,6 +134,13 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     network: () => props.network,
     auction: () => props.auction
   });
+
+const allOrdersTotalPages = computed(() => {
+  if (!allOrders.value) {
+    return 1;
+  }
+  return Math.ceil(props.auction.orderCount / LIMIT);
+});
 
 const fdv = computed(
   () =>
@@ -340,12 +347,6 @@ function handleTransactionConfirmed(tx: string | null) {
   }
   invalidateQueries();
   resetTransactionProgress();
-}
-
-function handleAllOrdersEndReached() {
-  if (!hasAllOrdersNextPage.value) return;
-
-  fetchAllOrdersNextPage();
 }
 
 function handleScrollEvent(target: HTMLElement) {
@@ -611,29 +612,24 @@ watch(volume, () => {
         <UiScrollerHorizontal @scroll="handleScrollEvent">
           <div class="min-w-[880px]">
             <UiLoading
-              v-if="isAllOrdersPending || isBiddingTokenPriceLoading"
+              v-if="isAllOrdersLoading || isBiddingTokenPriceLoading"
               class="px-4 py-3 block"
             />
             <UiStateWarning v-else-if="isAllOrdersError" class="px-4 py-3">
               Failed to load bids.
             </UiStateWarning>
             <UiStateWarning
-              v-else-if="allOrders?.pages.flat().length === 0"
+              v-else-if="auction.orderCount === 0"
               class="px-4 py-3"
             >
               There are no bids yet.
             </UiStateWarning>
-            <UiContainerInfiniteScroll
+            <div
               v-else-if="allOrders && typeof biddingTokenPrice === 'number'"
               class="divide-y divide-skin-border flex flex-col justify-center border-b"
-              :loading-more="isAllOrdersFetchingNextPage"
-              @end-reached="handleAllOrdersEndReached"
             >
-              <template #loading>
-                <UiLoading class="px-4 py-3 block" />
-              </template>
               <AuctionBid
-                v-for="order in allOrders?.pages.flat()"
+                v-for="order in allOrders"
                 :key="order.id"
                 :network-id="network"
                 :auction-id="auctionId"
@@ -642,9 +638,32 @@ watch(volume, () => {
                 :bidding-token-price="biddingTokenPrice"
                 :total-supply="totalSupply"
               />
-            </UiContainerInfiniteScroll>
+            </div>
           </div>
         </UiScrollerHorizontal>
+        <div class="flex justify-between px-4 py-3">
+          <span>{{ _n(auction.orderCount) }} bids</span>
+          <div class="space-x-2">
+            <UiButton
+              v-if="allOrdersTotalPages > 1"
+              :disabled="allOrdersPage === 1"
+              @click="allOrdersPage = Math.max(allOrdersPage - 1, 1)"
+            >
+              Previous
+            </UiButton>
+            <span>
+              Page {{ _n(allOrdersPage) }} of
+              {{ _n(allOrdersTotalPages) }}</span
+            >
+            <UiButton
+              v-if="allOrdersTotalPages > 1"
+              :disabled="allOrdersPage >= allOrdersTotalPages"
+              @click="allOrdersPage += 1"
+            >
+              Next
+            </UiButton>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -23,7 +23,7 @@ import {
 } from '@/helpers/constants';
 import { formatAddress } from '@/helpers/utils';
 
-const LIMIT = 20;
+export const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
 const ORDERS_LIMIT = 1000;
 const PRICE_HISTORY_LIMIT = 1000;
@@ -63,8 +63,9 @@ export const AUCTION_KEYS = {
   ],
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
-    auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [...AUCTION_KEYS.auction(network, auction), 'orders'],
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    page: MaybeRefOrGetter<number>
+  ) => [...AUCTION_KEYS.auction(network, auction), page, 'orders'],
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -124,25 +125,21 @@ export function useAuctionsQuery({
 export function useBidsQuery({
   network,
   auction,
+  page,
   enabled
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  page: MaybeRefOrGetter<number>;
   enabled?: MaybeRefOrGetter<boolean>;
 }) {
-  return useInfiniteQuery({
-    initialPageParam: 0,
-    queryKey: AUCTION_KEYS.orders(network, auction),
-    queryFn: ({ pageParam }) =>
+  return useQuery({
+    queryKey: AUCTION_KEYS.orders(network, auction, page),
+    queryFn: () =>
       getOrders(toValue(auction).id, toValue(network), {
         first: LIMIT,
-        skip: pageParam
+        skip: (toValue(page) - 1) * LIMIT
       }),
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < LIMIT) return null;
-
-      return pages.length * LIMIT;
-    },
     enabled
   });
 }
