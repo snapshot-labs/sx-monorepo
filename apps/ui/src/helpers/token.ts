@@ -8,7 +8,9 @@ const WETH_CONTRACTS = [
   // Mainnet WETH
   '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
   // Sepolia WETH
-  '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14'
+  '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14',
+  // Optimism predeployed WETH
+  '0x4200000000000000000000000000000000000006'
 ];
 
 export function isWethContract(address: string) {
