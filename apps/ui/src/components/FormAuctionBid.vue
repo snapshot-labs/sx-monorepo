@@ -88,7 +88,7 @@ const isBiddingWithWeth = computed(() =>
 const { data: userBalance, isError: isBalanceError } = useQuery({
   queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
   queryFn: async () => {
-    if (!web3Account.value) return '0';
+    if (!web3Account.value) return 0n;
 
     const contract = new Contract(
       props.auction.addressBiddingToken,
@@ -106,9 +106,19 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
       balance = balance.add(nativeTokenBalance);
     }
 
-    return balance;
+    return balance.toBigInt();
   },
   enabled: computed(() => !!web3Account.value)
+});
+
+const availableBalance = computed(() => {
+  if (!userBalance.value) return 0n;
+
+  if (isBiddingWithWeth.value) {
+    return userBalance.value - parseUnits(ETH_MIN_BALANCE.toString(), 18);
+  }
+
+  return userBalance.value;
 });
 
 const formattedBalance = computed(() => {
@@ -124,20 +134,23 @@ const amountError = computed(() => {
   if (!bidAmount.value) return undefined;
   if (formatErrors.value.amount) return formatErrors.value.amount;
 
-  const amount = parseFloat(bidAmount.value);
-
-  const minBiddingAmount = parseFloat(
-    formatUnits(
-      props.auction.minimumBiddingAmountPerOrder,
-      props.auction.decimalsBiddingToken
-    )
+  const amount = parseUnits(
+    bidAmount.value,
+    Number(props.auction.decimalsBiddingToken)
   );
 
+  const minBiddingAmount = BigInt(props.auction.minimumBiddingAmountPerOrder);
+
   if (amount <= minBiddingAmount) {
-    return `Amount must be bigger than ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
+    const formattedMinimumPrice = formatUnits(
+      minBiddingAmount,
+      Number(props.auction.decimalsBiddingToken)
+    );
+
+    return `Amount must be bigger than ${_n(formattedMinimumPrice, 'standard', { maximumFractionDigits: Number(props.auction.decimalsBiddingToken) })} ${props.auction.symbolBiddingToken}`;
   }
 
-  if (hasBalance.value && amount > formattedBalance.value) {
+  if (hasBalance.value && amount > availableBalance.value) {
     return 'Insufficient balance';
   }
 
@@ -249,15 +262,8 @@ async function handlePlaceOrder() {
 function handleSetMaxAmount() {
   if (!userBalance.value) return 0;
 
-  let availableBalance = userBalance.value;
-  if (isBiddingWithWeth.value) {
-    availableBalance = userBalance.value.sub(
-      parseUnits(ETH_MIN_BALANCE.toString(), 18)
-    );
-  }
-
   bidAmount.value = formatUnits(
-    availableBalance,
+    availableBalance.value,
     props.auction.decimalsBiddingToken
   );
 }
