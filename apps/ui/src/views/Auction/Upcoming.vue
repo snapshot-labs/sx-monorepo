@@ -51,7 +51,7 @@ watchEffect(() => {
         </UiBadgeNetwork>
         <div class="flex flex-col">
           <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-          <AuctionStatus class="max-w-fit" :state="'upcoming'" />
+          <AuctionStatus class="max-w-fit" state="upcoming" />
         </div>
       </div>
 
