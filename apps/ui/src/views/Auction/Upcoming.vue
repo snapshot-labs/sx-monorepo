@@ -14,8 +14,8 @@ const auction = computed<AuctionWithMetadata | undefined>(() => {
 
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
-    network: () => auction.value!.network,
-    tokenAddress: () => auction.value!.addressBiddingToken
+    network: () => auction.value?.network,
+    tokenAddress: () => auction.value?.addressBiddingToken
   });
 
 watchEffect(() => {

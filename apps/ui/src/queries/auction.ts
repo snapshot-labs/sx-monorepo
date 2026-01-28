@@ -213,15 +213,23 @@ export function useBiddingTokenPriceQuery({
   network,
   tokenAddress
 }: {
-  network: MaybeRefOrGetter<AuctionNetworkId>;
-  tokenAddress: MaybeRefOrGetter<string>;
+  network: MaybeRefOrGetter<AuctionNetworkId | undefined>;
+  tokenAddress: MaybeRefOrGetter<string | undefined>;
 }) {
   return useQuery({
-    queryKey: AUCTION_KEYS.biddingTokenPrice(network, tokenAddress),
+    queryKey: AUCTION_KEYS.biddingTokenPrice(
+      toRef(() => toValue(network)!),
+      toRef(() => toValue(tokenAddress)!)
+    ),
     queryFn: async () => {
       const networkValue = toValue(network);
+      let tokenAddressValue = toValue(tokenAddress);
 
-      let tokenAddressValue = formatAddress(toValue(tokenAddress));
+      if (!networkValue || !tokenAddressValue) {
+        return 0;
+      }
+
+      tokenAddressValue = formatAddress(tokenAddressValue);
       let chainId = CHAIN_IDS[networkValue];
 
       if (tokenAddressValue in TOKEN_PRICE_OVERRIDES) {
@@ -247,7 +255,8 @@ export function useBiddingTokenPriceQuery({
       ]);
 
       return coins[tokenAddressValue.toLowerCase()]?.usd ?? 0;
-    }
+    },
+    enabled: !!toValue(network) && !!toValue(tokenAddress)
   });
 }
 
