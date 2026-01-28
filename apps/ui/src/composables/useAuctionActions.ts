@@ -85,7 +85,6 @@ export function useAuctionActions(
     );
 
     const balance: BigNumber = await contract.balanceOf(web3Account.value);
-
     const missingBalance = sellOrder.sellAmount - balance.toBigInt();
 
     if (missingBalance <= 0n) {
