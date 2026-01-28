@@ -148,9 +148,8 @@ onUnmounted(() => {
       </label>
     </form>
 
-    <div v-if="isAuctionApp" class="flex-grow flex items-center space-x-2.5">
+    <div v-if="isAuctionApp" class="flex-grow">
       <IC-snapshot class="size-[28px] text-skin-link" />
-      <span class="text-[25px] text-skin-link mb-1">snapshot</span>
     </div>
 
     <div class="flex space-x-2 shrink-0">

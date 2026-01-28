@@ -362,22 +362,20 @@ watch(volume, () => {
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
-      <div class="flex gap-3">
-        <UiBadgeNetwork :id="network" :size="24">
+      <div class="flex gap-2.5">
+        <UiBadgeNetwork :id="network" :size="18" class="shrink-0">
           <UiStamp
             :id="auction.addressAuctioningToken"
-            :size="64"
+            :size="32"
             type="token"
             class="rounded-full"
           />
         </UiBadgeNetwork>
-        <div class="flex flex-col">
-          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-          <AuctionStatus class="max-w-fit" :state="auctionState" />
-        </div>
+        <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+        <AuctionStatus :state="auctionState" />
       </div>
       <div
-        class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
+        class="flex flex-col xl:flex-row xl:justify-between xl:items-start gap-3"
       >
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
@@ -423,33 +421,38 @@ watch(volume, () => {
             )}`"
           />
         </div>
-        <div v-if="countdown" class="flex gap-3.5">
-          <div
-            v-if="countdown.days > 0"
-            class="flex flex-col items-center uppercase min-w-6"
-          >
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.days).padStart(2, '0') }}
-            </span>
-            <span>days</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.hours).padStart(2, '0') }}
-            </span>
-            <span>hrs.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.minutes).padStart(2, '0') }}
-            </span>
-            <span>min.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.seconds).padStart(2, '0') }}
-            </span>
-            <span>sec.</span>
+        <div v-if="countdown" class="flex flex-col">
+          <span class="text-sm font-medium tracking-wider uppercase">
+            Ending in
+          </span>
+          <div class="flex gap-3">
+            <div
+              v-if="countdown.days > 0"
+              class="flex flex-col items-center min-w-6 leading-9"
+            >
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.days).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">days</span>
+            </div>
+            <div class="flex flex-col items-center min-w-6 leading-9">
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.hours).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">hrs.</span>
+            </div>
+            <div class="flex flex-col items-center min-w-6 leading-9">
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.minutes).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">min.</span>
+            </div>
+            <div class="flex flex-col items-center min-w-6 leading-9">
+              <span class="text-[32px] tracking-wider text-rose-500">
+                {{ String(countdown.seconds).padStart(2, '0') }}
+              </span>
+              <span class="text-sm font-medium -mt-2">sec.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -461,14 +464,18 @@ watch(volume, () => {
           :aria-active="chartType === 'price'"
           @click="chartType = 'price'"
         >
-          <UiLabel :is-active="chartType === 'price'" text="Clearing price" />
+          <UiLabel
+            :is-active="chartType === 'price'"
+            text="Clearing price"
+            size="lg"
+          />
         </AppLink>
         <AppLink
           v-if="volume"
           :aria-active="chartType === 'depth'"
           @click="chartType = 'depth'"
         >
-          <UiLabel :is-active="chartType === 'depth'" text="Depth" />
+          <UiLabel :is-active="chartType === 'depth'" text="Depth" size="lg" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -492,13 +499,17 @@ watch(volume, () => {
           :aria-active="bidsType === 'userBids'"
           @click="bidsType = 'userBids'"
         >
-          <UiLabel :is-active="bidsType === 'userBids'" text="My bids" />
+          <UiLabel
+            :is-active="bidsType === 'userBids'"
+            text="My bids"
+            size="lg"
+          />
         </AppLink>
         <AppLink
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" />
+          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" size="lg" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -676,7 +687,11 @@ watch(volume, () => {
               :aria-active="sidebarType === 'bid'"
               @click="sidebarType = 'bid'"
             >
-              <UiLabel :is-active="sidebarType === 'bid'" text="Place bid" />
+              <UiLabel
+                :is-active="sidebarType === 'bid'"
+                text="Place bid"
+                size="lg"
+              />
             </AppLink>
             <AppLink
               :aria-active="sidebarType === 'referral'"
@@ -685,6 +700,7 @@ watch(volume, () => {
               <UiLabel
                 :is-active="sidebarType === 'referral'"
                 text="Referral"
+                size="lg"
               />
             </AppLink>
           </div>
