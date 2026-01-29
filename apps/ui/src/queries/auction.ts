@@ -23,7 +23,7 @@ import {
 } from '@/helpers/constants';
 import { formatAddress } from '@/helpers/utils';
 
-const LIMIT = 20;
+export const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
 const ORDERS_LIMIT = 1000;
 const PRICE_HISTORY_LIMIT = 1000;
@@ -63,8 +63,17 @@ export const AUCTION_KEYS = {
   ],
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
-    auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [...AUCTION_KEYS.auction(network, auction), 'orders'],
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    page: MaybeRefOrGetter<number>,
+    orderBy: MaybeRefOrGetter<Order_OrderBy>,
+    orderDirection: MaybeRefOrGetter<'asc' | 'desc'>
+  ) => [
+    ...AUCTION_KEYS.auction(network, auction),
+    'orders',
+    page,
+    orderBy,
+    orderDirection
+  ],
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -124,26 +133,31 @@ export function useAuctionsQuery({
 export function useBidsQuery({
   network,
   auction,
-  enabled
+  page,
+  orderBy,
+  orderDirection
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
-  enabled?: MaybeRefOrGetter<boolean>;
+  page: MaybeRefOrGetter<number>;
+  orderBy: MaybeRefOrGetter<Order_OrderBy>;
+  orderDirection: MaybeRefOrGetter<'asc' | 'desc'>;
 }) {
-  return useInfiniteQuery({
-    initialPageParam: 0,
-    queryKey: AUCTION_KEYS.orders(network, auction),
-    queryFn: ({ pageParam }) =>
+  return useQuery({
+    queryKey: AUCTION_KEYS.orders(
+      network,
+      auction,
+      page,
+      orderBy,
+      orderDirection
+    ),
+    queryFn: () =>
       getOrders(toValue(auction).id, toValue(network), {
         first: LIMIT,
-        skip: pageParam
-      }),
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < LIMIT) return null;
-
-      return pages.length * LIMIT;
-    },
-    enabled
+        skip: (toValue(page) - 1) * LIMIT,
+        orderBy: toValue(orderBy),
+        orderDirection: toValue(orderDirection)
+      })
   });
 }
 

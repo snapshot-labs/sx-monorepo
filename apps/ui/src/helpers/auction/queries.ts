@@ -24,6 +24,7 @@ gql(`
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
+    orderCount
     exactOrder {
       sellAmount
       price
