@@ -33,8 +33,14 @@ const granularity = computed<ChartGranularity>(() => {
   const auctionDuration =
     Number(props.auction.endTimeTimestamp) -
     Number(props.auction.startingTimeStamp);
+  const auctionSinceStart =
+    Math.floor(Date.now() / 1000) - Number(props.auction.startingTimeStamp);
 
-  if ((offset.value && offset.value <= ONE_DAY) || auctionDuration <= ONE_DAY) {
+  if (
+    (offset.value && offset.value <= ONE_DAY) ||
+    auctionDuration <= ONE_DAY ||
+    auctionSinceStart <= ONE_DAY
+  ) {
     return 'minute';
   }
 
