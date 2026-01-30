@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
@@ -9,10 +10,11 @@ import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { removeTrailingZeroes } from '@/helpers/format';
 import { getProvider } from '@/helpers/provider';
-import { parseUnits } from '@/helpers/token';
+import { isWethContract, parseUnits } from '@/helpers/token';
 import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
+const ETH_MIN_BALANCE = 0.01;
 const MIN_PRICE_PREMIUM = 0.01; // 1% above minimum price
 const AMOUNT_DECIMALS = 6;
 
@@ -79,10 +81,14 @@ const canCancelOrder = computed(
   () => parseInt(props.auction.orderCancellationEndDate) > Date.now() / 1000
 );
 
+const isBiddingWithWeth = computed(() =>
+  isWethContract(props.auction.addressBiddingToken)
+);
+
 const { data: userBalance, isError: isBalanceError } = useQuery({
   queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
   queryFn: async () => {
-    if (!web3Account.value) return '0';
+    if (!web3Account.value) return 0n;
 
     const contract = new Contract(
       props.auction.addressBiddingToken,
@@ -90,11 +96,29 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
       provider.value
     );
 
-    const balance = await contract.balanceOf(web3Account.value);
+    let balance: BigNumber = await contract.balanceOf(web3Account.value);
 
-    return balance.toString();
+    if (isBiddingWithWeth.value) {
+      const nativeTokenBalance = await provider.value.getBalance(
+        web3Account.value
+      );
+
+      balance = balance.add(nativeTokenBalance);
+    }
+
+    return balance.toBigInt();
   },
   enabled: computed(() => !!web3Account.value)
+});
+
+const availableBalance = computed(() => {
+  if (!userBalance.value) return 0n;
+
+  if (isBiddingWithWeth.value) {
+    return userBalance.value - parseUnits(ETH_MIN_BALANCE.toString(), 18);
+  }
+
+  return userBalance.value;
 });
 
 const formattedBalance = computed(() => {
@@ -110,20 +134,23 @@ const amountError = computed(() => {
   if (!bidAmount.value) return undefined;
   if (formatErrors.value.amount) return formatErrors.value.amount;
 
-  const amount = parseFloat(bidAmount.value);
-
-  const minBiddingAmount = parseFloat(
-    formatUnits(
-      props.auction.minimumBiddingAmountPerOrder,
-      props.auction.decimalsBiddingToken
-    )
+  const amount = parseUnits(
+    bidAmount.value,
+    Number(props.auction.decimalsBiddingToken)
   );
 
+  const minBiddingAmount = BigInt(props.auction.minimumBiddingAmountPerOrder);
+
   if (amount <= minBiddingAmount) {
-    return `Amount must be bigger than ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
+    const formattedMinimumPrice = formatUnits(
+      minBiddingAmount,
+      Number(props.auction.decimalsBiddingToken)
+    );
+
+    return `Amount must be bigger than ${_n(formattedMinimumPrice, 'standard', { maximumFractionDigits: Number(props.auction.decimalsBiddingToken) })} ${props.auction.symbolBiddingToken}`;
   }
 
-  if (hasBalance.value && amount > formattedBalance.value) {
+  if (hasBalance.value && amount > availableBalance.value) {
     return 'Insufficient balance';
   }
 
@@ -230,6 +257,18 @@ async function handlePlaceOrder() {
     attestation,
     auction: props.auction
   });
+}
+
+function handleSetMaxAmount() {
+  if (!userBalance.value) {
+    bidAmount.value = '0';
+    return;
+  }
+
+  bidAmount.value = formatUnits(
+    availableBalance.value,
+    props.auction.decimalsBiddingToken
+  );
 }
 
 function handlePriceUpdate(value: string) {
@@ -340,7 +379,7 @@ onMounted(() => {
           </div>
           <button
             class="absolute top-0 right-0 text-skin-link flex items-center gap-1"
-            @click="bidAmount = String(formattedBalance)"
+            @click="handleSetMaxAmount"
           >
             {{ _n(formattedBalance) }}
             {{ auction.symbolBiddingToken }}
