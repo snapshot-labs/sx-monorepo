@@ -22,9 +22,10 @@ const props = defineProps<{
 
 const bidsHeader = ref<HTMLElement | null>(null);
 const page = ref(1);
-const { x: bidsHeaderX } = useScroll(bidsHeader);
 const orderBy = ref<Order_OrderBy>('timestamp');
 const orderDirection = ref<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
+
+const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const {
   data: orders,
@@ -33,7 +34,7 @@ const {
 } = useBidsQuery({
   network: () => props.network,
   auction: () => props.auction,
-  page: page,
+  page,
   orderBy,
   orderDirection
 });
@@ -148,17 +149,17 @@ function handleSortChange(field: Order_OrderBy) {
       class="flex justify-between items-center px-4 py-3"
     >
       <span>{{ _n(auction.orderCount) }} bids</span>
-      <div class="space-x-3 flex items-center">
+      <div class="flex items-center space-x-3">
         <UiButton
           v-if="totalPageCount > 1"
           uniform
           :disabled="page === 1"
           title="Previous Page"
-          @click="page = Math.max(page - 1, 1)"
+          @click="page = page - 1"
         >
           <IH-chevron-left />
         </UiButton>
-        <span> Page {{ _n(page) }} of {{ _n(totalPageCount) }}</span>
+        <span>Page {{ _n(page) }} of {{ _n(totalPageCount) }}</span>
         <UiButton
           v-if="totalPageCount > 1"
           uniform
