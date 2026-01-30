@@ -81,8 +81,8 @@ export const AUCTION_KEYS = {
     { limit: limit ?? SUMMARY_LIMIT, where }
   ],
   biddingTokenPrice: (
-    network: MaybeRefOrGetter<AuctionNetworkId>,
-    tokenAddress: MaybeRefOrGetter<string>
+    network: MaybeRefOrGetter<AuctionNetworkId | undefined>,
+    tokenAddress: MaybeRefOrGetter<string | undefined>
   ) => [...AUCTION_KEYS.all, network, tokenAddress, 'biddingTokenPrice'],
   priceHistory: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
@@ -217,10 +217,7 @@ export function useBiddingTokenPriceQuery({
   tokenAddress: MaybeRefOrGetter<string | undefined>;
 }) {
   return useQuery({
-    queryKey: AUCTION_KEYS.biddingTokenPrice(
-      toRef(() => toValue(network)!),
-      toRef(() => toValue(tokenAddress)!)
-    ),
+    queryKey: AUCTION_KEYS.biddingTokenPrice(network, tokenAddress),
     queryFn: async () => {
       const networkValue = toValue(network);
       let tokenAddressValue = toValue(tokenAddress);
