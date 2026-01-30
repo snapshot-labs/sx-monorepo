@@ -20,12 +20,10 @@ const props = defineProps<{
   totalSupply: bigint;
 }>();
 
-const bidsHeader = ref<HTMLElement | null>(null);
+const columnHeaderRef = ref<InstanceType<typeof UiColumnHeader> | null>(null);
 const page = ref(1);
 const orderBy = ref<Order_OrderBy>('timestamp');
 const orderDirection = ref<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
-
-const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const {
   data: orders,
@@ -46,13 +44,17 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     auction: () => props.auction
   });
 
+const { x: columnHeaderX } = useScroll(
+  () => columnHeaderRef.value?.container ?? null
+);
+
 const totalPageCount = computed(() => {
   const pages = Math.ceil(props.auction.orderCount / LIMIT);
   return pages === 0 ? 1 : pages;
 });
 
 function handleScrollEvent(target: HTMLElement) {
-  bidsHeaderX.value = target.scrollLeft;
+  columnHeaderX.value = target.scrollLeft;
 }
 
 function handleSortChange(field: Order_OrderBy) {
@@ -70,12 +72,7 @@ function handleSortChange(field: Order_OrderBy) {
   <div class="divide-y divide-skin-border">
     <div class="overflow-hidden">
       <UiColumnHeader
-        :ref="
-          ref =>
-            (bidsHeader =
-              (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
-              null)
-        "
+        ref="columnHeaderRef"
         class="!px-0 py-2 uppercase text-sm tracking-wider overflow-hidden"
         :sticky="false"
       >
