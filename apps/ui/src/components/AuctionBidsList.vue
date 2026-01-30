@@ -146,30 +146,27 @@ function handleSortChange(field: Order_OrderBy) {
     </div>
     <div
       v-if="auction.orderCount"
-      class="flex justify-between items-center px-4 py-3"
+      class="flex justify-center items-center space-x-3 px-4 py-3"
     >
-      <span>{{ _n(auction.orderCount) }} bids</span>
-      <div class="flex items-center space-x-3">
-        <UiButton
-          v-if="totalPageCount > 1"
-          uniform
-          :disabled="page === 1"
-          title="Previous Page"
-          @click="page = page - 1"
-        >
-          <IH-chevron-left />
-        </UiButton>
-        <span>Page {{ _n(page) }} of {{ _n(totalPageCount) }}</span>
-        <UiButton
-          v-if="totalPageCount > 1"
-          uniform
-          :disabled="page >= totalPageCount"
-          title="Next Page"
-          @click="page += 1"
-        >
-          <IH-chevron-right />
-        </UiButton>
-      </div>
+      <UiButton
+        v-if="totalPageCount > 1"
+        uniform
+        :disabled="page === 1"
+        title="Previous Page"
+        @click="page = page - 1"
+      >
+        <IH-chevron-left />
+      </UiButton>
+      <span>Page {{ _n(page) }} of {{ _n(totalPageCount) }}</span>
+      <UiButton
+        v-if="totalPageCount > 1"
+        uniform
+        :disabled="page >= totalPageCount"
+        title="Next Page"
+        @click="page += 1"
+      >
+        <IH-chevron-right />
+      </UiButton>
     </div>
   </div>
 </template>

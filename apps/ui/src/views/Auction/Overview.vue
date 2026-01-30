@@ -478,7 +478,11 @@ watch(volume, () => {
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" />
+          <UiLabel
+            :is-active="bidsType === 'allBids'"
+            text="Bids"
+            :count="auction.orderCount"
+          />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
