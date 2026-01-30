@@ -5,8 +5,15 @@ import {
   OrderFragment
 } from './gql/graphql';
 
+export type AuctionWithMetadata = AuctionDetailFragment & {
+  network: AuctionNetworkId;
+  imageUrl?: string;
+  soldSupplyPercentage: number;
+  referralId: string;
+};
 export type AuctionNetworkId = 'eth' | 'base' | 'sep';
 export type AuctionState =
+  | 'upcoming'
   | 'active'
   | 'finalizing'
   | 'claiming'

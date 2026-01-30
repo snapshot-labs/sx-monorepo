@@ -1,4 +1,5 @@
 import AuctionOverview from '@/views/Auction/Overview.vue';
+import AuctionUpcoming from '@/views/Auction/Upcoming.vue';
 import AuctionVerify from '@/views/Auction/Verify.vue';
 import Auction from '@/views/Auction.vue';
 import AuctionInvite from '@/views/AuctionInvite.vue';
@@ -28,5 +29,10 @@ export default [
       { path: '', name: 'auction-overview', component: AuctionOverview },
       { path: 'verify', name: 'auction-verify', component: AuctionVerify }
     ]
+  },
+  {
+    path: '/auction/upcoming/:id',
+    name: 'auction-upcoming',
+    component: AuctionUpcoming
   }
 ];
