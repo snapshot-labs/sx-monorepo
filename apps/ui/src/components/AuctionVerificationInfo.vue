@@ -18,14 +18,11 @@ const isConnected = computed(() => !!web3Account.value);
       <UiLoading :size="24" />
       <p class="text-sm text-skin-text">Checking verification status</p>
     </div>
-    <div v-else-if="isError" class="text-sm text-skin-danger">
+    <div v-else-if="isError" class="text-skin-danger">
       An error occurred while checking verification status. Please try again
       later.
     </div>
-    <div
-      v-else-if="isConnected && verificationType === 'unknownSigner'"
-      class="text-sm"
-    >
+    <div v-else-if="isConnected && verificationType === 'unknownSigner'">
       This auction uses an unsupported verification provider
     </div>
     <div v-else class="space-y-3">

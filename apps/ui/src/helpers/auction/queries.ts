@@ -136,6 +136,7 @@ export const auctionPriceLevelQuery = gql(`
     ) {
       price
       volume
+      buyAmount
     }
   }
 `);
