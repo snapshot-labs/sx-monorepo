@@ -41,7 +41,7 @@ const {
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
-    auction: () => props.auction
+    tokenAddress: () => props.auction.addressBiddingToken
   });
 
 const { x: columnHeaderX } = useScroll(
