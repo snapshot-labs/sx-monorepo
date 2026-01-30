@@ -30,7 +30,7 @@ const partnerStatistics = computed(
 </script>
 
 <template>
-  <div class="divide-y divide-skin-border mb-4">
+  <div class="divide-y divide-skin-border">
     <ReferralReward
       v-if="web3Account && auction"
       :network="network"
@@ -64,9 +64,7 @@ const partnerStatistics = computed(
           :loading-more="isFetchingNextPage"
           @end-reached="() => hasNextPage && fetchNextPage()"
         >
-          <div
-            class="divide-y divide-skin-border flex flex-col justify-center border-b"
-          >
+          <div class="divide-y divide-skin-border flex flex-col justify-center">
             <div
               v-for="entry in partnerStatistics"
               :key="entry.id"
