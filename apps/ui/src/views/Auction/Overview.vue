@@ -16,7 +16,6 @@ import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
   AUCTION_KEYS,
   useBiddingTokenPriceQuery,
-  useBidsQuery,
   useBidsSummaryQuery,
   useUnclaimedOrdersQuery
 } from '@/queries/auction';
@@ -89,19 +88,6 @@ const {
   orderBy: 'price',
   orderDirection: 'desc',
   enabled: () => isAccountSupported.value && bidsType.value === 'userBids'
-});
-
-const {
-  data: allOrders,
-  fetchNextPage: fetchAllOrdersNextPage,
-  hasNextPage: hasAllOrdersNextPage,
-  isPending: isAllOrdersPending,
-  isFetchingNextPage: isAllOrdersFetchingNextPage,
-  isError: isAllOrdersError
-} = useBidsQuery({
-  network: () => props.network,
-  auction: () => props.auction,
-  enabled: () => bidsType.value === 'allBids'
 });
 
 const {
@@ -330,12 +316,6 @@ function handleTransactionConfirmed(tx: string | null) {
   resetTransactionProgress();
 }
 
-function handleAllOrdersEndReached() {
-  if (!hasAllOrdersNextPage.value) return;
-
-  fetchAllOrdersNextPage();
-}
-
 function handleScrollEvent(target: HTMLElement) {
   bidsHeaderX.value = target.scrollLeft;
 }
@@ -464,7 +444,12 @@ watch(volume, () => {
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" size="lg" />
+          <UiLabel
+            :is-active="bidsType === 'allBids'"
+            text="Bids"
+            size="lg"
+            :count="auction.orderCount"
+          />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -550,69 +535,12 @@ watch(volume, () => {
         </div>
       </template>
     </div>
-    <div v-else-if="bidsType === 'allBids'" class="space-y-4">
-      <div class="overflow-hidden">
-        <UiColumnHeader
-          :ref="
-            ref =>
-              (bidsHeader =
-                (ref as InstanceType<typeof UiColumnHeader> | null)
-                  ?.container ?? null)
-          "
-          class="!px-0 py-2 uppercase text-sm tracking-wider overflow-hidden"
-          :sticky="false"
-        >
-          <div
-            class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[880px] w-full"
-          >
-            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-            <div class="w-[200px] max-w-[200px] truncate">Created</div>
-            <div class="w-[200px] max-w-[200px] truncate">Amount</div>
-            <div class="w-[200px] max-w-[200px] truncate">Max. price</div>
-            <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
-            <div class="w-[200px] max-w-[200px] truncate">Status</div>
-            <div class="min-w-[44px] lg:w-[60px]" />
-          </div>
-        </UiColumnHeader>
-        <UiScrollerHorizontal @scroll="handleScrollEvent">
-          <div class="min-w-[880px]">
-            <UiLoading
-              v-if="isAllOrdersPending || isBiddingTokenPriceLoading"
-              class="px-4 py-3 block"
-            />
-            <UiStateWarning v-else-if="isAllOrdersError" class="px-4 py-3">
-              Failed to load bids.
-            </UiStateWarning>
-            <UiStateWarning
-              v-else-if="allOrders?.pages.flat().length === 0"
-              class="px-4 py-3"
-            >
-              There are no bids yet.
-            </UiStateWarning>
-            <UiContainerInfiniteScroll
-              v-else-if="allOrders && typeof biddingTokenPrice === 'number'"
-              class="divide-y divide-skin-border flex flex-col justify-center border-b"
-              :loading-more="isAllOrdersFetchingNextPage"
-              @end-reached="handleAllOrdersEndReached"
-            >
-              <template #loading>
-                <UiLoading class="px-4 py-3 block" />
-              </template>
-              <AuctionBid
-                v-for="order in allOrders?.pages.flat()"
-                :key="order.id"
-                :network-id="network"
-                :auction-id="auctionId"
-                :auction="auction"
-                :order="order"
-                :bidding-token-price="biddingTokenPrice"
-                :total-supply="totalSupply"
-              />
-            </UiContainerInfiniteScroll>
-          </div>
-        </UiScrollerHorizontal>
-      </div>
-    </div>
+    <AuctionBidsList
+      v-else-if="bidsType === 'allBids'"
+      :auction="auction"
+      :network="network"
+      :total-supply="totalSupply"
+    />
   </div>
 
   <teleport to="#modal">
