@@ -256,7 +256,7 @@ export function useBiddingTokenPriceQuery({
 
       return coins[tokenAddressValue.toLowerCase()]?.usd ?? 0;
     },
-    enabled: !!toValue(network) && !!toValue(tokenAddress)
+    enabled: () => !!toValue(network) && !!toValue(tokenAddress)
   });
 }
 
