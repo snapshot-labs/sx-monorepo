@@ -564,7 +564,7 @@ watch(volume, () => {
         </div>
       </template>
     </div>
-    <BidsList
+    <AuctionBidsList
       v-else-if="bidsType === 'allBids'"
       :auction="auction"
       :network="network"
