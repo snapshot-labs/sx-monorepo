@@ -492,7 +492,7 @@ watch(volume, () => {
           <UiLabel
             :is-active="bidsType === 'allBids'"
             text="Bids"
-            size="lg" 
+            size="lg"
             :count="auction.orderCount"
           />
         </AppLink>
