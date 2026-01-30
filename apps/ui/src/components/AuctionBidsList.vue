@@ -30,6 +30,7 @@ const { x: bidsHeaderX } = useScroll(bidsHeader);
 const {
   data: orders,
   isLoading: isOrdersLoading,
+  isFetching,
   isError: isOrdersError
 } = useBidsQuery({
   network: () => props.network,
@@ -112,7 +113,7 @@ function handleSortChange(field: Order_OrderBy) {
         </div>
       </UiColumnHeader>
       <UiScrollerHorizontal @scroll="handleScrollEvent">
-        <div class="min-w-[880px]">
+        <div class="min-w-[880px]" :class="{ 'opacity-60': isFetching }">
           <UiLoading
             v-if="isOrdersLoading || isBiddingTokenPriceLoading"
             class="px-4 py-3 block"
@@ -151,7 +152,7 @@ function handleSortChange(field: Order_OrderBy) {
       <UiButton
         v-if="totalPageCount > 1"
         uniform
-        :disabled="page === 1"
+        :disabled="page === 1 || isFetching"
         title="Previous Page"
         @click="page = page - 1"
       >
@@ -161,7 +162,7 @@ function handleSortChange(field: Order_OrderBy) {
       <UiButton
         v-if="totalPageCount > 1"
         uniform
-        :disabled="page >= totalPageCount"
+        :disabled="page >= totalPageCount || isFetching"
         title="Next Page"
         @click="page += 1"
       >

@@ -1,4 +1,8 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery
+} from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   AuctionNetworkId,
@@ -157,7 +161,8 @@ export function useBidsQuery({
         skip: (toValue(page) - 1) * LIMIT,
         orderBy: toValue(orderBy),
         orderDirection: toValue(orderDirection)
-      })
+      }),
+    placeholderData: keepPreviousData
   });
 }
 
