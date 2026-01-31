@@ -31,8 +31,6 @@ const ABOVE_CLEARING_PRICE_SERIES_OPTIONS: AreaSeriesPartialOptions = {
   priceLineVisible: false
 };
 
-const CLEARING_PRICE_COLOR = '#f59e0b';
-
 const props = defineProps<{
   data: SingleValueData[];
   auction: AuctionDetailFragment;
@@ -153,12 +151,7 @@ function formatNumber(value: number, range?: number): string {
       </div>
     </UiChartTooltip>
 
-    <UiChartVerticalLine
-      v-if="chart"
-      :chart="chart"
-      :value="clearingPrice"
-      :color="CLEARING_PRICE_COLOR"
-    >
+    <UiChartVerticalLine v-if="chart" :chart="chart" :value="clearingPrice">
       Clearing:
       {{
         _n(clearingPrice, 'standard', {
