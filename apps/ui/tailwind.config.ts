@@ -16,6 +16,15 @@ export default {
     hoverOnlyWhenSupported: true
   },
   content: ['./index.html', './src/**/*.{js,ts,vue}'],
+  safelist: [
+    // Dynamic classes
+    'stroke-skin-success',
+    'stroke-skin-danger',
+    'stroke-skin-text',
+    'fill-skin-success',
+    'fill-skin-danger',
+    'fill-skin-text'
+  ],
   darkMode: 'class',
   theme: {
     extend: {
