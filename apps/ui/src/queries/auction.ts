@@ -1,4 +1,8 @@
-import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery
+} from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import {
   AuctionNetworkId,
@@ -23,7 +27,7 @@ import {
 } from '@/helpers/constants';
 import { formatAddress } from '@/helpers/utils';
 
-const LIMIT = 20;
+export const LIMIT = 20;
 const SUMMARY_LIMIT = 5;
 const ORDERS_LIMIT = 1000;
 const PRICE_HISTORY_LIMIT = 1000;
@@ -51,12 +55,29 @@ export const AUCTION_KEYS = {
   ],
   auction: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
-    auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [...AUCTION_KEYS.all, network, 'detail', () => toValue(auction).id],
+    auction: MaybeRefOrGetter<AuctionDetailFragment | string>
+  ) => [
+    ...AUCTION_KEYS.all,
+    network,
+    () => {
+      const auctionValue = toValue(auction);
+
+      return typeof auctionValue === 'string' ? auctionValue : auctionValue.id;
+    }
+  ],
   orders: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
-    auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [...AUCTION_KEYS.auction(network, auction), 'orders'],
+    auction: MaybeRefOrGetter<AuctionDetailFragment>,
+    page: MaybeRefOrGetter<number>,
+    orderBy: MaybeRefOrGetter<Order_OrderBy>,
+    orderDirection: MaybeRefOrGetter<'asc' | 'desc'>
+  ) => [
+    ...AUCTION_KEYS.auction(network, auction),
+    'orders',
+    page,
+    orderBy,
+    orderDirection
+  ],
   summary: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -73,14 +94,9 @@ export const AUCTION_KEYS = {
     { limit: limit ?? SUMMARY_LIMIT, where }
   ],
   biddingTokenPrice: (
-    network: MaybeRefOrGetter<AuctionNetworkId>,
-    auction: MaybeRefOrGetter<AuctionDetailFragment>
-  ) => [
-    ...AUCTION_KEYS.all,
-    network,
-    () => toValue(auction).id,
-    'biddingTokenPrice'
-  ],
+    network: MaybeRefOrGetter<AuctionNetworkId | undefined>,
+    tokenAddress: MaybeRefOrGetter<string | undefined>
+  ) => [...AUCTION_KEYS.all, network, tokenAddress, 'biddingTokenPrice'],
   priceHistory: (
     network: MaybeRefOrGetter<AuctionNetworkId>,
     auction: MaybeRefOrGetter<AuctionDetailFragment>,
@@ -116,26 +132,32 @@ export function useAuctionsQuery({
 export function useBidsQuery({
   network,
   auction,
-  enabled
+  page,
+  orderBy,
+  orderDirection
 }: {
   network: MaybeRefOrGetter<AuctionNetworkId>;
   auction: MaybeRefOrGetter<AuctionDetailFragment>;
-  enabled?: MaybeRefOrGetter<boolean>;
+  page: MaybeRefOrGetter<number>;
+  orderBy: MaybeRefOrGetter<Order_OrderBy>;
+  orderDirection: MaybeRefOrGetter<'asc' | 'desc'>;
 }) {
-  return useInfiniteQuery({
-    initialPageParam: 0,
-    queryKey: AUCTION_KEYS.orders(network, auction),
-    queryFn: ({ pageParam }) =>
+  return useQuery({
+    queryKey: AUCTION_KEYS.orders(
+      network,
+      auction,
+      page,
+      orderBy,
+      orderDirection
+    ),
+    queryFn: () =>
       getOrders(toValue(auction).id, toValue(network), {
         first: LIMIT,
-        skip: pageParam
+        skip: (toValue(page) - 1) * LIMIT,
+        orderBy: toValue(orderBy),
+        orderDirection: toValue(orderDirection)
       }),
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.length < LIMIT) return null;
-
-      return pages.length * LIMIT;
-    },
-    enabled
+    placeholderData: keepPreviousData
   });
 }
 
@@ -208,26 +230,30 @@ export function useUnclaimedOrdersQuery({
 
 export function useBiddingTokenPriceQuery({
   network,
-  auction
+  tokenAddress
 }: {
-  network: MaybeRefOrGetter<AuctionNetworkId>;
-  auction: MaybeRefOrGetter<AuctionDetailFragment>;
+  network: MaybeRefOrGetter<AuctionNetworkId | undefined>;
+  tokenAddress: MaybeRefOrGetter<string | undefined>;
 }) {
   return useQuery({
-    queryKey: AUCTION_KEYS.biddingTokenPrice(network, auction),
+    queryKey: AUCTION_KEYS.biddingTokenPrice(network, tokenAddress),
     queryFn: async () => {
       const networkValue = toValue(network);
-      const auctionValue = toValue(auction);
+      let tokenAddressValue = toValue(tokenAddress);
 
-      let tokenAddress = formatAddress(auctionValue.addressBiddingToken);
+      if (!networkValue || !tokenAddressValue) {
+        return 0;
+      }
+
+      tokenAddressValue = formatAddress(tokenAddressValue);
       let chainId = CHAIN_IDS[networkValue];
 
-      if (tokenAddress in TOKEN_PRICE_OVERRIDES) {
+      if (tokenAddressValue in TOKEN_PRICE_OVERRIDES) {
         const override =
           TOKEN_PRICE_OVERRIDES[
-            tokenAddress as keyof typeof TOKEN_PRICE_OVERRIDES
+            tokenAddressValue as keyof typeof TOKEN_PRICE_OVERRIDES
           ];
-        tokenAddress = override.address;
+        tokenAddressValue = override.address;
         chainId = override.chainId;
       }
 
@@ -241,11 +267,12 @@ export function useBiddingTokenPriceQuery({
         ];
 
       const coins = await getTokenPrices(coingeckoAssetPlatform, [
-        tokenAddress
+        tokenAddressValue
       ]);
 
-      return coins[tokenAddress.toLowerCase()]?.usd ?? 0;
-    }
+      return coins[tokenAddressValue.toLowerCase()]?.usd ?? 0;
+    },
+    enabled: () => !!toValue(network) && !!toValue(tokenAddress)
   });
 }
 

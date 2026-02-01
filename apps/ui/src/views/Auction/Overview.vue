@@ -10,19 +10,19 @@ import {
 } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
-import { _n, partitionDuration, sleep } from '@/helpers/utils';
+import { _n, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 import {
   AUCTION_KEYS,
   useBiddingTokenPriceQuery,
-  useBidsQuery,
   useBidsSummaryQuery,
   useUnclaimedOrdersQuery
 } from '@/queries/auction';
 import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
 
 const DEFAULT_TRANSACTION_PROGRESS_FN = async () => null;
+const DEFAULT_CHART_TYPE = 'price';
 
 const props = defineProps<{
   network: AuctionNetworkId;
@@ -40,6 +40,7 @@ const { cancelSellOrder, claimFromParticipantOrder } = useAuctionActions(
   toRef(props, 'auction')
 );
 
+const uiStore = useUiStore();
 const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
 const currentTimestamp = useTimestamp({ interval: 1000 });
@@ -48,14 +49,17 @@ const bidsHeader = ref<HTMLElement | null>(null);
 const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const isModalTransactionProgressOpen = ref(false);
+const isModalShareOpen = ref(false);
 const transactionProgressType = ref<
   'place-order' | 'cancel-order' | 'claim-orders' | null
 >(null);
 const cancelOrderFn = ref<() => Promise<string | null>>(
   DEFAULT_TRANSACTION_PROGRESS_FN
 );
+const txId = ref<string | null>(null);
+const sellOrder = ref<SellOrder | null>(null);
 
-const chartType = ref<'price' | 'depth'>('price');
+const chartType = ref<'price' | 'depth'>(DEFAULT_CHART_TYPE);
 const sidebarType = ref<'bid' | 'referral'>('bid');
 const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
@@ -66,18 +70,6 @@ const auctionState = computed(() =>
 const isAuctionOpen = computed(
   () => parseInt(props.auction.endTimeTimestamp) > currentTimestamp.value / 1000
 );
-
-const countdown = computed(() => {
-  if (isAuctionOpen.value === false) {
-    return null;
-  }
-
-  const diff =
-    parseInt(props.auction.endTimeTimestamp) -
-    Math.floor(currentTimestamp.value / 1000);
-
-  return partitionDuration(diff);
-});
 
 const isAccountSupported = computed<boolean>(() => {
   return !!auth.value && EVM_CONNECTORS.includes(auth.value.connector.type);
@@ -99,19 +91,6 @@ const {
 });
 
 const {
-  data: allOrders,
-  fetchNextPage: fetchAllOrdersNextPage,
-  hasNextPage: hasAllOrdersNextPage,
-  isPending: isAllOrdersPending,
-  isFetchingNextPage: isAllOrdersFetchingNextPage,
-  isError: isAllOrdersError
-} = useBidsQuery({
-  network: () => props.network,
-  auction: () => props.auction,
-  enabled: () => bidsType.value === 'allBids'
-});
-
-const {
   data: unclaimedOrders,
   isError: isUnclaimedOrdersError,
   isLoading: isUnclaimedOrdersLoading
@@ -127,7 +106,7 @@ const {
 const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   useBiddingTokenPriceQuery({
     network: () => props.network,
-    auction: () => props.auction
+    tokenAddress: () => props.auction.addressBiddingToken
   });
 
 const fdv = computed(
@@ -280,7 +259,9 @@ async function invalidateQueries() {
 async function moveToNextStep() {
   if (isLastStep.value) {
     invalidateQueries();
-    resetTransactionProgress();
+    isModalTransactionProgressOpen.value = false;
+
+    isModalShareOpen.value = true;
     return;
   }
 
@@ -297,12 +278,15 @@ function resetTransactionProgress() {
   isModalTransactionProgressOpen.value = false;
   transactionProgressType.value = null;
   cancelOrderFn.value = DEFAULT_TRANSACTION_PROGRESS_FN;
+  sellOrder.value = null;
+  txId.value = null;
 }
 
-async function handlePlaceSellOrder(sellOrder: SellOrder) {
+async function handlePlaceSellOrder(order: SellOrder) {
   transactionProgressType.value = 'place-order';
+  sellOrder.value = order;
 
-  start(sellOrder);
+  start(order);
   isModalTransactionProgressOpen.value = true;
 }
 
@@ -319,45 +303,47 @@ function handleClaimOrders() {
   isModalTransactionProgressOpen.value = true;
 }
 
-function handleTransactionConfirmed() {
+function handleTransactionConfirmed(tx: string | null) {
   if (transactionProgressType.value === 'place-order') {
+    if (tx) {
+      txId.value = tx;
+    }
     return moveToNextStep();
+  } else if (transactionProgressType.value === 'cancel-order') {
+    uiStore.addNotification('success', 'Your bid has been cancelled.');
   }
-
   invalidateQueries();
   resetTransactionProgress();
-}
-
-function handleAllOrdersEndReached() {
-  if (!hasAllOrdersNextPage.value) return;
-
-  fetchAllOrdersNextPage();
 }
 
 function handleScrollEvent(target: HTMLElement) {
   bidsHeaderX.value = target.scrollLeft;
 }
+
+watch(volume, () => {
+  if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
+    chartType.value = DEFAULT_CHART_TYPE;
+  }
+});
 </script>
 
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
     <div class="border-b p-4 flex flex-col gap-4">
-      <div class="flex gap-3">
-        <UiBadgeNetwork :id="network" :size="24">
+      <div class="flex gap-2.5">
+        <UiBadgeNetwork :id="network" :size="18" class="shrink-0">
           <UiStamp
             :id="auction.addressAuctioningToken"
-            :size="64"
+            :size="32"
             type="token"
             class="rounded-full"
           />
         </UiBadgeNetwork>
-        <div class="flex flex-col">
-          <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-          <AuctionStatus class="max-w-fit" :state="auctionState" />
-        </div>
+        <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+        <AuctionStatus :state="auctionState" />
       </div>
       <div
-        class="flex flex-col xl:flex-row xl:justify-between xl:items-center gap-3"
+        class="flex flex-col xl:flex-row xl:justify-between xl:items-start gap-3"
       >
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
           <AuctionCounter
@@ -403,35 +389,7 @@ function handleScrollEvent(target: HTMLElement) {
             )}`"
           />
         </div>
-        <div v-if="countdown" class="flex gap-3.5">
-          <div
-            v-if="countdown.days > 0"
-            class="flex flex-col items-center uppercase min-w-6"
-          >
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.days).padStart(2, '0') }}
-            </span>
-            <span>days</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.hours).padStart(2, '0') }}
-            </span>
-            <span>hrs.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.minutes).padStart(2, '0') }}
-            </span>
-            <span>min.</span>
-          </div>
-          <div class="flex flex-col items-center uppercase min-w-6">
-            <span class="text-[32px] tracking-wider text-rose-500">
-              {{ String(countdown.seconds).padStart(2, '0') }}
-            </span>
-            <span>sec.</span>
-          </div>
-        </div>
+        <UiCountdown :timestamp="parseInt(props.auction.endTimeTimestamp)" />
       </div>
     </div>
 
@@ -441,13 +399,18 @@ function handleScrollEvent(target: HTMLElement) {
           :aria-active="chartType === 'price'"
           @click="chartType = 'price'"
         >
-          <UiLabel :is-active="chartType === 'price'" text="Clearing price" />
+          <UiLabel
+            :is-active="chartType === 'price'"
+            text="Clearing price"
+            size="lg"
+          />
         </AppLink>
         <AppLink
+          v-if="volume"
           :aria-active="chartType === 'depth'"
           @click="chartType = 'depth'"
         >
-          <UiLabel :is-active="chartType === 'depth'" text="Depth" />
+          <UiLabel :is-active="chartType === 'depth'" text="Depth" size="lg" />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -471,13 +434,22 @@ function handleScrollEvent(target: HTMLElement) {
           :aria-active="bidsType === 'userBids'"
           @click="bidsType = 'userBids'"
         >
-          <UiLabel :is-active="bidsType === 'userBids'" text="My bids" />
+          <UiLabel
+            :is-active="bidsType === 'userBids'"
+            text="My bids"
+            size="lg"
+          />
         </AppLink>
         <AppLink
           :aria-active="bidsType === 'allBids'"
           @click="bidsType = 'allBids'"
         >
-          <UiLabel :is-active="bidsType === 'allBids'" text="Bids" />
+          <UiLabel
+            :is-active="bidsType === 'allBids'"
+            text="Bids"
+            size="lg"
+            :count="auction.orderCount"
+          />
         </AppLink>
       </div>
     </UiScrollerHorizontal>
@@ -563,69 +535,12 @@ function handleScrollEvent(target: HTMLElement) {
         </div>
       </template>
     </div>
-    <div v-else-if="bidsType === 'allBids'" class="space-y-4">
-      <div class="overflow-hidden">
-        <UiColumnHeader
-          :ref="
-            ref =>
-              (bidsHeader =
-                (ref as InstanceType<typeof UiColumnHeader> | null)
-                  ?.container ?? null)
-          "
-          class="!px-0 py-2 uppercase text-sm tracking-wider overflow-hidden"
-          :sticky="false"
-        >
-          <div
-            class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[880px] w-full"
-          >
-            <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-            <div class="w-[200px] max-w-[200px] truncate">Created</div>
-            <div class="w-[200px] max-w-[200px] truncate">Amount</div>
-            <div class="w-[200px] max-w-[200px] truncate">Max. price</div>
-            <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
-            <div class="w-[200px] max-w-[200px] truncate">Status</div>
-            <div class="min-w-[44px] lg:w-[60px]" />
-          </div>
-        </UiColumnHeader>
-        <UiScrollerHorizontal @scroll="handleScrollEvent">
-          <div class="min-w-[880px]">
-            <UiLoading
-              v-if="isAllOrdersPending || isBiddingTokenPriceLoading"
-              class="px-4 py-3 block"
-            />
-            <UiStateWarning v-else-if="isAllOrdersError" class="px-4 py-3">
-              Failed to load bids.
-            </UiStateWarning>
-            <UiStateWarning
-              v-else-if="allOrders?.pages.flat().length === 0"
-              class="px-4 py-3"
-            >
-              There are no bids yet.
-            </UiStateWarning>
-            <UiContainerInfiniteScroll
-              v-else-if="allOrders && typeof biddingTokenPrice === 'number'"
-              class="divide-y divide-skin-border flex flex-col justify-center border-b"
-              :loading-more="isAllOrdersFetchingNextPage"
-              @end-reached="handleAllOrdersEndReached"
-            >
-              <template #loading>
-                <UiLoading class="px-4 py-3 block" />
-              </template>
-              <AuctionBid
-                v-for="order in allOrders?.pages.flat()"
-                :key="order.id"
-                :network-id="network"
-                :auction-id="auctionId"
-                :auction="auction"
-                :order="order"
-                :bidding-token-price="biddingTokenPrice"
-                :total-supply="totalSupply"
-              />
-            </UiContainerInfiniteScroll>
-          </div>
-        </UiScrollerHorizontal>
-      </div>
-    </div>
+    <AuctionBidsList
+      v-else-if="bidsType === 'allBids'"
+      :auction="auction"
+      :network="network"
+      :total-supply="totalSupply"
+    />
   </div>
 
   <teleport to="#modal">
@@ -655,7 +570,11 @@ function handleScrollEvent(target: HTMLElement) {
               :aria-active="sidebarType === 'bid'"
               @click="sidebarType = 'bid'"
             >
-              <UiLabel :is-active="sidebarType === 'bid'" text="Place bid" />
+              <UiLabel
+                :is-active="sidebarType === 'bid'"
+                text="Place bid"
+                size="lg"
+              />
             </AppLink>
             <AppLink
               :aria-active="sidebarType === 'referral'"
@@ -664,6 +583,7 @@ function handleScrollEvent(target: HTMLElement) {
               <UiLabel
                 :is-active="sidebarType === 'referral'"
                 text="Referral"
+                size="lg"
               />
             </AppLink>
           </div>
@@ -683,8 +603,27 @@ function handleScrollEvent(target: HTMLElement) {
           v-else-if="sidebarType === 'referral'"
           :network="network"
           :auction="auction"
+          class="mb-4"
         />
       </div>
     </Affix>
   </div>
+  <teleport to="#modal">
+    <ModalShare
+      v-if="sellOrder"
+      :open="isModalShareOpen"
+      :tx-id="txId"
+      :show-icon="true"
+      :shareable="sellOrder"
+      :network="network"
+      :messages="{
+        title: 'Bid success!'
+      }"
+      :type="'bid'"
+      @close="
+        resetTransactionProgress();
+        isModalShareOpen = false;
+      "
+    />
+  </teleport>
 </template>

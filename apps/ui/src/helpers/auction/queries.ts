@@ -24,6 +24,7 @@ gql(`
     isAtomicClosureAllowed
     isPrivateAuction
     allowListSigner
+    orderCount
     exactOrder {
       sellAmount
       price
@@ -136,6 +137,7 @@ export const auctionPriceLevelQuery = gql(`
     ) {
       price
       volume
+      buyAmount
     }
   }
 `);

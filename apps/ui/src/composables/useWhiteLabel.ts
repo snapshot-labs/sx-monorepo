@@ -32,9 +32,22 @@ const MAPPING = {
     network: 's',
     id: 'openagora.eth'
   },
+  'governance.starknet.io': {
+    network: 'sn',
+    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
+    skinSettings: {
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      theme: 'light',
+      logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
+    }
+  },
   'starknet.stage.box': {
-    network: 's',
-    id: 'starknetdemo.eth',
+    network: 'sn',
+    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
