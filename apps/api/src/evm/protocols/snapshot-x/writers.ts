@@ -45,7 +45,8 @@ import {
   getProposalLink,
   getSpaceDecimals,
   getSpaceLink,
-  updateCounter
+  updateCounter,
+  updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, SnapshotXConfig } from '../../types';
 import {
@@ -1094,6 +1095,8 @@ export function createWriters(
       proposal[`scores_${choice}`],
       proposal.vp_decimals
     );
+
+    await updateScoresTick(proposal, created, config.indexerName);
     await proposal.save();
   };
 
