@@ -235,3 +235,17 @@ export function useProposalQuery(
     }
   });
 }
+
+export function useProposalScoresTicksQuery(
+  networkId: MaybeRefOrGetter<NetworkID>,
+  proposalId: MaybeRefOrGetter<string>
+) {
+  return useQuery({
+    queryKey: ['proposals', 'scoresTicks', networkId, proposalId],
+    queryFn: async () => {
+      return getNetwork(toValue(networkId)).api.loadProposalScoresTicks(
+        toValue(proposalId)
+      );
+    }
+  });
+}

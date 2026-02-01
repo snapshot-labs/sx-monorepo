@@ -1,6 +1,7 @@
 import {
   ApolloClient,
   createHttpLink,
+  gql,
   InMemoryCache
 } from '@apollo/client/core';
 import {
@@ -26,6 +27,7 @@ import {
   Proposal,
   ProposalExecution,
   ProposalState,
+  ScoresTick,
   Space,
   SpaceMetadataTreasury,
   Transaction,
@@ -438,6 +440,41 @@ export function createApi(
 
   return {
     apiUrl: uri,
+    loadProposalScoresTicks: async (
+      proposalId: string
+    ): Promise<ScoresTick[]> => {
+      const { data } = await apollo.query({
+        query: gql`
+          query ProposalScoresTicks($id: String!) {
+            proposal(id: $id) {
+              scores_ticks {
+                timestamp
+                scores_1
+                scores_2
+                scores_3
+              }
+            }
+          }
+        `,
+        variables: { id: proposalId }
+      });
+
+      return (data.proposal?.scores_ticks ?? []).map(
+        (tick: {
+          timestamp: number;
+          scores_1: string;
+          scores_2: string;
+          scores_3: string;
+        }) => ({
+          timestamp: tick.timestamp,
+          scores: [
+            Number(tick.scores_1),
+            Number(tick.scores_2),
+            Number(tick.scores_3)
+          ] as [number, number, number]
+        })
+      );
+    },
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,

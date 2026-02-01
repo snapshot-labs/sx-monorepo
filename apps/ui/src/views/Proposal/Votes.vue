@@ -2,6 +2,7 @@
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { useProposalScoresTicksQuery } from '@/queries/proposals';
 import { useProposalVotesQuery } from '@/queries/votes';
 import { Proposal as ProposalType, Vote } from '@/types';
 
@@ -21,6 +22,11 @@ const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
+
+const { data: scoresTicks } = useProposalScoresTicksQuery(
+  toRef(() => props.proposal.network),
+  toRef(() => props.proposal.id)
+);
 
 const {
   data,
@@ -64,6 +70,19 @@ function handleScrollEvent(target: HTMLElement) {
 </script>
 
 <template>
+  <ProposalScoresChart
+    v-if="
+      !offchainNetworks.includes(proposal.network) &&
+      scoresTicks &&
+      scoresTicks.length > 1
+    "
+    :ticks="scoresTicks"
+    :choices="proposal.choices"
+    :decimals="proposal.vp_decimals"
+    :start="proposal.start"
+    :end="proposal.max_end"
+    class="border-b pb-3"
+  />
   <UiColumnHeader
     :ref="
       ref =>

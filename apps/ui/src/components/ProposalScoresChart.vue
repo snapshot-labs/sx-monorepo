@@ -1,0 +1,256 @@
+<script setup lang="ts">
+import { _vp } from '@/helpers/utils';
+import { ScoresTick } from '@/types';
+
+const props = defineProps<{
+  ticks: ScoresTick[];
+  choices: string[];
+  decimals: number;
+  start: number;
+  end: number;
+}>();
+
+const HEIGHT = 160;
+const PADDING = { top: 24, bottom: 30, left: 12, right: 12 };
+const COLORS = ['skin-success', 'skin-danger', 'skin-text'];
+const CHART_HEIGHT = HEIGHT - PADDING.top - PADDING.bottom;
+const ZERO_Y = PADDING.top + CHART_HEIGHT;
+
+const containerRef = ref<HTMLElement | null>(null);
+const { width: containerWidth } = useElementSize(containerRef);
+const hoveredTimestamp = ref<number | null>(null);
+
+const chartWidth = computed(() => containerWidth.value || 400);
+const drawingWidth = computed(
+  () => chartWidth.value - PADDING.left - PADDING.right
+);
+
+const sortedTicks = computed(() =>
+  [...props.ticks].sort((a, b) => a.timestamp - b.timestamp)
+);
+
+const effectiveEnd = computed(() => {
+  const lastTick = sortedTicks.value.at(-1);
+  return lastTick ? Math.max(props.end, lastTick.timestamp) : props.end;
+});
+
+const duration = computed(() => effectiveEnd.value - props.start || 1);
+
+const maxScore = computed(() =>
+  Math.max(...sortedTicks.value.flatMap(t => t.scores), 1)
+);
+
+const scoreToY = (score: number) =>
+  ZERO_Y - (score / maxScore.value) * CHART_HEIGHT;
+
+const timestampToX = (ts: number) =>
+  PADDING.left +
+  Math.max(0, Math.min(1, (ts - props.start) / duration.value)) *
+    drawingWidth.value;
+
+const getTickAt = (ts: number) =>
+  sortedTicks.value.findLast(t => t.timestamp <= ts) ?? null;
+
+function buildPath(i: number, fromTs: number, toTs: number, fromZero = true) {
+  const times = sortedTicks.value
+    .filter(t => t.timestamp > fromTs && t.timestamp <= toTs)
+    .map(t => t.timestamp);
+
+  const points: string[] = [];
+  const startScore = getTickAt(fromTs)?.scores[i] ?? 0;
+  let lastY: number | null = fromZero
+    ? null
+    : startScore > 0
+      ? scoreToY(startScore)
+      : null;
+
+  if (!fromZero && lastY !== null) {
+    points.push(`${timestampToX(fromTs)},${lastY}`);
+  }
+
+  for (const ts of times) {
+    const score = getTickAt(ts)?.scores[i] ?? 0;
+    if (score === 0 && lastY === null) continue;
+
+    const x = timestampToX(ts);
+    const y = scoreToY(score);
+
+    if (lastY === null) {
+      points.push(`${x},${ZERO_Y}`, `${x},${y}`);
+    } else {
+      points.push(`${x},${lastY}`, `${x},${y}`);
+    }
+    lastY = y;
+  }
+
+  if (lastY !== null) {
+    points.push(`${timestampToX(toTs)},${lastY}`);
+  }
+
+  return points.join(' ');
+}
+
+const currentTs = computed(() => hoveredTimestamp.value ?? effectiveEnd.value);
+const currentTick = computed(() => getTickAt(currentTs.value));
+
+// Return in render order: gray(2), red(1), green(0) for proper z-order
+const lines = computed(() =>
+  [2, 1, 0].map(i => ({
+    points: buildPath(i, props.start, currentTs.value, true),
+    color: COLORS[i],
+    label: props.choices[i] || `Choice ${i + 1}`,
+    score: currentTick.value
+      ? _vp(currentTick.value.scores[i] / 10 ** props.decimals)
+      : '0'
+  }))
+);
+
+const grayedLines = computed(() =>
+  hoveredTimestamp.value === null
+    ? []
+    : [0, 1, 2].map(i =>
+        buildPath(i, hoveredTimestamp.value!, effectiveEnd.value, false)
+      )
+);
+
+const bulletPoints = computed(() => {
+  const tick = currentTick.value;
+  if (!tick) return [];
+  const x = timestampToX(currentTs.value);
+  return [2, 1, 0]
+    .filter(i => tick.scores[i] > 0)
+    .map(i => ({ x, y: scoreToY(tick.scores[i]), color: COLORS[i] }));
+});
+
+const dateLabels = computed(() => {
+  if (!drawingWidth.value) return [];
+
+  const LABEL_WIDTH = 50;
+  const MIN_SPACING = 10;
+  const startDate = new Date(props.start * 1000);
+  startDate.setHours(0, 0, 0, 0);
+  let ts = Math.floor(startDate.getTime() / 1000);
+  if (ts < props.start) ts += 86400;
+
+  const labels: { x: number; label: string }[] = [];
+  let lastX = -Infinity;
+
+  while (ts <= effectiveEnd.value) {
+    const x = timestampToX(ts);
+    if (
+      x >= PADDING.left &&
+      x + LABEL_WIDTH <= chartWidth.value - PADDING.right &&
+      x - lastX >= LABEL_WIDTH + MIN_SPACING
+    ) {
+      labels.push({
+        x,
+        label: new Date(ts * 1000).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric'
+        })
+      });
+      lastX = x;
+    }
+    ts += 86400;
+  }
+  return labels;
+});
+
+const displayedDate = computed(() =>
+  hoveredTimestamp.value === null
+    ? null
+    : new Date(hoveredTimestamp.value * 1000)
+        .toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit'
+        })
+        .replace(',', ' ·')
+);
+
+function handleMouseMove(e: MouseEvent) {
+  if (!containerRef.value) return;
+  const rect = containerRef.value.getBoundingClientRect();
+  const ratio = Math.max(
+    0,
+    Math.min(1, (e.clientX - rect.left - PADDING.left) / drawingWidth.value)
+  );
+  hoveredTimestamp.value = props.start + ratio * duration.value;
+}
+</script>
+
+<template>
+  <div v-if="ticks.length >= 2">
+    <div class="flex justify-between items-center mb-2 px-4 py-2.5">
+      <div class="flex gap-2.5">
+        <div
+          v-for="(line, i) in lines"
+          :key="i"
+          class="flex items-center gap-1.5"
+        >
+          <span class="w-2 h-2 rounded-full" :class="`bg-${line.color}`" />
+          <span class="text-skin-text hidden md:block" v-text="line.label" />
+          <span class="font-bold text-skin-link" v-text="line.score" />
+        </div>
+      </div>
+      <span
+        v-if="displayedDate"
+        class="text-skin-link"
+        v-text="displayedDate"
+      />
+    </div>
+
+    <div
+      ref="containerRef"
+      class="w-full"
+      :style="{ height: `${HEIGHT}px` }"
+      @mousemove="handleMouseMove"
+      @mouseleave="hoveredTimestamp = null"
+    >
+      <svg
+        :width="chartWidth"
+        :height="HEIGHT"
+        :viewBox="`0 0 ${chartWidth} ${HEIGHT}`"
+      >
+        <g
+          fill="none"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline
+            v-for="(line, i) in lines"
+            :key="i"
+            :points="line.points"
+            :class="`stroke-${line.color}`"
+          />
+          <polyline
+            v-for="(pts, i) in grayedLines"
+            :key="`g${i}`"
+            :points="pts"
+            class="stroke-skin-border"
+          />
+        </g>
+        <circle
+          v-for="(pt, i) in bulletPoints"
+          :key="`b${i}`"
+          :cx="pt.x"
+          :cy="pt.y"
+          r="4"
+          :class="`fill-${pt.color}`"
+        />
+        <text
+          v-for="(lbl, i) in dateLabels"
+          :key="`l${i}`"
+          :x="lbl.x"
+          :y="HEIGHT - 6"
+          text-anchor="start"
+          class="fill-skin-text text-[15px]"
+          v-text="lbl.label"
+        />
+      </svg>
+    </div>
+  </div>
+</template>
