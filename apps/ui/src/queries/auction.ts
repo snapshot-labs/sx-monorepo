@@ -21,6 +21,7 @@ import {
   COINGECKO_ASSET_PLATFORMS,
   ETH_CONTRACT
 } from '@/helpers/constants';
+import { WETH_CONTRACTS } from '@/helpers/token';
 import { formatAddress } from '@/helpers/utils';
 
 const LIMIT = 20;
@@ -36,17 +37,17 @@ const TOKEN_PRICE_OVERRIDES = {
     address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
   },
   // Mainnet WETH -> ETH
-  '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2': {
+  [WETH_CONTRACTS.eth]: {
     chainId: 1,
     address: ETH_CONTRACT
   },
   // Sepolia WETH -> ETH
-  '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14': {
+  [WETH_CONTRACTS.sep]: {
     chainId: 1,
     address: ETH_CONTRACT
   },
   // Optimism predeploy WETH -> ETH
-  '0x4200000000000000000000000000000000000006': {
+  [WETH_CONTRACTS.base]: {
     chainId: 1,
     address: ETH_CONTRACT
   }
