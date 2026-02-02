@@ -47,9 +47,9 @@ export function useAuctionOrderFlow(
   const STEPS = ref<Record<StepId, Step>>({
     wrap: {
       messages: {
-        approveTitle: 'Wrapping tokens',
+        approveTitle: 'Wrapping ETH to WETH',
         approveSubtitle: 'Waiting for wrapping to complete',
-        failTitle: 'Unwable to wrap your tokens'
+        failTitle: 'Unable to wrap your tokens'
       },
       nextStep: () => 'check_approval',
       execute: async () => wrapEth(sellOrder.value)
