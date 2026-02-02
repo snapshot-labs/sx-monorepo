@@ -8,6 +8,7 @@ type RelayerInfo = {
   balance: number;
   ticker: string;
   hasMinimumBalance: boolean;
+  isBalanceLow: boolean;
 };
 
 export function useRelayerInfoQuery(space: MaybeRefOrGetter<Space>) {

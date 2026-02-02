@@ -25,7 +25,9 @@ type AlertType =
   | 'IS_PRO_EXPIRING_SOON'
   | 'IS_PRO_JUST_EXPIRED'
   | 'IS_HIBERNATED'
-  | 'IS_RELAYER_BALANCE_LOW';
+  | 'IS_RELAYER_BALANCE_INSUFFICIENT'
+  | 'IS_RELAYER_BALANCE_LOW'
+  | 'IS_SIG_AUTHENTICATOR_INOPERATIVE';
 
 export function useSpaceAlerts(
   space: Ref<Space>,
@@ -43,7 +45,11 @@ export function useSpaceAlerts(
     offchainNetworks.includes(space.value.network)
   );
 
-  const { data: relayerInfo } = useRelayerInfoQuery(space);
+  const {
+    data: relayerInfo,
+    isError: isRelayerInfoError,
+    isLoading: isRelayerInfoLoading
+  } = useRelayerInfoQuery(space);
 
   const unsupportedProOnlyStrategies = computed(() => {
     if (!isOffchainSpace.value) return [];
@@ -134,19 +140,45 @@ export function useSpaceAlerts(
   });
 
   const isRelayerBalanceLow = computed(() => {
-    if (isOffchainSpace.value || !space.value.authenticators.length) {
-      return false;
-    }
-
     if (
-      !space.value.authenticators.every(a =>
-        sigAuthenticatorAddresses.value.includes(a)
-      )
+      isOffchainSpace.value ||
+      isRelayerInfoLoading.value ||
+      isRelayerInfoError.value
     ) {
       return false;
     }
 
-    return !relayerInfo.value?.hasMinimumBalance;
+    return relayerInfo.value?.isBalanceLow;
+  });
+
+  const isRelayerBalanceInsufficient = computed(() => {
+    if (
+      isOffchainSpace.value ||
+      isRelayerInfoLoading.value ||
+      isRelayerInfoError.value
+    ) {
+      return false;
+    }
+
+    return (
+      !!relayerInfo.value?.balance && !relayerInfo.value?.hasMinimumBalance
+    );
+  });
+
+  const isSigAuthenticatorInoperative = computed(() => {
+    if (
+      isOffchainSpace.value ||
+      isRelayerInfoLoading.value ||
+      isRelayerInfoError.value
+    ) {
+      return false;
+    }
+
+    return (
+      space.value.authenticators.some(a => {
+        return sigAuthenticatorAddresses.value.includes(a);
+      }) && !relayerInfo.value?.balance
+    );
   });
 
   const alerts = computed(() => {
@@ -198,6 +230,18 @@ export function useSpaceAlerts(
 
     if (isRelayerBalanceLow.value) {
       alertsMap.set('IS_RELAYER_BALANCE_LOW', {});
+    }
+
+    if (isRelayerBalanceInsufficient.value) {
+      alertsMap.set('IS_RELAYER_BALANCE_INSUFFICIENT', {});
+    }
+
+    if (isSigAuthenticatorInoperative.value) {
+      alertsMap.set('IS_SIG_AUTHENTICATOR_INOPERATIVE', {
+        isUsingOnlySigAuthenticators: space.value.authenticators.every(a =>
+          sigAuthenticatorAddresses.value.includes(a)
+        )
+      });
     }
 
     return alertsMap;
