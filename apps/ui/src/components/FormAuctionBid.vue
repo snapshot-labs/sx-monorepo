@@ -96,17 +96,15 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
       provider.value
     );
 
-    let balance: BigNumber = await contract.balanceOf(web3Account.value);
+    const biddingTokenBalance: BigNumber = await contract.balanceOf(
+      web3Account.value
+    );
+    const gasTokenBalance = await provider.value.getBalance(web3Account.value);
 
-    if (isBiddingWithWeth.value) {
-      const nativeTokenBalance = await provider.value.getBalance(
-        web3Account.value
-      );
-
-      balance = balance.add(nativeTokenBalance);
-    }
-
-    return balance.toBigInt();
+    return {
+      biddingTokenBalance: biddingTokenBalance.toBigInt(),
+      gasTokenBalance: gasTokenBalance.toBigInt()
+    };
   },
   enabled: computed(() => !!web3Account.value)
 });
@@ -115,16 +113,28 @@ const availableBalance = computed(() => {
   if (!userBalance.value) return 0n;
 
   if (isBiddingWithWeth.value) {
-    return userBalance.value - parseUnits(ETH_MIN_BALANCE.toString(), 18);
+    const availableGasBalance =
+      userBalance.value.gasTokenBalance -
+      parseUnits(ETH_MIN_BALANCE.toString(), 18);
+
+    return (
+      userBalance.value.biddingTokenBalance +
+      (availableGasBalance > 0n ? availableGasBalance : 0n)
+    );
   }
 
-  return userBalance.value;
+  return userBalance.value.biddingTokenBalance;
 });
 
 const formattedBalance = computed(() => {
   if (!userBalance.value) return 0;
+
+  const totalBalance = isBiddingWithWeth.value
+    ? userBalance.value.biddingTokenBalance + userBalance.value.gasTokenBalance
+    : userBalance.value.biddingTokenBalance;
+
   return parseFloat(
-    formatUnits(userBalance.value, props.auction.decimalsBiddingToken)
+    formatUnits(totalBalance, props.auction.decimalsBiddingToken)
   );
 });
 
@@ -381,7 +391,7 @@ onMounted(() => {
             class="absolute top-0 right-0 text-skin-link flex items-center gap-1"
             @click="handleSetMaxAmount"
           >
-            {{ _n(formattedBalance) }}
+            {{ _n(formattedBalance, 'standard', { maximumFractionDigits: 8 }) }}
             {{ auction.symbolBiddingToken }}
             <IC-wallet class="inline-block shrink-0 size-[16px]" />
           </button>
