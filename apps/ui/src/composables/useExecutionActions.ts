@@ -6,13 +6,6 @@ import {
 import gql from 'graphql-tag';
 import { MaybeRefOrGetter } from 'vue';
 import { getGenericExplorerUrl } from '@/helpers/generic';
-import {
-  getModuleAddressForTreasury,
-  getOgProposalGql,
-  getProposalHashFromTransactions,
-  isConfigCompliant
-} from '@/helpers/osnap/getters';
-import { getChainIdKind } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Network } from '@/networks/types';
 import { Proposal, ProposalExecution } from '@/types';
@@ -26,7 +19,7 @@ export const STARKNET_L1_EXECUTION_QUERY = gql`
 `;
 
 const STRATEGIES_WITH_FINALIZE = ['Axiom'];
-const STRATEGIES_WITH_EXTERNAL_DETAILS = ['EthRelayer', 'oSnap'];
+const STRATEGIES_WITH_EXTERNAL_DETAILS = ['EthRelayer'];
 
 export function useExecutionActions(
   proposal: MaybeRefOrGetter<Proposal>,
@@ -145,67 +138,6 @@ export function useExecutionActions(
     }
   }
 
-  async function fetchOSnapExecutionDetails() {
-    const executionValue = toValue(execution);
-
-    try {
-      if (
-        !executionValue.chainId ||
-        getChainIdKind(executionValue.chainId) !== 'evm'
-      ) {
-        throw new Error(
-          'Chain ID is required for oSnap execution and must be an EVM network'
-        );
-      }
-
-      // Safe to cast to number since we verified it's an EVM network
-      const chainId = Number(executionValue.chainId);
-
-      const proposalHash = getProposalHashFromTransactions(
-        executionValue.transactions
-      );
-      const moduleAddress = await getModuleAddressForTreasury(
-        chainId,
-        executionValue.safeAddress
-      );
-
-      const data = await getOgProposalGql({
-        chainId,
-        explanation: toValue(proposal).metadata_uri,
-        moduleAddress,
-        proposalHash
-      });
-
-      if (!data) {
-        try {
-          const configCompliant = await isConfigCompliant(
-            executionValue.safeAddress,
-            chainId
-          );
-          message.value = configCompliant.automaticExecution
-            ? 'Waiting for execution to be initiated.'
-            : 'Space is not configured for automatic execution.';
-        } catch {
-          message.value = 'Waiting for execution to be initiated.';
-          warningMessage.value =
-            'oSnap service may be temporarily unavailable to check automatic execution status.';
-        }
-      } else if (data.executionTransactionHash) {
-        try {
-          executionTx.value = data.executionTransactionHash;
-        } catch {
-          message.value =
-            'Proposal has been executed but execution details are not available.';
-        }
-      } else {
-        message.value = 'Waiting for execution to be confirmed.';
-      }
-    } catch (e) {
-      console.warn(e);
-      message.value = 'Execution details failed to load.';
-    }
-  }
-
   async function finalizeProposal() {
     finalizeProposalSending.value = true;
 
@@ -265,8 +197,6 @@ export function useExecutionActions(
       try {
         if (isEthRelayer) {
           await fetchEthRelayerExecutionDetails();
-        } else if (executionValue.strategyType === 'oSnap') {
-          await fetchOSnapExecutionDetails();
         } else {
           throw new Error('Unsupported strategy');
         }

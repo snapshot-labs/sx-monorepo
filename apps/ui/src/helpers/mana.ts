@@ -51,7 +51,8 @@ export async function executionCall(
     | 'finalizeProposal'
     | 'execute'
     | 'executeQueuedProposal'
-    | 'executeStarknetProposal',
+    | 'executeStarknetProposal'
+    | 'sendAuctionPartner',
   params: any
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);

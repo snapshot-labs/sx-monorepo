@@ -53,19 +53,21 @@ export const COINGECKO_ASSET_PLATFORMS = {
   42161: 'arbitrum-one',
   33139: 'apechain',
   33111: 'apechain'
-};
+} as const;
 
 export const COINGECKO_BASE_ASSETS = {
-  1: 'ethereum',
-  10: 'ethereum',
-  100: 'xdai',
-  137: 'matic-network',
-  5000: 'mantle',
-  8453: 'ethereum',
-  42161: 'ethereum',
-  33139: 'apecoin',
-  33111: 'apecoin'
-};
+  ethereum: 'ethereum',
+  'optimistic-ethereum': 'ethereum',
+  xdai: 'xdai',
+  'polygon-pos': 'matic-network',
+  mantle: 'mantle',
+  base: 'ethereum',
+  'arbitrum-one': 'ethereum',
+  apechain: 'apecoin'
+} satisfies Record<
+  (typeof COINGECKO_ASSET_PLATFORMS)[keyof typeof COINGECKO_ASSET_PLATFORMS],
+  string
+>;
 
 type ApeGasConfig = {
   l1ChainId: number;

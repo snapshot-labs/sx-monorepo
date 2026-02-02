@@ -1,11 +1,11 @@
 import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
+import { parseUnits } from '@/helpers/token';
 import { _n } from './utils';
 
 type Opts = { skipEmptyOptionalFields: boolean };

@@ -1,8 +1,12 @@
 import 'dotenv/config';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import { writeHeapSnapshot } from 'v8';
 import cors from 'cors';
 import express from 'express';
 import { PORT } from './constants';
-import ethRpc from './eth';
+import ethRpc, { handlers as ethHandlers } from './eth';
 import pkg from '../package.json';
 import { registeredApeGasProposalsLoop } from './eth/registered';
 import logger from './logger';
@@ -19,6 +23,7 @@ if (!process.env.WALLET_SECRET) {
 
 const app = express();
 
+const debugSecret = process.env.DEBUG_SECRET;
 const commit = process.env.COMMIT_HASH || '';
 const version = commit ? `${pkg.version}#${commit.substr(0, 7)}` : pkg.version;
 
@@ -31,9 +36,28 @@ app.use('/stark_rpc', starkRpc);
 app.get('/', (req, res) =>
   res.json({
     version,
-    port: PORT
+    port: PORT,
+    posterWallets: {
+      base: ethHandlers[8453]?.getWallet('poster').address,
+      sep: ethHandlers[11155111]?.getWallet('poster').address
+    }
   })
 );
+
+app.get('/debug/heapdump', (req, res) => {
+  if (!debugSecret || req.header('secret') !== debugSecret) {
+    res.status(403).send('Forbidden');
+    return;
+  }
+
+  const filename = path.join(os.tmpdir(), `heap-${Date.now()}.heapsnapshot`);
+  writeHeapSnapshot(filename);
+
+  res.download(filename, err => {
+    if (err) logger.error({ err }, 'Error sending heap snapshot');
+    fs.unlinkSync(filename);
+  });
+});
 
 async function start() {
   registeredTransactionsLoop();

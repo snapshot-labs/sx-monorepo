@@ -24,7 +24,7 @@ const isSiteRoute = computed(() => {
       >
         <router-link :to="{ name: 'site-landing' }" tabindex="-1">
           <UiButton uniform>
-            <IC-zap class="size-[24px]" />
+            <IH-question-mark-circle class="size-[24px]" />
           </UiButton>
         </router-link>
       </UiTooltip>

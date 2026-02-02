@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
@@ -59,6 +60,10 @@ const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
   isEditor: true
 });
 const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
+const { isInvalidNetwork: isSafeInvalidNetwork } = useSafeWallet(
+  props.space.network,
+  props.space.snapshot_chain_id
+);
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
@@ -252,7 +257,8 @@ const canSubmit = computed(() => {
     hasUnsupportedNetworks ||
     hasFormErrors ||
     disabledStrategiesList.value.length ||
-    unsupportedPremiumStrategiesList.value.length
+    unsupportedPremiumStrategiesList.value.length ||
+    isSafeInvalidNetwork.value
   ) {
     return false;
   }
@@ -365,7 +371,9 @@ async function handleProposeClick() {
         executions
       );
 
-      uiStore.addNotification('success', 'Proposal updated successfully.');
+      if (result) {
+        uiStore.addNotification('success', 'Proposal updated successfully.');
+      }
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
 
@@ -389,7 +397,9 @@ async function handleProposeClick() {
         executions
       );
 
-      uiStore.addNotification('success', 'Proposal created successfully.');
+      if (result) {
+        uiStore.addNotification('success', 'Proposal created successfully.');
+      }
     }
     if (result) {
       queryClient.invalidateQueries({
@@ -488,21 +498,6 @@ watch(
     await refreshDrafts();
   }
 );
-
-watchEffect(() => {
-  if (!proposal.value) return;
-
-  const hasOSnap = editorExecutions.value.find(
-    strategy => strategy.type === 'oSnap' && strategy.transactions.length > 0
-  );
-
-  if (hasOSnap) {
-    enforcedVoteType.value = 'basic';
-    proposal.value.type = 'basic';
-  } else {
-    enforcedVoteType.value = null;
-  }
-});
 
 watchEffect(() => {
   const title = proposal.value?.originalProposal
@@ -657,6 +652,15 @@ watchEffect(() => {
               Learn more
               <IH-arrow-sm-right class="-rotate-45" /> </AppLink
             >.
+          </UiAlert>
+          <UiAlert
+            v-else-if="space.snapshot_chain_id && isSafeInvalidNetwork"
+            type="error"
+            class="mb-4"
+          >
+            Please use a Safe on
+            {{ networks[space.snapshot_chain_id]?.name ?? 'this network' }} to
+            create proposals.
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">

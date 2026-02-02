@@ -231,7 +231,7 @@ export function lsRemove(key: string) {
   return localStorage.removeItem(`${pkg.name}.${key}`);
 }
 
-export function _d(s: number): string {
+export function partitionDuration(s: number) {
   const SECONDS_TO_DAYS = 60 * 60 * 24;
   const SECONDS_TO_HOURS = 60 * 60;
   const SECONDS_TO_MINUTES = 60;
@@ -246,6 +246,17 @@ export function _d(s: number): string {
     days * SECONDS_TO_DAYS -
     hours * SECONDS_TO_HOURS -
     minutes * SECONDS_TO_MINUTES;
+
+  return {
+    days,
+    hours,
+    minutes,
+    seconds
+  };
+}
+
+export function _d(s: number): string {
+  const { days, hours, minutes, seconds } = partitionDuration(s);
 
   return `${days}d ${hours}h ${minutes}m ${seconds}s`
     .replace(/\b0+[a-z]+\s*/gi, '')

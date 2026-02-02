@@ -2,6 +2,7 @@ import express from 'express';
 import { validateAndParseAddress } from 'starknet';
 import z from 'zod';
 import { generateSpaceStarknetWallet } from './dependencies';
+import logger from './logger';
 import { NETWORK_IDS, NETWORKS } from './networks';
 import { createNetworkHandler } from './rpc';
 import { rpcError } from '../utils';
@@ -34,6 +35,8 @@ router.post('/:chainId', (req, res) => {
   const parsed = jsonRpcRequestSchema.safeParse(req.body);
   if (!parsed.success) return rpcError(res, 400, parsed.error, 0);
   const { id, method, params } = parsed.data;
+
+  logger.info({ chainId, method }, 'Received RPC request');
 
   const handler = handlers[chainId];
   if (!handler) return rpcError(res, 404, new Error('Unsupported chainId'), id);

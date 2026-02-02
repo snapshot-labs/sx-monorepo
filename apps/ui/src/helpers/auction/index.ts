@@ -1,23 +1,49 @@
 import { ApolloClient, InMemoryCache } from '@apollo/client/core';
-import { auctionQuery, ordersQuery, previousOrderQuery } from './queries';
+import {
+  auctionPriceHourDataQuery,
+  auctionPriceLevelQuery,
+  auctionPriceMinuteDataQuery,
+  auctionQuery,
+  auctionsQuery,
+  ordersQuery,
+  previousOrderQuery,
+  unclaimedOrdersQuery
+} from './queries';
+import { ChartGranularity } from '../charts';
 import { getNames } from '../stamp';
-import { Order_Filter, Order_OrderBy, OrderFragment } from './gql/graphql';
+import {
+  AuctionDetailFragment,
+  AuctionPriceHourData_Filter,
+  AuctionPriceLevel_Filter,
+  AuctionPriceMinuteData_Filter,
+  Order_Filter,
+  Order_OrderBy,
+  OrderFragment
+} from './gql/graphql';
+import { encodeOrder } from './orders';
+import {
+  AuctionNetworkId,
+  AuctionPriceHistoryPoint,
+  AuctionPriceLevelPoint,
+  AuctionState,
+  Order
+} from './types';
 
-export type AuctionNetworkId = 'eth' | 'sep';
-export type Order = OrderFragment & { name: string | null };
-export type SellOrder = Pick<Order, 'sellAmount' | 'price'>;
+export * from './types';
 
 const DEFAULT_ORDER_ID =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 const SUBGRAPH_URLS: Record<AuctionNetworkId, string> = {
-  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/Hs3FN65uB3kzSn1U5kPMrc1kHqaS9zQMM8BCVDwNf7Fn',
-  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH'
+  eth: 'https://subgrapher.snapshot.org/subgraph/arbitrum/E6VviPcyLR1i77VUeyt8dRUbxWPCeMbEgJgBGX5QthnR',
+  base: 'https://subgrapher.snapshot.org/subgraph/arbitrum/A3pxMtQ3i2oL2PmqKfJP8kKuPV71FftggoLU29TGqnN2',
+  sep: 'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d'
 };
 
 export const AUCTION_CONTRACT_ADDRESSES: Record<AuctionNetworkId, string> = {
-  sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C',
-  eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101'
+  eth: '0x0b7fFc1f4AD541A4Ed16b40D8c37f0929158D101',
+  base: '0x5e9DC9694f6103dA5d5B9038c090040E3A6E4Bf8',
+  sep: '0x231F3Fd7c3E3C9a2c8A03B72132c31241DF0a26C'
 };
 
 export function formatPrice(
@@ -33,14 +59,61 @@ export function formatPrice(
     : '0';
 }
 
+export function getAuctionState(
+  auction: AuctionDetailFragment,
+  timestamp = Date.now()
+): AuctionState {
+  const now = Math.floor(timestamp / 1000);
+  const endTime = parseInt(auction.endTimeTimestamp);
+
+  if (now < endTime) return 'active';
+
+  const currentBiddingAmount = BigInt(auction.currentBiddingAmount);
+  const minFundingThreshold = BigInt(auction.minFundingThreshold);
+
+  if (!auction.clearingPriceOrder) return 'finalizing';
+  if (currentBiddingAmount < minFundingThreshold) return 'canceled';
+
+  if (auction.ordersWithoutClaimed?.length) {
+    return 'claiming';
+  }
+
+  return 'claimed';
+}
+
 function getClient(network: AuctionNetworkId) {
   const subgraphUrl = SUBGRAPH_URLS[network];
   if (!subgraphUrl) throw new Error(`Unknown network: ${network}`);
 
   return new ApolloClient({
     uri: subgraphUrl,
-    cache: new InMemoryCache()
+    cache: new InMemoryCache(),
+    defaultOptions: {
+      query: {
+        fetchPolicy: 'no-cache'
+      }
+    }
   });
+}
+
+export async function getAuctions(
+  network: AuctionNetworkId,
+  {
+    skip,
+    first
+  }: {
+    skip: number;
+    first: number;
+  }
+) {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: auctionsQuery,
+    variables: { first, skip }
+  });
+
+  return data.auctionDetails;
 }
 
 export async function getAuction(id: string, network: AuctionNetworkId) {
@@ -129,12 +202,73 @@ export async function getPreviousOrderId(
   });
 }
 
-export function encodeOrder(order: {
-  sellAmount: bigint;
-  buyAmount: bigint;
-  userId: bigint;
-}): string {
-  return `0x${order.userId.toString(16).padStart(16, '0')}${order.buyAmount
-    .toString(16)
-    .padStart(24, '0')}${order.sellAmount.toString(16).padStart(24, '0')}`;
+export async function getUnclaimedOrders(
+  id: string,
+  network: AuctionNetworkId,
+  {
+    orderFilter
+  }: {
+    orderFilter?: Order_Filter;
+  } = {}
+): Promise<Set<string>> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: unclaimedOrdersQuery,
+    variables: { id, orderFilter }
+  });
+
+  return new Set(
+    data.auctionDetail?.ordersWithoutClaimed?.map(order => order.id) ?? []
+  );
+}
+
+export async function getAuctionPriceHistory(
+  network: AuctionNetworkId,
+  granularity: ChartGranularity,
+  {
+    skip = 0,
+    first = 1000,
+    filter
+  }: {
+    skip?: number;
+    first?: number;
+    filter?: AuctionPriceHourData_Filter | AuctionPriceMinuteData_Filter;
+  } = {}
+): Promise<AuctionPriceHistoryPoint[]> {
+  const client = getClient(network);
+
+  const query =
+    granularity === 'hour'
+      ? auctionPriceHourDataQuery
+      : auctionPriceMinuteDataQuery;
+
+  const { data } = await client.query({
+    query,
+    variables: { where: filter, first, skip }
+  });
+
+  return data.priceData;
+}
+
+export async function getAuctionPriceLevels(
+  network: AuctionNetworkId,
+  {
+    skip = 0,
+    first = 1000,
+    filter
+  }: {
+    skip?: number;
+    first?: number;
+    filter?: AuctionPriceLevel_Filter;
+  } = {}
+): Promise<AuctionPriceLevelPoint[]> {
+  const client = getClient(network);
+
+  const { data } = await client.query({
+    query: auctionPriceLevelQuery,
+    variables: { where: filter, first, skip }
+  });
+
+  return data.auctionPriceLevels;
 }

@@ -26,7 +26,7 @@ const config: CodegenConfig = {
     },
     './src/helpers/auction/gql/': {
       schema:
-        'https://subgrapher.snapshot.org/subgraph/arbitrum/98f9T2v1KtNnZyexiEgNLMFnYkXdKoZq9Pt1EYQGq5aH',
+        'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
       documents: ['src/helpers/auction/queries.ts'],
       ...baseConfig,
       config: {
@@ -37,6 +37,11 @@ const config: CodegenConfig = {
           BigDecimal: 'string'
         }
       }
+    },
+    './src/helpers/auction/referral/gql/': {
+      schema: 'https://api.brokester.box',
+      documents: ['src/helpers/auction/referral/queries.ts'],
+      ...baseConfig
     }
   }
 };

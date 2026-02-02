@@ -3,21 +3,18 @@ import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
 import { abis } from '@/helpers/abis';
-import {
-  AuctionNetworkId,
-  formatPrice,
-  Order,
-  SellOrder
-} from '@/helpers/auction';
+import { AuctionNetworkId, Order, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { removeTrailingZeroes } from '@/helpers/format';
 import { getProvider } from '@/helpers/provider';
-import { _n, _t } from '@/helpers/utils';
+import { parseUnits } from '@/helpers/token';
+import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
-const DEFAULT_PRICE_PREMIUM = 1.001; // 0.1% above clearing price
-const PRICE_DECIMALS = 4;
-const INVERTED_PRICE_DECIMALS = 8;
+const MIN_PRICE_PREMIUM = 0.01; // 1% above minimum price
+const AMOUNT_DECIMALS = 6;
 
 const AMOUNT_DEFINITION = {
   type: 'string',
@@ -33,6 +30,8 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   auction: AuctionDetailFragment;
+  biddingTokenPrice?: number;
+  totalSupply: bigint;
   network: AuctionNetworkId;
   previousOrders?: Order[];
   isLoading?: boolean;
@@ -41,19 +40,22 @@ const props = defineProps<{
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 
-const isPriceInverted = ref(false);
+const {
+  verificationType,
+  status: verificationStatus,
+  isVerified,
+  generateSignature
+} = useAuctionVerification({
+  network: computed(() => props.network),
+  auction: computed(() => props.auction)
+});
+
 const bidAmount = ref('');
 const bidPrice = ref('');
+const bidFdv = ref('');
+const isTermsAccepted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
-
-const priceDefinition = computed(() => ({
-  ...AMOUNT_DEFINITION,
-  title: isPriceInverted.value ? 'Min bidding price' : 'Max bidding price',
-  tooltip: isPriceInverted.value
-    ? 'Minimum price you are willing to accept per token'
-    : 'Maximum price you are willing to pay per token'
-}));
 
 const formValidator = computed(() =>
   getValidator({
@@ -61,7 +63,7 @@ const formValidator = computed(() =>
     additionalProperties: false,
     properties: {
       amount: AMOUNT_DEFINITION,
-      price: priceDefinition.value
+      price: AMOUNT_DEFINITION
     }
   })
 );
@@ -71,12 +73,6 @@ const formatErrors = computed(() =>
     amount: bidAmount.value,
     price: bidPrice.value
   })
-);
-
-const priceUnit = computed(() =>
-  isPriceInverted.value
-    ? `${props.auction.symbolAuctioningToken} per ${props.auction.symbolBiddingToken}`
-    : `${props.auction.symbolBiddingToken} per ${props.auction.symbolAuctioningToken}`
 );
 
 const canCancelOrder = computed(
@@ -101,21 +97,6 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
   enabled: computed(() => !!web3Account.value)
 });
 
-const { data: totalSupply, isError: isSupplyError } = useQuery({
-  queryKey: ['supply', () => props.auction.addressAuctioningToken],
-  queryFn: async () => {
-    const contract = new Contract(
-      props.auction.addressAuctioningToken,
-      abis.erc20,
-      provider.value
-    );
-
-    const totalSupply = await contract.totalSupply();
-
-    return totalSupply.toString();
-  }
-});
-
 const formattedBalance = computed(() => {
   if (!userBalance.value) return 0;
   return parseFloat(
@@ -124,24 +105,6 @@ const formattedBalance = computed(() => {
 });
 
 const hasBalance = computed(() => !!(web3Account.value && userBalance.value));
-
-const maxMarketCap = computed(() => {
-  const displayPrice = parseFloat(bidPrice.value) || 0;
-  if (!displayPrice || !totalSupply.value) return '0';
-
-  const decimals = isPriceInverted.value
-    ? parseInt(props.auction.decimalsBiddingToken)
-    : parseInt(props.auction.decimalsAuctioningToken);
-  const normalizedPrice = isPriceInverted.value
-    ? parseFloat((1 / displayPrice).toFixed(decimals))
-    : displayPrice;
-
-  const totalSupplyFormatted = parseFloat(
-    formatUnits(totalSupply.value, props.auction.decimalsAuctioningToken)
-  );
-
-  return _n(Math.floor(totalSupplyFormatted * normalizedPrice));
-});
 
 const amountError = computed(() => {
   if (!bidAmount.value) return undefined;
@@ -174,21 +137,11 @@ const priceError = computed(() => {
   const price = parseFloat(bidPrice.value);
 
   const minimumSellPrice = parseFloat(props.auction.exactOrder?.price || '0');
-  if (minimumSellPrice) {
-    const limit = isPriceInverted.value
-      ? 1 / minimumSellPrice
-      : minimumSellPrice;
-    const isAboveLimit = isPriceInverted.value
-      ? price >= limit
-      : price <= limit;
-
-    if (isAboveLimit) {
-      const limitType = isPriceInverted.value ? 'Maximum' : 'Minimum';
-      return `${limitType} ${_n(limit)} ${priceUnit.value}`;
-    }
+  if (minimumSellPrice && price <= minimumSellPrice) {
+    return `Must be higher than ${_n(minimumSellPrice, 'standard', { maximumFractionDigits: Number(props.auction.decimalsBiddingToken) })} ${props.auction.symbolBiddingToken}`;
   }
 
-  const maxBiddingPrice = (isPriceInverted.value ? 1 / price : price).toFixed(
+  const maxBiddingPrice = price.toFixed(
     Number(props.auction.decimalsBiddingToken)
   );
 
@@ -200,8 +153,9 @@ const priceError = computed(() => {
         ) === maxBiddingPrice
     )
   ) {
-    return 'You already have an order at this price';
+    return 'You already have a bid at this price';
   }
+
   return undefined;
 });
 
@@ -213,118 +167,310 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
-function handlePlaceOrder() {
+const pricePremium = computed(() => {
+  const price = parseFloat(bidPrice.value);
+  if (!price) return null;
+
+  return convertPriceToPercentage(price);
+});
+
+const sliderValue = computed(() => {
+  if (pricePremium.value === null) return 0;
+
+  return Math.min(Math.max(pricePremium.value, 0), 100);
+});
+
+function convertPercentageToPrice(percentage: number) {
+  const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+  const minPrice = parseFloat(props.auction.exactOrder?.price || '0');
+
+  const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
+
+  const premiumPrice = basePrice * (1 + percentage / 100);
+
+  return premiumPrice;
+}
+
+function convertPriceToPercentage(price: number) {
+  const clearingPrice = parseFloat(props.auction.currentClearingPrice);
+  const minPrice = parseFloat(props.auction.exactOrder?.price || '0');
+
+  const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
+
+  return ((price - basePrice) / basePrice) * 100;
+}
+
+async function handlePlaceOrder() {
+  if (!web3Account.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   if (hasErrors.value) return;
 
-  const price = isPriceInverted.value
-    ? (1 / parseFloat(bidPrice.value)).toString()
-    : bidPrice.value;
+  const attestation = await generateSignature();
 
-  emit('submit', { sellAmount: bidAmount.value, price });
+  const sellAmount = parseUnits(
+    bidAmount.value,
+    Number(props.auction.decimalsBiddingToken)
+  );
+
+  const price = parseUnits(
+    bidPrice.value,
+    Number(props.auction.decimalsBiddingToken)
+  );
+
+  emit('submit', {
+    sellAmount,
+    buyAmount: getOrderBuyAmount({
+      sellAmount,
+      price,
+      buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
+    }),
+    attestation,
+    auction: props.auction
+  });
+}
+
+function handlePriceUpdate(value: string) {
+  bidPrice.value = value;
+
+  const price = parseFloat(value);
+  if (!price || !props.totalSupply) {
+    bidFdv.value = '';
+    return;
+  }
+
+  const totalSupplyFormatted = parseFloat(
+    formatUnits(props.totalSupply, props.auction.decimalsAuctioningToken)
+  );
+
+  const fdv = price * totalSupplyFormatted;
+
+  bidFdv.value = removeTrailingZeroes(fdv, AMOUNT_DECIMALS);
+}
+
+function handleFdvUpdate(value: string) {
+  bidFdv.value = value;
+
+  const fdv = parseFloat(value);
+  if (!fdv || !props.totalSupply) {
+    bidPrice.value = '';
+    return;
+  }
+
+  const totalSupplyFormatted = parseFloat(
+    formatUnits(props.totalSupply, props.auction.decimalsAuctioningToken)
+  );
+
+  const price = fdv / totalSupplyFormatted;
+
+  bidPrice.value = removeTrailingZeroes(price, AMOUNT_DECIMALS);
+}
+
+function handleSliderChange(value: number) {
+  const price = convertPercentageToPrice(value);
+  handlePriceUpdate(removeTrailingZeroes(price, AMOUNT_DECIMALS));
 }
 
 onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
   if (clearingPrice <= 0) return;
 
-  bidPrice.value = (clearingPrice * DEFAULT_PRICE_PREMIUM).toFixed(
-    PRICE_DECIMALS
-  );
+  handleSliderChange(25);
 });
-
-function togglePriceMode() {
-  const currentPrice = parseFloat(bidPrice.value) || 0;
-  isPriceInverted.value = !isPriceInverted.value;
-  if (currentPrice) {
-    const decimals = isPriceInverted.value
-      ? INVERTED_PRICE_DECIMALS
-      : PRICE_DECIMALS;
-    bidPrice.value = formatPrice(1 / currentPrice, decimals);
-  }
-}
 </script>
 
 <template>
   <div>
-    <h4 class="mb-3 eyebrow flex items-center gap-2">
-      <IH-cash />
-      Place bid
-    </h4>
-
-    <div class="border border-skin-border rounded-lg s-box p-4 space-y-3 pt-6">
+    <AuctionVerificationInfo
+      v-if="!isVerified"
+      :verification-type="verificationType"
+      :is-loading="verificationStatus === 'loading'"
+      :is-error="verificationStatus === 'error'"
+    />
+    <div v-else class="s-box p-4 space-y-3">
       <UiMessage
-        v-if="web3Account && (isBalanceError || isSupplyError)"
+        v-if="web3Account && isBalanceError"
         type="danger"
         class="mb-3"
       >
-        Failed to load balance or token supply.
+        Failed to load balance.
       </UiMessage>
-      <div class="relative">
-        <div
-          class="absolute -top-5 right-0 text-xs text-skin-text"
-          :class="{ invisible: !hasBalance }"
-        >
-          Balance: {{ _n(formattedBalance) }}
-          {{ auction.symbolBiddingToken }}
+      <div
+        class="px-3 py-2 bg-skin-border rounded-lg border overflow-hidden"
+        :class="amountError ? 'border-skin-danger' : ''"
+      >
+        <div class="flex flex-col text-skin-link">
+          <label
+            for="bid-amount"
+            class="text-[17px] truncate"
+            :class="amountError ? 'text-skin-danger' : ''"
+            >Spend</label
+          >
+          <div class="relative text-[26px]">
+            <UiRawInputAmount
+              id="bid-amount"
+              v-model="bidAmount"
+              class="bg-skin-border"
+              placeholder="0.0"
+              :decimals="Number(auction.decimalsBiddingToken)"
+            />
+            <div class="absolute top-0 right-0 ml-2 text-skin-text">
+              {{ auction.symbolBiddingToken }}
+            </div>
+          </div>
         </div>
-        <div class="relative">
-          <UiInputAmount
-            v-model="bidAmount"
-            :definition="AMOUNT_DEFINITION"
-            :error="amountError"
-          />
+        <span v-if="amountError" class="text-skin-danger">{{
+          amountError
+        }}</span>
+        <div class="relative text-[17px]">
+          <div>
+            ~${{
+              _n(
+                bidAmount && biddingTokenPrice
+                  ? parseFloat(bidAmount) * biddingTokenPrice
+                  : 0,
+                'standard',
+                {
+                  maximumFractionDigits: 2
+                }
+              )
+            }}
+          </div>
           <button
-            v-if="hasBalance"
-            type="button"
-            class="absolute right-3 top-[18px] text-skin-link"
+            class="absolute top-0 right-0 text-skin-link flex items-center gap-1"
             @click="bidAmount = String(formattedBalance)"
           >
-            max
+            {{ _n(formattedBalance) }}
+            {{ auction.symbolBiddingToken }}
+            <IC-wallet class="inline-block shrink-0 size-[16px]" />
           </button>
         </div>
       </div>
-
-      <div class="relative">
-        <UiInputAmount
-          v-model="bidPrice"
-          :definition="priceDefinition"
-          :error="priceError"
-        />
-        <div class="absolute right-3 top-[18px] flex items-center gap-2">
-          <div class="text-sm text-skin-text hidden sm:block">
-            {{ priceUnit }}
-          </div>
-          <button type="button" class="text-skin-link" @click="togglePriceMode">
-            <IH-switch-horizontal />
-          </button>
-        </div>
-      </div>
-
       <div
-        class="border rounded-lg text-[17px] bg-skin-input-bg px-3 py-2.5 flex justify-between flex-wrap"
+        class="px-3 py-2 bg-skin-border border rounded-lg overflow-hidden"
+        :class="priceError ? 'border-skin-danger' : ''"
       >
-        <div class="text-skin-text">Max market cap</div>
-        <div class="flex items-center gap-1 text-skin-link">
-          {{ maxMarketCap }} {{ auction.symbolBiddingToken }}
+        <div class="flex flex-col text-skin-link">
+          <label
+            for="bid-price"
+            class="text-[17px] truncate"
+            :class="priceError ? 'text-skin-danger' : ''"
+          >
+            Max. price per token
+          </label>
+          <div class="relative text-[26px]">
+            <UiRawInputAmount
+              id="bid-price"
+              :model-value="bidPrice"
+              class="bg-skin-border"
+              placeholder="0.0"
+              :decimals="Number(auction.decimalsBiddingToken)"
+              @update:model-value="handlePriceUpdate"
+            />
+            <div class="absolute top-0 right-0 ml-2 text-skin-text">
+              {{ auction.symbolBiddingToken }}
+            </div>
+          </div>
+        </div>
+        <span v-if="priceError" class="text-skin-danger">{{ priceError }}</span>
+        <div class="text-[17px]">
+          ~${{
+            _n(
+              bidPrice && biddingTokenPrice
+                ? parseFloat(bidPrice) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 2
+              }
+            )
+          }}
+        </div>
+        <div class="flex flex-col text-skin-link mt-2">
+          <label for="bid-fdv" class="text-[17px] truncate">Max. FDV</label>
+          <div class="relative text-[26px]">
+            <UiRawInputAmount
+              id="bid-fdv"
+              :model-value="bidFdv"
+              class="bg-skin-border"
+              placeholder="0.0"
+              :decimals="Number(auction.decimalsBiddingToken)"
+              @update:model-value="handleFdvUpdate"
+            />
+            <div class="absolute top-0 right-0 ml-2 text-skin-text">
+              {{ auction.symbolBiddingToken }}
+            </div>
+          </div>
+        </div>
+        <div class="text-[17px]">
+          ~${{
+            _n(
+              bidFdv && biddingTokenPrice
+                ? parseFloat(bidFdv) * biddingTokenPrice
+                : 0,
+              'standard',
+              {
+                maximumFractionDigits: 0
+              }
+            )
+          }}
+        </div>
+        <div class="relative flex my-2">
+          <div
+            class="absolute inset-0 pointer-events-none h-fit bg-skin-text/30 rounded-full overflow-hidden"
+          >
+            <div
+              class="flex justify-between w-full h-[7px] bg-gradient-to-r from-skin-link to-skin-link bg-no-repeat"
+              :style="{
+                backgroundSize: `${sliderValue}% 100%`
+              }"
+            >
+              <div class="w-0 h-full"></div>
+              <div class="w-0.5 bg-skin-border h-full"></div>
+              <div class="w-0.5 bg-skin-border h-full"></div>
+              <div class="w-0.5 bg-skin-border h-full"></div>
+              <div class="w-0 bg-red-500 h-full"></div>
+            </div>
+          </div>
+          <input
+            :value="sliderValue"
+            type="range"
+            min="0"
+            max="100"
+            class="range-slider relative w-full h-[7px] appearance-none bg-transparent hover:cursor-pointer"
+            @input="
+              e =>
+                handleSliderChange(Number((e.target as HTMLInputElement).value))
+            "
+          />
+        </div>
+        <div v-if="pricePremium !== null" class="text-[17px]">
+          <template v-if="pricePremium === 0">
+            Equal to current clearing price
+          </template>
+          <template v-else-if="pricePremium > 0">
+            {{ _p(pricePremium / 100) }} above current clearing price
+          </template>
+          <template v-else>
+            {{ _p(-pricePremium / 100) }} below current clearing price
+          </template>
         </div>
       </div>
-
+      <UiCheckbox v-model="isTermsAccepted" class="text-start">
+        <div class="text-skin-text leading-[22px] top-[-1px] relative">
+          By clicking "Place bid" you accept the Token Sale Privacy Policy
+        </div>
+      </UiCheckbox>
       <UiButton
-        v-if="!web3Account"
-        class="w-full"
-        @click="modalAccountOpen = true"
-      >
-        Connect wallet
-      </UiButton>
-      <UiButton
-        v-else
         primary
         class="w-full"
-        :disabled="hasErrors || isLoading"
+        :disabled="hasErrors || isLoading || !isTermsAccepted"
         :loading="isLoading"
         @click="handlePlaceOrder"
       >
-        Place order
+        Place bid
       </UiButton>
       <div class="text-xs text-center flex items-center justify-center gap-1.5">
         <IH-information-circle class="inline-block shrink-0" :size="16" />
@@ -332,8 +478,27 @@ function togglePriceMode() {
           Can cancel until
           {{ _t(parseInt(auction.orderCancellationEndDate)) }}
         </span>
-        <span v-else>Cannot be canceled once the order is placed</span>
+        <span v-else>Cannot be canceled once the bid is placed</span>
       </div>
     </div>
   </div>
 </template>
+
+<style lang="scss">
+@mixin slider-thumb {
+  @apply bg-skin-link rounded-full outline-skin-border;
+  appearance: none;
+  outline-width: 2px;
+  outline-style: solid;
+  height: 18px;
+  width: 6px;
+}
+
+.range-slider::-webkit-slider-thumb {
+  @include slider-thumb;
+}
+
+.range-slider::-moz-range-thumb {
+  @include slider-thumb;
+}
+</style>

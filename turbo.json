@@ -42,12 +42,18 @@
       "dependsOn": ["codegen", "^build"]
     },
     "codegen": {
-      "outputs": [".checkpoint/**", "src/networks/common/graphqlApi/gql/**", "src/helpers/auction/gql/**"],
+      "outputs": [
+        ".checkpoint/**",
+        "src/networks/common/graphqlApi/gql/**",
+        "src/helpers/auction/gql/**",
+        "src/helpers/auction/referral/gql/**"
+      ],
       "inputs": [
         "**/*.gql",
         "codegen.ts",
         "src/networks/common/graphqlApi/queries.ts",
-        "src/helpers/auction/queries.ts"
+        "src/helpers/auction/queries.ts",
+        "src/helpers/auction/referral/queries.ts"
       ]
     }
   }
