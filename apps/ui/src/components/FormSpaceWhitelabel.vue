@@ -137,7 +137,7 @@ onMounted(() => emit('errors', formErrors.value));
           learn-more-link="https://help.snapshot.box/en/articles/11201771-how-to-add-a-custom-domain"
         >
           To set up a custom domain, you need to create a CNAME record pointing
-          to "cname.snapshot.box" with your DNS provider or registrar.
+          to "cname-2.snapshot.box" with your DNS provider or registrar.
         </UiMessage>
         <UiInputString
           v-model="customDomain"
