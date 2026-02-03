@@ -88,7 +88,7 @@ const isBiddingWithWeth = computed(() =>
 const { data: userBalance, isError: isBalanceError } = useQuery({
   queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
   queryFn: async () => {
-    if (!web3Account.value) return 0n;
+    if (!web3Account.value) return null;
 
     const contract = new Contract(
       props.auction.addressBiddingToken,
