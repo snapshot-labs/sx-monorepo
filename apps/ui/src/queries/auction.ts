@@ -46,7 +46,7 @@ const TOKEN_PRICE_OVERRIDES = {
     chainId: 1,
     address: ETH_CONTRACT
   },
-  // Optimism predeploy WETH -> ETH
+  // Base predeploy WETH -> ETH
   [WETH_CONTRACTS.base]: {
     chainId: 1,
     address: ETH_CONTRACT
