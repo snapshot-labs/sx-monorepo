@@ -1,8 +1,9 @@
 import { MaybeRefOrGetter } from 'vue';
 import { AuctionNetworkId, SellOrder } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
+import { isWethContract } from '@/helpers/token';
 
-type StepId = 'check_approval' | 'approve' | 'bid';
+type StepId = 'wrap' | 'check_approval' | 'approve' | 'bid';
 
 type Step = {
   messages: {
@@ -18,25 +19,41 @@ type Step = {
   execute: () => Promise<string | null>;
 };
 
-const FIRST_STEP: StepId = 'check_approval';
 const LAST_STEP: StepId = 'bid';
 
 export function useAuctionOrderFlow(
   networkId: MaybeRefOrGetter<AuctionNetworkId>,
   auction: MaybeRefOrGetter<AuctionDetailFragment>
 ) {
-  const { getIsTokenApproved, approveToken, placeSellOrder } =
+  const { getIsTokenApproved, wrapEth, approveToken, placeSellOrder } =
     useAuctionActions(networkId, auction);
+
+  const initialStep = computed(() => {
+    if (isWethContract(toValue(auction).addressBiddingToken)) {
+      return 'wrap';
+    }
+
+    return 'check_approval';
+  });
 
   const sellOrder = ref<SellOrder>({
     sellAmount: 0n,
     buyAmount: 0n,
     auction: toValue(auction)
   });
-  const currentStepId = ref<StepId>(FIRST_STEP);
+  const currentStepId = ref<StepId>(initialStep.value);
   const stepExecuteResults = ref<Map<StepId, boolean>>(new Map());
 
   const STEPS = ref<Record<StepId, Step>>({
+    wrap: {
+      messages: {
+        approveTitle: 'Wrapping ETH to WETH',
+        approveSubtitle: 'Waiting for wrapping to complete',
+        failTitle: 'Unable to wrap your tokens'
+      },
+      nextStep: () => 'check_approval',
+      execute: async () => wrapEth(sellOrder.value)
+    },
     check_approval: {
       messages: {
         approveTitle: 'Checking token allowance',
@@ -91,7 +108,7 @@ export function useAuctionOrderFlow(
   }
 
   function start(order: SellOrder) {
-    currentStepId.value = FIRST_STEP;
+    currentStepId.value = initialStep.value;
     stepExecuteResults.value.clear();
     sellOrder.value = order;
   }

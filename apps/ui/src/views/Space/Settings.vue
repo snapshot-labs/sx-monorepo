@@ -240,7 +240,8 @@ const pendingSpace = computed(() => {
         ? String(strategy.chainId)
         : snapshotChainId.value
     })),
-    snapshot_chain_id: snapshotChainId.value
+    snapshot_chain_id: snapshotChainId.value,
+    authenticators: authenticators.value.map(strategy => strategy.address)
   };
 });
 
