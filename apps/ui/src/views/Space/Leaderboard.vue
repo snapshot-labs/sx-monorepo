@@ -6,6 +6,8 @@ import { getNetwork, offchainNetworks } from '@/networks';
 import { Space, UserActivity } from '@/types';
 
 type SortableColumn = 'proposal_count' | 'vote_count' | 'vp_value';
+type SortDirection = 'asc' | 'desc';
+type SortByValue = `${SortableColumn}-${SortDirection}`;
 
 const USERS_LIMIT = 20;
 
@@ -19,14 +21,8 @@ const isOffchainNetwork = computed(() =>
   offchainNetworks.includes(props.space.network)
 );
 
-const sortBy = ref(
-  (isOffchainNetwork.value ? 'vp_value-desc' : 'vote_count-desc') as
-    | 'vote_count-desc'
-    | 'vote_count-asc'
-    | 'proposal_count-desc'
-    | 'proposal_count-asc'
-    | 'vp_value-desc'
-    | 'vp_value-asc'
+const sortBy = ref<SortByValue>(
+  isOffchainNetwork.value ? 'vp_value-desc' : 'vote_count-desc'
 );
 
 const {
@@ -88,10 +84,10 @@ function handleSortChange(type: SortableColumn) {
 }
 
 const orderDirection = computed(
-  () => sortBy.value.split('-')[1] as 'asc' | 'desc'
+  () => sortBy.value.split('-')[1] as SortDirection
 );
 
-const orderBy = computed(() => sortBy.value.split('-')[0]);
+const orderBy = computed(() => sortBy.value.split('-')[0] as SortableColumn);
 
 const statsColumn = computed<Partial<Record<SortableColumn, string>>>(() => {
   return {
