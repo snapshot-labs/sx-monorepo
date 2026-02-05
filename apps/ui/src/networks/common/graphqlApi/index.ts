@@ -755,7 +755,8 @@ export function createApi(
         id: `${networkId}:${leaderboard.space.id}`,
         spaceId: `${networkId}:${leaderboard.space.id}`,
         vote_count: leaderboard.vote_count,
-        proposal_count: leaderboard.proposal_count
+        proposal_count: leaderboard.proposal_count,
+        vp_value: 0
       }));
     },
     async loadLeaderboard(
@@ -765,7 +766,9 @@ export function createApi(
         | 'vote_count-desc'
         | 'vote_count-asc'
         | 'proposal_count-desc'
-        | 'proposal_count-asc' = 'vote_count-desc',
+        | 'proposal_count-asc'
+        | 'vp_value-desc'
+        | 'vp_value-asc' = 'vote_count-desc',
       user?: string
     ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
@@ -792,7 +795,8 @@ export function createApi(
         id: leaderboard.user.id,
         spaceId: leaderboard.space.id,
         vote_count: leaderboard.vote_count,
-        proposal_count: leaderboard.proposal_count
+        proposal_count: leaderboard.proposal_count,
+        vp_value: 0
       }));
     },
     loadFollows: async () => {

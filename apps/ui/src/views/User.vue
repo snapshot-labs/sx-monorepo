@@ -95,7 +95,9 @@ async function loadActivities(userId: string) {
       .flat()
       .sort(
         (a, b) =>
-          b.proposal_count - a.proposal_count || b.vote_count - a.vote_count
+          b.vp_value - a.vp_value ||
+          b.proposal_count - a.proposal_count ||
+          b.vote_count - a.vote_count
       );
 
     await fetchSpacesAndStore(
@@ -229,9 +231,10 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
     </div>
     <UiSectionHeader label="Activity" sticky />
     <UiColumnHeader class="text-right">
-      <span class="w-[60%] lg:w-[50%] text-left truncate">Space</span>
-      <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
-      <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
+      <span class="w-[40%] text-left truncate">Space</span>
+      <span class="w-[20%] truncate">Proposals</span>
+      <span class="w-[20%] truncate">Votes</span>
+      <span class="w-[20%] truncate">VP value</span>
     </UiColumnHeader>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
     <UiStateWarning v-else-if="!activities.length" class="px-4 py-3">
@@ -251,7 +254,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       class="mx-4 border-b flex space-x-1 py-3"
     >
       <div
-        class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
+        class="flex items-center gap-x-3 leading-[22px] w-[40%] font-semibold text-skin-link truncate"
       >
         <SpaceAvatar
           :space="activity.space"
@@ -261,7 +264,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         <span class="flex-auto w-0 truncate" v-text="activity.space.name" />
       </div>
       <div
-        class="flex flex-col justify-center text-right w-[20%] lg:w-[25%] leading-[22px] truncate"
+        class="flex flex-col justify-center text-right w-[20%] leading-[22px] truncate"
       >
         <h4
           class="text-skin-link truncate"
@@ -273,13 +276,19 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         />
       </div>
       <div
-        class="flex flex-col justify-center text-right w-[20%] lg:w-[25%] leading-[22px] truncate"
+        class="flex flex-col justify-center text-right w-[20%] leading-[22px] truncate"
       >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div
           class="text-[17px] truncate"
           v-text="_p(activity.vote_percentage)"
         />
+      </div>
+      <div
+        class="flex flex-col justify-center text-right w-[20%] leading-[22px] truncate"
+      >
+        <h4 class="text-skin-link truncate" v-text="_n(activity.vp_value)" />
+        <div class="text-[17px] truncate">USD</div>
       </div>
     </AppLink>
     <teleport to="#modal">
