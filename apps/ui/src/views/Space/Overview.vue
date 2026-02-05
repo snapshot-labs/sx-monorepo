@@ -1,30 +1,33 @@
 <script setup lang="ts">
 import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
+import {
+  PROPOSALS_SUMMARY_LIMIT,
+  useProposalsSummaryQuery
+} from '@/queries/proposals';
 import { Space } from '@/types';
-
-const PROPOSALS_LIMIT = 4;
 
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
-const proposalsStore = useProposalsStore();
 
-onMounted(() => {
-  proposalsStore.fetchSummary(
-    props.space.id,
-    props.space.network,
-    PROPOSALS_LIMIT
-  );
-});
-
-const isOffchainSpace = offchainNetworks.includes(props.space.network);
+const isOffchainSpace = computed(() =>
+  offchainNetworks.includes(props.space.network)
+);
 
 const socials = computed(() => getSocialNetworksLink(props.space));
 
-const proposalsRecord = computed(
-  () => proposalsStore.proposals[`${props.space.network}:${props.space.id}`]
+const { data, isPending, isError } = useProposalsSummaryQuery(
+  toRef(() => props.space.network),
+  toRef(() => props.space.id)
+);
+
+const showChildren = computed(
+  () =>
+    !isWhiteLabel.value &&
+    !!props.space.children.length &&
+    props.space.children.every(child => child.name)
 );
 
 watchEffect(() => setTitle(props.space.name));
@@ -48,7 +51,7 @@ watchEffect(() => setTitle(props.space.name));
               name: 'space-editor',
               params: { space: `${space.network}:${space.id}` }
             }"
-            class="!px-0 w-[46px]"
+            uniform
           >
             <IH-pencil-alt />
           </UiButton>
@@ -58,20 +61,19 @@ watchEffect(() => setTitle(props.space.name));
     </div>
     <div class="px-4">
       <div class="mb-4 relative">
-        <AppLink :to="{ name: 'space-overview' }">
-          <SpaceAvatar
-            :space="space"
-            :size="90"
-            class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
-          />
-        </AppLink>
+        <SpaceAvatar
+          :space="space"
+          :size="90"
+          class="relative mb-2 border-4 border-skin-bg !rounded-lg -left-1"
+        />
         <div class="flex items-center">
-          <h1 v-text="space.name" />
-          <UiBadgeVerified
+          <h1 data-testid="space-name" v-text="space.name" />
+          <UiBadgeSpace
             v-if="!isWhiteLabel"
             class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
+            :flagged="space.additionalRawData?.flagged || false"
           />
         </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">
@@ -93,7 +95,7 @@ watchEffect(() => setTitle(props.space.name));
               followers
             </div>
           </template>
-          <template v-if="!isWhiteLabel && space.parent">
+          <template v-if="!isWhiteLabel && space.parent?.name">
             <div>·</div>
             <AppLink
               :to="{
@@ -123,7 +125,7 @@ watchEffect(() => setTitle(props.space.name));
             <a
               :href="social.href"
               target="_blank"
-              class="text-[#606060] hover:text-skin-link"
+              class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
             </a>
@@ -131,26 +133,40 @@ watchEffect(() => setTitle(props.space.name));
         </div>
       </div>
     </div>
-    <template v-if="!isWhiteLabel && space.children.length">
-      <UiLabel :label="'Sub-spaces'" />
-      <UiScrollerHorizontal gradient="md">
-        <div class="px-4 py-3 flex gap-3 min-w-max">
-          <SpacesListItem
-            v-for="child in space.children"
-            :key="child.id"
-            :space="child"
-            :show-about="false"
-            class="w-[240px]"
-          />
-        </div>
-      </UiScrollerHorizontal>
-    </template>
+    <SpaceAlerts :space="space" />
+    <OnboardingSpace :space="space" />
+    <div v-if="showChildren" class="mb-4">
+      <UiSectionHeader label="Sub-spaces" sticky />
+      <UiColumnHeader class="hidden md:flex text-center">
+        <div class="grow" />
+        <div
+          v-if="space.protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Active'"
+        />
+        <div class="w-[100px]" v-text="'Proposals'" />
+        <div
+          v-if="space.protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Followers'"
+        />
+      </UiColumnHeader>
+      <div>
+        <SpacesListItem
+          v-for="child in space.children"
+          :key="child.id"
+          :space="child"
+        />
+      </div>
+    </div>
     <div>
       <ProposalsList
+        data-testid="summary-proposals-list"
         title="Proposals"
-        :loading="!proposalsRecord?.summaryLoaded"
-        :limit="PROPOSALS_LIMIT - 1"
-        :proposals="proposalsRecord?.summaryProposals ?? []"
+        :is-error="isError"
+        :loading="isPending"
+        :limit="PROPOSALS_SUMMARY_LIMIT - 1"
+        :proposals="data ?? []"
         :route="{
           name: 'space-proposals',
           linkTitle: 'See more'

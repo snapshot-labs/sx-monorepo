@@ -18,7 +18,7 @@ const FAQ = [
   }
 ];
 
-const LINK = 'https://tally.so/r/31ApGb';
+const LINK = 'https://calendly.com/snapshot-labs/network-plan';
 
 const currentQuestion = ref();
 
@@ -30,7 +30,7 @@ function toggleQuestion(id) {
   <div class="space-y-[80px] pt-12 mb-8 blocks">
     <div class="py-8 text-center">
       <UiContainer class="!max-w-[880px] my-1">
-        <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[46px]">
+        <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[52px]">
           Unlock governance for your ecosystem
         </h1>
         <a
@@ -45,7 +45,7 @@ function toggleQuestion(id) {
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">
-      <div class="eyebrow mb-2">Key features</div>
+      <UiEyebrow class="mb-2">Key features</UiEyebrow>
       <h2 class="font-display text-[36px] mb-3">
         What the network plan offers
       </h2>
@@ -57,7 +57,7 @@ function toggleQuestion(id) {
         class="text-skin-link text-lg space-y-4 px-5 py-4 text-left border rounded-lg max-w-[500px] mx-auto"
       >
         <div>
-          <h3 class="font-display mb-3">Basic plan</h3>
+          <h3 class="font-display mb-3">Premium plan</h3>
           <div class="text-left">
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
@@ -65,15 +65,19 @@ function toggleQuestion(id) {
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
-              Custom domain registry support
+              Testnet network support
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
-              Dedicated customer support
+              Dedicated support
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
               Quick setup (~48 hours)
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
+              1 Snapshot Pro space
             </div>
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
@@ -83,23 +87,15 @@ function toggleQuestion(id) {
         </div>
 
         <div>
-          <h3 class="font-display mb-3">Premium plan</h3>
+          <h3 class="font-display mb-3">Platinum plan</h3>
           <div class="text-left">
             <div>
               <IH-check class="inline-block text-skin-success mr-2" />
+              Everything from Premium plan
+            </div>
+            <div>
+              <IH-check class="inline-block text-skin-success mr-2" />
               Snapshot X integration
-            </div>
-            <div>
-              <IH-check class="inline-block text-skin-success mr-2" />
-              Support for Safe voting
-            </div>
-            <div>
-              <IH-check class="inline-block text-skin-success mr-2" />
-              Support for delegate registry
-            </div>
-            <div>
-              <IH-check class="inline-block text-skin-success mr-2" />
-              Testnet network support
             </div>
           </div>
         </div>
@@ -107,7 +103,7 @@ function toggleQuestion(id) {
     </UiContainer>
 
     <div class="text-center">
-      <div class="eyebrow mb-4">Trusted by</div>
+      <UiEyebrow class="mb-4">Trusted by</UiEyebrow>
       <UiCarousel>
         <div class="customer">
           <IC-blast />
@@ -152,7 +148,7 @@ function toggleQuestion(id) {
     </div>
 
     <UiContainer class="!max-w-[880px] text-center">
-      <div class="eyebrow mb-2">Get started</div>
+      <UiEyebrow class="mb-2">Get started</UiEyebrow>
       <h2 class="font-display text-[36px] mb-5">Get network support today</h2>
       <a
         :href="LINK"
@@ -165,21 +161,7 @@ function toggleQuestion(id) {
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">
-      <div class="border p-4 rounded-lg">
-        <h3 class="mb-1">
-          <IH-exclamation-circle class="inline-block mr-1" />
-          Is your network already live on Snapshot?
-        </h3>
-        <div class="text-md">
-          All networks must subscribe to the network plan to maintain support on
-          Snapshot. To ensure continuous service and avoid interruptions, please
-          contact our team today.
-        </div>
-      </div>
-    </UiContainer>
-
-    <UiContainer class="!max-w-[880px]">
-      <div class="mb-2 eyebrow text-center">Frequently asked questions</div>
+      <UiEyebrow class="mb-2 text-center">Frequently asked questions</UiEyebrow>
       <h2 class="text-[36px] font-display mb-5 text-center">Questions?</h2>
       <div v-for="(question, i) in FAQ" :key="i" class="border-b">
         <button

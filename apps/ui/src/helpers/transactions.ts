@@ -1,17 +1,18 @@
 import { Interface } from '@ethersproject/abi';
-import { parseUnits } from '@ethersproject/units';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import { abis } from '@/helpers/abis';
-import { Token } from '@/helpers/alchemy';
-import { resolver } from '@/helpers/resolver';
-import { getSalt } from '@/helpers/utils';
 import {
   ContractCallTransaction,
   SendNftTransaction,
   SendTokenTransaction,
   StakeTokenTransaction,
-  Transaction
-} from '@/types';
+  Transaction,
+  utils
+} from '@snapshot-labs/sx';
+import { Nft } from '@/composables/useNfts';
+import { abis } from '@/helpers/abis';
+import { Token } from '@/helpers/alchemy';
+import { resolver } from '@/helpers/resolver';
+import { parseUnits } from '@/helpers/token';
+import { getSalt } from '@/helpers/utils';
 
 export async function createSendTokenTransaction({
   token,
@@ -58,6 +59,16 @@ export async function createSendNftTransaction({
   nft,
   address,
   form
+}: {
+  nft: Pick<
+    Nft,
+    'type' | 'contractAddress' | 'tokenId' | 'title' | 'collectionName'
+  >;
+  address: string;
+  form: {
+    to: string;
+    amount: string | number;
+  };
 }): Promise<SendNftTransaction> {
   let data = '';
 
@@ -111,7 +122,7 @@ export async function createSendNftTransaction({
 export async function createContractCallTransaction({
   form
 }): Promise<ContractCallTransaction> {
-  const args: any[] = Object.values(form.args);
+  let args: any[] = Object.values(form.args);
 
   let recipientAddress = form.to;
   const resolvedTo = await resolver.resolveName(form.to);
@@ -122,6 +133,11 @@ export async function createContractCallTransaction({
   const methodAbi = iface.functions[form.method];
 
   if (methodAbi) {
+    // Send in same order as the ABI
+    args = methodAbi.inputs.map(({ name }) => {
+      return form.args[name];
+    });
+
     await Promise.all(
       methodAbi.inputs.map(async (input, i) => {
         if (input.type === 'address') {
@@ -187,7 +203,7 @@ export async function createStakeTokenTransaction({
 
 export function convertToMetaTransactions(
   transactions: Transaction[]
-): MetaTransaction[] {
+): utils.encoding.MetaTransaction[] {
   return transactions.map((tx: Transaction) => ({
     ...tx,
     operation: 0,

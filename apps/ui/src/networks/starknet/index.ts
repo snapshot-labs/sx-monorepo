@@ -1,9 +1,8 @@
-import {
-  LibraryError,
-  ReceiptTx,
-  constants as starknetConstants
-} from 'starknet';
-import { pinPineapple } from '@/helpers/pin';
+import { LibraryError, constants as starknetConstants } from 'starknet';
+import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
+import { getRelayerInfo } from '@/helpers/mana';
+import { pin } from '@/helpers/pin';
+import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
@@ -11,6 +10,7 @@ import { createConstants } from './constants';
 import { createProvider } from './provider';
 import { STARKNET_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -30,9 +30,9 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     chainId: starknetConstants.StarknetChainId.SN_MAIN,
     baseChainId: 1,
     baseNetworkId: 'eth',
-    rpcUrl: `https://starknet-mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    ethRpcUrl: `https://mainnet.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl: 'https://api.snapshot.box',
+    rpcUrl: 'https://rpc.snapshot.org/sn',
+    ethRpcUrl: 'https://rpc.snapshot.org/1',
+    apiUrl: API_URL,
     explorerUrl: 'https://starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   },
@@ -41,11 +41,9 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     chainId: starknetConstants.StarknetChainId.SN_SEPOLIA,
     baseChainId: 11155111,
     baseNetworkId: 'sep',
-    rpcUrl: `https://starknet-sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    ethRpcUrl: `https://sepolia.infura.io/v3/${import.meta.env.VITE_INFURA_API_KEY}`,
-    apiUrl:
-      import.meta.env.VITE_STARKNET_SEPOLIA_API ??
-      'https://testnet-api.snapshot.box',
+    rpcUrl: 'https://rpc.snapshot.org/sn-sep',
+    ethRpcUrl: 'https://rpc.snapshot.org/11155111',
+    apiUrl: API_TESTNET_URL,
     explorerUrl: 'https://sepolia.starkscan.co',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   }
@@ -74,19 +72,19 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
   });
 
   const helpers = {
-    isAuthenticatorSupported: (authenticator: string) =>
-      constants.SUPPORTED_AUTHENTICATORS[authenticator],
-    isAuthenticatorContractSupported: (authenticator: string) =>
-      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
-    getRelayerAuthenticatorType: (authenticator: string) =>
-      constants.RELAYER_AUTHENTICATORS[authenticator],
+    getAuthenticatorSupportInfo: (authenticator: string) =>
+      constants.AUTHENTICATORS_SUPPORT_INFO[authenticator] || null,
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
     isExecutorSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
-    pin: pinPineapple,
+    isExecutorActionsSupported: (executor: string) =>
+      constants.SUPPORTED_EXECUTORS[executor],
+    pin,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: txId => provider.getTransactionReceipt(txId),
+    getRelayerInfo: (space: string, network: NetworkID) =>
+      getRelayerInfo(space, network, provider),
     waitForTransaction: txId => {
       let retries = 0;
 
@@ -111,8 +109,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
             return;
           }
 
-          const receiptTx = new ReceiptTx(tx);
-          if (receiptTx.isSuccess()) {
+          if (tx.isSuccess()) {
             resolve(tx);
           } else {
             reject(tx);
@@ -120,6 +117,27 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
 
           clearInterval(timer);
         }, 2000);
+      });
+    },
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransactionReceipt(txId);
+          if (
+            'block_number' in transaction &&
+            typeof transaction.block_number === 'number'
+          ) {
+            return transaction.block_number;
+          }
+
+          return null;
+        }
       });
     },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
@@ -137,6 +155,8 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       if (type === 'token') dataType = 'token';
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'contract';
+
+      if (dataType === 'contract') id = formatAddress(id);
 
       return `${explorerUrl}/${dataType}/${id}`;
     }

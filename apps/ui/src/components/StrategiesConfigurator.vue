@@ -7,10 +7,13 @@ const model = defineModel<StrategyConfig[]>({ required: true });
 const props = withDefaults(
   defineProps<{
     networkId: NetworkID;
+    spaceId: string;
+    votingPowerSymbol: string;
     limit?: number;
     unique?: boolean;
     availableStrategies: StrategyTemplate[];
     defaultParams?: Record<string, any>;
+    showTestButton?: boolean;
   }>(),
   {
     limit: Infinity,
@@ -20,7 +23,9 @@ const props = withDefaults(
 );
 
 const editedStrategy: Ref<StrategyConfig | null> = ref(null);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 const editStrategyModalOpen = ref(false);
+const isTestStrategiesModalOpen = ref(false);
 
 const limitReached = computed(() => model.value.length >= props.limit);
 const activeStrategiesMap = computed(() =>
@@ -74,11 +79,27 @@ function handleStrategySave(value: Record<string, any>) {
     };
   });
 }
+
+async function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
 </script>
 
 <template>
   <div>
-    <h4 class="eyebrow mb-2 font-medium">Active</h4>
+    <div class="mb-2 flex items-center justify-between">
+      <UiEyebrow class="font-medium">Active</UiEyebrow>
+      <UiTooltip
+        v-if="model.length && showTestButton"
+        title="Test all custom strategies"
+        class="flex items-center"
+      >
+        <button class="text-skin-link" @click="handleTestStrategies(model)">
+          <IH-play />
+        </button>
+      </UiTooltip>
+    </div>
     <div class="space-y-3 mb-4">
       <div v-if="model.length === 0">No strategies selected</div>
       <FormStrategiesStrategyActive
@@ -86,15 +107,17 @@ function handleStrategySave(value: Record<string, any>) {
         :key="strategy.id"
         :network-id="networkId"
         :strategy="strategy"
+        :show-test-button="showTestButton"
         @edit-strategy="editStrategy"
         @delete-strategy="removeStrategy"
+        @test-strategies="handleTestStrategies"
       />
     </div>
-    <h4 class="eyebrow mb-2 font-medium">Available</h4>
+    <UiEyebrow class="mb-2 font-medium">Available</UiEyebrow>
     <div v-if="availableStrategies.length === 0">No strategies available</div>
     <div v-else class="space-y-3">
       <ButtonStrategy
-        v-for="strategy in availableStrategies"
+        v-for="strategy in availableStrategies.filter(s => !s.deprecated)"
         :key="strategy.address"
         :disabled="
           limitReached || (unique && !!activeStrategiesMap[strategy.name])
@@ -104,6 +127,14 @@ function handleStrategySave(value: Record<string, any>) {
       />
     </div>
     <teleport to="#modal">
+      <ModalTestStrategy
+        :open="isTestStrategiesModalOpen"
+        :network-id="networkId"
+        :space-id="spaceId"
+        :voting-power-symbol="votingPowerSymbol"
+        :strategies="testedStrategies"
+        @close="isTestStrategiesModalOpen = false"
+      />
       <ModalEditStrategy
         v-if="editedStrategy"
         :open="editStrategyModalOpen"

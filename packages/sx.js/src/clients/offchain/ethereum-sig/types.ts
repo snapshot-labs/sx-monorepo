@@ -5,7 +5,7 @@ export const domain = {
 
 export const basicVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'string' },
@@ -20,7 +20,7 @@ export const singleChoiceVoteTypes = basicVoteTypes;
 
 export const approvalVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'string' },
@@ -35,10 +35,10 @@ export const rankedChoiceVoteTypes = approvalVoteTypes;
 
 export const encryptedVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
-    { name: 'proposal', type: 'bytes32' },
+    { name: 'proposal', type: 'string' },
     { name: 'choice', type: 'string' },
     { name: 'reason', type: 'string' },
     { name: 'app', type: 'string' },
@@ -48,7 +48,7 @@ export const encryptedVoteTypes = {
 
 export const weightedVoteTypes = {
   Vote: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'proposal', type: 'string' },
@@ -61,7 +61,7 @@ export const weightedVoteTypes = {
 
 export const proposeTypes = {
   Proposal: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'type', type: 'string' },
@@ -74,6 +74,7 @@ export const proposeTypes = {
     { name: 'end', type: 'uint64' },
     { name: 'snapshot', type: 'uint64' },
     { name: 'plugins', type: 'string' },
+    { name: 'privacy', type: 'string' },
     { name: 'app', type: 'string' }
   ]
 };
@@ -81,7 +82,7 @@ export const proposeTypes = {
 export const updateProposalTypes = {
   UpdateProposal: [
     { name: 'proposal', type: 'string' },
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
     { name: 'type', type: 'string' },
@@ -89,16 +90,27 @@ export const updateProposalTypes = {
     { name: 'body', type: 'string' },
     { name: 'discussion', type: 'string' },
     { name: 'choices', type: 'string[]' },
-    { name: 'plugins', type: 'string' }
+    { name: 'labels', type: 'string[]' },
+    { name: 'plugins', type: 'string' },
+    { name: 'privacy', type: 'string' }
+  ]
+};
+
+export const flagProposalTypes = {
+  FlagProposal: [
+    { name: 'from', type: 'string' },
+    { name: 'space', type: 'string' },
+    { name: 'proposal', type: 'string' },
+    { name: 'timestamp', type: 'uint64' }
   ]
 };
 
 export const cancelProposalTypes = {
   CancelProposal: [
-    { name: 'from', type: 'address' },
+    { name: 'from', type: 'string' },
     { name: 'space', type: 'string' },
     { name: 'timestamp', type: 'uint64' },
-    { name: 'proposal', type: 'bytes32' }
+    { name: 'proposal', type: 'string' }
   ]
 };
 
@@ -149,7 +161,7 @@ export const updateStatementTypes = {
   ]
 };
 
-export const updateSpaceTypes = {
+export const createSpaceTypes = {
   Space: [
     { name: 'from', type: 'address' },
     { name: 'space', type: 'string' },
@@ -157,6 +169,8 @@ export const updateSpaceTypes = {
     { name: 'settings', type: 'string' }
   ]
 };
+
+export const updateSpaceTypes = createSpaceTypes;
 
 export const deleteSpaceTypes = {
   DeleteSpace: [

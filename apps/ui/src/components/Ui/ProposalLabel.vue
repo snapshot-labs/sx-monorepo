@@ -1,19 +1,16 @@
 <script setup lang="ts">
+import { RouteLocationRaw } from 'vue-router';
+import { hexToRgb } from '@/helpers/utils';
+
 const props = defineProps<{
   label: string;
   color: string;
+  to?: RouteLocationRaw;
 }>();
 
-const { currentMode } = useUserSkin();
+const { currentTheme } = useTheme();
 
 const colorProperties = computed(() => checkColorProximity(props.color));
-
-function hexToRgb(hex: string): { r: number; g: number; b: number } {
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-  return { r, g, b };
-}
 
 function checkColorProximity(color: string): {
   backgroundColor?: string;
@@ -21,11 +18,11 @@ function checkColorProximity(color: string): {
   textColor: string;
 } {
   // if color is not a hex color, return default colors
-  if (!color.match(/^#[0-9A-F]{6}$/)) {
+  if (!color.match(/^#[0-9A-F]{6}$/i)) {
     return {
       showBorder: true,
-      backgroundColor: currentMode.value === 'dark' ? '#000000' : '#FFFFFF',
-      textColor: currentMode.value === 'dark' ? '#FFFFFF' : '#000000'
+      backgroundColor: currentTheme.value === 'dark' ? '#000000' : '#FFFFFF',
+      textColor: currentTheme.value === 'dark' ? '#FFFFFF' : '#000000'
     };
   }
   const hex = color.replace('#', '');
@@ -37,8 +34,8 @@ function checkColorProximity(color: string): {
   const textColor = brightness > 155 ? '#000000' : '#FFFFFF';
   return {
     showBorder:
-      (currentMode.value === 'dark' && nearToBlack) ||
-      (currentMode.value === 'light' && nearToWhite),
+      (currentTheme.value === 'dark' && nearToBlack) ||
+      (currentTheme.value === 'light' && nearToWhite),
     backgroundColor: color,
     textColor
   };
@@ -46,7 +43,8 @@ function checkColorProximity(color: string): {
 </script>
 
 <template>
-  <div
+  <AppLink
+    :to="to"
     class="rounded-full w-fit max-w-[220px] shrink-0 flex"
     :class="{
       border: colorProperties.showBorder
@@ -60,5 +58,5 @@ function checkColorProximity(color: string): {
       class="truncate text-sm leading-[11px] whitespace-nowrap px-2 py-[6px]"
       v-text="label"
     />
-  </div>
+  </AppLink>
 </template>

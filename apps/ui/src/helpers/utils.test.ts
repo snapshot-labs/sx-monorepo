@@ -1,10 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { Interface } from '@ethersproject/abi';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   _d,
+  _rt,
   _vp,
+  abiToDefinition,
   createErc1155Metadata,
   formatAddress,
+  getSpaceController,
   getStampUrl,
+  getUserFacingErrorMessage,
   uniqBy
 } from './utils';
 
@@ -60,15 +65,17 @@ describe('utils', () => {
         avatar: '',
         cover: '',
         description: 'Test description',
+        votingPowerSymbol: 'VOTE',
         externalUrl: 'https://test.com',
         github: 'snapshot-labs',
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
-        votingPowerSymbol: 'VOTE',
+        farcaster: 'snapshot-labs',
+        clanker: '0x000000000000000000000000000000000000dead',
         treasuries: [
           {
             name: 'treasury 1',
-            network: 'sep',
+            chainId: '11155111',
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
@@ -86,7 +93,7 @@ describe('utils', () => {
             apiType: 'governor-subgraph',
             apiUrl:
               'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            chainId: 11155111,
+            chainId: '11155111',
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]
@@ -102,11 +109,13 @@ describe('utils', () => {
           cover: '',
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
+          farcaster: 'snapshot-labs',
+          clanker: '0x000000000000000000000000000000000000dead',
           discord: 'snapshot',
           treasuries: [
             {
               name: 'treasury 1',
-              network: 'sep',
+              chain_id: '11155111',
               address: '0x000000000000000000000000000000000000dead'
             }
           ],
@@ -125,7 +134,7 @@ describe('utils', () => {
               api_url:
                 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
               contract: '0x000000000000000000000000000000000000dead',
-              chain_id: 11155111
+              chain_id: '11155111'
             }
           ]
         }
@@ -161,6 +170,39 @@ describe('utils', () => {
       expect(_d(86399)).toBe('23h 59m 59s');
       expect(_d(86400)).toBe('1d');
       expect(_d(86401)).toBe('1d 1s');
+    });
+  });
+
+  describe('_rt', () => {
+    const now = Date.now();
+    const timestamp = Math.floor(now / 1000);
+
+    beforeAll(() => {
+      vi.useFakeTimers();
+
+      vi.setSystemTime(now);
+    });
+
+    afterAll(() => {
+      vi.useRealTimers();
+    });
+
+    it('should format time in the past', () => {
+      expect(_rt(timestamp - 1)).toBe('just now');
+      expect(_rt(timestamp - 60)).toBe('1m ago');
+      expect(_rt(timestamp - 60 * 60)).toBe('1h ago');
+      expect(_rt(timestamp - 60 * 60 * 24)).toBe('1d ago');
+      expect(_rt(timestamp - 60 * 60 * 24 * 31 * 2)).toBe('2mo ago');
+      expect(_rt(timestamp - 60 * 60 * 24 * 365)).toBe('1y ago');
+    });
+
+    it('should format time in the future', () => {
+      expect(_rt(timestamp + 1)).toBe('in few seconds');
+      expect(_rt(timestamp + 60)).toBe('1m left');
+      expect(_rt(timestamp + 60 * 60)).toBe('1h left');
+      expect(_rt(timestamp + 60 * 60 * 24)).toBe('1d left');
+      expect(_rt(timestamp + 60 * 60 * 24 * 31 * 2)).toBe('2mo left');
+      expect(_rt(timestamp + 60 * 60 * 24 * 365)).toBe('1y left');
     });
   });
 
@@ -232,6 +274,121 @@ describe('utils', () => {
       ).toBe(
         'https://cdn.stamp.fyi/space/0x000000000000000000000000000000000000dEaD?s=64&cb=1234'
       );
+    });
+  });
+
+  describe('getUserFacingErrorMessage', () => {
+    it('should return error message if available', () => {
+      const testError = new Error('Test error');
+
+      expect(getUserFacingErrorMessage(testError)).toBe(testError.message);
+    });
+
+    it('should return a generic message for errors without a message', () => {
+      const testError = new Error();
+
+      expect(getUserFacingErrorMessage(testError)).toBe(
+        'Something went wrong. Please try again later.'
+      );
+    });
+
+    it('should return a generic message for non-error objects', () => {
+      const testError = { message: 'Test error' };
+
+      expect(getUserFacingErrorMessage(testError)).toBe(
+        'Something went wrong. Please try again later.'
+      );
+    });
+  });
+
+  describe('getSpaceController', () => {
+    it('should return the space controller address for a shib name on mainnet', async () => {
+      const spaceId = 'boorger.shib';
+      const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for an ENS name on mainnet', async () => {
+      const spaceId = 'ens.eth';
+      const expectedController = '0xb6E040C9ECAaE172a89bD561c5F73e1C48d28cd9';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for an ENS name on testnet', async () => {
+      const spaceId = 'ens.eth';
+      const expectedController = '0x179A862703a4adfb29896552DF9e307980D19285';
+      const controller = await getSpaceController(spaceId, 's-tn');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for a sonic name on mainnet', async () => {
+      const spaceId = 'boorger.sonic';
+      const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should throw an error when getting a sonic name on testnet', async () => {
+      const spaceId = 'boorger.sonic';
+      await expect(getSpaceController(spaceId, 's-tn')).rejects.toThrow(
+        'Unsupported network'
+      );
+    });
+  });
+
+  describe('abiToDefinition', () => {
+    it('should use placeholder input names if none are provided', () => {
+      const abi = [
+        'constructor(address _pool, address _lptoken, address _booster)',
+        'event Approval(address indexed owner, address indexed spender, uint256 value)',
+        'event Transfer(address indexed from, address indexed to, uint256 value)',
+        'function allowance(address, address) pure returns (uint256)',
+        'function approve(address, uint256) pure returns (bool)',
+        'function balanceOf(address account) view returns (uint256)',
+        'function booster() view returns (address)',
+        'function contractType() view returns (bytes32)',
+        'function curveToken() view returns (address)',
+        'function decimals() view returns (uint8)',
+        'function getPhantomTokenInfo() view returns (address, address)',
+        'function name() view returns (string)',
+        'function pool() view returns (address)',
+        'function symbol() view returns (string)',
+        'function totalSupply() view returns (uint256)',
+        'function transfer(address, uint256) pure returns (bool)',
+        'function transferFrom(address, address, uint256) pure returns (bool)',
+        'function underlying() view returns (address)',
+        'function version() view returns (uint256)'
+      ];
+
+      const iface = new Interface(abi);
+
+      const definition = abiToDefinition(iface.getFunction('allowance'), 1);
+
+      expect(definition).toEqual({
+        $async: true,
+        additionalProperties: false,
+        properties: {
+          'Input 1': {
+            chainId: 1,
+            examples: ['0x0000…'],
+            format: 'ens-or-address',
+            title: 'Input 1 (address)',
+            type: 'string'
+          },
+          'Input 2': {
+            chainId: 1,
+            examples: ['0x0000…'],
+            format: 'ens-or-address',
+            title: 'Input 2 (address)',
+            type: 'string'
+          }
+        },
+        required: ['Input 1', 'Input 2'],
+        title: 'allowance',
+        type: 'object'
+      });
     });
   });
 });

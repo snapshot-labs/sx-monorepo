@@ -7,7 +7,7 @@ import {
   shortenAddress
 } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
-import { getNetwork, supportsNullCurrent } from '@/networks';
+import { getNetwork } from '@/networks';
 import { VotingPower, VotingPowerStatus } from '@/networks/types';
 import { Space, UserActivity } from '@/types';
 
@@ -15,7 +15,6 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const usersStore = useUsersStore();
-const { getCurrent } = useMetaStore();
 const { isWhiteLabel } = useWhiteLabel();
 
 const userActivity = ref<UserActivity>({
@@ -25,6 +24,11 @@ const userActivity = ref<UserActivity>({
 const loaded = ref(false);
 const votingPowers = ref([] as VotingPower[]);
 const votingPowerStatus = ref<VotingPowerStatus>('loading');
+const delegateModalOpen = ref(false);
+const delegateModalState = ref<{
+  delegatees: { id: string }[];
+}>({ delegatees: [] });
+
 // const delegatesCount = ref(0);
 
 const network = computed(() => getNetwork(props.space.network));
@@ -38,19 +42,18 @@ const socials = computed(() => getSocialNetworksLink(user.value));
 const cb = computed(() => getCacheHash(user.value?.avatar));
 
 const formattedVotingPower = computed(() => {
-  const votingPower = votingPowers.value.reduce((acc, b) => acc + b.value, 0n);
-  const decimals = Math.max(
-    ...votingPowers.value.map(votingPower => votingPower.decimals),
-    0
+  const votingPower = _vp(
+    votingPowers.value.reduce(
+      (acc, b) => acc + Number(b.value) / 10 ** b.cumulativeDecimals,
+      0
+    )
   );
 
-  const value = _vp(Number(votingPower) / 10 ** decimals);
-
   if (props.space.voting_power_symbol) {
-    return `${value} ${props.space.voting_power_symbol}`;
+    return `${votingPower} ${props.space.voting_power_symbol}`;
   }
 
-  return value;
+  return votingPower;
 });
 
 const navigation = computed(() => [
@@ -67,6 +70,15 @@ const navigation = computed(() => [
   }
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
 ]);
+
+const hasOnlyInvalidDelegations = computed(() => {
+  if (!props.space.delegations.length) return true;
+
+  return props.space.delegations.every(
+    delegation =>
+      !delegation.chainId || !delegation.apiUrl || !delegation.apiType
+  );
+});
 
 async function loadUserActivity() {
   const spaceNetwork = getNetwork(props.space.network);
@@ -120,6 +132,11 @@ async function loadUserActivity() {
 //     .reduce((a, b) => a + b, 0);
 // }
 
+function handleDelegateClick() {
+  delegateModalState.value.delegatees[0] = { id: userId.value };
+  delegateModalOpen.value = true;
+}
+
 async function getVotingPower() {
   votingPowerStatus.value = 'loading';
   try {
@@ -130,9 +147,7 @@ async function getVotingPower() {
       props.space.strategies_parsed_metadata,
       userId.value,
       {
-        at: supportsNullCurrent(props.space.network)
-          ? null
-          : getCurrent(props.space.network) || 0,
+        at: null,
         chainId: props.space.snapshot_chain_id
       }
     );
@@ -145,8 +160,8 @@ async function getVotingPower() {
 }
 
 watch(
-  userId,
-  async id => {
+  [userId, () => props.space.id],
+  async ([id]) => {
     loaded.value = false;
 
     if (isValidAddress(id)) {
@@ -164,10 +179,9 @@ watch(
 
 <template>
   <UiLoading v-if="!loaded" class="block p-4" />
-  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    <span>This user does not exist</span>
-  </div>
+  <UiStateWarning v-else-if="!user" class="px-4 py-3">
+    This user does not exist
+  </UiStateWarning>
   <div v-else>
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
@@ -179,19 +193,18 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
+        <UiButton
+          v-if="!hasOnlyInvalidDelegations"
+          @click="handleDelegateClick()"
+        >
+          Delegate
+        </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
-          <UiButton
-            :to="{ name: 'user', params: { user: user.id } }"
-            class="!px-0 w-[46px]"
-          >
+          <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>
         </UiTooltip>
-        <DropdownShare
-          :shareable="{ user, space }"
-          type="space-user"
-          class="!px-0 w-[46px]"
-        />
+        <DropdownShare :shareable="{ user, space }" type="space-user" uniform />
       </div>
     </div>
     <div class="px-4">
@@ -203,15 +216,29 @@ watch(
           class="relative mb-2 border-4 border-skin-bg !bg-skin-border !rounded-full -left-1"
         />
         <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
-        <div class="mb-3 text-skin-text">
-          <span class="text-skin-link" v-text="userActivity.proposal_count" />
-          proposals ·
-          <span class="text-skin-link" v-text="userActivity.vote_count" />
-          votes
-          <template v-if="votingPowerStatus === 'success'">
+        <div
+          class="mb-3 text-skin-text flex flex-col xs:flex-row flex-wrap xs:items-center gap-x-2 whitespace-nowrap"
+        >
+          <UiAddress :address="user.id" copy-button="always" />
+          <div class="flex items-center gap-2">
+            <span class="hidden xs:inline">·</span>
+            <div>
+              <span
+                class="text-skin-link"
+                v-text="userActivity.proposal_count"
+              />
+              proposals
+            </div>
             ·
-            {{ formattedVotingPower }}
-          </template>
+            <div>
+              <span class="text-skin-link" v-text="userActivity.vote_count" />
+              votes
+            </div>
+            <template v-if="votingPowerStatus === 'success'">
+              ·
+              {{ formattedVotingPower }}
+            </template>
+          </div>
         </div>
         <div
           v-if="user.about"
@@ -223,7 +250,7 @@ watch(
             <a
               :href="social.href"
               target="_blank"
-              class="text-[#606060] hover:text-skin-link"
+              class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
             </a>
@@ -232,7 +259,7 @@ watch(
       </div>
     </div>
     <UiScrollerHorizontal
-      class="z-40 sticky top-[71px] lg:top-[72px]"
+      class="z-40 sticky top-header-height-with-offset lg:top-header-height"
       with-buttons
       gradient="xxl"
     >
@@ -242,7 +269,7 @@ watch(
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
         >
-          <UiLink
+          <UiLabel
             :is-active="route.name === item.route"
             :text="item.label"
             :count="item.count"
@@ -251,5 +278,13 @@ watch(
       </div>
     </UiScrollerHorizontal>
     <router-view :user="user" :space="space" />
+    <teleport to="#modal">
+      <ModalDelegate
+        :open="delegateModalOpen"
+        :space="space"
+        :initial-state="delegateModalState"
+        @close="delegateModalOpen = false"
+      />
+    </teleport>
   </div>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DELEGATION_TYPES_NAMES } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { offchainNetworks } from '@/networks';
@@ -18,13 +19,46 @@ const props = defineProps<{
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataDelegation);
+  (e: 'add', config: SpaceMetadataDelegation): void;
   (e: 'close'): void;
 }>();
 
 const showPicker = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataDelegation> = ref(clone(DEFAULT_FORM_STATE));
+
+const isApeChainDelegateRegistry = computed(
+  () => form.value.apiType === 'apechain-delegate-registry'
+);
+
+const delegationOptions = computed(() => {
+  if (form.value.chainId === null) return {};
+
+  if (isApeChainDelegateRegistry.value) {
+    return {
+      contractAddress: {
+        type: 'string',
+        format: 'bytes32',
+        title: 'Delegation ID',
+        examples: [
+          'e.g. 0x0000000000000000000000000000000000000000000000000000000000000001'
+        ],
+        minLength: 1
+      }
+    };
+  }
+
+  return {
+    contractAddress: {
+      type: 'string',
+      title: 'Delegation contract address',
+      examples: ['0x0000…'],
+      format: 'address',
+      chainId: form.value.chainId,
+      minLength: 1
+    }
+  };
+});
 
 const definition = computed(() => {
   return {
@@ -46,10 +80,17 @@ const definition = computed(() => {
         : {}),
       apiType: {
         type: ['string', 'null'],
-        enum: [null, 'governor-subgraph'],
+        enum: [null, 'governor-subgraph', 'apechain-delegate-registry'],
         options: [
           { id: null, name: 'No delegation API' },
-          { id: 'governor-subgraph', name: 'ERC-20 Votes' }
+          {
+            id: 'governor-subgraph',
+            name: DELEGATION_TYPES_NAMES['governor-subgraph']
+          },
+          {
+            id: 'apechain-delegate-registry',
+            name: DELEGATION_TYPES_NAMES['apechain-delegate-registry']
+          }
         ],
         title: 'Delegation type',
         nullable: true
@@ -69,20 +110,13 @@ const definition = computed(() => {
               format: 'network',
               networkId: props.networkId,
               networksListKind: 'full',
+              networksFilter: isApeChainDelegateRegistry.value
+                ? ['33139', '33111']
+                : undefined,
               title: 'Delegation contract network',
               nullable: true
             },
-            ...(form.value.chainId !== null
-              ? {
-                  contractAddress: {
-                    type: 'string',
-                    title: 'Delegation contract address',
-                    examples: ['0x0000…'],
-                    format: 'address',
-                    minLength: 1
-                  }
-                }
-              : {})
+            ...delegationOptions.value
           }
         : {})
     }
@@ -103,8 +137,8 @@ const formValid = computed(() => {
 
 async function handleSubmit() {
   const config = clone(form.value);
-  if (offchainNetworks.includes(props.networkId)) {
-    config.name = 'ERC-20 Votes';
+  if (offchainNetworks.includes(props.networkId) && config.apiType) {
+    config.name = DELEGATION_TYPES_NAMES[config.apiType];
   }
 
   emit('add', config);
@@ -112,8 +146,20 @@ async function handleSubmit() {
 }
 
 watch(
+  () => form.value.apiType,
+  (_, previousApiType) => {
+    if (!previousApiType) return;
+
+    form.value.chainId = null;
+    form.value.contractAddress = null;
+  }
+);
+
+watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.value = clone(props.initialState);
     } else {
@@ -135,16 +181,10 @@ watch(
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <PickerContact

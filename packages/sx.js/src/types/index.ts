@@ -2,11 +2,11 @@ import {
   TypedDataDomain,
   TypedDataField
 } from '@ethersproject/abstract-signer';
-import { BigNumberish, Call, RpcProvider, StarknetType } from 'starknet';
-import { NetworkConfig } from './networkConfig';
+import { Call, StarknetType } from 'starknet';
 import { MetaTransaction } from '../utils/encoding';
 
 export * from './networkConfig';
+export * from './governor';
 
 export enum Choice {
   Against = 0,
@@ -14,212 +14,20 @@ export enum Choice {
   Abstain = 2
 }
 
-export type Privacy = 'shutter' | null;
+export type Privacy = 'shutter' | 'none';
 
-export type ProposeCallArgs = {
-  author: string;
-  executionStrategy: {
-    address: string;
-    params: string[];
-  };
-  // rename to user_proposal_validation_params
-  strategiesParams: string[];
-  metadataUri: string;
-};
-
-export type VoteCallArgs = {
-  voter: string;
-  proposalId: number;
-  choice: Choice;
-  votingStrategies: IndexedConfig[];
-  metadataUri: string;
-};
-
-export type UpdateProposalCallArgs = {
-  author: string;
-  proposalId: number;
-  executionStrategy: {
-    address: string;
-    params: string[];
-  };
-  metadataUri: string;
-};
-
-export type Authenticator = {
-  type: string;
-  createProposeCall(envelope: Envelope<Propose>, args: ProposeCallArgs): Call;
-  createVoteCall(envelope: Envelope<Vote>, args: VoteCallArgs): Call;
-  createUpdateProposalCall(
-    envelope: Envelope<UpdateProposal>,
-    args: UpdateProposalCallArgs
-  ): Call;
-};
-
-export interface Strategy {
-  type: string;
-  getParams(
-    call: 'propose' | 'vote',
-    signerAddress: string,
-    address: string,
-    index: number,
-    metadata: Record<string, any> | null,
-    envelope: Envelope<Message>,
-    clientConfig: ClientConfig
-  ): Promise<string[]>;
-  getVotingPower: (
-    strategyAddress: string,
-    voterAddress: string,
-    metadata: Record<string, any> | null,
-    timestamp: number | null,
-    params: string[],
-    clientConfig: ClientConfig
-  ) => Promise<bigint>;
-}
-
-export type ClientOpts = {
-  ethUrl: string;
-  starkProvider: RpcProvider;
-  networkConfig: NetworkConfig;
-};
-
-export type ClientConfig = {
-  ethUrl: string;
-  starkProvider: RpcProvider;
-  networkConfig: NetworkConfig;
-};
-
-export type EthereumSigClientOpts = ClientOpts & {
-  manaUrl: string;
-};
-
-export type EthereumSigClientConfig = ClientConfig & {
-  manaUrl: string;
-};
-
-// TODO: normalize with EVM
-export type AddressConfig = {
-  addr: string;
-  params: string[];
-};
-
-export type IndexedConfig = {
-  index: number;
-  params: string[];
-};
-
-export type StrategyConfig = {
-  index: number;
-  address: string;
-  metadata?: Record<string, any>;
-};
-
-export type Propose = {
-  space: string;
-  authenticator: string;
-  strategies: StrategyConfig[];
-  executionStrategy: AddressConfig;
-  metadataUri: string;
-};
-
-export type UpdateProposal = {
-  space: string;
-  proposal: number;
-  authenticator: string;
-  executionStrategy: AddressConfig;
-  metadataUri: string;
-};
-
-export type Vote = {
-  space: string;
-  authenticator: string;
-  strategies: StrategyConfig[];
-  proposal: number;
-  choice: Choice;
-  metadataUri: string;
-};
-
-export type Alias = {
-  alias: string;
-};
-
-export type Message = Propose | Vote | UpdateProposal | Alias;
-
+// NOTE: This is shared between starknet and offchain clients.
+// Maybe we should find a way to unify it more or split it.
 export type SignatureData = {
   address: string;
   commitTxId?: string;
   commitHash?: string;
-  signature?: string | string[] | null;
+  signature?: string | string[];
   message?: Record<string, any>;
   domain?: TypedDataDomain;
   types?: Record<string, TypedDataField[] | StarknetType[]>;
   primaryType?: any;
 };
-
-export type Envelope<T extends Message> = {
-  signatureData?: SignatureData;
-  data: T;
-};
-
-export type StarknetEIP712ProposeMessage = {
-  space: string;
-  author: string;
-  executionStrategy: {
-    address: string;
-    params: string[];
-  };
-  userProposalValidationParams: string[];
-  metadataUri: string[];
-  salt: string;
-};
-
-export type StarknetEIP712UpdateProposalMessage = {
-  space: string;
-  author: string;
-  proposalId: { low: BigNumberish; high: BigNumberish };
-  executionStrategy: {
-    address: string;
-    params: string[];
-  };
-  metadataUri: string[];
-  salt: string;
-};
-
-export type StarknetEIP712VoteMessage = {
-  space: string;
-  voter: string;
-  proposalId: { low: BigNumberish; high: BigNumberish };
-  choice: string;
-  userVotingStrategies: { index: number; params: string[] }[];
-  metadataUri: string[];
-};
-
-export type StarknetEIP712AliasMessage = {
-  alias: string;
-  from?: string;
-  timestamp?: number;
-};
-
-export type EIP712ProposeMessage = StarknetEIP712ProposeMessage & {
-  authenticator: string;
-};
-
-export type EIP712UpdateProposalMessage = Omit<
-  StarknetEIP712UpdateProposalMessage,
-  'proposalId'
-> & {
-  authenticator: string;
-  proposalId: string;
-};
-
-export type EIP712VoteMessage = Omit<
-  StarknetEIP712VoteMessage,
-  'proposalId'
-> & {
-  authenticator: string;
-  proposalId: string;
-};
-
-export type StrategiesAddresses = { index: number; address: string }[];
 
 export type ExecutionInput = {
   calls?: Call[];
@@ -227,3 +35,74 @@ export type ExecutionInput = {
   // ethRelayer
   destination?: string;
 };
+
+export type BaseTransaction = {
+  to: string;
+  data: string;
+  value: string;
+  salt: string;
+};
+
+export type SendTokenTransaction = BaseTransaction & {
+  _type: 'sendToken';
+  _form: {
+    recipient: string;
+    amount: string;
+    token: {
+      name: string;
+      decimals: number;
+      symbol: string;
+      address: string;
+    };
+  };
+};
+
+export type SendNftTransaction = BaseTransaction & {
+  _type: 'sendNft';
+  _form: {
+    recipient: string;
+    sender: string;
+    amount: string;
+    nft: {
+      type: string;
+      address: string;
+      id: string;
+      name: string;
+      collection?: string;
+    };
+  };
+};
+
+export type StakeTokenTransaction = BaseTransaction & {
+  _type: 'stakeToken';
+  _form: {
+    recipient: string;
+    args: any;
+    amount: string;
+  };
+};
+
+export type ContractCallTransaction = BaseTransaction & {
+  _type: 'contractCall';
+  _form: {
+    abi: any[];
+    recipient: string;
+    method: string;
+    args: any;
+    amount?: string;
+  };
+};
+
+export type RawTransaction = BaseTransaction & {
+  _type: 'raw';
+  _form: {
+    recipient: string;
+  };
+};
+
+export type Transaction =
+  | SendTokenTransaction
+  | SendNftTransaction
+  | StakeTokenTransaction
+  | ContractCallTransaction
+  | RawTransaction;

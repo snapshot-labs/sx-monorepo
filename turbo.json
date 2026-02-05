@@ -1,26 +1,60 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
-  "pipeline": {
+  "tasks": {
     "build": {
-      "dependsOn": ["^build", "codegen"],
-      "outputs": ["dist/**", "dist.cjs/**"]
+      "dependsOn": ["^build", "codegen", "api#codegen"],
+      "outputs": ["dist/**", "dist.cjs/**"],
+      "env": ["ELECTRON"]
+    },
+    "build:electron": {
+      "dependsOn": ["build"],
+      "outputs": ["out/**"]
     },
     "lint": {},
+    "lint:fix": {},
+    "//#lint:scripts": {},
     "typecheck": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "codegen"]
     },
     "test": {
+      "dependsOn": ["^build"]
+    },
+    "test:integration": {
       "dependsOn": ["^build"]
     },
     "dev": {
       "cache": false,
       "persistent": true,
+      "dependsOn": ["codegen", "^build"],
+      "passThroughEnv": [
+        "UI_URL",
+        "ENABLED_NETWORKS",
+        "ENABLE_SNAPSHOT_X",
+        "ENABLE_GOVERNOR_BRAVO",
+        "ENABLE_OPENZEPPELIN",
+        "VITE_MANA_URL"
+      ]
+    },
+    "dev:electron": {
+      "cache": false,
+      "persistent": true,
       "dependsOn": ["codegen", "^build"]
     },
     "codegen": {
-      "outputs": [".checkpoint/**", "generated/**"],
-      "inputs": ["**/*.graphql", "**/*.gql"]
+      "outputs": [
+        ".checkpoint/**",
+        "src/networks/common/graphqlApi/gql/**",
+        "src/helpers/auction/gql/**",
+        "src/helpers/auction/referral/gql/**"
+      ],
+      "inputs": [
+        "**/*.gql",
+        "codegen.ts",
+        "src/networks/common/graphqlApi/queries.ts",
+        "src/helpers/auction/queries.ts",
+        "src/helpers/auction/referral/queries.ts"
+      ]
     }
   }
 }

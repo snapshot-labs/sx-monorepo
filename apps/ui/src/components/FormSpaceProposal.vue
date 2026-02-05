@@ -71,7 +71,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Proposal Validation</h4>
+  <UiEyebrow class="mb-2 font-medium">Proposal Validation</UiEyebrow>
   <div class="s-box">
     <UiWrapperInput
       :definition="{
@@ -92,8 +92,8 @@ watchEffect(() => {
       </button>
     </UiWrapperInput>
   </div>
-  <h4 class="eyebrow mb-2 font-medium">Proposal</h4>
-  <div class="s-box mb-4">
+  <UiEyebrow class="mb-2 font-medium">Proposal</UiEyebrow>
+  <div class="s-box">
     <UiInputString
       v-model="guidelines"
       :definition="GUIDELINES_DEFINITION"
@@ -112,7 +112,8 @@ watchEffect(() => {
       :open="isSelectValidationModalOpen"
       :network-id="networkId"
       :default-chain-id="snapshotChainId"
-      :space="space"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
       :current="proposalValidation"
       @close="isSelectValidationModalOpen = false"
       @save="value => (proposalValidation = value)"

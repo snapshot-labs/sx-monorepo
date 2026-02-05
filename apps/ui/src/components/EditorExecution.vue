@@ -3,7 +3,7 @@ import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
-import { shorten } from '@/helpers/utils';
+import { getChainIdKind, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
 
@@ -79,7 +79,7 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    typeof treasury.value.network === 'string'
+    getChainIdKind(treasury.value.network) !== 'evm'
   ) {
     return;
   }
@@ -87,7 +87,7 @@ async function handleSimulateClick() {
   simulationState.value = 'SIMULATING';
 
   const valid = await simulate(
-    treasury.value.network,
+    Number(treasury.value.network),
     treasury.value.wallet,
     model.value
   );
@@ -116,7 +116,7 @@ watch(
         class="w-full flex justify-between items-center px-4 py-3"
       >
         <UiBadgeNetwork
-          :id="treasury.networkId"
+          :chain-id="treasury.network"
           class="mr-3 shrink-0 size-fit"
           :class="{
             'opacity-40': disabled
@@ -148,35 +148,35 @@ watch(
         <div class="space-x-2 shrink-0">
           <UiTooltip title="Send token">
             <UiButton
-              :disabled="!treasury || disabled"
-              class="!px-0 w-[46px]"
+              :disabled="!treasury || disabled || !treasury.supportsTokens"
+              uniform
               @click="openModal('sendToken')"
             >
-              <IH-cash class="inline-block" />
+              <IH-cash />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Send NFT">
             <UiButton
-              :disabled="!treasury || disabled"
-              class="!px-0 w-[46px]"
+              :disabled="!treasury || disabled || !treasury.supportsNfts"
+              uniform
               @click="openModal('sendNft')"
             >
-              <IH-photograph class="inline-block" />
+              <IH-photograph />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Contract call">
             <UiButton
               :disabled="!treasury || disabled"
-              class="!px-0 w-[46px]"
+              uniform
               @click="openModal('contractCall')"
             >
-              <IH-code class="inline-block" />
+              <IH-code />
             </UiButton>
           </UiTooltip>
         </div>
       </div>
-      <template v-if="model.length > 0 && treasury && treasury.networkId">
-        <UiLabel label="Transactions" class="border-t" />
+      <template v-if="model.length > 0 && treasury">
+        <UiSectionHeader label="Transactions" class="border-t" />
         <div>
           <Draggable
             v-model="model"
@@ -184,10 +184,9 @@ watch(
             :item-key="() => undefined"
           >
             <template #item="{ element: tx, index: i }">
-              <TransactionsListItem :tx="tx" :network-id="treasury.networkId">
-                <template #left>
+              <TransactionsListItem :tx="tx" :chain-id="treasury.network">
+                <template v-if="model.length > 1" #left>
                   <div
-                    v-if="model.length > 1"
                     class="handle text-skin-link cursor-pointer opacity-50 hover:opacity-100"
                   >
                     <IH-switch-vertical />
@@ -247,18 +246,17 @@ watch(
 
     <teleport to="#modal">
       <ModalSendToken
-        v-if="treasury && treasury.networkId"
+        v-if="treasury && treasury.supportsTokens"
         :open="modalOpen.sendToken"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="treasury.networkId"
         :extra-contacts="extraContacts"
         :initial-state="modalState.sendToken"
         @close="modalOpen.sendToken = false"
         @add="addTx"
       />
       <ModalSendNft
-        v-if="treasury && treasury.networkId"
+        v-if="treasury && treasury.supportsNfts"
         :open="modalOpen.sendNft"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -268,17 +266,16 @@ watch(
         @add="addTx"
       />
       <ModalStakeToken
-        v-if="treasury && treasury.networkId"
+        v-if="treasury && treasury.supportsTokens"
         :open="modalOpen.stakeToken"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="treasury.networkId"
         :initial-state="modalState.stakeToken"
         @close="modalOpen.stakeToken = false"
         @add="addTx"
       />
       <ModalTransaction
-        v-if="treasury && treasury.networkId"
+        v-if="treasury"
         :open="modalOpen.contractCall"
         :network="treasury.network"
         :extra-contacts="extraContacts"

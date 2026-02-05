@@ -39,9 +39,13 @@ export type TestConfig = {
   vanillaProposalValidationStrategy: string;
   votingPowerProposalValidationStrategy: string;
   vanillaVotingStrategy: string;
+  vanillaVotingStrategyParams: string;
   compVotingStrategy: string;
+  compVotingStrategyParams: string;
   ozVotesVotingStrategy: string;
+  ozVotesVotingStrategyParams: string;
   merkleWhitelistVotingStrategy: string;
+  merkleWhitelistVotingStrategyParams: string;
   vanillaExecutionStrategy: string;
   avatarExecutionStrategy: string;
   timelockExecutionStrategy: string;
@@ -158,6 +162,7 @@ export async function setup(
 
   const networkConfig = {
     eip712ChainId: 31337,
+    blockTime: 1,
     proxyFactory,
     masterSpace,
     executionStrategiesImplementations: {
@@ -191,7 +196,11 @@ export async function setup(
     }
   } as const;
 
-  const ethTxClient = new EthereumTx({ networkConfig });
+  const ethTxClient = new EthereumTx({
+    networkConfig,
+    whitelistServerUrl: 'https://wls.snapshot.box',
+    provider
+  });
   const spaceAddress = await ethTxClient.predictSpaceAddress({
     signer,
     saltNonce: precomputedSpaceSalt
@@ -350,9 +359,13 @@ export async function setup(
     vanillaProposalValidationStrategy,
     votingPowerProposalValidationStrategy,
     vanillaVotingStrategy,
+    vanillaVotingStrategyParams: '0x00',
     compVotingStrategy,
+    compVotingStrategyParams: compToken,
     ozVotesVotingStrategy,
+    ozVotesVotingStrategyParams: erc20VotesToken,
     merkleWhitelistVotingStrategy,
+    merkleWhitelistVotingStrategyParams: whitelistVotingStrategyParams,
     vanillaExecutionStrategy,
     avatarExecutionStrategy,
     timelockExecutionStrategy,

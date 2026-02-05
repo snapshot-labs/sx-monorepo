@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
+import { ChainId } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   controller: ''
@@ -8,30 +9,34 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
+  chainId: ChainId;
   initialState?: { controller: string };
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', value: string);
-  (e: 'close');
+  (e: 'save', value: string): void;
+  (e: 'close'): void;
 }>();
 
-const CONTROLLER_DEFINITION = {
+const controllerDefinition = computed(() => ({
   type: 'string',
   format: 'ens-or-address',
+  chainId: props.chainId,
   title: 'Controller',
   examples: ['Address or ENS']
-};
+}));
 
-const formValidator = getValidator({
-  $async: true,
-  type: 'object',
-  additionalProperties: false,
-  required: ['controller'],
-  properties: {
-    controller: CONTROLLER_DEFINITION
-  }
-});
+const formValidator = computed(() =>
+  getValidator({
+    $async: true,
+    type: 'object',
+    additionalProperties: false,
+    required: ['controller'],
+    properties: {
+      controller: controllerDefinition.value
+    }
+  })
+);
 
 const form = reactive(clone(DEFAULT_FORM_STATE));
 const formValidated = ref(false);
@@ -42,6 +47,8 @@ const formErrors = ref({} as Record<string, any>);
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.controller = props.initialState.controller;
     } else {
@@ -53,7 +60,7 @@ watch(
 watchEffect(async () => {
   formValidated.value = false;
 
-  formErrors.value = await formValidator.validateAsync(form);
+  formErrors.value = await formValidator.value.validateAsync(form);
   formValidated.value = true;
 });
 </script>
@@ -70,16 +77,10 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <template v-if="showPicker">
@@ -95,8 +96,9 @@ watchEffect(async () => {
     <div v-else class="s-box p-4">
       <UiInputAddress
         v-model="form.controller"
-        :definition="CONTROLLER_DEFINITION"
+        :definition="controllerDefinition"
         :error="formErrors.delegatee"
+        :required="true"
         @pick="showPicker = true"
       />
     </div>

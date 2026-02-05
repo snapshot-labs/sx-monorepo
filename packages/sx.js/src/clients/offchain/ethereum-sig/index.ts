@@ -6,11 +6,13 @@ import {
 import {
   aliasTypes,
   approvalVoteTypes,
+  domain as baseDomain,
   basicVoteTypes,
   cancelProposalTypes,
+  createSpaceTypes,
   deleteSpaceTypes,
-  domain,
   encryptedVoteTypes,
+  flagProposalTypes,
   followSpaceTypes,
   proposeTypes,
   rankedChoiceVoteTypes,
@@ -23,12 +25,14 @@ import {
   weightedVoteTypes
 } from './types';
 import { offchainGoerli } from '../../../offchainNetworks';
-import { OffchainNetworkConfig, SignatureData } from '../../../types';
+import { OffchainNetworkEthereumConfig } from '../../../types';
 import {
   CancelProposal,
+  CreateSpace,
   DeleteSpace,
   EIP712CancelProposalMessage,
   EIP712DeleteSpaceMessage,
+  EIP712FlagProposalMessage,
   EIP712FollowSpaceMessage,
   EIP712Message,
   EIP712ProposeMessage,
@@ -40,9 +44,11 @@ import {
   EIP712UpdateUserMessage,
   EIP712VoteMessage,
   Envelope,
+  FlagProposal,
   FollowSpace,
   Propose,
   SetAlias,
+  SignatureData,
   UnfollowSpace,
   UpdateProposal,
   UpdateSpace,
@@ -52,24 +58,30 @@ import {
 } from '../types';
 import { encryptChoices } from '../utils';
 
-const SEQUENCER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
+const SEQUENCER_URLS: Record<
+  OffchainNetworkEthereumConfig['eip712ChainId'],
+  string
+> = {
   1: 'https://seq.snapshot.org',
   5: 'https://testnet.seq.snapshot.org'
 };
 
-const RELAYER_URLS: Record<OffchainNetworkConfig['eip712ChainId'], string> = {
+const RELAYER_URLS: Record<
+  OffchainNetworkEthereumConfig['eip712ChainId'],
+  string
+> = {
   1: 'https://relayer.snapshot.org',
   5: 'https://testnet.seq.snapshot.org' // no relayer for testnet
 };
 
 type EthereumSigClientOpts = {
-  networkConfig?: OffchainNetworkConfig;
+  networkConfig?: OffchainNetworkEthereumConfig;
   sequencerUrl?: string;
 };
 
 export class EthereumSig {
   sequencerUrl: string;
-  networkConfig: OffchainNetworkConfig;
+  networkConfig: OffchainNetworkEthereumConfig;
 
   constructor(opts?: EthereumSigClientOpts) {
     this.networkConfig = opts?.networkConfig || offchainGoerli;
@@ -82,6 +94,7 @@ export class EthereumSig {
       | EIP712VoteMessage
       | EIP712ProposeMessage
       | EIP712UpdateProposal
+      | EIP712FlagProposalMessage
       | EIP712CancelProposalMessage
       | EIP712FollowSpaceMessage
       | EIP712UnfollowSpaceMessage
@@ -101,6 +114,18 @@ export class EthereumSig {
       timestamp: parseInt((Date.now() / 1000).toFixed()),
       ...message
     };
+
+    const domain: typeof baseDomain & { chainId?: number } = baseDomain;
+    const isBrowser =
+      typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+    if (
+      isBrowser &&
+      ((window as any)?.ethereum?.isOKx || (window as any)?.ethereum?.isTrust)
+    ) {
+      domain.chainId = await signer.getChainId();
+    }
+
     const signature = await signer._signTypedData(domain, types, EIP712Message);
     return {
       address,
@@ -116,6 +141,7 @@ export class EthereumSig {
       | Vote
       | Propose
       | UpdateProposal
+      | FlagProposal
       | CancelProposal
       | FollowSpace
       | UnfollowSpace
@@ -200,6 +226,21 @@ export class EthereumSig {
     };
   }
 
+  public async flagProposal({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: FlagProposal;
+  }): Promise<Envelope<FlagProposal>> {
+    const signatureData = await this.sign(signer, data, flagProposalTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
   public async cancel({
     signer,
     data
@@ -234,6 +275,7 @@ export class EthereumSig {
         voteType = approvalVoteTypes;
         choice = data.choice as number[];
         break;
+      case 'copeland':
       case 'ranked-choice':
         voteType = rankedChoiceVoteTypes;
         choice = data.choice as number[];
@@ -254,10 +296,11 @@ export class EthereumSig {
       choice,
       reason: data.reason || '',
       app: data.app,
-      metadata: ''
+      metadata: '',
+      from: data.from
     };
 
-    if (data.privacy) {
+    if (data.privacy !== 'none') {
       message.privacy = data.privacy;
       voteType = encryptedVoteTypes;
       message.choice = await encryptChoices(
@@ -344,6 +387,21 @@ export class EthereumSig {
     data: UpdateStatement;
   }) {
     const signatureData = await this.sign(signer, data, updateStatementTypes);
+
+    return {
+      signatureData,
+      data
+    };
+  }
+
+  public async createSpace({
+    signer,
+    data
+  }: {
+    signer: Signer & TypedDataSigner;
+    data: CreateSpace;
+  }) {
+    const signatureData = await this.sign(signer, data, createSpaceTypes);
 
     return {
       signatureData,

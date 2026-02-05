@@ -5,7 +5,13 @@ import { CallData, Contract, LibraryError } from 'starknet';
 import EVMSlotValue from './abis/EVMSlotValue.json';
 import { getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
-import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import {
+  ClientConfig,
+  Envelope,
+  Propose,
+  Strategy,
+  Vote
+} from '../../clients/starknet/types';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 
@@ -50,6 +56,7 @@ export default function createEvmSlotValueStrategy(): Strategy {
       signerAddress: string,
       address: string,
       index: number,
+      params: string,
       metadata: Record<string, any> | null,
       envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig
@@ -86,6 +93,20 @@ export default function createEvmSlotValueStrategy(): Strategy {
         l1BlockNumber,
         ethUrl,
         chainId
+      );
+
+      // This check is only needed to look for "Slot is zero" error
+      // Current storage proof contracts will revert if we try to use them
+      // and user has no slot value.
+      // This can be removed after contracts include this
+      // https://github.com/snapshot-labs/sx-starknet/pull/624
+      await contract.get_voting_power(
+        startTimestamp,
+        getUserAddressEnum('ETHEREUM', signerAddress),
+        params.split(','),
+        CallData.compile({
+          storageProof
+        })
       );
 
       return CallData.compile({
@@ -151,10 +172,7 @@ export default function createEvmSlotValueStrategy(): Strategy {
       try {
         return await contract.get_voting_power(
           timestamp,
-          getUserAddressEnum(
-            voterAddress.length === 42 ? 'ETHEREUM' : 'STARKNET',
-            voterAddress
-          ),
+          getUserAddressEnum('ETHEREUM', voterAddress),
           params,
           CallData.compile({
             storageProof

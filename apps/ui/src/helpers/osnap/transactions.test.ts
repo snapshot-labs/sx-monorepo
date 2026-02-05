@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   OptimisticGovernorTransaction,
-  parseInternalTransaction,
   parseOSnapTransaction
 } from './transactions';
-import { ETH_CONTRACT } from '../constants';
 
 describe('parseOSnapTransaction', () => {
   it('should parse oSnap transfer funds transaction', () => {
@@ -210,98 +208,6 @@ describe('parseOSnapTransaction', () => {
     };
 
     expect(() => parseOSnapTransaction(transaction as any)).toThrowError(
-      'Invalid transaction type'
-    );
-  });
-});
-
-describe('parseInternalTransaction', () => {
-  it('should parse transfer token transaction', () => {
-    const transaction = {
-      _type: 'sendToken' as const,
-      to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
-      data: '0x',
-      value: '1',
-      salt: '',
-      _form: {
-        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
-        amount: '1',
-        token: {
-          name: 'Ether',
-          decimals: 18,
-          symbol: 'ETH',
-          address: ETH_CONTRACT
-        }
-      }
-    };
-
-    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
-  });
-
-  it('should parse transfer NFT transaction', () => {
-    const transaction = {
-      _type: 'sendNft' as const,
-      to: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
-      data: '0x42842e0e000000000000000000000000000000000000000000000000000000000000dead000000000000000000000000000000000000000000000000000000000000dead00000000000000000000000000000000000000000000000000000000000000a2',
-      value: '0',
-      salt: '',
-      _form: {
-        sender: '0x0',
-        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
-        amount: '1',
-        nft: {
-          type: 'erc721' as const,
-          address: '0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5',
-          id: '810',
-          name: 'Weeedidit Palls #101',
-          collection: 'Weee Did It Palz'
-        }
-      }
-    };
-
-    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
-  });
-
-  it('should parse contract call transaction', () => {
-    const transaction = {
-      _type: 'contractCall' as const,
-      data: '0xd0e30db0',
-      salt: '0x000000000000000000000000000000000000000000000000000000000000',
-      to: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844',
-      value: '20000000000000000000',
-      _form: {
-        abi: ['function deposit() payable'],
-        amount: '20',
-        args: {},
-        method: 'deposit()',
-        recipient: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844'
-      }
-    };
-
-    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
-  });
-
-  it('should parse raw transaction', () => {
-    const transaction = {
-      _type: 'raw' as const,
-      to: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
-      data: '0x',
-      value: '1',
-      salt: '',
-      _form: {
-        recipient: '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70'
-      }
-    };
-
-    expect(parseInternalTransaction(transaction)).toMatchSnapshot();
-  });
-
-  it('should throw on unknown transaction', () => {
-    const transaction = {
-      _type: 'unknown'
-    };
-
-    expect(() => parseInternalTransaction(transaction as any)).toThrowError(
       'Invalid transaction type'
     );
   });

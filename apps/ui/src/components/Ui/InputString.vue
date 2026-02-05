@@ -10,21 +10,21 @@ const model = defineModel<string>();
 const props = defineProps<{
   loading?: boolean;
   error?: string;
+  required?: boolean;
   definition: any;
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
     }
 
     return model.value;
   },
   set(newValue: string) {
-    dirty.value = true;
     model.value = newValue;
   }
 });
@@ -47,10 +47,6 @@ const inputLength = computed(() => {
   }
   return length;
 });
-
-watch(model, () => {
-  dirty.value = true;
-});
 </script>
 
 <template>
@@ -59,7 +55,8 @@ watch(model, () => {
     :definition="definition"
     :loading="loading"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
+    :required="required"
     :input-value-length="inputLength"
   >
     <input

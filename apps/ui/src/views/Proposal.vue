@@ -1,38 +1,54 @@
 <script setup lang="ts">
-import { HELPDESK_URL } from '@/helpers/constants';
+import { getBoostsCount } from '@/helpers/boost';
+import { FLAGS, HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
+import { useProposalQuery } from '@/queries/proposals';
+import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Space } from '@/types';
+import { TOTAL_NAV_HEIGHT } from '../../tailwind.config';
 
 const props = defineProps<{
   space: Space;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 const route = useRoute();
-const proposalsStore = useProposalsStore();
-const {
-  votingPower,
-  fetch: fetchVotingPower,
-  reset: resetVotingPower
-} = useVotingPower();
 const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
+const termsStore = useTermsStore();
 
 const modalOpenVote = ref(false);
+const modalOpenTerms = ref(false);
 const selectedChoice = ref<Choice | null>(null);
 const { votes } = useAccount();
 const editMode = ref(false);
 const discourseTopic: Ref<Topic | null> = ref(null);
+const boostCount = ref(0);
 
 const id = computed(() => route.params.proposal as string);
-const proposal = computed(() => {
-  return proposalsStore.getProposal(
-    props.space.id,
-    id.value,
-    props.space.network
-  );
-});
+
+const { data: proposal, isPending } = useProposalQuery(
+  props.space.network,
+  props.space.id,
+  id
+);
+
+const router = useRouter();
+
+const {
+  data: votingPower,
+  error: votingPowerError,
+  isPending: isVotingPowerPending,
+  isError: isVotingPowerError,
+  refetch: fetchVotingPower
+} = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(() => proposal.value),
+  toRef(() => ['active', 'pending'].includes(proposal.value?.state || ''))
+);
 
 const discussion = computed(() => {
   if (!proposal.value) return null;
@@ -40,20 +56,16 @@ const discussion = computed(() => {
   return sanitizeUrl(proposal.value.discussion);
 });
 
-const votingPowerDecimals = computed(() => {
-  if (!proposal.value) return 0;
-  return Math.max(
-    ...proposal.value.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
+const votingPowerDecimals = computed(() => proposal.value?.vp_decimals ?? 0);
 
 const currentVote = computed(
   () =>
     proposal.value &&
     votes.value[`${proposal.value.network}:${proposal.value.id}`]
+);
+
+const withoutContentInBottom = computed(
+  () => 'space-proposal-votes' === String(route.name)
 );
 
 async function handleVoteClick(choice: Choice) {
@@ -63,7 +75,18 @@ async function handleVoteClick(choice: Choice) {
   }
 
   selectedChoice.value = choice;
+
+  if (props.space.terms && !termsStore.areAccepted(props.space)) {
+    modalOpenTerms.value = true;
+    return;
+  }
+
   modalOpenVote.value = true;
+}
+
+function handleAcceptTerms() {
+  termsStore.accept(props.space);
+  handleVoteClick(selectedChoice.value!);
 }
 
 async function handleVoteSubmitted() {
@@ -71,35 +94,37 @@ async function handleVoteSubmitted() {
   editMode.value = false;
 }
 
-function handleFetchVotingPower() {
-  if (!proposal.value) return;
-
-  fetchVotingPower(proposal.value);
-}
-
 watch(
-  [proposal, () => web3.value.account, () => web3.value.authLoading],
-  ([toProposal, toAccount, toAuthLoading], [, fromAccount]) => {
-    if (fromAccount && toAccount && fromAccount !== toAccount) {
-      resetVotingPower();
-    }
-
-    if (toAuthLoading || !toProposal || !toAccount) return;
-
-    handleFetchVotingPower();
-  },
-  { immediate: true }
-);
-
-watch(
-  id,
-  async id => {
+  [id, proposal, isPending],
+  async ([id, proposal, isPending]) => {
     modalOpenVote.value = false;
     editMode.value = false;
-    await proposalsStore.fetchProposal(props.space.id, id, props.space.network);
+    discourseTopic.value = null;
+    boostCount.value = 0;
+
+    if (!isPending && !proposal) {
+      router.push({
+        name: 'space-overview',
+        params: { space: `${props.space.network}:${props.space.id}` }
+      });
+      return;
+    }
+
+    if (!proposal) return;
 
     if (discussion.value) {
-      discourseTopic.value = await loadSingleTopic(discussion.value);
+      loadSingleTopic(discussion.value).then(result => {
+        discourseTopic.value = result;
+      });
+    }
+
+    if (props.space.additionalRawData?.boost?.enabled) {
+      const bribeEnabled =
+        props.space.additionalRawData.boost.bribeEnabled || false;
+      const proposalEnd = proposal.max_end || 0;
+      getBoostsCount(id, bribeEnabled, proposalEnd).then(result => {
+        boostCount.value = result;
+      });
     }
   },
   { immediate: true }
@@ -108,19 +133,29 @@ watch(
 watchEffect(() => {
   if (!proposal.value) return;
 
-  setTitle(proposal.value.title || `Proposal #${proposal.value.proposal_id}`);
+  setTitle(
+    (proposal.value.flag_code !== FLAGS.DMCA && proposal.value.title) ||
+      `Proposal #${proposal.value.proposal_id}`
+  );
 });
 </script>
 
 <template>
-  <div class="flex items-stretch md:flex-row flex-col w-full md:h-full">
-    <UiLoading v-if="!proposal" class="ml-4 mt-3" />
-    <template v-else>
-      <div class="flex-1 grow min-w-0">
+  <div class="flex items-stretch md:flex-row flex-col w-full h-full">
+    <UiLoading v-if="isPending" class="ml-4 mt-3" />
+    <template v-else-if="proposal">
+      <div
+        :class="[
+          'flex-1 grow min-w-0',
+          { 'max-md:pb-0': !withoutContentInBottom }
+        ]"
+        v-bind="$attrs"
+      >
         <UiScrollerHorizontal
-          class="z-40 sticky top-[71px] lg:top-[72px]"
+          class="z-40 sticky top-header-height-with-offset lg:top-header-height"
           with-buttons
           gradient="xxl"
+          data-testid="proposal-tabs"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
@@ -132,9 +167,34 @@ watchEffect(() => {
                 }
               }"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-overview'"
                 text="Overview"
+              />
+            </AppLink>
+            <AppLink
+              v-if="
+                proposal.executions?.length ||
+                proposal.execution_strategy_type === 'safeSnap'
+              "
+              :to="{
+                name: 'space-proposal-execution',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-execution'"
+                :count="
+                  proposal.executions
+                    .map(execution => execution.transactions.length)
+                    .reduce((a, b) => a + b, 0)
+                "
+                text="Execution"
+                class="inline-block"
               />
             </AppLink>
             <AppLink
@@ -147,7 +207,7 @@ watchEffect(() => {
               }"
               class="flex items-center"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
@@ -166,7 +226,7 @@ watchEffect(() => {
                 }"
                 class="flex items-center"
               >
-                <UiLink
+                <UiLabel
                   :is-active="route.name === 'space-proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
@@ -179,172 +239,203 @@ watchEffect(() => {
                 target="_blank"
                 class="flex items-center"
               >
-                <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
+                <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
+              </a>
+            </template>
+            <template v-if="boostCount > 0">
+              <a
+                :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
+                class="flex items-center"
+                target="_blank"
+              >
+                <UiLabel
+                  :count="boostCount"
+                  text="Boost"
+                  class="inline-block"
+                />
               </a>
             </template>
           </div>
         </UiScrollerHorizontal>
         <router-view :proposal="proposal" />
       </div>
-      <Affix
+
+      <UiResizableHorizontal
+        id="proposal-sidebar"
+        :default="340"
+        :max="440"
+        :min="340"
         :class="[
-          'shrink-0 md:w-[340px] border-l-0 md:border-l',
-          { 'hidden md:block': route.name === 'space-proposal-votes' }
+          'shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg',
+          {
+            'hidden md:block': route.name === 'space-proposal-votes'
+          }
         ]"
-        :top="72"
-        :bottom="64"
       >
-        <div class="flex flex-col space-y-4 p-4">
-          <div
-            v-if="
-              !proposal.cancelled &&
-              ['pending', 'active'].includes(proposal.state)
-            "
-          >
-            <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
-              <template v-if="editMode">
-                <IH-cursor-click />
-                <span>Edit your vote</span>
-              </template>
-              <template v-else-if="currentVote">
-                <IH-check-circle />
-                <span>Your vote</span>
-              </template>
-              <template v-else>
-                <IH-cursor-click />
-                <span>Cast your vote</span>
-              </template>
-            </h4>
-            <div class="space-y-2">
-              <IndicatorVotingPower
-                v-if="web3.account && (!currentVote || editMode)"
-                v-slot="votingPowerProps"
-                :network-id="proposal.network"
-                :voting-power="votingPower"
-                class="mb-2 flex items-center"
-                @fetch-voting-power="handleFetchVotingPower"
-              >
-                <div
+        <Affix
+          data-testid="proposal-sidebar"
+          :top="TOTAL_NAV_HEIGHT"
+          :bottom="64"
+        >
+          <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
+            <div
+              v-if="
+                (!proposal.cancelled &&
+                  ['pending', 'active'].includes(proposal.state)) ||
+                currentVote
+              "
+            >
+              <UiEyebrow class="mb-2.5 flex items-center space-x-2">
+                <template v-if="editMode">
+                  <IH-cursor-click />
+                  <span>Edit your vote</span>
+                </template>
+                <template v-else-if="currentVote">
+                  <IH-check-circle />
+                  <span>Your vote</span>
+                </template>
+                <template v-else>
+                  <IH-cursor-click />
+                  <span>Cast your vote</span>
+                </template>
+              </UiEyebrow>
+              <div class="space-y-2">
+                <IndicatorVotingPower
                   v-if="
-                    votingPower?.error &&
-                    votingPower.error.details === 'NOT_READY_YET' &&
-                    ['evmSlotValue', 'ozVotesStorageProof'].includes(
-                      votingPower.error.source
-                    )
+                    (!currentVote || editMode) &&
+                    ['pending', 'active'].includes(proposal.state)
                   "
+                  v-slot="votingPowerProps"
+                  :network-id="proposal.network"
+                  :voting-power="votingPower"
+                  :is-loading="isVotingPowerPending"
+                  :is-error="isVotingPowerError"
+                  @fetch="fetchVotingPower"
                 >
-                  <span class="inline-flex align-top h-[27px] items-center">
-                    <IH-exclamation-circle class="mr-1" />
-                  </span>
-                  Please allow few minutes for the voting power to be collected
-                  from Ethereum.
-                </div>
-                <div v-else class="flex gap-1.5 items-center">
-                  <span class="shrink-0">Voting power:</span>
-                  <button
-                    type="button"
-                    class="truncate"
-                    @click="votingPowerProps.onClick"
-                  >
-                    <UiLoading
-                      v-if="!votingPower || votingPower.status === 'loading'"
+                  <div v-if="votingPowerError?.message === 'NOT_READY_YET'">
+                    <IH-exclamation-circle
+                      class="mr-1 -mt-1 inline-block h-[27px]"
                     />
-                    <IH-exclamation
-                      v-else-if="votingPower.status === 'error'"
-                      class="inline-block text-rose-500"
-                    />
-                    <span
-                      v-else
-                      class="text-skin-link"
-                      v-text="getFormattedVotingPower(votingPower)"
-                    />
-                  </button>
-                  <a
-                    v-if="
-                      votingPower?.status === 'success' &&
-                      votingPower.totalVotingPower === BigInt(0)
+                    Please allow a few minutes for the voting power to be
+                    computed.
+                  </div>
+                  <div v-else class="flex gap-1.5 items-center">
+                    <span class="shrink-0">Voting power:</span>
+                    <button
+                      type="button"
+                      class="truncate"
+                      :disabled="isVotingPowerPending"
+                      :class="{
+                        'cursor-not-allowed': isVotingPowerPending
+                      }"
+                      @click="votingPowerProps.onClick"
+                    >
+                      <UiLoading v-if="isVotingPowerPending" />
+                      <IH-exclamation
+                        v-else-if="isVotingPowerError"
+                        class="inline-block text-rose-500"
+                      />
+                      <span
+                        v-else
+                        class="text-skin-link"
+                        v-text="getFormattedVotingPower(votingPower)"
+                      />
+                    </button>
+                    <AppLink
+                      v-if="
+                        votingPower?.votingPowers?.every(v => v.value === 0n)
+                      "
+                      :to="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
+                    >
+                      <IH-question-mark-circle />
+                    </AppLink>
+                  </div>
+                </IndicatorVotingPower>
+                <ProposalVote
+                  v-if="proposal"
+                  :proposal="proposal"
+                  :edit-mode="editMode"
+                  @enter-edit-mode="editMode = true"
+                >
+                  <ProposalVoteBasic
+                    v-if="proposal.type === 'basic'"
+                    :choices="proposal.choices"
+                    @vote="handleVoteClick"
+                  />
+                  <ProposalVoteSingleChoice
+                    v-else-if="proposal.type === 'single-choice'"
+                    :proposal="proposal"
+                    :default-choice="currentVote?.choice"
+                    @vote="handleVoteClick"
+                  />
+                  <ProposalVoteApproval
+                    v-else-if="proposal.type === 'approval'"
+                    :proposal="proposal"
+                    :default-choice="currentVote?.choice"
+                    @vote="handleVoteClick"
+                  />
+                  <ProposalVoteRankedChoice
+                    v-else-if="
+                      ['ranked-choice', 'copeland'].includes(proposal.type)
                     "
-                    :href="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
-                    target="_blank"
-                  >
-                    <IH-question-mark-circle />
-                  </a>
-                </div>
-              </IndicatorVotingPower>
-              <ProposalVote
-                v-if="proposal"
+                    :proposal="proposal"
+                    :default-choice="currentVote?.choice"
+                    @vote="handleVoteClick"
+                  />
+                  <ProposalVoteWeighted
+                    v-else-if="
+                      ['weighted', 'quadratic'].includes(proposal.type)
+                    "
+                    :proposal="proposal"
+                    :default-choice="currentVote?.choice"
+                    @vote="handleVoteClick"
+                  />
+                </ProposalVote>
+              </div>
+            </div>
+            <div v-if="!proposal.cancelled">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
+                <IH-chart-square-bar />
+                Results
+              </UiEyebrow>
+              <ProposalResults
+                with-details
                 :proposal="proposal"
-                :edit-mode="editMode"
-                @enter-edit-mode="editMode = true"
-              >
-                <ProposalVoteBasic
-                  v-if="proposal.type === 'basic'"
-                  :choices="proposal.choices"
-                  @vote="handleVoteClick"
-                />
-                <ProposalVoteSingleChoice
-                  v-else-if="proposal.type === 'single-choice'"
-                  :proposal="proposal"
-                  :default-choice="currentVote?.choice"
-                  @vote="handleVoteClick"
-                />
-                <ProposalVoteApproval
-                  v-else-if="proposal.type === 'approval'"
-                  :proposal="proposal"
-                  :default-choice="currentVote?.choice"
-                  @vote="handleVoteClick"
-                />
-                <ProposalVoteRankedChoice
-                  v-else-if="proposal.type === 'ranked-choice'"
-                  :proposal="proposal"
-                  :default-choice="currentVote?.choice"
-                  @vote="handleVoteClick"
-                />
-                <ProposalVoteWeighted
-                  v-else-if="['weighted', 'quadratic'].includes(proposal.type)"
-                  :proposal="proposal"
-                  :default-choice="currentVote?.choice"
-                  @vote="handleVoteClick"
-                />
-              </ProposalVote>
+                :decimals="votingPowerDecimals"
+              />
+            </div>
+            <div v-if="space.labels?.length && proposal.labels?.length">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
+                <IH-tag />
+                Labels
+              </UiEyebrow>
+              <ProposalLabels
+                :space-id="`${space.network}:${space.id}`"
+                :space-labels="space.labels"
+                :labels="proposal.labels"
+                with-link
+              />
+            </div>
+            <div>
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
+                <IH-clock />
+                Timeline
+              </UiEyebrow>
+              <ProposalTimeline :data="proposal" />
             </div>
           </div>
-          <div
-            v-if="
-              !proposal.cancelled &&
-              proposal.state !== 'pending' &&
-              proposal.vote_count
-            "
-          >
-            <h4 class="mb-2.5 eyebrow flex items-center gap-2">
-              <IH-chart-square-bar />
-              Results
-            </h4>
-            <ProposalResults
-              with-details
-              :proposal="proposal"
-              :decimals="votingPowerDecimals"
-            />
-          </div>
-          <div v-if="space.labels?.length && proposal.labels?.length">
-            <h4 class="mb-2.5 eyebrow flex items-center gap-2">
-              <IH-tag />
-              Labels
-            </h4>
-            <ProposalLabels :labels="proposal.labels" :space="space" />
-          </div>
-          <div>
-            <h4 class="mb-2.5 eyebrow flex items-center gap-2">
-              <IH-clock />
-              Timeline
-            </h4>
-            <ProposalTimeline :data="proposal" />
-          </div>
-        </div>
-      </Affix>
+        </Affix>
+      </UiResizableHorizontal>
     </template>
     <teleport to="#modal">
+      <ModalTerms
+        v-if="space.terms"
+        :open="modalOpenTerms"
+        :space="space"
+        @close="modalOpenTerms = false"
+        @accept="handleAcceptTerms"
+      />
       <ModalVote
         v-if="proposal"
         :choice="selectedChoice"

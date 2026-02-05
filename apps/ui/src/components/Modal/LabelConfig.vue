@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { clone } from '@/helpers/utils';
+import { clone, getRandomHexColor } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { SpaceMetadataLabel } from '@/types';
 
@@ -9,7 +9,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataLabel);
+  (e: 'add', config: SpaceMetadataLabel): void;
   (e: 'close'): void;
 }>();
 
@@ -40,7 +40,8 @@ const definition = {
       type: 'string',
       format: 'color',
       title: 'Color',
-      examples: ['#FF0000']
+      examples: ['#FF0000'],
+      showControls: true
     }
   }
 };
@@ -59,7 +60,7 @@ function generateDefaultState(): SpaceMetadataLabel {
     id: crypto.randomUUID().substring(0, 8),
     name: '',
     description: '',
-    color: ''
+    color: getRandomHexColor()
   };
 }
 

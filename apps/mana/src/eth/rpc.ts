@@ -1,71 +1,120 @@
+import { Contract } from '@ethersproject/contracts';
 import {
   clients,
+  evmApe,
   evmArbitrum,
+  evmBase,
+  evmCurtis,
   evmMainnet,
+  evmMantle,
   EvmNetworkConfig,
+  evmNetworks,
   evmOptimism,
   evmPolygon,
   evmSepolia
 } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import { Response } from 'express';
 import { createWalletProxy } from './dependencies';
 import { rpcError, rpcSuccess } from '../utils';
+import logger from './logger';
 
-export const NETWORKS = new Map<number, EvmNetworkConfig>([
+const POSTER_CONFIG = {
+  contract: '0x000000000000cd17345801aa8147b8D3950260FF',
+  abi: ['function post(string calldata content, string calldata tag)']
+};
+
+const POSTER_SUPPORTED_NETWORKS = [8453, 11155111] as const;
+const BROKESTER_INDEXER_MAPPINGS = {
+  8453: 'base',
+  11155111: 'sepolia'
+} as const satisfies Record<(typeof POSTER_SUPPORTED_NETWORKS)[number], string>;
+
+const BROKESTER_API_URL =
+  process.env.BROKESTER_API_URL || 'https://api.brokester.box';
+
+const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [137, evmPolygon],
+  [8453, evmBase],
+  [5000, evmMantle],
   [42161, evmArbitrum],
   [1, evmMainnet],
+  [33139, evmApe],
+  [33111, evmCurtis],
   [11155111, evmSepolia]
 ]);
+
+export const NETWORK_IDS = new Map<number, string>(
+  Object.entries(evmNetworks).map(([networkId, config]) => [
+    config.Meta.eip712ChainId,
+    networkId
+  ])
+);
 
 export const createNetworkHandler = (chainId: number) => {
   const networkConfig = NETWORKS.get(chainId);
   if (!networkConfig) throw new Error('Unsupported chainId');
 
-  const getWallet = createWalletProxy(process.env.ETH_MNEMONIC || '', chainId);
+  const { provider, getWallet } = createWalletProxy(chainId);
 
-  const client = new clients.EvmEthereumTx({ networkConfig });
+  const client = new clients.EvmEthereumTx({
+    networkConfig,
+    whitelistServerUrl: 'https://wls.snapshot.box',
+    provider
+  });
+  const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
+  const governorBravoClient = new clients.GovernorBravoEthereumTx();
   const l1ExecutorClient = new clients.L1Executor();
 
   async function send(id: number, params: any, res: Response) {
     try {
-      const { signatureData, data } = params.envelope;
-      const { types } = signatureData;
+      const { signatureData } = params.envelope;
+      const { types, domain } = signatureData;
       let receipt;
 
-      const signer = getWallet(params.envelope.data.space);
+      logger.info({ params }, 'Processing send request');
 
-      console.time('Send');
-      console.log('Types', types);
-      console.log('Message', data);
+      if (signatureData.authenticatorType?.startsWith('OpenZeppelin')) {
+        const signer = getWallet(domain.verifyingContract);
 
-      if (types.Propose) {
-        receipt = await client.propose({
+        receipt = await openZeppelinClient.vote({
           signer,
           envelope: params.envelope
         });
-      } else if (types.updateProposal) {
-        receipt = await client.updateProposal({
+      } else if (signatureData.authenticatorType?.startsWith('GovernorBravo')) {
+        const signer = getWallet(domain.verifyingContract);
+
+        receipt = await governorBravoClient.vote({
           signer,
           envelope: params.envelope
         });
-      } else if (types.Vote) {
-        receipt = await client.vote({
-          signer,
-          envelope: params.envelope
-        });
+      } else {
+        const signer = getWallet(params.envelope.data.space);
+
+        if (types.Propose) {
+          receipt = await client.propose({
+            signer,
+            envelope: params.envelope
+          });
+        } else if (types.updateProposal) {
+          receipt = await client.updateProposal({
+            signer,
+            envelope: params.envelope
+          });
+        } else if (types.Vote) {
+          receipt = await client.vote({
+            signer,
+            envelope: params.envelope
+          });
+        }
       }
 
-      console.log('Receipt', receipt);
+      logger.info({ receipt }, 'Transaction broadcasted successfully');
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      console.log('Failed', e);
-      return rpcError(res, 500, e, id);
-    } finally {
-      console.timeEnd('Send');
+    } catch (err) {
+      logger.error({ err }, 'Failed to broadcast transaction');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -92,8 +141,9 @@ export const createNetworkHandler = (chainId: number) => {
       const result = await response.text();
 
       return rpcSuccess(res, result, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to finalize proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -110,8 +160,9 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to execute proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -127,8 +178,9 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to execute queued proposal');
+      return rpcError(res, 500, err, id);
     }
   }
 
@@ -170,11 +222,121 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
+  async function registerApeGasProposal(
+    id: number,
+    params: any,
+    res: Response
+  ) {
+    try {
+      const { viewId, snapshot } = params;
+
+      if (!viewId || !snapshot) {
+        return rpcError(res, 400, 'Missing viewId or snapshot', id);
+      }
+
+      // Ape API from Herodotus is down. For now we can skip storing the proposal in the DB.
+      // We also need it so we can add proper unique index on apegas_proposals.
+      //  await db.saveApeGasProposal({
+      //    chainId,
+      //    viewId,
+      //    snapshot
+      //  });
+
+      return rpcSuccess(res, 'success', id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to register ape gas proposal');
+      return rpcError(res, 500, err, id);
+    }
+  }
+
+  async function sendAuctionPartner(id: number, params: any, res: Response) {
+    try {
+      const { metadataUri, posterTag } = params;
+
+      if (!metadataUri || !posterTag) {
+        return rpcError(res, 400, 'Missing metadataUri or posterTag', id);
+      }
+
+      if (
+        !POSTER_SUPPORTED_NETWORKS.includes(
+          chainId as (typeof POSTER_SUPPORTED_NETWORKS)[number]
+        )
+      ) {
+        return rpcError(res, 400, 'Unsupported chain', id);
+      }
+
+      const ipfsUrl = metadataUri.replace(
+        'ipfs://',
+        'https://pineapple.fyi/ipfs/'
+      );
+      const metadataRes = await fetch(ipfsUrl);
+      if (!metadataRes.ok) {
+        return rpcError(res, 400, 'Failed to fetch IPFS metadata', id);
+      }
+
+      const metadata = await metadataRes.json();
+      const { signer, message } = metadata;
+
+      if (!signer || !message?.auction_tag) {
+        return rpcError(
+          res,
+          400,
+          'Invalid metadata: missing signer or auction_tag',
+          id
+        );
+      }
+
+      const inviteId = `${message.auction_tag}/${signer.toLowerCase()}`;
+
+      const indexer =
+        BROKESTER_INDEXER_MAPPINGS[
+          chainId as keyof typeof BROKESTER_INDEXER_MAPPINGS
+        ];
+
+      const response = await fetch(BROKESTER_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: `{ invite(indexer: "${indexer}", id: "${inviteId}") { id } }`
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data?.data?.invite) {
+          return rpcError(
+            res,
+            400,
+            'Invite already registered for this address',
+            id
+          );
+        }
+      }
+
+      const wallet = getWallet('poster');
+      const contract = new Contract(
+        POSTER_CONFIG.contract,
+        POSTER_CONFIG.abi,
+        wallet
+      );
+
+      const tx = await contract.post(metadataUri, posterTag);
+
+      return rpcSuccess(res, { hash: tx.hash }, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to post referral');
+      return rpcError(res, 500, err, id);
+    }
+  }
+
   return {
     send,
     finalizeProposal,
     execute,
     executeQueuedProposal,
-    executeStarknetProposal
+    executeStarknetProposal,
+    registerApeGasProposal,
+    sendAuctionPartner,
+    getWallet
   };
 };

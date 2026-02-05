@@ -6,8 +6,8 @@ import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
-import { _n, shorten } from '@/helpers/utils';
-import { ChainId, NetworkID } from '@/types';
+import { _n, getChainIdKind, shorten } from '@/helpers/utils';
+import { ChainId } from '@/types';
 
 const props = defineProps<{
   searchValue: string;
@@ -15,12 +15,11 @@ const props = defineProps<{
   assets: Token[];
   address: string;
   network: ChainId;
-  networkId: NetworkID;
 }>();
 
 const emit = defineEmits<{
-  (e: 'pick', value: string);
-  (e: 'add', token: Token);
+  (e: 'pick', value: string): void;
+  (e: 'add', token: Token): void;
 }>();
 
 const customTokenLoading = ref(false);
@@ -34,14 +33,9 @@ const filteredAssets = computed(() => {
   return props.assets
     .filter(asset => {
       return (
-        asset.symbol
-          .toLocaleLowerCase()
-          .includes(props.searchValue.toLocaleLowerCase()) ||
-        asset.name
-          .toLocaleLowerCase()
-          .includes(props.searchValue.toLocaleLowerCase()) ||
-        asset.contractAddress.toLocaleLowerCase() ===
-          props.searchValue.toLocaleLowerCase()
+        asset.symbol.toLowerCase().includes(props.searchValue.toLowerCase()) ||
+        asset.name.toLowerCase().includes(props.searchValue.toLowerCase()) ||
+        asset.contractAddress.toLowerCase() === props.searchValue.toLowerCase()
       );
     })
     .sort((a, b) => {
@@ -63,15 +57,15 @@ function handlePick(token: Token) {
 async function fetchCustomToken(address) {
   if (props.assets.find(asset => asset.contractAddress === address)) return;
 
-  if (typeof props.network === 'string') {
-    console.log('network is not a number (starknet is not supported)');
+  if (getChainIdKind(props.network) !== 'evm') {
+    console.log('only evm networks are supported');
     return;
   }
 
   customTokenLoading.value = true;
 
   const network = props.network;
-  const provider = getProvider(network);
+  const provider = getProvider(Number(network));
   const tokens = [address];
 
   try {
@@ -99,7 +93,7 @@ async function fetchCustomToken(address) {
       value: 0
     };
     isSearchValueValidToken.value = true;
-  } catch (e) {
+  } catch {
     isSearchValueValidToken.value = false;
   } finally {
     customTokenLoading.value = false;
@@ -143,9 +137,9 @@ watch(
       @click="handlePick(asset)"
     >
       <div class="flex items-center min-w-0 pr-2">
-        <UiBadgeNetwork :id="networkId">
+        <UiBadgeNetwork :chain-id="network">
           <UiStamp
-            :id="`${networkId}:${asset.contractAddress}`"
+            :id="`eip155:${network}:${asset.contractAddress}`"
             type="token"
             :size="32"
           />

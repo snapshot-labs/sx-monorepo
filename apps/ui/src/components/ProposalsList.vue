@@ -4,6 +4,7 @@ import { Proposal as ProposalType } from '@/types';
 const props = withDefaults(
   defineProps<{
     title?: string;
+    isError?: boolean;
     loading?: boolean;
     loadingMore?: boolean;
     limit?: number | 'off';
@@ -22,7 +23,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'endReached');
+  (e: 'endReached'): void;
 }>();
 
 const currentLimit = computed(() => {
@@ -34,8 +35,11 @@ const currentLimit = computed(() => {
 
 <template>
   <div>
-    <UiLabel v-if="title" :label="title" sticky />
+    <UiSectionHeader v-if="title" :label="title" sticky />
     <UiLoading v-if="loading" class="block px-4 py-3" />
+    <UiStateWarning v-else-if="isError" class="px-4 py-3">
+      Failed to load proposals.
+    </UiStateWarning>
     <div v-else>
       <UiContainerInfiniteScroll
         :loading-more="loadingMore"
@@ -49,13 +53,9 @@ const currentLimit = computed(() => {
           :show-author="showAuthor"
         />
       </UiContainerInfiniteScroll>
-      <div
-        v-if="!proposals.length"
-        class="px-4 py-3 flex items-center text-skin-link gap-2"
-      >
-        <IH-exclamation-circle />
-        <span v-text="'There are no proposals here.'" />
-      </div>
+      <UiStateWarning v-if="!proposals.length" class="px-4 py-3">
+        There are no proposals here.
+      </UiStateWarning>
       <AppLink
         v-else-if="route && proposals.length > currentLimit"
         :to="{ name: route.name }"

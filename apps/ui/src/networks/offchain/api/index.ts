@@ -3,10 +3,15 @@ import {
   createHttpLink,
   InMemoryCache
 } from '@apollo/client/core';
-import { CHAIN_IDS } from '@/helpers/constants';
-import { parseOSnapTransaction } from '@/helpers/osnap';
+import {
+  CHAIN_IDS,
+  DELEGATE_REGISTRY_STRATEGIES,
+  DELEGATION_TYPES_NAMES
+} from '@/helpers/constants';
+import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
+import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
-import { clone } from '@/helpers/utils';
+import { clone, compareAddresses } from '@/helpers/utils';
 import {
   NetworkApi,
   NetworkConstants,
@@ -18,12 +23,15 @@ import {
 import {
   Alias,
   Follow,
+  Member,
   NetworkID,
   OffchainAdditionalRawData,
   Proposal,
   ProposalExecution,
   ProposalState,
   RelatedSpace,
+  Setting,
+  SkinSettings,
   Space,
   SpaceMetadataDelegation,
   SpaceMetadataTreasury,
@@ -35,9 +43,11 @@ import {
 import {
   ALIASES_QUERY,
   LEADERBOARD_QUERY,
+  NETWORKS_QUERY,
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
+  SETTINGS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
   STATEMENTS_QUERY,
@@ -55,37 +65,73 @@ import {
   ApiStrategy,
   ApiVote
 } from './types';
-import { DEFAULT_VOTING_DELAY } from '../constants';
 
 const DEFAULT_AUTHENTICATOR = 'OffchainAuthenticator';
 
-const TREASURY_NETWORKS = new Map(
-  Object.entries(CHAIN_IDS).map(([networkId, chainId]) => [
-    chainId,
-    networkId as keyof typeof CHAIN_IDS
-  ])
-);
+const SPLIT_DELEGATION_STRATEGIES = ['split-delegation'];
 
-const DELEGATION_STRATEGIES = [
-  'delegation',
-  'erc20-balance-of-delegation',
-  'delegation-with-cap',
-  'delegation-with-overrides',
-  'with-delegation',
-  'erc20-balance-of-with-delegation'
-];
+const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
+  name: 'Split Delegation',
+  apiType: 'split-delegation',
+  apiUrl: 'https://delegate-api.gnosisguild.org',
+  contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
+  chainId: '1'
+};
 
-const DELEGATE_REGISTRY_URL = 'https://delegate-registry-api.snapshot.box';
+const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
+  s: 'https://delegate-registry-api.snapshot.box',
+  's-tn': 'https://testnet-delegate-registry-api.snapshot.box'
+};
 
-function getProposalState(proposal: ApiProposal): ProposalState {
+function getProposalState(
+  networkId: NetworkID,
+  proposal: ApiProposal
+): ProposalState {
   if (proposal.state === 'closed') {
-    if (proposal.scores_total < proposal.quorum) return 'rejected';
-    return proposal.type !== 'basic' || proposal.scores[0] > proposal.scores[1]
-      ? 'passed'
-      : 'rejected';
+    if (proposal.type !== 'basic') {
+      return 'closed';
+    }
+
+    const currentQuorum = getProposalCurrentQuorum(networkId, {
+      scores: proposal.scores,
+      scores_total: proposal.scores_total,
+      quorum_type: proposal.quorumType
+    });
+
+    if (proposal.quorumType === 'rejection') {
+      return currentQuorum > proposal.quorum ? 'rejected' : 'passed';
+    }
+
+    if (currentQuorum < proposal.quorum) {
+      return 'rejected';
+    }
+
+    return proposal.scores[0] > proposal.scores[1] ? 'passed' : 'rejected';
   }
 
   return proposal.state;
+}
+
+function getAuthorRole(
+  authorAddress: string,
+  {
+    admins,
+    moderators,
+    members
+  }: {
+    admins: string[];
+    moderators: string[];
+    members: string[];
+  }
+): Member['role'] | null {
+  if (admins.some(address => compareAddresses(address, authorAddress)))
+    return 'admin';
+  if (moderators.some(address => compareAddresses(address, authorAddress)))
+    return 'moderator';
+  if (members.some(address => compareAddresses(address, authorAddress)))
+    return 'author';
+
+  return null;
 }
 
 function formatSpace(
@@ -94,13 +140,10 @@ function formatSpace(
   constants: NetworkConstants
 ): Space {
   const treasuries: SpaceMetadataTreasury[] = space.treasuries.map(treasury => {
-    const chainId = treasury.network.startsWith('0x')
-      ? treasury.network
-      : parseInt(treasury.network, 10);
+    const chainId = treasury.network;
 
     return {
       name: treasury.name,
-      network: TREASURY_NETWORKS.get(chainId) ?? null,
       address: treasury.address,
       chainId
     };
@@ -123,25 +166,44 @@ function formatSpace(
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
     return {
       id: space.id,
+      protocol: 'snapshot',
       name: space.name,
       network: networkId,
       avatar: space.avatar,
       cover: space.cover || '',
       proposal_count: space.proposalsCount,
       vote_count: space.votesCount,
+      follower_count: space.followersCount,
+      active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
-      snapshot_chain_id: parseInt(space.network)
+      snapshot_chain_id: space.network
+    };
+  }
+
+  function formatSkinSettings(skinSettings: SkinSettings): SkinSettings {
+    return {
+      bg_color: skinSettings?.bg_color || '',
+      link_color: skinSettings?.link_color || '',
+      text_color: skinSettings?.text_color || '',
+      content_color: skinSettings?.content_color || '',
+      border_color: skinSettings?.border_color || '',
+      heading_color: skinSettings?.heading_color || '',
+      primary_color: skinSettings?.primary_color || '',
+      theme: skinSettings?.theme || 'light',
+      logo: skinSettings?.logo
     };
   }
 
   const additionalRawData: OffchainAdditionalRawData = {
     type: 'offchain',
     private: space.private,
+    flagged: space.flagged,
+    flagCode: space.flagCode,
+    hibernated: space.hibernated,
     domain: space.domain,
     skin: space.skin,
-    guidelines: space.guidelines,
-    template: space.template,
+    skinSettings: formatSkinSettings(space.skinSettings),
     strategies: space.strategies,
     categories: space.categories,
     admins: space.admins,
@@ -158,11 +220,13 @@ function formatSpace(
 
   return {
     id: space.id,
+    protocol: 'snapshot',
     network: networkId,
     verified: space.verified,
     turbo: space.turbo,
+    turbo_expiration: space.turboExpiration,
     controller: '',
-    snapshot_chain_id: parseInt(space.network),
+    snapshot_chain_id: space.network,
     name: space.name || '',
     avatar: space.avatar || '',
     cover: space.cover || '',
@@ -171,23 +235,25 @@ function formatSpace(
     github: space.github || '',
     twitter: space.twitter || '',
     discord: '',
+    farcaster: space.farcaster || '',
     coingecko: space.coingecko || '',
     proposal_count_1d: space.proposalsCount1d,
     proposal_count_30d: space.proposalsCount30d,
     proposal_count: space.proposalsCount,
     vote_count: space.votesCount,
     follower_count: space.followersCount,
-    voting_power_symbol: space.symbol,
+    voting_power_symbol: space.symbol || '',
+    active_proposals: space.activeProposals,
     voting_delay: space.voting.delay ?? 0,
     voting_types: space.voting.type
       ? [space.voting.type]
       : constants.EDITOR_VOTING_TYPES,
-    min_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
-    max_voting_period: space.voting.period ?? DEFAULT_VOTING_DELAY,
+    min_voting_period: space.voting.period ?? 0,
+    max_voting_period: space.voting.period ?? 0,
     proposal_threshold: '1',
     treasuries,
     labels: space.labels,
-    delegations: formatDelegations(space),
+    delegations: formatDelegations(space, networkId),
     // NOTE: ignored
     created: 0,
     authenticators: [DEFAULT_AUTHENTICATOR],
@@ -209,6 +275,9 @@ function formatSpace(
     children: space.children.map(formatRelatedSpace),
     parent: space.parent ? formatRelatedSpace(space.parent) : null,
     terms: space.terms,
+    privacy: space.voting.privacy || 'none',
+    guidelines: space.guidelines,
+    template: space.template,
     additionalRawData
   };
 }
@@ -244,6 +313,9 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
     }
+  } else if (proposal.plugins.safeSnap) {
+    executions = [];
+    executionType = 'safeSnap';
   }
 
   if (proposal.plugins.readOnlyExecution) {
@@ -262,15 +334,31 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     ];
   }
 
-  const state = getProposalState(proposal);
+  const voting_power_validation_params: any = [proposal.validation.params];
+  if (
+    proposal.validation.name === 'basic' &&
+    !(proposal.validation.params.strategies || []).length
+  ) {
+    voting_power_validation_params[0].strategies = proposal.strategies;
+  }
+
+  const state = getProposalState(networkId, proposal);
+
+  const { admins, moderators, members } = proposal.space;
 
   return {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
+    isInvalid: false,
     author: {
       id: proposal.author,
-      address_type: 1
+      address_type: 1,
+      role: getAuthorRole(proposal.author, {
+        admins,
+        moderators,
+        members
+      })
     },
     proposal_id: proposal.id,
     type: proposal.type,
@@ -290,24 +378,29 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     labels: proposal.labels,
     scores: proposal.scores,
     scores_total: proposal.scores_total,
+    vp_decimals: 0,
     vote_count: proposal.votes,
     state,
     cancelled: false,
     vetoed: false,
-    completed: proposal.state === 'closed',
+    execution_settled: false,
+    completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,
+      protocol: 'snapshot',
       name: proposal.space.name,
-      snapshot_chain_id: parseInt(proposal.space.network),
+      snapshot_chain_id: proposal.space.network,
       avatar: proposal.space.avatar,
       controller: '',
-      admins: proposal.space.admins,
-      moderators: proposal.space.moderators,
-      voting_power_symbol: proposal.space.symbol,
+      admins,
+      moderators,
+      voting_power_symbol: proposal.space.symbol || '',
       authenticators: [DEFAULT_AUTHENTICATOR],
       executors: [],
       executors_types: [],
-      strategies_parsed_metadata: []
+      strategies_parsed_metadata: [],
+      labels: proposal.space.labels,
+      terms: proposal.space.terms
     },
     execution_strategy_type: executionType,
     has_execution_window_opened: state === 'passed',
@@ -322,10 +415,16 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
+    voting_power_validation_strategy_strategies: [proposal.validation.name],
+    voting_power_validation_strategy_strategies_params:
+      voting_power_validation_params,
     tx: '',
     execution_tx: null,
     veto_tx: null,
-    privacy: proposal.privacy
+    privacy: proposal.privacy || 'none',
+    flagged: proposal.flagged,
+    flag_code: proposal.flagCode,
+    plugins: proposal.plugins
   };
 }
 
@@ -347,22 +446,25 @@ function formatVote(vote: ApiVote): Vote {
   };
 }
 
-function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
+function formatDelegations(
+  space: ApiSpace,
+  networkId: NetworkID
+): SpaceMetadataDelegation[] {
   const delegations: SpaceMetadataDelegation[] = [];
 
-  const spaceDelegationStrategy = space.strategies.find(strategy =>
-    DELEGATION_STRATEGIES.includes(strategy.name)
+  const basicDelegationStrategy = space.strategies.find(strategy =>
+    DELEGATE_REGISTRY_STRATEGIES.includes(strategy.name)
   );
 
   if (space.delegationPortal) {
-    const [apiType, name] =
+    const apiType =
       space.delegationPortal.delegationType === 'compound-governor'
-        ? (['governor-subgraph', 'ERC-20 Votes'] as const)
-        : [space.delegationPortal.delegationType, 'Split Delegation'];
+        ? 'governor-subgraph'
+        : space.delegationPortal.delegationType;
 
-    const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
-      ? space.delegationPortal.delegationNetwork
-      : parseInt(space.delegationPortal.delegationNetwork, 10);
+    const name = DELEGATION_TYPES_NAMES[apiType];
+
+    const chainId = space.delegationPortal.delegationNetwork;
 
     delegations.push({
       name,
@@ -373,16 +475,29 @@ function formatDelegations(space: ApiSpace): SpaceMetadataDelegation[] {
     });
   }
 
-  if (spaceDelegationStrategy) {
-    const chainId = parseInt(space.network, 10);
+  if (basicDelegationStrategy) {
+    const chainId = space.network;
 
-    delegations.push({
-      name: 'Delegate registry',
-      apiType: 'delegate-registry',
-      apiUrl: DELEGATE_REGISTRY_URL,
-      contractAddress: space.id,
-      chainId
-    });
+    const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
+    if (apiUrl) {
+      delegations.push({
+        name: DELEGATION_TYPES_NAMES['delegate-registry'],
+        apiType: 'delegate-registry',
+        apiUrl,
+        contractAddress: space.id,
+        chainId
+      });
+    }
+  }
+
+  const splitDelegationStrategy = space.strategies.find(strategy =>
+    SPLIT_DELEGATION_STRATEGIES.includes(strategy.name)
+  );
+  if (
+    splitDelegationStrategy &&
+    space.delegationPortal?.delegationType !== SPLIT_DELEGATION_DATA.apiType
+  ) {
+    delegations.push(SPLIT_DELEGATION_DATA);
   }
 
   return delegations;
@@ -404,9 +519,11 @@ function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
         }
       : {},
     spaceCount: strategy.spacesCount,
+    verifiedSpaceCount: strategy.verifiedSpacesCount,
     paramsDefinition: hasDefinition
       ? strategy.schema.definitions?.Strategy
-      : null
+      : null,
+    disabled: strategy.disabled
   };
 }
 
@@ -502,7 +619,7 @@ export function createApi(
       filters?: ProposalsFilter,
       searchQuery = ''
     ): Promise<Proposal[]> => {
-      const _filters: Record<string, any> = clone(filters || {});
+      const _filters: ProposalsFilter = clone(filters || {});
       const state = _filters.state;
 
       if (state === 'active') {
@@ -522,6 +639,12 @@ export function createApi(
         });
 
       delete _filters.state;
+
+      if (_filters.labels?.length) {
+        _filters.labels_in = _filters.labels;
+      }
+
+      delete _filters.labels;
 
       const { data } = await apollo.query({
         query: PROPOSALS_QUERY,
@@ -564,13 +687,27 @@ export function createApi(
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
-      if (!filter || filter.hasOwnProperty('searchQuery')) {
+      delete filter?.protocol;
+
+      if (
+        !filter ||
+        filter.hasOwnProperty('searchQuery') ||
+        filter.hasOwnProperty('category') ||
+        filter.hasOwnProperty('network')
+      ) {
+        const where = {};
+        if (filter?.searchQuery) where['search'] = filter.searchQuery;
+        if (filter?.category) where['category'] = filter.category;
+        if (filter?.network && filter.network !== 'all') {
+          where['network'] = filter.network;
+        }
+
         const { data } = await apollo.query({
           query: RANKING_QUERY,
           variables: {
             first: Math.min(limit, 20),
             skip,
-            where: filter?.searchQuery ? { search: filter.searchQuery } : {}
+            where
           }
         });
         return data.ranking.items.map(space =>
@@ -783,6 +920,31 @@ export function createApi(
       if (!data.strategy) return null;
 
       return formatStrategy(data.strategy as ApiStrategy);
-    }
+    },
+    getNetworks: async () => {
+      const { data } = await apollo.query({
+        query: NETWORKS_QUERY
+      });
+
+      return Object.fromEntries(
+        data.networks.map((network: any) => [
+          network.id,
+          {
+            spaces_count: network.spacesCount,
+            premium: network.premium
+          }
+        ])
+      );
+    },
+    loadSettings: async (): Promise<Setting[]> => {
+      const {
+        data: { options }
+      }: { data: { options: Setting[] } } = await apollo.query({
+        query: SETTINGS_QUERY
+      });
+
+      return options;
+    },
+    loadLastIndexedBlock: async () => null
   };
 }

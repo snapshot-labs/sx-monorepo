@@ -1,12 +1,17 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { clients, starknetNetworks, utils } from '@snapshot-labs/sx';
+import { clients, starknetNetworks } from '@snapshot-labs/sx';
 import { CallData, uint256 } from 'starknet';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
-import { pinPineapple } from '@/helpers/pin';
-import { getUrl, shorten, verifyNetwork } from '@/helpers/utils';
+import { pin } from '@/helpers/pin';
+import { _n, getUrl, shorten, sleep, verifyNetwork } from '@/helpers/utils';
+import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
-import { EVM_CONNECTORS } from '../common/constants';
-import { StrategyConfig, StrategyTemplate } from '../types';
+import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '../common/constants';
+import {
+  AuthenticatorSupportInfo,
+  StrategyConfig,
+  StrategyTemplate
+} from '../types';
 import IHCode from '~icons/heroicons-outline/code';
 import IHCube from '~icons/heroicons-outline/cube';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
@@ -18,19 +23,44 @@ export function createConstants(
   baseNetworkId: NetworkID,
   baseChainId: number
 ) {
-  const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
-  if (!config) throw new Error(`Unsupported network ${networkId}`);
+  if (!(networkId in starknetNetworks)) {
+    throw new Error(`Unsupported network ${networkId}`);
+  }
 
-  const SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthSig]: true,
-    [config.Authenticators.EthTx]: true,
-    [config.Authenticators.StarkSig]: true,
-    [config.Authenticators.StarkTx]: true
-  };
+  const config = starknetNetworks[networkId as keyof typeof starknetNetworks];
 
-  const CONTRACT_SUPPORTED_AUTHENTICATORS = {
-    [config.Authenticators.EthTx]: true
-  };
+  const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
+    {
+      [config.Authenticators.EthSig]: {
+        isSupported: true,
+        isContractSupported: false,
+        isReasonSupported: true,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.EthTx]: {
+        priority: 2,
+        isSupported: true,
+        isContractSupported: true,
+        isReasonSupported: true,
+        relayerType: 'evm-tx',
+        connectors: EVM_CONNECTORS
+      },
+      [config.Authenticators.StarkSig]: {
+        isSupported: true,
+        isContractSupported: false,
+        isReasonSupported: true,
+        relayerType: 'starknet',
+        connectors: STARKNET_CONNECTORS
+      },
+      [config.Authenticators.StarkTx]: {
+        priority: 1,
+        isSupported: true,
+        isContractSupported: false,
+        isReasonSupported: true,
+        connectors: STARKNET_CONNECTORS
+      }
+    };
 
   const SUPPORTED_STRATEGIES = {
     [config.Strategies.MerkleWhitelist]: true,
@@ -49,12 +79,6 @@ export function createConstants(
   const SUPPORTED_EXECUTORS = {
     EthRelayer: true
   };
-
-  const RELAYER_AUTHENTICATORS = {
-    [config.Authenticators.StarkSig]: 'starknet',
-    [config.Authenticators.EthSig]: 'evm',
-    [config.Authenticators.EthTx]: 'evm-tx'
-  } as const;
 
   const AUTHS = {
     [config.Authenticators.EthSig]: 'Ethereum signature',
@@ -95,7 +119,7 @@ export function createConstants(
     icon: IHCode,
     generateSummary: (params: Record<string, any>) =>
       `(${shorten(params.contractAddress)}, ${params.slotIndex})`,
-    generateParams: (params: Record<string, any>) => {
+    generateParams: async (params: Record<string, any>) => {
       return CallData.compile({
         contract_address: params.contractAddress,
         slot_index: uint256.bnToUint256(params.slotIndex)
@@ -138,6 +162,7 @@ export function createConstants(
         contractAddress: {
           type: 'string',
           format: 'address',
+          chainId: baseChainId,
           title: 'Contract address',
           examples: ['0x0000…']
         },
@@ -206,15 +231,17 @@ export function createConstants(
         return params?.strategies?.length > 0;
       },
       generateSummary: (params: Record<string, any>) => `(${params.threshold})`,
-      generateParams: (params: Record<string, any>) => {
-        const strategies = params.strategies.map((strategy: StrategyConfig) => {
-          return {
-            address: strategy.address,
-            params: strategy.generateParams
-              ? strategy.generateParams(strategy.params)
-              : []
-          };
-        });
+      generateParams: async (params: Record<string, any>) => {
+        const strategies = await Promise.all(
+          params.strategies.map(async (strategy: StrategyConfig) => {
+            return {
+              address: strategy.address,
+              params: strategy.generateParams
+                ? await strategy.generateParams(strategy.params)
+                : []
+            };
+          })
+        );
 
         return CallData.compile({
           threshold: uint256.bnToUint256(params.threshold),
@@ -227,7 +254,7 @@ export function createConstants(
             if (!strategy.generateMetadata) return;
 
             const metadata = await strategy.generateMetadata(strategy.params);
-            const pinned = await pinPineapple(metadata);
+            const pinned = await pin(metadata);
 
             return `ipfs://${pinned.cid}`;
           })
@@ -251,9 +278,9 @@ export function createConstants(
         required: ['threshold'],
         properties: {
           threshold: {
-            type: 'integer',
+            type: 'string',
+            format: 'uint256',
             title: 'Proposal threshold',
-            minimum: 1,
             examples: ['1']
           }
         }
@@ -277,27 +304,30 @@ export function createConstants(
                 .split(/[\n,]/)
                 .filter((s: string) => s.trim().length).length;
 
-        return `(${length} ${length === 1 ? 'address' : 'addresses'})`;
+        return `(${_n(length)} ${length === 1 ? 'address' : 'addresses'})`;
       },
-      generateParams: (params: Record<string, any>) => {
-        const leaves = params.whitelist
+      generateParams: async (params: Record<string, any>) => {
+        const entries = params.whitelist
           .split(/[\n,]/)
-          .filter((s: string) => s.trim().length)
-          .map((item: string) => {
-            const [address, votingPower] = item.split(':').map(s => s.trim());
-            const type =
-              address.length === 42
-                ? utils.merkle.AddressType.ETHEREUM
-                : utils.merkle.AddressType.STARKNET;
+          .map((s: string) => s.trim())
+          .filter((s: string) => s.length);
 
-            return new utils.merkle.Leaf(type, address, BigInt(votingPower));
+        const requestId = await generateMerkleTree({
+          network: 'starknet',
+          entries
+        });
+
+        await sleep(500);
+
+        while (true) {
+          const root = await getMerkleRoot({
+            requestId
           });
 
-        return [
-          utils.merkle.generateMerkleRoot(
-            leaves.map((leaf: utils.merkle.Leaf) => leaf.hash)
-          )
-        ];
+          if (root) return [root];
+
+          await sleep(5000);
+        }
       },
       generateMetadata: async (params: Record<string, any>) => {
         const tree = params.whitelist
@@ -314,7 +344,7 @@ export function createConstants(
             };
           });
 
-        const pinned = await pinPineapple({ tree });
+        const pinned = await pin({ tree });
 
         return {
           name: 'Whitelist',
@@ -354,7 +384,7 @@ export function createConstants(
         type: 'object',
         title: 'Params',
         additionalProperties: false,
-        required: [],
+        required: ['whitelist'],
         properties: {
           whitelist: {
             type: 'string',
@@ -380,7 +410,9 @@ export function createConstants(
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,
-      generateParams: (params: Record<string, any>) => [params.contractAddress],
+      generateParams: async (params: Record<string, any>) => [
+        params.contractAddress
+      ],
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'ERC-20 Votes (EIP-5805)',
         properties: {
@@ -410,6 +442,7 @@ export function createConstants(
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: config.Meta.eip712ChainId,
             title: 'Token address',
             examples: ['0x0000…']
           },
@@ -452,7 +485,8 @@ export function createConstants(
           createSlotValueStrategyConfig(
             config.Strategies.OZVotesTrace208StorageProof,
             'OZ Votes storage proof (trace 208)',
-            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 208 format).'
+            'A strategy that allows to use the value of an slot on EVM chain (for example ERC-20 balance on L1) as voting power including delegated balances (trace 208 format).',
+            `${HELPDESK_URL}/en/articles/9839152-oz-votes-storage-proof-voting-strategy`
           )
         ]
       : [])
@@ -464,7 +498,8 @@ export function createConstants(
         !(
           [
             config.Strategies.EVMSlotValue,
-            config.Strategies.OZVotesStorageProof
+            config.Strategies.OZVotesStorageProof,
+            config.Strategies.OZVotesTrace208StorageProof
           ] as string[]
         ).includes(strategy.address)
     );
@@ -516,6 +551,7 @@ export function createConstants(
           l1Controller: {
             type: 'string',
             format: 'address',
+            chainId: baseChainId,
             title: 'Controller address',
             examples: ['0x0000…']
           },
@@ -527,6 +563,7 @@ export function createConstants(
           contractAddress: {
             type: 'string',
             format: 'address',
+            chainId: baseChainId,
             title: 'Avatar address',
             examples: ['0x0000…']
           }
@@ -538,11 +575,9 @@ export function createConstants(
   const EDITOR_VOTING_TYPES: VoteType[] = ['basic'];
 
   return {
-    SUPPORTED_AUTHENTICATORS,
-    CONTRACT_SUPPORTED_AUTHENTICATORS,
+    AUTHENTICATORS_SUPPORT_INFO,
     SUPPORTED_STRATEGIES,
     SUPPORTED_EXECUTORS,
-    RELAYER_AUTHENTICATORS,
     AUTHS,
     PROPOSAL_VALIDATIONS,
     STRATEGIES,

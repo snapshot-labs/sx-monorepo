@@ -7,7 +7,7 @@ const followedSpacesStore = useFollowedSpacesStore();
 <template>
   <div class="flex flex-col border-r text-center">
     <AppLink :to="{ name: 'my-home' }" class="h-[72px] block">
-      <IC-zap class="inline-block my-[18px] size-[40px] text-skin-link" />
+      <IC-snapshot class="inline-block my-[22px] size-[28px] text-skin-link" />
     </AppLink>
     <div
       class="bg-gradient-to-b from-skin-bg top-[72px] h-[8px] w-[71px] absolute z-10"
@@ -32,7 +32,12 @@ const followedSpacesStore = useFollowedSpacesStore();
           class="block"
         >
           <UiTooltip :title="element.name" placement="right">
-            <SpaceAvatar :space="element" :size="32" class="!rounded-[4px]" />
+            <SpaceAvatar
+              show-active-proposals
+              :space="element"
+              :size="32"
+              class="!rounded-[4px]"
+            />
           </UiTooltip>
         </AppLink>
       </template>

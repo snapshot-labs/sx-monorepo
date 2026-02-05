@@ -2,6 +2,7 @@ import { Wallet } from '@ethersproject/wallet';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { EthereumSig } from '../../../../../src/clients/offchain/ethereum-sig';
 import { offchainGoerli } from '../../../../../src/offchainNetworks';
+import { Privacy } from '../../../../../src/types/index';
 
 describe('EthereumSig', () => {
   // Test address: 0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90
@@ -28,9 +29,11 @@ describe('EthereumSig', () => {
       proposal:
         '0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801',
       choice: 1,
+      privacy: 'none' as Privacy,
       metadataUri: '',
       type: 'basic',
-      app: 'snapshot-v2'
+      app: 'snapshot-v2',
+      from: signer.address
     };
 
     const envelope = await client.vote({
@@ -50,6 +53,32 @@ describe('EthereumSig', () => {
       discussion: 'https://snapshot.org',
       choices: ['For', 'Against', 'Abstain'],
       labels: ['1234e'],
+      privacy: '',
+      start: Math.floor(Date.now() / 1000),
+      end: Math.floor(Date.now() / 1000) + 60 * 60,
+      snapshot: 19283932,
+      plugins: '{}',
+      app: 'snapshot-v2'
+    };
+
+    const envelope = await client.propose({
+      signer,
+      data: payload
+    });
+
+    expect(envelope).toMatchSnapshot();
+  });
+
+  it('should create propose envelope with shutter', async () => {
+    const payload = {
+      space: 'wan-test.eth',
+      title: 'Creation test',
+      body: 'Dummy body',
+      type: 'basic',
+      discussion: 'https://snapshot.org',
+      choices: ['For', 'Against', 'Abstain'],
+      labels: ['1234e'],
+      privacy: 'shutter',
       start: Math.floor(Date.now() / 1000),
       end: Math.floor(Date.now() / 1000) + 60 * 60,
       snapshot: 19283932,

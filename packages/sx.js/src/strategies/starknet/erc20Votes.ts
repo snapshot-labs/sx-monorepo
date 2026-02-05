@@ -2,7 +2,13 @@
 
 import { Contract } from 'starknet';
 import ERC20VotesTokenAbi from './abis/ERC20VotesToken.json';
-import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import {
+  ClientConfig,
+  Envelope,
+  Propose,
+  Strategy,
+  Vote
+} from '../../clients/starknet/types';
 
 export default function createErc20VotesStrategy(): Strategy {
   return {
@@ -12,6 +18,7 @@ export default function createErc20VotesStrategy(): Strategy {
       signerAddress: string,
       address: string,
       index: number,
+      params: string,
       metadata: Record<string, any> | null,
       envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig

@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
 import defaultRoutes from '@/routes/default';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
 const route = useRoute();
 const router = useRouter();
-const { app } = useApp();
+const { app, isAuctionApp } = useApp();
 const {
   init: initWhiteLabel,
   isWhiteLabel,
@@ -20,7 +21,7 @@ function mountCustomDomainRoutes() {
   const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
 
   routes.forEach(route => router.addRoute(route));
-  router.removeRoute('splash-screen');
+  router.removeRoute('splash');
 }
 
 watchEffect(() => setTitle(app.value.app_name));
@@ -28,7 +29,7 @@ watchEffect(() => setTitle(app.value.app_name));
 watch(
   whiteLabelResolved,
   resolved => {
-    if (!resolved) return;
+    if (!resolved || isAuctionApp.value) return;
 
     if (isCustomDomain.value && !whiteLabelFailed.value) {
       mountCustomDomainRoutes();
@@ -37,14 +38,15 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  initWhiteLabel();
-});
+onMounted(() => initWhiteLabel());
 </script>
 
 <template>
-  <LayoutSplashScreen v-if="!whiteLabelResolved" />
-  <LayoutSite v-else-if="routeName === 'site'" />
-  <LayoutApp v-else />
-  <Messenger />
+  <div class="max-w-maximum mx-auto">
+    <ElectronTitlebar />
+    <LayoutSplash v-if="!whiteLabelResolved && !isAuctionApp" />
+    <LayoutSite v-else-if="routeName === 'site'" />
+    <LayoutApp v-else />
+    <AppFooter v-if="!isAuctionApp" />
+  </div>
 </template>

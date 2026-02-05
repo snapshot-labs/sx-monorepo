@@ -46,11 +46,7 @@ import { executeContractCallWithSigners } from './safeUtils';
 import { StarknetTx } from '../../../src/clients';
 import { NetworkConfig } from '../../../src/types';
 import { hexPadLeft } from '../../../src/utils/encoding';
-import {
-  AddressType,
-  generateMerkleRoot,
-  Leaf
-} from '../../../src/utils/merkletree';
+import { AddressType, generateMerkleTree } from '../../../src/utils/merkletree';
 
 export type TestConfig = {
   starknetCore: string;
@@ -68,8 +64,11 @@ export type TestConfig = {
   vanillaProposalValidationStrategy: string;
   propositionPowerProposalValidationStrategy: string;
   vanillaVotingStrategy: string;
+  vanillaVotingStrategyParams: string;
   merkleWhitelistVotingStrategy: string;
+  merkleWhitelistVotingStrategyParams: string;
   erc20VotesVotingStrategy: string;
+  erc20VotesVotingStrategyParams: string;
   merkleWhitelistStrategyMetadata: {
     tree: {
       type: AddressType;
@@ -129,7 +128,7 @@ export async function setup({
   ethereumWallet: Wallet;
   ethUrl: string;
 }): Promise<TestConfig> {
-  await mint(starknetAccount.address, 100000000000000000);
+  await mint(starknetAccount.address, 10000 * 1e18, 'FRI');
 
   const masterSpaceResult = await starknetAccount.declareIfNot({
     contract: sxSpaceSierra as any,
@@ -270,21 +269,21 @@ export async function setup({
   const masterSpaceClassHash = masterSpaceResult.class_hash;
   const factoryAddress = factoryResult.deploy.contract_address;
 
-  const leaf = new Leaf(
-    AddressType.ETHEREUM,
-    '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
-    42n
-  );
+  const leaf = {
+    address: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+    votingPower: 42n
+  };
   const merkleWhitelistStrategyMetadata = {
     tree: [leaf].map(leaf => ({
-      type: leaf.type,
+      type: 1,
       address: leaf.address,
       votingPower: leaf.votingPower
     }))
   };
-  const hashes = [leaf.hash];
+  const entries = [leaf].map(leaf => `${leaf.address}:${leaf.votingPower}`);
 
-  const merkleTreeRoot = generateMerkleRoot(hashes);
+  const merkleTreeRoot = (await generateMerkleTree(entries))[0];
+  if (!merkleTreeRoot) throw new Error('Invalid merkle tree root');
 
   const networkConfig: NetworkConfig = {
     eip712ChainId: '0x534e5f5345504f4c4941',
@@ -327,8 +326,9 @@ export async function setup({
 
   const client = new StarknetTx({
     starkProvider: starknetProvider,
+    networkConfig,
     ethUrl: 'https://rpc.brovider.xyz/5',
-    networkConfig
+    whitelistServerUrl: 'https://wls.snapshot.box'
   });
 
   const { address } = await client.deploySpace({
@@ -413,8 +413,11 @@ export async function setup({
     vanillaProposalValidationStrategy,
     propositionPowerProposalValidationStrategy,
     vanillaVotingStrategy,
+    vanillaVotingStrategyParams: '0x0',
     merkleWhitelistVotingStrategy,
+    merkleWhitelistVotingStrategyParams: merkleTreeRoot,
     erc20VotesVotingStrategy,
+    erc20VotesVotingStrategyParams: erc20VotesToken,
     merkleWhitelistStrategyMetadata,
     l1AvatarExecutionStrategyContract,
     safeContract,
@@ -449,6 +452,12 @@ export async function setupL1ExecutionStrategy(
     GnosisSafeProxyFactoryContract.abi,
     signer
   );
+
+  if (!gnosisSafeProxyFactoryContract.callStatic.createProxy) {
+    throw new Error(
+      'GnosisSafeProxyFactoryContract does not have createProxy method'
+    );
+  }
 
   const template = await gnosisSafeProxyFactoryContract.callStatic.createProxy(
     singleton,
@@ -510,10 +519,11 @@ export async function postDevnet(path: string, body: Record<string, any>) {
   return res.json();
 }
 
-export function mint(address: string, amount: number) {
+export function mint(address: string, amount: number, unit: 'FRI' | 'WEI') {
   return postDevnet('mint', {
     address,
-    amount
+    amount,
+    unit
   });
 }
 
@@ -538,8 +548,4 @@ export function loadL1MessagingContract(networkUrl: string, address: string) {
 
 export function flush() {
   return postDevnet('postman/flush', {});
-}
-
-export function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }

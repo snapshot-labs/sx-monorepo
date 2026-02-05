@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getValidator } from '@/helpers/validation';
-import { NetworkID } from '@/types';
+import { NetworkID, Space } from '@/types';
 
 const CHILDREN_LIMIT = 16;
 
@@ -29,31 +29,22 @@ const TERMS_OF_SERVICES_DEFINITION = {
     'Users will be required to accept these terms once before they can create a proposal or cast a vote'
 };
 
-const CUSTOM_DOMAIN_DEFINITION = {
-  type: 'string',
-  format: 'domain',
-  title: 'Domain name',
-  maxLength: 64,
-  examples: ['vote.balancer.fi']
-};
-
 const parent = defineModel<string>('parent', { required: true });
 const children = defineModel<string[]>('children', { required: true });
 const termsOfServices = defineModel<string>('termsOfServices', {
   required: true
 });
-const customDomain = defineModel<string>('customDomain', { required: true });
 const isPrivate = defineModel<boolean>('isPrivate', { required: true });
 
 const props = defineProps<{
   networkId: NetworkID;
-  spaceId: string;
+  space: Space;
   isController: boolean;
 }>();
 
 const emit = defineEmits<{
   (e: 'updateValidity', valid: boolean, resolved: boolean): void;
-  (e: 'deleteSpace');
+  (e: 'deleteSpace'): void;
 }>();
 
 const {
@@ -89,8 +80,7 @@ const formErrors = computed(() => {
     properties: {
       parent: PARENT_SPACE_DEFINITION,
       child: CHILD_DEFINITION,
-      termsOfServices: TERMS_OF_SERVICES_DEFINITION,
-      customDomain: CUSTOM_DOMAIN_DEFINITION
+      termsOfServices: TERMS_OF_SERVICES_DEFINITION
     }
   });
 
@@ -98,19 +88,18 @@ const formErrors = computed(() => {
     {
       parent: parent.value,
       child: child.value,
-      termsOfServices: termsOfServices.value,
-      customDomain: customDomain.value
+      termsOfServices: termsOfServices.value
     },
     {
       skipEmptyOptionalFields: true
     }
   );
 
-  if (parent.value === props.spaceId) {
+  if (parent.value === props.space.id) {
     errors.parent = 'Space cannot be a parent of itself';
   }
 
-  if (child.value === props.spaceId) {
+  if (child.value === props.space.id) {
     errors.child = 'Space cannot be a sub-space of itself';
   }
 
@@ -145,10 +134,10 @@ watchEffect(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Sub-spaces</h4>
+  <UiEyebrow class="mb-2 font-medium">Sub-spaces</UiEyebrow>
   <UiMessage
     type="info"
-    :learn-more-link="'https://docs.snapshot.org/user-guides/spaces/sub-spaces'"
+    :learn-more-link="'https://docs.snapshot.box/user-guides/spaces/sub-spaces'"
   >
     Add a sub-space to display its proposals within your space. If you want the
     current space to be displayed on the sub-space's page, the space need to be
@@ -178,17 +167,17 @@ watchEffect(() => {
   </div>
   <div class="flex flex-wrap gap-2">
     <div
-      v-for="(space, i) in children"
-      :key="space"
+      v-for="(childSpace, i) in children"
+      :key="childSpace"
       class="flex items-center gap-2 rounded-lg border px-3 py-2 w-fit"
     >
-      <span>{{ space }}</span>
+      <span>{{ childSpace }}</span>
       <button type="button" @click="deleteChild(i)">
         <IH-x-mark class="w-[16px]" />
       </button>
     </div>
   </div>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Terms of services</h4>
+  <UiEyebrow class="mb-2 font-medium mt-4">Terms of services</UiEyebrow>
   <div class="s-box">
     <UiInputString
       v-model="termsOfServices"
@@ -196,23 +185,11 @@ watchEffect(() => {
       :error="formErrors.termsOfServices"
     />
   </div>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Custom domain</h4>
-  <UiMessage
-    type="info"
-    :learn-more-link="'https://docs.snapshot.org/spaces/add-custom-domain'"
-  >
-    To setup a custom domain you additionally need to open a pull request on
-    GitHub after you have created the space.
-  </UiMessage>
+  <UiEyebrow class="mb-2 font-medium mt-4">Visibility</UiEyebrow>
   <div class="s-box mt-3">
-    <UiInputString
-      v-model="customDomain"
-      :definition="CUSTOM_DOMAIN_DEFINITION"
-      :error="formErrors.customDomain"
-    />
     <UiSwitch v-model="isPrivate" title="Hide space from homepage" />
   </div>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Danger zone</h4>
+  <UiEyebrow class="mb-2 font-medium mt-4">Danger zone</UiEyebrow>
   <div
     class="flex flex-col md:flex-row gap-3 md:gap-1 items-center border rounded-md px-4 py-3"
   >
@@ -237,7 +214,7 @@ watchEffect(() => {
   <teleport to="#modal">
     <ModalDeleteSpace
       :open="isDeleteSpaceModalOpen"
-      :space-id="spaceId"
+      :space-id="space.id"
       @confirm="emit('deleteSpace')"
       @close="isDeleteSpaceModalOpen = false"
     />

@@ -1,8 +1,10 @@
+import createApeGasStrategy from './apeGas';
 import createCompStrategy from './comp';
 import createMerkleWhitelist from './merkleWhitelist';
 import createOzVotesStrategy from './ozVotes';
 import createVanillaStrategy from './vanilla';
 import {
+  ClientConfig,
   IndexedConfig,
   Propose,
   Strategy,
@@ -34,6 +36,10 @@ export function getStrategy(
     return createMerkleWhitelist();
   }
 
+  if (strategy.type === 'apeGas') {
+    return createApeGasStrategy();
+  }
+
   return null;
 }
 
@@ -42,11 +48,14 @@ export async function getStrategiesWithParams(
   strategies: StrategyConfig[],
   signerAddress: string,
   data: Propose | Vote,
-  networkConfig: EvmNetworkConfig
+  config: ClientConfig
 ): Promise<IndexedConfig[]> {
   const results = await Promise.all(
     strategies.map(async strategyConfig => {
-      const strategy = getStrategy(strategyConfig.address, networkConfig);
+      const strategy = getStrategy(
+        strategyConfig.address,
+        config.networkConfig
+      );
       if (!strategy) throw new Error('Invalid strategy');
 
       try {
@@ -55,14 +64,15 @@ export async function getStrategiesWithParams(
           strategyConfig,
           signerAddress,
           strategyConfig.metadata || null,
-          data
+          data,
+          config
         );
 
         return {
           index: strategyConfig.index,
           params
         };
-      } catch (e) {
+      } catch {
         return null;
       }
     })

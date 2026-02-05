@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { getCacheHash, shorten } from '@/helpers/utils';
 
 defineProps<{
@@ -9,17 +8,18 @@ defineProps<{
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
-const auth = getInstance();
 const uiStore = useUiStore();
 const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
-const { login, web3 } = useWeb3();
-const { toggleSkin, currentMode } = useUserSkin();
+const { logout, web3 } = useWeb3();
+const { toggleTheme, currentTheme } = useTheme();
+const { isWhiteLabel } = useWhiteLabel();
+const { isAuctionApp } = useApp();
 
 const SEARCH_CONFIG = {
   space: {
     defaultRoute: 'space-proposals',
-    searchRoute: 'space-search',
+    searchRoute: 'space-proposals',
     placeholder: 'Search for a proposal',
     exclude: ['space-editor', 'space-proposal']
   },
@@ -30,7 +30,6 @@ const SEARCH_CONFIG = {
   }
 };
 
-const loading = ref(false);
 const searchInput = ref();
 const searchValue = ref('');
 
@@ -56,13 +55,6 @@ const searchConfig = computed(() => {
   return null;
 });
 
-async function handleLogin(connector) {
-  resetAccountModal();
-  loading.value = true;
-  await login(connector);
-  loading.value = false;
-}
-
 function handleSearchSubmit(e: Event) {
   e.preventDefault();
 
@@ -86,13 +78,42 @@ watch(
   { immediate: true }
 );
 
+function handleKeyboardShortcut(event: KeyboardEvent) {
+  if (event.key !== '/') return;
+
+  const activeElement = document.activeElement;
+  const tagName = activeElement?.tagName.toLowerCase() || '';
+
+  if (
+    modalAccountOpen.value ||
+    modalAccountWithoutDismissOpen.value ||
+    uiStore.sideMenuOpen ||
+    activeElement === searchInput.value ||
+    ['input', 'textarea'].includes(tagName)
+  ) {
+    return;
+  }
+
+  event.preventDefault();
+  searchInput.value?.focus();
+}
+
+watchEffect(onCleanup => {
+  if (searchConfig.value) {
+    document.addEventListener('keydown', handleKeyboardShortcut);
+    onCleanup(() => {
+      document.removeEventListener('keydown', handleKeyboardShortcut);
+    });
+  }
+});
+
 onUnmounted(() => {
   resetAccountModal();
 });
 </script>
 
 <template>
-  <UiTopnav v-bind="$attrs" class="gap-4 pr-4">
+  <UiTopnav v-bind="$attrs">
     <div
       class="flex items-center h-full truncate"
       :class="{
@@ -108,6 +129,7 @@ onUnmounted(() => {
         ]"
       />
     </div>
+
     <form
       v-if="searchConfig"
       id="search-form"
@@ -126,43 +148,68 @@ onUnmounted(() => {
       </label>
     </form>
 
+    <div v-if="isAuctionApp" class="flex-grow">
+      <IC-snapshot class="size-[28px] text-skin-link" />
+    </div>
+
     <div class="flex space-x-2 shrink-0">
-      <UiButton v-if="loading || web3.authLoading" loading />
+      <UiButton v-if="web3.authLoading" loading />
+      <UiDropdown :key="route.fullPath" v-else-if="web3.account">
+        <template #button>
+          <UiButton class="sm:w-auto !px-0 sm:!px-3">
+            <span
+              class="sm:flex items-center space-x-2"
+              data-testid="profile-button"
+            >
+              <UiStamp :id="user.id" :size="18" :cb="cb" />
+              <span
+                class="hidden sm:block truncate max-w-[120px]"
+                v-text="user.name || shorten(user.id)"
+              />
+            </span>
+          </UiButton>
+        </template>
+        <template v-if="web3.account" #items>
+          <UiDropdownItem
+            v-if="!isAuctionApp"
+            :to="{ name: 'user', params: { user: web3.account } }"
+          >
+            <IH-user />
+            My profile
+          </UiDropdownItem>
+          <UiDropdownItem
+            v-if="!isAuctionApp"
+            :to="{ name: 'settings-spaces' }"
+          >
+            <IH-cog />
+            Settings
+          </UiDropdownItem>
+          <UiDropdownItem @click="modalAccountOpen = true">
+            <IH-switch-horizontal />
+            Change wallet
+          </UiDropdownItem>
+          <hr class="bg-skin-text/20 h-[2px]" />
+          <UiDropdownItem class="!text-skin-danger" @click="logout()">
+            <IH-logout />
+            Log out
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
       <UiButton
         v-else
-        class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+        class="sm:w-auto !px-0 sm:!px-3"
         @click="modalAccountOpen = true"
       >
-        <span
-          v-if="auth.isAuthenticated.value"
-          class="sm:flex items-center space-x-2"
-        >
-          <UiStamp :id="user.id" :size="18" :cb="cb" />
-          <span
-            class="hidden sm:block truncate max-w-[120px]"
-            v-text="user.name || shorten(user.id)"
-          />
-        </span>
-        <template v-else>
-          <span class="hidden sm:block" v-text="'Log in'" />
-          <IH-login class="sm:hidden inline-block" />
-        </template>
+        <span class="hidden sm:block" v-text="'Log in'" />
+        <IH-login class="sm:hidden inline-block" />
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton class="!px-0 w-[46px]" @click="toggleSkin">
-        <IH-light-bulb v-if="currentMode === 'dark'" class="inline-block" />
-        <IH-moon v-else class="inline-block" />
+      <UiButton v-if="!isWhiteLabel" uniform @click="toggleTheme()">
+        <IH-sun v-if="currentTheme === 'dark'" />
+        <IH-moon v-else />
       </UiButton>
     </div>
   </UiTopnav>
-  <teleport to="#modal">
-    <ModalAccount
-      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
-      :closeable="!modalAccountWithoutDismissOpen"
-      @close="modalAccountOpen = false"
-      @login="handleLogin"
-    />
-  </teleport>
 </template>
 
 <style lang="scss" scoped>

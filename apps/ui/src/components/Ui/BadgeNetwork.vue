@@ -34,7 +34,7 @@ const networkData = computed<NetworkData | null>(() => {
     } catch {}
   }
 
-  if (props.chainId && typeof props.chainId === 'number') {
+  if (props.chainId) {
     try {
       const network: SnapshotJSNetwork | undefined =
         networks[String(props.chainId)];
@@ -44,7 +44,7 @@ const networkData = computed<NetworkData | null>(() => {
         name: network.name,
         avatar: network.logo
       };
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -55,8 +55,9 @@ const networkData = computed<NetworkData | null>(() => {
 
 <template>
   <div class="relative">
+    <slot />
     <img
-      v-if="networkData"
+      v-if="networkData && size !== 0"
       :src="getUrl(networkData.avatar) ?? undefined"
       :title="networkData.name"
       :style="{
@@ -66,6 +67,5 @@ const networkData = computed<NetworkData | null>(() => {
       :alt="networkData.name"
       class="absolute rounded-full -bottom-1 -right-1 border-2 bg-skin-border border-skin-bg"
     />
-    <slot />
   </div>
 </template>

@@ -5,7 +5,10 @@ const titles: Record<ProposalState, string> = {
   pending: 'Pending',
   active: 'Active',
   passed: 'Passed',
+  closed: 'Closed',
   rejected: 'Rejected',
+  queued: 'Queued',
+  vetoed: 'Vetoed',
   executed: 'Executed'
 };
 
@@ -38,13 +41,23 @@ const style = computed(() => ({
       class="text-skin-link"
       :style="style"
     />
+    <IS-minus-circle
+      v-else-if="state === 'closed'"
+      class="text-skin-link"
+      :style="style"
+    />
+    <IS-play
+      v-else-if="state === 'queued'"
+      class="text-gray-400"
+      :style="style"
+    />
     <IS-play
       v-else-if="state === 'executed'"
       class="text-purple-500"
       :style="style"
     />
     <IS-x-circle
-      v-else-if="state === 'rejected'"
+      v-else-if="['rejected', 'vetoed'].includes(state)"
       class="text-skin-danger"
       :style="style"
     />

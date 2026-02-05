@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { shorten } from '@/helpers/utils';
+import { isAddress } from '@ethersproject/address';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNetwork } from '@/networks';
+import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { Member, NetworkID } from '@/types';
 
 const model = defineModel<Member[]>({
@@ -17,6 +19,11 @@ const modalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.networkId));
 const isAbleToChangeAdmins = computed(() => props.isController);
+const starknetChainId = computed(() => {
+  return Object.values(STARKNET_NETWORK_METADATA).find(
+    snNetwork => snNetwork.baseChainId === network.value.baseChainId
+  )?.chainId;
+});
 
 function addMembers(members: Member[]) {
   model.value = [...model.value, ...members];
@@ -53,9 +60,17 @@ function deleteMember(index: number) {
     >
       <div class="flex flex-col">
         <a
-          :href="network.helpers.getExplorerUrl(member.address, 'address')"
+          :href="
+            getGenericExplorerUrl(
+              !isAddress(member.address) && starknetChainId
+                ? starknetChainId
+                : network.chainId,
+              member.address,
+              'address'
+            ) || ''
+          "
           target="_blank"
-          class="flex items-center text-skin-text leading-5"
+          class="flex items-center text-skin-text leading-5 group"
         >
           <UiStamp
             :id="member.address"
@@ -63,7 +78,7 @@ function deleteMember(index: number) {
             :size="18"
             class="mr-2 !rounded"
           />
-          {{ shorten(member.address) }}
+          <UiAddress :address="member.address" />
           <IH-arrow-sm-right class="-rotate-45" />
         </a>
       </div>
@@ -85,54 +100,32 @@ function deleteMember(index: number) {
             </button>
           </template>
           <template #items>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2 lg:min-w-[200px]"
-                :disabled="!isAbleToChangeAdmins"
-                :class="{
-                  'opacity-80': active && isAbleToChangeAdmins,
-                  'opacity-40 cursor-not-allowed': !isAbleToChangeAdmins
-                }"
-                @click="changeMemberRole(i, 'admin')"
+            <UiDropdownItem
+              :disabled="!isAbleToChangeAdmins"
+              @click="changeMemberRole(i, 'admin')"
+            >
+              Admin
+              <UiTooltip
+                :title="'Able to modify the space settings, manage the space\'s proposals and create proposals'"
               >
-                Admin
-                <UiTooltip
-                  :title="'Able to modify the space settings, manage the space\'s proposals and create proposals'"
-                >
-                  <IH-question-mark-circle />
-                </UiTooltip>
-              </button>
+                <IH-question-mark-circle />
+              </UiTooltip>
             </UiDropdownItem>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2 lg:min-w-[200px]"
-                :class="{ 'opacity-80': active }"
-                @click="changeMemberRole(i, 'moderator')"
+            <UiDropdownItem @click="changeMemberRole(i, 'moderator')">
+              Moderator
+              <UiTooltip
+                :title="'Able to manage the space\'s proposals and create proposals'"
               >
-                Moderator
-                <UiTooltip
-                  :title="'Able to manage the space\'s proposals and create proposals'"
-                >
-                  <IH-question-mark-circle />
-                </UiTooltip>
-              </button>
+                <IH-question-mark-circle />
+              </UiTooltip>
             </UiDropdownItem>
-            <UiDropdownItem v-slot="{ active }">
-              <button
-                type="button"
-                class="flex items-center gap-2 lg:min-w-[200px]"
-                :class="{ 'opacity-80': active }"
-                @click="changeMemberRole(i, 'author')"
+            <UiDropdownItem @click="changeMemberRole(i, 'author')">
+              Author
+              <UiTooltip
+                :title="'Able to create proposals without having to go through proposal validation'"
               >
-                Author
-                <UiTooltip
-                  :title="'Able to create proposals without having to go through proposal validation'"
-                >
-                  <IH-question-mark-circle />
-                </UiTooltip>
-              </button>
+                <IH-question-mark-circle />
+              </UiTooltip>
             </UiDropdownItem>
           </template>
         </UiDropdown>
@@ -149,7 +142,10 @@ function deleteMember(index: number) {
         </button>
       </div>
     </div>
-    <UiButton class="w-full" @click="modalOpen = true">Add members</UiButton>
+    <UiButton class="w-full" @click="modalOpen = true">
+      <IH-plus class="shrink-0 size-[16px]" />
+      Add members
+    </UiButton>
   </div>
   <teleport to="#modal">
     <ModalAddMembers

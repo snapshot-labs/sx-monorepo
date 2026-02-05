@@ -1,12 +1,16 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { pinGraph } from '@/helpers/pin';
+import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
+import { getRelayerInfo } from '@/helpers/mana';
+import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
+import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createConstants } from './constants';
 import { EVM_CONNECTORS } from '../common/constants';
 import { createApi } from '../common/graphqlApi';
+import { awaitIndexedOnApi } from '../common/helpers';
 
 type Metadata = {
   name: string;
@@ -15,58 +19,69 @@ type Metadata = {
   currentChainId?: number;
   apiUrl: string;
   avatar: string;
-  blockTime: number;
 };
-
-// shared for both ETH mainnet and ARB1
-const ETH_MAINNET_BLOCK_TIME = 12.09;
 
 export const METADATA: Record<string, Metadata> = {
   matic: {
     name: 'Polygon',
     ticker: 'MATIC',
     chainId: 137,
-    apiUrl:
-      'https://api.studio.thegraph.com/query/23545/sx-polygon/version/latest',
-    avatar:
-      'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am',
-    blockTime: 2.15812
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreihcx4zkpfjfcs6fazjp6lcyes4pdhqx3uvnjuo5uj2dlsjopxv5am'
   },
   arb1: {
     name: 'Arbitrum One',
     chainId: 42161,
     currentChainId: 1,
-    apiUrl:
-      'https://api.studio.thegraph.com/query/23545/sx-arbitrum/version/latest',
-    avatar:
-      'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq',
-    blockTime: ETH_MAINNET_BLOCK_TIME
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreic2p3zzafvz34y4tnx2kaoj6osqo66fpdo3xnagocil452y766gdq'
   },
   oeth: {
-    name: 'Optimism',
+    name: 'OP Mainnet',
     chainId: 10,
-    apiUrl:
-      'https://api.studio.thegraph.com/query/23545/sx-optimism/version/latest',
-    avatar: 'ipfs://QmfF4kwhGL8QosUXvgq2KWCmavhKBvwD6kbhs7L4p5ZAWb',
-    blockTime: 2
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreifu2remiqfpsb4hgisbwb3qxedrzpwsea7ik4el45znjcf56xf2ku'
+  },
+  base: {
+    name: 'Base',
+    chainId: 8453,
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreid4ek4gnj6ccxl3yubwj2wr3d5t6dqelvvh4hv5wo5eldkqs725ri'
+  },
+  mnt: {
+    name: 'Mantle',
+    ticker: 'MNT',
+    chainId: 5000,
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreidkucwfn4mzo2gtydrt2wogk3je5xpugom67vhi4h4comaxxjzoz4'
   },
   eth: {
     name: 'Ethereum',
     chainId: 1,
-    apiUrl: 'https://api.studio.thegraph.com/query/23545/sx/version/latest',
-    avatar:
-      'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
-    blockTime: ETH_MAINNET_BLOCK_TIME
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
+  },
+  ape: {
+    name: 'ApeChain',
+    ticker: 'APE',
+    chainId: 33139,
+    currentChainId: 1,
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4'
+  },
+  curtis: {
+    name: 'Curtis',
+    ticker: 'APE',
+    chainId: 33111,
+    currentChainId: 11155111,
+    apiUrl: API_TESTNET_URL,
+    avatar: 'ipfs://bafkreielbgcox2jsw3g6pqulqb7pyjgx7czjt6ahnibihaij6lozoy53w4'
   },
   sep: {
     name: 'Ethereum Sepolia',
     chainId: 11155111,
-    apiUrl:
-      import.meta.env.VITE_EVM_SEPOLIA_API ??
-      'https://api.studio.thegraph.com/query/23545/sx-sepolia/version/latest',
-    avatar:
-      'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4',
-    blockTime: 13.2816
+    apiUrl: API_TESTNET_URL,
+    avatar: 'ipfs://bafkreid7ndxh6y2ljw2jhbisodiyrhcy2udvnwqgon5wgells3kh4si5z4'
   }
 };
 
@@ -74,26 +89,41 @@ export function createEvmNetwork(networkId: NetworkID): Network {
   const { name, chainId, currentChainId, apiUrl, avatar } = METADATA[networkId];
 
   const provider = getProvider(chainId);
-  const constants = createConstants(networkId);
+  const constants = createConstants(networkId, { pin });
   const api = createApi(apiUrl, networkId, constants, {
-    highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
+    // NOTE: Highlight is currently disabled
+    // highlightApiUrl: import.meta.env.VITE_HIGHLIGHT_URL
   });
 
   const helpers = {
-    isAuthenticatorSupported: (authenticator: string) =>
-      constants.SUPPORTED_AUTHENTICATORS[authenticator],
-    isAuthenticatorContractSupported: (authenticator: string) =>
-      constants.CONTRACT_SUPPORTED_AUTHENTICATORS[authenticator],
-    getRelayerAuthenticatorType: (authenticator: string) =>
-      constants.RELAYER_AUTHENTICATORS[authenticator],
+    getAuthenticatorSupportInfo: (authenticator: string) =>
+      constants.AUTHENTICATORS_SUPPORT_INFO[authenticator] || null,
     isStrategySupported: (strategy: string) =>
       constants.SUPPORTED_STRATEGIES[strategy],
-    isExecutorSupported: (executor: string) =>
-      constants.SUPPORTED_EXECUTORS[executor],
-    pin: pinGraph,
+    isExecutorSupported: (executorType: string) =>
+      executorType !== 'ReadOnlyExecution',
+    isExecutorActionsSupported: (executorType: string) =>
+      constants.SUPPORTED_EXECUTORS[executorType],
+    pin,
     getSpaceController: async (space: Space) => space.controller,
+    getRelayerInfo: (space: string, network: NetworkID) =>
+      getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async (
+      txId: string,
+      timeout = 10000
+    ): Promise<boolean> => {
+      return awaitIndexedOnApi({
+        txId,
+        timeout,
+        getLastIndexedBlockNumber: api.loadLastIndexedBlock,
+        getTransactionBlockNumber: async (txId: string) => {
+          const transaction = await provider.getTransaction(txId);
+          return transaction.blockNumber ?? null;
+        }
+      });
+    },
     waitForSpace: (spaceAddress: string, interval = 5000): Promise<Space> =>
       new Promise(resolve => {
         const timer = setInterval(async () => {
@@ -110,6 +140,8 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       else if (['address', 'contract', 'strategy'].includes(type))
         dataType = 'address';
 
+      if (dataType === 'address') id = formatAddress(id);
+
       return `${networks[chainId].explorer.url}/${dataType}/${id}`;
     }
   };
@@ -121,9 +153,17 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     chainId,
     baseChainId: chainId,
     currentChainId: currentChainId ?? chainId,
-    supportsSimulation: ['eth', 'sep', 'oeth', 'matic', 'arb1'].includes(
-      networkId
-    ),
+    supportsSimulation: [
+      'eth',
+      'sep',
+      'oeth',
+      'matic',
+      'base',
+      'mnt',
+      'arb1',
+      'ape',
+      'curtis'
+    ].includes(networkId),
     managerConnectors: EVM_CONNECTORS,
     actions: createActions(provider, helpers, chainId),
     api,

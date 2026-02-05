@@ -1,22 +1,25 @@
 <script setup lang="ts">
-import { Space } from '@/types';
+import { SpaceMetadataLabel } from '@/types';
 
 const props = withDefaults(
   defineProps<{
-    space: Space;
+    spaceId: string;
     labels: string[];
+    spaceLabels?: SpaceMetadataLabel[];
     inline?: boolean;
+    withLink?: boolean;
   }>(),
   {
-    inline: false
+    inline: false,
+    withLink: false
   }
 );
 
 const validLabels = computed(() => {
-  if (!props.space.labels?.length || !props.labels?.length) return [];
+  if (!props.spaceLabels?.length || !props.labels?.length) return [];
 
   return props.labels
-    .map(label => props.space.labels?.find(l => l.id === label))
+    .map(label => props.spaceLabels?.find(l => l.id === label))
     .filter(l => l !== undefined);
 });
 </script>
@@ -27,6 +30,15 @@ const validLabels = computed(() => {
       :key="label.id"
       :label="label.name"
       :color="label.color"
+      :to="
+        withLink
+          ? {
+              name: 'space-proposals',
+              params: { space: spaceId },
+              query: { labels: label.id }
+            }
+          : undefined
+      "
       v-bind="$attrs"
       class="inline-flex !max-w-[160px] mr-1 last:mr-0"
     />
@@ -38,7 +50,19 @@ const validLabels = computed(() => {
   >
     <li v-for="label in validLabels" :key="label.id">
       <UiTooltip :title="label.description" class="inline">
-        <UiProposalLabel :label="label.name" :color="label.color" />
+        <UiProposalLabel
+          :label="label.name"
+          :color="label.color"
+          :to="
+            withLink
+              ? {
+                  name: 'space-proposals',
+                  params: { space: spaceId },
+                  query: { labels: label.id }
+                }
+              : undefined
+          "
+        />
       </UiTooltip>
     </li>
   </ul>

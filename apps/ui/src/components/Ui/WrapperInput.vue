@@ -8,6 +8,7 @@ const props = withDefaults(
     inputValueLength?: number;
     error?: string;
     dirty?: boolean;
+    required?: boolean;
   }>(),
   { inputValueLength: 0 }
 );
@@ -26,7 +27,7 @@ const showError = computed(() => props.error && props.dirty);
           :for="id"
           class="truncate flex items-center gap-1"
         >
-          {{ definition.title }}
+          {{ definition.title }}{{ required ? ' *' : '' }}
           <UiTooltip v-if="definition.tooltip" :title="definition.tooltip">
             <IH-question-mark-circle class="shrink-0" />
           </UiTooltip>

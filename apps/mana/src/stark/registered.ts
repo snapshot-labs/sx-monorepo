@@ -3,6 +3,7 @@ import { processProposal } from './herodotus';
 import { getClient } from './networks';
 import * as db from '../db';
 import { sleep } from '../utils';
+import logger from './logger';
 
 const INTERVAL = 15_000;
 
@@ -49,12 +50,17 @@ async function processTransaction(transaction: Transaction) {
     } else if (transaction.type === 'Vote') {
       receipt = await client.vote(account, payload);
     } else {
-      console.log('skipped unknown transaction type');
+      logger.warn(
+        {
+          transaction
+        },
+        'Skipped unknown transaction type'
+      );
     }
 
-    console.log('receipt', receipt);
-  } catch (e) {
-    console.log('error', e);
+    logger.info({ receipt }, 'Transaction broadcasted successfully');
+  } catch (err) {
+    logger.error({ err }, 'Failed to broadcast transaction');
 
     failedCounter[transaction.id] = (failedCounter[transaction.id] || 0) + 1;
   }
@@ -71,7 +77,7 @@ export async function registeredTransactionsLoop() {
   while (true) {
     const transactions = await db.getTransactionsToProcess();
 
-    console.log('processing', transactions.length, 'transactions');
+    logger.info({ count: transactions.length }, 'Processing transactions');
 
     for (const transaction of transactions) {
       await processTransaction(transaction);
@@ -86,13 +92,13 @@ export async function registeredProposalsLoop() {
   while (true) {
     const proposals = await db.getProposalsToProcess();
 
-    console.log('processing', proposals.length, 'proposals');
+    logger.info({ count: proposals.length }, 'Processing proposals');
 
     for (const proposal of proposals) {
       try {
         await processProposal(proposal);
-      } catch (e) {
-        console.log('error', e);
+      } catch (err) {
+        logger.error({ err, proposal }, 'Failed to process proposal');
       }
     }
 

@@ -1,20 +1,21 @@
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { getSpaceController } from '@/helpers/ens';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { getProvider } from '@/helpers/provider';
+import { formatAddress, getSpaceController } from '@/helpers/utils';
 import { Network } from '@/networks/types';
-import { NetworkID, Space } from '@/types';
+import { ChainId, NetworkID, Space } from '@/types';
 import { createActions } from './actions';
 import { createApi } from './api';
 import * as constants from './constants';
+import { EVM_CONNECTORS, STARKNET_CONNECTORS } from '../common/constants';
 
 const HUB_URLS: Partial<Record<NetworkID, string | undefined>> = {
   s: 'https://hub.snapshot.org/graphql',
   's-tn': 'https://testnet.hub.snapshot.org/graphql'
 };
-const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
-  s: 'https://snapshot.org',
-  's-tn': 'https://testnet.snapshot.org'
+export const SNAPSHOT_URLS: Partial<Record<NetworkID, string | undefined>> = {
+  s: 'https://v1.snapshot.box',
+  's-tn': 'https://testnet.v1.snapshot.box'
 };
 const CHAIN_IDS: Partial<Record<NetworkID, 1 | 11155111>> = {
   s: 1,
@@ -29,30 +30,43 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
   const provider = getProvider(l1ChainId);
   const api = createApi(hubUrl, networkId, constants);
 
+  const isExecutorSupported = (executorType: string) => {
+    if (executorType === 'ReadOnlyExecution') return true;
+    return false;
+  };
+
+  const isExecutorActionsSupported = () => {
+    return false;
+  };
+
   const helpers = {
-    isAuthenticatorSupported: () => true,
-    isAuthenticatorContractSupported: () => false,
-    getRelayerAuthenticatorType: () => null,
+    getAuthenticatorSupportInfo: () => ({
+      isSupported: true,
+      isContractSupported: false,
+      isReasonSupported: true,
+      connectors: Array.from(
+        new Set([...EVM_CONNECTORS, ...STARKNET_CONNECTORS])
+      )
+    }),
     isStrategySupported: () => true,
-    isExecutorSupported: (executorType: string) => {
-      if (executorType === 'oSnap') return true;
-      if (executorType === 'ReadOnlyExecution') return true;
-      return false;
-    },
-    pin: pinPineapple,
+    isExecutorSupported: isExecutorSupported,
+    isExecutorActionsSupported: isExecutorActionsSupported,
+    pin,
     getSpaceController: async (space: Space) =>
-      getSpaceController(space.id, l1ChainId),
+      getSpaceController(space.id, networkId),
+    getRelayerInfo: () => Promise.resolve(null),
     getTransaction: () => {
       throw new Error('Not implemented');
     },
     waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForIndexing: async () => true,
     waitForSpace: () => {
       throw new Error('Not implemented');
     },
     getExplorerUrl: (
       id: string,
       type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-      chainId?: number
+      chainId?: ChainId
     ) => {
       chainId = chainId || l1ChainId;
       const network = networks[chainId.toString()];
@@ -63,12 +77,16 @@ export function createOffchainNetwork(networkId: NetworkID): Network {
             return network ? `${network.explorer.url}/tx/${id}` : '';
           }
 
-          return `https://signator.io/view?ipfs=${id}`;
+          if (network.starknet) return '';
+
+          return `https://signator.io/ipfs/${id}`;
         case 'strategy':
           return `${SNAPSHOT_URLS[networkId]}/#/strategy/${id}`;
         case 'contract':
         case 'address':
-          return network ? `${network.explorer.url}/address/${id}` : '';
+          return network
+            ? `${network.explorer.url}/${network.starknet ? 'contract' : 'address'}/${formatAddress(id)}`
+            : '';
         default:
           throw new Error('Not implemented');
       }

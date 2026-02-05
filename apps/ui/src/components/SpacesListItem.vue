@@ -3,63 +3,51 @@ import { _n } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import { RelatedSpace, Space } from '@/types';
 
-const props = withDefaults(
-  defineProps<{
-    space: Space | RelatedSpace;
-    showAbout?: boolean;
-  }>(),
-  { showAbout: true }
-);
+const props = defineProps<{ space: Space | RelatedSpace }>();
 const compositeSpaceId = `${props.space.network}:${props.space.id}`;
 </script>
 
 <template>
   <AppLink
     :to="{ name: 'space-overview', params: { space: compositeSpaceId } }"
-    class="text-skin-text border rounded-lg block relative group overflow-hidden h-[186px]"
-    :class="{ 'h-[280px]': showAbout }"
+    class="text-skin-text mx-4 group overflow-hidden flex border-b items-center py-[18px] space-x-3"
   >
-    <div class="h-[68px] w-full absolute overflow-hidden">
-      <SpaceCover :space="props.space" size="sm" />
-    </div>
-    <div class="relative inline-block mx-4 mt-[34px]">
+    <div class="grow flex items-center">
       <UiBadgeNetwork
         :id="space.network"
+        class="mr-2.5 shrink-0"
         :size="!offchainNetworks.includes(space.network) ? 16 : 0"
-        class="mb-2"
       >
-        <SpaceAvatar
-          :space="space"
-          :size="50"
-          class="border-skin-bg rounded-md border-[3px]"
-        />
+        <SpaceAvatar :space="space" :size="32" class="rounded-md" />
       </UiBadgeNetwork>
-    </div>
-    <ButtonFollow
-      :space="space"
-      class="absolute top-2.5 right-2.5 hidden group-hover:block"
-    />
-    <div class="px-4">
-      <div class="flex items-center">
-        <h3 class="truncate" v-text="space.name" />
-        <UiBadgeVerified
-          class="ml-1"
-          :verified="space.verified"
-          :turbo="space.turbo"
-        />
-      </div>
-
-      <h5
-        v-if="showAbout"
-        class="mt-1 line-clamp-3 leading-6"
-        v-text="space.about"
+      <h3 class="truncate" v-text="space.name" />
+      <UiBadgeSpace
+        class="ml-1"
+        :verified="space.verified"
+        :turbo="space.turbo"
+        :flagged="
+          ('additionalRawData' in space && space.additionalRawData?.flagged) ||
+          false
+        "
       />
     </div>
-    <h5 class="absolute bottom-4 px-4 text-[17px]">
-      <b class="text-skin-link" v-text="_n(space.proposal_count, 'compact')" />
-      proposals ·
-      <b class="text-skin-link" v-text="_n(space.vote_count, 'compact')" />
-      votes
-    </h5>
+    <ButtonFollow :space="space" class="hidden group-hover:block -my-2" />
+    <div class="text-[21px] font-bold flex text-center">
+      <span
+        v-if="space.protocol === 'snapshot'"
+        class="w-[50px] md:w-[100px]"
+        :class="{ 'text-skin-success': (space.active_proposals ?? 0) > 0 }"
+        v-text="_n(space.active_proposals ?? 0, 'compact')"
+      />
+      <span
+        class="text-skin-link w-[100px] hidden md:block"
+        v-text="_n(space.proposal_count, 'compact')"
+      />
+      <span
+        v-if="space.follower_count !== undefined"
+        class="text-skin-link w-[100px] hidden md:block"
+        v-text="_n(space.follower_count, 'compact')"
+      />
+    </div>
   </AppLink>
 </template>

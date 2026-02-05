@@ -4,14 +4,14 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { createStakeTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, NetworkID, Transaction } from '@/types';
+import { Transaction } from '@/types';
 
 const STAKING_CONTRACTS = {
-  eth: {
+  1: {
     address: '0xae7ab96520de3a18e5e111b5eaab095312d7fe84',
     referral: '0x01e8CEC73B020AB9f822fD0dee3Aa4da2fe39e38'
   },
-  sep: {
+  11155111: {
     address: '0x3e3FE7dBc6B4C189E7128855dD526361c49b40Af',
     referral: '0x8C28Cf33d9Fd3D0293f963b1cd27e3FF422B425c'
   }
@@ -42,14 +42,13 @@ const validator = getValidator({
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: ChainId;
-  networkId: NetworkID;
+  network: string;
   initialState?: any;
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', transaction: Transaction);
-  (e: 'close');
+  (e: 'add', transaction: Transaction): void;
+  (e: 'close'): void;
 }>();
 
 const form: {
@@ -57,7 +56,12 @@ const form: {
   amount: string;
 } = reactive(clone(DEFAULT_FORM_STATE));
 
-const { assetsMap, loadBalances } = useBalances();
+const { assetsMap } = useBalances({
+  treasury: toRef(() => ({
+    chainId: props.network,
+    address: props.address
+  }))
+});
 
 const formErrors = computed(() =>
   validator.validate({
@@ -88,7 +92,7 @@ const token = computed(() => {
   return token;
 });
 
-const stakingContract = computed(() => STAKING_CONTRACTS[props.networkId]);
+const stakingContract = computed(() => STAKING_CONTRACTS[props.network]);
 
 function handleMaxClick() {
   handleAmountUpdate(
@@ -111,10 +115,6 @@ async function handleSubmit() {
   emit('add', tx);
   emit('close');
 }
-
-onMounted(() => {
-  loadBalances(props.address, props.network);
-});
 
 watch(
   () => props.open,
@@ -176,7 +176,7 @@ watch(
           />
           <div class="absolute right-3 top-[28px] flex items-center gap-x-2">
             <UiStamp
-              :id="`${networkId}:${stakingContract.address}`"
+              :id="`eip155:${network}:${stakingContract.address}`"
               type="token"
               :size="20"
             />

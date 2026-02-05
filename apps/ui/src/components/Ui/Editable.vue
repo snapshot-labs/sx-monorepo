@@ -24,7 +24,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'save', value: string | number);
+  (e: 'save', value: string | number): void;
 }>();
 
 const editing = ref(false);
@@ -87,7 +87,7 @@ watch(
     :class="{
       'mt-2': editing,
       'w-fit': definition.format !== 'duration',
-      's-box w-full max-w-xl': definition.format === 'duration'
+      's-box s-input-pb-0 w-full max-w-xl': definition.format === 'duration'
     }"
   >
     <UiLoading v-if="loading" />
@@ -108,8 +108,7 @@ watch(
             'top-[-19.5px]':
               definition.format !== 'duration' && !!formErrors.value,
             'top-[-18.5px]':
-              definition.format === 'duration' && !!formErrors.value,
-            '-top-1.5': definition.format === 'duration'
+              definition.format === 'duration' && !!formErrors.value
           }"
         >
           <button

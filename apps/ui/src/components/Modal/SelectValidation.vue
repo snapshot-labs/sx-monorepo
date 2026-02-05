@@ -5,7 +5,6 @@ type ValidationDetails = {
     | 'only-members'
     | 'basic'
     | 'passport-gated'
-    | 'arbitrum'
     | 'karma-eas-attestation';
   schema: Record<string, any> | null;
   proposalValidationOnly?: boolean;
@@ -19,7 +18,7 @@ import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { StrategyConfig } from '@/networks/types';
-import { ChainId, NetworkID, Space, Validation } from '@/types';
+import { ChainId, NetworkID, Validation } from '@/types';
 
 const SCORE_API_URL = 'https://score.snapshot.org/api/validations';
 const STRATEGIES_WITHOUT_PARAMS: ValidationDetails['key'][] = [
@@ -27,18 +26,23 @@ const STRATEGIES_WITHOUT_PARAMS: ValidationDetails['key'][] = [
   'only-members'
 ];
 
-const props = defineProps<{
-  open: boolean;
-  networkId: NetworkID;
-  defaultChainId: ChainId;
-  space: Space;
-  type: 'voting' | 'proposal';
-  current?: Validation;
-}>();
+const props = withDefaults(
+  defineProps<{
+    open: boolean;
+    networkId: NetworkID;
+    defaultChainId: ChainId;
+    spaceId: string;
+    votingPowerSymbol: string;
+    type: 'voting' | 'proposal';
+    current?: Validation;
+    skipMenu?: boolean;
+  }>(),
+  { skipMenu: false }
+);
 
 const emit = defineEmits<{
-  (e: 'save', type: Validation);
-  (e: 'close');
+  (e: 'save', type: Validation): void;
+  (e: 'close'): void;
 }>();
 
 const isLoading = ref(false);
@@ -47,6 +51,8 @@ const selectedValidation = ref(null as ValidationDetails | null);
 const form = ref({} as Record<string, any>);
 const rawParams = ref('{}');
 const customStrategies = ref([] as StrategyConfig[]);
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 
 async function fetchValidations() {
   if (isLoading.value || validations.value.length) return;
@@ -139,6 +145,7 @@ const definition = computed(() => {
 
   if (selectedValidation.value.key === 'basic') {
     updated.properties.minScore.examples = ['e.g. 1.23'];
+    delete updated.properties.strategies;
   }
 
   return updated;
@@ -196,6 +203,12 @@ function handleSelect(validationDetails: ValidationDetails) {
     form.value.scoreThreshold ??= 0;
     form.value.operator ??= 'NONE';
     form.value.stamps ??= [];
+
+    // Remove unsupported options
+    form.value.stamps =
+      definition.value.properties?.stamps?.options
+        ?.filter(option => form.value.stamps.includes(option.id))
+        ?.map(option => option.id) ?? form.value.stamps;
   }
 }
 
@@ -220,16 +233,30 @@ function handleApply() {
   emit('close');
 }
 
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
+
 watch(
   () => props.open,
-  value => {
+  async value => {
     if (value) {
       selectedValidation.value = null;
-      fetchValidations();
+      await fetchValidations();
 
       if (props.current) {
         form.value = clone(props.current.params);
         rawParams.value = JSON.stringify(props.current.params, null, 2);
+
+        if (props.skipMenu) {
+          const selectedValidationDetail = filteredValidations.value.find(
+            v => v.key === props.current!.name
+          );
+          if (selectedValidationDetail) {
+            handleSelect(selectedValidationDetail);
+          }
+        }
       }
     }
   },
@@ -247,13 +274,9 @@ watch(
     </template>
     <div class="p-4 flex flex-col gap-2.5">
       <UiLoading v-if="isLoading" class="m-auto" />
-      <div
-        v-else-if="hasError"
-        class="flex w-full justify-center items-center gap-2 text-skin-text"
-      >
-        <IH-exclamation-circle class="inline-block shrink-0" />
-        <span>Failed to load strategies.</span>
-      </div>
+      <UiStateWarning v-else-if="hasError" class="justify-center">
+        Failed to load strategies.
+      </UiStateWarning>
       <div v-else-if="selectedValidation" class="s-box">
         <UiForm
           v-if="definition"
@@ -271,12 +294,26 @@ watch(
           :error="formErrors.rawParams"
         />
         <template v-if="selectedValidation.key === 'basic'">
-          <div class="flex items-center gap-1 mb-2">
-            <h4 class="eyebrow font-medium">Custom strategies</h4>
+          <div class="flex items-center justify-between gap-1 mb-2 mt-4">
+            <div class="flex items-center gap-1">
+              <UiEyebrow class="font-medium">Custom strategies</UiEyebrow>
+              <UiTooltip
+                title="Calculate the score with a different configuration of Voting Strategies"
+              >
+                <IH-question-mark-circle class="shrink-0" />
+              </UiTooltip>
+            </div>
             <UiTooltip
-              title="Calculate the score with a different configuration of Voting Strategies"
+              class="flex items-center"
+              title="Test all custom strategies"
             >
-              <IH-question-mark-circle class="shrink-0" />
+              <button
+                :disabled="!customStrategies.length"
+                class="text-skin-link"
+                @click="handleTestStrategies(customStrategies)"
+              >
+                <IH-play />
+              </button>
             </UiTooltip>
           </div>
           <UiStrategiesConfiguratorOffchain
@@ -285,6 +322,7 @@ watch(
             allow-duplicates
             :network-id="networkId"
             :default-chain-id="defaultChainId"
+            @test-strategies="handleTestStrategies"
           >
             <template #empty>
               <div class="p-3 border border-dashed rounded-lg text-center">
@@ -339,4 +377,15 @@ watch(
       </UiButton>
     </template>
   </UiModal>
+  <teleport to="#modal">
+    <ModalTestStrategy
+      :open="isTestStrategiesModalOpen"
+      :network-id="networkId"
+      :chain-id="defaultChainId"
+      :space-id="spaceId"
+      :voting-power-symbol="votingPowerSymbol"
+      :strategies="testedStrategies"
+      @close="isTestStrategiesModalOpen = false"
+    />
+  </teleport>
 </template>

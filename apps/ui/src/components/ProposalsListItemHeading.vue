@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { quorumLabel, quorumProgress } from '@/helpers/quorum';
-import { _n, _p, _rt, getProposalId, shortenAddress } from '@/helpers/utils';
+import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
+import { _n, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -17,16 +17,16 @@ const props = withDefaults(
   }
 );
 
-const { getTsFromCurrent } = useMetaStore();
-const spacesStore = useSpacesStore();
 const { votes } = useAccount();
+
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
-const space = computed(() =>
-  spacesStore.spacesMap.get(
-    `${props.proposal.network}:${props.proposal.space.id}`
-  )
+
+const hasVoted = computed(
+  () =>
+    props.showVotedIndicator &&
+    votes.value[`${props.proposal.network}:${props.proposal.id}`]
 );
 </script>
 <template>
@@ -43,8 +43,7 @@ const space = computed(() =>
       >
         <ProposalIconStatus size="17" :state="proposal.state" class="top-1.5" />
       </AppLink>
-
-      <div class="min-w-0 my-1 items-center leading-6">
+      <div class="min-w-0 my-1 items-center leading-6 space-x-2">
         <AppLink
           v-if="showSpace"
           :to="{
@@ -53,11 +52,10 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
-          class="text-[21px] text-skin-text mr-2 font-bold inline shrink-0"
+          class="text-[21px] text-skin-text font-bold inline shrink-0"
         >
           {{ proposal.space.name }}
         </AppLink>
-
         <AppLink
           :to="{
             name: 'space-proposal-overview',
@@ -66,22 +64,24 @@ const space = computed(() =>
               space: `${proposal.network}:${proposal.space.id}`
             }
           }"
+          class="space-x-2"
         >
           <h3
-            class="text-[21px] inline [overflow-wrap:anywhere] mr-2 min-w-0"
+            class="text-[21px] inline [overflow-wrap:anywhere] min-w-0"
             v-text="proposal.title || `Proposal #${proposal.proposal_id}`"
           />
+          <UiTooltip v-if="proposal.isInvalid" title="This proposal is invalid">
+            <IH-exclamation
+              class="inline-block text-skin-danger shrink-0 relative bottom-0.5"
+            />
+          </UiTooltip>
           <ProposalLabels
-            v-if="space?.labels && proposal.labels.length"
+            v-if="proposal.space?.labels && proposal.labels.length"
+            :space-id="`${proposal.network}:${proposal.space.id}`"
+            :space-labels="proposal.space.labels"
             :labels="proposal.labels"
-            :space="space"
             inline
-          />
-          <IH-check
-            v-if="
-              showVotedIndicator && votes[`${proposal.network}:${proposal.id}`]
-            "
-            class="text-skin-success inline-block shrink-0 relative"
+            with-link
           />
         </AppLink>
       </div>
@@ -101,24 +101,49 @@ const space = computed(() =>
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
+          <span
+            v-if="proposal.author.role"
+            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
+            v-text="proposal.author.role"
+          />
         </AppLink>
       </template>
     </div>
     <span>
       <template v-if="proposal.vote_count">
-        · {{ _n(proposal.vote_count, 'compact') }}
-        {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        ·
+        <router-link
+          class="text-skin-text"
+          :to="{
+            name: 'space-proposal-votes',
+            params: {
+              proposal: proposal.proposal_id,
+              space: `${proposal.network}:${proposal.space.id}`
+            }
+          }"
+        >
+          {{ _n(proposal.vote_count, 'compact') }}
+          {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
+        </router-link>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
-        · {{ _p(totalProgress) }} {{ quorumLabel(proposal.quorum_type) }}
+        · {{ formatQuorum(totalProgress) }}
+        {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
-      <button
-        type="button"
-        class="text-skin-text"
-        @click="modalOpenTimeline = true"
-        v-text="_rt(getTsFromCurrent(proposal.network, proposal.max_end))"
-      />
+      <TimeRelative v-slot="{ relativeTime }" :time="props.proposal.max_end">
+        <button
+          type="button"
+          class="text-skin-text"
+          @click="modalOpenTimeline = true"
+          v-text="relativeTime"
+        />
+      </TimeRelative>
+      <template v-if="hasVoted">
+        ·
+        <IH-check class="inline-block mt-[-2px]" />
+        voted
+      </template>
     </span>
   </div>
   <teleport to="#modal">

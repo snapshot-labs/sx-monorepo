@@ -1,5 +1,12 @@
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { defineStore } from 'pinia';
-import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import {
+  enabledNetworks,
+  getNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
+import { useFollowedSpacesQuery } from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
 import pkg from '../../package.json';
 
@@ -10,32 +17,54 @@ function getCompositeSpaceId(space: Space) {
 }
 
 export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
-  const spacesStore = useSpacesStore();
+  const queryClient = useQueryClient();
   const actions = useActions();
   const { web3, authInitiated } = useWeb3();
   const { isWhiteLabel } = useWhiteLabel();
+  const { limits } = useSettings();
 
-  const followedSpacesIds = ref<string[]>([]);
-  const followedSpacesLoaded = ref(false);
+  /**
+   * This Ref tracks if we have any space data already loaded. We want to show loading indicator if we have nothing,
+   * but once we have some data already we ignore loading indicator, just showing old data until it's refetched.
+   * This should be reset when account changes.
+   * */
+  const hasSpaceDataLoaded = ref(false);
   const followedSpaceLoading = reactive(new Set<string>());
   const followedSpacesIdsByAccount = useStorage(
     `${pkg.name}.spaces-followed`,
     {} as Record<string, string[]>
   );
 
-  const followedSpacesMap = computed(
-    () =>
-      new Map(
-        followedSpacesIds.value
-          .map(spaceId => {
-            const space = spacesStore.spacesMap.get(spaceId);
-            if (!space) return;
+  const { data: followedSpacesIds } = useQuery({
+    queryKey: ['followedSpaces', () => web3.value.account],
+    queryFn: async () => {
+      const follows = await network.api.loadFollows(web3.value.account);
 
-            return [getCompositeSpaceId(space), space] as const;
-          })
-          .filter(space => space !== undefined)
+      return follows
+        .filter(follow => enabledNetworks.includes(follow.space.network))
+        .map(follow => getCompositeSpaceId(follow.space));
+    },
+    enabled: () =>
+      authInitiated.value && !isWhiteLabel.value && !!web3.value.account
+  });
+
+  const { data: followedSpacesData } = useFollowedSpacesQuery({
+    followedSpacesIds
+  });
+
+  const maxFollowLimit = computed(() => {
+    return limits.value['user.default.follow_limit'];
+  });
+
+  const followedSpacesMap = computed(() => {
+    if (!followedSpacesData.value) return new Map<string, Space>();
+
+    return new Map(
+      followedSpacesData.value.map(
+        space => [getCompositeSpaceId(space), space] as const
       )
-  );
+    );
+  });
 
   const followedSpaces = computed({
     get() {
@@ -50,7 +79,7 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   });
 
   const followedSpaceIdsByNetwork = computed(() =>
-    followedSpacesIds.value
+    (followedSpacesIds.value ?? [])
       .map(id => id.split(':') as [NetworkID, string])
       .reduce(
         (acc, [networkId, spaceId]) => {
@@ -66,33 +95,8 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
       )
   );
 
-  async function fetchSpacesData(ids: string[]) {
-    if (!ids.length) return;
-
-    await spacesStore.fetchSpaces(
-      ids.filter(id => !spacesStore.spacesMap.has(id))
-    );
-  }
-
-  async function loadFollowedSpaces() {
-    const followedIds = (await network.api.loadFollows(web3.value.account)).map(
-      follow => getCompositeSpaceId(follow.space)
-    );
-    const newIds = followedIds.filter(id => !isFollowed(id));
-    followedSpacesIds.value = followedIds;
-    followedSpacesIdsByAccount.value[web3.value.account] = Array.from(
-      new Set(
-        [
-          ...(followedSpacesIdsByAccount.value[web3.value.account] || []),
-          ...followedIds
-        ].filter(id => followedIds.includes(id))
-      )
-    );
-    await fetchSpacesData(newIds);
-  }
-
   async function toggleSpaceFollow(id: string) {
-    const alreadyFollowed = followedSpacesIds.value.includes(id);
+    const alreadyFollowed = followedSpacesIds.value?.includes(id) ?? false;
     const [spaceNetwork, spaceId] = id.split(':') as [NetworkID, string];
     followedSpaceLoading.add(id);
 
@@ -101,21 +105,26 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
         const result = await actions.unfollowSpace(spaceNetwork, spaceId);
         if (!result) return;
 
-        followedSpacesIds.value = followedSpacesIds.value.filter(
-          (spaceId: string) => spaceId !== id
+        queryClient.setQueryData<string[]>(
+          ['followedSpaces', web3.value.account],
+          old => (old ?? []).filter(spaceId => spaceId !== id)
         );
-        followedSpacesIdsByAccount.value[web3.value.account] =
-          followedSpacesIdsByAccount.value[web3.value.account].filter(
-            (spaceId: string) => spaceId !== id
-          );
       } else {
+        if (followedSpaces.value.length >= maxFollowLimit.value) {
+          throw new Error(
+            `You can follow up to ${maxFollowLimit.value} spaces.`
+          );
+        }
+
         const result = await actions.followSpace(spaceNetwork, spaceId);
         if (!result) return;
 
-        fetchSpacesData([id]);
-
-        followedSpacesIds.value.unshift(id);
+        // NOTE: here we put it in followedSpacesIdsByAccount as well so it ends up at the top of the list
         followedSpacesIdsByAccount.value[web3.value.account].unshift(id);
+        queryClient.setQueryData<string[]>(
+          ['followedSpaces', web3.value.account],
+          old => [id, ...(old ?? [])]
+        );
       }
     } finally {
       followedSpaceLoading.delete(id);
@@ -123,39 +132,49 @@ export const useFollowedSpacesStore = defineStore('followedSpaces', () => {
   }
 
   function isFollowed(spaceId: string) {
-    return followedSpacesIds.value.includes(spaceId);
+    return followedSpacesIds.value?.includes(spaceId);
   }
 
   watch(
-    [
-      () => web3.value.account,
-      () => web3.value.authLoading,
-      () => authInitiated.value,
-      () => isWhiteLabel.value
-    ],
-    async ([web3, authLoading, authInitiated, isWhiteLabel]) => {
-      if (!authInitiated || authLoading || isWhiteLabel) return;
+    followedSpacesIds,
+    followedSpacesIds => {
+      if (!followedSpacesIds) return;
 
-      followedSpacesLoaded.value = false;
-
-      if (!web3) {
-        followedSpacesIds.value = [];
-        followedSpacesLoaded.value = true;
-        return;
-      }
-
-      await loadFollowedSpaces();
-
-      followedSpacesLoaded.value = true;
+      followedSpacesIdsByAccount.value[web3.value.account] = Array.from(
+        new Set(
+          [
+            ...(followedSpacesIdsByAccount.value[web3.value.account] || []),
+            ...followedSpacesIds
+          ].filter(id => followedSpacesIds.includes(id))
+        )
+      );
     },
-    { immediate: true }
+    {
+      immediate: true
+    }
+  );
+
+  watch(followedSpacesData, data => {
+    if (data) hasSpaceDataLoaded.value = true;
+  });
+
+  watch(
+    () => web3.value.account,
+    () => {
+      hasSpaceDataLoaded.value = false;
+    }
   );
 
   return {
+    maxFollowLimit,
     followedSpaces,
-    followedSpacesIds,
+    followedSpacesIds: computed(() => followedSpacesIds.value ?? []),
     followedSpaceIdsByNetwork,
-    followedSpacesLoaded,
+    followedSpacesLoaded: computed(
+      () =>
+        (!web3.value.authLoading && !web3.value.account) ||
+        hasSpaceDataLoaded.value
+    ),
     followedSpaceLoading,
     toggleSpaceFollow,
     isFollowed

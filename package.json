@@ -6,23 +6,47 @@
     "type": "git",
     "url": "git@github.com:snapshot-labs/sx-monorepo.git"
   },
+  "type": "module",
   "scripts": {
-    "dev": "turbo run dev --filter=!mana --filter=!api --filter=!api-subgraph",
-    "dev:full": "./scripts/dev-full.sh",
+    "dev": "turbo run dev --filter=!mana --filter=!api",
+    "dev:interactive": "node --experimental-strip-types --no-warnings=ExperimentalWarning ./scripts/dev-interactive.ts",
+    "dev:electron": "turbo run dev:electron",
     "build": "turbo run build",
+    "build:electron": "ELECTRON=true turbo run build:electron",
     "test": "turbo run test",
-    "lint": "turbo run lint",
+    "test:integration": "turbo run test:integration",
+    "test:e2e": "playwright test --config=playwright.config.ts",
+    "test:e2e:headed": "playwright test --config=playwright.config.ts --headed",
+    "lint": "turbo run lint lint:scripts",
+    "lint:fix": "turbo run lint:fix && yarn lint:scripts --fix",
+    "lint:scripts": "eslint scripts/ --ext .ts",
     "typecheck": "turbo run typecheck",
     "release": "yarn build && changeset publish"
   },
+  "eslintConfig": {
+    "extends": "@snapshot-labs"
+  },
+  "prettier": "@snapshot-labs/prettier-config",
   "devDependencies": {
-    "@changesets/cli": "^2.27.1",
-    "turbo": "^1.12.3"
+    "@changesets/cli": "^2.29.7",
+    "@inquirer/prompts": "^7.10.1",
+    "@playwright/test": "^1.56.1",
+    "@snapshot-labs/eslint-config": "^0.1.0-beta.21",
+    "@snapshot-labs/prettier-config": "^0.1.0-beta.19",
+    "@types/decompress": "^4.2.7",
+    "decompress": "^4.2.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.1.0",
+    "turbo": "^2.4.0",
+    "typescript": "^5.8.3"
+  },
+  "resolutions": {
+    "error-ex": "1.3.2"
   },
   "engines": {
-    "node": ">=18.x"
+    "node": ">=22.6"
   },
-  "packageManager": "yarn@1.22.19",
+  "packageManager": "yarn@1.22.22",
   "workspaces": {
     "packages": [
       "apps/*",

@@ -1,6 +1,6 @@
 import { Contract } from '@ethersproject/contracts';
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
 import { computedAsync, useMemoize } from '@vueuse/core';
+import { getIsContract } from '@/helpers/contracts';
 import { getProvider } from '@/helpers/provider';
 import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
@@ -8,9 +8,9 @@ import { NetworkID } from '@/types';
 const getSafeVersion = useMemoize(
   async (networkKey: string, account: string) => {
     const provider = getProvider(Number(networkKey));
-    const code = await provider.getCode(account);
 
-    if (code === '0x') return undefined;
+    const isContract = await getIsContract(provider, account);
+    if (!isContract) return undefined;
 
     const abi = ['function VERSION() view returns (string)'];
     const contract = new Contract(account, abi, provider);
@@ -18,12 +18,12 @@ const getSafeVersion = useMemoize(
   }
 );
 
-export function useSafeWallet(network: NetworkID, chainId = 1) {
-  const { web3 } = useWeb3();
-  const auth = getInstance();
-  const connectorName = computed(() => auth.provider.value?.connectorName);
+export function useSafeWallet(network: NetworkID, chainId = '1') {
+  const { web3, auth } = useWeb3();
 
-  const signedChainId = computed(() => web3.value.network.key);
+  const signedChainId = computed<string>(() =>
+    String(web3.value.network.chainId)
+  );
 
   const isSafeContract = computedAsync(async () => {
     if (!web3.value.account) return false;
@@ -37,14 +37,14 @@ export function useSafeWallet(network: NetworkID, chainId = 1) {
   }, false);
 
   const isSafeWallet = computed(
-    () => connectorName.value === 'gnosis' || isSafeContract.value
+    () => auth.value?.connector.type === 'gnosis' || isSafeContract.value
   );
 
   const isInvalidNetwork = computed(() => {
     return (
       isSafeWallet.value &&
       offchainNetworks.includes(network) &&
-      Number(signedChainId.value) !== chainId
+      signedChainId.value !== chainId
     );
   });
 

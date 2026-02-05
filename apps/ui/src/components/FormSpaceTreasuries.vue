@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import Draggable from 'vuedraggable';
-import { offchainNetworks } from '@/networks';
+import { shorten } from '@/helpers/utils';
 import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
 const model = defineModel<SpaceMetadataTreasury[]>({
   required: true
 });
 
-const props = defineProps<{
+defineProps<{
   networkId: NetworkID;
   limit?: number;
 }>();
@@ -28,11 +28,7 @@ function addTreasuryConfig(config: SpaceMetadataTreasury) {
       : model.value;
 
   const getId = (t: SpaceMetadataTreasury) => {
-    const networkIdentifeir = offchainNetworks.includes(props.networkId)
-      ? t.chainId
-      : t.network;
-
-    return `${t.name}-${networkIdentifeir}-${t.address}`;
+    return `${t.name}-${t.chainId}-${t.address}`;
   };
 
   const existingTreasuries = new Map(
@@ -82,30 +78,54 @@ function deleteTreasury(index: number) {
 </script>
 
 <template>
-  <h4 v-bind="$attrs" class="eyebrow mb-2 font-medium">Treasuries</h4>
+  <UiEyebrow v-bind="$attrs" class="mb-2 font-medium">Treasuries</UiEyebrow>
   <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
     <template #item="{ element: treasury, index: i }">
       <div
-        class="flex justify-between items-center rounded-lg border px-4 py-3 mb-3 text-skin-link"
+        class="flex justify-between items-center first-of-type:rounded-t-lg last-of-type:rounded-b-lg first-of-type:border-t border-b border-x last-of-type:mb-3 px-4 py-3 text-skin-link"
       >
         <div class="flex items-center">
           <div
             v-if="model.length > 1"
-            class="handle mr-4 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
+            class="handle mr-3 text-skin-link cursor-pointer opacity-50 hover:opacity-100"
           >
             <IH-switch-vertical />
           </div>
-          <div class="flex min-w-0">
-            <div class="truncate mr-3">{{ treasury.name }}</div>
+          <div class="flex items-center">
+            <UiBadgeNetwork
+              :chain-id="treasury.chainId"
+              class="mr-3 hidden sm:block"
+            >
+              <UiStamp
+                :id="treasury.address"
+                type="avatar"
+                :size="32"
+                class="rounded-md"
+              />
+            </UiBadgeNetwork>
+            <div class="flex-1 leading-[22px]">
+              <h4
+                class="text-skin-link"
+                v-text="treasury.name || shorten(treasury.address)"
+              />
+              <UiAddress
+                class="text-skin-text text-[17px]"
+                :address="treasury.address"
+              />
+            </div>
           </div>
         </div>
-        <div class="flex gap-3">
-          <button type="button" @click="editTreasury(i)">
-            <IH-pencil />
-          </button>
-          <button type="button" @click="deleteTreasury(i)">
-            <IH-trash />
-          </button>
+        <div class="flex gap-2">
+          <UiTooltip title="Edit treasury">
+            <UiButton uniform @click="editTreasury(i)">
+              <IH-pencil />
+            </UiButton>
+          </UiTooltip>
+          <UiTooltip title="Delete treasury">
+            <UiButton uniform @click="deleteTreasury(i)">
+              <IH-trash />
+            </UiButton>
+          </UiTooltip>
         </div>
       </div>
     </template>
@@ -114,8 +134,10 @@ function deleteTreasury(index: number) {
     v-if="limit ? model.length < limit : true"
     class="w-full"
     @click="addTreasury"
-    >Add treasury</UiButton
   >
+    <IH-plus class="shrink-0 size-[16px]" />
+    Add treasury
+  </UiButton>
   <teleport to="#modal">
     <ModalTreasuryConfig
       :open="modalOpen"
@@ -126,3 +148,9 @@ function deleteTreasury(index: number) {
     />
   </teleport>
 </template>
+
+<style scoped lang="scss">
+.sortable-drag {
+  @apply rounded-lg border bg-skin-bg;
+}
+</style>

@@ -1,15 +1,19 @@
 <script setup lang="ts">
+import { useQueryClient } from '@tanstack/vue-query';
 import {
+  formatQuorum,
   quorumChoiceProgress,
   quorumLabel,
   quorumProgress
 } from '@/helpers/quorum';
 import { _n, _p, _vp } from '@/helpers/utils';
+import { getNetwork, offchainNetworks } from '@/networks';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal as ProposalType } from '@/types';
 
 const DEFAULT_MAX_CHOICES = 6;
 
-const SHUTTER_URL = 'https://blog.shutter.network/shielded-voting';
+const SHUTTER_URL = 'https://www.shutter.network/shielded-voting';
 
 const props = withDefaults(
   defineProps<{
@@ -25,11 +29,23 @@ const props = withDefaults(
   }
 );
 
+const queryClient = useQueryClient();
+
 const displayAllChoices = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
 
+const placeholderResults = computed(() =>
+  props.proposal.choices.map((_, i) => ({
+    choice: i + 1,
+    progress: 0,
+    score: 0
+  }))
+);
+
 const results = computed(() => {
+  if (!props.proposal.scores.length) return placeholderResults.value;
+
   // TODO: sx-api returns number, sx-subgraph returns string
   const parsedTotal = parseFloat(
     props.proposal.scores_total as unknown as string
@@ -61,11 +77,11 @@ const visibleResults = computed(() => {
 });
 
 const otherResultsSummary = computed(() => {
-  const oetherResultsStartIndex = hasOneExtra.value
+  const otherResultsStartIndex = hasOneExtra.value
     ? DEFAULT_MAX_CHOICES + 1
     : DEFAULT_MAX_CHOICES;
 
-  return results.value.slice(oetherResultsStartIndex).reduce(
+  return results.value.slice(otherResultsStartIndex).reduce(
     (acc, result) => ({
       progress: acc.progress + result.progress,
       count: acc.count + 1
@@ -76,29 +92,63 @@ const otherResultsSummary = computed(() => {
     }
   );
 });
+
+const isFinalizing = computed(() => {
+  return (
+    offchainNetworks.includes(props.proposal.network) &&
+    !props.proposal.completed &&
+    ['passed', 'executed', 'rejected', 'closed'].includes(props.proposal.state)
+  );
+});
+
+async function refreshScores() {
+  try {
+    const network = getNetwork(props.proposal.network);
+    const hubUrl = network.api.apiUrl.replace('/graphql', '');
+    const response = await fetch(`${hubUrl}/api/scores/${props.proposal.id}`);
+    const result = await response.json();
+
+    if (result.result === true) {
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(
+          props.proposal.network,
+          props.proposal.space.id
+        )
+      });
+    }
+  } catch (e) {
+    console.warn('Failed to refresh scores', e);
+  }
+}
+
+onMounted(() => {
+  if (isFinalizing.value) refreshScores();
+});
 </script>
 
 <template>
+  <div v-if="isFinalizing && withDetails" class="border rounded-lg px-3 py-2.5">
+    <div class="flex items-center gap-2 text-skin-link">
+      <IH-exclamation-circle class="shrink-0" />
+      Finalizing results
+    </div>
+    Please allow few minutes while final results are being calculated.
+  </div>
   <div
-    v-if="!!props.proposal.privacy && !props.proposal.completed && withDetails"
+    v-else-if="
+      props.proposal.privacy !== 'none' &&
+      props.proposal.state === 'active' &&
+      withDetails
+    "
+    class="space-y-1"
   >
-    <div class="mb-1">
+    <div>
       All votes are encrypted and will be decrypted only after the voting period
       is over, making the results visible.
     </div>
-    <div>
-      <a
-        :href="SHUTTER_URL"
-        class="flex items-center text-skin-link"
-        target="_blank"
-      >
-        <IC-Shutter class="w-[80px]" />
-        <IH-arrow-sm-right class="-rotate-45" />
-      </a>
-      <div v-if="proposal.quorum" class="mt-3.5">
-        {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
-      </div>
+    <div v-if="proposal.quorum">
+      {{ quorumLabel(proposal.quorum_type) }}:
+      <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
     </div>
   </div>
   <template v-else>
@@ -139,14 +189,17 @@ const otherResultsSummary = computed(() => {
             class="text-white size-[14px] mt-0.5 ml-0.5"
           />
         </div>
-        <div
-          class="truncate grow"
-          v-text="proposal.choices[result.choice - 1]"
+        <UiTooltipOnTruncate :content="proposal.choices[result.choice - 1]" />
+        <IH-lock-closed
+          v-if="proposal.privacy !== 'none' && !proposal.completed"
+          class="size-[16px] shrink-0"
         />
-        <div>
-          {{ _vp(result.score / 10 ** decimals) }}
-        </div>
-        <div v-text="_p(result.progress / 100)" />
+        <template v-else>
+          <div>
+            {{ _vp(result.score / 10 ** decimals) }}
+          </div>
+          <div v-text="_p(result.progress / 100)" />
+        </template>
       </div>
       <button
         v-if="!displayAllChoices && otherResultsSummary.count > 0"
@@ -177,21 +230,11 @@ const otherResultsSummary = computed(() => {
       </button>
       <div v-if="proposal.quorum">
         {{ quorumLabel(proposal.quorum_type) }}:
-        <span class="text-skin-link">{{ _p(totalProgress) }}</span>
-      </div>
-      <div v-if="proposal.privacy === 'shutter'" class="mt-2.5">
-        <a
-          :href="SHUTTER_URL"
-          class="flex items-center text-skin-link"
-          target="_blank"
-        >
-          <IC-Shutter class="w-[80px]" />
-          <IH-arrow-sm-right class="-rotate-45" />
-        </a>
+        <span class="text-skin-link">{{ formatQuorum(totalProgress) }}</span>
       </div>
     </div>
     <div
-      v-else-if="!props.proposal.privacy || props.proposal.completed"
+      v-else-if="props.proposal.privacy === 'none' || props.proposal.completed"
       class="h-full flex items-center"
     >
       <div
@@ -220,4 +263,13 @@ const otherResultsSummary = computed(() => {
       </div>
     </div>
   </template>
+  <a
+    v-if="proposal.privacy == 'shutter' && withDetails"
+    :href="SHUTTER_URL"
+    class="flex items-center text-skin-link mt-2.5"
+    target="_blank"
+  >
+    <IC-Shutter class="w-[80px]" />
+    <IH-arrow-sm-right class="-rotate-45" />
+  </a>
 </template>

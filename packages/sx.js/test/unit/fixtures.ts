@@ -1,4 +1,4 @@
-import { Envelope, Propose, Vote } from '../../src/types';
+import { Envelope, Propose, Vote } from '../../src/clients/starknet/types';
 
 const proposeData = {
   space: '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',
@@ -8,7 +8,8 @@ const proposeData = {
     {
       index: 1,
       address:
-        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
+        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a',
+      params: '0x'
     }
   ],
   executionStrategy: {
@@ -26,9 +27,11 @@ const voteData = {
     {
       index: 1,
       address:
-        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a'
+        '0x0277bc9bb7b7e7f48faaf5a2023f247e5c7cd81bfab1221bd7e91c9d4894ec1a',
+      params: '0x'
     }
   ],
+  metadataUri: '',
   proposal: 3,
   choice: 1
 };

@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia';
+import { waitForTransaction } from '@/helpers/generic';
 import { lsGet, lsSet } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
-import { NetworkID, NotificationType } from '@/types';
+import { ChainId, NotificationType } from '@/types';
+
+type SafeModal = {
+  id: string;
+  type: 'vote' | 'propose' | 'transaction';
+  showVerifierLink: boolean;
+};
 
 type Notification = {
   id: string;
@@ -10,7 +16,7 @@ type Notification = {
 };
 
 type PendingTransaction = {
-  networkId: NetworkID;
+  chainId: ChainId;
   txId: string;
   createdAt: number;
 };
@@ -25,12 +31,16 @@ function updateStorage(pendingTransactions: PendingTransaction[]) {
 export const useUiStore = defineStore('ui', {
   state: () => ({
     sideMenuOpen: false,
+    safeModal: null as SafeModal | null,
     notifications: [] as Notification[],
     pendingTransactions: [] as PendingTransaction[]
   }),
   actions: {
     async toggleSidebar() {
       this.sideMenuOpen = !this.sideMenuOpen;
+    },
+    openSafeModal(data: Omit<SafeModal, 'id'>) {
+      this.safeModal = { id: crypto.randomUUID(), ...data };
     },
     addNotification(type: NotificationType, message: string, timeout = 5000) {
       const id = crypto.randomUUID();
@@ -48,16 +58,16 @@ export const useUiStore = defineStore('ui', {
         notification => notification.id !== id
       );
     },
-    async addPendingTransaction(txId: string, networkId: NetworkID) {
+    async addPendingTransaction(txId: string, chainId: ChainId) {
       this.pendingTransactions.push({
-        networkId,
+        chainId,
         txId,
         createdAt: Date.now()
       });
       updateStorage(this.pendingTransactions);
 
       try {
-        await getNetwork(networkId).helpers.waitForTransaction(txId);
+        await waitForTransaction(txId, chainId);
       } finally {
         this.pendingTransactions = this.pendingTransactions.filter(
           el => el.txId !== txId
@@ -78,9 +88,9 @@ export const useUiStore = defineStore('ui', {
         updateStorage(this.pendingTransactions);
       }
 
-      this.pendingTransactions.forEach(async ({ networkId, txId }) => {
+      this.pendingTransactions.forEach(async ({ chainId, txId }) => {
         try {
-          await getNetwork(networkId).helpers.waitForTransaction(txId);
+          await waitForTransaction(txId, chainId);
         } finally {
           this.pendingTransactions = this.pendingTransactions.filter(
             el => el.txId !== txId

@@ -25,7 +25,12 @@ describe('merkleWhitelist', () => {
   };
 
   const merkleWhitelist = createMerkleWhitelistStrategy();
-  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
+  const config = {
+    starkProvider,
+    ethUrl,
+    networkConfig: starknetSepolia,
+    whitelistServerUrl: 'https://wls.snapshot.box'
+  };
 
   it('should return type', () => {
     expect(merkleWhitelist.type).toBe('whitelist');
@@ -37,6 +42,7 @@ describe('merkleWhitelist', () => {
       '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
       '0x344a63d1f5cd0e5f707fede9886d5dd306e86eba91ea410b416f39e44c3865',
       0,
+      '0x',
       metadata,
       proposeEnvelope,
       config

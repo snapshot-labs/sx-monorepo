@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { BaseDefinition, NetworkID } from '@/types';
 
 const network = defineModel<string | number | null>({
@@ -13,13 +11,17 @@ const props = defineProps<{
   definition: BaseDefinition<string | number | null> & {
     networkId: NetworkID;
     networksListKind?: 'full' | 'builtin';
+    networksFilter?: string[];
   };
 }>();
 
-const options = computed(() => {
-  if (props.definition.networksListKind === 'full') {
-    const baseNetworks = Object.entries(networks)
-      .filter(([, network]) => {
+const { networks } = useOffchainNetworksList(props.definition.networkId);
+
+const allOptions = computed(() => {
+  const networksListKind = props.definition.networksListKind;
+  if (networksListKind === 'full') {
+    return networks.value
+      .filter(network => {
         if (
           props.definition.networkId === 's' &&
           'testnet' in network &&
@@ -30,8 +32,8 @@ const options = computed(() => {
 
         return true;
       })
-      .map(([id, network]) => ({
-        id: Number(id),
+      .map(network => ({
+        id: String(network.chainId),
         name: network.name,
         icon: h('img', {
           src: getUrl(network.logo),
@@ -39,30 +41,6 @@ const options = computed(() => {
           class: 'rounded-full'
         })
       }));
-
-    return [
-      ...baseNetworks,
-      ...Object.values(STARKNET_NETWORK_METADATA)
-        .filter(metadata => {
-          if (
-            props.definition.networkId === 's' &&
-            metadata.name.includes('Sepolia')
-          ) {
-            return false;
-          }
-
-          return true;
-        })
-        .map(metadata => ({
-          id: metadata.chainId,
-          name: metadata.name,
-          icon: h('img', {
-            src: getUrl(metadata.avatar),
-            alt: metadata.name,
-            class: 'rounded-full'
-          })
-        }))
-    ];
   }
 
   return enabledNetworks
@@ -81,6 +59,14 @@ const options = computed(() => {
       };
     })
     .filter(network => !network.readOnly);
+});
+
+const options = computed(() => {
+  const networksFilter = props.definition.networksFilter;
+
+  if (!networksFilter) return allOptions.value;
+
+  return allOptions.value.filter(option => networksFilter.includes(option.id));
 });
 </script>
 

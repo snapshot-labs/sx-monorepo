@@ -94,9 +94,12 @@
   font-weight: 700;
   src: url('./assets/fonts/Stolzl-Medium.woff2') format('woff2');
 }
-
+html {
+  scrollbar-gutter: stable;
+}
 body {
-  @apply font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  @apply overflow-y-scroll font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  scrollbar-gutter: stable;
 }
 
 .font-display {
@@ -156,6 +159,10 @@ a,
 
 input {
   @apply outline-none;
+
+  &[disabled] {
+    @apply cursor-not-allowed;
+  }
 }
 
 .choice-bg {
@@ -219,14 +226,12 @@ input[type='number'] {
   appearance: textfield;
 }
 
-input:placeholder-shown {
-  @apply text-ellipsis;
+input[type='time']::-webkit-calendar-picker-indicator {
+  display: none;
 }
 
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 16px;
+input:placeholder-shown {
+  @apply text-ellipsis;
 }
 
 .notification {
@@ -271,6 +276,16 @@ input:placeholder-shown {
   background-image: url('@/assets/blocks-x-dark.svg');
 }
 
+.shapes {
+  background-repeat: repeat;
+  background-position: top center;
+  background-image: url('@/assets/shapes-light.svg');
+}
+
+.dark .shapes {
+  background-image: url('@/assets/shapes-dark.svg');
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -296,6 +311,48 @@ input:placeholder-shown {
     .s-label-char-count {
       display: block;
     }
+  }
+}
+
+.s-form > .s-base:last-child,
+.s-input-pb-0 .s-base {
+  .s-input,
+  &.s-error {
+    @apply mb-0;
+  }
+}
+
+.s-array {
+  @apply space-y-2.5;
+
+  &-items {
+    .s-input-wrapper {
+      @apply flex items-center h-[40px] gap-2.5 px-2.5 border bg-skin-border rounded-lg;
+
+      * {
+        @apply shrink-0;
+      }
+
+      input {
+        @apply flex-1 h-[40px] py-[10px] bg-transparent text-skin-heading focus:outline-none;
+      }
+    }
+
+    .s-error .s-input-wrapper {
+      @apply border-skin-danger;
+    }
+
+    .s-form-wrapper {
+      @apply border border-skin-border rounded-lg p-3 pt-2 space-y-2.5;
+    }
+
+    > .s-base {
+      @apply space-y-1;
+    }
+  }
+
+  + .s-base {
+    @apply mt-4;
   }
 }
 
@@ -348,6 +405,9 @@ input:placeholder-shown {
 
   .s-label {
     @apply absolute px-3 mt-1 text-[17px];
+    &:has(+ input[type='checkbox']) {
+      @apply px-0 m-0 ml-3.5;
+    }
   }
 
   .s-input {

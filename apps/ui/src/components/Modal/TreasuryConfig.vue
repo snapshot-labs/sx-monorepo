@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { offchainNetworks } from '@/networks';
 import { NetworkID, SpaceMetadataTreasury } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   name: '',
   address: '',
-  network: null,
   chainId: null
 };
 
@@ -17,7 +15,7 @@ const props = defineProps<{
   initialState?: SpaceMetadataTreasury;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataTreasury);
+  (e: 'add', config: SpaceMetadataTreasury): void;
   (e: 'close'): void;
 }>();
 
@@ -25,16 +23,12 @@ const showPicker = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataTreasury> = ref(clone(DEFAULT_FORM_STATE));
 
-const networkField = computed(() =>
-  offchainNetworks.includes(props.networkId) ? 'chainId' : 'network'
-);
-
 const definition = computed(() => {
   return {
     type: 'object',
     title: 'Space',
     additionalProperties: true,
-    required: ['name', 'network', 'address'],
+    required: ['name', 'chainId', 'address'],
     properties: {
       name: {
         type: 'string',
@@ -43,23 +37,22 @@ const definition = computed(() => {
         maxLength: 32,
         examples: ['Treasury name']
       },
-      [networkField.value]: {
+      chainId: {
         type: ['string', 'number', 'null'],
         format: 'network',
         networkId: props.networkId,
-        networksListKind: offchainNetworks.includes(props.networkId)
-          ? 'full'
-          : 'builtin',
+        networksListKind: 'full',
         title: 'Treasury network',
         nullable: true
       },
-      ...(form.value[networkField.value] !== null
+      ...(form.value.chainId !== null
         ? {
             address: {
               type: 'string',
               title: 'Treasury address',
               examples: ['0x0000…'],
               format: 'address',
+              chainId: form.value.chainId,
               minLength: 1
             }
           }
@@ -75,18 +68,20 @@ const formErrors = computed(() =>
 const formValid = computed(() => {
   return (
     Object.keys(formErrors.value).length === 0 &&
-    form.value[networkField.value] !== null &&
+    form.value.chainId !== null &&
     form.value.address !== ''
   );
 });
 
 async function handleSubmit() {
-  emit('add', form.value);
+  emit('add', clone(form.value));
 }
 
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.value = clone(props.initialState);
     } else {
@@ -108,16 +103,11 @@ watch(
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          ref="searchInput"
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <PickerContact

@@ -1,12 +1,23 @@
-import { OffchainNetworkConfig } from './types';
+import { constants as starknetConstants } from 'starknet';
+import {
+  OffchainNetworkEthereumConfig,
+  OffchainNetworkStarknetConfig
+} from './types';
 
-function createStandardConfig(
-  eip712ChainId: OffchainNetworkConfig['eip712ChainId']
-) {
+type EvmChainId = OffchainNetworkEthereumConfig['eip712ChainId'];
+type StarknetChainId = OffchainNetworkStarknetConfig['eip712ChainId'];
+
+function createStandardConfig<T>(eip712ChainId: T) {
   return {
     eip712ChainId
   };
 }
 
-export const offchainMainnet = createStandardConfig(1);
-export const offchainGoerli = createStandardConfig(5);
+export const offchainMainnet = createStandardConfig<EvmChainId>(1);
+export const offchainGoerli = createStandardConfig<EvmChainId>(5);
+export const offchainStarknetMainnet = createStandardConfig<StarknetChainId>(
+  starknetConstants.StarknetChainId.SN_MAIN
+);
+export const offchainStarknetSepolia = createStandardConfig<StarknetChainId>(
+  starknetConstants.StarknetChainId.SN_SEPOLIA
+);

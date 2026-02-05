@@ -1,54 +1,52 @@
-import { getInstance } from '@snapshot-labs/lock/plugins/vue3';
+import { Web3Provider } from '@ethersproject/providers';
+import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
-import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
-import { STARKNET_CONNECTORS } from '@/networks/common/constants';
-import { METADATA } from '@/networks/starknet';
+import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
+import {
+  getNetwork,
+  getReadWriteNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   ChainId,
   Choice,
   DelegationType,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   SpaceSettings,
   Statement,
   User,
   VoteType
 } from '@/types';
 
-const offchainToStarknetIds: Record<string, NetworkID> = {
-  s: 'sn',
-  's-tn': 'sn-sep'
+const PENDING_MESSAGES: Record<'vote' | 'propose' | 'transaction', string> = {
+  vote: 'Your vote is pending! Waiting for other signers',
+  propose: 'Your proposal is pending! Waiting for other signers',
+  transaction: 'Your transaction is pending! Waiting for other signers'
 };
-
-const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
   const uiStore = useUiStore();
   const alias = useAlias();
-  const { web3 } = useWeb3();
+  const { auth } = useWeb3();
   const { addPendingVote } = useAccount();
   const { getCurrentFromDuration } = useMetaStore();
   const { modalAccountOpen } = useModal();
-  const auth = getInstance();
 
   function wrapWithErrors<T extends any[], U>(fn: (...args: T) => U) {
     return async (...args: T): Promise<U> => {
       try {
         return await fn(...args);
       } catch (e) {
-        const isUserAbortError =
-          e.code === 4001 ||
-          e.message === 'User rejected the request.' ||
-          e.code === 'ACTION_REJECTED';
-
-        if (!isUserAbortError) {
-          uiStore.addNotification(
-            'error',
-            'Something went wrong. Please try again later.'
-          );
+        if (!isUserAbortError(e)) {
+          console.error(e);
+          uiStore.addNotification('error', getUserFacingErrorMessage(e));
         }
 
         throw e;
@@ -56,14 +54,25 @@ export function useActions() {
     };
   }
 
-  function handleSafeEnvelope(envelope: any) {
+  function handleSafeEnvelope(
+    envelope: any,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     if (envelope !== null) return false;
 
-    uiStore.addNotification('success', 'Transaction set up.');
+    uiStore.openSafeModal({
+      type: safeAppContext,
+      showVerifierLink: false
+    });
+
     return true;
   }
 
-  async function handleCommitEnvelope(envelope: any, networkId: NetworkID) {
+  async function handleCommitEnvelope(
+    envelope: any,
+    networkId: NetworkID,
+    safeAppContext: 'vote' | 'propose' | 'transaction'
+  ) {
     // TODO: it should work with WalletConnect, should be done before L1 transaction is broadcasted
     const network = getNetwork(networkId);
 
@@ -78,14 +87,21 @@ export function useActions() {
       if (envelope.signatureData.commitTxId) {
         uiStore.addPendingTransaction(
           envelope.signatureData.commitTxId,
-          network.baseNetworkId
+          network.baseChainId
         );
       }
 
-      uiStore.addNotification(
-        'success',
-        'Transaction set up. It will be processed once received on L2 network automatically.'
-      );
+      if (envelope.signatureData.commitTxId) {
+        uiStore.addNotification(
+          'success',
+          'Transaction set up. It will be processed once received on L2 network automatically.'
+        );
+      } else {
+        uiStore.openSafeModal({
+          type: safeAppContext,
+          showVerifierLink: true
+        });
+      }
 
       return true;
     }
@@ -96,14 +112,27 @@ export function useActions() {
   async function wrapPromise(
     networkId: NetworkID,
     promise: Promise<any>,
-    opts: { transactionNetworkId?: NetworkID } = {}
+    opts: {
+      chainId?: ChainId;
+      safeAppContext?: 'vote' | 'propose' | 'transaction';
+    } = {}
   ): Promise<string | null> {
     const network = getNetwork(networkId);
 
     const envelope = await promise;
 
-    if (handleSafeEnvelope(envelope)) return null;
-    if (await handleCommitEnvelope(envelope, networkId)) return null;
+    if (handleSafeEnvelope(envelope, opts.safeAppContext ?? 'transaction')) {
+      return null;
+    }
+    if (
+      await handleCommitEnvelope(
+        envelope,
+        networkId,
+        opts.safeAppContext ?? 'transaction'
+      )
+    ) {
+      return null;
+    }
 
     let hash;
     // TODO: unify send/soc to both return txHash under same property
@@ -115,20 +144,19 @@ export function useActions() {
 
       console.log('Receipt', receipt);
 
-      if (envelope.signatureData.signature === '0x')
-        uiStore.addNotification(
-          'success',
-          'Your vote is pending! waiting for other signers'
-        );
-      hash && uiStore.addPendingTransaction(hash, networkId);
+      if (envelope.signatureData.signature === '0x') {
+        const safeContext = opts.safeAppContext ?? 'transaction';
+        uiStore.addNotification('success', PENDING_MESSAGES[safeContext]);
+      }
+
+      if (hash) {
+        uiStore.addPendingTransaction(hash, network.chainId);
+      }
     } else {
       hash = envelope.transaction_hash || envelope.hash;
       console.log('Receipt', envelope);
 
-      uiStore.addPendingTransaction(
-        hash,
-        opts.transactionNetworkId || networkId
-      );
+      uiStore.addPendingTransaction(hash, opts.chainId || network.chainId);
     }
 
     return hash;
@@ -138,29 +166,37 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
-  async function getAliasSigner() {
-    const network = getNetwork(
-      STARKNET_CONNECTORS.includes(web3.value.type as Connector)
-        ? starknetNetworkId
-        : metadataNetwork
-    );
+  async function getAliasSigner({ provider }: { provider: Web3Provider }) {
+    const network = getNetwork(metadataNetwork);
 
     return alias.getAliasWallet(address =>
-      wrapPromise(metadataNetwork, network.actions.setAlias(auth.web3, address))
+      wrapPromise(metadataNetwork, network.actions.setAlias(provider, address))
     );
+  }
+
+  // Returns an alias signer if the connector is a Starknet wallet and the network is offchain,
+  // otherwise returns the original provider.
+  async function getOptionalAliasSigner(
+    auth: { connector: Connector; provider: Web3Provider },
+    networkId: NetworkID
+  ) {
+    return auth.connector.type === 'argentx' &&
+      offchainNetworks.includes(networkId)
+      ? await getAliasSigner(auth)
+      : auth.provider;
   }
 
   async function predictSpaceAddress(
     networkId: NetworkID,
     salt: string
   ): Promise<string | null> {
-    if (!web3.value.account) {
+    if (!auth.value) {
       forceLogin();
       return null;
     }
 
     const network = getReadWriteNetwork(networkId);
-    return network.actions.predictSpaceAddress(auth.web3, { salt });
+    return network.actions.predictSpaceAddress(auth.value.provider, { salt });
   }
 
   async function deployDependency(
@@ -169,15 +205,15 @@ export function useActions() {
     spaceAddress: string,
     dependencyConfig: StrategyConfig
   ) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       forceLogin();
       return null;
     }
 
     const network = getReadWriteNetwork(networkId);
     return network.actions.deployDependency(
-      auth.web3,
-      web3.value.type as Connector,
+      auth.value.provider,
+      auth.value.connector.type,
       {
         controller,
         spaceAddress,
@@ -198,51 +234,66 @@ export function useActions() {
     executionDestinations: string[],
     controller: string
   ) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       forceLogin();
       return false;
     }
 
     const network = getReadWriteNetwork(networkId);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
     }
 
-    const receipt = await network.actions.createSpace(auth.web3, salt, {
-      controller,
-      votingDelay: getCurrentFromDuration(networkId, settings.votingDelay),
-      minVotingDuration: getCurrentFromDuration(
-        networkId,
-        settings.minVotingDuration
-      ),
-      maxVotingDuration: getCurrentFromDuration(
-        networkId,
-        settings.maxVotingDuration
-      ),
-      authenticators,
-      validationStrategy,
-      votingStrategies,
-      executionStrategies,
-      executionDestinations,
-      metadata
-    });
+    const receipt = await network.actions.createSpace(
+      auth.value.provider,
+      salt,
+      {
+        controller,
+        votingDelay: getCurrentFromDuration(networkId, settings.votingDelay),
+        minVotingDuration: getCurrentFromDuration(
+          networkId,
+          settings.minVotingDuration
+        ),
+        maxVotingDuration: getCurrentFromDuration(
+          networkId,
+          settings.maxVotingDuration
+        ),
+        authenticators,
+        validationStrategy,
+        votingStrategies,
+        executionStrategies,
+        executionDestinations,
+        metadata
+      }
+    );
 
     console.log('Receipt', receipt);
 
     return receipt;
   }
 
-  async function updateMetadata(space: Space, metadata: SpaceMetadata) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+  async function createSpaceRaw(
+    networkId: NetworkID,
+    id: string,
+    settings: string
+  ) {
+    if (!auth.value) {
+      await forceLogin();
+      return null;
     }
 
-    await wrapPromise(
-      space.network,
-      network.actions.setMetadata(auth.web3, space, metadata)
+    const network = getNetwork(networkId);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
+
+    return wrapPromise(
+      networkId,
+      network.actions.createSpaceRaw(auth.value.provider, id, settings)
     );
   }
 
@@ -252,27 +303,31 @@ export function useActions() {
     reason: string,
     app: string
   ): Promise<string | null> {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return null;
     }
 
     const network = getNetwork(proposal.network);
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
-        auth.web3,
-        web3.value.type as Connector,
-        web3.value.account,
+        signer,
+        auth.value.connector.type,
+        auth.value.account,
         proposal,
         choice,
         reason,
         app
-      )
+      ),
+      {
+        safeAppContext: 'vote'
+      }
     );
 
-    addPendingVote(proposal.id);
+    if (txHash) addPendingVote(proposal.id);
 
     return txHash;
   }
@@ -284,211 +339,220 @@ export function useActions() {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     app: string,
+    created: number,
+    start: number,
+    min_end: number,
+    max_end: number,
     executions: ExecutionInfo[] | null
   ) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       forceLogin();
       return false;
     }
 
     const network = getNetwork(space.network);
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
-    await wrapPromise(
+    const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
-        auth.web3,
-        web3.value.type as Connector,
-        web3.value.account,
+        signer,
+        auth.value.connector.type,
+        auth.value.account,
         space,
         title,
         body,
         discussion,
         type,
         choices,
+        privacy,
         labels,
         app,
+        created,
+        start,
+        min_end,
+        max_end,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
     );
 
-    return true;
+    return txHash;
   }
 
   async function updateProposal(
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     executions: ExecutionInfo[] | null
   ) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       forceLogin();
       return false;
     }
 
     const network = getNetwork(space.network);
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     await wrapPromise(
       space.network,
       network.actions.updateProposal(
-        auth.web3,
-        web3.value.type as Connector,
-        web3.value.account,
+        signer,
+        auth.value.connector.type,
+        auth.value.account,
         space,
-        proposalId,
+        proposal,
         title,
         body,
         discussion,
         type,
         choices,
+        privacy,
         labels,
         executions
-      )
+      ),
+      {
+        safeAppContext: 'propose'
+      }
+    );
+
+    return true;
+  }
+
+  async function flagProposal(proposal: Proposal) {
+    if (!auth.value) {
+      await forceLogin();
+      return false;
+    }
+
+    const network = getNetwork(proposal.network);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
+
+    await wrapPromise(
+      proposal.network,
+      network.actions.flagProposal(signer, auth.value.account, proposal)
     );
 
     return true;
   }
 
   async function cancelProposal(proposal: Proposal) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return false;
     }
 
     const network = getNetwork(proposal.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.cancelProposal(auth.web3, proposal)
+      network.actions.cancelProposal(
+        signer,
+        auth.value.connector.type,
+        auth.value.account,
+        proposal
+      )
     );
 
     return true;
   }
 
   async function finalizeProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx')
+    if (!auth.value) return await forceLogin();
+
+    if (auth.value.connector.type === 'argentx')
       throw new Error('ArgentX is not supported');
 
     const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.finalizeProposal(auth.web3, proposal)
+      network.actions.finalizeProposal(auth.value.provider, proposal)
     );
   }
 
   async function executeTransactions(proposal: Proposal) {
+    if (!auth.value) return await forceLogin();
+
     const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.executeTransactions(auth.web3, proposal)
+      network.actions.executeTransactions(auth.value.provider, proposal)
     );
   }
 
   async function executeQueuedProposal(proposal: Proposal) {
+    if (!auth.value) return await forceLogin();
+
     const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.executeQueuedProposal(auth.web3, proposal),
+      network.actions.executeQueuedProposal(auth.value.provider, proposal),
       {
-        transactionNetworkId: proposal.execution_network
+        chainId: getNetwork(proposal.execution_network).chainId
       }
     );
   }
 
   async function vetoProposal(proposal: Proposal) {
-    if (!web3.value.account) return await forceLogin();
-    if (web3.value.type === 'argentx')
+    if (!auth.value) return await forceLogin();
+
+    if (auth.value.connector.type === 'argentx')
       throw new Error('ArgentX is not supported');
 
     const network = getReadWriteNetwork(proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.vetoProposal(auth.web3, proposal)
-    );
-  }
-
-  async function setVotingDelay(space: Space, votingDelay: number) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
-    }
-
-    await wrapPromise(
-      space.network,
-      network.actions.setVotingDelay(
-        auth.web3,
-        space,
-        getCurrentFromDuration(space.network, votingDelay)
-      )
-    );
-  }
-
-  async function setMinVotingDuration(space: Space, minVotingDuration: number) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
-    }
-
-    await wrapPromise(
-      space.network,
-      network.actions.setMinVotingDuration(
-        auth.web3,
-        space,
-        getCurrentFromDuration(space.network, minVotingDuration)
-      )
-    );
-  }
-
-  async function setMaxVotingDuration(space: Space, maxVotingDuration: number) {
-    if (!web3.value.account) return await forceLogin();
-
-    const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
-    }
-
-    await wrapPromise(
-      space.network,
-      network.actions.setMaxVotingDuration(
-        auth.web3,
-        space,
-        getCurrentFromDuration(space.network, maxVotingDuration)
-      )
+      network.actions.vetoProposal(auth.value.provider, proposal)
     );
   }
 
   async function transferOwnership(space: Space, owner: string) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return null;
     }
 
     const network = getNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
     }
 
     return wrapPromise(
       space.network,
-      network.actions.transferOwnership(auth.web3, space, owner)
+      network.actions.transferOwnership(
+        auth.value.provider,
+        auth.value.connector.type,
+        space,
+        owner
+      )
     );
   }
 
@@ -500,24 +564,28 @@ export function useActions() {
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
     validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
   ) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return null;
     }
 
     const network = getReadWriteNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
     }
 
     return wrapPromise(
       space.network,
       network.actions.updateSettings(
-        auth.web3,
+        auth.value.provider,
+        auth.value.connector.type,
         space,
         metadata,
         authenticatorsToAdd,
@@ -525,6 +593,7 @@ export function useActions() {
         votingStrategiesToAdd,
         votingStrategiesToRemove,
         validationStrategy,
+        executionStrategies,
         votingDelay !== null
           ? getCurrentFromDuration(space.network, votingDelay)
           : null,
@@ -539,74 +608,91 @@ export function useActions() {
   }
 
   async function updateSettingsRaw(space: Space, settings: string) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return null;
     }
 
     const network = getNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
     }
 
     return wrapPromise(
       space.network,
-      network.actions.updateSettingsRaw(auth.web3, space, settings)
+      network.actions.updateSettingsRaw(auth.value.provider, space, settings)
     );
   }
 
   async function deleteSpace(space: Space) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return null;
     }
 
     const network = getNetwork(space.network);
-    if (!network.managerConnectors.includes(web3.value.type as Connector)) {
-      throw new Error(`${web3.value.type} is not supported for this action`);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
     }
 
     return wrapPromise(
       space.network,
-      network.actions.deleteSpace(auth.web3, space)
+      network.actions.deleteSpace(auth.value.provider, space)
     );
   }
 
   async function delegate(
     space: Space,
     delegationType: DelegationType,
-    delegatee: string,
+    delegatees: string[],
     delegationContract: string,
-    chainId: ChainId
+    chainId: ChainId,
+    delegateesMetadata?: Record<string, any>
   ) {
-    if (!web3.value.account) return await forceLogin();
+    if (!auth.value) {
+      await forceLogin();
+      return null;
+    }
 
-    const isEvmNetwork = typeof chainId === 'number';
-    const actionNetwork = isEvmNetwork
-      ? 'eth'
-      : (Object.entries(METADATA).find(
-          ([, metadata]) => metadata.chainId === chainId
-        )?.[0] as NetworkID);
-    if (!actionNetwork) throw new Error('Failed to detect action network');
-
+    const actionNetwork = getDelegationNetwork(chainId);
     const network = getReadWriteNetwork(actionNetwork);
 
-    await wrapPromise(
+    return wrapPromise(
       actionNetwork,
       network.actions.delegate(
-        auth.web3,
+        auth.value.provider,
         space,
         actionNetwork,
         delegationType,
-        delegatee,
+        delegatees,
         delegationContract,
-        chainId
-      )
+        chainId,
+        delegateesMetadata
+      ),
+      { chainId }
     );
   }
 
+  async function getDelegatee(
+    delegation: SpaceMetadataDelegation,
+    delegator: string
+  ) {
+    if (!auth.value) return;
+
+    if (!delegation.chainId) throw new Error('Chain ID is missing');
+
+    const actionNetwork = getDelegationNetwork(delegation.chainId);
+    const network = getReadWriteNetwork(actionNetwork);
+
+    return network.actions.getDelegatee(delegation, delegator);
+  }
+
   async function followSpace(networkId: NetworkID, spaceId: string) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return false;
     }
@@ -617,14 +703,17 @@ export function useActions() {
       await wrapPromise(
         metadataNetwork,
         network.actions.followSpace(
-          await getAliasSigner(),
+          await getAliasSigner(auth.value),
           networkId,
           spaceId,
-          web3.value.account
+          auth.value.account
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      }
+
       return false;
     }
 
@@ -632,7 +721,7 @@ export function useActions() {
   }
 
   async function unfollowSpace(networkId: NetworkID, spaceId: string) {
-    if (!web3.value.account) {
+    if (!auth.value) {
       await forceLogin();
       return false;
     }
@@ -643,14 +732,17 @@ export function useActions() {
       await wrapPromise(
         metadataNetwork,
         network.actions.unfollowSpace(
-          await getAliasSigner(),
+          await getAliasSigner(auth.value),
           networkId,
           spaceId,
-          web3.value.account
+          auth.value.account
         )
       );
     } catch (e) {
-      uiStore.addNotification('error', e.message);
+      if (!isUserAbortError(e)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      }
+
       return false;
     }
 
@@ -658,14 +750,19 @@ export function useActions() {
   }
 
   async function updateUser(user: User) {
+    if (!auth.value) {
+      await forceLogin();
+      return false;
+    }
+
     const network = getNetwork(metadataNetwork);
 
     await wrapPromise(
       metadataNetwork,
       network.actions.updateUser(
-        await getAliasSigner(),
+        await getAliasSigner(auth.value),
         user,
-        web3.value.account
+        auth.value.account
       )
     );
 
@@ -673,14 +770,19 @@ export function useActions() {
   }
 
   async function updateStatement(statement: Statement) {
+    if (!auth.value) {
+      await forceLogin();
+      return false;
+    }
+
     const network = getNetwork(metadataNetwork);
 
     await wrapPromise(
       metadataNetwork,
       network.actions.updateStatement(
-        await getAliasSigner(),
+        await getAliasSigner(auth.value),
         statement,
-        web3.value.account
+        auth.value.account
       )
     );
 
@@ -691,23 +793,22 @@ export function useActions() {
     predictSpaceAddress: wrapWithErrors(predictSpaceAddress),
     deployDependency: wrapWithErrors(deployDependency),
     createSpace: wrapWithErrors(createSpace),
-    updateMetadata: wrapWithErrors(updateMetadata),
+    createSpaceRaw: wrapWithErrors(createSpaceRaw),
     vote: wrapWithErrors(vote),
     propose: wrapWithErrors(propose),
     updateProposal: wrapWithErrors(updateProposal),
+    flagProposal: wrapWithErrors(flagProposal),
     cancelProposal: wrapWithErrors(cancelProposal),
     finalizeProposal: wrapWithErrors(finalizeProposal),
     executeTransactions: wrapWithErrors(executeTransactions),
     executeQueuedProposal: wrapWithErrors(executeQueuedProposal),
     vetoProposal: wrapWithErrors(vetoProposal),
-    setVotingDelay: wrapWithErrors(setVotingDelay),
-    setMinVotingDuration: wrapWithErrors(setMinVotingDuration),
-    setMaxVotingDuration: wrapWithErrors(setMaxVotingDuration),
     transferOwnership: wrapWithErrors(transferOwnership),
     updateSettings: wrapWithErrors(updateSettings),
     updateSettingsRaw: wrapWithErrors(updateSettingsRaw),
     deleteSpace: wrapWithErrors(deleteSpace),
     delegate: wrapWithErrors(delegate),
+    getDelegatee: wrapWithErrors(getDelegatee),
     followSpace: wrapWithErrors(followSpace),
     unfollowSpace: wrapWithErrors(unfollowSpace),
     updateUser: wrapWithErrors(updateUser),

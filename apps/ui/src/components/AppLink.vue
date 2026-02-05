@@ -1,9 +1,20 @@
 <script lang="ts" setup>
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
-const props = defineProps<RouterLinkProps>();
+const props = defineProps<
+  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; isExternal?: boolean }
+>();
+
+defineEmits<{
+  (e: 'click'): void;
+}>();
 
 const { isWhiteLabel } = useWhiteLabel();
+const router = useRouter();
+
+function isExternalLink(to: RouteLocationRaw | undefined): to is string {
+  return (typeof to === 'string' && to.startsWith('http')) || props.isExternal;
+}
 
 function normalize(to: RouteLocationRaw) {
   if (
@@ -29,10 +40,33 @@ function normalize(to: RouteLocationRaw) {
 
   return to;
 }
+
+function resolveToUrl(to: RouteLocationRaw | string): string {
+  if (typeof to === 'string') {
+    return to;
+  }
+
+  return router.resolve(to).href;
+}
 </script>
 
 <template>
-  <router-link :to="normalize(props.to)">
+  <a
+    v-if="isExternalLink(props.to)"
+    :href="resolveToUrl(props.to)"
+    target="_blank"
+    @click="$emit('click')"
+  >
+    <slot />
+  </a>
+  <router-link
+    v-else-if="props.to"
+    :to="normalize(props.to)"
+    @click="$emit('click')"
+  >
     <slot />
   </router-link>
+  <button v-else type="button" @click="$emit('click')">
+    <slot />
+  </button>
 </template>

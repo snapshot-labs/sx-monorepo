@@ -7,11 +7,11 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'vote', value: number);
+  (e: 'vote', value: number): void;
 }>();
 
 const selectedChoice = ref<number | null>(
-  (!props.proposal.privacy && (props.defaultChoice as number)) || null
+  (props.proposal.privacy === 'none' && (props.defaultChoice as number)) || null
 );
 </script>
 
@@ -21,17 +21,18 @@ const selectedChoice = ref<number | null>(
       <UiButton
         v-for="(choice, index) in proposal.choices"
         :key="index"
-        class="!h-[48px] text-left w-full flex items-center"
+        class="text-left"
+        :size="48"
         :class="{ 'border-skin-text': selectedChoice === index + 1 }"
         @click="selectedChoice = index + 1"
       >
-        <div class="grow truncate">{{ choice }}</div>
+        <UiTooltipOnTruncate :content="choice" />
         <IH-check v-if="selectedChoice === index + 1" class="shrink-0" />
       </UiButton>
     </div>
     <UiButton
       primary
-      class="!h-[48px] w-full"
+      :size="48"
       :disabled="!selectedChoice"
       @click="emit('vote', selectedChoice!)"
     >

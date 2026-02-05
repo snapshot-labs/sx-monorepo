@@ -1,18 +1,19 @@
 <script setup lang="ts">
+import { sanitizeUrl } from '@braintree/sanitize-url';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
-import {
-  MAX_1D_PROPOSALS,
-  MAX_30D_PROPOSALS,
-  MAX_BODY_LENGTH,
-  MAX_CHOICES,
-  TURBO_URL,
-  VERIFIED_URL
-} from '@/helpers/turbo';
-import { _n, omit } from '@/helpers/utils';
+import { BASIC_CHOICES, VERIFIED_URL } from '@/helpers/constants';
+import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
+import { TOTAL_NAV_HEIGHT } from '../../../tailwind.config';
+
+const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 3;
 
 const TITLE_DEFINITION = {
   type: 'string',
@@ -33,8 +34,12 @@ const props = defineProps<{
   space: Space;
 }>();
 
+defineOptions({ inheritAttrs: false });
+
 const { setTitle } = useTitle();
-const { proposals, createDraft } = useEditor();
+const queryClient = useQueryClient();
+const uiStore = useUiStore();
+const { proposals, createDraft, refreshDrafts } = useEditor();
 const route = useRoute();
 const router = useRouter();
 const { propose, updateProposal } = useActions();
@@ -46,15 +51,60 @@ const {
   executionStrategy: walletConnectTransactionExecutionStrategy,
   reset
 } = useWalletConnectTransaction();
-const proposalsStore = useProposalsStore();
-const { votingPower, fetch: fetchVotingPower } = useVotingPower();
 const { strategiesWithTreasuries } = useTreasuries(props.space);
+const termsStore = useTermsStore();
+const timestamp = useTimestamp({ interval: 1000 });
+const { limits, lists } = useSettings();
+const { isWhiteLabel } = useWhiteLabel();
+const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
+  isEditor: true
+});
+const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
+const { isInvalidNetwork: isSafeInvalidNetwork } = useSafeWallet(
+  props.space.network,
+  props.space.snapshot_chain_id
+);
 
 const modalOpen = ref(false);
+const modalOpenTerms = ref(false);
+const { modalAccountOpen } = useModal();
 const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
+const nonPremiumNetworksList = computed(() => {
+  const networks = alerts.value.get('HAS_PRO_ONLY_NETWORKS')?.networks;
+  if (!networks) return '';
+  const boldNames = networks.map((n: any) => `<b>${n.name}</b>`);
+  return prettyConcat(boldNames, 'and');
+});
+
+const disabledStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_DISABLED_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
+});
+
+const unsupportedPremiumStrategiesList = computed(() => {
+  return (
+    alerts.value
+      .get('HAS_PRO_ONLY_STRATEGIES')
+      ?.strategies?.map((n: any) => `<b>${n}</b>`) || []
+  );
+});
+
+const privacy = computed({
+  get() {
+    return proposal.value?.privacy === 'shutter';
+  },
+  set(value) {
+    if (proposal.value) {
+      proposal.value.privacy = value ? 'shutter' : 'none';
+    }
+  }
+});
 const draftId = computed(() => route.params.key as string);
 const network = computed(() => getNetwork(props.space.network));
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -103,22 +153,60 @@ const hasExecution = computed(() =>
 const extraContacts = computed(() => {
   return props.space.treasuries as Contact[];
 });
+const guidelines = computed(() => {
+  if (!props.space.guidelines) return null;
+
+  return sanitizeUrl(props.space.guidelines);
+});
 
 const bodyDefinition = computed(() => ({
   type: 'string',
   format: 'long',
   title: 'Body',
-  maxLength: MAX_BODY_LENGTH[props.space.turbo ? 'turbo' : 'default'],
+  maxLength: limits.value[`space.${spaceType.value}.body_limit`],
   examples: ['Propose something…']
 }));
 
+const choicesPlaceholders = computed<string[]>(() => {
+  if (proposal.value?.type === 'basic') {
+    return BASIC_CHOICES;
+  }
+
+  const placeholders: string[] = [];
+  for (
+    let i = 1;
+    i <= limits.value[`space.${spaceType.value}.choices_limit`];
+    i++
+  ) {
+    placeholders.push(`Choice ${i}`);
+  }
+
+  return placeholders;
+});
+
+const choicesMinItems = computed<number>(() => {
+  if (!offchainNetworks.includes(props.space.network)) {
+    return BASIC_CHOICES.length;
+  }
+
+  return proposal.value?.type === 'basic' ? 2 : 1;
+});
+
 const choicesDefinition = computed(() => ({
   type: 'array',
-  title: 'Choices',
-  minItems: offchainNetworks.includes(props.space.network) ? 2 : 3,
-  maxItems: MAX_CHOICES[props.space.turbo ? 'turbo' : 'default'],
-  items: [{ type: 'string', minLength: 1, maxLength: 32 }],
-  additionalItems: { type: 'string', maxLength: 32 }
+  minItems: choicesMinItems.value,
+  maxItems:
+    proposal.value?.type === 'basic'
+      ? BASIC_CHOICES.length
+      : limits.value[`space.${spaceType.value}.choices_limit`],
+  items: {
+    type: 'string',
+    title: 'Choice',
+    examples: choicesPlaceholders.value,
+    minLength: 1,
+    maxLength: 32
+  },
+  sortable: proposal.value?.type !== 'basic'
 }));
 
 const formErrors = computed(() => {
@@ -141,32 +229,114 @@ const formErrors = computed(() => {
       title: proposal.value.title,
       body: proposal.value.body,
       discussion: proposal.value.discussion,
-      choices: proposal.value.choices.filter(choice => !!choice)
+      choices: proposal.value.choices
     },
     {
       skipEmptyOptionalFields: true
     }
   );
 });
+const isSubmitButtonLoading = computed(() => {
+  if (web3.value.authLoading) return true;
+  if (!web3.value.account) return false;
+
+  return (
+    sending.value ||
+    (!propositionPower.value && !isPropositionPowerError.value) ||
+    isPropositionPowerPending.value
+  );
+});
 const canSubmit = computed(() => {
-  if (Object.keys(formErrors.value).length > 0) return false;
+  const hasUnsupportedNetworks =
+    alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
+    !proposal.value?.originalProposal;
+  const hasFormErrors = Object.keys(formErrors.value).length > 0;
+
+  if (
+    alerts.value.has('IS_HIBERNATED') ||
+    hasUnsupportedNetworks ||
+    hasFormErrors ||
+    disabledStrategiesList.value.length ||
+    unsupportedPremiumStrategiesList.value.length ||
+    isSafeInvalidNetwork.value
+  ) {
+    return false;
+  }
 
   return web3.value.account
-    ? votingPower.value?.canPropose
+    ? propositionPower.value?.canPropose
     : !web3.value.authLoading;
 });
-const spaceType = computed(() =>
-  props.space.turbo ? 'turbo' : props.space.verified ? 'verified' : 'default'
+const spaceType = computed(() => {
+  if (props.space.turbo) return 'turbo';
+  if (props.space.verified) return 'verified';
+  return 'default';
+});
+
+const spaceTypeForProposalLimit = computed(() => {
+  if (lists.value['space.ecosystem.list'].includes(props.space.id))
+    return 'ecosystem';
+  if (props.space.additionalRawData?.flagged) return 'flagged';
+  return spaceType.value;
+});
+
+const proposalLimitReached = computed(() => {
+  const type = spaceTypeForProposalLimit.value;
+
+  return (
+    (props.space.proposal_count_1d || 0) >=
+      limits.value[`space.${type}.proposal_limit_per_day`] ||
+    (props.space.proposal_count_30d || 0) >=
+      limits.value[`space.${type}.proposal_limit_per_month`]
+  );
+});
+
+const unixTimestamp = computed(() => Math.floor(timestamp.value / 1000));
+
+const defaultVotingDelay = computed(() =>
+  isOffchainSpace.value ? DEFAULT_VOTING_DELAY : 0
 );
 
-const proposalLimitReached = computed(
-  () =>
-    (props.space.proposal_count_1d || 0) >= MAX_1D_PROPOSALS[spaceType.value] ||
-    (props.space.proposal_count_30d || 0) >= MAX_30D_PROPOSALS[spaceType.value]
+const proposalStart = computed(
+  () => proposal.value?.start ?? unixTimestamp.value + props.space.voting_delay
 );
+
+const proposalMinEnd = computed(
+  () =>
+    proposal.value?.min_end ??
+    proposalStart.value +
+      (props.space.min_voting_period || defaultVotingDelay.value)
+);
+
+const proposalMaxEnd = computed(() => {
+  if (isOffchainSpace.value) return proposalMinEnd.value;
+
+  return (
+    proposal.value?.max_end ??
+    proposalStart.value +
+      (props.space.max_voting_period || defaultVotingDelay.value)
+  );
+});
+
+const {
+  data: propositionPower,
+  isPending: isPropositionPowerPending,
+  isError: isPropositionPowerError,
+  refetch: fetchPropositionPower
+} = usePropositionPowerQuery(toRef(props, 'space'));
 
 async function handleProposeClick() {
   if (!proposal.value) return;
+
+  if (props.space.terms && !termsStore.areAccepted(props.space)) {
+    modalOpenTerms.value = true;
+    return;
+  }
+
+  if (!web3.value.account) {
+    modalAccountOpen.value = true;
+    return;
+  }
 
   sending.value = true;
 
@@ -183,25 +353,33 @@ async function handleProposeClick() {
         destinationAddress: strategy.destinationAddress || '',
         transactions: strategy.transactions,
         treasuryName: strategy.treasury.name,
-        chainId: strategy.treasury.chainId as number
+        chainId: Number(strategy.treasury.chainId)
       }));
 
     let result;
-    if (proposal.value.proposalId) {
+    if (proposal.value.originalProposal) {
       result = await updateProposal(
         props.space,
-        proposal.value.proposalId,
+        proposal.value.originalProposal,
         proposal.value.title,
         proposal.value.body,
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         executions
       );
+
+      if (result) {
+        uiStore.addNotification('success', 'Proposal updated successfully.');
+      }
     } else {
       const appName = (route.query.app as LocationQueryValue) || '';
 
+      // Proposal start, min and end time are unix timestamp,
+      // and are not compatible with onchain EMV spaces (those use blocks instead of timestamps)
+      // (these args are ignored by onchain networks)
       result = await propose(
         props.space,
         proposal.value.title,
@@ -209,31 +387,49 @@ async function handleProposeClick() {
         proposal.value.discussion,
         proposal.value.type,
         choices,
+        proposal.value.privacy,
         proposal.value.labels,
         appName.length <= 128 ? appName : '',
+        unixTimestamp.value,
+        proposalStart.value,
+        proposalMinEnd.value,
+        proposalMaxEnd.value,
         executions
       );
-    }
-    if (result) {
-      proposalsStore.reset(props.space.id, props.space.network);
 
-      if (
-        proposal.value.proposalId &&
-        offchainNetworks.includes(props.space.network)
-      ) {
-        router.push({
-          name: 'space-proposal-overview',
-          params: {
-            proposal: proposal.value.proposalId
-          }
-        });
-      } else {
-        router.push({ name: 'space-proposals' });
+      if (result) {
+        uiStore.addNotification('success', 'Proposal created successfully.');
       }
     }
+    if (result) {
+      queryClient.invalidateQueries({
+        queryKey: PROPOSALS_KEYS.space(props.space.network, props.space.id)
+      });
+    }
+
+    if (
+      proposal.value.originalProposal &&
+      offchainNetworks.includes(props.space.network)
+    ) {
+      router.push({
+        name: 'space-proposal-overview',
+        params: {
+          proposal: proposal.value.originalProposal.proposal_id
+        }
+      });
+    } else {
+      router.push({ name: 'space-proposals' });
+    }
+  } catch (e) {
+    console.error(e);
   } finally {
     sending.value = false;
   }
+}
+
+function handleAcceptTerms() {
+  termsStore.accept(props.space);
+  handleProposeClick();
 }
 
 function handleExecutionUpdated(
@@ -266,16 +462,10 @@ function handleTransactionAccept() {
   reset();
 }
 
-function handleFetchVotingPower() {
-  fetchVotingPower(props.space);
-}
-
 watch(
-  () => web3.value.account,
-  toAccount => {
-    if (!toAccount) return;
-
-    handleFetchVotingPower();
+  [() => web3.value.account, () => web3.value.authLoading],
+  ([account, authLoading]) => {
+    if (!account || authLoading) return;
   },
   { immediate: true }
 );
@@ -302,154 +492,276 @@ watch(proposalData, () => {
   proposal.value.updatedAt = Date.now();
 });
 
-watchEffect(() => {
-  if (!proposal.value) return;
-
-  const hasOSnap = editorExecutions.value.find(
-    strategy => strategy.type === 'oSnap' && strategy.transactions.length > 0
-  );
-
-  if (hasOSnap) {
-    enforcedVoteType.value = 'basic';
-    proposal.value.type = 'basic';
-  } else {
-    enforcedVoteType.value = null;
+watch(
+  () => props.space,
+  async () => {
+    await refreshDrafts();
   }
-});
+);
 
 watchEffect(() => {
-  const title = proposal.value?.proposalId ? 'Update proposal' : 'New proposal';
+  const title = proposal.value?.originalProposal
+    ? 'Update proposal'
+    : 'New proposal';
 
   setTitle(`${title} - ${props.space.name}`);
 });
 </script>
 <template>
-  <div v-if="proposal">
-    <UiTopnav class="gap-2 px-4">
-      <UiButton
-        :to="{ name: 'space-overview', params: { space: spaceKey } }"
-        class="w-[46px] !px-0 mr-2 shrink-0"
-      >
-        <IH-arrow-narrow-left />
-      </UiButton>
-      <h4
-        class="grow truncate"
-        v-text="proposal?.proposalId ? 'Update proposal' : 'New proposal'"
-      />
-      <IndicatorPendingTransactions />
-      <UiTooltip title="Drafts">
-        <UiButton class="leading-3 !px-0 w-[46px]" @click="modalOpen = true">
-          <IH-collection class="inline-block" />
+  <div v-if="proposal" class="h-full">
+    <UiTopnav
+      :class="{ 'maximum:border-l': isWhiteLabel }"
+      class="maximum:border-r"
+    >
+      <div class="flex items-center gap-3 shrink truncate">
+        <UiButton
+          :to="{ name: 'space-overview', params: { space: spaceKey } }"
+          class="ml-4 shrink-0"
+          uniform
+        >
+          <IH-arrow-narrow-left />
         </UiButton>
-      </UiTooltip>
-      <UiButton
-        class="primary min-w-[46px] flex gap-2 justify-center items-center !px-0 md:!px-3"
-        :loading="
-          !!web3.account &&
-          (sending || !votingPower || votingPower.status === 'loading')
-        "
-        :disabled="!canSubmit"
-        @click="handleProposeClick"
-      >
-        <span
-          class="hidden md:inline-block"
-          v-text="proposal?.proposalId ? 'Update' : 'Publish'"
-        />
-        <IH-paper-airplane class="rotate-90 relative left-[2px]" />
-      </UiButton>
-    </UiTopnav>
-    <div class="md:mr-[340px]">
-      <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto s-box">
-        <MessageVotingPower
-          v-if="votingPower"
-          class="mb-4"
-          :voting-power="votingPower"
-          action="propose"
-          @fetch-voting-power="handleFetchVotingPower"
-        />
-        <UiAlert
-          v-if="votingPower && spaceType === 'default' && proposalLimitReached"
-          type="error"
-          class="mb-4"
-        >
-          <span
-            >Please verify your space to publish more proposals.
-            <a
-              :href="VERIFIED_URL"
-              target="_blank"
-              class="text-rose-500 dark:text-neutral-100 font-semibold"
-              >Verify space</a
-            >.</span
-          >
-        </UiAlert>
-        <UiAlert
-          v-else-if="
-            votingPower && spaceType !== 'turbo' && proposalLimitReached
+        <h4
+          class="grow truncate"
+          v-text="
+            proposal?.originalProposal ? 'Update proposal' : 'New proposal'
           "
-          type="error"
-          class="mb-4"
+        />
+      </div>
+      <div class="flex gap-2 items-center">
+        <IndicatorPendingTransactions />
+        <UiTooltip title="Drafts">
+          <UiButton uniform @click="modalOpen = true">
+            <IH-collection />
+          </UiButton>
+        </UiTooltip>
+        <UiButton
+          class="min-w-[46px] !px-0 md:!px-3"
+          primary
+          :loading="isSubmitButtonLoading"
+          :disabled="!canSubmit"
+          @click="handleProposeClick"
         >
           <span
-            >You can publish up to {{ MAX_1D_PROPOSALS.verified }} proposals per
-            day and {{ MAX_30D_PROPOSALS.verified }} proposals per month.
-            <a
-              :href="TURBO_URL"
-              target="_blank"
-              class="text-rose-500 dark:text-neutral-100 font-semibold"
-              >Increase limit</a
-            >.</span
+            class="hidden md:inline-block"
+            v-text="proposal?.originalProposal ? 'Update' : 'Publish'"
+          />
+          <IH-paper-airplane class="rotate-90 relative left-[2px]" />
+        </UiButton>
+      </div>
+    </UiTopnav>
+    <div
+      class="flex items-stretch md:flex-row flex-col w-full md:h-full pt-header-height"
+    >
+      <div
+        class="flex-1 grow min-w-0 border-r-0 md:border-r max-md:pb-0"
+        v-bind="$attrs"
+      >
+        <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto s-box">
+          <UiAlert v-if="alerts.has('IS_HIBERNATED')" type="error" class="mb-4">
+            This space is hibernated and read-only. A space admin needs to
+            reactivate it to create new proposals.
+          </UiAlert>
+          <UiAlert
+            v-else-if="nonPremiumNetworksList && !proposal?.originalProposal"
+            type="error"
+            class="mb-4"
           >
-        </UiAlert>
-        <UiInputString
-          :key="proposalKey || ''"
-          v-model="proposal.title"
-          :definition="TITLE_DEFINITION"
-          :error="formErrors.title"
-        />
-        <div class="flex space-x-3">
-          <button type="button" @click="previewEnabled = false">
-            <UiLink
-              :is-active="!previewEnabled"
-              text="Write"
-              class="border-transparent"
-            />
-          </button>
-          <button type="button" @click="previewEnabled = true">
-            <UiLink
-              :is-active="previewEnabled"
-              text="Preview"
-              class="border-transparent"
-            />
-          </button>
-        </div>
-        <UiMarkdown
-          v-if="previewEnabled"
-          class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
-          :body="proposal.body"
-        />
-        <UiComposer
-          v-else
-          v-model="proposal.body"
-          :definition="bodyDefinition"
-          :error="formErrors.body"
-        >
-          <template
-            v-if="
-              !space?.turbo &&
-              isOffchainSpace &&
-              formErrors.body?.startsWith('Must not have more than')
+            You cannot create proposals. This space is configured with
+            non-premium networks (<span v-html="nonPremiumNetworksList" />).
+            Change to a
+            <AppLink
+              to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+              class="font-semibold text-rose-500"
+            >
+              premium network
+              <IH-arrow-sm-right class="inline-block -rotate-45" />
+            </AppLink>
+            or
+            <AppLink
+              :to="{ name: 'space-pro' }"
+              class="font-semibold text-rose-500"
+            >
+              upgrade your space
+            </AppLink>
+            to continue.
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              disabledStrategiesList.length && !proposal?.originalProposal
             "
-            #error-suffix
+            type="error"
+            class="mb-4"
           >
-            <a
-              :href="TURBO_URL"
-              target="_blank"
-              class="ml-1 text-skin-danger font-semibold"
-              >Increase limit</a
+            You can not create proposals. The
+            <span v-html="prettyConcat(disabledStrategiesList)" />
+            {{
+              disabledStrategiesList.length > 1
+                ? 'strategies are'
+                : 'strategy is'
+            }}
+            no longer available.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              See migration guide
+              <IH-arrow-sm-right class="-rotate-45" />
+            </AppLink>
+            <template v-if="isController || isAdmin">
+              and
+              <AppLink
+                :to="{
+                  name: 'space-settings',
+                  params: { tab: 'voting-strategies' }
+                }"
+                class="font-semibold text-rose-500"
+                >update your space</AppLink
+              >.
+            </template>
+          </UiAlert>
+          <UiAlert
+            v-else-if="
+              unsupportedPremiumStrategiesList.length &&
+              !proposal?.originalProposal
+            "
+            type="error"
+            class="mb-4"
+          >
+            This space is configured with premium strategies, please
+            <AppLink
+              :to="{ name: 'space-pro' }"
+              class="font-semibold text-rose-500"
+            >
+              upgrade to Snapshot Pro
+            </AppLink>
+            or
+            <AppLink
+              :to="{
+                name: 'space-settings',
+                params: { tab: 'voting-strategies' }
+              }"
+              class="font-semibold text-rose-500"
+              >edit your strategies</AppLink
+            >
+            to create a proposal.
+            <AppLink
+              to="https://help.snapshot.box/en/articles/12038725-premium-voting-strategies"
+              class="inline-flex items-center font-semibold text-rose-500"
+            >
+              Learn more
+              <IH-arrow-sm-right class="-rotate-45" /> </AppLink
             >.
+          </UiAlert>
+          <UiAlert
+            v-else-if="space.snapshot_chain_id && isSafeInvalidNetwork"
+            type="error"
+            class="mb-4"
+          >
+            Please use a Safe on
+            {{ networks[space.snapshot_chain_id]?.name ?? 'this network' }} to
+            create proposals.
+          </UiAlert>
+          <template v-else>
+            <template v-if="proposalLimitReached">
+              <UiAlert type="error" class="mb-4">
+                <span
+                  v-if="
+                    ['default', 'flagged'].includes(spaceTypeForProposalLimit)
+                  "
+                >
+                  Please verify your space to publish more proposals.
+                  <a
+                    :href="VERIFIED_URL"
+                    target="_blank"
+                    class="text-rose-500 dark:text-neutral-100 font-semibold"
+                  >
+                    Verify space </a
+                  >.</span
+                >
+                <span v-else-if="spaceTypeForProposalLimit !== 'turbo'">
+                  You can publish up to
+                  {{ limits['space.verified.proposal_limit_per_day'] }}
+                  proposals per day and
+                  {{ limits['space.verified.proposal_limit_per_month'] }}
+                  proposals per month.
+                  <AppLink
+                    :to="{ name: 'space-pro' }"
+                    class="text-rose-500 dark:text-neutral-100 font-semibold"
+                    >Increase limit</AppLink
+                  >.
+                </span>
+              </UiAlert>
+            </template>
+            <template v-else-if="!isPropositionPowerPending">
+              <MessageErrorFetchPower
+                v-if="isPropositionPowerError || !propositionPower"
+                class="mb-4"
+                :type="'proposition'"
+                @fetch="fetchPropositionPower"
+              />
+              <MessagePropositionPower
+                v-else-if="propositionPower && !propositionPower.canPropose"
+                class="mb-4"
+                :proposition-power="propositionPower"
+              />
+            </template>
           </template>
-        </UiComposer>
-        <div class="s-base mb-5">
+          <div v-if="guidelines">
+            <UiEyebrow class="mb-2">Guidelines</UiEyebrow>
+            <a :href="guidelines" target="_blank" class="block mb-4">
+              <UiLinkPreview :url="guidelines" :show-default="true" />
+            </a>
+          </div>
+          <UiInputString
+            :key="proposalKey || ''"
+            v-model="proposal.title"
+            :definition="TITLE_DEFINITION"
+            :error="formErrors.title"
+            :required="true"
+          />
+          <div class="flex space-x-3">
+            <button type="button" @click="previewEnabled = false">
+              <UiLabel
+                :is-active="!previewEnabled"
+                text="Write"
+                class="border-transparent"
+              />
+            </button>
+            <button type="button" @click="previewEnabled = true">
+              <UiLabel
+                :is-active="previewEnabled"
+                text="Preview"
+                class="border-transparent"
+              />
+            </button>
+          </div>
+          <UiMarkdown
+            v-if="previewEnabled"
+            class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
+            :body="proposal.body"
+          />
+          <UiComposer
+            v-else
+            v-model="proposal.body"
+            :definition="bodyDefinition"
+            :error="formErrors.body"
+          >
+            <template
+              v-if="
+                !space?.turbo &&
+                isOffchainSpace &&
+                formErrors.body?.startsWith('Must not have more than')
+              "
+              #error-suffix
+            >
+              <AppLink
+                :to="{ name: 'space-pro' }"
+                class="ml-1 text-skin-danger font-semibold"
+                >Increase limit</AppLink
+              >.
+            </template>
+          </UiComposer>
           <UiInputString
             :key="proposalKey || ''"
             v-model="proposal.discussion"
@@ -457,77 +769,124 @@ watchEffect(() => {
             :error="formErrors.discussion"
           />
           <UiLinkPreview :key="proposalKey || ''" :url="proposal.discussion" />
-        </div>
-        <div
-          v-if="
-            network &&
-            strategiesWithTreasuries &&
-            strategiesWithTreasuries.length > 0
-          "
-        >
-          <h4 class="eyebrow mb-2">Execution</h4>
-          <EditorExecution
-            v-for="execution in editorExecutions"
-            :key="execution.address"
-            :model-value="execution.transactions"
-            :disabled="
-              !supportsMultipleTreasuries &&
-              hasExecution &&
-              execution.transactions.length === 0
+          <div
+            v-if="
+              network &&
+              strategiesWithTreasuries &&
+              strategiesWithTreasuries.length > 0
             "
-            :space="space"
-            :strategy="execution"
-            :extra-contacts="extraContacts"
-            class="mb-3"
-            @update:model-value="
-              value => handleExecutionUpdated(execution.address, value)
+          >
+            <UiEyebrow class="mb-2 mt-4">Execution</UiEyebrow>
+            <EditorExecution
+              v-for="execution in editorExecutions"
+              :key="execution.address"
+              :model-value="execution.transactions"
+              :disabled="
+                !supportsMultipleTreasuries &&
+                hasExecution &&
+                execution.transactions.length === 0
+              "
+              :space="space"
+              :strategy="execution"
+              :extra-contacts="extraContacts"
+              class="mb-3"
+              @update:model-value="
+                value => handleExecutionUpdated(execution.address, value)
+              "
+            />
+          </div>
+        </UiContainer>
+      </div>
+
+      <Affix
+        :class="['shrink-0 md:w-[340px]']"
+        :top="TOTAL_NAV_HEIGHT"
+        :bottom="64"
+      >
+        <div v-bind="$attrs" class="flex flex-col px-4 gap-y-4 pt-4 !h-auto">
+          <EditorVotingType
+            v-model="proposal"
+            :voting-types="
+              enforcedVoteType ? [enforcedVoteType] : space.voting_types
             "
           />
+          <div class="space-y-2.5">
+            <UiEyebrow>Choices</UiEyebrow>
+            <UiInputArray
+              v-model="proposal.choices"
+              class="s-box"
+              :definition="choicesDefinition"
+              :error="formErrors.choices"
+            >
+              <template
+                v-if="proposal.type === 'basic'"
+                #input-prefix="{ index }"
+              >
+                <UiIconBasicChoice :choice-index="index" />
+              </template>
+              <template
+                v-if="proposal.type === 'basic'"
+                #input-suffix="{ index, deleteItem }"
+              >
+                <button
+                  v-if="index > 1"
+                  class="text-skin-text"
+                  title="Delete choice"
+                  @click="deleteItem(index)"
+                >
+                  <IH-trash />
+                </button>
+                <div v-else />
+              </template>
+              <template
+                v-if="
+                  proposal.type !== 'basic' &&
+                  proposal.choices.length >= choicesDefinition.maxItems
+                "
+                #suffix
+              >
+                <div class="text-skin-danger">
+                  Maximum number of choices reached.
+                  <AppLink
+                    :to="{ name: 'space-pro' }"
+                    class="text-skin-danger font-semibold"
+                    >Increase limit</AppLink
+                  >.
+                </div>
+              </template>
+            </UiInputArray>
+          </div>
+          <UiSwitch
+            v-if="isOffchainSpace && space.privacy === 'any'"
+            v-model="privacy"
+            title="Shielded voting"
+            tooltip="Choices will be encrypted and only visible once the voting period is over."
+          />
+          <EditorLabels
+            v-if="space.labels?.length"
+            v-model="proposal.labels"
+            :space="space"
+          />
+          <EditorTimeline
+            v-model="proposal"
+            :space="space"
+            :created="proposal.created || unixTimestamp"
+            :start="proposalStart"
+            :min_end="proposalMinEnd"
+            :max_end="proposalMaxEnd"
+            :editable="!proposal.originalProposal"
+          />
         </div>
-      </UiContainer>
-    </div>
-
-    <div
-      class="static md:fixed md:top-[72px] md:right-0 w-full md:h-[calc(100vh-72px)] md:max-w-[340px] p-4 md:pb-[88px] border-l-0 md:border-l space-y-4 no-scrollbar overflow-y-scroll"
-    >
-      <EditorVotingType
-        v-model="proposal"
-        :voting-types="
-          enforcedVoteType ? [enforcedVoteType] : space.voting_types
-        "
-      />
-      <EditorChoices
-        v-model="proposal"
-        :minimum-basic-choices="
-          offchainNetworks.includes(space.network) ? 2 : 3
-        "
-        :definition="choicesDefinition"
-        :error="
-          proposal.choices.length > choicesDefinition.maxItems
-            ? `Must not have more than ${_n(choicesDefinition.maxItems)} items.`
-            : ''
-        "
-      >
-        <template v-if="!space?.turbo && isOffchainSpace" #error-suffix>
-          <a
-            :href="TURBO_URL"
-            target="_blank"
-            class="ml-1 text-skin-danger font-semibold"
-            >Increase limit</a
-          >.
-        </template>
-      </EditorChoices>
-      <EditorLabels
-        v-if="space.labels?.length"
-        v-model="proposal.labels"
-        :space="space"
-      />
-      <div>
-        <h4 class="eyebrow mb-2.5" v-text="'Timeline'" />
-        <ProposalTimeline :data="space" />
-      </div>
+      </Affix>
     </div>
     <teleport to="#modal">
+      <ModalTerms
+        v-if="space.terms"
+        :open="modalOpenTerms"
+        :space="space"
+        @close="modalOpenTerms = false"
+        @accept="handleAcceptTerms"
+      />
       <ModalDrafts
         :open="modalOpen"
         :network-id="space.network"

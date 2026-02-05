@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { MAX_STRATEGIES } from '@/helpers/turbo';
 import { StrategyConfig } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
 
-const snapshotChainId = defineModel<number>('snapshotChainId', {
+const snapshotChainId = defineModel<string>('snapshotChainId', {
   required: true
 });
 const strategies = defineModel<StrategyConfig[]>('strategies', {
@@ -16,6 +15,11 @@ const props = defineProps<{
   space: Space;
 }>();
 
+const { limits } = useSettings();
+
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
+
 const strategiesLimit = computed(() => {
   const spaceType = props.space.turbo
     ? 'turbo'
@@ -23,13 +27,18 @@ const strategiesLimit = computed(() => {
       ? 'verified'
       : 'default';
 
-  return MAX_STRATEGIES[spaceType];
+  return limits.value[`space.${spaceType}.strategies_limit`];
 });
+
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Strategies</h4>
-  <div class="s-box mb-4">
+  <UiEyebrow class="mb-2 font-medium">Strategies</UiEyebrow>
+  <div class="s-box">
     <UiSelectorNetwork
       v-model="snapshotChainId"
       :definition="{
@@ -38,14 +47,27 @@ const strategiesLimit = computed(() => {
         tooltip:
           'The default network used for this space. Networks can also be specified in individual strategies',
         examples: ['Select network'],
-        networkId
+        networkId,
+        networksListKind: 'full'
       }"
     />
   </div>
   <UiContainerSettings
     :title="`Select up to ${strategiesLimit} strategies`"
     description="(Voting power is cumulative)"
+    class="!mx-0"
   >
+    <template #actions>
+      <UiTooltip class="flex items-center" title="Test all custom strategies">
+        <button
+          :disabled="!strategies.length"
+          class="text-skin-link"
+          @click="handleTestStrategies(strategies)"
+        >
+          <IH-play />
+        </button>
+      </UiTooltip>
+    </template>
     <UiMessage
       v-if="!isTicketValid"
       type="danger"
@@ -61,6 +83,20 @@ const strategiesLimit = computed(() => {
       :network-id="networkId"
       :default-chain-id="snapshotChainId"
       :limit="strategiesLimit"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
+      @test-strategies="handleTestStrategies"
     />
   </UiContainerSettings>
+  <teleport to="#modal">
+    <ModalTestStrategy
+      :open="isTestStrategiesModalOpen"
+      :network-id="networkId"
+      :chain-id="space.snapshot_chain_id"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
+      :strategies="testedStrategies"
+      @close="isTestStrategiesModalOpen = false"
+    />
+  </teleport>
 </template>

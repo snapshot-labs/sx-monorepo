@@ -11,19 +11,25 @@ describe('ozVotesStorageProof', () => {
   const ozVotesStorageProofStrategy = createOzVotesStorageProofStrategy({
     trace: 224
   });
-  const config = { starkProvider, ethUrl, networkConfig: starknetSepolia };
+  const config = {
+    starkProvider,
+    ethUrl,
+    networkConfig: starknetSepolia,
+    whitelistServerUrl: 'https://wls.snapshot.box'
+  };
 
   it('should return type', () => {
     expect(ozVotesStorageProofStrategy.type).toBe('ozVotesStorageProof');
   });
 
   it('should throw for non-ethereum address', async () => {
-    expect(
+    await expect(
       ozVotesStorageProofStrategy.getParams(
         'vote',
         '0x06AbD599AB530c5b3bc603111Bdd20d77890Db330402dC870Fc9866f50eD6d2A',
         '0x1b3cbb267de6d0f30ddf521cd385a2e11836f0c5ba6f7b2224cf77a6ed86acf',
         0,
+        '0x',
         null,
         proposeEnvelope,
         config
@@ -35,7 +41,7 @@ describe('ozVotesStorageProof', () => {
     it('should compute live voting power', async () => {
       const votingPower = await ozVotesStorageProofStrategy.getVotingPower(
         '0x16aa0c2eda8ff56fa9922a4858d4d91e3b01cf21d2aecd01e1c95d296362218',
-        '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',
+        '0xdead4f50e4aefd8dd7f41b9f8072bdfb42420aad',
         {
           contractAddress: '0x6Fd821e79cDf212aD8b06C59B28FE8C2185291d4',
           slotIndex: 8

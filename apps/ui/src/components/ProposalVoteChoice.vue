@@ -16,7 +16,7 @@ withDefaults(
 
 <template>
   <div
-    v-if="!!proposal.privacy && !proposal.completed"
+    v-if="proposal.privacy !== 'none' && !proposal.completed"
     class="flex gap-1 items-center"
   >
     <span class="text-skin-heading leading-[22px]">Encrypted choice</span>

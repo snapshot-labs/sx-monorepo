@@ -5,6 +5,7 @@ const SPACE_FRAGMENT = gql`
     id
     verified
     turbo
+    turboExpiration
     admins
     members
     name
@@ -15,8 +16,10 @@ const SPACE_FRAGMENT = gql`
     website
     twitter
     github
+    farcaster
     coingecko
     symbol
+    activeProposals
     treasuries {
       name
       network
@@ -68,6 +71,8 @@ const SPACE_FRAGMENT = gql`
       cover
       proposalsCount
       votesCount
+      followersCount
+      activeProposals
       turbo
       verified
       network
@@ -79,6 +84,7 @@ const SPACE_FRAGMENT = gql`
       cover
       proposalsCount
       votesCount
+      activeProposals
       turbo
       verified
       network
@@ -86,8 +92,22 @@ const SPACE_FRAGMENT = gql`
     # needed for settings
     terms
     private
+    flagged
+    flagCode
+    hibernated
     domain
     skin
+    skinSettings {
+      bg_color
+      link_color
+      text_color
+      content_color
+      border_color
+      heading_color
+      primary_color
+      theme
+      logo
+    }
     guidelines
     template
     categories
@@ -115,7 +135,15 @@ const PROPOSAL_FRAGMENT = gql`
       network
       admins
       moderators
+      members
       symbol
+      labels {
+        id
+        name
+        description
+        color
+      }
+      terms
     }
     type
     title
@@ -131,17 +159,24 @@ const PROPOSAL_FRAGMENT = gql`
     labels
     scores
     scores_total
+    scores_state
     state
     strategies {
       name
       params
       network
     }
+    validation {
+      name
+      params
+    }
     created
     updated
     votes
     privacy
     plugins
+    flagged
+    flagCode
   }
 `;
 
@@ -342,8 +377,10 @@ const STRATEGY_FRAGMENT = gql`
     about
     version
     spacesCount
+    verifiedSpacesCount
     examples
     schema
+    disabled
   }
 `;
 
@@ -363,4 +400,23 @@ export const STRATEGY_QUERY = gql`
     }
   }
   ${STRATEGY_FRAGMENT}
+`;
+
+export const NETWORKS_QUERY = gql`
+  query Networks {
+    networks {
+      id
+      spacesCount
+      premium
+    }
+  }
+`;
+
+export const SETTINGS_QUERY = gql`
+  query Settings {
+    options {
+      name
+      value
+    }
+  }
 `;

@@ -14,23 +14,23 @@ const model = defineModel<T[]>({ required: true });
 
 const props = defineProps<{
   error?: string;
+  required?: boolean;
   definition: DefinitionWithMultipleOptions<T> & {
     maxItems?: number;
   };
 }>();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
     }
 
     return model.value || [];
   },
   set(newValue: T[]) {
-    dirty.value = true;
     model.value = newValue;
   }
 });
@@ -58,17 +58,14 @@ function isItemDisabled(item: T) {
   if (inputValue.value.length < props.definition.maxItems) return false;
   return !inputValue.value.some(selectedItem => selectedItem === item);
 }
-
-watch(model, () => {
-  dirty.value = true;
-});
 </script>
 
 <template>
   <UiWrapperInput
     :definition="definition"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
+    :required="required"
     class="relative"
   >
     <Listbox v-slot="{ open }" v-model="inputValue" multiple as="div">

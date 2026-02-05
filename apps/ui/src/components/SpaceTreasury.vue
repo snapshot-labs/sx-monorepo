@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
-import { evmNetworks } from '@/networks';
+import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
-const ETHEREUM_NETWORKS = ['eth', 'sep'];
+const STAKING_CHAIN_IDS: string[] = ['1', '11155111'];
+const EVM_CHAIN_IDS: string[] = evmNetworks
+  .filter(network => enabledNetworks.includes(network))
+  .map(network => String(getNetwork(network).chainId));
 
 const props = defineProps<{
   space: Space;
@@ -16,12 +18,31 @@ const props = defineProps<{
 const { setTitle } = useTitle();
 const route = useRoute();
 const router = useRouter();
-const { copy, copied } = useClipboard();
-const { loading, loaded, assets, loadBalances } = useBalances();
-const { loading: nftsLoading, loaded: nftsLoaded, nfts, loadNfts } = useNfts();
 const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
 const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
+
+const isAddressModalOpen = ref(false);
+
+const balancesTreasury = computed(() => {
+  if (!treasury.value?.network) return null;
+
+  return {
+    chainId: treasury.value.network,
+    address: treasury.value.wallet
+  };
+});
+const { isPending, isSuccess, isError, assets } = useBalances({
+  treasury: balancesTreasury
+});
+const {
+  isPending: isNftsPending,
+  isSuccess: isNftsSuccess,
+  isError: isNftsError,
+  nfts
+} = useNfts({
+  treasury: balancesTreasury
+});
 
 const page: Ref<'tokens' | 'nfts'> = computed(() => {
   return route.params.tab === 'nfts' ? 'nfts' : 'tokens';
@@ -31,10 +52,6 @@ const modalOpen = ref({
   nfts: false,
   stake: false,
   walletConnectLink: false
-});
-
-const currentNetworkId = computed(() => {
-  return treasury.value?.networkId ?? null;
 });
 
 const spaceKey = computed(() => `${props.space.network}:${props.space.id}`);
@@ -47,7 +64,6 @@ const executionStrategy = computed(
 const isReadOnly = computed(
   () =>
     executionStrategy.value === null ||
-    !currentNetworkId.value ||
     !treasury.value?.supportsTokens ||
     !treasury.value?.supportsNfts
 );
@@ -72,15 +88,6 @@ const totalChange = computed(() => {
   );
 });
 
-const sortedAssets = computed(() =>
-  (assets || []).value.sort((a, b) => {
-    const isEth = (token: Token) => token.contractAddress === ETH_CONTRACT;
-    if (isEth(a)) return -1;
-    if (isEth(b)) return 1;
-    return 0;
-  })
-);
-
 const treasuryExplorerUrl = computed(() => {
   if (!treasury.value) return '';
 
@@ -90,10 +97,9 @@ const treasuryExplorerUrl = computed(() => {
 const hasStakeableAssets = computed(() => {
   return (
     treasury.value &&
-    treasury.value.networkId &&
     !isReadOnly.value &&
     assets.value.some(asset => asset.contractAddress === ETH_CONTRACT) &&
-    ETHEREUM_NETWORKS.includes(treasury.value.networkId)
+    STAKING_CHAIN_IDS.includes(treasury.value.network)
   );
 });
 
@@ -116,48 +122,28 @@ async function addTx(tx: Transaction) {
   });
 }
 
-onMounted(() => {
-  if (!treasury.value) return;
-
-  if (treasury.value.supportsTokens) {
-    loadBalances(treasury.value.wallet, treasury.value.network);
-  }
-
-  if (treasury.value.supportsNfts) {
-    loadNfts(treasury.value.wallet, treasury.value.network);
-  }
-});
-
 watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
-  <div v-if="!treasury" class="p-4 flex items-center text-skin-link space-x-2">
-    <IH-exclamation-circle class="inline-block shrink-0" />
-    <span>No treasury configured.</span>
-  </div>
+  <UiStateWarning v-if="!treasury" class="p-4">
+    No treasury configured.
+  </UiStateWarning>
   <template v-else>
     <div class="p-4 space-x-2 flex">
       <div class="flex-auto" />
 
       <UiTooltip
-        v-if="
-          !isReadOnly &&
-          currentNetworkId &&
-          evmNetworks.includes(currentNetworkId)
-        "
+        v-if="!isReadOnly && EVM_CHAIN_IDS.includes(treasury.network)"
         title="Connect to apps"
       >
-        <UiButton
-          class="!px-0 w-[46px]"
-          @click="modalOpen.walletConnectLink = true"
-        >
+        <UiButton uniform @click="modalOpen.walletConnectLink = true">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="480"
             height="332"
             viewBox="0 0 480 332"
-            class="inline-block size-[26px]"
+            class="size-[26px]"
           >
             <path
               fill="rgba(var(--link))"
@@ -166,37 +152,32 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           </svg>
         </UiButton>
       </UiTooltip>
-      <UiTooltip title="Copy address">
-        <UiButton class="!px-0 w-[46px]" @click="copy(treasury.wallet)">
-          <IH-duplicate v-if="!copied" class="inline-block" />
-          <IH-check v-else class="inline-block" />
+      <UiTooltip title="Deposit">
+        <UiButton uniform @click="isAddressModalOpen = true">
+          <IH-qrcode />
         </UiButton>
       </UiTooltip>
       <UiTooltip
         v-if="!isReadOnly"
         :title="page === 'tokens' ? 'Send token' : 'Send NFT'"
       >
-        <UiButton class="!px-0 w-[46px]" @click="openModal(page)">
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
+        <UiButton uniform @click="openModal(page)">
+          <IH-arrow-sm-right class="-rotate-45" />
         </UiButton>
       </UiTooltip>
     </div>
     <div class="space-y-3">
       <div>
-        <UiLabel label="Treasury" sticky />
+        <UiSectionHeader label="Treasury" sticky />
         <a
           :href="treasuryExplorerUrl || '#'"
           target="_blank"
-          class="flex justify-between items-center mx-4 py-3 border-b"
+          class="flex justify-between items-center mx-4 py-3 border-b group"
           :class="{
             'pointer-events-none': !treasuryExplorerUrl
           }"
         >
-          <UiBadgeNetwork
-            :id="treasury.networkId"
-            :chain-id="treasury.network"
-            class="mr-3"
-          >
+          <UiBadgeNetwork :chain-id="treasury.network" class="mr-3">
             <UiStamp
               :id="treasury.wallet"
               type="avatar"
@@ -209,13 +190,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               class="text-skin-link"
               v-text="treasury.name || shorten(treasury.wallet)"
             />
-            <div
+            <UiAddress
               class="text-skin-text text-[17px]"
-              v-text="shorten(treasury.wallet)"
+              :address="treasury.wallet"
             />
           </div>
           <div
-            v-if="loaded"
+            v-if="isSuccess"
             class="flex-col items-end text-right leading-[22px]"
           >
             <h4
@@ -252,7 +233,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               }
             }"
           >
-            <UiLink :is-active="page === 'tokens'" text="Tokens" />
+            <UiLabel :is-active="page === 'tokens'" text="Tokens" />
           </AppLink>
           <AppLink
             :to="{
@@ -261,30 +242,31 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               }
             }"
           >
-            <UiLink :is-active="page === 'nfts'" text="NFTs" />
+            <UiLabel :is-active="page === 'nfts'" text="NFTs" />
           </AppLink>
         </div>
-        <div
+        <UiStateWarning
           v-if="
             (page === 'tokens' && !treasury.supportsTokens) ||
             (page === 'nfts' && !treasury.supportsNfts)
           "
-          class="p-4 flex items-center text-skin-link space-x-2"
+          class="p-4"
         >
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>This treasury network is not supported.</span>
-        </div>
+          This treasury network is not supported.
+        </UiStateWarning>
         <div v-else-if="page === 'tokens'">
-          <UiLoading v-if="loading && !loaded" class="px-4 py-3 block" />
-          <div
-            v-else-if="loaded && sortedAssets.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+          <UiLoading v-if="isPending" class="px-4 py-3 block" />
+          <UiStateWarning
+            v-else-if="isSuccess && assets.length === 0"
+            class="px-4 py-3"
           >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>There are no tokens in treasury.</span>
-          </div>
+            There are no tokens in treasury.
+          </UiStateWarning>
+          <UiStateWarning v-else-if="isError" class="px-4 py-3">
+            Failed to load treasury tokens.
+          </UiStateWarning>
           <a
-            v-for="(asset, i) in sortedAssets"
+            v-for="(asset, i) in assets"
             v-else
             :key="i"
             :href="
@@ -296,12 +278,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0 space-x-3">
-              <UiBadgeNetwork
-                :id="treasury.networkId"
-                :chain-id="treasury.network"
-              >
+              <UiBadgeNetwork :chain-id="treasury.network">
                 <UiStamp
-                  :id="`${treasury.networkId}:${asset.contractAddress}`"
+                  :id="`eip155:${treasury.network}:${asset.contractAddress}`"
                   type="token"
                   :size="32"
                 />
@@ -319,11 +298,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 "
                 title="Stake with Lido"
               >
-                <UiButton
-                  class="!px-0 w-[46px]"
-                  @click.prevent="openModal('stake')"
-                >
-                  <IC-stake class="inline-block" />
+                <UiButton uniform @click.prevent="openModal('stake')">
+                  <IC-stake />
                 </UiButton>
               </UiTooltip>
             </div>
@@ -377,17 +353,16 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           </a>
         </div>
         <div v-else-if="page === 'nfts'">
-          <div
-            v-if="nftsLoaded && nfts.length === 0"
-            class="px-4 py-3 flex items-center text-skin-link space-x-2"
+          <UiStateWarning
+            v-if="isNftsSuccess && nfts.length === 0"
+            class="px-4 py-3"
           >
-            <IH-exclamation-circle class="inline-block shrink-0" />
-            <span>There are no NFTs in treasury.</span>
-          </div>
-          <UiLoading
-            v-if="nftsLoading && !nftsLoaded"
-            class="px-4 py-3 block"
-          />
+            There are no NFTs in treasury.
+          </UiStateWarning>
+          <UiStateWarning v-else-if="isNftsError" class="px-4 py-3">
+            Failed to load treasury NFTs.
+          </UiStateWarning>
+          <UiLoading v-if="isNftsPending" class="px-4 py-3 block" />
           <div
             class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 max-w-fit mx-auto p-4"
           >
@@ -409,17 +384,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     </div>
     <teleport to="#modal">
       <ModalSendToken
-        v-if="!isReadOnly && currentNetworkId && treasury.supportsTokens"
+        v-if="!isReadOnly && treasury.supportsTokens"
         :open="modalOpen.tokens"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="currentNetworkId"
         :extra-contacts="extraContacts"
         @close="modalOpen.tokens = false"
         @add="addTx"
       />
       <ModalSendNft
-        v-if="currentNetworkId"
         :open="modalOpen.nfts"
         :address="treasury.wallet"
         :network="treasury.network"
@@ -428,23 +401,29 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         @add="addTx"
       />
       <ModalStakeToken
-        v-if="hasStakeableAssets && currentNetworkId"
+        v-if="hasStakeableAssets"
         :open="modalOpen.stake"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="currentNetworkId"
         @close="modalOpen.stake = false"
         @add="addTx"
       />
       <ModalLinkWalletConnect
-        v-if="executionStrategy && currentNetworkId"
+        v-if="executionStrategy"
         :open="modalOpen.walletConnectLink"
         :address="treasury.wallet"
         :network="treasury.network"
-        :network-id="currentNetworkId"
+        :network-id="space.network"
         :space-key="spaceKey"
         :execution-strategy="executionStrategy"
         @close="modalOpen.walletConnectLink = false"
+      />
+      <ModalDeposit
+        v-if="treasuryData.chainId"
+        :open="isAddressModalOpen"
+        :address="treasuryData.address"
+        :chain-id="treasuryData.chainId"
+        @close="isAddressModalOpen = false"
       />
     </teleport>
   </template>

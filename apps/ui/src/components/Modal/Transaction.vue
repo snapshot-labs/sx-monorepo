@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { Fragment, Interface, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
+import { getIsContract } from '@/helpers/contracts';
 import { getABI } from '@/helpers/etherscan';
 import { getProvider } from '@/helpers/provider';
 import { resolver } from '@/helpers/resolver';
 import { createContractCallTransaction } from '@/helpers/transactions';
-import { abiToDefinition, clone } from '@/helpers/utils';
+import { abiToDefinition, clone, getChainIdKind } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { Contact } from '@/types';
+import { ChainId, Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -19,7 +20,7 @@ const DEFAULT_FORM_STATE = {
 
 const props = defineProps<{
   open: boolean;
-  network: number | string;
+  network: ChainId;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
@@ -66,7 +67,7 @@ const definition = computed(() => {
     currentMethod.value.name &&
     currentMethod.value.inputs.length > 0
   ) {
-    return abiToDefinition(currentMethod.value);
+    return abiToDefinition(currentMethod.value, props.network);
   }
 
   return {};
@@ -79,7 +80,8 @@ const formValidator = computed(() =>
     properties: {
       to: {
         type: 'string',
-        format: 'ens-or-address'
+        format: 'ens-or-address',
+        chainId: props.network
       },
       abi: {
         type: 'string',
@@ -145,7 +147,10 @@ function handleMethodChange() {
 }
 
 async function handleToChange(to: string) {
-  form.abi = [];
+  form.abi = DEFAULT_FORM_STATE.abi;
+  form.method = DEFAULT_FORM_STATE.method;
+  form.args = DEFAULT_FORM_STATE.args;
+  form.amount = DEFAULT_FORM_STATE.amount;
   abiStr.value = '';
   addressInvalid.value = false;
   showAbiInput.value = false;
@@ -159,22 +164,22 @@ async function handleToChange(to: string) {
     return;
   }
 
-  if (typeof props.network === 'string') {
-    console.log('network is not a number (starknet is not supported)');
+  if (getChainIdKind(props.network) !== 'evm') {
+    console.log('only evm networks are supported');
     return;
   }
 
   loading.value = true;
-  const provider = getProvider(props.network);
+  const provider = getProvider(Number(props.network));
 
   try {
-    const code = await provider.getCode(contractAddress);
-    if (code === '0x') {
+    const isContract = await getIsContract(provider, contractAddress);
+    if (!isContract) {
       addressInvalid.value = true;
       return;
     }
 
-    form.abi = await getABI(props.network, contractAddress);
+    form.abi = await getABI(Number(props.network), contractAddress);
   } catch (e) {
     console.log(e);
     showAbiInput.value = true;
@@ -211,7 +216,7 @@ watch(abiStr, value => {
     new Interface(abi);
     form.abi = abi;
     showAbiInput.value = false;
-  } catch (e) {
+  } catch {
     console.log('Invalid abi', value);
   }
 });
@@ -274,16 +279,7 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput v-model="searchValue" />
       </template>
     </template>
     <template v-if="showPicker">
@@ -305,11 +301,13 @@ watchEffect(async () => {
         <UiInputAddress
           v-model="form.to"
           :error="errors.to"
-          :show-picker="!loading"
+          :required="true"
           :definition="{
             type: 'string',
             title: 'Contract address',
-            examples: ['Address or ENS']
+            examples: ['Address or ENS'],
+            chainId: props.network,
+            showControls: !loading
           }"
           @pick="handlePickerClick('to')"
         />
@@ -318,6 +316,7 @@ watchEffect(async () => {
         v-if="showAbiInput"
         v-model="abiStr"
         :error="errors.abi"
+        :required="true"
         :definition="{
           type: 'string',
           format: 'abi',
@@ -339,6 +338,7 @@ watchEffect(async () => {
           title: 'ETH amount',
           examples: ['Payable amount']
         }"
+        :required="true"
       />
       <div v-if="definition">
         <UiForm

@@ -1,19 +1,8 @@
 <script setup lang="ts">
-import { MAX_SYMBOL_LENGTH } from '@/helpers/constants';
+import { MAX_SYMBOL_LENGTH, SPACE_CATEGORIES } from '@/helpers/constants';
 import { validateForm } from '@/helpers/validation';
 import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
-
-const SPACE_CATEGORIES = [
-  { id: 'protocol', name: 'Protocol' },
-  { id: 'social', name: 'Social' },
-  { id: 'investment', name: 'Investment' },
-  { id: 'grant', name: 'Grant' },
-  { id: 'service', name: 'Service' },
-  { id: 'media', name: 'Media' },
-  { id: 'creator', name: 'Creator' },
-  { id: 'collector', name: 'Collector' }
-];
 
 const props = defineProps<{
   form: any;
@@ -27,8 +16,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'errors', value: any);
-  (e: 'pick', field: any);
+  (e: 'errors', value: any): void;
+  (e: 'pick', field: any): void;
 }>();
 
 const isOffchainNetwork = computed(
@@ -85,8 +74,7 @@ const votingPowerDefinition = computed(() => ({
       type: 'string',
       title: 'Voting power symbol',
       examples: ['e.g. VP'],
-      maxLength: isOffchainNetwork ? 16 : MAX_SYMBOL_LENGTH,
-      minLength: isOffchainNetwork ? 1 : undefined
+      maxLength: isOffchainNetwork.value ? 16 : MAX_SYMBOL_LENGTH
     }
   }
 }));
@@ -98,6 +86,12 @@ const socialAccountsDefinition = computed(() => {
       format: 'discord-handle',
       title: 'Discord',
       examples: ['Discord handle or invite code']
+    },
+    clanker: {
+      type: 'string',
+      title: 'Clanker',
+      format: 'ethAddress',
+      examples: ['Clanker address']
     }
   };
 
@@ -138,6 +132,12 @@ const socialAccountsDefinition = computed(() => {
         examples: ['X (Twitter) handle'],
         maxLength: 15
       },
+      farcaster: {
+        type: 'string',
+        title: 'Farcaster',
+        examples: ['Farcaster handle'],
+        maxLength: 256
+      },
       ...(isOffchainNetwork.value ? offchainProperties : onchainProperties)
     }
   };
@@ -164,7 +164,7 @@ onMounted(() => {
 
 <template>
   <UiInputStampCover v-model="(form as any).cover" :space="space" />
-  <div class="s-box p-4 mt-[-80px] max-w-[640px]">
+  <div class="s-box px-4 mt-[-56px] max-w-[640px]">
     <UiInputStamp
       v-model="(form as any).avatar"
       :definition="{
@@ -174,19 +174,19 @@ onMounted(() => {
         default: `${space?.network || 'eth'}:${props.id || '0x2121212121212121212121212121212121212121212121212121212121212121'}`
       }"
     />
-    <h4 class="eyebrow mb-2 font-medium">Profile</h4>
+    <UiEyebrow class="mb-2 font-medium">Profile</UiEyebrow>
     <UiForm
       :model-value="form"
       :error="formErrors"
       :definition="profileDefinition"
     />
-    <h4 class="eyebrow mt-4 mb-2 font-medium">Voting power</h4>
+    <UiEyebrow class="mt-4 mb-2 font-medium">Voting power</UiEyebrow>
     <UiForm
       :model-value="form"
       :error="formErrors"
       :definition="votingPowerDefinition"
     />
-    <h4 class="eyebrow mt-4 mb-2 font-medium">Social accounts</h4>
+    <UiEyebrow class="mt-4 mb-2 font-medium">Social accounts</UiEyebrow>
     <UiForm
       :model-value="form"
       :error="formErrors"

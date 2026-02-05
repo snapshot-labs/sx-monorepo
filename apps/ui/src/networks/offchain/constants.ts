@@ -1,18 +1,25 @@
 import { VoteType } from '@/types';
-import { Connector } from '../types';
+import { ConnectorType } from '../types';
 
 export const AUTHS = {};
 export const PROPOSAL_VALIDATIONS = {
   any: 'Any',
   basic: 'Basic',
   'passport-gated': 'Passport gated',
-  arbitrum: 'Arbitrum',
   'karma-eas-attestation': 'Karma EAS Attestation',
   'only-members': 'Only members'
 };
 export const STRATEGIES = {};
 export const EXECUTORS = {};
-export const CONNECTORS: Connector[] = ['injected', 'walletconnect'];
+export const CONNECTORS: ConnectorType[] = [
+  'injected',
+  'walletconnect',
+  'coinbase',
+  'gnosis',
+  'sequence',
+  'guest',
+  'argentx'
+];
 export const EDITOR_AUTHENTICATORS = [];
 export const EDITOR_PROPOSAL_VALIDATIONS = [];
 export const EDITOR_VOTING_STRATEGIES = [];
@@ -24,8 +31,7 @@ export const EDITOR_VOTING_TYPES: VoteType[] = [
   'single-choice',
   'approval',
   'ranked-choice',
+  'copeland',
   'weighted',
   'quadratic'
 ];
-
-export const DEFAULT_VOTING_DELAY = 60 * 60 * 24 * 7;

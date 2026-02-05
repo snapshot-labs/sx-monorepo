@@ -1,7 +1,6 @@
 import {
   DelegationType,
-  NetworkID,
-  Privacy,
+  SkinSettings,
   SpaceMetadataLabel,
   VoteType
 } from '@/types';
@@ -9,10 +8,12 @@ import {
 export type ApiRelatedSpace = {
   id: string;
   name: string;
-  network: NetworkID;
+  network: string;
   avatar: string;
   cover: string | null;
   proposalsCount: number;
+  followersCount: number;
+  activeProposals: number;
   votesCount: number;
   turbo: boolean;
   verified: boolean;
@@ -22,6 +23,7 @@ export type ApiSpace = {
   id: string;
   verified: boolean;
   turbo: boolean;
+  turboExpiration: number;
   admins: string[];
   members: string[];
   name: string | null;
@@ -32,8 +34,10 @@ export type ApiSpace = {
   website: string | null;
   twitter: string | null;
   github: string | null;
+  farcaster: string | null;
   coingecko: string | null;
   symbol: string;
+  activeProposals: number;
   treasuries: {
     name: string;
     network: string;
@@ -52,7 +56,7 @@ export type ApiSpace = {
     type: VoteType | '' | null;
     quorum: number | null;
     quorumType?: 'default' | 'rejection';
-    privacy: string;
+    privacy: '' | 'shutter' | 'any';
     hideAbstain: boolean;
   };
   strategies: { network: string; params: Record<string, any>; name: string }[];
@@ -74,8 +78,12 @@ export type ApiSpace = {
   terms: string;
   // properties used for settings
   private: boolean;
+  flagged: boolean;
+  flagCode: number;
+  hibernated: boolean;
   domain: string | null;
   skin: string | null;
+  skinSettings: SkinSettings;
   template: string | null;
   guidelines: string | null;
   categories: string[];
@@ -101,7 +109,10 @@ export type ApiProposal = {
     network: string;
     admins: string[];
     moderators: string[];
+    members: string[];
     symbol: string;
+    labels: SpaceMetadataLabel[];
+    terms: string;
   };
   type: VoteType;
   title: string;
@@ -117,13 +128,17 @@ export type ApiProposal = {
   labels: string[];
   scores: number[];
   scores_total: number;
+  scores_state: 'invalid' | 'pending' | 'final';
   state: 'active' | 'pending' | 'closed';
   strategies: { network: string; params: Record<string, any>; name: string }[];
+  validation: { name: string; params: Record<string, any> };
   created: number;
   updated: number | null;
   votes: number;
-  privacy: Privacy;
+  privacy: 'shutter' | '';
   plugins: Record<string, any>;
+  flagged: boolean;
+  flagCode: number;
 };
 
 export type ApiVote = {
@@ -147,6 +162,8 @@ export type ApiStrategy = {
   author: string;
   version: string;
   spacesCount: number;
+  verifiedSpacesCount: number;
   examples: any;
   schema: any;
+  disabled: boolean;
 };

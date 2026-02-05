@@ -7,7 +7,7 @@ import {
 import { _d } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { ChainId, Space, Validation, VoteType } from '@/types';
+import { ChainId, Space, SpacePrivacy, Validation, VoteType } from '@/types';
 
 const votingDelay = defineModel<number | null>('votingDelay', {
   required: true
@@ -28,13 +28,10 @@ const quorum = defineModel<string | number>('quorum', {
 const votingType = defineModel<VoteType | 'any'>('votingType', {
   required: true
 });
-const privacy = defineModel<'none' | 'shutter'>('privacy', {
+const privacy = defineModel<SpacePrivacy>('privacy', {
   required: true
 });
 const voteValidation = defineModel<Validation>('voteValidation', {
-  required: true
-});
-const ignoreAbstainVotes = defineModel<boolean>('ignoreAbstainVotes', {
   required: true
 });
 
@@ -62,6 +59,7 @@ const isSelectPrivacyModalOpen = ref(false);
 const isSelectValidationModalOpen = ref(false);
 
 const network = computed(() => getNetwork(props.space.network));
+
 const isOffchainNetwork = computed(() =>
   offchainNetworks.includes(props.space.network)
 );
@@ -119,7 +117,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Voting</h4>
+  <UiEyebrow class="mb-2 font-medium">Voting</UiEyebrow>
   <div class="space-y-3">
     <div>
       <div class="s-label !mb-0">Voting delay</div>
@@ -187,9 +185,9 @@ watchEffect(() => {
         :definition="{
           type: 'integer',
           format: 'duration',
-          maximum: isOffchainNetwork ? 15552000 : undefined,
+          maximum: isOffchainNetwork ? 31622400 : undefined,
           errorMessage: {
-            maximum: 'Voting period must be less than 180 days'
+            maximum: 'Voting period must be less than a year'
           }
         }"
         :custom-error-validation="
@@ -285,10 +283,6 @@ watchEffect(() => {
           <IH-chevron-down />
         </button>
       </UiWrapperInput>
-      <UiSwitch
-        v-model="ignoreAbstainVotes"
-        title="Ignore abstain votes in basic voting results"
-      />
     </div>
   </div>
   <teleport to="#modal">
@@ -311,7 +305,8 @@ watchEffect(() => {
       :open="isSelectValidationModalOpen"
       :network-id="space.network"
       :default-chain-id="snapshotChainId"
-      :space="space"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
       :current="voteValidation"
       @close="isSelectValidationModalOpen = false"
       @save="value => (voteValidation = value)"

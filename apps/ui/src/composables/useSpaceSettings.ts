@@ -11,10 +11,13 @@ import {
 } from '@/networks/types';
 import {
   Member,
+  SkinSettings,
   Space,
   SpaceMetadata,
   SpaceMetadataLabel,
+  SpacePrivacy,
   StrategyParsedMetadata,
+  Theme,
   Validation
 } from '@/types';
 
@@ -29,6 +32,7 @@ export type OffchainSpaceSettings = {
   website: string;
   twitter: string;
   github: string;
+  farcaster: string;
   coingecko: string;
   parent: string | null;
   children: string[];
@@ -51,6 +55,7 @@ export type OffchainSpaceSettings = {
   boost: OffchainApiSpace['boost'];
   validation: OffchainApiSpace['validation'];
   voteValidation: OffchainApiSpace['voteValidation'];
+  skinSettings: SkinSettings;
 };
 
 type Form = SpaceMetadata & {
@@ -69,11 +74,25 @@ const DEFAULT_FORM_STATE: Form = {
   twitter: '',
   github: '',
   discord: '',
+  farcaster: '',
+  clanker: '',
   coingecko: '',
   votingPowerSymbol: '',
   treasuries: [],
   labels: [],
   delegations: []
+};
+
+const DEFAULT_SKIN_SETTINGS = {
+  bg_color: '',
+  link_color: '',
+  text_color: '',
+  content_color: '',
+  border_color: '',
+  heading_color: '',
+  primary_color: '',
+  theme: 'light' as Theme,
+  logo: undefined
 };
 
 export function useSpaceSettings(space: Ref<Space>) {
@@ -85,34 +104,33 @@ export function useSpaceSettings(space: Ref<Space>) {
     transferOwnership,
     deleteSpace: deleteSpaceAction
   } = useActions();
+  const { isWhiteLabel } = useWhiteLabel();
+  const { setSkin } = useSkin();
 
   const loading = ref(true);
-  const isModified = ref(false);
+  const isModifiedEvaluating = ref(false);
 
   const network = computed(() => getNetwork(space.value.network));
-  const isController = computedAsync(async () => {
-    const { account } = web3.value;
 
-    const controller = await network.value.helpers.getSpaceController(
-      space.value
-    );
+  const { isController } = useSpaceController(space);
+  const isOwner = computedAsync(
+    async () => {
+      if (!offchainNetworks.includes(space.value.network)) {
+        return isController.value;
+      }
 
-    return compareAddresses(controller, account);
-  }, false);
-  const isOwner = computedAsync(async () => {
-    if (!offchainNetworks.includes(space.value.network)) {
-      return isController.value;
-    }
+      const { account } = web3.value;
 
-    const { account } = web3.value;
+      const owner = await getNameOwner(
+        space.value.id,
+        network.value.chainId as ENSChainId
+      );
 
-    const owner = await getNameOwner(
-      space.value.id,
-      network.value.chainId as ENSChainId
-    );
-
-    return compareAddresses(owner, account);
-  }, false);
+      return compareAddresses(owner, account);
+    },
+    false,
+    { lazy: true }
+  );
   const isAdmin = computed(() => {
     if (!offchainNetworks.includes(space.value.network)) return false;
 
@@ -140,7 +158,9 @@ export function useSpaceSettings(space: Ref<Space>) {
   // Onchain properties
   const authenticators = ref([] as StrategyConfig[]);
   const validationStrategy = ref(null as StrategyConfig | null);
+  const executionStrategies = ref([] as StrategyConfig[]);
   const votingStrategies = ref([] as StrategyConfig[]);
+  const initialExecutionStrategiesObjectHash = ref(null as string | null);
   const initialValidationStrategyObjectHash = ref(null as string | null);
 
   // Offchain properties
@@ -150,21 +170,22 @@ export function useSpaceSettings(space: Ref<Space>) {
   const quorumType = ref(
     'default' as NonNullable<OffchainApiSpace['voting']['quorumType']>
   );
-  const quorum = ref(1 as string | number);
+  const quorum = ref(0 as string | number);
   const voteType = ref(
     'any' as
       | 'any'
       | 'single-choice'
       | 'approval'
+      | 'copeland'
       | 'quadratic'
       | 'ranked-choice'
       | 'weighted'
       | 'basic'
   );
-  const privacy = ref('none' as 'none' | 'shutter');
+  const privacy = ref('none' as SpacePrivacy);
   const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
-  const snapshotChainId: Ref<number> = ref(1);
+  const snapshotChainId: Ref<string> = ref('1');
   const strategies = ref([] as StrategyConfig[]);
   const members = ref([] as Member[]);
   const parent = ref('');
@@ -172,6 +193,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const termsOfServices = ref('');
   const customDomain = ref('');
   const isPrivate = ref(false);
+  const skinSettings = ref<SkinSettings>(clone(DEFAULT_SKIN_SETTINGS));
 
   function currentToMinutesOnly(value: number) {
     const duration = getDurationFromCurrent(space.value.network, value);
@@ -266,6 +288,25 @@ export function useSpaceSettings(space: Ref<Space>) {
     };
   }
 
+  async function getInitialExecutionStrategies(
+    executors: string[],
+    executorTypes: string[]
+  ) {
+    return executors.map((executor, i) => {
+      return {
+        id: executor,
+        address: executor,
+        type: executorTypes[i],
+        name:
+          network.value.constants.EXECUTORS[executor] ||
+          network.value.constants.EXECUTORS[executorTypes[i]] ||
+          executorTypes[i],
+        params: {},
+        paramsDefinition: {}
+      };
+    });
+  }
+
   async function hasStrategyChanged(
     strategy: StrategyConfig,
     previousParams: any,
@@ -295,12 +336,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     let params: string[] = [];
     if (evmNetworks.includes(space.value.network)) {
       params = strategy.generateParams
-        ? strategy.generateParams(strategy.params)
+        ? await strategy.generateParams(strategy.params)
         : ['0x'];
       previousParams = previousParams ?? ['0x'];
     } else {
       params = strategy.generateParams
-        ? strategy.generateParams(strategy.params)
+        ? await strategy.generateParams(strategy.params)
         : [];
       previousParams = previousParams ?? [];
     }
@@ -310,7 +351,14 @@ export function useSpaceSettings(space: Ref<Space>) {
     const formattedParams = params.map(param =>
       param === '0x' ? param : `0x${BigInt(param).toString(16)}`
     );
-    return objectHash(formattedParams) !== objectHash(previousParams);
+
+    // NOTE: This is a workaround for ApeGas - in this case it needs to be zero-padded,
+    // otherwise it will revert
+    const formattedPreviousParams = previousParams.map(param =>
+      param === '0x' ? param : `0x${BigInt(param).toString(16)}`
+    );
+
+    return objectHash(formattedParams) !== objectHash(formattedPreviousParams);
   }
 
   async function processChanges(
@@ -387,13 +435,18 @@ export function useSpaceSettings(space: Ref<Space>) {
       externalUrl: space.external_url,
       github: space.github,
       discord: space.discord,
+      farcaster: space.farcaster,
+      clanker: space.clanker || '',
       coingecko: space.coingecko || '',
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
       treasuries: space.treasuries,
       labels: space.labels || [],
       delegations: space.delegations.filter(
-        delegation => delegation.apiType !== 'delegate-registry'
+        delegation =>
+          !['delegate-registry', 'split-delegation'].includes(
+            delegation.apiType || ''
+          )
       )
     };
   }
@@ -418,15 +471,18 @@ export function useSpaceSettings(space: Ref<Space>) {
   }
 
   function getInitialVotingProperties(space: Space) {
+    const validPrivacyTypes = ['shutter', 'any'];
     const spaceVoteType = space.additionalRawData?.voting.type;
-    const privacyValue = space.additionalRawData?.voting.privacy;
+    const privacyValue = space.privacy;
 
     return {
       quorumType: space.additionalRawData?.voting.quorumType ?? 'default',
-      quorum: space.additionalRawData?.voting.quorum ?? 1,
+      quorum: space.additionalRawData?.voting.quorum ?? 0,
       votingType:
         !spaceVoteType || spaceVoteType === 'custom' ? 'any' : spaceVoteType,
-      privacy: privacyValue === 'shutter' ? 'shutter' : 'none',
+      privacy: validPrivacyTypes.includes(privacyValue as string)
+        ? privacyValue
+        : 'none',
       ignoreAbstainVotes: space.additionalRawData?.voting.hideAbstain ?? false
     } as const;
   }
@@ -442,6 +498,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     if (space.additionalRawData?.filters.onlyMembers) {
       validation.name = 'only-members';
       validation.params = {};
+    } else if (
+      space.additionalRawData?.filters.minScore &&
+      validation.name === 'basic' &&
+      !validation.params.minScore
+    ) {
+      validation.params.minScore = space.additionalRawData.filters.minScore;
     } else if (validation.name === 'any') {
       validation.name = 'basic';
       validation.params = {
@@ -457,7 +519,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     return space.additionalRawData.strategies.map(strategy => ({
       id: crypto.randomUUID(),
-      chainId: Number(strategy.network),
+      chainId: strategy.network,
       address: strategy.name,
       name: strategy.name,
       paramsDefinition: null,
@@ -520,12 +582,13 @@ export function useSpaceSettings(space: Ref<Space>) {
         form.value.categories ?? space.value.additionalRawData.categories,
       avatar: form.value.avatar ?? space.value.avatar,
       cover: form.value.cover ?? space.value.cover,
-      network: String(snapshotChainId.value),
+      network: snapshotChainId.value,
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
       terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
       twitter: form.value.twitter ?? space.value.twitter,
       github: form.value.github ?? space.value.github,
+      farcaster: form.value.farcaster ?? space.value.farcaster,
       coingecko: form.value.coingecko ?? space.value.coingecko,
       parent: parent.value,
       children: children.value,
@@ -536,7 +599,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       template: template.value,
       strategies: strategies.value.map(strategy => ({
         name: strategy.name,
-        network: strategy.chainId?.toString() ?? snapshotChainId.value,
+        network: strategy.chainId
+          ? String(strategy.chainId)
+          : snapshotChainId.value,
         params: strategy.params
       })),
       treasuries: form.value.treasuries.map(treasury => ({
@@ -580,9 +645,9 @@ export function useSpaceSettings(space: Ref<Space>) {
           ? space.value.additionalRawData.validation
           : proposalValidation.value,
       voteValidation: voteValidation.value,
-      boost: space.value.additionalRawData.boost
+      boost: space.value.additionalRawData.boost,
+      skinSettings: skinSettings.value
     };
-
     const prunedSaveData: Partial<OffchainSpaceSettings> = clone(saveData);
     Object.entries(prunedSaveData).forEach(([key, value]) => {
       if (value === null || value === '') delete prunedSaveData[key];
@@ -599,6 +664,17 @@ export function useSpaceSettings(space: Ref<Space>) {
       prunedSaveData.voting.quorumType === 'default'
     ) {
       delete prunedSaveData.voting.quorumType;
+    }
+    if (prunedSaveData.skinSettings) {
+      if (!customDomain.value && !space.value.turbo) {
+        delete prunedSaveData.skinSettings;
+      } else {
+        Object.entries(prunedSaveData.skinSettings).forEach(([key, value]) => {
+          if (value === null || value === '') {
+            delete prunedSaveData.skinSettings?.[key];
+          }
+        });
+      }
     }
 
     return updateSettingsRaw(space.value, JSON.stringify(prunedSaveData));
@@ -631,6 +707,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       strategiesToAdd,
       strategiesToRemove,
       validationStrategy.value,
+      executionStrategies.value,
       votingDelay.value,
       minVotingPeriod.value,
       maxVotingPeriod.value
@@ -675,6 +752,11 @@ export function useSpaceSettings(space: Ref<Space>) {
       space.value.voting_power_validation_strategies_parsed_metadata
     );
 
+    const executionStrategiesValue = await getInitialExecutionStrategies(
+      space.value.executors,
+      space.value.executors_types
+    );
+
     controller.value = force
       ? await network.value.helpers.getSpaceController(space.value)
       : initialController.value;
@@ -693,11 +775,15 @@ export function useSpaceSettings(space: Ref<Space>) {
     initialValidationStrategyObjectHash.value = objectHash(
       validationStrategyValue
     );
+    executionStrategies.value = executionStrategiesValue;
+    initialExecutionStrategiesObjectHash.value = objectHash(
+      executionStrategiesValue
+    );
 
     if (offchainNetworks.includes(space.value.network)) {
       proposalValidation.value = getInitialProposalValidation(space.value);
-      guidelines.value = space.value.additionalRawData?.guidelines ?? '';
-      template.value = space.value.additionalRawData?.template ?? '';
+      guidelines.value = space.value.guidelines ?? '';
+      template.value = space.value.template ?? '';
 
       const initialVotingProperties = getInitialVotingProperties(space.value);
       quorumType.value = initialVotingProperties.quorumType;
@@ -713,7 +799,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         }
       );
 
-      snapshotChainId.value = space.value.snapshot_chain_id ?? 1;
+      snapshotChainId.value = space.value.snapshot_chain_id ?? '1';
 
       if (space.value.additionalRawData?.type === 'offchain') {
         strategies.value = getInitialStrategies(space.value);
@@ -725,236 +811,240 @@ export function useSpaceSettings(space: Ref<Space>) {
       termsOfServices.value = space.value.terms ?? '';
       customDomain.value = space.value.additionalRawData?.domain ?? '';
       isPrivate.value = space.value.additionalRawData?.private ?? false;
+      skinSettings.value = clone(
+        space.value.additionalRawData?.skinSettings || DEFAULT_SKIN_SETTINGS
+      );
+      if (isWhiteLabel.value) {
+        setSkin(skinSettings.value);
+      }
     }
   }
 
-  watchEffect(async () => {
-    isModified.value = false;
+  const isModified = computedAsync(
+    async () => {
+      // NOTE: those need to be reassigned there as async watcher won't track changes after await call
+      const formValue = form.value;
+      const votingDelayValue = votingDelay.value;
+      const minVotingPeriodValue = minVotingPeriod.value;
+      const maxVotingPeriodValue = maxVotingPeriod.value;
+      const authenticatorsValue = authenticators.value;
+      const votingStrategiesValue = votingStrategies.value;
+      const validationStrategyValue = validationStrategy.value;
+      const initialValidationStrategyObjectHashValue =
+        initialValidationStrategyObjectHash.value;
+      const executionStrategiesValue = executionStrategies.value;
+      const initialExecutionStrategiesObjectHashValue =
+        initialExecutionStrategiesObjectHash.value;
+      const proposalValidationValue = proposalValidation.value;
+      const guidelinesValue = guidelines.value;
+      const templateValue = template.value;
+      const quorumTypeValue = quorumType.value;
+      const quorumValue = quorum.value;
+      const votingTypeValue = voteType.value;
+      const privacyValue = privacy.value;
+      const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
+      const voteValidationValue = voteValidation.value;
+      const snapshotChainIdValue = snapshotChainId.value;
+      const strategiesValue = strategies.value;
+      const membersValue = members.value;
+      const parentValue = parent.value;
+      const childrenValue = children.value;
+      const termsOfServicesValue = termsOfServices.value;
+      const customDomainValue = customDomain.value;
+      const isPrivateValue = isPrivate.value;
+      const skinSettingsValue = skinSettings.value;
 
-    // NOTE: those need to be reassigned there as async watcher won't track changes after await call
-    const formValue = form.value;
-    const votingDelayValue = votingDelay.value;
-    const minVotingPeriodValue = minVotingPeriod.value;
-    const maxVotingPeriodValue = maxVotingPeriod.value;
-    const authenticatorsValue = authenticators.value;
-    const votingStrategiesValue = votingStrategies.value;
-    const validationStrategyValue = validationStrategy.value;
-    const initialValidationStrategyObjectHashValue =
-      initialValidationStrategyObjectHash.value;
-    const proposalValidationValue = proposalValidation.value;
-    const guidelinesValue = guidelines.value;
-    const templateValue = template.value;
-    const quorumTypeValue = quorumType.value;
-    const quorumValue = quorum.value;
-    const votingTypeValue = voteType.value;
-    const privacyValue = privacy.value;
-    const ignoreAbstainVotesValue = ignoreAbstainVotes.value;
-    const voteValidationValue = voteValidation.value;
-    const snapshotChainIdValue = snapshotChainId.value;
-    const strategiesValue = strategies.value;
-    const membersValue = members.value;
-    const parentValue = parent.value;
-    const childrenValue = children.value;
-    const termsOfServicesValue = termsOfServices.value;
-    const customDomainValue = customDomain.value;
-    const isPrivateValue = isPrivate.value;
+      if (loading.value) {
+        return false;
+      }
 
-    if (loading.value) {
-      isModified.value = false;
-      return;
-    }
-
-    if (objectHash(formValue) !== objectHash(getInitialForm(space.value))) {
-      isModified.value = true;
-      return;
-    }
-
-    if (
-      votingDelayValue !== null &&
-      votingDelayValue !== currentToMinutesOnly(space.value.voting_delay)
-    ) {
-      isModified.value = true;
-      return;
-    }
-
-    if (
-      minVotingPeriodValue !== null &&
-      minVotingPeriodValue !==
-        currentToMinutesOnly(space.value.min_voting_period)
-    ) {
-      isModified.value = true;
-      return;
-    }
-
-    if (
-      maxVotingPeriodValue !== null &&
-      maxVotingPeriodValue !==
-        currentToMinutesOnly(space.value.max_voting_period)
-    ) {
-      isModified.value = true;
-      return;
-    }
-
-    if (offchainNetworks.includes(space.value.network)) {
-      const ignoreOrderOpts = { unorderedArrays: true };
-
-      const initialProposalValidation = getInitialProposalValidation(
-        space.value
-      );
-
-      if (
-        objectHash(proposalValidationValue) !==
-        objectHash(initialProposalValidation)
-      ) {
-        isModified.value = true;
-        return;
+      if (objectHash(formValue) !== objectHash(getInitialForm(space.value))) {
+        return true;
       }
 
       if (
-        guidelinesValue !== (space.value.additionalRawData?.guidelines ?? '')
+        votingDelayValue !== null &&
+        votingDelayValue !== currentToMinutesOnly(space.value.voting_delay)
       ) {
-        isModified.value = true;
-        return;
-      }
-
-      if (templateValue !== (space.value.additionalRawData?.template ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      const initialVotingProperties = getInitialVotingProperties(space.value);
-
-      if (quorumTypeValue !== initialVotingProperties.quorumType) {
-        isModified.value = true;
-        return;
-      }
-
-      if (quorumValue !== initialVotingProperties.quorum) {
-        isModified.value = true;
-        return;
-      }
-
-      if (votingTypeValue !== initialVotingProperties.votingType) {
-        isModified.value = true;
-        return;
-      }
-
-      if (privacyValue !== initialVotingProperties.privacy) {
-        isModified.value = true;
-        return;
+        return true;
       }
 
       if (
-        ignoreAbstainVotesValue !== initialVotingProperties.ignoreAbstainVotes
+        minVotingPeriodValue !== null &&
+        minVotingPeriodValue !==
+          currentToMinutesOnly(space.value.min_voting_period)
       ) {
-        isModified.value = true;
-        return;
-      }
-
-      const initialVoteValidation = space.value.additionalRawData
-        ?.voteValidation ?? {
-        name: 'any',
-        params: {}
-      };
-
-      if (
-        objectHash(voteValidationValue) !== objectHash(initialVoteValidation)
-      ) {
-        isModified.value = true;
-        return;
-      }
-
-      if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? 1)) {
-        isModified.value = true;
-        return;
+        return true;
       }
 
       if (
-        hasStrategiesChanged(strategiesValue, getInitialStrategies(space.value))
+        maxVotingPeriodValue !== null &&
+        maxVotingPeriodValue !==
+          currentToMinutesOnly(space.value.max_voting_period)
       ) {
-        isModified.value = true;
-        return;
+        return true;
       }
 
-      if (
-        objectHash(membersValue, ignoreOrderOpts) !==
-        objectHash(getInitialMembers(space.value), ignoreOrderOpts)
-      ) {
-        isModified.value = true;
-        return;
-      }
+      if (offchainNetworks.includes(space.value.network)) {
+        const ignoreOrderOpts = { unorderedArrays: true };
 
-      if (parentValue !== (space.value.parent?.id ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      if (
-        objectHash(childrenValue, ignoreOrderOpts) !==
-        objectHash(
-          space.value.children.map(child => child.id),
-          ignoreOrderOpts
-        )
-      ) {
-        isModified.value = true;
-        return;
-      }
-
-      if (termsOfServicesValue !== (space.value.terms ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      if (customDomainValue !== (space.value.additionalRawData?.domain ?? '')) {
-        isModified.value = true;
-        return;
-      }
-
-      if (isPrivateValue !== space.value.additionalRawData?.private) {
-        isModified.value = true;
-        return;
-      }
-    } else {
-      const [authenticatorsToAdd, authenticatorsToRemove] =
-        await processChanges(
-          authenticatorsValue,
-          space.value.authenticators,
-          [],
-          []
+        const initialProposalValidation = getInitialProposalValidation(
+          space.value
         );
 
-      if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
-        isModified.value = true;
-        return;
+        if (
+          objectHash(proposalValidationValue) !==
+          objectHash(initialProposalValidation)
+        ) {
+          return true;
+        }
+
+        if (guidelinesValue !== (space.value.guidelines ?? '')) {
+          return true;
+        }
+
+        if (templateValue !== (space.value.template ?? '')) {
+          return true;
+        }
+
+        const initialVotingProperties = getInitialVotingProperties(space.value);
+
+        if (quorumTypeValue !== initialVotingProperties.quorumType) {
+          return true;
+        }
+
+        if (quorumValue !== initialVotingProperties.quorum) {
+          return true;
+        }
+
+        if (votingTypeValue !== initialVotingProperties.votingType) {
+          return true;
+        }
+
+        if (privacyValue !== initialVotingProperties.privacy) {
+          return true;
+        }
+
+        if (
+          ignoreAbstainVotesValue !== initialVotingProperties.ignoreAbstainVotes
+        ) {
+          return true;
+        }
+
+        const initialVoteValidation = space.value.additionalRawData
+          ?.voteValidation ?? {
+          name: 'any',
+          params: {}
+        };
+
+        if (
+          objectHash(voteValidationValue) !== objectHash(initialVoteValidation)
+        ) {
+          return true;
+        }
+
+        if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? '1')) {
+          return true;
+        }
+
+        if (
+          hasStrategiesChanged(
+            strategiesValue,
+            getInitialStrategies(space.value)
+          )
+        ) {
+          return true;
+        }
+
+        if (
+          objectHash(membersValue, ignoreOrderOpts) !==
+          objectHash(getInitialMembers(space.value), ignoreOrderOpts)
+        ) {
+          return true;
+        }
+
+        if (parentValue !== (space.value.parent?.id ?? '')) {
+          return true;
+        }
+
+        if (
+          objectHash(childrenValue, ignoreOrderOpts) !==
+          objectHash(
+            space.value.children.map(child => child.id),
+            ignoreOrderOpts
+          )
+        ) {
+          return true;
+        }
+
+        if (termsOfServicesValue !== (space.value.terms ?? '')) {
+          return true;
+        }
+
+        if (
+          customDomainValue !== (space.value.additionalRawData?.domain ?? '')
+        ) {
+          return true;
+        }
+
+        if (isPrivateValue !== space.value.additionalRawData?.private) {
+          return true;
+        }
+
+        if (
+          objectHash(space.value.additionalRawData?.skinSettings) !==
+          objectHash(skinSettingsValue)
+        ) {
+          return true;
+        }
+      } else {
+        const [authenticatorsToAdd, authenticatorsToRemove] =
+          await processChanges(
+            authenticatorsValue,
+            space.value.authenticators,
+            [],
+            []
+          );
+
+        if (authenticatorsToAdd.length || authenticatorsToRemove.length) {
+          return true;
+        }
+
+        const [strategiesToAdd, strategiesToRemove] = await processChanges(
+          votingStrategiesValue,
+          space.value.strategies,
+          space.value.strategies_params,
+          space.value.strategies_parsed_metadata
+        );
+
+        if (strategiesToAdd.length || strategiesToRemove.length) {
+          return true;
+        }
+
+        const hasValidationStrategyChanged =
+          objectHash(validationStrategyValue) !==
+          initialValidationStrategyObjectHashValue;
+        if (hasValidationStrategyChanged) {
+          return true;
+        }
+
+        const hasExecutionStrategiesChanged =
+          objectHash(executionStrategiesValue) !==
+          initialExecutionStrategiesObjectHashValue;
+        if (hasExecutionStrategiesChanged) {
+          return true;
+        }
       }
-
-      const [strategiesToAdd, strategiesToRemove] = await processChanges(
-        votingStrategiesValue,
-        space.value.strategies,
-        space.value.strategies_params,
-        space.value.strategies_parsed_metadata
-      );
-
-      if (strategiesToAdd.length || strategiesToRemove.length) {
-        isModified.value = true;
-        return;
-      }
-
-      const hasValidationStrategyChanged =
-        objectHash(validationStrategyValue) !==
-        initialValidationStrategyObjectHashValue;
-      if (hasValidationStrategyChanged) {
-        isModified.value = true;
-        return;
-      }
-    }
-
-    isModified.value = false;
-  });
+    },
+    false,
+    isModifiedEvaluating
+  );
 
   return {
     loading,
-    isModified,
+    isModified: computed(() =>
+      isModifiedEvaluating.value ? false : isModified.value
+    ),
     isController,
     isOwner,
     isAdmin,
@@ -969,6 +1059,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     validationStrategy,
     votingStrategies,
     proposalValidation,
+    executionStrategies,
     guidelines,
     template,
     quorumType,
@@ -985,6 +1076,7 @@ export function useSpaceSettings(space: Ref<Space>) {
     termsOfServices,
     customDomain,
     isPrivate,
+    skinSettings,
     save,
     saveController,
     deleteSpace,

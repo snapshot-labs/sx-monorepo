@@ -1,0 +1,84 @@
+<script setup lang="ts">
+import { useExploreSpacesQuery } from '@/queries/spaces';
+import { Space } from '@/types';
+
+const props = defineProps<{
+  open: boolean;
+}>();
+
+defineEmits<{
+  (e: 'close'): void;
+  (e: 'pick', space: Space): void;
+}>();
+
+const searchQuery = ref<string>('');
+const throttledSearchQuery = refDebounced(searchQuery, 500);
+
+const { data, isPending, isFetchingNextPage, hasNextPage, fetchNextPage } =
+  useExploreSpacesQuery({
+    searchQuery: throttledSearchQuery,
+    protocol: 'snapshot',
+    network: 'all',
+    category: 'all'
+  });
+
+function handleEndReached() {
+  if (!hasNextPage.value) return;
+
+  fetchNextPage();
+}
+
+watch(
+  () => props.open,
+  open => {
+    if (!open) {
+      searchQuery.value = '';
+    }
+  }
+);
+</script>
+
+<template>
+  <UiModal :open="open" @close="$emit('close')">
+    <template #header>
+      <h3 v-text="'Select a space'" />
+      <UiModalSearchInput v-model="searchQuery" />
+    </template>
+    <div>
+      <UiLoading v-if="isPending" class="inline-block p-4" />
+      <template v-else-if="data">
+        <UiContainerInfiniteScroll
+          v-if="data.pages.flat().length"
+          :loading-more="isFetchingNextPage"
+          class="justify-center max-w-screen-md mx-auto"
+          @end-reached="handleEndReached"
+        >
+          <button
+            v-for="space in data.pages.flat()"
+            :key="space.id"
+            type="button"
+            :space="space"
+            class="flex items-center space-x-3 truncate px-4 py-3 border-b w-full"
+            @click="$emit('pick', space)"
+          >
+            <div class="shrink-0">
+              <SpaceAvatar :space="space" :size="32" class="!rounded-[4px]" />
+            </div>
+            <div class="space-x-1 flex items-center truncate">
+              <span class="truncate text-skin-link" v-text="space.name" />
+              <UiBadgeSpace
+                :verified="space.verified"
+                :turbo="space.turbo"
+                :flagged="space.additionalRawData?.flagged || false"
+                class="shrink-0"
+              />
+            </div>
+          </button>
+        </UiContainerInfiniteScroll>
+        <UiStateWarning v-else class="m-4">
+          No results found for your search.
+        </UiStateWarning>
+      </template>
+    </div>
+  </UiModal>
+</template>

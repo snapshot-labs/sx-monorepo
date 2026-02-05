@@ -1,4 +1,3 @@
-import { getStrategy } from '../strategies/starknet';
 import {
   ClientConfig,
   IndexedConfig,
@@ -6,7 +5,8 @@ import {
   StrategiesAddresses,
   StrategyConfig,
   Vote
-} from '../types';
+} from '../clients/starknet/types';
+import { getStrategy } from '../strategies/starknet';
 import { getStorageVarAddress } from '../utils/encoding';
 
 export async function getStrategies(
@@ -49,6 +49,7 @@ export async function getStrategiesWithParams(
           address,
           strategyData.address,
           strategyData.index,
+          strategyData.params,
           strategyData.metadata || null,
           {
             data
@@ -60,7 +61,7 @@ export async function getStrategiesWithParams(
           index: strategyData.index,
           params
         };
-      } catch (e) {
+      } catch {
         return null;
       }
     })

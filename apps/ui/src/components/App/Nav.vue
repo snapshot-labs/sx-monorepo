@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { FunctionalComponent } from 'vue';
+import { RouteLocationNormalizedLoaded } from 'vue-router';
+import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
-import { compareAddresses } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { offchainNetworks } from '@/networks';
+import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
+import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
@@ -17,9 +20,15 @@ import IHUser from '~icons/heroicons-outline/user';
 import IHUserGroup from '~icons/heroicons-outline/user-group';
 import IHUsers from '~icons/heroicons-outline/users';
 
+type NavigationConfig = {
+  style?: 'default' | 'slim';
+  items: Record<string, NavigationItem>;
+  shortcuts?: Record<string, NavigationItem>;
+};
+
 type NavigationItem = {
   name: string;
-  icon: FunctionalComponent;
+  icon?: FunctionalComponent;
   count?: number;
   hidden?: boolean;
   link?: any;
@@ -27,31 +36,27 @@ type NavigationItem = {
 };
 
 const route = useRoute();
-const spacesStore = useSpacesStore();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
+const { data: spaceData } = useSpaceQuery({
+  networkId: networkId,
+  spaceId: address
+});
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
-const space = computed(() =>
-  currentRouteName.value === 'space' && resolved.value
-    ? spacesStore.spacesMap.get(`${networkId.value}:${address.value}`)
-    : null
-);
+const space = computed(() => {
+  if (currentRouteName.value === 'space' && resolved.value) {
+    return spaceData.value ?? null;
+  }
 
-const isController = computedAsync(async () => {
-  if (!networkId.value || !space.value) return false;
-
-  const { account } = web3.value;
-
-  const network = getNetwork(networkId.value);
-  const controller = await network.helpers.getSpaceController(space.value);
-
-  return compareAddresses(controller, account);
+  return null;
 });
+
+const { isController } = useSpaceController(space);
 
 const canSeeSettings = computed(() => {
   if (isController.value) return true;
@@ -63,98 +68,217 @@ const canSeeSettings = computed(() => {
 
     return admins.includes(web3.value.account.toLowerCase());
   }
+
+  return false;
 });
 
-const navigationConfig = computed<
-  Record<string, Record<string, NavigationItem>>
->(() => ({
-  space: {
-    overview: {
-      name: 'Overview',
-      icon: IHGlobeAlt
-    },
-    proposals: {
-      name: 'Proposals',
-      icon: IHNewspaper
-    },
-    leaderboard: {
-      name: 'Leaderboard',
-      icon: IHUserGroup
-    },
-    ...(space.value?.delegations && space.value.delegations.length > 0
-      ? {
-          delegates: {
-            name: 'Delegates',
-            icon: IHLightningBolt
-          }
-        }
-      : undefined),
-    ...(SPACES_DISCUSSIONS[`${networkId.value}:${address.value}`]
-      ? {
-          discussions: {
-            name: 'Discussions',
-            icon: IHAnnotation,
-            active: ['space-discussions', 'space-discussions-topic'].includes(
-              route.name as string
-            )
-          }
-        }
-      : undefined),
-    ...(space.value?.treasuries?.length
-      ? {
-          treasury: {
-            name: 'Treasury',
-            icon: IHCash
-          }
-        }
-      : undefined),
-    ...(canSeeSettings.value
-      ? {
-          settings: {
-            name: 'Settings',
-            icon: IHCog
-          }
-        }
-      : undefined)
-  },
-  settings: {
-    spaces: {
-      name: 'My spaces',
-      icon: IHStop,
-      hidden: isWhiteLabel.value
-    },
-    contacts: {
-      name: 'Contacts',
-      icon: IHUsers
-    },
-    'email-notifications': {
-      name: 'Email notifications',
-      icon: IHBell,
-      hidden: true
-    }
-  },
-  my: {
-    home: {
-      name: 'Home',
-      icon: IHHome,
-      hidden: !web3.value.account
-    },
-    explore: {
-      name: 'Explore',
-      icon: IHGlobe
-    },
-    notifications: {
-      name: 'Notifications',
-      count: notificationsStore.unreadNotificationsCount,
-      icon: IHBell,
-      hidden: !web3.value.account
-    }
-  }
-}));
-const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
-  () => {
+function getNavigationConfig(
+  route: RouteLocationNormalizedLoaded
+): NavigationConfig | null {
+  const mainRoute = route.matched[0]?.name;
+
+  function getSettingsRoute({
+    name,
+    tab,
+    hidden
+  }: {
+    name: string;
+    tab: string;
+    hidden?: boolean;
+  }) {
     return {
-      my: {
+      name,
+      link: {
+        name: 'space-settings',
+        params: { tab }
+      },
+      active: route.params.tab === tab,
+      hidden
+    };
+  }
+
+  if (mainRoute === 'space') {
+    if (route.name === 'space-settings') {
+      const isOffchainNetwork = space.value
+        ? offchainNetworks.includes(space.value.network)
+        : false;
+
+      return {
+        style: 'slim',
+        items: {
+          back: {
+            name: 'Settings',
+            icon: IHArrowLongLeft,
+            link: { name: 'space-overview' },
+            active: true
+          },
+          profile: getSettingsRoute({
+            name: 'Profile',
+            tab: 'profile'
+          }),
+          proposal: getSettingsRoute({
+            name: 'Proposal',
+            tab: 'proposal'
+          }),
+          votingStrategies: getSettingsRoute({
+            name: 'Voting strategies',
+            tab: 'voting-strategies'
+          }),
+          voting: getSettingsRoute({
+            name: 'Voting',
+            tab: 'voting'
+          }),
+          members: getSettingsRoute({
+            name: 'Members',
+            tab: 'members',
+            hidden: !isOffchainNetwork
+          }),
+          execution: getSettingsRoute({
+            name: 'Execution',
+            tab: 'execution',
+            hidden: isOffchainNetwork
+          }),
+          authenticators: getSettingsRoute({
+            name: 'Authenticators',
+            tab: 'authenticators',
+            hidden: isOffchainNetwork
+          }),
+          treasuries: getSettingsRoute({
+            name: 'Treasuries',
+            tab: 'treasuries'
+          }),
+          delegations: getSettingsRoute({
+            name: 'Delegations',
+            tab: 'delegations'
+          }),
+          labels: getSettingsRoute({
+            name: 'Labels',
+            tab: 'labels'
+          }),
+          whitelabel: getSettingsRoute({
+            name: 'Custom domain',
+            tab: 'whitelabel',
+            hidden: !isOffchainNetwork
+          }),
+          advanced: getSettingsRoute({
+            name: 'Advanced',
+            tab: 'advanced',
+            hidden: !isOffchainNetwork
+          }),
+          controller: getSettingsRoute({
+            name: 'Controller',
+            tab: 'controller'
+          }),
+          billing: getSettingsRoute({
+            name: 'Billing',
+            tab: 'billing',
+            hidden: !isOffchainNetwork
+          }),
+          snapshotPro: {
+            name: 'Snapshot Pro',
+            link: { name: 'space-pro' },
+            hidden: !isOffchainNetwork
+          }
+        }
+      };
+    }
+
+    return {
+      items: {
+        overview: {
+          name: 'Overview',
+          icon: IHGlobeAlt
+        },
+        proposals: {
+          name: 'Proposals',
+          icon: IHNewspaper
+        },
+        leaderboard: {
+          name: 'Leaderboard',
+          icon: IHUserGroup
+        },
+        ...(space.value?.delegations && space.value.delegations.length > 0
+          ? {
+              delegates: {
+                name: 'Delegates',
+                icon: IHLightningBolt
+              }
+            }
+          : undefined),
+        ...(SPACES_DISCUSSIONS[`${networkId.value}:${address.value}`]
+          ? {
+              discussions: {
+                name: 'Discussions',
+                icon: IHAnnotation,
+                active: [
+                  'space-discussions',
+                  'space-discussions-topic'
+                ].includes(route.name as string)
+              }
+            }
+          : undefined),
+        ...(space.value?.treasuries?.length
+          ? {
+              treasury: {
+                name: 'Treasury',
+                icon: IHCash
+              }
+            }
+          : undefined),
+        ...(canSeeSettings.value
+          ? {
+              settings: {
+                name: 'Settings',
+                icon: IHCog,
+                link: { name: 'space-settings', params: { tab: 'profile' } }
+              }
+            }
+          : undefined)
+      }
+    };
+  }
+
+  if (mainRoute === 'settings') {
+    return {
+      items: {
+        spaces: {
+          name: 'My spaces',
+          icon: IHStop,
+          hidden: isWhiteLabel.value
+        },
+        contacts: {
+          name: 'Contacts',
+          icon: IHUsers
+        },
+        'email-notifications': {
+          name: 'Email notifications',
+          icon: IHBell,
+          hidden: true
+        }
+      }
+    };
+  }
+
+  if (mainRoute === 'my') {
+    return {
+      items: {
+        home: {
+          name: 'Home',
+          icon: IHHome,
+          hidden: !web3.value.account
+        },
+        explore: {
+          name: 'Explore',
+          icon: IHGlobe
+        },
+        notifications: {
+          name: 'Notifications',
+          count: notificationsStore.unreadNotificationsCount,
+          icon: IHBell,
+          hidden: !web3.value.account
+        }
+      },
+      shortcuts: {
         user: {
           name: 'Profile',
           link: { name: 'user', params: { user: web3.value.account } },
@@ -174,12 +298,17 @@ const shortcuts = computed<Record<string, Record<string, NavigationItem>>>(
       }
     };
   }
-);
+
+  return null;
+}
+
+const navigationConfig = computed(() => getNavigationConfig(route));
+
 const navigationItems = computed(() =>
   Object.fromEntries(
     Object.entries({
-      ...navigationConfig.value[currentRouteName.value],
-      ...shortcuts.value[currentRouteName.value]
+      ...navigationConfig.value?.items,
+      ...navigationConfig.value?.shortcuts
     })
       .map(([key, item]): [string, NavigationItem] => {
         return [
@@ -199,21 +328,30 @@ const navigationItems = computed(() =>
 </script>
 
 <template>
-  <div class="border-r bg-skin-bg py-4">
-    <AppLink
-      v-for="(item, key) in navigationItems"
-      :key="key"
-      :to="item.link"
-      class="px-4 py-1.5 space-x-2 flex items-center"
-      :class="item.active ? 'text-skin-link' : 'text-skin-text'"
-    >
-      <component :is="item.icon" class="inline-block"></component>
-      <span class="grow" v-text="item.name" />
-      <span
-        v-if="item.count"
-        class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-        v-text="item.count"
-      />
-    </AppLink>
+  <div class="border-r bg-skin-bg">
+    <div class="py-4 no-scrollbar overscroll-contain overflow-auto">
+      <AppLink
+        v-for="(item, key) in navigationItems"
+        :key="key"
+        :to="item.link"
+        class="px-4 space-x-2 flex items-center"
+        :class="[
+          item.active ? 'text-skin-link' : 'text-skin-text',
+          navigationConfig?.style === 'slim' ? 'py-1' : 'py-1.5'
+        ]"
+      >
+        <component
+          :is="item.icon"
+          v-if="item.icon"
+          class="inline-block"
+        ></component>
+        <span class="grow" v-text="item.name" />
+        <span
+          v-if="item.count"
+          class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
+          v-text="item.count"
+        />
+      </AppLink>
+    </div>
   </div>
 </template>

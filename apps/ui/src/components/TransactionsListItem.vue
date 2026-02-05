@@ -1,17 +1,13 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
+import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNames } from '@/helpers/stamp';
 import { _n, shorten } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
-import { NetworkID, Transaction } from '@/types';
+import { ChainId, Transaction } from '@/types';
 
-const props = defineProps<{ networkId: NetworkID; tx: Transaction }>();
+const props = defineProps<{ chainId: ChainId; tx: Transaction }>();
 
 const expanded = ref(false);
-
-const network = computed(() => {
-  return getNetwork(props.networkId);
-});
 
 const title = computed(() => {
   if (props.tx._type === 'sendToken') {
@@ -157,22 +153,22 @@ const parsedTitle = computedAsync(
 
 <template>
   <div class="w-full border-b last:border-b-0">
-    <div class="w-full px-4 py-3 gap-2 flex items-center">
-      <div class="shrink-0">
+    <button
+      class="w-full px-4 py-3 gap-2 flex items-center"
+      @click="expanded = !expanded"
+    >
+      <div v-if="$slots.left" class="shrink-0">
         <slot name="left" />
       </div>
-      <button
-        class="flex gap-2 truncate items-center flex-auto"
-        @click="expanded = !expanded"
-      >
+      <div class="flex gap-2 truncate items-center flex-auto">
         <IH-cash v-if="tx._type === 'sendToken'" class="shrink-0" />
         <IH-photograph v-else-if="tx._type === 'sendNft'" class="shrink-0" />
         <IC-stake v-else-if="tx._type === 'stakeToken'" class="shrink-0" />
         <IH-code v-else class="shrink-0" />
         <div class="truncate text-skin-link" v-html="parsedTitle" />
-      </button>
+      </div>
       <slot name="right" />
-    </div>
+    </button>
     <div v-if="expanded" class="border-y last:border-b-0 px-4 py-3">
       <div v-if="call" class="text-skin-link">
         Call
@@ -183,7 +179,9 @@ const parsedTitle = computedAsync(
         <a
           class="inline-flex items-center"
           target="_blank"
-          :href="network.helpers.getExplorerUrl(call.to, 'address')"
+          :href="
+            getGenericExplorerUrl(chainId, call.to, 'address') || undefined
+          "
         >
           {{ shorten(call.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -194,7 +192,10 @@ const parsedTitle = computedAsync(
         <a
           class="inline-flex items-center"
           target="_blank"
-          :href="network.helpers.getExplorerUrl(interaction.to, 'address')"
+          :href="
+            getGenericExplorerUrl(chainId, interaction.to, 'address') ||
+            undefined
+          "
         >
           {{ shorten(interaction.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
@@ -208,12 +209,15 @@ const parsedTitle = computedAsync(
             v-if="param.type === 'address'"
             class="inline-flex items-center"
             target="_blank"
-            :href="network.helpers.getExplorerUrl(param.value, 'address')"
+            :href="
+              getGenericExplorerUrl(chainId, param.value, 'address') ||
+              undefined
+            "
           >
             {{ shorten(param.value) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </a>
-          <div v-else class="truncate inline-block">{{ param.value }}</div>
+          <div v-else class="break-all inline-block">{{ param.value }}</div>
         </div>
       </template>
       <div v-if="value" class="mt-3">
@@ -222,7 +226,7 @@ const parsedTitle = computedAsync(
       </div>
       <div v-if="data" class="mt-3">
         <h4 class="font-medium">Data</h4>
-        <div>{{ data }}</div>
+        <div class="break-all">{{ data }}</div>
       </div>
     </div>
   </div>

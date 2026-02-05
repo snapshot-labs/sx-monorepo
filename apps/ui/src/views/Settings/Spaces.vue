@@ -1,53 +1,44 @@
 <script setup lang="ts">
 import { explorePageProtocols } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
+import { useExploreSpacesQuery } from '@/queries/spaces';
 
 useTitle('My spaces');
 
-const protocols = Object.values(explorePageProtocols).map(
-  ({ key, label }: ProtocolConfig) => ({
+const protocols = Object.values(explorePageProtocols)
+  .filter(protocol => !protocol.disabled)
+  .map(({ key, label }: ProtocolConfig) => ({
     key,
     label
-  })
-);
+  }));
+
 const DEFAULT_PROTOCOL = 'snapshot';
 
-const spacesStore = useSpacesStore();
 const route = useRoute();
 const router = useRouter();
 const { web3 } = useWeb3();
 
-const loaded = ref(false);
+const protocol = ref<ExplorePageProtocol>(DEFAULT_PROTOCOL);
+
+const { data, isPending } = useExploreSpacesQuery({
+  controller: toRef(() => web3.value.account),
+  protocol
+});
 
 const loading = computed(
-  () =>
-    !loaded ||
-    (web3.value.account && spacesStore.loading) ||
-    web3.value.authLoading
+  () => (web3.value.account && isPending.value) || web3.value.authLoading
 );
 
-watch(
-  () => spacesStore.protocol,
-  value => {
-    router.push({ query: { ...route.query, p: value } });
-  }
-);
+watch(protocol, value => {
+  router.push({ query: { ...route.query, p: value } });
+});
 
 watch(
-  [() => route.query.p as string, () => web3.value.account],
-  ([protocolQuery, controller]) => {
-    loaded.value = false;
-
-    spacesStore.protocol = (
+  [() => route.query.p as string],
+  ([protocolQuery]) => {
+    protocol.value = (
       explorePageProtocols[protocolQuery] ? protocolQuery : DEFAULT_PROTOCOL
     ) as ExplorePageProtocol;
-    if (controller) {
-      spacesStore.fetch({ controller });
-    } else {
-      spacesStore.explorePageSpaces = [];
-    }
-
-    loaded.value = true;
   },
   {
     immediate: true
@@ -56,33 +47,49 @@ watch(
 </script>
 
 <template>
-  <div class="flex justify-between">
-    <div class="flex flex-row p-4 space-x-2">
-      <UiSelectDropdown
-        v-model="spacesStore.protocol"
-        title="Protocol"
-        gap="12"
-        placement="start"
-        :items="protocols"
-      />
+  <div>
+    <div class="flex justify-between p-4 gap-2 gap-y-3 flex-row">
+      <div class="flex flex-row space-x-2">
+        <UiSelectDropdown
+          v-model="protocol"
+          title="Protocol"
+          gap="12"
+          placement="start"
+          :items="protocols"
+        />
+      </div>
+      <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
+        <UiButton
+          :to="{
+            name: `create-space-${protocol}`
+          }"
+          uniform
+        >
+          <IH-plus-sm />
+        </UiButton>
+      </UiTooltip>
     </div>
-  </div>
-  <UiLabel label="My spaces" sticky />
-  <UiLoading v-if="loading" class="block m-4" />
-  <UiContainer
-    v-else-if="spacesStore.explorePageSpaces.length"
-    class="!max-w-screen-md pt-5"
-  >
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+    <UiSectionHeader label="My spaces" sticky />
+    <UiColumnHeader class="hidden md:flex text-center">
+      <div class="grow" />
+      <div v-if="protocol === 'snapshot'" class="w-[100px]" v-text="'Active'" />
+      <div class="w-[100px]" v-text="'Proposals'" />
+      <div
+        v-if="protocol === 'snapshot'"
+        class="w-[100px]"
+        v-text="'Followers'"
+      />
+    </UiColumnHeader>
+    <UiLoading v-if="loading" class="block m-4" />
+    <div v-else-if="data?.pages.flat().length">
       <SpacesListItem
-        v-for="space in spacesStore.explorePageSpaces"
+        v-for="space in data?.pages.flat()"
         :key="space.id"
         :space="space"
       />
     </div>
-  </UiContainer>
-  <div v-else class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block shrink-0" />
-    <span v-text="'There are no spaces here.'" />
+    <UiStateWarning v-else class="px-4 py-3">
+      There are no spaces here.
+    </UiStateWarning>
   </div>
 </template>

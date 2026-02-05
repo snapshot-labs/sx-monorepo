@@ -7,8 +7,8 @@ enum StickStatus {
 
 const props = withDefaults(
   defineProps<{
-    top: number;
-    bottom: number;
+    top?: number;
+    bottom?: number;
   }>(),
   {
     top: 0,
@@ -31,9 +31,10 @@ function updatePosition(scrollY: number) {
   if (!el.value) return;
 
   const isBottomReached =
-    el.value.getBoundingClientRect().bottom + props.bottom <=
+    Math.round(el.value.getBoundingClientRect().bottom) + props.bottom <=
     window.innerHeight;
-  const isTopReached = el.value.getBoundingClientRect().top >= props.top;
+  const isTopReached =
+    Math.round(el.value.getBoundingClientRect().top) >= props.top;
   const scrollingDown = lastScrollY.value < scrollY;
   const scrollingUp = lastScrollY.value > scrollY;
   const stickedToBottom = stickStatus.value === StickStatus.BOTTOM;
@@ -103,7 +104,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="wrapperEl" class="relative">
+  <div ref="wrapperEl" class="relative h-full">
     <slot />
   </div>
 </template>

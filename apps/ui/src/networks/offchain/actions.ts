@@ -1,4 +1,3 @@
-import { isAddress } from '@ethersproject/address';
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
 import {
@@ -6,19 +5,20 @@ import {
   getOffchainStrategy,
   offchainGoerli,
   offchainMainnet,
-  OffchainNetworkConfig
+  OffchainNetworkEthereumConfig,
+  OffchainNetworkStarknetConfig,
+  offchainStarknetMainnet,
+  offchainStarknetSepolia
 } from '@snapshot-labs/sx';
+import { constants as starknetConstants } from 'starknet';
 import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
-import {
-  getModuleAddressForTreasury,
-  OSnapPlugin,
-  parseInternalTransaction
-} from '@/helpers/osnap';
-import { getProvider } from '@/helpers/provider';
+import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
 import {
   Choice,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   Statement,
@@ -28,11 +28,14 @@ import {
   UserProfile,
   VoteType
 } from '@/types';
-import { EDITOR_SNAPSHOT_OFFSET } from './constants';
-import { getSdkChoice } from './helpers';
+import {
+  getLatestBlockNumber,
+  getSdkChoice,
+  isStarknetChainId
+} from './helpers';
 import { EDITOR_APP_NAME } from '../common/constants';
 import {
-  Connector,
+  ConnectorType,
   ExecutionInfo,
   NetworkConstants,
   NetworkHelpers,
@@ -52,10 +55,21 @@ type ReadOnlyExecutionPlugin = {
   safes: ReadOnlyExecutionSafe[];
 };
 
-const CONFIGS: Record<number, OffchainNetworkConfig> = {
+const CONFIGS: Record<number, OffchainNetworkEthereumConfig> = {
   1: offchainMainnet,
   5: offchainGoerli
 };
+
+const STARKNET_CONFIGS: Record<number, OffchainNetworkStarknetConfig> = {
+  1: offchainStarknetMainnet,
+  11155111: offchainStarknetSepolia
+};
+
+// List of valid starknet chaind IDs returned by wallets
+// Argent X will return 0x534e5f4d41494e while Braavos will return SN_MAIN
+const STARKNET_CHAIN_IDS = Object.entries(
+  starknetConstants.StarknetChainId
+).flat();
 
 export function createActions(
   constants: NetworkConstants,
@@ -67,37 +81,51 @@ export function createActions(
   const client = new clients.OffchainEthereumSig({
     networkConfig
   });
+  const starknetSigClient = new clients.OffchainStarknetSig({
+    networkConfig: STARKNET_CONFIGS[chainId]
+  });
 
-  async function getPlugins(executions: ExecutionInfo[] | null) {
+  async function verifyChainNetwork(
+    web3: Web3Provider | Wallet,
+    snapshotChainId: string | undefined
+  ) {
+    if (!snapshotChainId || isStarknetChainId(snapshotChainId)) {
+      return;
+    }
+
+    if (
+      web3 instanceof Web3Provider &&
+      (web3.provider as any)._isSequenceProvider
+    ) {
+      await verifyNetwork(web3, Number(snapshotChainId));
+    }
+  }
+
+  async function getPlugins(
+    executions: ExecutionInfo[] | null,
+    originalProposal: Proposal | null
+  ) {
+    const supportedPlugins = ['readOnlyExecution'];
+
     const plugins = {} as {
-      oSnap?: OSnapPlugin;
       readOnlyExecution?: ReadOnlyExecutionPlugin;
     };
 
+    if (originalProposal) {
+      for (const [name, plugin] of Object.entries(originalProposal.plugins)) {
+        if (!supportedPlugins.includes(name)) {
+          plugins[name] = plugin;
+        }
+      }
+    }
+
     if (!executions) return plugins;
 
-    const oSnapSafes = [] as OSnapPlugin['safes'];
     const readOnlyExecutionSafes = [] as ReadOnlyExecutionPlugin['safes'];
     for (const info of executions) {
       if (!info.transactions.length) continue;
 
-      if (info.strategyType === 'oSnap') {
-        const treasuryAddress = info.strategyAddress;
-        const moduleAddress = await getModuleAddressForTreasury(
-          info.chainId,
-          treasuryAddress
-        );
-
-        oSnapSafes.push({
-          safeName: info.treasuryName,
-          safeAddress: treasuryAddress,
-          network: info.chainId.toString(),
-          transactions: info.transactions.map(tx =>
-            parseInternalTransaction(tx)
-          ),
-          moduleAddress
-        });
-      } else if (info.strategyType === 'ReadOnlyExecution') {
+      if (info.strategyType === 'ReadOnlyExecution') {
         readOnlyExecutionSafes.push({
           safeName: info.treasuryName,
           safeAddress: info.strategyAddress,
@@ -105,10 +133,6 @@ export function createActions(
           transactions: info.transactions
         });
       }
-    }
-
-    if (oSnapSafes.length > 0) {
-      plugins.oSnap = { safes: oSnapSafes };
     }
 
     if (readOnlyExecutionSafes.length > 0) {
@@ -120,8 +144,8 @@ export function createActions(
 
   return {
     async propose(
-      web3: Web3Provider,
-      connectorType: Connector,
+      web3: Web3Provider | Wallet,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       title: string,
@@ -129,16 +153,18 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       app: string,
+      created: number,
+      start: number,
+      min_end: number,
+      max_end: number,
       executions: ExecutionInfo[]
     ) {
-      const currentTime = Math.floor(Date.now() / 1000);
-      const startTime = currentTime + space.voting_delay;
-      const provider = getProvider(space.snapshot_chain_id as number);
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
 
-      const plugins = await getPlugins(executions);
-
+      const plugins = await getPlugins(executions, null);
       const data = {
         space: space.id,
         title,
@@ -146,65 +172,104 @@ export function createActions(
         type,
         discussion,
         choices,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
-        start: startTime,
-        end: startTime + space.min_voting_period,
-        snapshot: (await provider.getBlockNumber()) - EDITOR_SNAPSHOT_OFFSET,
+        start,
+        end: min_end,
+        snapshot: await getLatestBlockNumber(space.snapshot_chain_id as string),
         plugins: JSON.stringify(plugins),
         app: app || EDITOR_APP_NAME,
-        timestamp: currentTime
+        timestamp: created,
+        from: account
       };
 
-      return client.propose({ signer: web3.getSigner(), data });
+      return client.propose({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
     async updateProposal(
-      web3: Web3Provider,
-      connectorType: Connector,
+      web3: Web3Provider | Wallet,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       executions: ExecutionInfo[]
     ) {
-      const plugins = await getPlugins(executions);
+      await verifyChainNetwork(web3, space.snapshot_chain_id);
+
+      const plugins = await getPlugins(executions, proposal);
 
       const data = {
-        proposal: proposalId as string,
+        proposal: proposal.proposal_id as string,
         space: space.id,
         title,
         body,
         type,
         discussion,
         choices,
+        privacy: privacy === 'shutter' ? 'shutter' : '',
         labels,
-        plugins: JSON.stringify(plugins)
+        plugins: JSON.stringify(plugins),
+        from: account
       };
 
-      return client.updateProposal({ signer: web3.getSigner(), data });
+      return client.updateProposal({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data
+      });
     },
-    cancelProposal(web3: Web3Provider, proposal: Proposal) {
-      return client.cancel({
-        signer: web3.getSigner(),
+    async flagProposal(
+      web3: Web3Provider | Wallet,
+      account: string,
+      proposal: Proposal
+    ) {
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
+
+      return client.flagProposal({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data: {
           proposal: proposal.proposal_id as string,
-          space: proposal.space.id
+          space: proposal.space.id,
+          from: account
         }
       });
     },
-    vote(
-      web3: Web3Provider,
-      connectorType: Connector,
+    async cancelProposal(
+      web3: Web3Provider | Wallet,
+      connectorType: ConnectorType,
+      account: string,
+      proposal: Proposal
+    ) {
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
+
+      return client.cancel({
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        data: {
+          proposal: proposal.proposal_id as string,
+          space: proposal.space.id,
+          from: account
+        }
+      });
+    },
+    async vote(
+      web3: Web3Provider | Wallet,
+      connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
       choice: Choice,
       reason: string,
       app: string
     ): Promise<any> {
+      await verifyChainNetwork(web3, proposal.space.snapshot_chain_id);
+
       const data = {
         space: proposal.space.id,
         proposal: proposal.proposal_id as string,
@@ -215,11 +280,12 @@ export function createActions(
         metadataUri: '',
         privacy: proposal.privacy,
         reason,
-        app: app || EDITOR_APP_NAME
+        app: app || EDITOR_APP_NAME,
+        from: account
       };
 
       return client.vote({
-        signer: web3.getSigner(),
+        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
         data
       });
     },
@@ -239,9 +305,16 @@ export function createActions(
       const name = strategiesNames[0];
       const strategy = getOffchainStrategy(name);
 
-      if (!strategy || !isAddress(voterAddress)) {
+      if (!strategy || !isValidAddress(voterAddress)) {
         return [
-          { address: name, value: 0n, decimals: 0, token: null, symbol: '' }
+          {
+            address: name,
+            value: 0n,
+            cumulativeDecimals: 0,
+            displayDecimals: 0,
+            token: null,
+            symbol: ''
+          }
         ];
       }
 
@@ -249,14 +322,18 @@ export function createActions(
         spaceId,
         voterAddress,
         strategiesOrValidationParams,
-        snapshotInfo
+        {
+          at: snapshotInfo.at || null,
+          chainId: String(snapshotInfo.chainId)
+        }
       );
 
       if (strategy.type !== 'remote-vp') {
         return [
           {
             address: strategiesNames[0],
-            decimals: 0,
+            cumulativeDecimals: 0,
+            displayDecimals: 0,
             symbol: '',
             token: '',
             chainId: snapshotInfo.chainId,
@@ -272,10 +349,11 @@ export function createActions(
         return {
           address: strategy.name,
           value,
-          decimals,
+          cumulativeDecimals: decimals,
+          displayDecimals: decimals,
           symbol: strategy.params.symbol,
           token: strategy.params.address,
-          chainId: strategy.network ? parseInt(strategy.network) : undefined,
+          chainId: strategy.network,
           swapLink: getSwapLink(
             strategy.name,
             strategy.params.address,
@@ -306,7 +384,22 @@ export function createActions(
         data: { network: networkId, space: spaceId, ...(from ? { from } : {}) }
       });
     },
-    setAlias(web3: Web3Provider, alias: string) {
+    async setAlias(web3: any, alias: string) {
+      const web3ChainId =
+        web3.provider?.chainId || web3.provider?.provider?.chainId;
+
+      if (STARKNET_CHAIN_IDS.includes(web3ChainId)) {
+        await verifyStarknetNetwork(
+          web3,
+          STARKNET_CONFIGS[chainId].eip712ChainId
+        );
+
+        return starknetSigClient.setAlias({
+          signer: web3.provider.account,
+          data: { alias }
+        });
+      }
+
       return client.setAlias({
         signer: web3.getSigner(),
         data: { alias }
@@ -341,9 +434,12 @@ export function createActions(
     },
     transferOwnership: async (
       web3: Web3Provider,
+      connectorType: ConnectorType,
       space: Space,
       owner: string
     ) => {
+      await verifyNetwork(web3, chainId);
+
       return setEnsTextRecord(
         web3.getSigner(),
         space.id,
@@ -352,19 +448,35 @@ export function createActions(
         chainId
       );
     },
-    updateSettingsRaw: (
-      web3: Web3Provider | Wallet,
+    createSpaceRaw: async (
+      web3: Web3Provider,
+      id: string,
+      settings: string
+    ) => {
+      await verifyNetwork(web3, chainId);
+
+      return client.createSpace({
+        signer: web3.getSigner(),
+        data: { space: id, settings }
+      });
+    },
+    updateSettingsRaw: async (
+      web3: Web3Provider,
       space: Space,
       settings: string
     ) => {
+      await verifyNetwork(web3, chainId);
+
       return client.updateSpace({
-        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        signer: web3.getSigner(),
         data: { space: space.id, settings }
       });
     },
-    deleteSpace: (web3: Web3Provider | Wallet, space: Space) => {
+    deleteSpace: async (web3: Web3Provider, space: Space) => {
+      await verifyNetwork(web3, chainId);
+
       return client.deleteSpace({
-        signer: web3 instanceof Web3Provider ? web3.getSigner() : web3,
+        signer: web3.getSigner(),
         data: { space: space.id }
       });
     }

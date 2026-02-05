@@ -1,3 +1,6 @@
+import { BigNumberish } from '@ethersproject/bignumber';
+import { constants as starknetConstants } from 'starknet';
+
 export type ExecutorType =
   | 'SimpleQuorumVanilla'
   | 'SimpleQuorumAvatar'
@@ -18,6 +21,10 @@ export type EthSigAuthenticatorConfig = {
   type: 'ethSig';
 };
 
+export type EthSigV2AuthenticatorConfig = {
+  type: 'ethSigV2';
+};
+
 export type StarkSigAuthenticatorConfig = {
   type: 'starkSig';
 };
@@ -36,6 +43,10 @@ export type CompStrategyConfig = {
 
 export type OzVotesStrategyConfig = {
   type: 'ozVotes';
+};
+
+export type ApeGasStrategyConfig = {
+  type: 'apeGas';
 };
 
 export type Erc20VotesStrategyConfig = {
@@ -72,6 +83,7 @@ export type NetworkConfig = {
       | VanillaAuthenticatorConfig
       | EthTxAuthenticatorConfig
       | EthSigAuthenticatorConfig
+      | EthSigV2AuthenticatorConfig
       | StarkSigAuthenticatorConfig
       | StarkTxAuthenticatorConfig
       | undefined;
@@ -81,6 +93,7 @@ export type NetworkConfig = {
       | VanillaStrategyConfig
       | CompStrategyConfig
       | OzVotesStrategyConfig
+      | ApeGasStrategyConfig
       | Erc20VotesStrategyConfig
       | WhitelistStrategyConfig
       | EvmSlotValueStrategyConfig
@@ -100,12 +113,24 @@ export type EvmNetworkConfig = Omit<
   | 'herodotusAccumulatesChainId'
 > & {
   eip712ChainId: number;
+  maxPriorityFeePerGas?: BigNumberish;
+  blockTime: number;
+  /**
+   * Indicates that the network block.number returns block
+   *  that is different than the native block number.
+   *  For example on Arbitrum block.number returns L1 block number.
+   * */
+  hasNonNativeBlockNumbers?: boolean;
   proxyFactory: string;
   executionStrategiesImplementations: {
     [key in ExecutorType]?: string;
   };
 };
 
-export type OffchainNetworkConfig = {
+export type OffchainNetworkEthereumConfig = {
   eip712ChainId: 1 | 5;
+};
+
+export type OffchainNetworkStarknetConfig = {
+  eip712ChainId: starknetConstants.StarknetChainId;
 };

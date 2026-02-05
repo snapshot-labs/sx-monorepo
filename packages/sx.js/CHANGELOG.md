@@ -1,5 +1,35 @@
 # @snapshot-labs/sx
 
+## 0.1.9
+
+### Patch Changes
+
+- 5429684: Call get_voting_power in storage proof strategies to verify Slot is zero is not thrown
+- bd2cc25: convert params for getVotingPower check in storage slot proof strategies
+
+## 0.1.8
+
+### Patch Changes
+
+- 0bf0a22: use whitelist server to compute EVM merkleWhitelist proof
+- 4ada1f3: generate standard execution payload for any execution with transactions
+- abb0940: relax voter and proposal author type to allow starknet address
+- 0bf0a22: require params to be included in EMV strategies for propose and vote
+- 9f5c784: add Apechain and Curtis networks
+- 7ae0363: use whitelistServer instead of mana for whitelist proofs
+
+## 0.1.7
+
+### Patch Changes
+
+- 7bfd971: Add privacy option to proposal and update-proposal
+- 2add7c2: add space creation support to OffchainEthereumSig
+- f08f273: Add new voting type copeland
+- 5ebcc3c: add flagProposal method to offchain EthereumSig client
+- 88a6f85: fetch merkletree proof from Mana https://github.com/snapshot-labs/sx-monorepo/pull/1176
+- 5bcc748: encrypt only shutter votes
+- 302cd7a: add Mantle network support
+
 ## 0.1.6
 
 ### Patch Changes

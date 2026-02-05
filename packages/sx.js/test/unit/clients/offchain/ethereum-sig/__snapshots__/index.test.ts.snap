@@ -18,12 +18,12 @@ exports[`EthereumSig > should create cancelProposal envelope 1`] = `
       "space": "test.eth",
       "timestamp": 1705795200,
     },
-    "signature": "0xe358de8e39c6c0cc9df929892e61806371e6539199a2b0781b9100700760067334024ca8cd5f86f1cb16fc93e76602989618eeacebf1fafbc1acad882d14b4d61c",
+    "signature": "0xb0d9374069983281b54ca07c4822d7cb1ac60c45d852dd4216575a87375774f44bc7422668bf000df1f4e0ae60b2221afdc92948fb936341560652ba588935251c",
     "types": {
       "CancelProposal": [
         {
           "name": "from",
-          "type": "address",
+          "type": "string",
         },
         {
           "name": "space",
@@ -35,7 +35,7 @@ exports[`EthereumSig > should create cancelProposal envelope 1`] = `
         },
         {
           "name": "proposal",
-          "type": "bytes32",
+          "type": "string",
         },
       ],
     },
@@ -59,6 +59,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
       "1234e",
     ],
     "plugins": "{}",
+    "privacy": "",
     "snapshot": 19283932,
     "space": "wan-test.eth",
     "start": 1705795200,
@@ -86,6 +87,7 @@ exports[`EthereumSig > should create propose envelope 1`] = `
         "1234e",
       ],
       "plugins": "{}",
+      "privacy": "",
       "snapshot": 19283932,
       "space": "wan-test.eth",
       "start": 1705795200,
@@ -93,12 +95,12 @@ exports[`EthereumSig > should create propose envelope 1`] = `
       "title": "Creation test",
       "type": "basic",
     },
-    "signature": "0x33482a4ebefdcc7c5dc006a8766e1b0dc5c653360b894d49a0c7819d97f16b6b67f4b78a9c4cd46f551fef61e4de97be9140bb32d5a43f7b0e52b4936a08c5f41c",
+    "signature": "0x5ba9d0555e3d82bdcf559a041d2807fb7004db902f2a18f68ac54e03eedc3bc9350940cf50d558fe0e873665efcb52bacbb4d9b3a5a01f5ae7cf164af205143d1c",
     "types": {
       "Proposal": [
         {
           "name": "from",
-          "type": "address",
+          "type": "string",
         },
         {
           "name": "space",
@@ -149,6 +151,131 @@ exports[`EthereumSig > should create propose envelope 1`] = `
           "type": "string",
         },
         {
+          "name": "privacy",
+          "type": "string",
+        },
+        {
+          "name": "app",
+          "type": "string",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`EthereumSig > should create propose envelope with shutter 1`] = `
+{
+  "data": {
+    "app": "snapshot-v2",
+    "body": "Dummy body",
+    "choices": [
+      "For",
+      "Against",
+      "Abstain",
+    ],
+    "discussion": "https://snapshot.org",
+    "end": 1705798800,
+    "labels": [
+      "1234e",
+    ],
+    "plugins": "{}",
+    "privacy": "shutter",
+    "snapshot": 19283932,
+    "space": "wan-test.eth",
+    "start": 1705795200,
+    "title": "Creation test",
+    "type": "basic",
+  },
+  "signatureData": {
+    "address": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+    "domain": {
+      "name": "snapshot",
+      "version": "0.1.4",
+    },
+    "message": {
+      "app": "snapshot-v2",
+      "body": "Dummy body",
+      "choices": [
+        "For",
+        "Against",
+        "Abstain",
+      ],
+      "discussion": "https://snapshot.org",
+      "end": 1705798800,
+      "from": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
+      "labels": [
+        "1234e",
+      ],
+      "plugins": "{}",
+      "privacy": "shutter",
+      "snapshot": 19283932,
+      "space": "wan-test.eth",
+      "start": 1705795200,
+      "timestamp": 1705795200,
+      "title": "Creation test",
+      "type": "basic",
+    },
+    "signature": "0xf9d24c7574aeff0a160824a5d5bcc777890cdbe1eb91e048bdb44370b44facbd0c21bd6d4894e37b2561a1576f3f2f3a0050a84546557f53863761133d59582e1b",
+    "types": {
+      "Proposal": [
+        {
+          "name": "from",
+          "type": "string",
+        },
+        {
+          "name": "space",
+          "type": "string",
+        },
+        {
+          "name": "timestamp",
+          "type": "uint64",
+        },
+        {
+          "name": "type",
+          "type": "string",
+        },
+        {
+          "name": "title",
+          "type": "string",
+        },
+        {
+          "name": "body",
+          "type": "string",
+        },
+        {
+          "name": "discussion",
+          "type": "string",
+        },
+        {
+          "name": "choices",
+          "type": "string[]",
+        },
+        {
+          "name": "labels",
+          "type": "string[]",
+        },
+        {
+          "name": "start",
+          "type": "uint64",
+        },
+        {
+          "name": "end",
+          "type": "uint64",
+        },
+        {
+          "name": "snapshot",
+          "type": "uint64",
+        },
+        {
+          "name": "plugins",
+          "type": "string",
+        },
+        {
+          "name": "privacy",
+          "type": "string",
+        },
+        {
           "name": "app",
           "type": "string",
         },
@@ -164,7 +291,9 @@ exports[`EthereumSig > should create vote envelope 1`] = `
     "app": "snapshot-v2",
     "authenticator": "",
     "choice": 1,
+    "from": "0xf1f09AdC06aAB740AA16004D62Dbd89484d3Be90",
     "metadataUri": "",
+    "privacy": "none",
     "proposal": "0xcc47146e5e0ac781e8976405a8da4468f2a0c4cdf0c7659353d728fafe46f801",
     "space": "wan-test.eth",
     "strategies": [],
@@ -186,12 +315,12 @@ exports[`EthereumSig > should create vote envelope 1`] = `
       "space": "wan-test.eth",
       "timestamp": 1705795200,
     },
-    "signature": "0x92df2e1de71e2f0cdf04d7fd5d028fe0d38b990aa896ad677c4627bfd303cd386b17ad4c403dade15f2508b5fa444d2e8b4b1bed8ca63d341006a4d5d2e64bac1b",
+    "signature": "0x8ebb390031f1c0b1ca907b8d3d3a7058a7bc0054e93f49d1ab33b853c065f54624a448b6610936f6b47cc44e833a7e969140c48cb18358c035df5dad9b19925b1c",
     "types": {
       "Vote": [
         {
           "name": "from",
-          "type": "address",
+          "type": "string",
         },
         {
           "name": "space",

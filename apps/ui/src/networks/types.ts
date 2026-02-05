@@ -8,9 +8,12 @@ import {
   DelegationType,
   Follow,
   NetworkID,
+  Privacy,
   Proposal,
+  Setting,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   Statement,
   StrategyParsedMetadata,
   Transaction,
@@ -26,16 +29,38 @@ export type SpacesFilter = {
   id_in?: string[];
   searchQuery?: string;
   domain?: string;
+  category?: string;
+  network?: string;
+  protocol?: ExplorePageProtocol;
+  protocol_in?: string[];
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
+  labels?: string[];
 } & Record<string, any>;
-export type Connector =
+export type ConnectorType =
   | 'argentx'
   | 'injected'
   | 'walletconnect'
-  | 'walletlink'
-  | 'gnosis';
+  | 'coinbase'
+  | 'gnosis'
+  | 'sequence'
+  | 'unicorn'
+  | 'guest';
+export type Connector = {
+  id: string;
+  type: ConnectorType;
+  info: {
+    name: string;
+    icon: string;
+  };
+  options: any;
+  provider: any;
+  autoConnectOnly: boolean;
+  connect: () => void;
+  autoConnect: () => void;
+  disconnect: () => void;
+};
 export type GeneratedMetadata =
   | {
       name: string;
@@ -54,10 +79,16 @@ export type GeneratedMetadata =
 export type StrategyTemplate = {
   address: string;
   name: string;
+  /**
+   * Deprecated strategy can still be used but can't be added to new spaces.
+   */
+  deprecated?: boolean;
   about?: string;
   author?: string;
   version?: string;
   spaceCount?: number;
+  verifiedSpaceCount?: number;
+  disabled?: boolean;
   link?: string;
   icon?: FunctionalComponent;
   type?: string;
@@ -65,7 +96,7 @@ export type StrategyTemplate = {
   paramsDefinition: any;
   validate?: (params: Record<string, any>) => boolean;
   generateSummary?: (params: Record<string, any>) => string;
-  generateParams?: (params: Record<string, any>) => any[];
+  generateParams?: (params: Record<string, any>) => Promise<any[]>;
   generateMetadata?: (
     params: Record<string, any>
   ) => Promise<GeneratedMetadata>;
@@ -73,7 +104,7 @@ export type StrategyTemplate = {
     params: string,
     metadata: StrategyParsedMetadata | null
   ) => Promise<Record<string, any>>;
-  deployConnectors?: Connector[];
+  deployConnectors?: ConnectorType[];
   deployNetworkId?: NetworkID;
   deploy?: (
     client: any,
@@ -101,16 +132,23 @@ export type ExecutionInfo = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: ChainId;
 };
 
 export type VotingPower = {
   address: string;
   value: bigint;
-  decimals: number;
+  /**
+   * Decimals used to interpret value in context of final (total) VP.
+   */
+  cumulativeDecimals: number;
+  /**
+   * Decimals used to display this strategy value.
+   */
+  displayDecimals: number;
   token: string | null;
   symbol: string;
-  chainId?: number;
+  chainId?: ChainId;
   swapLink?: string;
 };
 
@@ -128,8 +166,8 @@ export type ReadOnlyNetworkActions = {
     snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
   propose(
-    web3: Web3Provider,
-    connectorType: Connector,
+    web3: Web3Provider | Wallet,
+    connectorType: ConnectorType,
     account: string,
     space: Space,
     title: string,
@@ -137,28 +175,44 @@ export type ReadOnlyNetworkActions = {
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     app: string,
+    created: number,
+    start: number,
+    min_end: number,
+    max_end: number,
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
-    web3: Web3Provider,
-    connectorType: Connector,
+    web3: Web3Provider | Wallet,
+    connectorType: ConnectorType,
     account: string,
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
     type: VoteType,
     choices: string[],
+    privacy: Privacy,
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
-  cancelProposal(web3: Web3Provider, proposal: Proposal);
+  flagProposal(
+    web3: Web3Provider | Wallet,
+    account: string,
+    proposal: Proposal
+  );
+  cancelProposal(
+    web3: Web3Provider | Wallet,
+    connectorType: ConnectorType,
+    account: string,
+    proposal: Proposal
+  );
   vote(
-    web3: Web3Provider,
-    connectorType: Connector,
+    web3: Web3Provider | Wallet,
+    connectorType: ConnectorType,
     account: string,
     proposal: Proposal,
     choice: Choice,
@@ -184,8 +238,14 @@ export type ReadOnlyNetworkActions = {
     statement: Statement,
     from?: string
   );
-  transferOwnership(web3: Web3Provider, space: Space, owner: string);
+  transferOwnership(
+    web3: Web3Provider,
+    connectorType: ConnectorType,
+    space: Space,
+    owner: string
+  );
   updateSettingsRaw(web3: Web3Provider, space: Space, settings: string);
+  createSpaceRaw(web3: Web3Provider, id: string, settings: string);
   deleteSpace(web3: Web3Provider, space: Space);
   send(envelope: any): Promise<any>;
 };
@@ -197,7 +257,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
   ): Promise<string | null>;
   deployDependency(
     web3: Web3Provider,
-    connectorType: Connector,
+    connectorType: ConnectorType,
     params: {
       controller: string;
       spaceAddress: string;
@@ -220,24 +280,13 @@ export type NetworkActions = ReadOnlyNetworkActions & {
       metadata: SpaceMetadata;
     }
   );
-  setMetadata(web3: Web3Provider, space: Space, metadata: SpaceMetadata);
   finalizeProposal(web3: Web3Provider, proposal: Proposal);
   executeTransactions(web3: Web3Provider, proposal: Proposal);
   executeQueuedProposal(web3: Web3Provider, proposal: Proposal);
   vetoProposal(web3: Web3Provider, proposal: Proposal);
-  setVotingDelay(web3: Web3Provider, space: Space, votingDelay: number);
-  setMinVotingDuration(
-    web3: Web3Provider,
-    space: Space,
-    minVotingDuration: number
-  );
-  setMaxVotingDuration(
-    web3: Web3Provider,
-    space: Space,
-    maxVotingDuration: number
-  );
   updateSettings(
     web3: Web3Provider,
+    connectorType: ConnectorType,
     space: Space,
     metadata: SpaceMetadata,
     authenticatorsToAdd: StrategyConfig[],
@@ -245,6 +294,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     votingStrategiesToAdd: StrategyConfig[],
     votingStrategiesToRemove: number[],
     validationStrategy: StrategyConfig,
+    executionStrategies: StrategyConfig[],
     votingDelay: number | null,
     minVotingDuration: number | null,
     maxVotingDuration: number | null
@@ -254,10 +304,15 @@ export type NetworkActions = ReadOnlyNetworkActions & {
     space: Space,
     networkId: NetworkID,
     delegationType: DelegationType,
-    delegatee: string,
+    delegatees: string[],
     delegationContract: string,
-    chainIdOverride?: ChainId
+    chainIdOverride?: ChainId,
+    delegateesMetadata?: Record<string, any>
   );
+  getDelegatee(
+    delegation: SpaceMetadataDelegation,
+    delegator: string
+  ): Promise<{ address: string; balance: bigint; decimals: number } | null>;
 };
 
 export type NetworkApi = {
@@ -320,6 +375,11 @@ export type NetworkApi = {
   ): Promise<Statement[]>;
   loadStrategies(): Promise<StrategyTemplate[]>;
   loadStrategy(address: string): Promise<StrategyTemplate | null>;
+  getNetworks(): Promise<
+    Record<ChainId, { spaces_count: number; premium: boolean }>
+  >;
+  loadSettings(): Promise<Setting[]>;
+  loadLastIndexedBlock(): Promise<number | null>;
 };
 
 export type NetworkConstants = {
@@ -336,23 +396,64 @@ export type NetworkConstants = {
   STORAGE_PROOF_STRATEGIES_TYPES?: string[];
 };
 
+export type AuthenticatorSupportInfo = {
+  /**
+   * Whether the authenticator is supported by the app.
+   */
+  isSupported: boolean;
+  /**
+   * Whether the authenticator can be used with contract-based accounts.
+   */
+  isContractSupported: boolean;
+  /**
+   * Whether the authenticator supports providing a reason when voting.
+   */
+  isReasonSupported: boolean;
+  /**
+   * Type of the relayer used by authenticator.
+   * Determines how authenticator is interacted with.
+   */
+  relayerType?: 'starknet' | 'evm' | 'evm-tx';
+  /**
+   * List of connectors that can be used with this authenticator.
+   */
+  connectors: ConnectorType[];
+  /**
+   * Priority of the authenticator.
+   * Lower number means higher priority.
+   * Default is 0.
+   */
+  priority?: number;
+};
+
 export type NetworkHelpers = {
-  isAuthenticatorSupported(authenticator: string): boolean;
-  isAuthenticatorContractSupported(authenticator: string): boolean;
-  getRelayerAuthenticatorType(
+  getAuthenticatorSupportInfo(
     authenticator: string
-  ): 'evm' | 'evm-tx' | 'starknet' | null;
+  ): AuthenticatorSupportInfo | null;
   isStrategySupported(strategy: string): boolean;
-  isExecutorSupported(executor: string): boolean;
+  /**
+   * Checks if the executor type is supported.
+   * If supported executor can be used to create proposal execution.
+   * @param executorType executor type
+   */
+  isExecutorSupported(executorType: string): boolean;
+  /**
+   * Checks if the executor actions are supported.
+   * If supported UI will show execution actions for the executor.
+   * @param executorType executor type
+   */
+  isExecutorActionsSupported(executorType: string): boolean;
   pin: (content: any) => Promise<{ cid: string; provider: string }>;
   getSpaceController(space: Space): Promise<string>;
+  getRelayerInfo(space: string, network: NetworkID): Promise<any>;
   getTransaction(txId: string): Promise<any>;
   waitForTransaction(txId: string): Promise<any>;
+  waitForIndexing(txId: string, timeout?: number): Promise<boolean>;
   waitForSpace(spaceAddress: string, interval?: number): Promise<Space>;
   getExplorerUrl(
     id: string,
     type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-    chainId?: number
+    chainId?: ChainId
   ): string;
 };
 
@@ -365,7 +466,7 @@ type BaseNetwork = {
   currentChainId: number;
   baseNetworkId?: NetworkID;
   supportsSimulation: boolean;
-  managerConnectors: Connector[];
+  managerConnectors: ConnectorType[];
   api: NetworkApi;
   constants: NetworkConstants;
   helpers: NetworkHelpers;
@@ -381,11 +482,14 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshotx';
+export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
+  apiNetwork: NetworkID;
   networks: NetworkID[];
+  protocols?: string[];
   limit: number;
+  disabled?: boolean;
 };

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, shortenAddress } from '@/helpers/utils';
+import { shorten } from '@/helpers/utils';
 import { Contact } from '@/types';
 
 const props = withDefaults(
@@ -14,7 +14,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'pick', value: string);
+  (e: 'pick', value: string): void;
 }>();
 
 const { account } = useAccount();
@@ -40,11 +40,8 @@ const allContacts = computed(() => {
 const filteredContacts = computed(() =>
   allContacts.value.filter(contact => {
     return (
-      contact.name
-        .toLocaleLowerCase()
-        .includes(props.searchValue.toLocaleLowerCase()) ||
-      contact.address.toLocaleLowerCase() ===
-        props.searchValue.toLocaleLowerCase()
+      contact.name.toLowerCase().includes(props.searchValue.toLowerCase()) ||
+      contact.address.toLowerCase() === props.searchValue.toLowerCase()
     );
   })
 );
@@ -72,9 +69,9 @@ const filteredContacts = computed(() =>
           <UiStamp :id="contact.address" type="avatar" :size="32" />
           <div class="flex flex-col ml-3 leading-5 overflow-hidden text-left">
             <div class="text-skin-link" v-text="shorten(contact.name, 24)" />
-            <div
+            <UiAddress
+              :address="contact.address"
               class="text-[17px] text-ellipsis overflow-hidden"
-              v-text="shortenAddress(contact.address)"
             />
           </div>
         </div>

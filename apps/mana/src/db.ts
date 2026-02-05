@@ -2,41 +2,15 @@ import knex from './knex';
 
 export const REGISTERED_TRANSACTIONS = 'registered_transactions';
 export const REGISTERED_PROPOSALS = 'registered_proposals';
+export const APEGAS_PROPOSALS = 'apegas_proposals';
 
-export async function createTables() {
-  const registeredTransactionsTableExists = await knex.schema.hasTable(
-    REGISTERED_TRANSACTIONS
-  );
-  const registeredProposalsTableExists =
-    await knex.schema.hasTable(REGISTERED_PROPOSALS);
-
-  if (!registeredTransactionsTableExists) {
-    await knex.schema.createTable(REGISTERED_TRANSACTIONS, t => {
-      t.increments('id').primary();
-      t.timestamps(true, true);
-      t.boolean('processed').defaultTo(false).index();
-      t.boolean('failed').defaultTo(false).index();
-      t.string('network').index();
-      t.string('type').index();
-      t.string('sender');
-      t.string('hash');
-      t.json('data');
-      t.unique(['sender', 'hash']);
-    });
-  }
-
-  if (!registeredProposalsTableExists) {
-    await knex.schema.createTable(REGISTERED_PROPOSALS, t => {
-      t.string('id').primary();
-      t.timestamps(true, true);
-      t.string('chainId');
-      t.integer('timestamp');
-      t.string('strategyAddress');
-      t.string('herodotusId');
-      t.boolean('processed').defaultTo(false).index();
-    });
-  }
-}
+export type ApeGasProposal = {
+  chainId: number;
+  viewId: number;
+  snapshot: number;
+  herodotusId?: string | null;
+  processed?: boolean;
+};
 
 export async function registerTransaction(
   network: string,
@@ -119,4 +93,30 @@ export async function getDataByMessageHash(hash: string) {
     .select(['sender', 'type', 'data', 'hash', 'network'])
     .where({ hash })
     .first();
+}
+
+export async function saveApeGasProposal(proposal: ApeGasProposal) {
+  return knex(APEGAS_PROPOSALS).insert(proposal).onConflict().ignore();
+}
+
+export async function updateApeGasProposal(
+  id: string,
+  proposal: Partial<ApeGasProposal>
+) {
+  return knex(APEGAS_PROPOSALS)
+    .update({ updated_at: knex.fn.now(), ...proposal })
+    .where({ id });
+}
+
+export async function getApeGasProposalsToProcess({
+  chainId,
+  maxSnapshot
+}: {
+  chainId: number;
+  maxSnapshot: number;
+}) {
+  return knex(APEGAS_PROPOSALS)
+    .select('*')
+    .where({ chainId, processed: false })
+    .andWhere('snapshot', '<=', maxSnapshot);
 }

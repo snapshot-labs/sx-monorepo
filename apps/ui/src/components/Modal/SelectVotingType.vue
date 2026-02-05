@@ -17,8 +17,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'save', type: AvailableVotingTypes);
-  (e: 'close');
+  (e: 'save', type: AvailableVotingTypes): void;
+  (e: 'close'): void;
 }>();
 
 const availableVotingTypes = computed(() =>
@@ -44,7 +44,15 @@ function handleSelect(type: AvailableVotingTypes) {
         @click="handleSelect(type)"
       >
         <div>
-          <h4 class="text-skin-link" v-text="VOTING_TYPES_INFO[type].label" />
+          <h4
+            class="text-skin-link inline"
+            v-text="VOTING_TYPES_INFO[type].label"
+          />
+          <span
+            v-if="VOTING_TYPES_INFO[type].isBeta"
+            class="ml-2 bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
+            >beta</span
+          >
           <div v-text="VOTING_TYPES_INFO[type].description" />
         </div>
       </UiSelector>

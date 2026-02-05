@@ -6,7 +6,7 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { createSendTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, Contact, NetworkID, Transaction } from '@/types';
+import { Contact, Transaction } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -15,25 +15,17 @@ const DEFAULT_FORM_STATE = {
   value: ''
 };
 
-const RECIPIENT_DEFINITION = {
-  type: 'string',
-  format: 'ens-or-address',
-  title: 'Recipient',
-  examples: ['Address or ENS']
-};
-
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: ChainId;
-  networkId: NetworkID;
+  network: string;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', transaction: Transaction);
-  (e: 'close');
+  (e: 'add', transaction: Transaction): void;
+  (e: 'close'): void;
 }>();
 
 const searchInput: Ref<HTMLElement | null> = ref(null);
@@ -50,7 +42,12 @@ const searchValue = ref('');
 const customTokens: Ref<Token[]> = ref([]);
 const formValidated = ref(false);
 const formErrors = ref({} as Record<string, any>);
-const { loading, assets, assetsMap, loadBalances } = useBalances();
+const { isPending, assets, assetsMap } = useBalances({
+  treasury: toRef(() => ({
+    chainId: props.network,
+    address: props.address
+  }))
+});
 
 const allAssets = computed(() => [...assets.value, ...customTokens.value]);
 
@@ -80,6 +77,14 @@ const currentToken = computed(() => {
   return token;
 });
 
+const recipientDefinition = computed(() => ({
+  type: 'string',
+  format: 'ens-or-address',
+  chainId: props.network,
+  title: 'Recipient',
+  examples: ['Address or ENS']
+}));
+
 const amountDefinition = computed(() => ({
   type: 'string',
   decimals: currentToken.value?.decimals ?? 0,
@@ -95,7 +100,7 @@ const formValidator = computed(() =>
     additionalProperties: false,
     required: ['to', 'amount'],
     properties: {
-      to: RECIPIENT_DEFINITION,
+      to: recipientDefinition.value,
       amount: amountDefinition.value
     }
   })
@@ -177,10 +182,6 @@ async function handleSubmit() {
   emit('close');
 }
 
-onMounted(() => {
-  loadBalances(props.address, props.network);
-});
-
 watch(
   () => props.open,
   () => {
@@ -202,10 +203,6 @@ watch(
     }
   }
 );
-
-watch([() => props.address, () => props.network], ([address, network]) => {
-  loadBalances(address, network);
-});
 
 watch(currentToken, token => {
   if (!token || form.amount === '') return;
@@ -237,18 +234,13 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            :placeholder="
-              pickerType === 'token' ? 'Search name or paste address' : 'Search'
-            "
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          :ref="ref => (searchInput = (ref as any)?.searchInput)"
+          v-model="searchValue"
+          :placeholder="
+            pickerType === 'token' ? 'Search name or paste address' : 'Search'
+          "
+        />
       </template>
     </template>
     <template v-if="showPicker">
@@ -257,8 +249,7 @@ watchEffect(async () => {
         :assets="allAssets"
         :address="address"
         :network="network"
-        :network-id="networkId"
-        :loading="loading"
+        :loading="isPending"
         :search-value="searchValue"
         @pick="
           form.token = $event;
@@ -280,12 +271,13 @@ watchEffect(async () => {
     <div v-if="!showPicker" class="s-box p-4">
       <UiInputAddress
         v-model="form.to"
-        :definition="RECIPIENT_DEFINITION"
+        :definition="recipientDefinition"
+        :required="true"
         :error="formErrors.to"
         @pick="handlePickerClick('contact')"
       />
       <div class="s-base">
-        <div class="s-label" v-text="'Token'" />
+        <div class="s-label" v-text="'Token *'" />
         <button
           type="button"
           class="s-input text-left h-[61px]"
@@ -294,7 +286,7 @@ watchEffect(async () => {
           <div class="flex items-center">
             <UiStamp
               v-if="currentToken"
-              :id="`${networkId}:${currentToken.contractAddress}`"
+              :id="`eip155:${network}:${currentToken.contractAddress}`"
               type="token"
               class="mr-2"
               :size="20"
@@ -311,6 +303,7 @@ watchEffect(async () => {
             :model-value="form.amount"
             :definition="amountDefinition"
             :error="formErrors.amount"
+            :required="true"
             @update:model-value="handleAmountUpdate"
           />
           <button

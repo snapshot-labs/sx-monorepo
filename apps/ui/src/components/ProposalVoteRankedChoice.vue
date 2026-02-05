@@ -10,12 +10,15 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'vote', value: Choice);
+  (e: 'vote', value: Choice): void;
 }>();
 
 const selectedChoices = ref<RankedChoice>(
-  (!props.proposal.privacy && (props.defaultChoice as RankedChoice)) ||
-    props.proposal.choices.map((_, i) => i + 1)
+  (props.proposal.privacy === 'none' &&
+    (props.defaultChoice as RankedChoice)) ||
+    Array.from({ length: props.proposal.choices.length }, (_, i) => i + 1).sort(
+      () => Math.random() - 0.5
+    )
 );
 </script>
 
@@ -29,14 +32,9 @@ const selectedChoices = ref<RankedChoice>(
       item-key="id"
     >
       <template #item="{ element, index }">
-        <UiButton
-          class="!h-[48px] text-left w-full flex items-center handle cursor-grab gap-2"
-        >
+        <UiButton :size="48" class="text-left handle cursor-grab">
           <IC-drag class="text-skin-text" />
-
-          <div class="grow truncate">
-            {{ proposal.choices[element - 1] }}
-          </div>
+          <UiTooltipOnTruncate :content="proposal.choices[element - 1]" />
           <div
             class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block"
           >
@@ -45,11 +43,7 @@ const selectedChoices = ref<RankedChoice>(
         </UiButton>
       </template>
     </Draggable>
-    <UiButton
-      primary
-      class="!h-[48px] w-full"
-      @click="emit('vote', selectedChoices)"
-    >
+    <UiButton primary :size="48" @click="emit('vote', selectedChoices)">
       Vote
     </UiButton>
   </div>

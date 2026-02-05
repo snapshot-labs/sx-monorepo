@@ -1,44 +1,62 @@
 <script setup lang="ts">
 import { RouteLocationRaw } from 'vue-router';
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     type?: 'button' | 'submit' | 'reset';
     primary?: boolean;
     loading?: boolean;
     disabled?: boolean;
+    uniform?: boolean;
+    size?: number;
     to?: RouteLocationRaw;
   }>(),
   {
     type: 'button',
     primary: false,
     loading: false,
-    disabled: false
+    disabled: false,
+    uniform: false,
+    size: 46
   }
 );
+
+const attrs = useAttrs();
+
+const isCompact = computed(() => {
+  const isFullWidth = (attrs.class as 'string')?.includes('w-full');
+
+  return (props.loading || props.uniform) && !isFullWidth;
+});
+
+const classNames = computed(() => {
+  return {
+    button: true,
+    primary: props.primary,
+    'px-0 shrink-0': isCompact.value,
+    'px-3.5': !isCompact.value
+  };
+});
+
+const buttonStyles = computed(() => {
+  return {
+    height: `${props.size}px`,
+    minWidth: `${props.size}px`,
+    width: isCompact.value ? `${props.size}px` : undefined
+  };
+});
 </script>
 
 <template>
-  <AppLink
-    v-if="to"
-    :to="to"
-    :class="{
-      primary: primary
-    }"
-    class="button inline-flex items-center justify-center px-3.5"
-  >
+  <AppLink v-if="to" :to="to" :class="classNames" :style="buttonStyles">
     <slot />
   </AppLink>
   <button
     v-else
     :type="type"
     :disabled="disabled || loading"
-    :class="{
-      primary: primary,
-      'w-[46px] px-0': loading,
-      'px-3.5': !loading || ($attrs.class as 'string')?.includes('w-full')
-    }"
-    class="button"
+    :class="classNames"
+    :style="buttonStyles"
   >
     <UiLoading v-if="loading" :inverse="primary" />
     <slot v-else />
@@ -47,7 +65,7 @@ withDefaults(
 
 <style lang="scss" scoped>
 .button {
-  @apply rounded-full leading-[100%] border h-[46px] text-skin-link bg-skin-bg;
+  @apply rounded-full leading-[100%] border text-skin-link bg-skin-bg inline-flex items-center justify-center gap-2;
 
   &:disabled:deep() {
     color: rgba(var(--border)) !important;

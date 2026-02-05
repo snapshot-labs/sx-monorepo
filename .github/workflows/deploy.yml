@@ -6,43 +6,33 @@ on:
       - master
 
 jobs:
-  deploy_api_mainnet:
-    name: Deploy API to mainnet
-    environment: api_mainnet
+  deploy_api:
+    name: Deploy API to staging (${{ matrix.environment }})
+    strategy:
+      matrix:
+        environment: [api_mainnet, api_testnet]
+    environment: ${{ matrix.environment }}
     concurrency:
-      group: api_mainnet
-      cancel-in-progress: true
+      group: ${{ matrix.environment }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 1000
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Deploy if files have changed
-        run: ./scripts/deploy-api-prod.sh
-
-  deploy_api_testnet:
-    name: Deploy API to testnet
-    environment: api_testnet
-    concurrency:
-      group: api_testnet
-      cancel-in-progress: true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+      - name: Get deployments
+        id: get-deployments
+        uses: ./.github/actions/get-deployments
         with:
-          fetch-depth: 2
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+          public-api-url: ${{ vars.PUBLIC_API_URL }}
+          app-1-id: ${{ vars.APP_1_ID }}
+          app-2-id: ${{ vars.APP_2_ID }}
       - name: Deploy if files have changed
-        run: ./scripts/deploy-changed.sh apps/api ${{ vars.DIGITALOCEAN_APP_ID }}
+        run: ./scripts/deploy-changed.sh apps/api ${{ steps.get-deployments.outputs.staging-app-id }}
 
   deploy_mana_prod:
     name: Deploy mana to production
@@ -53,9 +43,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 1000
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:

@@ -13,8 +13,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'confirm');
-  (e: 'close');
+  (e: 'confirm'): void;
+  (e: 'close'): void;
 }>();
 
 const form: Ref<{
@@ -58,6 +58,7 @@ watch(
           title: `Enter ${spaceId} to continue`,
           minLength: 1
         }"
+        :required="true"
       />
       <UiCheckbox
         v-model="form.confirmed"

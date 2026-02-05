@@ -6,6 +6,7 @@ import {
   getStampUrl,
   whiteLabelAwareParams
 } from '@/helpers/utils';
+import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -19,11 +20,19 @@ const sidebarSwipeEnabled = ref(true);
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
-const { modalOpen } = useModal();
+const {
+  modalOpen,
+  modalAccountOpen,
+  modalAccountWithoutDismissOpen,
+  resetAccountModal
+} = useModal();
 const { init, setAppName, app } = useApp();
-const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
+const { setSkin } = useSkin();
+const { setTheme } = useTheme();
+const { isStandaloneLayout } = useLayout();
+const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
-const { web3 } = useWeb3();
+const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
     const noSideBarSwipe = (e.target as Element)?.closest(
@@ -49,17 +58,28 @@ const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const hasAppNav = computed(
   () =>
-    ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
+    ['space', 'my', 'settings', 'pro'].includes(
+      String(route.matched[0]?.name)
+    ) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
-const hasSidebar = computed(() => !isWhiteLabel.value);
+const hasSidebar = computed(() => !isStandaloneLayout.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
 const hasPlaceHolderSidebar = computed(
   () =>
-    !['space-proposal', 'create'].includes(String(route.matched[0]?.name)) &&
+    ![
+      'space-proposal',
+      'create-space-snapshot',
+      'create-space-snapshot-x',
+      'auction',
+      'auctions',
+      'auction-invite',
+      'auction-upcoming',
+      'auction-verify-standalone'
+    ].includes(String(route.matched[0]?.name)) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
@@ -67,9 +87,10 @@ const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
 });
 
-const bottomPadding = computed(
-  () => !['space-proposal-votes'].includes(String(route.name))
-);
+async function handleLogin(connector: Connector) {
+  resetAccountModal();
+  await login(connector);
+}
 
 async function handleTransactionAccept() {
   if (
@@ -109,7 +130,7 @@ onMounted(async () => {
 
 watch(scrollDisabled, val => {
   const el = document.body;
-  el.classList[val ? 'add' : 'remove']('overflow-hidden');
+  el.classList[val ? 'add' : 'remove']('overflow-y-hidden');
 });
 
 watch(isSwiping, () => {
@@ -133,7 +154,7 @@ watch(isSwiping, () => {
 watch(
   isWhiteLabel,
   isWhiteLabel => {
-    if (!isWhiteLabel) {
+    if (!isWhiteLabel || !skinSettings.value) {
       setAppName(APP_NAME);
       return;
     }
@@ -146,9 +167,11 @@ watch(
       16,
       getCacheHash(whiteLabelSpace.value.avatar)
     );
-    setFavicon(faviconUrl);
 
+    setFavicon(faviconUrl);
     setAppName(whiteLabelSpace.value.name);
+    setTheme(skinSettings.value.theme);
+    setSkin(skinSettings.value);
   },
   { immediate: true }
 );
@@ -165,9 +188,13 @@ router.afterEach(() => {
     :class="{ 'overflow-clip': scrollDisabled }"
   >
     <UiLoading v-if="app.loading || !app.init" class="overlay big" />
-    <div v-else :class="['flex min-h-screen', { 'pb-6': bottomPadding }]">
+    <div
+      v-else
+      class="flex min-h-screen maximum:border-r"
+      :class="{ 'maximum:border-l': isStandaloneLayout }"
+    >
       <AppBottomNav
-        v-if="web3.account && !isWhiteLabel"
+        v-if="web3.account && !isStandaloneLayout"
         :class="[
           `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
           { 'app-bottom-nav-open': uiStore.sideMenuOpen }
@@ -176,16 +203,21 @@ router.afterEach(() => {
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex app-sidebar fixed inset-y-0`,
+          `hidden lg:flex app-sidebar fixed inset-y-0 top-electron-titlebar-height`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
-      <AppTopnav :has-app-nav="hasAppNav" :class="{ hidden: !hasTopNav }">
+      <AppTopnav
+        :has-app-nav="hasAppNav"
+        :class="{ hidden: !hasTopNav, 'maximum:border-l': isStandaloneLayout }"
+        class="maximum:border-r"
+      >
         <template #toggle-sidebar-button>
           <button
             v-if="hasSwipeableContent"
             type="button"
             class="text-skin-link lg:hidden ml-4"
+            :class="{ hidden: uiStore.sideMenuOpen }"
             @click="uiStore.toggleSidebar"
           >
             <IH-menu-alt-2 />
@@ -195,9 +227,9 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'top-[72px] inset-y-0 z-10 hidden lg:block fixed app-nav',
+          'top-header-height inset-y-0 z-10 hidden lg:flex fixed app-nav',
           {
-            '!block app-nav-open': uiStore.sideMenuOpen
+            '!flex app-nav-open': uiStore.sideMenuOpen
           }
         ]"
       />
@@ -208,8 +240,8 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0 mt-[72px]">
-          <router-view />
+        <div class="flex-auto w-0" :class="{ 'mt-header-height': hasTopNav }">
+          <router-view class="h-full pb-10" />
         </div>
         <div
           v-if="hasPlaceHolderSidebar"
@@ -218,6 +250,17 @@ router.afterEach(() => {
       </main>
     </div>
     <AppNotifications />
+    <ModalConfirmSafe
+      v-if="uiStore.safeModal !== null"
+      :open="uiStore.safeModal !== null"
+      :type="uiStore.safeModal.type"
+      :show-verifier-link="uiStore.safeModal.showVerifierLink"
+      :messages="{
+        title: 'Confirm proposal in Safe app',
+        subtitle: 'Go back to Safe app to confirm your proposal'
+      }"
+      @close="uiStore.safeModal = null"
+    />
     <ModalTransaction
       v-if="route.name !== 'space-editor' && transaction && network"
       :open="!!transaction"
@@ -225,6 +268,12 @@ router.afterEach(() => {
       :initial-state="transaction._form"
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
+    />
+    <ModalConnector
+      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
+      :closeable="!modalAccountWithoutDismissOpen"
+      @close="modalAccountOpen = false"
+      @pick="handleLogin"
     />
   </div>
 </template>
@@ -291,15 +340,9 @@ $placeholderSidebarWidth: 240px;
   @apply w-[#{$placeholderSidebarWidth}];
 
   &::before {
-    @apply block fixed border-l top-[72px] bottom-0 right-0 w-[#{$placeholderSidebarWidth}];
+    @apply block fixed border-l top-[72px] bottom-0 w-[#{$placeholderSidebarWidth}];
 
     content: '';
-  }
-}
-
-@media (screen(xl)) {
-  main > div:has(+ .app-placeholder-sidebar) :deep(.app-toolbar-bottom) {
-    @apply right-[#{$placeholderSidebarWidth}];
   }
 }
 
@@ -307,9 +350,8 @@ $placeholderSidebarWidth: 240px;
   .app-sidebar {
     & ~ :deep(main),
     & ~ .backdrop,
-    & ~ :deep(header.fixed),
-    & ~ :deep(main header.fixed),
-    & ~ :deep(main .app-toolbar-bottom),
+    & ~ :deep(header.fixed > div),
+    & ~ :deep(main header.fixed > div),
     & ~ :deep(.app-nav) {
       @apply ml-[#{$sidebarWidth}];
     }
@@ -317,9 +359,8 @@ $placeholderSidebarWidth: 240px;
     &:has(~ .app-nav) ~ .app-nav {
       & ~ :deep(main),
       & ~ .backdrop,
-      & ~ :deep(header.fixed),
-      & ~ :deep(main header.fixed),
-      & ~ :deep(main .app-toolbar-bottom),
+      & ~ :deep(header.fixed > div),
+      & ~ :deep(main header.fixed > div),
       & ~ :deep(.app-nav) {
         @apply ml-[#{$sidebarWidth + $navWidth}];
       }
@@ -332,7 +373,7 @@ $placeholderSidebarWidth: 240px;
 }
 
 .backdrop {
-  @apply fixed inset-0 z-[99];
+  @apply fixed inset-0 top-electron-titlebar-height z-[99];
   @apply bg-[black]/40 #{!important};
 }
 </style>

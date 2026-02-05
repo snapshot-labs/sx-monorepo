@@ -13,7 +13,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const contactsStore = useContactsStore();
@@ -33,7 +33,8 @@ const definition = {
       type: 'string',
       format: 'address',
       title: 'Address',
-      examples: ['Address']
+      examples: ['Address'],
+      showControls: false
     }
   }
 };

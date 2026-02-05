@@ -29,11 +29,7 @@ function handleVoteTypeSelected(type: VoteType) {
 }
 
 function updateChoices(currentType: VoteType, previousType: VoteType) {
-  if (previousType === 'basic') {
-    proposal.value.choices = Array(2).fill('');
-  }
-
-  if (currentType) {
+  if (currentType === 'basic' || previousType === 'basic') {
     proposal.value.choices = [...BASIC_CHOICES];
   }
 }
@@ -48,7 +44,7 @@ watch(
 
 <template>
   <div class="s-base">
-    <h4 class="eyebrow mb-2.5">Voting system</h4>
+    <UiEyebrow class="mb-2.5">Voting system</UiEyebrow>
     <button
       type="button"
       class="border rounded-xl py-2.5 px-3 flex text-left relative border-skin-content w-full"
@@ -58,7 +54,14 @@ watch(
       :disabled="!hasMultipleVotingType"
       @click="handleVotingTypeClick"
     >
-      <h4 class="text-skin-link mr-3" v-text="activeVotingType.label" />
+      <div>
+        <h4 class="text-skin-link inline" v-text="activeVotingType.label" />
+        <span
+          v-if="activeVotingType.isBeta"
+          class="ml-2 bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
+          >beta</span
+        >
+      </div>
       <div
         v-if="hasMultipleVotingType"
         class="w-[20px] text-right text-skin-link absolute right-3 top-3"

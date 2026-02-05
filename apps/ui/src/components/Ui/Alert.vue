@@ -7,7 +7,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 </script>
 
@@ -23,7 +23,13 @@ const emit = defineEmits<{
         type === 'success'
     }"
   >
-    <slot />
+    <div>
+      <IH-information-circle
+        v-if="type === 'error'"
+        class="inline-block -mt-0.5 mr-1"
+      />
+      <slot />
+    </div>
     <button
       v-if="dismissible"
       type="button"

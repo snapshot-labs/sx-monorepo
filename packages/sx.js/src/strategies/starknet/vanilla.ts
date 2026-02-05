@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import {
+  ClientConfig,
+  Envelope,
+  Propose,
+  Strategy,
+  Vote
+} from '../../clients/starknet/types';
 
 export default function createVanillaStrategy(): Strategy {
   return {
@@ -10,6 +16,7 @@ export default function createVanillaStrategy(): Strategy {
       signerAddress: string,
       address: string,
       index: number,
+      params: string,
       metadata: Record<string, any> | null,
       envelope: Envelope<Propose | Vote>,
       clientConfig: ClientConfig

@@ -12,6 +12,11 @@ const props = defineProps<{
   allowDuplicates?: boolean;
   defaultChainId?: ChainId;
   limit?: number;
+  hiddenStrategies?: string[];
+}>();
+
+const emit = defineEmits<{
+  (e: 'testStrategies', strategies: StrategyConfig[]): void;
 }>();
 
 const isStrategiesModalOpen = ref(false);
@@ -83,6 +88,13 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
 
 <template>
   <div>
+    <template v-if="$slots.title || $slots.actions">
+      <div class="flex items-center justify-between mb-2">
+        <slot name="title" />
+        <div />
+        <slot name="actions" />
+      </div>
+    </template>
     <div class="space-y-3 mb-3">
       <slot v-if="strategies.length === 0" name="empty">
         <div>No strategies selected</div>
@@ -93,13 +105,17 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
         class="mb-3"
         :network-id="networkId"
         :strategy="strategy"
+        :show-test-button="true"
         @edit-strategy="handleEditStrategy"
         @delete-strategy="handleRemoveStrategy"
+        @test-strategies="
+          (strategies: StrategyConfig[]) => emit('testStrategies', strategies)
+        "
       />
     </div>
     <UiButton
       v-if="!props.limit || strategies.length < props.limit"
-      class="w-full flex items-center justify-center gap-1"
+      class="w-full"
       @click="isStrategiesModalOpen = true"
     >
       <IH-plus class="shrink-0 size-[16px]" />
@@ -109,6 +125,7 @@ function handleRemoveStrategy(strategy: StrategyConfig) {
       <ModalStrategies
         :open="isStrategiesModalOpen"
         :network-id="networkId"
+        :hidden-strategies="hiddenStrategies"
         @add-strategy="handleAddStrategy"
         @close="isStrategiesModalOpen = false"
       />

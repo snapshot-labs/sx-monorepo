@@ -1,19 +1,21 @@
 <script setup lang="ts">
+import { Nft } from '@/composables/useNfts';
+
 const props = defineProps<{
   searchValue: string;
   loading: boolean;
-  nfts: any[];
+  nfts: Nft[];
 }>();
 
 const emit = defineEmits<{
-  (e: 'pick', value: string);
+  (e: 'pick', value: string): void;
 }>();
 
 const filteredNfts = computed(() =>
   props.nfts.filter(nft => {
     return nft.displayTitle
-      .toLocaleLowerCase()
-      .includes(props.searchValue.toLocaleLowerCase());
+      .toLowerCase()
+      .includes(props.searchValue.toLowerCase());
   })
 );
 </script>

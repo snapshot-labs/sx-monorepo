@@ -11,9 +11,11 @@ import {
   Call,
   CallData,
   RpcProvider,
-  constants as starknetConstants
+  constants as starknetConstants,
+  uint256
 } from 'starknet';
-import { executionCall, MANA_URL } from '@/helpers/mana';
+import { getIsContract as _getIsContract } from '@/helpers/contracts';
+import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
 import {
@@ -21,6 +23,7 @@ import {
   verifyNetwork,
   verifyStarknetNetwork
 } from '@/helpers/utils';
+import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   EVM_CONNECTORS,
   STARKNET_CONNECTORS
@@ -33,7 +36,7 @@ import {
   parseStrategyMetadata
 } from '@/networks/common/helpers';
 import {
-  Connector,
+  ConnectorType,
   ExecutionInfo,
   NetworkActions,
   NetworkHelpers,
@@ -45,9 +48,11 @@ import {
   Choice,
   DelegationType,
   NetworkID,
+  Privacy,
   Proposal,
   Space,
   SpaceMetadata,
+  SpaceMetadataDelegation,
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
@@ -81,20 +86,22 @@ export function createActions(
     starkProvider,
     manaUrl: MANA_URL,
     ethUrl,
-    networkConfig
+    networkConfig,
+    whitelistServerUrl: WHITELIST_SERVER_URL
   };
 
   const pickAuthenticatorAndStrategies = createStrategyPicker({
-    helpers,
-    managerConnectors: STARKNET_CONNECTORS,
-    lowPriorityAuthenticators: ['evm-tx']
+    helpers
   });
 
-  const getIsContract = async (connectorType: Connector, address: string) => {
+  const getIsContract = async (
+    connectorType: ConnectorType,
+    address: string
+  ) => {
     if (!EVM_CONNECTORS.includes(connectorType)) return false;
+    if (connectorType === 'sequence') return true;
 
-    const code = await l1Provider.getCode(address);
-    return code !== '0x';
+    return _getIsContract(l1Provider, address);
   };
 
   const client = new clients.StarknetTx(clientConfig);
@@ -111,7 +118,7 @@ export function createActions(
     },
     deployDependency: async (
       web3: any,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       params: {
         controller: string;
         spaceAddress: string;
@@ -181,7 +188,7 @@ export function createActions(
           proposalValidationStrategy: {
             addr: params.validationStrategy.address,
             params: params.validationStrategy.generateParams
-              ? params.validationStrategy.generateParams(
+              ? await params.validationStrategy.generateParams(
                   params.validationStrategy.params
                 )
               : []
@@ -190,36 +197,21 @@ export function createActions(
           metadataUri: `ipfs://${pinned.cid}`,
           daoUri: '',
           authenticators: params.authenticators.map(config => config.address),
-          votingStrategies: params.votingStrategies.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)
-              : []
-          })),
+          votingStrategies: await Promise.all(
+            params.votingStrategies.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? await config.generateParams(config.params)
+                : []
+            }))
+          ),
           votingStrategiesMetadata: metadataUris
         }
       });
     },
-    setMetadata: async (web3: any, space: Space, metadata: SpaceMetadata) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      const pinned = await helpers.pin(
-        createErc1155Metadata(metadata, {
-          execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types,
-          execution_destinations: space.executors_destinations
-        })
-      );
-
-      return client.setMetadataUri({
-        signer: web3.provider.account,
-        space: space.id,
-        metadataUri: `ipfs://${pinned.cid}`
-      });
-    },
     propose: async (
       web3: any,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
       title: string,
@@ -227,8 +219,13 @@ export function createActions(
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       app: string,
+      created: number,
+      start: number,
+      min_end: number,
+      max_end: number,
       executions: ExecutionInfo[] | null
     ) => {
       const executionInfo = executions?.[0];
@@ -247,14 +244,22 @@ export function createActions(
 
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        space.id,
+        space.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: space.authenticators,
           strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndicies:
+          strategiesIndices:
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
-          isContract
+          isContract,
+          hasReason: false,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -283,6 +288,11 @@ export function createActions(
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
+          const params =
+            space.voting_power_validation_strategy_strategies_params[
+              strategy.paramsIndex
+            ];
+
           const metadata = await parseStrategyMetadata(
             space.voting_power_validation_strategies_parsed_metadata[
               strategy.index
@@ -291,6 +301,7 @@ export function createActions(
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -316,7 +327,7 @@ export function createActions(
         });
       } else if (relayerType === 'evm-tx') {
         return ethTxClient.initializePropose(web3.getSigner(), data, {
-          noWait: isContract
+          noWait: isContract && connectorType !== 'sequence'
         });
       }
 
@@ -326,15 +337,16 @@ export function createActions(
     },
     async updateProposal(
       web3: any,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
       type: VoteType,
       choices: string[],
+      privacy: Privacy,
       labels: string[],
       executions: ExecutionInfo[] | null
     ) {
@@ -353,13 +365,21 @@ export function createActions(
 
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        space.id,
+        space.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator } = pickAuthenticatorAndStrategies({
         authenticators: space.authenticators,
         strategies: space.voting_power_validation_strategy_strategies,
-        strategiesIndicies:
+        strategiesIndices:
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
-        isContract
+        isContract,
+        hasReason: false,
+        ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -388,7 +408,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: Number(proposal.proposal_id),
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -406,7 +426,7 @@ export function createActions(
         });
       } else if (relayerType === 'evm-tx') {
         return ethTxClient.initializeUpdateProposal(web3.getSigner(), data, {
-          noWait: isContract
+          noWait: isContract && connectorType !== 'sequence'
         });
       }
 
@@ -414,18 +434,26 @@ export function createActions(
         data
       });
     },
-    cancelProposal: async (web3: any, proposal: Proposal) => {
+    flagProposal: () => {
+      throw new Error('Not implemented');
+    },
+    cancelProposal: async (
+      web3: any,
+      connectorType: ConnectorType,
+      account: string,
+      proposal: Proposal
+    ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       return client.cancelProposal({
         signer: web3.provider.account,
         space: proposal.space.id,
-        proposal: proposal.proposal_id as number
+        proposal: Number(proposal.proposal_id)
       });
     },
     vote: async (
       web3: any,
-      connectorType: Connector,
+      connectorType: ConnectorType,
       account: string,
       proposal: Proposal,
       choice: Choice,
@@ -433,13 +461,21 @@ export function createActions(
     ) => {
       const isContract = await getIsContract(connectorType, account);
 
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        starkProvider
+      );
+
       const { relayerType, authenticator, strategies } =
         pickAuthenticatorAndStrategies({
           authenticators: proposal.space.authenticators,
           strategies: proposal.strategies,
-          strategiesIndicies: proposal.strategies_indices,
+          strategiesIndices: proposal.strategies_indices,
           connectorType,
-          isContract
+          isContract,
+          hasReason: !!reason,
+          ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
       if (relayerType && ['evm', 'evm-tx'].includes(relayerType)) {
@@ -454,12 +490,14 @@ export function createActions(
             strategy.index
           );
 
+          const params = proposal.strategies_params[strategy.paramsIndex];
           const metadata = await parseStrategyMetadata(
             proposal.space.strategies_parsed_metadata[metadataIndex].payload
           );
 
           return {
             ...strategy,
+            params,
             metadata
           };
         })
@@ -472,7 +510,7 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
-        proposal: proposal.proposal_id as number,
+        proposal: Number(proposal.proposal_id),
         choice: getSdkChoice(choice),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : ''
       };
@@ -551,7 +589,7 @@ export function createActions(
       return executionCall('eth', l1ChainId, 'executeStarknetProposal', {
         space: proposal.space.id,
         executor: proposal.execution_destination,
-        proposalId: proposal.proposal_id as number,
+        proposalId: Number(proposal.proposal_id),
         proposal: proposalData,
         votesFor,
         votesAgainst,
@@ -566,42 +604,12 @@ export function createActions(
       });
     },
     vetoProposal: () => null,
-    setVotingDelay: async (web3: any, space: Space, votingDelay: number) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return client.setVotingDelay({
-        signer: web3.provider.account,
-        space: space.id,
-        votingDelay
-      });
-    },
-    setMinVotingDuration: async (
+    transferOwnership: async (
       web3: any,
+      connectorType: ConnectorType,
       space: Space,
-      minVotingDuration: number
+      owner: string
     ) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return client.setMinVotingDuration({
-        signer: web3.provider.account,
-        space: space.id,
-        minVotingDuration
-      });
-    },
-    setMaxVotingDuration: async (
-      web3: any,
-      space: Space,
-      maxVotingDuration: number
-    ) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return client.setMaxVotingDuration({
-        signer: web3.provider.account,
-        space: space.id,
-        maxVotingDuration
-      });
-    },
-    transferOwnership: async (web3: any, space: Space, owner: string) => {
       await verifyStarknetNetwork(web3, chainId);
 
       return client.transferOwnership({
@@ -612,6 +620,7 @@ export function createActions(
     },
     updateSettings: async (
       web3: any,
+      connectorType: ConnectorType,
       space: Space,
       metadata: SpaceMetadata,
       authenticatorsToAdd: StrategyConfig[],
@@ -619,6 +628,7 @@ export function createActions(
       votingStrategiesToAdd: StrategyConfig[],
       votingStrategiesToRemove: number[],
       validationStrategy: StrategyConfig,
+      executionStrategies: StrategyConfig[],
       votingDelay: number | null,
       minVotingDuration: number | null,
       maxVotingDuration: number | null
@@ -627,8 +637,12 @@ export function createActions(
 
       const pinned = await helpers.pin(
         createErc1155Metadata(metadata, {
-          execution_strategies: space.executors,
-          execution_strategies_types: space.executors_types,
+          execution_strategies: executionStrategies.map(
+            config => config.address
+          ),
+          execution_strategies_types: executionStrategies.map(
+            config => config.type
+          ),
           execution_destinations: space.executors_destinations
         })
       );
@@ -653,12 +667,14 @@ export function createActions(
           authenticatorsToRemove: space.authenticators.filter(
             (authenticator, index) => authenticatorsToRemove.includes(index)
           ),
-          votingStrategiesToAdd: votingStrategiesToAdd.map(config => ({
-            addr: config.address,
-            params: config.generateParams
-              ? config.generateParams(config.params)
-              : []
-          })),
+          votingStrategiesToAdd: await Promise.all(
+            votingStrategiesToAdd.map(async config => ({
+              addr: config.address,
+              params: config.generateParams
+                ? await config.generateParams(config.params)
+                : []
+            }))
+          ),
           votingStrategiesToRemove: votingStrategiesToRemove.map(
             index => space.strategies_indices[index]
           ),
@@ -666,7 +682,9 @@ export function createActions(
           proposalValidationStrategy: {
             addr: validationStrategy.address,
             params: validationStrategy.generateParams
-              ? validationStrategy.generateParams(validationStrategy.params)
+              ? await validationStrategy.generateParams(
+                  validationStrategy.params
+                )
               : []
           },
           proposalValidationStrategyMetadataUri,
@@ -683,12 +701,14 @@ export function createActions(
       space: Space,
       networkId: NetworkID,
       delegationType: DelegationType,
-      delegatee: string,
+      delegatees: string[],
       delegationContract: string
     ) => {
       await verifyStarknetNetwork(web3, chainId);
 
       const { account }: { account: Account } = web3.provider;
+
+      const delegatee = delegatees[0] ?? '0x0';
 
       let calls: AllowArray<Call> = {
         contractAddress: delegationContract,
@@ -719,6 +739,41 @@ export function createActions(
 
       return account.execute(calls);
     },
+    getDelegatee: async (
+      delegation: SpaceMetadataDelegation,
+      delegator: string
+    ) => {
+      const { contractAddress } = delegation;
+      if (!contractAddress) return null;
+
+      const [[decimals], balance, [delegatee]] = await Promise.all([
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'decimals'
+        }),
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'balance_of',
+          calldata: CallData.compile({ delegator })
+        }),
+        starkProvider.callContract({
+          contractAddress,
+          entrypoint: 'delegates',
+          calldata: CallData.compile({ delegator })
+        })
+      ]);
+
+      return delegatee !== '0x0'
+        ? {
+            address: delegatee,
+            balance: uint256.uint256ToBN({
+              low: balance[0],
+              high: balance[1]
+            }),
+            decimals: parseInt(decimals, 16)
+          }
+        : null;
+    },
     getVotingPower: async (
       spaceId: string,
       strategiesAddresses: string[],
@@ -727,11 +782,22 @@ export function createActions(
       voterAddress: string,
       snapshotInfo: SnapshotInfo
     ): Promise<VotingPower[]> => {
+      const cumulativeDecimals = Math.max(
+        ...strategiesMetadata.map(metadata => metadata.decimals ?? 0)
+      );
+
       return Promise.all(
         strategiesAddresses.map(async (address, i) => {
           const strategy = getStarknetStrategy(address, networkConfig);
           if (!strategy)
-            return { address, value: 0n, decimals: 0, token: null, symbol: '' };
+            return {
+              address,
+              value: 0n,
+              cumulativeDecimals: 0,
+              displayDecimals: 0,
+              token: null,
+              symbol: ''
+            };
 
           const strategyMetadata = await parseStrategyMetadata(
             strategiesMetadata[i].payload
@@ -752,7 +818,8 @@ export function createActions(
           return {
             address,
             value,
-            decimals: strategiesMetadata[i]?.decimals ?? 0,
+            cumulativeDecimals,
+            displayDecimals: strategiesMetadata[i]?.decimals ?? 0,
             symbol: strategiesMetadata[i]?.symbol ?? '',
             token: strategiesMetadata[i]?.token ?? null
           };
@@ -761,17 +828,13 @@ export function createActions(
     },
     followSpace: () => {},
     unfollowSpace: () => {},
-    setAlias: async (web3: any, alias: string) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return starkSigClient.setAlias({
-        signer: web3.provider.account,
-        data: { alias }
-      });
-    },
+    setAlias: async () => {},
     updateUser: () => {},
     updateStatement: () => {},
     updateSettingsRaw: () => {
+      throw new Error('Not implemented');
+    },
+    createSpaceRaw: () => {
       throw new Error('Not implemented');
     },
     deleteSpace: () => {

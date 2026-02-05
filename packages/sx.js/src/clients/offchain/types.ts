@@ -1,4 +1,6 @@
-import { Privacy, SignatureData } from '../../types';
+import { SignatureData as BaseSignatureData, Privacy } from '../../types';
+
+export type SignatureData = BaseSignatureData;
 
 export type Choice = number | number[] | string | Record<string, number>;
 
@@ -12,7 +14,7 @@ export type Envelope<
     | UnfollowSpace
     | SetAlias
 > = {
-  signatureData?: SignatureData;
+  signatureData?: BaseSignatureData;
   data: T;
 };
 
@@ -24,7 +26,7 @@ export type StrategyConfig = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: string;
 };
 
 export type Strategy = {
@@ -78,6 +80,13 @@ export type EIP712UpdateProposal = {
   plugins: string;
   timestamp?: number;
   from?: string;
+};
+
+export type EIP712FlagProposalMessage = {
+  space: string;
+  proposal: string;
+  from?: string;
+  timestamp?: number;
 };
 
 export type EIP712CancelProposalMessage = {
@@ -152,6 +161,7 @@ export type EIP712Message = Required<
 >;
 
 export type Vote = {
+  from?: string;
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];
@@ -159,7 +169,7 @@ export type Vote = {
   choice: Choice;
   metadataUri: string;
   type: string;
-  privacy?: Privacy;
+  privacy: Privacy;
   timestamp?: number;
   reason?: string;
   app: string;
@@ -172,6 +182,7 @@ export type Propose = {
   body: string;
   discussion: string;
   choices: string[];
+  privacy: string;
   labels: string[];
   start: number;
   end: number;
@@ -193,11 +204,18 @@ export type UpdateProposal = {
   plugins: string;
 };
 
+export type FlagProposal = {
+  from?: string;
+  space: string;
+  proposal: string;
+  timestamp?: number;
+};
+
 export type CancelProposal = {
   from?: string;
   space: string;
-  timestamp?: number;
   proposal: string;
+  timestamp?: number;
 };
 
 export type FollowSpace = {
@@ -236,12 +254,14 @@ export type UpdateStatement = {
   status: string;
 };
 
-export type UpdateSpace = {
+export type CreateSpace = {
   from?: string;
   timestamp?: number;
   space: string;
   settings: string;
 };
+
+export type UpdateSpace = CreateSpace;
 
 export type DeleteSpace = {
   from?: string;

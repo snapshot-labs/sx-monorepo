@@ -12,9 +12,10 @@ describe('EthereumTx', () => {
   const wallet = new Wallet(ethPrivateKey);
 
   const ethereumTx = new EthereumTx({
-    ethUrl,
     starkProvider,
-    networkConfig: starknetSepolia
+    networkConfig: starknetSepolia,
+    ethUrl,
+    whitelistServerUrl: 'https://wls.snapshot.box'
   });
 
   const { EthTx } = starknetNetworks['sn-sep'].Authenticators;
@@ -28,7 +29,8 @@ describe('EthereumTx', () => {
       strategies: [
         {
           address: MerkleWhitelist,
-          index: 0
+          index: 0,
+          params: '0x'
         }
       ],
       executionStrategy: {
@@ -52,7 +54,8 @@ describe('EthereumTx', () => {
       strategies: [
         {
           index: 0,
-          address: MerkleWhitelist
+          address: MerkleWhitelist,
+          params: '0x'
         }
       ],
       proposal: 32,

@@ -1,22 +1,38 @@
+import { skipToken, useQuery } from '@tanstack/vue-query';
+import { MaybeRefOrGetter } from 'vue';
 import { getNfts } from '@/helpers/opensea';
-import { ChainId } from '@/types';
 
-export function useNfts() {
-  const nfts: Ref<any[]> = ref([]);
-  const loading = ref(true);
-  const loaded = ref(false);
+export type Nft = Awaited<ReturnType<typeof getNfts>>[number];
 
-  async function loadNfts(address: string, chainId: ChainId) {
-    loading.value = true;
+type Treasury = {
+  chainId: string;
+  address: string;
+};
 
-    nfts.value = await getNfts(address, chainId);
-    loading.value = false;
-    loaded.value = true;
-  }
+export function useNfts({
+  treasury
+}: {
+  treasury: MaybeRefOrGetter<Treasury | null>;
+}) {
+  const queryFn = computed(() => {
+    const treasuryValue = toValue(treasury);
+
+    if (!treasuryValue) return skipToken;
+
+    return () => getNfts(treasuryValue.address, treasuryValue.chainId);
+  });
+
+  const { data, isPending, isSuccess, isError } = useQuery({
+    queryKey: ['nfts', treasury],
+    queryFn: queryFn,
+    staleTime: 5 * 60 * 1000
+  });
+
+  const nfts = computed(() => data.value ?? []);
 
   const nftsMap = computed(
     () => new Map(nfts.value.map(asset => [asset.id, asset]))
   );
 
-  return { loading, loaded, nfts, nftsMap, loadNfts };
+  return { isPending, isSuccess, isError, nfts, nftsMap };
 }

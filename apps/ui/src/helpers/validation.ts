@@ -1,11 +1,11 @@
 import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
+import { parseUnits } from '@/helpers/token';
 import { _n } from './utils';
 
 type Opts = { skipEmptyOptionalFields: boolean };
@@ -22,7 +22,7 @@ addFormats(ajv);
 export const addressValidator = (value: string) => {
   try {
     return !!validateAndParseAddress(value);
-  } catch (e) {
+  } catch {
     return isAddress(value);
   }
 };
@@ -38,12 +38,13 @@ const validateType = (type: string, value: string) => {
     const iface = new Interface([`function test(${type})`]);
     iface.encodeFunctionData('test', [value]);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
 
 const bytesValidator = (value: string) => validateType('bytes', value);
+const bytes32Validator = (value: string) => validateType('bytes32', value);
 const uint256Validator = (value: string) => validateType('uint256', value);
 const int256Validator = (value: string) => validateType('int256', value);
 
@@ -77,6 +78,14 @@ ajv.addFormat('int256', {
 
 ajv.addFormat('bytes', {
   validate: bytesValidator
+});
+
+ajv.addFormat('bytes32', {
+  validate: bytes32Validator
+});
+
+ajv.addFormat('address[]', {
+  validate: getArrayValidator(addressValidator)
 });
 
 ajv.addFormat('ethAddress[]', {
@@ -116,7 +125,7 @@ ajv.addFormat('ens-or-address', {
       if (resolved?.address) return true;
 
       return !!validateAndParseAddress(value);
-    } catch (e) {
+    } catch {
       return isAddress(value);
     }
   }
@@ -248,6 +257,8 @@ ajv.addKeyword({
 });
 ajv.addKeyword('options');
 ajv.addKeyword('tooltip');
+ajv.addKeyword('showControls');
+ajv.addKeyword('sortable');
 
 // UiSelectorNetwork
 ajv.addFormat('network', {
@@ -255,6 +266,8 @@ ajv.addFormat('network', {
 });
 ajv.addKeyword('networkId');
 ajv.addKeyword('networksListKind');
+ajv.addKeyword('networksFilter');
+ajv.addKeyword('chainId');
 
 function getErrorMessage(errorObject: Partial<ErrorObject>): string {
   if (!errorObject.message) return 'Invalid field.';
@@ -270,6 +283,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'address':
       case 'ethAddress':
         return 'Must be a valid address.';
+      case 'ethChecksumAddress':
+        return 'Must be a valid checksum address.';
       case 'address[]':
       case 'ethAddress[]':
         return 'Must be comma separated list of valid addresses.';
@@ -278,7 +293,7 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
       case 'abi':
         return 'Must be a valid ABI.';
       case 'twitter-handle':
-        return 'Must be a valid Twitter handle.';
+        return 'Must be a valid X handle.';
       case 'github-handle':
         return 'Must be a valid GitHub handle.';
       case 'discord-handle':
@@ -315,9 +330,9 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     return `Must be at most ${_n(errorObject.params.limit)}.`;
   }
 
-  return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
+  return `${errorObject.message.charAt(0).toUpperCase()}${errorObject.message
     .slice(1)
-    .toLocaleLowerCase()}.`;
+    .toLowerCase()}.`;
 }
 
 const getFormValues = (schema: any, form: any, opts: Opts) => {

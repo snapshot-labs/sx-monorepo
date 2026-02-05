@@ -2,7 +2,7 @@
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, Contact } from '@/types';
+import { Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -10,31 +10,34 @@ const DEFAULT_FORM_STATE = {
   amount: ''
 };
 
-const RECIPIENT_DEFINITION = {
-  type: 'string',
-  format: 'ens-or-address',
-  title: 'Recipient',
-  examples: ['Address or ENS']
-};
-
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: ChainId;
+  network: string;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
 
-const formValidator = getValidator({
-  $async: true,
-  type: 'object',
-  title: 'TokenTransfer',
-  additionalProperties: false,
-  required: ['to'],
-  properties: {
-    to: RECIPIENT_DEFINITION
-  }
-});
+const recipientDefinition = computed(() => ({
+  type: 'string',
+  format: 'ens-or-address',
+  chainId: props.network,
+  title: 'Recipient',
+  examples: ['Address or ENS']
+}));
+
+const formValidator = computed(() =>
+  getValidator({
+    $async: true,
+    type: 'object',
+    title: 'TokenTransfer',
+    additionalProperties: false,
+    required: ['to'],
+    properties: {
+      to: recipientDefinition.value
+    }
+  })
+);
 
 const emit = defineEmits(['add', 'close']);
 
@@ -49,7 +52,12 @@ const form: { to: string; nft: string; amount: string | number } = reactive(
   clone(DEFAULT_FORM_STATE)
 );
 
-const { loading, loaded, nfts, nftsMap, loadNfts } = useNfts();
+const { isPending, nfts, nftsMap } = useNfts({
+  treasury: toRef(() => ({
+    chainId: props.network,
+    address: props.address
+  }))
+});
 
 const currentNft = computed(() => nftsMap.value?.get(form.nft));
 
@@ -62,10 +70,6 @@ const formValid = computed(
 );
 
 function handlePickerClick(type: 'nft' | 'contact') {
-  if (type === 'nft' && !loaded.value) {
-    loadNfts(props.address, props.network);
-  }
-
   showPicker.value = true;
   pickerType.value = type;
 
@@ -77,6 +81,8 @@ function handlePickerClick(type: 'nft' | 'contact') {
 }
 
 async function handleSubmit() {
+  if (!currentNft.value) return;
+
   const tx = await createSendNftTransaction({
     nft: currentNft.value,
     address: props.address,
@@ -96,10 +102,6 @@ watch(
       form.to = props.initialState.recipient;
       form.nft = `${props.initialState.nft.address}:${props.initialState.nft.id}`;
       form.amount = props.initialState.amount;
-
-      if (!loaded.value) {
-        loadNfts(props.address, props.network);
-      }
     } else {
       form.to = DEFAULT_FORM_STATE.to;
       form.nft = DEFAULT_FORM_STATE.nft;
@@ -111,7 +113,7 @@ watch(
 watchEffect(async () => {
   formValidated.value = false;
 
-  formErrors.value = await formValidator.validateAsync({
+  formErrors.value = await formValidator.value.validateAsync({
     to: form.to
   });
   formValidated.value = true;
@@ -130,23 +132,17 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          :ref="ref => (searchInput = (ref as any)?.searchInput)"
+          v-model="searchValue"
+        />
       </template>
     </template>
     <template v-if="showPicker">
       <PickerNft
         v-if="pickerType === 'nft'"
         :nfts="nfts"
-        :loading="loading"
+        :loading="isPending"
         :search-value="searchValue"
         @pick="
           form.nft = $event;
@@ -167,12 +163,13 @@ watchEffect(async () => {
     <div v-if="!showPicker" class="s-box p-4">
       <UiInputAddress
         v-model="form.to"
-        :definition="RECIPIENT_DEFINITION"
+        :definition="recipientDefinition"
         :error="formErrors.to"
+        :required="true"
         @pick="handlePickerClick('contact')"
       />
       <div class="s-base">
-        <div class="s-label" v-text="'NFT'" />
+        <div class="s-label" v-text="'NFT *'" />
         <button
           type="button"
           class="s-input text-left h-[61px]"

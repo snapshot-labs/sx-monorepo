@@ -1,32 +1,27 @@
 <script setup lang="ts">
+import { getGenericExplorerUrl } from '@/helpers/generic';
+import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { buildBatchFile } from '@/helpers/safe/ build';
 import { getExecutionName } from '@/helpers/ui';
-import { sanitizeUrl, shorten, toBigIntOrNumber } from '@/helpers/utils';
+import { shorten, toBigIntOrNumber } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { NetworkID, Proposal, ProposalExecution } from '@/types';
 
-defineProps<{
+const props = defineProps<{
+  networkId: NetworkID;
   proposal: Proposal;
   executions: ProposalExecution[];
 }>();
 
-function getTreasuryExplorerUrl(networkId: NetworkID, safeAddress: string) {
-  if (!safeAddress) return null;
-
-  try {
-    const network = getNetwork(networkId);
-
-    const url = network.helpers.getExplorerUrl(safeAddress, 'address');
-    return sanitizeUrl(url);
-  } catch (e) {
-    return null;
-  }
-}
+const network = computed(() => getNetwork(props.networkId));
 
 function downloadExecution(execution: ProposalExecution) {
   if (!execution.chainId) return;
 
-  const batchFile = buildBatchFile(execution.chainId, execution.transactions);
+  const batchFile = buildBatchFile(
+    execution.chainId as number,
+    execution.transactions
+  );
 
   const blob = new Blob([JSON.stringify(batchFile)], {
     type: 'application/json'
@@ -36,30 +31,35 @@ function downloadExecution(execution: ProposalExecution) {
   a.href = url;
   a.download = `execution-${execution.safeAddress}.json`;
   a.click();
+  URL.revokeObjectURL(url);
 }
 </script>
 
 <template>
   <div
     v-for="execution in executions"
-    :key="`${execution.networkId}:${execution.safeAddress}`"
+    :key="`${execution.chainId}:${execution.safeAddress}`"
     class="x-block !border-x rounded-lg mb-3 last:mb-0"
   >
     <a
       :href="
-        getTreasuryExplorerUrl(execution.networkId, execution.safeAddress) ||
-        undefined
+        getGenericExplorerUrl(
+          execution.chainId,
+          execution.safeAddress,
+          'address'
+        ) || undefined
       "
       target="_blank"
       class="flex justify-between items-center px-4 py-3"
       :class="{
-        'pointer-events-none': !getTreasuryExplorerUrl(
-          execution.networkId,
-          execution.safeAddress
+        'pointer-events-none': !getGenericExplorerUrl(
+          execution.chainId,
+          execution.safeAddress,
+          'address'
         )
       }"
     >
-      <UiBadgeNetwork :id="execution.networkId" class="mr-3 shrink-0">
+      <UiBadgeNetwork :chain-id="execution.chainId" class="mr-3 shrink-0">
         <UiStamp
           :id="execution.safeAddress"
           type="avatar"
@@ -74,15 +74,12 @@ function downloadExecution(execution: ProposalExecution) {
         />
         <div
           class="text-skin-text text-[17px] truncate"
-          v-text="
-            getExecutionName(proposal.network, execution.strategyType) ||
-            shorten(execution.safeAddress)
-          "
+          v-text="getExecutionName(proposal.network, execution.strategyType)"
         />
       </div>
     </a>
     <div class="flex justify-between items-center border-y pr-3">
-      <UiLabel label="Transactions" class="border-b-0 pr-0 truncate" />
+      <UiSectionHeader label="Transactions" class="border-b-0 pr-0 truncate" />
       <UiTooltip
         v-if="execution.strategyType === 'ReadOnlyExecution'"
         title="Export transactions"
@@ -99,7 +96,7 @@ function downloadExecution(execution: ProposalExecution) {
     <TransactionsListItem
       v-for="(tx, i) in execution.transactions"
       :key="i"
-      :network-id="execution.networkId"
+      :chain-id="execution.chainId"
       :tx="tx"
     />
     <ProposalExecutionActions
@@ -107,11 +104,12 @@ function downloadExecution(execution: ProposalExecution) {
         proposal.executions &&
         proposal.executions.length > 0 &&
         proposal.scores.length > 0 &&
-        toBigIntOrNumber(proposal.scores_total) >=
-          toBigIntOrNumber(proposal.quorum) &&
+        getProposalCurrentQuorum(proposal.network, proposal) >=
+          proposal.quorum &&
         toBigIntOrNumber(proposal.scores[0]) >
           toBigIntOrNumber(proposal.scores[1]) &&
-        proposal.has_execution_window_opened
+        proposal.has_execution_window_opened &&
+        network.helpers.isExecutorActionsSupported(execution.strategyType)
       "
       :proposal="proposal"
       :execution="execution"

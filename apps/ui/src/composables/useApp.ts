@@ -12,8 +12,18 @@ export function useApp() {
   async function init() {
     state.loading = true;
 
+    let connectorId: string | undefined = undefined;
+
+    // Auto connect with unicorn-connector when walletId param is in URL
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashParams = useUrlSearchParams('hash');
+
+    if (searchParams.get('walletId')) connectorId = 'unicorn';
+    else if (hashParams.as) connectorId = 'guest';
     // Auto connect with gnosis-connector when inside gnosis-safe iframe
-    autoLogin(window?.parent === window ? undefined : 'gnosis');
+    if (window?.parent !== window) connectorId = 'gnosis';
+
+    autoLogin(connectorId);
 
     state.init = true;
     state.loading = false;
@@ -23,9 +33,14 @@ export function useApp() {
     state.app_name = title ?? window.location.toString();
   }
 
+  const isAuctionApp = computed(
+    () => import.meta.env.VITE_IS_BROKESTER === 'true'
+  );
+
   return {
     init,
     setAppName,
+    isAuctionApp,
     app: computed(() => state)
   };
 }

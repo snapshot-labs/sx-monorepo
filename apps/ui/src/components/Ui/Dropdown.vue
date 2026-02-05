@@ -18,7 +18,12 @@ withDefaults(
 
 <template>
   <Menu as="div" class="relative">
-    <Float :placement="`bottom-${placement}`" :offset="Number(gap)" portal>
+    <Float
+      :placement="`bottom-${placement}`"
+      :offset="Number(gap)"
+      portal
+      z-index="60"
+    >
       <MenuButton :disabled="disabled" as="template" class="cursor-pointer">
         <slot name="button" />
       </MenuButton>
@@ -31,9 +36,11 @@ withDefaults(
         leave-to-class="transform scale-95 opacity-0"
       >
         <MenuItems
-          :class="`rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none`"
+          class="rounded-md bg-skin-border text-skin-link shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
         >
-          <slot name="items" />
+          <div class="max-h-[208px] overflow-y-auto">
+            <slot name="items" />
+          </div>
         </MenuItems>
       </transition>
     </Float>
