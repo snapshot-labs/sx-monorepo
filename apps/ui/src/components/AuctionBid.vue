@@ -26,22 +26,14 @@ const amountValue = computed(
 const priceValue = computed(
   () => Number(props.order.price) * props.biddingTokenPrice
 );
-
-const fdv = computed(
-  () =>
-    Number(props.order.price) *
-    Number(
-      props.totalSupply / 10n ** BigInt(props.auction.decimalsAuctioningToken)
-    )
-);
-
-const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
 </script>
 
 <template>
-  <div class="flex justify-between items-center gap-3 py-3 px-4 leading-[22px]">
-    <div class="flex-1 min-w-[168px] truncate">
-      <div class="w-fit flex items-center space-x-3 truncate">
+  <div
+    class="flex items-center gap-3 py-3 px-4 leading-[22px] border-b border-skin-border"
+  >
+    <div class="w-[260px] max-w-[260px] truncate">
+      <div class="flex items-center space-x-3 truncate">
         <UiStamp :id="order.userAddress" :size="32" />
         <div class="flex flex-col truncate">
           <h4
@@ -53,14 +45,6 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
             class="text-[17px] text-skin-text truncate"
           />
         </div>
-      </div>
-    </div>
-    <div class="w-[200px] max-w-[200px] flex flex-col justify-center truncate">
-      <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
-        <h4>{{ relativeTime }}</h4>
-      </TimeRelative>
-      <div class="text-[17px]">
-        {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
     <div class="w-[200px] max-w-[200px] truncate">
@@ -89,21 +73,20 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
-      <h4 class="text-skin-link truncate">
-        {{ _n(fdv, 'compact') }}
-        {{ auction.symbolBiddingToken }}
-      </h4>
-      <div class="text-[17px] truncate">
-        ${{
-          _n(fdvValue, 'standard', {
-            maximumFractionDigits: 2
-          })
-        }}
+    <div class="w-[200px] max-w-[200px] flex flex-col justify-center truncate">
+      <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
+        <h4>{{ relativeTime }}</h4>
+      </TimeRelative>
+      <div class="text-[17px]">
+        {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] text-skin-success truncate">Active</div>
-    <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
+    <div class="w-[24px] flex items-center">
+      <UiTooltip title="Active">
+        <span class="inline-block w-2 h-2 rounded-full bg-skin-success" />
+      </UiTooltip>
+    </div>
+    <div class="min-w-[44px] lg:w-[60px] flex mt-1 items-center justify-center">
       <UiDropdown>
         <template #button>
           <button type="button">

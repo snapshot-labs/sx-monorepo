@@ -35,28 +35,10 @@ const amountValue = computed(
 const priceValue = computed(
   () => Number(props.order.price) * props.biddingTokenPrice
 );
-
-const fdv = computed(
-  () =>
-    Number(props.order.price) *
-    Number(
-      props.totalSupply / 10n ** BigInt(props.auction.decimalsAuctioningToken)
-    )
-);
-
-const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
 </script>
 
 <template>
-  <div class="flex justify-between items-center gap-3 py-3 px-4 leading-[22px]">
-    <div class="flex-1 min-w-[110px] flex flex-col justify-center truncate">
-      <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
-        <h4>{{ relativeTime }}</h4>
-      </TimeRelative>
-      <div class="text-[17px]">
-        {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
-      </div>
-    </div>
+  <div class="flex items-center gap-3 py-3 px-4 leading-[22px]">
     <div class="w-[200px] max-w-[200px] truncate">
       <h4 class="text-skin-link truncate">
         {{ _c(order.sellAmount, Number(auction.decimalsBiddingToken)) }}
@@ -83,36 +65,33 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
-      <h4 class="text-skin-link truncate">
-        {{ _n(fdv, 'compact') }}
-        {{ auction.symbolBiddingToken }}
-      </h4>
-      <div class="text-[17px] truncate">
-        ${{
-          _n(fdvValue, 'standard', {
-            maximumFractionDigits: 2
-          })
-        }}
+    <div class="w-[200px] max-w-[200px] flex flex-col justify-center truncate">
+      <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
+        <h4>{{ relativeTime }}</h4>
+      </TimeRelative>
+      <div class="text-[17px]">
+        {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] text-skin-link truncate">
-      <span v-if="orderStatus === 'open'">Open</span>
-      <span v-else-if="orderStatus === 'claimed'" class="text-skin-success">
-        Claimed
-      </span>
-      <span v-else-if="orderStatus === 'filled'" class="text-skin-success">
-        Filled
-      </span>
-      <span
+    <div class="w-[24px] flex items-center">
+      <UiTooltip v-if="orderStatus === 'open'" title="Open">
+        <span class="inline-block w-2 h-2 rounded-full bg-skin-text" />
+      </UiTooltip>
+      <UiTooltip v-else-if="orderStatus === 'claimed'" title="Claimed">
+        <span class="inline-block w-2 h-2 rounded-full bg-skin-success" />
+      </UiTooltip>
+      <UiTooltip v-else-if="orderStatus === 'filled'" title="Filled">
+        <span class="inline-block w-2 h-2 rounded-full bg-skin-success" />
+      </UiTooltip>
+      <UiTooltip
         v-else-if="orderStatus === 'partially-filled'"
-        class="text-yellow-500"
+        title="Partially filled"
       >
-        Partially-filled
-      </span>
-      <span v-else-if="orderStatus === 'rejected'" class="text-skin-danger">
-        Rejected
-      </span>
+        <span class="inline-block w-2 h-2 rounded-full bg-yellow-500" />
+      </UiTooltip>
+      <UiTooltip v-else-if="orderStatus === 'rejected'" title="Rejected">
+        <span class="inline-block w-2 h-2 rounded-full bg-skin-danger" />
+      </UiTooltip>
     </div>
     <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
       <UiDropdown>

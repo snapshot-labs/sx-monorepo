@@ -28,7 +28,7 @@ import {
 import { WETH_CONTRACTS } from '@/helpers/token';
 import { formatAddress } from '@/helpers/utils';
 
-export const LIMIT = 20;
+export const LIMIT = 5;
 const SUMMARY_LIMIT = 5;
 const ORDERS_LIMIT = 1000;
 const PRICE_HISTORY_LIMIT = 1000;

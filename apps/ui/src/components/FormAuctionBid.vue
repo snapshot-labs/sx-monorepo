@@ -391,7 +391,7 @@ onMounted(() => {
             class="absolute top-0 right-0 text-skin-link flex items-center gap-1"
             @click="handleSetMaxAmount"
           >
-            {{ _n(formattedBalance, 'standard', { maximumFractionDigits: 8 }) }}
+            {{ _n(formattedBalance, 'standard', { maximumFractionDigits: 5 }) }}
             {{ auction.symbolBiddingToken }}
             <IC-wallet class="inline-block shrink-0 size-[16px]" />
           </button>

@@ -102,6 +102,7 @@ function handleEndReached() {
       <div class="w-[100px]" v-text="'Buying'" />
       <div class="w-[100px]" v-text="'Status'" />
       <div class="w-[100px]" v-text="'Volume'" />
+      <div class="w-[80px]" v-text="'Bids'" />
       <div class="w-[170px]" v-text="'End date'" />
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="block m-4" />
@@ -144,6 +145,7 @@ function handleEndReached() {
               }}
               {{ auction.symbolBiddingToken }}
             </div>
+            <div class="w-[80px]" v-text="auction.orderCount" />
             <div class="w-[170px]">
               {{ _t(auction.endTimeTimestamp) }}
             </div>

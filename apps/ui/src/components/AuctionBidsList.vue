@@ -69,7 +69,7 @@ function handleSortChange(field: Order_OrderBy) {
 }
 </script>
 <template>
-  <div class="divide-y divide-skin-border">
+  <div>
     <div class="overflow-hidden">
       <UiColumnHeader
         ref="columnHeaderRef"
@@ -77,17 +77,9 @@ function handleSortChange(field: Order_OrderBy) {
         :sticky="false"
       >
         <div
-          class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[880px] w-full"
+          class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[930px] w-full"
         >
-          <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-          <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
-            :is-ordered="orderBy === 'timestamp'"
-            :order-direction="orderDirection"
-            @sort-change="handleSortChange('timestamp')"
-          >
-            Created
-          </UiColumnHeaderItemSortable>
+          <div class="w-[260px] max-w-[260px] truncate">Bidder</div>
           <UiColumnHeaderItemSortable
             class="w-[200px] max-w-[200px]"
             :is-ordered="orderBy === 'sellAmount'"
@@ -104,13 +96,20 @@ function handleSortChange(field: Order_OrderBy) {
           >
             Max. price
           </UiColumnHeaderItemSortable>
-          <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
-          <div class="w-[200px] max-w-[200px] truncate">Status</div>
+          <UiColumnHeaderItemSortable
+            class="w-[200px] max-w-[200px]"
+            :is-ordered="orderBy === 'timestamp'"
+            :order-direction="orderDirection"
+            @sort-change="handleSortChange('timestamp')"
+          >
+            Created
+          </UiColumnHeaderItemSortable>
+          <div class="w-[24px]" />
           <div class="min-w-[44px] lg:w-[60px]" />
         </div>
       </UiColumnHeader>
       <UiScrollerHorizontal @scroll="handleScrollEvent">
-        <div class="min-w-[880px]" :class="{ 'opacity-60': isFetching }">
+        <div class="min-w-[930px]" :class="{ 'opacity-60': isFetching }">
           <UiLoading
             v-if="isOrdersLoading || isBiddingTokenPriceLoading"
             class="px-4 py-3 block"
@@ -126,7 +125,7 @@ function handleSortChange(field: Order_OrderBy) {
           </UiStateWarning>
           <div
             v-else-if="orders && typeof biddingTokenPrice === 'number'"
-            class="divide-y divide-skin-border flex flex-col justify-center"
+            class="flex flex-col justify-center"
           >
             <AuctionBid
               v-for="order in orders"
@@ -143,28 +142,58 @@ function handleSortChange(field: Order_OrderBy) {
       </UiScrollerHorizontal>
     </div>
     <div
-      v-if="auction.orderCount"
-      class="flex justify-center items-center space-x-3 px-4 py-3"
+      v-if="totalPageCount > 1"
+      class="flex justify-start items-center space-x-2 px-4 py-3"
     >
-      <UiButton
-        v-if="totalPageCount > 1"
-        uniform
-        :disabled="page === 1 || isFetching"
+      <button
+        v-if="page > 1"
+        type="button"
+        :disabled="isFetching"
+        title="First Page"
+        class="text-skin-text hover:text-skin-link"
+        @click="page = 1"
+      >
+        <IS-chevron-double-left />
+      </button>
+      <button
+        v-if="page > 1"
+        type="button"
+        :disabled="isFetching"
         title="Previous Page"
+        class="text-skin-text hover:text-skin-link"
         @click="page = page - 1"
       >
-        <IH-chevron-left />
-      </UiButton>
-      <span>Page {{ _n(page) }} of {{ _n(totalPageCount) }}</span>
-      <UiButton
-        v-if="totalPageCount > 1"
-        uniform
-        :disabled="page >= totalPageCount || isFetching"
+        <IS-chevron-left />
+      </button>
+      <span>
+        Page
+        <span class="text-skin-link font-bold mx-1" v-text="_n(page)" />
+        of
+        <span
+          class="text-skin-link font-bold mx-1"
+          v-text="_n(totalPageCount)"
+        />
+      </span>
+      <button
+        v-if="page < totalPageCount"
+        type="button"
+        :disabled="isFetching"
         title="Next Page"
+        class="text-skin-text hover:text-skin-link"
         @click="page += 1"
       >
-        <IH-chevron-right />
-      </UiButton>
+        <IS-chevron-right />
+      </button>
+      <button
+        v-if="page < totalPageCount"
+        type="button"
+        :disabled="isFetching"
+        title="Last Page"
+        class="text-skin-text hover:text-skin-link"
+        @click="page = totalPageCount"
+      >
+        <IS-chevron-double-right />
+      </button>
     </div>
   </div>
 </template>

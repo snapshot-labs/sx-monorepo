@@ -61,7 +61,6 @@ const sellOrder = ref<SellOrder | null>(null);
 
 const chartType = ref<'price' | 'depth'>(DEFAULT_CHART_TYPE);
 const sidebarType = ref<'bid' | 'referral'>('bid');
-const bidsType = ref<'userBids' | 'allBids'>('userBids');
 
 const auctionState = computed(() =>
   getAuctionState(props.auction, currentTimestamp.value)
@@ -87,7 +86,7 @@ const {
   }),
   orderBy: 'price',
   orderDirection: 'desc',
-  enabled: () => isAccountSupported.value && bidsType.value === 'userBids'
+  enabled: () => isAccountSupported.value
 });
 
 const {
@@ -329,69 +328,76 @@ watch(volume, () => {
 
 <template>
   <div class="flex-1 grow min-w-0" v-bind="$attrs">
-    <div class="border-b p-4 flex flex-col gap-4">
-      <div class="flex gap-2.5">
-        <UiBadgeNetwork :id="network" :size="18" class="shrink-0">
-          <UiStamp
-            :id="auction.addressAuctioningToken"
-            :size="32"
-            type="token"
-            class="rounded-full"
-          />
-        </UiBadgeNetwork>
-        <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
-        <AuctionStatus :state="auctionState" />
-      </div>
-      <div
-        class="flex flex-col xl:flex-row xl:justify-between xl:items-start gap-3"
-      >
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-8">
-          <AuctionCounter
-            :title="isAuctionOpen ? 'Current price' : 'Clearing price'"
-            :amount="
-              _n(auction.currentClearingPrice, 'standard', {
-                maximumFractionDigits: 6
-              })
-            "
-            :symbol="auction.symbolBiddingToken"
-            :subamount="`$${_n(
-              biddingTokenPrice
-                ? Number(auction.currentClearingPrice) * biddingTokenPrice
-                : 0,
-              'standard',
-              {
-                maximumFractionDigits: 2
-              }
-            )}`"
-          />
-          <AuctionCounter
-            :title="isAuctionOpen ? 'Current FDV' : 'Clearing FDV'"
-            :amount="_n(fdv, 'compact')"
-            :symbol="auction.symbolBiddingToken"
-            :subamount="`$${_n(
-              biddingTokenPrice ? fdv * biddingTokenPrice : 0,
-              'standard',
-              {
-                maximumFractionDigits: 0
-              }
-            )}`"
-          />
-          <AuctionCounter
-            :title="isAuctionOpen ? 'Current volume' : 'Total volume'"
-            :amount="_n(volume, 'compact')"
-            :symbol="auction.symbolBiddingToken"
-            :subamount="`$${_n(
-              biddingTokenPrice ? volume * biddingTokenPrice : 0,
-              'standard',
-              {
-                maximumFractionDigits: 0
-              }
-            )}`"
-          />
+    <div class="p-4 flex gap-4">
+      <div class="flex items-center">
+        <div class="flex gap-2.5 w-[300px]">
+          <div class="shrink-0">
+            <UiBadgeNetwork :id="network" :size="24" class="shrink-0">
+              <UiStamp
+                :id="auction.addressAuctioningToken"
+                :size="64"
+                type="token"
+                class="rounded-full"
+              />
+            </UiBadgeNetwork>
+          </div>
+          <div>
+            <h1 class="text-[24px]">{{ auction.symbolAuctioningToken }}</h1>
+            <AuctionStatus :state="auctionState" />
+          </div>
         </div>
-        <UiCountdown :timestamp="parseInt(props.auction.endTimeTimestamp)" />
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+        <AuctionCounter
+          :title="isAuctionOpen ? 'Current price' : 'Clearing price'"
+          :amount="
+            _n(auction.currentClearingPrice, 'standard', {
+              maximumFractionDigits: 6
+            })
+          "
+          :symbol="auction.symbolBiddingToken"
+          :subamount="`$${_n(
+            biddingTokenPrice
+              ? Number(auction.currentClearingPrice) * biddingTokenPrice
+              : 0,
+            'standard',
+            {
+              maximumFractionDigits: 2
+            }
+          )}`"
+        />
+        <AuctionCounter
+          :title="isAuctionOpen ? 'Current FDV' : 'Clearing FDV'"
+          :amount="_n(fdv, 'compact')"
+          :symbol="auction.symbolBiddingToken"
+          :subamount="`$${_n(
+            biddingTokenPrice ? fdv * biddingTokenPrice : 0,
+            'standard',
+            {
+              maximumFractionDigits: 0
+            }
+          )}`"
+        />
+        <AuctionCounter
+          :title="isAuctionOpen ? 'Current volume' : 'Total volume'"
+          :amount="_n(volume, 'compact')"
+          :symbol="auction.symbolBiddingToken"
+          :subamount="`$${_n(
+            biddingTokenPrice ? volume * biddingTokenPrice : 0,
+            'standard',
+            {
+              maximumFractionDigits: 0
+            }
+          )}`"
+        />
       </div>
     </div>
+
+    <UiCountdown
+      :timestamp="parseInt(props.auction.endTimeTimestamp)"
+      :start-timestamp="parseInt(props.auction.startingTimeStamp)"
+      inline
+    />
 
     <UiScrollerHorizontal with-buttons gradient="xxl">
       <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
@@ -428,37 +434,19 @@ watch(volume, () => {
       class="min-h-[355px] p-4"
     />
 
-    <UiScrollerHorizontal with-buttons gradient="xxl">
-      <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-        <AppLink
-          :aria-active="bidsType === 'userBids'"
-          @click="bidsType = 'userBids'"
-        >
-          <UiLabel
-            :is-active="bidsType === 'userBids'"
-            text="My bids"
-            size="lg"
-          />
-        </AppLink>
-        <AppLink
-          :aria-active="bidsType === 'allBids'"
-          @click="bidsType = 'allBids'"
-        >
-          <UiLabel
-            :is-active="bidsType === 'allBids'"
-            text="Bids"
-            size="lg"
-            :count="auction.orderCount"
-          />
-        </AppLink>
-      </div>
-    </UiScrollerHorizontal>
+    <AuctionDetails
+      :network="network"
+      :auction="auction"
+      :total-supply="totalSupply"
+      :bidding-token-price="biddingTokenPrice"
+    />
 
-    <div v-if="bidsType === 'userBids'" class="space-y-4">
-      <UiStateWarning v-if="!isAccountSupported" class="px-4 py-3">
-        Log in to view your bids.
-      </UiStateWarning>
-      <template v-else>
+    <template v-if="isAccountSupported">
+      <div class="flex px-4 space-x-3 bg-skin-bg border-b">
+        <UiLabel :is-active="true" text="My bids" size="lg" />
+      </div>
+
+      <div class="space-y-4">
         <div class="overflow-hidden">
           <UiColumnHeader
             :ref="
@@ -471,18 +459,17 @@ watch(volume, () => {
             :sticky="false"
           >
             <div
-              class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[735px] w-full"
+              class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[690px] w-full"
             >
-              <div class="flex-1 min-w-[110px] truncate">Created</div>
               <div class="w-[200px] max-w-[200px] truncate">Amount</div>
               <div class="w-[200px] max-w-[200px] truncate">Max. price</div>
-              <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
-              <div class="w-[200px] max-w-[200px] truncate">Status</div>
+              <div class="w-[200px] max-w-[200px] truncate">Created</div>
+              <div class="w-[24px]" />
               <div class="min-w-[44px] lg:w-[60px]" />
             </div>
           </UiColumnHeader>
           <UiScrollerHorizontal @scroll="handleScrollEvent">
-            <div class="min-w-[735px]">
+            <div class="min-w-[690px]">
               <UiLoading
                 v-if="
                   isUserOrdersLoading ||
@@ -533,10 +520,19 @@ watch(volume, () => {
             {{ claimText }}
           </UiButton>
         </div>
-      </template>
+      </div>
+    </template>
+
+    <div class="flex px-4 space-x-3 bg-skin-bg border-b">
+      <UiLabel
+        :is-active="true"
+        text="Bids"
+        size="lg"
+        :count="auction.orderCount"
+      />
     </div>
+
     <AuctionBidsList
-      v-else-if="bidsType === 'allBids'"
       :auction="auction"
       :network="network"
       :total-supply="totalSupply"
@@ -567,6 +563,7 @@ watch(volume, () => {
         <UiScrollerHorizontal with-buttons gradient="xxl">
           <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
             <AppLink
+              v-if="isAuctionOpen"
               :aria-active="sidebarType === 'bid'"
               @click="sidebarType = 'bid'"
             >
@@ -600,7 +597,7 @@ watch(volume, () => {
         />
 
         <FormAuctionReferral
-          v-else-if="sidebarType === 'referral'"
+          v-else
           :network="network"
           :auction="auction"
           class="mb-4"
