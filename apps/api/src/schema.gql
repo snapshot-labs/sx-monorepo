@@ -365,6 +365,24 @@ type Vote {
 }
 
 """
+Historical scores for a proposal at a specific hour
+"""
+type ScoresTick {
+  "Unique identifier (proposalId/hourTimestamp)"
+  id: String!
+  "Proposal this tick belongs to"
+  proposal: Proposal!
+  "Unix timestamp of when scores were recorded"
+  timestamp: Int!
+  "Voting power for choice 1 at this timestamp"
+  scores_1: BigDecimalVP!
+  "Voting power for choice 2 at this timestamp"
+  scores_2: BigDecimalVP!
+  "Voting power for choice 3 at this timestamp"
+  scores_3: BigDecimalVP!
+}
+
+"""
 Metadata for a vote containing optional reasoning
 """
 type VoteMetadataItem {
