@@ -3,7 +3,7 @@ import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
-import { offchainNetworks } from '@/networks';
+import { metadataNetwork, offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
@@ -253,7 +253,8 @@ function getNavigationConfig(
         },
         'email-notifications': {
           name: 'Email notifications',
-          icon: IHAtSymbol
+          icon: IHAtSymbol,
+          hidden: metadataNetwork !== 's'
         }
       }
     };
