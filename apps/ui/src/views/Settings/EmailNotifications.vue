@@ -99,7 +99,7 @@ watch(
 
 watchEffect(async () => {
   formValidated.value = false;
-  formErrors.value = await formValidator.validateAsync(form);
+  formErrors.value = await formValidator.validateAsync(form.value);
   formValidated.value = true;
 });
 </script>
