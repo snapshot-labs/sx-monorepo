@@ -8,7 +8,7 @@ export function useEmailNotificationQuery(address: MaybeRefOrGetter<string>) {
     queryFn: async () => {
       return getSubscription(toValue(address));
     },
-    enabled: !!toValue(address)
+    enabled: () => !!toValue(address)
   });
 }
 
