@@ -74,7 +74,7 @@ function handleScrollEvent(target: HTMLElement) {
     v-if="
       !offchainNetworks.includes(proposal.network) &&
       scoresTicks &&
-      scoresTicks.length > 1
+      scoresTicks.length > 0
     "
     :ticks="scoresTicks"
     :choices="proposal.choices"

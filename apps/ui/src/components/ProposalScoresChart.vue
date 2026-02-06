@@ -52,20 +52,28 @@ const getTickAt = (ts: number) =>
   sortedTicks.value.findLast(t => t.timestamp <= ts) ?? null;
 
 function buildPath(i: number, fromTs: number, toTs: number, fromZero = true) {
+  // For the primary line (fromZero=true), include ticks from start onwards
+  // For the grey continuation (fromZero=false), only include ticks after the hover point
   const times = sortedTicks.value
     .filter(t => t.timestamp > fromTs && t.timestamp <= toTs)
     .map(t => t.timestamp);
 
   const points: string[] = [];
   const startScore = getTickAt(fromTs)?.scores[i] ?? 0;
-  let lastY: number | null = fromZero
-    ? null
-    : startScore > 0
-      ? scoreToY(startScore)
-      : null;
 
-  if (!fromZero && lastY !== null) {
+  // For grey continuation: start from hover position if there's a score
+  // For primary line: check if there's a pre-start tick we need to render from start
+  let lastY: number | null = null;
+
+  if (!fromZero && startScore > 0) {
+    // Grey line: start from hover position at current score
+    lastY = scoreToY(startScore);
     points.push(`${timestampToX(fromTs)},${lastY}`);
+  } else if (fromZero && startScore > 0) {
+    // Primary line with pre-start tick: draw from chart start
+    lastY = scoreToY(startScore);
+    points.push(`${timestampToX(props.start)},${ZERO_Y}`);
+    points.push(`${timestampToX(props.start)},${lastY}`);
   }
 
   for (const ts of times) {
@@ -135,11 +143,12 @@ const dateLabels = computed(() => {
   const labels: { x: number; label: string }[] = [];
   let lastX = -Infinity;
 
+  const HALF_WIDTH = LABEL_WIDTH / 2;
   while (ts <= effectiveEnd.value) {
     const x = timestampToX(ts);
     if (
-      x >= PADDING.left &&
-      x + LABEL_WIDTH <= chartWidth.value - PADDING.right &&
+      x - HALF_WIDTH >= PADDING.left &&
+      x + HALF_WIDTH <= chartWidth.value - PADDING.right &&
       x - lastX >= LABEL_WIDTH + MIN_SPACING
     ) {
       labels.push({
@@ -182,7 +191,7 @@ function handleMouseMove(e: MouseEvent) {
 </script>
 
 <template>
-  <div v-if="ticks.length >= 2">
+  <div v-if="ticks.length >= 1">
     <div class="flex justify-between items-center mb-2 px-4 py-2.5">
       <div class="flex gap-2.5">
         <div
@@ -246,7 +255,7 @@ function handleMouseMove(e: MouseEvent) {
           :key="`l${i}`"
           :x="lbl.x"
           :y="HEIGHT - 6"
-          text-anchor="start"
+          text-anchor="middle"
           class="fill-skin-text text-[15px]"
           v-text="lbl.label"
         />
