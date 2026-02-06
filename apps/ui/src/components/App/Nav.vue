@@ -7,6 +7,7 @@ import { offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
+import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
@@ -252,8 +253,7 @@ function getNavigationConfig(
         },
         'email-notifications': {
           name: 'Email notifications',
-          icon: IHBell,
-          hidden: true
+          icon: IHAtSymbol
         }
       }
     };
