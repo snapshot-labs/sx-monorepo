@@ -1,9 +1,4 @@
 <script lang="ts" setup>
-import {
-  createSubscription,
-  resendVerificationEmail,
-  updateSubscription
-} from '@/helpers/emailNotification';
 import { EmailSubscriptionStatus } from '@/helpers/emailNotification/types';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
@@ -29,6 +24,7 @@ const SUBSCRIBE_DEFINITION = {
       type: 'string',
       format: 'email',
       title: 'Email',
+      errorMessage: 'Invalid email address',
       maxLength: 256,
       examples: ['e.g. me@snapshot.box']
     }
@@ -45,14 +41,23 @@ const formValidated = ref(false);
 const status = ref<EmailSubscriptionStatus>('NOT_SUBSCRIBED');
 const feeds = reactive<Record<string, boolean>>({});
 
+const { createSubscription, resendVerificationEmail, updateSubscription } =
+  useEmailNotification();
+
 const { data: subscription, isLoading: isSubscriptionLoading } =
   useEmailNotificationQuery(toRef(() => web3.value.account));
 
 const { data: feedsList, isLoading: isFeedsListLoading } =
   useEmailNotificationFeedsListQuery();
 
+const isFormValid = computed(() => !Object.keys(formErrors.value).length);
+
 async function handleCreateSubscriptionClick() {
-  await createSubscription();
+  if (!isFormValid.value) return;
+
+  if (await createSubscription(form.value.email)) {
+    status.value = 'UNVERIFIED';
+  }
 }
 
 async function handleResendConfirmationClick() {
@@ -60,7 +65,7 @@ async function handleResendConfirmationClick() {
 }
 
 async function handleUpdateSubscriptionClick() {
-  await updateSubscription();
+  await updateSubscription(Object.keys(feeds).filter(key => feeds[key]));
 }
 
 const formValidator = getValidator(SUBSCRIBE_DEFINITION);
@@ -125,7 +130,7 @@ watchEffect(async () => {
         />
       </div>
       <UiButton
-        :disabled="!web3.account"
+        :disabled="!web3.account || !isFormValid || !formValidated"
         @click="handleCreateSubscriptionClick"
       >
         Subscribe now
@@ -141,7 +146,7 @@ watchEffect(async () => {
           process.
         </div>
       </div>
-      <UiButton @click="handleResendConfirmationClick">
+      <UiButton disabled @click="handleResendConfirmationClick">
         Resend confirmation email
       </UiButton>
     </template>
