@@ -1,4 +1,5 @@
 import { getAddress } from '@ethersproject/address';
+import { Web3Provider } from '@ethersproject/providers';
 import { ComputedRef } from 'vue';
 import { AuctionNetworkId } from '@/helpers/auction';
 import {
@@ -10,8 +11,24 @@ import {
   PROVIDERS,
   VerificationContext
 } from '@/helpers/auction/verification-providers';
+import { CHAIN_IDS } from '@/helpers/constants';
 
 const ATTESTATION_API_URL = import.meta.env.VITE_ATTESTATION_URL;
+
+const ATTESTATION_EIP712_TYPES = {
+  WalletOwnership: [
+    { name: 'user', type: 'address' },
+    { name: 'timestamp', type: 'uint256' }
+  ]
+};
+
+function getAttestationEIP712Domain(network: AuctionNetworkId) {
+  return {
+    name: 'brokester-attestations',
+    version: '1',
+    chainId: CHAIN_IDS[network]
+  };
+}
 
 type VerifyResponse = {
   verified: boolean;
@@ -49,7 +66,7 @@ export function useAuctionVerification({
     | undefined
   >;
 }) {
-  const { web3, web3Account } = useWeb3();
+  const { web3, web3Account, auth } = useWeb3();
   const { modalAccountOpen } = useModal();
   const uiStore = useUiStore();
 
@@ -89,6 +106,7 @@ export function useAuctionVerification({
   }
 
   async function checkStatus(options?: {
+    auth?: { signature: string; timestamp: number };
     showNotification?: boolean;
     metadata?: object;
   }) {
@@ -111,6 +129,7 @@ export function useAuctionVerification({
         user: web3Account.value,
         ...(signer.value && { signer: signer.value }),
         ...(provider && { provider }),
+        ...(options?.auth && { auth: options.auth }),
         ...(options?.metadata && { metadata: options.metadata })
       });
 
@@ -166,6 +185,21 @@ export function useAuctionVerification({
     const provider = PROVIDERS[targetProviderId];
     if (!provider) return;
 
+    if (!auth.value) {
+      handleError(new Error('No wallet connected'), 'Please connect a wallet');
+      return;
+    }
+
+    status.value = 'signing';
+    let attestationAuth;
+    try {
+      attestationAuth = await signAttestation();
+    } catch (e) {
+      console.error('Attestation signing failed', e);
+      status.value = 'started';
+      return;
+    }
+
     const context: VerificationContext = {
       web3Account,
       network: network.value,
@@ -174,11 +208,34 @@ export function useAuctionVerification({
       verificationUrl,
       error,
       handleError,
+      auth: attestationAuth,
       rpcCall,
       checkStatus
     };
 
     await provider.startVerification(context);
+  }
+
+  async function signAttestation(): Promise<{
+    signature: string;
+    timestamp: number;
+  }> {
+    const web3Provider = auth.value?.provider;
+    if (!web3Provider || !(web3Provider instanceof Web3Provider)) {
+      throw new Error('Wallet does not support signing');
+    }
+    const timestamp = Date.now();
+    const signature = await web3Provider
+      .getSigner()
+      ._signTypedData(
+        getAttestationEIP712Domain(network.value),
+        ATTESTATION_EIP712_TYPES,
+        {
+          user: web3Account.value,
+          timestamp
+        }
+      );
+    return { signature, timestamp };
   }
 
   async function generateSignature(): Promise<`0x${string}` | undefined> {
