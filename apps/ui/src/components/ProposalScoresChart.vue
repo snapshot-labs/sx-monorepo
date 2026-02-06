@@ -16,7 +16,23 @@ const props = withDefaults(
 
 const HEIGHT = 160;
 const PADDING = { top: 24, bottom: 30, left: 12, right: 12 };
-const COLORS = ['skin-success', 'skin-danger', 'skin-text'];
+const SERIES = [
+  {
+    stroke: 'stroke-skin-success',
+    fill: 'fill-skin-success',
+    bg: 'bg-skin-success'
+  },
+  {
+    stroke: 'stroke-skin-danger',
+    fill: 'fill-skin-danger',
+    bg: 'bg-skin-danger'
+  },
+  {
+    stroke: 'stroke-skin-text',
+    fill: 'fill-skin-text',
+    bg: 'bg-skin-text'
+  }
+];
 const CHART_HEIGHT = HEIGHT - PADDING.top - PADDING.bottom;
 const ZERO_Y = PADDING.top + CHART_HEIGHT;
 
@@ -109,7 +125,7 @@ const currentTick = computed(() => getTickAt(currentTs.value));
 const lines = computed(() =>
   [2, 1, 0].map(i => ({
     points: buildPath(i, props.start, currentTs.value, true),
-    color: COLORS[i],
+    ...SERIES[i],
     label: props.choices[i] || `Choice ${i + 1}`,
     score: currentTick.value
       ? _vp(currentTick.value.scores[i] / 10 ** props.decimals)
@@ -135,7 +151,7 @@ const bulletPoints = computed(() => {
     .map(i => ({
       x: currentX.value,
       y: scoreToY(tick.scores[i]),
-      color: COLORS[i]
+      fill: SERIES[i].fill
     }));
 });
 
@@ -208,7 +224,7 @@ function handleMouseMove(e: MouseEvent) {
           :key="i"
           class="flex items-center gap-1.5"
         >
-          <span class="w-2 h-2 rounded-full" :class="`bg-${line.color}`" />
+          <span class="w-2 h-2 rounded-full" :class="line.bg" />
           <span class="text-skin-text hidden md:block" v-text="line.label" />
           <span class="font-bold text-skin-link" v-text="line.score" />
         </div>
@@ -262,7 +278,7 @@ function handleMouseMove(e: MouseEvent) {
             v-for="(line, i) in lines"
             :key="i"
             :points="line.points"
-            :class="`stroke-${line.color}`"
+            :class="line.stroke"
           />
           <polyline
             v-for="(pts, i) in grayedLines"
@@ -277,7 +293,7 @@ function handleMouseMove(e: MouseEvent) {
           :cx="pt.x"
           :cy="pt.y"
           r="4"
-          :class="`fill-${pt.color}`"
+          :class="pt.fill"
         />
         <text
           v-for="(lbl, i) in dateLabels"
