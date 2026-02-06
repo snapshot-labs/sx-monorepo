@@ -81,6 +81,7 @@ function handleScrollEvent(target: HTMLElement) {
     :decimals="proposal.vp_decimals"
     :start="proposal.start"
     :end="proposal.max_end"
+    :quorum="proposal.quorum"
     class="border-b pb-3"
   />
   <UiColumnHeader

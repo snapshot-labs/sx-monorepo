@@ -2,13 +2,17 @@
 import { _vp } from '@/helpers/utils';
 import { ScoresTick } from '@/types';
 
-const props = defineProps<{
-  ticks: ScoresTick[];
-  choices: string[];
-  decimals: number;
-  start: number;
-  end: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    ticks: ScoresTick[];
+    choices: string[];
+    decimals: number;
+    start: number;
+    end: number;
+    quorum?: number;
+  }>(),
+  { quorum: 0 }
+);
 
 const HEIGHT = 160;
 const PADDING = { top: 24, bottom: 30, left: 12, right: 12 };
@@ -121,13 +125,18 @@ const grayedLines = computed(() =>
       )
 );
 
+const currentX = computed(() => timestampToX(currentTs.value));
+
 const bulletPoints = computed(() => {
   const tick = currentTick.value;
   if (!tick) return [];
-  const x = timestampToX(currentTs.value);
   return [2, 1, 0]
     .filter(i => tick.scores[i] > 0)
-    .map(i => ({ x, y: scoreToY(tick.scores[i]), color: COLORS[i] }));
+    .map(i => ({
+      x: currentX.value,
+      y: scoreToY(tick.scores[i]),
+      color: COLORS[i]
+    }));
 });
 
 const dateLabels = computed(() => {
@@ -191,7 +200,7 @@ function handleMouseMove(e: MouseEvent) {
 </script>
 
 <template>
-  <div v-if="ticks.length >= 1">
+  <div v-if="ticks.length >= 1" class="pb-4">
     <div class="flex justify-between items-center mb-2 px-4 py-2.5">
       <div class="flex gap-2.5">
         <div
@@ -223,6 +232,26 @@ function handleMouseMove(e: MouseEvent) {
         :height="HEIGHT"
         :viewBox="`0 0 ${chartWidth} ${HEIGHT}`"
       >
+        <line
+          v-if="quorum > 0"
+          :x1="PADDING.left"
+          :x2="currentX"
+          :y1="scoreToY(quorum)"
+          :y2="scoreToY(quorum)"
+          class="stroke-skin-link"
+          stroke-dasharray="6 4"
+          stroke-width="1"
+        />
+        <line
+          v-if="quorum > 0 && hoveredTimestamp !== null"
+          :x1="currentX"
+          :x2="chartWidth - PADDING.right"
+          :y1="scoreToY(quorum)"
+          :y2="scoreToY(quorum)"
+          class="stroke-skin-border"
+          stroke-dasharray="6 4"
+          stroke-width="1"
+        />
         <g
           fill="none"
           stroke-width="2"
