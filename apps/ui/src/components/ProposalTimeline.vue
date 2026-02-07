@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { _t } from '@/helpers/utils';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { NetworkID, Proposal, Space } from '@/types';
 
 type ProposalTimelineValues = {
@@ -16,6 +17,7 @@ type ProposalTimelineInput = {
 type State = {
   id: keyof typeof LABELS;
   value: number;
+  url?: string;
 };
 
 const props = defineProps<{
@@ -27,7 +29,8 @@ const LABELS = {
   start: 'Start',
   end: 'End',
   min_end: 'Min. end',
-  max_end: 'Max. end'
+  max_end: 'Max. end',
+  executed: 'Executed'
 };
 
 const { getDurationFromCurrent } = useMetaStore();
@@ -56,38 +59,42 @@ function formatTimelineValues(): ProposalTimelineValues {
   };
 }
 
+function getExplorerUrl(data: Proposal, tx: string | null) {
+  if (!tx || offchainNetworks.includes(data.network)) return undefined;
+  return getNetwork(data.network).helpers.getExplorerUrl(tx, 'transaction');
+}
+
 const states: ComputedRef<State[]> = computed(() => {
+  const data = props.data;
   const { created, start, min_end, max_end } = formatTimelineValues();
+  const isProposal = 'state' in data;
   const initial: State[] = [];
 
   if (created) {
     initial.push({
       id: 'created',
-      value: created
+      value: created,
+      url: isProposal ? getExplorerUrl(data, data.tx) : undefined
     });
   }
 
-  initial.push({
-    id: 'start',
-    value: start
-  });
+  initial.push({ id: 'start', value: start });
 
   if (min_end === max_end) {
-    initial.push({
-      id: 'end',
-      value: min_end
-    });
+    initial.push({ id: 'end', value: min_end });
   } else {
     initial.push(
-      {
-        id: 'min_end',
-        value: min_end
-      },
-      {
-        id: 'max_end',
-        value: max_end
-      }
+      { id: 'min_end', value: min_end },
+      { id: 'max_end', value: max_end }
     );
+  }
+
+  if (isProposal && data.state === 'executed' && data.execution_time > 0) {
+    initial.push({
+      id: 'executed',
+      value: data.execution_time,
+      url: getExplorerUrl(data, data.execution_tx)
+    });
   }
 
   return initial;
@@ -127,7 +134,16 @@ function isInThePast(timestamp: number): boolean {
         :key="state.id"
         class="mb-3 last:mb-0 h-[44px]"
       >
-        <h4 v-text="LABELS[state.id]" />
+        <a
+          v-if="state.url"
+          :href="state.url"
+          target="_blank"
+          class="flex items-center gap-1"
+        >
+          <h4 v-text="LABELS[state.id]" />
+          <IH-arrow-sm-right class="-rotate-45" :width="16" />
+        </a>
+        <h4 v-else v-text="LABELS[state.id]" />
         <div class="flex gap-2 items-center">
           <div v-text="_t(state.value)" />
           <slot :name="`${state.id}-date-suffix`" />
