@@ -30,10 +30,6 @@ export default {
 
         // backgrounds
         'skin-bg': 'rgba(var(--bg), <alpha-value>)',
-        'skin-block-bg': 'rgba(var(--block-bg), <alpha-value>)',
-        'skin-input-bg': 'rgba(var(--input-bg), <alpha-value>)',
-        'skin-hover-bg': 'rgba(var(--hover-bg), <alpha-value>)',
-        'skin-active-bg': 'rgba(var(--active-bg), <alpha-value>)',
         'skin-border': 'rgba(var(--border), <alpha-value>)',
 
         // text
