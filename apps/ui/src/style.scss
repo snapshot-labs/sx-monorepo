@@ -9,13 +9,13 @@
   --border: 229, 229, 230;
 
   // text
-  --heading: 17, 17, 17;
-  --link: 17, 17, 17;
+  --heading: 0, 0, 0;
+  --link: 0, 0, 0;
   --text: 87, 96, 106;
-  --content: rgba(17, 17, 17, 0.8);
+  --content: rgba(0, 0, 0, 0.8);
 
   // accents
-  --primary: 17, 17, 17;
+  --primary: 0, 0, 0;
   --accent-foreground: 251, 251, 251;
   --danger: 235, 76, 91;
   --success: 87, 179, 117;
@@ -38,13 +38,13 @@
   --border: 47, 46, 51;
 
   // text
-  --heading: 251, 251, 251;
-  --link: 251, 251, 251;
+  --heading: 255, 255, 255;
+  --link: 255, 255, 255;
   --text: 160, 159, 164;
-  --content: rgba(250, 249, 252, 0.8);
+  --content: rgba(255, 255, 255, 0.8);
 
   // accents
-  --primary: 251, 251, 251;
+  --primary: 255, 255, 255;
   --accent-foreground: 17, 17, 17;
   --danger: 235, 76, 91;
   --success: 87, 179, 117;
