@@ -54,11 +54,8 @@ export function useEmailNotification() {
     );
   }
 
-  async function resendVerificationEmail() {}
-
   return {
     createSubscription,
-    updateSubscription,
-    resendVerificationEmail
+    updateSubscription
   };
 }

@@ -45,8 +45,7 @@ const formValidated = ref(false);
 const status = ref<EmailSubscriptionStatus>('NOT_SUBSCRIBED');
 const feeds = reactive<Record<string, boolean>>({});
 
-const { createSubscription, resendVerificationEmail, updateSubscription } =
-  useEmailNotification();
+const { createSubscription, updateSubscription } = useEmailNotification();
 
 const { data: subscription, isLoading: isSubscriptionLoading } =
   useEmailNotificationQuery(toRef(() => web3.value.account));
@@ -62,10 +61,6 @@ async function handleCreateSubscriptionClick() {
   if (await createSubscription(form.value.email)) {
     status.value = 'UNVERIFIED';
   }
-}
-
-async function handleResendConfirmationClick() {
-  await resendVerificationEmail();
 }
 
 async function handleUpdateSubscriptionClick() {
@@ -156,9 +151,6 @@ watchEffect(async () => {
           process.
         </div>
       </div>
-      <UiButton disabled @click="handleResendConfirmationClick">
-        Resend confirmation email
-      </UiButton>
     </template>
     <template v-else-if="status === 'VERIFIED'">
       <div>
