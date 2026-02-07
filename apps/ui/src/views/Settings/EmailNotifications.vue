@@ -1,8 +1,10 @@
 <script lang="ts" setup>
+import { useQueryClient } from '@tanstack/vue-query';
 import { EmailSubscriptionStatus } from '@/helpers/emailNotification/types';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import {
+  EMAIL_NOTIFICATION_KEYS,
   useEmailNotificationFeedsListQuery,
   useEmailNotificationQuery
 } from '@/queries/emailNotification';
@@ -32,6 +34,8 @@ const SUBSCRIBE_DEFINITION = {
 };
 
 const { web3 } = useWeb3();
+const uiStore = useUiStore();
+const queryClient = useQueryClient();
 
 const form = ref<{
   email: string;
@@ -65,7 +69,13 @@ async function handleResendConfirmationClick() {
 }
 
 async function handleUpdateSubscriptionClick() {
-  await updateSubscription(Object.keys(feeds).filter(key => feeds[key]));
+  if (await updateSubscription(Object.keys(feeds).filter(key => feeds[key]))) {
+    uiStore.addNotification('success', 'Your subscriptions have been updated');
+
+    queryClient.invalidateQueries({
+      queryKey: EMAIL_NOTIFICATION_KEYS.user(web3.value.account)
+    });
+  }
 }
 
 const formValidator = getValidator(SUBSCRIBE_DEFINITION);
@@ -110,7 +120,7 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiSectionHeader label="Email notifications" />
+  <UiSectionHeader label="Email notifications" sticky />
   <div v-bind="$attrs" class="p-4 space-y-3 max-w-[640px]">
     <UiLoading
       v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"

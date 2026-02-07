@@ -2,10 +2,21 @@ import { EmailSubscription } from './types';
 
 const ENVELOP_API_URL = import.meta.env.VITE_ENVELOP_URL;
 
+export type Params = { email: string; subscriptions?: string[] };
+export type Method = 'subscribe' | 'update';
+
 export const SubscribeSchema = {
   Subscribe: [
     { name: 'address', type: 'address' },
     { name: 'email', type: 'string' }
+  ]
+};
+
+export const UpdateSubscriptionsSchema = {
+  Subscriptions: [
+    { name: 'address', type: 'address' },
+    { name: 'email', type: 'string' },
+    { name: 'subscriptions', type: 'string[]' }
   ]
 };
 
@@ -32,16 +43,15 @@ export async function getSubscription(
   };
 }
 
-export async function createSubscription(params: {
-  email: string;
-  address: string;
-  signature: string;
-}): Promise<boolean> {
+export async function send(
+  params: Params & { address: string; signature: string },
+  method: Method
+): Promise<boolean> {
   const response = await fetch(`${ENVELOP_API_URL}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      method: 'snapshot.subscribe',
+      method: `snapshot.${method}`,
       params
     })
   });
