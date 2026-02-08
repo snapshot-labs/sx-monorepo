@@ -268,7 +268,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-text="_n(activity.proposal_count)"
         />
         <div
-          class="text-[17px] truncate"
+          class="text-[17px] text-skin-text truncate"
           v-text="_p(activity.proposal_percentage)"
         />
       </div>
@@ -277,7 +277,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div
-          class="text-[17px] truncate"
+          class="text-[17px] text-skin-text truncate"
           v-text="_p(activity.vote_percentage)"
         />
       </div>
