@@ -5,6 +5,8 @@ import Ecosystem from '@/views/Ecosystem.vue';
 import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
 import Home from '@/views/My/Home.vue';
+import Messages from '@/views/My/Messages.vue';
+import MessagesConversation from '@/views/My/MessagesConversation.vue';
 import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
@@ -74,6 +76,12 @@ export default [
       },
       { path: '/', name: 'my-home', component: Home },
       { path: '/explore', name: 'my-explore', component: Explore },
+      { path: '/messages', name: 'my-messages', component: Messages },
+      {
+        path: '/messages/:address',
+        name: 'my-messages-conversation',
+        component: MessagesConversation
+      },
       {
         path: '/notifications',
         name: 'my-notifications',
