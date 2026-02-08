@@ -47,6 +47,8 @@ async function fetchPrices() {
     );
     const resJson = await res.json();
 
+    if (!resJson.event_id) return;
+
     const validatedData = FutarchyResponseSchema.parse(resJson);
     data.value = validatedData;
   } catch (e) {
