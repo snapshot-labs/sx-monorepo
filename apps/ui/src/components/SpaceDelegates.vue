@@ -231,7 +231,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 {{ space.voting_power_symbol }}
               </h4>
               <div
-                class="text-[17px]"
+                class="text-[17px] text-skin-text"
                 v-text="_p(delegatee.delegatedVotePercentage)"
               />
             </div>
@@ -392,7 +392,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   v-text="_n(delegate.tokenHoldersRepresentedAmount)"
                 />
                 <div
-                  class="text-[17px]"
+                  class="text-[17px] text-skin-text"
                   v-text="_p(delegate.delegatorsPercentage)"
                 />
               </div>
@@ -404,7 +404,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                   {{ space.voting_power_symbol }}
                 </h4>
                 <div
-                  class="text-[17px]"
+                  class="text-[17px] text-skin-text"
                   v-text="_p(delegate.votesPercentage)"
                 />
               </div>
