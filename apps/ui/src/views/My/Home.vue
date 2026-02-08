@@ -72,7 +72,7 @@ watch(
   <div>
     <OnboardingUser class="mb-2" />
     <div class="flex justify-between">
-      <div class="flex flex-row p-4 space-x-2">
+      <div class="min-h-[94px] flex flex-row p-4 space-x-2">
         <UiSelectDropdown
           v-model="state"
           title="Status"
