@@ -106,7 +106,7 @@ watchEffect(async () => {
 
 <template>
   <UiSectionHeader label="Email notifications" />
-  <div v-bind="$attrs" class="p-4 space-y-3 max-w-[640px]">
+  <div class="p-4 space-y-3 max-w-[640px]">
     <UiLoading
       v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"
     />
