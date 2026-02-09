@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { validateForm } from '@/helpers/validation';
+import { resolver } from '@/helpers/resolver';
+import { getValidator } from '@/helpers/validation';
 
 const props = defineProps<{
   open: boolean;
@@ -18,9 +19,9 @@ const definition = {
   properties: {
     address: {
       type: 'string',
-      format: 'address',
-      title: 'Address',
-      examples: ['0x...'],
+      format: 'ens-or-address',
+      title: 'To',
+      examples: ['Address or ENS'],
       showControls: false
     }
   }
@@ -28,10 +29,24 @@ const definition = {
 
 const form = reactive({ address: '' });
 
-const formErrors = computed(() => validateForm(definition, form));
+const formValidated = ref(false);
+const formErrors = ref({} as Record<string, any>);
 
-function handleSubmit() {
-  emit('start', form.address.toLowerCase());
+const formValidator = computed(() =>
+  getValidator({ $async: true, ...definition })
+);
+
+watchEffect(async () => {
+  formValidated.value = false;
+  formErrors.value = await formValidator.value.validateAsync(form);
+  formValidated.value = true;
+});
+
+async function handleSubmit() {
+  let address = form.address;
+  const resolved = await resolver.resolveName(form.address);
+  if (resolved?.address) address = resolved.address;
+  emit('start', address.toLowerCase());
   emit('close');
 }
 
@@ -58,7 +73,7 @@ watch(
     <template #footer>
       <UiButton
         class="w-full"
-        :disabled="Object.keys(formErrors).length > 0"
+        :disabled="!formValidated || Object.keys(formErrors).length > 0"
         @click="handleSubmit"
       >
         Confirm
