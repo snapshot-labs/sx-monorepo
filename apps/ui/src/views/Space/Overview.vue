@@ -109,7 +109,7 @@ watchEffect(() => setTitle(props.space.name));
               <SpaceAvatar
                 :space="space.parent"
                 :size="22"
-                class="rounded-md"
+                class="rounded-md !block"
               />
               <span>{{ space.parent.name }}</span>
             </AppLink>

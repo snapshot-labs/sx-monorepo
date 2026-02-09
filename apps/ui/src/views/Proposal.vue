@@ -173,6 +173,24 @@ watchEffect(() => {
               />
             </AppLink>
             <AppLink
+              v-if="proposal.vote_count"
+              :to="{
+                name: 'space-proposal-votes',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-votes'"
+                :count="proposal.vote_count"
+                text="Votes"
+                class="inline-block"
+              />
+            </AppLink>
+            <AppLink
               v-if="
                 proposal.executions?.length ||
                 proposal.execution_strategy_type === 'safeSnap'
@@ -194,23 +212,6 @@ watchEffect(() => {
                     .reduce((a, b) => a + b, 0)
                 "
                 text="Execution"
-                class="inline-block"
-              />
-            </AppLink>
-            <AppLink
-              :to="{
-                name: 'space-proposal-votes',
-                params: {
-                  proposal: proposal.proposal_id,
-                  space: `${proposal.network}:${proposal.space.id}`
-                }
-              }"
-              class="flex items-center"
-            >
-              <UiLabel
-                :is-active="route.name === 'space-proposal-votes'"
-                :count="proposal.vote_count"
-                text="Votes"
                 class="inline-block"
               />
             </AppLink>
