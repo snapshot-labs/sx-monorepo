@@ -524,7 +524,7 @@ onBeforeUnmount(() => destroyAudio());
               </UiDropdownItem>
               <UiDropdownItem v-if="snapshotV1Url" :to="snapshotV1Url">
                 <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                View on previous interface
+                View on v1 interface
               </UiDropdownItem>
             </template>
           </UiDropdown>
