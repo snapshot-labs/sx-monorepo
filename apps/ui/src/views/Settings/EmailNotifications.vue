@@ -124,10 +124,7 @@ watchEffect(async () => {
           :definition="SUBSCRIBE_DEFINITION.properties.email"
         />
       </div>
-      <UiButton
-        :disabled="!web3.account"
-        @click="handleCreateSubscriptionClick"
-      >
+      <UiButton disabled @click="handleCreateSubscriptionClick">
         Subscribe now
       </UiButton>
     </template>
