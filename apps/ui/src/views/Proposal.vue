@@ -191,10 +191,7 @@ watchEffect(() => {
               />
             </AppLink>
             <AppLink
-              v-if="
-                proposal.executions?.length ||
-                proposal.execution_strategy_type === 'safeSnap'
-              "
+              v-if="proposal.executions?.length"
               :to="{
                 name: 'space-proposal-execution',
                 params: {
