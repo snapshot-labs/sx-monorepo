@@ -43,46 +43,31 @@ function handleNewDm(address: string) {
 
 <template>
   <div>
-    <!-- Loading: still logging in or XMTP connecting -->
-    <div
-      v-if="web3.authLoading || isInitializing || (isActivated && !isReady)"
-      class="px-4 py-3"
-    >
-      <UiLoading v-if="!error" class="block" />
-      <div v-else class="mt-3 text-center">
-        <p class="mb-3 text-red text-sm">{{ error }}</p>
-        <UiButton primary @click="init"> Retry </UiButton>
-      </div>
+    <!-- Still logging in or activated user reconnecting -->
+    <div v-if="web3.authLoading || (isActivated && !isReady)" class="px-4 py-3">
+      <UiLoading class="block" />
     </div>
 
-    <!-- Onboarding: user has never activated XMTP -->
-    <div
-      v-else-if="!isReady"
-      class="flex flex-col items-center justify-center text-center px-4 gap-3 min-h-[calc(100vh-72px)]"
-    >
-      <IH-chat-alt class="text-skin-link size-[48px]" />
-      <h2>Messages</h2>
-      <div class="max-w-[360px]">
-        Send and receive encrypted messages powered by XMTP. A one-time wallet
-        signature is required to get started.
-      </div>
-      <UiButton primary :loading="isInitializing" class="mt-2" @click="init">
-        Get started
-      </UiButton>
-      <p v-if="error" class="text-red text-sm">{{ error }}</p>
-    </div>
-
-    <!-- XMTP enabled -->
     <template v-else>
       <!-- Top action bar -->
       <div class="p-4 flex">
+        <UiButton
+          v-if="!isActivated"
+          primary
+          :loading="isInitializing"
+          @click="init"
+        >
+          Get started
+        </UiButton>
         <div class="flex-auto" />
-        <UiTooltip title="New message">
+        <UiTooltip v-if="isReady" title="New message">
           <UiButton uniform @click="modalOpen = true">
             <IH-user-add />
           </UiButton>
         </UiTooltip>
       </div>
+
+      <p v-if="error" class="px-4 pb-3 text-red text-sm">{{ error }}</p>
 
       <!-- Messages tab -->
       <div class="flex pl-4 border-b space-x-3">

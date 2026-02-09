@@ -1,3 +1,4 @@
+import { arrayify } from '@ethersproject/bytes';
 import {
   Client as ClientType,
   DecodedMessage,
@@ -10,11 +11,7 @@ function loadSdk() {
   return import('@xmtp/browser-sdk');
 }
 
-function textOf(content: unknown): string {
-  return typeof content === 'string' ? content : String(content);
-}
-
-export type ConversationPreview = {
+type ConversationPreview = {
   id: string;
   peerAddress: string;
   peerName: string;
@@ -23,13 +20,23 @@ export type ConversationPreview = {
   lastMessageIsOwn: boolean;
 };
 
-export type MessageItem = {
+type MessageItem = {
   id: string;
   content: unknown;
   senderInboxId: string;
   sentAt: Date;
   kind: number | string;
 };
+
+function toMessageItem(m: DecodedMessage): MessageItem {
+  return {
+    id: m.id,
+    content: m.content,
+    senderInboxId: m.senderInboxId,
+    sentAt: m.sentAt,
+    kind: m.kind
+  };
+}
 
 // XMTP classes use private fields (#field) which break with Vue's deep
 // reactive Proxy. Use shallowRef + markRaw so Vue never wraps them.
@@ -55,7 +62,7 @@ const xmtpActivated = useStorage(
   {} as Record<string, boolean>
 );
 
-// Data state (replaces TanStack Query)
+// Data state
 const conversations = ref<ConversationPreview[]>([]);
 const conversationsLoading = ref(false);
 const messageCache = ref<
@@ -63,15 +70,6 @@ const messageCache = ref<
 >({});
 const messagesLoading = ref(false);
 const messagesError = ref<string | null>(null);
-
-function hexToBytes(hex: string): Uint8Array {
-  const cleaned = hex.startsWith('0x') ? hex.slice(2) : hex;
-  const bytes = new Uint8Array(cleaned.length / 2);
-  for (let i = 0; i < cleaned.length; i += 2) {
-    bytes[i / 2] = parseInt(cleaned.substring(i, i + 2), 16);
-  }
-  return bytes;
-}
 
 async function getEthId(address: string) {
   const { IdentifierKind } = await loadSdk();
@@ -99,14 +97,7 @@ async function startMessageStream() {
     consentStates: [ConsentState.Allowed, ConsentState.Unknown],
     onValue: (message: DecodedMessage) => {
       if (message.kind !== GroupMessageKind.Application) return;
-      const item: MessageItem = {
-        id: message.id,
-        content: message.content,
-        senderInboxId: message.senderInboxId,
-        sentAt: message.sentAt,
-        kind: message.kind
-      };
-      messageHandler?.(item, message.conversationId);
+      messageHandler?.(toMessageItem(message), message.conversationId);
     },
     onError: (err: unknown) => {
       console.error('XMTP stream error:', err);
@@ -131,7 +122,7 @@ export function useXmtp() {
     }
 
     const isOwn = item.senderInboxId === xmtpClient.value?.inboxId;
-    const text = textOf(item.content);
+    const text = String(item.content);
     const time = Math.floor(item.sentAt.getTime() / 1000);
 
     // Update conversations list
@@ -158,9 +149,9 @@ export function useXmtp() {
       const cacheKey = convo.peerAddress.toLowerCase();
       const cached = messageCache.value[cacheKey];
       if (cached && !cached.messages.some(m => m.id === item.id)) {
-        messageCache.value = {
-          ...messageCache.value,
-          [cacheKey]: { ...cached, messages: [...cached.messages, item] }
+        messageCache.value[cacheKey] = {
+          ...cached,
+          messages: [...cached.messages, item]
         };
       }
     }
@@ -207,7 +198,7 @@ export function useXmtp() {
             if (lastMsg) {
               lastMessageText =
                 lastMsg.kind === GroupMessageKind.Application
-                  ? textOf(lastMsg.content)
+                  ? String(lastMsg.content)
                   : '';
               lastMessageTime = Math.floor(lastMsg.sentAt.getTime() / 1000);
               lastMessageIsOwn =
@@ -269,27 +260,28 @@ export function useXmtp() {
     messagesError.value = null;
 
     try {
-      const { GroupMessageKind } = await loadSdk();
+      let messages: MessageItem[] = [];
 
       await xmtpClient.value.conversations.syncAll();
       const id = await getEthId(peerAddress);
       const rawConvo =
         await xmtpClient.value.conversations.fetchDmByIdentifier(id);
-      if (!rawConvo) return;
 
-      await rawConvo.sync();
-      const allMsgs = await rawConvo.messages();
-      const messages: MessageItem[] = allMsgs
-        .filter((m: DecodedMessage) => m.kind === GroupMessageKind.Application)
-        .map((m: DecodedMessage) => ({
-          id: m.id,
-          content: m.content,
-          senderInboxId: m.senderInboxId,
-          sentAt: m.sentAt,
-          kind: m.kind
-        }));
+      if (rawConvo) {
+        const { GroupMessageKind } = await loadSdk();
+        try {
+          await rawConvo.sync();
+        } catch {
+          // conversation may be inactive; continue with cached messages
+        }
+        const allMsgs = await rawConvo.messages();
+        messages = allMsgs
+          .filter(
+            (m: DecodedMessage) => m.kind === GroupMessageKind.Application
+          )
+          .map(toMessageItem);
+      }
 
-      // Resolve peer name
       let peerName = '';
       try {
         const names = await getNames([peerAddress]);
@@ -298,10 +290,7 @@ export function useXmtp() {
         // fallback: no name
       }
 
-      messageCache.value = {
-        ...messageCache.value,
-        [key]: { messages, peerName }
-      };
+      messageCache.value[key] = { messages, peerName };
     } catch (e: any) {
       messagesError.value = e.message || 'Failed to load messages';
     } finally {
@@ -347,7 +336,7 @@ export function useXmtp() {
         }),
         signMessage: async (message: string) => {
           const signature = await ethersSigner.signMessage(message);
-          return hexToBytes(signature);
+          return arrayify(signature);
         }
       };
 
@@ -361,6 +350,8 @@ export function useXmtp() {
       startMessageStream();
       loadConversations();
     } catch (e: any) {
+      // Silently ignore user-rejected wallet signatures
+      if (/reject|denied|cancel/i.test(e.message)) return;
       console.error('Failed to initialize XMTP client:', e);
       error.value = e.message || 'Failed to initialize XMTP';
     } finally {

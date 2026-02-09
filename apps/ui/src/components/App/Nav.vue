@@ -370,7 +370,7 @@ const navigationItems = computed(() =>
           v-if="item.icon"
           class="inline-block"
         ></component>
-        <span class="grow" v-text="item.name" />
+        <span v-text="item.name" />
         <span
           v-if="item.count"
           class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
