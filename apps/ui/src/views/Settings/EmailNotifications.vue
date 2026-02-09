@@ -161,7 +161,7 @@ watchEffect(async () => {
           <div class="text-skin-text" v-text="feedType.description" />
         </div>
       </UiSwitch>
-      <UiButton @click="handleUpdateSubscriptionClick">
+      <UiButton disabled @click="handleUpdateSubscriptionClick">
         Update subscriptions
       </UiButton>
     </template>
