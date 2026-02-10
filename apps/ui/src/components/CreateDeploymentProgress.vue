@@ -58,7 +58,8 @@ const connectorModalOpen = ref(false);
 const connectorModalConnectors = ref([] as ConnectorType[]);
 const connectorCallbackFn: Ref<((value: Connector | false) => void) | null> =
   ref(null);
-const txIds = ref({});
+const txIds = ref<Record<string, string>>({});
+const deployedAddresses = ref<Record<string, string>>({});
 const deployedExecutionStrategies = ref([] as StrategyConfig[]);
 const executionStrategiesDestinations = ref([] as string[]);
 
@@ -141,43 +142,62 @@ async function deployStep(
     await login(selectedConnector);
   }
 
-  let result;
-  if (step.id === 'DEPLOYING_SPACE') {
-    const executionStrategies = deployedExecutionStrategies.value;
-    const executionDestinations = executionStrategiesDestinations.value;
+  const existingTxId = txIds.value[step.id];
+  let address: string;
+  let txId: string;
 
-    result = await createSpace(
-      props.networkId,
-      props.salt,
-      props.metadata,
-      props.settings,
-      props.authenticators,
-      props.validationStrategy,
-      props.votingStrategies,
-      executionStrategies,
-      executionDestinations,
-      props.controller
-    );
+  if (existingTxId) {
+    txId = existingTxId;
+    address = deployedAddresses.value[step.id] ?? '';
   } else {
-    result = await deployDependency(
-      props.networkId,
-      props.controller,
-      props.predictedSpaceAddress,
-      step.strategy
-    );
+    let result;
+    if (step.id === 'DEPLOYING_SPACE') {
+      const executionStrategies = deployedExecutionStrategies.value;
+      const executionDestinations = executionStrategiesDestinations.value;
+
+      result = await createSpace(
+        props.networkId,
+        props.salt,
+        props.metadata,
+        props.settings,
+        props.authenticators,
+        props.validationStrategy,
+        props.votingStrategies,
+        executionStrategies,
+        executionDestinations,
+        props.controller
+      );
+    } else {
+      result = await deployDependency(
+        props.networkId,
+        props.controller,
+        props.predictedSpaceAddress,
+        step.strategy
+      );
+    }
+
+    if (!result) {
+      failed.value = true;
+      return;
+    }
+
+    address = result.address;
+    txId = result.txId;
+    txIds.value[step.id] = txId;
+    deployedAddresses.value[step.id] = address;
   }
 
-  if (!result) {
-    failed.value = true;
-    return;
-  }
-
-  const { address, txId }: { address: string; txId: string } = result;
-
-  txIds.value[step.id] = txId;
   const stepNetwork = getStepNetwork(step);
+
+  await new Promise(resolve => setTimeout(resolve, 10000));
+
   const confirmedReceipt = await stepNetwork.helpers.waitForTransaction(txId);
-  if (confirmedReceipt.status === 0) throw new Error('Transaction failed');
+
+  if (confirmedReceipt.status === 0) {
+    delete txIds.value[step.id];
+    delete deployedAddresses.value[step.id];
+    throw new Error('Transaction failed');
+  }
 
   if (step.id !== 'DEPLOYING_SPACE') {
     const isCrosschainDeploy = step.strategy.address !== '';
