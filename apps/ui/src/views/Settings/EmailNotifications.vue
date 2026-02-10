@@ -66,18 +66,37 @@ const isFormValid = computed(() => !Object.keys(formErrors.value).length);
 async function handleCreateSubscriptionClick() {
   if (!isFormValid.value) return;
 
-  if (await createSubscription(form.value.email)) {
-    status.value = 'UNVERIFIED';
+  try {
+    if (await createSubscription(form.value.email)) {
+      status.value = 'UNVERIFIED';
+    }
+  } catch {
+    uiStore.addNotification(
+      'error',
+      'An error occured while submitting your query, please try again.'
+    );
   }
 }
 
 async function handleUpdateSubscriptionClick() {
-  if (await updateSubscription(Object.keys(feeds).filter(key => feeds[key]))) {
-    uiStore.addNotification('success', 'Your subscriptions have been updated');
+  try {
+    if (
+      await updateSubscription(Object.keys(feeds).filter(key => feeds[key]))
+    ) {
+      uiStore.addNotification(
+        'success',
+        'Your subscriptions have been updated'
+      );
 
-    queryClient.invalidateQueries({
-      queryKey: EMAIL_NOTIFICATION_KEYS.user(web3.value.account)
-    });
+      queryClient.invalidateQueries({
+        queryKey: EMAIL_NOTIFICATION_KEYS.user(web3.value.account)
+      });
+    }
+  } catch {
+    uiStore.addNotification(
+      'error',
+      'An error occured while submitting your query, please try again.'
+    );
   }
 }
 
