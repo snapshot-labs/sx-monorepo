@@ -12,6 +12,7 @@ import {
   VerificationContext
 } from '@/helpers/auction/verification-providers';
 import { CHAIN_IDS } from '@/helpers/constants';
+import { isUserAbortError, verifyNetwork } from '@/helpers/utils';
 
 const ATTESTATION_API_URL = import.meta.env.VITE_ATTESTATION_URL;
 
@@ -195,7 +196,9 @@ export function useAuctionVerification({
     try {
       attestationAuth = await signAttestation();
     } catch (e) {
-      console.error('Attestation signing failed', e);
+      if (!isUserAbortError(e)) {
+        console.error('Attestation signing failed', e);
+      }
       status.value = 'started';
       return;
     }
@@ -224,6 +227,9 @@ export function useAuctionVerification({
     if (!web3Provider || !(web3Provider instanceof Web3Provider)) {
       throw new Error('Wallet does not support signing');
     }
+
+    await verifyNetwork(web3Provider, CHAIN_IDS[network.value] as number);
+
     const timestamp = Date.now();
     const signature = await web3Provider
       .getSigner()
