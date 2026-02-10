@@ -1,9 +1,6 @@
-import { EmailSubscription } from './types';
+import { EmailSubscription, Method, Params } from './types';
 
 const ENVELOP_API_URL = import.meta.env.VITE_ENVELOP_URL;
-
-export type Params = { email: string; subscriptions?: string[] };
-export type Method = 'subscribe' | 'update';
 
 export const SubscribeSchema = {
   Subscribe: [

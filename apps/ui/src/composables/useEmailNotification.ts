@@ -1,11 +1,10 @@
 import {
   DOMAIN,
-  Method,
-  Params,
   send,
   SubscribeSchema,
   UpdateSubscriptionsSchema
 } from '@/helpers/emailNotification';
+import { Method, Params } from '@/helpers/emailNotification/types';
 import { isUserAbortError } from '@/helpers/utils';
 
 type Schema = typeof SubscribeSchema | typeof UpdateSubscriptionsSchema;
