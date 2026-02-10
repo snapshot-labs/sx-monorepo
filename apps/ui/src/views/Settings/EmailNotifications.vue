@@ -73,7 +73,7 @@ async function handleCreateSubscriptionClick() {
   } catch {
     uiStore.addNotification(
       'error',
-      'An error occured while submitting your query, please try again.'
+      'An error occurred while submitting your query, please try again.'
     );
   }
 }
@@ -95,7 +95,7 @@ async function handleUpdateSubscriptionClick() {
   } catch {
     uiStore.addNotification(
       'error',
-      'An error occured while submitting your query, please try again.'
+      'An error occurred while submitting your query, please try again.'
     );
   }
 }
