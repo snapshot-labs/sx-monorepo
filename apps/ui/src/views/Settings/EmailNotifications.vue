@@ -47,20 +47,19 @@ const feeds = reactive<Record<string, boolean>>({});
 
 const { createSubscription, updateSubscription } = useEmailNotification();
 
-const { 
+const {
   data: subscription,
   refetch: refetchSubscription,
   isLoading: isSubscriptionLoading,
-  isError: isSubscriptionError 
+  isError: isSubscriptionError
 } = useEmailNotificationQuery(toRef(() => web3.value.account));
 
-const { 
+const {
   data: feedsList,
   refetch: refetchFeedsList,
   isLoading: isFeedsListLoading,
   isError: isFeedsListError
-} =
-  useEmailNotificationFeedsListQuery();
+} = useEmailNotificationFeedsListQuery();
 
 const isFormValid = computed(() => !Object.keys(formErrors.value).length);
 
@@ -135,6 +134,16 @@ watchEffect(async () => {
       <UiLoading
         v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"
       />
+      <div
+        v-else-if="isFeedsListError || isSubscriptionError"
+        class="flex flex-col gap-3 items-start"
+      >
+        <UiAlert type="error">
+          There was an error fetching your subscription details. Please try
+          again.
+        </UiAlert>
+        <UiButton @click="refetchDetails"> <IH-refresh />Retry </UiButton>
+      </div>
       <template v-else-if="status === 'NOT_SUBSCRIBED'">
         <div>
           <h3 class="text-md leading-6">Receive email notifications</h3>
