@@ -25,7 +25,11 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return 'Contract call to <b>_NAME_</b>';
+    const rawMethodName = props.tx._form.method.slice(
+      0,
+      props.tx._form.method.indexOf('(')
+    );
+    return `<b>${rawMethodName}</b> on <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'raw') {
