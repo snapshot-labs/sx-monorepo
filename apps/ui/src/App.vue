@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouteRecordRaw } from 'vue-router';
 import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
 import defaultRoutes from '@/routes/default';
 import { orgWhiteLabelRoutes } from '@/routes/organization';
@@ -19,14 +20,14 @@ const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
 
-function mountCustomDomainRoutes() {
-  const routes = isOrganization.value
-    ? orgWhiteLabelRoutes
-    : isWhiteLabel.value
-      ? whiteLabelRoutes
-      : defaultRoutes;
+function getCustomDomainRoutes(): RouteRecordRaw[] {
+  if (isOrganization.value) return orgWhiteLabelRoutes;
+  if (isWhiteLabel.value) return whiteLabelRoutes;
+  return defaultRoutes;
+}
 
-  routes.forEach(route => router.addRoute(route));
+function mountCustomDomainRoutes() {
+  getCustomDomainRoutes().forEach(route => router.addRoute(route));
   router.removeRoute('splash');
 }
 
