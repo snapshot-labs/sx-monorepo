@@ -97,10 +97,10 @@ router.beforeEach((to, from, next) => {
   if (!name) return next();
 
   if (name.startsWith('space-')) {
-    const orgName = name.replace('space-', 'org-');
+    const orgRouteName = name.replace('space-', 'org-');
     const params = { ...to.params };
-    if (!ORG_ROUTES_WITH_SPACE.has(orgName)) delete params.space;
-    return next({ ...to, name: orgName, params });
+    if (!ORG_ROUTES_WITH_SPACE.has(orgRouteName)) delete params.space;
+    return next({ ...to, name: orgRouteName, params });
   }
 
   if (name === 'user') {

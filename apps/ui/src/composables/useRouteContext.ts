@@ -53,11 +53,11 @@ export function useRouteContext() {
         if (spaceParam && !orgSpaceKeys.value.has(spaceParam)) return to;
       }
 
-      const orgName = name.replace('space-', 'org-');
+      const orgRouteName = name.replace('space-', 'org-');
       const params = { ...to.params };
-      if (!ORG_ROUTES_WITH_SPACE.has(orgName)) delete params.space;
+      if (!ORG_ROUTES_WITH_SPACE.has(orgRouteName)) delete params.space;
 
-      return { ...to, name: orgName, params };
+      return { ...to, name: orgRouteName, params };
     }
 
     if (name === 'user') {
