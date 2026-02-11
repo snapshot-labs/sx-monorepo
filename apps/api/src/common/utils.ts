@@ -3,7 +3,7 @@ import { getExecutionData, utils } from '@snapshot-labs/sx';
 import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
 import { keccak256 } from 'viem';
-import { Network } from '../../.checkpoint/models';
+import { Network, Proposal, ScoresTick } from '../../.checkpoint/models';
 import { UI_URL } from '../config';
 
 type ExecutionType = Parameters<typeof getExecutionData>[0];
@@ -142,4 +142,27 @@ export function getParsedVP(value: string, decimals: number) {
   const parsedValue = parseInt(value, 10);
 
   return parsedValue / 10 ** decimals;
+}
+
+export async function updateScoresTick(
+  proposal: Proposal,
+  timestamp: number,
+  indexerName: string
+): Promise<void> {
+  const hourTimestamp = Math.floor(timestamp / 3600) * 3600;
+  const tickId = `${proposal.id}/${hourTimestamp}`;
+
+  let tick = await ScoresTick.loadEntity(tickId, indexerName);
+
+  if (!tick) {
+    tick = new ScoresTick(tickId, indexerName);
+    tick.proposal = proposal.id;
+  }
+
+  tick.timestamp = hourTimestamp;
+  tick.scores_1 = proposal.scores_1;
+  tick.scores_2 = proposal.scores_2;
+  tick.scores_3 = proposal.scores_3;
+
+  await tick.save();
 }
