@@ -10,6 +10,24 @@ export const ORG_ROUTES_WITH_SPACE = new Set([
   'org-editor'
 ]);
 
+export function toOrgRoute(
+  name: string,
+  params: Record<string, any> = {}
+): { name: string; params: Record<string, any> } | null {
+  if (name.startsWith('space-')) {
+    const orgRouteName = name.replace('space-', 'org-');
+    const newParams = { ...params };
+    if (!ORG_ROUTES_WITH_SPACE.has(orgRouteName)) delete newParams.space;
+    return { name: orgRouteName, params: newParams };
+  }
+
+  if (name === 'user') {
+    return { name: 'org-user-statement', params };
+  }
+
+  return null;
+}
+
 export function useOrgContext() {
   const route = useRoute();
   const { organization: whiteLabelOrg } = useWhiteLabel();
@@ -45,26 +63,13 @@ export function useOrgContext() {
       return to;
     }
 
-    const name = to.name.toString();
-
-    if (name.startsWith('space-')) {
-      if (opts?.checkSpaceMembership) {
-        const spaceParam = to.params?.space as string | undefined;
-        if (spaceParam && !orgSpaceKeys.value.has(spaceParam)) return to;
-      }
-
-      const orgRouteName = name.replace('space-', 'org-');
-      const params = { ...to.params };
-      if (!ORG_ROUTES_WITH_SPACE.has(orgRouteName)) delete params.space;
-
-      return { ...to, name: orgRouteName, params };
+    if (opts?.checkSpaceMembership) {
+      const spaceParam = to.params?.space as string | undefined;
+      if (spaceParam && !orgSpaceKeys.value.has(spaceParam)) return to;
     }
 
-    if (name === 'user') {
-      return { ...to, name: 'org-user-statement' };
-    }
-
-    return to;
+    const rewritten = toOrgRoute(to.name.toString(), to.params ?? {});
+    return rewritten ? { ...to, ...rewritten } : to;
   }
 
   return { isOrgContext, orgDefinition, orgSpaceKeys, resolveSpaceRoute };
