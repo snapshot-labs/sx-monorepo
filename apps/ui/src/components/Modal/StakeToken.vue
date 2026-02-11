@@ -186,7 +186,11 @@ watch(
       </template>
     </div>
     <template v-if="stakingContract" #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :disabled="!formValid || !form.amount"
+        @click="handleSubmit"
+      >
         Confirm
       </UiButton>
     </template>
