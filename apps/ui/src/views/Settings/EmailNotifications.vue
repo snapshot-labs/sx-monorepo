@@ -42,8 +42,12 @@ const form = ref<{
 }>(clone(SUBSCRIBE_FORM_STATE));
 const formErrors = ref<Record<string, any>>({});
 const formValidated = ref(false);
+const saving = ref(false);
+const el = ref(null);
+const { height: bottomToolbarHeight } = useElementSize(el);
 const status = ref<EmailSubscriptionStatus>('NOT_SUBSCRIBED');
 const feeds = reactive<Record<string, boolean>>({});
+const originalFeeds = ref<Record<string, boolean>>({});
 
 const {
   data: subscription,
@@ -68,7 +72,22 @@ async function handleResendConfirmationClick() {
 }
 
 async function handleUpdateSubscriptionClick() {
-  await updateSubscription();
+  saving.value = true;
+  try {
+    await updateSubscription();
+  } finally {
+    saving.value = false;
+  }
+}
+
+const isFeedsModified = computed(() =>
+  Object.keys(feeds).some(key => feeds[key] !== originalFeeds.value[key])
+);
+
+function resetFeeds() {
+  Object.keys(feeds).forEach(key => {
+    feeds[key] = originalFeeds.value[key] ?? true;
+  });
 }
 
 const formValidator = getValidator(SUBSCRIBE_DEFINITION);
@@ -105,6 +124,7 @@ watch(
       feeds[key] = subscription.value.feeds.includes(key);
     });
 
+    originalFeeds.value = { ...feeds };
     status.value = subscription.value.status;
   },
   { immediate: true }
@@ -118,7 +138,11 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <div>
+  <div
+    v-bind="$attrs"
+    class="!h-auto"
+    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 73}px)`"
+  >
     <div class="p-4 max-w-[592px] space-y-4">
       <UiLoading
         v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"
@@ -180,10 +204,16 @@ watchEffect(async () => {
             </div>
           </UiSwitch>
         </div>
-        <UiButton disabled @click="handleUpdateSubscriptionClick">
-          Update subscriptions
-        </UiButton>
       </UiContainerSettings>
     </div>
   </div>
+  <SettingsToolbar
+    v-if="status === 'VERIFIED' && isFeedsModified"
+    ref="el"
+    :error="null"
+    :is-modified="isFeedsModified"
+    :saving="saving"
+    @save="handleUpdateSubscriptionClick"
+    @reset="resetFeeds"
+  />
 </template>
