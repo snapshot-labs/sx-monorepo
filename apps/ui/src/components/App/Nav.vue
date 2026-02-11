@@ -44,7 +44,7 @@ type NavigationItem = {
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
-const { orgDefinition } = useRouteContext();
+const { orgDefinition } = useOrgContext();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);

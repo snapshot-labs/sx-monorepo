@@ -10,7 +10,7 @@ defineEmits<{
 }>();
 
 const { isWhiteLabel } = useWhiteLabel();
-const { isOrgContext, resolveSpaceRoute } = useRouteContext();
+const { isOrgContext, resolveSpaceRoute } = useOrgContext();
 const router = useRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {

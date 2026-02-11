@@ -7,7 +7,7 @@ const { setFavicon } = useFavicon();
 const { loadVotes } = useAccount();
 const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
-const { orgDefinition } = useRouteContext();
+const { orgDefinition } = useOrgContext();
 
 const { data: primarySpace, isPending: isPrimaryPending } = useSpaceQuery({
   networkId: computed(() => orgDefinition.value?.primarySpace.network ?? null),

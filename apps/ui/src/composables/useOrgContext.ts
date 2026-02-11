@@ -10,7 +10,7 @@ export const ORG_ROUTES_WITH_SPACE = new Set([
   'org-editor'
 ]);
 
-export function useRouteContext() {
+export function useOrgContext() {
   const route = useRoute();
   const { organization: whiteLabelOrg } = useWhiteLabel();
 
