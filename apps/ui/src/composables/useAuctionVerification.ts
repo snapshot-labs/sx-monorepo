@@ -83,6 +83,7 @@ export function useAuctionVerification({
   const error = ref<string | null>(null);
   const selectedProviderId = ref<VerificationProviderId | null>(null);
   const acceptedProviders = ref<VerificationProviderId[]>([]);
+  let verificationNonce = 0;
 
   const verificationType = computed((): AuctionVerificationType => {
     if (auction?.value && !auction.value.isPrivateAuction) return 'public';
@@ -191,17 +192,22 @@ export function useAuctionVerification({
       return;
     }
 
+    const currentNonce = ++verificationNonce;
+
     status.value = 'signing';
     let attestationAuth;
     try {
       attestationAuth = await signAttestation();
     } catch (e) {
+      if (currentNonce !== verificationNonce) return;
       if (!isUserAbortError(e)) {
         console.error('Attestation signing failed', e);
       }
       status.value = 'started';
       return;
     }
+
+    if (currentNonce !== verificationNonce) return;
 
     const context: VerificationContext = {
       web3Account,
