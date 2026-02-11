@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { shorten, sleep } from '@/helpers/utils';
+import { shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Connector, ConnectorType, StrategyConfig } from '@/networks/types';
 import { NetworkID, SpaceMetadata, SpaceSettings } from '@/types';
@@ -188,9 +188,6 @@ async function deployStep(
   }
 
   const stepNetwork = getStepNetwork(step);
-
-  await sleep(10000);
-
   const confirmedReceipt = await stepNetwork.helpers.waitForTransaction(txId);
 
   if (confirmedReceipt.status === 0) {

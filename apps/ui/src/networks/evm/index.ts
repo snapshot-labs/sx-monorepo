@@ -109,7 +109,31 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     getRelayerInfo: (space: string, network: NetworkID) =>
       getRelayerInfo(space, network, provider),
     getTransaction: (txId: string) => provider.getTransaction(txId),
-    waitForTransaction: (txId: string) => provider.waitForTransaction(txId),
+    waitForTransaction: (txId: string) =>
+      new Promise((resolve, reject) => {
+        const startTime = Date.now();
+
+        const timer = setInterval(async () => {
+          let receipt;
+          try {
+            receipt = await provider.getTransactionReceipt(txId);
+          } catch {
+            receipt = null;
+          }
+
+          if (!receipt) {
+            if (Date.now() - startTime > 600_000) {
+              clearInterval(timer);
+              reject(new Error('Transaction not found'));
+            }
+            return;
+          }
+
+          clearInterval(timer);
+          if (receipt.status === 0) reject(receipt);
+          else resolve(receipt);
+        }, 2000);
+      }),
     waitForIndexing: async (
       txId: string,
       timeout = 10000
