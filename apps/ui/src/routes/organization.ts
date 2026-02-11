@@ -19,7 +19,7 @@ import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
 import SpaceUser from '@/views/SpaceUser.vue';
 import Topic from '@/views/Topic.vue';
 
-export const orgChildrenRoutes: RouteRecordRaw[] = [
+const orgChildrenRoutes: RouteRecordRaw[] = [
   { path: '', name: 'org-overview', component: SpaceOverview },
   {
     path: ':space/create/:key?',
@@ -93,7 +93,7 @@ export const orgChildrenRoutes: RouteRecordRaw[] = [
 ];
 
 // For default routes: /org/:orgId
-export const orgDefaultRoute: RouteRecordRaw = {
+export const orgRoute: RouteRecordRaw = {
   path: '/org/:orgId',
   name: 'org',
   component: Organization,
@@ -101,7 +101,7 @@ export const orgDefaultRoute: RouteRecordRaw = {
 };
 
 // For whitelabel routes: / (root)
-export const orgWhiteLabelRoutes: RouteRecordRaw[] = [
+export const orgRootRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'org',

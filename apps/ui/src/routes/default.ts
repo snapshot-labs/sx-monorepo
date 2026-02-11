@@ -19,7 +19,7 @@ import Space from '@/views/Space.vue';
 import Terms from '@/views/Terms.vue';
 import User from '@/views/User.vue';
 import { spaceChildrenRoutes } from './common';
-import { orgDefaultRoute } from './organization';
+import { orgRoute } from './organization';
 
 export default [
   {
@@ -35,7 +35,7 @@ export default [
       { path: '/privacy-policy', name: 'site-policy', component: Policy }
     ]
   },
-  orgDefaultRoute,
+  orgRoute,
   {
     path: '/:space',
     name: 'space',
