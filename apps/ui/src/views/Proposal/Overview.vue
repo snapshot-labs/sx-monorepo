@@ -22,7 +22,6 @@ const props = defineProps<{
 
 const queryClient = useQueryClient();
 const router = useRouter();
-const { resolveSpaceRoute } = useRouteContext();
 const uiStore = useUiStore();
 const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
@@ -173,15 +172,13 @@ async function handleEditClick() {
     executions
   });
 
-  router.push(
-    resolveSpaceRoute({
-      name: 'space-editor',
-      params: {
-        space: spaceId,
-        key: draftId
-      }
-    })
-  );
+  router.push({
+    name: 'space-editor',
+    params: {
+      space: spaceId,
+      key: draftId
+    }
+  });
 }
 
 async function handleDuplicateClick() {
@@ -209,15 +206,13 @@ async function handleDuplicateClick() {
     executions
   });
 
-  router.push(
-    resolveSpaceRoute({
-      name: 'space-editor',
-      params: {
-        space: spaceId,
-        key: draftId
-      }
-    })
-  );
+  router.push({
+    name: 'space-editor',
+    params: {
+      space: spaceId,
+      key: draftId
+    }
+  });
 }
 
 async function handleFlagClick() {
@@ -235,7 +230,9 @@ async function handleFlagClick() {
 
       uiStore.addNotification('success', 'Proposal flagged successfully.');
 
-      router.push(resolveSpaceRoute({ name: 'space-overview' }));
+      router.push({
+        name: 'space-overview'
+      });
     }
   } finally {
     flagging.value = false;
@@ -257,7 +254,9 @@ async function handleCancelClick() {
 
       uiStore.addNotification('success', 'Proposal cancelled successfully.');
 
-      router.push(resolveSpaceRoute({ name: 'space-overview' }));
+      router.push({
+        name: 'space-overview'
+      });
     }
   } finally {
     cancelling.value = false;

@@ -19,7 +19,6 @@ const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
 const termsStore = useTermsStore();
-const { resolveSpaceRoute } = useRouteContext();
 
 const modalOpenVote = ref(false);
 const modalOpenTerms = ref(false);
@@ -106,12 +105,10 @@ watch(
     boostCount.value = 0;
 
     if (!isPending && !proposal) {
-      router.push(
-        resolveSpaceRoute({
-          name: 'space-overview',
-          params: { space: `${props.space.network}:${props.space.id}` }
-        })
-      );
+      router.push({
+        name: 'space-overview',
+        params: { space: `${props.space.network}:${props.space.id}` }
+      });
       return;
     }
 

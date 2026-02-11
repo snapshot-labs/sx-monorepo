@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Splash from '@/components/Layout/Splash.vue';
+import { ORG_ROUTES_WITH_SPACE } from '@/composables/useRouteContext';
 import aliases from '@/helpers/aliases.json';
 import { metadataNetwork } from '@/networks';
 import auctionRoutes from '@/routes/auction';
@@ -86,6 +87,27 @@ router.beforeEach((to, _from, next) => {
   } else {
     next();
   }
+});
+
+// Rewrite space-* routes to org-* when navigating within an org context
+router.beforeEach((to, from, next) => {
+  if (String(from.matched[0]?.name) !== 'org') return next();
+
+  const name = to.name?.toString();
+  if (!name) return next();
+
+  if (name.startsWith('space-')) {
+    const orgName = name.replace('space-', 'org-');
+    const params = { ...to.params };
+    if (!ORG_ROUTES_WITH_SPACE.has(orgName)) delete params.space;
+    return next({ ...to, name: orgName, params });
+  }
+
+  if (name === 'user') {
+    return next({ ...to, name: 'org-user-statement' });
+  }
+
+  next();
 });
 
 export default router;

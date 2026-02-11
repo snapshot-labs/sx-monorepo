@@ -31,7 +31,6 @@ const { setSkin } = useSkin();
 const { setTheme } = useTheme();
 const { isStandaloneLayout } = useLayout();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
-const { resolveSpaceRoute } = useRouteContext();
 const { setFavicon } = useFavicon();
 const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
@@ -115,15 +114,13 @@ async function handleTransactionAccept() {
     executions
   });
 
-  router.push(
-    resolveSpaceRoute({
-      name: 'space-editor',
-      params: whiteLabelAwareParams(isWhiteLabel.value, {
-        space: walletConnectSpaceKey.value,
-        key: draftId
-      })
+  router.push({
+    name: 'space-editor',
+    params: whiteLabelAwareParams(isWhiteLabel.value, {
+      space: walletConnectSpaceKey.value,
+      key: draftId
     })
-  );
+  });
 
   reset();
 }

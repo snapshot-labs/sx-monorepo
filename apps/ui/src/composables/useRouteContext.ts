@@ -1,7 +1,7 @@
 import { RouteLocationRaw } from 'vue-router';
 import { getOrganizationById } from '@/helpers/organizations';
 
-const ORG_ROUTES_WITH_SPACE = new Set([
+export const ORG_ROUTES_WITH_SPACE = new Set([
   'org-proposal',
   'org-proposal-overview',
   'org-proposal-votes',
