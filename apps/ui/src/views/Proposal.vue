@@ -19,6 +19,7 @@ const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const { modalAccountOpen } = useModal();
 const termsStore = useTermsStore();
+const { resolveSpaceRoute } = useRouteContext();
 
 const modalOpenVote = ref(false);
 const modalOpenTerms = ref(false);
@@ -65,7 +66,9 @@ const currentVote = computed(
 );
 
 const withoutContentInBottom = computed(
-  () => 'space-proposal-votes' === String(route.name)
+  () =>
+    String(route.name) === 'space-proposal-votes' ||
+    String(route.name) === 'org-proposal-votes'
 );
 
 async function handleVoteClick(choice: Choice) {
@@ -103,10 +106,12 @@ watch(
     boostCount.value = 0;
 
     if (!isPending && !proposal) {
-      router.push({
-        name: 'space-overview',
-        params: { space: `${props.space.network}:${props.space.id}` }
-      });
+      router.push(
+        resolveSpaceRoute({
+          name: 'space-overview',
+          params: { space: `${props.space.network}:${props.space.id}` }
+        })
+      );
       return;
     }
 
@@ -168,7 +173,10 @@ watchEffect(() => {
               }"
             >
               <UiLabel
-                :is-active="route.name === 'space-proposal-overview'"
+                :is-active="
+                  route.name === 'space-proposal-overview' ||
+                  route.name === 'org-proposal-overview'
+                "
                 text="Overview"
               />
             </AppLink>
@@ -184,7 +192,10 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="route.name === 'space-proposal-votes'"
+                :is-active="
+                  route.name === 'space-proposal-votes' ||
+                  route.name === 'org-proposal-votes'
+                "
                 :count="proposal.vote_count"
                 text="Votes"
                 class="inline-block"
@@ -205,7 +216,10 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="route.name === 'space-proposal-execution'"
+                :is-active="
+                  route.name === 'space-proposal-execution' ||
+                  route.name === 'org-proposal-execution'
+                "
                 :count="
                   proposal.executions
                     .map(execution => execution.transactions.length)
@@ -228,7 +242,10 @@ watchEffect(() => {
                 class="flex items-center"
               >
                 <UiLabel
-                  :is-active="route.name === 'space-proposal-discussion'"
+                  :is-active="
+                    route.name === 'space-proposal-discussion' ||
+                    route.name === 'org-proposal-discussion'
+                  "
                   :count="discourseTopic.posts_count"
                   text="Discussion"
                   class="inline-block"
@@ -270,7 +287,9 @@ watchEffect(() => {
         :class="[
           'shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg',
           {
-            'hidden md:block': route.name === 'space-proposal-votes'
+            'hidden md:block':
+              route.name === 'space-proposal-votes' ||
+              route.name === 'org-proposal-votes'
           }
         ]"
       >

@@ -42,6 +42,7 @@ const uiStore = useUiStore();
 const { proposals, createDraft, refreshDrafts } = useEditor();
 const route = useRoute();
 const router = useRouter();
+const { resolveSpaceRoute } = useRouteContext();
 const { propose, updateProposal } = useActions();
 const { web3 } = useWeb3();
 const {
@@ -411,14 +412,16 @@ async function handleProposeClick() {
       proposal.value.originalProposal &&
       offchainNetworks.includes(props.space.network)
     ) {
-      router.push({
-        name: 'space-proposal-overview',
-        params: {
-          proposal: proposal.value.originalProposal.proposal_id
-        }
-      });
+      router.push(
+        resolveSpaceRoute({
+          name: 'space-proposal-overview',
+          params: {
+            proposal: proposal.value.originalProposal.proposal_id
+          }
+        })
+      );
     } else {
-      router.push({ name: 'space-proposals' });
+      router.push(resolveSpaceRoute({ name: 'space-proposals' }));
     }
   } catch (e) {
     console.error(e);
@@ -477,11 +480,13 @@ watch(
 
     const newId = await createDraft(spaceKey.value);
 
-    router.replace({
-      name: 'space-editor',
-      params: { key: newId },
-      query: route.query
-    });
+    router.replace(
+      resolveSpaceRoute({
+        name: 'space-editor',
+        params: { space: spaceKey.value, key: newId },
+        query: route.query
+      })
+    );
   },
   { immediate: true }
 );

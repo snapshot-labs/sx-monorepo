@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
 import defaultRoutes from '@/routes/default';
+import { orgWhiteLabelRoutes } from '@/routes/organization';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
 const route = useRoute();
@@ -9,6 +10,7 @@ const { app, isAuctionApp } = useApp();
 const {
   init: initWhiteLabel,
   isWhiteLabel,
+  isOrganization,
   isCustomDomain,
   resolved: whiteLabelResolved,
   failed: whiteLabelFailed
@@ -18,7 +20,11 @@ const { setTitle } = useTitle();
 const routeName = computed(() => String(route.matched[0]?.name));
 
 function mountCustomDomainRoutes() {
-  const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
+  const routes = isOrganization.value
+    ? orgWhiteLabelRoutes
+    : isWhiteLabel.value
+      ? whiteLabelRoutes
+      : defaultRoutes;
 
   routes.forEach(route => router.addRoute(route));
   router.removeRoute('splash');

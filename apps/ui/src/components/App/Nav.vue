@@ -12,7 +12,9 @@ import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
+import IHChatAlt2 from '~icons/heroicons-outline/chat-alt-2';
 import IHCog from '~icons/heroicons-outline/cog';
+import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
@@ -36,11 +38,13 @@ type NavigationItem = {
   hidden?: boolean;
   link?: any;
   active?: boolean;
+  isExternal?: boolean;
 };
 
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { orgDefinition } = useRouteContext();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
@@ -51,7 +55,17 @@ const { data: spaceData } = useSpaceQuery({
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
+
+const { data: orgPrimarySpaceData } = useSpaceQuery({
+  networkId: computed(() => orgDefinition.value?.primarySpace.network ?? null),
+  spaceId: computed(() => orgDefinition.value?.primarySpace.id ?? null)
+});
+
 const space = computed(() => {
+  if (currentRouteName.value === 'org') {
+    return orgPrimarySpaceData.value ?? null;
+  }
+
   if (currentRouteName.value === 'space' && resolved.value) {
     return spaceData.value ?? null;
   }
@@ -261,6 +275,153 @@ function getNavigationConfig(
     };
   }
 
+  if (mainRoute === 'org') {
+    if (route.name === 'org-settings') {
+      const isOffchainNetwork = space.value
+        ? offchainNetworks.includes(space.value.network)
+        : false;
+
+      function getOrgSettingsRoute({
+        name,
+        tab,
+        hidden
+      }: {
+        name: string;
+        tab: string;
+        hidden?: boolean;
+      }) {
+        return {
+          name,
+          link: {
+            name: 'org-settings',
+            params: { tab }
+          },
+          active: route.params.tab === tab,
+          hidden
+        };
+      }
+
+      return {
+        style: 'slim',
+        items: {
+          back: {
+            name: 'Settings',
+            icon: IHArrowLongLeft,
+            link: { name: 'org-overview' },
+            active: true
+          },
+          profile: getOrgSettingsRoute({
+            name: 'Profile',
+            tab: 'profile'
+          }),
+          proposal: getOrgSettingsRoute({
+            name: 'Proposal',
+            tab: 'proposal'
+          }),
+          votingStrategies: getOrgSettingsRoute({
+            name: 'Voting strategies',
+            tab: 'voting-strategies'
+          }),
+          voting: getOrgSettingsRoute({
+            name: 'Voting',
+            tab: 'voting'
+          }),
+          execution: getOrgSettingsRoute({
+            name: 'Execution',
+            tab: 'execution',
+            hidden: isOffchainNetwork
+          }),
+          authenticators: getOrgSettingsRoute({
+            name: 'Authenticators',
+            tab: 'authenticators',
+            hidden: isOffchainNetwork
+          }),
+          treasuries: getOrgSettingsRoute({
+            name: 'Treasuries',
+            tab: 'treasuries'
+          }),
+          delegations: getOrgSettingsRoute({
+            name: 'Delegations',
+            tab: 'delegations'
+          }),
+          labels: getOrgSettingsRoute({
+            name: 'Labels',
+            tab: 'labels'
+          }),
+          controller: getOrgSettingsRoute({
+            name: 'Controller',
+            tab: 'controller'
+          })
+        }
+      };
+    }
+
+    const org = orgDefinition.value;
+    const primarySpaceKey = org
+      ? `${org.primarySpace.network}:${org.primarySpace.id}`
+      : '';
+
+    const externalLinksItems: Record<string, NavigationItem> = {};
+    if (org) {
+      for (const link of org.externalLinks) {
+        const key = link.name.toLowerCase().replace(/\s+/g, '-');
+        externalLinksItems[key] = {
+          name: link.name,
+          icon: IHDocumentText,
+          link: link.url,
+          active: false,
+          isExternal: true
+        };
+      }
+    }
+
+    return {
+      items: {
+        overview: {
+          name: 'Overview',
+          icon: IHGlobeAlt
+        },
+        proposals: {
+          name: 'Proposals',
+          icon: IHNewspaper
+        },
+        polls: {
+          name: 'Polls',
+          icon: IHChatAlt2
+        },
+        ...(space.value?.delegations && space.value.delegations.length > 0
+          ? {
+              delegates: {
+                name: 'Delegates',
+                icon: IHLightningBolt
+              }
+            }
+          : undefined),
+        ...(SPACES_DISCUSSIONS[primarySpaceKey]
+          ? {
+              discussions: {
+                name: 'Discussions',
+                icon: IHAnnotation,
+                active: ['org-discussions', 'org-discussions-topic'].includes(
+                  route.name as string
+                )
+              }
+            }
+          : undefined),
+        ...externalLinksItems,
+        ...(canSeeSettings.value
+          ? {
+              settings: {
+                name: 'Settings',
+                icon: IHCog,
+                link: { name: 'org-settings', params: { tab: 'profile' } }
+              }
+            }
+          : undefined)
+      }
+    };
+  }
+
   if (mainRoute === 'settings') {
     return {
       items: {
@@ -357,6 +518,7 @@ const navigationItems = computed(() =>
         v-for="(item, key) in navigationItems"
         :key="key"
         :to="item.link"
+        :is-external="item.isExternal"
         class="px-4 space-x-2 flex items-center"
         :class="[
           item.active ? 'text-skin-link' : 'text-skin-text',
@@ -368,7 +530,14 @@ const navigationItems = computed(() =>
           v-if="item.icon"
           class="inline-block"
         ></component>
-        <span class="grow" v-text="item.name" />
+        <span class="grow flex items-center gap-2.5">
+          <span v-text="item.name" />
+          <IH-arrow-sm-right
+            v-if="item.isExternal"
+            class="-rotate-45"
+            :width="16"
+          />
+        </span>
         <span
           v-if="item.count"
           class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"

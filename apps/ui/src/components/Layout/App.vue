@@ -31,6 +31,7 @@ const { setSkin } = useSkin();
 const { setTheme } = useTheme();
 const { isStandaloneLayout } = useLayout();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
+const { resolveSpaceRoute } = useRouteContext();
 const { setFavicon } = useFavicon();
 const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
@@ -58,10 +59,12 @@ const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const hasAppNav = computed(
   () =>
-    ['space', 'my', 'settings', 'pro'].includes(
+    ['space', 'org', 'my', 'settings', 'pro'].includes(
       String(route.matched[0]?.name)
     ) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+    !['space-editor', 'space-proposal', 'org-editor', 'org-proposal'].includes(
+      String(route.matched[1]?.name)
+    )
 );
 
 const hasSidebar = computed(() => !isStandaloneLayout.value);
@@ -80,11 +83,15 @@ const hasPlaceHolderSidebar = computed(
       'auction-upcoming',
       'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+    !['space-editor', 'space-proposal', 'org-editor', 'org-proposal'].includes(
+      String(route.matched[1]?.name)
+    )
 );
 
 const hasTopNav = computed(() => {
-  return 'space-editor' !== String(route.matched[1]?.name);
+  return !['space-editor', 'org-editor'].includes(
+    String(route.matched[1]?.name)
+  );
 });
 
 async function handleLogin(connector: Connector) {
@@ -108,13 +115,15 @@ async function handleTransactionAccept() {
     executions
   });
 
-  router.push({
-    name: 'space-editor',
-    params: whiteLabelAwareParams(isWhiteLabel.value, {
-      space: walletConnectSpaceKey.value,
-      key: draftId
+  router.push(
+    resolveSpaceRoute({
+      name: 'space-editor',
+      params: whiteLabelAwareParams(isWhiteLabel.value, {
+        space: walletConnectSpaceKey.value,
+        key: draftId
+      })
     })
-  });
+  );
 
   reset();
 }
@@ -262,7 +271,12 @@ router.afterEach(() => {
       @close="uiStore.safeModal = null"
     />
     <ModalTransaction
-      v-if="route.name !== 'space-editor' && transaction && network"
+      v-if="
+        route.name !== 'space-editor' &&
+        route.name !== 'org-editor' &&
+        transaction &&
+        network
+      "
       :open="!!transaction"
       :network="network"
       :initial-state="transaction._form"

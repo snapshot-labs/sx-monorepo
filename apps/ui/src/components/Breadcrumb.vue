@@ -21,7 +21,7 @@ const { data: spaceData } = useSpaceQuery({
 
 const showSpace = computed(
   () =>
-    ['proposal', 'space'].includes(String(route.matched[0]?.name)) ||
+    ['proposal', 'space', 'org'].includes(String(route.matched[0]?.name)) ||
     isWhiteLabel.value
 );
 
