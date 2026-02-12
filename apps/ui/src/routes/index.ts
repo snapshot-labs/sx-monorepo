@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Splash from '@/components/Layout/Splash.vue';
-import { toOrgRoute } from '@/composables/useOrgContext';
+import { toOrgRoute } from '@/composables/useOrganization';
 import aliases from '@/helpers/aliases.json';
 import { metadataNetwork } from '@/networks';
 import auctionRoutes from '@/routes/auction';

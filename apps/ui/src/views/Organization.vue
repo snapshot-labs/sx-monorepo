@@ -1,53 +1,41 @@
 <script setup lang="ts">
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
-import { useSpaceQuery } from '@/queries/spaces';
 
 const route = useRoute();
 const { setFavicon } = useFavicon();
 const { loadVotes } = useAccount();
 const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
-const { orgDefinition } = useOrgContext();
+const { organization, resolved } = useOrganization();
 
-const { data: primarySpace, isPending: isPrimaryPending } = useSpaceQuery({
-  networkId: computed(() => orgDefinition.value?.primarySpace.network ?? null),
-  spaceId: computed(() => orgDefinition.value?.primarySpace.id ?? null)
-});
-
-const { data: secondarySpace, isPending: isSecondaryPending } = useSpaceQuery({
-  networkId: computed(
-    () => orgDefinition.value?.secondarySpace.network ?? null
-  ),
-  spaceId: computed(() => orgDefinition.value?.secondarySpace.id ?? null)
-});
-
-const isPending = computed(
-  () => isPrimaryPending.value || isSecondaryPending.value
-);
-
-const isSecondaryRoute = computed(() => {
-  if (route.name === 'org-polls') return true;
+const activeSpace = computed(() => {
+  if (!organization.value) return null;
   const spaceParam = route.params.space as string | undefined;
-  if (!spaceParam || !orgDefinition.value) return false;
-  const { network, id } = orgDefinition.value.secondarySpace;
-  return spaceParam === `${network}:${id}`;
-});
 
-const activeSpace = computed(() =>
-  isSecondaryRoute.value ? secondarySpace.value : primarySpace.value
-);
+  if (spaceParam) {
+    const match = organization.value.spaces.find(
+      s => spaceParam === `${s.network}:${s.id}`
+    );
+    if (match) return match;
+  }
+
+  return organization.value.spaces[0] ?? null;
+});
 
 watch(
-  [() => orgDefinition.value?.primarySpace, () => web3.value.account],
-  ([primary, account]) => {
-    if (!primary || !account) return;
-    loadVotes(primary.network, [primary.id]);
+  [() => organization.value?.spaces, () => web3.value.account],
+  ([spaces, account]) => {
+    if (!spaces || !account) return;
+    for (const space of spaces) {
+      loadVotes(space.network, [space.id]);
+    }
   },
   { immediate: true }
 );
 
 watchEffect(() => {
-  if (!primarySpace.value) {
+  const firstSpace = organization.value?.spaces[0];
+  if (!firstSpace) {
     setFavicon(null);
     return;
   }
@@ -55,9 +43,9 @@ watchEffect(() => {
   setFavicon(
     getStampUrl(
       'space',
-      `${primarySpace.value.network}:${primarySpace.value.id}`,
+      `${firstSpace.network}:${firstSpace.id}`,
       16,
-      getCacheHash(primarySpace.value.avatar)
+      getCacheHash(firstSpace.avatar)
     )
   );
 });
@@ -68,6 +56,6 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <UiLoading v-if="isPending" class="block p-4" />
+  <UiLoading v-if="!resolved" class="block p-4" />
   <router-view v-else :space="activeSpace" />
 </template>

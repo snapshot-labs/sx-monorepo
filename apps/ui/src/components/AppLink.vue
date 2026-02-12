@@ -10,7 +10,7 @@ defineEmits<{
 }>();
 
 const { isWhiteLabel } = useWhiteLabel();
-const { isOrgContext, resolveSpaceRoute } = useOrgContext();
+const { organization, resolveSpaceRoute } = useOrganization();
 const router = useRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
@@ -22,7 +22,7 @@ function normalize(to: RouteLocationRaw) {
     return to;
   }
 
-  if (isOrgContext.value) {
+  if (organization.value) {
     return resolveSpaceRoute(to, { checkSpaceMembership: true });
   }
 

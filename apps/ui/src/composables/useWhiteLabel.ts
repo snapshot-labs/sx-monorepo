@@ -1,10 +1,6 @@
 import { useQueryClient } from '@tanstack/vue-query';
-import {
-  getOrganizationByDomain,
-  OrganizationDefinition
-} from '@/helpers/organizations';
 import { getNetwork, metadataNetwork } from '@/networks';
-import { NetworkID, SkinSettings, Space } from '@/types';
+import { SkinSettings, Space } from '@/types';
 
 // List of global paths, that should not be nested inside space scope
 // when redirecting from whitelabel to main app
@@ -14,10 +10,7 @@ const WHITELABEL_MAPPING = import.meta.env.VITE_WHITELABEL_MAPPING;
 const domain = window.location.hostname;
 
 // Hardcoded whitelabel mappings for onchain spaces
-const MAPPING: Record<
-  string,
-  { network: NetworkID; id: string; skinSettings?: Partial<SkinSettings> }
-> = {
+const MAPPING = {
   'vanilla.box': {
     network: 'base',
     id: '0x8cF43759f3d4E72cB72cED6bd69cCe43d4428264',
@@ -38,12 +31,32 @@ const MAPPING: Record<
   'townhall.box': {
     network: 's',
     id: 'openagora.eth'
+  },
+  'governance.starknet.io': {
+    skinSettings: {
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      theme: 'light',
+      logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
+    }
+  },
+  'starknet.stage.box': {
+    skinSettings: {
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      theme: 'light',
+      logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
+    }
   }
 };
 
 const isWhiteLabel = ref(false);
-const isOrganization = ref(false);
-const organization = ref<OrganizationDefinition | null>(null);
 const isCustomDomain = ref(
   WHITELABEL_MAPPING ? true : domain !== DEFAULT_DOMAIN
 );
@@ -55,29 +68,9 @@ const resolved = ref(!isCustomDomain.value || isElectron);
 const space = ref<Space | null>(null);
 const skinSettings = ref<SkinSettings>();
 
-async function loadSpace(
-  spaceNetwork: NetworkID,
-  loadSpacesParams: Record<string, string>
-): Promise<Space | null> {
-  const queryClient = useQueryClient();
-  const network = getNetwork(spaceNetwork);
-  const result = (
-    await network.api.loadSpaces({ limit: 1 }, loadSpacesParams)
-  )[0];
-
-  if (!result) return null;
-
-  queryClient.setQueryData(
-    ['spaces', 'detail', `${result.network}:${result.id}`],
-    result
-  );
-
-  return result;
-}
-
 async function getSpace(domain: string): Promise<Space | null> {
   const loadSpacesParams: Record<string, string> = {};
-  let spaceNetwork: NetworkID = metadataNetwork;
+  let spaceNetwork = metadataNetwork;
 
   // Resolve white label domain locally if mapping is provided
   // for easier local testing
@@ -86,17 +79,31 @@ async function getSpace(domain: string): Promise<Space | null> {
     const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
     if (domain === localDomain) {
       const [network, id] = localSpaceId.split(':');
-      spaceNetwork = network as NetworkID;
+      spaceNetwork = network;
       loadSpacesParams.id = id;
     }
   } else if (MAPPING[domain]) {
+    if (!('id' in MAPPING[domain])) return null;
     loadSpacesParams.id = MAPPING[domain].id;
     spaceNetwork = MAPPING[domain].network;
   } else {
     loadSpacesParams.domain = domain;
   }
 
-  return loadSpace(spaceNetwork, loadSpacesParams);
+  const queryClient = useQueryClient();
+  const network = getNetwork(spaceNetwork);
+  const space = (
+    await network.api.loadSpaces({ limit: 1 }, loadSpacesParams)
+  )[0];
+
+  if (!space) return null;
+
+  queryClient.setQueryData(
+    ['spaces', 'detail', `${space.network}:${space.id}`],
+    space
+  );
+
+  return space;
 }
 
 export function useWhiteLabel() {
@@ -106,30 +113,13 @@ export function useWhiteLabel() {
     let shouldResolve = true;
 
     try {
-      // Check if domain is an organization first
-      const org = getOrganizationByDomain(domain);
-      if (org) {
-        organization.value = org;
-        isOrganization.value = true;
-        isWhiteLabel.value = true;
-
-        // Load the primary space for skin/favicon
-        space.value = await loadSpace(org.primarySpace.network, {
-          id: org.primarySpace.id
-        });
-
-        skinSettings.value =
-          (org.skinSettings as SkinSettings) ||
-          space.value?.additionalRawData?.skinSettings;
-
-        return;
-      }
+      const mapping = MAPPING[domain];
 
       space.value = await getSpace(domain);
 
-      if (!space.value) return;
+      if (!space.value && !mapping) return;
 
-      if (!space.value.turbo && !MAPPING[domain]) {
+      if (space.value && !space.value.turbo && !mapping) {
         const redirectUrl = new URL(
           `${window.location.protocol}//${DEFAULT_DOMAIN}`
         );
@@ -154,8 +144,7 @@ export function useWhiteLabel() {
 
       isWhiteLabel.value = true;
       skinSettings.value =
-        (MAPPING[domain]?.skinSettings as SkinSettings) ||
-        space.value.additionalRawData?.skinSettings;
+        mapping?.skinSettings || space.value?.additionalRawData?.skinSettings;
     } catch (e) {
       console.log(e);
       failed.value = true;
@@ -167,8 +156,6 @@ export function useWhiteLabel() {
   return {
     init,
     isWhiteLabel,
-    isOrganization,
-    organization,
     isCustomDomain,
     failed,
     space,

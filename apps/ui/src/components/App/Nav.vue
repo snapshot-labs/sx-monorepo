@@ -44,7 +44,7 @@ type NavigationItem = {
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
-const { orgDefinition } = useOrgContext();
+const { organization } = useOrganization();
 
 const { param } = useRouteParser('space');
 const { resolved, address, networkId } = useResolve(param);
@@ -56,14 +56,9 @@ const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
 
-const { data: orgPrimarySpaceData } = useSpaceQuery({
-  networkId: computed(() => orgDefinition.value?.primarySpace.network ?? null),
-  spaceId: computed(() => orgDefinition.value?.primarySpace.id ?? null)
-});
-
 const space = computed(() => {
   if (currentRouteName.value === 'org') {
-    return orgPrimarySpaceData.value ?? null;
+    return organization.value?.spaces[0] ?? null;
   }
 
   if (currentRouteName.value === 'space' && resolved.value) {
@@ -275,24 +270,19 @@ function getNavigationConfig(
     };
   }
 
-  if (mainRoute === 'org') {
-    const org = orgDefinition.value;
-    const primarySpaceKey = org
-      ? `${org.primarySpace.network}:${org.primarySpace.id}`
-      : '';
+  if (mainRoute === 'org' && organization.value) {
+    const primarySpaceKey = `${organization.value.spaces[0].network}:${organization.value.spaces[0].id}`;
 
     const externalLinksItems: Record<string, NavigationItem> = {};
-    if (org) {
-      for (const link of org.externalLinks) {
-        const key = link.name.toLowerCase().replace(/\s+/g, '-');
-        externalLinksItems[key] = {
-          name: link.name,
-          icon: IHDocumentText,
-          link: link.url,
-          active: false,
-          isExternal: true
-        };
-      }
+    for (const link of organization.value.externalLinks) {
+      const key = link.name.toLowerCase().replace(/\s+/g, '-');
+      externalLinksItems[key] = {
+        name: link.name,
+        icon: IHDocumentText,
+        link: link.url,
+        active: false,
+        isExternal: true
+      };
     }
 
     return {

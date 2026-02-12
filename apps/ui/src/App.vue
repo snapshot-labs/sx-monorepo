@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouteRecordRaw } from 'vue-router';
 import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
+import { getOrganizationByDomain } from '@/helpers/organizations';
 import defaultRoutes from '@/routes/default';
 import { orgRootRoutes } from '@/routes/organization';
 import whiteLabelRoutes from '@/routes/whiteLabel';
@@ -11,7 +12,6 @@ const { app, isAuctionApp } = useApp();
 const {
   init: initWhiteLabel,
   isWhiteLabel,
-  isOrganization: isWhiteLabelOrganization,
   isCustomDomain,
   resolved: whiteLabelResolved,
   failed: whiteLabelFailed
@@ -20,8 +20,13 @@ const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
 
+const whiteLabelOrg = getOrganizationByDomain(window.location.hostname);
+const isWhiteLabelMultiSpace = whiteLabelOrg
+  ? whiteLabelOrg.spaceIds.length > 1
+  : false;
+
 function getCustomDomainRoutes(): RouteRecordRaw[] {
-  if (isWhiteLabelOrganization.value) return orgRootRoutes;
+  if (isWhiteLabelMultiSpace) return orgRootRoutes;
   if (isWhiteLabel.value) return whiteLabelRoutes;
   return defaultRoutes;
 }

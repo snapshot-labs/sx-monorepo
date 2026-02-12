@@ -1,5 +1,11 @@
 import { RouteLocationRaw } from 'vue-router';
-import { getOrganizationById } from '@/helpers/organizations';
+import {
+  getOrganizationByDomain,
+  getOrganizationById,
+  Organization
+} from '@/helpers/organizations';
+import { useSpaceQuery } from '@/queries/spaces';
+import { Space } from '@/types';
 
 export const ORG_ROUTES_WITH_SPACE = new Set([
   'org-proposal',
@@ -30,26 +36,43 @@ export function toOrgRoute(
   return null;
 }
 
-export function useOrgContext() {
+export function useOrganization() {
   const route = useRoute();
-  const { organization: whiteLabelOrg } = useWhiteLabel();
 
-  const isOrgContext = computed(() => String(route.matched[0]?.name) === 'org');
+  const isOrgRoute = computed(() => String(route.matched[0]?.name) === 'org');
 
-  const orgDefinition = computed(() => {
-    if (!isOrgContext.value) return null;
-    if (whiteLabelOrg.value) return whiteLabelOrg.value;
-    const orgId = route.params.orgId as string;
-    return orgId ? getOrganizationById(orgId) : null;
+  const config = computed(() => {
+    if (!isOrgRoute.value) return null;
+    return (
+      getOrganizationByDomain(window.location.hostname) ??
+      getOrganizationById(route.params.orgId as string)
+    );
   });
 
   const orgSpaceKeys = computed(() => {
-    const org = orgDefinition.value;
+    const org = config.value;
     if (!org) return new Set<string>();
-    return new Set([
-      `${org.primarySpace.network}:${org.primarySpace.id}`,
-      `${org.secondarySpace.network}:${org.secondarySpace.id}`
-    ]);
+    return new Set(org.spaceIds.map(s => `${s.network}:${s.id}`));
+  });
+
+  const spaceQueries = (config.value?.spaceIds ?? []).map((_, i) =>
+    useSpaceQuery({
+      networkId: computed(() => config.value?.spaceIds[i]?.network ?? null),
+      spaceId: computed(() => config.value?.spaceIds[i]?.id ?? null)
+    })
+  );
+
+  const resolved = computed(() => spaceQueries.every(q => !q.isPending.value));
+
+  const organization = computed<Organization | null>(() => {
+    const org = config.value;
+    if (!org || !resolved.value) return null;
+
+    const spaces = spaceQueries
+      .map(q => q.data.value)
+      .filter((s): s is Space => !!s);
+
+    return { ...org, spaces };
   });
 
   function resolveSpaceRoute(
@@ -57,7 +80,7 @@ export function useOrgContext() {
     opts?: { checkSpaceMembership?: boolean }
   ): RouteLocationRaw {
     if (
-      !isOrgContext.value ||
+      !config.value ||
       typeof to === 'string' ||
       !('name' in to) ||
       !to.name
@@ -74,5 +97,9 @@ export function useOrgContext() {
     return rewritten ? { ...to, ...rewritten } : to;
   }
 
-  return { isOrgContext, orgDefinition, orgSpaceKeys, resolveSpaceRoute };
+  return {
+    organization,
+    resolved,
+    resolveSpaceRoute
+  };
 }
