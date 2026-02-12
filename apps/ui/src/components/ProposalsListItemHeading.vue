@@ -112,7 +112,7 @@ const hasVoted = computed(
     <span>
       <template v-if="proposal.vote_count">
         ·
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-proposal-votes',
@@ -124,7 +124,7 @@ const hasVoted = computed(
         >
           {{ _n(proposal.vote_count, 'compact') }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </router-link>
+        </AppLink>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
         · {{ formatQuorum(totalProgress) }}

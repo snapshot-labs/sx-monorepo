@@ -22,7 +22,8 @@ import {
   getCurrentTimestamp,
   getParsedVP,
   getProposalLink,
-  getSpaceLink
+  getSpaceLink,
+  updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
@@ -556,6 +557,7 @@ export function createWriters(
 
     leaderboardItem.vote_count += 1;
 
+    await updateScoresTick(proposal, vote.created, config.indexerName);
     await Promise.all([
       space.save(),
       proposal.save(),

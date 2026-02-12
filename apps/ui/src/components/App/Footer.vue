@@ -22,11 +22,11 @@ const isSiteRoute = computed(() => {
         v-if="resolved && !isWhiteLabel && !isSiteRoute"
         title="About Snapshot"
       >
-        <router-link :to="{ name: 'site-landing' }" tabindex="-1">
+        <AppLink :to="{ name: 'site-landing' }" tabindex="-1">
           <UiButton uniform>
             <IH-question-mark-circle class="size-[24px]" />
           </UiButton>
-        </router-link>
+        </AppLink>
       </UiTooltip>
       <UiTooltip title="Get help">
         <a :href="HELPDESK_URL" target="_blank" tabindex="-1">
