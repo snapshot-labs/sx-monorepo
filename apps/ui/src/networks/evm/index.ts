@@ -111,7 +111,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
     getTransaction: (txId: string) => provider.getTransaction(txId),
     waitForTransaction: (txId: string) =>
       new Promise((resolve, reject) => {
-        const startTime = Date.now();
+        let retries = 0;
 
         const timer = setInterval(async () => {
           let receipt;
@@ -122,7 +122,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
           }
 
           if (!receipt) {
-            if (Date.now() - startTime > 600_000) {
+            if (retries++ > 60) {
               clearInterval(timer);
               reject(new Error('Transaction not found'));
             }
