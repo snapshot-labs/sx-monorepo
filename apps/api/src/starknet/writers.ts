@@ -33,7 +33,8 @@ import {
   getProposalLink,
   getSpaceDecimals,
   getSpaceLink,
-  updateCounter
+  updateCounter,
+  updateScoresTick
 } from '../common/utils';
 
 type Strategy = {
@@ -870,6 +871,8 @@ export function createWriters(config: FullConfig) {
       proposal[`scores_${choice}`],
       proposal.vp_decimals
     );
+
+    await updateScoresTick(proposal, created, config.indexerName);
     await proposal.save();
   };
 
