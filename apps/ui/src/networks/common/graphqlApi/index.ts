@@ -454,7 +454,7 @@ export function createApi(
           Number(tick.scores_1),
           Number(tick.scores_2),
           Number(tick.scores_3)
-        ] as [number, number, number]
+        ] as const
       }));
     },
     loadProposalVotes: async (
