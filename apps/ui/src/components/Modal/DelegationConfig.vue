@@ -19,7 +19,7 @@ const props = defineProps<{
   initialState?: SpaceMetadataDelegation;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataDelegation);
+  (e: 'add', config: SpaceMetadataDelegation): void;
   (e: 'close'): void;
 }>();
 
@@ -111,7 +111,7 @@ const definition = computed(() => {
               networkId: props.networkId,
               networksListKind: 'full',
               networksFilter: isApeChainDelegateRegistry.value
-                ? [33139, 33111]
+                ? ['33139', '33111']
                 : undefined,
               title: 'Delegation contract network',
               nullable: true
@@ -158,6 +158,8 @@ watch(
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.value = clone(props.initialState);
     } else {
@@ -179,16 +181,10 @@ watch(
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <PickerContact

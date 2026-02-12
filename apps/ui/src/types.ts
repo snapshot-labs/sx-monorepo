@@ -1,3 +1,4 @@
+import { Transaction as _Transaction } from '@snapshot-labs/sx';
 import { VNode } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
@@ -85,7 +86,7 @@ export type SelectedStrategy = {
 export type SpaceMetadataTreasury = {
   name: string;
   address: string;
-  chainId: ChainId | null;
+  chainId: string | null;
 };
 
 export type SpaceMetadataLabel = {
@@ -100,7 +101,7 @@ export type SpaceMetadataDelegation = {
   apiType: DelegationType | null;
   apiUrl: string | null;
   contractAddress: string | null;
-  chainId: ChainId | null;
+  chainId: string | null;
 };
 
 export type SpaceMetadata = {
@@ -113,6 +114,7 @@ export type SpaceMetadata = {
   github: string;
   discord: string;
   farcaster: string;
+  clanker: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
   labels: SpaceMetadataLabel[];
@@ -164,6 +166,7 @@ export type OffchainAdditionalRawData = {
   | 'private'
   | 'flagged'
   | 'flagCode'
+  | 'hibernated'
   | 'domain'
   | 'skin'
   | 'skinSettings'
@@ -201,6 +204,7 @@ export type Space = {
   github: string;
   discord: string;
   farcaster: string;
+  clanker?: string;
   coingecko?: string;
   terms: string;
   privacy: SpacePrivacy;
@@ -458,76 +462,7 @@ export type SkinSettings = {
 
 export type Drafts = Record<string, Draft>;
 
-export type BaseTransaction = {
-  to: string;
-  data: string;
-  value: string;
-  salt: string;
-};
-
-export type SendTokenTransaction = BaseTransaction & {
-  _type: 'sendToken';
-  _form: {
-    recipient: string;
-    amount: string;
-    token: {
-      name: string;
-      decimals: number;
-      symbol: string;
-      address: string;
-    };
-  };
-};
-
-export type SendNftTransaction = BaseTransaction & {
-  _type: 'sendNft';
-  _form: {
-    recipient: string;
-    sender: string;
-    amount: string;
-    nft: {
-      type: string;
-      address: string;
-      id: string;
-      name: string;
-      collection?: string;
-    };
-  };
-};
-
-export type StakeTokenTransaction = BaseTransaction & {
-  _type: 'stakeToken';
-  _form: {
-    recipient: string;
-    args: any;
-    amount: string;
-  };
-};
-
-export type ContractCallTransaction = BaseTransaction & {
-  _type: 'contractCall';
-  _form: {
-    abi: any[];
-    recipient: string;
-    method: string;
-    args: any;
-    amount?: string;
-  };
-};
-
-export type RawTransaction = BaseTransaction & {
-  _type: 'raw';
-  _form: {
-    recipient: string;
-  };
-};
-
-export type Transaction =
-  | SendTokenTransaction
-  | SendNftTransaction
-  | StakeTokenTransaction
-  | ContractCallTransaction
-  | RawTransaction;
+export type Transaction = _Transaction;
 
 // Utils
 export type RequiredProperty<T> = {

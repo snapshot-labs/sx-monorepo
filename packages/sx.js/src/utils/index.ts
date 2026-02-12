@@ -7,3 +7,4 @@ export * as encoding from './encoding';
 export * as starknetEnums from './starknet-enums';
 export * as strategies from './strategies';
 export * as storageProofs from './storage-proofs';
+export * as execution from './execution';

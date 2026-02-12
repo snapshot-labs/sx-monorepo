@@ -15,8 +15,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'addStrategy', strategy: StrategyTemplate);
-  (e: 'close');
+  (e: 'addStrategy', strategy: StrategyTemplate): void;
+  (e: 'close'): void;
 }>();
 
 const searchValue = ref('');
@@ -71,29 +71,13 @@ watch(
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Add strategy</h3>
-      <div
-        v-if="!isLoading"
-        class="flex items-center border-t px-2 py-3 mt-3 -mb-3"
-      >
-        <IH-search class="mx-2" />
-        <input
-          ref="searchInput"
-          v-model="searchValue"
-          type="text"
-          placeholder="Search"
-          class="flex-auto bg-transparent text-skin-link"
-        />
-      </div>
+      <UiModalSearchInput v-if="!isLoading" v-model="searchValue" />
     </template>
     <div class="p-4 flex">
       <UiLoading v-if="isLoading" class="m-auto" />
-      <div
-        v-else-if="hasError"
-        class="flex w-full justify-center items-center gap-2 text-skin-text"
-      >
-        <IH-exclamation-circle class="inline-block shrink-0" />
-        <span>Failed to load strategies.</span>
-      </div>
+      <UiStateWarning v-else-if="hasError" class="justify-center">
+        Failed to load strategies.
+      </UiStateWarning>
       <div v-else class="flex flex-col flex-1 gap-3 overflow-hidden">
         <button
           v-for="strategy in filteredStrategies"

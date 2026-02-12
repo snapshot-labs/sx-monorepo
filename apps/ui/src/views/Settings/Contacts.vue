@@ -24,13 +24,10 @@ function handleContactEdit(contact) {
 
 <template>
   <div>
-    <div class="flex">
-      <div class="flex-auto" />
-      <div class="pt-4 px-4 space-x-2">
-        <UiButton class="!px-0 w-[46px]" @click="openModal('editContact')">
-          <IH-plus-sm class="inline-block" />
-        </UiButton>
-      </div>
+    <div class="flex justify-end p-4">
+      <UiButton uniform @click="openModal('editContact')">
+        <IH-plus-sm />
+      </UiButton>
     </div>
     <UiSectionHeader label="Contacts" />
     <div
@@ -63,13 +60,9 @@ function handleContactEdit(contact) {
         </button>
       </div>
     </div>
-    <div
-      v-if="!contactsStore.contacts.length"
-      class="flex items-center px-4 py-3 text-skin-link gap-2"
-    >
-      <IH-exclamation-circle />
-      <span v-text="'There are no contacts here.'" />
-    </div>
+    <UiStateWarning v-if="!contactsStore.contacts.length" class="px-4 py-3">
+      There are no contacts here.
+    </UiStateWarning>
     <teleport to="#modal">
       <ModalEditContact
         :open="modalOpen.editContact"

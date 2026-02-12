@@ -6,6 +6,7 @@ import {
   getStampUrl,
   whiteLabelAwareParams
 } from '@/helpers/utils';
+import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
 
@@ -19,13 +20,19 @@ const sidebarSwipeEnabled = ref(true);
 const route = useRoute();
 const router = useRouter();
 const uiStore = useUiStore();
-const { modalOpen } = useModal();
+const {
+  modalOpen,
+  modalAccountOpen,
+  modalAccountWithoutDismissOpen,
+  resetAccountModal
+} = useModal();
 const { init, setAppName, app } = useApp();
 const { setSkin } = useSkin();
 const { setTheme } = useTheme();
+const { isStandaloneLayout } = useLayout();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
-const { web3 } = useWeb3();
+const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
     const noSideBarSwipe = (e.target as Element)?.closest(
@@ -57,7 +64,7 @@ const hasAppNav = computed(
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
 
-const hasSidebar = computed(() => !isWhiteLabel.value);
+const hasSidebar = computed(() => !isStandaloneLayout.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
@@ -66,7 +73,12 @@ const hasPlaceHolderSidebar = computed(
     ![
       'space-proposal',
       'create-space-snapshot',
-      'create-space-snapshot-x'
+      'create-space-snapshot-x',
+      'auction',
+      'auctions',
+      'auction-invite',
+      'auction-upcoming',
+      'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
@@ -74,6 +86,11 @@ const hasPlaceHolderSidebar = computed(
 const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
 });
+
+async function handleLogin(connector: Connector) {
+  resetAccountModal();
+  await login(connector);
+}
 
 async function handleTransactionAccept() {
   if (
@@ -174,10 +191,10 @@ router.afterEach(() => {
     <div
       v-else
       class="flex min-h-screen maximum:border-r"
-      :class="{ 'maximum:border-l': isWhiteLabel }"
+      :class="{ 'maximum:border-l': isStandaloneLayout }"
     >
       <AppBottomNav
-        v-if="web3.account && !isWhiteLabel"
+        v-if="web3.account && !isStandaloneLayout"
         :class="[
           `fixed bottom-0 inset-x-0 hidden app-bottom-nav z-[100]`,
           { 'app-bottom-nav-open': uiStore.sideMenuOpen }
@@ -186,13 +203,13 @@ router.afterEach(() => {
       <AppSidebar
         v-if="hasSidebar"
         :class="[
-          `hidden lg:flex app-sidebar fixed inset-y-0`,
+          `hidden lg:flex app-sidebar fixed inset-y-0 top-electron-titlebar-height`,
           { '!flex app-sidebar-open': uiStore.sideMenuOpen }
         ]"
       />
       <AppTopnav
         :has-app-nav="hasAppNav"
-        :class="{ hidden: !hasTopNav, 'maximum:border-l': isWhiteLabel }"
+        :class="{ hidden: !hasTopNav, 'maximum:border-l': isStandaloneLayout }"
         class="maximum:border-r"
       >
         <template #toggle-sidebar-button>
@@ -210,7 +227,7 @@ router.afterEach(() => {
       <AppNav
         v-if="hasAppNav"
         :class="[
-          'top-[72px] inset-y-0 z-10 hidden lg:flex fixed app-nav',
+          'top-header-height inset-y-0 z-10 hidden lg:flex fixed app-nav',
           {
             '!flex app-nav-open': uiStore.sideMenuOpen
           }
@@ -223,7 +240,7 @@ router.afterEach(() => {
         @click="uiStore.sideMenuOpen = false"
       />
       <main class="flex-auto w-full flex">
-        <div class="flex-auto w-0" :class="{ 'mt-[72px]': hasTopNav }">
+        <div class="flex-auto w-0" :class="{ 'mt-header-height': hasTopNav }">
           <router-view class="h-full pb-10" />
         </div>
         <div
@@ -251,6 +268,12 @@ router.afterEach(() => {
       :initial-state="transaction._form"
       @add="handleTransactionAccept"
       @close="handleTransactionReject"
+    />
+    <ModalConnector
+      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
+      :closeable="!modalAccountWithoutDismissOpen"
+      @close="modalAccountOpen = false"
+      @pick="handleLogin"
     />
   </div>
 </template>
@@ -350,7 +373,7 @@ $placeholderSidebarWidth: 240px;
 }
 
 .backdrop {
-  @apply fixed inset-0 z-[99];
+  @apply fixed inset-0 top-electron-titlebar-height z-[99];
   @apply bg-[black]/40 #{!important};
 }
 </style>

@@ -6,20 +6,16 @@
 
   // backgrounds
   --bg: 255, 255, 255;
-  --block-bg: 255, 255, 255;
-  --input-bg: 251, 251, 251;
-  --hover-bg: 247, 247, 247;
-  --active-bg: 237, 237, 237;
   --border: 229, 229, 230;
 
   // text
-  --heading: 17, 17, 17;
-  --link: 17, 17, 17;
+  --heading: 0, 0, 0;
+  --link: 0, 0, 0;
   --text: 87, 96, 106;
-  --content: rgba(17, 17, 17, 0.8);
+  --content: rgba(0, 0, 0, 0.8);
 
   // accents
-  --primary: 17, 17, 17;
+  --primary: 0, 0, 0;
   --accent-foreground: 251, 251, 251;
   --danger: 235, 76, 91;
   --success: 87, 179, 117;
@@ -38,21 +34,17 @@
   color-scheme: dark;
 
   // backgrounds
-  --bg: 24, 23, 28;
-  --block-bg: 28, 27, 32;
-  --input-bg: 35, 34, 39;
-  --hover-bg: 37, 36, 41;
-  --active-bg: 41, 40, 46;
-  --border: 47, 46, 51;
+  --bg: 20, 19, 24;
+  --border: 43, 42, 47;
 
   // text
-  --heading: 251, 251, 251;
-  --link: 251, 251, 251;
+  --heading: 255, 255, 255;
+  --link: 255, 255, 255;
   --text: 160, 159, 164;
-  --content: rgba(250, 249, 252, 0.8);
+  --content: rgba(255, 255, 255, 0.8);
 
   // accents
-  --primary: 251, 251, 251;
+  --primary: 255, 255, 255;
   --accent-foreground: 17, 17, 17;
   --danger: 235, 76, 91;
   --success: 87, 179, 117;
@@ -100,7 +92,6 @@ html {
 body {
   @apply overflow-y-scroll font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
   scrollbar-gutter: stable;
-
 }
 
 .font-display {
@@ -227,18 +218,12 @@ input[type='number'] {
   appearance: textfield;
 }
 
-input[type="time"]::-webkit-calendar-picker-indicator {
+input[type='time']::-webkit-calendar-picker-indicator {
   display: none;
 }
 
 input:placeholder-shown {
   @apply text-ellipsis;
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 16px;
 }
 
 .notification {
@@ -321,12 +306,47 @@ input:placeholder-shown {
   }
 }
 
-.s-form > .s-base:last-child, .s-input-pb-0 .s-base {
-    .s-input, &.s-error {
-      @apply mb-0;
-    }
+.s-form > .s-base:last-child,
+.s-input-pb-0 .s-base {
+  .s-input,
+  &.s-error {
+    @apply mb-0;
+  }
 }
 
+.s-array {
+  @apply space-y-2.5;
+
+  &-items {
+    .s-input-wrapper {
+      @apply flex items-center h-[40px] gap-2.5 px-2.5 border bg-skin-border rounded-lg;
+
+      * {
+        @apply shrink-0;
+      }
+
+      input {
+        @apply flex-1 h-[40px] py-[10px] bg-transparent text-skin-heading focus:outline-none;
+      }
+    }
+
+    .s-error .s-input-wrapper {
+      @apply border-skin-danger;
+    }
+
+    .s-form-wrapper {
+      @apply border border-skin-border rounded-lg p-3 pt-2 space-y-2.5;
+    }
+
+    > .s-base {
+      @apply space-y-1;
+    }
+  }
+
+  + .s-base {
+    @apply mt-4;
+  }
+}
 
 .s-error {
   @apply mb-2;
@@ -377,7 +397,7 @@ input:placeholder-shown {
 
   .s-label {
     @apply absolute px-3 mt-1 text-[17px];
-    &:has(+ input[type="checkbox"]) {
+    &:has(+ input[type='checkbox']) {
       @apply px-0 m-0 ml-3.5;
     }
   }

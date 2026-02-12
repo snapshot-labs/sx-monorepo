@@ -37,7 +37,7 @@ watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
           class="inline-block"
           tabindex="-1"
         >
-          <UiButton class="flex items-center gap-2 justify-center">
+          <UiButton>
             <IC-discourse class="size-[22px] shrink-0" />
             Join the discussion
             <IH-arrow-sm-right class="-rotate-45 shrink-0" />

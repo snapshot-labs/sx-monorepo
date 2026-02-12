@@ -6,6 +6,7 @@ import { SkinSettings, Space } from '@/types';
 // when redirecting from whitelabel to main app
 const GLOBAL_PATHS = { contacts: 'settings/contacts' };
 const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
+const WHITELABEL_MAPPING = import.meta.env.VITE_WHITELABEL_MAPPING;
 const domain = window.location.hostname;
 
 // Hardcoded whitelabel mappings for onchain spaces
@@ -31,9 +32,22 @@ const MAPPING = {
     network: 's',
     id: 'openagora.eth'
   },
+  'governance.starknet.io': {
+    network: 'sn',
+    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
+    skinSettings: {
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      theme: 'light',
+      logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
+    }
+  },
   'starknet.stage.box': {
-    network: 's',
-    id: 'starknetdemo.eth',
+    network: 'sn',
+    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
@@ -47,9 +61,14 @@ const MAPPING = {
 };
 
 const isWhiteLabel = ref(false);
-const isCustomDomain = ref(domain !== DEFAULT_DOMAIN);
+const isCustomDomain = ref(
+  WHITELABEL_MAPPING ? true : domain !== DEFAULT_DOMAIN
+);
 const failed = ref(false);
-const resolved = ref(domain === DEFAULT_DOMAIN);
+
+const isElectron = !!process.env.ELECTRON;
+
+const resolved = ref(!isCustomDomain.value || isElectron);
 const space = ref<Space | null>(null);
 const skinSettings = ref<SkinSettings>();
 
@@ -59,10 +78,9 @@ async function getSpace(domain: string): Promise<Space | null> {
 
   // Resolve white label domain locally if mapping is provided
   // for easier local testing
-  // e.g. VITE_WHITE_LABEL_MAPPING='127.0.0.1;s:snapshot.eth'
-  const localMapping = import.meta.env.VITE_WHITE_LABEL_MAPPING;
-  if (localMapping) {
-    const [localDomain, localSpaceId] = localMapping.split(';');
+  // e.g. VITEWHITE_LABEL_MAPPING='localhost;s:snapshot.eth'
+  if (WHITELABEL_MAPPING) {
+    const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
     if (domain === localDomain) {
       const [network, id] = localSpaceId.split(':');
       spaceNetwork = network;

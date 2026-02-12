@@ -1,24 +1,47 @@
 import { CodegenConfig } from '@graphql-codegen/cli';
 
+const baseConfig: CodegenConfig['config'] = {
+  preset: 'client',
+  config: {
+    enumsAsTypes: true,
+    skipTypename: true,
+    avoidOptionals: {
+      field: true,
+      inputValue: false
+    }
+  },
+  presetConfig: {
+    gqlTagName: 'gql',
+    fragmentMasking: false
+  }
+};
+
 const config: CodegenConfig = {
-  schema: '../api/.checkpoint/schema.gql',
-  documents: ['src/networks/common/graphqlApi/queries.ts'],
   ignoreNoDocuments: true, // for better experience with the watcher
   generates: {
     './src/networks/common/graphqlApi/gql/': {
-      preset: 'client',
+      schema: '../api/.checkpoint/schema.gql',
+      documents: ['src/networks/common/graphqlApi/queries.ts'],
+      ...baseConfig
+    },
+    './src/helpers/auction/gql/': {
+      schema:
+        'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
+      documents: ['src/helpers/auction/queries.ts'],
+      ...baseConfig,
       config: {
-        enumsAsTypes: true,
-        skipTypename: true,
-        avoidOptionals: {
-          field: true,
-          inputValue: false
+        ...baseConfig.config,
+        scalars: {
+          BigInt: 'string',
+          Bytes: 'string',
+          BigDecimal: 'string'
         }
-      },
-      presetConfig: {
-        gqlTagName: 'gql',
-        fragmentMasking: false
       }
+    },
+    './src/helpers/auction/referral/gql/': {
+      schema: 'https://api.brokester.box',
+      documents: ['src/helpers/auction/referral/queries.ts'],
+      ...baseConfig
     }
   }
 };

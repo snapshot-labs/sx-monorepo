@@ -16,6 +16,8 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { modalAccountOpen } = useModal();
+const { web3Account } = useWeb3();
 
 const userActivity = ref<UserActivity>({
   vote_count: 0,
@@ -133,6 +135,11 @@ async function loadUserActivity() {
 // }
 
 function handleDelegateClick() {
+  if (!web3Account.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   delegateModalState.value.delegatees[0] = { id: userId.value };
   delegateModalOpen.value = true;
 }
@@ -160,8 +167,8 @@ async function getVotingPower() {
 }
 
 watch(
-  userId,
-  async id => {
+  [userId, () => props.space.id],
+  async ([id]) => {
     loaded.value = false;
 
     if (isValidAddress(id)) {
@@ -179,10 +186,9 @@ watch(
 
 <template>
   <UiLoading v-if="!loaded" class="block p-4" />
-  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    <span>This user does not exist</span>
-  </div>
+  <UiStateWarning v-else-if="!user" class="px-4 py-3">
+    This user does not exist
+  </UiStateWarning>
   <div v-else>
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
@@ -201,18 +207,11 @@ watch(
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
-          <UiButton
-            :to="{ name: 'user', params: { user: user.id } }"
-            class="!px-0 w-[46px]"
-          >
+          <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>
         </UiTooltip>
-        <DropdownShare
-          :shareable="{ user, space }"
-          type="space-user"
-          class="!px-0 w-[46px]"
-        />
+        <DropdownShare :shareable="{ user, space }" type="space-user" uniform />
       </div>
     </div>
     <div class="px-4">
@@ -267,7 +266,7 @@ watch(
       </div>
     </div>
     <UiScrollerHorizontal
-      class="z-40 sticky top-[71px] lg:top-[72px]"
+      class="z-40 sticky top-header-height-with-offset lg:top-header-height"
       with-buttons
       gradient="xxl"
     >

@@ -1,5 +1,16 @@
 import { Config } from 'tailwindcss';
 
+const ELECTRON_TITLEBAR_HEIGHT = !!process.env.ELECTRON ? 32 : 0;
+const APP_TOPNAV_HEIGHT = 72;
+
+export const TOTAL_NAV_HEIGHT = ELECTRON_TITLEBAR_HEIGHT + APP_TOPNAV_HEIGHT;
+
+const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + 41;
+
+// On some mobile devices (reproduced on Android only) consecutive sticky elements sometimes get out of sync when scrolling.
+// To prevent that we offset those elements by 1px so they overlap slightly preventing gaps.
+const STICKY_ELEMENT_BUFFER = 1;
+
 export default {
   future: {
     hoverOnlyWhenSupported: true
@@ -19,10 +30,6 @@ export default {
 
         // backgrounds
         'skin-bg': 'rgba(var(--bg), <alpha-value>)',
-        'skin-block-bg': 'rgba(var(--block-bg), <alpha-value>)',
-        'skin-input-bg': 'rgba(var(--input-bg), <alpha-value>)',
-        'skin-hover-bg': 'rgba(var(--hover-bg), <alpha-value>)',
-        'skin-active-bg': 'rgba(var(--active-bg), <alpha-value>)',
         'skin-border': 'rgba(var(--border), <alpha-value>)',
 
         // text
@@ -85,7 +92,16 @@ export default {
       10: '80px',
       11: '88px',
       12: '96px',
-      maximum: '1900px'
+      maximum: '1900px',
+      // Layout heights
+      'header-height': `${TOTAL_NAV_HEIGHT}px`,
+      'electron-titlebar-height': `${ELECTRON_TITLEBAR_HEIGHT}px`,
+      'header-height-with-offset': `${TOTAL_NAV_HEIGHT - STICKY_ELEMENT_BUFFER}px`,
+      'header-with-section-height': `${TOTAL_WITH_SECTION}px`,
+      // This offset is used on elements that have two preceeding fixed/sticky elements.
+      // Second fixed/sticky element is already shifted by STICKY_ELEMENT_BUFFER, so for third element
+      // we need to shift it again by the same amount so they overlap again.
+      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION - 2 * STICKY_ELEMENT_BUFFER}px`
     },
     fontFamily: {
       serif: ['"Calibre", Helvetica, Arial, sans-serif']

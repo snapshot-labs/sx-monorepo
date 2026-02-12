@@ -27,9 +27,9 @@ const props = defineProps<{
 }>();
 
 defineEmits<{
-  (e: 'editStrategy', strategy: Strategy);
-  (e: 'deleteStrategy', strategy: Strategy);
-  (e: 'testStrategies', strategies: StrategyConfig[]);
+  (e: 'editStrategy', strategy: Strategy): void;
+  (e: 'deleteStrategy', strategy: Strategy): void;
+  (e: 'testStrategies', strategies: StrategyConfig[]): void;
 }>();
 
 const network = computed(() => getNetwork(props.networkId));

@@ -71,7 +71,7 @@ const skinSettings = defineModel<SkinSettings>('skinSettings', {
 const props = defineProps<{ space: Space }>();
 
 const emit = defineEmits<{
-  (e: 'errors', value: any);
+  (e: 'errors', value: any): void;
 }>();
 
 const { encodeSkin } = useSkin();
@@ -147,7 +147,7 @@ onMounted(() => emit('errors', formErrors.value));
         />
       </div>
       <div>
-        <h4 class="eyebrow font-medium">Skin colors</h4>
+        <UiEyebrow class="font-medium">Skin colors</UiEyebrow>
         <div class="mb-2">
           Empty colors value will fallback to the base theme color.
         </div>
@@ -159,7 +159,7 @@ onMounted(() => emit('errors', formErrors.value));
         />
       </div>
       <div>
-        <h4 class="eyebrow font-medium">Custom logo</h4>
+        <UiEyebrow class="font-medium">Custom logo</UiEyebrow>
         <div class="mb-2">
           You can replace your space name in the upper left corner by a custom
           logo. Max dimensions are 380x76 pixels.
@@ -186,7 +186,7 @@ onMounted(() => emit('errors', formErrors.value));
       <Affix :top="137" :bottom="100">
         <div>
           <div class="flex justify-between items-center mb-2">
-            <h4 class="eyebrow font-medium">Preview</h4>
+            <UiEyebrow class="font-medium">Preview</UiEyebrow>
             <AppLink :to="previewUrl" target="_blank">
               <IHArrowsExpand class="cursor-pointer" />
             </AppLink>
@@ -198,7 +198,10 @@ onMounted(() => emit('errors', formErrors.value));
             <div
               class="browser-content-container flex items-center justify-center"
             >
-              <IC-zap v-if="isDisabled" class="size-[126px] text-skin-border" />
+              <IC-snapshot
+                v-if="isDisabled"
+                class="size-[126px] text-skin-border"
+              />
               <div v-else-if="!isWhiteLabel">
                 Preview only available on
                 <AppLink

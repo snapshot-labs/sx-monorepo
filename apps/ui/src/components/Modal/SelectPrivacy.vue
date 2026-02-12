@@ -10,8 +10,8 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', type: SpacePrivacy);
-  (e: 'close');
+  (e: 'save', type: SpacePrivacy): void;
+  (e: 'close'): void;
 }>();
 
 function handleSelect(type: SpacePrivacy) {

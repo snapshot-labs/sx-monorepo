@@ -11,6 +11,7 @@ import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
+import EmailNotifications from '@/views/Settings/EmailNotifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
 import Settings from '@/views/Settings.vue';
 import Site from '@/views/Site.vue';
@@ -61,7 +62,12 @@ export default [
     component: Settings,
     children: [
       { path: '', name: 'settings-spaces', component: SettingsSpaces },
-      { path: 'contacts', name: 'settings-contacts', component: Contacts }
+      { path: 'contacts', name: 'settings-contacts', component: Contacts },
+      {
+        path: 'email-notifications',
+        name: 'settings-email-notifications',
+        component: EmailNotifications
+      }
     ]
   },
   {

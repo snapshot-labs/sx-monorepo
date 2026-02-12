@@ -53,7 +53,7 @@ watchEffect(() => {
     <UiScrollerHorizontal
       v-if="props.space.treasuries.length !== 1"
       ref="treasuriesList"
-      class="z-40 sticky top-[71px] lg:top-[72px]"
+      class="z-40 sticky top-header-height-with-offset lg:top-header-height"
       with-buttons
       gradient="xxl"
     >
@@ -84,9 +84,8 @@ watchEffect(() => {
       :treasury-data="treasuryData"
       :extra-contacts="props.space.treasuries"
     />
-    <div v-else class="flex items-center px-4 py-3 text-skin-link gap-2">
-      <IH-exclamation-circle />
-      <span v-text="'Treasury not found.'" />
-    </div>
+    <UiStateWarning v-else class="px-4 py-3">
+      Treasury not found.
+    </UiStateWarning>
   </div>
 </template>

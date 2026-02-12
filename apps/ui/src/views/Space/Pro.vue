@@ -105,7 +105,9 @@ const modalPaymentOpen = ref(false);
 const modalSpaceOpen = ref(false);
 const modalConnectorOpen = ref(false);
 
-const paymentNetwork = computed(() => (metadataNetwork === 's' ? 1 : 11155111));
+const paymentNetwork = computed(() =>
+  metadataNetwork === 's' ? '1' : '11155111'
+);
 
 const tokens = computed(() => {
   return TOKENS[paymentNetwork.value].filter(t =>
@@ -230,10 +232,9 @@ onMounted(() => {
   <div class="space-y-8">
     <div class="shapes px-4 py-8 bg-skin-border/20 flex items-center">
       <div class="text-center w-full space-y-4">
-        <span
-          class="eyebrow inline-block text-skin-bg bg-skin-link rounded-full px-2"
-          >Snapshot Pro</span
-        >
+        <div class="inline-block bg-skin-link rounded-full px-2">
+          <UiEyebrow class="text-skin-bg">Snapshot Pro</UiEyebrow>
+        </div>
         <h1 class="pb-4">
           Level up your governance<br />
           with exclusive features
@@ -275,7 +276,7 @@ onMounted(() => {
       </div>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "
@@ -294,7 +295,7 @@ onMounted(() => {
     </div>
 
     <div class="mx-4">
-      <h4 class="eyebrow mb-4 text-center">Features</h4>
+      <UiEyebrow class="mb-4 text-center">Features</UiEyebrow>
       <h2 class="mb-6 text-center text-[32px]">
         Everything you asked for, and more
       </h2>
@@ -315,7 +316,7 @@ onMounted(() => {
     </div>
 
     <div class="mx-4">
-      <h4 class="eyebrow mb-4 text-center">Limits</h4>
+      <UiEyebrow class="mb-4 text-center">Limits</UiEyebrow>
       <h2 class="mb-6 text-center text-[32px]">
         Take your governance to the max
       </h2>
@@ -324,12 +325,13 @@ onMounted(() => {
           class="flex rounded-t-lg border-b bg-skin-bg px-4 py-2 text-skin-heading uppercase font-semibold text-sm"
         >
           <div class="flex-1 min-w-[70px]" />
-          <div
+          <UiEyebrow
             v-for="tier in TIER_PLAN"
             :key="tier"
-            class="eyebrow w-[120px] text-center"
-            v-text="tier"
-          />
+            class="w-[120px] text-center"
+          >
+            {{ tier }}
+          </UiEyebrow>
         </div>
         <div class="py-2">
           <div
@@ -350,7 +352,7 @@ onMounted(() => {
     </div>
 
     <div class="space-y-4 mx-4 flex flex-col items-center">
-      <h4 class="eyebrow">Trusted by leaders</h4>
+      <UiEyebrow>Trusted by leaders</UiEyebrow>
       <div class="max-w-[740px] flex flex-wrap justify-center gap-3">
         <UiStamp
           v-for="(user, i) in USERS"
@@ -367,7 +369,7 @@ onMounted(() => {
       <h2 class="text-[32px]">Get started today</h2>
       <div class="space-y-2.5 text-center">
         <UiButton
-          class="primary"
+          primary
           :disabled="
             !!selectedSpace && selectedSpace.network !== metadataNetwork
           "
@@ -446,10 +448,9 @@ onMounted(() => {
           class="font-semibold text-skin-heading text-lg flex flex-col items-center gap-2 mb-3"
         >
           Upgraded to
-          <span
-            class="eyebrow inline-block text-skin-bg bg-skin-link rounded-full px-2"
-            >Snapshot Pro</span
-          >
+          <div class="inline-block text-skin-bg bg-skin-link rounded-full px-2">
+            <UiEyebrow class="text-skin-bg">Snapshot Pro</UiEyebrow>
+          </div>
         </h4>
       </template>
       <template #transactionModalSuccessSubtitle>

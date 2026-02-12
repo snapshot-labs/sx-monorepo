@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useProposalVotesQuery } from '@/queries/votes';
@@ -63,11 +64,16 @@ function handleScrollEvent(target: HTMLElement) {
 </script>
 
 <template>
-  <div
-    ref="votesHeader"
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b overflow-hidden"
+  <UiColumnHeader
+    :ref="
+      ref =>
+        (votesHeader =
+          (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
+          null)
+    "
+    class="!px-0 overflow-hidden"
   >
-    <div class="flex space-x-3 font-medium min-w-[735px]">
+    <div class="flex space-x-3 min-w-[735px] w-full">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
       <div class="grow w-[40%]">
         <template v-if="offchainNetworks.includes(proposal.network)"
@@ -76,7 +82,7 @@ function handleScrollEvent(target: HTMLElement) {
         <UiSelectDropdown
           v-else
           v-model="choiceFilter"
-          class="font-normal"
+          class="font-normal text-center"
           title="Choice"
           gap="12"
           placement="start"
@@ -122,21 +128,16 @@ function handleScrollEvent(target: HTMLElement) {
       </button>
       <div class="min-w-[44px] lg:w-[60px]" />
     </div>
-  </div>
+  </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />
-      <div v-if="isError" class="px-4 py-3 flex items-center space-x-2">
-        <IH-exclamation-circle class="inline-block" />
-        <span>Failed to load votes.</span>
-      </div>
-      <div
-        v-if="data?.pages.flat().length === 0"
-        class="px-4 py-3 flex items-center space-x-2"
-      >
-        <IH-exclamation-circle class="inline-block" />
-        <span>There are no votes here.</span>
-      </div>
+      <UiStateWarning v-if="isError" class="px-4 py-3">
+        Failed to load votes.
+      </UiStateWarning>
+      <UiStateWarning v-if="data?.pages.flat().length === 0" class="px-4 py-3">
+        There are no votes here.
+      </UiStateWarning>
       <UiContainerInfiniteScroll
         v-if="data"
         :loading-more="isFetchingNextPage"
@@ -217,27 +218,20 @@ function handleScrollEvent(target: HTMLElement) {
           >
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <button type="button">
                   <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                </button>
               </template>
               <template #items>
-                <UiDropdownItem v-slot="{ active }">
-                  <a
-                    :href="
-                      network.helpers.getExplorerUrl(vote.tx, 'transaction')
-                    "
-                    target="_blank"
-                    class="flex items-center gap-2"
-                    :class="{ 'opacity-80': active }"
-                  >
-                    <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                    {{
-                      offchainNetworks.includes(proposal.network)
-                        ? 'Verify signature'
-                        : 'View on block explorer'
-                    }}
-                  </a>
+                <UiDropdownItem
+                  :to="network.helpers.getExplorerUrl(vote.tx, 'transaction')"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  {{
+                    offchainNetworks.includes(proposal.network)
+                      ? 'Verify signature'
+                      : 'View on block explorer'
+                  }}
                 </UiDropdownItem>
               </template>
             </UiDropdown>

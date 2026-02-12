@@ -33,6 +33,7 @@ export async function handleSpaceMetadata(
   spaceMetadataItem.twitter = '';
   spaceMetadataItem.discord = '';
   spaceMetadataItem.farcaster = '';
+  spaceMetadataItem.clanker = '';
   spaceMetadataItem.voting_power_symbol = '';
   spaceMetadataItem.wallet = '';
   spaceMetadataItem.executors = [];
@@ -78,6 +79,8 @@ export async function handleSpaceMetadata(
       spaceMetadataItem.discord = metadata.properties.discord;
     if (metadata.properties.farcaster)
       spaceMetadataItem.farcaster = metadata.properties.farcaster;
+    if (metadata.properties.clanker)
+      spaceMetadataItem.clanker = metadata.properties.clanker;
     if (metadata.properties.voting_power_symbol) {
       spaceMetadataItem.voting_power_symbol =
         metadata.properties.voting_power_symbol;

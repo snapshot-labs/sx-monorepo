@@ -14,8 +14,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', value: string);
-  (e: 'close');
+  (e: 'save', value: string): void;
+  (e: 'close'): void;
 }>();
 
 const controllerDefinition = computed(() => ({
@@ -47,6 +47,8 @@ const formErrors = ref({} as Record<string, any>);
 watch(
   () => props.open,
   () => {
+    showPicker.value = false;
+
     if (props.initialState) {
       form.controller = props.initialState.controller;
     } else {
@@ -75,16 +77,10 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <template v-if="showPicker">

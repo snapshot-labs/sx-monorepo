@@ -160,10 +160,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
 
 <template>
   <UiLoading v-if="!loaded" class="block p-4" />
-  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    <span>This user does not exist</span>
-  </div>
+  <UiStateWarning v-else-if="!user" class="px-4 py-3">
+    This user does not exist
+  </UiStateWarning>
   <div v-else>
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
@@ -180,8 +179,8 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-if="compareAddresses(web3.account, user.id)"
           title="Edit profile"
         >
-          <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
-            <IH-cog class="inline-block" />
+          <UiButton uniform @click="modalOpenEditUser = true">
+            <IH-cog />
           </UiButton>
         </UiTooltip>
       </div>
@@ -227,23 +226,17 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           </template>
         </div>
       </div>
-      <h4 class="mb-2 eyebrow leading-8">Activity</h4>
     </div>
-    <div class="border-b w-full">
-      <div class="flex space-x-1 px-4 leading-8">
-        <span class="w-[60%] lg:w-[50%] truncate">Space</span>
-        <span class="w-[20%] lg:w-[25%] text-right truncate">Proposals</span>
-        <span class="w-[20%] lg:w-[25%] text-right truncate">Votes</span>
-      </div>
-    </div>
+    <UiSectionHeader label="Activity" sticky />
+    <UiColumnHeader class="text-right">
+      <span class="w-[60%] lg:w-[50%] text-left truncate">Space</span>
+      <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
+      <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
+    </UiColumnHeader>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
-    <div
-      v-else-if="!activities.length"
-      class="px-4 py-3 flex items-center space-x-2"
-    >
-      <IH-exclamation-circle class="inline-block" />
-      <span>This user does not have any activities yet.</span>
-    </div>
+    <UiStateWarning v-else-if="!activities.length" class="px-4 py-3">
+      This user does not have any activities yet.
+    </UiStateWarning>
     <AppLink
       v-for="activity in activities"
       v-else
@@ -275,7 +268,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-text="_n(activity.proposal_count)"
         />
         <div
-          class="text-[17px] truncate"
+          class="text-[17px] text-skin-text truncate"
           v-text="_p(activity.proposal_percentage)"
         />
       </div>
@@ -284,7 +277,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div
-          class="text-[17px] truncate"
+          class="text-[17px] text-skin-text truncate"
           v-text="_p(activity.vote_percentage)"
         />
       </div>

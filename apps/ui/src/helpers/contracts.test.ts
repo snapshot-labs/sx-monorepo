@@ -8,7 +8,7 @@ describe('getTokensMetadata', () => {
       '0x514910771af9ca656af840dff83e8264ecf986ca'
     ];
 
-    const metadata = await getTokensMetadata(1, addresses);
+    const metadata = await getTokensMetadata('1', addresses);
 
     expect(metadata).toEqual([
       {

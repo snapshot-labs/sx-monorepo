@@ -89,17 +89,15 @@ async function handleTestStrategies(strategies: StrategyConfig[]) {
 <template>
   <div>
     <div class="mb-2 flex items-center justify-between">
-      <h4 class="eyebrow font-medium">Active</h4>
+      <UiEyebrow class="font-medium">Active</UiEyebrow>
       <UiTooltip
         v-if="model.length && showTestButton"
         title="Test all custom strategies"
+        class="flex items-center"
       >
-        <UiButton
-          class="!p-0 !border-0 !h-auto !w-[20px]"
-          @click="handleTestStrategies(model)"
-        >
+        <button class="text-skin-link" @click="handleTestStrategies(model)">
           <IH-play />
-        </UiButton>
+        </button>
       </UiTooltip>
     </div>
     <div class="space-y-3 mb-4">
@@ -115,7 +113,7 @@ async function handleTestStrategies(strategies: StrategyConfig[]) {
         @test-strategies="handleTestStrategies"
       />
     </div>
-    <h4 class="eyebrow mb-2 font-medium">Available</h4>
+    <UiEyebrow class="mb-2 font-medium">Available</UiEyebrow>
     <div v-if="availableStrategies.length === 0">No strategies available</div>
     <div v-else class="space-y-3">
       <ButtonStrategy

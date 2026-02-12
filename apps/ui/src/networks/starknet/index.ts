@@ -1,7 +1,7 @@
 import { LibraryError, constants as starknetConstants } from 'starknet';
 import { API_TESTNET_URL, API_URL } from '@/helpers/constants';
 import { getRelayerInfo } from '@/helpers/mana';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { formatAddress } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 import { NetworkID, Space } from '@/types';
@@ -33,7 +33,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     rpcUrl: 'https://rpc.snapshot.org/sn',
     ethRpcUrl: 'https://rpc.snapshot.org/1',
     apiUrl: API_URL,
-    explorerUrl: 'https://starkscan.co',
+    explorerUrl: 'https://voyager.online',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   },
   'sn-sep': {
@@ -44,7 +44,7 @@ export const METADATA: Partial<Record<NetworkID, Metadata>> = {
     rpcUrl: 'https://rpc.snapshot.org/sn-sep',
     ethRpcUrl: 'https://rpc.snapshot.org/11155111',
     apiUrl: API_TESTNET_URL,
-    explorerUrl: 'https://sepolia.starkscan.co',
+    explorerUrl: 'https://sepolia.voyager.online',
     avatar: 'ipfs://bafkreihbjafyh7eud7r6e5743esaamifcttsvbspfwcrfoc5ykodjdi67m'
   }
 };
@@ -80,7 +80,7 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
       constants.SUPPORTED_EXECUTORS[executor],
     isExecutorActionsSupported: (executor: string) =>
       constants.SUPPORTED_EXECUTORS[executor],
-    pin: pinPineapple,
+    pin,
     getSpaceController: async (space: Space) => space.controller,
     getTransaction: txId => provider.getTransactionReceipt(txId),
     getRelayerInfo: (space: string, network: NetworkID) =>
