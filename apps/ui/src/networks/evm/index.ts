@@ -118,16 +118,14 @@ export function createEvmNetwork(networkId: NetworkID): Network {
           try {
             receipt = await provider.getTransactionReceipt(txId);
           } catch {
-            receipt = null;
-          }
-
-          if (!receipt) {
             if (retries++ > 60) {
               clearInterval(timer);
               reject(new Error('Transaction not found'));
             }
             return;
           }
+
+          if (!receipt) return;
 
           clearInterval(timer);
           if (receipt.status === 0) reject(receipt);
