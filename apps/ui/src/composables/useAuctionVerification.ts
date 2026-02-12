@@ -200,8 +200,8 @@ export function useAuctionVerification({
       attestationAuth = await signAttestation();
     } catch (err) {
       if (currentNonce !== verificationNonce) return;
-      if (!isUserAbortError(e)) {
-        console.error('Attestation signing failed', e);
+      if (!isUserAbortError(err)) {
+        console.error('Attestation signing failed', err);
       }
       status.value = 'started';
       return;
