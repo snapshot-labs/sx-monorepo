@@ -288,6 +288,17 @@ function handleMouseMove(e: MouseEvent) {
             class="stroke-skin-border"
           />
         </g>
+        <template v-if="end > Date.now() / 1000 && hoveredTimestamp === null">
+          <circle
+            v-for="(pt, i) in bulletPoints"
+            :key="`h${i}`"
+            :cx="pt.x"
+            :cy="pt.y"
+            r="8"
+            :class="pt.fill"
+            class="halo"
+          />
+        </template>
         <circle
           v-for="(pt, i) in bulletPoints"
           :key="`b${i}`"

@@ -466,3 +466,13 @@ input:placeholder-shown {
 div[data-tippy-root] {
   @apply break-words;
 }
+
+.halo {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0; }
+  50% { opacity: 0.4; }
+  100% { opacity: 0; }
+}
