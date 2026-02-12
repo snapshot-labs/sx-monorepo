@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
-import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
+import { _n, getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { useVoteValidationPowerQuery } from '@/queries/voteValidationPower';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
@@ -24,8 +25,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'voted');
+  (e: 'close'): void;
+  (e: 'voted'): void;
 }>();
 
 const queryClient = useQueryClient();
@@ -79,8 +80,27 @@ const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
+const blockExplorerUrl = computed(() => {
+  const chainId =
+    props.proposal.space.snapshot_chain_id ||
+    getNetwork(props.proposal.network).currentChainId.toString();
+  const snapshot = props.proposal.snapshot;
+
+  if (!snapshot || !chainId) return null;
+
+  const network = networks[chainId];
+
+  return network?.explorer?.url
+    ? `${network.explorer.url}/block/${snapshot}`
+    : null;
+});
+
 const offchainProposal = computed<boolean>(() =>
   offchainNetworks.includes(props.proposal.network)
+);
+
+const isStarknetProposal = computed<boolean>(() =>
+  starknetNetworks.includes(props.proposal.network)
 );
 
 const canSubmit = computed<boolean>(
@@ -229,9 +249,23 @@ watchEffect(async () => {
         </dd>
         <dd
           v-else-if="votingPower"
-          class="font-semibold text-skin-heading text-[20px] leading-6"
-          v-text="formattedVotingPower"
-        />
+          class="font-semibold text-skin-heading text-[20px] leading-6 flex gap-1.5"
+        >
+          {{ formattedVotingPower }}
+          <span
+            v-if="!isStarknetProposal && proposal.snapshot && blockExplorerUrl"
+            class="font-normal flex gap-0.5 text-sm items-center"
+          >
+            (
+            <a :href="blockExplorerUrl" target="_blank">{{
+              _n(proposal.snapshot)
+            }}</a>
+            <UiTooltip title="Snapshot block number">
+              <IH-information-circle class="size-3" />
+            </UiTooltip>
+            )
+          </span>
+        </dd>
       </dl>
       <div v-if="proposal.privacy === 'none'" class="s-box">
         <UiForm
@@ -281,9 +315,11 @@ watchEffect(async () => {
       :tx-id="txId"
       :show-icon="true"
       :shareable="{ proposal, choice: selectedChoice! }"
+      :network="proposal.network"
       :messages="{
         title: 'Vote success!'
       }"
+      :type="'vote'"
       @close="modalShareOpen = false"
     />
   </teleport>

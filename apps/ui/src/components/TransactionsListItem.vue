@@ -25,7 +25,11 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return 'Contract call to <b>_NAME_</b>';
+    const rawMethodName = props.tx._form.method.slice(
+      0,
+      props.tx._form.method.indexOf('(')
+    );
+    return `<b>${rawMethodName}</b> on <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'raw') {
@@ -153,22 +157,22 @@ const parsedTitle = computedAsync(
 
 <template>
   <div class="w-full border-b last:border-b-0">
-    <div class="w-full px-4 py-3 gap-2 flex items-center">
+    <button
+      class="w-full px-4 py-3 gap-2 flex items-center"
+      @click="expanded = !expanded"
+    >
       <div v-if="$slots.left" class="shrink-0">
         <slot name="left" />
       </div>
-      <button
-        class="flex gap-2 truncate items-center flex-auto"
-        @click="expanded = !expanded"
-      >
+      <div class="flex gap-2 truncate items-center flex-auto">
         <IH-cash v-if="tx._type === 'sendToken'" class="shrink-0" />
         <IH-photograph v-else-if="tx._type === 'sendNft'" class="shrink-0" />
         <IC-stake v-else-if="tx._type === 'stakeToken'" class="shrink-0" />
         <IH-code v-else class="shrink-0" />
         <div class="truncate text-skin-link" v-html="parsedTitle" />
-      </button>
+      </div>
       <slot name="right" />
-    </div>
+    </button>
     <div v-if="expanded" class="border-y last:border-b-0 px-4 py-3">
       <div v-if="call" class="text-skin-link">
         Call
@@ -217,7 +221,7 @@ const parsedTitle = computedAsync(
             {{ shorten(param.value) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </a>
-          <div v-else class="truncate inline-block">{{ param.value }}</div>
+          <div v-else class="break-all inline-block">{{ param.value }}</div>
         </div>
       </template>
       <div v-if="value" class="mt-3">
@@ -226,7 +230,7 @@ const parsedTitle = computedAsync(
       </div>
       <div v-if="data" class="mt-3">
         <h4 class="font-medium">Data</h4>
-        <div>{{ data }}</div>
+        <div class="break-all">{{ data }}</div>
       </div>
     </div>
   </div>

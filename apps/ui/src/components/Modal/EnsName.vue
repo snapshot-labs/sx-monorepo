@@ -27,8 +27,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'attach', name: string);
+  (e: 'close'): void;
+  (e: 'attach', name: string): void;
 }>();
 
 const { attachCustomName } = useWalletEns(props.networkId);

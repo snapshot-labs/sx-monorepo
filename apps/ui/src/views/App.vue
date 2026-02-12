@@ -44,7 +44,7 @@ onMounted(() => load());
               </div>
             </div>
             <a v-if="app.link" :href="app.link" target="_blank">
-              <UiButton class="primary w-full">Use integration</UiButton>
+              <UiButton primary class="w-full">Use integration</UiButton>
             </a>
           </div>
           <div class="md:flex md:space-x-4">
@@ -62,21 +62,21 @@ onMounted(() => load());
                 />
               </div>
               <div>
-                <div class="eyebrow mb-2">Overview</div>
+                <UiEyebrow class="mb-2">Overview</UiEyebrow>
                 <div
                   class="text-md text-skin-link whitespace-pre-line"
                   v-text="app.overview"
                 />
               </div>
               <div v-if="app.how">
-                <div class="eyebrow mb-2">How it works</div>
+                <UiEyebrow class="mb-2">How it works</UiEyebrow>
                 <div
                   class="text-md text-skin-link whitespace-pre-line"
                   v-text="app.how"
                 />
               </div>
               <div v-if="app.start">
-                <div class="eyebrow mb-2">Get started</div>
+                <UiEyebrow class="mb-2">Get started</UiEyebrow>
                 <div
                   class="text-md text-skin-link whitespace-pre-line"
                   v-text="app.start"
@@ -92,25 +92,25 @@ onMounted(() => load());
               class="border rounded-lg md:w-[300px] shrink-0 h-fit p-4 space-y-3 mb-4"
             >
               <div>
-                <h4 class="eyebrow" v-text="'Built by'" />
+                <UiEyebrow>Built by</UiEyebrow>
                 {{ app.author }}
               </div>
               <div v-if="app.website">
-                <h4 class="eyebrow" v-text="'Website'" />
+                <UiEyebrow>Website</UiEyebrow>
                 <a :href="app.website" target="_blank">
                   {{ simplifyURL(app.website) }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </a>
               </div>
               <div v-if="app.x">
-                <h4 class="eyebrow" v-text="'X (Twitter)'" />
+                <UiEyebrow>X (Twitter)</UiEyebrow>
                 <a :href="`https://x.com/${app.x}`" target="_blank">
                   {{ app.x }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </a>
               </div>
               <div v-if="app.github">
-                <h4 class="eyebrow" v-text="'Source code'" />
+                <UiEyebrow>Source code</UiEyebrow>
                 <a :href="app.github" target="_blank">
                   {{ simplifyURL(app.github) }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />

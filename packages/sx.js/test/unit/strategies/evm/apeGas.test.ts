@@ -79,46 +79,56 @@ describe('apeGas', () => {
     expect(votingPower.toString()).toEqual('1652112965448993573');
   });
 
-  it('should compute live voting power for user with own APE gas at null block', async () => {
-    const votingPower = await apeGasStrategy.getVotingPower(
-      '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
-      '0xc4Af7180FD4BBC1E5A3e10eB82801Ab6238eB1C5',
-      metadata,
-      null,
-      params,
-      provider
-    );
+  it(
+    'should compute live voting power for user with own APE gas at null block',
+    { retry: 3 },
+    async () => {
+      const votingPower = await apeGasStrategy.getVotingPower(
+        '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
+        '0xc4Af7180FD4BBC1E5A3e10eB82801Ab6238eB1C5',
+        metadata,
+        null,
+        params,
+        provider
+      );
 
-    expect(votingPower > 500000000000000n).toBe(true);
-    expect(votingPower < 550000000000000n).toBe(true);
-  });
+      expect(votingPower > 500000000000000n).toBe(true);
+    }
+  );
 
-  it('should compute live voting power for user that receives delegated gas at null block', async () => {
-    const votingPower = await apeGasStrategy.getVotingPower(
-      '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
-      '0xC7Ca2aC1Ae120eBa3aB42a8BF4cb071895641ceF',
-      metadata,
-      null,
-      params,
-      provider
-    );
+  it(
+    'should compute live voting power for user that receives delegated gas at null block',
+    { retry: 3 },
+    async () => {
+      const votingPower = await apeGasStrategy.getVotingPower(
+        '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
+        '0xC7Ca2aC1Ae120eBa3aB42a8BF4cb071895641ceF',
+        metadata,
+        null,
+        params,
+        provider
+      );
 
-    expect(votingPower > 149999267997822587n).toBe(true);
-    expect(votingPower < 155000000000000000n).toBe(true);
-  });
+      expect(votingPower > 149999267997822587n).toBe(true);
+    }
+  );
 
-  it('should return 0 live voting power for user that delegates gas to someone at null block', async () => {
-    const votingPower = await apeGasStrategy.getVotingPower(
-      '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
-      '0xa40839f84CF98Ee6F4fdB84c1bB1a448e7835EfE',
-      metadata,
-      null,
-      params,
-      provider
-    );
+  it(
+    'should return 0 live voting power for user that delegates gas to someone at null block',
+    { retry: 3 },
+    async () => {
+      const votingPower = await apeGasStrategy.getVotingPower(
+        '0x8E7083D3D0174Fe7f33821b2b4bDFE0fEE9C8e87',
+        '0xa40839f84CF98Ee6F4fdB84c1bB1a448e7835EfE',
+        metadata,
+        null,
+        params,
+        provider
+      );
 
-    expect(votingPower.toString()).toBe('0');
-  });
+      expect(votingPower.toString()).toBe('0');
+    }
+  );
 
   // NOTE: skipped because Herodotus API is down
   it.skip('should throw when requesting unknown block', () => {

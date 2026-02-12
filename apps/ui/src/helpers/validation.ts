@@ -1,11 +1,11 @@
 import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import { parseUnits } from '@ethersproject/units';
 import Ajv, { ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
+import { parseUnits } from '@/helpers/token';
 import { _n } from './utils';
 
 type Opts = { skipEmptyOptionalFields: boolean };
@@ -258,6 +258,7 @@ ajv.addKeyword({
 ajv.addKeyword('options');
 ajv.addKeyword('tooltip');
 ajv.addKeyword('showControls');
+ajv.addKeyword('sortable');
 
 // UiSelectorNetwork
 ajv.addFormat('network', {
@@ -329,9 +330,9 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     return `Must be at most ${_n(errorObject.params.limit)}.`;
   }
 
-  return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
+  return `${errorObject.message.charAt(0).toUpperCase()}${errorObject.message
     .slice(1)
-    .toLocaleLowerCase()}.`;
+    .toLowerCase()}.`;
 }
 
 const getFormValues = (schema: any, form: any, opts: Opts) => {

@@ -15,7 +15,9 @@ import {
   evmOptimism,
   evmPolygon,
   evmSepolia,
-  getEvmStrategy
+  getEvmStrategy,
+  GovernorBravoAuthenticator,
+  OpenZeppelinAuthenticator
 } from '@snapshot-labs/sx';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
@@ -25,7 +27,11 @@ import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import {
+  createErc1155Metadata,
+  getChainIdKind,
+  verifyNetwork
+} from '@/helpers/utils';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   buildMetadata,
@@ -88,7 +94,14 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
+  const openZeppelinSigClient = new clients.OpenZeppelinEthereumSig({
+    chainId
+  });
   const governorBravoClient = new clients.GovernorBravoEthereumTx();
+  const governorBravoSigClient = new clients.GovernorBravoEthereumSig({
+    chainId
+  });
   const ethSigClient = new clients.EvmEthereumSig({
     ...clientOpts,
     manaUrl: MANA_URL
@@ -263,6 +276,20 @@ export function createActions(
         });
       }
 
+      if (space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.propose({
+          signer,
+          envelope: {
+            data: {
+              spaceId: space.id,
+              title,
+              body,
+              executions: executionInfo?.transactions ?? []
+            }
+          }
+        });
+      }
+
       const pinned = await helpers.pin({
         title,
         body,
@@ -288,6 +315,7 @@ export function createActions(
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
+          hasReason: false,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
@@ -398,6 +426,7 @@ export function createActions(
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
+        hasReason: false,
         ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
@@ -482,20 +511,6 @@ export function createActions(
       await verifyNetwork(web3, chainId);
       const signer = getSigner(web3);
 
-      if (proposal.space.protocol === 'governor-bravo') {
-        return governorBravoClient.vote({
-          signer,
-          envelope: {
-            data: {
-              spaceId: proposal.space.id,
-              proposalId: Number(proposal.proposal_id),
-              choice: getSdkChoice(choice),
-              reason
-            }
-          }
-        });
-      }
-
       const isContract = await getIsContract(account, connectorType);
 
       const relayer = await getRelayerInfo(
@@ -511,8 +526,63 @@ export function createActions(
           strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
+          hasReason: !!reason,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
+
+      if (proposal.space.protocol === 'governor-bravo') {
+        if (relayerType === 'evm') {
+          return governorBravoSigClient.vote({
+            signer,
+            authenticatorType: authenticator as GovernorBravoAuthenticator,
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: Number(proposal.proposal_id),
+              choice: getSdkChoice(choice),
+              reason
+            }
+          });
+        }
+
+        return governorBravoClient.vote({
+          signer,
+          envelope: {
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: Number(proposal.proposal_id),
+              choice: getSdkChoice(choice),
+              reason
+            }
+          }
+        });
+      }
+
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        if (relayerType === 'evm') {
+          return openZeppelinSigClient.vote({
+            signer,
+            authenticatorType: authenticator as OpenZeppelinAuthenticator,
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: proposal.proposal_id,
+              choice: getSdkChoice(choice),
+              reason
+            }
+          });
+        }
+
+        return openZeppelinClient.vote({
+          signer,
+          envelope: {
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: proposal.proposal_id,
+              choice: getSdkChoice(choice),
+              reason
+            }
+          }
+        });
+      }
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
@@ -586,6 +656,17 @@ export function createActions(
         });
       }
 
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.queue({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          descriptionHash: proposal.execution_hash,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
+        });
+      }
+
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
@@ -607,6 +688,17 @@ export function createActions(
           signer: getSigner(web3),
           spaceId: proposal.space.id,
           proposalId: Number(proposal.proposal_id)
+        });
+      }
+
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.execute({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          descriptionHash: proposal.execution_hash,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
         });
       }
 
@@ -664,11 +756,11 @@ export function createActions(
       chainIdOverride?: ChainId,
       delegateesMetadata?: Record<string, any>
     ) => {
-      if (typeof chainIdOverride === 'string') {
+      if (chainIdOverride && getChainIdKind(chainIdOverride) !== 'evm') {
         throw new Error('Chain ID must be a number for EVM networks');
       }
 
-      const currentChainId = chainIdOverride || chainId;
+      const currentChainId = Number(chainIdOverride) || chainId;
       await verifyNetwork(web3, currentChainId);
 
       let contractParams: {
@@ -780,8 +872,8 @@ export function createActions(
         return null;
 
       const multi = new Multicaller(
-        delegation.chainId.toString(),
-        getProvider(delegation.chainId as number),
+        delegation.chainId,
+        getProvider(Number(delegation.chainId)),
         [
           'function decimals() view returns (uint8)',
           'function balanceOf(address account) view returns (uint256)',

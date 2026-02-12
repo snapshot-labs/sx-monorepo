@@ -18,7 +18,8 @@ const knownHosts = [
   'safe.fantom.network',
   'safe.apechain.com',
   'console.brahma.fi',
-  'pass.celopg.eco'
+  'pass.celopg.eco',
+  'app.cg'
 ];
 const parentUrl =
   window.location != window.parent.location

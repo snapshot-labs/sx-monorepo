@@ -1,0 +1,3 @@
+[
+  "function nonces(address owner) view returns (uint256)"
+]

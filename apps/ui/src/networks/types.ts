@@ -32,6 +32,7 @@ export type SpacesFilter = {
   category?: string;
   network?: string;
   protocol?: ExplorePageProtocol;
+  protocol_in?: string[];
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
@@ -405,6 +406,10 @@ export type AuthenticatorSupportInfo = {
    */
   isContractSupported: boolean;
   /**
+   * Whether the authenticator supports providing a reason when voting.
+   */
+  isReasonSupported: boolean;
+  /**
    * Type of the relayer used by authenticator.
    * Determines how authenticator is interacted with.
    */
@@ -477,13 +482,14 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor-bravo';
+export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
   apiNetwork: NetworkID;
   networks: NetworkID[];
+  protocols?: string[];
   limit: number;
   disabled?: boolean;
 };

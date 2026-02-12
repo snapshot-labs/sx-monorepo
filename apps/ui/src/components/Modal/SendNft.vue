@@ -2,7 +2,7 @@
 import { createSendNftTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, Contact } from '@/types';
+import { Contact } from '@/types';
 
 const DEFAULT_FORM_STATE = {
   to: '',
@@ -13,7 +13,7 @@ const DEFAULT_FORM_STATE = {
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: ChainId;
+  network: string;
   extraContacts?: Contact[];
   initialState?: any;
 }>();
@@ -132,16 +132,10 @@ watchEffect(async () => {
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          :ref="ref => (searchInput = (ref as any)?.searchInput)"
+          v-model="searchValue"
+        />
       </template>
     </template>
     <template v-if="showPicker">

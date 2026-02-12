@@ -4,7 +4,6 @@ import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
 import { _n, clone, compareAddresses } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId } from '@/types';
 
 const FORM = {
   quantity: 1
@@ -15,7 +14,7 @@ const props = withDefaults(
     open: boolean;
     unitPrice: number;
     tokens: Token[];
-    network: ChainId;
+    network: string;
     barcodePayload: BarcodePayload;
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;
@@ -29,8 +28,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'confirmed');
+  (e: 'close'): void;
+  (e: 'confirmed'): void;
 }>();
 
 const { auth } = useWeb3();
@@ -50,6 +49,7 @@ const { isPending, assetsMap } = useBalances({
       : null;
   })
 });
+const { isWhiteLabel } = useWhiteLabel();
 
 const selectedTokenAddress = ref<string>('');
 const showPicker = ref(false);
@@ -135,9 +135,11 @@ async function moveToNextStep() {
 
   isModalTransactionProgressOpen.value = false;
 
-  if (await goToNextStep()) {
+  goToNextStep();
+
+  nextTick(() => {
     isModalTransactionProgressOpen.value = true;
-  }
+  });
 }
 
 function handleSubmit() {
@@ -219,7 +221,7 @@ watch(
       />
       <div class="space-y-3">
         <div
-          class="border rounded-lg text-[17px] bg-skin-input-bg p-3 py-2.5 space-y-1"
+          class="border rounded-lg text-[17px] bg-skin-border/40 p-3 py-2.5 space-y-1"
         >
           <div class="flex justify-between">
             You will pay
@@ -239,8 +241,17 @@ watch(
         <UiCheckbox v-model="isTermsAccepted" class="text-start">
           <div class="text-skin-text leading-[22px] top-[-1px] relative">
             I have read and agree to the
-            <AppLink is-external :to="{ name: 'site-terms' }" @click.stop
-              >Terms of service</AppLink
+            <span @click.stop>
+              <AppLink
+                is-external
+                :to="
+                  isWhiteLabel
+                    ? 'https://snapshot.box/#/terms-of-use'
+                    : { name: 'site-terms' }
+                "
+                @click.stop
+                >Terms of service</AppLink
+              ></span
             >.
           </div>
         </UiCheckbox>

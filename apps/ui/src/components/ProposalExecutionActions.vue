@@ -15,6 +15,7 @@ const {
   hasExecuteQueued,
   fetchingDetails,
   message,
+  warningMessage,
   executionTx,
   executionTxUrl,
   finalizeProposalSending,
@@ -39,8 +40,11 @@ const network = computed(() => getNetwork(props.proposal.network));
     <div v-if="fetchingDetails" class="flex justify-center">
       <UiLoading class="text-center" />
     </div>
-    <div v-else-if="message">
-      {{ message }}
+    <div v-else-if="message" class="space-y-2">
+      <div>{{ message }}</div>
+      <UiAlert v-if="warningMessage" type="warning">
+        {{ warningMessage }}
+      </UiAlert>
     </div>
     <div v-else-if="executionTx">
       Proposal has been already executed at
@@ -67,7 +71,7 @@ const network = computed(() => getNetwork(props.proposal.network));
     <div v-else class="space-y-2">
       <UiButton
         v-if="hasFinalize"
-        class="w-full flex justify-center items-center gap-2"
+        class="w-full"
         :loading="finalizeProposalSending"
         @click="finalizeProposal"
       >
@@ -76,7 +80,7 @@ const network = computed(() => getNetwork(props.proposal.network));
       </UiButton>
       <UiButton
         v-else-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
-        class="w-full flex justify-center items-center gap-2"
+        class="w-full"
         :loading="executeProposalSending"
         @click="executeProposal"
       >
@@ -87,7 +91,7 @@ const network = computed(() => getNetwork(props.proposal.network));
         v-if="hasExecuteQueued"
         :disabled="executionCountdown > 0"
         :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
-        class="w-full flex justify-center items-center gap-2"
+        class="w-full"
         :loading="executeQueuedProposalSending"
         @click="executeQueuedProposal"
       >
@@ -108,7 +112,7 @@ const network = computed(() => getNetwork(props.proposal.network));
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
         "
         :disabled="executionCountdown === 0"
-        class="w-full flex justify-center items-center gap-2"
+        class="w-full"
         :loading="vetoProposalSending"
         @click="vetoProposal"
       >

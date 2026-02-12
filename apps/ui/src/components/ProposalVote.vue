@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { _t, getChoiceText } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
@@ -12,7 +13,7 @@ const props = withDefaults(
 );
 
 defineEmits<{
-  (e: 'enterEditMode');
+  (e: 'enterEditMode'): void;
 }>();
 
 const { auth } = useWeb3();
@@ -81,7 +82,8 @@ const isEditable = computed(() => {
 <template>
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
     <UiButton
-      class="!h-[48px] text-left w-full flex items-center justify-between rounded-lg space-x-2"
+      class="text-left w-full !justify-between"
+      :size="48"
       :class="{
         'border-skin-link': isEditable
       }"
@@ -161,8 +163,13 @@ const isEditable = computed(() => {
     </template>
     <template v-else>Voting for this proposal is not supported</template>
   </slot>
-  <slot v-else-if="isInvalidNetwork" name="wrong-safe-network">
-    Safe's network should be same as space's network
+  <slot
+    v-else-if="proposal.space.snapshot_chain_id && isInvalidNetwork"
+    name="wrong-safe-network"
+  >
+    Please use a Safe on
+    {{ networks[proposal.space.snapshot_chain_id]?.name ?? 'space network' }} to
+    vote.
   </slot>
   <div v-else>
     <slot />

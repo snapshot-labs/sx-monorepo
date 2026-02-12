@@ -44,7 +44,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'updateValidity', valid: boolean, resolved: boolean): void;
-  (e: 'deleteSpace');
+  (e: 'deleteSpace'): void;
 }>();
 
 const {
@@ -134,7 +134,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Sub-spaces</h4>
+  <UiEyebrow class="mb-2 font-medium">Sub-spaces</UiEyebrow>
   <UiMessage
     type="info"
     :learn-more-link="'https://docs.snapshot.box/user-guides/spaces/sub-spaces'"
@@ -177,7 +177,7 @@ watchEffect(() => {
       </button>
     </div>
   </div>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Terms of services</h4>
+  <UiEyebrow class="mb-2 font-medium mt-4">Terms of services</UiEyebrow>
   <div class="s-box">
     <UiInputString
       v-model="termsOfServices"
@@ -185,11 +185,11 @@ watchEffect(() => {
       :error="formErrors.termsOfServices"
     />
   </div>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Visibility</h4>
+  <UiEyebrow class="mb-2 font-medium mt-4">Visibility</UiEyebrow>
   <div class="s-box mt-3">
     <UiSwitch v-model="isPrivate" title="Hide space from homepage" />
   </div>
-  <h4 class="eyebrow mb-2 font-medium mt-4">Danger zone</h4>
+  <UiEyebrow class="mb-2 font-medium mt-4">Danger zone</UiEyebrow>
   <div
     class="flex flex-col md:flex-row gap-3 md:gap-1 items-center border rounded-md px-4 py-3"
   >

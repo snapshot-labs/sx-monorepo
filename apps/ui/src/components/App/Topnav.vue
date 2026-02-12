@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getCacheHash, shorten } from '@/helpers/utils';
-import { Connector } from '@/networks/types';
 
 defineProps<{
   hasAppNav: boolean;
@@ -12,9 +11,10 @@ const usersStore = useUsersStore();
 const uiStore = useUiStore();
 const { modalAccountOpen, modalAccountWithoutDismissOpen, resetAccountModal } =
   useModal();
-const { login, web3 } = useWeb3();
+const { logout, web3 } = useWeb3();
 const { toggleTheme, currentTheme } = useTheme();
 const { isWhiteLabel } = useWhiteLabel();
+const { isAuctionApp } = useApp();
 
 const SEARCH_CONFIG = {
   space: {
@@ -30,7 +30,6 @@ const SEARCH_CONFIG = {
   }
 };
 
-const loading = ref(false);
 const searchInput = ref();
 const searchValue = ref('');
 
@@ -55,13 +54,6 @@ const searchConfig = computed(() => {
 
   return null;
 });
-
-async function handleLogin(connector: Connector) {
-  resetAccountModal();
-  loading.value = true;
-  await login(connector);
-  loading.value = false;
-}
 
 function handleSearchSubmit(e: Event) {
   e.preventDefault();
@@ -137,6 +129,7 @@ onUnmounted(() => {
         ]"
       />
     </div>
+
     <form
       v-if="searchConfig"
       id="search-form"
@@ -155,48 +148,68 @@ onUnmounted(() => {
       </label>
     </form>
 
+    <div v-if="isAuctionApp" class="flex-grow">
+      <IC-snapshot class="size-[28px] text-skin-link" />
+    </div>
+
     <div class="flex space-x-2 shrink-0">
-      <UiButton v-if="loading || web3.authLoading" loading />
+      <UiButton v-if="web3.authLoading" loading />
+      <UiDropdown v-else-if="web3.account" :key="route.fullPath">
+        <template #button>
+          <UiButton class="sm:w-auto !px-0 sm:!px-3">
+            <span
+              class="sm:flex items-center space-x-2"
+              data-testid="profile-button"
+            >
+              <UiStamp :id="user.id" :size="18" :cb="cb" />
+              <span
+                class="hidden sm:block truncate max-w-[120px]"
+                v-text="user.name || shorten(user.id)"
+              />
+            </span>
+          </UiButton>
+        </template>
+        <template v-if="web3.account" #items>
+          <UiDropdownItem
+            v-if="!isAuctionApp"
+            :to="{ name: 'user', params: { user: web3.account } }"
+          >
+            <IH-user />
+            My profile
+          </UiDropdownItem>
+          <UiDropdownItem
+            v-if="!isAuctionApp"
+            :to="{ name: 'settings-spaces' }"
+          >
+            <IH-cog />
+            Settings
+          </UiDropdownItem>
+          <UiDropdownItem @click="modalAccountOpen = true">
+            <IH-switch-horizontal />
+            Change wallet
+          </UiDropdownItem>
+          <hr class="bg-skin-text/20 h-[2px]" />
+          <UiDropdownItem class="!text-skin-danger" @click="logout()">
+            <IH-logout />
+            Log out
+          </UiDropdownItem>
+        </template>
+      </UiDropdown>
       <UiButton
         v-else
-        class="float-left !px-0 w-[46px] sm:w-auto sm:!px-3 text-center"
+        class="sm:w-auto !px-0 sm:!px-3"
         @click="modalAccountOpen = true"
       >
-        <span
-          v-if="web3.account"
-          class="sm:flex items-center space-x-2"
-          data-testid="profile-button"
-        >
-          <UiStamp :id="user.id" :size="18" :cb="cb" />
-          <span
-            class="hidden sm:block truncate max-w-[120px]"
-            v-text="user.name || shorten(user.id)"
-          />
-        </span>
-        <template v-else>
-          <span class="hidden sm:block" v-text="'Log in'" />
-          <IH-login class="sm:hidden inline-block" />
-        </template>
+        <span class="hidden sm:block" v-text="'Log in'" />
+        <IH-login class="sm:hidden inline-block" />
       </UiButton>
       <IndicatorPendingTransactions />
-      <UiButton
-        v-if="!isWhiteLabel"
-        class="!px-0 w-[46px]"
-        @click="toggleTheme()"
-      >
-        <IH-sun v-if="currentTheme === 'dark'" class="inline-block" />
-        <IH-moon v-else class="inline-block" />
+      <UiButton v-if="!isWhiteLabel" uniform @click="toggleTheme()">
+        <IH-sun v-if="currentTheme === 'dark'" />
+        <IH-moon v-else />
       </UiButton>
     </div>
   </UiTopnav>
-  <teleport to="#modal">
-    <ModalAccount
-      :open="modalAccountOpen || modalAccountWithoutDismissOpen"
-      :closeable="!modalAccountWithoutDismissOpen"
-      @close="modalAccountOpen = false"
-      @login="handleLogin"
-    />
-  </teleport>
 </template>
 
 <style lang="scss" scoped>

@@ -3,10 +3,13 @@ import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
-import { offchainNetworks } from '@/networks';
+import { ENSChainId, getNameOwner } from '@/helpers/ens';
+import { compareAddresses } from '@/helpers/utils';
+import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
+import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCog from '~icons/heroicons-outline/cog';
@@ -58,11 +61,31 @@ const space = computed(() => {
 
 const { isController } = useSpaceController(space);
 
+const ensOwner = computedAsync(
+  async () => {
+    if (
+      !web3.value.account ||
+      isController.value ||
+      !space.value ||
+      !offchainNetworks.includes(space.value.network)
+    ) {
+      return null;
+    }
+
+    const network = getNetwork(space.value.network);
+    return getNameOwner(space.value.id, network.chainId as ENSChainId);
+  },
+  null,
+  { lazy: true }
+);
+
 const canSeeSettings = computed(() => {
-  if (isController.value) return true;
+  const isOwner =
+    ensOwner.value && compareAddresses(ensOwner.value, web3.value.account);
+  if (isController.value || isOwner) return true;
 
   if (space.value?.additionalRawData?.type === 'offchain') {
-    const admins = space.value?.additionalRawData?.admins.map((admin: string) =>
+    const admins = space.value.additionalRawData.admins.map((admin: string) =>
       admin.toLowerCase()
     );
 
@@ -169,9 +192,15 @@ function getNavigationConfig(
             name: 'Controller',
             tab: 'controller'
           }),
+          billing: getSettingsRoute({
+            name: 'Billing',
+            tab: 'billing',
+            hidden: !isOffchainNetwork
+          }),
           snapshotPro: {
             name: 'Snapshot Pro',
-            link: { name: 'space-pro' }
+            link: { name: 'space-pro' },
+            hidden: !isOffchainNetwork
           }
         }
       };
@@ -243,6 +272,11 @@ function getNavigationConfig(
         contacts: {
           name: 'Contacts',
           icon: IHUsers
+        },
+        'email-notifications': {
+          name: 'Email notifications',
+          icon: IHAtSymbol,
+          hidden: metadataNetwork !== 's'
         }
       }
     };

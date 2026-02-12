@@ -2,17 +2,10 @@ import { formatUnits } from '@ethersproject/units';
 import { skipToken, useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getBalances, Token } from '@/helpers/alchemy';
-import {
-  COINGECKO_ASSET_PLATFORMS,
-  COINGECKO_BASE_ASSETS,
-  ETH_CONTRACT
-} from '@/helpers/constants';
+import { getTokenPrices } from '@/helpers/coingecko';
+import { COINGECKO_ASSET_PLATFORMS, ETH_CONTRACT } from '@/helpers/constants';
 import { METADATA } from '@/networks/evm';
 import { ChainId } from '@/types';
-
-const COINGECKO_API_KEY = 'CG-1z19sMoCC6LoqR4b6avyLi3U';
-const COINGECKO_API_URL = 'https://pro-api.coingecko.com/api/v3/simple';
-const COINGECKO_PARAMS = '&vs_currencies=usd&include_24hr_change=true';
 
 type Metadata = {
   name: string;
@@ -37,7 +30,7 @@ METADATA_BY_CHAIN_ID.set(42220, {
 });
 
 type Treasury = {
-  chainId: ChainId;
+  chainId: string;
   address: string;
 };
 
@@ -46,34 +39,7 @@ export function useBalances({
 }: {
   treasury: MaybeRefOrGetter<Treasury | null>;
 }) {
-  async function callCoinGecko(apiUrl: string) {
-    const res = await fetch(apiUrl);
-    return res.json();
-  }
-
-  async function getCoins(
-    assetPlatform: string,
-    baseToken: string,
-    contractAddresses: string[]
-  ) {
-    const [baseTokenData, tokenData] = await Promise.all([
-      callCoinGecko(
-        `${COINGECKO_API_URL}/price?ids=${baseToken}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
-      ),
-      callCoinGecko(
-        `${COINGECKO_API_URL}/token_price/${assetPlatform}?contract_addresses=${contractAddresses
-          .slice(0, 100)
-          .join(',')}${COINGECKO_PARAMS}&x_cg_pro_api_key=${COINGECKO_API_KEY}`
-      )
-    ]);
-
-    return {
-      [ETH_CONTRACT]: baseTokenData[baseToken],
-      ...tokenData
-    };
-  }
-
-  async function loadBalances(address: string, chainId: ChainId) {
+  async function loadBalances(address: string, chainId: string) {
     const metadata = METADATA_BY_CHAIN_ID.get(chainId);
     const baseToken = metadata?.ticker
       ? { name: metadata.name, symbol: metadata.ticker }
@@ -87,18 +53,13 @@ export function useBalances({
     );
 
     const coingeckoAssetPlatform = COINGECKO_ASSET_PLATFORMS[chainId];
-    const coingeckoBaseAsset = COINGECKO_BASE_ASSETS[chainId];
 
-    const coins =
-      coingeckoBaseAsset && coingeckoAssetPlatform
-        ? await getCoins(
-            coingeckoAssetPlatform,
-            coingeckoBaseAsset,
-            tokensWithBalance
-              .filter(asset => asset.contractAddress !== ETH_CONTRACT)
-              .map(token => token.contractAddress)
-          )
-        : [];
+    const coins = coingeckoAssetPlatform
+      ? await getTokenPrices(
+          coingeckoAssetPlatform,
+          tokensWithBalance.map(token => token.contractAddress)
+        )
+      : {};
 
     return tokensWithBalance
       .map(asset => {

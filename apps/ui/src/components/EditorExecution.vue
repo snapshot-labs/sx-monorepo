@@ -3,7 +3,7 @@ import Draggable from 'vuedraggable';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { simulate } from '@/helpers/tenderly';
 import { getExecutionName } from '@/helpers/ui';
-import { shorten } from '@/helpers/utils';
+import { getChainIdKind, shorten } from '@/helpers/utils';
 import { getNetwork } from '@/networks';
 import { Contact, Space, Transaction as TransactionType } from '@/types';
 
@@ -197,7 +197,7 @@ async function handleSimulateClick() {
   if (
     simulationState.value !== null ||
     !treasury.value ||
-    typeof treasury.value.network === 'string'
+    getChainIdKind(treasury.value.network) !== 'evm'
   ) {
     return;
   }
@@ -205,7 +205,7 @@ async function handleSimulateClick() {
   simulationState.value = 'SIMULATING';
 
   const valid = await simulate(
-    treasury.value.network,
+    Number(treasury.value.network),
     treasury.value.wallet,
     model.value
   );
@@ -267,28 +267,28 @@ watch(
           <UiTooltip title="Send token">
             <UiButton
               :disabled="!treasury || disabled || !treasury.supportsTokens"
-              class="!px-0 w-[46px]"
+              uniform
               @click="openModal('sendToken')"
             >
-              <IH-cash class="inline-block" />
+              <IH-cash />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Send NFT">
             <UiButton
               :disabled="!treasury || disabled || !treasury.supportsNfts"
-              class="!px-0 w-[46px]"
+              uniform
               @click="openModal('sendNft')"
             >
-              <IH-photograph class="inline-block" />
+              <IH-photograph />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Contract call">
             <UiButton
               :disabled="!treasury || disabled"
-              class="!px-0 w-[46px]"
+              uniform
               @click="openModal('contractCall')"
             >
-              <IH-code class="inline-block" />
+              <IH-code />
             </UiButton>
           </UiTooltip>
           <UiTooltip title="Import Safe file">

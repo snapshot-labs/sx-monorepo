@@ -1,23 +1,42 @@
 <script setup lang="ts">
 import { _n } from '@/helpers/utils';
 
-defineProps<{
+const props = defineProps<{
   text: string;
   isActive?: boolean;
   count?: number;
+  size?: 'md' | 'lg';
 }>();
+
+const isLarge = computed(() => props.size === 'lg');
 </script>
 
 <template>
   <div
-    class="flex items-center"
-    :class="[isActive && 'border-b border-skin-link mb-[-1px]']"
+    class="flex items-center mb-[-1px]"
+    :class="[
+      isLarge
+        ? [
+            'border-b-[2px]',
+            isActive ? 'border-skin-link' : 'border-transparent'
+          ]
+        : { 'border-b border-skin-link': isActive }
+    ]"
   >
-    <h4
-      class="eyebrow py-2 cursor-pointer inline-block hover:text-skin-link"
+    <span
+      v-if="isLarge"
+      class="py-2 text-[19px] font-bold cursor-pointer inline-block hover:text-skin-link"
       :class="[isActive ? 'text-skin-link' : 'text-skin-text']"
-      v-text="text"
-    />
+    >
+      {{ text }}
+    </span>
+    <UiEyebrow
+      v-else
+      class="py-2 cursor-pointer inline-block hover:text-skin-link"
+      :class="[isActive ? 'text-skin-link' : 'text-skin-text']"
+    >
+      {{ text }}
+    </UiEyebrow>
     <span
       v-if="count"
       class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-2"

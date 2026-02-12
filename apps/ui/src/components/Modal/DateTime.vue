@@ -143,12 +143,13 @@ watch(
         <UiButton v-else class="w-full" @click="goToPrevious">
           Previous
         </UiButton>
-        <UiButton v-if="!isLast" class="primary w-full" @click="goToNext">
+        <UiButton v-if="!isLast" class="w-full" primary @click="goToNext">
           Next
         </UiButton>
         <UiButton
           v-else
-          class="primary w-full"
+          class="w-full"
+          primary
           :disabled="!!formError"
           @click="handleSubmit"
         >

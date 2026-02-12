@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
+import SpaceBilling from '@/components/SpaceBilling.vue';
 import {
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
@@ -39,7 +40,6 @@ const {
   votingType,
   privacy,
   voteValidation,
-  ignoreAbstainVotes,
   snapshotChainId,
   strategies,
   members,
@@ -86,6 +86,7 @@ type Tab = {
     | 'labels'
     | 'whitelabel'
     | 'advanced'
+    | 'billing'
     | 'controller';
   visible: boolean;
 };
@@ -143,6 +144,10 @@ const tabs = computed<Tab[]>(
       },
       {
         id: 'advanced',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'billing',
         visible: isOffchainNetwork.value
       },
       {
@@ -218,7 +223,8 @@ const showToolbar = computed(() => {
     (isModified.value &&
       isAdvancedFormResolved.value &&
       canModifySettings.value) ||
-    error.value
+    error.value ||
+    props.space.additionalRawData?.hibernated
   );
 });
 
@@ -234,7 +240,8 @@ const pendingSpace = computed(() => {
         ? String(strategy.chainId)
         : snapshotChainId.value
     })),
-    snapshot_chain_id: snapshotChainId.value
+    snapshot_chain_id: snapshotChainId.value,
+    authenticators: authenticators.value.map(strategy => strategy.address)
   };
 });
 
@@ -258,12 +265,14 @@ async function handleSettingsSave() {
 
   if (isOffchainNetwork.value) {
     try {
-      await save();
+      const result = await save();
       reloadSpaceAndReset();
-      uiStore.addNotification(
-        'success',
-        'Your changes were successfully saved.'
-      );
+      if (result) {
+        uiStore.addNotification(
+          'success',
+          'Your changes were successfully saved.'
+        );
+      }
     } catch {
     } finally {
       saving.value = false;
@@ -338,7 +347,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <div
       v-else
       class="flex-grow"
-      :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
+      :class="{
+        'px-4 pt-4': !['profile', 'billing'].includes(activeTab)
+      }"
     >
       <SpaceSettingsAlerts
         :space="pendingSpace"
@@ -427,7 +438,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           v-model:voting-type="votingType"
           v-model:privacy="privacy"
           v-model:vote-validation="voteValidation"
-          v-model:ignore-abstain-votes="ignoreAbstainVotes"
           :snapshot-chain-id="snapshotChainId"
           :space="space"
           @update-validity="v => (hasVotingErrors = !v)"
@@ -446,7 +456,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </UiContainerSettings>
       <UiContainerSettings
-        v-else-if="activeTab === 'execution'"
+        v-if="activeTab === 'execution'"
         title="Execution(s)"
         description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
       >
@@ -539,6 +549,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           "
         />
       </UiContainerSettings>
+      <SpaceBilling v-if="activeTab === 'billing'" :space="space" />
       <UiContainerSettings
         v-if="activeTab === 'controller'"
         title="Controller"
@@ -566,9 +577,11 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </div>
   <UiToolbarBottom v-if="showToolbar" ref="el">
     <div
-      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+      class="px-4 py-3 flex flex-col xs:flex-row items-center"
+      :class="error || isModified ? 'justify-between' : 'justify-end'"
     >
       <h4
+        v-if="error || isModified"
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
         :class="{ 'text-skin-danger': error }"
       >
@@ -589,7 +602,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           primary
           @click="handleSettingsSave"
         >
-          Save
+          <template v-if="isModified"> Save </template>
+          <template v-else-if="space.additionalRawData?.hibernated">
+            Reactivate
+          </template>
         </UiButton>
       </div>
     </div>

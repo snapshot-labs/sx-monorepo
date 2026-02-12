@@ -1,21 +1,33 @@
+import { evmNetworks, starknetNetworks } from '@snapshot-labs/sx';
 import {
   DEPRECATED_STRATEGIES,
   DISABLED_STRATEGIES,
   OVERRIDING_STRATEGIES
 } from '@/helpers/constants';
 import { offchainNetworks } from '@/networks';
+import { useRelayerInfoQuery } from '@/queries/relayerInfo';
 import { Space } from '@/types';
 
 const UPCOMING_PRO_ONLY_NETWORKS: readonly string[] = [
   '137' // Polygon
 ];
 
+const PRO_EXPIRATION_WARNING_DAYS = 7;
+const PRO_AFTER_EXPIRATION_WARNING_DAYS = 7;
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
 type AlertType =
   | 'HAS_DEPRECATED_STRATEGIES'
   | 'HAS_DISABLED_STRATEGIES'
   | 'HAS_PRO_ONLY_STRATEGIES'
   | 'HAS_PRO_ONLY_NETWORKS'
-  | 'HAS_PRO_ONLY_WHITELABEL';
+  | 'HAS_PRO_ONLY_WHITELABEL'
+  | 'IS_PRO_EXPIRING_SOON'
+  | 'IS_PRO_JUST_EXPIRED'
+  | 'IS_HIBERNATED'
+  | 'IS_RELAYER_BALANCE_INSUFFICIENT'
+  | 'IS_RELAYER_BALANCE_LOW'
+  | 'IS_SIG_AUTHENTICATOR_INOPERATIVE';
 
 export function useSpaceAlerts(
   space: Ref<Space>,
@@ -33,13 +45,17 @@ export function useSpaceAlerts(
     offchainNetworks.includes(space.value.network)
   );
 
+  const {
+    data: relayerInfo,
+    isError: isRelayerInfoError,
+    isLoading: isRelayerInfoLoading
+  } = useRelayerInfoQuery(space);
+
   const unsupportedProOnlyStrategies = computed(() => {
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(
-      strategy =>
-        (OVERRIDING_STRATEGIES as readonly string[]).includes(strategy) &&
-        !space.value.turbo
+      strategy => OVERRIDING_STRATEGIES.includes(strategy) && !space.value.turbo
     );
   });
 
@@ -47,7 +63,7 @@ export function useSpaceAlerts(
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(strategy =>
-      (DEPRECATED_STRATEGIES as readonly string[]).includes(strategy)
+      DEPRECATED_STRATEGIES.includes(strategy)
     );
   });
 
@@ -55,7 +71,7 @@ export function useSpaceAlerts(
     if (!isOffchainSpace.value) return [];
 
     return space.value.strategies.filter(strategy =>
-      (DISABLED_STRATEGIES as readonly string[]).includes(strategy)
+      DISABLED_STRATEGIES.includes(strategy)
     );
   });
 
@@ -89,6 +105,82 @@ export function useSpaceAlerts(
       .filter(network => !!network);
   });
 
+  const warningDaysBeforeProExpiration = computed(() => {
+    const now = Date.now();
+    const expirationTime = (space.value.turbo_expiration || 0) * 1000;
+    const warningThresholdMs = PRO_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
+
+    if (expirationTime < now || expirationTime > now + warningThresholdMs) {
+      return 0;
+    }
+
+    const diff = expirationTime - now;
+
+    return Math.ceil(diff / DAY_IN_MS);
+  });
+
+  const isProJustExpired = computed(() => {
+    const now = Date.now();
+    const expirationTime = (space.value.turbo_expiration || 0) * 1000;
+    const graceThresholdMs = PRO_AFTER_EXPIRATION_WARNING_DAYS * DAY_IN_MS;
+
+    return expirationTime < now && expirationTime >= now - graceThresholdMs;
+  });
+
+  const sigAuthenticatorAddresses = computed(() => {
+    const authenticators: Record<string, string | undefined> =
+      { ...evmNetworks, ...starknetNetworks }[space.value.network]
+        ?.Authenticators || {};
+
+    return [
+      authenticators.EthSig,
+      authenticators.EthSigV2,
+      authenticators.StarkSig
+    ].filter(v => typeof v !== 'undefined');
+  });
+
+  const isRelayerBalanceLow = computed(() => {
+    if (
+      isOffchainSpace.value ||
+      isRelayerInfoLoading.value ||
+      isRelayerInfoError.value
+    ) {
+      return false;
+    }
+
+    return relayerInfo.value?.isBalanceLow;
+  });
+
+  const isRelayerBalanceInsufficient = computed(() => {
+    if (
+      isOffchainSpace.value ||
+      isRelayerInfoLoading.value ||
+      isRelayerInfoError.value
+    ) {
+      return false;
+    }
+
+    return (
+      !!relayerInfo.value?.balance && !relayerInfo.value?.hasMinimumBalance
+    );
+  });
+
+  const isSigAuthenticatorInoperative = computed(() => {
+    if (
+      isOffchainSpace.value ||
+      isRelayerInfoLoading.value ||
+      isRelayerInfoError.value
+    ) {
+      return false;
+    }
+
+    return (
+      space.value.authenticators.some(a => {
+        return sigAuthenticatorAddresses.value.includes(a);
+      }) && !relayerInfo.value?.balance
+    );
+  });
+
   const alerts = computed(() => {
     const alertsMap = new Map<AlertType, Record<string, any>>();
 
@@ -119,6 +211,36 @@ export function useSpaceAlerts(
     if (space.value.additionalRawData?.domain && !space.value.turbo) {
       alertsMap.set('HAS_PRO_ONLY_WHITELABEL', {
         domain: space.value.additionalRawData.domain
+      });
+    }
+
+    if (warningDaysBeforeProExpiration.value) {
+      alertsMap.set('IS_PRO_EXPIRING_SOON', {
+        daysUntilExpiration: warningDaysBeforeProExpiration.value
+      });
+    }
+
+    if (isProJustExpired.value) {
+      alertsMap.set('IS_PRO_JUST_EXPIRED', {});
+    }
+
+    if (space.value.additionalRawData?.hibernated) {
+      alertsMap.set('IS_HIBERNATED', {});
+    }
+
+    if (isRelayerBalanceLow.value) {
+      alertsMap.set('IS_RELAYER_BALANCE_LOW', {});
+    }
+
+    if (isRelayerBalanceInsufficient.value) {
+      alertsMap.set('IS_RELAYER_BALANCE_INSUFFICIENT', {});
+    }
+
+    if (isSigAuthenticatorInoperative.value) {
+      alertsMap.set('IS_SIG_AUTHENTICATOR_INOPERATIVE', {
+        isUsingOnlySigAuthenticators: space.value.authenticators.every(a =>
+          sigAuthenticatorAddresses.value.includes(a)
+        )
       });
     }
 

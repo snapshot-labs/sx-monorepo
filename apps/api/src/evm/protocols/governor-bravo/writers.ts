@@ -1,10 +1,9 @@
 import { evm } from '@snapshot-labs/checkpoint';
-import { evmNetworks } from '@snapshot-labs/sx';
-import { createPublicClient, getAddress, http } from 'viem';
+import { evmNetworks, utils } from '@snapshot-labs/sx';
+import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
 import GovernorModuleAbi from './abis/GovernorModule';
 import TimelockAbi from './abis/Timelock';
 import logger from './logger';
-import { convertChoice, getProposalTitle } from './utils';
 import {
   ExecutionStrategy,
   Leaderboard,
@@ -23,13 +22,25 @@ import {
   getCurrentTimestamp,
   getParsedVP,
   getProposalLink,
-  getSpaceLink
+  getSpaceLink,
+  updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
+import {
+  convertChoice,
+  getProposalBody,
+  getProposalTitle
+} from '../openzeppelin/utils';
 
 type SpaceData = {
   name: string;
+  about?: string;
+  avatar?: string;
+  externalUrl?: string;
+  github?: string;
+  twitter?: string;
+  farcaster?: string;
   symbol: string;
   decimals: number;
   governanceToken: string;
@@ -43,22 +54,36 @@ type SpaceData = {
 const spaceData: Record<string, SpaceData | undefined> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': {
     name: 'Uniswap',
+    about:
+      'The largest onchain marketplace. Buy and sell crypto on Ethereum and 14+ other chains.',
+    avatar:
+      'ipfs://bafkreigzzj4yc3khx4mn2zmdrdgtvae3s36e5ae2sgry2azuqvxfakjuoa',
+    externalUrl: 'https://app.uniswap.org',
+    github: 'uniswap',
+    twitter: 'Uniswap',
+    farcaster: 'uniswap',
     symbol: 'UNI',
     decimals: 18,
     governanceToken: '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984',
     treasury: {
-      name: 'Uniswap Treasury',
+      name: 'Timelock',
       address: '0x1a9C8182C09F50C8318d769245beA52c32BE35BC',
       chain_id: 1
     }
   },
   '0xc0Da02939E1441F497fd74F78cE7Decb17B66529': {
     name: 'Compound',
+    about: 'Building infrastructure for the future of finance.',
+    avatar:
+      'ipfs://bafkreia4lin2o6uux2375uhekvgqlr466tes7gsdzg6aldakw5jicylcd4',
+    externalUrl: 'https://compound.finance',
+    github: 'compound-finance',
+    twitter: 'compoundfinance',
     symbol: 'COMP',
     decimals: 18,
     governanceToken: '0xc00e94Cb662C3520282E6f5717214004A7f26888',
     treasury: {
-      name: 'Compound Treasury',
+      name: 'Timelock',
       address: '0x6d903f6003cca6255D85CcA4D3B5E5146dC33925',
       chain_id: 1
     }
@@ -69,7 +94,7 @@ const spaceData: Record<string, SpaceData | undefined> = {
     decimals: 18,
     governanceToken: '0xc27427e6B1a112eD59f9dB58c34BC13a7ee76546',
     treasury: {
-      name: 'MOCK',
+      name: 'Timelock',
       address: '0x52f26d07f8fEf1CF806A53159ce68bf1B4031baB',
       chain_id: 11155111
     }
@@ -210,7 +235,10 @@ export function createWriters(
 
     const { name, symbol, treasury, governanceToken } = spaceDataEntry;
 
-    space.authenticators = ['GovernorBravoAuthenticator'];
+    space.authenticators = [
+      'GovernorBravoAuthenticator',
+      'GovernorBravoAuthenticatorSignature'
+    ];
     space.strategies = [evmNetworks[config.indexerName].Strategies.Comp];
     space.strategies_params = [governanceToken];
     space.strategies_indices = [0];
@@ -224,6 +252,12 @@ export function createWriters(
 
     const spaceMetadata = new SpaceMetadataItem(metadataId, config.indexerName);
     spaceMetadata.name = name;
+    spaceMetadata.about = spaceDataEntry.about || '';
+    spaceMetadata.avatar = spaceDataEntry.avatar || '';
+    spaceMetadata.external_url = spaceDataEntry.externalUrl || '';
+    spaceMetadata.twitter = spaceDataEntry.twitter || '';
+    spaceMetadata.github = spaceDataEntry.github || '';
+    spaceMetadata.farcaster = spaceDataEntry.farcaster || '';
     spaceMetadata.voting_power_symbol = symbol;
     spaceMetadata.treasuries = [JSON.stringify(treasury)];
     spaceMetadata.executors_strategies = [executionStrategy.id];
@@ -305,8 +339,8 @@ export function createWriters(
     proposal.min_end = await getTimestampFromBlock(event.args.endBlock);
     proposal.min_end_block_number = Number(event.args.endBlock);
     proposal.max_end = proposal.min_end;
-    proposal.max_end_block_number = proposal.max_end;
-    proposal.snapshot = proposal.start;
+    proposal.max_end_block_number = proposal.min_end_block_number;
+    proposal.snapshot = proposal.start_block_number;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
     proposal.strategies = space.strategies;
@@ -329,19 +363,32 @@ export function createWriters(
 
     const proposalBody = event.args.description || '';
 
-    const execution = event.args.targets.map((target, index) => ({
-      _type: 'raw',
-      _form: {
-        recipient: target
-      },
-      to: target,
-      data: event.args.calldatas[index] ?? '0x',
-      value: event.args.values[index]?.toString() ?? '0',
-      salt: '0'
-    }));
+    const execution = await Promise.all(
+      event.args.targets.map((target, index) => {
+        const signature = event.args.signatures[index] ?? '';
+
+        let calldata: `0x${string}` | '';
+        if (signature) {
+          const sighash = keccak256(toHex(signature)).slice(0, 10);
+          calldata =
+            `${sighash}${(event.args.calldatas[index] ?? '').slice(2)}` as `0x${string}`;
+        } else {
+          calldata = event.args.calldatas[index] ?? '';
+        }
+
+        return utils.execution.convertToTransaction(
+          {
+            target,
+            calldata,
+            value: event.args.values[index]?.toString() ?? '0'
+          },
+          protocolConfig.chainId
+        );
+      })
+    );
 
     proposalMetadata.title = getProposalTitle(proposalBody);
-    proposalMetadata.body = proposalBody;
+    proposalMetadata.body = getProposalBody(proposalBody);
     proposalMetadata.choices = ['For', 'Against', 'Abstain'];
     proposalMetadata.execution = JSON.stringify(execution);
 
@@ -510,6 +557,7 @@ export function createWriters(
 
     leaderboardItem.vote_count += 1;
 
+    await updateScoresTick(proposal, vote.created, config.indexerName);
     await Promise.all([
       space.save(),
       proposal.save(),

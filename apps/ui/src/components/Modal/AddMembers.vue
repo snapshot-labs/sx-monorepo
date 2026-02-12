@@ -16,7 +16,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'add', value: Member[]): void;
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const form: Ref<{
@@ -82,15 +82,12 @@ const formErrors = computed(() => {
   const errors = validateForm(definition.value, form.value);
 
   const existingAddresses = new Map(
-    props.currentMembers.map(member => [
-      member.address.toLocaleLowerCase(),
-      true
-    ])
+    props.currentMembers.map(member => [member.address.toLowerCase(), true])
   );
 
   if (
     uniqueAddresses.value.some(address =>
-      existingAddresses.has(address.toLocaleLowerCase())
+      existingAddresses.has(address.toLowerCase())
     )
   ) {
     errors.addresses = 'Member already exists';

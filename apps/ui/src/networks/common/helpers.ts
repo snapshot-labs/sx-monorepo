@@ -73,6 +73,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     strategies,
     strategiesIndices,
     isContract,
+    hasReason,
     connectorType,
     ignoreRelayer
   }: {
@@ -80,6 +81,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     strategies: string[];
     strategiesIndices: number[];
     isContract: boolean;
+    hasReason: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
   }) {
@@ -104,6 +106,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
       .filter(({ supportInfo }) => {
         if (isContract && !supportInfo.isContractSupported) return false;
         if (ignoreRelayer && supportInfo.relayerType) return false;
+        if (hasReason && !supportInfo.isReasonSupported) return false;
 
         return supportInfo.isSupported;
       })

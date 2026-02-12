@@ -65,16 +65,17 @@ describe('utils', () => {
         avatar: '',
         cover: '',
         description: 'Test description',
+        votingPowerSymbol: 'VOTE',
         externalUrl: 'https://test.com',
         github: 'snapshot-labs',
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
         farcaster: 'snapshot-labs',
-        votingPowerSymbol: 'VOTE',
+        clanker: '0x000000000000000000000000000000000000dead',
         treasuries: [
           {
             name: 'treasury 1',
-            chainId: 11155111,
+            chainId: '11155111',
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
@@ -92,7 +93,7 @@ describe('utils', () => {
             apiType: 'governor-subgraph',
             apiUrl:
               'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            chainId: 11155111,
+            chainId: '11155111',
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]
@@ -109,11 +110,12 @@ describe('utils', () => {
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
           farcaster: 'snapshot-labs',
+          clanker: '0x000000000000000000000000000000000000dead',
           discord: 'snapshot',
           treasuries: [
             {
               name: 'treasury 1',
-              chain_id: 11155111,
+              chain_id: '11155111',
               address: '0x000000000000000000000000000000000000dead'
             }
           ],
@@ -132,7 +134,7 @@ describe('utils', () => {
               api_url:
                 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
               contract: '0x000000000000000000000000000000000000dead',
-              chain_id: 11155111
+              chain_id: '11155111'
             }
           ]
         }

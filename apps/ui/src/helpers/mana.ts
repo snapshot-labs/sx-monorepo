@@ -51,7 +51,8 @@ export async function executionCall(
     | 'finalizeProposal'
     | 'execute'
     | 'executeQueuedProposal'
-    | 'executeStarknetProposal',
+    | 'executeStarknetProposal'
+    | 'sendAuctionPartner',
   params: any
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);
@@ -93,6 +94,7 @@ export async function getRelayerInfo(
   balance: number;
   ticker: string;
   hasMinimumBalance: boolean;
+  isBalanceLow: boolean;
 } | null> {
   try {
     const isStarknet = starknetNetworks.includes(network);
@@ -110,6 +112,9 @@ export async function getRelayerInfo(
     data.ticker = isStarknet ? 'STRK' : METADATA[network].ticker ?? 'ETH';
     data.hasMinimumBalance =
       data.balance >= MINIMUM_RELAYER_BALANCES[networkType];
+    data.isBalanceLow =
+      data.hasMinimumBalance &&
+      data.balance < MINIMUM_RELAYER_BALANCES[networkType] * 2;
 
     return data;
   } catch (e) {

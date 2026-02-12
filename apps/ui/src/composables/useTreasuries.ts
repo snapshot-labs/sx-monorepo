@@ -1,6 +1,5 @@
-import { getIsOsnapEnabled } from '@/helpers/osnap';
 import { compareAddresses } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork } from '@/networks';
 import { SelectedStrategy, Space, SpaceMetadataTreasury } from '@/types';
 
 export type StrategyWithTreasury = SelectedStrategy & {
@@ -14,48 +13,15 @@ export function useTreasuries(spaceRef: ComputedRef<InputType> | InputType) {
 
     if (!space) return null;
 
-    let oSnapSupportPerTreasury: boolean[] | null = null;
-    if (offchainNetworks.includes(space.network)) {
-      oSnapSupportPerTreasury = await Promise.all(
-        space.treasuries.map(async treasury => {
-          if (!treasury.address || !treasury.chainId) {
-            return false;
-          }
-
-          try {
-            return await getIsOsnapEnabled(
-              treasury.chainId as number,
-              treasury.address
-            );
-          } catch {
-            return false;
-          }
-        })
-      );
-    }
-
     return space.treasuries
-      .map((treasury, i) => {
-        if (
-          offchainNetworks.includes(space.network) &&
-          oSnapSupportPerTreasury &&
-          oSnapSupportPerTreasury[i]
-        ) {
-          return {
-            address: treasury.address,
-            destinationAddress: null,
-            type: 'oSnap',
-            treasury
-          };
-        }
-
+      .map(treasury => {
         const strategy = space.executors_strategies.find(strategy => {
           return (
             strategy.treasury &&
             strategy.treasury_chain &&
             treasury.address &&
             compareAddresses(strategy.treasury, treasury.address) &&
-            treasury.chainId === strategy.treasury_chain
+            treasury.chainId === String(strategy.treasury_chain)
           );
         });
 

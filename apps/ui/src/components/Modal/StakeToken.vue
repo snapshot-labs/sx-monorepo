@@ -4,7 +4,7 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { createStakeTokenTransaction } from '@/helpers/transactions';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId, Transaction } from '@/types';
+import { Transaction } from '@/types';
 
 const STAKING_CONTRACTS = {
   1: {
@@ -42,13 +42,13 @@ const validator = getValidator({
 const props = defineProps<{
   open: boolean;
   address: string;
-  network: ChainId;
+  network: string;
   initialState?: any;
 }>();
 
 const emit = defineEmits<{
-  (e: 'add', transaction: Transaction);
-  (e: 'close');
+  (e: 'add', transaction: Transaction): void;
+  (e: 'close'): void;
 }>();
 
 const form: {
@@ -186,7 +186,11 @@ watch(
       </template>
     </div>
     <template v-if="stakingContract" #footer>
-      <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
+      <UiButton
+        class="w-full"
+        :disabled="!formValid || !form.amount"
+        @click="handleSubmit"
+      >
         Confirm
       </UiButton>
     </template>
