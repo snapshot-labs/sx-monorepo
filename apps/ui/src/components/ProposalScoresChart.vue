@@ -15,7 +15,7 @@ const props = withDefaults(
 );
 
 const HEIGHT = 160;
-const PADDING = { top: 24, bottom: 30, left: 12, right: 12 };
+const PADDING = { top: 24, bottom: 30, left: 24, right: 24 };
 const SERIES = [
   {
     stroke: 'stroke-skin-success',
