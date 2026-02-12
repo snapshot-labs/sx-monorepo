@@ -50,6 +50,10 @@ const {
   toRef(() => ['active', 'pending'].includes(proposal.value?.state || ''))
 );
 
+const baseRouteName = computed(() =>
+  String(route.name).replace(/^(space|org)-/, '')
+);
+
 const discussion = computed(() => {
   if (!proposal.value) return null;
 
@@ -65,9 +69,7 @@ const currentVote = computed(
 );
 
 const withoutContentInBottom = computed(
-  () =>
-    String(route.name) === 'space-proposal-votes' ||
-    String(route.name) === 'org-proposal-votes'
+  () => baseRouteName.value === 'proposal-votes'
 );
 
 async function handleVoteClick(choice: Choice) {
@@ -170,10 +172,7 @@ watchEffect(() => {
               }"
             >
               <UiLabel
-                :is-active="
-                  route.name === 'space-proposal-overview' ||
-                  route.name === 'org-proposal-overview'
-                "
+                :is-active="baseRouteName === 'proposal-overview'"
                 text="Overview"
               />
             </AppLink>
@@ -189,10 +188,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="
-                  route.name === 'space-proposal-votes' ||
-                  route.name === 'org-proposal-votes'
-                "
+                :is-active="baseRouteName === 'proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
                 class="inline-block"
@@ -213,10 +209,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="
-                  route.name === 'space-proposal-execution' ||
-                  route.name === 'org-proposal-execution'
-                "
+                :is-active="baseRouteName === 'proposal-execution'"
                 :count="
                   proposal.executions
                     .map(execution => execution.transactions.length)
@@ -239,10 +232,7 @@ watchEffect(() => {
                 class="flex items-center"
               >
                 <UiLabel
-                  :is-active="
-                    route.name === 'space-proposal-discussion' ||
-                    route.name === 'org-proposal-discussion'
-                  "
+                  :is-active="baseRouteName === 'proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
                   class="inline-block"
@@ -284,9 +274,7 @@ watchEffect(() => {
         :class="[
           'shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg',
           {
-            'hidden md:block':
-              route.name === 'space-proposal-votes' ||
-              route.name === 'org-proposal-votes'
+            'hidden md:block': baseRouteName === 'proposal-votes'
           }
         ]"
       >
