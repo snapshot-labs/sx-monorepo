@@ -298,7 +298,7 @@ function handleMouseMove(e: MouseEvent) {
             :cy="pt.y"
             r="8"
             :class="pt.fill"
-            class="halo"
+            class="animate-halo"
           />
         </template>
         <circle
