@@ -217,7 +217,7 @@ function handleMouseMove(e: MouseEvent) {
 </script>
 
 <template>
-  <div v-if="ticks.length >= 1">
+  <div v-if="ticks.length > 0">
     <div class="flex justify-between items-center mb-2 px-4 py-2.5">
       <div class="flex gap-2.5">
         <div
