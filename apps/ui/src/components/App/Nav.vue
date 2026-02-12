@@ -276,86 +276,6 @@ function getNavigationConfig(
   }
 
   if (mainRoute === 'org') {
-    if (route.name === 'org-settings') {
-      const isOffchainNetwork = space.value
-        ? offchainNetworks.includes(space.value.network)
-        : false;
-
-      function getOrgSettingsRoute({
-        name,
-        tab,
-        hidden
-      }: {
-        name: string;
-        tab: string;
-        hidden?: boolean;
-      }) {
-        return {
-          name,
-          link: {
-            name: 'org-settings',
-            params: { tab }
-          },
-          active: route.params.tab === tab,
-          hidden
-        };
-      }
-
-      return {
-        style: 'slim',
-        items: {
-          back: {
-            name: 'Settings',
-            icon: IHArrowLongLeft,
-            link: { name: 'org-overview' },
-            active: true
-          },
-          profile: getOrgSettingsRoute({
-            name: 'Profile',
-            tab: 'profile'
-          }),
-          proposal: getOrgSettingsRoute({
-            name: 'Proposal',
-            tab: 'proposal'
-          }),
-          votingStrategies: getOrgSettingsRoute({
-            name: 'Voting strategies',
-            tab: 'voting-strategies'
-          }),
-          voting: getOrgSettingsRoute({
-            name: 'Voting',
-            tab: 'voting'
-          }),
-          execution: getOrgSettingsRoute({
-            name: 'Execution',
-            tab: 'execution',
-            hidden: isOffchainNetwork
-          }),
-          authenticators: getOrgSettingsRoute({
-            name: 'Authenticators',
-            tab: 'authenticators',
-            hidden: isOffchainNetwork
-          }),
-          treasuries: getOrgSettingsRoute({
-            name: 'Treasuries',
-            tab: 'treasuries'
-          }),
-          delegations: getOrgSettingsRoute({
-            name: 'Delegations',
-            tab: 'delegations'
-          }),
-          labels: getOrgSettingsRoute({
-            name: 'Labels',
-            tab: 'labels'
-          }),
-          controller: getOrgSettingsRoute({
-            name: 'Controller',
-            tab: 'controller'
-          })
-        }
-      };
-    }
-
     const org = orgDefinition.value;
     const primarySpaceKey = org
       ? `${org.primarySpace.network}:${org.primarySpace.id}`
@@ -408,16 +328,7 @@ function getNavigationConfig(
               }
             }
           : undefined),
-        ...externalLinksItems,
-        ...(canSeeSettings.value
-          ? {
-              settings: {
-                name: 'Settings',
-                icon: IHCog,
-                link: { name: 'org-settings', params: { tab: 'profile' } }
-              }
-            }
-          : undefined)
+        ...externalLinksItems
       }
     };
   }

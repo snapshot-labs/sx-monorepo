@@ -11,7 +11,6 @@ import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
-import SpaceSettings from '@/views/Space/Settings.vue';
 import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
 import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
@@ -60,11 +59,6 @@ const orgChildrenRoutes: RouteRecordRaw[] = [
     path: 'discussions/:topic',
     name: 'org-discussions-topic',
     component: Topic
-  },
-  {
-    path: 'settings/:tab?',
-    name: 'org-settings',
-    component: SpaceSettings
   },
   { path: 'delegates', name: 'org-delegates', component: SpaceDelegates },
   {
