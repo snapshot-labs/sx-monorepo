@@ -60,7 +60,11 @@ export const PROPOSALS_KEYS = {
     networkId: MaybeRefOrGetter<NetworkID>,
     spaceId: MaybeRefOrGetter<string>,
     proposalId: MaybeRefOrGetter<string>
-  ) => [...PROPOSALS_KEYS.details(networkId, spaceId), proposalId] as const
+  ) => [...PROPOSALS_KEYS.details(networkId, spaceId), proposalId] as const,
+  scoresTicks: (
+    networkId: MaybeRefOrGetter<NetworkID>,
+    proposalId: MaybeRefOrGetter<string>
+  ) => [...PROPOSALS_KEYS.all, 'scoresTicks', networkId, proposalId] as const
 };
 
 async function withAuthorNames(proposals: Proposal[]) {
@@ -241,7 +245,7 @@ export function useProposalScoresTicksQuery(
   proposalId: MaybeRefOrGetter<string>
 ) {
   return useQuery({
-    queryKey: ['proposals', 'scoresTicks', networkId, proposalId],
+    queryKey: PROPOSALS_KEYS.scoresTicks(networkId, proposalId),
     queryFn: async () => {
       return getNetwork(toValue(networkId)).api.loadProposalScoresTicks(
         toValue(proposalId)
