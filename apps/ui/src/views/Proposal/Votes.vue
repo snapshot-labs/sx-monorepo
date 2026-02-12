@@ -23,10 +23,12 @@ const { x: votesHeaderX } = useScroll(votesHeader);
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
-const { data: scoresTicks, isPending: isScoresTicksPending } = useProposalScoresTicksQuery(
-  toRef(() => props.proposal.network),
-  toRef(() => props.proposal.id)
-);
+const { data: scoresTicks, isPending: isScoresTicksPending } =
+  useProposalScoresTicksQuery(
+    toRef(() => props.proposal.network),
+    toRef(() => props.proposal.space.id),
+    toRef(() => props.proposal.id)
+  );
 
 const {
   data,
@@ -72,8 +74,7 @@ function handleScrollEvent(target: HTMLElement) {
 <template>
   <div
     v-if="
-      !offchainNetworks.includes(proposal.network) &&
-      proposal.vote_count > 0
+      !offchainNetworks.includes(proposal.network) && proposal.vote_count > 0
     "
   >
     <ProposalScoresChart
