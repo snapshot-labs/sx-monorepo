@@ -237,9 +237,7 @@ watchEffect(() => setTitle('Explore'));
         class="hidden text-skin-text sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
       >
         Log in to start making decisions.
-        <router-link :to="{ name: 'site-landing' }"
-          >See how it works</router-link
-        >.
+        <AppLink :to="{ name: 'site-landing' }">See how it works</AppLink>.
       </h4>
       <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
         <UiButton
