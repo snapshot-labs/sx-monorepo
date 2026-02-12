@@ -1,7 +1,6 @@
 import {
   ApolloClient,
   createHttpLink,
-  gql,
   InMemoryCache
 } from '@apollo/client/core';
 import {
@@ -51,6 +50,7 @@ import {
   LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
+  PROPOSAL_SCORES_TICKS_QUERY,
   PROPOSALS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
@@ -444,18 +444,7 @@ export function createApi(
       proposalId: string
     ): Promise<ScoresTick[]> => {
       const { data } = await apollo.query({
-        query: gql`
-          query ProposalScoresTicks($id: String!) {
-            proposal(id: $id) {
-              scores_ticks {
-                timestamp
-                scores_1
-                scores_2
-                scores_3
-              }
-            }
-          }
-        `,
+        query: PROPOSAL_SCORES_TICKS_QUERY,
         variables: { id: proposalId }
       });
 
