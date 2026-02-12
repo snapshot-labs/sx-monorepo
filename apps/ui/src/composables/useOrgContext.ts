@@ -14,6 +14,8 @@ export function toOrgRoute(
   name: string,
   params: Record<string, any> = {}
 ): { name: string; params: Record<string, any> } | null {
+  if (name === 'space-overview') return null;
+
   if (name.startsWith('space-')) {
     const orgRouteName = name.replace('space-', 'org-');
     const newParams = { ...params };
