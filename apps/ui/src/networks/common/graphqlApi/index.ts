@@ -448,21 +448,14 @@ export function createApi(
         variables: { id: proposalId }
       });
 
-      return (data.proposal?.scores_ticks ?? []).map(
-        (tick: {
-          timestamp: number;
-          scores_1: string;
-          scores_2: string;
-          scores_3: string;
-        }) => ({
-          timestamp: tick.timestamp,
-          scores: [
-            Number(tick.scores_1),
-            Number(tick.scores_2),
-            Number(tick.scores_3)
-          ] as [number, number, number]
-        })
-      );
+      return (data.proposal?.scores_ticks ?? []).map(tick => ({
+        timestamp: tick.timestamp,
+        scores: [
+          Number(tick.scores_1),
+          Number(tick.scores_2),
+          Number(tick.scores_3)
+        ] as [number, number, number]
+      }));
     },
     loadProposalVotes: async (
       proposal: Proposal,
