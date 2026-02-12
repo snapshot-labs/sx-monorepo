@@ -64,7 +64,7 @@ export const PROPOSALS_KEYS = {
   scoresTicks: (
     networkId: MaybeRefOrGetter<NetworkID>,
     proposalId: MaybeRefOrGetter<string>
-  ) => [...PROPOSALS_KEYS.all, 'scoresTicks', networkId, proposalId] as const
+  ) => [...PROPOSALS_KEYS.detail(networkId, spaceId, proposalId), 'scoresTick'] as const
 };
 
 async function withAuthorNames(proposals: Proposal[]) {
