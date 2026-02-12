@@ -51,7 +51,8 @@ const sortedTicks = computed(() =>
 
 const effectiveEnd = computed(() => {
   const lastTick = sortedTicks.value.at(-1);
-  return lastTick ? Math.max(props.end, lastTick.timestamp) : props.end;
+  const end = lastTick ? Math.max(props.end, lastTick.timestamp) : props.end;
+  return Math.min(end, Math.floor(Date.now() / 1000));
 });
 
 const duration = computed(() => effectiveEnd.value - props.start || 1);
