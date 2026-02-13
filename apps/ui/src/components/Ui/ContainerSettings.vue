@@ -16,7 +16,10 @@ defineProps<{
         <div />
         <slot name="actions" />
       </div>
-      <span v-if="description" class="inline-block" v-text="description" />
+      <div v-if="$slots.description" class="inline-block">
+        <slot name="description" />
+      </div>
+      <span v-else-if="description" class="inline-block" v-text="description" />
     </div>
     <slot />
   </div>
