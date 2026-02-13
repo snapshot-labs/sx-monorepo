@@ -1,43 +1,12 @@
 <script setup lang="ts">
-import {
-  getOrganizationByDomain,
-  getOrganizationById
-} from '@/helpers/organizations';
-import { getCacheHash, getStampUrl } from '@/helpers/utils';
-
-const route = useRoute();
-const { setFavicon } = useFavicon();
 const { loadVotes } = useAccount();
 const { web3 } = useWeb3();
-const { organization, resolved, loadOrgSpaces } = useOrganization();
+const { init: initOrganization, organization, resolved } = useOrganization();
+const { space } = useCurrentSpace();
 
-const orgConfig = computed(
-  () =>
-    getOrganizationByDomain(window.location.hostname) ??
-    getOrganizationById(route.params.orgId as string)
-);
+initOrganization();
 
-watch(
-  orgConfig,
-  config => {
-    if (config) loadOrgSpaces(config);
-  },
-  { immediate: true }
-);
-
-const activeSpace = computed(() => {
-  if (!organization.value) return null;
-  const spaceParam = route.params.space as string | undefined;
-
-  if (spaceParam) {
-    const match = organization.value.spaces.find(
-      s => spaceParam === `${s.network}:${s.id}`
-    );
-    if (match) return match;
-  }
-
-  return organization.value.spaces[0] ?? null;
-});
+useSpaceFavicon(computed(() => organization.value?.spaces[0] ?? null));
 
 watch(
   [() => organization.value?.spaces, () => web3.value.account],
@@ -49,30 +18,9 @@ watch(
   },
   { immediate: true }
 );
-
-watchEffect(() => {
-  const firstSpace = organization.value?.spaces[0];
-  if (!firstSpace) {
-    setFavicon(null);
-    return;
-  }
-
-  setFavicon(
-    getStampUrl(
-      'space',
-      `${firstSpace.network}:${firstSpace.id}`,
-      16,
-      getCacheHash(firstSpace.avatar)
-    )
-  );
-});
-
-onUnmounted(() => {
-  setFavicon(null);
-});
 </script>
 
 <template>
   <UiLoading v-if="!resolved" class="block p-4" />
-  <router-view v-else :space="activeSpace" />
+  <router-view v-else :space="space" />
 </template>
