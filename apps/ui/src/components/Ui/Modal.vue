@@ -41,7 +41,7 @@ watch(open, val => {
       class="modal mx-auto pt-electron-titlebar-height"
       data-testid="modal"
     >
-      <div class="backdrop" @click="closeable ? $emit('close') : null" />
+      <div class="backdrop" @click="closeable ? emit('close') : null" />
       <div class="shell overflow-hidden relative rounded-none md:rounded-lg">
         <div
           v-if="$slots.header"
@@ -65,7 +65,7 @@ watch(open, val => {
           type="button"
           class="absolute right-0 -top-1 p-4"
           aria-label="Close modal"
-          @click="$emit('close')"
+          @click="emit('close')"
         >
           <IH-x />
         </button>

@@ -40,7 +40,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Confirm action</h3>
     </template>

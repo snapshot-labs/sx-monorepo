@@ -169,7 +169,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Edit strategy</h3>
       <template v-if="showPicker">

@@ -1,10 +1,6 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false });
+
 import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
 import InputArray from './InputArray.vue';

@@ -97,7 +97,7 @@ function getZodiacAppUrl(strategyAddress: string) {
   <div>
     <UiLoading v-if="isPending" />
     <UiStateWarning v-else-if="isError">
-      Error while loading execution strategies.
+      Failed to load execution strategies.
     </UiStateWarning>
     <div
       v-for="executionStrategy in executionStrategies"

@@ -6,7 +6,7 @@ const props = defineProps<{
   open: boolean;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close'): void;
   (e: 'pick', space: Space): void;
 }>();
@@ -39,7 +39,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Select a space'" />
       <UiModalSearchInput v-model="searchQuery" />
@@ -59,7 +59,7 @@ watch(
             type="button"
             :space="space"
             class="flex items-center space-x-3 truncate px-4 py-3 border-b w-full"
-            @click="$emit('pick', space)"
+            @click="emit('pick', space)"
           >
             <div class="shrink-0">
               <SpaceAvatar :space="space" :size="32" class="!rounded-[4px]" />

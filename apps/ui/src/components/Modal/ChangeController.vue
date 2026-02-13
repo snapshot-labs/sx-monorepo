@@ -66,7 +66,7 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Change controller</h3>
       <template v-if="showPicker">
