@@ -60,7 +60,7 @@ const form: {
 const isFormValidated = ref(false);
 const isFormValid = ref(false);
 const isHidden = ref(false);
-const isPickerShown = ref(false);
+const showPicker = ref(false);
 const isConnectorModalOpen = ref(false);
 const isSending = ref(false);
 const pickerIndex = ref(0);
@@ -298,7 +298,7 @@ function handleConnectorPick(connector: Connector) {
 
 function handlePickerClick(index = 0) {
   pickerIndex.value = index;
-  isPickerShown.value = true;
+  showPicker.value = true;
 }
 
 watch(delegatees, () => {
@@ -338,11 +338,11 @@ watch(
   <UiModal :open="open" :class="{ hidden: isHidden }" @close="$emit('close')">
     <template #header>
       <h3>Delegate voting power</h3>
-      <template v-if="isPickerShown">
+      <template v-if="showPicker">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="isPickerShown = false"
+          @click="showPicker = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
@@ -352,13 +352,13 @@ watch(
         />
       </template>
     </template>
-    <template v-if="isPickerShown">
+    <template v-if="showPicker">
       <PickerContact
         :loading="false"
         :search-value="searchValue"
         @pick="
           form.delegatees[pickerIndex].id = $event;
-          isPickerShown = false;
+          showPicker = false;
         "
       />
     </template>
@@ -418,7 +418,7 @@ watch(
         />
       </template>
     </div>
-    <template v-if="!isPickerShown && auth" #footer>
+    <template v-if="!showPicker && auth" #footer>
       <UiButton
         v-if="!isDelegationSupportedByConnectedWallet(selectedDelegation)"
         class="w-full"
