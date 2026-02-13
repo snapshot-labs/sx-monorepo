@@ -11,13 +11,19 @@ const { loadVotes } = useAccount();
 const { web3 } = useWeb3();
 const { organization, resolved, loadOrgSpaces } = useOrganization();
 
-const orgConfig =
-  getOrganizationByDomain(window.location.hostname) ??
-  getOrganizationById(route.params.orgId as string);
+const orgConfig = computed(
+  () =>
+    getOrganizationByDomain(window.location.hostname) ??
+    getOrganizationById(route.params.orgId as string)
+);
 
-onMounted(() => {
-  if (orgConfig) loadOrgSpaces(orgConfig);
-});
+watch(
+  orgConfig,
+  config => {
+    if (config) loadOrgSpaces(config);
+  },
+  { immediate: true }
+);
 
 const activeSpace = computed(() => {
   if (!organization.value) return null;

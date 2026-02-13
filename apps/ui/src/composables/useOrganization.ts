@@ -131,8 +131,6 @@ export function useOrganization() {
   }
 
   async function loadOrgSpaces(org: OrganizationConfig) {
-    if (spaces.value.length > 0) return;
-
     resolved.value = false;
     try {
       spaces.value = await loadSpaces(org, queryClient);
