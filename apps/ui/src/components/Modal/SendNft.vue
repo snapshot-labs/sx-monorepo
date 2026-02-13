@@ -121,7 +121,7 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Send NFT'" />
       <template v-if="showPicker">

@@ -335,7 +335,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" :class="{ hidden: isHidden }" @close="$emit('close')">
+  <UiModal :open="open" :class="{ hidden: isHidden }" @close="emit('close')">
     <template #header>
       <h3>Delegate voting power</h3>
       <template v-if="showPicker">

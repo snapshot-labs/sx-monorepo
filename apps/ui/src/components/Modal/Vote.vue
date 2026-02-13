@@ -207,7 +207,7 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" :class="{ hidden }" @close="$emit('close')">
+  <UiModal :open="open" :class="{ hidden }" @close="emit('close')">
     <template #header>
       <h3>Cast your vote</h3>
     </template>
@@ -280,7 +280,7 @@ watchEffect(async () => {
       <div class="flex flex-col xs:flex-row gap-3">
         <UiButton
           class="w-full order-last xs:order-none"
-          @click="$emit('close')"
+          @click="emit('close')"
         >
           Cancel
         </UiButton>
