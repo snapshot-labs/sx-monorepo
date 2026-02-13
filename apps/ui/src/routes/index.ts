@@ -2,6 +2,10 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Splash from '@/components/Layout/Splash.vue';
 import { toOrgRoute } from '@/composables/useOrganization';
 import aliases from '@/helpers/aliases.json';
+import {
+  getOrganizationByDomain,
+  getOrganizationById
+} from '@/helpers/organizations';
 import { metadataNetwork } from '@/networks';
 import auctionRoutes from '@/routes/auction';
 import defaultRoutes from '@/routes/default';
@@ -95,6 +99,19 @@ router.beforeEach((to, from, next) => {
 
   const name = to.name?.toString();
   if (!name) return next();
+
+  // Don't rewrite if the target space is not part of the org
+  const spaceParam = to.params?.space as string | undefined;
+  if (spaceParam) {
+    const orgId = from.params.orgId as string | undefined;
+    const org =
+      getOrganizationByDomain(window.location.hostname) ??
+      (orgId ? getOrganizationById(orgId) : null);
+    const orgSpaceKeys = new Set(
+      org?.spaceIds.map(s => `${s.network}:${s.id}`) ?? []
+    );
+    if (!orgSpaceKeys.has(spaceParam)) return next();
+  }
 
   const rewritten = toOrgRoute(name, to.params);
   if (rewritten) return next({ ...to, ...rewritten });
