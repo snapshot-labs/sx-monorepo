@@ -6,7 +6,6 @@ import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
-import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
@@ -46,27 +45,10 @@ const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
 
-const { param } = useRouteParser('space');
-const { resolved, address, networkId } = useResolve(param);
-const { data: spaceData } = useSpaceQuery({
-  networkId: networkId,
-  spaceId: address
-});
+const { space, networkId, address } = useCurrentSpace();
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
-
-const space = computed(() => {
-  if (currentRouteName.value === 'org') {
-    return organization.value?.spaces[0] ?? null;
-  }
-
-  if (currentRouteName.value === 'space' && resolved.value) {
-    return spaceData.value ?? null;
-  }
-
-  return null;
-});
 
 const { isController } = useSpaceController(space);
 
