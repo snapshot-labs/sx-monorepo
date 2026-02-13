@@ -580,6 +580,7 @@ export function createApi(
 
   return {
     apiUrl: uri,
+    loadProposalScoresTicks: async () => [],
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,

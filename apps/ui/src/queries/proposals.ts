@@ -60,7 +60,16 @@ export const PROPOSALS_KEYS = {
     networkId: MaybeRefOrGetter<NetworkID>,
     spaceId: MaybeRefOrGetter<string>,
     proposalId: MaybeRefOrGetter<string>
-  ) => [...PROPOSALS_KEYS.details(networkId, spaceId), proposalId] as const
+  ) => [...PROPOSALS_KEYS.details(networkId, spaceId), proposalId] as const,
+  scoresTicks: (
+    networkId: MaybeRefOrGetter<NetworkID>,
+    spaceId: MaybeRefOrGetter<string>,
+    proposalId: MaybeRefOrGetter<string>
+  ) =>
+    [
+      ...PROPOSALS_KEYS.detail(networkId, spaceId, proposalId),
+      'scoresTicks'
+    ] as const
 };
 
 async function withAuthorNames(proposals: Proposal[]) {
@@ -232,6 +241,21 @@ export function useProposalQuery(
       if (!proposal) return null;
 
       return (await withAuthorNames([proposal]))[0];
+    }
+  });
+}
+
+export function useProposalScoresTicksQuery(
+  networkId: MaybeRefOrGetter<NetworkID>,
+  spaceId: MaybeRefOrGetter<string>,
+  proposalId: MaybeRefOrGetter<string>
+) {
+  return useQuery({
+    queryKey: PROPOSALS_KEYS.scoresTicks(networkId, spaceId, proposalId),
+    queryFn: async () => {
+      return getNetwork(toValue(networkId)).api.loadProposalScoresTicks(
+        toValue(proposalId)
+      );
     }
   });
 }
