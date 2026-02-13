@@ -1,10 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { getStampUrl } from '@/helpers/utils';
 
-const props = defineProps({
-  item: Object,
-  size: Number
-});
+const props = defineProps<{
+  item: {
+    contractAddress: string;
+    image?: string;
+  };
+  size?: number;
+}>();
 
 const fallbackUrl = computed(() =>
   getStampUrl(
@@ -15,8 +18,8 @@ const fallbackUrl = computed(() =>
 );
 const url = computed(() => props.item.image || fallbackUrl.value);
 
-function handleError(e) {
-  e.target.src = fallbackUrl.value;
+function handleError(e: Event) {
+  (e.target as HTMLImageElement).src = fallbackUrl.value;
 }
 </script>
 
