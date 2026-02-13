@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouteRecordRaw } from 'vue-router';
 import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
-import { getOrganizationByDomain } from '@/helpers/organizations';
+import { getOrganizationConfigByDomain } from '@/helpers/organizations';
 import defaultRoutes from '@/routes/default';
 import { orgRootRoutes } from '@/routes/organization';
 import whiteLabelRoutes from '@/routes/whiteLabel';
@@ -20,13 +20,12 @@ const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
 
-const whiteLabelOrg = getOrganizationByDomain(window.location.hostname);
-const isWhiteLabelMultiSpace = whiteLabelOrg
-  ? whiteLabelOrg.spaceIds.length > 1
-  : false;
+const isWhiteLabelOrg = !!getOrganizationConfigByDomain(
+  window.location.hostname
+);
 
 function getCustomDomainRoutes(): RouteRecordRaw[] {
-  if (isWhiteLabelMultiSpace) return orgRootRoutes;
+  if (isWhiteLabelOrg) return orgRootRoutes;
   if (isWhiteLabel.value) return whiteLabelRoutes;
   return defaultRoutes;
 }

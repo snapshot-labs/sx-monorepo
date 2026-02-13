@@ -48,12 +48,41 @@ export const ORGANIZATION_DOMAINS: Record<string, string> = {
   'starknet.stage.box': 'starknet'
 };
 
-export function getOrganizationByDomain(
+const ORG_ROUTES_WITH_SPACE = new Set([
+  'org-proposal',
+  'org-proposal-overview',
+  'org-proposal-votes',
+  'org-proposal-execution',
+  'org-proposal-discussion',
+  'org-editor'
+]);
+
+export function toOrgRoute(
+  name: string,
+  params: Record<string, any> = {}
+): { name: string; params: Record<string, any> } | null {
+  if (name.startsWith('space-')) {
+    const orgRouteName = name.replace('space-', 'org-');
+    const newParams = { ...params };
+    if (!ORG_ROUTES_WITH_SPACE.has(orgRouteName)) delete newParams.space;
+    return { name: orgRouteName, params: newParams };
+  }
+
+  if (name === 'user') {
+    return { name: 'org-user-statement', params };
+  }
+
+  return null;
+}
+
+export function getOrganizationConfigByDomain(
   domain: string
 ): OrganizationConfig | null {
   return ORGANIZATIONS[ORGANIZATION_DOMAINS[domain]] ?? null;
 }
 
-export function getOrganizationById(id: string): OrganizationConfig | null {
+export function getOrganizationConfigById(
+  id: string
+): OrganizationConfig | null {
   return ORGANIZATIONS[id] ?? null;
 }
