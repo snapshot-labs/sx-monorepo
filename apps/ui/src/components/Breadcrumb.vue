@@ -73,7 +73,8 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
   <AppLink
     v-if="space"
     :to="{
-      name: 'space-overview'
+      name: 'space-overview',
+      params: { space: `${networkId}:${spaceAddress}` }
     }"
     class="flex item-center space-x-2.5 truncate text-[24px]"
     v-bind="$attrs"
