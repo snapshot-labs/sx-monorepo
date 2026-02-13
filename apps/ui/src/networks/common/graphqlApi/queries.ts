@@ -294,3 +294,16 @@ export const LAST_INDEXED_BLOCK_QUERY = gql(`
     }
   }
 `);
+
+export const PROPOSAL_SCORES_TICKS_QUERY = gql(`
+  query ProposalScoresTicks($id: String!) {
+    proposal(id: $id) {
+      scores_ticks {
+        timestamp
+        scores_1
+        scores_2
+        scores_3
+      }
+    }
+  }
+`);
