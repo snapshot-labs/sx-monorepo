@@ -274,7 +274,7 @@ function getNavigationConfig(
     const primarySpaceKey = `${organization.value.spaces[0].network}:${organization.value.spaces[0].id}`;
 
     const externalLinksItems: Record<string, NavigationItem> = {};
-    for (const link of organization.value.externalLinks) {
+    for (const link of organization.value.externalLinks || []) {
       const key = link.name.toLowerCase().replace(/\s+/g, '-');
       externalLinksItems[key] = {
         name: link.name,

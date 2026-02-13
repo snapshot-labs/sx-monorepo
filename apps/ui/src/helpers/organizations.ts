@@ -11,7 +11,7 @@ export type OrganizationConfig = {
   id: string;
   name: string;
   spaceIds: SpaceRef[];
-  externalLinks: OrganizationExternalLink[];
+  externalLinks?: OrganizationExternalLink[];
 };
 
 export type Organization = OrganizationConfig & {
@@ -35,6 +35,11 @@ export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     externalLinks: [
       { name: 'Docs', url: 'https://docs.starknet.io/learn/protocol/strk' }
     ]
+  },
+  snapshot: {
+    id: 'snapshot',
+    name: 'Snapshot',
+    spaceIds: [{ network: 's', id: 'shot.eth' }]
   }
 };
 

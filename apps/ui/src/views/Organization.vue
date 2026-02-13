@@ -1,12 +1,23 @@
 <script setup lang="ts">
+import {
+  getOrganizationByDomain,
+  getOrganizationById
+} from '@/helpers/organizations';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 
 const route = useRoute();
 const { setFavicon } = useFavicon();
 const { loadVotes } = useAccount();
-const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
-const { organization, resolved } = useOrganization();
+const { organization, resolved, loadOrgSpaces } = useOrganization();
+
+const orgConfig =
+  getOrganizationByDomain(window.location.hostname) ??
+  getOrganizationById(route.params.orgId as string);
+
+onMounted(() => {
+  if (orgConfig) loadOrgSpaces(orgConfig);
+});
 
 const activeSpace = computed(() => {
   if (!organization.value) return null;
@@ -51,7 +62,7 @@ watchEffect(() => {
 });
 
 onUnmounted(() => {
-  if (!isWhiteLabel.value) setFavicon(null);
+  setFavicon(null);
 });
 </script>
 

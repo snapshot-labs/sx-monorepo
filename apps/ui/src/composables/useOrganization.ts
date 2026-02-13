@@ -1,10 +1,12 @@
+import { useQueryClient } from '@tanstack/vue-query';
 import { RouteLocationRaw } from 'vue-router';
 import {
   getOrganizationByDomain,
   getOrganizationById,
-  Organization
+  Organization,
+  OrganizationConfig
 } from '@/helpers/organizations';
-import { useSpaceQuery } from '@/queries/spaces';
+import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
 export const ORG_ROUTES_WITH_SPACE = new Set([
@@ -20,8 +22,6 @@ export function toOrgRoute(
   name: string,
   params: Record<string, any> = {}
 ): { name: string; params: Record<string, any> } | null {
-  if (name === 'space-overview') return null;
-
   if (name.startsWith('space-')) {
     const orgRouteName = name.replace('space-', 'org-');
     const newParams = { ...params };
@@ -36,15 +36,46 @@ export function toOrgRoute(
   return null;
 }
 
+const domain = window.location.hostname;
+const orgIdFromHash = window.location.hash.match(/^#\/org\/([^/]+)/)?.[1];
+
+const isOrg = !!getOrganizationByDomain(domain) || !!orgIdFromHash;
+const resolved = ref(!isOrg);
+const spaces = ref<Space[]>([]);
+
+async function loadSpaces(
+  config: OrganizationConfig,
+  queryClient: ReturnType<typeof useQueryClient>
+): Promise<Space[]> {
+  const loadedSpaces = await Promise.all(
+    config.spaceIds.map(async ({ network: networkId, id }) => {
+      const network = getNetwork(networkId);
+      const space = await network.api.loadSpace(id);
+
+      if (space) {
+        queryClient.setQueryData(
+          ['spaces', 'detail', `${space.network}:${space.id}`],
+          space
+        );
+      }
+
+      return space;
+    })
+  );
+
+  return loadedSpaces.filter((s): s is Space => !!s);
+}
+
 export function useOrganization() {
   const route = useRoute();
+  const queryClient = useQueryClient();
 
   const isOrgRoute = computed(() => String(route.matched[0]?.name) === 'org');
 
   const config = computed(() => {
     if (!isOrgRoute.value) return null;
     return (
-      getOrganizationByDomain(window.location.hostname) ??
+      getOrganizationByDomain(domain) ??
       getOrganizationById(route.params.orgId as string)
     );
   });
@@ -55,25 +86,27 @@ export function useOrganization() {
     return new Set(org.spaceIds.map(s => `${s.network}:${s.id}`));
   });
 
-  const spaceQueries = (config.value?.spaceIds ?? []).map((_, i) =>
-    useSpaceQuery({
-      networkId: computed(() => config.value?.spaceIds[i]?.network ?? null),
-      spaceId: computed(() => config.value?.spaceIds[i]?.id ?? null)
-    })
-  );
-
-  const resolved = computed(() => spaceQueries.every(q => !q.isPending.value));
-
   const organization = computed<Organization | null>(() => {
     const org = config.value;
     if (!org || !resolved.value) return null;
-
-    const spaces = spaceQueries
-      .map(q => q.data.value)
-      .filter((s): s is Space => !!s);
-
-    return { ...org, spaces };
+    return { ...org, spaces: spaces.value };
   });
+
+  async function init() {
+    if (resolved.value) return;
+
+    try {
+      const org =
+        getOrganizationByDomain(domain) ??
+        (orgIdFromHash ? getOrganizationById(orgIdFromHash) : null);
+
+      if (!org) return;
+
+      spaces.value = await loadSpaces(org, queryClient);
+    } finally {
+      resolved.value = true;
+    }
+  }
 
   function resolveSpaceRoute(
     to: RouteLocationRaw,
@@ -97,7 +130,20 @@ export function useOrganization() {
     return rewritten ? { ...to, ...rewritten } : to;
   }
 
+  async function loadOrgSpaces(org: OrganizationConfig) {
+    if (spaces.value.length > 0) return;
+
+    resolved.value = false;
+    try {
+      spaces.value = await loadSpaces(org, queryClient);
+    } finally {
+      resolved.value = true;
+    }
+  }
+
   return {
+    init,
+    loadOrgSpaces,
     organization,
     resolved,
     resolveSpaceRoute
