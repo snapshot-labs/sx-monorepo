@@ -1,9 +1,10 @@
+import { RouteRecordRaw } from 'vue-router';
 import Contacts from '@/views/Settings/Contacts.vue';
 import Settings from '@/views/Settings.vue';
 import Space from '@/views/Space.vue';
 import { spaceChildrenRoutes } from './common';
 
-export default [
+const whiteLabelRoutes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'space',
@@ -17,3 +18,5 @@ export default [
     children: [{ path: '', name: 'settings-contacts', component: Contacts }]
   }
 ];
+
+export default whiteLabelRoutes;
