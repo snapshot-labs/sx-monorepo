@@ -1,3 +1,4 @@
+import { getAddress, isAddress } from '@ethersproject/address';
 import { resolver } from '@/helpers/resolver';
 import { NetworkID } from '@/types';
 
@@ -23,10 +24,13 @@ export function useResolve(id: Ref<string>) {
 
       resolved.value = false;
 
-      const resolvedName = await resolver.resolveName(id);
+      const [network, name] = id.split(':') as [NetworkID, string];
+      const resolvedName = await resolver.resolveName(name, network);
       if (resolvedName) {
         networkId.value = resolvedName.networkId;
-        address.value = resolvedName.address;
+        address.value = isAddress(resolvedName.address)
+          ? getAddress(resolvedName.address)
+          : resolvedName.address;
         resolved.value = true;
       }
     },
