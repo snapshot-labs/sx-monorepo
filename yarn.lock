@@ -6338,6 +6338,31 @@
   resolved "https://registry.npmjs.org/@xmldom/xmldom/-/xmldom-0.8.11.tgz"
   integrity sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==
 
+"@xmtp/browser-sdk@^6.3.0":
+  version "6.3.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/browser-sdk/-/browser-sdk-6.3.0.tgz#7b96e2fc01b0580db0e0304d74356ca1688df908"
+  integrity sha512-MjGf49DfRijJbq0Pov+DoB3SmM2qE5uMJ/P7qFLzrx5h6C20JkJq0dew/kz7FkCOVxVaFfBrmE8GB8/mRxi65g==
+  dependencies:
+    "@xmtp/content-type-primitives" "3.0.0"
+    "@xmtp/wasm-bindings" "1.9.1"
+
+"@xmtp/content-type-primitives@3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/content-type-primitives/-/content-type-primitives-3.0.0.tgz#c32367402da6394db29e8ab51a407b3795d2f915"
+  integrity sha512-gxK6+k0ywOz39LFJjrUF3fOXWXR3aAmIkF7e0rFz7c27izDimZC5E2oja9iz/CYyzDS6lf9Pm31qRcGTMSYaHg==
+  dependencies:
+    "@xmtp/node-bindings" "1.8.0"
+
+"@xmtp/node-bindings@1.8.0":
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/@xmtp/node-bindings/-/node-bindings-1.8.0.tgz#68080e847b8463b68233eec0711f790ede3bbe04"
+  integrity sha512-dyppg1pQNsEdGH13RfsbkbXdnUdjufak6ea1YahjCROgmaJClDpMHcMcSfMzoJzASanU58MwEdCgYUF638NKgw==
+
+"@xmtp/wasm-bindings@1.9.1":
+  version "1.9.1"
+  resolved "https://registry.yarnpkg.com/@xmtp/wasm-bindings/-/wasm-bindings-1.9.1.tgz#ea020098e109c79fc93b617a1ecd903043afb7b5"
+  integrity sha512-xc6TA7ExjBgrfVLFwdN0UZz9TW4S4v8oxpOmuzOqb/Rbd6QPmqEfbD8FVO2ssUPSKG5r32Plpg/YGam+pkresg==
+
 "@zk-kit/utils@^1.2.1":
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/@zk-kit/utils/-/utils-1.4.1.tgz#b834eeb1f4b158df8f07a7be3ca05bbc24bae48f"

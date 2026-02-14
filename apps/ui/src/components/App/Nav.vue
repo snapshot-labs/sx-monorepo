@@ -12,6 +12,7 @@ import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
+import IHChatAlt from '~icons/heroicons-outline/chat-alt';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
@@ -40,6 +41,7 @@ type NavigationItem = {
 
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
+const { unreadCount: unreadMessagesCount } = useXmtp();
 const { isWhiteLabel } = useWhiteLabel();
 
 const { param } = useRouteParser('space');
@@ -294,6 +296,12 @@ function getNavigationConfig(
           name: 'Explore',
           icon: IHGlobe
         },
+        messages: {
+          name: 'Messages',
+          icon: IHChatAlt,
+          count: unreadMessagesCount.value,
+          hidden: !web3.value.account
+        },
         notifications: {
           name: 'Notifications',
           count: notificationsStore.unreadNotificationsCount,
@@ -368,7 +376,7 @@ const navigationItems = computed(() =>
           v-if="item.icon"
           class="inline-block"
         ></component>
-        <span class="grow" v-text="item.name" />
+        <span v-text="item.name" />
         <span
           v-if="item.count"
           class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"

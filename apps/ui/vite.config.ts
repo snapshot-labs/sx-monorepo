@@ -59,7 +59,8 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: ['@snapshot-labs/sx'],
+    exclude: ['@snapshot-labs/sx', '@xmtp/wasm-bindings', '@xmtp/browser-sdk'],
+    include: ['@xmtp/proto'],
     esbuildOptions: {
       target
     }
