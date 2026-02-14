@@ -11,7 +11,6 @@ import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
-import SpaceUserDelegators from '@/views/SpaceUser/Delegators.vue';
 import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
@@ -70,11 +69,6 @@ const orgChildrenRoutes: RouteRecordRaw[] = [
         path: '',
         name: 'org-user-statement',
         component: SpaceUserStatement
-      },
-      {
-        path: 'delegators',
-        name: 'org-user-delegators',
-        component: SpaceUserDelegators
       },
       {
         path: 'proposals',
