@@ -14,7 +14,7 @@ const domain = window.location.hostname;
 const orgIdFromHash = window.location.hash.match(/^#\/org\/([^/]+)/)?.[1];
 
 const isOrg = !!getOrganizationConfigByDomain(domain) || !!orgIdFromHash;
-const resolved = ref(!isOrg);
+const isPending = ref(isOrg);
 const spaces = ref<Space[]>([]);
 
 async function loadSpaces(
@@ -61,7 +61,7 @@ export function useOrganization() {
 
   const organization = computed<Organization | null>(() => {
     const org = config.value;
-    if (!org || !resolved.value) return null;
+    if (!org || isPending.value) return null;
     return { ...org, spaces: spaces.value };
   });
 
@@ -71,11 +71,11 @@ export function useOrganization() {
       async newConfig => {
         if (!newConfig) return;
 
-        resolved.value = false;
+        isPending.value = true;
         try {
           spaces.value = await loadSpaces(newConfig, queryClient);
         } finally {
-          resolved.value = true;
+          isPending.value = false;
         }
       },
       { immediate: true }
@@ -107,7 +107,7 @@ export function useOrganization() {
   return {
     init,
     organization,
-    resolved,
+    isPending,
     resolveSpaceRoute
   };
 }
