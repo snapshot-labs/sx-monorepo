@@ -277,7 +277,9 @@ watch(
           :to="{ name: item.route, params: { user: userId } }"
         >
           <UiLabel
-            :is-active="route.name === item.route"
+            :is-active="
+              String(route.name).replace(/^org/, 'space') === item.route
+            "
             :text="item.label"
             :count="item.count"
           />
