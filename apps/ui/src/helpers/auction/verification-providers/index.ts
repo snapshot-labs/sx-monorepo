@@ -1,4 +1,5 @@
 import { ComputedRef } from 'vue';
+import { AuctionNetworkId } from '../';
 import { VerificationProviderId, VerificationStatus } from '../types';
 import { sumsubProvider } from './sumsub';
 import { zkpassportProvider } from './zkpassport';
@@ -16,14 +17,16 @@ export type VerificationProvider = {
 
 export type VerificationContext = {
   web3Account: ComputedRef<string>;
-  network: string;
+  network: AuctionNetworkId;
   providerId: VerificationProviderId;
   status: { value: VerificationStatus };
   verificationUrl: { value: string | null };
   error: { value: string | null };
   handleError: (err: unknown, message?: string) => void;
+  auth: { signature: string; timestamp: number };
   rpcCall: <T>(method: string, params: object) => Promise<T>;
   checkStatus: (options?: {
+    auth?: { signature: string; timestamp: number };
     metadata?: object;
     showNotification?: boolean;
   }) => Promise<void>;
