@@ -50,15 +50,14 @@ export function useOrganization() {
     if (!isOrgRoute.value) return null;
     return (
       getOrganizationConfigByDomain(domain) ??
-      getOrganizationConfigById(route.params.orgId as string)
+      getOrganizationConfigById(route.params.org as string)
     );
   });
 
-  const orgSpaceKeys = computed(() => {
-    const org = config.value;
-    if (!org) return new Set<string>();
-    return new Set(org.spaceIds.map(s => `${s.network}:${s.id}`));
-  });
+  function isOrgSpace(spaceKey: string): boolean {
+    if (!config.value) return false;
+    return config.value.spaceIds.some(s => `${s.network}:${s.id}` === spaceKey);
+  }
 
   const organization = computed<Organization | null>(() => {
     const org = config.value;
@@ -98,7 +97,7 @@ export function useOrganization() {
 
     if (opts?.checkSpaceMembership) {
       const spaceParam = to.params?.space as string | undefined;
-      if (spaceParam && !orgSpaceKeys.value.has(spaceParam)) return to;
+      if (spaceParam && !isOrgSpace(spaceParam)) return to;
     }
 
     const rewritten = toOrgRoute(to.name.toString(), to.params ?? {});

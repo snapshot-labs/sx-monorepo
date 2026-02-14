@@ -86,9 +86,9 @@ const orgChildrenRoutes: RouteRecordRaw[] = [
   }
 ];
 
-// For default routes: /org/:orgId
+// For default routes: /org/:org
 export const orgRoute: RouteRecordRaw = {
-  path: '/org/:orgId',
+  path: '/org/:org',
   name: 'org',
   component: Organization,
   children: orgChildrenRoutes

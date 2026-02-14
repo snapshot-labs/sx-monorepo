@@ -103,14 +103,14 @@ router.beforeEach((to, from, next) => {
   // Don't rewrite if the target space is not part of the org
   const spaceParam = to.params?.space as string | undefined;
   if (spaceParam) {
-    const orgId = from.params.orgId as string | undefined;
+    const orgId = from.params.org as string | undefined;
     const org =
       getOrganizationConfigByDomain(window.location.hostname) ??
       (orgId ? getOrganizationConfigById(orgId) : null);
-    const orgSpaceKeys = new Set(
-      org?.spaceIds.map(s => `${s.network}:${s.id}`) ?? []
+    const isOrgSpace = org?.spaceIds.some(
+      s => `${s.network}:${s.id}` === spaceParam
     );
-    if (!orgSpaceKeys.has(spaceParam)) return next();
+    if (!isOrgSpace) return next();
   }
 
   const rewritten = toOrgRoute(name, to.params);
