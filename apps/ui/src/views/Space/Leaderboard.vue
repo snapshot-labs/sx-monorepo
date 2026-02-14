@@ -2,8 +2,12 @@
 import { useInfiniteQuery } from '@tanstack/vue-query';
 import { getNames } from '@/helpers/stamp';
 import { _n, _p, shorten } from '@/helpers/utils';
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { Space, UserActivity } from '@/types';
+
+type SortableColumn = 'proposal_count' | 'vote_count' | 'vp_value';
+type SortDirection = 'asc' | 'desc';
+type SortByValue = `${SortableColumn}-${SortDirection}`;
 
 const USERS_LIMIT = 20;
 
@@ -11,15 +15,15 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 
-const sortBy = ref(
-  'vote_count-desc' as
-    | 'vote_count-desc'
-    | 'vote_count-asc'
-    | 'proposal_count-desc'
-    | 'proposal_count-asc'
+const network = computed(() => getNetwork(props.space.network));
+
+const isOffchainNetwork = computed(() =>
+  offchainNetworks.includes(props.space.network)
 );
 
-const network = computed(() => getNetwork(props.space.network));
+const sortBy = ref<SortByValue>(
+  isOffchainNetwork.value ? 'vp_value-desc' : 'vote_count-desc'
+);
 
 const {
   data,
@@ -69,7 +73,7 @@ async function withAuthorNames(users: UserActivity[]): Promise<UserActivity[]> {
   });
 }
 
-function handleSortChange(type: 'vote_count' | 'proposal_count') {
+function handleSortChange(type: SortableColumn) {
   if (sortBy.value.startsWith(type)) {
     sortBy.value = sortBy.value.endsWith('desc')
       ? `${type}-asc`
@@ -78,6 +82,22 @@ function handleSortChange(type: 'vote_count' | 'proposal_count') {
     sortBy.value = `${type}-desc`;
   }
 }
+
+const orderDirection = computed(
+  () => sortBy.value.split('-')[1] as SortDirection
+);
+
+const orderBy = computed(() => sortBy.value.split('-')[0] as SortableColumn);
+
+const statsColumn = computed<Partial<Record<SortableColumn, string>>>(() => {
+  return {
+    ...{
+      proposal_count: 'Proposals',
+      vote_count: 'Votes'
+    },
+    ...(isOffchainNetwork.value ? { vp_value: 'VP value' } : {})
+  };
+});
 
 function handleEndReached() {
   if (!hasNextPage.value) return;
@@ -92,37 +112,17 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
     <UiColumnHeader>
-      <div class="w-[40%] lg:w-[50%] flex items-center truncate">User</div>
-      <button
-        type="button"
-        class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link space-x-1 truncate"
-        @click="handleSortChange('proposal_count')"
-      >
-        <span class="truncate">Proposals</span>
-        <IH-arrow-sm-down
-          v-if="sortBy === 'proposal_count-desc'"
-          class="shrink-0"
+      <div class="w-[40%] flex items-center truncate">User</div>
+      <div class="grid grid-flow-col auto-cols-fr w-[60%]">
+        <UiColumnHeaderItemSortable
+          v-for="(label, key) in statsColumn"
+          :key="key"
+          :is-ordered="orderBy === key"
+          :order-direction="orderDirection"
+          :label="label!"
+          @sort-change="handleSortChange(key as SortableColumn)"
         />
-        <IH-arrow-sm-up
-          v-else-if="sortBy === 'proposal_count-asc'"
-          class="shrink-0"
-        />
-      </button>
-      <button
-        type="button"
-        class="flex justify-end items-center hover:text-skin-link w-[30%] lg:w-[25%] space-x-1 truncate"
-        @click="handleSortChange('vote_count')"
-      >
-        <span class="truncate">Votes</span>
-        <IH-arrow-sm-down
-          v-if="sortBy === 'vote_count-desc'"
-          class="shrink-0"
-        />
-        <IH-arrow-sm-up
-          v-else-if="sortBy === 'vote_count-asc'"
-          class="shrink-0"
-        />
-      </button>
+      </div>
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <template v-else>
@@ -146,7 +146,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           class="border-b flex space-x-1"
         >
           <div
-            class="flex items-center py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
+            class="flex items-center py-3 gap-x-3 leading-[22px] w-[40%] truncate"
           >
             <UiStamp :id="user.id" :size="32" />
             <AppLink
@@ -166,20 +166,29 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
               />
             </AppLink>
           </div>
-          <div
-            class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"
-          >
-            <h4 class="text-skin-link" v-text="_n(user.proposal_count)" />
-            <div class="text-[17px]">
-              {{ _p(user.proposal_count / space.proposal_count) }}
+          <div class="grid grid-flow-col auto-cols-fr w-[60%]">
+            <div
+              class="flex flex-col items-end justify-center leading-[22px] truncate"
+            >
+              <h4 class="text-skin-link" v-text="_n(user.proposal_count)" />
+              <div class="text-[17px]">
+                {{ _p(user.proposal_count / space.proposal_count) }}
+              </div>
             </div>
-          </div>
-          <div
-            class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"
-          >
-            <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
-            <div class="text-[17px]">
-              {{ _p(user.vote_count / space.proposal_count) }}
+            <div
+              class="flex flex-col items-end justify-center leading-[22px] truncate"
+            >
+              <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
+              <div class="text-[17px]">
+                {{ _p(user.vote_count / space.proposal_count) }}
+              </div>
+            </div>
+            <div
+              v-if="isOffchainNetwork"
+              class="flex flex-col items-end justify-center leading-[22px] truncate"
+            >
+              <h4 class="text-skin-link" v-text="_n(user.vp_value)" />
+              <div class="text-[17px]">USD</div>
             </div>
           </div>
         </div>
