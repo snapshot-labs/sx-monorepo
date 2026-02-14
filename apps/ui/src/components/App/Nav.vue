@@ -262,7 +262,6 @@ function getNavigationConfig(
         name: link.name,
         icon: IHDocumentText,
         link: link.url,
-        active: false,
         isExternal: true
       };
     }
@@ -408,12 +407,8 @@ const navigationItems = computed(() =>
           navigationConfig?.style === 'slim' ? 'py-1' : 'py-1.5'
         ]"
       >
-        <component
-          :is="item.icon"
-          v-if="item.icon"
-          class="inline-block"
-        ></component>
-        <span class="grow flex items-center gap-2.5">
+        <component :is="item.icon" v-if="item.icon" class="inline-block" />
+        <span class="grow flex items-center gap-2">
           <span v-text="item.name" />
           <IH-arrow-sm-right
             v-if="item.isExternal"
