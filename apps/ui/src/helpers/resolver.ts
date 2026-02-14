@@ -1,10 +1,11 @@
-import { resolveName as resolveEnsName } from '@/helpers/ens';
+import { ENSChainId, resolveName as resolveEnsName } from '@/helpers/ens';
 import { memoize } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
 
-const ENS_CHAIN_ID = 1;
-const ENS_NETWORK_ID = 'eth';
+const ENS_CHAIN_IDS: Partial<Record<NetworkID, ENSChainId>> = {
+  eth: 1,
+  sep: 11155111
+};
 
 type ResolvedName = {
   networkId: NetworkID;
@@ -12,42 +13,43 @@ type ResolvedName = {
 };
 
 function createResolver() {
-  const cache = new Map<string, ResolvedName | null>();
+  const cache = new Map<string, ResolvedName>();
 
-  function resolveStatic(id: string): ResolvedName | null {
-    const parts = id.split(':');
-
-    return {
-      networkId: parts[0] as NetworkID,
-      address: parts[1]
-    };
-  }
-
-  async function resolveEns(id: string): Promise<ResolvedName | null> {
-    const resolvedAddress = await resolveEnsName(id, ENS_CHAIN_ID);
+  async function resolveEns(
+    networkId: NetworkID,
+    name: string
+  ): Promise<ResolvedName | null> {
+    const chainId = ENS_CHAIN_IDS[networkId]!;
+    const resolvedAddress = await resolveEnsName(name, chainId);
 
     if (!resolvedAddress) {
       return null;
     }
 
     return {
-      networkId: ENS_NETWORK_ID,
+      networkId,
       address: resolvedAddress.toLowerCase()
     };
   }
 
-  async function resolveName(id: string) {
-    if (cache.has(id)) {
-      return cache.get(id);
+  async function resolveName(
+    name: string,
+    networkId: NetworkID = 'eth'
+  ): Promise<ResolvedName | null> {
+    const cacheKey = `${networkId}:${name}`;
+
+    if (cache.has(cacheKey)) {
+      return cache.get(cacheKey)!;
     }
 
-    const shouldUseEns =
-      id.endsWith('.eth') &&
-      !offchainNetworks.includes(id.split(':')[0] as NetworkID);
+    const shouldUseEns = name.endsWith('.eth') && networkId in ENS_CHAIN_IDS;
 
-    const resolved = shouldUseEns ? await resolveEns(id) : resolveStatic(id);
+    const resolved = shouldUseEns
+      ? await resolveEns(networkId, name)
+      : { networkId, address: name };
+
     if (resolved) {
-      cache.set(id, resolved);
+      cache.set(cacheKey, resolved);
     }
 
     return resolved;
