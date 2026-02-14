@@ -56,6 +56,9 @@ const {
 
 provide('web3', web3);
 
+const EDITOR_ROUTES = ['space-editor', 'org-editor'];
+const PROPOSAL_ROUTES = ['space-proposal', 'org-proposal'];
+
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const hasAppNav = computed(
@@ -63,7 +66,7 @@ const hasAppNav = computed(
     ['space', 'org', 'my', 'settings', 'pro'].includes(
       String(route.matched[0]?.name)
     ) &&
-    !['space-editor', 'space-proposal', 'org-editor', 'org-proposal'].includes(
+    ![...EDITOR_ROUTES, ...PROPOSAL_ROUTES].includes(
       String(route.matched[1]?.name)
     )
 );
@@ -75,7 +78,6 @@ const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 const hasPlaceHolderSidebar = computed(
   () =>
     ![
-      'space-proposal',
       'create-space-snapshot',
       'create-space-snapshot-x',
       'auction',
@@ -84,15 +86,13 @@ const hasPlaceHolderSidebar = computed(
       'auction-upcoming',
       'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal', 'org-editor', 'org-proposal'].includes(
+    ![...EDITOR_ROUTES, ...PROPOSAL_ROUTES].includes(
       String(route.matched[1]?.name)
     )
 );
 
 const hasTopNav = computed(() => {
-  return !['space-editor', 'org-editor'].includes(
-    String(route.matched[1]?.name)
-  );
+  return !EDITOR_ROUTES.includes(String(route.matched[1]?.name));
 });
 
 async function handleLogin(connector: Connector) {
@@ -282,12 +282,7 @@ router.afterEach(() => {
       @close="uiStore.safeModal = null"
     />
     <ModalTransaction
-      v-if="
-        route.name !== 'space-editor' &&
-        route.name !== 'org-editor' &&
-        transaction &&
-        network
-      "
+      v-if="hasTopNav && transaction && network"
       :open="!!transaction"
       :network="network"
       :initial-state="transaction._form"
