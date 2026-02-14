@@ -42,7 +42,7 @@ function createResolver() {
       return cache.get(cacheKey)!;
     }
 
-    const shouldUseEns = name.endsWith('.eth') && networkId in ENS_CHAIN_IDS;
+    const shouldUseEns = name.endsWith('.eth') && !!ENS_CHAIN_IDS[networkId];
 
     const resolved = shouldUseEns
       ? await resolveEns(networkId, name)
