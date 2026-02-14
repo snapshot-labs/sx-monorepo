@@ -1,17 +1,10 @@
 import { NetworkID, Space } from '@/types';
 
-export type OrganizationExternalLink = {
-  name: string;
-  url: string;
-};
-
-export type SpaceRef = { network: NetworkID; id: string };
-
 export type OrganizationConfig = {
   id: string;
   name: string;
-  spaceIds: SpaceRef[];
-  externalLinks?: OrganizationExternalLink[];
+  spaceIds: { network: NetworkID; id: string }[];
+  externalLinks?: { name: string; url: string }[];
 };
 
 export type Organization = OrganizationConfig & {
