@@ -1,10 +1,7 @@
 <script setup lang="ts">
 const { loadVotes } = useAccount();
-const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
 const { space, isPending, networkId, address } = useCurrentSpace();
-
-useSpaceFavicon(space, !isWhiteLabel.value);
 
 watch(
   [networkId, address, () => web3.value.account],

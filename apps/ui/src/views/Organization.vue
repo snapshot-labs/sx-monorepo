@@ -6,8 +6,6 @@ const { space } = useCurrentSpace();
 
 initOrganization();
 
-useSpaceFavicon(computed(() => organization.value?.spaces[0] ?? null));
-
 watch(
   [() => organization.value?.spaces, () => web3.value.account],
   ([spaces, account]) => {
