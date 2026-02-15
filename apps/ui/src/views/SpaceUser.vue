@@ -16,6 +16,7 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
 const { modalAccountOpen } = useModal();
 const { web3Account } = useWeb3();
 
@@ -206,7 +207,7 @@ watch(
         >
           Delegate
         </UiButton>
-        <UiTooltip v-if="!isWhiteLabel" title="View profile">
+        <UiTooltip v-if="!isWhiteLabel && !organization" title="View profile">
           <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>

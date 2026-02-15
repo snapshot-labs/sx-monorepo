@@ -70,7 +70,7 @@ watchEffect(() => setTitle(props.space.name));
         <div class="flex items-center">
           <h1 data-testid="space-name" v-text="space.name" />
           <UiBadgeSpace
-            v-if="!isWhiteLabel"
+            v-if="!isWhiteLabel && !organization"
             class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
@@ -96,7 +96,7 @@ watchEffect(() => setTitle(props.space.name));
               followers
             </div>
           </template>
-          <template v-if="!isWhiteLabel && space.parent?.name">
+          <template v-if="!isWhiteLabel && !organization && space.parent?.name">
             <div>·</div>
             <AppLink
               :to="{
