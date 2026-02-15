@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { getCacheHash, getUrl } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
-import { useSpaceQuery } from '@/queries/spaces';
-import { NetworkID } from '@/types';
+import { Space } from '@/types';
 
 const SPACE_LOGO_WIDTH = 190;
 const SPACE_LOGO_HEIGHT = 38;
@@ -12,30 +11,19 @@ defineOptions({ inheritAttrs: false });
 const route = useRoute();
 const { isWhiteLabel, skinSettings } = useWhiteLabel();
 const { logo } = useSkin();
-const { param } = useRouteParser('space');
-const { resolved, address: spaceAddress, networkId } = useResolve(param);
-const { data: spaceData } = useSpaceQuery({
-  networkId: networkId,
-  spaceId: spaceAddress
-});
+const { space: currentSpace } = useCurrentSpace();
+const { organization } = useOrganization();
 
-const showSpace = computed(
+const shouldShowSpace = computed<boolean>(
   () =>
     ['proposal', 'space'].includes(String(route.matched[0]?.name)) ||
+    !!organization.value ||
     isWhiteLabel.value
 );
 
-const space = computed(() => {
-  if (
-    !showSpace.value ||
-    !resolved.value ||
-    !spaceAddress.value ||
-    !networkId.value
-  ) {
-    return null;
-  }
-
-  return spaceData.value;
+const space = computed<Space | null>(() => {
+  if (!shouldShowSpace.value) return null;
+  return organization.value?.spaces[0] ?? currentSpace.value;
 });
 
 const previewLogoUrl = computed(() => {
@@ -73,7 +61,8 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
   <AppLink
     v-if="space"
     :to="{
-      name: 'space-overview'
+      name: 'space-overview',
+      params: { space: `${space.network}:${space.id}` }
     }"
     class="flex item-center space-x-2.5 truncate text-[24px]"
     v-bind="$attrs"
@@ -97,11 +86,7 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
     />
     <template v-else>
       <div class="shrink-0">
-        <SpaceAvatar
-          :space="{ ...space, network: networkId as NetworkID }"
-          :size="36"
-          class="!rounded-[4px]"
-        />
+        <SpaceAvatar :space="space" :size="36" class="!rounded-[4px]" />
       </div>
       <span class="truncate" v-text="space.name" />
     </template>

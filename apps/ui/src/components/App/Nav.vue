@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
-import { useSpaceQuery } from '@/queries/spaces';
+import { NavigationItem } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
@@ -29,35 +28,15 @@ type NavigationConfig = {
   shortcuts?: Record<string, NavigationItem>;
 };
 
-type NavigationItem = {
-  name: string;
-  icon?: FunctionalComponent;
-  count?: number;
-  hidden?: boolean;
-  link?: any;
-  active?: boolean;
-};
-
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
 
-const { param } = useRouteParser('space');
-const { resolved, address, networkId } = useResolve(param);
-const { data: spaceData } = useSpaceQuery({
-  networkId: networkId,
-  spaceId: address
-});
+const { space, networkId, address } = useCurrentSpace();
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
-const space = computed(() => {
-  if (currentRouteName.value === 'space' && resolved.value) {
-    return spaceData.value ?? null;
-  }
-
-  return null;
-});
 
 const { isController } = useSpaceController(space);
 
@@ -261,6 +240,53 @@ function getNavigationConfig(
     };
   }
 
+  if (mainRoute === 'org' && organization.value) {
+    const primarySpace = organization.value.spaces[0];
+    const primarySpaceKey = `${primarySpace.network}:${primarySpace.id}`;
+
+    const entries: [string, NavigationItem][] = [
+      ['overview', { name: 'Overview', icon: IHGlobeAlt }],
+      ['proposals', { name: 'Proposals', icon: IHNewspaper }],
+      ...(primarySpace?.delegations?.length
+        ? ([['delegates', { name: 'Delegates', icon: IHLightningBolt }]] as [
+            string,
+            NavigationItem
+          ][])
+        : []),
+      ...(SPACES_DISCUSSIONS[primarySpaceKey]
+        ? ([
+            [
+              'discussions',
+              {
+                name: 'Discussions',
+                icon: IHAnnotation,
+                active: ['org-discussions', 'org-discussions-topic'].includes(
+                  route.name as string
+                )
+              }
+            ]
+          ] as [string, NavigationItem][])
+        : [])
+    ];
+
+    for (const [key, navItem] of Object.entries(
+      organization.value.navItems || {}
+    )) {
+      const entry: [string, NavigationItem] = [key, navItem];
+
+      if (navItem.position !== undefined) {
+        const index = Math.min(navItem.position - 1, entries.length);
+        entries.splice(index, 0, entry);
+      } else {
+        entries.push(entry);
+      }
+    }
+
+    return {
+      items: Object.fromEntries(entries)
+    };
+  }
+
   if (mainRoute === 'settings') {
     return {
       items: {
@@ -357,18 +383,22 @@ const navigationItems = computed(() =>
         v-for="(item, key) in navigationItems"
         :key="key"
         :to="item.link"
+        :is-external="item.isExternal"
         class="px-4 space-x-2 flex items-center"
         :class="[
           item.active ? 'text-skin-link' : 'text-skin-text',
           navigationConfig?.style === 'slim' ? 'py-1' : 'py-1.5'
         ]"
       >
-        <component
-          :is="item.icon"
-          v-if="item.icon"
-          class="inline-block"
-        ></component>
-        <span class="grow" v-text="item.name" />
+        <component :is="item.icon" v-if="item.icon" class="inline-block" />
+        <span class="grow flex items-center gap-2">
+          <span v-text="item.name" />
+          <IH-arrow-sm-right
+            v-if="item.isExternal"
+            class="-rotate-45"
+            :width="16"
+          />
+        </span>
         <span
           v-if="item.count"
           class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
