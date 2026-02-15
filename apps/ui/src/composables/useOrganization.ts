@@ -1,11 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query';
-import { RouteLocationRaw } from 'vue-router';
 import {
   getOrganizationConfigByDomain,
   getOrganizationConfigById,
   Organization,
-  OrganizationConfig,
-  toOrgRoute
+  OrganizationConfig
 } from '@/helpers/organizations';
 import { getNetwork } from '@/networks';
 import { Space } from '@/types';
@@ -59,34 +57,8 @@ export function useOrganization() {
     return { ...org, spaces: spaces.value };
   });
 
-  function resolveSpaceRoute(
-    to: RouteLocationRaw,
-    opts?: { checkSpaceMembership?: boolean }
-  ): RouteLocationRaw {
-    if (
-      !config.value ||
-      typeof to === 'string' ||
-      !('name' in to) ||
-      !to.name
-    ) {
-      return to;
-    }
-
-    if (opts?.checkSpaceMembership) {
-      const spaceParam = to.params?.space as string | undefined;
-      const isOrgSpace = config.value.spaceIds.some(
-        s => `${s.network}:${s.id}` === spaceParam
-      );
-      if (spaceParam && !isOrgSpace) return to;
-    }
-
-    const rewritten = toOrgRoute(to.name.toString(), to.params ?? {});
-    return rewritten ? { ...to, ...rewritten } : to;
-  }
-
   return {
     organization,
-    isLoading,
-    resolveSpaceRoute
+    isLoading
   };
 }

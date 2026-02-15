@@ -1,3 +1,4 @@
+import { RouteLocationRaw } from 'vue-router';
 import { NetworkID, Space } from '@/types';
 
 export type OrganizationConfig = {
@@ -66,6 +67,24 @@ export function toOrgRoute(
   }
 
   return null;
+}
+
+export function resolveOrgRoute(
+  organization: Organization,
+  to: RouteLocationRaw
+): RouteLocationRaw {
+  if (typeof to === 'string' || !('name' in to) || !to.name) {
+    return to;
+  }
+
+  const spaceParam = to.params?.space as string | undefined;
+  const isOrgSpace = organization.spaceIds.some(
+    s => `${s.network}:${s.id}` === spaceParam
+  );
+  if (spaceParam && !isOrgSpace) return to;
+
+  const rewritten = toOrgRoute(to.name.toString(), to.params ?? {});
+  return rewritten ? { ...to, ...rewritten } : to;
 }
 
 export function getOrganizationConfigByDomain(
