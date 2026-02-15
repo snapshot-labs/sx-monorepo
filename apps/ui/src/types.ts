@@ -1,10 +1,21 @@
 import { Transaction as _Transaction } from '@snapshot-labs/sx';
-import { VNode } from 'vue';
+import { FunctionalComponent, VNode } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 
 // UI
 export type NotificationType = 'error' | 'warning' | 'success';
+
+export type NavigationItem = {
+  name: string;
+  icon?: FunctionalComponent;
+  count?: number;
+  hidden?: boolean;
+  link?: any;
+  active?: boolean;
+  isExternal?: boolean;
+  position?: number;
+};
 
 export type Task = {
   description: string;

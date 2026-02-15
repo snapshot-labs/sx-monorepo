@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
+import { NavigationItem } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
@@ -28,16 +28,6 @@ type NavigationConfig = {
   style?: 'default' | 'slim';
   items: Record<string, NavigationItem>;
   shortcuts?: Record<string, NavigationItem>;
-};
-
-type NavigationItem = {
-  name: string;
-  icon?: FunctionalComponent;
-  count?: number;
-  hidden?: boolean;
-  link?: any;
-  active?: boolean;
-  isExternal?: boolean;
 };
 
 const route = useRoute();
