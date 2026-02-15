@@ -500,3 +500,8 @@ export type Setting = {
   name: string;
   value: string | string[];
 };
+
+export type ScoresTick = {
+  timestamp: number;
+  scores: [number, number, number];
+};

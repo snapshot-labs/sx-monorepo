@@ -10,6 +10,7 @@ import {
   NetworkID,
   Privacy,
   Proposal,
+  ScoresTick,
   Setting,
   Space,
   SpaceMetadata,
@@ -317,6 +318,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
 
 export type NetworkApi = {
   apiUrl: string;
+  loadProposalScoresTicks(proposalId: string): Promise<ScoresTick[]>;
   loadProposalVotes(
     proposal: Proposal,
     paginationOpts: PaginationOpts,

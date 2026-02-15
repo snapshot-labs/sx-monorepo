@@ -461,7 +461,7 @@ export function createWriters(
   const handleProposalExecuted: evm.Writer<
     typeof GovernorModuleAbi,
     'ProposalExecuted'
-  > = async ({ event, rawEvent }) => {
+  > = async ({ event, rawEvent, block, blockNumber }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal executed');
@@ -475,6 +475,8 @@ export function createWriters(
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = rawEvent.transactionHash;
+    proposal.executed_at = Number(block?.timestamp ?? getCurrentTimestamp());
+    proposal.executed_at_block_number = blockNumber;
 
     await proposal.save();
   };
