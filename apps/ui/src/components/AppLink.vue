@@ -1,6 +1,9 @@
 <script lang="ts" setup>
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
-import { resolveOrgRoute } from '@/helpers/organizations';
+import {
+  NamedRouteLocationRaw,
+  resolveOrgRoute
+} from '@/helpers/organizations';
 
 const props = defineProps<
   Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; isExternal?: boolean }
@@ -24,7 +27,7 @@ function normalize(to: RouteLocationRaw) {
   }
 
   if (organization.value) {
-    return resolveOrgRoute(organization.value, to);
+    return resolveOrgRoute(organization.value, to as NamedRouteLocationRaw);
   }
 
   if (!isWhiteLabel.value) {
