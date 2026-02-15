@@ -25,6 +25,11 @@ const orgChildrenRoutes: RouteRecordRaw[] = [
     component: SpaceEditor
   },
   { path: 'proposals', name: 'org-proposals', component: SpaceProposals },
+  {
+    path: ':space/proposals',
+    name: 'org-space-proposals',
+    component: SpaceProposals
+  },
   { path: 'polls', name: 'org-polls', component: SpaceProposals },
   {
     path: ':space/proposal/:proposal?',

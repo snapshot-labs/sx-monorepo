@@ -51,7 +51,8 @@ const ORG_ROUTES_WITH_SPACE = new Set([
   'org-proposal-votes',
   'org-proposal-execution',
   'org-proposal-discussion',
-  'org-editor'
+  'org-editor',
+  'org-space-proposals'
 ]);
 
 export function toOrgRoute(
@@ -59,8 +60,15 @@ export function toOrgRoute(
   params: Record<string, any> = {}
 ): { name: string; params: Record<string, any> } | null {
   if (name.startsWith('space-')) {
-    const orgRouteName = name.replace('space-', 'org-');
+    const suffix = name.slice('space-'.length);
+    const orgRouteName = `org-${suffix}`;
+    const orgSpaceRouteName = `org-space-${suffix}`;
     const newParams = { ...params };
+
+    if (newParams.space && ORG_ROUTES_WITH_SPACE.has(orgSpaceRouteName)) {
+      return { name: orgSpaceRouteName, params: newParams };
+    }
+
     if (!ORG_ROUTES_WITH_SPACE.has(orgRouteName)) delete newParams.space;
     return { name: orgRouteName, params: newParams };
   }
