@@ -1,10 +1,8 @@
 <script setup lang="ts">
 const { loadVotes } = useAccount();
 const { web3 } = useWeb3();
-const { init: initOrganization, organization, isPending } = useOrganization();
+const { organization, isLoading } = useOrganization();
 const { space } = useCurrentSpace();
-
-initOrganization();
 
 watch(
   [() => organization.value?.spaces, () => web3.value.account],
@@ -19,6 +17,6 @@ watch(
 </script>
 
 <template>
-  <UiLoading v-if="isPending" class="block p-4" />
+  <UiLoading v-if="isLoading" class="block p-4" />
   <router-view v-else :space="space" />
 </template>

@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/vue-query';
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
 import { RouteLocationRaw } from 'vue-router';
 import {
   getOrganizationConfigByDomain,
@@ -11,76 +11,53 @@ import { getNetwork } from '@/networks';
 import { Space } from '@/types';
 
 const domain = window.location.hostname;
-const orgIdFromHash = window.location.hash.match(/^#\/org\/([^/]+)/)?.[1];
-
-const isOrg = !!getOrganizationConfigByDomain(domain) || !!orgIdFromHash;
-const isPending = ref(isOrg);
-const spaces = ref<Space[]>([]);
-
-async function loadSpaces(
-  config: OrganizationConfig,
-  queryClient: ReturnType<typeof useQueryClient>
-): Promise<Space[]> {
-  const loadedSpaces = await Promise.all(
-    config.spaceIds.map(async ({ network: networkId, id }) => {
-      const network = getNetwork(networkId);
-      const space = await network.api.loadSpace(id);
-
-      if (space) {
-        queryClient.setQueryData(
-          ['spaces', 'detail', `${space.network}:${space.id}`],
-          space
-        );
-      }
-
-      return space;
-    })
-  );
-
-  return loadedSpaces.filter((s): s is Space => !!s);
-}
 
 export function useOrganization() {
   const route = useRoute();
   const queryClient = useQueryClient();
 
-  const isOrgRoute = computed(() => String(route.matched[0]?.name) === 'org');
-
-  const config = computed(() => {
-    if (!isOrgRoute.value) return null;
+  const config = computed<OrganizationConfig | null>(() => {
+    if (String(route.matched[0]?.name) !== 'org') return null;
     return (
       getOrganizationConfigByDomain(domain) ??
       getOrganizationConfigById(route.params.org as string)
     );
   });
 
-  function isOrgSpace(spaceKey: string): boolean {
-    if (!config.value) return false;
-    return config.value.spaceIds.some(s => `${s.network}:${s.id}` === spaceKey);
-  }
+  const { data: spaces, isLoading } = useQuery({
+    queryKey: ['org', 'spaces', () => config.value?.id],
+    queryFn: async () => {
+      const loadedSpaces = await Promise.all(
+        config.value!.spaceIds.map(async ({ network: networkId, id }) => {
+          const network = getNetwork(networkId);
+          const space = await network.api.loadSpace(id);
+
+          if (!space) {
+            console.warn(
+              `Failed to load space ${networkId}:${id} for organization ${config.value!.id}`
+            );
+            return null;
+          }
+
+          queryClient.setQueryData(
+            ['spaces', 'detail', `${space.network}:${space.id}`],
+            space
+          );
+
+          return space;
+        })
+      );
+
+      return loadedSpaces.filter((s): s is Space => !!s);
+    },
+    enabled: () => config.value !== null
+  });
 
   const organization = computed<Organization | null>(() => {
     const org = config.value;
-    if (!org || isPending.value) return null;
+    if (!org || !spaces.value) return null;
     return { ...org, spaces: spaces.value };
   });
-
-  function init() {
-    watch(
-      config,
-      async newConfig => {
-        if (!newConfig) return;
-
-        isPending.value = true;
-        try {
-          spaces.value = await loadSpaces(newConfig, queryClient);
-        } finally {
-          isPending.value = false;
-        }
-      },
-      { immediate: true }
-    );
-  }
 
   function resolveSpaceRoute(
     to: RouteLocationRaw,
@@ -97,7 +74,10 @@ export function useOrganization() {
 
     if (opts?.checkSpaceMembership) {
       const spaceParam = to.params?.space as string | undefined;
-      if (spaceParam && !isOrgSpace(spaceParam)) return to;
+      const isOrgSpace = config.value.spaceIds.some(
+        s => `${s.network}:${s.id}` === spaceParam
+      );
+      if (spaceParam && !isOrgSpace) return to;
     }
 
     const rewritten = toOrgRoute(to.name.toString(), to.params ?? {});
@@ -105,9 +85,8 @@ export function useOrganization() {
   }
 
   return {
-    init,
     organization,
-    isPending,
+    isLoading,
     resolveSpaceRoute
   };
 }
