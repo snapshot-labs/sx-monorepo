@@ -1,14 +1,18 @@
 import { RouteLocationNamedRaw, RouteLocationRaw } from 'vue-router';
-import { NetworkID, Space } from '@/types';
+import { NavigationItem, NetworkID, Space } from '@/types';
+import IHDocumentText from '~icons/heroicons-outline/document-text';
+import IHNewspaper from '~icons/heroicons-outline/newspaper';
 
 export type NamedRouteLocationRaw = RouteLocationNamedRaw &
   Required<Pick<RouteLocationNamedRaw, 'name'>>;
 
+export type SpaceId = { network: NetworkID; id: string };
+
 export type OrganizationConfig = {
   id: string;
   name: string;
-  spaceIds: { network: NetworkID; id: string }[];
-  externalLinks?: { name: string; url: string }[];
+  spaceIds: SpaceId[];
+  navItems?: Record<string, NavigationItem>;
 };
 
 export type Organization = OrganizationConfig & {
@@ -29,9 +33,23 @@ export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         id: 'starknet.eth'
       }
     ],
-    externalLinks: [
-      { name: 'Docs', url: 'https://docs.starknet.io/learn/protocol/strk' }
-    ]
+    navItems: {
+      'space-proposals': {
+        name: 'Polls',
+        icon: IHNewspaper,
+        link: {
+          name: 'org-space-proposals',
+          params: { space: 's:starknet.eth' }
+        },
+        position: 3
+      },
+      docs: {
+        name: 'Docs',
+        icon: IHDocumentText,
+        link: 'https://docs.starknet.io/learn/protocol/strk',
+        isExternal: true
+      }
+    }
   },
   snapshot: {
     id: 'snapshot',

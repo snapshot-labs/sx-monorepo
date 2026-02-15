@@ -11,9 +11,7 @@ import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
-import IHChatAlt2 from '~icons/heroicons-outline/chat-alt-2';
 import IHCog from '~icons/heroicons-outline/cog';
-import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
 import IHHome from '~icons/heroicons-outline/home';
@@ -243,54 +241,49 @@ function getNavigationConfig(
   }
 
   if (mainRoute === 'org' && organization.value) {
-    const primarySpaceKey = `${organization.value.spaces[0].network}:${organization.value.spaces[0].id}`;
+    const primarySpace = organization.value.spaces[0];
+    const primarySpaceKey = `${primarySpace.network}:${primarySpace.id}`;
 
-    const externalLinksItems: Record<string, NavigationItem> = {};
-    for (const link of organization.value.externalLinks || []) {
-      const key = link.name.toLowerCase().replace(/\s+/g, '-');
-      externalLinksItems[key] = {
-        name: link.name,
-        icon: IHDocumentText,
-        link: link.url,
-        isExternal: true
-      };
-    }
-
-    return {
-      items: {
-        overview: {
-          name: 'Overview',
-          icon: IHGlobeAlt
-        },
-        proposals: {
-          name: 'Proposals',
-          icon: IHNewspaper
-        },
-        polls: {
-          name: 'Polls',
-          icon: IHChatAlt2
-        },
-        ...(space.value?.delegations && space.value.delegations.length > 0
-          ? {
-              delegates: {
-                name: 'Delegates',
-                icon: IHLightningBolt
-              }
-            }
-          : undefined),
-        ...(SPACES_DISCUSSIONS[primarySpaceKey]
-          ? {
-              discussions: {
+    const entries: [string, NavigationItem][] = [
+      ['overview', { name: 'Overview', icon: IHGlobeAlt }],
+      ['proposals', { name: 'Proposals', icon: IHNewspaper }],
+      ...(primarySpace?.delegations?.length
+        ? ([['delegates', { name: 'Delegates', icon: IHLightningBolt }]] as [
+            string,
+            NavigationItem
+          ][])
+        : []),
+      ...(SPACES_DISCUSSIONS[primarySpaceKey]
+        ? ([
+            [
+              'discussions',
+              {
                 name: 'Discussions',
                 icon: IHAnnotation,
                 active: ['org-discussions', 'org-discussions-topic'].includes(
                   route.name as string
                 )
               }
-            }
-          : undefined),
-        ...externalLinksItems
+            ]
+          ] as [string, NavigationItem][])
+        : [])
+    ];
+
+    for (const [key, navItem] of Object.entries(
+      organization.value.navItems || {}
+    )) {
+      const entry: [string, NavigationItem] = [key, navItem];
+
+      if (navItem.position !== undefined) {
+        const index = Math.min(navItem.position - 1, entries.length);
+        entries.splice(index, 0, entry);
+      } else {
+        entries.push(entry);
       }
+    }
+
+    return {
+      items: Object.fromEntries(entries)
     };
   }
 
