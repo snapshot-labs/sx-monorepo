@@ -16,6 +16,7 @@ defineProps<{ task: Task }>();
     <div>
       <AppLink
         :to="task.link"
+        hide-external-icon
         class="inline"
         :class="{
           'text-skin-danger': task.type === 'error',

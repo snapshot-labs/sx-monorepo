@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
 
-defineProps<{ app: any }>();
+const props = defineProps<{ app: any }>();
 
-const defaultLink = computed(() => {
-  return window.location.origin;
+const link = computed(() => {
+  return props.app.link || props.app.website || window.location.origin;
 });
 </script>
 
 <template>
   <AppLink
-    :to="app.link || app.website || defaultLink"
+    :to="link"
     hide-external-icon
     class="border rounded-lg p-3 leading-6 relative group"
   >

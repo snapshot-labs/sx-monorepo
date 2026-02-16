@@ -91,7 +91,7 @@ function handleSelect(value: string) {
         Still experimenting?
         <br />
         You can also try
-        <AppLink to="https://testnet.snapshot.box/#/create">
+        <AppLink to="https://testnet.snapshot.box/#/create" hide-external-icon>
           testnet.snapshot.box
         </AppLink>
         - a Sepolia testnet playground dedicated to testing before creating your
@@ -149,6 +149,7 @@ function handleSelect(value: string) {
                   be reused to create a new space.
                   <AppLink
                     to="https://docs.snapshot.box/faq/im-a-snapshot-user/space-settings#why-cant-i-create-a-new-space-with-my-previous-deleted-space-ens-name"
+                    hide-external-icon
                     class="text-skin-link"
                   >
                     Learn more

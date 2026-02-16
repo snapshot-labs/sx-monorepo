@@ -68,6 +68,7 @@ watch(() => props.proposal.id, fetchPrices);
   <div v-if="!loading && !error && data">
     <AppLink
       :to="`https://app.futarchy.fi/markets/${data.event_id}?utm_source=snapshot`"
+      hide-external-icon
       class="block xl:flex xl:space-x-3 items-center border rounded-lg px-3.5 py-2.5 mb-4"
     >
       <div class="grow flex items-center gap-2 xl:mb-0 mb-2">

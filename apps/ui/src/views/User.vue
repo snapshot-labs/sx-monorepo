@@ -198,12 +198,18 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           <UiAddress :address="user.id" copy-button="always" />
           <div v-if="userMetadata.loaded" class="flex items-center gap-2">
             <span class="hidden xs:inline">·</span>
-            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
+            <AppLink
+              :to="`https://ethfollow.xyz/${user.id}`"
+              hide-external-icon
+            >
               {{ _n(userMetadata.following_count) }}
               <span class="text-skin-text">following</span>
             </AppLink>
             ·
-            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
+            <AppLink
+              :to="`https://ethfollow.xyz/${user.id}`"
+              hide-external-icon
+            >
               {{ _n(userMetadata.followers_count) }}
               <span class="text-skin-text">followers</span>
             </AppLink>

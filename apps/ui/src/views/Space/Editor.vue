@@ -705,7 +705,7 @@ watchEffect(() => {
           </template>
           <div v-if="guidelines">
             <UiEyebrow class="mb-2">Guidelines</UiEyebrow>
-            <AppLink :to="guidelines" class="block mb-4">
+            <AppLink :to="guidelines" hide-external-icon class="block mb-4">
               <UiLinkPreview :url="guidelines" :show-default="true" />
             </AppLink>
           </div>

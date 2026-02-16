@@ -22,7 +22,7 @@ function handleAgreeClick() {
     </template>
     <div class="p-4">
       Before continuing, please read and agree to {{ space.name }}
-      <AppLink :to="space.terms">terms of service</AppLink>.
+      <AppLink :to="space.terms" hide-external-icon>terms of service</AppLink>.
     </div>
     <template #footer>
       <UiButton class="w-full" @click="handleAgreeClick">Agree</UiButton>

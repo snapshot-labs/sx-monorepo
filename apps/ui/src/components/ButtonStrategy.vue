@@ -31,6 +31,7 @@ defineProps<{
         <AppLink
           v-if="strategy.link"
           :to="strategy.link"
+          hide-external-icon
           class="inline-block"
           @click.stop
         >

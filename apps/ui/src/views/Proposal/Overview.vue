@@ -537,7 +537,7 @@ onBeforeUnmount(() => destroyAudio());
           <IH-chat-alt />
           <span>Discussion</span>
         </UiEyebrow>
-        <AppLink :to="discussion" class="block mb-5">
+        <AppLink :to="discussion" hide-external-icon class="block mb-5">
           <UiLinkPreview :url="discussion" :show-default="true" />
         </AppLink>
       </div>
