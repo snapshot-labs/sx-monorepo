@@ -71,6 +71,7 @@ watch(
           <AppLink
             v-for="(socialNetwork, i) in SOCIAL_NETWORKS"
             :key="i"
+            hide-external-icon
             class="rounded-full leading-[100%] border text-skin-link size-[46px] flex items-center justify-center"
             :title="`Share on ${socialNetwork.name}`"
             :to="getShareUrl(socialNetwork.id, type, shareable)"

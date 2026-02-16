@@ -87,7 +87,11 @@ onMounted(async () => {
         class="border-b last:border-b-0 py-4"
       >
         <div class="flex gap-2.5 items-center">
-          <AppLink :to="reply.user_url" class="shrink-0 rounded-full">
+          <AppLink
+            :to="reply.user_url"
+            hide-external-icon
+            class="shrink-0 rounded-full"
+          >
             <img
               :src="reply.avatar_template"
               class="rounded-full inline-block bg-skin-border size-[32px]"
