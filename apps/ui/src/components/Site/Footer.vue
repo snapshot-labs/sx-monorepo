@@ -112,6 +112,7 @@ const SOCIALS = [
             v-for="social in SOCIALS"
             :key="social.href"
             :to="social.href"
+            hide-external-icon
             class="text-skin-text hover:text-skin-link"
           >
             <component :is="social.icon" class="size-[32px] text-skin-link" />
