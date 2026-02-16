@@ -2,11 +2,15 @@
 import { getUrl } from '@/helpers/utils';
 
 defineProps<{ app: any }>();
+
+const defaultLink = computed(() => {
+  return window.location.origin;
+});
 </script>
 
 <template>
   <AppLink
-    :to="app.link || app.website"
+    :to="app.link || app.website || defaultLink"
     hide-external-icon
     class="border rounded-lg p-3 leading-6 relative group"
   >
