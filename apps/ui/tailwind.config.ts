@@ -55,7 +55,14 @@ export default {
         'skin-success-active': 'var(--success-active)'
       },
       animation: {
-        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        halo: 'halo 1.5s ease-in-out infinite'
+      },
+      keyframes: {
+        halo: {
+          '0%, 100%': { opacity: '0' },
+          '50%': { opacity: '0.3' }
+        }
       },
       gridTemplateColumns: {
         'explore-3': 'repeat(3, minmax(0, 230px))',

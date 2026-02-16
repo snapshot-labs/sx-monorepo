@@ -5,10 +5,11 @@ import { useSpaceController } from '@/composables/useSpaceController';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { compareAddresses } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
+import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHChatAlt from '~icons/heroicons-outline/chat-alt';
@@ -273,6 +274,11 @@ function getNavigationConfig(
         contacts: {
           name: 'Contacts',
           icon: IHUsers
+        },
+        'email-notifications': {
+          name: 'Email notifications',
+          icon: IHAtSymbol,
+          hidden: metadataNetwork !== 's'
         }
       }
     };

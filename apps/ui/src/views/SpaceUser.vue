@@ -17,6 +17,8 @@ const route = useRoute();
 const usersStore = useUsersStore();
 const { web3 } = useWeb3();
 const { isWhiteLabel } = useWhiteLabel();
+const { modalAccountOpen } = useModal();
+const { web3Account } = useWeb3();
 
 const userActivity = ref<UserActivity>({
   vote_count: 0,
@@ -134,6 +136,11 @@ async function loadUserActivity() {
 // }
 
 function handleDelegateClick() {
+  if (!web3Account.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   delegateModalState.value.delegatees[0] = { id: userId.value };
   delegateModalOpen.value = true;
 }

@@ -45,7 +45,8 @@ import {
   getProposalLink,
   getSpaceDecimals,
   getSpaceLink,
-  updateCounter
+  updateCounter,
+  updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, SnapshotXConfig } from '../../types';
 import {
@@ -948,7 +949,7 @@ export function createWriters(
   const handleProposalExecuted: evm.Writer<
     typeof SpaceAbi,
     'ProposalExecuted'
-  > = async ({ txId, rawEvent, event, block }) => {
+  > = async ({ txId, rawEvent, event, block, blockNumber }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle proposal executed');
@@ -975,6 +976,8 @@ export function createWriters(
           proposal.execution_settled = true;
           proposal.completed = true;
           proposal.execution_tx = txId;
+          proposal.executed_at = now;
+          proposal.executed_at_block_number = blockNumber;
           break;
         case 'SimpleQuorumTimelock':
           proposal.execution_time =
@@ -1094,13 +1097,15 @@ export function createWriters(
       proposal[`scores_${choice}`],
       proposal.vp_decimals
     );
+
+    await updateScoresTick(proposal, created, config.indexerName);
     await proposal.save();
   };
 
   const handleTimelockProposalExecuted: evm.Writer<
     typeof SimpleQuorumTimelockExecutionStrategyAbi,
     'ProposalExecuted'
-  > = async ({ txId, rawEvent, event }) => {
+  > = async ({ txId, rawEvent, event, block, blockNumber }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle timelock proposal executed');
@@ -1120,6 +1125,8 @@ export function createWriters(
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = txId;
+    proposal.executed_at = Number(block?.timestamp ?? getCurrentTimestamp());
+    proposal.executed_at_block_number = blockNumber;
     await proposal.save();
   };
 

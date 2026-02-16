@@ -420,6 +420,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       voting_power_validation_params,
     tx: '',
     execution_tx: null,
+    executed_at: null,
     veto_tx: null,
     privacy: proposal.privacy || 'none',
     flagged: proposal.flagged,
@@ -548,6 +549,7 @@ export function createApi(
 
   return {
     apiUrl: uri,
+    loadProposalScoresTicks: async () => [],
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,

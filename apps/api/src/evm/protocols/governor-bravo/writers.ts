@@ -22,7 +22,8 @@ import {
   getCurrentTimestamp,
   getParsedVP,
   getProposalLink,
-  getSpaceLink
+  getSpaceLink,
+  updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, GovernorBravoConfig } from '../../types';
 import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
@@ -460,7 +461,7 @@ export function createWriters(
   const handleProposalExecuted: evm.Writer<
     typeof GovernorModuleAbi,
     'ProposalExecuted'
-  > = async ({ event, rawEvent }) => {
+  > = async ({ event, rawEvent, block, blockNumber }) => {
     if (!event || !rawEvent) return;
 
     logger.info('Handle proposal executed');
@@ -474,6 +475,8 @@ export function createWriters(
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = rawEvent.transactionHash;
+    proposal.executed_at = Number(block?.timestamp ?? getCurrentTimestamp());
+    proposal.executed_at_block_number = blockNumber;
 
     await proposal.save();
   };
@@ -556,6 +559,7 @@ export function createWriters(
 
     leaderboardItem.vote_count += 1;
 
+    await updateScoresTick(proposal, vote.created, config.indexerName);
     await Promise.all([
       space.save(),
       proposal.save(),

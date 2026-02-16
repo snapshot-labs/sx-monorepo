@@ -577,7 +577,7 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <div>
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-proposal-votes',
@@ -589,7 +589,7 @@ onBeforeUnmount(() => destroyAudio());
         >
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </router-link>
+        </AppLink>
         ·
         <button
           type="button"

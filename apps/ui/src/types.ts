@@ -308,6 +308,7 @@ export type Proposal = {
   /** Timestamp when proposal can end at the latest */
   max_end: number;
   snapshot: number;
+  executed_at: number | null;
   choices: string[];
   labels: string[];
   scores: number[];
@@ -499,4 +500,9 @@ export type SelectItem<T> = {
 export type Setting = {
   name: string;
   value: string | string[];
+};
+
+export type ScoresTick = {
+  timestamp: number;
+  scores: [number, number, number];
 };
