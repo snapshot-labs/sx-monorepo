@@ -109,7 +109,7 @@ export async function getRelayerInfo(
     }
 
     data.balance = await fetchGasBalance(provider, data.address, isStarknet);
-    data.ticker = isStarknet ? 'STRK' : (METADATA[network].ticker ?? 'ETH');
+    data.ticker = isStarknet ? 'STRK' : METADATA[network].ticker ?? 'ETH';
     data.hasMinimumBalance =
       data.balance >= MINIMUM_RELAYER_BALANCES[networkType];
     data.isBalanceLow =
