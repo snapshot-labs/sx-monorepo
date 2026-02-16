@@ -60,7 +60,7 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
     :href="resolveToUrl(props.to)"
     target="_blank"
     rel="noopener noreferrer"
-    :class="{ 'inline-flex items-center gap-1': !hideExternalIcon }"
+    :class="{ 'flex items-center gap-1': !hideExternalIcon }"
     @click="$emit('click')"
   >
     <template v-if="!hideExternalIcon">
