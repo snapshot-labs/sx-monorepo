@@ -13,7 +13,7 @@ defineProps<{ task: Task }>();
   >
     <IH-information-circle v-if="task.type === 'error'" class="mt-1 shrink-0" />
     <IS-flag v-else class="mt-1 shrink-0" />
-    <div class="gap-2">
+    <div class="flex items-center gap-2">
       <AppLink
         :to="task.link"
         class="inline"

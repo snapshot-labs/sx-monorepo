@@ -341,7 +341,7 @@ watch(
         @click="handleSelect(validation)"
       >
         <div class="w-full">
-          <div class="flex items-center gap-1 overflow-hidden">
+          <div class="flex items-center gap-2 overflow-hidden">
             <h4
               class="text-skin-link truncate"
               v-text="

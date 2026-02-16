@@ -41,8 +41,8 @@ const emit = defineEmits<{
       <component :is="item.icon || IHCode" class="inline-block mx-3" />
     </div>
     <div class="py-3 px-4">
-      <div class="flex items-center space-x-2">
-        <h4 class="text-skin-link inline-block" v-text="item.label" />
+      <div class="flex items-center gap-2">
+        <h4 class="text-skin-link" v-text="item.label" />
         <UiPill v-if="item.tag" variant="accent" :label="item.tag" />
       </div>
       <div
