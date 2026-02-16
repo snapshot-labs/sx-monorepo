@@ -15,6 +15,7 @@ const props = defineProps<{ space: Space }>();
 
 const route = useRoute();
 const usersStore = useUsersStore();
+const { web3 } = useWeb3();
 const { isWhiteLabel } = useWhiteLabel();
 const { modalAccountOpen } = useModal();
 const { web3Account } = useWeb3();
@@ -209,6 +210,22 @@ watch(
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
           <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
+          </UiButton>
+        </UiTooltip>
+        <UiTooltip
+          v-if="
+            web3.account && web3.account.toLowerCase() !== user.id.toLowerCase()
+          "
+          title="Send message"
+        >
+          <UiButton
+            uniform
+            :to="{
+              name: 'my-messages-conversation',
+              params: { address: user.id }
+            }"
+          >
+            <IH-chat-alt />
           </UiButton>
         </UiTooltip>
         <DropdownShare :shareable="{ user, space }" type="space-user" uniform />

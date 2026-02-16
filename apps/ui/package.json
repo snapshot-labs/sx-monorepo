@@ -70,6 +70,7 @@
     "@walletconnect/core": "^2.21.9",
     "@walletconnect/types": "^2.21.9",
     "@walletconnect/utils": "^2.21.9",
+    "@xmtp/browser-sdk": "^6.3.0",
     "@zkpassport/sdk": "^0.12.4",
     "ajv": "^8.12.0",
     "ajv-errors": "^3.0.0",
