@@ -63,8 +63,11 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
     :class="{ 'inline-flex items-center gap-1': !hideExternalIcon }"
     @click="$emit('click')"
   >
-    <span class="inline-flex items-center"><slot /></span>
-    <IH-arrow-sm-right v-if="!hideExternalIcon" class="-rotate-45 shrink-0" />
+    <template v-if="!hideExternalIcon">
+      <span class="inline-flex items-center"><slot /></span>
+      <IH-arrow-sm-right class="-rotate-45 shrink-0" />
+    </template>
+    <slot v-else />
   </a>
   <router-link
     v-else-if="props.to"
