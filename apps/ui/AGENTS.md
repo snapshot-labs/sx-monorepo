@@ -1,6 +1,11 @@
 # UI — AGENTS.md
 
-Vue 3 frontend for the governance platform. Fetches data from **API** (GraphQL), submits transactions via **Mana** (JSON-RPC). See root `AGENTS.md` for architecture and repo-wide tooling.
+Vue 3 frontend for the governance platform.
+
+Onchain spaces (Snapshot X, Compound Governor, OpenZeppelin Governor) data is fetched from **API** (GraphQL), and transactions are submitted via **Mana** (JSON-RPC) for gasless voting or directly.
+Offchain spaces (Snapshot spaces) data is fetched from **snapshot-hub** (GraphQL), and actions are submitted to **snapshot-sequencer** (JSON-RPC).
+
+See root `AGENTS.md` for architecture and repo-wide tooling.
 
 ## Commands
 
