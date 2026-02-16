@@ -1,7 +1,7 @@
 <script setup lang="ts">
-defineOptions({ inheritAttrs: false });
-
 import { getRandomHexColor } from '@/helpers/utils';
+
+defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
   loading?: boolean;
