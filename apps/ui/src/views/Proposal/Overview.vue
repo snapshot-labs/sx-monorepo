@@ -367,7 +367,7 @@ onBeforeUnmount(() => destroyAudio());
           <div class="flex flex-col ml-2 leading-4 gap-1">
             <div>
               {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-              <UiPillCounter
+              <UiPill
                 v-if="proposal.author.role"
                 class="py-0.5"
                 v-text="proposal.author.role"

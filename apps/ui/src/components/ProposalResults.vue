@@ -215,7 +215,7 @@ onMounted(() => {
         />
         <div class="truncate grow">
           Others
-          <UiPillCounter
+          <UiPill
             class="ml-2"
             v-text="_n(otherResultsSummary.count, 'compact')"
           />

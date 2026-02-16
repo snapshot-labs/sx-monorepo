@@ -48,12 +48,12 @@ function handleSelect(type: AvailableVotingTypes) {
             class="text-skin-link inline"
             v-text="VOTING_TYPES_INFO[type].label"
           />
-          <UiPillCounter
+          <UiPill
             v-if="VOTING_TYPES_INFO[type].isBeta"
             class="ml-2 py-0.5"
           >
             beta
-          </UiPillCounter>
+          </UiPill>
           <div v-text="VOTING_TYPES_INFO[type].description" />
         </div>
       </UiSelector>

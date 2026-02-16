@@ -56,9 +56,9 @@ watch(
     >
       <div>
         <h4 class="text-skin-link inline" v-text="activeVotingType.label" />
-        <UiPillCounter v-if="activeVotingType.isBeta" class="ml-2 py-0.5">
+        <UiPill v-if="activeVotingType.isBeta" class="ml-2 py-0.5">
           beta
-        </UiPillCounter>
+        </UiPill>
       </div>
       <div
         v-if="hasMultipleVotingType"

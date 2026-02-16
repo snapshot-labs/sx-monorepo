@@ -37,6 +37,6 @@ const isLarge = computed(() => props.size === 'lg');
     >
       {{ text }}
     </UiEyebrow>
-    <UiPillCounter v-if="count" class="ml-2" v-text="_n(count, 'compact')" />
+    <UiPill v-if="count" class="ml-2" v-text="_n(count, 'compact')" />
   </div>
 </template>

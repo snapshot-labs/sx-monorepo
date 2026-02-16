@@ -23,9 +23,9 @@ defineProps<{ task: Task }>();
         }"
         >{{ task.description }}</AppLink
       >
-      <UiPillCounter v-if="task.totalSteps" class="ml-1">
+      <UiPill v-if="task.totalSteps" class="ml-1">
         {{ task.currentStep || 0 }}/{{ task.totalSteps }}
-      </UiPillCounter>
+      </UiPill>
     </div>
   </div>
 </template>
