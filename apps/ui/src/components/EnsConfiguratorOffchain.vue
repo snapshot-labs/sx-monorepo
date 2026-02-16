@@ -167,9 +167,7 @@ function handleSelect(value: string) {
         <UiMessage v-else type="danger">
           No domain names found for the current wallet.
         </UiMessage>
-        <AppLink :to="ensUrl" class="inline-block">
-          Register a new ENS name </AppLink
-        >, or
+        <AppLink :to="ensUrl"> Register a new ENS name </AppLink>, or
         <button class="text-skin-link" @click="isModalEnsNameOpen = true">
           attach a custom domain</button
         >.
