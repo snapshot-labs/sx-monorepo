@@ -1,6 +1,6 @@
 import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import Ajv, { ErrorObject } from 'ajv';
+import Ajv, { AnySchema, ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
@@ -227,7 +227,7 @@ ajv.addFormat('domain', {
 });
 
 ajv.addFormat('ethValue', {
-  validate: value => {
+  validate: (value: string) => {
     if (!value.match(/^([0-9]|[1-9][0-9]+)(\.[0-9]+)?$/)) return false;
 
     try {
@@ -379,7 +379,7 @@ const getErrors = (errors: Partial<ErrorObject>[]) => {
   return output;
 };
 
-export const getValidator = (schema: any) => {
+export const getValidator = (schema: AnySchema) => {
   const validate = ajv.compile(schema);
 
   return {
@@ -411,8 +411,8 @@ export const getValidator = (schema: any) => {
  * @deprecated Use getValidator instead.
  */
 export function validateForm(
-  schema,
-  form,
+  schema: AnySchema,
+  form: unknown,
   opts: { skipEmptyOptionalFields: boolean } = {
     skipEmptyOptionalFields: false
   }
