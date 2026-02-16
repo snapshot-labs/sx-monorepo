@@ -1,10 +1,6 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false });
+
 const model = defineModel<string>();
 
 const props = defineProps<{

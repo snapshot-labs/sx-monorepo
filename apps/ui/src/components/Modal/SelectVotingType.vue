@@ -32,7 +32,7 @@ function handleSelect(type: AvailableVotingTypes) {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Select voting system</h3>
     </template>
