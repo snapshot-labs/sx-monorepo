@@ -89,10 +89,10 @@ const states: ComputedRef<State[]> = computed(() => {
     );
   }
 
-  if (isProposal && data.state === 'executed' && data.execution_time > 0) {
+  if (isProposal && data.state === 'executed' && data.executed_at) {
     initial.push({
       id: 'executed',
-      value: data.execution_time,
+      value: data.executed_at,
       url: getExplorerUrl(data, data.execution_tx)
     });
   }

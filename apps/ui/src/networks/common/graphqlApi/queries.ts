@@ -122,6 +122,7 @@ gql(`
     max_end
     max_end_block_number
     snapshot
+    executed_at
     vp_decimals
     scores_1
     scores_2
