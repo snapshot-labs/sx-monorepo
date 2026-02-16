@@ -1,9 +1,3 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
 import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
@@ -18,6 +12,8 @@ import Select from './Select.vue';
 import SelectMultiple from './SelectMultiple.vue';
 import SelectorNetwork from './SelectorNetwork.vue';
 import Textarea from './Textarea.vue';
+
+defineOptions({ inheritAttrs: false });
 
 const model = defineModel<any>({ required: true });
 

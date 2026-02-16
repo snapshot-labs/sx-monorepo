@@ -78,7 +78,7 @@ onMounted(async () => {
       <UiLoading />
     </div>
     <UiStateWarning v-else-if="failed" class="p-4">
-      Error while loading the topic.
+      Failed to load the topic.
     </UiStateWarning>
     <div v-if="loaded && !failed" class="pt-5 max-w-[730px] mx-auto px-4">
       <h1 class="text-[40px] leading-[1.1em]">

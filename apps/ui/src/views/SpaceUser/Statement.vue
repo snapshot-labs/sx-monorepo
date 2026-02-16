@@ -128,6 +128,6 @@ watchEffect(() =>
         </UiStateWarning>
       </div>
     </template>
-    <UiStateWarning v-else> Error while loading statement </UiStateWarning>
+    <UiStateWarning v-else> Failed to load statement. </UiStateWarning>
   </div>
 </template>
