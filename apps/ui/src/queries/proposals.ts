@@ -126,7 +126,7 @@ async function getProposals(
 }
 
 function getProposalsQuery(
-  queryKey: readonly unknown[],
+  queryKey: Parameters<typeof useInfiniteQuery>[0]['queryKey'],
   networkId: MaybeRefOrGetter<NetworkID>,
   spacesIds: MaybeRefOrGetter<string[]>,
   filters: Filters,
