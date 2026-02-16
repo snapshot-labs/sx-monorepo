@@ -73,7 +73,7 @@ const normalizedData = computed<SingleValueData[]>(() => {
       v-if="isPending || isError || hasNextPage || isFetchingNextPage"
       class="flex items-center justify-center flex-1"
     >
-      <template v-if="isError">Error while loading chart</template>
+      <template v-if="isError">Failed to load chart.</template>
       <UiLoading v-else-if="isPending || hasNextPage || isFetchingNextPage" />
     </div>
     <UiChartPriceDepth

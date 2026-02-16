@@ -94,7 +94,7 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <UiModal :open="open" data-model="user-modal" @close="$emit('close')">
+  <UiModal :open="open" data-model="user-modal" @close="emit('close')">
     <template #header>
       <h3>Edit profile</h3>
     </template>

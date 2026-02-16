@@ -30,7 +30,7 @@ const props = defineProps<{
   chainId?: ChainId;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
@@ -145,7 +145,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Test {{ strategies.length > 1 ? 'strategies' : 'strategy' }}</h3>
       <template v-if="isPickerShown">
