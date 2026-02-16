@@ -215,29 +215,28 @@ watchEffect(() => {
                 class="inline-block"
               />
             </AppLink>
-            <template v-if="discussion">
-              <AppLink
-                v-if="discourseTopic?.posts_count"
-                :to="{
-                  name: 'space-proposal-discussion',
-                  params: {
-                    proposal: proposal.proposal_id,
-                    space: `${proposal.network}:${proposal.space.id}`
-                  }
-                }"
-                class="flex items-center"
-              >
-                <UiLabel
-                  :is-active="route.name === 'space-proposal-discussion'"
-                  :count="discourseTopic.posts_count"
-                  text="Discussion"
-                  class="inline-block"
-                />
-              </AppLink>
-              <AppLink v-else :to="discussion">
-                <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
-              </AppLink>
-            </template>
+            <AppLink
+              v-if="discussion"
+              :to="
+                discourseTopic?.posts_count
+                  ? {
+                      name: 'space-proposal-discussion',
+                      params: {
+                        proposal: proposal.proposal_id,
+                        space: `${proposal.network}:${proposal.space.id}`
+                      }
+                    }
+                  : discussion
+              "
+              class="text-skin-text flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-discussion'"
+                :count="discourseTopic?.posts_count"
+                text="Discussion"
+                class="inline-block"
+              />
+            </AppLink>
             <template v-if="boostCount > 0">
               <AppLink
                 :to="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"

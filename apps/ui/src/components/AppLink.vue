@@ -60,13 +60,13 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
     :href="resolveToUrl(props.to)"
     target="_blank"
     rel="noopener noreferrer"
-    :class="{ 'inline-flex items-center': !hideExternalIcon }"
+    :class="{ 'gap-1': !hideExternalIcon }"
     @click="$emit('click')"
   >
     <slot />
     <IH-arrow-sm-right
       v-if="!hideExternalIcon"
-      class="-rotate-45 shrink-0 ml-1"
+      class="-rotate-45 inline-block shrink-0 -mb-0.5 -mt-0.5"
     />
   </a>
   <router-link

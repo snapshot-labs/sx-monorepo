@@ -98,7 +98,9 @@ onMounted(async () => {
             />
           </AppLink>
           <div class="flex flex-col leading-4 gap-1">
-            <AppLink :to="reply.user_url">{{ reply.name }}</AppLink>
+            <AppLink hide-external-icon :to="reply.user_url">{{
+              reply.name
+            }}</AppLink>
             <TimeRelative v-slot="{ relativeTime }" :time="reply.created_at">
               <span class="text-skin-text text-sm" v-text="relativeTime" />
             </TimeRelative>

@@ -108,10 +108,13 @@ watchEffect(() =>
           />
           <div v-if="shouldShowSource && statement.source">
             <UiEyebrow class="text-skin-text mb-2">Source</UiEyebrow>
-            <AppLink :to="SOURCE_ICONS[statement.source].link" class="flex">
+            <AppLink
+              :to="SOURCE_ICONS[statement.source].link"
+              class="flex items-center"
+            >
               <component
                 :is="SOURCE_ICONS[statement.source].icon"
-                class="max-h-[25px] max-w-[85px] w-auto text-skin-link"
+                class="max-h-[25px] max-w-[85px] w-auto"
               />
             </AppLink>
           </div>

@@ -124,6 +124,7 @@ watchEffect(() => setTitle(props.space.name));
           <template v-for="social in socials" :key="social.key">
             <AppLink
               :to="social.href"
+              hide-external-icon
               class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
