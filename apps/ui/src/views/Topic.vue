@@ -65,13 +65,11 @@ onMounted(async () => {
   <div>
     <div v-if="discussion" class="bg-skin-bg border-b">
       <div class="max-w-[730px] mx-auto p-4">
-        <a :href="discussion" target="_blank" tabindex="-1">
-          <UiButton class="w-full">
-            <IC-discourse class="size-[22px] shrink-0" />
-            Join the discussion
-            <IH-arrow-sm-right class="-rotate-45 shrink-0" />
-          </UiButton>
-        </a>
+        <UiButton :to="discussion" class="w-full">
+          <IC-discourse class="size-[22px] shrink-0" />
+          Join the discussion
+          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
+        </UiButton>
       </div>
     </div>
     <div v-if="loading" class="text-center p-4">
@@ -126,13 +124,11 @@ onMounted(async () => {
     </div>
     <div v-if="loaded && !failed && discussion" class="bg-skin-bg border-t">
       <div class="max-w-[730px] mx-auto p-4 pb-0">
-        <a :href="discussion" target="_blank" tabindex="-1">
-          <UiButton class="w-full">
-            <IC-discourse class="size-[22px] shrink-0" />
-            Reply
-            <IH-arrow-sm-right class="-rotate-45 shrink-0" />
-          </UiButton>
-        </a>
+        <UiButton :to="discussion" class="w-full">
+          <IC-discourse class="size-[22px] shrink-0" />
+          Reply
+          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
+        </UiButton>
       </div>
     </div>
   </div>
