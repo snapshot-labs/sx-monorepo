@@ -67,7 +67,7 @@ function getExplorerUrl(data: Proposal, tx: string | null) {
 const states: ComputedRef<State[]> = computed(() => {
   const data = props.data;
   const { created, start, min_end, max_end } = formatTimelineValues();
-  const isProposal = 'state' in data;
+  const isProposal = 'proposal_id' in data;
   const initial: State[] = [];
 
   if (created) {
