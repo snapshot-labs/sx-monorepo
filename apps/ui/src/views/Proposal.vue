@@ -215,30 +215,28 @@ watchEffect(() => {
                 class="inline-block"
               />
             </AppLink>
-            <template v-if="discussion">
-              <AppLink
-                v-if="discourseTopic?.posts_count"
-                :to="{
-                  name: 'space-proposal-discussion',
-                  params: {
-                    proposal: proposal.proposal_id,
-                    space: `${proposal.network}:${proposal.space.id}`
-                  }
-                }"
-                class="flex items-center"
-              >
-                <UiLabel
-                  :is-active="route.name === 'space-proposal-discussion'"
-                  :count="discourseTopic.posts_count"
-                  text="Discussion"
-                  class="inline-block"
-                />
-              </AppLink>
-              <AppLink v-else :to="discussion" class="flex items-center">
-                <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
-                <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-              </AppLink>
-            </template>
+            <AppLink
+              v-if="discussion"
+              :to="
+                discourseTopic?.posts_count
+                  ? {
+                      name: 'space-proposal-discussion',
+                      params: {
+                        proposal: proposal.proposal_id,
+                        space: `${proposal.network}:${proposal.space.id}`
+                      }
+                    }
+                  : discussion
+              "
+              class="text-skin-text flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-discussion'"
+                :count="discourseTopic?.posts_count"
+                text="Discussion"
+                class="inline-block"
+              />
+            </AppLink>
             <template v-if="boostCount > 0">
               <AppLink
                 :to="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
@@ -342,6 +340,7 @@ watchEffect(() => {
                         votingPower?.votingPowers?.every(v => v.value === 0n)
                       "
                       :to="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
+                      hide-external-icon
                     >
                       <IH-question-mark-circle />
                     </AppLink>

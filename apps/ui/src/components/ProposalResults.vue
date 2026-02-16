@@ -266,9 +266,8 @@ onMounted(() => {
   <AppLink
     v-if="proposal.privacy == 'shutter' && withDetails"
     :to="SHUTTER_URL"
-    class="flex items-center text-skin-link mt-2.5"
+    class="flex items-center mt-2.5"
   >
     <IC-Shutter class="w-[80px]" />
-    <IH-arrow-sm-right class="-rotate-45" />
   </AppLink>
 </template>

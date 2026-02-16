@@ -2,7 +2,11 @@
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 
 const props = defineProps<
-  Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; isExternal?: boolean }
+  Omit<RouterLinkProps, 'to'> & {
+    to?: RouteLocationRaw;
+    isExternal?: boolean;
+    hideExternalIcon?: boolean;
+  }
 >();
 
 defineEmits<{
@@ -56,9 +60,14 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
     :href="resolveToUrl(props.to)"
     target="_blank"
     rel="noopener noreferrer"
+    :class="{ 'gap-1': !hideExternalIcon }"
     @click="$emit('click')"
   >
     <slot />
+    <IH-arrow-sm-right
+      v-if="!hideExternalIcon"
+      class="-rotate-45 inline-block shrink-0 -mb-0.5 -mt-0.5"
+    />
   </a>
   <router-link
     v-else-if="props.to"

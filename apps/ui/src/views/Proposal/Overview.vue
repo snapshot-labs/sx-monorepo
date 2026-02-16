@@ -537,7 +537,7 @@ onBeforeUnmount(() => destroyAudio());
           <IH-chat-alt />
           <span>Discussion</span>
         </UiEyebrow>
-        <AppLink :to="discussion" class="block mb-5">
+        <AppLink :to="discussion" hide-external-icon class="block mb-5">
           <UiLinkPreview :url="discussion" :show-default="true" />
         </AppLink>
       </div>
@@ -561,10 +561,9 @@ onBeforeUnmount(() => destroyAudio());
             the
             <AppLink
               :to="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-              class="inline-flex items-center font-bold"
+              class="font-bold"
             >
               previous interface
-              <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
             .
           </UiAlert>

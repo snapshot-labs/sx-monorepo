@@ -68,7 +68,6 @@ onMounted(async () => {
         <UiButton :to="discussion" class="w-full">
           <IC-discourse class="size-[22px] shrink-0" />
           Join the discussion
-          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
         </UiButton>
       </div>
     </div>
@@ -88,14 +87,20 @@ onMounted(async () => {
         class="border-b last:border-b-0 py-4"
       >
         <div class="flex gap-2.5 items-center">
-          <AppLink :to="reply.user_url" class="shrink-0 rounded-full">
+          <AppLink
+            :to="reply.user_url"
+            hide-external-icon
+            class="shrink-0 rounded-full"
+          >
             <img
               :src="reply.avatar_template"
               class="rounded-full inline-block bg-skin-border size-[32px]"
             />
           </AppLink>
           <div class="flex flex-col leading-4 gap-1">
-            <AppLink :to="reply.user_url">{{ reply.name }}</AppLink>
+            <AppLink hide-external-icon :to="reply.user_url">{{
+              reply.name
+            }}</AppLink>
             <TimeRelative v-slot="{ relativeTime }" :time="reply.created_at">
               <span class="text-skin-text text-sm" v-text="relativeTime" />
             </TimeRelative>
@@ -123,7 +128,6 @@ onMounted(async () => {
         <UiButton :to="discussion" class="w-full">
           <IC-discourse class="size-[22px] shrink-0" />
           Reply
-          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
         </UiButton>
       </div>
     </div>

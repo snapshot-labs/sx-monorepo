@@ -49,10 +49,9 @@ const qrCodeUrl = computedAsync(async () => {
         </p>
         <AppLink
           :to="verificationUrl"
-          class="text-skin-link text-sm inline-flex items-center gap-1 hover:underline"
+          class="text-skin-link text-sm hover:underline"
         >
           Open in app
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </div>
     </div>

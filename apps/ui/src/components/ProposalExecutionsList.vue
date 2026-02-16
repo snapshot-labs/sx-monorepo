@@ -50,6 +50,7 @@ function downloadExecution(execution: ProposalExecution) {
         ) || undefined
       "
       class="flex justify-between items-center px-4 py-3"
+      hide-external-icon
       :class="{
         'pointer-events-none': !getGenericExplorerUrl(
           execution.chainId,

@@ -71,6 +71,7 @@ watch(
           <AppLink
             v-for="(socialNetwork, i) in SOCIAL_NETWORKS"
             :key="i"
+            hide-external-icon
             class="rounded-full leading-[100%] border text-skin-link size-[46px] flex items-center justify-center"
             :title="`Share on ${socialNetwork.name}`"
             :to="getShareUrl(socialNetwork.id, type, shareable)"
@@ -83,7 +84,6 @@ watch(
     <div v-if="txId" class="flex items-center justify-center p-4 pt-3 -mt-2">
       <AppLink :to="network.helpers.getExplorerUrl(txId, 'transaction')">
         View on explorer
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </AppLink>
     </div>
   </UiModal>

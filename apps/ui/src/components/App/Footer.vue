@@ -27,7 +27,7 @@ const isSiteRoute = computed(() => {
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Get help">
-        <UiButton :to="HELPDESK_URL" uniform>
+        <UiButton :to="HELPDESK_URL" uniform hide-external-icon>
           <IH-chat />
         </UiButton>
       </UiTooltip>

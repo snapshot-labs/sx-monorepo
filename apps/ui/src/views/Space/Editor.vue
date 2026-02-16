@@ -575,7 +575,6 @@ watchEffect(() => {
               class="font-semibold text-rose-500"
             >
               premium network
-              <IH-arrow-sm-right class="inline-block -rotate-45" />
             </AppLink>
             or
             <AppLink
@@ -603,10 +602,9 @@ watchEffect(() => {
             no longer available.
             <AppLink
               to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
-              class="inline-flex items-center font-semibold text-rose-500"
+              class="font-semibold text-rose-500"
             >
               See migration guide
-              <IH-arrow-sm-right class="-rotate-45" />
             </AppLink>
             <template v-if="isController || isAdmin">
               and
@@ -647,10 +645,9 @@ watchEffect(() => {
             to create a proposal.
             <AppLink
               to="https://help.snapshot.box/en/articles/12038725-premium-voting-strategies"
-              class="inline-flex items-center font-semibold text-rose-500"
+              class="font-semibold text-rose-500"
             >
-              Learn more
-              <IH-arrow-sm-right class="-rotate-45" /> </AppLink
+              Learn more </AppLink
             >.
           </UiAlert>
           <UiAlert
@@ -708,7 +705,7 @@ watchEffect(() => {
           </template>
           <div v-if="guidelines">
             <UiEyebrow class="mb-2">Guidelines</UiEyebrow>
-            <AppLink :to="guidelines" class="block mb-4">
+            <AppLink :to="guidelines" hide-external-icon class="block mb-4">
               <UiLinkPreview :url="guidelines" :show-default="true" />
             </AppLink>
           </div>

@@ -171,6 +171,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         <UiSectionHeader label="Treasury" sticky />
         <AppLink
           :to="treasuryExplorerUrl || '#'"
+          hide-external-icon
           class="flex justify-between items-center mx-4 py-3 border-b group"
           :class="{
             'pointer-events-none': !treasuryExplorerUrl
@@ -273,6 +274,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 ? treasuryExplorerUrl
                 : getExplorerUrl(asset.contractAddress, 'token') || '#'
             "
+            hide-external-icon
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0 space-x-3">
@@ -368,6 +370,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               v-for="(nft, i) in nfts"
               :key="i"
               :to="sanitizeUrl(nft.opensea_url) || '#'"
+              hide-external-icon
               class="block w-full minimum:max-w-[160px] md:max-w-[120px] mx-auto shrink-0"
             >
               <UiNftImage :item="nft" class="w-full" />

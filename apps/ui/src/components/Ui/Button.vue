@@ -10,6 +10,7 @@ const props = withDefaults(
     uniform?: boolean;
     size?: number;
     to?: RouteLocationRaw;
+    hideExternalIcon?: boolean;
   }>(),
   {
     type: 'button',
@@ -48,7 +49,13 @@ const buttonStyles = computed(() => {
 </script>
 
 <template>
-  <AppLink v-if="to" :to="to" :class="classNames" :style="buttonStyles">
+  <AppLink
+    v-if="to"
+    :to="to"
+    :hide-external-icon="hideExternalIcon"
+    :class="classNames"
+    :style="buttonStyles"
+  >
     <slot />
   </AppLink>
   <button

@@ -28,14 +28,15 @@ function handleSave(value: string) {
           :to="network.helpers.getExplorerUrl(controller, 'contract')"
           class="flex items-center text-skin-text leading-5 group"
         >
-          <UiStamp
-            :id="controller"
-            type="avatar"
-            :size="18"
-            class="mr-2 !rounded"
-          />
-          <UiAddress :address="controller" />
-          <IH-arrow-sm-right class="-rotate-45" />
+          <div class="flex items-center gap-2">
+            <UiStamp
+              :id="controller"
+              type="avatar"
+              :size="18"
+              class="!rounded"
+            />
+            <UiAddress :address="controller" />
+          </div>
         </AppLink>
       </div>
       <button

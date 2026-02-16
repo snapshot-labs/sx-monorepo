@@ -286,10 +286,7 @@ onMounted(() => {
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div>
-          <AppLink :to="CALENDLY">
-            Talk to sales
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </AppLink>
+          <AppLink :to="CALENDLY"> Talk to sales </AppLink>
         </div>
       </div>
     </div>
@@ -379,24 +376,17 @@ onMounted(() => {
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div>
-          <AppLink :to="CALENDLY">
-            Talk to sales
-            <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </AppLink>
+          <AppLink :to="CALENDLY"> Talk to sales </AppLink>
         </div>
       </div>
     </div>
 
-    <div class="px-4">
+    <div class="px-4 text-center">
       <AppLink
         to="https://help.snapshot.box/en/collections/12372196-snapshot-pro"
+        class="inline-flex items-center mb-6"
       >
-        <h2
-          class="mb-6 text-center flex items-center justify-center text-[32px]"
-        >
-          Frequently asked questions
-          <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-        </h2>
+        <h2 class="text-[32px]">Frequently asked questions</h2>
       </AppLink>
     </div>
 

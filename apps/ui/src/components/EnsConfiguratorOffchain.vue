@@ -91,7 +91,7 @@ function handleSelect(value: string) {
         Still experimenting?
         <br />
         You can also try
-        <AppLink to="https://testnet.snapshot.box/#/create">
+        <AppLink to="https://testnet.snapshot.box/#/create" hide-external-icon>
           testnet.snapshot.box
         </AppLink>
         - a Sepolia testnet playground dedicated to testing before creating your
@@ -152,7 +152,6 @@ function handleSelect(value: string) {
                     class="text-skin-link"
                   >
                     Learn more
-                    <IH-arrow-sm-right class="-rotate-45 inline" />
                   </AppLink>
                 </div>
               </div>
@@ -168,10 +167,7 @@ function handleSelect(value: string) {
         <UiMessage v-else type="danger">
           No domain names found for the current wallet.
         </UiMessage>
-        <AppLink :to="ensUrl" class="inline-block">
-          Register a new ENS name
-          <IH-arrow-sm-right class="-rotate-45 inline" /> </AppLink
-        >, or
+        <AppLink :to="ensUrl"> Register a new ENS name </AppLink>, or
         <button class="text-skin-link" @click="isModalEnsNameOpen = true">
           attach a custom domain</button
         >.

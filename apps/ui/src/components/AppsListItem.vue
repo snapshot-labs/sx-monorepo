@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { getUrl } from '@/helpers/utils';
 
-defineProps<{ app: any }>();
+const props = defineProps<{ app: any }>();
+
+const link = computed(() => {
+  return props.app.link || props.app.website || window.location.origin;
+});
 </script>
 
 <template>
   <AppLink
-    :to="app.link || app.website"
+    :to="link"
+    hide-external-icon
     class="border rounded-lg p-3 leading-6 relative group"
   >
     <img :src="getUrl(app.avatar) || ''" class="size-[32px] rounded-lg mb-2" />

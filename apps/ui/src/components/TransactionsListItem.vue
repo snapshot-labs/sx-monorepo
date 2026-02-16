@@ -181,24 +181,20 @@ const parsedTitle = computedAsync(
         }}</code>
         on
         <AppLink
-          class="inline-flex items-center"
           :to="getGenericExplorerUrl(chainId, call.to, 'address') || undefined"
         >
           {{ shorten(call.to) }}
-          <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
         </AppLink>
       </div>
       <div v-else-if="interaction" class="text-skin-link">
         Interaction with
         <AppLink
-          class="inline-flex items-center"
           :to="
             getGenericExplorerUrl(chainId, interaction.to, 'address') ||
             undefined
           "
         >
           {{ shorten(interaction.to) }}
-          <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
         </AppLink>
       </div>
       <template v-if="params.length > 0">
@@ -207,14 +203,12 @@ const parsedTitle = computedAsync(
           <span class="text-skin-link">{{ param.name }}</span>
           <AppLink
             v-if="param.type === 'address'"
-            class="inline-flex items-center"
             :to="
               getGenericExplorerUrl(chainId, param.value, 'address') ||
               undefined
             "
           >
             {{ shorten(param.value) }}
-            <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </AppLink>
           <div v-else class="break-all inline-block">{{ param.value }}</div>
         </div>

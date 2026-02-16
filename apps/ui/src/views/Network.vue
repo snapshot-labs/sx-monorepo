@@ -38,7 +38,6 @@ function toggleQuestion(id) {
           class="px-4 py-3 space-x-2 bg-skin-link text-skin-bg rounded-full"
         >
           Talk to sales
-          <IH-arrow-sm-right class="inline-block -rotate-45" />
         </AppLink>
       </UiContainer>
     </div>
@@ -154,7 +153,6 @@ function toggleQuestion(id) {
         class="px-4 py-3 space-x-2 bg-skin-link text-skin-bg rounded-full"
       >
         Talk to sales
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </AppLink>
     </UiContainer>
 

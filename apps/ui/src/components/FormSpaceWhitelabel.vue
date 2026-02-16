@@ -187,7 +187,7 @@ onMounted(() => emit('errors', formErrors.value));
         <div>
           <div class="flex justify-between items-center mb-2">
             <UiEyebrow class="font-medium">Preview</UiEyebrow>
-            <AppLink :to="previewUrl" target="_blank">
+            <AppLink :to="previewUrl" hide-external-icon target="_blank">
               <IHArrowsExpand class="cursor-pointer" />
             </AppLink>
           </div>
@@ -206,6 +206,7 @@ onMounted(() => emit('errors', formErrors.value));
                 Preview only available on
                 <AppLink
                   :to="`https://${previewDomain}/#/settings/whitelabel`"
+                  hide-external-icon
                   >{{ previewDomain }}</AppLink
                 >
               </div>

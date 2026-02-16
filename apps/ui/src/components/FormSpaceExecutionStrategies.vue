@@ -164,7 +164,6 @@ function getZodiacAppUrl(strategyAddress: string) {
               :to="getZodiacAppUrl(executionStrategy.address)"
             >
               Enable
-              <IH-arrow-sm-right class="-rotate-45 -mr-2" />
             </UiButton>
           </template>
         </template>

@@ -83,7 +83,11 @@ onMounted(() => load());
                 />
               </div>
               <div v-if="app.form">
-                <AppLink :to="app.form" class="text-skin-text">
+                <AppLink
+                  :to="app.form"
+                  hide-external-icon
+                  class="text-skin-text"
+                >
                   <IH-pencil class="inline-block mr-1" /> Edit this page
                 </AppLink>
               </div>
@@ -99,21 +103,18 @@ onMounted(() => load());
                 <UiEyebrow>Website</UiEyebrow>
                 <AppLink :to="app.website">
                   {{ simplifyURL(app.website) }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </AppLink>
               </div>
               <div v-if="app.x">
                 <UiEyebrow>X (Twitter)</UiEyebrow>
                 <AppLink :to="`https://x.com/${app.x}`">
                   {{ app.x }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </AppLink>
               </div>
               <div v-if="app.github">
                 <UiEyebrow>Source code</UiEyebrow>
                 <AppLink :to="app.github">
                   {{ simplifyURL(app.github) }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </AppLink>
               </div>
             </div>

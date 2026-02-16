@@ -75,6 +75,7 @@ const isOffchainNetwork = computed(() => {
         <AppLink
           v-if="!hasAddress"
           :to="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
+          hide-external-icon
           class="text-skin-link"
         >
           <IH-information-circle />
@@ -96,7 +97,6 @@ const isOffchainNetwork = computed(() => {
         class="mr-2 !rounded"
       />
       {{ shorten(strategy.address) }}
-      <IH-arrow-sm-right class="-rotate-45" />
     </AppLink>
     <div class="flex flex-col gap-2 mt-3 empty:mt-0">
       <div

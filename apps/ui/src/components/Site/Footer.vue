@@ -53,20 +53,14 @@ const SOCIALS = [
           <UiEyebrow>Resources</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <AppLink :to="HELPDESK_URL">
-                Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
+              <AppLink :to="HELPDESK_URL"> Helpdesk </AppLink>
             </div>
             <div>
-              <AppLink to="https://snapshot.mirror.xyz">
-                Blog
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
+              <AppLink to="https://snapshot.mirror.xyz"> Blog </AppLink>
             </div>
             <div>
               <AppLink to="https://github.com/snapshot-labs/brand">
                 Brand
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
             </div>
           </div>
@@ -75,22 +69,13 @@ const SOCIALS = [
           <UiEyebrow>Developers</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <AppLink to="https://docs.snapshot.box">
-                Docs
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
+              <AppLink to="https://docs.snapshot.box"> Docs </AppLink>
             </div>
             <div>
-              <AppLink to="https://github.com/snapshot-labs">
-                GitHub
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
+              <AppLink to="https://github.com/snapshot-labs"> GitHub </AppLink>
             </div>
             <div>
-              <AppLink to="https://status.snapshot.org">
-                Status
-                <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </AppLink>
+              <AppLink to="https://status.snapshot.org"> Status </AppLink>
             </div>
           </div>
         </div>
@@ -120,7 +105,6 @@ const SOCIALS = [
                 `v${version}${COMMIT_SHA ? `#${COMMIT_SHA.slice(0, 7)}` : ''}`
               "
             />
-            <IH-arrow-sm-right class="inline-block -rotate-45 ml-0.5" />
           </AppLink>
         </div>
         <div class="flex space-x-2.5">
@@ -128,6 +112,7 @@ const SOCIALS = [
             v-for="social in SOCIALS"
             :key="social.href"
             :to="social.href"
+            hide-external-icon
             class="text-skin-text hover:text-skin-link"
           >
             <component :is="social.icon" class="size-[32px] text-skin-link" />
