@@ -22,22 +22,21 @@ const uiStore = useUiStore();
         No pending transactions
       </div>
       <template v-else>
-        <a
+        <AppLink
           v-for="pendingTx in uiStore.pendingTransactions"
           :key="pendingTx.txId"
-          :href="
+          :to="
             getGenericExplorerUrl(
               pendingTx.chainId,
               pendingTx.txId,
               'transaction'
             ) ?? undefined
           "
-          target="_blank"
           class="border rounded-lg px-3 py-2 flex items-center w-full mb-2 last:mb-0"
         >
           <IH-arrow-sm-right class="-rotate-45" />
           <div class="ml-2 truncate text-skin-link">{{ pendingTx.txId }}</div>
-        </a>
+        </AppLink>
       </template>
     </div>
   </UiModal>

@@ -169,9 +169,8 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     <div class="space-y-3">
       <div>
         <UiSectionHeader label="Treasury" sticky />
-        <a
-          :href="treasuryExplorerUrl || '#'"
-          target="_blank"
+        <AppLink
+          :to="treasuryExplorerUrl || '#'"
           class="flex justify-between items-center mx-4 py-3 border-b group"
           :class="{
             'pointer-events-none': !treasuryExplorerUrl
@@ -222,7 +221,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               />
             </div>
           </div>
-        </a>
+        </AppLink>
       </div>
       <div>
         <div class="flex pl-4 border-b space-x-3">
@@ -265,16 +264,15 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <UiStateWarning v-else-if="isError" class="px-4 py-3">
             Failed to load treasury tokens.
           </UiStateWarning>
-          <a
+          <AppLink
             v-for="(asset, i) in assets"
             v-else
             :key="i"
-            :href="
+            :to="
               asset.contractAddress === ETH_CONTRACT
                 ? treasuryExplorerUrl
                 : getExplorerUrl(asset.contractAddress, 'token') || '#'
             "
-            target="_blank"
             class="mx-4 py-3 border-b flex"
           >
             <div class="flex-auto flex items-center min-w-0 space-x-3">
@@ -350,7 +348,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 "
               />
             </div>
-          </a>
+          </AppLink>
         </div>
         <div v-else-if="page === 'nfts'">
           <UiStateWarning
@@ -366,18 +364,17 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <div
             class="grid grid-cols-1 minimum:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 3xl:grid-cols-9 gap-4 gap-y-2 max-w-fit mx-auto p-4"
           >
-            <a
+            <AppLink
               v-for="(nft, i) in nfts"
               :key="i"
-              :href="sanitizeUrl(nft.opensea_url) || '#'"
-              target="_blank"
+              :to="sanitizeUrl(nft.opensea_url) || '#'"
               class="block w-full minimum:max-w-[160px] md:max-w-[120px] mx-auto shrink-0"
             >
               <UiNftImage :item="nft" class="w-full" />
               <div class="mt-2 text-[17px] truncate text-center">
                 {{ nft.displayTitle }}
               </div>
-            </a>
+            </AppLink>
           </div>
         </div>
       </div>
