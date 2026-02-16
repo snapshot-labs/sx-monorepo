@@ -36,7 +36,7 @@ const form: {
   value: string;
 } = reactive(clone(DEFAULT_FORM_STATE));
 
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const pickerType: Ref<'token' | 'contact' | null> = ref(null);
 const searchValue = ref('');
 const customTokens: Ref<Token[]> = ref([]);
@@ -127,7 +127,7 @@ function handleAddCustomToken(token: Token) {
 }
 
 function handlePickerClick(type: 'token' | 'contact') {
-  showPicker.value = true;
+  isPickerShown.value = true;
   pickerType.value = type;
 
   searchValue.value = '';
@@ -185,7 +185,7 @@ async function handleSubmit() {
 watch(
   () => props.open,
   () => {
-    showPicker.value = false;
+    isPickerShown.value = false;
 
     if (props.initialState) {
       form.to = props.initialState.recipient;
@@ -223,14 +223,14 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Send token'" />
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
@@ -243,7 +243,7 @@ watchEffect(async () => {
         />
       </template>
     </template>
-    <template v-if="showPicker">
+    <template v-if="isPickerShown">
       <PickerToken
         v-if="pickerType === 'token'"
         :assets="allAssets"
@@ -253,7 +253,7 @@ watchEffect(async () => {
         :search-value="searchValue"
         @pick="
           form.token = $event;
-          showPicker = false;
+          isPickerShown = false;
         "
         @add="handleAddCustomToken"
       />
@@ -264,11 +264,11 @@ watchEffect(async () => {
         :extra-contacts="extraContacts"
         @pick="
           form.to = $event;
-          showPicker = false;
+          isPickerShown = false;
         "
       />
     </template>
-    <div v-if="!showPicker" class="s-box p-4">
+    <div v-if="!isPickerShown" class="s-box p-4">
       <UiInputAddress
         v-model="form.to"
         :definition="recipientDefinition"
@@ -322,7 +322,7 @@ watchEffect(async () => {
         </div>
       </div>
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit">
         Confirm
       </UiButton>
