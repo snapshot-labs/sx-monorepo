@@ -381,12 +381,12 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="px-4">
+    <div class="px-4 text-center">
       <AppLink
         to="https://help.snapshot.box/en/collections/12372196-snapshot-pro"
-        class="mb-6 text-center justify-center text-[32px]"
+        class="mb-6"
       >
-        <h2>Frequently asked questions</h2>
+        <h2 class="text-[32px]">Frequently asked questions</h2>
       </AppLink>
     </div>
 
