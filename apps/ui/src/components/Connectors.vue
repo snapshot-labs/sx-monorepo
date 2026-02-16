@@ -51,9 +51,6 @@ const availableConnectors = computed(() => {
       variant="primary"
       label="Recent"
     />
-    <UiPill
-      v-else-if="connector.type === 'injected'"
-      label="Detected"
-    />
+    <UiPill v-else-if="connector.type === 'injected'" label="Detected" />
   </UiButton>
 </template>

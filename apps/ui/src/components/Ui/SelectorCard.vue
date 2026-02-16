@@ -43,12 +43,7 @@ const emit = defineEmits<{
     <div class="py-3 px-4">
       <div class="flex items-center space-x-2">
         <h4 class="text-skin-link inline-block" v-text="item.label" />
-        <UiPill
-          v-if="item.tag"
-          variant="accent"
-          class="py-0.5"
-          :label="item.tag"
-        />
+        <UiPill v-if="item.tag" variant="accent" :label="item.tag" />
       </div>
       <div
         v-if="item.description"

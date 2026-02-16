@@ -369,7 +369,6 @@ onBeforeUnmount(() => destroyAudio());
               {{ proposal.author.name || shortenAddress(proposal.author.id) }}
               <UiPill
                 v-if="proposal.author.role"
-                class="py-0.5"
                 :label="proposal.author.role"
               />
             </div>

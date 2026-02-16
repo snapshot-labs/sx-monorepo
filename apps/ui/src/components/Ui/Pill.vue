@@ -13,10 +13,10 @@ defineProps<{
 
 <style lang="scss" scoped>
 .pill {
-  @apply inline-block text-[13px] rounded-full px-1.5 bg-skin-border text-skin-link;
+  @apply inline-block text-[13px] leading-5 rounded-full px-1.5 bg-skin-border text-skin-link;
 
   &.accent {
-    @apply bg-skin-text text-skin-accent-foreground leading-[13px] h-fit;
+    @apply bg-skin-text text-skin-accent-foreground;
   }
 
   &.primary {

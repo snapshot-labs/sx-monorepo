@@ -52,10 +52,8 @@ function handleSelect(type: AvailableVotingTypes) {
             <UiPill
               v-if="VOTING_TYPES_INFO[type].isBeta"
               variant="accent"
-              class="py-0.5"
-            >
-              beta
-            </UiPill>
+              label="Beta"
+            />
           </div>
           <div v-text="VOTING_TYPES_INFO[type].description" />
         </div>

@@ -56,7 +56,7 @@ watch(
     >
       <div class="flex items-center gap-2">
         <h4 class="text-skin-link inline" v-text="activeVotingType.label" />
-        <UiPill v-if="activeVotingType.isBeta" class="py-0.5"> beta </UiPill>
+        <UiPill v-if="activeVotingType.isBeta" label="beta" />
       </div>
       <div
         v-if="hasMultipleVotingType"

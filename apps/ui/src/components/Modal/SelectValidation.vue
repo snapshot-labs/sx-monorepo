@@ -353,10 +353,8 @@ watch(
             <UiPill
               v-if="validation.key === 'passport-gated'"
               variant="accent"
-              class="py-0.5"
-            >
-              Beta
-            </UiPill>
+              label="Beta"
+            />
           </div>
           <div
             v-text="
