@@ -27,7 +27,7 @@ CI will reject lint/type/test failures.
 | `packages/sx.js` | Shared TypeScript SDK for governance (published as @snapshot-labs/sx) |
 | `scripts/`       | Monorepo dev scripts (dev-interactive, etc.)                          |
 | `tests/`         | E2E tests (Playwright)                                                |
-| `docs/`          | Project documentation                                                 |
+| `docs/`          | Documents describing common patterns in the codebase                  |
 
 ## Architecture
 
