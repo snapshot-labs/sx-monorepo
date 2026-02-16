@@ -35,11 +35,11 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 
 **UI** (Vue 3) → queries **API** via GraphQL for governance data, submits transactions to **Mana** via JSON-RPC.
 
-**API** (Apollo + Checkpoint) → indexes governance events from EVM, Starknet, and offchain. Serves unified GraphQL for spaces, proposals, votes, users. Supports SnapshotX, Compound Governor, OpenZeppelin Governor. Can run indexer-only or API-only.
+**API** (Apollo + Checkpoint) → indexes governance events from EVM, Starknet, and offchain. Serves unified GraphQL for spaces, proposals, votes, users. Supports Snapshot X, Compound Governor, OpenZeppelin Governor. Can run indexer-only or API-only.
 
 **Mana** (Express) → relays transactions for gasless voting, handles cross-chain execution (L1↔L2), manages relayer wallets and automated proposal execution.
 
-**sx.js** → shared SDK used by all services for signing, and blockchain interactions.
+**SX.js** → shared SDK used by all services for signing, and blockchain interactions.
 
 **[snapshot-hub](https://github.com/snapshot-labs/snapshot-hub)** (external) → API and data store for offchain Snapshot spaces. UI queries it for offchain governance data.
 
@@ -55,10 +55,10 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 ## Key Concepts
 
 - **Spaces** — governance DAOs with voting configs and execution strategies. Two types:
-  - **Onchain spaces** — indexed by API in this repo. Protocols: SnapshotX, Compound Governor, OpenZeppelin Governor
+  - **Onchain spaces** — indexed by API in this repo. Protocols: Snapshot X, Compound Governor, OpenZeppelin Governor
   - **Offchain spaces** — Snapshot spaces fetched from [snapshot-hub](https://github.com/snapshot-labs/snapshot-hub). Writes go through [snapshot-sequencer](https://github.com/snapshot-labs/snapshot-sequencer).
 - **Strategies** — voting power calculation (token balance, whitelist, cross-chain proofs)
-- **Executors** — on-chain execution patterns (Safe, Timelock, Axiom ZK proofs)
+- **Executors** — onchain execution patterns (Safe, Timelock)
 
 ## Tooling
 
