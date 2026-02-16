@@ -48,7 +48,7 @@ const availableConnectors = computed(() => {
     <span class="flex-grow text-left" v-text="connector.info.name" />
     <UiPill
       v-if="connector.id === recentConnector"
-      variant="highlighted"
+      variant="primary"
       v-text="'Recent'"
     />
     <UiPill

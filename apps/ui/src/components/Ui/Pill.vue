@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  variant?: 'default' | 'accent' | 'highlighted';
+  variant?: 'accent' | 'primary';
 }>();
 </script>
 
@@ -18,7 +18,7 @@ defineProps<{
     @apply bg-skin-text text-skin-accent-foreground leading-[13px] h-fit;
   }
 
-  &.highlighted {
+  &.primary {
     @apply bg-skin-link text-skin-bg;
   }
 }
