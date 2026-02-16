@@ -43,9 +43,10 @@ const emit = defineEmits<{
     <div class="py-3 px-4">
       <div class="flex items-center space-x-2">
         <h4 class="text-skin-link inline-block" v-text="item.label" />
-        <span
+        <UiPillCounter
           v-if="item.tag"
-          class="bg-skin-text text-skin-accent-foreground rounded-full px-1.5 py-0.5 text-[13px] leading-[13px] h-fit"
+          variant="accent"
+          class="py-0.5"
           v-text="item.tag"
         />
       </div>

@@ -46,14 +46,13 @@ const availableConnectors = computed(() => {
       :alt="connector.info.name"
     />
     <span class="flex-grow text-left" v-text="connector.info.name" />
-    <span
+    <UiPillCounter
       v-if="connector.id === recentConnector"
-      class="inline-block bg-skin-link text-skin-bg text-[13px] rounded-full px-1.5"
+      variant="highlighted"
       v-text="'Recent'"
     />
-    <span
+    <UiPillCounter
       v-else-if="connector.type === 'injected'"
-      class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
       v-text="'Detected'"
     />
   </UiButton>

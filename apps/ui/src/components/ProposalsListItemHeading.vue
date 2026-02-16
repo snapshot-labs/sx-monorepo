@@ -101,9 +101,9 @@ const hasVoted = computed(
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-          <span
+          <UiPillCounter
             v-if="proposal.author.role"
-            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
+            class="py-0.5"
             v-text="proposal.author.role"
           />
         </AppLink>

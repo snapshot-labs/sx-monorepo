@@ -23,12 +23,9 @@ defineProps<{ task: Task }>();
         }"
         >{{ task.description }}</AppLink
       >
-      <div
-        v-if="task.totalSteps"
-        class="text-skin-link inline-block bg-skin-border text-[13px] rounded-full px-1.5 ml-1"
-      >
+      <UiPillCounter v-if="task.totalSteps" class="ml-1">
         {{ task.currentStep || 0 }}/{{ task.totalSteps }}
-      </div>
+      </UiPillCounter>
     </div>
   </div>
 </template>
