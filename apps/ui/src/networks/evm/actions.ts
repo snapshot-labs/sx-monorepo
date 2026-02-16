@@ -19,6 +19,7 @@ import {
   GovernorBravoAuthenticator,
   OpenZeppelinAuthenticator
 } from '@snapshot-labs/sx';
+import { AbiCoder } from 'ethers';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { vote as highlightVote } from '@/helpers/highlight';
@@ -62,7 +63,6 @@ import {
   StrategyParsedMetadata,
   VoteType
 } from '@/types';
-import { EDITOR_APP_NAME } from '../common/constants';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
@@ -254,136 +254,177 @@ export function createActions(
       created: number,
       start: number,
       min_end: number,
-      max_end: number,
-      executions: ExecutionInfo[] | null
+      max_end: number
+      // executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
       const signer = getSigner(web3);
 
-      const executionInfo = executions?.[0];
-
-      if (space.protocol === 'governor-bravo') {
-        return governorBravoClient.propose({
-          signer,
-          envelope: {
-            data: {
-              spaceId: space.id,
-              title,
-              body,
-              executions: executionInfo?.transactions ?? []
-            }
-          }
-        });
-      }
-
-      if (space.protocol === '@openzeppelin/governor') {
-        return openZeppelinClient.propose({
-          signer,
-          envelope: {
-            data: {
-              spaceId: space.id,
-              title,
-              body,
-              executions: executionInfo?.transactions ?? []
-            }
-          }
-        });
-      }
-
-      const pinned = await helpers.pin({
-        title,
-        body,
-        discussion,
-        type,
-        app: app || EDITOR_APP_NAME,
-        choices: choices.filter(c => !!c),
-        labels,
-        execution: executionInfo?.transactions ?? []
-      });
-      if (!pinned || !pinned.cid) return false;
-      console.log('IPFS', pinned);
-
-      const isContract = await getIsContract(account, connectorType);
-
-      const relayer = await getRelayerInfo(space.id, space.network, provider);
-
-      const { relayerType, authenticator, strategies } =
-        pickAuthenticatorAndStrategies({
-          authenticators: space.authenticators,
-          strategies: space.voting_power_validation_strategy_strategies,
-          strategiesIndices:
-            space.voting_power_validation_strategy_strategies.map((_, i) => i),
-          connectorType,
-          isContract,
-          hasReason: false,
-          ignoreRelayer: !relayer?.hasMinimumBalance
-        });
-
-      let selectedExecutionStrategy;
-      if (executionInfo) {
-        selectedExecutionStrategy = {
-          addr: executionInfo.strategyAddress,
-          params: getExecutionData(
-            space,
-            executionInfo.strategyAddress,
-            executionInfo.destinationAddress,
-            convertToMetaTransactions(executionInfo.transactions)
-          ).executionParams[0]
+      // Load deployed addresses for this space from localStorage
+      const data = localStorage.getItem('deployedContracts');
+      let matchAddress = space.id;
+      if (matchAddress.startsWith('s:')) matchAddress = matchAddress.slice(2);
+      let deployedAddresses: {
+        spaceContract: string;
+        vanillaAuthenticator: string;
+        vanillaExecutionStrategy: string;
+        vanillaProposalValidationStrategy: string;
+        vanillaVotingStrategy: string;
+      } | null = null;
+      if (data) {
+        const spaces = JSON.parse(data);
+        const found = spaces.find(s => s.spaceContractAddress === matchAddress);
+        if (!found)
+          throw new Error(
+            `No deployed contract info found for this space address: ${matchAddress}`
+          );
+        deployedAddresses = {
+          spaceContract: found.spaceContractAddress,
+          vanillaAuthenticator: found.authenticatorAddress,
+          vanillaExecutionStrategy: found.executionStrategyAddress,
+          vanillaProposalValidationStrategy:
+            found.proposalValidationStrategyAddress,
+          vanillaVotingStrategy: found.votingStrategyAddress
         };
       } else {
-        selectedExecutionStrategy = {
-          addr: '0x0000000000000000000000000000000000000000',
-          params: '0x'
-        };
+        throw new Error('No deployedContracts found in localStorage');
+      }
+      if (!deployedAddresses) {
+        throw new Error('deployedAddresses is null');
       }
 
-      const strategiesWithMetadata = await Promise.all(
-        strategies.map(async strategy => {
-          const params =
-            space.voting_power_validation_strategy_strategies_params[
-              strategy.paramsIndex
-            ];
-
-          const metadata = await parseStrategyMetadata(
-            space.voting_power_validation_strategies_parsed_metadata[
-              strategy.index
-            ].payload
-          );
-
-          return {
-            ...strategy,
-            params,
-            metadata
-          };
-        })
-      );
-
-      const data = {
-        space: space.id,
-        authenticator,
-        strategies: strategiesWithMetadata,
-        executionStrategy: selectedExecutionStrategy,
-        metadataUri: `ipfs://${pinned.cid}`
+      const data2propose = {
+        author: account,
+        metadataURI: '',
+        executionStrategy: {
+          addr: deployedAddresses.vanillaExecutionStrategy,
+          params: '0x'
+        },
+        userProposalValidationParams: '0x'
       };
 
-      if (relayerType === 'evm') {
-        return ethSigClient.propose({
-          signer,
-          data
-        });
-      }
-
-      return client.propose(
-        {
-          signer,
-          envelope: {
-            data
-          }
-        },
-        {
-          noWait: isContract && connectorType !== 'sequence'
-        }
+      const abiCoder = new AbiCoder();
+      const encodedData = abiCoder.encode(
+        ['address', 'string', '(address,bytes)', 'bytes'],
+        [
+          data2propose.author,
+          data2propose.metadataURI,
+          [
+            data2propose.executionStrategy.addr,
+            data2propose.executionStrategy.params
+          ],
+          data2propose.userProposalValidationParams
+        ]
       );
+
+      const spaceContract = new Contract(
+        deployedAddresses.spaceContract,
+        ['function nextProposalId() view returns (uint256)'],
+        signer
+      );
+      const ggp = await spaceContract.nextProposalId();
+
+      // Create proposal
+      const authenticatorContract = new Contract(
+        deployedAddresses.vanillaAuthenticator,
+        [
+          'function authenticate(address space, bytes4 selector, bytes calldata data)'
+        ],
+        signer
+      );
+
+      const tx = await authenticatorContract.authenticate(
+        deployedAddresses.spaceContract,
+        '0xaad83f3b',
+        encodedData
+      );
+
+      await tx.wait();
+
+      const localKey = `localProposals:${deployedAddresses.spaceContract}`;
+      const localProposals = JSON.parse(localStorage.getItem(localKey) || '[]');
+
+      // Helper function to ensure timestamp is in seconds
+      const ensureSeconds = (timestamp: number) => {
+        // If timestamp is in milliseconds (13+ digits), convert to seconds
+        return timestamp > 9999999999
+          ? Math.floor(timestamp / 1000)
+          : timestamp;
+      };
+
+      const newProposal = {
+        id: `local-${Date.now()}`,
+        title,
+        body,
+        ggp: Number(ggp),
+        discussion,
+        choices,
+        created: Math.floor(Date.now() / 1000),
+        author: {
+          id: account,
+          name: '',
+          role: null,
+          address_type: 0
+        },
+        state: 'pending',
+        network: space.network,
+        space: {
+          id: deployedAddresses.spaceContract,
+          name: space?.name || '',
+          avatar: space?.avatar || '',
+          network: space.network,
+          admins: (space as any)?.admins || [],
+          moderators: (space as any)?.moderators || [],
+          controller: space?.controller || '',
+          strategies_parsed_metadata: [],
+          terms: space?.terms || '',
+          voting_power_symbol: space?.voting_power_symbol || '',
+          authenticators: space?.authenticators || [],
+          executors: space?.executors || [],
+          executors_types: space?.executors_types || [],
+          labels: space?.labels || []
+        },
+        proposal_id: '',
+        execution_network: space.network,
+        isInvalid: false,
+        type,
+        quorum: 0,
+        quorum_type: 'default',
+        execution_hash: '',
+        metadata_uri: '',
+        executions: [],
+        start: ensureSeconds(start || Math.floor(Date.now() / 1000) + 3600), // 1 hour from now
+        min_end: ensureSeconds(min_end || Math.floor(Date.now() / 1000) + 7200), // 2 hours from now
+        max_end: ensureSeconds(max_end || Math.floor(Date.now() / 1000) + 7200), // 2 hours from now
+        snapshot: 0,
+        labels: labels || [],
+        scores: [],
+        scores_total: 0,
+        execution_time: 0,
+        execution_strategy: '',
+        execution_strategy_type: '',
+        execution_destination: null,
+        timelock_veto_guardian: null,
+        strategies_indices: [],
+        strategies: [],
+        strategies_params: [],
+        edited: null,
+        tx: '',
+        execution_tx: null,
+        veto_tx: null,
+        vote_count: 0,
+        has_execution_window_opened: false,
+        execution_ready: false,
+        vetoed: false,
+        completed: false,
+        cancelled: false,
+        privacy: privacy || 'none',
+        flagged: false
+      };
+      localProposals.push(newProposal);
+      localStorage.setItem(localKey, JSON.stringify(localProposals));
+
+      return { txId: tx.hash };
     },
     async updateProposal(
       web3: Web3Provider,

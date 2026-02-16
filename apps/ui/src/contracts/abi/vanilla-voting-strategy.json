@@ -1,0 +1,45 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "VanillaVotingStrategy",
+  "sourceName": "contracts/voting-strategies/VanillaVotingStrategy.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "getVotingPower",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x6080806040523460145760fd90816100198239f35b5f80fdfe60808060405260043610156011575f80fd5b5f3560e01c63871d81b7146023575f80fd5b34609857608036600319011260985760043563ffffffff8116036098576024356001600160a01b0381160360985760443567ffffffffffffffff8111609857606e903690600401609c565b50506064359067ffffffffffffffff821160985760906020923690600401609c565b505060018152f35b5f80fd5b9181601f8401121560985782359167ffffffffffffffff83116098576020838186019501011160985756fea2646970667358221220317d805f53271d5475bb6b04cb84b61f7849f31c41f0fcd7b39c03eeeb0b748d64736f6c634300081c0033",
+  "deployedBytecode": "0x60808060405260043610156011575f80fd5b5f3560e01c63871d81b7146023575f80fd5b34609857608036600319011260985760043563ffffffff8116036098576024356001600160a01b0381160360985760443567ffffffffffffffff8111609857606e903690600401609c565b50506064359067ffffffffffffffff821160985760906020923690600401609c565b505060018152f35b5f80fd5b9181601f8401121560985782359167ffffffffffffffff83116098576020838186019501011160985756fea2646970667358221220317d805f53271d5475bb6b04cb84b61f7849f31c41f0fcd7b39c03eeeb0b748d64736f6c634300081c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
