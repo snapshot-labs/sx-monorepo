@@ -34,7 +34,7 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const isLoading = ref(false);
 const hasError = ref(false);
 const searchValue = ref('');
@@ -55,7 +55,7 @@ const hasFormErrors = computed(() => {
 
 function handlePick(address: string) {
   form.value.address = address;
-  showPicker.value = false;
+  isPickerShown.value = false;
   handleSubmit();
 }
 
@@ -136,7 +136,7 @@ watch(
   () => props.open,
   () => {
     form.value.address = '';
-    showPicker.value = false;
+    isPickerShown.value = false;
     votingPower.value = null;
     hasError.value = false;
     isLoading.value = false;
@@ -148,11 +148,11 @@ watch(
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Test {{ strategies.length > 1 ? 'strategies' : 'strategy' }}</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
@@ -163,7 +163,7 @@ watch(
         />
       </template>
     </template>
-    <template v-if="showPicker">
+    <template v-if="isPickerShown">
       <PickerContact
         :loading="false"
         :search-value="searchValue"
@@ -175,7 +175,7 @@ watch(
         v-model="form"
         :definition="DEFINITION"
         :error="formErrors"
-        @pick="showPicker = true"
+        @pick="isPickerShown = true"
       />
       <MessageErrorFetchPower
         v-if="hasError"

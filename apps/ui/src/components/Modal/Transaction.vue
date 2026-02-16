@@ -28,7 +28,7 @@ const props = defineProps<{
 const emit = defineEmits(['add', 'close']);
 
 const loading = ref(false);
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const pickerField: Ref<string | null> = ref(null);
 const searchValue = ref('');
 const ignoreFormUpdates = ref(true);
@@ -120,12 +120,12 @@ const formValid = computed(
 );
 
 function handlePickerClick(field: string) {
-  showPicker.value = true;
+  isPickerShown.value = true;
   pickerField.value = field;
 }
 
 function handlePickerSelect(value: string) {
-  showPicker.value = false;
+  isPickerShown.value = false;
 
   if (!pickerField.value) return;
 
@@ -226,7 +226,7 @@ watchImmediate(
   open => {
     if (!open) return;
 
-    showPicker.value = false;
+    isPickerShown.value = false;
 
     if (props.initialState) {
       form.to = props.initialState.recipient;
@@ -271,18 +271,18 @@ watchEffect(async () => {
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Add transaction'" />
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
         <UiModalSearchInput v-model="searchValue" />
       </template>
     </template>
-    <template v-if="showPicker">
+    <template v-if="isPickerShown">
       <PickerContact
         :loading="false"
         :search-value="searchValue"
@@ -292,7 +292,7 @@ watchEffect(async () => {
     </template>
     <div
       v-show="
-        !showPicker /* has to use v-show so dirty flag works, need to find a better way to handle it */
+        !isPickerShown /* has to use v-show so dirty flag works, need to find a better way to handle it */
       "
       class="s-box p-4"
     >
@@ -349,7 +349,7 @@ watchEffect(async () => {
         />
       </div>
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"
         >Confirm</UiButton
       >

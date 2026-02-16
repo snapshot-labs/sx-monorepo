@@ -40,14 +40,14 @@ const formValidator = computed(() =>
 
 const form = reactive(clone(DEFAULT_FORM_STATE));
 const formValidated = ref(false);
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const searchValue = ref('');
 const formErrors = ref({} as Record<string, any>);
 
 watch(
   () => props.open,
   () => {
-    showPicker.value = false;
+    isPickerShown.value = false;
 
     if (props.initialState) {
       form.controller = props.initialState.controller;
@@ -69,11 +69,11 @@ watchEffect(async () => {
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Change controller</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
@@ -83,13 +83,13 @@ watchEffect(async () => {
         />
       </template>
     </template>
-    <template v-if="showPicker">
+    <template v-if="isPickerShown">
       <PickerContact
         :loading="false"
         :search-value="searchValue"
         @pick="
           form.controller = $event;
-          showPicker = false;
+          isPickerShown = false;
         "
       />
     </template>
@@ -99,10 +99,10 @@ watchEffect(async () => {
         :definition="controllerDefinition"
         :error="formErrors.delegatee"
         :required="true"
-        @pick="showPicker = true"
+        @pick="isPickerShown = true"
       />
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton
         class="w-full"
         :disabled="Object.keys(formErrors).length > 0"

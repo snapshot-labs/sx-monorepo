@@ -32,7 +32,7 @@ const emit = defineEmits<{
 }>();
 
 const network: Ref<ChainId> = ref('');
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const isDefinitionLoading = ref(false);
 const pickerField: Ref<string | null> = ref(null);
 const searchValue = ref('');
@@ -86,12 +86,12 @@ const formErrors = computed(() => {
 });
 
 function handlePickerClick(field: string) {
-  showPicker.value = true;
+  isPickerShown.value = true;
   pickerField.value = field;
 }
 
 function handlePickerSelect(value: string) {
-  showPicker.value = false;
+  isPickerShown.value = false;
 
   if (!pickerField.value) return;
 
@@ -150,7 +150,7 @@ function cloneInitialState(state: any) {
 watch(
   () => props.open,
   () => {
-    showPicker.value = false;
+    isPickerShown.value = false;
 
     if (props.initialNetwork) {
       network.value = props.initialNetwork;
@@ -172,11 +172,11 @@ watch(
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Edit strategy</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
@@ -187,7 +187,7 @@ watch(
       <UiLoading class="m-auto" />
     </div>
     <PickerContact
-      v-else-if="showPicker"
+      v-else-if="isPickerShown"
       :loading="false"
       :search-value="searchValue"
       @pick="handlePickerSelect"
@@ -229,7 +229,7 @@ watch(
         :error="formErrors.rawParams"
       />
     </div>
-    <template v-if="!showPicker && !isDefinitionLoading" #footer>
+    <template v-if="!isPickerShown && !isDefinitionLoading" #footer>
       <UiButton
         class="w-full"
         :disabled="

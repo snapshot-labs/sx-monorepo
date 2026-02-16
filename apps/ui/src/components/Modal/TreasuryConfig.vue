@@ -19,7 +19,7 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataTreasury> = ref(clone(DEFAULT_FORM_STATE));
 
@@ -80,7 +80,7 @@ async function handleSubmit() {
 watch(
   () => props.open,
   () => {
-    showPicker.value = false;
+    isPickerShown.value = false;
 
     if (props.initialState) {
       form.value = clone(props.initialState);
@@ -95,11 +95,11 @@ watch(
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Add treasury'" />
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
@@ -111,13 +111,13 @@ watch(
       </template>
     </template>
     <PickerContact
-      v-if="showPicker"
+      v-if="isPickerShown"
       :loading="false"
       :search-value="searchValue"
       @pick="
         value => {
           form.address = value;
-          showPicker = false;
+          isPickerShown = false;
         }
       "
     />
@@ -126,7 +126,7 @@ watch(
         :model-value="form"
         :error="formErrors"
         :definition="definition"
-        @pick="showPicker = true"
+        @pick="isPickerShown = true"
       />
     </div>
     <template #footer>

@@ -22,7 +22,7 @@ const emit = defineEmits<{
 
 const uiStore = useUiStore();
 
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const searchValue = ref('');
 const contractAddress = ref('');
 const isSubmitting = ref(false);
@@ -77,7 +77,7 @@ async function handleSubmit() {
 watch(
   () => props.open,
   () => {
-    showPicker.value = false;
+    isPickerShown.value = false;
     contractAddress.value = '';
   }
 );
@@ -87,11 +87,11 @@ watch(
   <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Add Custom Strategy</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
@@ -102,13 +102,13 @@ watch(
       </template>
     </template>
     <PickerContact
-      v-if="showPicker"
+      v-if="isPickerShown"
       :loading="false"
       :search-value="searchValue"
       @pick="
         value => {
           contractAddress = value;
-          showPicker = false;
+          isPickerShown = false;
         }
       "
     />
@@ -117,10 +117,10 @@ watch(
         v-model="contractAddress"
         :definition="definition"
         :error="formErrors.contractAddress"
-        @pick="showPicker = true"
+        @pick="isPickerShown = true"
       />
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton
         :loading="isSubmitting"
         class="w-full"
