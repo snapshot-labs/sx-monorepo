@@ -370,7 +370,7 @@ onBeforeUnmount(() => destroyAudio());
               <UiPill
                 v-if="proposal.author.role"
                 class="py-0.5"
-                v-text="proposal.author.role"
+                :label="proposal.author.role"
               />
             </div>
             <span class="text-skin-text text-sm">

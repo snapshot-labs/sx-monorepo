@@ -49,11 +49,11 @@ const availableConnectors = computed(() => {
     <UiPill
       v-if="connector.id === recentConnector"
       variant="primary"
-      v-text="'Recent'"
+      label="Recent"
     />
     <UiPill
       v-else-if="connector.type === 'injected'"
-      v-text="'Detected'"
+      label="Detected"
     />
   </UiButton>
 </template>

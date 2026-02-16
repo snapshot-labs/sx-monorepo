@@ -1,12 +1,13 @@
 <script setup lang="ts">
 defineProps<{
+  label?: string | number;
   variant?: 'accent' | 'primary';
 }>();
 </script>
 
 <template>
   <span class="pill" :class="variant">
-    <slot />
+    <slot>{{ label }}</slot>
   </span>
 </template>
 

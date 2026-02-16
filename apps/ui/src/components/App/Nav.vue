@@ -369,7 +369,7 @@ const navigationItems = computed(() =>
           class="inline-block"
         ></component>
         <span class="grow" v-text="item.name" />
-        <UiPill v-if="item.count" v-text="item.count" />
+        <UiPill v-if="item.count" :label="item.count" />
       </AppLink>
     </div>
   </div>

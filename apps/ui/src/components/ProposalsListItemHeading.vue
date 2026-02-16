@@ -104,7 +104,7 @@ const hasVoted = computed(
           <UiPill
             v-if="proposal.author.role"
             class="py-0.5"
-            v-text="proposal.author.role"
+            :label="proposal.author.role"
           />
         </AppLink>
       </template>

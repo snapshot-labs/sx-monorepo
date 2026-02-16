@@ -47,7 +47,7 @@ const emit = defineEmits<{
           v-if="item.tag"
           variant="accent"
           class="py-0.5"
-          v-text="item.tag"
+          :label="item.tag"
         />
       </div>
       <div

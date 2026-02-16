@@ -215,7 +215,7 @@ onMounted(() => {
         />
         <div class="truncate grow flex items-center gap-2">
           Others
-          <UiPill v-text="_n(otherResultsSummary.count, 'compact')" />
+          <UiPill :label="_n(otherResultsSummary.count, 'compact')" />
         </div>
         <div
           class="group-hover:hidden"
