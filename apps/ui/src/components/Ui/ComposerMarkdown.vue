@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { _n } from '@/helpers/utils';
+
 const model = defineModel<string>({ required: true });
 
 const props = defineProps<{
