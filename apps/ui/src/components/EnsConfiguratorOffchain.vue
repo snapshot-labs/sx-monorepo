@@ -149,7 +149,6 @@ function handleSelect(value: string) {
                   be reused to create a new space.
                   <AppLink
                     to="https://docs.snapshot.box/faq/im-a-snapshot-user/space-settings#why-cant-i-create-a-new-space-with-my-previous-deleted-space-ens-name"
-                    hide-external-icon
                     class="text-skin-link"
                   >
                     Learn more

@@ -83,7 +83,11 @@ onMounted(() => load());
                 />
               </div>
               <div v-if="app.form">
-                <AppLink :to="app.form" class="text-skin-text">
+                <AppLink
+                  :to="app.form"
+                  hide-external-icon
+                  class="text-skin-text"
+                >
                   <IH-pencil class="inline-block mr-1" /> Edit this page
                 </AppLink>
               </div>

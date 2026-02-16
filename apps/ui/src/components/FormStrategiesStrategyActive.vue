@@ -75,6 +75,7 @@ const isOffchainNetwork = computed(() => {
         <AppLink
           v-if="!hasAddress"
           :to="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
+          hide-external-icon
           class="text-skin-link"
         >
           <IH-information-circle />

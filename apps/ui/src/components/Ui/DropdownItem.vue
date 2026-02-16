@@ -9,6 +9,7 @@ defineProps<{
 <template>
   <MenuItem v-slot="{ active }" :disabled="disabled" as="template">
     <AppLink
+      hide-external-icon
       class="w-full px-3 py-2 text-[17px] whitespace-nowrap flex items-center gap-2"
       :class="{
         'opacity-80': active,
