@@ -172,7 +172,9 @@ watch(
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="'Add delegation'" />
+      <h3>
+        {{ props.initialState ? 'Edit delegation' : 'Add delegation' }}
+      </h3>
       <template v-if="isPickerShown">
         <button
           type="button"
