@@ -151,7 +151,6 @@ watch(
         :to="getGenericExplorerUrl(chainId, txId, 'transaction') ?? undefined"
       >
         View on explorer
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </AppLink>
       <div
         v-else-if="step === 'fail'"

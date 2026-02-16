@@ -58,11 +58,8 @@ const emit = defineEmits<{
 
       <div v-if="showVerifierLink" class="pt-2">
         You can use
-        <AppLink
-          to="https://github.com/snapshot-labs/hash-verifier"
-          class="inline-flex items-center"
-        >
-          hash-verifier <IH-arrow-sm-right class="inline-block -rotate-45" />
+        <AppLink to="https://github.com/snapshot-labs/hash-verifier">
+          hash-verifier
         </AppLink>
         to validate the data.
       </div>

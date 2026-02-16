@@ -75,7 +75,6 @@ const baseNetwork = computed(() =>
               class="mr-2 rounded-sm"
             />
             {{ shorten(strategy.token) }}
-            <IH-arrow-sm-right class="ml-1 -rotate-45" />
           </AppLink>
           <AppLink
             v-if="strategy.swapLink"
@@ -83,7 +82,6 @@ const baseNetwork = computed(() =>
             class="flex items-center text-skin-text"
           >
             Buy
-            <IH-arrow-sm-right class="ml-1 -rotate-45" />
           </AppLink>
         </div>
         <div v-else />

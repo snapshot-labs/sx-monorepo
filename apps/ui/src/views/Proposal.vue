@@ -234,9 +234,8 @@ watchEffect(() => {
                   class="inline-block"
                 />
               </AppLink>
-              <AppLink v-else :to="discussion" class="flex items-center">
+              <AppLink v-else :to="discussion">
                 <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
-                <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
               </AppLink>
             </template>
             <template v-if="boostCount > 0">
@@ -342,6 +341,7 @@ watchEffect(() => {
                         votingPower?.votingPowers?.every(v => v.value === 0n)
                       "
                       :to="`${HELPDESK_URL}/en/articles/9566904-why-do-i-have-0-voting-power`"
+                      hide-external-icon
                     >
                       <IH-question-mark-circle />
                     </AppLink>

@@ -99,21 +99,18 @@ onMounted(() => load());
                 <UiEyebrow>Website</UiEyebrow>
                 <AppLink :to="app.website">
                   {{ simplifyURL(app.website) }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </AppLink>
               </div>
               <div v-if="app.x">
                 <UiEyebrow>X (Twitter)</UiEyebrow>
                 <AppLink :to="`https://x.com/${app.x}`">
                   {{ app.x }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </AppLink>
               </div>
               <div v-if="app.github">
                 <UiEyebrow>Source code</UiEyebrow>
                 <AppLink :to="app.github">
                   {{ simplifyURL(app.github) }}
-                  <IH-arrow-sm-right class="inline-block -rotate-45" />
                 </AppLink>
               </div>
             </div>

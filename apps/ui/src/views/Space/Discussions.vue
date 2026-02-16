@@ -34,7 +34,6 @@ watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
         <UiButton :to="discussionsUrl">
           <IC-discourse class="size-[22px] shrink-0" />
           Join the discussion
-          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
         </UiButton>
       </div>
     </div>

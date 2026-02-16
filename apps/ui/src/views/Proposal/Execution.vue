@@ -23,10 +23,9 @@ defineProps<{
       the new interface. You can view execution details on the
       <AppLink
         :to="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-        class="inline-flex items-center font-bold"
+        class="font-bold"
       >
         previous interface
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </AppLink>
       .
     </UiAlert>

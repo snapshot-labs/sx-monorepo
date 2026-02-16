@@ -83,7 +83,6 @@ watch(
     <div v-if="txId" class="flex items-center justify-center p-4 pt-3 -mt-2">
       <AppLink :to="network.helpers.getExplorerUrl(txId, 'transaction')">
         View on explorer
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </AppLink>
     </div>
   </UiModal>

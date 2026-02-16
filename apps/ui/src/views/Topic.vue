@@ -68,7 +68,6 @@ onMounted(async () => {
         <UiButton :to="discussion" class="w-full">
           <IC-discourse class="size-[22px] shrink-0" />
           Join the discussion
-          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
         </UiButton>
       </div>
     </div>
@@ -123,7 +122,6 @@ onMounted(async () => {
         <UiButton :to="discussion" class="w-full">
           <IC-discourse class="size-[22px] shrink-0" />
           Reply
-          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
         </UiButton>
       </div>
     </div>

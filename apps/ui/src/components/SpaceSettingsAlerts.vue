@@ -88,10 +88,8 @@ const hasAnyAlerts = computed(
         deprecated and no longer supported.
         <AppLink
           to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
-          class="inline-flex items-center"
         >
           See migration guide
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
       <UiAlert v-if="disabledStrategies.length" type="error">
@@ -100,10 +98,9 @@ const hasAnyAlerts = computed(
         no longer available.
         <AppLink
           to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
-          class="inline-flex items-center font-semibold text-rose-500"
+          class="font-semibold text-rose-500"
         >
           See migration guide
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
       <UiAlert v-if="unsupportedProOnlyStrategies.length" type="error">
@@ -119,10 +116,8 @@ const hasAnyAlerts = computed(
         or
         <AppLink
           to="https://help.snapshot.box/en/articles/11568442-migrating-from-delegation-to-with-delegation-strategy"
-          class="inline-flex items-center"
         >
           follow migration guide
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
       <UiAlert v-if="unsupportedProOnlyNetworks.length" type="error">
@@ -137,10 +132,8 @@ const hasAnyAlerts = computed(
         or
         <AppLink
           to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
-          class="inline-flex items-center"
         >
           change to a premium network
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
     </template>
@@ -165,10 +158,8 @@ const hasAnyAlerts = computed(
         or
         <AppLink
           to="https://help.snapshot.box/en/articles/11661865-migrating-from-using-a-whitelabel"
-          class="inline-flex items-center"
         >
           follow migration guide
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </UiAlert>
     </template>

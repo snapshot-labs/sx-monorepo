@@ -206,6 +206,7 @@ onMounted(() => emit('errors', formErrors.value));
                 Preview only available on
                 <AppLink
                   :to="`https://${previewDomain}/#/settings/whitelabel`"
+                  hide-external-icon
                   >{{ previewDomain }}</AppLink
                 >
               </div>

@@ -262,7 +262,6 @@ onMounted(() => deploy());
           </button>
           <AppLink
             v-if="txIds[step.id]"
-            class="inline-flex items-center"
             :to="
               getStepNetwork(step).helpers.getExplorerUrl(
                 txIds[step.id],
@@ -271,7 +270,6 @@ onMounted(() => deploy());
             "
           >
             {{ shorten(txIds[step.id]) }}
-            <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
           </AppLink>
         </div>
       </div>

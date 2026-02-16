@@ -78,7 +78,6 @@ function deleteMember(index: number) {
             class="mr-2 !rounded"
           />
           <UiAddress :address="member.address" />
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </div>
       <div class="flex gap-3">

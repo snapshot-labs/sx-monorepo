@@ -65,7 +65,6 @@ function prettySymbolsList(symbols: string[]): string {
         :to="LINKS[offchainStrategy.name].url"
       >
         {{ LINKS[offchainStrategy.name].label }}
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
       </AppLink>
     </template>
     <template v-else>

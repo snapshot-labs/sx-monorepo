@@ -35,7 +35,6 @@ function handleSave(value: string) {
             class="mr-2 !rounded"
           />
           <UiAddress :address="controller" />
-          <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
       </div>
       <button

@@ -152,7 +152,6 @@ function handleSelect(value: string) {
                     class="text-skin-link"
                   >
                     Learn more
-                    <IH-arrow-sm-right class="-rotate-45 inline" />
                   </AppLink>
                 </div>
               </div>
@@ -169,8 +168,7 @@ function handleSelect(value: string) {
           No domain names found for the current wallet.
         </UiMessage>
         <AppLink :to="ensUrl" class="inline-block">
-          Register a new ENS name
-          <IH-arrow-sm-right class="-rotate-45 inline" /> </AppLink
+          Register a new ENS name </AppLink
         >, or
         <button class="text-skin-link" @click="isModalEnsNameOpen = true">
           attach a custom domain</button

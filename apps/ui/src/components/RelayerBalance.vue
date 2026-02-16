@@ -33,6 +33,7 @@ const {
       <template v-else>
         <AppLink
           :to="network.helpers.getExplorerUrl(relayerInfo.address, 'address')"
+          hide-external-icon
           class="flex items-center gap-3 truncate"
         >
           <UiBadgeNetwork :chain-id="network.chainId" class="hidden sm:block">

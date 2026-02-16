@@ -110,14 +110,11 @@ watchEffect(() =>
             <UiEyebrow class="text-skin-text mb-2">Source</UiEyebrow>
             <AppLink
               :to="SOURCE_ICONS[statement.source].link"
-              class="flex items-center space-x-1"
+              class="space-x-1"
             >
               <component
                 :is="SOURCE_ICONS[statement.source].icon"
                 class="max-h-[25px] max-w-[85px] w-auto text-skin-link"
-              />
-              <IH-arrow-sm-right
-                class="-rotate-45 text-skin-link relative top-[1px]"
               />
             </AppLink>
           </div>
