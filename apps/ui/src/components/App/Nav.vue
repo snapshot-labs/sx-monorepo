@@ -6,7 +6,7 @@ const { navigationConfig } = useNavigation();
   <div class="border-r bg-skin-bg">
     <div class="py-4 no-scrollbar overscroll-contain overflow-auto">
       <AppLink
-        v-for="(item, key) in navigationConfig?.items"
+        v-for="(item, key) in navigationConfig?.items ?? {}"
         :key="key"
         :to="item.link"
         class="px-4 space-x-2 flex items-center"
