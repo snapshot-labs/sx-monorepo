@@ -1,4 +1,4 @@
-import { NavContext, NavigationConfig } from '.';
+import { NavigationConfig, NavParams } from '.';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
@@ -7,13 +7,13 @@ import IHUser from '~icons/heroicons-outline/user';
 
 export default {
   routeName: 'my',
-  getConfig(ctx: NavContext): NavigationConfig {
+  getConfig({ account, route, unreadCount }: NavParams): NavigationConfig {
     return {
       items: {
         home: {
           name: 'Home',
           icon: IHHome,
-          hidden: !ctx.web3.account
+          hidden: !account
         },
         explore: {
           name: 'Explore',
@@ -21,24 +21,23 @@ export default {
         },
         notifications: {
           name: 'Notifications',
-          count: ctx.notificationsStore.unreadNotificationsCount,
+          count: unreadCount,
           icon: IHBell,
-          hidden: !ctx.web3.account
+          hidden: !account
         },
         user: {
           name: 'Profile',
-          link: { name: 'user', params: { user: ctx.web3.account } },
+          link: { name: 'user', params: { user: account } },
           icon: IHUser,
-          hidden: !ctx.web3.account,
+          hidden: !account,
           active:
-            (ctx.route.name as string) === 'user' &&
-            ctx.route.params.user === ctx.web3.account
+            (route.name as string) === 'user' && route.params.user === account
         },
         settings: {
           name: 'Settings',
           link: { name: 'settings-spaces' },
           icon: IHCog,
-          hidden: !ctx.web3.account
+          hidden: !account
         }
       }
     };

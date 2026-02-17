@@ -56,7 +56,7 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
-const { hasAppNav } = useAppNav();
+const { hasAppNav } = useNavigation();
 
 const hasSidebar = computed(() => !isStandaloneLayout.value);
 

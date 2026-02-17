@@ -1,7 +1,7 @@
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
-import { NavContext, NavigationConfig, NavigationItem } from '.';
+import { NavigationConfig, NavigationItem, NavParams } from '.';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -12,14 +12,14 @@ import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHUserGroup from '~icons/heroicons-outline/user-group';
 
 function getSettingsRoute(
-  ctx: NavContext,
+  params: NavParams,
   tab: string,
   { name, hidden }: { name: string; hidden?: boolean }
 ): NavigationItem {
   return {
     name,
     link: { name: 'space-settings', params: { tab } },
-    active: ctx.route.params.tab === tab,
+    active: params.route.params.tab === tab,
     hidden
   };
 }
@@ -51,15 +51,15 @@ const SETTINGS_TABS: {
   { key: 'billing', name: 'Billing', offchainOnly: true }
 ];
 
-function getSpaceSettingsConfig(ctx: NavContext): NavigationConfig {
-  const isOffchainNetwork = ctx.space
-    ? offchainNetworks.includes(ctx.space.network)
+function getSpaceSettingsConfig(params: NavParams): NavigationConfig {
+  const isOffchainNetwork = params.space
+    ? offchainNetworks.includes(params.space.network)
     : false;
 
   const tabItems = Object.fromEntries(
     SETTINGS_TABS.map(({ key, tab, name, offchainOnly, onchainOnly }) => [
       key,
-      getSettingsRoute(ctx, tab ?? key, {
+      getSettingsRoute(params, tab ?? key, {
         name,
         hidden:
           (offchainOnly && !isOffchainNetwork) ||
@@ -82,48 +82,48 @@ function getSpaceSettingsConfig(ctx: NavContext): NavigationConfig {
   };
 }
 
-function canSeeSettings(ctx: NavContext): boolean {
+export function canSeeSettings(params: NavParams): boolean {
   const isOwner =
-    ctx.ensOwner && compareAddresses(ctx.ensOwner, ctx.web3.account);
-  if (ctx.isController || isOwner) return true;
+    params.ensOwner && compareAddresses(params.ensOwner, params.account);
+  if (params.isController || isOwner) return true;
 
-  if (ctx.space?.additionalRawData?.type === 'offchain') {
-    const admins = ctx.space.additionalRawData.admins.map((admin: string) =>
+  if (params.space?.additionalRawData?.type === 'offchain') {
+    const admins = params.space.additionalRawData.admins.map((admin: string) =>
       admin.toLowerCase()
     );
 
-    return admins.includes(ctx.web3.account.toLowerCase());
+    return admins.includes(params.account.toLowerCase());
   }
 
   return false;
 }
 
-function getSpaceMainConfig(ctx: NavContext): NavigationConfig {
+function getSpaceMainConfig(params: NavParams): NavigationConfig {
   const items: Record<string, NavigationItem> = {
     overview: { name: 'Overview', icon: IHGlobeAlt },
     proposals: { name: 'Proposals', icon: IHNewspaper },
     leaderboard: { name: 'Leaderboard', icon: IHUserGroup }
   };
 
-  if (ctx.space?.delegations && ctx.space.delegations.length > 0) {
+  if (params.space?.delegations && params.space.delegations.length > 0) {
     items.delegates = { name: 'Delegates', icon: IHLightningBolt };
   }
 
-  if (SPACES_DISCUSSIONS[`${ctx.networkId}:${ctx.address}`]) {
+  if (SPACES_DISCUSSIONS[`${params.networkId}:${params.address}`]) {
     items.discussions = {
       name: 'Discussions',
       icon: IHAnnotation,
       active: ['space-discussions', 'space-discussions-topic'].includes(
-        ctx.route.name as string
+        params.route.name as string
       )
     };
   }
 
-  if (ctx.space?.treasuries?.length) {
+  if (params.space?.treasuries?.length) {
     items.treasury = { name: 'Treasury', icon: IHCash };
   }
 
-  if (canSeeSettings(ctx)) {
+  if (canSeeSettings(params)) {
     items.settings = {
       name: 'Settings',
       icon: IHCog,
@@ -136,10 +136,10 @@ function getSpaceMainConfig(ctx: NavContext): NavigationConfig {
 
 export default {
   routeName: 'space',
-  getConfig(ctx: NavContext): NavigationConfig {
-    if (ctx.route.name === 'space-settings') {
-      return getSpaceSettingsConfig(ctx);
+  getConfig(params: NavParams): NavigationConfig {
+    if (params.route.name === 'space-settings') {
+      return getSpaceSettingsConfig(params);
     }
-    return getSpaceMainConfig(ctx);
+    return getSpaceMainConfig(params);
   }
 };
