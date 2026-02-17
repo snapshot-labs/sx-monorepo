@@ -202,7 +202,6 @@ router.afterEach(() => {
         ]"
       />
       <AppTopnav
-        :has-app-nav="hasAppNav"
         :class="{ hidden: !hasTopNav, 'maximum:border-l': isStandaloneLayout }"
         class="maximum:border-r"
       >
