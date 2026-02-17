@@ -7,7 +7,10 @@ defineProps<{
 
 <template>
   <div class="max-w-[592px]">
-    <div v-if="title || description || $slots.actions" class="mb-4">
+    <div
+      v-if="title || description || $slots.actions || $slots.description"
+      class="mb-4"
+    >
       <div
         v-if="$slots.actions || title"
         class="flex items-center justify-between gap-2"

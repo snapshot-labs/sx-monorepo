@@ -140,72 +140,70 @@ watchEffect(async () => {
 <template>
   <div
     v-bind="$attrs"
-    class="!h-auto"
+    class="!h-auto p-4"
     :style="`min-height: calc(100vh - ${bottomToolbarHeight + 73}px)`"
   >
-    <div class="p-4 max-w-[592px] space-y-4">
-      <UiLoading
-        v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"
-      />
-      <div
-        v-else-if="isFeedsListError || isSubscriptionError"
-        class="flex flex-col gap-3 items-start"
-      >
-        <UiAlert type="error">
-          There was an error fetching your subscription details. Please try
-          again.
-        </UiAlert>
-        <UiButton @click="refetchDetails"> <IH-refresh />Retry </UiButton>
-      </div>
-      <UiContainerSettings
-        v-else-if="status === 'NOT_SUBSCRIBED'"
-        title="Receive email notifications"
-        description="Stay updated with the latest and important updates directly on your inbox."
-        class="s-box"
-      >
+    <UiLoading
+      v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"
+    />
+    <div
+      v-else-if="isFeedsListError || isSubscriptionError"
+      class="max-w-[592px] flex flex-col gap-3 items-start"
+    >
+      <UiAlert type="error">
+        There was an error fetching your subscription details. Please try again.
+      </UiAlert>
+      <UiButton @click="refetchDetails"> <IH-refresh />Retry </UiButton>
+    </div>
+    <UiContainerSettings
+      v-else-if="status === 'NOT_SUBSCRIBED'"
+      title="Receive email notifications"
+      description="Stay updated with the latest and important updates directly on your inbox."
+    >
+      <div class="s-box">
         <UiInputString
           v-model="form.email"
           :error="formErrors.email"
           :definition="SUBSCRIBE_DEFINITION.properties.email"
         />
-        <UiButton disabled @click="handleCreateSubscriptionClick">
-          Subscribe now
-        </UiButton>
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="status === 'UNVERIFIED'"
-        title="Confirm your email"
-      >
-        <template #description>
-          We've sent an email to your email address.
-          <br />
-          Please check your inbox and follow the instructions to complete the
-          process.
-        </template>
-        <UiButton @click="handleResendConfirmationClick">
-          Resend confirmation email
-        </UiButton>
-      </UiContainerSettings>
-      <UiContainerSettings
-        v-else-if="status === 'VERIFIED'"
-        title="Email notifications"
-        description="Choose the notifications you'd like to receive - and those you don't."
-      >
-        <div class="space-y-3 mb-4">
-          <UiSwitch
-            v-for="(feedType, key) in feedsList"
-            :key="key"
-            v-model="feeds[key]"
-            class="gap-2.5 !items-start"
-          >
-            <div class="space-y-1 leading-[18px]">
-              <h4 class="text-base font-normal" v-text="feedType.name" />
-              <div class="text-skin-text" v-text="feedType.description" />
-            </div>
-          </UiSwitch>
-        </div>
-      </UiContainerSettings>
-    </div>
+      </div>
+      <UiButton disabled @click="handleCreateSubscriptionClick">
+        Subscribe now
+      </UiButton>
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="status === 'UNVERIFIED'"
+      title="Confirm your email"
+    >
+      <template #description>
+        We've sent an email to your email address.
+        <br />
+        Please check your inbox and follow the instructions to complete the
+        process.
+      </template>
+      <UiButton @click="handleResendConfirmationClick">
+        Resend confirmation email
+      </UiButton>
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="status === 'VERIFIED'"
+      title="Email notifications"
+      description="Choose the notifications you'd like to receive - and those you don't."
+    >
+      <div class="space-y-3 mb-4">
+        <UiSwitch
+          v-for="(feedType, key) in feedsList"
+          :key="key"
+          v-model="feeds[key]"
+          class="gap-2.5 !items-start"
+        >
+          <div class="space-y-1 leading-[18px]">
+            <h4 class="text-base font-normal" v-text="feedType.name" />
+            <div class="text-skin-text" v-text="feedType.description" />
+          </div>
+        </UiSwitch>
+      </div>
+    </UiContainerSettings>
   </div>
   <SettingsToolbar
     v-if="status === 'VERIFIED' && isFeedsModified"
