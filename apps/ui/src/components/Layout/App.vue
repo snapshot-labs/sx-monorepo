@@ -56,11 +56,7 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
-const hasAppNav = computed(
-  () =>
-    ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
-);
+const { hasAppNav } = useAppNav();
 
 const hasSidebar = computed(() => !isStandaloneLayout.value);
 
@@ -206,7 +202,6 @@ router.afterEach(() => {
         ]"
       />
       <AppTopnav
-        :has-app-nav="hasAppNav"
         :class="{ hidden: !hasTopNav, 'maximum:border-l': isStandaloneLayout }"
         class="maximum:border-r"
       >

@@ -38,6 +38,8 @@ export type NavProvider = {
 
 const providers: NavProvider[] = [space, settings, my];
 
+export const NAV_ROUTE_NAMES = providers.map(p => p.routeName);
+
 export function getNavConfig(
   routeName: string,
   ctx: NavContext
