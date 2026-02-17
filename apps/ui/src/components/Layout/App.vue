@@ -58,7 +58,7 @@ const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const hasAppNav = computed(
   () =>
-    ['space', 'my', 'settings', 'pro'].includes(
+    ['space', 'my', 'settings'].includes(
       String(route.matched[0]?.name)
     ) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
