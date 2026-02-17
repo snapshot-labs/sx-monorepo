@@ -1,12 +1,12 @@
 import { metadataNetwork } from '@/networks';
-import { NavigationConfig, NavParams } from '.';
+import { NavigationConfig, NavContext } from '.';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHStop from '~icons/heroicons-outline/stop';
 import IHUsers from '~icons/heroicons-outline/users';
 
 export default {
   routeName: 'settings',
-  getConfig({ isWhiteLabel }: NavParams): NavigationConfig {
+  getConfig({ isWhiteLabel }: NavContext): NavigationConfig {
     return {
       items: {
         spaces: {
