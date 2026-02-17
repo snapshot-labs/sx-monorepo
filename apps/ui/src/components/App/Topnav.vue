@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { getCacheHash, shorten } from '@/helpers/utils';
 
-const { hasAppNav } = useNavigation();
+defineProps<{
+  hasAppNav: boolean;
+}>();
 
 const route = useRoute();
 const router = useRouter();
