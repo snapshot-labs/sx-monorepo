@@ -55,6 +55,7 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
     v-if="isExternalLink(props.to)"
     :href="resolveToUrl(props.to)"
     target="_blank"
+    rel="noopener noreferrer"
     @click="$emit('click')"
   >
     <slot />
