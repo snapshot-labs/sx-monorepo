@@ -6,8 +6,10 @@ async function startVerification(context: VerificationContext): Promise<void> {
 
   try {
     const result = await context.rpcCall<{ url: string }>('generate_link', {
+      network: context.network,
       user: context.web3Account.value,
-      provider: context.providerId
+      provider: context.providerId,
+      auth: context.auth
     });
 
     context.verificationUrl.value = result.url;
