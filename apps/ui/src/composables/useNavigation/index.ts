@@ -1,5 +1,5 @@
 import { FunctionalComponent } from 'vue';
-import { RouteLocationNormalizedLoaded } from 'vue-router';
+import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
@@ -13,7 +13,7 @@ export type NavigationItem = {
   icon?: FunctionalComponent;
   count?: number;
   hidden?: boolean;
-  link?: any;
+  link?: RouteLocationRaw;
   active?: boolean;
 };
 
@@ -22,7 +22,7 @@ export type NavigationConfig = {
   items: Record<string, NavigationItem>;
 };
 
-export type NavParams = {
+export type NavContext = {
   route: RouteLocationNormalizedLoaded;
   account: string;
   unreadCount: number;
@@ -36,7 +36,7 @@ export type NavParams = {
 
 export type NavProvider = {
   routeName: string;
-  getConfig: (params: NavParams) => NavigationConfig;
+  getConfig: (context: NavContext) => NavigationConfig;
 };
 
 const providers: NavProvider[] = [space, settings, my];
@@ -48,7 +48,7 @@ const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
 function enrichNavigationItems(
   config: NavigationConfig,
   routeName: string,
-  route: { name: unknown }
+  route: Pick<RouteLocationNormalizedLoaded, 'name'>
 ): NavigationConfig {
   const items = Object.fromEntries(
     Object.entries(config.items)
