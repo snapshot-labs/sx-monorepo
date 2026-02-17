@@ -88,18 +88,14 @@ onMounted(async () => {
         class="border-b last:border-b-0 py-4"
       >
         <div class="flex gap-2.5 items-center">
-          <a
-            :href="reply.user_url"
-            target="_blank"
-            class="shrink-0 rounded-full"
-          >
+          <AppLink :to="reply.user_url" class="shrink-0 rounded-full">
             <img
               :src="reply.avatar_template"
               class="rounded-full inline-block bg-skin-border size-[32px]"
             />
-          </a>
+          </AppLink>
           <div class="flex flex-col leading-4 gap-1">
-            <a :href="reply.user_url" target="_blank" v-text="reply.name" />
+            <AppLink :to="reply.user_url">{{ reply.name }}</AppLink>
             <TimeRelative v-slot="{ relativeTime }" :time="reply.created_at">
               <span class="text-skin-text text-sm" v-text="relativeTime" />
             </TimeRelative>

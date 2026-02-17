@@ -68,27 +68,23 @@ watch(
       <div class="flex flex-col">
         <div class="my-2">Share your {{ type }}</div>
         <div class="flex space-x-2">
-          <a
+          <AppLink
             v-for="(socialNetwork, i) in SOCIAL_NETWORKS"
             :key="i"
             class="rounded-full leading-[100%] border text-skin-link size-[46px] flex items-center justify-center"
             :title="`Share on ${socialNetwork.name}`"
-            :href="getShareUrl(socialNetwork.id, type, shareable)"
-            target="_blank"
+            :to="getShareUrl(socialNetwork.id, type, shareable)"
           >
             <component :is="socialNetwork.icon" />
-          </a>
+          </AppLink>
         </div>
       </div>
     </div>
     <div v-if="txId" class="flex items-center justify-center p-4 pt-3 -mt-2">
-      <a
-        :href="network.helpers.getExplorerUrl(txId, 'transaction')"
-        target="_blank"
-      >
+      <AppLink :to="network.helpers.getExplorerUrl(txId, 'transaction')">
         View on explorer
         <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </a>
+      </AppLink>
     </div>
   </UiModal>
 </template>

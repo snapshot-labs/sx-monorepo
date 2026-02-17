@@ -47,14 +47,13 @@ const qrCodeUrl = computedAsync(async () => {
         <p class="text-sm text-skin-text">
           Scan with the ZKPassport app to continue
         </p>
-        <a
-          :href="verificationUrl"
-          target="_blank"
+        <AppLink
+          :to="verificationUrl"
           class="text-skin-link text-sm inline-flex items-center gap-1 hover:underline"
         >
           Open in app
           <IH-arrow-sm-right class="-rotate-45" />
-        </a>
+        </AppLink>
       </div>
     </div>
 

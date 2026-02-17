@@ -670,12 +670,11 @@ watchEffect(() => {
                   "
                 >
                   Please verify your space to publish more proposals.
-                  <a
-                    :href="VERIFIED_URL"
-                    target="_blank"
+                  <AppLink
+                    :to="VERIFIED_URL"
                     class="text-rose-500 dark:text-neutral-100 font-semibold"
                   >
-                    Verify space </a
+                    Verify space </AppLink
                   >.</span
                 >
                 <span v-else-if="spaceTypeForProposalLimit !== 'turbo'">
@@ -708,9 +707,9 @@ watchEffect(() => {
           </template>
           <div v-if="guidelines">
             <UiEyebrow class="mb-2">Guidelines</UiEyebrow>
-            <a :href="guidelines" target="_blank" class="block mb-4">
+            <AppLink :to="guidelines" class="block mb-4">
               <UiLinkPreview :url="guidelines" :show-default="true" />
-            </a>
+            </AppLink>
           </div>
           <UiInputString
             :key="proposalKey || ''"
