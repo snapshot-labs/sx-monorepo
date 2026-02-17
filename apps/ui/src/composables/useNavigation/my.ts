@@ -1,4 +1,4 @@
-import { NavigationConfig, NavContext } from '.';
+import { NavContext, NavigationConfig } from '.';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
