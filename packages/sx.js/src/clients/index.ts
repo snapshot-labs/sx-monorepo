@@ -12,3 +12,4 @@ export { EthereumTx as OpenZeppelinEthereumTx } from './openzeppelin/ethereum-tx
 export { EthereumSig as OpenZeppelinEthereumSig } from './openzeppelin/ethereum-sig';
 export { EthereumSig as OffchainEthereumSig } from './offchain/ethereum-sig';
 export { StarknetSig as OffchainStarknetSig } from './offchain/starknet-sig';
+export * as offchainActions from './offchain/actions';

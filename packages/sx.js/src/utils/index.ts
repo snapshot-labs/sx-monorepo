@@ -8,3 +8,5 @@ export * as starknetEnums from './starknet-enums';
 export * as strategies from './strategies';
 export * as storageProofs from './storage-proofs';
 export * as execution from './execution';
+export * as ens from './ens';
+export * as domains from './domains';
