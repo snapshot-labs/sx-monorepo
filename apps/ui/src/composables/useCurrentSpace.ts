@@ -9,6 +9,7 @@ export function useCurrentSpace() {
 
   const spaceId = ref<{ networkId: NetworkID; address: string } | null>(null);
   const isResolving = ref(false);
+  // Incrementing token used to ignore stale async resolution results.
   let resolveCounter = 0;
 
   const spaceParam = computed(() => route.params.space as string | undefined);
@@ -47,6 +48,9 @@ export function useCurrentSpace() {
               : result.address
           };
         }
+      } catch (err) {
+        console.error('useCurrentSpace: resolveName failed', err);
+        if (requestId === resolveCounter) spaceId.value = null;
       } finally {
         if (requestId === resolveCounter) {
           isResolving.value = false;
