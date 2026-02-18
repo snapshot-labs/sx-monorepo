@@ -55,7 +55,10 @@ export function useCurrentSpace() {
       }
 
       const [network, name] = param.split(':') as [NetworkID, string];
-      if (!name) return;
+      if (!name) {
+        resolvedName.value = null;
+        return;
+      }
 
       const result = await resolver.resolveName(name, network);
       if (result) {
