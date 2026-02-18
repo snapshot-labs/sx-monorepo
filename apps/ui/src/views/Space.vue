@@ -1,31 +1,19 @@
 <script setup lang="ts">
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
-import { useSpaceQuery } from '@/queries/spaces';
 
 const { setFavicon } = useFavicon();
-const { param } = useRouteParser('space');
-const { resolved, address, networkId } = useResolve(param);
+const { space, isPending } = useCurrentSpace();
 const { loadVotes } = useAccount();
 const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
 
-const { data: space, isPending } = useSpaceQuery({
-  networkId,
-  spaceId: address
-});
-
 watch(
-  [resolved, networkId, address, () => web3.value.account],
-  async ([resolved, networkId, address, account]) => {
-    if (!resolved || !networkId || !address) return;
-
-    if (account) {
-      loadVotes(networkId, [address]);
-    }
+  [space, () => web3.value.account],
+  ([space, account]) => {
+    if (!space || !account) return;
+    loadVotes(space.network, [space.id]);
   },
-  {
-    immediate: true
-  }
+  { immediate: true }
 );
 
 watchEffect(() => {
