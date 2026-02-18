@@ -10,6 +10,7 @@ export function useCurrentSpace() {
   const resolvedName = ref<{ networkId: NetworkID; address: string } | null>(
     null
   );
+  const isResolving = ref(false);
 
   const spaceParam = computed(() => route.params.space as string | undefined);
 
@@ -29,6 +30,11 @@ export function useCurrentSpace() {
     return spaceParam.value ? spaceParam.value.split(':')[1] : null;
   });
 
+  const needsResolution = computed(() => {
+    const name = address.value;
+    return !!name && !isAddress(name);
+  });
+
   const resolvedNetworkId = computed(
     () => resolvedName.value?.networkId ?? networkId.value
   );
@@ -37,14 +43,22 @@ export function useCurrentSpace() {
   );
 
   const { data: queriedSpace, isPending: isQueryPending } = useSpaceQuery({
-    networkId: () => (primarySpace.value ? null : resolvedNetworkId.value),
-    spaceId: () => (primarySpace.value ? null : resolvedAddress.value)
+    networkId: () =>
+      primarySpace.value || (needsResolution.value && !resolvedName.value)
+        ? null
+        : resolvedNetworkId.value,
+    spaceId: () =>
+      primarySpace.value || (needsResolution.value && !resolvedName.value)
+        ? null
+        : resolvedAddress.value
   });
 
   const space = computed(
     () => primarySpace.value ?? queriedSpace.value ?? null
   );
-  const isPending = computed(() => !primarySpace.value && isQueryPending.value);
+  const isPending = computed(
+    () => !primarySpace.value && (isResolving.value || isQueryPending.value)
+  );
 
   watch(
     spaceParam,
@@ -60,6 +74,7 @@ export function useCurrentSpace() {
         return;
       }
 
+      isResolving.value = true;
       const result = await resolver.resolveName(name, network);
       if (result) {
         resolvedName.value = {
@@ -71,6 +86,7 @@ export function useCurrentSpace() {
       } else {
         resolvedName.value = null;
       }
+      isResolving.value = false;
     },
     { immediate: true }
   );
