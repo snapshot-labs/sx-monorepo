@@ -109,11 +109,9 @@ function getNavigationConfig(
     };
   }
 
-  if (mainRoute === 'space') {
+  if (mainRoute === 'space' && space.value) {
     if (route.name === 'space-settings') {
-      const isOffchainNetwork = space.value
-        ? offchainNetworks.includes(space.value.network)
-        : false;
+      const isOffchainNetwork = offchainNetworks.includes(space.value.network);
 
       return {
         style: 'slim',
@@ -209,7 +207,7 @@ function getNavigationConfig(
           name: 'Leaderboard',
           icon: IHUserGroup
         },
-        ...(space.value?.delegations && space.value.delegations.length > 0
+        ...(space.value.delegations.length > 0
           ? {
               delegates: {
                 name: 'Delegates',
@@ -217,7 +215,7 @@ function getNavigationConfig(
               }
             }
           : undefined),
-        ...(SPACES_DISCUSSIONS[`${space.value!.network}:${space.value!.id}`]
+        ...(SPACES_DISCUSSIONS[`${space.value.network}:${space.value.id}`]
           ? {
               discussions: {
                 name: 'Discussions',
@@ -229,7 +227,7 @@ function getNavigationConfig(
               }
             }
           : undefined),
-        ...(space.value?.treasuries?.length
+        ...(space.value.treasuries?.length
           ? {
               treasury: {
                 name: 'Treasury',
