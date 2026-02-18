@@ -7,50 +7,59 @@ export function useCurrentSpace() {
   const { space: whiteLabelSpace } = useWhiteLabel();
   const route = useRoute();
 
-  const resolvedName = ref<{ networkId: NetworkID; address: string } | null>(
-    null
-  );
+  const spaceId = ref<{ networkId: NetworkID; address: string } | null>(null);
   const isResolving = ref(false);
+  let resolveCounter = 0;
 
   const spaceParam = computed(() => route.params.space as string | undefined);
-
   const primarySpace = computed<Space | null>(
     () => whiteLabelSpace.value ?? null
   );
 
-  const networkId = computed<NetworkID | null>(() => {
-    if (primarySpace.value) return primarySpace.value.network;
-    return spaceParam.value
-      ? (spaceParam.value.split(':')[0] as NetworkID)
-      : null;
-  });
+  watch(
+    spaceParam,
+    async param => {
+      const requestId = ++resolveCounter;
 
-  const address = computed<string | null>(() => {
-    if (primarySpace.value) return primarySpace.value.id;
-    return spaceParam.value ? spaceParam.value.split(':')[1] : null;
-  });
+      spaceId.value = null;
+      isResolving.value = false;
 
-  const needsResolution = computed(() => {
-    const name = address.value;
-    return !!name && !isAddress(name);
-  });
+      if (primarySpace.value || !param) return;
 
-  const resolvedNetworkId = computed(
-    () => resolvedName.value?.networkId ?? networkId.value
-  );
-  const resolvedAddress = computed(
-    () => resolvedName.value?.address ?? address.value
+      const [network, name] = param.split(':') as [NetworkID, string];
+      if (!name) return;
+
+      if (isAddress(name)) {
+        spaceId.value = { networkId: network, address: getAddress(name) };
+        return;
+      }
+
+      isResolving.value = true;
+      try {
+        const result = await resolver.resolveName(name, network);
+        if (requestId !== resolveCounter) return;
+
+        if (result) {
+          spaceId.value = {
+            networkId: result.networkId,
+            address: isAddress(result.address)
+              ? getAddress(result.address)
+              : result.address
+          };
+        }
+      } finally {
+        if (requestId === resolveCounter) {
+          isResolving.value = false;
+        }
+      }
+    },
+    { immediate: true }
   );
 
   const { data: queriedSpace, isPending: isQueryPending } = useSpaceQuery({
     networkId: () =>
-      primarySpace.value || (needsResolution.value && !resolvedName.value)
-        ? null
-        : resolvedNetworkId.value,
-    spaceId: () =>
-      primarySpace.value || (needsResolution.value && !resolvedName.value)
-        ? null
-        : resolvedAddress.value
+      primarySpace.value ? null : spaceId.value?.networkId ?? null,
+    spaceId: () => (primarySpace.value ? null : spaceId.value?.address ?? null)
   });
 
   const space = computed(
@@ -58,37 +67,6 @@ export function useCurrentSpace() {
   );
   const isPending = computed(
     () => !primarySpace.value && (isResolving.value || isQueryPending.value)
-  );
-
-  watch(
-    spaceParam,
-    async param => {
-      if (primarySpace.value || !param) {
-        resolvedName.value = null;
-        return;
-      }
-
-      const [network, name] = param.split(':') as [NetworkID, string];
-      if (!name) {
-        resolvedName.value = null;
-        return;
-      }
-
-      isResolving.value = true;
-      const result = await resolver.resolveName(name, network);
-      if (result) {
-        resolvedName.value = {
-          networkId: result.networkId,
-          address: isAddress(result.address)
-            ? getAddress(result.address)
-            : result.address
-        };
-      } else {
-        resolvedName.value = null;
-      }
-      isResolving.value = false;
-    },
-    { immediate: true }
   );
 
   return {
