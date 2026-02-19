@@ -51,7 +51,7 @@ function handleSelect(type: AvailableVotingTypes) {
             />
             <UiPill
               v-if="VOTING_TYPES_INFO[type].isBeta"
-              variant="accent"
+              variant="secondary"
               label="Beta"
             />
           </div>

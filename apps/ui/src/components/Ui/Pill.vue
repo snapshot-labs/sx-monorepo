@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   label?: string | number;
-  variant?: 'accent' | 'primary';
+  variant?: 'secondary' | 'primary';
 }>();
 </script>
 
@@ -15,7 +15,7 @@ defineProps<{
 .pill {
   @apply inline-block text-[13px] leading-5 rounded-full px-1.5 bg-skin-border text-skin-link;
 
-  &.accent {
+  &.secondary {
     @apply bg-skin-text text-skin-accent-foreground;
   }
 

@@ -9,7 +9,7 @@ const meta = {
     label: { control: 'text' },
     variant: {
       control: 'select',
-      options: [undefined, 'accent', 'primary']
+      options: [undefined, 'secondary', 'primary']
     }
   }
 } satisfies Meta<typeof Pill>;
@@ -23,10 +23,10 @@ export const Default: Story = {
   }
 };
 
-export const Accent: Story = {
+export const Secondary: Story = {
   args: {
     label: 'Beta',
-    variant: 'accent'
+    variant: 'secondary'
   }
 };
 

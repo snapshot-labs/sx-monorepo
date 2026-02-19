@@ -352,7 +352,7 @@ watch(
             />
             <UiPill
               v-if="validation.key === 'passport-gated'"
-              variant="accent"
+              variant="secondary"
               label="Beta"
             />
           </div>
