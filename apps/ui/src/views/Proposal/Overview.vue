@@ -114,6 +114,13 @@ const proposalMetadataUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
+const snapshotV1Url = computed(() => {
+  if (!offchainNetworks.includes(props.proposal.network)) return null;
+  const base = SNAPSHOT_URLS[props.proposal.network];
+  if (!base) return null;
+  return `${base}/#/${props.proposal.space.id}/proposal/${props.proposal.id}`;
+});
+
 const proposalTransactionId = computed(() => {
   const network = getNetwork(props.proposal.network);
 
@@ -514,6 +521,10 @@ onBeforeUnmount(() => destroyAudio());
                 <IH-arrow-sm-right class="-rotate-45" :width="16" />
                 View on block explorer
               </UiDropdownItem>
+              <UiDropdownItem v-if="snapshotV1Url" :to="snapshotV1Url">
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View on v1 interface
+              </UiDropdownItem>
             </template>
           </UiDropdown>
         </div>
@@ -540,33 +551,12 @@ onBeforeUnmount(() => destroyAudio());
           <UiLinkPreview :url="discussion" :show-default="true" />
         </AppLink>
       </div>
-      <div
-        v-if="
-          (proposal.executions && proposal.executions.length > 0) ||
-          proposal.execution_strategy_type === 'safeSnap'
-        "
-      >
+      <div v-if="proposal.executions && proposal.executions.length > 0">
         <UiEyebrow class="mb-3 flex items-center gap-2">
           <IH-play />
           <span>Execution</span>
         </UiEyebrow>
         <div class="mb-4">
-          <UiAlert
-            v-if="proposal.execution_strategy_type === 'safeSnap'"
-            type="warning"
-          >
-            This proposal uses SafeSnap execution which is currently not
-            supported on the new interface. You can view execution details on
-            the
-            <AppLink
-              :to="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-              class="inline-flex items-center font-bold"
-            >
-              previous interface
-              <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </AppLink>
-            .
-          </UiAlert>
           <ProposalExecutionsList
             :network-id="proposal.network"
             :proposal="proposal"
