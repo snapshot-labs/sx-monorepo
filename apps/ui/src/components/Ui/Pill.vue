@@ -1,8 +1,11 @@
 <script setup lang="ts">
-defineProps<{
-  label?: string | number;
-  variant?: 'secondary' | 'primary';
-}>();
+withDefaults(
+  defineProps<{
+    label?: string | number;
+    variant?: 'default' | 'secondary' | 'primary';
+  }>(),
+  { variant: 'default' }
+);
 </script>
 
 <template>

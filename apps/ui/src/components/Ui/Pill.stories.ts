@@ -9,7 +9,7 @@ const meta = {
     label: { control: 'text' },
     variant: {
       control: 'select',
-      options: [undefined, 'secondary', 'primary']
+      options: ['default', 'secondary', 'primary']
     }
   }
 } satisfies Meta<typeof Pill>;
