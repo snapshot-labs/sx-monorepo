@@ -11,11 +11,8 @@ import {
 import * as actions from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { approve, deposit, getTokenAllowance } from '@/helpers/token';
-import {
-  getUserFacingErrorMessage,
-  isUserAbortError,
-  verifyNetwork
-} from '@/helpers/utils';
+import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
+import { verifyNetwork } from '@/helpers/walletNetworks';
 import { METADATA as EVM_METADATA } from '@/networks/evm';
 
 export function useAuctionActions(
