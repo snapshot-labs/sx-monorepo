@@ -6,6 +6,7 @@ import Landing from '@/views/Landing.vue';
 import Explore from '@/views/My/Explore.vue';
 import Home from '@/views/My/Home.vue';
 import Notifications from '@/views/My/Notifications.vue';
+import Service from '@/views/My/Service.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
@@ -80,6 +81,7 @@ export default [
       },
       { path: '/', name: 'my-home', component: Home },
       { path: '/explore', name: 'my-explore', component: Explore },
+      { path: '/service/:id', name: 'my-service', component: Service },
       {
         path: '/notifications',
         name: 'my-notifications',
