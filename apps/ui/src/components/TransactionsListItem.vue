@@ -25,7 +25,7 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return `<b>${props.tx._form.method}</b> on <b>_NAME_</b>`;
+    return `<b>${props.tx._form.method.split('(')[0]}</b> on <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'raw') {
@@ -63,7 +63,7 @@ const call = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return { name: props.tx._form.method, to: props.tx.to };
+    return { name: props.tx._form.method.split('(')[0], to: props.tx.to };
   }
 
   return null;

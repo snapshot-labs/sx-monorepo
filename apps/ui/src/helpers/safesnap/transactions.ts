@@ -85,7 +85,9 @@ function parseContractInteraction(
     const iface = new Interface(abi);
     const parsed = iface.parseTransaction({ data: tx.data });
     methodName =
-      parsed.functionFragment?.name || parsed.signature || methodName;
+      parsed.functionFragment?.format('sighash') ||
+      parsed.signature ||
+      methodName;
 
     for (let i = 0; parsed.args && i < parsed.args.length; i++) {
       args.push(String(parsed.args[i]));
