@@ -2,7 +2,6 @@ import { sanitizeUrl as baseSanitizeUrl } from '@braintree/sanitize-url';
 import { FunctionFragment } from '@ethersproject/abi';
 import { getAddress, isAddress } from '@ethersproject/address';
 import { namehash } from '@ethersproject/hash';
-import { Web3Provider } from '@ethersproject/providers';
 import { upload as pin } from '@snapshot-labs/pineapple';
 import Autolinker from 'autolinker';
 import dayjs from 'dayjs';
@@ -10,10 +9,7 @@ import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import updateLocale from 'dayjs/plugin/updateLocale';
 import sha3 from 'js-sha3';
-import {
-  constants as starknetConstants,
-  validateAndParseAddress
-} from 'starknet';
+import { validateAndParseAddress } from 'starknet';
 import { RouteParamsRaw } from 'vue-router';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
@@ -38,18 +34,6 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 
 const IPFS_GATEWAY: string =
   import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
-const ADDABLE_NETWORKS = {
-  //   12345: {
-  //     chainName: 'My network name',
-  //     nativeCurrency: {
-  //       name: 'MyNetwork',
-  //       symbol: 'NTW',
-  //       decimals: 18
-  //     },
-  //     rpcUrls: ['https://...'],
-  //     blockExplorerUrls: ['https://...']
-  //   }
-};
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -390,82 +374,6 @@ export function uniqBy<T>(arr: T[], predicate: keyof T | ((o: T) => any)): T[] {
 
 export function clone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
-}
-
-export async function verifyNetwork(
-  web3Provider: Web3Provider,
-  chainId: number
-) {
-  if (!web3Provider.provider.request) return;
-
-  const network = await web3Provider.getNetwork();
-  if (network.chainId === chainId) return;
-
-  const encodedChainId = `0x${chainId.toString(16)}`;
-
-  try {
-    await web3Provider.provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: encodedChainId }]
-    });
-  } catch (err) {
-    if (
-      (err instanceof Error && 'code' in err && err.code !== 4902) ||
-      !ADDABLE_NETWORKS[chainId]
-    ) {
-      throw err;
-    }
-
-    await web3Provider.provider.request({
-      method: 'wallet_addEthereumChain',
-      params: [
-        {
-          chainId: encodedChainId,
-          chainName: ADDABLE_NETWORKS[chainId].chainName,
-          nativeCurrency: ADDABLE_NETWORKS[chainId].nativeCurrency,
-          rpcUrls: ADDABLE_NETWORKS[chainId].rpcUrls,
-          blockExplorerUrls: ADDABLE_NETWORKS[chainId].blockExplorerUrls
-        }
-      ]
-    });
-
-    const network = await web3Provider.getNetwork();
-    if (network.chainId !== chainId) {
-      const error = new Error(
-        'User rejected network change after it being added'
-      );
-      (error as any).code = 4001;
-      throw error;
-    }
-  }
-}
-
-// Not implemented by Braavos and Argent Mobile
-// Signing and verifying messages on different network should work fine
-// for single signer message
-export async function verifyStarknetNetwork(
-  web3: any,
-  chainId: starknetConstants.StarknetChainId
-) {
-  if (!web3.provider.request) return;
-  // Skip network switch for Argent Mobile,
-  // only SN_MAIN is supported (getting `unknown request` error inside in-built browser)
-  if (web3.provider.name === 'Argent Mobile') return;
-  try {
-    await web3.provider.request({
-      type: 'wallet_switchStarknetChain',
-      params: {
-        chainId
-      }
-    });
-  } catch (e) {
-    if (
-      e instanceof Error &&
-      !e.message.toLowerCase().includes('not implemented')
-    ) {
-      throw new Error(e.message);
-    }
-  }
 }
 
 /**

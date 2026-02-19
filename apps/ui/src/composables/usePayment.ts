@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { MaybeRefOrGetter } from 'vue';
 import { approve as approveToken, getTokenAllowance } from '@/helpers/token';
-import { verifyNetwork } from '@/helpers/utils';
+import { verifyNetwork } from '@/helpers/walletNetworks';
 import { ChainId } from '@/types';
 
 export type Token = {
