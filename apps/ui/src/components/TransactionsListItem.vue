@@ -9,11 +9,6 @@ const props = defineProps<{ chainId: ChainId; tx: Transaction }>();
 
 const expanded = ref(false);
 
-function getMethodName(method: string) {
-  const i = method.indexOf('(');
-  return i !== -1 ? method.slice(0, i) : method;
-}
-
 const title = computed(() => {
   if (props.tx._type === 'sendToken') {
     return `Send <b>${_n(formatUnits(props.tx._form.amount, props.tx._form.token.decimals), 'standard', { formatDust: true })}</b> ${
@@ -30,7 +25,7 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return `<b>${getMethodName(props.tx._form.method)}</b> on <b>_NAME_</b>`;
+    return `<b>${props.tx._form.method}</b> on <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'raw') {
@@ -68,7 +63,7 @@ const call = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    return { name: getMethodName(props.tx._form.method), to: props.tx.to };
+    return { name: props.tx._form.method, to: props.tx.to };
   }
 
   return null;
