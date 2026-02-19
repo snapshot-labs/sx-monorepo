@@ -276,7 +276,7 @@ function getNavigationConfig(
         'email-notifications': {
           name: 'Email notifications',
           icon: IHAtSymbol,
-          hidden: metadataNetwork !== 's'
+          hidden: metadataNetwork !== 's' || isWhiteLabel.value
         }
       }
     };
