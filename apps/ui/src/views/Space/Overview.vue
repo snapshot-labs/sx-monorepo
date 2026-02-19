@@ -122,13 +122,12 @@ watchEffect(() => setTitle(props.space.name));
         />
         <div v-if="socials.length > 0" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
-            <a
-              :href="social.href"
-              target="_blank"
+            <AppLink
+              :to="social.href"
               class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
-            </a>
+            </AppLink>
           </template>
         </div>
       </div>

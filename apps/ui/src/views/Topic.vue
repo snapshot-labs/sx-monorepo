@@ -65,13 +65,11 @@ onMounted(async () => {
   <div>
     <div v-if="discussion" class="bg-skin-bg border-b">
       <div class="max-w-[730px] mx-auto p-4">
-        <a :href="discussion" target="_blank" tabindex="-1">
-          <UiButton class="w-full">
-            <IC-discourse class="size-[22px] shrink-0" />
-            Join the discussion
-            <IH-arrow-sm-right class="-rotate-45 shrink-0" />
-          </UiButton>
-        </a>
+        <UiButton :to="discussion" class="w-full">
+          <IC-discourse class="size-[22px] shrink-0" />
+          Join the discussion
+          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
+        </UiButton>
       </div>
     </div>
     <div v-if="loading" class="text-center p-4">
@@ -90,18 +88,14 @@ onMounted(async () => {
         class="border-b last:border-b-0 py-4"
       >
         <div class="flex gap-2.5 items-center">
-          <a
-            :href="reply.user_url"
-            target="_blank"
-            class="shrink-0 rounded-full"
-          >
+          <AppLink :to="reply.user_url" class="shrink-0 rounded-full">
             <img
               :src="reply.avatar_template"
               class="rounded-full inline-block bg-skin-border size-[32px]"
             />
-          </a>
+          </AppLink>
           <div class="flex flex-col leading-4 gap-1">
-            <a :href="reply.user_url" target="_blank" v-text="reply.name" />
+            <AppLink :to="reply.user_url">{{ reply.name }}</AppLink>
             <TimeRelative v-slot="{ relativeTime }" :time="reply.created_at">
               <span class="text-skin-text text-sm" v-text="relativeTime" />
             </TimeRelative>
@@ -126,13 +120,11 @@ onMounted(async () => {
     </div>
     <div v-if="loaded && !failed && discussion" class="bg-skin-bg border-t">
       <div class="max-w-[730px] mx-auto p-4 pb-0">
-        <a :href="discussion" target="_blank" tabindex="-1">
-          <UiButton class="w-full">
-            <IC-discourse class="size-[22px] shrink-0" />
-            Reply
-            <IH-arrow-sm-right class="-rotate-45 shrink-0" />
-          </UiButton>
-        </a>
+        <UiButton :to="discussion" class="w-full">
+          <IC-discourse class="size-[22px] shrink-0" />
+          Reply
+          <IH-arrow-sm-right class="-rotate-45 shrink-0" />
+        </UiButton>
       </div>
     </div>
   </div>

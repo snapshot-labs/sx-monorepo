@@ -66,9 +66,8 @@ watch(() => props.proposal.id, fetchPrices);
 
 <template>
   <div v-if="!loading && !error && data">
-    <a
-      :href="`https://app.futarchy.fi/markets/${data.event_id}?utm_source=snapshot`"
-      target="_blank"
+    <AppLink
+      :to="`https://app.futarchy.fi/markets/${data.event_id}?utm_source=snapshot`"
       class="block xl:flex xl:space-x-3 items-center border rounded-lg px-3.5 py-2.5 mb-4"
     >
       <div class="grow flex items-center gap-2 xl:mb-0 mb-2">
@@ -110,6 +109,6 @@ watch(() => props.proposal.id, fetchPrices);
         </span>
       </template>
       <span v-else class="italic"> The futarchy market is closed. </span>
-    </a>
+    </AppLink>
   </div>
 </template>

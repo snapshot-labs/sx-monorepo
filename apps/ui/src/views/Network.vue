@@ -33,14 +33,13 @@ function toggleQuestion(id) {
         <h1 class="mb-6 font-display max-w-[600px] mx-auto text-[52px]">
           Unlock governance for your ecosystem
         </h1>
-        <a
-          :href="LINK"
-          target="_blank"
+        <AppLink
+          :to="LINK"
           class="px-4 py-3 space-x-2 bg-skin-link text-skin-bg rounded-full"
         >
           Talk to sales
           <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        </AppLink>
       </UiContainer>
     </div>
 
@@ -150,14 +149,13 @@ function toggleQuestion(id) {
     <UiContainer class="!max-w-[880px] text-center">
       <UiEyebrow class="mb-2">Get started</UiEyebrow>
       <h2 class="font-display text-[36px] mb-5">Get network support today</h2>
-      <a
-        :href="LINK"
-        target="_blank"
+      <AppLink
+        :to="LINK"
         class="px-4 py-3 space-x-2 bg-skin-link text-skin-bg rounded-full"
       >
         Talk to sales
         <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </a>
+      </AppLink>
     </UiContainer>
 
     <UiContainer class="!max-w-[880px]">

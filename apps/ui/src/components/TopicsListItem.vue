@@ -38,12 +38,9 @@ defineProps<{ topic: Topic }>();
               class="rounded-full size-[22px] inline-block -mr-1.5 border-2 border-skin-bg bg-skin-border"
             />
           </span>
-          <a
-            :href="topic.user_url"
-            target="_blank"
-            class="text-skin-text"
-            v-text="topic.latest_poster.name || topic.latest_poster.username"
-          />
+          <AppLink :to="topic.user_url" class="text-skin-text">{{
+            topic.latest_poster.name || topic.latest_poster.username
+          }}</AppLink>
         </div>
         <TimeRelative v-slot="{ relativeTime }" :time="topic.updated">
           <span> · {{ relativeTime }}</span>

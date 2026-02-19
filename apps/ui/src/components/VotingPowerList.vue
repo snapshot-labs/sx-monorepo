@@ -26,17 +26,17 @@ const baseNetwork = computed(() =>
       class="py-3 px-4 border-b last:border-b-0"
     >
       <div class="flex justify-between">
-        <a
-          :href="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
-          target="_blank"
+        <AppLink
+          :to="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
           class="truncate"
-          v-text="
+        >
+          {{
             network.constants.STRATEGIES[strategy.address] ||
             (isValidAddress(strategy.address)
               ? shorten(strategy.address)
               : strategy.address)
-          "
-        />
+          }}
+        </AppLink>
         <div class="text-skin-link shrink-0">
           {{
             _n(
@@ -53,8 +53,8 @@ const baseNetwork = computed(() =>
       </div>
       <div class="flex justify-between">
         <div v-if="strategy.token" class="flex items-center gap-2">
-          <a
-            :href="
+          <AppLink
+            :to="
               (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(
                 strategy.address
               )
@@ -66,7 +66,6 @@ const baseNetwork = computed(() =>
                 strategy.chainId
               )
             "
-            target="_blank"
             class="flex items-center text-skin-text"
           >
             <UiStamp
@@ -77,16 +76,15 @@ const baseNetwork = computed(() =>
             />
             {{ shorten(strategy.token) }}
             <IH-arrow-sm-right class="ml-1 -rotate-45" />
-          </a>
-          <a
+          </AppLink>
+          <AppLink
             v-if="strategy.swapLink"
-            :href="strategy.swapLink"
-            target="_blank"
+            :to="strategy.swapLink"
             class="flex items-center text-skin-text"
           >
             Buy
             <IH-arrow-sm-right class="ml-1 -rotate-45" />
-          </a>
+          </AppLink>
         </div>
         <div v-else />
         <div>

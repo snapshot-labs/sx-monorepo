@@ -231,28 +231,22 @@ watchEffect(() => {
                   class="inline-block"
                 />
               </AppLink>
-              <a
-                v-else
-                :href="discussion"
-                target="_blank"
-                class="flex items-center"
-              >
+              <AppLink v-else :to="discussion" class="flex items-center">
                 <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-              </a>
+              </AppLink>
             </template>
             <template v-if="boostCount > 0">
-              <a
-                :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
+              <AppLink
+                :to="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
                 class="flex items-center"
-                target="_blank"
               >
                 <UiLabel
                   :count="boostCount"
                   text="Boost"
                   class="inline-block"
                 />
-              </a>
+              </AppLink>
             </template>
           </div>
         </UiScrollerHorizontal>

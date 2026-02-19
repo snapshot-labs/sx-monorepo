@@ -72,23 +72,21 @@ const isOffchainNetwork = computed(() => {
         >
           <IH-play />
         </button>
-        <a
+        <AppLink
           v-if="!hasAddress"
-          :href="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
-          target="_blank"
+          :to="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
           class="text-skin-link"
         >
           <IH-information-circle />
-        </a>
+        </AppLink>
         <button type="button" @click="$emit('deleteStrategy', strategy)">
           <IH-trash />
         </button>
       </div>
     </div>
-    <a
+    <AppLink
       v-if="hasAddress"
-      :href="network.helpers.getExplorerUrl(strategy.address, 'contract')"
-      target="_blank"
+      :to="network.helpers.getExplorerUrl(strategy.address, 'contract')"
       class="flex items-center text-skin-text leading-5 mt-1"
     >
       <UiStamp
@@ -99,7 +97,7 @@ const isOffchainNetwork = computed(() => {
       />
       {{ shorten(strategy.address) }}
       <IH-arrow-sm-right class="-rotate-45" />
-    </a>
+    </AppLink>
     <div class="flex flex-col gap-2 mt-3 empty:mt-0">
       <div
         v-if="strategyNetworkDetails"

@@ -134,15 +134,14 @@ function isInThePast(timestamp: number): boolean {
         :key="state.id"
         class="mb-3 last:mb-0 h-[44px]"
       >
-        <a
+        <AppLink
           v-if="state.url"
-          :href="state.url"
-          target="_blank"
+          :to="state.url"
           class="flex items-center gap-1"
         >
           <h4 v-text="LABELS[state.id]" />
           <IH-arrow-sm-right class="-rotate-45" :width="16" />
-        </a>
+        </AppLink>
         <h4 v-else v-text="LABELS[state.id]" />
         <div class="flex gap-2 items-center">
           <div v-text="_t(state.value)" />
