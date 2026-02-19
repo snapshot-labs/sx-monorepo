@@ -341,7 +341,7 @@ watch(
         @click="handleSelect(validation)"
       >
         <div class="w-full">
-          <div class="flex items-center gap-1 overflow-hidden">
+          <div class="flex items-center gap-2 overflow-hidden">
             <h4
               class="text-skin-link truncate"
               v-text="
@@ -350,12 +350,11 @@ watch(
                 ].label
               "
             />
-            <span
+            <UiPill
               v-if="validation.key === 'passport-gated'"
-              class="bg-skin-text text-skin-accent-foreground rounded-full px-1.5 py-0.5 text-[13px] leading-[13px] h-fit"
-            >
-              Beta
-            </span>
+              variant="secondary"
+              label="Beta"
+            />
           </div>
           <div
             v-text="

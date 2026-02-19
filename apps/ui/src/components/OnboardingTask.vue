@@ -13,7 +13,7 @@ defineProps<{ task: Task }>();
   >
     <IH-information-circle v-if="task.type === 'error'" class="mt-1 shrink-0" />
     <IS-flag v-else class="mt-1 shrink-0" />
-    <div>
+    <div class="flex items-center gap-2">
       <AppLink
         :to="task.link"
         class="inline"
@@ -23,12 +23,10 @@ defineProps<{ task: Task }>();
         }"
         >{{ task.description }}</AppLink
       >
-      <div
+      <UiPill
         v-if="task.totalSteps"
-        class="text-skin-link inline-block bg-skin-border text-[13px] rounded-full px-1.5 ml-1"
-      >
-        {{ task.currentStep || 0 }}/{{ task.totalSteps }}
-      </div>
+        :label="`${task.currentStep || 0}/${task.totalSteps}`"
+      />
     </div>
   </div>
 </template>
