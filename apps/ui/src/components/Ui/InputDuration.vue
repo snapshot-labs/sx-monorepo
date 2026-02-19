@@ -13,6 +13,10 @@ const hours = ref(0);
 const minutes = ref(0);
 
 watch([days, hours, minutes], () => {
+  if (days.value < 0) days.value = 0;
+  if (hours.value < 0) hours.value = 0;
+  if (minutes.value < 0) minutes.value = 0;
+
   model.value = (days.value * 24 * 60 + hours.value * 60 + minutes.value) * 60;
 });
 
