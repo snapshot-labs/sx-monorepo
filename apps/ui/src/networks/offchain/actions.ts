@@ -13,8 +13,8 @@ import {
 import { constants as starknetConstants } from 'starknet';
 import { setEnsTextRecord } from '@/helpers/ens';
 import { getSwapLink } from '@/helpers/link';
-import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/utils';
 import { addressValidator as isValidAddress } from '@/helpers/validation';
+import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import {
   Choice,
   NetworkID,
