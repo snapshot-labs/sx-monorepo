@@ -56,7 +56,11 @@ watch(
     >
       <div class="flex items-center gap-2">
         <h4 class="text-skin-link inline" v-text="activeVotingType.label" />
-        <UiPill v-if="activeVotingType.isBeta" label="Beta" />
+        <UiPill
+          v-if="activeVotingType.isBeta"
+          variant="secondary"
+          label="Beta"
+        />
       </div>
       <div
         v-if="hasMultipleVotingType"
