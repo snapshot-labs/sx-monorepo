@@ -317,13 +317,15 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   } else if (proposal.plugins.safeSnap) {
     try {
       const safeSnapConfig = proposal.plugins.safeSnap;
-      const safes = safeSnapConfig.safes || [];
+      const safes: any[] =
+        safeSnapConfig.safes ||
+        (safeSnapConfig.txs ? [{ txs: safeSnapConfig.txs }] : []);
 
       executions = [
         ...executions,
         ...safes
           .map(safe => {
-            const chainId = Number(safe.network);
+            const chainId = Number(safe.network || 1);
             const batches: any[] = safe.txs || [];
 
             const transactions = batches.flatMap(batch => {
