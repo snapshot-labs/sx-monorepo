@@ -286,6 +286,7 @@ function formatSpace(
 function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   let executions = [] as ProposalExecution[];
   let executionType = '';
+  let isInvalid = false;
 
   const chainIdToNetworkId = Object.fromEntries(
     Object.entries(CHAIN_IDS).map(([k, v]) => [v, k])
@@ -349,6 +350,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       executionType = 'safeSnap';
     } catch (e) {
       console.warn('failed to parse safeSnap execution', e);
+      isInvalid = true;
     }
   }
 
@@ -384,7 +386,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
-    isInvalid: false,
+    isInvalid,
     author: {
       id: proposal.author,
       address_type: 1,
