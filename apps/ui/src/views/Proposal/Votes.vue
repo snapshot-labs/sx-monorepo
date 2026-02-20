@@ -68,7 +68,13 @@ function handleScrollEvent(target: HTMLElement) {
 </script>
 
 <template>
-  <div v-if="proposal.type === 'basic' && proposal.vote_count > 0">
+  <div
+    v-if="
+      proposal.type === 'basic' &&
+      proposal.vote_count > 0 &&
+      proposal.privacy === 'none'
+    "
+  >
     <ProposalScoresChart
       v-if="scoresTicks && scoresTicks.length > 0"
       :ticks="scoresTicks"
