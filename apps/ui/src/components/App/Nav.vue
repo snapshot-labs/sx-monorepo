@@ -276,7 +276,7 @@ function getNavigationConfig(
         'email-notifications': {
           name: 'Email notifications',
           icon: IHAtSymbol,
-          hidden: metadataNetwork !== 's'
+          hidden: metadataNetwork !== 's' || isWhiteLabel.value
         }
       }
     };
@@ -369,11 +369,7 @@ const navigationItems = computed(() =>
           class="inline-block"
         ></component>
         <span class="grow" v-text="item.name" />
-        <span
-          v-if="item.count"
-          class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-          v-text="item.count"
-        />
+        <UiPill v-if="item.count" :label="item.count" />
       </AppLink>
     </div>
   </div>

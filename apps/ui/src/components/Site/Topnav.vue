@@ -27,16 +27,16 @@ const { toggleTheme, currentTheme } = useTheme();
         <AppLink :to="{ name: 'site-ecosystem' }">Ecosystem</AppLink>
       </li>
       <li>
-        <a href="https://docs.snapshot.box" target="_blank">
+        <AppLink to="https://docs.snapshot.box">
           Developers
           <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        </AppLink>
       </li>
       <li>
-        <a href="https://snapshot.mirror.xyz" target="_blank">
+        <AppLink to="https://snapshot.mirror.xyz">
           Blog
           <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        </AppLink>
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">

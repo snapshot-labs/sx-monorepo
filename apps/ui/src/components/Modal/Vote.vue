@@ -257,9 +257,9 @@ watchEffect(async () => {
             class="font-normal flex gap-0.5 text-sm items-center"
           >
             (
-            <a :href="blockExplorerUrl" target="_blank">{{
+            <AppLink :to="blockExplorerUrl">{{
               _n(proposal.snapshot)
-            }}</a>
+            }}</AppLink>
             <UiTooltip title="Snapshot block number">
               <IH-information-circle class="size-3" />
             </UiTooltip>
