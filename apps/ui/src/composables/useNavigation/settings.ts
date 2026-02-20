@@ -1,5 +1,5 @@
 import { metadataNetwork } from '@/networks';
-import { NavContext, NavigationConfig } from '.';
+import { NavContext, NavigationConfig } from './types';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHStop from '~icons/heroicons-outline/stop';
 import IHUsers from '~icons/heroicons-outline/users';
