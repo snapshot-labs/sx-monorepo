@@ -1,43 +1,22 @@
-import { FunctionalComponent } from 'vue';
-import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
+import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
-import { NetworkID, Space } from '@/types';
-import my from './my';
-import settings from './settings';
-import space from './space';
+import { NetworkID } from '@/types';
+import my from './useNavigation/my';
+import settings from './useNavigation/settings';
+import space from './useNavigation/space';
+import {
+  NavigationConfig,
+  NavigationItem,
+  NavProvider
+} from './useNavigation/types';
 
-export type NavigationItem = {
-  name: string;
-  icon?: FunctionalComponent;
-  count?: number;
-  hidden?: boolean;
-  link?: RouteLocationRaw;
-  active?: boolean;
-};
-
-export type NavigationConfig = {
-  style?: 'default' | 'slim';
-  items: Record<string, NavigationItem>;
-};
-
-export type NavContext = {
-  route: RouteLocationNormalizedLoaded;
-  account: string;
-  unreadCount: number;
-  isWhiteLabel: boolean;
-  space: Space | null;
-  networkId: NetworkID | null;
-  address: string | null;
-  isController: boolean;
-  ensOwner: string | null;
-};
-
-export type NavProvider = {
-  routeName: string;
-  getConfig: (context: NavContext) => NavigationConfig;
-};
+export type {
+  NavContext,
+  NavigationConfig,
+  NavigationItem
+} from './useNavigation/types';
 
 const providers: NavProvider[] = [space, settings, my];
 
@@ -126,7 +105,7 @@ export function useNavigation() {
       unreadCount: notificationsStore.unreadNotificationsCount,
       isWhiteLabel: isWhiteLabel.value,
       space: space.value,
-      networkId: networkId.value,
+      networkId: networkId.value as NetworkID | null,
       address: address.value,
       isController: isController.value,
       ensOwner: ensOwner.value

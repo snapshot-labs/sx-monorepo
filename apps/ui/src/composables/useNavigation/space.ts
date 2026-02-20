@@ -1,7 +1,7 @@
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
-import { NavContext, NavigationConfig, NavigationItem } from '.';
+import { NavContext, NavigationConfig, NavigationItem } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHCash from '~icons/heroicons-outline/cash';
