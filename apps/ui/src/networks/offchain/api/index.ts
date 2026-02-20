@@ -86,7 +86,7 @@ const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
 };
 
 const SCORES_TICKS_PAGE_SIZE = 1000;
-const SCORES_TICKS_MAX_VOTES = 2000;
+const SCORES_TICKS_MAX_VOTES = 4000;
 
 function getProposalState(
   networkId: NetworkID,
