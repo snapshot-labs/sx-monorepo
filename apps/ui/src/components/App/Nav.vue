@@ -6,7 +6,6 @@ import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { compareAddresses } from '@/helpers/utils';
 import { getNetwork, metadataNetwork, offchainNetworks } from '@/networks';
-import { useSpaceQuery } from '@/queries/spaces';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
@@ -41,23 +40,13 @@ type NavigationItem = {
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
 const { isWhiteLabel } = useWhiteLabel();
-
-const { param } = useRouteParser('space');
-const { resolved, address, networkId } = useResolve(param);
-const { data: spaceData } = useSpaceQuery({
-  networkId: networkId,
-  spaceId: address
-});
+const { space: currentSpace } = useCurrentSpace();
 const { web3 } = useWeb3();
 
 const currentRouteName = computed(() => String(route.matched[0]?.name));
-const space = computed(() => {
-  if (currentRouteName.value === 'space' && resolved.value) {
-    return spaceData.value ?? null;
-  }
-
-  return null;
-});
+const space = computed(() =>
+  currentRouteName.value === 'space' ? currentSpace.value : null
+);
 
 const { isController } = useSpaceController(space);
 
@@ -120,11 +109,9 @@ function getNavigationConfig(
     };
   }
 
-  if (mainRoute === 'space') {
+  if (mainRoute === 'space' && space.value) {
     if (route.name === 'space-settings') {
-      const isOffchainNetwork = space.value
-        ? offchainNetworks.includes(space.value.network)
-        : false;
+      const isOffchainNetwork = offchainNetworks.includes(space.value.network);
 
       return {
         style: 'slim',
@@ -220,7 +207,7 @@ function getNavigationConfig(
           name: 'Leaderboard',
           icon: IHUserGroup
         },
-        ...(space.value?.delegations && space.value.delegations.length > 0
+        ...(space.value.delegations.length > 0
           ? {
               delegates: {
                 name: 'Delegates',
@@ -228,7 +215,7 @@ function getNavigationConfig(
               }
             }
           : undefined),
-        ...(SPACES_DISCUSSIONS[`${networkId.value}:${address.value}`]
+        ...(SPACES_DISCUSSIONS[`${space.value.network}:${space.value.id}`]
           ? {
               discussions: {
                 name: 'Discussions',
@@ -240,7 +227,7 @@ function getNavigationConfig(
               }
             }
           : undefined),
-        ...(space.value?.treasuries?.length
+        ...(space.value.treasuries?.length
           ? {
               treasury: {
                 name: 'Treasury',
