@@ -1,7 +1,7 @@
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
-import { NavContext, NavigationConfig, NavigationItem } from './types';
+import { NavConfig, NavContext, NavItem } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHCash from '~icons/heroicons-outline/cash';
@@ -15,7 +15,7 @@ function getSettingsRoute(
   context: NavContext,
   tab: string,
   { name, hidden }: { name: string; hidden?: boolean }
-): NavigationItem {
+): NavItem {
   return {
     name,
     link: { name: 'space-settings', params: { tab } },
@@ -51,7 +51,7 @@ const SETTINGS_TABS: {
   { key: 'billing', name: 'Billing', offchainOnly: true }
 ];
 
-function getSpaceSettingsConfig(context: NavContext): NavigationConfig {
+function getSpaceSettingsConfig(context: NavContext): NavConfig {
   const isOffchainNetwork = context.space
     ? offchainNetworks.includes(context.space.network)
     : false;
@@ -82,7 +82,7 @@ function getSpaceSettingsConfig(context: NavContext): NavigationConfig {
   };
 }
 
-export function canSeeSettings(context: NavContext): boolean {
+function canSeeSettings(context: NavContext): boolean {
   const isOwner =
     context.ensOwner && compareAddresses(context.ensOwner, context.account);
   if (context.isController || isOwner) return true;
@@ -98,8 +98,8 @@ export function canSeeSettings(context: NavContext): boolean {
   return false;
 }
 
-function getSpaceMainConfig(context: NavContext): NavigationConfig {
-  const items: Record<string, NavigationItem> = {
+function getSpaceMainConfig(context: NavContext): NavConfig {
+  const items: Record<string, NavItem> = {
     overview: { name: 'Overview', icon: IHGlobeAlt },
     proposals: { name: 'Proposals', icon: IHNewspaper },
     leaderboard: { name: 'Leaderboard', icon: IHUserGroup }
@@ -134,9 +134,13 @@ function getSpaceMainConfig(context: NavContext): NavigationConfig {
   return { items };
 }
 
+const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
+
 export default {
   routeName: 'space',
-  getConfig(context: NavContext): NavigationConfig {
+  isVisible: ({ route }) =>
+    !EXCLUDED_SUB_ROUTES.includes(String(route.matched[1]?.name)),
+  getConfig(context: NavContext): NavConfig {
     if (context.route.name === 'space-settings') {
       return getSpaceSettingsConfig(context);
     }

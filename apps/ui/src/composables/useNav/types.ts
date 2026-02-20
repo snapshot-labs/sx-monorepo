@@ -2,7 +2,7 @@ import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
 import { NetworkID, Space } from '@/types';
 
-export type NavigationItem = {
+export type NavItem = {
   name: string;
   icon?: FunctionalComponent;
   count?: number;
@@ -11,9 +11,9 @@ export type NavigationItem = {
   active?: boolean;
 };
 
-export type NavigationConfig = {
+export type NavConfig = {
   style?: 'default' | 'slim';
-  items: Record<string, NavigationItem>;
+  items: Record<string, NavItem>;
 };
 
 export type NavContext = {
@@ -30,5 +30,6 @@ export type NavContext = {
 
 export type NavProvider = {
   routeName: string;
-  getConfig: (context: NavContext) => NavigationConfig;
+  isVisible?: (context: NavContext) => boolean;
+  getConfig: (context: NavContext) => NavConfig;
 };

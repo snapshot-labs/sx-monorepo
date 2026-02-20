@@ -3,35 +3,21 @@ import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID } from '@/types';
-import my from './useNavigation/my';
-import settings from './useNavigation/settings';
-import space from './useNavigation/space';
-import {
-  NavigationConfig,
-  NavigationItem,
-  NavProvider
-} from './useNavigation/types';
-
-export type {
-  NavContext,
-  NavigationConfig,
-  NavigationItem
-} from './useNavigation/types';
+import my from './useNav/my';
+import settings from './useNav/settings';
+import space from './useNav/space';
+import { NavConfig, NavItem, NavProvider } from './useNav/types';
 
 const providers: NavProvider[] = [space, settings, my];
 
-export const NAV_ROUTE_NAMES = providers.map(p => p.routeName);
-
-const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
-
-function enrichNavigationItems(
-  config: NavigationConfig,
+function enrichItems(
+  config: NavConfig,
   routeName: string,
   route: Pick<RouteLocationNormalizedLoaded, 'name'>
-): NavigationConfig {
+): NavConfig {
   const items = Object.fromEntries(
     Object.entries(config.items)
-      .map(([key, item]): [string, NavigationItem] => [
+      .map(([key, item]): [string, NavItem] => [
         key,
         {
           ...item,
@@ -46,7 +32,7 @@ function enrichNavigationItems(
   return { ...config, items };
 }
 
-export function useNavigation() {
+export function useNav() {
   const route = useRoute();
   const notificationsStore = useNotificationsStore();
   const { isWhiteLabel } = useWhiteLabel();
@@ -60,10 +46,8 @@ export function useNavigation() {
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
 
-  const hasAppNav = computed(
-    () =>
-      NAV_ROUTE_NAMES.includes(currentRouteName.value) &&
-      !EXCLUDED_SUB_ROUTES.includes(String(route.matched[1]?.name))
+  const currentProvider = computed(() =>
+    providers.find(p => p.routeName === currentRouteName.value)
   );
 
   const space = computed(() => {
@@ -94,25 +78,31 @@ export function useNavigation() {
     { lazy: true }
   );
 
-  const navigationConfig = computed(() => {
-    const name = currentRouteName.value;
-    const provider = providers.find(p => p.routeName === name);
-    if (!provider) return null;
+  const context = computed(() => ({
+    route,
+    account: web3.value.account,
+    unreadCount: notificationsStore.unreadNotificationsCount,
+    isWhiteLabel: isWhiteLabel.value,
+    space: space.value,
+    networkId: networkId.value as NetworkID | null,
+    address: address.value,
+    isController: isController.value,
+    ensOwner: ensOwner.value
+  }));
 
-    const config = provider.getConfig({
-      route,
-      account: web3.value.account,
-      unreadCount: notificationsStore.unreadNotificationsCount,
-      isWhiteLabel: isWhiteLabel.value,
-      space: space.value,
-      networkId: networkId.value as NetworkID | null,
-      address: address.value,
-      isController: isController.value,
-      ensOwner: ensOwner.value
-    });
-
-    return enrichNavigationItems(config, name, route);
+  const hasAppNav = computed(() => {
+    const provider = currentProvider.value;
+    if (!provider) return false;
+    return provider.isVisible?.(context.value) ?? true;
   });
 
-  return { hasAppNav, navigationConfig };
+  const config = computed(() => {
+    const provider = currentProvider.value;
+    if (!provider) return null;
+
+    const result = provider.getConfig(context.value);
+    return enrichItems(result, provider.routeName, route);
+  });
+
+  return { hasAppNav, config };
 }

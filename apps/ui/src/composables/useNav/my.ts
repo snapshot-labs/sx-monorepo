@@ -1,4 +1,4 @@
-import { NavContext, NavigationConfig } from './types';
+import { NavConfig, NavContext } from './types';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
@@ -7,7 +7,7 @@ import IHUser from '~icons/heroicons-outline/user';
 
 export default {
   routeName: 'my',
-  getConfig({ account, route, unreadCount }: NavContext): NavigationConfig {
+  getConfig({ account, route, unreadCount }: NavContext): NavConfig {
     return {
       items: {
         home: {

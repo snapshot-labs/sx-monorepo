@@ -1,18 +1,18 @@
 <script lang="ts" setup>
-const { navigationConfig } = useNavigation();
+const { config } = useNav();
 </script>
 
 <template>
   <div class="border-r bg-skin-bg">
     <div class="py-4 no-scrollbar overscroll-contain overflow-auto">
       <AppLink
-        v-for="(item, key) in navigationConfig?.items ?? {}"
+        v-for="(item, key) in config?.items ?? {}"
         :key="key"
         :to="item.link"
         class="px-4 space-x-2 flex items-center"
         :class="[
           item.active ? 'text-skin-link' : 'text-skin-text',
-          navigationConfig?.style === 'slim' ? 'py-1' : 'py-1.5'
+          config?.style === 'slim' ? 'py-1' : 'py-1.5'
         ]"
       >
         <component :is="item.icon" v-if="item.icon" />
