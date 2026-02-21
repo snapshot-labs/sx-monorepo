@@ -1,6 +1,6 @@
 ---
 title: "Sybil resistance, scam & spam prevention"
-description: "How to avoid scams, spam and make sure that your proposal authors and voters are genuine humans? How can you take into account users' on-chain reputation? Read on!"
+description: "How to avoid scams, spam and make sure that your proposal authors and voters are genuine humans? How can you take into account users' onchain reputation? Read on!"
 ---
 
 > A **Sybil attack** is a type of attack on a computer [network service](https://en.wikipedia.org/wiki/Network_service) in which an attacker subverts the service's reputation system by creating a large number of [pseudonymous](https://en.wikipedia.org/wiki/Pseudonymity) identities and uses them to gain a disproportionately large influence.\\
@@ -104,7 +104,7 @@ You can select individual or multiple stamps that matter for your space. You can
 
 Useful when combined with Quadratic Voting, which provides a certain level of Sybil resistance.
 
-The strategy combines any arbitrary Voting Strategy defining a membership with any Voting Strategy calculating the Voting Power of a user. In the idea **one can only vote if he passes the membership strategy**, the membership here can be an identity symbol like possessing a [UID](https://etherscan.io/address/0xba0439088dc1e75F58e0A7C107627942C15cbb41) or a [PUNK](https://etherscan.io/token/0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb) (with an `erc721` strategy) or any other custom verification strategy based on on-chain behavior.
+The strategy combines any arbitrary Voting Strategy defining a membership with any Voting Strategy calculating the Voting Power of a user. In the idea **one can only vote if he passes the membership strategy**, the membership here can be an identity symbol like possessing a [UID](https://etherscan.io/address/0xba0439088dc1e75F58e0A7C107627942C15cbb41) or a [PUNK](https://etherscan.io/token/0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb) (with an `erc721` strategy) or any other custom verification strategy based on onchain behavior.
 
 The membership portion is binary. If the membership strategy returns any number > 0 for an address, then user is considered a member and their Voting Power will be the result of the `votingPowerStrategy`.
 

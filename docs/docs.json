@@ -18,7 +18,7 @@
   "navigation": {
     "groups": [
       {
-            "group": "Getting Started",
+            "group": "Getting started",
             "pages": [
               "index"
             ]
@@ -87,7 +87,7 @@
             ]
           },
           {
-            "group": "Developer Guides",
+            "group": "Developer guides",
             "pages": [
               "developer-guides/voting-strategy",
               "developer-guides/validation-strategy",
