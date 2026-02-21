@@ -83,7 +83,13 @@
               "user-guides/voting-strategies",
               "user-guides/validation-strategies",
               "user-guides/using-safe-multi-sig",
-              "user-guides/delegation"
+              {
+                "group": "Delegation",
+                "pages": [
+                  "user-guides/delegation",
+                  "tools/subgraphs"
+                ]
+              }
             ]
           },
           {
@@ -92,8 +98,7 @@
               "developer-guides/voting-strategy",
               "developer-guides/validation-strategy",
               "developer-guides/identify-integrator-activity",
-              "developer-guides/networks",
-              "v1-interface/plugins/safesnap-reality"
+              "developer-guides/networks"
             ]
           },
           {
@@ -109,9 +114,10 @@
                 ]
               },
               "tools/webhooks",
-              "tools/subgraphs",
+
               "tools/mobile-notifications",
-              "tools/bots"
+              "tools/bots",
+              "v1-interface/plugins/safesnap-reality"
             ]
           },
           {
