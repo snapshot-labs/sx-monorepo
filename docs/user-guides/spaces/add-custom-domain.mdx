@@ -2,29 +2,35 @@
 title: "Add a custom domain"
 ---
 
-By adding a custom domain to your space, you can whitelabel the Snapshot website and present your community with a fully branded governance experience. This feature allows you to display only your specific space at your custom URL and even customize colors to match your brand identity.
+Use a custom domain to host your Snapshot space directly on your own URL. Your community will see only your space with your logo and colors matching your brand for a fully branded governance experience.
 
 ### Examples
 
-More than 400 DAOs already use custom domains for their governance, such as:
+More than 200 DAOs already use custom domains for their governance, such as:
 
-[vote.balancer.fi](https://vote.balancer.fi/)\
-[vote.morpho.org](https://vote.morpho.org/)\
-[vote.sushi.com](https://vote.sushi.com/)
+[vote.worldlibertyfinancial.com](https://vote.worldlibertyfinancial.com)\
+[governance.starknet.io](https://governance.starknet.io)\
+[vote.convexfinance.com](https://vote.convexfinance.com)
 
 ### Requirements
 
-To enable this whitelabel experience, you must subscribe to our [Pro plan](pro). Once your subscription is active, follow the setup process below.
+This feature is available with the [Snapshot Pro](pro) plan. Once your subscription is active, follow the setup process below.
 
 ### Setup steps
 
-#### 1. Add a CNAME record
+#### 1. Create a CNAME record
 
-Go to your DNS provider or registrar and create a new CNAME record.
+Log in to your domain provider and add a new CNAME record:
 
-* Host: _your custom domain_ (for example, vote.myprotocol.xyz)
-* Points to: `cname.snapshot.box`
+* **Host:** the domain or subdomain you want to use (e.g., `vote.convexfinance.com`)
+* **Points to:** `cname.snapshot.box`
 
 #### 2. Contact us
 
-After you have created the CNAME record, let us know you’d like to enable whitelabel. Reach out to us through our [Help center](https://help.snapshot.box), [Discord](https://discord.snapshot.org), or [Telegram](https://t.me/bonustrack).
+After you have created the CNAME record, contact us via the messenger on our [Help Center](https://help.snapshot.box) to confirm your custom domain. We'll handle the rest and activate your branded Snapshot space.
+
+<Warning>
+**Migrating from a whitelabel**
+
+Effective August 15, 2025, whitelabel (custom domain) functionality is a Snapshot Pro feature. To continue using your custom domain, please subscribe to [Snapshot Pro](https://snapshot.box/#/pro). If you prefer to disable your custom domain, remove the CNAME record from your DNS provider and consider setting up a redirect from your old domain to your main website.
+</Warning>

@@ -3,7 +3,12 @@ title: "Create a space"
 description: "Learn how to create a new space for your organization."
 ---
 
-Head to the [Create space page](https://snapshot.box/#/create/snapshot-x) and follow the below steps:
+To create a new space on Snapshot X:
+
+* For mainnet networks, visit: [snapshot.box/#/create/snapshot-x](https://snapshot.box/#/create/snapshot-x)
+* For testnet networks, visit: [testnet.snapshot.box/#/create/snapshot-x](https://testnet.snapshot.box/#/create/snapshot-x)
+
+Follow the steps below:
 
 ## 1. Organization's details
 
@@ -23,14 +28,16 @@ In order to set your Treasury select the network first.
 
 Choose the network for your organisation. At the moment Snapshot X works with Ethereum.
 
-ℹ️ _Starknet implementation is coming soon._
+<Info>
+Starknet implementation is coming soon.
+</Info>
 
 ## 3. Voting strategies
 
 Voting Strategies calculate the **Voting Power** of each user.
 
 <Info>
-If you are not familiar with what a Voting Strategy is head to [Broken link](broken-reference) to learn more.
+If you are not familiar with what a Voting Strategy is, head to [voting strategies](/snapshot-x/protocol/voting-strategies) to learn more.
 </Info>
 
 Select a Voting Strategy from the list of available options and provide the required details.
@@ -44,16 +51,16 @@ For example for the **Delegated Compound Token** you have to provide the token c
 Choose how users will be authenticated in order to create a proposal or cast a vote.
 
 <Info>
-If you are not familiar with what Authenticators are head to [Broken link](broken-reference)to learn more.
+If you are not familiar with what Authenticators are, head to [authenticators](/snapshot-x/protocol/authenticators) to learn more.
 </Info>
 
 The two authenticators provided by Snapshot X are:
 
-#### [Ethereum signature](broken-reference)
+#### Ethereum signature
 
 It will authenticate a user based on a message signed by an Ethereum private key.
 
-#### [Ethereum transaction](broken-reference)
+#### Ethereum transaction
 
 Users have to submit a transaction on Ethereum. Authentication is proving that the sender's address is valid.
 
@@ -62,12 +69,14 @@ Users have to submit a transaction on Ethereum. Authentication is proving that t
 Proposal Validation is setting **requirements** that user needs to meet in order to **create a new proposal.**
 
 <Info>
-If you are not familiar with what a Proposal Validation is head to [Broken link](broken-reference) to learn more.
+If you are not familiar with what a Proposal Validation is, head to [proposal validations](/snapshot-x/protocol/proposal-validations) to learn more.
 </Info>
 
 Define the minimum Voting Power required to create a new proposal.
 
-**⚠️ We highly recommend setting a high threshold to avoid scam proposals. ⚠️**
+<Warning>
+We highly recommend setting a high threshold to avoid scam proposals.
+</Warning>
 
 ![](/images/60.png)
 
@@ -83,10 +92,10 @@ Execution Strategies have two key roles:
 2. and **executing the payload** of a proposal if it has been accepted.
 
 <Info>
-If you are not familiar with what Execution Strategies are head to [Broken link](broken-reference) to learn more.
+If you are not familiar with what Execution Strategies are, head to [execution strategies](/snapshot-x/protocol/execution-strategies) to learn more.
 </Info>
 
-When selecting the execution strategy you have to provide a **quorum** - minimum number of votes required for a proposal to pass.
+When selecting the execution strategy you have to provide a **quorum**, the minimum number of votes required for a proposal to pass.
 
 ### Execution strategies
 
@@ -101,15 +110,13 @@ Currently Snapshot X provides two Execution Strategies:
 -> uses simple quorum
 
 <Info>
-Avatar contract is any contract which implements the `IAvatar`interface.\
-**Safe** is an example of an Avatar contract.
+Avatar contract is any contract which implements the `IAvatar` interface. **Safe** is an example of an Avatar contract.
 </Info>
 
 <Warning>
-To set the Avatar Execution Strategy up fully you have to enable it on your Safe account after you have created your space.\
-\
-**Follow this guide to complete the setup:**\
-[Broken link](broken-reference)
+To set the Avatar Execution Strategy up fully you have to enable it on your Safe account after you have created your space.
+
+**Follow this guide to complete the setup:** [Safe execution setup](/snapshot-x/user-guides/safe-execution-setup)
 </Warning>
 
 #### Timelock
@@ -130,9 +137,9 @@ Customize the setup for voting which will affect **all proposals** in your space
 
 ![](/images/66.png)
 
-* **Voting delay** - The delay between when a proposal is created, and when the voting starts. A value of 0 means that as soon as the proposal is created anyone can vote while a value of 3600 means that voting will start 3600 seconds after the proposal is created.
-* **Minimum voting duration** - The minimum duration of the voting period. It is **impossible to execute a proposal before** **this period** has elapsed.
-* **Maximum voting duration** - The maximum duration of the voting period, it is **impossible to cast a vote after this period** has passed. The **`minimum voting duration`** must be less than or equal to this value.
+* **Voting delay:** The delay between when a proposal is created, and when the voting starts. A value of 0 means that as soon as the proposal is created anyone can vote while a value of 3600 means that voting will start 3600 seconds after the proposal is created.
+* **Minimum voting duration:** The minimum duration of the voting period. It is **impossible to execute a proposal before** **this period** has elapsed.
+* **Maximum voting duration:** The maximum duration of the voting period, it is **impossible to cast a vote after this period** has passed. The **`minimum voting duration`** must be less than or equal to this value.
 
 <Info>
 We highly recommend implementing a Voting Delay to allow more time to review proposal's content and identify malicious proposals before voting starts.
@@ -153,4 +160,4 @@ Click **Create** and sign transaction(s) in your wallet. You will have to sign m
 
 ![](/images/199.png)
 
-And that's it! 🎉
+Your space is now created.

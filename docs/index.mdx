@@ -1,21 +1,36 @@
 ---
-title: "Welcome to Snapshot docs"
+title: "Snapshot Help Center"
 ---
+
+## How can we help?
+
+<Card title="Contact support" icon="headset" href="#intercom">
+  Chat with our support team. We typically reply in under 5 minutes.
+</Card>
 
 ## What is Snapshot?
 
-Snapshot is a **voting platform** that allows DAOs, DeFi protocols, or NFT communities to vote easily and **without gas fees**.The tool allows high customization of the voting process to cater to the diverse needs of the users and organizations. Customization includes different aspects like calculation of the users' voting power, selection of the voting mechanism, proposal and vote validation, and many more.In short, Snapshot is an offchain gasless multi-governance client which results are easy to verify and hard to contest.
+Snapshot is a voting platform that allows DAOs, DeFi protocols, and NFT communities to vote easily and without gas fees. It supports flexible voting strategies, multiple voting systems, and fully customizable governance, all offchain and open source.
 
-### Key features
+## Browse by topic
 
-* **Gasless:** Create proposals and cast your votes without any gas fees.
-* **Flexible voting strategies:** Customize how the voting power is calculated through single or combined strategies that enable voting with ERC20s, NFTs, other contracts, and more.
-* **Proposal and voting validation:** Use custom logic to define who can create a proposal or cast a vote.
-* **Multiple voting systems:** Single choice, approval voting, quadratic voting, and more.
-* **Signed messages:** Votes are cast through signed messages easily verifiable.
-* **Custom branding** - spaces can use their own branding, color schemes and domain name.
-* **Fully open-source:** Snapshot is fully open source with MIT license, the code is available on GitHub at [https://github.com/snapshot-labs](https://github.com/snapshot-labs/).​
-
-## How does it work?
-
-Snapshot’s protocol involves three core elements: spaces, proposals, and votes. A space functions like an organization’s profile, and every proposal and vote is tied to that space. To create a space, the only requirement is to have an ENS domain. Once a space is set up, users can submit proposals and cast their votes on the space’s page. Administrators of the space can tailor the rules for creating proposals and voting by configuring various voting and validation strategies. For instance, a space might require users to hold a minimum of 500 tokens to create a proposal, or it might assign voting power proportionally to the token balance in a user’s wallet.
+<CardGroup cols={3}>
+  <Card title="Spaces" icon="building" href="/user-guides/spaces/what-is-a-space">
+    Create and manage your organization's governance space.
+  </Card>
+  <Card title="Proposals" icon="file-lines" href="/user-guides/create">
+    Create proposals and cast votes on decisions.
+  </Card>
+  <Card title="Strategies" icon="chart-pie" href="/user-guides/voting-strategies">
+    Configure how voting power is calculated.
+  </Card>
+  <Card title="Snapshot X" icon="bolt" href="/snapshot-x/overview">
+    Fully onchain governance on EVM and Starknet.
+  </Card>
+  <Card title="Guides" icon="book-open" href="/user-guides/delegation">
+    Delegation, Safe voting, notifications, and more.
+  </Card>
+  <Card title="FAQ" icon="circle-question" href="/faq">
+    Answers to the most common questions.
+  </Card>
+</CardGroup>

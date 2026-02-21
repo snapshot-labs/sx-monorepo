@@ -1,15 +1,353 @@
 ---
-title: "FAQs"
-description: "Frequently asked questions."
+title: "FAQ"
+description: "Frequently asked questions about Snapshot."
 ---
 
-[getting-started.md](getting-started)
+## General
 
+<Accordion title="What does 'snapshot' mean?">
+A snapshot is a record of the blockchain's state at a specific block number. It shows exactly who owned which tokens at that precise moment. By doing this, voting rights are based on actual holdings fixed at the time of a proposal. Without a snapshot, a user could vote, transfer their tokens to another account they control, and vote again, effectively double spending their voting power. This process of locking the data at a single point in time to prevent such abuse is what gives Snapshot its name.
+</Accordion>
 
-[im-a-snapshot-user](im-a-snapshot-user/)
+<Accordion title="Is Snapshot free to use?">
+Yes, Snapshot itself is free to use and does not charge any fees for setting up a space, creating proposals, casting votes, or executing decisions. However, to create a space, you need an ENS domain, which you must purchase from [ens.domains](https://ens.domains). While Snapshot's core features are offchain and do not require gas fees, deploying a Snapshot X space may involve paying gas fees. If you decide to sponsor gas costs for users on Snapshot X, you will also need to cover those fees. Despite these extra costs arising from external factors, Snapshot itself remains free.
+</Accordion>
 
+<Accordion title="Is Snapshot open source?">
+Yes, Snapshot is fully open source under the MIT license, meaning anyone can see how it's built and contribute to its development. All code repositories are available on [GitHub](https://github.com/snapshot-labs).
+</Accordion>
 
-[im-a-developer.md](im-a-developer)
+<Accordion title="How can Snapshot be used without gas fees?">
+Snapshot facilitates gasless voting through the use of offchain signed messages. This approach allows users to participate in governance without the need for onchain transactions, avoiding gas fees while ensuring verifiability.
+</Accordion>
 
+<Accordion title="Do I need to create a user account?">
+No. Snapshot uses the universal web3 login: you need to have a wallet account like MetaMask or Coinbase to connect to Snapshot.
+</Accordion>
 
-Still can't find an answer? Have a look at our [Github discussions](https://github.com/snapshot-labs/snapshot/discussions/categories/q-a) or follow this question:[#i-have-an-issue-where-should-i-report-it](./#i-have-an-issue-where-should-i-report-it)
+<Accordion title="How can I access Snapshot if the main site is down?">
+Snapshot maintains several mirror sites to ensure you can always access the platform:
+
+* **Primary domain:** [snapshot.box](https://snapshot.box)
+* **Alternative mirrors:**
+  * [snapshot.org](https://snapshot.org) (Netlify hosting)
+  * [snapshot.eth.limo](https://snapshot.eth.limo) (Fleek with IPFS)
+
+All mirrors display identical content. Your votes, proposals, and data remain synchronized across every domain. You can also host Snapshot yourself, the full source code is available at [github.com/snapshot-labs/sx-monorepo](https://github.com/snapshot-labs/sx-monorepo).
+</Accordion>
+
+<Accordion title="Is voting on Snapshot safe?">
+Yes. The message you sign in your wallet to cast a vote doesn't affect your holdings or web3 identity. Some spaces may be flagged with a warning badge if we suspect them to be fake, but there is no risk to your funds associated with signing a Snapshot vote. Read more about [badges and warnings](/user-guides/spaces/badges-and-warnings).
+</Accordion>
+
+<Accordion title="I can't follow more than 25 spaces, is that intended?">
+Yes. Limiting the number of followed spaces to 25 is one of our anti-scam and anti-spam measures.
+</Accordion>
+
+## Voting
+
+<Accordion title="How can I vote?">
+You need to connect to Snapshot with your wallet and fulfil the requirements defined by the voting strategies used by a specific space. For example, you might be required to hold a specific amount of the organization's token. You can see the voting strategies directly on a proposal's page in the **Information** section.
+
+If your voting power is `0`, it's most likely because you did not hold the required tokens at the time of proposal creation. Tokens acquired after the proposal was created are not taken into account.
+
+If you are eligible to vote, select your choice(s) and confirm your vote. You will be asked to sign a message which doesn't create any gas fees or affect your holdings. That's it!
+</Accordion>
+
+<Accordion title="Can I vote on any proposal?">
+No. Your eligibility to vote depends on the voting strategies defined by the space and usually requires holding the organization's token. Some spaces allow anyone to vote, however this is a rare case. Read more about [voting strategies](/user-guides/voting-strategies).
+</Accordion>
+
+<Accordion title="Can I change my vote?">
+Yes, you can change your vote as long as the voting period is still active. Simply cast a new vote on the same proposal, and it will overwrite your previous vote.
+</Accordion>
+
+<Accordion title="Can I vote with a Safe/Multisig?">
+Yes. You can find more details in [Using Safe multi-sig](/user-guides/using-safe-multi-sig).
+</Accordion>
+
+<Accordion title="I'm having issues when voting with Safe. What's wrong?">
+Make sure that your wallet is on the same network as the Space. Go to the Space page > Settings > Strategies to check what the Space's network is.
+</Accordion>
+
+<Accordion title="Can I explain the reason for my vote?">
+Yes, apart from proposals using shielded voting. You can add a short explanation when casting a vote.
+</Accordion>
+
+<Accordion title="I delegated my voting power but would like to take it back. How can I do it?">
+You can remove your delegations by going to [snapshot.box/#/delegate](https://snapshot.box/#/delegate) and clicking the remove button for the delegations you wish to remove.
+
+If you want to override your delegate's vote on a proposal using the delegation strategy, you can simply cast your own vote and it will override the delegate's vote. If the delegation happened onchain, head to the delegation portal of the project you're looking for and redelegate there.
+</Accordion>
+
+<Accordion title="How can I export voting results to a spreadsheet?">
+Go to the proposal page and click the download icon to get a CSV file. You can open it directly in Excel or import it into Google Sheets.
+</Accordion>
+
+<Accordion title="I get 'Your voting power could not be calculated due to misconfigured strategy or unresponsive RPC node'. What should I do?">
+This issue is related to either space settings or the failure of the external infrastructure that Snapshot relies on. Wait 15 minutes and try again. If the error persists, please contact our support on [Help Center](https://help.snapshot.box/en/) with the URL of the proposal and the error message.
+</Accordion>
+
+<Accordion title="There is a proposal open and I have a new token minted after the proposal's creation. Can it be used to vote?">
+No. Snapshot calculates the voting power at the time of proposal creation. If the token was not in your wallet before the proposal was created, it will not be counted.
+</Accordion>
+
+## Proposals
+
+<Accordion title="Can I create a proposal?">
+It depends on the space settings. Spaces can set up a validation strategy which defines who is eligible to create a proposal, for example you need to hold at least 1 ETH. Moreover, spaces can specify a list of users who can create proposals by listing their wallet addresses. Read more about [proposal validation](/user-guides/validation-strategies).
+</Accordion>
+
+<Accordion title="What are the limitations for creating proposals?">
+Each proposal's description is limited to **10,000 characters**. An address can have up to **10 active proposals** across spaces at any time. Verified spaces can create up to **10 proposals daily** and **50 monthly**, unverified spaces are limited to **3 daily** and **15 monthly**, while flagged spaces can only create **1 daily** and **5 monthly**.
+
+With the [Snapshot Pro](/user-guides/spaces/pro) plan, the character limit increases to **50,000 characters**, and proposal creation limits expand to **100 proposals per day** and **500 per month**.
+</Accordion>
+
+<Accordion title="Is it possible to submit proposals programmatically?">
+Yes, using Snapshot's API or SDK, you can automate proposal submissions. Check the [developer documentation](/tools/snapshot.js) for specific methods and requirements.
+</Accordion>
+
+<Accordion title="What happens if a proposal doesn't reach quorum?">
+If a proposal does not reach the required quorum, it is considered as not passed. However, the outcome depends on the governance rules of the specific project. Some projects might still consider the proposal for further discussion, while others might require resubmission with modifications.
+</Accordion>
+
+<Accordion title="I can't create a proposal with a shortened URL in the description. Why?">
+Due to an increased amount of scam attacks on Snapshot, shortened URLs are not allowed in the proposal description. Make sure you provide a full URL.
+</Accordion>
+
+<Accordion title="Are there solutions to minimize whales' power in the voting process?">
+Yes. Have a look at the [Quadratic Voting](/proposals/voting-types) system which reduces the impact of large token holders.
+</Accordion>
+
+<Accordion title="'Your proposal cannot be submitted due to a missing proposal validation rule'. What does it mean?">
+Due to multiple spam attacks on Snapshot, all spaces are required to set up a Proposal Validation. Head to [validation strategies](/user-guides/validation-strategies#how-to-use-validation-strategies) to learn how.
+</Accordion>
+
+## Voting strategies
+
+<Accordion title="What is a voting strategy?">
+A voting strategy is a set of conditions used to calculate a user's voting power. Strategies enable Snapshot to calculate the final result of voting on a given proposal. Read more in our [voting strategies](/user-guides/voting-strategies) documentation.
+</Accordion>
+
+<Accordion title="I want to test a strategy. How can I do it?">
+You can use the playground on Snapshot available from any strategy's detail page by clicking the **Playground** button.
+</Accordion>
+
+<Accordion title="How to limit voting to users who own a specific amount of token(s)?">
+You need to set up a Basic voting validation which allows you to select a specific strategy and define the minimum threshold required. Learn more in [validation strategies](/user-guides/validation-strategies).
+</Accordion>
+
+<Accordion title="Why is my voting power equal to 0?">
+There might be multiple reasons. Most commonly your voting power is 0 because you didn't have the required tokens in your wallet at the time of proposal creation. Have a look at [this discussion](https://github.com/snapshot-labs/snapshot/discussions/767) to explore other potential reasons.
+</Accordion>
+
+<Accordion title="Why is my voting power reduced? I'm a delegate.">
+If the space is using the delegation strategy and the address which delegated its voting power to you casts a vote, your total voting power is reduced by the delegation you received.
+
+Example (using the `delegation` strategy):
+* B has voting power of 20 of its own
+* A has voting power of 10 and delegates it to B
+* B now has voting power of 30
+* If A does not vote, B's voting power is 30
+* If A does vote, B's voting power is 20 (30 reduced by 10)
+</Accordion>
+
+<Accordion title="I want to give one vote per wallet regardless of balance. Which strategy should I use?">
+You can use the [ticket](https://snapshot.box/#/strategy/ticket) strategy.
+</Accordion>
+
+<Accordion title="How can I give 1 voting power to all voters holding a specific token regardless of amount?">
+It's a two step process:
+
+**1. Voting validation:** Set up a `Basic` voting validation in the space settings. Define the `strategies` for the tokens and the `minScore` required for voters to be eligible.
+
+**2. Voting strategy:** Use the [ticket](https://snapshot.box/#/strategy/ticket) strategy to give voting power equal to `1` to any user who passed the voting validation.
+</Accordion>
+
+<Accordion title="I want different voting strategies for different types of proposals. How?">
+You can use sub-spaces on Snapshot. This allows you to link different spaces and set different settings for each of them. Learn more in [sub-spaces](/user-guides/spaces/sub-spaces).
+</Accordion>
+
+## Space settings
+
+<Accordion title="Is it possible to create a space with a multisig account?">
+Yes. Navigate to [app.safe.global](https://app.safe.global) and select Snapshot in the `Apps` tab. Your multisig address will connect to Snapshot and allow you to create spaces, proposals and vote.
+</Accordion>
+
+<Accordion title="I lost access to my ENS domain which was used to register a space. What should I do?">
+If you are still a controller of the space you can apply to delete your space or migrate it to another one with a different ENS. Learn more in [migrate or delete](/user-guides/spaces/migrate-or-delete).
+</Accordion>
+
+<Accordion title="Can I change the name of my space?">
+Yes, you can do it in the space settings. Do not confuse it with changing the `ID` or the ENS domain: for that, you need to migrate the space. Learn more in [migrate or delete](/user-guides/spaces/migrate-or-delete).
+</Accordion>
+
+<Accordion title="How can I verify my space?">
+There is a list of requirements you have to meet. Learn more in [get verified](/user-guides/spaces/get-verified).
+</Accordion>
+
+<Accordion title="How long does it take to verify a space?">
+The process can take up to 72 hours.
+</Accordion>
+
+<Accordion title="My space is no longer verified. Why?">
+Verification status is valid as long as the space meets all requirements. Make sure you meet all requirements defined in [get verified](/user-guides/spaces/get-verified#how-to-get-your-space-verified) and contact our support on [Help Center](https://help.snapshot.box/en/) to regain the space verification.
+</Accordion>
+
+<Accordion title="I made a mistake with my space settings and I want to cancel existing votes. How?">
+You cannot invalidate existing votes. However you can delete the proposal (if you are an admin of the space or the proposal's creator), change the space settings, and recreate the proposal from scratch.
+</Accordion>
+
+<Accordion title="Can I customize the appearance of my Snapshot space?">
+Yes, you can customize the appearance by setting a custom skin, which allows you to change the colors of your space. This feature is available for spaces using custom domains.
+</Accordion>
+
+<Accordion title="'Missing Voting Validation rule required with the ticket strategy'. What does it mean?">
+If your space is using only a ticket Voting Strategy, you are required to set a Voting Validation to minimize the risk of spam votes. Learn how to set it up in [validation strategies](/user-guides/validation-strategies#voting-validation-in-space-settings).
+</Accordion>
+
+<Accordion title="Why can't I create a new space with my previously deleted space's ENS name?">
+Deleting a space does not release its attached ENS name, so you cannot create a new space with the same ENS name. If you wish to retain a similar domain, you could create a new space under a subdomain of your previous ENS name.
+</Accordion>
+
+## Quorum
+
+<Accordion title="How does quorum work on Snapshot?">
+A proposal passes if it has more "For" votes than "Against" votes, and the total of "For" plus "Abstain" plus "Against" votes reaches or exceeds the quorum. All votes, whether in favor, against, or abstaining, count toward meeting the required participation level. Once that level is met, the proposal's success depends on having a clear majority of "For" votes over "Against".
+</Accordion>
+
+<Accordion title="How does quorum work on Snapshot X?">
+A proposal passes if it meets two conditions: it must have more "For" votes than "Against" votes, and the total of "For" plus "Abstain" votes must reach or exceed a set quorum. In other words, there needs to be enough participation and a clear majority in favor for the proposal to succeed.
+</Accordion>
+
+## Networks
+
+<Accordion title="How to add a new network to Snapshot?">
+Snapshot supports EVM-compatible networks. To add a new network, you need to subscribe to the network plan. Once subscribed, Snapshot will take care of adding your network to the platform. For more details, visit [snapshot.box/#/network](https://snapshot.box/#/network). For non-EVM networks, please contact the Snapshot team directly.
+</Accordion>
+
+<Accordion title="What are the premium networks?">
+Snapshot supports many networks. Some have full support ("premium") while others have limited support ("non-premium").
+
+Premium networks include: Ethereum, Anime, APECHAIN, Avalanche, Base, Blast, BNB Chain, Cyber, Fraxtal, Gnosis Chain, Horizen EON, Immutable zkEVM, Ink, Kava, Linea, Manta Network, Mantle Network, Merlin Chain, Metis, opBNB, Optimism, peaq, Sei, Shibarium, SNAXchain, Sonic, Story, Vana, and zk.Link.
+
+If you want to upgrade a network from non-premium to premium, follow the instructions at [snapshot.box/#/network](https://snapshot.box/#/network).
+</Accordion>
+
+## Wallet compatibility
+
+<Accordion title="Does Snapshot support EIP-1271?">
+Yes, Snapshot supports EIP-1271, enabling smart contract wallets to participate directly in governance. EIP-1271 allows smart contracts to implement their own method for signature verification. If you manage a smart contract account, you can use it to create proposals or vote on Snapshot. Make sure your smart contract account is on the same base network as the Snapshot space you want to interact with.
+</Accordion>
+
+<Accordion title="Does Snapshot support EIP-6492?">
+Yes, Snapshot supports EIP-6492, a standard for undeployed smart contract wallets (counterfactual wallets). EIP-6492 provides a standardized method to verify signatures from smart contract wallets before they are deployed onchain, enabling users to participate in governance without initially deploying their wallet contracts.
+</Accordion>
+
+<Accordion title="How to fix signing issue with MetaMask?">
+A release of the MetaMask Chrome extension (version 12.15.1) introduced a bug affecting message signing. The MetaMask team fixed the problem in version 12.15.2. Please ensure your extension is updated:
+
+1. Open your MetaMask Chrome extension
+2. Click on the top-right three-dot menu > Settings > **About**
+3. If the version is **12.15.2 or higher**, you're good to go
+4. To update manually: go to `chrome://extensions`, find MetaMask, enable **Developer mode**, and click **Update**
+</Accordion>
+
+## Migrations
+
+<Accordion title="What is the oSnap deprecation?">
+UMA has announced that they are ending support for oSnap on **December 15, 2025**. After this date, oSnap will no longer execute transactions from your DAO's Safe treasury. If your DAO relies on oSnap, you must take action before this deadline.
+
+You can either migrate to [Snapshot X](/snapshot-x/user-guides/create-a-space) (recommended for fully onchain governance) or to [SafeSnap](/v1-interface/plugins/safesnap-reality) (for optimistic execution similar to oSnap).
+</Accordion>
+
+<Accordion title="How do I migrate from 'delegation' to 'with-delegation' strategy?">
+The "delegation" strategy is being replaced by "with-delegation" (effective August 15, 2025). The key difference is that "delegation" works like liquid democracy where a delegator can reclaim power by voting, while "with-delegation" combines both delegated and own voting power and requires explicit undelegation.
+
+To migrate, replace your standalone voting strategies and "delegation" strategy with a single "with-delegation" strategy.
+</Accordion>
+
+<Accordion title="How do I migrate from the 'multichain' voting strategy?">
+The "multichain" strategy is being deprecated (effective August 15, 2025). Since Snapshot now has native multichain support, you should add each strategy individually with the appropriate network, then delete the old "multichain" strategy. You must migrate before August 2025 or you won't be able to create new proposals.
+</Accordion>
+
+## Support and feedback
+
+<Accordion title="What are the different support tiers?">
+**Basic support** (free, available to everyone):
+* Live chat accessible from any page in the Snapshot app
+* Average reply time under 5 minutes
+* Email follow-ups and community Discord
+
+**Premium support** (for Premium networks or Snapshot Pro spaces):
+* All basic support features
+* Dedicated Telegram group with direct access to the technical team
+* Prioritized feature development
+</Accordion>
+
+<Accordion title="How to report a security issue?">
+If you've discovered a vulnerability or security issue, please send an email to **security@snapshot.org** with as much information as possible.
+</Accordion>
+
+<Accordion title="How to request new features?">
+Share your suggestions and upvote existing feature requests at [snapshot.canny.io/feature-requests](https://snapshot.canny.io/feature-requests).
+</Accordion>
+
+<Accordion title="Have a partnership idea?">
+Please fill out the [partnership form](https://tally.so/r/w2axeK) and we'll get in touch with you soon.
+</Accordion>
+
+<Accordion title="I have an issue, where should I report it?">
+Before reporting, browse through this FAQ and our documentation. If you still have an issue, contact our support on [Help Center](https://help.snapshot.box/en/) with the following details:
+
+* Detailed description of the issue (what action were you trying to perform, what error did you get)
+* Screenshots of the error
+* Applicable URLs (proposal or space URL)
+</Accordion>
+
+<Accordion title="I get 'Oops, something went wrong!' What should I do?">
+Wait about 10 minutes and try again. If the error persists, open the browser console (right click > Inspect > Console tab), take a screenshot of the panel, and contact our support on [Help Center](https://help.snapshot.box/en/) with details of what you were attempting to do.
+</Accordion>
+
+## Developers
+
+<Accordion title="Which networks are supported for voting with Gnosis Safe?">
+You can find the networks' IDs here: [snapshot-relayer check.ts](https://github.com/snapshot-labs/snapshot-relayer/blob/master/src/check.ts#L9)
+</Accordion>
+
+<Accordion title="Do we need to deploy an ENS contract on our custom network?">
+No, it's not needed.
+</Accordion>
+
+<Accordion title="Is it possible to test Snapshot without creating ENS on mainnet?">
+Yes. You can use [testnet.snapshot.box](https://testnet.snapshot.box) with an ENS domain on Sepolia Testnet.
+</Accordion>
+
+<Accordion title="How does Snapshot use IPFS?">
+Snapshot uses IPFS to pin the receipts of the votes. Read more in the [IPFS case study](https://blog.ipfs.tech/2022-08-25-snapshot-ipfs-case-study/).
+</Accordion>
+
+<Accordion title="Can I use the Hub API without an API Key?">
+Yes, however we encourage everyone to apply for a key as the limits for keyless access are much lower. Learn more in [API keys](/tools/api/api-keys).
+</Accordion>
+
+<Accordion title="Are there any limits for using the Hub GraphQL API?">
+Yes. Without an API Key: 100 requests per minute. With an API Key: 2 million requests per month. Learn how to apply in [API keys](/tools/api/api-keys).
+</Accordion>
+
+<Accordion title="How to add a webhook?">
+Have a look at our [webhooks documentation](/tools/webhooks).
+</Accordion>
+
+<Accordion title="How to use a staking contract for voting?">
+Browse existing staking strategies at [snapshot.box](https://snapshot.box/#/?type=strategies&q=stake). If none work for you, you can use the `erc20-balance-of` strategy if your contract has a `balanceOf` method, or the `contract-call` strategy if the balance method has a different name.
+</Accordion>
+
+<Accordion title="Is it possible to support delegation on our network?">
+Yes. If it's not supported yet you can create a custom voting strategy. Learn more in [voting strategy development](/developer-guides/voting-strategy).
+</Accordion>
+
+<Accordion title="How long will it take to merge my PR?">
+It usually takes around 72 hours. Once the PR is merged, you will also have to wait for a new release which can take another couple of days.
+</Accordion>

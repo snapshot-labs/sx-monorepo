@@ -41,13 +41,14 @@ You can use the [ticket](https://snapshot.org/#/strategy/ticket) strategy.
 </Accordion>
 
 <Accordion title="How can I give 1 voting power to all voters holding a specific token regardless of its amount?">
-It's a two step process - you have to define a [validation strategy](../../user-guides/validation-strategies) and a [voting strategy](#voting-strategies) for your space.\
-\
-**1. Voting validation**\
-In order to allow users to participate in voting, setup a `Basic` voting validation in the space settings. You can find it in the voting section in space settings:\
-\
-![](/images/246.png)\
-\
+It's a two step process - you have to define a [validation strategy](../../user-guides/validation-strategies) and a [voting strategy](#voting-strategies) for your space.
+
+**1. Voting validation**
+
+In order to allow users to participate in voting, setup a `Basic` voting validation in the space settings. You can find it in the voting section in space settings:
+
+![](/images/246.png)
+
 When defining the voting validation parameters, you have the option to specify the `strategies` for the tokens and the `minScore` required for voters to be eligible to vote:
 
 Here is an example of the basic strategy setup for voters holding DAI tokens:
@@ -69,13 +70,13 @@ Here is an example of the basic strategy setup for voters holding DAI tokens:
 
 **2. Voting strategy**
 
-Use the [Ticket](https://snapshot.org/#/strategy/ticket) strategy to give voting power equal to `1` to any user eligible to vote - users that passed the voting validation described in step 1.\
+Use the [Ticket](https://snapshot.org/#/strategy/ticket) strategy to give voting power equal to `1` to any user eligible to vote - users that passed the voting validation described in step 1.
+
 ![](/images/256.png)
 </Accordion>
 
 <Accordion title="I am not a developer, can someone work on my strategy for money?">
 Yes. You can create an issue on [https://github.com/snapshot-labs/score-api/issues](https://github.com/snapshot-labs/score-api/issues) and then post in on the [#developers](https://discord.com/channels/707079246388133940/747050056422785055) channel on Discord.
 
-\
 Snapshot is not responsible for the agreement between you and the contributors.
 </Accordion>

@@ -1,0 +1,19 @@
+---
+title: "Storage proofs"
+---
+
+Storage proofs are a way to verify data from one blockchain on another blockchain without accessing the entire state. Snapshot X collaborates with Herodotus to integrate storage proofs into its voting strategies on Starknet.
+
+This integration allows Snapshot X to calculate voting power based on data from Ethereum mainnet or Sepolia testnet contracts. Here's how it works:
+
+1. A block hash from Ethereum (L1) is sent to Starknet (L2)
+2. Using this block hash, the state of any contract from L1 can be verified on L2 at that specific block
+3. The voting strategy accesses and verifies data (like token balances) from the Ethereum contract
+4. Voting power is then calculated using the verified data
+
+This approach enables secure cross-chain governance, combining Ethereum's security with Starknet's scalability. It allows projects to use Ethereum data for voting on Starknet efficiently and securely. Currently, this feature is only available on Starknet.
+
+### Learn more
+
+* [Herodotus: Proving Ethereum's State Using Storage Proofs on Starknet](https://www.herodotus.dev/)
+* [Storage Proofs | Herodotus Docs](https://docs.herodotus.dev/)

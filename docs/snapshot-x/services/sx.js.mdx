@@ -60,7 +60,7 @@ import { Provider, constants } from 'starknet';
 const ethUrl = 'https://rpc.snapshot.org/1';
 const manaUrl = 'https://mana.pizza';
 
-const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_GOERLI } });
+const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_SEPOLIA } });
 
 const clientConfig = {
   starkProvider,
@@ -163,7 +163,7 @@ const web3 = window.starknet.provider;
 const ethUrl = 'https://rpc.snapshot.org/1';
 const manaUrl = 'https://mana.pizza';
 
-const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_GOERLI } });
+const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_SEPOLIA } });
 
 const clientConfig = {
   starkProvider,
@@ -205,7 +205,7 @@ const web3 = window.starknet.provider;
 const ethUrl = 'https://rpc.snapshot.org/1';
 const manaUrl = 'https://mana.pizza';
 
-const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_GOERLI } });
+const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_SEPOLIA } });
 
 const clientConfig = {
   starkProvider,
@@ -326,7 +326,7 @@ const web3 = window.starknet.provider;
 const ethUrl = 'https://rpc.snapshot.org/1';
 const manaUrl = 'https://mana.pizza';
 
-const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_GOERLI } });
+const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_SEPOLIA } });
 
 const clientConfig = {
   starkProvider,
@@ -370,7 +370,7 @@ const web3 = window.starknet.provider;
 const ethUrl = 'https://rpc.snapshot.org/1';
 const manaUrl = 'https://mana.pizza';
 
-const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_GOERLI } });
+const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_SEPOLIA } });
 
 const clientConfig = {
   starkProvider,
@@ -485,7 +485,7 @@ const web3 = window.starknet.provider;
 const ethUrl = 'https://rpc.snapshot.org/1';
 const manaUrl = 'https://mana.pizza';
 
-const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_GOERLI } });
+const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_SEPOLIA } });
 
 const clientConfig = {
   starkProvider,
@@ -524,7 +524,7 @@ const web3 = window.starknet.provider;
 const ethUrl = 'https://rpc.snapshot.org/1';
 const manaUrl = 'https://mana.pizza';
 
-const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_GOERLI } });
+const starkProvider = new Provider({ sequencer: { network: constants.NetworkName.SN_SEPOLIA } });
 
 const clientConfig = {
   starkProvider,
@@ -565,14 +565,14 @@ Address' voting power depends on the strategy used. Below you can see an example
 <Tab title="Starknet Whitelist">
 ```typescript
 import {
-  starknetGoerli1,
+  starknetSepolia1,
   getStarknetStrategy,
 } from '@snapshot-labs/sx';
 
 const clientConfig = {
   starkProvider,
   ethUrl,
-  networkConfig: starknetGoerli1
+  networkConfig: starknetSepolia1
 };
 
 const address = '0xe3ca14dcb7862116bbbe4331a9927c6693b141aa8936bb76e2bdfa4b551a52';

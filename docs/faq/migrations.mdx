@@ -1,0 +1,128 @@
+---
+title: "Migrations"
+---
+
+## oSnap deprecation and migration guide
+
+UMA has announced that they are ending support for oSnap on **December 15, 2025**. After this date, oSnap will no longer be able to execute transactions from your DAO's Safe treasury.
+
+If your DAO relies on oSnap, you must take action before this deadline to ensure your governance continues to function.
+
+### How to disable oSnap
+
+<Warning>
+Once you turn off oSnap, your DAO will go back to using standard manual signing. Make sure your Safe signers are active and ready to sign transactions manually until you set up a new solution.
+</Warning>
+
+Follow the guide provided by UMA to remove the module: [Disabling oSnap via Zodiac Safe App](https://docs.uma.xyz/resources/osnap/disabling-osnap-via-zodiac-safe-app)
+
+### Migrate from oSnap to Snapshot X
+
+Snapshot X is our onchain voting protocol available on EVM chains and Starknet. It provides trustless execution through a Safe module or Timelock. This is the recommended option for fully onchain governance.
+
+* **Requirements:** Your DAO must use an ERC-20 Votes token or a Whitelist strategy
+* **Available networks:** Ethereum, Base, Optimism, Arbitrum, and Starknet
+* **How it works:** Votes happen onchain. Once passed, transactions are executed trustlessly using either a Safe module or a Timelock contract
+
+Get started: [How to create a Snapshot X space](/snapshot-x/user-guides/create-a-space)
+
+### Migrate from oSnap to SafeSnap
+
+SafeSnap (using Reality.eth) is a plugin for optimistic execution that works similarly to oSnap.
+
+* **How it works:** You keep voting offchain. If a proposal passes, it is verified by an oracle (Reality.eth). If no one challenges the result, the transaction executes
+* **Why choose this:** You can keep your current voting process while ensuring transactions still happen automatically
+
+Get started: [How to setup SafeSnap](/v1-interface/plugins/safesnap-reality)
+
+## Migrating from "delegation" to "with-delegation" strategy
+
+<Warning>
+Effective August 15, 2025
+</Warning>
+
+The "delegation" strategy is an "overriding strategy" that allows a single vote to dynamically affect other voters' voting power. This requires recalculating voting power for all participants every time someone votes, which does not scale well for proposals with many votes.
+
+### Key differences
+
+* **delegation** works like liquid democracy. When person A delegates to person B, if both vote, only A's vote counts because A can reclaim their voting power by voting directly.
+* **with-delegation** combines both delegated and own voting power (Total VP = delegated VP + own VP). Once someone delegates, they cannot take it back by voting and must undelegate first.
+
+### Configuration changes
+
+**Before** (using delegation):
+
+```json
+// Strategy 1: erc20-balance-of
+{
+  "address": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+  "symbol": "ENS",
+  "decimals": 18
+}
+
+// Strategy 2: delegation
+{
+  "symbol": "ENS (delegated)",
+  "strategies": [
+    {
+      "name": "erc20-balance-of",
+      "params": {
+        "address": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+        "symbol": "ENS",
+        "decimals": 18
+      }
+    }
+  ]
+}
+```
+
+**After** (using with-delegation):
+
+```json
+// Single strategy: with-delegation
+{
+  "symbol": "ENS (delegated)",
+  "strategies": [
+    {
+      "name": "erc20-balance-of",
+      "params": {
+        "address": "0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72",
+        "symbol": "ENS",
+        "decimals": 18
+      }
+    }
+  ]
+}
+```
+
+<Info>
+Remove your standalone voting strategies (like "erc20-balance-of") from your main strategy list when switching to "with-delegation" to prevent double-counting votes.
+</Info>
+
+### Important considerations
+
+Users lose the ability to reclaim delegated voting power by voting and must undelegate first. "with-delegation" provides better performance for high-participation proposals but removes liquid democracy flexibility.
+
+If you want overriding strategies, consider upgrading to [Snapshot Pro](/user-guides/spaces/pro).
+
+## Migrating from "multichain" voting strategy
+
+<Warning>
+Effective August 15, 2025
+</Warning>
+
+The "multichain" strategy was created before Snapshot had built-in multichain support. It allowed spaces to combine strategies from different blockchains using inner strategies within a wrapper. Since Snapshot now has native multichain support, some spaces have been using "multichain" to get around the 8-strategy limit, which causes performance problems.
+
+### Migration steps
+
+1. Go to your space settings
+2. Look at your "multichain" strategy and note all the strategies inside it
+3. Add each strategy individually, setting the appropriate network for each one
+4. Delete the old "multichain" strategy
+5. Make sure you have 8 or fewer total strategies ([Snapshot Pro](/user-guides/spaces/pro) users can have more)
+
+### Important considerations
+
+You must migrate before August 2025 or you won't be able to create new proposals. Your total voting power will stay the same after migration, but you'll now be able to see the voting power breakdown for each individual strategy.
+
+If you need more than 8 strategies, consider upgrading to [Snapshot Pro](/user-guides/spaces/pro).

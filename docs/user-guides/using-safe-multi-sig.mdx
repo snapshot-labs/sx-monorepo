@@ -3,7 +3,7 @@ title: "Using Safe multisig"
 description: "Learn how you can use Snapshot with a Gnosis Safe multisig wallet."
 ---
 
-You can use a Gnosis Safe to vote, create a proposal or setup a space on Snapshot. 
+Voting with a Safe is possible using two methods: an offchain signature or a transaction. You can select your preferred method in the Safe interface under Settings > Safe Apps. You can also use a Safe to create proposals or set up a space on Snapshot.
 
 <Warning>
 Your Safe has to be on the same network as the Space is. Head to Space settings, **Strategies** tab to check the Space's network.
@@ -30,9 +30,9 @@ To connect your Safe to Snapshot
 
 There are two ways to sign with your Safe multisig wallet on Snapshot:
 
-1. **Synchronous signing (offchain)** - you keep the confirmation modal open until all Safe signers confirm the transaction.
+1. **Synchronous signing (offchain):** you keep the confirmation modal open until all Safe signers confirm the transaction.
 
-2. **Asynchronous signing (onchain)** - you can close the confirmation modal and the transaction will be created in your Safe transactions queue. The Safe signers can confirm it later.
+2. **Asynchronous signing (onchain):** you can close the confirmation modal and the transaction will be created in your Safe transactions queue. The Safe signers can confirm it later.
 
 For more information, refer to the [Gnosis Safe documentation](https://help.safe.global/en/articles/40783-what-are-signed-messages).
 
@@ -51,6 +51,6 @@ If you'd like to enable asynchronous signing for all Safe's signers and not have
 
 ![](/images/168.png)
 
-That's all :tada: Signers can now sign even if you you close the confirmation modal.
+Signers can now sign even if you close the confirmation modal.
 
 It will create a pending transaction in your Safe transactions queue. This transaction must be confirmed by the Safe signers within **144 hours.**

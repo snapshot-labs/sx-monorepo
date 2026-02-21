@@ -16,82 +16,100 @@
     "light": "#fafe69"
   },
   "navigation": {
-    "groups": [
+    "tabs": [
       {
+        "tab": "Help center",
+        "groups": [
+          {
             "group": "Getting started",
             "pages": [
               "index"
             ]
           },
           {
-            "group": "User guides",
+            "group": "Spaces",
             "pages": [
+              "user-guides/spaces/what-is-a-space",
               {
-                "group": "Spaces",
+                "group": "Create a space",
                 "pages": [
-                  "user-guides/spaces/what-is-a-space",
-                  {
-                    "group": "Create a space",
-                    "pages": [
-                      "user-guides/spaces/create",
-                      "user-guides/spaces/create/ens-domain",
-                      "user-guides/spaces/create/alternative-way-to-create-a-space"
-                    ]
-                  },
-                  "user-guides/spaces/settings",
-                  "user-guides/spaces/sub-spaces",
-                  "user-guides/spaces/get-verified",
-                  "user-guides/spaces/space-hibernation",
-                  "user-guides/spaces/add-custom-domain",
-                  "user-guides/spaces/space-roles",
-                  "user-guides/spaces/migrate-or-delete",
-                  "user-guides/spaces/badges-and-warnings",
-                  "user-guides/spaces/pro",
-                  {
-                    "group": "Space handbook",
-                    "pages": [
-                      "user-guides/spaces/space-handbook",
-                      "user-guides/spaces/space-handbook/most-common",
-                      "user-guides/spaces/space-handbook/voting-threshold",
-                      "user-guides/spaces/space-handbook/anti-whale",
-                      "user-guides/spaces/space-handbook/sybil-resistance-scam-and-spam-prevention",
-                      "user-guides/spaces/space-handbook/liquidity-staking-pool",
-                      "user-guides/spaces/space-handbook/delegation",
-                      {
-                        "group": "NFT voting",
-                        "pages": [
-                          "user-guides/spaces/space-handbook/nft-voting",
-                          "user-guides/spaces/space-handbook/nft-voting/most-common-erc-721",
-                          "user-guides/spaces/space-handbook/nft-voting/multi-token-erc-1155",
-                          "user-guides/spaces/space-handbook/nft-voting/poap-proof-of-attendance"
-                        ]
-                      },
-                      "user-guides/spaces/space-handbook/custom-calculations"
-                    ]
-                  }
+                  "user-guides/spaces/create",
+                  "user-guides/spaces/create/ens-domain",
+                  "user-guides/spaces/create/alternative-way-to-create-a-space"
                 ]
               },
-              "user-guides/create",
-              {
-                "group": "Voting",
-                "pages": [
-                  "user-guides/voting/vote"
-                ]
-              },
-              "user-guides/voting-strategies",
-              "user-guides/validation-strategies",
-              "user-guides/using-safe-multi-sig",
-              {
-                "group": "Delegation",
-                "pages": [
-                  "user-guides/delegation",
-                  "tools/subgraphs"
-                ]
-              }
+              "user-guides/spaces/settings",
+              "user-guides/spaces/sub-spaces",
+              "user-guides/spaces/get-verified",
+              "user-guides/spaces/add-custom-domain",
+              "user-guides/spaces/space-roles",
+              "user-guides/spaces/migrate-or-delete",
+              "user-guides/spaces/badges-and-warnings",
+              "user-guides/spaces/cover-image-size",
+              "user-guides/spaces/pro"
             ]
           },
           {
-            "group": "Developer guides",
+            "group": "Proposals",
+            "pages": [
+              "user-guides/create",
+              "proposals/edit-a-proposal",
+              "user-guides/voting/vote",
+              "proposals/voting-types"
+            ]
+          },
+          {
+            "group": "Strategies",
+            "pages": [
+              "user-guides/voting-strategies",
+              "user-guides/validation-strategies",
+              "user-guides/premium-voting-strategies",
+              "user-guides/voting-strategies-development-service"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "user-guides/delegation",
+              "user-guides/using-safe-multi-sig",
+              "v1-interface/plugins/safesnap-reality",
+              "tools/mobile-notifications",
+              "tools/bots"
+            ]
+          },
+          {
+            "group": "Snapshot X",
+            "pages": [
+              "snapshot-x/overview",
+              "snapshot-x/user-guides/create-a-space",
+              "snapshot-x/user-guides/proposals",
+              "snapshot-x/user-guides/voting",
+              "snapshot-x/user-guides/safe-execution-setup",
+              "snapshot-x/user-guides/gasless-voting",
+              "snapshot-x/user-guides/voting-power",
+              "snapshot-x/user-guides/storage-proofs",
+              "snapshot-x/user-guides/voting-strategies-sx"
+            ]
+          },
+          {
+            "group": "FAQ",
+            "pages": [
+              "faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Developers",
+        "groups": [
+          {
+            "group": "Getting started",
+            "pages": [
+              "developers/index"
+            ]
+          },
+          {
+            "group": "Guides",
             "pages": [
               "developer-guides/voting-strategy",
               "developer-guides/validation-strategy",
@@ -112,25 +130,13 @@
                 ]
               },
               "tools/webhooks",
-
-              "tools/mobile-notifications",
-              "tools/bots",
-              "v1-interface/plugins/safesnap-reality"
+              "tools/subgraphs"
             ]
           },
           {
             "group": "Snapshot X",
             "pages": [
-              "snapshot-x/overview",
-              {
-                "group": "User guides",
-                "pages": [
-                  "snapshot-x/user-guides/create-a-space",
-                  "snapshot-x/user-guides/proposals",
-                  "snapshot-x/user-guides/voting",
-                  "snapshot-x/user-guides/safe-execution-setup"
-                ]
-              },
+              "snapshot-x/services/architecture",
               {
                 "group": "Protocol",
                 "pages": [
@@ -145,18 +151,14 @@
                   "snapshot-x/protocol/audits"
                 ]
               },
-              {
-                "group": "Services",
-                "pages": [
-                  "snapshot-x/services/architecture",
-                  "snapshot-x/services/api",
-                  "snapshot-x/services/sx.js",
-                  "snapshot-x/services/ui",
-                  "snapshot-x/services/mana"
-                ]
-              }
+              "snapshot-x/services/api",
+              "snapshot-x/services/sx.js",
+              "snapshot-x/services/ui",
+              "snapshot-x/services/mana"
             ]
           }
+        ]
+      }
     ]
   },
   "contextual": {

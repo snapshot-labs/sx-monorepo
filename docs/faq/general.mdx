@@ -1,0 +1,34 @@
+---
+title: "General"
+---
+
+## What does "snapshot" mean?
+
+A snapshot is a record of the blockchain's state at a specific block number. It shows exactly who owned which tokens at that precise moment. By doing this, voting rights are based on actual holdings fixed at the time of a proposal. Without a snapshot, a user could vote, transfer their tokens to another account they control, and vote again, effectively double spending their voting power. This process of locking the data at a single point in time to prevent such abuse is what gives Snapshot its name.
+
+## Is Snapshot free to use?
+
+Yes, Snapshot itself is free to use and does not charge any fees for setting up a space, creating proposals, casting votes, or executing decisions. However, to create a space, you need an ENS domain, which you must purchase from [ens.domains](https://ens.domains). While Snapshot's core features are offchain and do not require gas fees, deploying a Snapshot X space may involve paying gas fees. If you decide to sponsor gas costs for users on Snapshot X, you will also need to cover those fees. Despite these extra costs arising from external factors, Snapshot itself remains free.
+
+## Is Snapshot open source?
+
+Yes, Snapshot is fully open source under the MIT license, meaning anyone can see how it's built and contribute to its development. All code repositories are available on [GitHub](https://github.com/snapshot-labs).
+
+## How can Snapshot be used without gas fees?
+
+Snapshot facilitates gasless voting through the use of offchain signed messages. This approach allows users to participate in governance without the need for onchain transactions, avoiding gas fees while ensuring verifiability.
+
+## How can I access Snapshot if the main site is down?
+
+Snapshot maintains several mirror sites to ensure you can always access the platform:
+
+* **Primary domain:** [snapshot.box](https://snapshot.box)
+* **Alternative mirrors:**
+  * [snapshot.org](https://snapshot.org) (Netlify hosting)
+  * [snapshot.eth.limo](https://snapshot.eth.limo) (Fleek with IPFS)
+
+All mirrors display identical content. Your votes, proposals, and data remain synchronized across every domain.
+
+### Self-hosting Snapshot
+
+You can also host Snapshot yourself or run it locally. The full source code is open-source and available at [github.com/snapshot-labs/sx-monorepo](https://github.com/snapshot-labs/sx-monorepo).

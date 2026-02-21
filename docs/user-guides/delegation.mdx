@@ -9,39 +9,23 @@ Snapshot enables a couple of ways to delegate your Voting Power to another addre
 
 You can delegate your Voting Power via:
 
-👉 [Delegates Registry per Space](#delegates-registry) (if the Space has set up their custom delegation contract)
-
-<Info>
-This is a great solution for those who are **not sure who to delegate** their VP to.
-</Info>
-
-👉 [General Snapshot's delegation page](#from-snapshot-interface)
-
-<Info>
-The quickest solution to delegate the Voting Power to a **known address.**
-</Info>
-
-👉 [Smart Contract](#with-a-smart-contract)
-
-<Info>
-If you prefer to skip the interface and **interact with the Contract** directly.
-</Info>
-
-Let's look at each option in detail.
+* [Delegates registry per space](#delegates-registry) - if the space has set up a custom delegation contract. A great solution if you are not sure who to delegate to.
+* [Snapshot's delegation page](#delegate-page) - the quickest solution to delegate to a known address.
+* [Smart contract](#smart-contract-interaction) - if you prefer to interact with the contract directly.
 
 ### Delegates registry
 
 <Warning>
-This page only applies to custom delegation contracts.\
-\
+This page only applies to custom delegation contracts.
+
 To see the Snapshot native delegation, head to:
 
-**https://snapshot.org/#/delegate/space-name.eth**
+**https://snapshot.box/#/delegate/space-name.eth**
 </Warning>
 
 It is possible to discover the Delegate registry of Spaces that provided their custom delegation contract in settings.
 
-Head to the Space page and click **Delegates** in the left sidebar\*\*:\*\*
+Head to the Space page and click **Delegates** in the left sidebar:
 
 ![](/images/96.png)
 
@@ -55,21 +39,20 @@ You can delegate your Voting Power to one of the delegates directly by clicking 
 
 ### Delegate page
 
-1. Go to [https://snapshot.org/#/delegate](https://snapshot.org/#/delegate)
+1. Go to [snapshot.box/#/delegate](https://snapshot.box/#/delegate)
 2. Enter the address you want to delegate to.
 3. To limit the delegation to a specific space, tap the on switch button and enter the space key (example: `balancer.eth`) you want your delegation to take effect on. If no space is selected, the effect will take place for all spaces.
 4. Click confirm to save your delegation.
 
 <Warning>
-The **direct delegation** to a chosen space has priority over the **all spaces** delegation.\
-\
-What does it mean?\
-\
-:thumbsup: Address A delegates to B for all spaces, and A delegates to C for a chosen space.\
-:arrow\_backward: The chosen space uses overriding delegation strategy.\
-:raised\_back\_of\_hand: B votes first - their VP is taken into account.\
-:hand\_splayed: C votes - their vote has priority (direct single space delegation) and erases B's Voting power (all spaces delegation).\
-:raised\_hand:A votes - B and C's Voting Power decreased to 0.
+The **direct delegation** to a chosen space has priority over the **all spaces** delegation.
+
+What does it mean?
+
+Address A delegates to B for all spaces, and A delegates to C for a chosen space. The chosen space uses overriding delegation strategy.\
+B votes first - their VP is taken into account.\
+C votes - their vote has priority (direct single space delegation) and erases B's Voting power (all spaces delegation).\
+A votes - B and C's Voting Power decreased to 0.
 </Warning>
 
 ### Smart contract interaction
@@ -99,15 +82,12 @@ Here is an example of integration in a Solidity contract:
 
 ## Delegation contract
 
-Snapshot uses the Gnosis "Delegate Registry" contract here:\
-[https://github.com/gnosis/delegate-registry](https://github.com/gnosis/delegate-registry)
+Snapshot uses the Gnosis "Delegate Registry" contract here: [https://github.com/gnosis/delegate-registry](https://github.com/gnosis/delegate-registry)
 
-The contract is deployed on this address: [0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446](https://etherscan.io/address/0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446#code)\
-The contract is also available on "Supported networks" listed above.
+The contract is deployed on this address: [0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446](https://etherscan.io/address/0x469788fE6E9E9681C6ebF3bF78e7Fd26Fc015446#code). The contract is also available on "Supported networks" listed above.
 
-Delegations are stored on this subgraph:\
-[https://thegraph.com/explorer/subgraph/snapshot-labs/snapshot](https://thegraph.com/explorer/subgraph/snapshot-labs/snapshot)
+Delegations are stored on this subgraph: [https://thegraph.com/explorer/subgraph/snapshot-labs/snapshot](https://thegraph.com/explorer/subgraph/snapshot-labs/snapshot)
 
 <Info>
-A **delegation Voting Strategy must be added** to the Snapshot space before delegated votes will be counted. You can use the [**with-delegation**](https://snapshot.org/#/strategy/with-delegation) strategy.
+A **delegation Voting Strategy must be added** to the Snapshot space before delegated votes will be counted. You can use the [**with-delegation**](https://snapshot.box/#/strategy/with-delegation) strategy.
 </Info>

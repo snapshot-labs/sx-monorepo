@@ -4,7 +4,7 @@ description: "Learn more about the different voting schemes on Snapshot."
 ---
 
 <Info>
-Snapshot supports a number of different voting types and we plan to support many more in the future. If you would like to request a new voting type, please open a feature request [here](https://snapshot.canny.io/feature-requests) :pray:
+Snapshot supports a number of different voting types and we plan to support many more in the future. If you would like to request a new voting type, please open a [feature request](https://snapshot.canny.io/feature-requests).
 </Info>
 
 ## What is a voting type?
@@ -15,12 +15,12 @@ Do not mistake it with the voting strategy though - a [voting strategy](../user-
 
 Voting type is defined in the space settings or at the level of an individual proposal (unless it has been already defined in the space settings) and can allow the users to:
 
-* Choose only **one option** - [#single-choice-voting](#single-choice-voting)
-* Spread their votes over **multiple options** - [#weighted-voting](#weighted-voting)
-* **Approve** a certain number of options - [#approval-voting](#approval-voting)
-* Spread their votes over multiple options using the [**quadratic voting**](https://en.wikipedia.org/wiki/Quadratic_voting) **formula** - [#quadratic-voting](#quadratic-voting)
-* Rank the different choices in their **order of preference** - [#ranked-choice-voting-instant-runoff-voting](#ranked-choice-voting-instant-runoff-voting)
-* **Abstain** from voting while still participating in quorum - [#basic-voting](#basic-voting)
+* Choose only **one option**, [#single-choice-voting](#single-choice-voting)
+* Spread their votes over **multiple options**, [#weighted-voting](#weighted-voting)
+* **Approve** a certain number of options, [#approval-voting](#approval-voting)
+* Spread their votes over multiple options using the [**quadratic voting**](https://en.wikipedia.org/wiki/Quadratic_voting) **formula**, [#quadratic-voting](#quadratic-voting)
+* Rank the different choices in their **order of preference**, [#ranked-choice-voting-instant-runoff-voting](#ranked-choice-voting-instant-runoff-voting)
+* **Abstain** from voting while still participating in quorum, [#basic-voting](#basic-voting)
 
 Let's have a look at each voting type in the next section.
 
@@ -30,12 +30,12 @@ Let's have a look at each voting type in the next section.
 
 Each user can select only one option. The results will reflect these votes as percentages of the total voting power of all voting participants cast on the specific choice.
 
-Ideal for choosing one option from many.\
-\
+Ideal for choosing one option from many.
+
 **Pros**: Most simple and common voting type which is easy to set up and use.\
 **Cons**: Voters can pick only one option.
 
-👉 [**Try it yourself!**](https://snapshot.org/#/pistachiodao.eth/proposal/0x02c3fcd64e86157d07c88e5a715ac08f57655917f8bfd5be30a99092136511ec)
+[**Try it yourself**](https://snapshot.box/#/s:pistachiodao.eth/proposal/0x02c3fcd64e86157d07c88e5a715ac08f57655917f8bfd5be30a99092136511ec)
 
 ![](/images/226.png)
 
@@ -48,7 +48,7 @@ Each user can spread their voting power across any number of choices, from one t
 
 This voting method was first introduced by Float Protocol with [Scattershot](https://github.com/FloatProtocol/scattershot) (a fork of Snapshot).
 
-:point\_right: [**Try it yourself!**](https://snapshot.org/#/pistachiodao.eth/proposal/0xf93f1ac80e22cc930b1eef1d20bd34671ccc33b88b04695479c9de364451d77f)
+[**Try it yourself**](https://snapshot.box/#/s:pistachiodao.eth/proposal/0xf93f1ac80e22cc930b1eef1d20bd34671ccc33b88b04695479c9de364451d77f)
 
 ![](/images/157.png)
 
@@ -59,7 +59,7 @@ Each user can select (_approve_) any number of choices, each selected choice wil
 **Pros**: Ask for approval of several decisions in a single proposal.\
 **Cons**: There is no way to manifest _how much_ you support each choice. It’s a simple yes or no.
 
-:point\_right: [**Try it yourself!**](https://snapshot.org/#/pistachiodao.eth/proposal/0x08c3bd2960700525770a1d634f8599ba967e55fcc05b6c1649d984d88253769d)
+[**Try it yourself**](https://snapshot.box/#/s:pistachiodao.eth/proposal/0x08c3bd2960700525770a1d634f8599ba967e55fcc05b6c1649d984d88253769d)
 
 ![](/images/138.png)
 
@@ -121,15 +121,13 @@ All in all, you don't have to understand each step of the calculation. Yet, it s
 </Info>
 
 <Warning>
-This Voting type may encourage the whales to create multiple wallets and split their holdings among them. Therefore it's important to also implement a mechanism providing Sybil Resistance.\
-\
-**Read more** [**here**](../user-guides/spaces/space-handbook/sybil-resistance-scam-and-spam-prevention)**!**
+This voting type may encourage whales to create multiple wallets and split their holdings. It is important to also implement a [validation strategy](../user-guides/validation-strategies) providing Sybil resistance.
 </Warning>
 
 **Pros**: Dilutes the whales' voting power in favor of smaller holders. Individuals will matter more than the number of tokens.\
 **Cons**: This voting type needs to be accompanied by a [Sybil-resistance mechanism](../user-guides/validation-strategies) that prevents whales from splitting funds across different wallets.
 
-:point\_right: [**Try it yourself!**](https://snapshot.org/#/pistachiodao.eth/proposal/0x21f64875abbca71762a980efae43ab62b546d54f19a208d0e61a5d7cee571a35)
+[**Try it yourself**](https://snapshot.box/#/s:pistachiodao.eth/proposal/0x21f64875abbca71762a980efae43ab62b546d54f19a208d0e61a5d7cee571a35)
 
 ![](/images/282.png)
 
@@ -152,7 +150,7 @@ Some options will show up as if they had **not received any votes** because they
 **Pros**: Favors the option with the strongest support and reduces wasted votes.\
 **Cons**: Complex to understand. Will only determine one winner, doesn’t work well to select 2 or more winning options.
 
-:point\_right: [**Try it yourself!**](https://snapshot.org/#/pistachiodao.eth/proposal/0x5003da0f03e718b461e53fe10a998b60172e2e108472153282fcef781c300f23)
+[**Try it yourself**](https://snapshot.box/#/s:pistachiodao.eth/proposal/0x5003da0f03e718b461e53fe10a998b60172e2e108472153282fcef781c300f23)
 
 ![](/images/234.png)
 
@@ -165,6 +163,6 @@ The votes cast on the `Abstain` choice are counted in calculating if the necessa
 **Pros**: Results are easy to interpret and hard to contest.\
 **Cons**: Choices are predefined and cannot be edited.
 
-:point\_right: [**Try it yourself!**](https://snapshot.org/#/pistachiodao.eth/proposal/0x38c654c0f81b63ea1839ec3b221fad6ecba474aa0c4e8b4e8bc957f70100e753)
+[**Try it yourself**](https://snapshot.box/#/s:pistachiodao.eth/proposal/0x38c654c0f81b63ea1839ec3b221fad6ecba474aa0c4e8b4e8bc957f70100e753)
 
 ![](/images/277.png)

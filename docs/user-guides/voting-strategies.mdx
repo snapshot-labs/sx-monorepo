@@ -5,15 +5,29 @@ description: "Learn what a voting strategy is and how to set it up."
 
 ## What is a voting strategy?
 
-Voting strategy is a set of conditions used to calculate user's voting power. Strategies enable Snapshot to calculate the final result of voting on a given proposal.
+Voting strategies determine how voting power is calculated for Snapshot proposals based on specific rules or conditions. Snapshot offers more than 400 available strategies, ranging from simple token-based methods to complex ones involving multiple conditions. Anyone can create custom strategies to precisely meet their governance needs. You can combine up to 8 strategies to calculate cumulative voting power, or up to 10 strategies for [Snapshot Pro](spaces/pro) spaces.
 
->  In technical terms a strategy is a JavaScript function that returns a score for a set of addresses. 
+Strategies are defined in the space settings in the [voting strategies](spaces/settings#voting-strategies) section. The default strategy is `erc20-balance-of`, which calculates the balance of a predefined ERC-20 token for each user.
 
-Strategy/-ies are defined in the space settings in [#voting-strategies](spaces/settings#voting-strategies) section. Each space can select from one up to eight voting strategies. The default strategy is `erc20-balance-of` - it calculates the balance of a predefined ERC20 token for each user.
+### Most common voting strategies
 
-Voting strategies can be used to create a score from onchain data, the data however does not necessarily need to be monetary. As an example a strategy can calculate how many POAPs or specific NFTs a user owns.
+* **ERC-20 balance** (`erc20-balance-of`): Voting power is based on participants' ERC-20 token holdings.
+* **ERC-721 NFT balance** (`erc721`): Uses ownership of ERC-721 NFTs as voting power.
+* **ERC-1155 NFT balance** (`erc1155-balance-of`): Similar to ERC-721 but designed for ERC-1155 NFTs.
+* **ERC-20 Votes** (`erc20-votes`): Voting power is determined by delegated ERC-20 token balances.
+* **Whitelist** (`whitelist`): Grants a fixed voting power (usually 1 vote) to specific wallet addresses, regardless of onchain token holdings.
 
-You can browse through 400+ strategies by selecting the **Strategies** filter on the main page of [https://snapshot.org](https://snapshot.org). If you can't find a strategy that fulfills your needs you can create a new one. To learn more about creating custom voting strategies head to [voting-strategy.md](../developer-guides/voting-strategy).
+### Other popular strategies
+
+* **Contract call** (`contract-call`): Uses the result of a custom contract call as voting power.
+* **Delegation** (`delegation`): Allows delegation of voting power based on existing strategies.
+* **Balance with minimum** (`balance-of-with-min`): Assigns 1 voting power to participants holding at least a specified amount of a certain token.
+* **API** (`api`): Retrieves voting power from an external offchain API.
+* **Whitelist weighted** (`whitelist-weighted`): Assigns custom voting power values to specified addresses.
+* **ETH balance** (`eth-balance`): Uses ETH holdings (or the equivalent gas token on other networks) as voting power.
+* **Ticket** (`ticket`): Gives 1 voting power per participant, used exclusively in combination with a voting validation strategy.
+
+To learn more about creating custom voting strategies, head to the [developer guide](../developer-guides/voting-strategy).
 
 ![](/images/140.png)
 
@@ -22,27 +36,26 @@ You can browse through 400+ strategies by selecting the **Strategies** filter on
 Majority of spaces on Snapshot is using a single strategy however if you need a more complex calculation, you can combine up to 8 strategies. They will be applied to all proposals created for your space (created _after_ the update of the settings) and the voting power will be calculated cumulatively. 
 
 <Info>
-**Multiple voting strategies**\
+**Multiple voting strategies**
+
 If you combine several voting strategies the voting power will be calculated in the following way:\
-&#xNAN;_&#x74;otal voting power = voting power from strategy A + voting power from strategy B + ..._
+_Total voting power = voting power from strategy A + voting power from strategy B + ..._
 </Info>
 
-\
 In order to set up a voting strategy head to your space settings and scroll down to **Strategies** section. You should see the below pop-up after clicking **Add strategy** and selecting a strategy from the list:
 
-<figure>![](/images/188.png)<figcaption><p>Example of setting up an erc20-balance-of strategy.</p></figcaption></figure>
+![Example of setting up an erc20-balance-of strategy.](/images/188.png)
 
 You will see that there is information that you need to provide in order to make the strategy work, for example the **network** where the token is deployed, its **symbol** and **address** of the token's contract. 
 
-Each strategy will require a different setup and you can read the full description and see the required parameters in the strategy's page, for example [erc20-balance-of](https://snapshot.org/#/strategy/erc20-balance-of). You can find each strategy's details through using the search bar and **Strategies** filter.
+Each strategy will require a different setup and you can read the full description and see the required parameters in the strategy's page, for example [erc20-balance-of](https://snapshot.box/#/strategy/erc20-balance-of). You can find each strategy's details through using the search bar and **Strategies** filter.
 
 ## Testing a voting strategy
 
 Before you add the strategy to your space's settings we highly recommend to test it in the **Playground** in order to avoid any potential issues with the voting process.
 
 <Warning>
-If you made a mistake in your space settings and votes have already been cast **it is not possible to revert them.** \
-The best solution would be to (1) delete the proposal, (2) update the settings with correct strategies and (3) recreate the proposal from scratch after the settings have been updated.
+If you made a mistake in your space settings and votes have already been cast **it is not possible to revert them.** The best solution would be to (1) delete the proposal, (2) update the settings with correct strategies and (3) recreate the proposal from scratch after the settings have been updated.
 </Warning>
 
 You can access it from the strategy's detail page by clicking the **Playground** on the right-hand side:
@@ -53,6 +66,6 @@ Your browser will load a Playground page where you can test the custom setup for
 
 ![](/images/237.png)
 
-If everything is set up correctly you should see the calculated voting power for each address after clicking the :arrow\_forward: button:
+If everything is set up correctly you should see the calculated voting power for each address after clicking the play button:
 
 ![](/images/272.png)

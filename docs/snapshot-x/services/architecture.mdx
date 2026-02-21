@@ -1,12 +1,22 @@
 ---
-title: "Architecture"
+title: "Overview"
 ---
 
-To enhance the user experience of interacting with the protocol, we offer a number of additional offchain services. All of these products are fully open source in the [Snapshot Labs Github organization](https://github.com/snapshot-labs). These are all completely optional and therefore do not introduce any censorship concerns. 
+**Snapshot X** is a fully onchain voting protocol deployed on EVM chains and Starknet. It consists of modular smart contracts that handle proposal creation, voting, and execution without reliance on any centralized service.
 
-* [**SX UI**](ui)**:** An easy to use interface for interacting with the protocol. 
-* [**SX API**](api)**:** A fast and efficient indexer for all the protocol data. 
-* [**SX.js**](sx.js)**:** A Typescript SDK that can be used to build 3rd Party Integrations with the protocol.  
-* [**Mana**](mana)**:** A meta-transaction relayer that can provide a way for proposal creation and vote costs to be sponsored.
+Key properties:
 
-[https://whimsical.com/snapshot-x-evm-offchain-architecture-KtBKB8B4qVrrp4i7jeh9oi](https://whimsical.com/snapshot-x-evm-offchain-architecture-KtBKB8B4qVrrp4i7jeh9oi)
+- **Censorship resistant:** the protocol runs entirely onchain with no centralized dependencies.
+- **Onchain voting power:** voting logic is fully onchain and auditable.
+- **Trustless execution:** proposal transactions are automatically executed when a proposal passes.
+
+Both the [EVM implementation](https://github.com/snapshot-labs/sx-evm) and the [Starknet implementation](https://github.com/snapshot-labs/sx-starknet) are open source.
+
+## Services
+
+To enhance the user experience of interacting with the protocol, Snapshot Labs provides a number of additional offchain services. All are fully open source and completely optional - they do not introduce any censorship concerns.
+
+- [**API**](api): A fast indexer for all protocol data.
+- [**SX.js**](sx.js): A TypeScript SDK for building integrations with the protocol.
+- [**UI**](ui): An interface for interacting with the protocol.
+- [**Mana**](mana): A meta-transaction relayer that sponsors proposal creation and vote costs.

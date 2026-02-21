@@ -5,25 +5,29 @@ description: "Learn what the space roles are and how you can assign them to user
 
 ## What is a role?
 
-A role is a set of permissions related to managing your space and its proposals which an account (wallet address) can be granted.
+Snapshot spaces use a hierarchical role system to manage governance and participation. The four main roles are Controller, Admin, Moderator, and Author, each with specific permissions.
 
 ## Role permissions
 
 ### Controller
 
-The controller has **full control over the space settings** including managing the list of admins.
+The **Controller** is the highest authority, limited to a single entity per space. They have full control, including adding or removing admins, editing space settings, canceling proposals, and publishing proposals. Controllers can be represented by smart contract wallets like Safe, and sometimes the space itself serves as the Controller.
 
 ### Admin
 
-An admin can **edit space settings** with the exception of the list of admin users and **archive proposals.**
+**Admins** can edit space settings, cancel proposals, and publish proposals but cannot add or remove other admins.
 
 ### Moderator
 
-A moderator can manage proposals within the space and create new ones.
+**Moderators** can cancel proposals and publish proposals but cannot edit settings or manage admins.
 
 ### Author
 
-An author can **create proposals** regardless of their voting power and the proposal validation strategy.
+**Authors** can publish proposals without needing voting power or meeting proposal validation requirements. They have no other administrative permissions.
+
+<Info>
+On Snapshot X there is only one role: the Controller. The Controller can change settings and cancel proposals.
+</Info>
 
 ## Assign a role to a user
 

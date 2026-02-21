@@ -4,7 +4,7 @@ title: "Validation strategies"
 
 ## What is a validation strategy?
 
-A voting validation is a JavaScript function that returns a boolean (`true` or `false`) for the connected account. Voting validations are being used on Snapshot to decide if an **account can vote** or **create a proposal** in a specific spac&#x65;**.** Each space can use one voting validation for all of its proposals at a time. While voting strategies calculate the Voting Power mainly on the basis of the monetary assets, the validation strategy can serve as a protection against **Sybil attacks**. It can take into consideration how many POAPs an account owns or track the account activity to assess if the account is a bot or a **real human**.
+A voting validation is a JavaScript function that returns a boolean (`true` or `false`) for the connected account. Voting validations are being used on Snapshot to decide if an **account can vote** or **create a proposal** in a specific space. Each space can use one voting validation for all of its proposals at a time. While voting strategies calculate the Voting Power mainly on the basis of the monetary assets, the validation strategy can serve as a protection against **Sybil attacks**. It can take into consideration how many POAPs an account owns or track the account activity to assess if the account is a bot or a **real human**.
 
 The **default** validation is checking if the address has **any voting power.** If the voting power is higher than `0` the connected account is validated. A validation strategy can send a call to a node or subgraph.
 
@@ -17,7 +17,7 @@ Spaces are required to use **Proposal Validation**. Learn how to set it up on th
 </Info>
 
 <Info>
-Spaces using only a [ticket strategy](https://snapshot.org/#/strategy/ticket) are required to set a Voting Validation to secure their spaces and ensure a fair voting process preventing spam. Learn here how to set it up: [#voting-validation-in-space-settings](#voting-validation-in-space-settings)
+Spaces using only a [ticket strategy](https://snapshot.box/#/strategy/ticket) are required to set a Voting Validation to secure their spaces and ensure a fair voting process preventing spam. Learn here how to set it up: [#voting-validation-in-space-settings](#voting-validation-in-space-settings)
 </Info>
 
 ## How to use validation strategies:
@@ -44,7 +44,7 @@ If you want to allow addresses with any voting power to vote you can use the def
 ![](/images/149.png)
 
 <Info>
-If you are using only a [ticket](https://snapshot.org/#/strategy/ticket) Voting Strategy for your space you are required to use a [Gitcoin Passport Validation](#validation-strategy-example-gitcoin-passport) for Voting to protect your space from spam votes.
+If you are using only a [ticket](https://snapshot.box/#/strategy/ticket) Voting Strategy for your space you are required to use a [Gitcoin Passport Validation](#validation-strategy-example-gitcoin-passport) for Voting to protect your space from spam votes.
 </Info>
 
 ## Authors only mode
@@ -53,19 +53,19 @@ If you wish to limit proposal creators to Admins, Moderators and Authors only, y
 
 ![](/images/81.png)
 
-## Validation strategy example - Basic
+## Validation strategy example: Basic
 
 The Basic validation strategy allows you to use existing Voting Strategies configured for your space or define a custom setup to determine if a user is eligible to create a proposal or cast a vote. 
 
 In order to use existing setup of Voting Strategies you can simply chose **Basic Validation** and define a required threshold as on the screenshot below. `100` corresponds to user's Voting Power calculated on the basis of the Voting Strategies.
 
-<figure>![](/images/79.png)<figcaption><p>Use current setup and define a strong threshold to avoid spam in your space.</p></figcaption></figure>
+![Use current setup and define a strong threshold to avoid spam in your space.](/images/79.png)
 
 If you wish to use a different configuration, toggle the **Use custom strategies** button and define the strategies for your use case:
 
-<figure>![](/images/80.png)<figcaption><p>Use a custom setup using various Voting Strategies to calculate if a user is eligible to create a proposal or vote.</p></figcaption></figure>
+![Use a custom setup using various Voting Strategies to calculate if a user is eligible to create a proposal or vote.](/images/80.png)
 
-## Validation strategy example - Gitcoin Passport
+## Validation strategy example: Gitcoin Passport
 
 Validation strategy built together with **Gitcoin Passport.** You can select individual or multiple stamps that matter for your space. You can also decide if they need to meet all of these criteria or only one. The more criteria you select, the more sybil resistant your space is.
 
@@ -129,7 +129,7 @@ export default class extends Validation {
 }
 ```
 
-Voting validation can be specified in your space settings at `https://snapshot.page/#/<SPACE ADDRESS>/settings`. 
+Voting validation can be specified in your space settings at `https://snapshot.box/#/s:<SPACE ADDRESS>/settings`.
 
 ## Create a custom validation 
 

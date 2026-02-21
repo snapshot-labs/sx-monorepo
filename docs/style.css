@@ -1,5 +1,62 @@
+:root {
+  --background-dark: #141318;
+  --border-dark: #2b2a2f;
+  --text-dark: #d0d0d1;
+}
+
+body {
+  background-color: #141318;
+  color: #d0d0d1;
+}
+
+#navbar {
+  background-color: #141318;
+  border-bottom-color: #2b2a2f;
+}
+
 #sidebar {
-  border-right: 1px solid hsl(0 0% 100% / 0.05);
+  background-color: #141318;
+  border-right: 1px solid #2b2a2f;
+}
+
+#content-area {
+  background-color: #141318;
+  color: #d0d0d1;
+}
+
+#content-area p,
+#content-area li,
+#content-area td,
+#content-area th,
+#content-area span,
+#content-area div {
+  color: #d0d0d1;
+}
+
+h1, h2, h3, h4, h5, h6,
+h1 *, h2 *, h3 *, h4 *, h5 *, h6 * {
+  color: #ffffff !important;
+}
+
+#content-area a {
+  color: #ffffff;
+}
+
+header, footer, main, div, a, hr, [class*="border"] {
+  border-color: #2b2a2f !important;
+}
+
+nav:not(#navbar):not(.nav-tabs) {
+  border-color: #2b2a2f !important;
+}
+
+/* Dropdown / popover backgrounds */
+[data-radix-popper-content-wrapper] > div,
+[data-radix-popper-content-wrapper] > div > div {
+  background: #1c1b22 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-color: #2b2a2f !important;
 }
 
 #sidebar,
