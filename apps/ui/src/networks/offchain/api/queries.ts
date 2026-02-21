@@ -362,6 +362,7 @@ export const LEADERBOARD_QUERY = gql`
       space
       proposalsCount
       votesCount
+      vpValue
     }
   }
 `;
