@@ -92,7 +92,8 @@
               "developer-guides/voting-strategy",
               "developer-guides/validation-strategy",
               "developer-guides/identify-integrator-activity",
-              "developer-guides/networks"
+              "developer-guides/networks",
+              "v1-interface/plugins/safesnap-reality"
             ]
           },
           {
@@ -150,27 +151,6 @@
                   "snapshot-x/services/mana"
                 ]
               }
-            ]
-          },
-          {
-            "group": "V1 interface",
-            "pages": [
-              "v1-interface/email-notifications",
-              {
-                "group": "Plugins",
-                "pages": [
-                  "v1-interface/plugins/what-is-a-plugin-and-how-to-use-it",
-                  "v1-interface/plugins/create-a-plugin",
-                  "v1-interface/plugins/safesnap-osnap",
-                  "v1-interface/plugins/safesnap-reality",
-                  "v1-interface/plugins/poap",
-                  "v1-interface/plugins/quorum",
-                  "v1-interface/plugins/domino",
-                  "v1-interface/plugins/gnosis-impact",
-                  "v1-interface/plugins/galxe"
-                ]
-              },
-              "v1-interface/boost"
             ]
           }
     ]
