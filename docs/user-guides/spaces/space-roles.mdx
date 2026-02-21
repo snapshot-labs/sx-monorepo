@@ -5,44 +5,44 @@ description: "Learn what the space roles are and how you can assign them to user
 
 ## What is a role?
 
-Role is a set of permissions related to managing your space and its proposals which an account (wallet address) can be granted.
+A role is a set of permissions related to managing your space and its proposals which an account (wallet address) can be granted.
 
 ## Role permissions
 
 ### Controller
 
-Controller of space has a **full control over the space settings** including managing the list of admins.
+The controller has **full control over the space settings** including managing the list of admins.
 
 ### Admin
 
-Admin can **edit space settings** with the exception of the list of admin users and **archive proposals.**
+An admin can **edit space settings** with the exception of the list of admin users and **archive proposals.**
 
 ### Moderator
 
-Moderator can manage proposals within the Space and create new ones.
+A moderator can manage proposals within the space and create new ones.
 
 ### Author
 
-Author can **create proposals** regardless of their voting power and the proposal validation strategy.
+An author can **create proposals** regardless of their voting power and the proposal validation strategy.
 
-## Assign a role to the user
+## Assign a role to a user
 
 ### Controller
 
-The controller is first assigned during the process of space creation. By default, it is the ENS domain controller. To learn more about this step, head to [#2.-set-the-space-controller-ens-text-record](create/#2.-set-the-space-controller-ens-text-record).
+The controller is first assigned during the process of space creation. By default, it is the ENS domain controller.
 
-There can be only **one controller** per space and can be updated **only by the current controller.**
+There can be only **one controller** per space and it can be updated **only by the ENS owner.**
 
-To update the controller role head to the space settings on Snapshot and the **Advanced** tab. At the bottom of the page you'll find the **Danger zone** where you can change the controller:
+To view or update the controller, go to your space **Settings** and select the **Controller** tab:
 
 ![](/images/121.png)
 
-Paste the address of the account you want to set as space controller in the pop-up window and click `Set`. It will trigger your wallet browser extension and ask you to sign a **transaction with a gas fee.** 
+Click the edit icon next to the controller address, paste the address of the new controller, and confirm. This will trigger your wallet and ask you to sign a **transaction with a gas fee.**
 
-### **Admins, moderators, and authors**
+### Admins, moderators, and authors
 
-To update the admins and authors lists head to the space settings on Snapshot and the **Members** tab.
+To manage members, go to your space **Settings** and select the **Members** tab.
 
-You can add addresses one by one and choose their applicable role:
+You can add addresses and choose their applicable role from the dropdown:
 
 ![](/images/172.png)

@@ -43,11 +43,10 @@
                   "user-guides/spaces/get-verified",
                   "user-guides/spaces/space-hibernation",
                   "user-guides/spaces/add-custom-domain",
-                  "user-guides/spaces/add-skin",
                   "user-guides/spaces/space-roles",
                   "user-guides/spaces/migrate-or-delete",
                   "user-guides/spaces/badges-and-warnings",
-                  "user-guides/spaces/turbo-plan",
+                  "user-guides/spaces/pro",
                   {
                     "group": "Space handbook",
                     "pages": [
@@ -76,8 +75,7 @@
               {
                 "group": "Voting",
                 "pages": [
-                  "user-guides/voting/vote",
-                  "user-guides/voting/delegate-your-voting-power"
+                  "user-guides/voting/vote"
                 ]
               },
               "user-guides/voting-strategies",

@@ -3,113 +3,69 @@ title: "Create a space"
 description: "This page guides you step by step through the process of creating a space for your organization."
 ---
 
-<Warning>
-If you already have a space without ENS domain (legacy), you need to [Migrate your space to ENS](https://docs.snapshot.page/spaces/migrate).
-</Warning>
-
 <Info>
-If you want to use Snapshot in a demo mode to experiment with the platform head to [https://testnet.snapshot.org](https://testnet.snapshot.org) - our playground connected to the Goerli Testnet. Make sure to provide an ENS name registered on Goerli Testnet in the first step below.
+If you want to experiment with Snapshot before creating a real space, try [testnet.snapshot.box](https://testnet.snapshot.box) — a Sepolia testnet playground for testing.
 </Info>
 
-### 1. Set or get an ENS domain for your space
+To create a space, go to [snapshot.box/#/create](https://snapshot.box/#/create) or click the **+** button in the left sidebar. You will be guided through the following steps.
 
-Tap the plus **`+`** button in the left sidebar to create a new space.
+### 1. Profile
+
+Set up your space's identity. Enter a **name** (required) and optionally add a description, avatar, cover image, categories, voting power symbol, and social accounts (website, GitHub, X, Farcaster, CoinGecko).
+
+You can update this information at any time after creating the space.
 
 ![](/images/23.png)
 
-If you already own an ENS domain, make sure you are connected to [snapshot.org](https://snapshot.org/#/setup) with the **Ethereum address** that is set as **controller of your ENS name** (if you are confused about the difference between ENS Registrant and Controller, have a read [here](https://docs.ens.domains/permanent-registrar-faq#what-is-the-registrant-and-controller-of-a-name)). 
+### 2. Domain name
 
-If the above condition is met, your ENS name will appear. To confirm it's correct, click on it.\
-\
+Select your space's domain name. You need an ENS name on Ethereum mainnet or a web3 domain name on a mainnet network. Your available domains will be listed automatically.
 
-
-<Info>
-If you **don't own an ENS domain** you will have to register one. \
-\
-Enter a name that suits the needs of your DAO in the `register a new domain` field and click `Register.` You can then follow [ens-domain.md](ens-domain) and come back here for step 2 once domain has been registered.
-</Info>
-
-### 3. Create your profile
-
-To complete the profile of your space you have to enter a name for your DAO (mandatory) and can add further optional information like a description, avatar, categories describing the field that your DAO is operating in and more. 
-
-You can add or update this information after you have finished creating the space.
+If you don't have a domain, you can register a new ENS name or attach a custom domain. By default, the space's controller is the domain owner.
 
 ![](/images/27.png)
 
-### **4. Set your very first strategy**
+### 3. Network
 
-Your space can combine up to 8 voting strategies which will be responsible for calculating the users' voting power. The setting affects all proposals that will be created for that space. 
-
-<Info>
-If you would like to differentiate the calculation of users' voting power between proposals you will have to create a sub-space. Head to [sub-spaces.md](../sub-spaces) to learn more.
-</Info>
-
-For the initial setup you have to choose one of the three following strategy types to then specify the strategy details:
-
-![](/images/25.png)
-
-### Voting strategies types 
-
-Let's have a look at each of the possible options and see how you can specify the strategy details.
-
-<Info>
-Each strategy is taking into account the assets that belong to the voting address **at the time of proposal creation**, not at the time of voting.
-</Info>
-
-#### Token weighted voting
-
-Voting power is weighted by the amount of the token held by the user. The token can be an ERC-20, ERC-721 or ERC-1155 token standard.
-
-1. Select your token network
-2. Select your token standard
-3. Enter your token contract address
-
-<div align="center">![](/images/26.png)</div>
-
-#### One person, one vote
-
-This option can be used in two different ways:
-
-* **Whitelist voting** lets you specify a list of addresses that will be able to vote
-* **Ticket voting** will let any wallet vote (option used mostly for testing purposes)
-
-![](/images/28.png)
-
-#### Custom setup
-
-If you feel ready to dive deeper into the custom setup here are a few hints that you may find useful:
-
-* You can select up to 8 different strategies. Voting power is cumulative.
-* Network can be selected individually for each strategy. This way you can leverage multi-chain voting power calculation.
-* It is possible to set a different symbol for each strategy. They will be displayed on the proposal page.
-* You can write a custom voting strategy if the existing ones are the sufficient for your needs. Have a look at [voting-strategy.md](../../../developer-guides/voting-strategy) to learn more.
-
-\
-At the time of writing this article there are around 415 Snapshot voting strategies and this number keeps growing. [Learn more about the strategies. ](../../voting-strategies)
+Select the base network for your space.
 
 ![](/images/30.png)
 
-## Moderation
+### 4. Voting strategies
 
-**Admins** will be able to edit the space settings and moderate proposals. 
-
-**Authors** will be able to create proposals without any constraints like proposal validation. Make sure that members specified in authors field are allowed to submit a proposal.
+Choose how your users' votes are counted through a set of strategies. You can pick from common strategies like **ERC-20**, **ERC-20 Votes**, **ERC-721**, or **ERC-1155**, or browse the full list to add a custom strategy.
 
 <Info>
-You can add between 1 and 100 addresses. Each line should be an individual address - do not list multiple addresses in on line with any characters like commas, dots or semicolons.
+Each strategy takes into account the assets that belong to the voting address **at the time of proposal creation**, not at the time of voting.
 </Info>
 
+![](/images/25.png)
+
+### 5. Proposal validation
+
+Configure who is allowed to create a proposal. Options include:
+
+* **Only authors can propose** — restrict proposal creation to designated authors
+* **Basic** — use a minimum score with any strategy to determine eligibility
+* **Gitcoin Passport gated** — require users to have a Gitcoin Passport
+* **Karma EAS Attestation** — use EAS attestations for eligibility
+
+![](/images/26.png)
+
+### 6. Voting settings
+
+Set the **voting delay** (time between proposal creation and voting start) and the **voting period** (how long voting remains open). If left empty, the proposal author will be able to set these values.
+
+![](/images/28.png)
+
+### 7. Members
+
+Assign roles and permissions to your space members. Available roles:
+
+* **Admin** — can modify settings, manage proposals, and create proposals
+* **Moderator** — can manage proposals and create proposals
+* **Author** — can create proposals without validation
+
+Once everything is configured, click **Create space** to finalize.
+
 ![](/images/43.png)
-
-## Your space is live !
-
-![](/images/44.png)
-
-### What else can I customize?
-
-
-[add-custom-domain.md](../add-custom-domain)
-
-
-[add-skin.md](../add-skin)

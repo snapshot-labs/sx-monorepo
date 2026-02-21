@@ -1,107 +1,65 @@
 ---
 title: "Settings"
-description: "Customize your space settings, sub-spaces, manage access, voting strategies and validation and more!"
+description: "Customize your space settings, manage members, voting strategies, validation, and more."
 ---
 
 ## Access your settings
 
-Navigate to your space settings from the space menu by clicking on `Settings`.
+As a space admin, you can access the settings page from the space sidebar. The settings are organized into tabs, each covering a specific aspect of your space configuration.
 
 ![](/images/31.png)
 
 <Info>
-If you have trouble finding the settings page you can manually navigate to it with the following URL: https://snapshot.org/#/`&lt;YOUR-ENS-NAME&gt;`/settings
+You can navigate directly to the settings page with the URL: `https://snapshot.box/#/s:&lt;YOUR-SPACE&gt;/settings`
 </Info>
 
-## Edit the controller of your space
+## Profile
 
-Space controller is the main account that is able to manage the space settings and assign other addresses as admins of the space. By default it's set as the ENS Controller address however you can change it to another address.
-
-To replace the current space controller by a new controller click the `Edit controller` button.
-
-![](/images/32.png)
-
-<Info>
-You will need to **sign a transaction** on the Ethereum Mainnet to set the ENS text-record.
-</Info>
-
-## Edit your profile information
-
-To complete your profile, you can upload an avatar/logo, enter a name for your DAO, a description, select up to 2 categories and other details. These settings can be changed at any time.
+Edit your space's profile information including name, description, avatar, cover image, categories, voting power symbol, and social accounts (website, GitHub, X, Farcaster, CoinGecko).
 
 ![](/images/33.png)
 
-## Social accounts
+### Social accounts
 
-You can link your social media accounts to the space on Snapshot by typing in your account handle, i.e. [@SnapshotLabs](https://twitter.com/SnapshotLabs)
+Link your social media accounts by entering your handle in the corresponding fields.
 
 ![](/images/34.png)
 
-## Sub-spaces
+## Controller
 
-<Info>
-If you don't know what a sub-space is head to [sub-spaces.md](sub-spaces) to learn more about them!
-</Info>
+The controller is the account able to change the space settings and cancel pending proposals. By default it's set as the ENS domain owner, but you can change it to another address.
 
-In order to connect the space with sub-spaces you need to set them up for both main- and the sub-space.
-
-1. First **create the sub-space** as you would create a normal space. Once the sub-space is set up, type it's linked ENS domain name in the Sub-spaces input field. If everything went well, you will be able to click the **`+`** on the right.
-2. Head to the sub-space settings and type in the linked ENS domain name of the **voting** in the correct input field.
-
-![](/images/35.png)
-
-<Warning>
-If you see a ❌ after typing the sub-space name it means that it cannot be found. Make sure that you have created the sub-space before adding it.
-</Warning>
+![](/images/32.png)
 
 ## Voting strategies
 
-Specify how the voting power should be calculated by adding one or up to 8 strategies.
+Specify how voting power should be calculated by adding up to 6 strategies. Select a network and add strategies from the available list. Voting power is cumulative across strategies.
 
-To learn more about what they are and how they work head to [voting-strategies.md](../voting-strategies).
-
-<Warning>
-If you are using a [ticket](https://snapshot.org/#/strategy/ticket) strategy which gives everyone 1 vote regardless of their holdings, you are required to set up a Voting Validation.\
-\
-Head here to learn how to do it: [#validation-strategy-example-gitcoin-passport](../validation-strategies#validation-strategy-example-gitcoin-passport)
-</Warning>
+To learn more about strategies, head to [voting-strategies.md](../voting-strategies).
 
 ![](/images/36.png)
 
-## Admins and authors
+## Members
 
-In order to specify who can manage the space or create proposals, fill in the apropriate field with addresses for:
+Assign roles and permissions to your space members:
 
-* **Admins** - able to edit the space settings and moderate proposals.
-* **Authors** - able to create proposals without any constraints Make sure that members specified in authors field are allowed to submit a proposal.
-
-<Info>
-Each line should be populated with one address only. Do not add multiple addreses in one line and do not use separators like commas, dots or semicolons.\
-\
-You can add up to 100 addresses in each field.
-</Info>
+* **Admin** — can modify settings, manage proposals, and create proposals
+* **Moderator** — can manage proposals and create proposals
+* **Author** — can create proposals without validation
 
 Head to [space-roles.md](space-roles) to learn more about each role.
 
 ![](/images/37.png)
 
-##
+## Proposal
 
-## Proposals
-
-You can provide guidelines and a template which will be displayed during the proposal creation:
+Configure proposal guidelines, templates, and validation. The proposal validation determines who is allowed to create a proposal.
 
 ![](/images/139.png)
 
 ### Proposal validation
 
-<Warning>
-Due to multiple spam attacks on Snapshot each space is now required to set up a **Proposal Validation**.\
-\
-Learn how to do it in [#how-to-use-validation-strategies](../validation-strategies#how-to-use-validation-strategies)
-</Warning>
-
-To validate if someone can post a proposal or not you can use the basic validation by default which takes your voting power with space strategies and checks if you pass a defined threshold.
+To validate if someone can post a proposal, you can use the basic validation which checks voting power against a minimum threshold, or restrict proposals to authors only.
 
 To learn what a validation is head to [validation-strategies.md](../validation-strategies).
 
@@ -109,59 +67,52 @@ To learn what a validation is head to [validation-strategies.md](../validation-s
 
 ## Voting
 
-The **voting delay** is a value in time between the time of proposal creation and the moment when users are allowed to vote.\
-The **voting period** is the duration that the proposal is active and votes can be cast. It is counted from the moment
+Set the **voting delay** (time between proposal creation and the start of voting) and the **voting period** (duration that voting remains open).
 
-**Quorum** is the amount of voting power collectively achieved by voters which is required for a proposal to pass.
+Configure **quorum** (the amount of voting power required for a proposal to pass), **type** (voting system), **privacy**, and **vote validation**.
 
 ![](/images/39.png)
 
-### Shielded Voting
+### Shielded voting
 
-You can enable Shielded Voting within your space if you want to enable partial privacy and reduce voter apathy. Shielded Voting designed by Shutter is enabling that by using threshold encryption. You can learn more about it in the [technical overview.](https://www.shutter.network/shielded-voting)
+You can enable shielded voting if you want to enable partial privacy and reduce voter apathy. Powered by Shutter, it uses threshold encryption so that voters' choices are private during the voting period and revealed when the proposal closes.
 
-In short, Shielded Voting is a voting setting in which the voters choices are private during the voting period and get revealed when the proposal closes.
-
-To enable it head to **Voting** tab and select Shutter within the **Privacy** setting.
+To enable it, select **Shutter** in the **Privacy** dropdown on the Voting tab.
 
 ![](/images/283.png)
 
-## Delegation
+## Delegations
 
-In the **Delegation** tab you can set a custom delegation contract to enable delegate discovery for your space:
+Set a custom delegation contract to enable delegate discovery for your space.
 
 ![](/images/98.png)
 
 <Info>
-Once set, the delegates registry will be visible in the **Delegates** tab in the Space page.
+Once set, the delegates registry will be visible in the **Delegates** tab on the space page.
 </Info>
 
-## Custom domain and skin
+## Advanced
 
-You can add a custom domain to your space by following the [add-custom-domain.md](add-custom-domain) guide.
+Configure parent and children spaces (sub-spaces), terms, and other advanced settings.
 
-If you want to apply a different design (skin) to your space, you have to set a custom domain first. Head to [add-skin.md](add-skin) to learn how to add a custom skin for your custom domain.
+![](/images/35.png)
+
+<Info>
+To learn more about sub-spaces, head to [sub-spaces.md](sub-spaces).
+</Info>
+
+## Custom domain
+
+You can add a custom domain to your space in the **Custom domain** tab. Head to [add-custom-domain.md](add-custom-domain) for a step-by-step guide.
 
 ![](/images/40.png)
 
 ## Treasuries
 
-In order to link your organization's treasury to Snapshot you have to:
-
-1. Choose the treasury network
-2. Enter its Ethereum address
-3. Fill in the name of that treasury.
-
-It is possible to add multiple treasuries to one space.
+Link your organization's treasury to Snapshot by adding the treasury network, address, and name. You can add multiple treasuries to one space.
 
 ![](/images/41.png)
 
-## Plugins
-
-You can customize your space even further with various plugins which provide extra features. To learn more about the plugins head to [plugins](../../v1-interface/plugins/) section.
-
-![](/images/42.png)
-
 ## Save your settings
 
-Make sure to click the `Save` button on top of the settings page to apply the changes to your space. Once you **sign a message** (gasless) in your wallet, changes will be applied!
+Make sure to click the **Save** button to apply your changes. You will need to **sign a message** (gasless) in your wallet to confirm.
