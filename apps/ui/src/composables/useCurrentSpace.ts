@@ -8,13 +8,26 @@ type SpaceId = { networkId: NetworkID; address: string };
 
 export function useCurrentSpace() {
   const { space: whiteLabelSpace } = useWhiteLabel();
+  const { organization } = useOrganization();
   const route = useRoute();
 
   const spaceParam = computed(() => route.params.space as string | undefined);
 
-  const primarySpace = computed<Space | null>(
-    () => whiteLabelSpace.value ?? null
-  );
+  const primarySpace = computed<Space | null>(() => {
+    if (whiteLabelSpace.value) return whiteLabelSpace.value;
+
+    const org = organization.value;
+    if (!org) return null;
+
+    if (spaceParam.value) {
+      const match = org.spaces.find(
+        s => spaceParam.value === `${s.network}:${s.id}`
+      );
+      if (match) return match;
+    }
+
+    return org.spaces[0] ?? null;
+  });
 
   const queryFn = computed<typeof skipToken | (() => Promise<SpaceId | null>)>(
     () => {
@@ -61,8 +74,24 @@ export function useCurrentSpace() {
     () => !primarySpace.value && (isResolving.value || isQueryPending.value)
   );
 
+  const networkId = computed<NetworkID | null>(() => {
+    if (primarySpace.value) return primarySpace.value.network;
+    if (spaceId.value) return spaceId.value.networkId;
+    return spaceParam.value
+      ? (spaceParam.value.split(':')[0] as NetworkID)
+      : null;
+  });
+
+  const address = computed<string | null>(() => {
+    if (primarySpace.value) return primarySpace.value.id;
+    if (spaceId.value) return spaceId.value.address;
+    return spaceParam.value ? spaceParam.value.split(':')[1] : null;
+  });
+
   return {
     space,
-    isPending
+    isPending,
+    networkId,
+    address
   };
 }

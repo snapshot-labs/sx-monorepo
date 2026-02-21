@@ -1,7 +1,6 @@
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID } from '@/types';
 import my from './useNav/my';
 import settings from './useNav/settings';
@@ -37,12 +36,7 @@ export function useNav() {
   const notificationsStore = useNotificationsStore();
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
-  const { param } = useRouteParser('space');
-  const { resolved, address, networkId } = useResolve(param);
-  const { data: spaceData } = useSpaceQuery({
-    networkId: networkId,
-    spaceId: address
-  });
+  const { space: currentSpace, networkId, address } = useCurrentSpace();
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
 
@@ -50,13 +44,9 @@ export function useNav() {
     providers.find(p => p.routeName === currentRouteName.value)
   );
 
-  const space = computed(() => {
-    if (currentRouteName.value === 'space' && resolved.value) {
-      return spaceData.value ?? null;
-    }
-
-    return null;
-  });
+  const space = computed(() =>
+    currentRouteName.value === 'space' ? currentSpace.value : null
+  );
 
   const { isController } = useSpaceController(space);
 

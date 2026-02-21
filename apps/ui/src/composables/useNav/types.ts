@@ -9,6 +9,8 @@ export type NavItem = {
   hidden?: boolean;
   link?: RouteLocationRaw;
   active?: boolean;
+  isExternal?: boolean;
+  position?: number;
 };
 
 export type NavConfig = {

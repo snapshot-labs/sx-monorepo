@@ -33,8 +33,6 @@ const MAPPING = {
     id: 'openagora.eth'
   },
   'governance.starknet.io': {
-    network: 'sn',
-    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
@@ -46,8 +44,6 @@ const MAPPING = {
     }
   },
   'starknet.stage.box': {
-    network: 'sn',
-    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
@@ -87,6 +83,7 @@ async function getSpace(domain: string): Promise<Space | null> {
       loadSpacesParams.id = id;
     }
   } else if (MAPPING[domain]) {
+    if (!('id' in MAPPING[domain])) return null;
     loadSpacesParams.id = MAPPING[domain].id;
     spaceNetwork = MAPPING[domain].network;
   } else {
@@ -116,11 +113,13 @@ export function useWhiteLabel() {
     let shouldResolve = true;
 
     try {
+      const mapping = MAPPING[domain];
+
       space.value = await getSpace(domain);
 
-      if (!space.value) return;
+      if (!space.value && !mapping) return;
 
-      if (!space.value.turbo && !MAPPING[domain]) {
+      if (space.value && !space.value.turbo && !mapping) {
         const redirectUrl = new URL(
           `${window.location.protocol}//${DEFAULT_DOMAIN}`
         );
@@ -145,8 +144,7 @@ export function useWhiteLabel() {
 
       isWhiteLabel.value = true;
       skinSettings.value =
-        MAPPING[domain]?.skinSettings ||
-        space.value.additionalRawData?.skinSettings;
+        mapping?.skinSettings || space.value?.additionalRawData?.skinSettings;
     } catch (e) {
       console.log(e);
       failed.value = true;
