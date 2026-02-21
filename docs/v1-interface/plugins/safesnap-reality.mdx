@@ -1,0 +1,53 @@
+---
+title: "SafeSnap"
+---
+
+SafeSnap enables trustless execution for your Snapshot governance on a Safe treasury using [Reality.eth](https://reality.eth.limo/) oracle.
+
+## How does it work?
+
+SafeSnap plugin is an oracle based solution which works together with Safe and Snapshot in the following way:
+
+![](/images/162.png)
+
+* A Safe module, where anyone can create a new proposal: an array of multisend transaction payloads.
+* Each proposal is a `Reality.eth` question asking if (1) the linked Snapshot proposal passed, (2) did the proposal include the payload, and (3) does the payload do what the proposal describes.
+* If the proposal passes on Snapshot, then `Reality.eth` should resolve to the same outcome, and after a 24 hour cooldown period, the proposal’s transactions are executable by anyone.
+* Reality uses an ERC-20 token (a given DAO’s governance token) for the bond. The minimum bond can be set by way of a proposal to the DAO.
+* The UI is a Snapshot plugin, in which users can enter an array of tx-payloads to be executed sequentially by the Safe if the proposal passes. Once the proposal has passed, the Reality.eth question has resolved, and the 24 hour cooldown period is over, there is the option on the Snapshot interface to trigger each of the multisend transactions in the proposal.
+
+## Setup
+
+Follow the official Zodiac guide on how to setup a SafeSnap for your project.\
+\
+**I'm a non-dev operator (space controller or admin):**
+
+[https://docs.kleros.io/integrations/types-of-integrations/1.-dispute-resolution-integration-plan/channel-partners/kleros-reality-module](https://docs.kleros.io/integrations/types-of-integrations/1.-dispute-resolution-integration-plan/channel-partners/kleros-reality-module)
+
+**I'm a developer:**
+
+[https://github.com/gnosis/zodiac-module-reality/blob/main/docs/setup\_guide.md](https://github.com/gnosis/zodiac-module-reality/blob/main/docs/setup_guide.md)
+
+## Security recommendations
+
+In order to ensure maximal safety we recommend to define several paremeters for your setup:
+
+* Set a **substantial bond** for an answer
+* Select an **arbitrator**
+* Select a **long cooldown**
+* Set up a **monitoring infrastructure** for questions
+
+## Additional resources
+
+Learn more about SafeSnap here:
+
+[https://blog.gnosis.pm/introducing-safesnap-the-first-in-a-decentralized-governance-tool-suite-for-the-gnosis-safe-ea67eb95c34f](https://blog.gnosis.pm/introducing-safesnap-the-first-in-a-decentralized-governance-tool-suite-for-the-gnosis-safe-ea67eb95c34f)
+
+<iframe
+  src="https://www.youtube.com/embed/ncDeEuJfVkg"
+  title="YouTube video"
+  width="100%"
+  height="400"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+/>

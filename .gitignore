@@ -42,3 +42,5 @@ yarn-error.log*
 
 # playwright related files
 .browser
+
+/legacy-docs

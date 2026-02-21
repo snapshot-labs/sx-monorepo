@@ -1,0 +1,72 @@
+---
+title: "⚙️ Space settings"
+---
+
+<Accordion title="It is possible to create a space with a multi-sig account?">
+Yes. In order to do so navigate to [https://app.safe.global](https://app.safe.global) and select Snapshot in the `Apps` tab. Your multi-sig address will connect to Snapshot and allow you to create spaces, proposals and vote.
+</Accordion>
+
+<Accordion title="I lost access to my ENS domain which was used to register a space on Snapshot. What should I do?">
+If you are still a controller of the space you can apply to delete your space or migrate the current space to another one with different ENS. Have a look at our documentation for more details: [migrate-or-delete.md](../../user-guides/spaces/migrate-or-delete)
+</Accordion>
+
+<Accordion title="How can I differentiate settings for proposals and voting?">
+You can use sub-spaces on Snapshot. This solution allows you to link multiple spaces and set different settings for each of them depending on your needs. Have a look at our documentation to learn more: [sub-spaces.md](../../user-guides/spaces/sub-spaces)
+</Accordion>
+
+<Accordion title="Can I change the name of my space?">
+Yes. You can do it in the space settings.
+
+Do not confuse it with changing the `ID` or the ENS domain for your space. To do that, you need to migrate the space. You can read more about changing the ENS domain in our documentation: [migrate-or-delete.md](../../user-guides/spaces/migrate-or-delete)
+</Accordion>
+
+<Accordion title="How can I verify my space?">
+There is a list of requirements you have to meet. Have a look at our documentation to learn more: [get-verified.md](../../user-guides/spaces/get-verified)
+</Accordion>
+
+<Accordion title="How long does it take to verify a space?">
+The process can take up to 72 hours.
+</Accordion>
+
+<Accordion title="I made a mistake with my space settings and I want to cancel existing votes. How can I do it?">
+You cannot invalidate existing votes. However you can delete the proposal.
+
+If you are an admin of the space or proposal’s creator you can delete the current proposal by clicking `Delete` on the proposal’s page:
+
+![](/images/174.png)
+
+Then change the space settings and make sure to persist the changes.
+
+Once the settings have been updated you can recreate the proposal from scratch.
+</Accordion>
+
+<Accordion title="Can I customize the appearance of my Snapshot space?">
+Yes, you can customize the appearance of your Snapshot space to some extent by setting a custom skin, which allows you to change the colors of your space. This customization feature is available for spaces using the custom domains setting.
+</Accordion>
+
+<Accordion title="Your proposal cannot be submitted due to a missing Voting Validation rule required with the 'ticket' strategy. What does it mean?">
+![](/images/206.png)
+
+If your space is using only a [ticket](https://snapshot.org/#/strategy/ticket) Voting Strategy you are required to set a Voting Validation to minimize the risk of spam votes on your proposals.\
+Without it, hackers can easily create multiple accounts (each getting 1 Voting Power) and take the voting process over.\
+\
+Have a read here to learn how to set it up: [#voting-validation-in-space-settings](../../user-guides/validation-strategies#voting-validation-in-space-settings)
+</Accordion>
+
+<Accordion title="My space is no longer verified. Why is that?">
+Verification status is valid as long as the space meets all requirements. Make sure you meet all the requirements defined [here](../../user-guides/spaces/get-verified#how-to-get-your-space-verified) and contact our support on [Help Center](https://help.snapshot.org/en/) to regain the space verification.
+</Accordion>
+
+<Accordion title="My space is hibernated. Why?">
+Spaces are put in hibernation mode after 12 months of inactivity. To learn more head to [space-hibernation.md](../../user-guides/spaces/space-hibernation)
+</Accordion>
+
+<Accordion title="How can I get my space out of hibernation?">
+As a space controller or an admin you can reactive the space through the space settings by clicking `Reactivate space` button. More information can be found in [space-hibernation.md](../../user-guides/spaces/space-hibernation)
+</Accordion>
+
+<Accordion title="Why can't I create a new space with my previous deleted space ENS name ?">
+Deleting a space does not release its attached ENS name, so you can not create a new space with the same ENS name. Head [Space deletion](../../user-guides/spaces/migrate-or-delete) to to learn more.
+
+If you wish to retain the same ENS domain for you new space, you could create a new space under a [subdomain](https://wagmi.tips/guides/ens-subdomain/) of your previous ENS name.
+</Accordion>

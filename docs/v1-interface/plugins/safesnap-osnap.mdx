@@ -1,0 +1,77 @@
+---
+title: "oSnap"
+description: "Combine Safe with Snapshot using oSnap."
+---
+
+<Warning>
+**oSnap is being deprecated, and support for the product will end on December 15, 2025. To ensure continued functionality, please follow the migration guide here:** \
+[**https://help.snapshot.box/en/articles/12886075-osnap-deprecation-migration-guide**](https://help.snapshot.box/en/articles/12886075-osnap-deprecation-migration-guide)
+</Warning>
+
+“oSnap” is short for Optimistic Snapshot Execution. oSnap lets DAOs propose transactions, do an off-chain governance vote, and have the transaction data submitted in a trustless fashion.
+
+### Instructions for using oSnap
+
+![](/images/113.png)
+
+Setting up the oSnap module:
+
+* Create a Safe and Snapshot Space, or connect to your current accounts.
+* Go to Safe Apps, install the Zodiac app, and install the oSnap module through Zodiac.
+* Set the proposal bond, challenge period, and Snapshot Space.
+* Link the oSnap module to your Snapshot Space with SafeSnap.
+* Your oSnap module address is added to the SafeSnap plugin configuration to enforce the results of proposals on-chain.
+
+Using oSnap with Snapshot:
+
+* Create a proposal and Snapshot vote, along with the transactions to execute if the proposal passes.
+* Invite the community to vote on the proposal.
+* Once the Snapshot voting period ends, anyone can propose the transactions by posting a bond.
+* After the challenge period, execute the transactions on-chain through the Snapshot interface.
+
+### Tutorials
+
+Video tutorial on how to deploy and use an oSnap module:
+
+<iframe
+  src="https://www.youtube.com/embed/R97GIW5M_r0"
+  title="YouTube video"
+  width="100%"
+  height="400"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+/>
+
+Follow the oSnap documentation on how to set up an oSnap module for your project.
+
+Deployment tutorial using the Zodiac module:
+
+[https://docs.uma.xyz/developers/osnap/osnap-deployment-tutorial](https://docs.uma.xyz/developers/osnap/osnap-deployment-tutorial)
+
+Snapshot tutorial to configure and execute transactions with Snapshot proposals:
+
+[https://docs.uma.xyz/developers/osnap/snapshot-tutorial](https://docs.uma.xyz/developers/osnap/snapshot-tutorial)
+
+An overview on verifying and disputing proposed transactions:
+
+[https://docs.uma.xyz/developers/osnap/osnap-proposal-verification](https://docs.uma.xyz/developers/osnap/osnap-proposal-verification)
+
+Updating the oSnap using admin functions:
+
+[https://docs.uma.xyz/developers/osnap/osnap-module-admin-functions](https://docs.uma.xyz/developers/osnap/osnap-module-admin-functions)
+
+### Security recommendations
+
+In order to ensure maximal safety we recommend to define several paremeters for your oSnap setup:
+
+* Set a **substantial bond** for an answer
+* Select a **long challenge period**
+* Set up a **monitoring infrastructure** for proposed transactions
+
+### Additional resources
+
+Learn more about oSnap here:
+
+[https://docs.uma.xyz/developers/osnap](https://docs.uma.xyz/developers/osnap)
+
+[https://medium.com/uma-project/announcing-osnap-gasless-snapshot-voting-with-on-chain-execution-by-uma-7374ed729b28](https://medium.com/uma-project/announcing-osnap-gasless-snapshot-voting-with-on-chain-execution-by-uma-7374ed729b28)

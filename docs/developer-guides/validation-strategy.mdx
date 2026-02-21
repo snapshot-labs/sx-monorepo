@@ -1,0 +1,44 @@
+---
+title: "Create a validation strategy"
+description: "Create a validation strategy and use it in your own space"
+---
+
+To add your own voting validation strategy on Snapshot you need to fork the **score-api** repository and create a pull request.
+
+[https://github.com/snapshot-labs/score-api](https://github.com/snapshot-labs/score-api)
+
+### 1. Navigate to the **`src\validations.`**
+
+```bash
+└── src
+    └── validations
+        └── basic
+```
+
+### 2. Create a copy of the **`basic`** strategy folder and rename it to the name of your voting validation.
+
+### 3. Customize the logic of your voting validation.
+
+If you are not sure about the `Validation` class, have a look at its definition:
+
+[https://github.com/snapshot-labs/score-api/blob/master/src/strategies/validations/validation.ts](https://github.com/snapshot-labs/score-api/blob/master/src/strategies/validations/validation.ts)
+
+The validation name has to be included in the[ `index.ts`](https://github.com/snapshot-labs/score-api/blob/master/src/strategies/validations/index.ts)  in the `validationClasses` variable.
+
+### 4. Test your validation
+
+To make sure your validation passes all tests, run:
+
+```javascript
+npm run test --validation=<VALIDATION NAME> // replace <VALIDATION NAME>
+```
+
+### 4. Make sure you pass the checklist
+
+Have a look here on the requirements for adding a new validation strategy and make sure you fulfill the points in the checklist: 
+
+[https://github.com/snapshot-labs/score-api#checklist-for-adding-a-new-strategy](https://github.com/snapshot-labs/score-api#checklist-for-adding-a-new-strategy)
+
+### 5. Create a pull request
+
+The team will then review your PR and after it's approved and merged it will be available to choose in your space settings.

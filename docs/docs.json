@@ -1,0 +1,207 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Snapshot",
+  "theme": "mint",
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
+  "logo": {
+    "dark": "/logo/snapshot.svg",
+    "light": "/logo/snapshot.svg"
+  },
+  "colors": {
+    "primary": "#fafe69",
+    "dark": "#fafe69",
+    "light": "#fafe69"
+  },
+  "navigation": {
+    "groups": [
+      {
+            "group": "Getting Started",
+            "pages": [
+              "index"
+            ]
+          },
+          {
+            "group": "User guides",
+            "pages": [
+              {
+                "group": "Spaces",
+                "pages": [
+                  "user-guides/spaces/what-is-a-space",
+                  {
+                    "group": "Create a space",
+                    "pages": [
+                      "user-guides/spaces/create",
+                      "user-guides/spaces/create/ens-domain",
+                      "user-guides/spaces/create/alternative-way-to-create-a-space"
+                    ]
+                  },
+                  "user-guides/spaces/settings",
+                  "user-guides/spaces/sub-spaces",
+                  "user-guides/spaces/get-verified",
+                  "user-guides/spaces/space-hibernation",
+                  "user-guides/spaces/add-custom-domain",
+                  "user-guides/spaces/add-skin",
+                  "user-guides/spaces/space-roles",
+                  "user-guides/spaces/migrate-or-delete",
+                  "user-guides/spaces/badges-and-warnings",
+                  "user-guides/spaces/turbo-plan",
+                  {
+                    "group": "Space handbook",
+                    "pages": [
+                      "user-guides/spaces/space-handbook",
+                      "user-guides/spaces/space-handbook/most-common",
+                      "user-guides/spaces/space-handbook/voting-threshold",
+                      "user-guides/spaces/space-handbook/anti-whale",
+                      "user-guides/spaces/space-handbook/sybil-resistance-scam-and-spam-prevention",
+                      "user-guides/spaces/space-handbook/liquidity-staking-pool",
+                      "user-guides/spaces/space-handbook/delegation",
+                      {
+                        "group": "NFT voting",
+                        "pages": [
+                          "user-guides/spaces/space-handbook/nft-voting",
+                          "user-guides/spaces/space-handbook/nft-voting/most-common-erc-721",
+                          "user-guides/spaces/space-handbook/nft-voting/multi-token-erc-1155",
+                          "user-guides/spaces/space-handbook/nft-voting/poap-proof-of-attendance"
+                        ]
+                      },
+                      "user-guides/spaces/space-handbook/custom-calculations"
+                    ]
+                  }
+                ]
+              },
+              "user-guides/create",
+              {
+                "group": "Voting",
+                "pages": [
+                  "user-guides/voting/vote",
+                  "user-guides/voting/delegate-your-voting-power"
+                ]
+              },
+              "user-guides/voting-strategies",
+              "user-guides/validation-strategies",
+              "user-guides/using-safe-multi-sig",
+              "user-guides/delegation"
+            ]
+          },
+          {
+            "group": "Developer Guides",
+            "pages": [
+              "developer-guides/voting-strategy",
+              "developer-guides/validation-strategy",
+              "developer-guides/identify-integrator-activity",
+              "developer-guides/networks"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "tools/tools-overview",
+              "tools/snapshot.js",
+              {
+                "group": "API",
+                "pages": [
+                  "tools/api",
+                  "tools/api/api-keys"
+                ]
+              },
+              "tools/webhooks",
+              "tools/subgraphs",
+              "tools/mobile-notifications",
+              "tools/bots"
+            ]
+          },
+          {
+            "group": "Snapshot X",
+            "pages": [
+              "snapshot-x/overview",
+              {
+                "group": "User guides",
+                "pages": [
+                  "snapshot-x/user-guides/create-a-space",
+                  "snapshot-x/user-guides/proposals",
+                  "snapshot-x/user-guides/voting",
+                  "snapshot-x/user-guides/safe-execution-setup"
+                ]
+              },
+              {
+                "group": "Protocol",
+                "pages": [
+                  "snapshot-x/protocol/overview",
+                  "snapshot-x/protocol/space-actions",
+                  "snapshot-x/protocol/space-controller-actions",
+                  "snapshot-x/protocol/authenticators",
+                  "snapshot-x/protocol/proposal-validations",
+                  "snapshot-x/protocol/voting-strategies",
+                  "snapshot-x/protocol/starknet-specifics",
+                  "snapshot-x/protocol/execution-strategies",
+                  "snapshot-x/protocol/audits"
+                ]
+              },
+              {
+                "group": "Services",
+                "pages": [
+                  "snapshot-x/services/architecture",
+                  "snapshot-x/services/api",
+                  "snapshot-x/services/sx.js",
+                  "snapshot-x/services/ui",
+                  "snapshot-x/services/mana"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "V1 interface",
+            "pages": [
+              "v1-interface/email-notifications",
+              {
+                "group": "Plugins",
+                "pages": [
+                  "v1-interface/plugins/what-is-a-plugin-and-how-to-use-it",
+                  "v1-interface/plugins/create-a-plugin",
+                  "v1-interface/plugins/safesnap-osnap",
+                  "v1-interface/plugins/safesnap-reality",
+                  "v1-interface/plugins/poap",
+                  "v1-interface/plugins/quorum",
+                  "v1-interface/plugins/domino",
+                  "v1-interface/plugins/gnosis-impact",
+                  "v1-interface/plugins/galxe"
+                ]
+              },
+              "v1-interface/boost"
+            ]
+          }
+    ]
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "chatgpt",
+      "claude",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "integrations": {
+    "intercom": {
+      "appId": "n9dmxtcs"
+    }
+  },
+  "externalLinks": [
+    {
+      "label": "Help Center",
+      "url": "https://help.snapshot.box"
+    },
+    {
+      "label": "Discord",
+      "url": "https://discord.snapshot.org"
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/snapshot-labs"
+    }
+  ]
+}

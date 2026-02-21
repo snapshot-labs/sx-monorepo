@@ -1,0 +1,140 @@
+---
+title: "Validation strategies"
+---
+
+## What is a validation strategy?
+
+A voting validation is a JavaScript function that returns a boolean (`true` or `false`) for the connected account. Voting validations are being used on Snapshot to decide if an **account can vote** or **create a proposal** in a specific spac&#x65;**.** Each space can use one voting validation for all of its proposals at a time. While voting strategies calculate the Voting Power mainly on the basis of the monetary assets, the validation strategy can serve as a protection against **Sybil attacks**. It can take into consideration how many POAPs an account owns or track the account activity to assess if the account is a bot or a **real human**.
+
+The **default** validation is checking if the address has **any voting power.** If the voting power is higher than `0` the connected account is validated. A validation strategy can send a call to a node or subgraph.
+
+When setting the Validation Strategy up it’s important to keep in mind that it is **meant to make it difficult for users outside of your community to post scam proposals or post spam votes.**
+
+Therefore for Proposal Validation make sure to use a **high threshold**, for example $100 worth of your organization’s token. A good idea would be to check the holdings of previous proposal creators, both legitimate and scammers, to assess a reasonable value.
+
+<Info>
+Spaces are required to use **Proposal Validation**. Learn how to set it up on this page or read [**our article**](https://snapshot.mirror.xyz/-uSylOUP82hGAyWUlVn4lCg9ESzKX9QCvsUgvv-ng84)**.**
+</Info>
+
+<Info>
+Spaces using only a [ticket strategy](https://snapshot.org/#/strategy/ticket) are required to set a Voting Validation to secure their spaces and ensure a fair voting process preventing spam. Learn here how to set it up: [#voting-validation-in-space-settings](#voting-validation-in-space-settings)
+</Info>
+
+## How to use validation strategies:
+
+Validation strategies can be used for two purposes:
+
+* proposal validation - determine if the account can create a new proposal,
+* voting validation - determine if the account can take part in the voting process.
+
+#### Proposal Validation in Space Settings
+
+Head to **Proposals** tab in the sidebar to update the configuration: 
+
+![](/images/82.png)
+
+#### Voting Validation in Space Settings
+
+Head to **Voting** tab in the sidebar to update the configuration: 
+
+![](/images/83.png)
+
+If you want to allow addresses with any voting power to vote you can use the default voting validation.
+
+![](/images/149.png)
+
+<Info>
+If you are using only a [ticket](https://snapshot.org/#/strategy/ticket) Voting Strategy for your space you are required to use a [Gitcoin Passport Validation](#validation-strategy-example-gitcoin-passport) for Voting to protect your space from spam votes.
+</Info>
+
+## Authors only mode
+
+If you wish to limit proposal creators to Admins, Moderators and Authors only, you can do so by enabling the **Authors only** setting in the **Proposal** tab in the space settings. Make sure to give the Author role to the users you trust!
+
+![](/images/81.png)
+
+## Validation strategy example - Basic
+
+The Basic validation strategy allows you to use existing Voting Strategies configured for your space or define a custom setup to determine if a user is eligible to create a proposal or cast a vote. 
+
+In order to use existing setup of Voting Strategies you can simply chose **Basic Validation** and define a required threshold as on the screenshot below. `100` corresponds to user's Voting Power calculated on the basis of the Voting Strategies.
+
+<figure>![](/images/79.png)<figcaption><p>Use current setup and define a strong threshold to avoid spam in your space.</p></figcaption></figure>
+
+If you wish to use a different configuration, toggle the **Use custom strategies** button and define the strategies for your use case:
+
+<figure>![](/images/80.png)<figcaption><p>Use a custom setup using various Voting Strategies to calculate if a user is eligible to create a proposal or vote.</p></figcaption></figure>
+
+## Validation strategy example - Gitcoin Passport
+
+Validation strategy built together with **Gitcoin Passport.** You can select individual or multiple stamps that matter for your space. You can also decide if they need to meet all of these criteria or only one. The more criteria you select, the more sybil resistant your space is.
+
+![](/images/241.png)
+
+#### Implementation
+
+Have a look at the example of the Gitcoin Passport validation strategy.
+
+[https://github.com/snapshot-labs/score-api/blob/master/src/strategies/validations/passport-gated/index.ts](https://github.com/snapshot-labs/score-api/blob/master/src/strategies/validations/passport-gated/index.ts)
+
+```javascript
+import snapshot from '@snapshot-labs/snapshot.js';
+import Validation from '../validation';
+import {
+  getPassport,
+  getVerifiedStamps,
+  hasValidIssuanceAndExpiration
+} from '../passport-weighted/helper';
+
+export default class extends Validation {
+  public id = 'passport-gated';
+  public github = 'snapshot-labs';
+  public version = '0.1.0';
+
+  async validate(): Promise<boolean> {
+    const requiredStamps = this.params.stamps;
+    const passport: any = await getPassport(this.author);
+    if (!passport) return false;
+    if (!passport.stamps?.length || !requiredStamps?.length) return false;
+
+    const verifiedStamps: any[] = await getVerifiedStamps(
+      passport,
+      this.author,
+      requiredStamps.map((stamp) => ({
+        id: stamp
+      }))
+    );
+    if (!verifiedStamps.length) return false;
+
+    const provider = snapshot.utils.getProvider(this.network);
+    const proposalTs = (await provider.getBlock(this.snapshot)).timestamp;
+
+    const operator = this.params.operator;
+
+    // check issuance and expiration
+    const validStamps = verifiedStamps
+      .filter((stamp) =>
+        hasValidIssuanceAndExpiration(stamp.credential, proposalTs)
+      )
+      .map((stamp) => stamp.provider);
+
+    if (operator === 'AND') {
+      return requiredStamps.every((stamp) => validStamps.includes(stamp));
+    } else if (operator === 'OR') {
+      return requiredStamps.some((stamp) => validStamps.includes(stamp));
+    } else {
+      return false;
+    }
+  }
+}
+```
+
+Voting validation can be specified in your space settings at `https://snapshot.page/#/<SPACE ADDRESS>/settings`. 
+
+## Create a custom validation 
+
+The possibilities are endless! You can build a custom validation strategy for your space. Please have a look at [validation-strategy.md](../developer-guides/validation-strategy)for more details.
+
+## Find more voting validations here:
+
+[https://github.com/snapshot-labs/score-api/tree/master/src/strategies/validations](https://github.com/snapshot-labs/score-api/tree/master/src/strategies/validations)

@@ -1,0 +1,156 @@
+---
+title: "Create a space"
+description: "Learn how to create a new space for your organization."
+---
+
+Head to the [Create space page](https://snapshot.box/#/create/snapshot-x) and follow the below steps:
+
+## 1. Organization's details
+
+Provide the profile information like `name`, `description`, social links or handles and `treasury`.
+
+![](/images/64.png)
+
+In order to set your Treasury select the network first.
+
+<Info>
+**Treasury** is the address of your organisation's main account.
+</Info>
+
+![](/images/59.png)
+
+## 2. Select network
+
+Choose the network for your organisation. At the moment Snapshot X works with Ethereum.
+
+ℹ️ _Starknet implementation is coming soon._
+
+## 3. Voting strategies
+
+Voting Strategies calculate the **Voting Power** of each user.
+
+<Info>
+If you are not familiar with what a Voting Strategy is head to [Broken link](broken-reference) to learn more.
+</Info>
+
+Select a Voting Strategy from the list of available options and provide the required details.
+
+For example for the **Delegated Compound Token** you have to provide the token contract address, its decimals and the symbol:
+
+![](/images/65.png)
+
+## 4. Authenticators
+
+Choose how users will be authenticated in order to create a proposal or cast a vote.
+
+<Info>
+If you are not familiar with what Authenticators are head to [Broken link](broken-reference)to learn more.
+</Info>
+
+The two authenticators provided by Snapshot X are:
+
+#### [Ethereum signature](broken-reference)
+
+It will authenticate a user based on a message signed by an Ethereum private key.
+
+#### [Ethereum transaction](broken-reference)
+
+Users have to submit a transaction on Ethereum. Authentication is proving that the sender's address is valid.
+
+## 5. Proposal validation
+
+Proposal Validation is setting **requirements** that user needs to meet in order to **create a new proposal.**
+
+<Info>
+If you are not familiar with what a Proposal Validation is head to [Broken link](broken-reference) to learn more.
+</Info>
+
+Define the minimum Voting Power required to create a new proposal.
+
+**⚠️ We highly recommend setting a high threshold to avoid scam proposals. ⚠️**
+
+![](/images/60.png)
+
+Once you have defined the required Voting Power, you can then select the Voting Strategies which will be used to calculate the voting power of proposal creators and assess the eligibility to create a new one:
+
+![](/images/61.png)
+
+## 6. Execution
+
+Execution Strategies have two key roles:
+
+1. determining **the status** of a proposal at any time,
+2. and **executing the payload** of a proposal if it has been accepted.
+
+<Info>
+If you are not familiar with what Execution Strategies are head to [Broken link](broken-reference) to learn more.
+</Info>
+
+When selecting the execution strategy you have to provide a **quorum** - minimum number of votes required for a proposal to pass.
+
+### Execution strategies
+
+Currently Snapshot X provides two Execution Strategies:
+
+#### Avatar
+
+-> ideal solution for treasuries on [Safe](https://safe.global/)
+
+-> executes transactions on an [Avatar contract](https://github.com/gnosis/zodiac/blob/master/contracts/interfaces/IAvatar.sol)
+
+-> uses simple quorum
+
+<Info>
+Avatar contract is any contract which implements the `IAvatar`interface.\
+**Safe** is an example of an Avatar contract.
+</Info>
+
+<Warning>
+To set the Avatar Execution Strategy up fully you have to enable it on your Safe account after you have created your space.\
+\
+**Follow this guide to complete the setup:**\
+[Broken link](broken-reference)
+</Warning>
+
+#### Timelock
+
+-> adds additional **security layer** to review or cancel transactions before they get executed
+
+-> executes transactions after a delay specified in **seconds**
+
+-> uses simple quorum
+
+<Info>
+When a proposal with this strategy is executed, the proposal transactions are queued in the Timelock for `timelockDelay` seconds before they can be executed.
+</Info>
+
+### 7. Voting
+
+Customize the setup for voting which will affect **all proposals** in your space:
+
+![](/images/66.png)
+
+* **Voting delay** - The delay between when a proposal is created, and when the voting starts. A value of 0 means that as soon as the proposal is created anyone can vote while a value of 3600 means that voting will start 3600 seconds after the proposal is created.
+* **Minimum voting duration** - The minimum duration of the voting period. It is **impossible to execute a proposal before** **this period** has elapsed.
+* **Maximum voting duration** - The maximum duration of the voting period, it is **impossible to cast a vote after this period** has passed. The **`minimum voting duration`** must be less than or equal to this value.
+
+<Info>
+We highly recommend implementing a Voting Delay to allow more time to review proposal's content and identify malicious proposals before voting starts.
+</Info>
+
+### 7. Controller
+
+Space controller is a user that has a **full control over the space settings.**
+
+The address can differ from your own, you can for example set a multisig account as the controller.
+
+### 8. Sign transaction(s)
+
+Click **Create** and sign transaction(s) in your wallet. You will have to sign multiple transactions, each for individual contracts to be deployed:
+
+* Space contract
+* Execution strategy contracts - each space has its execution strategy deployed as an individual contract
+
+![](/images/199.png)
+
+And that's it! 🎉
