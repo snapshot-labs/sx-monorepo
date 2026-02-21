@@ -1,6 +1,11 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Splash from '@/components/Layout/Splash.vue';
 import aliases from '@/helpers/aliases.json';
+import {
+  getOrganizationConfigByDomain,
+  getOrganizationConfigById,
+  toOrgRoute
+} from '@/helpers/organizations';
 import { metadataNetwork } from '@/networks';
 import auctionRoutes from '@/routes/auction';
 import defaultRoutes from '@/routes/default';
@@ -86,6 +91,32 @@ router.beforeEach((to, _from, next) => {
   } else {
     next();
   }
+});
+
+// Rewrite space-* routes to org-* when navigating within an org context
+router.beforeEach((to, from, next) => {
+  if (String(from.matched[0]?.name) !== 'org') return next();
+
+  const name = to.name?.toString();
+  if (!name) return next();
+
+  // Don't rewrite if the target space is not part of the org
+  const spaceParam = to.params?.space as string | undefined;
+  if (spaceParam) {
+    const orgId = from.params.org as string | undefined;
+    const org =
+      getOrganizationConfigByDomain(window.location.hostname) ??
+      (orgId ? getOrganizationConfigById(orgId) : null);
+    const isOrgSpace = org?.spaceIds.some(
+      s => `${s.network}:${s.id}` === spaceParam
+    );
+    if (!isOrgSpace) return next();
+  }
+
+  const rewritten = toOrgRoute(name, to.params);
+  if (rewritten) return next({ ...to, ...rewritten });
+
+  next();
 });
 
 export default router;

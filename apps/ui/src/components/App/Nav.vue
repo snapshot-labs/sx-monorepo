@@ -9,6 +9,7 @@ const { config } = useNav();
         v-for="(item, key) in config?.items ?? {}"
         :key="key"
         :to="item.link"
+        :is-external="item.isExternal"
         class="px-4 space-x-2 flex items-center"
         :class="[
           item.active ? 'text-skin-link' : 'text-skin-text',
