@@ -60,7 +60,6 @@ export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
 };
 
 export const ORGANIZATION_DOMAINS: Record<string, string> = {
-  'governance.starknet.io': 'starknet',
   'starknet.stage.box': 'starknet'
 };
 
