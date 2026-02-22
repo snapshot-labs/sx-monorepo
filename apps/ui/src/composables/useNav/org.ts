@@ -1,7 +1,6 @@
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
-import IHCash from '~icons/heroicons-outline/cash';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
@@ -27,10 +26,6 @@ function getOrgConfig(context: NavContext): NavConfig {
         context.route.name as string
       )
     };
-  }
-
-  if (space?.treasuries?.length) {
-    items.treasury = { name: 'Treasury', icon: IHCash, position: 7 };
   }
 
   if (context.organization?.navItems) {
