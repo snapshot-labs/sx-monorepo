@@ -59,9 +59,7 @@ const formattedVotingPower = computed(() => {
   return votingPower;
 });
 
-const routePrefix = computed(() =>
-  organization.value ? 'org' : 'space'
-);
+const routePrefix = computed(() => (organization.value ? 'org' : 'space'));
 
 const navigation = computed(() => [
   { label: 'Statement', route: `${routePrefix.value}-user-statement` },
