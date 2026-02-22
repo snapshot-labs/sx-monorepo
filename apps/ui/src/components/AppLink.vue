@@ -1,5 +1,9 @@
 <script lang="ts" setup>
 import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
+import {
+  NamedRouteLocationRaw,
+  resolveOrgRoute
+} from '@/helpers/organizations';
 
 const props = defineProps<
   Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; isExternal?: boolean }
@@ -10,6 +14,7 @@ defineEmits<{
 }>();
 
 const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
 const router = useRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
@@ -17,12 +22,15 @@ function isExternalLink(to: RouteLocationRaw | undefined): to is string {
 }
 
 function normalize(to: RouteLocationRaw) {
-  if (
-    !isWhiteLabel.value ||
-    typeof to === 'string' ||
-    !('name' in to) ||
-    !to.name
-  ) {
+  if (typeof to === 'string' || !('name' in to) || !to.name) {
+    return to;
+  }
+
+  if (organization.value) {
+    return resolveOrgRoute(organization.value, to as NamedRouteLocationRaw);
+  }
+
+  if (!isWhiteLabel.value) {
     return to;
   }
 

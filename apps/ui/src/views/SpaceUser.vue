@@ -16,6 +16,7 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
 const { modalAccountOpen } = useModal();
 const { web3Account } = useWeb3();
 
@@ -58,19 +59,21 @@ const formattedVotingPower = computed(() => {
   return votingPower;
 });
 
+const routePrefix = computed(() => (organization.value ? 'org' : 'space'));
+
 const navigation = computed(() => [
-  { label: 'Statement', route: 'space-user-statement' },
+  { label: 'Statement', route: `${routePrefix.value}-user-statement` },
   {
     label: 'Proposals',
-    route: 'space-user-proposals',
+    route: `${routePrefix.value}-user-proposals`,
     count: userActivity.value?.proposal_count
   },
   {
     label: 'Votes',
-    route: 'space-user-votes',
+    route: `${routePrefix.value}-user-votes`,
     count: userActivity.value?.vote_count
   }
-  // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
+  // { label: 'Delegators', route: `${routePrefix.value}-user-delegators`, count: delegatesCount.value },
 ]);
 
 const hasOnlyInvalidDelegations = computed(() => {
@@ -206,7 +209,7 @@ watch(
         >
           Delegate
         </UiButton>
-        <UiTooltip v-if="!isWhiteLabel" title="View profile">
+        <UiTooltip v-if="!isWhiteLabel && !organization" title="View profile">
           <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>
