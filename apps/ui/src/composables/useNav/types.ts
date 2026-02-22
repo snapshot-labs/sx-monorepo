@@ -1,5 +1,6 @@
 import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
+import { Organization } from '@/helpers/organizations';
 import { Space } from '@/types';
 
 export type NavItem = {
@@ -26,6 +27,7 @@ export type NavContext = {
   space: Space | null;
   isController: boolean;
   ensOwner: string | null;
+  organization: Organization | null;
 };
 
 export type NavProvider = {
