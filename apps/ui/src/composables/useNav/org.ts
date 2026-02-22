@@ -5,6 +5,8 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 
+const EXCLUDED_SUB_ROUTES = ['org-editor', 'org-proposal'];
+
 function getOrgConfig(context: NavContext): NavConfig {
   const space = context.organization?.spaces[0];
 
@@ -27,26 +29,19 @@ function getOrgConfig(context: NavContext): NavConfig {
     };
   }
 
+  const result = Object.entries(items);
+
   if (context.organization?.navItems) {
-    Object.assign(items, context.organization.navItems);
-  }
-
-  const positioned = Object.entries(items)
-    .filter(([, item]) => item.position != null)
-    .sort(([, a], [, b]) => a.position! - b.position!);
-  const result = Object.entries(items).filter(
-    ([, item]) => item.position == null
-  );
-
-  for (const entry of positioned) {
-    const idx = Math.min(entry[1].position! - 1, result.length);
-    result.splice(idx, 0, entry);
+    for (const [key, item] of Object.entries(context.organization.navItems)) {
+      const idx = item.position
+        ? Math.min(item.position - 1, result.length)
+        : result.length;
+      result.splice(idx, 0, [key, item]);
+    }
   }
 
   return { items: Object.fromEntries(result) };
 }
-
-const EXCLUDED_SUB_ROUTES = ['org-editor', 'org-proposal'];
 
 const provider: NavProvider = {
   routeName: 'org',

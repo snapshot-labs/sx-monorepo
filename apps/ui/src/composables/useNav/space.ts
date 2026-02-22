@@ -11,6 +11,8 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHUserGroup from '~icons/heroicons-outline/user-group';
 
+const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
+
 function getSettingsRoute(
   context: NavContext,
   tab: string,
@@ -141,8 +143,6 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
 
   return { items };
 }
-
-const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
 
 export default {
   routeName: 'space',
