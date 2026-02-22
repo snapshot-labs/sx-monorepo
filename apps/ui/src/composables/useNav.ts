@@ -5,10 +5,10 @@ import { NetworkID } from '@/types';
 import my from './useNav/my';
 import org from './useNav/org';
 import settings from './useNav/settings';
-import space from './useNav/space';
+import spaceProvider from './useNav/space';
 import { NavConfig, NavItem, NavProvider } from './useNav/types';
 
-const providers: NavProvider[] = [org, space, settings, my];
+const providers: NavProvider[] = [org, spaceProvider, settings, my];
 
 function enrichItems(
   config: NavConfig,
@@ -37,7 +37,7 @@ export function useNav() {
   const notificationsStore = useNotificationsStore();
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
-  const { space: currentSpace, networkId, address } = useCurrentSpace();
+  const { space, networkId, address } = useCurrentSpace();
   const { organization } = useOrganization();
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
@@ -45,8 +45,6 @@ export function useNav() {
   const currentProvider = computed(() =>
     providers.find(p => p.routeName === currentRouteName.value)
   );
-
-  const space = currentSpace;
 
   const { isController } = useSpaceController(space);
 
