@@ -39,14 +39,13 @@ export function useNav() {
   const { web3 } = useWeb3();
   const { space, networkId, address } = useCurrentSpace();
   const { organization } = useOrganization();
+  const { isController } = useSpaceController(space);
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
 
   const currentProvider = computed(() =>
     providers.find(p => p.routeName === currentRouteName.value)
   );
-
-  const { isController } = useSpaceController(space);
 
   const ensOwner = computedAsync(
     async () => {
