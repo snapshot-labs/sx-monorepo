@@ -8,23 +8,14 @@ const SPACE_LOGO_HEIGHT = 38;
 
 defineOptions({ inheritAttrs: false });
 
-const route = useRoute();
 const { isWhiteLabel, skinSettings } = useWhiteLabel();
 const { logo } = useSkin();
 const { space: currentSpace } = useCurrentSpace();
 const { organization } = useOrganization();
 
-const shouldShowSpace = computed<boolean>(
-  () =>
-    ['proposal', 'space'].includes(String(route.matched[0]?.name)) ||
-    !!organization.value ||
-    isWhiteLabel.value
+const space = computed<Space | null>(
+  () => organization.value?.spaces[0] ?? currentSpace.value
 );
-
-const space = computed<Space | null>(() => {
-  if (!shouldShowSpace.value) return null;
-  return organization.value?.spaces[0] ?? currentSpace.value;
-});
 
 const previewLogoUrl = computed(() => {
   if (
@@ -59,7 +50,7 @@ const cb = computed(() => (logo.value ? getCacheHash(logo.value) : undefined));
 
 <template>
   <AppLink
-    v-if="shouldShowSpace && space"
+    v-if="space"
     :to="{
       name: 'space-overview',
       params: { space: `${space.network}:${space.id}` }
