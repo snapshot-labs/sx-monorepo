@@ -17,6 +17,10 @@ vi.mock('@/composables/useWhiteLabel', () => ({
   useWhiteLabel: () => ({ space: mockWhiteLabelSpace })
 }));
 
+vi.mock('@/composables/useOrganization', () => ({
+  useOrganization: () => ({ organization: ref(null) })
+}));
+
 vi.mock('@/queries/spaces', () => ({
   useSpaceQuery: (args: any) => {
     spaceQueryArgs = args;
