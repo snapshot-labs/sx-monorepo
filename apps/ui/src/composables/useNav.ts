@@ -3,11 +3,12 @@ import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
 import my from './useNav/my';
+import org from './useNav/org';
 import settings from './useNav/settings';
 import space from './useNav/space';
 import { NavConfig, NavItem, NavProvider } from './useNav/types';
 
-const providers: NavProvider[] = [space, settings, my];
+const providers: NavProvider[] = [org, space, settings, my];
 
 function enrichItems(
   config: NavConfig,
@@ -37,6 +38,7 @@ export function useNav() {
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
   const { space: currentSpace, networkId, address } = useCurrentSpace();
+  const { organization } = useOrganization();
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
 
@@ -44,9 +46,7 @@ export function useNav() {
     providers.find(p => p.routeName === currentRouteName.value)
   );
 
-  const space = computed(() =>
-    currentRouteName.value === 'space' ? currentSpace.value : null
-  );
+  const space = currentSpace;
 
   const { isController } = useSpaceController(space);
 
@@ -77,7 +77,8 @@ export function useNav() {
     networkId: networkId.value as NetworkID | null,
     address: address.value,
     isController: isController.value,
-    ensOwner: ensOwner.value
+    ensOwner: ensOwner.value,
+    organization: organization.value
   }));
 
   const hasAppNav = computed(() => {
