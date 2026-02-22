@@ -9,19 +9,18 @@ function getOrgConfig(context: NavContext): NavConfig {
   const space = context.organization?.spaces[0];
 
   const items: Record<string, NavItem> = {
-    overview: { name: 'Overview', icon: IHGlobeAlt, position: 1 },
-    proposals: { name: 'Proposals', icon: IHNewspaper, position: 2 }
+    overview: { name: 'Overview', icon: IHGlobeAlt },
+    proposals: { name: 'Proposals', icon: IHNewspaper }
   };
 
   if (space?.delegations?.length) {
-    items.delegates = { name: 'Delegates', icon: IHLightningBolt, position: 4 };
+    items.delegates = { name: 'Delegates', icon: IHLightningBolt };
   }
 
   if (space && SPACES_DISCUSSIONS[`${space.network}:${space.id}`]) {
     items.discussions = {
       name: 'Discussions',
       icon: IHAnnotation,
-      position: 6,
       active: ['org-discussions', 'org-discussions-topic'].includes(
         context.route.name as string
       )
