@@ -7,6 +7,7 @@ const CHECKSUMMED = '0x000000000000000000000000000000000000dEaD';
 
 let mockRoute: { params: Record<string, string> };
 const mockWhiteLabelSpace = ref<any>(null);
+const mockOrganization = ref<any>(null);
 let spaceQueryArgs: { networkId: () => any; spaceId: () => any };
 
 vi.mock('vue-router', () => ({
@@ -18,7 +19,7 @@ vi.mock('@/composables/useWhiteLabel', () => ({
 }));
 
 vi.mock('@/composables/useOrganization', () => ({
-  useOrganization: () => ({ organization: ref(null) })
+  useOrganization: () => ({ organization: mockOrganization })
 }));
 
 vi.mock('@/queries/spaces', () => ({
@@ -36,6 +37,7 @@ vi.mock('@/helpers/resolver', () => ({
 beforeEach(() => {
   mockRoute = reactive({ params: {} });
   mockWhiteLabelSpace.value = null;
+  mockOrganization.value = null;
   resolveNameMock.mockReset();
 });
 
@@ -195,6 +197,43 @@ describe('useCurrentSpace', () => {
 
       expect(spaceQueryArgs.networkId()).toBe(null);
       expect(spaceQueryArgs.spaceId()).toBe(null);
+    });
+  });
+
+  describe('organization', () => {
+    const orgSpaceA = { network: 'sn', id: '0xORG_A' };
+    const orgSpaceB = { network: 's', id: 'starknet.eth' };
+    const mockOrg = { spaces: [orgSpaceA, orgSpaceB] };
+
+    it('should return primary space when no route param', () => {
+      mockOrganization.value = mockOrg;
+      const { space } = useCurrentSpace();
+
+      expect(space.value).toEqual(orgSpaceA);
+      expect(spaceQueryArgs.networkId()).toBe(null);
+      expect(spaceQueryArgs.spaceId()).toBe(null);
+    });
+
+    it('should return route-matched org space when param matches', async () => {
+      mockOrganization.value = mockOrg;
+      mockRoute.params = { space: 's:starknet.eth' };
+      const { space } = useCurrentSpace();
+      await nextTick();
+
+      expect(space.value).toEqual(orgSpaceB);
+      expect(resolveNameMock).not.toHaveBeenCalled();
+      expect(spaceQueryArgs.networkId()).toBe(null);
+    });
+
+    it('should fall back to primary space when param does not match any org space', async () => {
+      mockOrganization.value = mockOrg;
+      mockRoute.params = { space: 'eth:unknown.eth' };
+      const { space, isPending } = useCurrentSpace();
+      await nextTick();
+
+      expect(space.value).toEqual(orgSpaceA);
+      expect(isPending.value).toBe(false);
+      expect(resolveNameMock).not.toHaveBeenCalled();
     });
   });
 
