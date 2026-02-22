@@ -15,24 +15,21 @@ export function useCurrentSpace() {
 
   const spaceParam = computed(() => route.params.space as string | undefined);
 
-  const primarySpace = computed<Space | null>(() => {
-    if (whiteLabelSpace.value) return whiteLabelSpace.value;
+  const primarySpace = computed<Space | null>(
+    () => whiteLabelSpace.value ?? organization.value?.spaces[0] ?? null
+  );
 
-    const org = organization.value;
-    if (!org) return null;
-
-    if (spaceParam.value) {
-      const match = org.spaces.find(
+  const orgRouteSpace = computed<Space | null>(
+    () =>
+      organization.value?.spaces.find(
         s => spaceParam.value === `${s.network}:${s.id}`
-      );
-      if (match) return match;
-    }
+      ) ?? null
+  );
 
-    return org.spaces[0] ?? null;
-  });
+  const knownSpace = computed(() => orgRouteSpace.value ?? primarySpace.value);
 
   const networkId = computed<NetworkID | null>(() => {
-    if (primarySpace.value) return primarySpace.value.network;
+    if (knownSpace.value) return knownSpace.value.network;
     if (spaceId.value) return spaceId.value.networkId;
     return spaceParam.value
       ? (spaceParam.value.split(':')[0] as NetworkID)
@@ -40,7 +37,7 @@ export function useCurrentSpace() {
   });
 
   const address = computed<string | null>(() => {
-    if (primarySpace.value) return primarySpace.value.id;
+    if (knownSpace.value) return knownSpace.value.id;
     if (spaceId.value) return spaceId.value.address;
     return spaceParam.value ? spaceParam.value.split(':')[1] : null;
   });
@@ -53,7 +50,7 @@ export function useCurrentSpace() {
       spaceId.value = null;
       isResolving.value = false;
 
-      if (primarySpace.value || !param) return;
+      if (knownSpace.value || !param) return;
 
       const [network, name] = param.split(':') as [NetworkID, string];
       if (!name) return;
@@ -90,15 +87,16 @@ export function useCurrentSpace() {
 
   const { data: queriedSpace, isPending: isQueryPending } = useSpaceQuery({
     networkId: () =>
-      primarySpace.value ? null : spaceId.value?.networkId ?? null,
-    spaceId: () => (primarySpace.value ? null : spaceId.value?.address ?? null)
+      knownSpace.value ? null : spaceId.value?.networkId ?? null,
+    spaceId: () => (knownSpace.value ? null : spaceId.value?.address ?? null)
   });
 
   const space = computed(
-    () => primarySpace.value ?? queriedSpace.value ?? null
+    () =>
+      orgRouteSpace.value ?? primarySpace.value ?? queriedSpace.value ?? null
   );
   const isPending = computed(
-    () => !primarySpace.value && (isResolving.value || isQueryPending.value)
+    () => !knownSpace.value && (isResolving.value || isQueryPending.value)
   );
 
   return {
