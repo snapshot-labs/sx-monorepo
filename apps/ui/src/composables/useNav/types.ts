@@ -11,6 +11,7 @@ export type NavItem = {
   link?: RouteLocationRaw;
   active?: boolean;
   isExternal?: boolean;
+  /** 1-based insertion index used by org nav to position custom items among defaults */
   position?: number;
 };
 

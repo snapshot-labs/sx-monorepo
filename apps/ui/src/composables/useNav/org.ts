@@ -31,11 +31,19 @@ function getOrgConfig(context: NavContext): NavConfig {
     Object.assign(items, context.organization.navItems);
   }
 
-  const sorted = Object.entries(items).sort(
-    ([, a], [, b]) => (a.position ?? Infinity) - (b.position ?? Infinity)
+  const positioned = Object.entries(items)
+    .filter(([, item]) => item.position != null)
+    .sort(([, a], [, b]) => a.position! - b.position!);
+  const result = Object.entries(items).filter(
+    ([, item]) => item.position == null
   );
 
-  return { items: Object.fromEntries(sorted) };
+  for (const entry of positioned) {
+    const idx = Math.min(entry[1].position! - 1, result.length);
+    result.splice(idx, 0, entry);
+  }
+
+  return { items: Object.fromEntries(result) };
 }
 
 const EXCLUDED_SUB_ROUTES = ['org-editor', 'org-proposal'];
