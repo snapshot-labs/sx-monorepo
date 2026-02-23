@@ -65,7 +65,9 @@ const currentVote = computed(
 );
 
 const withoutContentInBottom = computed(
-  () => 'space-proposal-votes' === String(route.name)
+  () =>
+    route.name === 'space-proposal-votes' ||
+    route.name === 'space-proposal-futarchy'
 );
 
 async function handleVoteClick(choice: Choice) {
@@ -187,6 +189,23 @@ watchEffect(() => {
                 :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
+                class="inline-block"
+              />
+            </AppLink>
+            <AppLink
+              :to="{
+                name: 'space-proposal-futarchy',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-futarchy'"
+                :count="10"
+                text="Futarchy"
                 class="inline-block"
               />
             </AppLink>
