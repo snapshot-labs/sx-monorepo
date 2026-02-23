@@ -349,8 +349,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
           .filter(execution => execution.transactions.length > 0)
       ];
       executionType = 'safeSnap';
-    } catch (e) {
-      console.warn('failed to parse safeSnap execution', e);
+    } catch (err) {
+      console.warn('failed to parse safeSnap execution', err);
       isInvalid = true;
     }
   }
