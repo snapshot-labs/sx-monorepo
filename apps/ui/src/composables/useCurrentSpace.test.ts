@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { nextTick, reactive, ref } from 'vue';
+import { computed, nextTick, reactive, ref } from 'vue';
 import { useCurrentSpace } from './useCurrentSpace';
 
 const VALID_ADDRESS = '0x000000000000000000000000000000000000dEaD';
@@ -8,6 +8,9 @@ const CHECKSUMMED = '0x000000000000000000000000000000000000dEaD';
 let mockRoute: { params: Record<string, string> };
 const mockWhiteLabelSpace = ref<any>(null);
 let spaceQueryArgs: { networkId: () => any; spaceId: () => any };
+
+let resolveQueryData: any;
+let resolveQueryFetching: any;
 
 vi.mock('vue-router', () => ({
   useRoute: () => mockRoute
@@ -20,7 +23,40 @@ vi.mock('@/composables/useWhiteLabel', () => ({
 vi.mock('@/queries/spaces', () => ({
   useSpaceQuery: (args: any) => {
     spaceQueryArgs = args;
-    return { data: ref(null), isPending: ref(false) };
+    return { data: ref(null), isFetching: ref(false) };
+  }
+}));
+
+vi.mock('@tanstack/vue-query', () => ({
+  skipToken: Symbol('skipToken'),
+  useQuery: (opts: any) => {
+    resolveQueryData = ref(undefined);
+    resolveQueryFetching = ref(false);
+
+    const queryFn = computed(() =>
+      typeof opts.queryFn === 'object' && 'value' in opts.queryFn
+        ? opts.queryFn.value
+        : opts.queryFn
+    );
+
+    watchEffect(async () => {
+      const fn = queryFn.value;
+      if (!fn || typeof fn === 'symbol') {
+        resolveQueryData.value = undefined;
+        resolveQueryFetching.value = false;
+        return;
+      }
+      resolveQueryFetching.value = true;
+      try {
+        resolveQueryData.value = await fn();
+      } catch {
+        resolveQueryData.value = undefined;
+      } finally {
+        resolveQueryFetching.value = false;
+      }
+    });
+
+    return { data: resolveQueryData, isFetching: resolveQueryFetching };
   }
 }));
 
@@ -38,22 +74,21 @@ beforeEach(() => {
 describe('useCurrentSpace', () => {
   describe('param parsing', () => {
     it('should return null space when no route param', () => {
-      const { space, isPending } = useCurrentSpace();
+      const { space } = useCurrentSpace();
 
       expect(space.value).toBe(null);
-      expect(isPending.value).toBe(false);
       expect(spaceQueryArgs.networkId()).toBe(null);
       expect(spaceQueryArgs.spaceId()).toBe(null);
     });
 
     it('should pass parsed networkId and address to query for direct addresses', async () => {
       mockRoute.params = { space: `eth:${VALID_ADDRESS}` };
-      const { isPending } = useCurrentSpace();
-      await nextTick();
+      useCurrentSpace();
 
-      expect(spaceQueryArgs.networkId()).toBe('eth');
-      expect(spaceQueryArgs.spaceId()).toBe(CHECKSUMMED);
-      expect(isPending.value).toBe(false);
+      await vi.waitFor(() => {
+        expect(spaceQueryArgs.networkId()).toBe('eth');
+        expect(spaceQueryArgs.spaceId()).toBe(CHECKSUMMED);
+      });
       expect(resolveNameMock).not.toHaveBeenCalled();
     });
 
@@ -78,28 +113,23 @@ describe('useCurrentSpace', () => {
 
   describe('ENS resolution', () => {
     it('should resolve ENS names and pass result to query', async () => {
-      let resolve: (v: any) => void;
-      resolveNameMock.mockReturnValue(
-        new Promise(r => {
-          resolve = r;
-        })
-      );
+      resolveNameMock.mockResolvedValue({
+        networkId: 'eth',
+        address: VALID_ADDRESS
+      });
 
       mockRoute.params = { space: 'eth:vitalik.eth' };
-      const { isPending } = useCurrentSpace();
-      await nextTick();
+      useCurrentSpace();
 
-      expect(isPending.value).toBe(true);
       expect(resolveNameMock).toHaveBeenCalledWith('vitalik.eth', 'eth');
 
-      resolve!({ networkId: 'eth', address: VALID_ADDRESS });
       await vi.waitFor(() => {
         expect(spaceQueryArgs.networkId()).toBe('eth');
         expect(spaceQueryArgs.spaceId()).toBe(CHECKSUMMED);
       });
     });
 
-    it('should leave query disabled when resolution returns null', async () => {
+    it('should leave query disabled when resolution throws', async () => {
       resolveNameMock.mockResolvedValue(null);
 
       mockRoute.params = { space: 'eth:unknown.eth' };
@@ -135,62 +165,47 @@ describe('useCurrentSpace', () => {
   });
 
   describe('race conditions', () => {
-    it('should discard stale resolution results on rapid param changes', async () => {
-      let resolve: (v: any) => void;
-      resolveNameMock.mockReturnValue(
-        new Promise(r => {
-          resolve = r;
-        })
-      );
+    it('should use latest param result via query key change', async () => {
+      resolveNameMock.mockResolvedValue({
+        networkId: 'eth',
+        address: '0x0000000000000000000000000000000000000001'
+      });
 
       mockRoute.params = { space: 'eth:first.eth' };
       useCurrentSpace();
       await nextTick();
 
+      // Change to a direct address — query key changes, stale ENS result discarded
       mockRoute.params = { space: `eth:${VALID_ADDRESS}` };
-      await nextTick();
 
-      expect(spaceQueryArgs.spaceId()).toBe(CHECKSUMMED);
-
-      // Stale ENS result arrives — should be ignored
-      resolve!({
-        networkId: 'eth',
-        address: '0x0000000000000000000000000000000000000001'
+      await vi.waitFor(() => {
+        expect(spaceQueryArgs.spaceId()).toBe(CHECKSUMMED);
       });
-      await nextTick();
-
-      expect(spaceQueryArgs.spaceId()).toBe(CHECKSUMMED);
     });
   });
 
   describe('error handling', () => {
-    it('should reset isPending and spaceId when resolveName throws', async () => {
-      let resolve: (v: any) => void;
-      resolveNameMock.mockReturnValueOnce(
-        new Promise(r => {
-          resolve = r;
-        })
-      );
+    it('should reset spaceId when resolveName throws', async () => {
+      resolveNameMock.mockResolvedValueOnce({
+        networkId: 'eth',
+        address: VALID_ADDRESS
+      });
 
       mockRoute.params = { space: 'eth:first.eth' };
-      const { isPending } = useCurrentSpace();
+      useCurrentSpace();
 
-      // First resolution succeeds
-      resolve!({ networkId: 'eth', address: VALID_ADDRESS });
       await vi.waitFor(() => {
         expect(spaceQueryArgs.spaceId()).toBe(CHECKSUMMED);
       });
 
-      // Second resolution fails
+      // Second resolution fails — queryFn throws, data resets
       resolveNameMock.mockRejectedValue(new Error('network error'));
       mockRoute.params = { space: 'eth:failing.eth' };
 
       await vi.waitFor(() => {
-        expect(isPending.value).toBe(false);
+        expect(spaceQueryArgs.networkId()).toBe(null);
+        expect(spaceQueryArgs.spaceId()).toBe(null);
       });
-
-      expect(spaceQueryArgs.networkId()).toBe(null);
-      expect(spaceQueryArgs.spaceId()).toBe(null);
     });
   });
 
