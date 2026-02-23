@@ -7,6 +7,7 @@ import {
 import { MaybeRefOrGetter } from 'vue';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { SCORES_TICKS_MAX_VOTES } from '@/networks/offchain/api';
 import { ProposalsFilter } from '@/networks/types';
 import { NetworkID, Proposal } from '@/types';
 
@@ -17,7 +18,6 @@ type Filters = {
 
 export const PROPOSALS_LIMIT = 20;
 export const PROPOSALS_SUMMARY_LIMIT = 6;
-const OFFCHAIN_SCORES_TICKS_VOTES_LIMIT = 2000;
 
 export const PROPOSALS_KEYS = {
   all: ['proposals'] as const,
@@ -262,7 +262,7 @@ export function useProposalScoresTicksQuery(
         if (
           p.type !== 'basic' ||
           p.privacy !== 'none' ||
-          p.vote_count > OFFCHAIN_SCORES_TICKS_VOTES_LIMIT
+          p.vote_count > SCORES_TICKS_MAX_VOTES
         ) {
           return [];
         }
