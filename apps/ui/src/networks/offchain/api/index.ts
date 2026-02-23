@@ -85,7 +85,7 @@ const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
   's-tn': 'https://testnet-delegate-registry-api.snapshot.box'
 };
 
-const SCORES_TICKS_PAGE_SIZE = 1000;
+const SCORES_TICKS_LIMIT = 1000;
 export const SCORES_TICKS_MAX_VOTES = 4000;
 
 function getProposalState(
@@ -564,7 +564,7 @@ export function createApi(
         const { data } = await apollo.query({
           query: SCORES_TICKS_VOTES_QUERY,
           variables: {
-            first: SCORES_TICKS_PAGE_SIZE,
+            first: SCORES_TICKS_LIMIT,
             skip,
             where: { proposal: proposalId }
           }
@@ -573,8 +573,8 @@ export function createApi(
         const page = data.votes;
         votes.push(...page);
 
-        if (page.length < SCORES_TICKS_PAGE_SIZE) break;
-        skip += SCORES_TICKS_PAGE_SIZE;
+        if (page.length < SCORES_TICKS_LIMIT) break;
+        skip += SCORES_TICKS_LIMIT;
       }
 
       const scores: [number, number, number] = [0, 0, 0];
