@@ -262,7 +262,7 @@ export function useProposalScoresTicksQuery(
         if (
           p.type !== 'basic' ||
           p.privacy !== 'none' ||
-          p.vote_count > OFFCHAIN_SCORES_TICKS_MAX_VOTES
+          p.vote_count > OFFCHAIN_SCORES_TICKS_VOTES_LIMIT
         ) {
           return [];
         }
