@@ -16,6 +16,18 @@ services:
     volumes:
       - ./initdb.d:/docker-entrypoint-initdb.d
       - pg:/var/lib/postgresql/data
+
+  agent:
+    build:
+      context: ../apps/agent
+    depends_on:
+      - postgres
+    env_file:
+      - ../apps/agent/.env
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/agent
+      PORT: 3002
+
 volumes:
   pg:
     driver: local

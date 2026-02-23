@@ -117,17 +117,22 @@ onUnmounted(() => {
     <div
       class="flex items-center h-full truncate"
       :class="{
-        'lg:border-r lg:pr-4 lg:w-[240px] shrink-0': hasAppNav,
-        'border-r pr-4 w-[240px]': hasAppNav && uiStore.sideMenuOpen
+        'lg:border-r lg:pr-4 lg:w-[240px] shrink-0': hasAppNav && !$slots['left-content'],
+        'border-r pr-4 w-[240px]': hasAppNav && uiStore.sideMenuOpen && !$slots['left-content']
       }"
     >
-      <slot name="toggle-sidebar-button" />
-      <Breadcrumb
-        :class="[
-          'ml-4',
-          { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
-        ]"
-      />
+      <template v-if="$slots['left-content']">
+        <slot name="left-content" />
+      </template>
+      <template v-else>
+        <slot name="toggle-sidebar-button" />
+        <Breadcrumb
+          :class="[
+            'ml-4',
+            { 'hidden lg:flex': searchConfig && !uiStore.sideMenuOpen }
+          ]"
+        />
+      </template>
     </div>
 
     <form

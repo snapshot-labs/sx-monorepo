@@ -9,6 +9,9 @@ import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
+import AgentDetail from '@/views/Settings/AgentDetail.vue';
+import Agents from '@/views/Settings/Agents.vue';
+import AgentsNew from '@/views/Settings/AgentsNew.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import EmailNotifications from '@/views/Settings/EmailNotifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
@@ -56,12 +59,28 @@ export default [
     component: CreateSpaceSnapshot
   },
   {
+    path: '/settings/agents/new',
+    name: 'settings-agents-new',
+    component: AgentsNew
+  },
+  {
+    path: '/settings/agents/:agentAddress/edit',
+    name: 'settings-agent-edit',
+    component: AgentsNew
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: Settings,
     children: [
       { path: '', name: 'settings-spaces', component: SettingsSpaces },
       { path: 'contacts', name: 'settings-contacts', component: Contacts },
+      { path: 'agents', name: 'settings-agents', component: Agents },
+      {
+        path: 'agents/:agentAddress',
+        name: 'settings-agent-detail',
+        component: AgentDetail
+      },
       {
         path: 'email-notifications',
         name: 'settings-email-notifications',

@@ -72,6 +72,8 @@ const hasPlaceHolderSidebar = computed(
       'space-proposal',
       'create-space-snapshot',
       'create-space-snapshot-x',
+      'settings-agents-new',
+      'settings-agent-edit',
       'auction',
       'auctions',
       'auction-invite',
@@ -80,6 +82,13 @@ const hasPlaceHolderSidebar = computed(
     ].includes(String(route.matched[0]?.name)) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );
+
+const agentPageTitle = computed(() => {
+  const name = String(route.matched[0]?.name);
+  if (name === 'settings-agents-new') return 'New agent';
+  if (name === 'settings-agent-edit') return 'Edit agent';
+  return '';
+});
 
 const hasTopNav = computed(() => {
   return 'space-editor' !== String(route.matched[1]?.name);
@@ -210,6 +219,18 @@ router.afterEach(() => {
         :class="{ hidden: !hasTopNav, 'maximum:border-l': isStandaloneLayout }"
         class="maximum:border-r"
       >
+        <template v-if="agentPageTitle" #left-content>
+          <div class="flex items-center gap-3 ml-4">
+            <UiButton
+              :to="{ name: 'settings-agents' }"
+              class="shrink-0"
+              uniform
+            >
+              <IH-arrow-narrow-left />
+            </UiButton>
+            <h4 class="truncate" v-text="agentPageTitle" />
+          </div>
+        </template>
         <template #toggle-sidebar-button>
           <button
             v-if="hasSwipeableContent"

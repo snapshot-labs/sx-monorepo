@@ -33,7 +33,8 @@
         "ENABLE_SNAPSHOT_X",
         "ENABLE_GOVERNOR_BRAVO",
         "ENABLE_OPENZEPPELIN",
-        "VITE_MANA_URL"
+        "VITE_MANA_URL",
+        "VITE_AGENT_URL"
       ]
     },
     "dev:electron": {

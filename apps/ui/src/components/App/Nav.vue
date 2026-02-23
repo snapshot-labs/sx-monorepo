@@ -22,6 +22,7 @@ import IHStop from '~icons/heroicons-outline/stop';
 import IHUser from '~icons/heroicons-outline/user';
 import IHUserGroup from '~icons/heroicons-outline/user-group';
 import IHUsers from '~icons/heroicons-outline/users';
+import IHChip from '~icons/heroicons-outline/chip';
 
 type NavigationConfig = {
   style?: 'default' | 'slim';
@@ -268,6 +269,10 @@ function getNavigationConfig(
           name: 'My spaces',
           icon: IHStop,
           hidden: isWhiteLabel.value
+        },
+        agents: {
+          name: 'Agents',
+          icon: IHChip
         },
         contacts: {
           name: 'Contacts',
