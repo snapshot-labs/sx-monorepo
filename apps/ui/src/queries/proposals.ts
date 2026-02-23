@@ -17,6 +17,7 @@ type Filters = {
 
 export const PROPOSALS_LIMIT = 20;
 export const PROPOSALS_SUMMARY_LIMIT = 6;
+const OFFCHAIN_SCORES_TICKS_VOTES_LIMIT = 2000;
 
 export const PROPOSALS_KEYS = {
   all: ['proposals'] as const,
@@ -244,8 +245,6 @@ export function useProposalQuery(
     }
   });
 }
-
-const OFFCHAIN_SCORES_TICKS_MAX_VOTES = 2000;
 
 export function useProposalScoresTicksQuery(
   proposal: MaybeRefOrGetter<Proposal>
