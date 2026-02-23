@@ -17,7 +17,7 @@ This is the Snapshot monorepository containing a Vue frontend, GraphQL API, tran
 ## Project setup
 
 ```
-yarn
+bun install
 ```
 
 ### Compiles and hot-reloads for development
@@ -25,7 +25,7 @@ yarn
 #### UI only
 
 ```sh
-yarn dev
+bun run dev
 ```
 
 #### UI with backend services
@@ -35,31 +35,31 @@ yarn dev
 ### Compiles and minifies for production
 
 ```
-yarn build
+bun run build
 ```
 
 ### Lints and fixes files
 
 ```
-yarn lint
+bun run lint
 ```
 
 ### Runs tests
 
 ```
-yarn test
+bun run test
 ```
 
 ### Run E2E tests using Playwright
 
 ```
-yarn test:e2e
+bun run test:e2e
 ```
 
 ### Verifies TypeScript code
 
 ```
-yarn typecheck
+bun run typecheck
 ```
 
 ## Running local services
@@ -70,7 +70,7 @@ Local APIs will only be used for Ethereum Sepolia and Starknet Sepolia.
 This command will allow you to select which services you want to run.
 
 ```
-yarn dev:interactive
+bun run dev:interactive
 ```
 
 ### Setup
@@ -86,7 +86,7 @@ In `apps/mana/.env` you need to fill in following empty variables:
 
 ### Getting it running faster
 
-If you run `yarn dev:interactive` it will take long time to sync all the blocks for the first time. To mitigate it you can just change starting block
+If you run `bun run dev:interactive` it will take long time to sync all the blocks for the first time. To mitigate it you can just change starting block
 for indexing here:
 
 - https://github.com/snapshot-labs/sx-monorepo/blob/daad48dbd2aa775e47334d0697cb84477c1d3427/apps/api/src/starknet/config.ts#L40 (for Starknet)
@@ -98,7 +98,7 @@ If you do that make sure to create a new space, because spaces created before th
 
 Packages are versioned using [`changesets`](https://github.com/changesets/changesets).
 In most cases all you need to do is when adding new changes to versioned packages (right now it's just `sx.js`)
-is to execute `yarn changeset`, specify package you updated, version bump per [semver](https://semver.org/) and description of your changes.
+is to execute `bun run changeset`, specify package you updated, version bump per [semver](https://semver.org/) and description of your changes.
 Then commit generated files in your PR.
 
 Once merged changesets actions will create PR that can be used to release and publish those packages.

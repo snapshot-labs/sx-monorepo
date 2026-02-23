@@ -28,9 +28,7 @@ async function encryptShutterChoice(
     typeof window !== 'undefined' && typeof window.document !== 'undefined';
   const shutterWasm = isBrowser
     ? (
-        await import(
-          '@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url'
-        )
+        await import('@shutter-network/shutter-crypto/dist/shutter-crypto.wasm?url')
       ).default
     : undefined;
 

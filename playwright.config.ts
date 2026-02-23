@@ -15,7 +15,7 @@ export default defineConfig({
     timeout: 10000
   },
   webServer: {
-    command: 'yarn dev',
+    command: 'bun run dev',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',

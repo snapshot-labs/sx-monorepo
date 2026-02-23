@@ -5,7 +5,7 @@ set -e
 PIDS=()
 
 function start_node() {
-  yarn node:"$1" > /dev/null 2>&1 &
+  bun run node:"$1" > /dev/null 2>&1 &
   PIDS+=($!)
   echo "Started $1 with PID $!"
 }
@@ -24,7 +24,7 @@ start_node evm
 start_node starknet
 
 echo "Running evm tests"
-yarn test:integration:evm
+bun run test:integration:evm
 
 echo "Running starknet tests"
-yarn test:integration:starknet
+bun run test:integration:starknet
