@@ -42,7 +42,9 @@ export function getGenericExplorerUrl(
       mappedType = 'token';
     }
 
-    return `${(networks[chainId] || networks[1]).explorer.url}/${mappedType}/${address}`;
+    if (!networks[chainId]) return null;
+
+    return `${networks[chainId].explorer.url}/${mappedType}/${address}`;
   }
 
   try {
