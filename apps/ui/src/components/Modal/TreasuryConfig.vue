@@ -94,7 +94,7 @@ watch(
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="'Add treasury'" />
+      <h3>{{ initialState ? 'Edit treasury' : 'Add treasury' }}</h3>
       <template v-if="isPickerShown">
         <button
           type="button"

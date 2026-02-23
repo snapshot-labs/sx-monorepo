@@ -59,8 +59,8 @@ function deleteMember(index: number) {
       class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
     >
       <div class="flex flex-col">
-        <a
-          :href="
+        <AppLink
+          :to="
             getGenericExplorerUrl(
               !isAddress(member.address) && starknetChainId
                 ? starknetChainId
@@ -69,7 +69,6 @@ function deleteMember(index: number) {
               'address'
             ) || ''
           "
-          target="_blank"
           class="flex items-center text-skin-text leading-5 group"
         >
           <UiStamp
@@ -80,7 +79,7 @@ function deleteMember(index: number) {
           />
           <UiAddress :address="member.address" />
           <IH-arrow-sm-right class="-rotate-45" />
-        </a>
+        </AppLink>
       </div>
       <div class="flex gap-3">
         <UiDropdown

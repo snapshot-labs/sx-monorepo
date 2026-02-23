@@ -180,47 +180,42 @@ const parsedTitle = computedAsync(
           call.name
         }}</code>
         on
-        <a
+        <AppLink
           class="inline-flex items-center"
-          target="_blank"
-          :href="
-            getGenericExplorerUrl(chainId, call.to, 'address') || undefined
-          "
+          :to="getGenericExplorerUrl(chainId, call.to, 'address') || undefined"
         >
           {{ shorten(call.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-        </a>
+        </AppLink>
       </div>
       <div v-else-if="interaction" class="text-skin-link">
         Interaction with
-        <a
+        <AppLink
           class="inline-flex items-center"
-          target="_blank"
-          :href="
+          :to="
             getGenericExplorerUrl(chainId, interaction.to, 'address') ||
             undefined
           "
         >
           {{ shorten(interaction.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-        </a>
+        </AppLink>
       </div>
       <template v-if="params.length > 0">
         <h4 class="font-medium mt-3">Parameters</h4>
         <div v-for="param in params" :key="param.name" class="flex space-x-2">
           <span class="text-skin-link">{{ param.name }}</span>
-          <a
+          <AppLink
             v-if="param.type === 'address'"
             class="inline-flex items-center"
-            target="_blank"
-            :href="
+            :to="
               getGenericExplorerUrl(chainId, param.value, 'address') ||
               undefined
             "
           >
             {{ shorten(param.value) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-          </a>
+          </AppLink>
           <div v-else class="break-all inline-block">{{ param.value }}</div>
         </div>
       </template>

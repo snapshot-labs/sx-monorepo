@@ -53,21 +53,21 @@ const SOCIALS = [
           <UiEyebrow>Resources</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <a :href="HELPDESK_URL" target="_blank">
+              <AppLink :to="HELPDESK_URL">
                 Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://snapshot.mirror.xyz" target="_blank">
+              <AppLink to="https://snapshot.mirror.xyz">
                 Blog
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://github.com/snapshot-labs/brand" target="_blank">
+              <AppLink to="https://github.com/snapshot-labs/brand">
                 Brand
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
           </div>
         </div>
@@ -75,22 +75,22 @@ const SOCIALS = [
           <UiEyebrow>Developers</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <a href="https://docs.snapshot.box" target="_blank">
+              <AppLink to="https://docs.snapshot.box">
                 Docs
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://github.com/snapshot-labs" target="_blank">
+              <AppLink to="https://github.com/snapshot-labs">
                 GitHub
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://status.snapshot.org" target="_blank">
+              <AppLink to="https://status.snapshot.org">
                 Status
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ const SOCIALS = [
             <AppLink :to="{ name: 'site-policy' }">Privacy policy</AppLink>
           </div>
           <div>
-            <a :href="HELPDESK_URL" target="_blank">Contact us</a>
+            <AppLink :to="HELPDESK_URL">Contact us</AppLink>
           </div>
         </div>
       </div>
@@ -111,9 +111,8 @@ const SOCIALS = [
         <div class="flex-grow">
           <IC-snapshot class="size-[32px] inline-block text-skin-link mr-3" />
           © {{ new Date().getFullYear() }} Snapshot Labs
-          <a
-            :href="`${repositoryUrl}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
-            target="_blank"
+          <AppLink
+            :to="`${repositoryUrl}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
             class="ml-1.5"
           >
             <span
@@ -122,18 +121,17 @@ const SOCIALS = [
               "
             />
             <IH-arrow-sm-right class="inline-block -rotate-45 ml-0.5" />
-          </a>
+          </AppLink>
         </div>
         <div class="flex space-x-2.5">
-          <a
+          <AppLink
             v-for="social in SOCIALS"
             :key="social.href"
-            :href="social.href"
-            target="_blank"
+            :to="social.href"
             class="text-skin-text hover:text-skin-link"
           >
             <component :is="social.icon" class="size-[32px] text-skin-link" />
-          </a>
+          </AppLink>
         </div>
       </div>
     </UiContainer>

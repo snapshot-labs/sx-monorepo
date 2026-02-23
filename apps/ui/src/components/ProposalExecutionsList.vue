@@ -41,15 +41,14 @@ function downloadExecution(execution: ProposalExecution) {
     :key="`${execution.chainId}:${execution.safeAddress}`"
     class="x-block !border-x rounded-lg mb-3 last:mb-0"
   >
-    <a
-      :href="
+    <AppLink
+      :to="
         getGenericExplorerUrl(
           execution.chainId,
           execution.safeAddress,
           'address'
         ) || undefined
       "
-      target="_blank"
       class="flex justify-between items-center px-4 py-3"
       :class="{
         'pointer-events-none': !getGenericExplorerUrl(
@@ -77,7 +76,7 @@ function downloadExecution(execution: ProposalExecution) {
           v-text="getExecutionName(proposal.network, execution.strategyType)"
         />
       </div>
-    </a>
+    </AppLink>
     <div class="flex justify-between items-center border-y pr-3">
       <UiSectionHeader label="Transactions" class="border-b-0 pr-0 truncate" />
       <UiTooltip

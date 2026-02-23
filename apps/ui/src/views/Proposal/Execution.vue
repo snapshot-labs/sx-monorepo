@@ -21,14 +21,13 @@ defineProps<{
     >
       This proposal uses SafeSnap execution which is currently not supported on
       the new interface. You can view execution details on the
-      <a
-        :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-        target="_blank"
+      <AppLink
+        :to="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
         class="inline-flex items-center font-bold"
       >
         previous interface
         <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </a>
+      </AppLink>
       .
     </UiAlert>
     <ProposalExecutionsList

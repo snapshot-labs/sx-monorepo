@@ -5,9 +5,8 @@ defineProps<{ app: any }>();
 </script>
 
 <template>
-  <a
-    :href="app.link || app.website"
-    target="_blank"
+  <AppLink
+    :to="app.link || app.website"
     class="border rounded-lg p-3 leading-6 relative group"
   >
     <img :src="getUrl(app.avatar) || ''" class="size-[32px] rounded-lg mb-2" />
@@ -16,5 +15,5 @@ defineProps<{ app: any }>();
     />
     <h4 v-text="app.name" />
     <div class="text-skin-text text-[17px]" v-text="app.category" />
-  </a>
+  </AppLink>
 </template>

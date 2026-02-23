@@ -286,10 +286,10 @@ onMounted(() => {
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div>
-          <a :href="CALENDLY" target="_blank">
+          <AppLink :to="CALENDLY">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </a>
+          </AppLink>
         </div>
       </div>
     </div>
@@ -379,10 +379,10 @@ onMounted(() => {
           {{ selectedSpace?.name || 'space' }}
         </UiButton>
         <div>
-          <a :href="CALENDLY" target="_blank">
+          <AppLink :to="CALENDLY">
             Talk to sales
             <IH-arrow-sm-right class="inline-block -rotate-45" />
-          </a>
+          </AppLink>
         </div>
       </div>
     </div>

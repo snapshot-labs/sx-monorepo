@@ -108,9 +108,8 @@ watchEffect(() =>
           />
           <div v-if="shouldShowSource && statement.source">
             <UiEyebrow class="text-skin-text mb-2">Source</UiEyebrow>
-            <a
-              :href="SOURCE_ICONS[statement.source].link"
-              target="_blank"
+            <AppLink
+              :to="SOURCE_ICONS[statement.source].link"
               class="flex items-center space-x-1"
             >
               <component
@@ -120,7 +119,7 @@ watchEffect(() =>
               <IH-arrow-sm-right
                 class="-rotate-45 text-skin-link relative top-[1px]"
               />
-            </a>
+            </AppLink>
           </div>
         </template>
         <UiStateWarning v-else>
