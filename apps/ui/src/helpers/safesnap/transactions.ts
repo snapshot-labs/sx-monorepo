@@ -8,29 +8,53 @@ import {
 } from '@snapshot-labs/sx';
 import { ETH_CONTRACT } from '../constants';
 
-export type SafeSnapTransaction = {
+type SafeSnapBaseTransaction = {
   to: string;
   data: string;
   value: string;
-  type?: string;
-  recipient?: string;
-  amount?: string;
-  token?: {
+};
+
+type SafeSnapTransferFundsTransaction = SafeSnapBaseTransaction & {
+  type: 'transferFunds';
+  recipient: string;
+  amount: string;
+  token: {
     name: string;
     decimals: number;
     symbol: string;
     address: string;
   };
-  collectable?: {
+};
+
+type SafeSnapTransferNFTTransaction = SafeSnapBaseTransaction & {
+  type: 'transferNFT';
+  recipient: string;
+  collectable: {
     address: string;
     id: string;
     name: string;
     tokenName: string;
   };
-  abi?: string | any[];
 };
 
-function parseTransferFunds(tx: SafeSnapTransaction): SendTokenTransaction {
+type SafeSnapContractInteractionTransaction = SafeSnapBaseTransaction & {
+  type: 'contractInteraction';
+  abi: string | any[];
+};
+
+type SafeSnapRawTransaction = SafeSnapBaseTransaction & {
+  type?: undefined;
+};
+
+export type SafeSnapTransaction =
+  | SafeSnapTransferFundsTransaction
+  | SafeSnapTransferNFTTransaction
+  | SafeSnapContractInteractionTransaction
+  | SafeSnapRawTransaction;
+
+function parseTransferFunds(
+  tx: SafeSnapTransferFundsTransaction
+): SendTokenTransaction {
   return {
     to: tx.to,
     data: tx.data,
@@ -38,19 +62,21 @@ function parseTransferFunds(tx: SafeSnapTransaction): SendTokenTransaction {
     salt: '',
     _type: 'sendToken',
     _form: {
-      recipient: tx.recipient!,
-      amount: tx.amount!,
+      recipient: tx.recipient,
+      amount: tx.amount,
       token: {
-        name: tx.token!.name,
-        decimals: tx.token!.decimals,
-        symbol: tx.token!.symbol,
-        address: tx.token!.address === 'main' ? ETH_CONTRACT : tx.token!.address
+        name: tx.token.name,
+        decimals: tx.token.decimals,
+        symbol: tx.token.symbol,
+        address: tx.token.address === 'main' ? ETH_CONTRACT : tx.token.address
       }
     }
   };
 }
 
-function parseTransferNFT(tx: SafeSnapTransaction): SendNftTransaction {
+function parseTransferNFT(
+  tx: SafeSnapTransferNFTTransaction
+): SendNftTransaction {
   return {
     to: tx.to,
     data: tx.data,
@@ -58,22 +84,22 @@ function parseTransferNFT(tx: SafeSnapTransaction): SendNftTransaction {
     salt: '',
     _type: 'sendNft',
     _form: {
-      recipient: tx.recipient!,
+      recipient: tx.recipient,
       sender: '',
       amount: '1',
       nft: {
         type: '',
-        address: tx.collectable!.address,
-        id: tx.collectable!.id,
-        name: tx.collectable!.name,
-        collection: tx.collectable!.tokenName || ''
+        address: tx.collectable.address,
+        id: tx.collectable.id,
+        name: tx.collectable.name,
+        collection: tx.collectable.tokenName || ''
       }
     }
   };
 }
 
 function parseContractInteraction(
-  tx: SafeSnapTransaction
+  tx: SafeSnapContractInteractionTransaction
 ): ContractCallTransaction {
   const abi =
     typeof tx.abi === 'string' ? JSON.parse(tx.abi) : (tx.abi as any[]);
@@ -106,7 +132,7 @@ function parseContractInteraction(
   };
 }
 
-function parseRaw(tx: SafeSnapTransaction): RawTransaction {
+function parseRaw(tx: SafeSnapBaseTransaction): RawTransaction {
   return {
     to: tx.to,
     data: tx.data,
