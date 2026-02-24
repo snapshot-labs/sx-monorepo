@@ -51,7 +51,7 @@ function downloadExecution(execution: ProposalExecution) {
       "
       class="flex justify-between items-center px-4 py-3"
       :class="{
-        'pointer-events-none': !getGenericExplorerUrl(
+        'pointer-events-none text-left': !getGenericExplorerUrl(
           execution.chainId,
           execution.safeAddress,
           'address'

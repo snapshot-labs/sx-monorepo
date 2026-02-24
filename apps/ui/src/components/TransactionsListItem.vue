@@ -25,11 +25,7 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    const rawMethodName = props.tx._form.method.slice(
-      0,
-      props.tx._form.method.indexOf('(')
-    );
-    return `<b>${rawMethodName}</b> on <b>_NAME_</b>`;
+    return `<b>${props.tx._form.method.split('(')[0]}</b> on <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'raw') {
@@ -67,11 +63,7 @@ const call = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    const rawMethodName = props.tx._form.method.slice(
-      0,
-      props.tx._form.method.indexOf('(')
-    );
-    return { name: rawMethodName, to: props.tx.to };
+    return { name: props.tx._form.method.split('(')[0], to: props.tx.to };
   }
 
   return null;
