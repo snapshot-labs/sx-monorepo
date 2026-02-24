@@ -2,16 +2,19 @@ import { Theme } from '@/types';
 
 type UserTheme = Theme | 'none';
 
-const DEFAULT_THEME = 'light';
+const preferredColor = usePreferredColorScheme();
 
 export function useTheme() {
   const store = useStorage<UserTheme>('theme', 'none');
+  const defaultTheme = computed(() =>
+    preferredColor.value === 'light' ? 'light' : 'dark'
+  );
   const currentTheme = computed(() =>
-    [DEFAULT_THEME, 'none'].includes(store.value) ? DEFAULT_THEME : 'dark'
+    store.value !== 'none' ? store.value : defaultTheme.value
   );
 
   function toggleTheme() {
-    store.value = ['light', 'none'].includes(store.value) ? 'dark' : 'light';
+    store.value = currentTheme.value === 'light' ? 'dark' : 'light';
   }
 
   function setTheme(theme: Theme) {
@@ -23,7 +26,7 @@ export function useTheme() {
   }
 
   function applyTheme(theme: Theme) {
-    if (theme === DEFAULT_THEME) {
+    if (theme === 'light') {
       document.documentElement.classList.remove('dark');
     } else {
       document.documentElement.classList.add('dark');
@@ -35,7 +38,6 @@ export function useTheme() {
   });
 
   return {
-    DEFAULT_THEME,
     currentTheme,
     toggleTheme,
     setTheme,

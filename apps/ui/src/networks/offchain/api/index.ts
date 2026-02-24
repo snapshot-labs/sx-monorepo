@@ -10,6 +10,7 @@ import {
 } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
+import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
 import {
@@ -285,6 +286,7 @@ function formatSpace(
 function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   let executions = [] as ProposalExecution[];
   let executionType = '';
+  let isInvalid = false;
 
   const chainIdToNetworkId = Object.fromEntries(
     Object.entries(CHAIN_IDS).map(([k, v]) => [v, k])
@@ -312,10 +314,45 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       executionType = 'oSnap';
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
+      isInvalid = true;
     }
   } else if (proposal.plugins.safeSnap) {
-    executions = [];
-    executionType = 'safeSnap';
+    try {
+      const safeSnapConfig = proposal.plugins.safeSnap;
+      const safes: any[] =
+        safeSnapConfig.safes ||
+        (safeSnapConfig.txs ? [{ txs: safeSnapConfig.txs }] : []);
+
+      executions = [
+        ...executions,
+        ...safes
+          .map(safe => {
+            const chainId = Number(safe.network || 1);
+            const batches: any[] = safe.txs || [];
+
+            const transactions = batches.flatMap(batch => {
+              const txs = batch.transactions || batch;
+              return (Array.isArray(txs) ? txs : [txs]).map(tx =>
+                parseSafeSnapTransaction(tx)
+              );
+            });
+
+            return {
+              strategyType: 'safeSnap',
+              safeName: '',
+              safeAddress: safe.realityAddress || safe.umaAddress || '',
+              networkId: chainIdToNetworkId[chainId],
+              chainId,
+              transactions
+            };
+          })
+          .filter(execution => execution.transactions.length > 0)
+      ];
+      executionType = 'safeSnap';
+    } catch (err) {
+      console.warn('failed to parse safeSnap execution', err);
+      isInvalid = true;
+    }
   }
 
   if (proposal.plugins.readOnlyExecution) {
@@ -350,7 +387,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
-    isInvalid: false,
+    isInvalid,
     author: {
       id: proposal.author,
       address_type: 1,
