@@ -73,3 +73,22 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 - Use TypeScript whenever possible, avoid `any`
 - Reuse existing code when possible — check helpers, composables, and utils before writing new logic
 - Name errors in catch blocks `err`: `catch (err) { ... }`
+
+## Cursor Cloud specific instructions
+
+### Services overview
+
+- **UI** (`yarn dev`, port 8080) — the primary service. Connects to remote production API/Mana by default, so it works standalone without Docker or databases.
+- **API** and **Mana** are optional for UI development. They require PostgreSQL (via `scripts/docker-compose.yml`) and `.env` files copied from `.env.example` in their respective `apps/` directories.
+- Do **not** use `yarn dev:interactive` in non-interactive environments — it requires TTY input. Use `yarn dev` for UI-only development.
+
+### Build before dev
+
+`yarn dev` runs `turbo run dev` which automatically builds `packages/sx.js` and runs `codegen` (GraphQL + Checkpoint schema generation) before starting the Vite dev server. No separate build step is needed before `yarn dev`.
+
+### Gotchas
+
+- The `turbo` telemetry notice appears on first run and is harmless.
+- The Vite warning about `process.env` in `define` is expected and does not affect functionality.
+- `yarn build` includes a production build of the UI (takes ~60s) — for quick verification, `yarn lint && yarn test && yarn typecheck` is faster.
+- API and Mana `.env` files are gitignored. Copy from `.env.example` if missing before running those services.
