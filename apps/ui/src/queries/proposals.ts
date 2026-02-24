@@ -261,7 +261,7 @@ export function useProposalScoresTicksQuery(
       if (offchainNetworks.includes(p.network)) {
         if (
           p.type !== 'basic' ||
-          p.privacy !== 'none' ||
+          (p.privacy !== 'none' && !p.completed) ||
           p.vote_count > SCORES_TICKS_MAX_VOTES
         ) {
           return [];
