@@ -24,13 +24,14 @@ export function useCurrentSpace() {
       const [network, name] = param.split(':') as [NetworkID, string];
       if (!name) return skipToken;
 
-      if (isAddress(name)) {
-        return async () => ({ networkId: network, address: getAddress(name) });
-      }
-
       return async () => {
+        if (isAddress(name)) {
+          return { networkId: network, address: getAddress(name) };
+        }
+
         const result = await resolver.resolveName(name, network);
         if (!result) return null;
+
         return {
           networkId: result.networkId,
           address: isAddress(result.address)
