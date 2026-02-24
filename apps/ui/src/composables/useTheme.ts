@@ -2,9 +2,9 @@ import { Theme } from '@/types';
 
 type UserTheme = Theme | 'none';
 
-export function useTheme() {
-  const preferredColor = usePreferredColorScheme();
+const preferredColor = usePreferredColorScheme();
 
+export function useTheme() {
   const store = useStorage<UserTheme>('theme', 'none');
   const defaultTheme = computed(() =>
     preferredColor.value === 'light' ? 'light' : 'dark'
