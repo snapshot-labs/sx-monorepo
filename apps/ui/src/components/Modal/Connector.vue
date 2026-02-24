@@ -46,6 +46,14 @@ function handleGuestLogin() {
   });
 }
 
+function handleConnectorClick(connector: Connector) {
+  if (connector.type === 'guest') {
+    showGuest.value = true;
+  } else {
+    emit('pick', connector);
+  }
+}
+
 function handleClose() {
   showGuest.value = false;
   emit('close');
@@ -79,14 +87,11 @@ function handleClose() {
         }"
       />
     </form>
-    <div v-else class="m-4 space-y-2 flex flex-col">
+    <div v-else class="m-4">
       <Connectors
         :supported-connectors="supportedConnectors"
-        @click="(connector: Connector) => emit('pick', connector)"
+        @click="handleConnectorClick"
       />
-      <UiButton class="w-full" @click="showGuest = true">
-        <span class="flex-grow text-left">Log in as guest</span>
-      </UiButton>
     </div>
     <template v-if="showGuest" #footer>
       <UiButton
