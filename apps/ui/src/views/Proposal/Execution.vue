@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { Proposal } from '@/types';
 
 defineProps<{
@@ -9,27 +8,9 @@ defineProps<{
 
 <template>
   <UiContainer
-    v-if="
-      (proposal.executions && proposal.executions.length > 0) ||
-      proposal.execution_strategy_type === 'safeSnap'
-    "
+    v-if="proposal.executions && proposal.executions.length > 0"
     class="pt-5 !max-w-[730px] mx-0 md:mx-auto"
   >
-    <UiAlert
-      v-if="proposal.execution_strategy_type === 'safeSnap'"
-      type="warning"
-    >
-      This proposal uses SafeSnap execution which is currently not supported on
-      the new interface. You can view execution details on the
-      <AppLink
-        :to="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-        class="inline-flex items-center font-bold"
-      >
-        previous interface
-        <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </AppLink>
-      .
-    </UiAlert>
     <ProposalExecutionsList
       :network-id="proposal.network"
       :proposal="proposal"
