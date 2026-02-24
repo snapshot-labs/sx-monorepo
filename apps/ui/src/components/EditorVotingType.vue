@@ -54,13 +54,13 @@ watch(
       :disabled="!hasMultipleVotingType"
       @click="handleVotingTypeClick"
     >
-      <div>
+      <div class="flex items-center gap-2">
         <h4 class="text-skin-link inline" v-text="activeVotingType.label" />
-        <span
+        <UiPill
           v-if="activeVotingType.isBeta"
-          class="ml-2 bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
-          >beta</span
-        >
+          variant="secondary"
+          label="Beta"
+        />
       </div>
       <div
         v-if="hasMultipleVotingType"

@@ -213,12 +213,9 @@ onMounted(() => {
             width: `${otherResultsSummary.progress.toFixed(2)}%`
           }"
         />
-        <div class="truncate grow">
+        <div class="truncate grow flex items-center gap-2">
           Others
-          <span
-            class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-2"
-            v-text="_n(otherResultsSummary.count, 'compact')"
-          />
+          <UiPill :label="_n(otherResultsSummary.count, 'compact')" />
         </div>
         <div
           class="group-hover:hidden"
