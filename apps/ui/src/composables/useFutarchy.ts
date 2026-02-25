@@ -169,11 +169,8 @@ export function useFutarchy(
       );
 
       if (!hasYes || !hasNo) {
-        console.error('[useFutarchy] ❌ Missing conditional pool data');
         throw new Error('Missing conditional pool candle data');
       }
-
-      console.log(`[useFutarchy] ✅ Phase 1: ${candles.length} candles (YES+NO, no spot yet)`);
 
       candleData.value = candles;
       priceScaleFactor.value = scaleFactor;
@@ -216,7 +213,6 @@ export function useFutarchy(
       const spotCandles = spotData?.spotCandles || [];
 
       if (spotCandles.length === 0) {
-        console.log('[useFutarchy] ℹ️ No spot candles returned');
         return;
       }
 
@@ -234,8 +230,7 @@ export function useFutarchy(
 
       const { candles, scaleFactor } = processCandleData(yesCandles, noCandles, spotCandles);
 
-      const spotCount = candles.filter(c => c.spot > 0).length;
-      console.log(`[useFutarchy] ✅ Phase 2: merged ${spotCount} spot candles`);
+
 
       candleData.value = candles;
       priceScaleFactor.value = scaleFactor;
