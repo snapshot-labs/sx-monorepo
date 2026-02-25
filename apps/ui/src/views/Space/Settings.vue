@@ -323,8 +323,9 @@ function addCustomStrategy(strategy: { address: string; type: string }) {
   ];
 }
 
-onBeforeRouteLeave(async () => {
+onBeforeRouteLeave(async to => {
   if (!isModified.value || !canModifySettings.value) return true;
+  if (to.name !== 'space-pro') return true;
 
   const { isCanceled } = await revealLeaveConfirm();
   return !isCanceled;
