@@ -12,6 +12,7 @@ const VolumeMarketSchema = z.object({
 
 const FutarchyResponseSchema = z.object({
   event_id: z.string(),
+  trading_address: z.string().optional(),
   conditional_yes: z.object({
     price_usd: z.number(),
     pool_id: z.string()

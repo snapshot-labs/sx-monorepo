@@ -56,7 +56,7 @@ const volumeSymbol = computed(() => {
     <div class="flex justify-between items-center">
       {{ volumeSymbol === '$' ? '$' : '' }}{{ _n(displayVolume, 'standard') }}{{ volumeSymbol !== '$' ? ` ${volumeSymbol}` : '' }} Vol.
       <a
-        :href="`https://app.futarchy.fi/markets/${marketData.event_id}?utm_source=snapshot`"
+        :href="`https://app.futarchy.fi/markets/${marketData.trading_address || marketData.event_id}?utm_source=snapshot`"
         target="_blank"
       >
         <UiButton primary>
