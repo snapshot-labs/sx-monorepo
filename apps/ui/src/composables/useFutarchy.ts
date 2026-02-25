@@ -177,7 +177,7 @@ export function useFutarchy(
         variables: {
           yesPoolId: `${chainId}-${yesPoolId.toLowerCase()}`,
           noPoolId: `${chainId}-${noPoolId.toLowerCase()}`,
-          minTimestamp: chartStartRange || startTimestamp.value,
+          minTimestamp: startTimestamp.value,
           maxTimestamp: maxTimestamp.value,
           poolTicker
         }
@@ -318,7 +318,7 @@ export function useFutarchy(
       const poolTicker = market.spot?.pool_ticker;
       if (poolTicker) {
         loadingSpot.value = true;
-        const chartStart = (market as any).timeline?.chart_start_range || startTimestamp.value;
+        const chartStart = startTimestamp.value;
 
         fetchSpotCandles(poolTicker, chartStart, maxTimestamp.value)
           .then(async spotCandles => {
