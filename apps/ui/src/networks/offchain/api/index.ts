@@ -31,6 +31,7 @@ import {
   ProposalExecution,
   ProposalState,
   RelatedSpace,
+  ScoresTick,
   Setting,
   SkinSettings,
   Space,
@@ -48,6 +49,7 @@ import {
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
+  SCORES_TICKS_VOTES_QUERY,
   SETTINGS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
@@ -83,6 +85,9 @@ const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
   s: 'https://delegate-registry-api.snapshot.box',
   's-tn': 'https://testnet-delegate-registry-api.snapshot.box'
 };
+
+const SCORES_TICKS_LIMIT = 1000;
+export const SCORES_TICKS_MAX_VOTES = 4000;
 
 function getProposalState(
   networkId: NetworkID,
@@ -586,7 +591,56 @@ export function createApi(
 
   return {
     apiUrl: uri,
-    loadProposalScoresTicks: async () => [],
+    loadProposalScoresTicks: async (
+      proposalId: string
+    ): Promise<ScoresTick[]> => {
+      const votes: { choice: number; vp: number; created: number }[] = [];
+      let skip = 0;
+
+      while (skip < SCORES_TICKS_MAX_VOTES) {
+        const { data } = await apollo.query({
+          query: SCORES_TICKS_VOTES_QUERY,
+          variables: {
+            first: SCORES_TICKS_LIMIT,
+            skip,
+            where: { proposal: proposalId }
+          }
+        });
+
+        const page = data.votes;
+        votes.push(...page);
+
+        if (page.length < SCORES_TICKS_LIMIT) break;
+        skip += SCORES_TICKS_LIMIT;
+      }
+
+      const scores: [number, number, number] = [0, 0, 0];
+      const ticks: ScoresTick[] = [];
+
+      for (const vote of votes) {
+        if (
+          typeof vote.choice === 'number' &&
+          vote.choice >= 1 &&
+          vote.choice <= 3
+        ) {
+          scores[vote.choice - 1] += vote.vp;
+        }
+
+        const hourTs = Math.floor(vote.created / 3600) * 3600;
+        const last = ticks.at(-1);
+
+        if (!last || last.timestamp !== hourTs) {
+          ticks.push({
+            timestamp: hourTs,
+            scores: [...scores] as [number, number, number]
+          });
+        } else {
+          last.scores = [...scores] as [number, number, number];
+        }
+      }
+
+      return ticks;
+    },
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,

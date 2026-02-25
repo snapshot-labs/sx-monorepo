@@ -59,6 +59,12 @@ const { invalidateController } = useSpaceController(toRef(props, 'space'));
 const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
+const {
+  isRevealed: isLeaveConfirmModalOpen,
+  reveal: revealLeaveConfirm,
+  confirm: confirmLeave,
+  cancel: cancelLeave
+} = useConfirmDialog();
 
 const el = ref(null);
 const { height: bottomToolbarHeight } = useElementSize(el);
@@ -316,6 +322,14 @@ function addCustomStrategy(strategy: { address: string; type: string }) {
     }
   ];
 }
+
+onBeforeRouteLeave(async to => {
+  if (!isModified.value || !canModifySettings.value) return true;
+  if (to.name !== 'space-pro') return true;
+
+  const { isCanceled } = await revealLeaveConfirm();
+  return !isCanceled;
+});
 
 watch(
   () => props.space.controller,
@@ -615,6 +629,24 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       @close="customStrategyModalOpen = false"
       @save="addCustomStrategy"
     />
+    <UiModal :open="isLeaveConfirmModalOpen" @close="cancelLeave">
+      <template #header>
+        <h3>Unsaved changes</h3>
+      </template>
+      <div class="s-box p-4">
+        <UiMessage type="danger">
+          You have unsaved changes. Are you sure you want to leave?
+        </UiMessage>
+      </div>
+      <template #footer>
+        <div class="flex gap-3 w-full">
+          <UiButton class="flex-1" @click="cancelLeave">Stay</UiButton>
+          <UiButton class="flex-1" primary @click="confirmLeave">
+            Leave
+          </UiButton>
+        </div>
+      </template>
+    </UiModal>
     <ModalTransactionProgress
       :open="saving && (!isOffchainNetwork || executeFn === saveController)"
       :chain-id="network.chainId"

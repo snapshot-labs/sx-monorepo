@@ -299,6 +299,22 @@ export const VOTES_QUERY = gql`
   }
 `;
 
+export const SCORES_TICKS_VOTES_QUERY = gql`
+  query ($first: Int!, $skip: Int!, $where: VoteWhere) {
+    votes(
+      first: $first
+      skip: $skip
+      where: $where
+      orderBy: "created"
+      orderDirection: asc
+    ) {
+      choice
+      vp
+      created
+    }
+  }
+`;
+
 export const ALIASES_QUERY = gql`
   query Aliases($address: String!, $alias: String!, $created_gt: Int) {
     aliases(
