@@ -10,7 +10,16 @@ import { z } from 'zod';
 const BASE_API_URL = import.meta.env.VITE_FUTARCHY_API_URL || 'https://rwh1qtmir9.execute-api.eu-north-1.amazonaws.com';
 
 const FUTARCHY_API_URL = BASE_API_URL;
-const CANDLES_API_URL = `${BASE_API_URL}/subgraphs/name/algebra-proposal-candles-v1`;
+// Candles endpoint: use api.futarchy.fi/candles/graphql directly (not through futarchy-charts proxy)
+const CANDLES_API_URL = (() => {
+  try {
+    const url = new URL(BASE_API_URL);
+    return `https://api.futarchy.fi/candles/graphql`;
+  } catch {
+    // Fallback for relative URLs
+    return `${BASE_API_URL}/candles/graphql`;
+  }
+})();
 
 const VolumeMarketSchema = z.object({
   status: z.string(),
@@ -65,19 +74,21 @@ const CANDLES_QUERY = gql`
   ) {
     yesCandles: candles(
       first: 1000
-      orderBy: periodStartUnix
+      orderBy: time
       orderDirection: asc
-      where: { pool: $yesPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
+      where: { pool: $yesPoolId, time_gte: $minTimestamp, time_lte: $maxTimestamp, period: 3600 }
     ) {
+      time
       periodStartUnix
       close
     }
     noCandles: candles(
       first: 1000
-      orderBy: periodStartUnix
+      orderBy: time
       orderDirection: asc
-      where: { pool: $noPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
+      where: { pool: $noPoolId, time_gte: $minTimestamp, time_lte: $maxTimestamp, period: 3600 }
     ) {
+      time
       periodStartUnix
       close
     }
@@ -140,19 +151,21 @@ export function useFutarchy(
     noPoolId: string,
     poolTicker: string | null,
     chartStartRange: number | null,
-    currencyRate: number | null  // Rate to apply to YES/NO prices for USD conversion
+    currencyRate: number | null,  // Rate to apply to YES/NO prices for USD conversion
+    chainId: number  // Chain ID for pool ID prefixing (100=Gnosis, 1=Mainnet)
   ): Promise<{ candles: CandleDataPoint[]; scaleFactor: number; hasYes: boolean; hasNo: boolean; hasSpot: boolean }> {
     // Use direct fetch instead of Apollo to ensure all variables (including poolTicker) are sent
+    // Checkpoint-native query format: time field, integer period, chain-prefixed pool IDs
     const query = `
       query GetCandles($yesPoolId: String!, $noPoolId: String!, $minTimestamp: Int!, $maxTimestamp: Int!) {
         yesCandles: candles(
-          first: 1000, orderBy: periodStartUnix, orderDirection: asc,
-          where: { pool: $yesPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
-        ) { periodStartUnix, close }
+          first: 1000, orderBy: time, orderDirection: asc,
+          where: { pool: $yesPoolId, time_gte: $minTimestamp, time_lte: $maxTimestamp, period: 3600 }
+        ) { time, periodStartUnix, close }
         noCandles: candles(
-          first: 1000, orderBy: periodStartUnix, orderDirection: asc,
-          where: { pool: $noPoolId, periodStartUnix_gte: $minTimestamp, periodStartUnix_lte: $maxTimestamp, period: "3600" }
-        ) { periodStartUnix, close }
+          first: 1000, orderBy: time, orderDirection: asc,
+          where: { pool: $noPoolId, time_gte: $minTimestamp, time_lte: $maxTimestamp, period: 3600 }
+        ) { time, periodStartUnix, close }
       }
     `;
 
@@ -162,8 +175,8 @@ export function useFutarchy(
       body: JSON.stringify({
         query,
         variables: {
-          yesPoolId: yesPoolId.toLowerCase(),
-          noPoolId: noPoolId.toLowerCase(),
+          yesPoolId: `${chainId}-${yesPoolId.toLowerCase()}`,
+          noPoolId: `${chainId}-${noPoolId.toLowerCase()}`,
           minTimestamp: chartStartRange || startTimestamp.value,
           maxTimestamp: maxTimestamp.value,
           poolTicker
@@ -194,13 +207,7 @@ export function useFutarchy(
       allTimestamps.add(time);
     }
 
-    // Process spot candles from Express server
-    for (const candle of data.spotCandles || []) {
-      const time = parseInt(candle.periodStartUnix) * 1000;
-      const rawPrice = parseFloat(candle.close);
-      spotMap.set(time, rawPrice);
-      allTimestamps.add(time);
-    }
+    // Display spot candles logic was moved to a separate fetch in load()
     // Express server already handles forward-fill, just merge YES and NO data
     const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
 
@@ -225,6 +232,57 @@ export function useFutarchy(
     return { candles, scaleFactor, hasYes: yesMap.size > 0, hasNo: noMap.size > 0, hasSpot: spotMap.size > 0 };
   }
 
+  const loadingSpot = ref(false);
+
+  async function fetchSpotCandles(
+    poolTicker: string,
+    minTimestamp: number,
+    maxTimestamp: number
+  ): Promise<{ periodStartUnix: string; close: string }[]> {
+    const params = new URLSearchParams({
+      ticker: poolTicker,
+      minTimestamp: String(minTimestamp),
+      maxTimestamp: String(maxTimestamp),
+      _t: String(Date.now()) // cache buster
+    });
+    const spotUrl = `${FUTARCHY_API_URL}/api/v1/spot-candles?${params}`;
+    console.log(`[useFutarchy] 🔍 Fetching spot from: ${spotUrl}`);
+    const response = await fetch(spotUrl);
+    console.log(`[useFutarchy] 🔍 Spot response status: ${response.status}`);
+    const data = await response.json();
+    console.log(`[useFutarchy] 🔍 Spot response keys: ${Object.keys(data)}, spotCandles length: ${(data.spotCandles || []).length}`);
+    return data.spotCandles || [];
+  }
+
+  function mergeSpotIntoCandles(
+    existing: CandleDataPoint[],
+    spotCandles: { periodStartUnix: string; close: string }[]
+  ): CandleDataPoint[] {
+    // Sort spot entries by time for binary search
+    const sortedSpot = spotCandles
+      .map(c => ({ time: parseInt(c.periodStartUnix) * 1000, value: parseFloat(c.close) }))
+      .sort((a, b) => a.time - b.time);
+
+    if (sortedSpot.length === 0) return existing;
+
+    // For each candle, find the nearest spot value (latest spot ≤ candle time)
+    return existing.map(candle => {
+      // Binary search: find last spot entry ≤ candle.time
+      let lo = 0, hi = sortedSpot.length - 1, best = -1;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        if (sortedSpot[mid].time <= candle.time) {
+          best = mid;
+          lo = mid + 1;
+        } else {
+          hi = mid - 1;
+        }
+      }
+      const spotValue = best >= 0 ? sortedSpot[best].value : 0;
+      return { ...candle, spot: spotValue || candle.spot };
+    });
+  }
+
   async function load() {
     loadingChart.value = true;
     error.value = false;
@@ -234,34 +292,66 @@ export function useFutarchy(
       if (!market) throw new Error('Failed to fetch market data');
       marketData.value = market;
 
+      const chainId = (market as any).timeline?.chain_id || 100;
+
+      // 1️⃣ Fetch YES/NO candles first (fast - direct from Checkpoint)
       const result = await fetchCandleData(
         market.conditional_yes.pool_id,
         market.conditional_no.pool_id,
         market.spot?.pool_ticker || null,
         (market as any).timeline?.chart_start_range || null,
-        (market as any).timeline?.currency_rate || null  // sDAI→USD rate for YES/NO prices
+        (market as any).timeline?.currency_rate || null,
+        chainId
       );
 
-      // Error if missing YES or NO candles (conditional pools required)
       if (!result.hasYes || !result.hasNo) {
-        console.error('[useFutarchy] ❌ Missing conditional pool data:', {
-          hasYes: result.hasYes,
-          hasNo: result.hasNo
-        });
+        console.error('[useFutarchy] ❌ Missing conditional pool data');
         throw new Error('Missing conditional pool candle data');
       }
 
-      // Alert if missing SPOT candles (still show chart)
-      if (!result.hasSpot) {
-        console.warn('[useFutarchy] ⚠️ Missing spot candle data - chart will show without spot line');
-      }
-
+      // Show chart immediately with YES/NO data
       candleData.value = result.candles;
       priceScaleFactor.value = result.scaleFactor;
+      loadingChart.value = false;
+
+      // 2️⃣ Fetch spot candles in background (slower - GeckoTerminal via proxy)
+      const poolTicker = market.spot?.pool_ticker;
+      if (poolTicker) {
+        loadingSpot.value = true;
+        const chartStart = (market as any).timeline?.chart_start_range || startTimestamp.value;
+
+        fetchSpotCandles(poolTicker, chartStart, maxTimestamp.value)
+          .then(async spotCandles => {
+            console.log(`[useFutarchy] 🔍 Spot candles received: ${spotCandles.length}`);
+            if (spotCandles.length > 0) {
+              console.log(`[useFutarchy] 🔍 First spot: t=${spotCandles[0].periodStartUnix} close=${spotCandles[0].close}`);
+              console.log(`[useFutarchy] 🔍 Existing candles: ${candleData.value.length}, first time: ${candleData.value[0]?.time}`);
+              // Force Vue reactivity: assign new array to trigger chart watcher
+              const merged = mergeSpotIntoCandles(candleData.value, spotCandles);
+              const spotCount = merged.filter(c => c.spot > 0).length;
+              console.log(`[useFutarchy] 🔍 Merged: ${merged.length} candles, ${spotCount} have spot > 0`);
+              if (merged.length > 0) {
+                const sample = merged[Math.floor(merged.length / 2)];
+                console.log(`[useFutarchy] 🔍 Sample merged candle: time=${sample.time} yes=${sample.yes} no=${sample.no} spot=${sample.spot}`);
+              }
+              candleData.value = [];          // Clear first to force change detection
+              await nextTick();
+              candleData.value = merged;      // Then set merged data
+              console.log(`[useFutarchy] ✅ Spot candles merged: ${spotCandles.length} points`);
+            } else {
+              console.warn('[useFutarchy] ⚠️ No spot candle data returned');
+            }
+          })
+          .catch(err => {
+            console.warn('[useFutarchy] ⚠️ Spot candles failed:', err.message);
+          })
+          .finally(() => {
+            loadingSpot.value = false;
+          });
+      }
     } catch (e) {
       console.error('Error fetching Futarchy data', e);
       error.value = true;
-    } finally {
       loadingChart.value = false;
     }
   }
@@ -276,6 +366,7 @@ export function useFutarchy(
     totalVolumeUsd,
     currencyInfo,
     loadingChart,
+    loadingSpot,
     error
   };
 }
