@@ -12,7 +12,7 @@ import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import { _n, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
-import { METADATA as EVM_METADATA } from '@/networks/evm';
+import { METADATA as EVM_METADATA } from '@/networks/evm/metadata';
 import {
   AUCTION_KEYS,
   useBiddingTokenPriceQuery,

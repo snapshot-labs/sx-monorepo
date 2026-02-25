@@ -1,6 +1,6 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { constants as starknetConstants } from 'starknet';
-import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm';
+import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm/metadata';
 
 const ADDABLE_NETWORKS = {
   //   12345: {
