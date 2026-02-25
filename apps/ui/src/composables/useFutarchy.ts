@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ⚡ Single API URL for all Futarchy data
-const FUTARCHY_API_URL = import.meta.env.VITE_FUTARCHY_API_URL || 'https://rwh1qtmir9.execute-api.eu-north-1.amazonaws.com';
+const FUTARCHY_API_URL = import.meta.env.VITE_FUTARCHY_API_URL || 'https://api.futarchy.fi/charts';
 
 const VolumeMarketSchema = z.object({
   status: z.string(),
