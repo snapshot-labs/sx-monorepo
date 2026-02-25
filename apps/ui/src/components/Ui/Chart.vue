@@ -398,15 +398,15 @@ onUnmounted(() => chart?.remove());
 
 <template>
   <div class="relative w-full h-full flex flex-col">
-    <div class="flex items-center justify-between mb-2">
-      <div class="flex items-center gap-2.5">
+    <div class="flex flex-wrap items-center justify-between gap-1 mb-2">
+      <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-sm sm:text-base">
         <div
           v-for="series in currentValues"
           :key="series.id"
-          class="flex items-center gap-1.5"
+          class="flex items-center gap-1 whitespace-nowrap"
         >
           <div
-            class="w-2 h-2 rounded-full"
+            class="w-2 h-2 rounded-full shrink-0"
             :style="{ backgroundColor: series.color }"
           />
           {{ series.label }}
@@ -415,7 +415,7 @@ onUnmounted(() => chart?.remove());
           </span>
         </div>
       </div>
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2 text-xs sm:text-sm">
         <!-- Currency toggle (only shown if both symbols available) -->
         <button
           v-if="showCurrencyToggle"

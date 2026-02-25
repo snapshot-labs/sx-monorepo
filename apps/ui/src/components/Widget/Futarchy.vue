@@ -42,9 +42,9 @@ const volumeSymbol = computed(() => {
 
 <template>
   <!-- Only show when we have valid market + candle data, hide on error or during loading -->
-  <div v-if="!error && !loadingChart && marketData && candleData.length > 0" class="border rounded-lg p-4 mb-4">
+  <div v-if="!error && !loadingChart && marketData && candleData.length > 0" class="border rounded-lg p-3 sm:p-4 mb-4">
     <UiChart
-      class="!h-[280px] mb-2"
+      class="!h-[200px] sm:!h-[280px] mb-2"
       :candle-data="candleData"
       :price-scale-factor="priceScaleFactor"
       :start-timestamp="proposal.start"
@@ -53,10 +53,10 @@ const volumeSymbol = computed(() => {
       :currency-info="currencyInfo"
       @rate-toggle="handleRateToggle"
     />
-    <div class="flex justify-between items-center">
-      {{ volumeSymbol === '$' ? '$' : '' }}{{ _n(displayVolume, 'standard') }}{{ volumeSymbol !== '$' ? ` ${volumeSymbol}` : '' }} Vol.
+    <div class="flex flex-wrap justify-between items-center gap-2 text-sm sm:text-base">
+      <span>{{ volumeSymbol === '$' ? '$' : '' }}{{ _n(displayVolume, 'standard') }}{{ volumeSymbol !== '$' ? ` ${volumeSymbol}` : '' }} Vol.</span>
       <a
-        :href="`https://app.futarchy.fi/markets/${marketData.trading_address || marketData.event_id}?utm_source=snapshot`"
+        :href="`https://app.futarchy.fi/market?proposalId=${marketData.trading_address || marketData.event_id}&utm_source=snapshot`"
         target="_blank"
       >
         <UiButton primary>
