@@ -52,7 +52,7 @@ function deleteDelegation(index: number) {
 </script>
 
 <template>
-  <h4 v-bind="$attrs" class="eyebrow mb-2 font-medium">Delegations</h4>
+  <UiEyebrow v-bind="$attrs" class="mb-2 font-medium">Delegations</UiEyebrow>
   <Draggable v-model="model" handle=".handle" :item-key="() => undefined">
     <template #item="{ element: delegation, index: i }">
       <div
@@ -85,6 +85,7 @@ function deleteDelegation(index: number) {
     class="w-full"
     @click="addDelegation"
   >
+    <IH-plus class="shrink-0 size-[16px]" />
     Add delegation
   </UiButton>
   <teleport to="#modal">

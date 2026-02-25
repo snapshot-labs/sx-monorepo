@@ -18,7 +18,7 @@ import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { StrategyConfig } from '@/networks/types';
-import { ChainId, NetworkID, Space, Validation } from '@/types';
+import { ChainId, NetworkID, Validation } from '@/types';
 
 const SCORE_API_URL = 'https://score.snapshot.org/api/validations';
 const STRATEGIES_WITHOUT_PARAMS: ValidationDetails['key'][] = [
@@ -31,7 +31,8 @@ const props = withDefaults(
     open: boolean;
     networkId: NetworkID;
     defaultChainId: ChainId;
-    space?: Space;
+    spaceId: string;
+    votingPowerSymbol: string;
     type: 'voting' | 'proposal';
     current?: Validation;
     skipMenu?: boolean;
@@ -40,8 +41,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'save', type: Validation);
-  (e: 'close');
+  (e: 'save', type: Validation): void;
+  (e: 'close'): void;
 }>();
 
 const isLoading = ref(false);
@@ -50,6 +51,8 @@ const selectedValidation = ref(null as ValidationDetails | null);
 const form = ref({} as Record<string, any>);
 const rawParams = ref('{}');
 const customStrategies = ref([] as StrategyConfig[]);
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 
 async function fetchValidations() {
   if (isLoading.value || validations.value.length) return;
@@ -142,6 +145,7 @@ const definition = computed(() => {
 
   if (selectedValidation.value.key === 'basic') {
     updated.properties.minScore.examples = ['e.g. 1.23'];
+    delete updated.properties.strategies;
   }
 
   return updated;
@@ -201,9 +205,10 @@ function handleSelect(validationDetails: ValidationDetails) {
     form.value.stamps ??= [];
 
     // Remove unsupported options
-    form.value.stamps = definition.value.properties.stamps.options
-      .filter(option => form.value.stamps.includes(option.id))
-      .map(option => option.id);
+    form.value.stamps =
+      definition.value.properties?.stamps?.options
+        ?.filter(option => form.value.stamps.includes(option.id))
+        ?.map(option => option.id) ?? form.value.stamps;
   }
 }
 
@@ -226,6 +231,11 @@ function handleApply() {
 
   emit('save', { name: selectedValidation.value.key, params });
   emit('close');
+}
+
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
 }
 
 watch(
@@ -264,13 +274,9 @@ watch(
     </template>
     <div class="p-4 flex flex-col gap-2.5">
       <UiLoading v-if="isLoading" class="m-auto" />
-      <div
-        v-else-if="hasError"
-        class="flex w-full justify-center items-center gap-2 text-skin-text"
-      >
-        <IH-exclamation-circle class="inline-block shrink-0" />
-        <span>Failed to load strategies.</span>
-      </div>
+      <UiStateWarning v-else-if="hasError" class="justify-center">
+        Failed to load strategies.
+      </UiStateWarning>
       <div v-else-if="selectedValidation" class="s-box">
         <UiForm
           v-if="definition"
@@ -288,12 +294,26 @@ watch(
           :error="formErrors.rawParams"
         />
         <template v-if="selectedValidation.key === 'basic'">
-          <div class="flex items-center gap-1 mb-2 mt-4">
-            <h4 class="eyebrow font-medium">Custom strategies</h4>
+          <div class="flex items-center justify-between gap-1 mb-2 mt-4">
+            <div class="flex items-center gap-1">
+              <UiEyebrow class="font-medium">Custom strategies</UiEyebrow>
+              <UiTooltip
+                title="Calculate the score with a different configuration of Voting Strategies"
+              >
+                <IH-question-mark-circle class="shrink-0" />
+              </UiTooltip>
+            </div>
             <UiTooltip
-              title="Calculate the score with a different configuration of Voting Strategies"
+              class="flex items-center"
+              title="Test all custom strategies"
             >
-              <IH-question-mark-circle class="shrink-0" />
+              <button
+                :disabled="!customStrategies.length"
+                class="text-skin-link"
+                @click="handleTestStrategies(customStrategies)"
+              >
+                <IH-play />
+              </button>
             </UiTooltip>
           </div>
           <UiStrategiesConfiguratorOffchain
@@ -302,6 +322,7 @@ watch(
             allow-duplicates
             :network-id="networkId"
             :default-chain-id="defaultChainId"
+            @test-strategies="handleTestStrategies"
           >
             <template #empty>
               <div class="p-3 border border-dashed rounded-lg text-center">
@@ -320,7 +341,7 @@ watch(
         @click="handleSelect(validation)"
       >
         <div class="w-full">
-          <div class="flex items-center gap-1 overflow-hidden">
+          <div class="flex items-center gap-2 overflow-hidden">
             <h4
               class="text-skin-link truncate"
               v-text="
@@ -329,12 +350,11 @@ watch(
                 ].label
               "
             />
-            <span
+            <UiPill
               v-if="validation.key === 'passport-gated'"
-              class="bg-skin-text text-skin-accent-foreground rounded-full px-1.5 py-0.5 text-[13px] leading-[13px] h-fit"
-            >
-              Beta
-            </span>
+              variant="secondary"
+              label="Beta"
+            />
           </div>
           <div
             v-text="
@@ -356,4 +376,15 @@ watch(
       </UiButton>
     </template>
   </UiModal>
+  <teleport to="#modal">
+    <ModalTestStrategy
+      :open="isTestStrategiesModalOpen"
+      :network-id="networkId"
+      :chain-id="defaultChainId"
+      :space-id="spaceId"
+      :voting-power-symbol="votingPowerSymbol"
+      :strategies="testedStrategies"
+      @close="isTestStrategiesModalOpen = false"
+    />
+  </teleport>
 </template>

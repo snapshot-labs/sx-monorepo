@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { SUPPORTED_VOTING_TYPES } from '@/helpers/constants';
 import { _t, getChoiceText } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
@@ -12,18 +13,15 @@ const props = withDefaults(
 );
 
 defineEmits<{
-  (e: 'enterEditMode');
+  (e: 'enterEditMode'): void;
 }>();
 
 const { auth } = useWeb3();
 const { votes, pendingVotes } = useAccount();
-const { getTsFromCurrent } = useMetaStore();
 const { isInvalidNetwork } = useSafeWallet(
   props.proposal.network,
   props.proposal.space.snapshot_chain_id
 );
-
-const start = getTsFromCurrent(props.proposal.network, props.proposal.start);
 
 const hasSupportedAuthenticator = computed(() => {
   const network = getNetwork(props.proposal.network);
@@ -84,7 +82,8 @@ const isEditable = computed(() => {
 <template>
   <slot v-if="currentVote && !editMode" name="voted" :vote="currentVote">
     <UiButton
-      class="!h-[48px] text-left w-full flex items-center justify-between rounded-lg space-x-2"
+      class="text-left w-full !justify-between"
+      :size="48"
       :class="{
         'border-skin-link': isEditable
       }"
@@ -92,7 +91,10 @@ const isEditable = computed(() => {
       @click="$emit('enterEditMode')"
     >
       <div
-        v-if="proposal.privacy !== 'none'"
+        v-if="
+          proposal.privacy !== 'none' &&
+          ['pending', 'active'].includes(proposal.state)
+        "
         class="flex space-x-2 items-center grow truncate text-skin-link"
       >
         <IH-lock-closed class="size-[16px] shrink-0" />
@@ -137,11 +139,15 @@ const isEditable = computed(() => {
   </slot>
   <slot v-else-if="proposal.state === 'pending'" name="waiting">
     Voting for this proposal hasn't started yet. Voting will start
-    {{ _t(start) }}.
+    {{ _t(proposal.start) }}.
   </slot>
 
   <slot
-    v-else-if="['passed', 'rejected', 'executed'].includes(proposal.state)"
+    v-else-if="
+      ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(
+        proposal.state
+      )
+    "
     name="ended"
   >
     Proposal voting window has ended
@@ -157,8 +163,13 @@ const isEditable = computed(() => {
     </template>
     <template v-else>Voting for this proposal is not supported</template>
   </slot>
-  <slot v-else-if="isInvalidNetwork" name="wrong-safe-network">
-    Safe's network should be same as space's network
+  <slot
+    v-else-if="proposal.space.snapshot_chain_id && isInvalidNetwork"
+    name="wrong-safe-network"
+  >
+    Please use a Safe on
+    {{ networks[proposal.space.snapshot_chain_id]?.name ?? 'space network' }} to
+    vote.
   </slot>
   <div v-else>
     <slot />

@@ -61,7 +61,7 @@ describe('erc20VotesStrategy', () => {
   });
 
   it('should throw for ethereum address', async () => {
-    expect(
+    await expect(
       erc20VotesStrategy.getParams(
         'vote',
         '0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70',

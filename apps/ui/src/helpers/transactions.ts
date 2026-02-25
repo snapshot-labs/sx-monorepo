@@ -1,18 +1,18 @@
 import { Interface } from '@ethersproject/abi';
-import { parseUnits } from '@ethersproject/units';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
-import { Nft } from '@/composables/useNfts';
-import { abis } from '@/helpers/abis';
-import { Token } from '@/helpers/alchemy';
-import { resolver } from '@/helpers/resolver';
-import { getSalt } from '@/helpers/utils';
 import {
   ContractCallTransaction,
   SendNftTransaction,
   SendTokenTransaction,
   StakeTokenTransaction,
-  Transaction
-} from '@/types';
+  Transaction,
+  utils
+} from '@snapshot-labs/sx';
+import { Nft } from '@/composables/useNfts';
+import { abis } from '@/helpers/abis';
+import { Token } from '@/helpers/alchemy';
+import { resolver } from '@/helpers/resolver';
+import { parseUnits } from '@/helpers/token';
+import { getSalt } from '@/helpers/utils';
 
 export async function createSendTokenTransaction({
   token,
@@ -203,7 +203,7 @@ export async function createStakeTokenTransaction({
 
 export function convertToMetaTransactions(
   transactions: Transaction[]
-): MetaTransaction[] {
+): utils.encoding.MetaTransaction[] {
   return transactions.map((tx: Transaction) => ({
     ...tx,
     operation: 0,

@@ -22,9 +22,13 @@ withDefaults(
       :placement="`bottom-${placement}`"
       :offset="Number(gap)"
       portal
-      z-index="10"
+      z-index="60"
     >
-      <MenuButton :disabled="disabled" as="template" class="cursor-pointer">
+      <MenuButton
+        :disabled="disabled"
+        as="template"
+        class="cursor-pointer [&_svg]:pointer-events-none"
+      >
         <slot name="button" />
       </MenuButton>
       <transition

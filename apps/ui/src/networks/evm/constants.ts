@@ -24,26 +24,72 @@ export function createConstants(
   networkId: NetworkID,
   { pin }: { pin: PinFunction }
 ) {
-  const config = evmNetworks[networkId];
-  if (!config) throw new Error(`Unsupported network ${networkId}`);
+  if (!(networkId in evmNetworks)) {
+    throw new Error(`Unsupported network ${networkId}`);
+  }
+
+  const config = evmNetworks[networkId as keyof typeof evmNetworks];
 
   const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
     {
       [config.Authenticators.EthSigV2]: {
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.EthSig]: {
+        priority: 1,
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.EthTx]: {
+        priority: 2,
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
+        connectors: EVM_CONNECTORS
+      },
+      // Governor Bravo
+      GovernorBravoAuthenticator: {
+        priority: 1,
+        isSupported: true,
+        isContractSupported: true,
+        isReasonSupported: true,
+        connectors: EVM_CONNECTORS
+      },
+      GovernorBravoAuthenticatorSignature: {
+        isSupported: true,
+        isContractSupported: false,
+        isReasonSupported: true,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      // OpenZeppelin
+      OpenZeppelinAuthenticator: {
+        priority: 2,
+        isSupported: true,
+        isContractSupported: true,
+        isReasonSupported: true,
+        connectors: EVM_CONNECTORS
+      },
+      OpenZeppelinAuthenticatorSignatureV4: {
+        priority: 1,
+        isSupported: true,
+        isContractSupported: false,
+        isReasonSupported: false,
+        relayerType: 'evm',
+        connectors: EVM_CONNECTORS
+      },
+      OpenZeppelinAuthenticatorSignatureV5: {
+        isSupported: true,
+        isContractSupported: true,
+        isReasonSupported: true,
+        relayerType: 'evm',
         connectors: EVM_CONNECTORS
       }
     };
@@ -53,14 +99,20 @@ export function createConstants(
     [config.Strategies.Comp]: true,
     [config.Strategies.OZVotes]: true,
     [config.Strategies.Whitelist]: true,
-    [config.Strategies.ApeGas]: true
+    ...(config.Strategies.ApeGas && {
+      [config.Strategies.ApeGas]: true
+    })
   };
 
   const SUPPORTED_EXECUTORS = {
     SimpleQuorumAvatar: true,
     SimpleQuorumTimelock: true,
     Axiom: true,
-    Isokratia: true
+    Isokratia: true,
+    // Governor Bravo
+    GovernorBravoTimelock: true,
+    // OpenZeppelin
+    OpenZeppelinTimelockController: true
   };
 
   const AUTHS = {
@@ -78,14 +130,18 @@ export function createConstants(
     [config.Strategies.Comp]: 'ERC-20 Votes Comp (EIP-5805)',
     [config.Strategies.OZVotes]: 'ERC-20 Votes (EIP-5805)',
     [config.Strategies.Whitelist]: 'Merkle whitelist',
-    [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
+    ...(config.Strategies.ApeGas && {
+      [config.Strategies.ApeGas]: 'ApeChain Delegated Gas'
+    })
   };
 
   const EXECUTORS = {
     SimpleQuorumAvatar: 'Safe module (Zodiac)',
     SimpleQuorumTimelock: 'Timelock',
     Axiom: 'Axiom',
-    Isokratia: 'Isokratia'
+    Isokratia: 'Isokratia',
+    GovernorBravoTimelock: 'Timelock',
+    OpenZeppelinTimelockController: 'Timelock'
   };
 
   const EDITOR_AUTHENTICATORS = [
@@ -183,9 +239,9 @@ export function createConstants(
         required: ['threshold'],
         properties: {
           threshold: {
-            type: 'integer',
+            type: 'string',
+            format: 'uint256',
             title: 'Proposal threshold',
-            minimum: 1,
             examples: ['1']
           }
         }

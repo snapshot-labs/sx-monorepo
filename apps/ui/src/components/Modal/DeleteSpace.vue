@@ -13,8 +13,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'confirm');
-  (e: 'close');
+  (e: 'confirm'): void;
+  (e: 'close'): void;
 }>();
 
 const form: Ref<{
@@ -40,7 +40,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Confirm action</h3>
     </template>

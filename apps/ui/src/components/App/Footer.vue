@@ -28,18 +28,14 @@ const isSiteRoute = computed(() => {
         v-if="resolved && !isWhiteLabel && !isSiteRoute"
         title="About Snapshot"
       >
-        <router-link :to="{ name: 'site-landing' }" tabindex="-1">
-          <UiButton class="!px-0 w-[46px]">
-            <IC-zap class="inline-block size-[24px]" />
-          </UiButton>
-        </router-link>
+        <UiButton :to="{ name: 'site-landing' }" uniform>
+          <IH-question-mark-circle class="size-[24px]" />
+        </UiButton>
       </UiTooltip>
       <UiTooltip title="Get help">
-        <a :href="HELPDESK_URL" target="_blank" tabindex="-1">
-          <UiButton class="!px-0 w-[46px]">
-            <IH-chat class="inline-block" />
-          </UiButton>
-        </a>
+        <UiButton :to="HELPDESK_URL" uniform>
+          <IH-chat />
+        </UiButton>
       </UiTooltip>
     </div>
   </div>

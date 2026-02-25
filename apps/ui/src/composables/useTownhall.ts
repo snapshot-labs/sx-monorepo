@@ -7,7 +7,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { clients, TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
 import gql from 'graphql-tag';
 import { HIGHLIGHT_URL } from '@/helpers/highlight';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { Alias } from '@/types';
 
 export const ALIASES_QUERY = gql`
@@ -125,12 +125,13 @@ export function useTownhall() {
       return null;
     }
 
-    const pinned = await pinPineapple(
+    const pinned = await pin(
       {
         name,
         description
       },
-      'swarm'
+      undefined,
+      { protocol: 'swarm' }
     );
     const signer = await getAliasSigner(auth.value.provider);
 
@@ -159,12 +160,13 @@ export function useTownhall() {
       return null;
     }
 
-    const pinned = await pinPineapple(
+    const pinned = await pin(
       {
         name,
         description
       },
-      'swarm'
+      undefined,
+      { protocol: 'swarm' }
     );
     const signer = await getAliasSigner(auth.value.provider);
 
@@ -211,13 +213,14 @@ export function useTownhall() {
       return null;
     }
 
-    const pinned = await pinPineapple(
+    const pinned = await pin(
       {
         title,
         body,
         discussionUrl
       },
-      'swarm'
+      undefined,
+      { protocol: 'swarm' }
     );
     const signer = await getAliasSigner(auth.value.provider);
 
@@ -257,7 +260,9 @@ export function useTownhall() {
       return null;
     }
 
-    const pinned = await pinPineapple({ body }, 'swarm');
+    const pinned = await pin({ body }, undefined, {
+      protocol: 'swarm'
+    });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
@@ -354,7 +359,9 @@ export function useTownhall() {
       return null;
     }
 
-    const pinned = await pinPineapple({ name, description, color }, 'swarm');
+    const pinned = await pin({ name, description, color }, undefined, {
+      protocol: 'swarm'
+    });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(
@@ -385,7 +392,9 @@ export function useTownhall() {
       return null;
     }
 
-    const pinned = await pinPineapple({ name, description, color }, 'swarm');
+    const pinned = await pin({ name, description, color }, undefined, {
+      protocol: 'swarm'
+    });
     const signer = await getAliasSigner(auth.value.provider);
 
     return wrapPromise(

@@ -23,11 +23,13 @@ const props = defineProps<{
   readOnly?: boolean;
   networkId: NetworkID;
   strategy: Strategy;
+  showTestButton?: boolean;
 }>();
 
 defineEmits<{
-  (e: 'editStrategy', strategy: Strategy);
-  (e: 'deleteStrategy', strategy: Strategy);
+  (e: 'editStrategy', strategy: Strategy): void;
+  (e: 'deleteStrategy', strategy: Strategy): void;
+  (e: 'testStrategies', strategies: StrategyConfig[]): void;
 }>();
 
 const network = computed(() => getNetwork(props.networkId));
@@ -38,13 +40,16 @@ const strategyNetworkDetails = computed<NetworkDetails>(() => {
 
   return networks[props.strategy.chainId];
 });
+const isOffchainNetwork = computed(() => {
+  return offchainNetworks.includes(props.networkId);
+});
 </script>
 
 <template>
   <div class="rounded-lg border px-4 py-3 text-skin-link leading-[18px]">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center gap-1">
       <div class="flex min-w-0">
-        <div class="whitespace-nowrap">{{ strategy.name }}</div>
+        <div class="whitespace-nowrap truncate">{{ strategy.name }}</div>
         <div
           v-if="strategy.generateSummary"
           class="ml-2 pr-2 text-skin-text truncate"
@@ -54,31 +59,34 @@ const strategyNetworkDetails = computed<NetworkDetails>(() => {
       </div>
       <div v-if="!readOnly" class="flex gap-3">
         <button
-          v-if="
-            strategy.paramsDefinition || offchainNetworks.includes(networkId)
-          "
+          v-if="strategy.paramsDefinition || isOffchainNetwork"
           type="button"
           @click="$emit('editStrategy', strategy)"
         >
           <IH-pencil />
         </button>
-        <button type="button" @click="$emit('deleteStrategy', strategy)">
-          <IH-trash />
+        <button
+          v-if="showTestButton"
+          type="button"
+          @click="$emit('testStrategies', [strategy])"
+        >
+          <IH-play />
         </button>
-        <a
+        <AppLink
           v-if="!hasAddress"
-          :href="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
-          target="_blank"
+          :to="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
           class="text-skin-link"
         >
           <IH-information-circle />
-        </a>
+        </AppLink>
+        <button type="button" @click="$emit('deleteStrategy', strategy)">
+          <IH-trash />
+        </button>
       </div>
     </div>
-    <a
+    <AppLink
       v-if="hasAddress"
-      :href="network.helpers.getExplorerUrl(strategy.address, 'contract')"
-      target="_blank"
+      :to="network.helpers.getExplorerUrl(strategy.address, 'contract')"
       class="flex items-center text-skin-text leading-5 mt-1"
     >
       <UiStamp
@@ -89,7 +97,7 @@ const strategyNetworkDetails = computed<NetworkDetails>(() => {
       />
       {{ shorten(strategy.address) }}
       <IH-arrow-sm-right class="-rotate-45" />
-    </a>
+    </AppLink>
     <div class="flex flex-col gap-2 mt-3 empty:mt-0">
       <div
         v-if="strategyNetworkDetails"

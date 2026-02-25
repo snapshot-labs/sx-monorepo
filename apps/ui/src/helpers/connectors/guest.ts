@@ -71,13 +71,14 @@ export default class Guest extends Connector {
     super(options);
 
     const router = useRouter();
+    const { login } = useWeb3();
 
     watch(
       () => router.currentRoute.value.query.as,
       async address => {
         if (!address) return;
 
-        await this.connect();
+        await login(this);
 
         const query = { ...router.currentRoute.value.query };
         delete query.as;

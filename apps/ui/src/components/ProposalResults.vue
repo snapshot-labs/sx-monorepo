@@ -95,6 +95,7 @@ const otherResultsSummary = computed(() => {
 
 const isFinalizing = computed(() => {
   return (
+    offchainNetworks.includes(props.proposal.network) &&
     !props.proposal.completed &&
     ['passed', 'executed', 'rejected', 'closed'].includes(props.proposal.state)
   );
@@ -121,9 +122,7 @@ async function refreshScores() {
 }
 
 onMounted(() => {
-  if (offchainNetworks.includes(props.proposal.network) && isFinalizing.value) {
-    refreshScores();
-  }
+  if (isFinalizing.value) refreshScores();
 });
 </script>
 
@@ -214,12 +213,9 @@ onMounted(() => {
             width: `${otherResultsSummary.progress.toFixed(2)}%`
           }"
         />
-        <div class="truncate grow">
+        <div class="truncate grow flex items-center gap-2">
           Others
-          <span
-            class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 ml-2"
-            v-text="_n(otherResultsSummary.count, 'compact')"
-          />
+          <UiPill :label="_n(otherResultsSummary.count, 'compact')" />
         </div>
         <div
           class="group-hover:hidden"
@@ -264,13 +260,12 @@ onMounted(() => {
       </div>
     </div>
   </template>
-  <a
+  <AppLink
     v-if="proposal.privacy == 'shutter' && withDetails"
-    :href="SHUTTER_URL"
+    :to="SHUTTER_URL"
     class="flex items-center text-skin-link mt-2.5"
-    target="_blank"
   >
     <IC-Shutter class="w-[80px]" />
     <IH-arrow-sm-right class="-rotate-45" />
-  </a>
+  </AppLink>
 </template>

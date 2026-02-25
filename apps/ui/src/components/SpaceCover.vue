@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { SPACE_COVER_DIMENSIONS } from '@/helpers/constants';
 import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { NetworkID } from '@/types';
 
@@ -10,9 +11,6 @@ const props = withDefaults(
   { size: 'lg' }
 );
 
-const width = props.size === 'sm' ? 450 : 1500;
-const height = props.size === 'sm' ? 120 : 400;
-
 const cb = computed(() => getCacheHash(props.space.cover));
 </script>
 
@@ -20,8 +18,8 @@ const cb = computed(() => getCacheHash(props.space.cover));
   <UiStamp
     v-if="space.cover"
     :id="`${space.network}:${space.id}`"
-    :width="width"
-    :height="height"
+    :width="SPACE_COVER_DIMENSIONS[size].width"
+    :height="SPACE_COVER_DIMENSIONS[size].height"
     :cb="cb"
     type="space-cover"
     class="object-cover !rounded-none size-full"

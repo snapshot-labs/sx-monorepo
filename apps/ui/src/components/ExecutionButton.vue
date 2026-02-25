@@ -9,7 +9,7 @@ withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'click');
+  (e: 'click'): void;
 }>();
 </script>
 

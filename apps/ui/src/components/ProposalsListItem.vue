@@ -42,7 +42,7 @@ function handleAcceptTerms() {
 }
 </script>
 <template>
-  <div>
+  <div data-testid="proposal-list-item">
     <div class="border-b mx-4 py-[14px] flex">
       <ProposalsListItemHeading
         :proposal="proposal"

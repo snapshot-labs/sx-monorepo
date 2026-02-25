@@ -16,6 +16,8 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { modalAccountOpen } = useModal();
+const { web3Account } = useWeb3();
 
 const userActivity = ref<UserActivity>({
   vote_count: 0,
@@ -133,6 +135,11 @@ async function loadUserActivity() {
 // }
 
 function handleDelegateClick() {
+  if (!web3Account.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   delegateModalState.value.delegatees[0] = { id: userId.value };
   delegateModalOpen.value = true;
 }
@@ -160,8 +167,8 @@ async function getVotingPower() {
 }
 
 watch(
-  userId,
-  async id => {
+  [userId, () => props.space.id],
+  async ([id]) => {
     loaded.value = false;
 
     if (isValidAddress(id)) {
@@ -179,10 +186,9 @@ watch(
 
 <template>
   <UiLoading v-if="!loaded" class="block p-4" />
-  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    <span>This user does not exist</span>
-  </div>
+  <UiStateWarning v-else-if="!user" class="px-4 py-3">
+    This user does not exist
+  </UiStateWarning>
   <div v-else>
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
@@ -201,18 +207,11 @@ watch(
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel" title="View profile">
-          <UiButton
-            :to="{ name: 'user', params: { user: user.id } }"
-            class="!px-0 w-[46px]"
-          >
+          <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>
         </UiTooltip>
-        <DropdownShare
-          :shareable="{ user, space }"
-          type="space-user"
-          class="!px-0 w-[46px]"
-        />
+        <DropdownShare :shareable="{ user, space }" type="space-user" uniform />
       </div>
     </div>
     <div class="px-4">
@@ -224,15 +223,29 @@ watch(
           class="relative mb-2 border-4 border-skin-bg !bg-skin-border !rounded-full -left-1"
         />
         <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
-        <div class="mb-3 text-skin-text">
-          <span class="text-skin-link" v-text="userActivity.proposal_count" />
-          proposals ·
-          <span class="text-skin-link" v-text="userActivity.vote_count" />
-          votes
-          <template v-if="votingPowerStatus === 'success'">
+        <div
+          class="mb-3 text-skin-text flex flex-col xs:flex-row flex-wrap xs:items-center gap-x-2 whitespace-nowrap"
+        >
+          <UiAddress :address="user.id" copy-button="always" />
+          <div class="flex items-center gap-2">
+            <span class="hidden xs:inline">·</span>
+            <div>
+              <span
+                class="text-skin-link"
+                v-text="userActivity.proposal_count"
+              />
+              proposals
+            </div>
             ·
-            {{ formattedVotingPower }}
-          </template>
+            <div>
+              <span class="text-skin-link" v-text="userActivity.vote_count" />
+              votes
+            </div>
+            <template v-if="votingPowerStatus === 'success'">
+              ·
+              {{ formattedVotingPower }}
+            </template>
+          </div>
         </div>
         <div
           v-if="user.about"
@@ -241,19 +254,18 @@ watch(
         />
         <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
-            <a
-              :href="social.href"
-              target="_blank"
-              class="text-[#606060] hover:text-skin-link"
+            <AppLink
+              :to="social.href"
+              class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
-            </a>
+            </AppLink>
           </template>
         </div>
       </div>
     </div>
     <UiScrollerHorizontal
-      class="z-40 sticky top-[71px] lg:top-[72px]"
+      class="z-40 sticky top-header-height-with-offset lg:top-header-height"
       with-buttons
       gradient="xxl"
     >
@@ -263,7 +275,7 @@ watch(
           :key="i"
           :to="{ name: item.route, params: { user: userId } }"
         >
-          <UiLink
+          <UiLabel
             :is-active="route.name === item.route"
             :text="item.label"
             :count="item.count"

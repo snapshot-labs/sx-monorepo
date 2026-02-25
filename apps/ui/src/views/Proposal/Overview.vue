@@ -9,10 +9,12 @@ import {
   sanitizeUrl,
   shortenAddress
 } from '@/helpers/utils';
-import { offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
+
+const WHITELISTED_SPACES = ['kleros.eth', 'paraswap-dao.eth'];
 
 const props = defineProps<{
   proposal: Proposal;
@@ -21,7 +23,7 @@ const props = defineProps<{
 const queryClient = useQueryClient();
 const router = useRouter();
 const uiStore = useUiStore();
-const { getCurrent, getTsFromCurrent } = useMetaStore();
+const { getCurrent } = useMetaStore();
 const { web3 } = useWeb3();
 const { flagProposal, cancelProposal } = useActions();
 const { createDraft } = useEditor();
@@ -91,7 +93,7 @@ const cancellable = computed(() => {
   } else {
     return (
       compareAddresses(props.proposal.space.controller, web3.value.account) &&
-      props.proposal.state !== 'executed' &&
+      !['queued', 'vetoed', 'executed'].includes(props.proposal.state) &&
       props.proposal.cancelled === false
     );
   }
@@ -102,15 +104,31 @@ const discussion = computed(() => {
 });
 
 const proposalMetadataUrl = computed(() => {
+  if (props.proposal.space.protocol === 'governor-bravo') {
+    return null;
+  }
+
   const url = getUrl(props.proposal.metadata_uri);
   if (!url) return null;
 
   return sanitizeUrl(url);
 });
 
-const endTime = useRelativeTime(() => {
-  return getTsFromCurrent(props.proposal.network, props.proposal.max_end);
+const proposalTransactionId = computed(() => {
+  const network = getNetwork(props.proposal.network);
+
+  if (
+    ['governor-bravo', '@openzeppelin/governor'].includes(
+      props.proposal.space.protocol
+    )
+  ) {
+    return network.helpers.getExplorerUrl(props.proposal.tx, 'transaction');
+  }
+
+  return null;
 });
+
+const endTime = useRelativeTime(() => props.proposal.max_end);
 
 const votingTime = computed(() => {
   if (!props.proposal) return null;
@@ -139,7 +157,7 @@ async function handleEditClick() {
   );
 
   const draftId = await createDraft(spaceId, {
-    proposalId: props.proposal.proposal_id,
+    originalProposal: props.proposal,
     title: props.proposal.title,
     body: props.proposal.body,
     discussion: props.proposal.discussion,
@@ -207,6 +225,9 @@ async function handleFlagClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal flagged successfully.');
+
       router.push({
         name: 'space-overview'
       });
@@ -228,6 +249,9 @@ async function handleCancelClick() {
           props.proposal.space.id
         )
       });
+
+      uiStore.addNotification('success', 'Proposal cancelled successfully.');
+
       router.push({
         name: 'space-overview'
       });
@@ -302,7 +326,7 @@ onBeforeUnmount(() => destroyAudio());
 </script>
 
 <template>
-  <UiContainer class="pt-5 !max-w-[710px] mx-0 md:mx-auto">
+  <UiContainer class="pt-5 !max-w-[730px] mx-0 md:mx-auto">
     <ContentFlagable :item="proposal">
       <UiAlert v-if="proposal.isInvalid" type="error" class="mb-3">
         <template v-if="proposal.execution_strategy === EVM_EMPTY_ADDRESS">
@@ -317,11 +341,16 @@ onBeforeUnmount(() => destroyAudio());
         </template>
       </UiAlert>
 
-      <h1 class="mb-3 text-[40px] leading-[1.1em] break-words">
+      <h1 class="mb-3 text-[42px] leading-[1.1em] break-words">
         {{ proposal.title || `Proposal #${proposal.proposal_id}` }}
       </h1>
 
       <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
+
+      <WidgetFutarchy
+        v-if="WHITELISTED_SPACES.includes(proposal.space.id)"
+        :proposal="proposal"
+      />
 
       <div class="flex justify-between items-center mb-4">
         <AppLink
@@ -338,10 +367,9 @@ onBeforeUnmount(() => destroyAudio());
           <div class="flex flex-col ml-2 leading-4 gap-1">
             <div>
               {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-              <span
+              <UiPill
                 v-if="proposal.author.role"
-                class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
-                v-text="proposal.author.role"
+                :label="proposal.author.role"
               />
             </div>
             <span class="text-skin-text text-sm">
@@ -370,15 +398,18 @@ onBeforeUnmount(() => destroyAudio());
               props.proposal.body.length > 500
             "
             :title="'AI summary'"
+            class="flex items-center"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto !w-[22px]"
+              class="!border-0"
+              uniform
+              :size="22"
               :disabled="aiSummaryState.loading"
               :loading="aiSummaryState.loading"
               @click="handleAiSummaryClick"
             >
               <IH-sparkles
-                class="inline-block size-[22px]"
+                class="size-[22px]"
                 :class="aiSummaryOpen ? 'text-skin-link' : 'text-skin-text'"
               />
             </UiButton>
@@ -391,46 +422,44 @@ onBeforeUnmount(() => destroyAudio());
               props.proposal.body.length < 4096
             "
             :title="audioState === 'playing' ? 'Pause' : 'Listen'"
+            class="flex items-center"
           >
             <UiButton
-              class="!p-0 !border-0 !h-auto !w-[22px]"
+              class="!border-0"
+              uniform
+              :size="22"
               :disabled="aiSpeechState.loading"
               :loading="aiSpeechState.loading"
               @click="handleAiSpeechClick"
             >
               <IH-pause
                 v-if="audioState === 'playing'"
-                class="inline-block size-[22px] text-skin-link"
+                class="size-[22px] text-skin-link"
               />
-              <IH-play v-else class="inline-block text-skin-text size-[22px]" />
+              <IH-play v-else class="text-skin-text size-[22px]" />
             </UiButton>
           </UiTooltip>
-          <DropdownShare :shareable="proposal" type="proposal">
+          <DropdownShare
+            :shareable="proposal"
+            type="proposal"
+            class="flex items-center"
+          >
             <template #button>
-              <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-share class="text-skin-text inline-block size-[22px]" />
-              </UiButton>
+              <button>
+                <IH-share class="size-[22px]" />
+              </button>
             </template>
           </DropdownShare>
-          <UiDropdown>
+          <UiDropdown class="flex items-center">
             <template #button>
-              <UiButton class="!p-0 !border-0 !h-auto">
-                <IH-dots-vertical
-                  class="text-skin-text inline-block size-[22px]"
-                />
-              </UiButton>
+              <button>
+                <IH-dots-vertical class="size-[22px]" />
+              </button>
             </template>
             <template #items>
-              <UiDropdownItem v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="handleDuplicateClick"
-                >
-                  <IH-document-duplicate :width="16" />
-                  Duplicate proposal
-                </button>
+              <UiDropdownItem @click="handleDuplicateClick">
+                <IH-document-duplicate :width="16" />
+                Duplicate proposal
               </UiDropdownItem>
               <UiDropdownItem
                 v-if="
@@ -440,75 +469,50 @@ onBeforeUnmount(() => destroyAudio());
                     proposal.state
                   )
                 "
-                v-slot="{ active }"
+                @click="handleDownloadVotes"
               >
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="handleDownloadVotes"
-                >
-                  <template v-if="isDownloadingVotes">
-                    <UiLoading :size="18" />
-                    Downloading votes
-                  </template>
-                  <template v-else>
-                    <IS-arrow-down-tray />
-                    Download votes
-                  </template>
-                </button>
+                <template v-if="isDownloadingVotes">
+                  <UiLoading :size="18" />
+                  Downloading votes
+                </template>
+                <template v-else>
+                  <IS-arrow-down-tray />
+                  Download votes
+                </template>
               </UiDropdownItem>
-              <UiDropdownItem v-if="editable" v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="handleEditClick"
-                >
-                  <IS-pencil :width="16" />
-                  Edit proposal
-                </button>
+              <UiDropdownItem v-if="editable" @click="handleEditClick">
+                <IS-pencil :width="16" />
+                Edit proposal
               </UiDropdownItem>
               <UiDropdownItem
                 v-if="flaggable"
-                v-slot="{ active, disabled }"
                 :disabled="flagging"
+                @click="handleFlagClick"
               >
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                  @click="handleFlagClick"
-                >
-                  <IH-flag :width="16" />
-                  Flag proposal
-                </button>
+                <IH-flag :width="16" />
+                Flag proposal
               </UiDropdownItem>
               <UiDropdownItem
                 v-if="cancellable"
-                v-slot="{ active, disabled }"
                 :disabled="cancelling"
+                @click="handleCancelClick"
               >
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-                  @click="handleCancelClick"
-                >
-                  <IS-x-mark :width="16" />
-                  Cancel proposal
-                </button>
+                <IS-x-mark :width="16" />
+                Cancel proposal
               </UiDropdownItem>
-              <UiDropdownItem v-if="proposalMetadataUrl" v-slot="{ active }">
-                <a
-                  :href="proposalMetadataUrl"
-                  target="_blank"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                >
-                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                  View metadata
-                </a>
+              <UiDropdownItem
+                v-if="proposalMetadataUrl"
+                :to="proposalMetadataUrl"
+              >
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View metadata
+              </UiDropdownItem>
+              <UiDropdownItem
+                v-if="proposalTransactionId"
+                :to="proposalTransactionId"
+              >
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View on block explorer
               </UiDropdownItem>
             </template>
           </UiDropdown>
@@ -516,25 +520,25 @@ onBeforeUnmount(() => destroyAudio());
       </div>
 
       <div v-if="aiSummaryOpen" class="mb-6">
-        <h4 class="mb-2 eyebrow flex items-center gap-2">
+        <UiEyebrow class="mb-2 flex items-center gap-2">
           <IH-sparkles />
           <span>AI summary</span>
-        </h4>
+        </UiEyebrow>
         <div class="text-md text-skin-link mb-2">{{ aiSummaryContent }}</div>
         <div class="flex gap-2 items-center text-sm">
           <IH-exclamation />
           AI can be inaccurate or misleading.
         </div>
       </div>
-      <UiMarkdown v-if="proposal.body" class="mb-4" :body="proposal.body" />
+      <UiMarkdown v-if="proposal.body" class="mb-8" :body="proposal.body" />
       <div v-if="discussion">
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
+        <UiEyebrow class="mb-3 flex items-center gap-2">
           <IH-chat-alt />
           <span>Discussion</span>
-        </h4>
-        <a :href="discussion" target="_blank" class="block mb-5">
+        </UiEyebrow>
+        <AppLink :to="discussion" class="block mb-5">
           <UiLinkPreview :url="discussion" :show-default="true" />
-        </a>
+        </AppLink>
       </div>
       <div
         v-if="
@@ -542,10 +546,10 @@ onBeforeUnmount(() => destroyAudio());
           proposal.execution_strategy_type === 'safeSnap'
         "
       >
-        <h4 class="mb-3 eyebrow flex items-center gap-2">
+        <UiEyebrow class="mb-3 flex items-center gap-2">
           <IH-play />
           <span>Execution</span>
-        </h4>
+        </UiEyebrow>
         <div class="mb-4">
           <UiAlert
             v-if="proposal.execution_strategy_type === 'safeSnap'"
@@ -554,14 +558,13 @@ onBeforeUnmount(() => destroyAudio());
             This proposal uses SafeSnap execution which is currently not
             supported on the new interface. You can view execution details on
             the
-            <a
-              :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-              target="_blank"
+            <AppLink
+              :to="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
               class="inline-flex items-center font-bold"
             >
               previous interface
               <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
+            </AppLink>
             .
           </UiAlert>
           <ProposalExecutionsList
@@ -572,7 +575,7 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <div>
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-proposal-votes',
@@ -584,7 +587,7 @@ onBeforeUnmount(() => destroyAudio());
         >
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </router-link>
+        </AppLink>
         ·
         <button
           type="button"

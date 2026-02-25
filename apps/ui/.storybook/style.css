@@ -1,0 +1,5 @@
+/* Apply background color to Storybook docs: https://github.com/storybookjs/storybook/issues/30928 */
+
+.docs-story {
+  background-color: rgba(var(--bg));
+}

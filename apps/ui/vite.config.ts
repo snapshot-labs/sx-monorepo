@@ -9,15 +9,13 @@ import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 
+// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 const ELECTRON = process.env.ELECTRON || false;
 
 const target = ['esnext'];
 
 export default defineConfig({
-  base: ELECTRON ? path.resolve(__dirname, './dist') : undefined,
-  server: {
-    host: '127.0.0.1'
-  },
+  base: ELECTRON ? './' : undefined,
   define: {
     'process.env': process.env
   },

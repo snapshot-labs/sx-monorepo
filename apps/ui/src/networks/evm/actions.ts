@@ -15,7 +15,9 @@ import {
   evmOptimism,
   evmPolygon,
   evmSepolia,
-  getEvmStrategy
+  getEvmStrategy,
+  GovernorBravoAuthenticator,
+  OpenZeppelinAuthenticator
 } from '@snapshot-labs/sx';
 import { APE_GAS_CONFIGS } from '@/helpers/constants';
 import { getIsContract as _getIsContract } from '@/helpers/contracts';
@@ -25,7 +27,11 @@ import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import { createErc1155Metadata, verifyNetwork } from '@/helpers/utils';
+import {
+  createErc1155Metadata,
+  getChainIdKind,
+  verifyNetwork
+} from '@/helpers/utils';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   buildMetadata,
@@ -88,6 +94,14 @@ export function createActions(
   };
 
   const client = new clients.EvmEthereumTx(clientOpts);
+  const openZeppelinClient = new clients.OpenZeppelinEthereumTx();
+  const openZeppelinSigClient = new clients.OpenZeppelinEthereumSig({
+    chainId
+  });
+  const governorBravoClient = new clients.GovernorBravoEthereumTx();
+  const governorBravoSigClient = new clients.GovernorBravoEthereumSig({
+    chainId
+  });
   const ethSigClient = new clients.EvmEthereumSig({
     ...clientOpts,
     manaUrl: MANA_URL
@@ -244,8 +258,38 @@ export function createActions(
       executions: ExecutionInfo[] | null
     ) => {
       await verifyNetwork(web3, chainId);
+      const signer = getSigner(web3);
 
       const executionInfo = executions?.[0];
+
+      if (space.protocol === 'governor-bravo') {
+        return governorBravoClient.propose({
+          signer,
+          envelope: {
+            data: {
+              spaceId: space.id,
+              title,
+              body,
+              executions: executionInfo?.transactions ?? []
+            }
+          }
+        });
+      }
+
+      if (space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.propose({
+          signer,
+          envelope: {
+            data: {
+              spaceId: space.id,
+              title,
+              body,
+              executions: executionInfo?.transactions ?? []
+            }
+          }
+        });
+      }
+
       const pinned = await helpers.pin({
         title,
         body,
@@ -271,6 +315,7 @@ export function createActions(
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
+          hasReason: false,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
@@ -321,8 +366,6 @@ export function createActions(
         metadataUri: `ipfs://${pinned.cid}`
       };
 
-      const signer = getSigner(web3);
-
       if (relayerType === 'evm') {
         return ethSigClient.propose({
           signer,
@@ -347,7 +390,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposalId: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -383,6 +426,7 @@ export function createActions(
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
+        hasReason: false,
         ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
@@ -406,7 +450,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: Number(proposalId.proposal_id),
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -437,6 +481,7 @@ export function createActions(
     cancelProposal: async (
       web3: Web3Provider,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) => {
       await verifyNetwork(web3, chainId);
@@ -450,7 +495,7 @@ export function createActions(
         {
           signer,
           space: proposal.space.id,
-          proposal: proposal.proposal_id as number
+          proposal: Number(proposal.proposal_id)
         },
         { noWait: isContract && connectorType !== 'sequence' }
       );
@@ -464,6 +509,7 @@ export function createActions(
       reason: string
     ) => {
       await verifyNetwork(web3, chainId);
+      const signer = getSigner(web3);
 
       const isContract = await getIsContract(account, connectorType);
 
@@ -480,8 +526,63 @@ export function createActions(
           strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
+          hasReason: !!reason,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
+
+      if (proposal.space.protocol === 'governor-bravo') {
+        if (relayerType === 'evm') {
+          return governorBravoSigClient.vote({
+            signer,
+            authenticatorType: authenticator as GovernorBravoAuthenticator,
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: Number(proposal.proposal_id),
+              choice: getSdkChoice(choice),
+              reason
+            }
+          });
+        }
+
+        return governorBravoClient.vote({
+          signer,
+          envelope: {
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: Number(proposal.proposal_id),
+              choice: getSdkChoice(choice),
+              reason
+            }
+          }
+        });
+      }
+
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        if (relayerType === 'evm') {
+          return openZeppelinSigClient.vote({
+            signer,
+            authenticatorType: authenticator as OpenZeppelinAuthenticator,
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: proposal.proposal_id,
+              choice: getSdkChoice(choice),
+              reason
+            }
+          });
+        }
+
+        return openZeppelinClient.vote({
+          signer,
+          envelope: {
+            data: {
+              spaceId: proposal.space.id,
+              proposalId: proposal.proposal_id,
+              choice: getSdkChoice(choice),
+              reason
+            }
+          }
+        });
+      }
 
       const strategiesWithMetadata = await Promise.all(
         strategies.map(async strategy => {
@@ -509,13 +610,11 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
-        proposal: proposal.proposal_id as number,
+        proposal: Number(proposal.proposal_id),
         choice: getSdkChoice(choice),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : '',
         chainId
       };
-
-      const signer = getSigner(web3);
 
       if (!isContract && proposal.execution_strategy_type === 'Axiom') {
         return highlightVote({ signer, data });
@@ -549,6 +648,25 @@ export function createActions(
     executeTransactions: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
 
+      if (proposal.space.protocol === 'governor-bravo') {
+        return governorBravoClient.queue({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          proposalId: Number(proposal.proposal_id)
+        });
+      }
+
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.queue({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          descriptionHash: proposal.execution_hash,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
+        });
+      }
+
       const executionData = getExecutionData(
         proposal.space,
         proposal.execution_strategy,
@@ -564,6 +682,25 @@ export function createActions(
     },
     executeQueuedProposal: async (web3: Web3Provider, proposal: Proposal) => {
       await verifyNetwork(web3, chainId);
+
+      if (proposal.space.protocol === 'governor-bravo') {
+        return governorBravoClient.execute({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          proposalId: Number(proposal.proposal_id)
+        });
+      }
+
+      if (proposal.space.protocol === '@openzeppelin/governor') {
+        return openZeppelinClient.execute({
+          signer: getSigner(web3),
+          spaceId: proposal.space.id,
+          descriptionHash: proposal.execution_hash,
+          transactions: convertToMetaTransactions(
+            proposal.executions[0].transactions
+          )
+        });
+      }
 
       const executionData = getExecutionData(
         proposal.space,
@@ -619,11 +756,11 @@ export function createActions(
       chainIdOverride?: ChainId,
       delegateesMetadata?: Record<string, any>
     ) => {
-      if (typeof chainIdOverride === 'string') {
+      if (chainIdOverride && getChainIdKind(chainIdOverride) !== 'evm') {
         throw new Error('Chain ID must be a number for EVM networks');
       }
 
-      const currentChainId = chainIdOverride || chainId;
+      const currentChainId = Number(chainIdOverride) || chainId;
       await verifyNetwork(web3, currentChainId);
 
       let contractParams: {
@@ -735,8 +872,8 @@ export function createActions(
         return null;
 
       const multi = new Multicaller(
-        delegation.chainId.toString(),
-        getProvider(delegation.chainId as number),
+        delegation.chainId,
+        getProvider(Number(delegation.chainId)),
         [
           'function decimals() view returns (uint8)',
           'function balanceOf(address account) view returns (uint256)',
@@ -884,7 +1021,7 @@ export function createActions(
             address,
             voterAddress,
             strategyMetadata,
-            snapshotInfo.at!,
+            snapshotInfo.at,
             strategiesParams[i],
             provider
           );

@@ -34,3 +34,8 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           timeout_minutes: "60"
+          direct_prompt: |
+            Please review this pull request for potential bugs, security vulnerabilities, and opportunities to reduce code complexity or remove duplication. 
+            Ensure the code adheres to the existing codebase coding style and naming conventions for consistency. 
+            Keep your review concise and focused, providing only actionable feedback that will meaningfully improve the code quality. 
+            When suggesting changes, include specific diff-formatted code snippets showing the original code and your proposed improvement to make implementation straightforward.

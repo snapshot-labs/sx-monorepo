@@ -1,7 +1,7 @@
 import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { MaybeRefOrGetter } from 'vue';
-import { abis } from '@/helpers/abis';
+import { approve as approveToken, getTokenAllowance } from '@/helpers/token';
 import { verifyNetwork } from '@/helpers/utils';
 import { ChainId } from '@/types';
 
@@ -52,8 +52,8 @@ export const TOKENS: Record<ChainId, Token[]> = {
   ]
 } as const;
 
-function getWeiAmount(token: Token, amount: number): BigNumber {
-  return BigNumber.from(amount * 10 ** token.decimals);
+function getWeiAmount(token: Token, amount: number): bigint {
+  return BigNumber.from(amount * 10 ** token.decimals).toBigInt();
 }
 
 export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
@@ -71,18 +71,13 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
 
     await verifyNetwork(auth.value.provider, Number(toValue(network)));
 
-    const signer = auth.value.provider.getSigner();
-    const tokenContract = new Contract(
+    const allowance = await getTokenAllowance(
+      auth.value!.provider,
       token.contractAddress,
-      abis.erc20,
-      signer
-    );
-    const allowance = await tokenContract.allowance(
-      signer.getAddress(),
       PAYMENT_CONTRACT_ADDRESSES[toValue(network)]
     );
 
-    return BigNumber.from(allowance).gte(getWeiAmount(token, amount));
+    return allowance >= getWeiAmount(token, amount);
   }
 
   async function approve(token: Token, amount: number) {
@@ -93,13 +88,9 @@ export default function usePayment(network: MaybeRefOrGetter<ChainId>) {
 
     await verifyNetwork(auth.value.provider, Number(toValue(network)));
 
-    const tokenContract = new Contract(
+    return approveToken(
+      auth.value!.provider,
       token.contractAddress,
-      abis.erc20,
-      auth.value.provider.getSigner()
-    );
-
-    return tokenContract.approve(
       PAYMENT_CONTRACT_ADDRESSES[toValue(network)],
       getWeiAmount(token, amount)
     );

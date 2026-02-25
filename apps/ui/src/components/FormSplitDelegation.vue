@@ -232,7 +232,7 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="space-y-3">
       <div class="space-y-1">
-        <h4 class="eyebrow">Delegates</h4>
+        <UiEyebrow>Delegates</UiEyebrow>
         <div class="leading-6">
           Delegate your voting power with several addresses. Any power you don't
           delegate stays with you.
@@ -337,10 +337,7 @@ onMounted(() => {
             />
           </div>
         </div>
-        <UiButton
-          class="w-full flex items-center justify-center space-x-1"
-          @click="handleAddDelegatee"
-        >
+        <UiButton class="w-full" @click="handleAddDelegatee">
           <IH-plus-sm />
           Add delegate
         </UiButton>
@@ -348,7 +345,7 @@ onMounted(() => {
     </div>
 
     <div class="space-y-1">
-      <h4 class="eyebrow flex items-center gap-1">
+      <UiEyebrow class="flex items-center gap-1">
         Expiration date
         <UiTooltip
           title="All delegations will be cleared after the expiration date"
@@ -356,7 +353,7 @@ onMounted(() => {
         >
           <IH-exclamation-circle />
         </UiTooltip>
-      </h4>
+      </UiEyebrow>
       <button
         type="button"
         class="flex items-center gap-2"
@@ -373,7 +370,7 @@ onMounted(() => {
     </div>
 
     <div class="space-y-2.5">
-      <h4 class="eyebrow flex items-center gap-1">
+      <UiEyebrow class="flex items-center gap-1">
         Delegation network
         <UiTooltip
           title="Voting power will be aggregated from all networks, regardless of the delegation network"
@@ -381,7 +378,7 @@ onMounted(() => {
         >
           <IH-exclamation-circle />
         </UiTooltip>
-      </h4>
+      </UiEyebrow>
       <Combobox v-model="form.chainId" :definition="networkDefinition" />
     </div>
   </div>

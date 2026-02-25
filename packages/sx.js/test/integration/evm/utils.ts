@@ -162,6 +162,7 @@ export async function setup(
 
   const networkConfig = {
     eip712ChainId: 31337,
+    blockTime: 1,
     proxyFactory,
     masterSpace,
     executionStrategiesImplementations: {

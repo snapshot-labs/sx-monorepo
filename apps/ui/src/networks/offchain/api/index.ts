@@ -8,7 +8,7 @@ import {
   DELEGATE_REGISTRY_STRATEGIES,
   DELEGATION_TYPES_NAMES
 } from '@/helpers/constants';
-import { parseOSnapTransaction } from '@/helpers/osnap';
+import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
@@ -75,7 +75,7 @@ const SPLIT_DELEGATION_DATA: SpaceMetadataDelegation = {
   apiType: 'split-delegation',
   apiUrl: 'https://delegate-api.gnosisguild.org',
   contractAddress: '0xDE1e8A7E184Babd9F0E3af18f40634e9Ed6F0905',
-  chainId: 1
+  chainId: '1'
 };
 
 const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
@@ -140,9 +140,7 @@ function formatSpace(
   constants: NetworkConstants
 ): Space {
   const treasuries: SpaceMetadataTreasury[] = space.treasuries.map(treasury => {
-    const chainId = treasury.network.startsWith('0x')
-      ? treasury.network
-      : parseInt(treasury.network, 10);
+    const chainId = treasury.network;
 
     return {
       name: treasury.name,
@@ -168,16 +166,18 @@ function formatSpace(
   function formatRelatedSpace(space: ApiRelatedSpace): RelatedSpace {
     return {
       id: space.id,
+      protocol: 'snapshot',
       name: space.name,
       network: networkId,
       avatar: space.avatar,
       cover: space.cover || '',
       proposal_count: space.proposalsCount,
       vote_count: space.votesCount,
+      follower_count: space.followersCount,
       active_proposals: space.activeProposals,
       turbo: space.turbo,
       verified: space.verified,
-      snapshot_chain_id: parseInt(space.network)
+      snapshot_chain_id: space.network
     };
   }
 
@@ -200,6 +200,7 @@ function formatSpace(
     private: space.private,
     flagged: space.flagged,
     flagCode: space.flagCode,
+    hibernated: space.hibernated,
     domain: space.domain,
     skin: space.skin,
     skinSettings: formatSkinSettings(space.skinSettings),
@@ -219,12 +220,13 @@ function formatSpace(
 
   return {
     id: space.id,
+    protocol: 'snapshot',
     network: networkId,
     verified: space.verified,
     turbo: space.turbo,
     turbo_expiration: space.turboExpiration,
     controller: '',
-    snapshot_chain_id: parseInt(space.network),
+    snapshot_chain_id: space.network,
     name: space.name || '',
     avatar: space.avatar || '',
     cover: space.cover || '',
@@ -332,6 +334,14 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     ];
   }
 
+  const voting_power_validation_params: any = [proposal.validation.params];
+  if (
+    proposal.validation.name === 'basic' &&
+    !(proposal.validation.params.strategies || []).length
+  ) {
+    voting_power_validation_params[0].strategies = proposal.strategies;
+  }
+
   const state = getProposalState(networkId, proposal);
 
   const { admins, moderators, members } = proposal.space;
@@ -368,15 +378,18 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     labels: proposal.labels,
     scores: proposal.scores,
     scores_total: proposal.scores_total,
+    vp_decimals: 0,
     vote_count: proposal.votes,
     state,
     cancelled: false,
     vetoed: false,
+    execution_settled: false,
     completed: proposal.state === 'closed' && proposal.scores_state === 'final',
     space: {
       id: proposal.space.id,
+      protocol: 'snapshot',
       name: proposal.space.name,
-      snapshot_chain_id: parseInt(proposal.space.network),
+      snapshot_chain_id: proposal.space.network,
       avatar: proposal.space.avatar,
       controller: '',
       admins,
@@ -402,12 +415,17 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     strategies: proposal.strategies.map(strategy => strategy.name),
     strategies_indices: [],
     strategies_params: proposal.strategies.map(strategy => strategy),
+    voting_power_validation_strategy_strategies: [proposal.validation.name],
+    voting_power_validation_strategy_strategies_params:
+      voting_power_validation_params,
     tx: '',
     execution_tx: null,
+    executed_at: null,
     veto_tx: null,
     privacy: proposal.privacy || 'none',
     flagged: proposal.flagged,
-    flag_code: proposal.flagCode
+    flag_code: proposal.flagCode,
+    plugins: proposal.plugins
   };
 }
 
@@ -447,9 +465,7 @@ function formatDelegations(
 
     const name = DELEGATION_TYPES_NAMES[apiType];
 
-    const chainId = space.delegationPortal.delegationNetwork.startsWith('0x')
-      ? space.delegationPortal.delegationNetwork
-      : parseInt(space.delegationPortal.delegationNetwork, 10);
+    const chainId = space.delegationPortal.delegationNetwork;
 
     delegations.push({
       name,
@@ -461,7 +477,7 @@ function formatDelegations(
   }
 
   if (basicDelegationStrategy) {
-    const chainId = parseInt(space.network, 10);
+    const chainId = space.network;
 
     const apiUrl = DELEGATE_REGISTRY_URLS[networkId];
     if (apiUrl) {
@@ -507,7 +523,8 @@ function formatStrategy(strategy: ApiStrategy): StrategyTemplate {
     verifiedSpaceCount: strategy.verifiedSpacesCount,
     paramsDefinition: hasDefinition
       ? strategy.schema.definitions?.Strategy
-      : null
+      : null,
+    disabled: strategy.disabled
   };
 }
 
@@ -532,6 +549,7 @@ export function createApi(
 
   return {
     apiUrl: uri,
+    loadProposalScoresTicks: async () => [],
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,
@@ -671,6 +689,8 @@ export function createApi(
       { limit, skip = 0 }: PaginationOpts,
       filter?: SpacesFilter
     ): Promise<Space[]> => {
+      delete filter?.protocol;
+
       if (
         !filter ||
         filter.hasOwnProperty('searchQuery') ||
@@ -910,7 +930,7 @@ export function createApi(
 
       return Object.fromEntries(
         data.networks.map((network: any) => [
-          Number(network.id),
+          network.id,
           {
             spaces_count: network.spacesCount,
             premium: network.premium

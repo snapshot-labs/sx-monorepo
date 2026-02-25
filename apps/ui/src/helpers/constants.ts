@@ -11,11 +11,10 @@ export const APP_NAME = 'Snapshot';
 
 export const SIDEKICK_URL = 'https://sh5.co';
 
-export const UNIFIED_API_URL =
-  import.meta.env.VITE_UNIFIED_API_URL ?? 'https://api.snapshot.box';
-export const UNIFIED_API_TESTNET_URL =
-  import.meta.env.VITE_UNIFIED_API_TESTNET_URL ??
-  'https://testnet-api.snapshot.box';
+export const API_URL =
+  import.meta.env.VITE_API_URL ?? 'https://api.snapshot.box';
+export const API_TESTNET_URL =
+  import.meta.env.VITE_API_TESTNET_URL ?? 'https://testnet-api.snapshot.box';
 
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
@@ -54,19 +53,21 @@ export const COINGECKO_ASSET_PLATFORMS = {
   42161: 'arbitrum-one',
   33139: 'apechain',
   33111: 'apechain'
-};
+} as const;
 
 export const COINGECKO_BASE_ASSETS = {
-  1: 'ethereum',
-  10: 'ethereum',
-  100: 'xdai',
-  137: 'matic-network',
-  5000: 'mantle',
-  8453: 'ethereum',
-  42161: 'ethereum',
-  33139: 'apecoin',
-  33111: 'apecoin'
-};
+  ethereum: 'ethereum',
+  'optimistic-ethereum': 'ethereum',
+  xdai: 'xdai',
+  'polygon-pos': 'matic-network',
+  mantle: 'mantle',
+  base: 'ethereum',
+  'arbitrum-one': 'ethereum',
+  apechain: 'apecoin'
+} satisfies Record<
+  (typeof COINGECKO_ASSET_PLATFORMS)[keyof typeof COINGECKO_ASSET_PLATFORMS],
+  string
+>;
 
 type ApeGasConfig = {
   l1ChainId: number;
@@ -228,7 +229,7 @@ export const FLAGS = {
   DMCA: 2
 };
 
-export const OVERRIDING_STRATEGIES = [
+export const OVERRIDING_STRATEGIES: readonly string[] = [
   'aura-vlaura-vebal-with-overrides',
   'balance-of-with-linear-vesting-power',
   'balancer-delegation',
@@ -247,21 +248,29 @@ export const OVERRIDING_STRATEGIES = [
   'api-v2-override',
   'rocketpool-node-operator-delegate-v8',
   'eden-online-override',
-  'split-delegation'
+  'split-delegation',
+  'sonic-staked-balance'
 ] as const;
-export const DEPRECATED_STRATEGIES = ['multichain'] as const;
+export const DISABLED_STRATEGIES: readonly string[] = ['multichain'];
+export const DEPRECATED_STRATEGIES: readonly string[] = [];
 export const DELEGATE_REGISTRY_STRATEGIES = [
   'delegation',
   'erc20-balance-of-delegation',
   'delegation-with-cap',
   'delegation-with-overrides',
   'with-delegation',
-  'erc20-balance-of-with-delegation'
+  'erc20-balance-of-with-delegation',
+  'spark-with-delegation'
 ];
 
 export const DELEGATION_TYPES_NAMES: Record<DelegationType, string> = {
-  'delegate-registry': 'Delegat registry',
+  'delegate-registry': 'Delegate registry',
   'apechain-delegate-registry': 'ApeChain Delegate Registry',
   'split-delegation': 'Split Delegation',
   'governor-subgraph': 'ERC-20 Votes'
+};
+
+export const SPACE_COVER_DIMENSIONS = {
+  sm: { width: 450, height: 120 },
+  lg: { width: 1500, height: 400 }
 };

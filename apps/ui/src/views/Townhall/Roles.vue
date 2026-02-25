@@ -181,7 +181,7 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
       </UiButton>
     </div>
     <div>
-      <UiLabel label="Roles" sticky />
+      <UiSectionHeader label="Roles" sticky />
       <div>
         <div v-if="isPending" class="my-3 mx-4">
           <UiLoading />
@@ -253,27 +253,15 @@ watchEffect(() => setTitle(`Roles - ${props.space.name}`));
                     </UiButton>
                   </template>
                   <template #items>
-                    <UiDropdownItem v-slot="{ active }">
-                      <button
-                        type="button"
-                        class="flex items-center gap-2"
-                        :class="{ 'opacity-80': active }"
-                        @click="() => setModalStatus(true, role.id)"
-                      >
-                        <IH-pencil :width="16" />
-                        Edit role
-                      </button>
+                    <UiDropdownItem
+                      @click="() => setModalStatus(true, role.id)"
+                    >
+                      <IH-pencil :width="16" />
+                      Edit role
                     </UiDropdownItem>
-                    <UiDropdownItem v-slot="{ active }">
-                      <button
-                        type="button"
-                        class="flex items-center gap-2"
-                        :class="{ 'opacity-80': active }"
-                        @click="() => handleDeleteRole(role.id)"
-                      >
-                        <IH-trash :width="16" />
-                        Delete role
-                      </button>
+                    <UiDropdownItem @click="() => handleDeleteRole(role.id)">
+                      <IH-trash :width="16" />
+                      Delete role
                     </UiDropdownItem>
                   </template>
                 </UiDropdown>

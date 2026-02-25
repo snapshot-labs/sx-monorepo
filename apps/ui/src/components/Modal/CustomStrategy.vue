@@ -16,13 +16,13 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'save', strategy: { address: string; type: string });
+  (e: 'close'): void;
+  (e: 'save', strategy: { address: string; type: string }): void;
 }>();
 
 const uiStore = useUiStore();
 
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const searchValue = ref('');
 const contractAddress = ref('');
 const isSubmitting = ref(false);
@@ -74,45 +74,41 @@ async function handleSubmit() {
   }
 }
 
-watchEffect(() => {
-  if (props.open) {
+watch(
+  () => props.open,
+  () => {
+    isPickerShown.value = false;
     contractAddress.value = '';
   }
-});
+);
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Add Custom Strategy</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <PickerContact
-      v-if="showPicker"
+      v-if="isPickerShown"
       :loading="false"
       :search-value="searchValue"
       @pick="
         value => {
           contractAddress = value;
-          showPicker = false;
+          isPickerShown = false;
         }
       "
     />
@@ -121,10 +117,10 @@ watchEffect(() => {
         v-model="contractAddress"
         :definition="definition"
         :error="formErrors.contractAddress"
-        @pick="showPicker = true"
+        @pick="isPickerShown = true"
       />
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton
         :loading="isSubmitting"
         class="w-full"

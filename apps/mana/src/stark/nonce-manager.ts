@@ -1,5 +1,6 @@
 import { Mutex, MutexInterface } from 'async-mutex';
 import { Account } from 'starknet';
+import logger from './logger';
 
 export class NonceManager {
   private mutex = new Mutex();
@@ -36,7 +37,7 @@ export class NonceManager {
 
   release() {
     if (!this.releaseMutex) {
-      console.warn('Tried releasing mutex without acquiring it first');
+      logger.warn('Tried releasing mutex without acquiring it first');
       return;
     }
 

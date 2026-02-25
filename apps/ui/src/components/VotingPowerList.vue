@@ -1,0 +1,97 @@
+<script setup lang="ts">
+import { _n, shorten } from '@/helpers/utils';
+import { addressValidator as isValidAddress } from '@/helpers/validation';
+import { getNetwork } from '@/networks';
+import { VotingPowerItem } from '@/queries/votingPower';
+import { NetworkID } from '@/types';
+
+const props = defineProps<{
+  votingPower: VotingPowerItem;
+  networkId: NetworkID;
+}>();
+
+const network = computed(() => getNetwork(props.networkId));
+const baseNetwork = computed(() =>
+  network.value.baseNetworkId
+    ? getNetwork(network.value.baseNetworkId)
+    : network.value
+);
+</script>
+
+<template>
+  <div>
+    <div
+      v-for="(strategy, i) in votingPower.votingPowers"
+      :key="i"
+      class="py-3 px-4 border-b last:border-b-0"
+    >
+      <div class="flex justify-between">
+        <AppLink
+          :to="network.helpers.getExplorerUrl(strategy.address, 'strategy')"
+          class="truncate"
+        >
+          {{
+            network.constants.STRATEGIES[strategy.address] ||
+            (isValidAddress(strategy.address)
+              ? shorten(strategy.address)
+              : strategy.address)
+          }}
+        </AppLink>
+        <div class="text-skin-link shrink-0">
+          {{
+            _n(
+              Number(strategy.value) / 10 ** strategy.cumulativeDecimals,
+              'compact',
+              {
+                maximumFractionDigits: 2,
+                formatDust: true
+              }
+            )
+          }}
+          {{ votingPower.symbol }}
+        </div>
+      </div>
+      <div class="flex justify-between">
+        <div v-if="strategy.token" class="flex items-center gap-2">
+          <AppLink
+            :to="
+              (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(
+                strategy.address
+              )
+                ? baseNetwork
+                : network
+              ).helpers.getExplorerUrl(
+                strategy.token,
+                'contract',
+                strategy.chainId
+              )
+            "
+            class="flex items-center text-skin-text"
+          >
+            <UiStamp
+              :id="strategy.token"
+              type="avatar"
+              :size="18"
+              class="mr-2 rounded-sm"
+            />
+            {{ shorten(strategy.token) }}
+            <IH-arrow-sm-right class="ml-1 -rotate-45" />
+          </AppLink>
+          <AppLink
+            v-if="strategy.swapLink"
+            :to="strategy.swapLink"
+            class="flex items-center text-skin-text"
+          >
+            Buy
+            <IH-arrow-sm-right class="ml-1 -rotate-45" />
+          </AppLink>
+        </div>
+        <div v-else />
+        <div>
+          {{ _n(Number(strategy.value) / 10 ** strategy.displayDecimals) }}
+          {{ strategy.symbol || 'units' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

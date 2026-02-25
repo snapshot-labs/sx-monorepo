@@ -13,10 +13,10 @@ export async function getIsContract(provider: Provider, address: string) {
   return true;
 }
 
-export async function getTokensMetadata(chainId: number, tokens: string[]) {
-  const provider = getProvider(chainId);
+export async function getTokensMetadata(chainId: string, tokens: string[]) {
+  const provider = getProvider(Number(chainId));
 
-  const multi = new Multicaller(chainId.toString(), provider, abis.erc20);
+  const multi = new Multicaller(chainId, provider, abis.erc20);
   tokens.forEach(token => {
     multi.call(`${token}.name`, token, 'name');
     multi.call(`${token}.symbol`, token, 'symbol');

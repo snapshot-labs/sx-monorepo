@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`StarknetSig > should create setAlias envelope 1`] = `
+{
+  "data": {
+    "alias": "0xdeadbeef",
+  },
+  "signatureData": {
+    "address": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+    "domain": {
+      "chainId": "0x534e5f5345504f4c4941",
+      "name": "sx-starknet",
+      "version": "0.1.0",
+    },
+    "message": {
+      "alias": "0xdeadbeef",
+      "from": "0x07d2f37b75a5e779f7da01c22acee1b66c39e8ba470ee5448f05e1462afcedb4",
+      "timestamp": 1705795200,
+    },
+    "primaryType": "SetAlias",
+    "signature": [
+      "0x41c602fccc95b2a605a0a5d5ccbd42eabb9d5d7a09e436b3cddd1fdc1b5310d",
+      "0x64bed5315abdc4e2e78bd84c9cfa13cd17a5e9c370c4a89514b754b693ea9d5",
+    ],
+    "types": {
+      "SetAlias": [
+        {
+          "name": "from",
+          "type": "felt",
+        },
+        {
+          "name": "alias",
+          "type": "felt",
+        },
+        {
+          "name": "timestamp",
+          "type": "felt",
+        },
+      ],
+      "StarkNetDomain": [
+        {
+          "name": "name",
+          "type": "felt",
+        },
+        {
+          "name": "version",
+          "type": "felt",
+        },
+        {
+          "name": "chainId",
+          "type": "felt",
+        },
+      ],
+    },
+  },
+}
+`;

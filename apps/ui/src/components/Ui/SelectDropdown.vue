@@ -63,27 +63,20 @@ const items = computed(() => props.items);
       <UiDropdownItem
         v-for="item in items"
         :key="item.key"
-        v-slot="{ active, disabled }"
+        @click="model = item.key"
       >
-        <button
-          type="button"
-          class="flex items-center gap-2"
-          :class="{ 'opacity-80': active, 'opacity-40': disabled }"
-          @click="model = item.key"
-        >
-          <div
-            v-if="item.indicator || item.indicatorStyle"
-            class="size-[8px] rounded-full"
-            :class="item.indicator"
-            :style="item.indicatorStyle"
-          />
-          <component
-            :is="item.component"
-            v-else-if="item.component"
-            v-bind="item.componentProps"
-          />
-          {{ item.label }}
-        </button>
+        <div
+          v-if="item.indicator || item.indicatorStyle"
+          class="size-[8px] rounded-full"
+          :class="item.indicator"
+          :style="item.indicatorStyle"
+        />
+        <component
+          :is="item.component"
+          v-else-if="item.component"
+          v-bind="item.componentProps"
+        />
+        {{ item.label }}
       </UiDropdownItem>
     </template>
   </UiDropdown>

@@ -18,10 +18,12 @@ const getSafeVersion = useMemoize(
   }
 );
 
-export function useSafeWallet(network: NetworkID, chainId = 1) {
+export function useSafeWallet(network: NetworkID, chainId = '1') {
   const { web3, auth } = useWeb3();
 
-  const signedChainId = computed(() => web3.value.network.key);
+  const signedChainId = computed<string>(() =>
+    String(web3.value.network.chainId)
+  );
 
   const isSafeContract = computedAsync(async () => {
     if (!web3.value.account) return false;
@@ -42,7 +44,7 @@ export function useSafeWallet(network: NetworkID, chainId = 1) {
     return (
       isSafeWallet.value &&
       offchainNetworks.includes(network) &&
-      Number(signedChainId.value) !== chainId
+      signedChainId.value !== chainId
     );
   });
 

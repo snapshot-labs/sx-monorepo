@@ -43,9 +43,9 @@ onMounted(() => load());
                 <div v-text="app.category" />
               </div>
             </div>
-            <a v-if="app.link" :href="app.link" target="_blank">
-              <UiButton class="primary w-full">Use integration</UiButton>
-            </a>
+            <UiButton v-if="app.link" :to="app.link" primary class="w-full">
+              Use integration
+            </UiButton>
           </div>
           <div class="md:flex md:space-x-4">
             <div class="space-y-5 p-4 flex-grow border rounded-lg h-fit mb-4">
@@ -62,59 +62,59 @@ onMounted(() => load());
                 />
               </div>
               <div>
-                <div class="eyebrow mb-2">Overview</div>
+                <UiEyebrow class="mb-2">Overview</UiEyebrow>
                 <div
                   class="text-md text-skin-link whitespace-pre-line"
                   v-text="app.overview"
                 />
               </div>
               <div v-if="app.how">
-                <div class="eyebrow mb-2">How it works</div>
+                <UiEyebrow class="mb-2">How it works</UiEyebrow>
                 <div
                   class="text-md text-skin-link whitespace-pre-line"
                   v-text="app.how"
                 />
               </div>
               <div v-if="app.start">
-                <div class="eyebrow mb-2">Get started</div>
+                <UiEyebrow class="mb-2">Get started</UiEyebrow>
                 <div
                   class="text-md text-skin-link whitespace-pre-line"
                   v-text="app.start"
                 />
               </div>
               <div v-if="app.form">
-                <a :href="app.form" target="_blank" class="text-skin-text">
+                <AppLink :to="app.form" class="text-skin-text">
                   <IH-pencil class="inline-block mr-1" /> Edit this page
-                </a>
+                </AppLink>
               </div>
             </div>
             <div
               class="border rounded-lg md:w-[300px] shrink-0 h-fit p-4 space-y-3 mb-4"
             >
               <div>
-                <h4 class="eyebrow" v-text="'Built by'" />
+                <UiEyebrow>Built by</UiEyebrow>
                 {{ app.author }}
               </div>
               <div v-if="app.website">
-                <h4 class="eyebrow" v-text="'Website'" />
-                <a :href="app.website" target="_blank">
+                <UiEyebrow>Website</UiEyebrow>
+                <AppLink :to="app.website">
                   {{ simplifyURL(app.website) }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
-                </a>
+                </AppLink>
               </div>
               <div v-if="app.x">
-                <h4 class="eyebrow" v-text="'X (Twitter)'" />
-                <a :href="`https://x.com/${app.x}`" target="_blank">
+                <UiEyebrow>X (Twitter)</UiEyebrow>
+                <AppLink :to="`https://x.com/${app.x}`">
                   {{ app.x }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
-                </a>
+                </AppLink>
               </div>
               <div v-if="app.github">
-                <h4 class="eyebrow" v-text="'Source code'" />
-                <a :href="app.github" target="_blank">
+                <UiEyebrow>Source code</UiEyebrow>
+                <AppLink :to="app.github">
                   {{ simplifyURL(app.github) }}
                   <IH-arrow-sm-right class="inline-block -rotate-45" />
-                </a>
+                </AppLink>
               </div>
             </div>
           </div>

@@ -15,11 +15,11 @@ const props = defineProps<{
   initialState?: SpaceMetadataTreasury;
 }>();
 const emit = defineEmits<{
-  (e: 'add', config: SpaceMetadataTreasury);
+  (e: 'add', config: SpaceMetadataTreasury): void;
   (e: 'close'): void;
 }>();
 
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const searchValue = ref('');
 const form: Ref<SpaceMetadataTreasury> = ref(clone(DEFAULT_FORM_STATE));
 
@@ -74,12 +74,14 @@ const formValid = computed(() => {
 });
 
 async function handleSubmit() {
-  emit('add', form.value);
+  emit('add', clone(form.value));
 }
 
 watch(
   () => props.open,
   () => {
+    isPickerShown.value = false;
+
     if (props.initialState) {
       form.value = clone(props.initialState);
     } else {
@@ -92,35 +94,30 @@ watch(
 <template>
   <UiModal :open="open" @close="emit('close')">
     <template #header>
-      <h3 v-text="'Add treasury'" />
-      <template v-if="showPicker">
+      <h3>{{ initialState ? 'Edit treasury' : 'Add treasury' }}</h3>
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          ref="searchInput"
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <PickerContact
-      v-if="showPicker"
+      v-if="isPickerShown"
       :loading="false"
       :search-value="searchValue"
       @pick="
         value => {
           form.address = value;
-          showPicker = false;
+          isPickerShown = false;
         }
       "
     />
@@ -129,7 +126,7 @@ watch(
         :model-value="form"
         :error="formErrors"
         :definition="definition"
-        @pick="showPicker = true"
+        @pick="isPickerShown = true"
       />
     </div>
     <template #footer>

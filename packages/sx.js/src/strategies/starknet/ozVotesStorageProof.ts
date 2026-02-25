@@ -8,7 +8,13 @@ import OZVotesStorageProof from './abis/OZVotesStorageProof.json';
 import OzVotesToken from './abis/OzVotesToken.json';
 import { getNestedSlotKey, getSlotKey } from './utils';
 import SpaceAbi from '../../clients/starknet/starknet-tx/abis/Space.json';
-import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import {
+  ClientConfig,
+  Envelope,
+  Propose,
+  Strategy,
+  Vote
+} from '../../clients/starknet/types';
 import { VotingPowerDetailsError } from '../../utils/errors';
 import { getUserAddressEnum } from '../../utils/starknet-enums';
 
@@ -130,6 +136,22 @@ export default function createOzVotesStorageProofStrategy({
       const [checkpointMptProof, exclusionMptProof] = proofs;
       if (!checkpointMptProof || !exclusionMptProof)
         throw new Error('Invalid proofs');
+
+      // This check is only needed to look for "Slot is zero" error
+      // Current storage proof contracts will revert if we try to use them
+      // and user has no slot value.
+      // This can be removed after contracts include this
+      // https://github.com/snapshot-labs/sx-starknet/pull/624
+      await contract.get_voting_power(
+        startTimestamp,
+        getUserAddressEnum('ETHEREUM', signerAddress),
+        params.split(','),
+        CallData.compile({
+          checkpointIndex,
+          checkpointMptProof,
+          exclusionMptProof
+        })
+      );
 
       return CallData.compile({
         checkpointIndex,

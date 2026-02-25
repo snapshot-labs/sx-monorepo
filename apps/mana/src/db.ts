@@ -2,8 +2,6 @@ import knex from './knex';
 
 export const REGISTERED_TRANSACTIONS = 'registered_transactions';
 export const REGISTERED_PROPOSALS = 'registered_proposals';
-export const MERKLETREE_REQUESTS = 'merkletree_requests';
-export const MERKLETREES = 'merkletrees';
 export const APEGAS_PROPOSALS = 'apegas_proposals';
 
 export type ApeGasProposal = {
@@ -95,40 +93,6 @@ export async function getDataByMessageHash(hash: string) {
     .select(['sender', 'type', 'data', 'hash', 'network'])
     .where({ hash })
     .first();
-}
-
-export async function saveRequest(id: string) {
-  await knex(MERKLETREE_REQUESTS).insert({
-    id
-  });
-}
-
-export async function saveMerkleTree(id: string, root: string, tree: string[]) {
-  return knex.transaction(async trx => {
-    await trx(MERKLETREES)
-      .insert({
-        id: root,
-        tree: JSON.stringify(tree)
-      })
-      .onConflict()
-      .ignore();
-
-    await trx(MERKLETREE_REQUESTS)
-      .update({
-        processed: true,
-        updated_at: knex.fn.now(),
-        root
-      })
-      .where({ id });
-  });
-}
-
-export async function getMerkleTreeRequest(id: string) {
-  return knex(MERKLETREE_REQUESTS).select('*').where({ id }).first();
-}
-
-export async function getMerkleTree(id: string) {
-  return knex(MERKLETREES).select('*').where({ id }).first();
 }
 
 export async function saveApeGasProposal(proposal: ApeGasProposal) {

@@ -1,14 +1,14 @@
 <script setup lang="ts">
+import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
+import { useProposalScoresTicksQuery } from '@/queries/proposals';
 import { useProposalVotesQuery } from '@/queries/votes';
 import { Proposal as ProposalType, Vote } from '@/types';
 
 const props = defineProps<{
   proposal: ProposalType;
 }>();
-
-const { copy, copied } = useClipboard();
 
 const sortBy = ref(
   'vp-desc' as 'vp-desc' | 'vp-asc' | 'created-desc' | 'created-asc'
@@ -21,14 +21,14 @@ const votesHeader = ref<HTMLElement | null>(null);
 const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
-const votingPowerDecimals = computed(() => {
-  return Math.max(
-    ...props.proposal.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
+const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
+
+const { data: scoresTicks, isPending: isScoresTicksPending } =
+  useProposalScoresTicksQuery(
+    toRef(() => props.proposal.network),
+    toRef(() => props.proposal.space.id),
+    toRef(() => props.proposal.id)
   );
-});
 
 const {
   data,
@@ -73,10 +73,38 @@ function handleScrollEvent(target: HTMLElement) {
 
 <template>
   <div
-    ref="votesHeader"
-    class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b overflow-hidden"
+    v-if="
+      !offchainNetworks.includes(proposal.network) && proposal.vote_count > 0
+    "
   >
-    <div class="flex space-x-3 font-medium min-w-[735px]">
+    <ProposalScoresChart
+      v-if="scoresTicks && scoresTicks.length > 0"
+      :ticks="scoresTicks"
+      :choices="proposal.choices"
+      :decimals="proposal.vp_decimals"
+      :start="proposal.start"
+      :end="proposal.max_end"
+      :quorum="proposal.quorum"
+      class="border-b pb-3"
+    />
+    <div
+      v-else-if="isScoresTicksPending"
+      class="flex items-center justify-center border-b pb-3"
+      style="height: 236px"
+    >
+      <UiLoading />
+    </div>
+  </div>
+  <UiColumnHeader
+    :ref="
+      ref =>
+        (votesHeader =
+          (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
+          null)
+    "
+    class="!px-0 overflow-hidden"
+  >
+    <div class="flex space-x-3 min-w-[735px] w-full">
       <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
       <div class="grow w-[40%]">
         <template v-if="offchainNetworks.includes(proposal.network)"
@@ -85,7 +113,7 @@ function handleScrollEvent(target: HTMLElement) {
         <UiSelectDropdown
           v-else
           v-model="choiceFilter"
-          class="font-normal"
+          class="font-normal text-center"
           title="Choice"
           gap="12"
           placement="start"
@@ -131,21 +159,16 @@ function handleScrollEvent(target: HTMLElement) {
       </button>
       <div class="min-w-[44px] lg:w-[60px]" />
     </div>
-  </div>
+  </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />
-      <div v-if="isError" class="px-4 py-3 flex items-center space-x-2">
-        <IH-exclamation-circle class="inline-block" />
-        <span>Failed to load votes.</span>
-      </div>
-      <div
-        v-if="data?.pages.flat().length === 0"
-        class="px-4 py-3 flex items-center space-x-2"
-      >
-        <IH-exclamation-circle class="inline-block" />
-        <span>There are no votes here.</span>
-      </div>
+      <UiStateWarning v-if="isError" class="px-4 py-3">
+        Failed to load votes.
+      </UiStateWarning>
+      <UiStateWarning v-if="data?.pages.flat().length === 0" class="px-4 py-3">
+        There are no votes here.
+      </UiStateWarning>
       <UiContainerInfiniteScroll
         v-if="data"
         :loading-more="isFetchingNextPage"
@@ -178,7 +201,7 @@ function handleScrollEvent(target: HTMLElement) {
                 user: vote.voter.id
               }
             }"
-            class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate"
+            class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate group"
           >
             <UiStamp :id="vote.voter.id" :size="32" />
             <div class="flex flex-col truncate">
@@ -186,9 +209,9 @@ function handleScrollEvent(target: HTMLElement) {
                 class="truncate"
                 v-text="vote.voter.name || shortenAddress(vote.voter.id)"
               />
-              <div
+              <UiAddress
+                :address="vote.voter.id"
                 class="text-[17px] text-skin-text truncate"
-                v-text="shortenAddress(vote.voter.id)"
               />
             </div>
           </AppLink>
@@ -226,44 +249,20 @@ function handleScrollEvent(target: HTMLElement) {
           >
             <UiDropdown>
               <template #button>
-                <UiButton class="!p-0 !border-0 !h-[auto] !bg-transparent">
+                <button type="button">
                   <IH-dots-horizontal class="text-skin-link" />
-                </UiButton>
+                </button>
               </template>
               <template #items>
-                <UiDropdownItem v-slot="{ active }">
-                  <a
-                    :href="
-                      network.helpers.getExplorerUrl(vote.tx, 'transaction')
-                    "
-                    target="_blank"
-                    class="flex items-center gap-2"
-                    :class="{ 'opacity-80': active }"
-                  >
-                    <IH-arrow-sm-right class="-rotate-45" :width="16" />
-                    {{
-                      offchainNetworks.includes(proposal.network)
-                        ? 'Verify signature'
-                        : 'View on block explorer'
-                    }}
-                  </a>
-                </UiDropdownItem>
-                <UiDropdownItem v-slot="{ active }">
-                  <button
-                    type="button"
-                    class="flex items-center gap-2"
-                    :class="{ 'opacity-80': active }"
-                    @click.prevent="copy(vote.voter.id)"
-                  >
-                    <template v-if="!copied">
-                      <IH-duplicate :width="16" />
-                      Copy voter address
-                    </template>
-                    <template v-else>
-                      <IH-check :width="16" />
-                      Copied
-                    </template>
-                  </button>
+                <UiDropdownItem
+                  :to="network.helpers.getExplorerUrl(vote.tx, 'transaction')"
+                >
+                  <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                  {{
+                    offchainNetworks.includes(proposal.network)
+                      ? 'Verify signature'
+                      : 'View on block explorer'
+                  }}
                 </UiDropdownItem>
               </template>
             </UiDropdown>

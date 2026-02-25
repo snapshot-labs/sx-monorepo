@@ -136,32 +136,22 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
           </UiButton>
         </template>
         <template #items>
-          <UiDropdownItem v-slot="{ active }">
-            <AppLink
-              class="flex items-center gap-2"
-              :class="{ 'opacity-80': active }"
-              :to="{ name: 'space-townhall-roles' }"
-            >
-              <IS-users :width="16" />
-              Roles
-            </AppLink>
+          <UiDropdownItem :to="{ name: 'space-townhall-roles' }">
+            <IS-users :width="16" />
+            Roles
           </UiDropdownItem>
-          <UiDropdownItem v-if="isUserAdmin" v-slot="{ active }">
-            <button
-              type="button"
-              class="flex items-center gap-2"
-              :class="{ 'opacity-80': active }"
-              @click="setAddCategoryModalStatus(true)"
-            >
-              <IH-plus :width="16" /> Create category
-            </button>
+          <UiDropdownItem
+            v-if="isUserAdmin"
+            @click="setAddCategoryModalStatus(true)"
+          >
+            <IH-plus :width="16" /> Create category
           </UiDropdownItem>
         </template>
       </UiDropdown>
     </div>
     <div class="space-y-3">
       <div v-if="categories?.length">
-        <UiLabel label="Categories" sticky />
+        <UiSectionHeader label="Categories" sticky />
         <router-link
           v-for="(c, i) in categories"
           :key="i"
@@ -194,34 +184,22 @@ watchEffect(() => setTitle(`Topics - ${props.space.name}`));
               </UiButton>
             </template>
             <template #items>
-              <UiDropdownItem v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="setAddCategoryModalStatus(true, c.id)"
-                >
-                  <IH-pencil :width="16" />
-                  Edit category
-                </button>
+              <UiDropdownItem @click="setAddCategoryModalStatus(true, c.id)">
+                <IH-pencil :width="16" />
+                Edit category
               </UiDropdownItem>
-              <UiDropdownItem v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="() => deleteCategory({ id: c.category_id })"
-                >
-                  <IH-trash :width="16" />
-                  Delete category
-                </button>
+              <UiDropdownItem
+                @click="() => deleteCategory({ id: c.category_id })"
+              >
+                <IH-trash :width="16" />
+                Delete category
               </UiDropdownItem>
             </template>
           </UiDropdown>
         </router-link>
       </div>
       <div>
-        <UiLabel label="Topics" sticky />
+        <UiSectionHeader label="Topics" sticky />
         <TownhallTopicsList
           limit="off"
           :is-error="isError"

@@ -90,11 +90,9 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 
 <template>
   <div>
-    <UiLabel label="Leaderboard" sticky />
-    <div
-      class="bg-skin-bg sticky top-[112px] lg:top-[113px] z-40 border-b w-full flex font-medium space-x-1"
-    >
-      <div class="pl-4 w-[40%] lg:w-[50%] flex items-center truncate">User</div>
+    <UiSectionHeader label="Leaderboard" sticky />
+    <UiColumnHeader>
+      <div class="w-[40%] lg:w-[50%] flex items-center truncate">User</div>
       <button
         type="button"
         class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link space-x-1 truncate"
@@ -112,7 +110,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
       </button>
       <button
         type="button"
-        class="flex justify-end items-center hover:text-skin-link pr-4 w-[30%] lg:w-[25%] space-x-1 truncate"
+        class="flex justify-end items-center hover:text-skin-link w-[30%] lg:w-[25%] space-x-1 truncate"
         @click="handleSortChange('vote_count')"
       >
         <span class="truncate">Votes</span>
@@ -125,21 +123,21 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           class="shrink-0"
         />
       </button>
-    </div>
+    </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <template v-else>
-      <div
+      <UiStateWarning
         v-if="isError || data?.pages.flat().length === 0"
-        class="px-4 py-3 flex items-center space-x-2"
+        class="px-4 py-3"
       >
-        <IH-exclamation-circle class="inline-block" />
-        <span v-if="isError">Failed to load the leaderboard.</span>
-        <span v-else-if="data?.pages.flat().length === 0">
+        <template v-if="isError"> Failed to load the leaderboard. </template>
+        <template v-else>
           This space does not have any activities yet.
-        </span>
-      </div>
+        </template>
+      </UiStateWarning>
       <UiContainerInfiniteScroll
         :loading-more="isFetchingNextPage"
+        class="px-4"
         @end-reached="handleEndReached"
       >
         <div
@@ -148,7 +146,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
           class="border-b flex space-x-1"
         >
           <div
-            class="flex items-center pl-4 py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
+            class="flex items-center py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"
           >
             <UiStamp :id="user.id" :size="32" />
             <AppLink
@@ -156,15 +154,15 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
                 name: 'space-user-statement',
                 params: { space: `${space.network}:${space.id}`, user: user.id }
               }"
-              class="overflow-hidden"
+              class="overflow-hidden group"
             >
               <h4
                 class="text-skin-link truncate"
                 v-text="user.name || shorten(user.id)"
               />
-              <div
+              <UiAddress
+                :address="user.id"
                 class="text-[17px] text-skin-text truncate"
-                v-text="shorten(user.id)"
               />
             </AppLink>
           </div>
@@ -177,7 +175,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
             </div>
           </div>
           <div
-            class="flex flex-col items-end justify-center pr-4 leading-[22px] w-[30%] lg:w-[25%] truncate"
+            class="flex flex-col items-end justify-center leading-[22px] w-[30%] lg:w-[25%] truncate"
           >
             <h4 class="text-skin-link" v-text="_n(user.vote_count)" />
             <div class="text-[17px]">

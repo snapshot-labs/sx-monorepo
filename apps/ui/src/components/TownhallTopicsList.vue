@@ -28,7 +28,7 @@ const currentLimit = computed(() => {
 
 <template>
   <div>
-    <UiLabel v-if="title" :label="title" sticky />
+    <UiSectionHeader v-if="title" :label="title" sticky />
     <UiLoading v-if="isLoading" class="block px-4 py-3" />
     <div
       v-else-if="isError"

@@ -58,37 +58,27 @@ function getChoiceResult(choice: 1 | 2 | 3) {
           </UiButton>
         </template>
         <template #items>
-          <UiDropdownItem v-slot="{ active }">
-            <button
-              type="button"
-              class="flex items-center gap-2"
-              :class="{ 'opacity-80': active }"
-              @click="
-                setPostVisibility({
-                  postId: post.post_id,
-                  visibility: post.pinned ? 'unpin' : 'pin'
-                })
-              "
-            >
-              <IC-pin class="w-[16px] h-[16px]" />
-              {{ post.pinned ? 'Unpin' : 'Pin' }} post
-            </button>
+          <UiDropdownItem
+            @click="
+              setPostVisibility({
+                postId: post.post_id,
+                visibility: post.pinned ? 'unpin' : 'pin'
+              })
+            "
+          >
+            <IC-pin class="w-[16px] h-[16px]" />
+            {{ post.pinned ? 'Unpin' : 'Pin' }} post
           </UiDropdownItem>
-          <UiDropdownItem v-slot="{ active }">
-            <button
-              type="button"
-              class="flex items-center gap-2"
-              :class="{ 'opacity-80': active }"
-              @click="
-                setPostVisibility({
-                  postId: post.post_id,
-                  visibility: 'hide'
-                })
-              "
-            >
-              <IH-flag :width="16" />
-              Hide post
-            </button>
+          <UiDropdownItem
+            @click="
+              setPostVisibility({
+                postId: post.post_id,
+                visibility: 'hide'
+              })
+            "
+          >
+            <IH-flag :width="16" />
+            Hide post
           </UiDropdownItem>
         </template>
       </UiDropdown>

@@ -20,7 +20,6 @@ const route = useRoute();
 const usersStore = useUsersStore();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
-const { copy, copied } = useClipboard();
 
 const activities = ref<
   (UserActivity & {
@@ -161,10 +160,9 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
 
 <template>
   <UiLoading v-if="!loaded" class="block p-4" />
-  <div v-else-if="!user" class="px-4 py-3 flex items-center space-x-2">
-    <IH-exclamation-circle class="inline-block" />
-    <span>This user does not exist</span>
-  </div>
+  <UiStateWarning v-else-if="!user" class="px-4 py-3">
+    This user does not exist
+  </UiStateWarning>
   <div v-else>
     <div
       class="relative bg-skin-border h-[156px] md:h-[140px] mb-[-86px] md:mb-[-70px] top-[-1px]"
@@ -181,8 +179,8 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-if="compareAddresses(web3.account, user.id)"
           title="Edit profile"
         >
-          <UiButton class="!px-0 w-[46px]" @click="modalOpenEditUser = true">
-            <IH-cog class="inline-block" />
+          <UiButton uniform @click="modalOpenEditUser = true">
+            <IH-cog />
           </UiButton>
         </UiTooltip>
       </div>
@@ -196,30 +194,20 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           class="relative mb-2 border-[4px] border-skin-bg !bg-skin-border !rounded-full left-[-4px]"
         />
         <h1 class="break-words" v-text="user.name || shortenAddress(user.id)" />
-        <div class="mb-3 flex items-center space-x-2">
-          <span class="text-skin-text" v-text="shortenAddress(user.id)" />
-          <UiTooltip title="Copy address">
-            <button
-              type="button"
-              class="text-skin-text"
-              @click.prevent="copy(user.id)"
-            >
-              <IH-duplicate v-if="!copied" class="inline-block" />
-              <IH-check v-else class="inline-block" />
-            </button>
-          </UiTooltip>
-          <span v-if="userMetadata.loaded">
-            ·
-            <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
+        <div class="mb-3 flex flex-col xs:flex-row xs:items-center gap-x-2">
+          <UiAddress :address="user.id" copy-button="always" />
+          <div v-if="userMetadata.loaded" class="flex items-center gap-2">
+            <span class="hidden xs:inline">·</span>
+            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
               {{ _n(userMetadata.following_count) }}
               <span class="text-skin-text">following</span>
-            </a>
+            </AppLink>
             ·
-            <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
+            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
               {{ _n(userMetadata.followers_count) }}
               <span class="text-skin-text">followers</span>
-            </a>
-          </span>
+            </AppLink>
+          </div>
         </div>
         <div
           v-if="user.about"
@@ -228,33 +216,26 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         />
         <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
-            <a
-              :href="social.href"
-              target="_blank"
-              class="text-[#606060] hover:text-skin-link"
+            <AppLink
+              :to="social.href"
+              class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
-            </a>
+            </AppLink>
           </template>
         </div>
       </div>
-      <h4 class="mb-2 eyebrow leading-8">Activity</h4>
     </div>
-    <div class="border-b w-full">
-      <div class="flex space-x-1 px-4 leading-8">
-        <span class="w-[60%] lg:w-[50%] truncate">Space</span>
-        <span class="w-[20%] lg:w-[25%] text-right truncate">Proposals</span>
-        <span class="w-[20%] lg:w-[25%] text-right truncate">Votes</span>
-      </div>
-    </div>
+    <UiSectionHeader label="Activity" sticky />
+    <UiColumnHeader class="text-right">
+      <span class="w-[60%] lg:w-[50%] text-left truncate">Space</span>
+      <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
+      <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
+    </UiColumnHeader>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
-    <div
-      v-else-if="!activities.length"
-      class="px-4 py-3 flex items-center space-x-2"
-    >
-      <IH-exclamation-circle class="inline-block" />
-      <span>This user does not have any activities yet.</span>
-    </div>
+    <UiStateWarning v-else-if="!activities.length" class="px-4 py-3">
+      This user does not have any activities yet.
+    </UiStateWarning>
     <AppLink
       v-for="activity in activities"
       v-else
@@ -286,7 +267,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           v-text="_n(activity.proposal_count)"
         />
         <div
-          class="text-[17px] truncate"
+          class="text-[17px] text-skin-text truncate"
           v-text="_p(activity.proposal_percentage)"
         />
       </div>
@@ -295,7 +276,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       >
         <h4 class="text-skin-link truncate" v-text="_n(activity.vote_count)" />
         <div
-          class="text-[17px] truncate"
+          class="text-[17px] text-skin-text truncate"
           v-text="_p(activity.vote_percentage)"
         />
       </div>

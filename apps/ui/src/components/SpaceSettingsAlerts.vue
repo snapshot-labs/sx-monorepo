@@ -27,12 +27,34 @@ const deprecatedStrategies = computed(
       ?.strategies.map((s: string) => `"${s}"`) || []
 );
 
+const disabledStrategies = computed(
+  () =>
+    alerts.value
+      .get('HAS_DISABLED_STRATEGIES')
+      ?.strategies.map((s: string) => `"${s}"`) || []
+);
+
 const hasVotingStrategiesAlerts = computed(
   () =>
     props.activeTab === 'voting-strategies' &&
     (unsupportedProOnlyStrategies.value.length > 0 ||
       deprecatedStrategies.value.length > 0 ||
+      disabledStrategies.value.length > 0 ||
       unsupportedProOnlyNetworks.value.length > 0)
+);
+
+const isRelayerBalanceLow = computed(() =>
+  alerts.value.has('IS_RELAYER_BALANCE_LOW')
+);
+
+const isRelayerBalanceInsufficient = computed(() =>
+  alerts.value.has('IS_RELAYER_BALANCE_INSUFFICIENT')
+);
+
+const isUsingOnlyInoperativeSigAuthenticators = computed(
+  () =>
+    alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
+      ?.isUsingOnlySigAuthenticators
 );
 
 const hasWhitelabelAlerts = computed(
@@ -41,8 +63,19 @@ const hasWhitelabelAlerts = computed(
     alerts.value.has('HAS_PRO_ONLY_WHITELABEL')
 );
 
+const hasAuthenticatorsAlerts = computed(
+  () =>
+    props.activeTab === 'authenticators' &&
+    (isRelayerBalanceLow.value ||
+      isRelayerBalanceInsufficient.value ||
+      isUsingOnlyInoperativeSigAuthenticators.value)
+);
+
 const hasAnyAlerts = computed(
-  () => hasVotingStrategiesAlerts.value || hasWhitelabelAlerts.value
+  () =>
+    hasVotingStrategiesAlerts.value ||
+    hasWhitelabelAlerts.value ||
+    hasAuthenticatorsAlerts.value
 );
 </script>
 
@@ -56,6 +89,18 @@ const hasAnyAlerts = computed(
         <AppLink
           to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
           class="inline-flex items-center"
+        >
+          See migration guide
+          <IH-arrow-sm-right class="-rotate-45" />
+        </AppLink>
+      </UiAlert>
+      <UiAlert v-if="disabledStrategies.length" type="error">
+        The {{ prettyConcat(disabledStrategies, 'and') }}
+        {{ disabledStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
+        no longer available.
+        <AppLink
+          to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+          class="inline-flex items-center font-semibold text-rose-500"
         >
           See migration guide
           <IH-arrow-sm-right class="-rotate-45" />
@@ -99,9 +144,23 @@ const hasAnyAlerts = computed(
         </AppLink>
       </UiAlert>
     </template>
+    <template v-if="hasAuthenticatorsAlerts">
+      <UiAlert v-if="isRelayerBalanceLow" type="error">
+        Your relayer balance is running low. Please top up to keep gasless
+        voting active.
+      </UiAlert>
+      <UiAlert v-if="isRelayerBalanceInsufficient" type="error">
+        Your relayer balance is depleted. Gasless voting is disabled until you
+        top up.
+      </UiAlert>
+      <UiAlert v-if="isUsingOnlyInoperativeSigAuthenticators" type="error">
+        Top up your relayer account to enable gasless voting, or add another
+        authenticator.
+      </UiAlert>
+    </template>
     <template v-if="hasWhitelabelAlerts">
       <UiAlert type="error">
-        Whitelabel requires Snapshot Pro.
+        Custom domain requires Snapshot Pro.
         <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
         or
         <AppLink

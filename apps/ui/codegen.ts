@@ -1,6 +1,6 @@
-import { IGraphQLConfig } from 'graphql-config';
+import { CodegenConfig } from '@graphql-codegen/cli';
 
-const baseConfig = {
+const baseConfig: CodegenConfig['config'] = {
   preset: 'client',
   config: {
     enumsAsTypes: true,
@@ -16,31 +16,39 @@ const baseConfig = {
   }
 };
 
-const configs: IGraphQLConfig = {
-  projects: {
-    api: {
+const config: CodegenConfig = {
+  ignoreNoDocuments: true, // for better experience with the watcher
+  generates: {
+    './src/networks/common/graphqlApi/gql/': {
       schema: '../api/.checkpoint/schema.gql',
       documents: ['src/networks/common/graphqlApi/queries.ts'],
-      extensions: {
-        codegen: {
-          generates: {
-            './src/networks/common/graphqlApi/gql/': baseConfig
-          }
+      ...baseConfig
+    },
+    './src/helpers/auction/gql/': {
+      schema:
+        'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
+      documents: ['src/helpers/auction/queries.ts'],
+      ...baseConfig,
+      config: {
+        ...baseConfig.config,
+        scalars: {
+          BigInt: 'string',
+          Bytes: 'string',
+          BigDecimal: 'string'
         }
       }
     },
-    highlight: {
+    './src/helpers/auction/referral/gql/': {
+      schema: 'https://api.brokester.box',
+      documents: ['src/helpers/auction/referral/queries.ts'],
+      ...baseConfig
+    },
+    './src/helpers/townhall/gql/': {
       schema: '../highlight/.checkpoint/schema.gql',
       documents: ['src/helpers/townhall/api.ts'],
-      extensions: {
-        codegen: {
-          generates: {
-            './src/helpers/townhall/gql/': baseConfig
-          }
-        }
-      }
+      ...baseConfig
     }
   }
 };
 
-export default configs;
+export default config;

@@ -7,7 +7,10 @@ import { NetworkID } from '@/types';
 export const MANA_URL =
   import.meta.env.VITE_MANA_URL || 'http://localhost:3000';
 
-const MINIMUM_RELAYER_BALANCE = 0.01;
+const MINIMUM_RELAYER_BALANCES = {
+  eth: 0.01,
+  stark: 0.1
+};
 
 async function rpcCall(path: string, method: string, params: any) {
   const res = await fetch(`${MANA_URL}/${path}`, {
@@ -48,7 +51,8 @@ export async function executionCall(
     | 'finalizeProposal'
     | 'execute'
     | 'executeQueuedProposal'
-    | 'executeStarknetProposal',
+    | 'executeStarknetProposal'
+    | 'sendAuctionPartner',
   params: any
 ) {
   return rpcCall(`${network}_rpc/${chainId}`, method, params);
@@ -64,7 +68,7 @@ async function fetchGasBalance(
   if (isStarknet) {
     const starknetProvider = provider as RpcProvider;
     const token =
-      '0x049D36570D4e46f48e99674bd3fcc84644DdD6b96F7C741B1562B82f9e004dC7';
+      '0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d';
 
     const balanceResponse = await starknetProvider.callContract({
       contractAddress: token,
@@ -90,6 +94,7 @@ export async function getRelayerInfo(
   balance: number;
   ticker: string;
   hasMinimumBalance: boolean;
+  isBalanceLow: boolean;
 } | null> {
   try {
     const isStarknet = starknetNetworks.includes(network);
@@ -104,8 +109,12 @@ export async function getRelayerInfo(
     }
 
     data.balance = await fetchGasBalance(provider, data.address, isStarknet);
-    data.ticker = METADATA[network]?.ticker || 'ETH';
-    data.hasMinimumBalance = data.balance >= MINIMUM_RELAYER_BALANCE;
+    data.ticker = isStarknet ? 'STRK' : METADATA[network].ticker ?? 'ETH';
+    data.hasMinimumBalance =
+      data.balance >= MINIMUM_RELAYER_BALANCES[networkType];
+    data.isBalanceLow =
+      data.hasMinimumBalance &&
+      data.balance < MINIMUM_RELAYER_BALANCES[networkType] * 2;
 
     return data;
   } catch (e) {

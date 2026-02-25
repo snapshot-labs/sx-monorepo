@@ -35,7 +35,7 @@ onUnmounted(() => notificationsStore.markAllAsRead());
 
 <template>
   <div>
-    <UiLabel :label="'Notifications'" sticky />
+    <UiSectionHeader label="Notifications" sticky />
     <UiLoading v-if="notificationsStore.loading" class="block px-4 py-3" />
     <div v-else-if="notificationsStore.notifications.length">
       <div
@@ -80,9 +80,8 @@ onUnmounted(() => notificationsStore.markAllAsRead());
         </div>
       </div>
     </div>
-    <div v-else class="px-4 py-3 flex items-center space-x-2">
-      <IH-exclamation-circle class="inline-block" />
-      <span>All caught up, you don't have any notifications</span>
-    </div>
+    <UiStateWarning v-else class="px-4 py-3">
+      All caught up, you don't have any notifications
+    </UiStateWarning>
   </div>
 </template>

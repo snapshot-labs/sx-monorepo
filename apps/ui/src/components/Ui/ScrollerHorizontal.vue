@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const emit = defineEmits<{
-  (e: 'scroll', target: HTMLElement);
+  (e: 'scroll', target: HTMLElement): void;
 }>();
 
 withDefaults(

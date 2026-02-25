@@ -14,12 +14,12 @@ const DEFAULT_PROTOCOL = 'snapshot';
 const DEFAULT_NETWORK = 'all';
 const DEFAULT_CATEGORY = 'all';
 
-const protocols = Object.values(explorePageProtocols).map(
-  ({ key, label }: ProtocolConfig) => ({
+const protocols = Object.values(explorePageProtocols)
+  .filter(protocol => !protocol.disabled)
+  .map(({ key, label }: ProtocolConfig) => ({
     key,
     label
-  })
-);
+  }));
 
 const categories = [
   { key: 'all', label: 'All categories' },
@@ -184,25 +184,38 @@ watchEffect(() => setTitle('Explore'));
           :items="categories"
         />
       </div>
-      <UiTooltip title="Create new space">
+      <UiTooltip v-if="protocol !== 'governor'" title="Create new space">
         <UiButton
           :to="{
             name: `create-space-${protocol}`
           }"
-          class="!px-0 w-[46px]"
+          uniform
         >
           <IH-plus-sm />
         </UiButton>
       </UiTooltip>
     </div>
     <div class="flex-grow" v-bind="$attrs">
-      <UiLabel label="Spaces" sticky />
+      <UiSectionHeader label="Spaces" sticky />
+      <UiColumnHeader class="hidden md:flex text-center">
+        <div class="grow" />
+        <div
+          v-if="protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Active'"
+        />
+        <div class="w-[100px]" v-text="'Proposals'" />
+        <div
+          v-if="protocol === 'snapshot'"
+          class="w-[100px]"
+          v-text="'Followers'"
+        />
+      </UiColumnHeader>
       <UiLoading v-if="isPending" class="block m-4" />
-      <div v-else-if="data">
+      <div v-else-if="data" data-testid="explore-spaces-list">
         <UiContainerInfiniteScroll
           v-if="data.pages.flat().length"
           :loading-more="isFetchingNextPage"
-          class="justify-center max-w-screen-md 2xl:max-w-screen-xl 3xl:max-w-screen-2xl mx-auto p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-explore-3 2xl:grid-cols-explore-4 3xl:grid-cols-explore-5 gap-3"
           @end-reached="handleEndReached"
         >
           <SpacesListItem
@@ -211,10 +224,9 @@ watchEffect(() => setTitle('Explore'));
             :space="space"
           />
         </UiContainerInfiniteScroll>
-        <div v-else class="px-4 py-3 flex items-center space-x-2">
-          <IH-exclamation-circle class="inline-block shrink-0" />
-          <span>No results found for your search</span>
-        </div>
+        <UiStateWarning v-else class="px-4 py-3">
+          No results found for your search
+        </UiStateWarning>
       </div>
     </div>
     <UiToolbarBottom
@@ -225,13 +237,12 @@ watchEffect(() => setTitle('Explore'));
         class="hidden text-skin-text sm:block leading-7 flex-none sm:flex-auto font-medium truncate mb-2 xs:mb-0"
       >
         Log in to start making decisions.
-        <router-link :to="{ name: 'site-landing' }"
-          >See how it works</router-link
-        >.
+        <AppLink :to="{ name: 'site-landing' }">See how it works</AppLink>.
       </h4>
       <div class="flex space-x-3 shrink-0 flex-auto sm:flex-none">
         <UiButton
-          class="primary w-full sm:w-auto"
+          class="w-full sm:w-auto"
+          primary
           @click="modalAccountOpen = true"
         >
           Log in

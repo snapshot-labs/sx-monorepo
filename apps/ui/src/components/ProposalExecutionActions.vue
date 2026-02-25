@@ -15,6 +15,7 @@ const {
   hasExecuteQueued,
   fetchingDetails,
   message,
+  warningMessage,
   executionTx,
   executionTxUrl,
   finalizeProposalSending,
@@ -26,7 +27,10 @@ const {
   executeProposal,
   executeQueuedProposal,
   vetoProposal
-} = useExecutionActions(props.proposal, props.execution);
+} = useExecutionActions(
+  () => props.proposal,
+  () => props.execution
+);
 
 const network = computed(() => getNetwork(props.proposal.network));
 </script>
@@ -36,35 +40,36 @@ const network = computed(() => getNetwork(props.proposal.network));
     <div v-if="fetchingDetails" class="flex justify-center">
       <UiLoading class="text-center" />
     </div>
-    <div v-else-if="message">
-      {{ message }}
+    <div v-else-if="message" class="space-y-2">
+      <div>{{ message }}</div>
+      <UiAlert v-if="warningMessage" type="warning">
+        {{ warningMessage }}
+      </UiAlert>
     </div>
     <div v-else-if="executionTx">
       Proposal has been already executed at
-      <a
+      <AppLink
         class="inline-flex items-center"
-        target="_blank"
-        :href="executionTxUrl || undefined"
+        :to="executionTxUrl || undefined"
       >
         {{ shorten(executionTx) }}
         <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-      </a>
+      </AppLink>
     </div>
     <div v-else-if="proposal.veto_tx">
       Proposal has been vetoed at
-      <a
+      <AppLink
         class="inline-flex items-center"
-        target="_blank"
-        :href="network.helpers.getExplorerUrl(proposal.veto_tx, 'transaction')"
+        :to="network.helpers.getExplorerUrl(proposal.veto_tx, 'transaction')"
       >
         {{ shorten(proposal.veto_tx) }}
         <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-      </a>
+      </AppLink>
     </div>
     <div v-else class="space-y-2">
       <UiButton
         v-if="hasFinalize"
-        class="w-full flex justify-center items-center gap-2"
+        class="w-full"
         :loading="finalizeProposalSending"
         @click="finalizeProposal"
       >
@@ -72,8 +77,8 @@ const network = computed(() => getNetwork(props.proposal.network));
         Finalize proposal
       </UiButton>
       <UiButton
-        v-else-if="proposal.state !== 'executed'"
-        class="w-full flex justify-center items-center gap-2"
+        v-else-if="!['queued', 'vetoed', 'executed'].includes(proposal.state)"
+        class="w-full"
         :loading="executeProposalSending"
         @click="executeProposal"
       >
@@ -84,7 +89,7 @@ const network = computed(() => getNetwork(props.proposal.network));
         v-if="hasExecuteQueued"
         :disabled="executionCountdown > 0"
         :title="executionCountdown === 0 ? '' : 'Veto period has not ended yet'"
-        class="w-full flex justify-center items-center gap-2"
+        class="w-full"
         :loading="executeQueuedProposalSending"
         @click="executeQueuedProposal"
       >
@@ -99,14 +104,13 @@ const network = computed(() => getNetwork(props.proposal.network));
       </UiButton>
       <UiButton
         v-if="
-          proposal.state === 'executed' &&
-          !proposal.completed &&
+          proposal.state === 'queued' &&
           !proposal.vetoed &&
           proposal.timelock_veto_guardian &&
           compareAddresses(proposal.timelock_veto_guardian, web3.account)
         "
         :disabled="executionCountdown === 0"
-        class="w-full flex justify-center items-center gap-2"
+        class="w-full"
         :loading="vetoProposalSending"
         @click="vetoProposal"
       >

@@ -1,10 +1,12 @@
 <script setup lang="ts">
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
-import { getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
+import { _n, getChoiceText, getFormattedVotingPower } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { getNetwork, offchainNetworks, starknetNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
+import { useVoteValidationPowerQuery } from '@/queries/voteValidationPower';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Proposal } from '@/types';
 
@@ -23,8 +25,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'voted');
+  (e: 'close'): void;
+  (e: 'voted'): void;
 }>();
 
 const queryClient = useQueryClient();
@@ -38,6 +40,16 @@ const {
   isError: isVotingPowerError,
   refetch: fetchVotingPower
 } = useProposalVotingPowerQuery(
+  toRef(() => web3.value.account),
+  toRef(props, 'proposal'),
+  toRef(props, 'open')
+);
+const {
+  data: voteValidationPower,
+  isPending: isVoteValidationPowerPending,
+  isError: isVoteValidationPowerError,
+  refetch: fetchVoteValidationPower
+} = useVoteValidationPowerQuery(
   toRef(() => web3.value.account),
   toRef(props, 'proposal'),
   toRef(props, 'open')
@@ -68,8 +80,27 @@ const formattedVotingPower = computed(() =>
   getFormattedVotingPower(votingPower.value)
 );
 
+const blockExplorerUrl = computed(() => {
+  const chainId =
+    props.proposal.space.snapshot_chain_id ||
+    getNetwork(props.proposal.network).currentChainId.toString();
+  const snapshot = props.proposal.snapshot;
+
+  if (!snapshot || !chainId) return null;
+
+  const network = networks[chainId];
+
+  return network?.explorer?.url
+    ? `${network.explorer.url}/block/${snapshot}`
+    : null;
+});
+
 const offchainProposal = computed<boolean>(() =>
   offchainNetworks.includes(props.proposal.network)
+);
+
+const isStarknetProposal = computed<boolean>(() =>
+  starknetNetworks.includes(props.proposal.network)
 );
 
 const canSubmit = computed<boolean>(
@@ -77,6 +108,7 @@ const canSubmit = computed<boolean>(
     formValidated.value &&
     !!props.choice &&
     Object.keys(formErrors.value).length === 0 &&
+    !!voteValidationPower.value?.canVote &&
     !!votingPower.value?.canVote
 );
 
@@ -175,13 +207,22 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" :class="{ hidden }" @close="$emit('close')">
+  <UiModal :open="open" :class="{ hidden }" @close="emit('close')">
     <template #header>
       <h3>Cast your vote</h3>
     </template>
     <div class="m-4 mb-3 flex flex-col space-y-3">
       <MessageErrorFetchPower
-        v-if="isVotingPowerError"
+        v-if="isVoteValidationPowerError"
+        type="vote-validation"
+        @fetch="fetchVoteValidationPower"
+      />
+      <MessagePropositionPower
+        v-else-if="voteValidationPower && !voteValidationPower.canVote"
+        :proposition-power="voteValidationPower"
+      />
+      <MessageErrorFetchPower
+        v-else-if="voteValidationPower?.canVote && isVotingPowerError"
         type="voting"
         @fetch="fetchVotingPower"
       />
@@ -208,9 +249,23 @@ watchEffect(async () => {
         </dd>
         <dd
           v-else-if="votingPower"
-          class="font-semibold text-skin-heading text-[20px] leading-6"
-          v-text="formattedVotingPower"
-        />
+          class="font-semibold text-skin-heading text-[20px] leading-6 flex gap-1.5"
+        >
+          {{ formattedVotingPower }}
+          <span
+            v-if="!isStarknetProposal && proposal.snapshot && blockExplorerUrl"
+            class="font-normal flex gap-0.5 text-sm items-center"
+          >
+            (
+            <AppLink :to="blockExplorerUrl">{{
+              _n(proposal.snapshot)
+            }}</AppLink>
+            <UiTooltip title="Snapshot block number">
+              <IH-information-circle class="size-3" />
+            </UiTooltip>
+            )
+          </span>
+        </dd>
       </dl>
       <div v-if="proposal.privacy === 'none'" class="s-box">
         <UiForm
@@ -225,7 +280,7 @@ watchEffect(async () => {
       <div class="flex flex-col xs:flex-row gap-3">
         <UiButton
           class="w-full order-last xs:order-none"
-          @click="$emit('close')"
+          @click="emit('close')"
         >
           Cancel
         </UiButton>
@@ -233,7 +288,7 @@ watchEffect(async () => {
           primary
           class="w-full"
           :disabled="!canSubmit"
-          :loading="loading"
+          :loading="isVoteValidationPowerPending || loading"
           @click="handleSubmit"
         >
           Confirm
@@ -260,9 +315,11 @@ watchEffect(async () => {
       :tx-id="txId"
       :show-icon="true"
       :shareable="{ proposal, choice: selectedChoice! }"
+      :network="proposal.network"
       :messages="{
         title: 'Vote success!'
       }"
+      :type="'vote'"
       @close="modalShareOpen = false"
     />
   </teleport>

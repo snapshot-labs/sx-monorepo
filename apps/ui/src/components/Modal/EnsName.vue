@@ -27,8 +27,8 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'attach', name: string);
+  (e: 'close'): void;
+  (e: 'attach', name: string): void;
 }>();
 
 const { attachCustomName } = useWalletEns(props.networkId);
@@ -83,7 +83,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" data-model="user-modal" @close="$emit('close')">
+  <UiModal :open="open" data-model="user-modal" @close="emit('close')">
     <template #header>
       <h3>Attach custom domain</h3>
     </template>

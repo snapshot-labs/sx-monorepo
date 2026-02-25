@@ -1,9 +1,4 @@
-import { getAddress } from '@ethersproject/address';
-import { BigNumber } from '@ethersproject/bignumber';
-import { Contract as EthContract } from '@ethersproject/contracts';
-import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { utils } from '@snapshot-labs/sx';
-import fetch from 'cross-fetch';
 import {
   BigNumberish,
   CallData,
@@ -12,12 +7,14 @@ import {
   shortString,
   validateAndParseAddress
 } from 'starknet';
+import { createPublicClient, getAddress, http } from 'viem';
 import EncodersAbi from './abis/encoders.json';
 import ExecutionStrategyAbi from './abis/executionStrategy.json';
-import SimpleQuorumExecutionStrategyAbi from './abis/l1/SimpleQuorumExecutionStrategy.json';
+import L1AvatarExecutionStrategyAbi from './abis/l1/L1AvatarExectionStrategy';
 import { FullConfig } from './config';
 import { Space } from '../../.checkpoint/models';
 import { handleVotingPowerValidationMetadata } from '../common/ipfs';
+import logger from '../logger';
 
 type StrategyConfig = {
   address: BigNumberish;
@@ -25,14 +22,6 @@ type StrategyConfig = {
 };
 
 const encodersAbi = new CallData(EncodersAbi);
-
-export function toAddress(bn: any) {
-  try {
-    return getAddress(BigNumber.from(bn).toHexString());
-  } catch {
-    return bn;
-  }
-}
 
 export function longStringToText(array: string[]): string {
   return array.reduce(
@@ -119,20 +108,15 @@ export async function handleExecutionStrategy(
         throw new Error('Invalid payload for EthRelayer execution strategy');
       destinationAddress = formatAddress('Ethereum', l1Destination);
 
-      const ethProvider = new StaticJsonRpcProvider(
-        config.overrides.l1NetworkNodeUrl,
-        config.overrides.baseChainId
-      );
+      const client = createPublicClient({
+        transport: http(config.overrides.l1NetworkNodeUrl)
+      });
 
-      const SimpleQuorumExecutionStrategyContract = new EthContract(
-        destinationAddress,
-        SimpleQuorumExecutionStrategyAbi,
-        ethProvider
-      );
-
-      quorum = (
-        await SimpleQuorumExecutionStrategyContract.quorum()
-      ).toBigInt();
+      quorum = await client.readContract({
+        address: destinationAddress as `0x${string}`,
+        abi: L1AvatarExecutionStrategyAbi,
+        functionName: 'quorum'
+      });
     }
 
     return {
@@ -140,8 +124,8 @@ export async function handleExecutionStrategy(
       destinationAddress,
       quorum
     };
-  } catch (e) {
-    console.log('failed to get execution strategy type', e);
+  } catch (err) {
+    logger.warn({ err }, 'Failed to get execution strategy type');
 
     return null;
   }
@@ -190,8 +174,8 @@ export async function updateProposalValidationStrategy(
         space.voting_power_validation_strategy_metadata,
         config
       );
-    } catch (e) {
-      console.log('failed to handle voting power strategies metadata', e);
+    } catch (err) {
+      logger.warn({ err }, 'Failed to handle voting power strategies metadata');
     }
   }
 }

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import RelayerBalance from '@/components/RelayerBalance.vue';
+import SpaceBilling from '@/components/SpaceBilling.vue';
+import {
+  DISABLED_STRATEGIES,
+  OVERRIDING_STRATEGIES
+} from '@/helpers/constants';
 import { evmNetworks, getNetwork, offchainNetworks } from '@/networks';
 import { Space } from '@/types';
 
@@ -35,7 +40,6 @@ const {
   votingType,
   privacy,
   voteValidation,
-  ignoreAbstainVotes,
   snapshotChainId,
   strategies,
   members,
@@ -52,6 +56,7 @@ const {
 } = useSpaceSettings(toRef(props, 'space'));
 const { invalidateController } = useSpaceController(toRef(props, 'space'));
 
+const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
 
@@ -81,8 +86,8 @@ type Tab = {
     | 'labels'
     | 'whitelabel'
     | 'advanced'
+    | 'billing'
     | 'controller';
-  name: string;
   visible: boolean;
 };
 
@@ -95,67 +100,58 @@ const tabs = computed<Tab[]>(
     [
       {
         id: 'profile',
-        name: 'Profile',
         visible: true
       },
       {
         id: 'proposal',
-        name: 'Proposal',
         visible: true
       },
       {
         id: 'voting-strategies',
-        name: 'Voting strategies',
         visible: true
       },
       {
         id: 'voting',
-        name: 'Voting',
         visible: true
       },
       {
         id: 'members',
-        name: 'Members',
         visible: isOffchainNetwork.value
       },
       {
         id: 'execution',
-        name: 'Execution',
         visible: !isOffchainNetwork.value
       },
       {
         id: 'authenticators',
-        name: 'Authenticators',
         visible: !isOffchainNetwork.value
       },
       {
         id: 'treasuries',
-        name: 'Treasuries',
         visible: true
       },
       {
         id: 'delegations',
-        name: 'Delegations',
         visible: true
       },
       {
         id: 'labels',
-        name: 'Labels',
         visible: true
       },
       {
         id: 'whitelabel',
-        name: 'Whitelabel',
         visible: isOffchainNetwork.value
       },
       {
         id: 'advanced',
-        name: 'Advanced',
+        visible: isOffchainNetwork.value
+      },
+      {
+        id: 'billing',
         visible: isOffchainNetwork.value
       },
       {
         id: 'controller',
-        name: 'Controller',
         visible: true
       }
     ] as const
@@ -197,7 +193,12 @@ const error = computed(() => {
       return 'At least one strategy is required';
     }
 
-    if (!isTicketValid.value) {
+    if (
+      !isTicketValid.value ||
+      strategies.value.some(s => DISABLED_STRATEGIES.includes(s.address)) ||
+      (!props.space.turbo &&
+        strategies.value.some(s => OVERRIDING_STRATEGIES.includes(s.address)))
+    ) {
       return 'Strategies are invalid';
     }
 
@@ -222,7 +223,8 @@ const showToolbar = computed(() => {
     (isModified.value &&
       isAdvancedFormResolved.value &&
       canModifySettings.value) ||
-    error.value
+    error.value ||
+    props.space.additionalRawData?.hibernated
   );
 });
 
@@ -234,15 +236,18 @@ const pendingSpace = computed(() => {
     strategies_params: strategies.value.map(strategy => ({
       name: strategy.name,
       params: strategy.params,
-      network: strategy.chainId?.toString() ?? snapshotChainId.value
+      network: strategy.chainId
+        ? String(strategy.chainId)
+        : snapshotChainId.value
     })),
-    snapshot_chain_id: snapshotChainId.value
+    snapshot_chain_id: snapshotChainId.value,
+    authenticators: authenticators.value.map(strategy => strategy.address)
   };
 });
 
 function isValidTab(param: string | string[]): param is Tab['id'] {
   if (Array.isArray(param)) return false;
-  return tabs.value.map(tab => tab.id).includes(param as any);
+  return tabs.value.find(tab => tab.id === param)?.visible ?? false;
 }
 
 async function reloadSpaceAndReset() {
@@ -260,8 +265,14 @@ async function handleSettingsSave() {
 
   if (isOffchainNetwork.value) {
     try {
-      await save();
+      const result = await save();
       reloadSpaceAndReset();
+      if (result) {
+        uiStore.addNotification(
+          'success',
+          'Your changes were successfully saved.'
+        );
+      }
     } catch {
     } finally {
       saving.value = false;
@@ -282,6 +293,7 @@ function handleSpaceDelete() {
   saving.value = true;
   executeFn.value = async () => {
     await deleteSpace();
+    uiStore.addNotification('success', 'Your space was successfully deleted.');
     router.push({ name: 'my-home' });
 
     return null;
@@ -305,14 +317,6 @@ function addCustomStrategy(strategy: { address: string; type: string }) {
   ];
 }
 
-function handleTabFocus(event: FocusEvent) {
-  if (!event.target) return;
-
-  (event.target as HTMLElement).scrollIntoView({
-    block: 'end'
-  });
-}
-
 watch(
   () => props.space.controller,
   () => {
@@ -332,31 +336,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
 </script>
 
 <template>
-  <UiScrollerHorizontal
-    class="sticky z-40 top-[72px]"
-    with-buttons
-    gradient="xxl"
-  >
-    <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
-      <AppLink
-        v-for="tab in tabs.filter(tab => tab.visible)"
-        :key="tab.id"
-        :to="{
-          name: 'space-settings',
-          params: { space: route.params.space, tab: tab.id }
-        }"
-        type="button"
-        class="scroll-mx-8"
-        @focus="handleTabFocus"
-      >
-        <UiLink :is-active="tab.id === activeTab" :text="tab.name" />
-      </AppLink>
-    </div>
-  </UiScrollerHorizontal>
   <div
     v-bind="$attrs"
     class="!h-auto"
-    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 114}px)`"
+    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 73}px)`"
   >
     <div v-if="loading" class="p-4">
       <UiLoading />
@@ -364,7 +347,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
     <div
       v-else
       class="flex-grow"
-      :class="{ 'px-4 pt-4': activeTab !== 'profile' }"
+      :class="{
+        'px-4 pt-4': !['profile', 'billing'].includes(activeTab)
+      }"
     >
       <SpaceSettingsAlerts
         :space="pendingSpace"
@@ -407,6 +392,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-voting-strategies="
             network.constants.EDITOR_PROPOSAL_VALIDATION_VOTING_STRATEGIES
           "
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
           title="Proposal"
           description="Proposal validation strategies are used to determine if a user is allowed to create a proposal."
         />
@@ -432,6 +419,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-strategies="network.constants.EDITOR_VOTING_STRATEGIES"
           title="Voting strategies"
           description="Voting strategies are customizable contracts used to define how much voting power each user has when casting a vote."
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
+          :show-test-button="true"
         />
       </template>
       <UiContainerSettings
@@ -448,7 +438,6 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           v-model:voting-type="votingType"
           v-model:privacy="privacy"
           v-model:vote-validation="voteValidation"
-          v-model:ignore-abstain-votes="ignoreAbstainVotes"
           :snapshot-chain-id="snapshotChainId"
           :space="space"
           @update-validity="v => (hasVotingErrors = !v)"
@@ -467,17 +456,14 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         />
       </UiContainerSettings>
       <UiContainerSettings
-        v-else-if="activeTab === 'execution'"
+        v-if="activeTab === 'execution'"
         title="Execution(s)"
         description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
       >
         <div class="space-y-3">
-          <FormStrategiesStrategyActive
-            v-for="strategy in executionStrategies"
-            :key="strategy.id"
-            read-only
-            :network-id="space.network"
-            :strategy="strategy"
+          <FormSpaceExecutionStrategies
+            :space="space"
+            :execution-strategies="executionStrategies"
           />
           <UiButton
             v-if="evmNetworks.includes(space.network)"
@@ -495,6 +481,8 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           :available-strategies="network.constants.EDITOR_AUTHENTICATORS"
           title="Authenticators"
           description="Authenticators are customizable contracts that verify user identity for proposing and voting using different methods."
+          :space-id="space.id"
+          :voting-power-symbol="space.voting_power_symbol"
         />
         <RelayerBalance :space="space" :network="network" />
       </UiContainerSettings>
@@ -529,7 +517,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </UiContainerSettings>
       <UiContainerSettings
         v-show="activeTab === 'whitelabel'"
-        title="Whitelabel"
+        title="Custom domain"
         description="Customize the appearance of your space to match your brand."
         class="max-w-full"
       >
@@ -558,6 +546,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           "
         />
       </UiContainerSettings>
+      <SpaceBilling v-if="activeTab === 'billing'" :space="space" />
       <UiContainerSettings
         v-if="activeTab === 'controller'"
         title="Controller"
@@ -585,16 +574,23 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
   </div>
   <UiToolbarBottom v-if="showToolbar" ref="el">
     <div
-      class="px-4 py-3 flex flex-col xs:flex-row justify-between items-center"
+      class="px-4 py-3 flex flex-col xs:flex-row items-center"
+      :class="error || isModified ? 'justify-between' : 'justify-end'"
     >
       <h4
+        v-if="error || isModified"
         class="leading-7 font-medium truncate mb-2 xs:mb-0"
         :class="{ 'text-skin-danger': error }"
       >
         {{ error || 'You have unsaved changes' }}
       </h4>
       <div class="flex space-x-3">
-        <button type="reset" class="text-skin-heading" @click="reset()">
+        <button
+          v-if="isModified"
+          type="reset"
+          class="text-skin-heading"
+          @click="reset()"
+        >
           Reset
         </button>
         <UiButton
@@ -603,7 +599,10 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
           primary
           @click="handleSettingsSave"
         >
-          Save
+          <template v-if="isModified"> Save </template>
+          <template v-else-if="space.additionalRawData?.hibernated">
+            Reactivate
+          </template>
         </UiButton>
       </div>
     </div>

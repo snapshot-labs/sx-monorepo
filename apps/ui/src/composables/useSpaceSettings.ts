@@ -75,6 +75,7 @@ const DEFAULT_FORM_STATE: Form = {
   github: '',
   discord: '',
   farcaster: '',
+  clanker: '',
   coingecko: '',
   votingPowerSymbol: '',
   treasuries: [],
@@ -184,7 +185,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const privacy = ref('none' as SpacePrivacy);
   const voteValidation = ref({ name: 'any', params: {} } as Validation);
   const ignoreAbstainVotes = ref(false);
-  const snapshotChainId: Ref<number> = ref(1);
+  const snapshotChainId: Ref<string> = ref('1');
   const strategies = ref([] as StrategyConfig[]);
   const members = ref([] as Member[]);
   const parent = ref('');
@@ -435,6 +436,7 @@ export function useSpaceSettings(space: Ref<Space>) {
       github: space.github,
       discord: space.discord,
       farcaster: space.farcaster,
+      clanker: space.clanker || '',
       coingecko: space.coingecko || '',
       twitter: space.twitter,
       votingPowerSymbol: space.voting_power_symbol,
@@ -517,7 +519,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     return space.additionalRawData.strategies.map(strategy => ({
       id: crypto.randomUUID(),
-      chainId: Number(strategy.network),
+      chainId: strategy.network,
       address: strategy.name,
       name: strategy.name,
       paramsDefinition: null,
@@ -580,7 +582,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         form.value.categories ?? space.value.additionalRawData.categories,
       avatar: form.value.avatar ?? space.value.avatar,
       cover: form.value.cover ?? space.value.cover,
-      network: String(snapshotChainId.value),
+      network: snapshotChainId.value,
       symbol: form.value.votingPowerSymbol ?? space.value.voting_power_symbol,
       terms: termsOfServices.value,
       website: form.value.externalUrl ?? space.value.external_url,
@@ -597,7 +599,9 @@ export function useSpaceSettings(space: Ref<Space>) {
       template: template.value,
       strategies: strategies.value.map(strategy => ({
         name: strategy.name,
-        network: strategy.chainId?.toString() ?? snapshotChainId.value,
+        network: strategy.chainId
+          ? String(strategy.chainId)
+          : snapshotChainId.value,
         params: strategy.params
       })),
       treasuries: form.value.treasuries.map(treasury => ({
@@ -795,7 +799,7 @@ export function useSpaceSettings(space: Ref<Space>) {
         }
       );
 
-      snapshotChainId.value = space.value.snapshot_chain_id ?? 1;
+      snapshotChainId.value = space.value.snapshot_chain_id ?? '1';
 
       if (space.value.additionalRawData?.type === 'offchain') {
         strategies.value = getInitialStrategies(space.value);
@@ -939,7 +943,7 @@ export function useSpaceSettings(space: Ref<Space>) {
           return true;
         }
 
-        if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? 1)) {
+        if (snapshotChainIdValue !== (space.value.snapshot_chain_id ?? '1')) {
           return true;
         }
 

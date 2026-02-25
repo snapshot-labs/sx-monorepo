@@ -46,7 +46,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const { delegate } = useActions();
@@ -177,22 +177,7 @@ function isValidDelegation(delegation?: SpaceMetadataDelegation): boolean {
 }
 
 function getNetworkDetails(chainId: number | string) {
-  if (typeof chainId === 'number') {
-    return networks[chainId];
-  }
-
-  const starknetNetwork = Object.entries(STARKNET_NETWORK_METADATA).find(
-    ([, { chainId: starknetChainId }]) => starknetChainId === chainId
-  )?.[0];
-
-  if (!starknetNetwork) {
-    return { name: 'Unknown network', logo: '' };
-  }
-
-  return {
-    name: STARKNET_NETWORK_METADATA[starknetNetwork].name,
-    logo: STARKNET_NETWORK_METADATA[starknetNetwork].avatar
-  };
+  return networks[chainId] || { name: 'Unknown network', logo: '' };
 }
 
 async function handleSubmit() {
@@ -350,7 +335,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" :class="{ hidden: isHidden }" @close="$emit('close')">
+  <UiModal :open="open" :class="{ hidden: isHidden }" @close="emit('close')">
     <template #header>
       <h3>Delegate voting power</h3>
       <template v-if="isPickerShown">
@@ -361,16 +346,10 @@ watch(
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search name or paste address"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput
+          v-model="searchValue"
+          placeholder="Search name or paste address"
+        />
       </template>
     </template>
     <template v-if="isPickerShown">
@@ -415,11 +394,7 @@ watch(
         <UiAlert type="error">
           Error loading delegates data. Please try again.
         </UiAlert>
-        <UiButton
-          type="button"
-          class="flex w-full items-center gap-2 justify-center"
-          @click="fetchDelegatees"
-        >
+        <UiButton class="w-full" @click="fetchDelegatees">
           <IH-refresh />Retry
         </UiButton>
       </div>

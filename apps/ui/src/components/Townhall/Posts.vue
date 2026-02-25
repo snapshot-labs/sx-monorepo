@@ -45,38 +45,28 @@ const { mutate: setPostVisibility, isPending: isSetPostVisibilityPending } =
               </UiButton>
             </template>
             <template #items>
-              <UiDropdownItem v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="
-                    setPostVisibility({
-                      postId: posts[0].post_id,
-                      visibility: posts[0].pinned ? 'unpin' : 'pin'
-                    })
-                  "
-                >
-                  <IC-pin class="w-[16px] h-[16px]" />
-                  {{ posts[0].pinned ? 'Unpin' : 'Pin' }} statement
-                </button>
+              <UiDropdownItem
+                @click="
+                  setPostVisibility({
+                    postId: posts[0].post_id,
+                    visibility: posts[0].pinned ? 'unpin' : 'pin'
+                  })
+                "
+              >
+                <IC-pin class="w-[16px] h-[16px]" />
+                {{ posts[0].pinned ? 'Unpin' : 'Pin' }} statement
               </UiDropdownItem>
-              <UiDropdownItem v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  :disabled="isSetPostVisibilityPending"
-                  @click="
-                    setPostVisibility({
-                      postId: posts[0].post_id,
-                      visibility: 'hide'
-                    })
-                  "
-                >
-                  <IH-flag :width="16" />
-                  Hide statement
-                </button>
+              <UiDropdownItem
+                :disabled="isSetPostVisibilityPending"
+                @click="
+                  setPostVisibility({
+                    postId: posts[0].post_id,
+                    visibility: 'hide'
+                  })
+                "
+              >
+                <IH-flag :width="16" />
+                Hide statement
               </UiDropdownItem>
             </template>
           </UiDropdown>

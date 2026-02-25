@@ -188,21 +188,14 @@ watchEffect(() => {
               </UiButton>
             </template>
             <template #items>
-              <UiDropdownItem v-slot="{ active }">
-                <button
-                  type="button"
-                  class="flex items-center gap-2"
-                  :class="{ 'opacity-80': active }"
-                  @click="closeTopic()"
-                >
-                  <template v-if="isCloseTopicPending">
-                    <UiLoading :size="18" />
-                  </template>
-                  <template v-else>
-                    <IS-lock-closed class="w-[16px] h-[16px]" />
-                  </template>
-                  Close topic
-                </button>
+              <UiDropdownItem @click="closeTopic()">
+                <template v-if="isCloseTopicPending">
+                  <UiLoading :size="18" />
+                </template>
+                <template v-else>
+                  <IS-lock-closed class="w-[16px] h-[16px]" />
+                </template>
+                Close topic
               </UiDropdownItem>
             </template>
           </UiDropdown>

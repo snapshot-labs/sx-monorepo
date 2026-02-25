@@ -22,6 +22,7 @@ gql(`
   fragment spaceFields on Space {
     id
     _indexer
+    protocol
     verified
     turbo
     metadata {
@@ -34,6 +35,7 @@ gql(`
       twitter
       discord
       farcaster
+      clanker
       voting_power_symbol
       treasuries
       labels
@@ -114,9 +116,14 @@ gql(`
       labels
     }
     start
+    start_block_number
     min_end
+    min_end_block_number
     max_end
+    max_end_block_number
     snapshot
+    executed_at
+    vp_decimals
     scores_1
     scores_2
     scores_3
@@ -130,6 +137,7 @@ gql(`
       type
       treasury_chain
       treasury
+      quorum
     }
     execution_strategy_type
     execution_destination
@@ -147,7 +155,7 @@ gql(`
     execution_ready
     executed
     vetoed
-    completed
+    execution_settled
     cancelled
   }
 `);
@@ -284,6 +292,19 @@ export const LAST_INDEXED_BLOCK_QUERY = gql(`
   query _Metadata($indexer: String!) {
     _metadata(indexer: $indexer, id: "last_indexed_block") {
       value
+    }
+  }
+`);
+
+export const PROPOSAL_SCORES_TICKS_QUERY = gql(`
+  query ProposalScoresTicks($id: String!) {
+    proposal(id: $id) {
+      scores_ticks {
+        timestamp
+        scores_1
+        scores_2
+        scores_3
+      }
     }
   }
 `);

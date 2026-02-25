@@ -31,9 +31,10 @@ function updatePosition(scrollY: number) {
   if (!el.value) return;
 
   const isBottomReached =
-    el.value.getBoundingClientRect().bottom + props.bottom <=
+    Math.round(el.value.getBoundingClientRect().bottom) + props.bottom <=
     window.innerHeight;
-  const isTopReached = el.value.getBoundingClientRect().top >= props.top;
+  const isTopReached =
+    Math.round(el.value.getBoundingClientRect().top) >= props.top;
   const scrollingDown = lastScrollY.value < scrollY;
   const scrollingUp = lastScrollY.value > scrollY;
   const stickedToBottom = stickStatus.value === StickStatus.BOTTOM;

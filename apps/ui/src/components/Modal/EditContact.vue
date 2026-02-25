@@ -13,7 +13,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'close');
+  (e: 'close'): void;
 }>();
 
 const contactsStore = useContactsStore();
@@ -33,7 +33,8 @@ const definition = {
       type: 'string',
       format: 'address',
       title: 'Address',
-      examples: ['Address']
+      examples: ['Address'],
+      showControls: false
     }
   }
 };
@@ -74,7 +75,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="initialState?.address ? 'Edit contact' : 'Add contact'" />
     </template>

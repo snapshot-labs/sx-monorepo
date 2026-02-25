@@ -10,8 +10,8 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', type: SpacePrivacy);
-  (e: 'close');
+  (e: 'save', type: SpacePrivacy): void;
+  (e: 'close'): void;
 }>();
 
 function handleSelect(type: SpacePrivacy) {
@@ -21,7 +21,7 @@ function handleSelect(type: SpacePrivacy) {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Select privacy</h3>
     </template>

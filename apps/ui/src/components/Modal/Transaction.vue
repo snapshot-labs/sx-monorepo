@@ -6,7 +6,7 @@ import { getABI } from '@/helpers/etherscan';
 import { getProvider } from '@/helpers/provider';
 import { resolver } from '@/helpers/resolver';
 import { createContractCallTransaction } from '@/helpers/transactions';
-import { abiToDefinition, clone } from '@/helpers/utils';
+import { abiToDefinition, clone, getChainIdKind } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { ChainId, Contact } from '@/types';
 
@@ -28,7 +28,7 @@ const props = defineProps<{
 const emit = defineEmits(['add', 'close']);
 
 const loading = ref(false);
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const pickerField: Ref<string | null> = ref(null);
 const searchValue = ref('');
 const ignoreFormUpdates = ref(true);
@@ -120,12 +120,12 @@ const formValid = computed(
 );
 
 function handlePickerClick(field: string) {
-  showPicker.value = true;
+  isPickerShown.value = true;
   pickerField.value = field;
 }
 
 function handlePickerSelect(value: string) {
-  showPicker.value = false;
+  isPickerShown.value = false;
 
   if (!pickerField.value) return;
 
@@ -147,7 +147,10 @@ function handleMethodChange() {
 }
 
 async function handleToChange(to: string) {
-  form.abi = [];
+  form.abi = DEFAULT_FORM_STATE.abi;
+  form.method = DEFAULT_FORM_STATE.method;
+  form.args = DEFAULT_FORM_STATE.args;
+  form.amount = DEFAULT_FORM_STATE.amount;
   abiStr.value = '';
   addressInvalid.value = false;
   showAbiInput.value = false;
@@ -161,13 +164,13 @@ async function handleToChange(to: string) {
     return;
   }
 
-  if (typeof props.network === 'string') {
-    console.log('network is not a number (starknet is not supported)');
+  if (getChainIdKind(props.network) !== 'evm') {
+    console.log('only evm networks are supported');
     return;
   }
 
   loading.value = true;
-  const provider = getProvider(props.network);
+  const provider = getProvider(Number(props.network));
 
   try {
     const isContract = await getIsContract(provider, contractAddress);
@@ -176,7 +179,7 @@ async function handleToChange(to: string) {
       return;
     }
 
-    form.abi = await getABI(props.network, contractAddress);
+    form.abi = await getABI(Number(props.network), contractAddress);
   } catch (e) {
     console.log(e);
     showAbiInput.value = true;
@@ -223,7 +226,7 @@ watchImmediate(
   open => {
     if (!open) return;
 
-    showPicker.value = false;
+    isPickerShown.value = false;
 
     if (props.initialState) {
       form.to = props.initialState.recipient;
@@ -265,30 +268,21 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Add transaction'" />
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput v-model="searchValue" />
       </template>
     </template>
-    <template v-if="showPicker">
+    <template v-if="isPickerShown">
       <PickerContact
         :loading="false"
         :search-value="searchValue"
@@ -298,7 +292,7 @@ watchEffect(async () => {
     </template>
     <div
       v-show="
-        !showPicker /* has to use v-show so dirty flag works, need to find a better way to handle it */
+        !isPickerShown /* has to use v-show so dirty flag works, need to find a better way to handle it */
       "
       class="s-box p-4"
     >
@@ -307,13 +301,13 @@ watchEffect(async () => {
         <UiInputAddress
           v-model="form.to"
           :error="errors.to"
-          :show-picker="!loading"
           :required="true"
           :definition="{
             type: 'string',
             title: 'Contract address',
             examples: ['Address or ENS'],
-            chainId: props.network
+            chainId: props.network,
+            showControls: !loading
           }"
           @pick="handlePickerClick('to')"
         />
@@ -355,7 +349,7 @@ watchEffect(async () => {
         />
       </div>
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton class="w-full" :disabled="!formValid" @click="handleSubmit"
         >Confirm</UiButton
       >

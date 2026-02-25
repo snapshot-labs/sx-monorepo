@@ -9,8 +9,36 @@ const { alerts } = useSpaceAlerts(toRef(props, 'space'));
 const pendingTasks = computed(() => {
   const _alerts: Task[] = [];
 
+  if (alerts.value.has('IS_PRO_EXPIRING_SOON')) {
+    const data = alerts.value.get('IS_PRO_EXPIRING_SOON');
+    const days = data?.daysUntilExpiration || 0;
+    const daysText = days === 1 ? 'less than 1 day' : `${days} days`;
+    _alerts.push({
+      description: `Your Pro plan expires in ${daysText}, renew now`,
+      link: { name: 'space-pro' },
+      type: 'error'
+    });
+  }
+
+  if (alerts.value.has('IS_PRO_JUST_EXPIRED')) {
+    _alerts.push({
+      description: 'Your Pro plan just expired, renew now',
+      link: { name: 'space-pro' },
+      type: 'error'
+    });
+  }
+
+  if (alerts.value.has('IS_HIBERNATED')) {
+    _alerts.push({
+      description: 'This space has been hibernated, reactivate it now',
+      link: { name: 'space-settings', params: { tab: 'profile' } },
+      type: 'error'
+    });
+  }
+
   if (
     alerts.value.has('HAS_DEPRECATED_STRATEGIES') ||
+    alerts.value.has('HAS_DISABLED_STRATEGIES') ||
     alerts.value.has('HAS_PRO_ONLY_STRATEGIES') ||
     alerts.value.has('HAS_PRO_ONLY_NETWORKS')
   ) {
@@ -23,9 +51,38 @@ const pendingTasks = computed(() => {
 
   if (alerts.value.has('HAS_PRO_ONLY_WHITELABEL')) {
     _alerts.push({
-      description: 'Whitelabel settings need to be updated',
+      description: 'Custom domain settings need to be updated',
       link: { name: 'space-settings', params: { tab: 'whitelabel' } },
       type: 'error'
+    });
+  }
+
+  if (alerts.value.has('IS_RELAYER_BALANCE_INSUFFICIENT')) {
+    _alerts.push({
+      description:
+        'Relayer balance depleted. Gasless voting is disabled until you top up.',
+      link: { name: 'space-settings', params: { tab: 'authenticators' } },
+      type: 'error'
+    });
+  }
+
+  if (alerts.value.has('IS_RELAYER_BALANCE_LOW')) {
+    _alerts.push({
+      description:
+        'Relayer balance is running low. Top up soon to keep gasless voting active.',
+      link: { name: 'space-settings', params: { tab: 'authenticators' } },
+      type: 'error'
+    });
+  }
+
+  if (alerts.value.has('IS_SIG_AUTHENTICATOR_INOPERATIVE')) {
+    _alerts.push({
+      description: 'Top up your relayer account to enable gasless voting',
+      link: { name: 'space-settings', params: { tab: 'authenticators' } },
+      type: alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
+        ?.isUsingOnlySigAuthenticators
+        ? 'error'
+        : 'info'
     });
   }
 
@@ -39,7 +96,7 @@ const isVisible = computed(() => {
 
 <template>
   <div v-if="isVisible">
-    <UiLabel label="important" sticky />
+    <UiSectionHeader label="Important" sticky />
     <OnboardingTask v-for="(alert, i) in pendingTasks" :key="i" :task="alert" />
     <div class="mx-4 py-[10px] mb-4 flex gap-x-1.5 text-sm">
       <IH-eye class="mt-[3px]" /> Only admins can see this

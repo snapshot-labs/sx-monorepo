@@ -17,12 +17,17 @@ const props = withDefaults(
   }
 );
 
-const { getTsFromCurrent } = useMetaStore();
 const { votes } = useAccount();
 
 const modalOpenTimeline = ref(false);
 
 const totalProgress = computed(() => quorumProgress(props.proposal));
+
+const hasVoted = computed(
+  () =>
+    props.showVotedIndicator &&
+    votes.value[`${props.proposal.network}:${props.proposal.id}`]
+);
 </script>
 <template>
   <div v-bind="$attrs">
@@ -78,12 +83,6 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
             inline
             with-link
           />
-          <IH-check
-            v-if="
-              showVotedIndicator && votes[`${proposal.network}:${proposal.id}`]
-            "
-            class="text-skin-success inline-block shrink-0 relative"
-          />
         </AppLink>
       </div>
     </div>
@@ -102,18 +101,14 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-          <span
-            v-if="proposal.author.role"
-            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
-            v-text="proposal.author.role"
-          />
+          <UiPill v-if="proposal.author.role" :label="proposal.author.role" />
         </AppLink>
       </template>
     </div>
     <span>
       <template v-if="proposal.vote_count">
         ·
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-proposal-votes',
@@ -125,17 +120,14 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
         >
           {{ _n(proposal.vote_count, 'compact') }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </router-link>
+        </AppLink>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
         · {{ formatQuorum(totalProgress) }}
         {{ quorumLabel(proposal.quorum_type) }}
       </span>
       ·
-      <TimeRelative
-        v-slot="{ relativeTime }"
-        :time="getTsFromCurrent(props.proposal.network, props.proposal.max_end)"
-      >
+      <TimeRelative v-slot="{ relativeTime }" :time="props.proposal.max_end">
         <button
           type="button"
           class="text-skin-text"
@@ -143,6 +135,11 @@ const totalProgress = computed(() => quorumProgress(props.proposal));
           v-text="relativeTime"
         />
       </TimeRelative>
+      <template v-if="hasVoted">
+        ·
+        <IH-check class="inline-block mt-[-2px]" />
+        voted
+      </template>
     </span>
   </div>
   <teleport to="#modal">

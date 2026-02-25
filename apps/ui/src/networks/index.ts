@@ -105,5 +105,14 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
         network => !offchainNetworks.includes(network)
       ),
       limit: 18
+    },
+    governor: {
+      key: 'governor',
+      label: 'Governor',
+      apiNetwork: 'eth',
+      networks: ['eth'],
+      protocols: ['governor-bravo', '@openzeppelin/governor'],
+      limit: 18,
+      disabled: import.meta.env.VITE_ENABLE_GOVERNOR !== 'true'
     }
   };

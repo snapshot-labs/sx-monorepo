@@ -8,14 +8,14 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'pick', value: string);
+  (e: 'pick', value: string): void;
 }>();
 
 const filteredNfts = computed(() =>
   props.nfts.filter(nft => {
     return nft.displayTitle
-      .toLocaleLowerCase()
-      .includes(props.searchValue.toLocaleLowerCase());
+      .toLowerCase()
+      .includes(props.searchValue.toLowerCase());
   })
 );
 </script>

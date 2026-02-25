@@ -24,7 +24,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'save', value: string | number);
+  (e: 'save', value: string | number): void;
 }>();
 
 const editing = ref(false);

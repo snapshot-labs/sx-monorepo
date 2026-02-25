@@ -1,12 +1,13 @@
 import 'dotenv/config';
 import http from 'http';
 import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { expressMiddleware } from '@as-integrations/express4';
 import Checkpoint, { createGetLoader } from '@snapshot-labs/checkpoint';
 import cors from 'cors';
 import express from 'express';
+import logger from './logger';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3000;
 
@@ -50,5 +51,5 @@ export async function startApiServer(checkpoint: Checkpoint) {
     httpServer.listen({ port: PORT }, resolve)
   );
 
-  console.log(`Listening on port ${PORT}`);
+  logger.info(`Listening on port ${PORT}`);
 }

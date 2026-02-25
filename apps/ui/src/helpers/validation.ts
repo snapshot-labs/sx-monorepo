@@ -1,11 +1,11 @@
 import { Interface } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
-import { parseUnits } from '@ethersproject/units';
-import Ajv, { ErrorObject } from 'ajv';
+import Ajv, { AnySchema, ErrorObject } from 'ajv';
 import ajvErrors from 'ajv-errors';
 import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
+import { parseUnits } from '@/helpers/token';
 import { _n } from './utils';
 
 type Opts = { skipEmptyOptionalFields: boolean };
@@ -82,6 +82,10 @@ ajv.addFormat('bytes', {
 
 ajv.addFormat('bytes32', {
   validate: bytes32Validator
+});
+
+ajv.addFormat('address[]', {
+  validate: getArrayValidator(addressValidator)
 });
 
 ajv.addFormat('ethAddress[]', {
@@ -223,7 +227,7 @@ ajv.addFormat('domain', {
 });
 
 ajv.addFormat('ethValue', {
-  validate: value => {
+  validate: (value: string) => {
     if (!value.match(/^([0-9]|[1-9][0-9]+)(\.[0-9]+)?$/)) return false;
 
     try {
@@ -254,6 +258,7 @@ ajv.addKeyword({
 ajv.addKeyword('options');
 ajv.addKeyword('tooltip');
 ajv.addKeyword('showControls');
+ajv.addKeyword('sortable');
 
 // UiSelectorNetwork
 ajv.addFormat('network', {
@@ -325,9 +330,9 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
     return `Must be at most ${_n(errorObject.params.limit)}.`;
   }
 
-  return `${errorObject.message.charAt(0).toLocaleUpperCase()}${errorObject.message
+  return `${errorObject.message.charAt(0).toUpperCase()}${errorObject.message
     .slice(1)
-    .toLocaleLowerCase()}.`;
+    .toLowerCase()}.`;
 }
 
 const getFormValues = (schema: any, form: any, opts: Opts) => {
@@ -374,7 +379,7 @@ const getErrors = (errors: Partial<ErrorObject>[]) => {
   return output;
 };
 
-export const getValidator = (schema: any) => {
+export const getValidator = (schema: AnySchema) => {
   const validate = ajv.compile(schema);
 
   return {
@@ -406,8 +411,8 @@ export const getValidator = (schema: any) => {
  * @deprecated Use getValidator instead.
  */
 export function validateForm(
-  schema,
-  form,
+  schema: AnySchema,
+  form: unknown,
   opts: { skipEmptyOptionalFields: boolean } = {
     skipEmptyOptionalFields: false
   }

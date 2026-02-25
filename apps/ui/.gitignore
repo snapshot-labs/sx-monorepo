@@ -27,3 +27,6 @@ pnpm-debug.log*
 *.sw?
 
 gql
+
+*storybook.log
+storybook-static

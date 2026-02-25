@@ -1,4 +1,4 @@
-import { Envelope, Propose, Vote } from '../../src/types';
+import { Envelope, Propose, Vote } from '../../src/clients/starknet/types';
 
 const proposeData = {
   space: '0x07e6e9047eb910f84f7e3b86cea7b1d7779c109c970a39b54379c1f4fa395b28',

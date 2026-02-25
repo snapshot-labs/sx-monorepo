@@ -3,7 +3,8 @@ import createEthTxAuthenticator from './ethTx';
 import createStarkSigAuthenticator from './starkSig';
 import createStarkTxAuthenticator from './starkTx';
 import createVanillaAuthenticator from './vanilla';
-import { Authenticator, NetworkConfig } from '../../types';
+import { Authenticator } from '../../clients/starknet/types';
+import { NetworkConfig } from '../../types';
 import { hexPadLeft } from '../../utils/encoding';
 
 export function getAuthenticator(

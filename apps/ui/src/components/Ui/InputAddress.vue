@@ -1,18 +1,7 @@
 <script setup lang="ts">
 import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getUrl } from '@/helpers/utils';
-import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
 import { BaseDefinition } from '@/types';
-
-const STARKNET_NETWORKS = Object.fromEntries(
-  Object.values(STARKNET_NETWORK_METADATA).map(metadata => [
-    metadata.chainId,
-    {
-      name: metadata.name,
-      logoUrl: getUrl(metadata.avatar)
-    }
-  ])
-);
 
 type NetworkDetails = {
   name: string;
@@ -21,22 +10,17 @@ type NetworkDetails = {
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(
-  defineProps<{
-    showPicker?: boolean;
-    path?: string;
-    definition?: BaseDefinition<string> & {
-      chainId?: number | string;
-    };
-    required?: boolean;
-  }>(),
-  {
-    showPicker: true
-  }
-);
+const props = defineProps<{
+  path?: string;
+  definition?: BaseDefinition<string> & {
+    chainId?: number | string;
+    showControls?: boolean;
+  };
+  required?: boolean;
+}>();
 
 const emit = defineEmits<{
-  (e: 'pick', path: string);
+  (e: 'pick', path: string): void;
 }>();
 
 const networkDetails = computed<NetworkDetails | null>(() => {
@@ -44,9 +28,7 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 
   if (!chainId) return null;
 
-  if (typeof chainId === 'string' && chainId in STARKNET_NETWORKS) {
-    return STARKNET_NETWORKS[chainId];
-  } else if (chainId in snapshotJsNetworks) {
+  if (chainId in snapshotJsNetworks) {
     const network = snapshotJsNetworks[chainId];
     return {
       name: network.name,
@@ -56,15 +38,14 @@ const networkDetails = computed<NetworkDetails | null>(() => {
 
   return null;
 });
+
+const shouldShowPicker = computed(() => {
+  return props.definition?.showControls ?? true;
+});
 </script>
 
 <template>
   <div class="relative">
-    <div v-if="showPicker" class="absolute top-3.5 right-3 z-10">
-      <button type="button" @click="emit('pick', path || '')">
-        <IH-identification />
-      </button>
-    </div>
     <UiTooltip
       v-if="networkDetails"
       :title="networkDetails.name"
@@ -76,13 +57,22 @@ const networkDetails = computed<NetworkDetails | null>(() => {
       />
     </UiTooltip>
     <UiInputString
-      :definition="props.definition"
+      :definition="definition"
       :required="required"
       v-bind="$attrs as any"
-      class="!pr-7"
       :class="{
-        '!pl-[42px]': !!networkDetails
+        '!pl-[42px]': !!networkDetails,
+        '!pr-7': shouldShowPicker
       }"
     />
+    <button
+      v-if="shouldShowPicker"
+      class="absolute top-3.5 right-3 z-10"
+      type="button"
+      aria-label="Pick address from contacts"
+      @click="emit('pick', path || '')"
+    >
+      <IH-identification />
+    </button>
   </div>
 </template>

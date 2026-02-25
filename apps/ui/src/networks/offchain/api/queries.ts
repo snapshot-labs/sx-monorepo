@@ -71,6 +71,7 @@ const SPACE_FRAGMENT = gql`
       cover
       proposalsCount
       votesCount
+      followersCount
       activeProposals
       turbo
       verified
@@ -93,6 +94,7 @@ const SPACE_FRAGMENT = gql`
     private
     flagged
     flagCode
+    hibernated
     domain
     skin
     skinSettings {
@@ -163,6 +165,10 @@ const PROPOSAL_FRAGMENT = gql`
       name
       params
       network
+    }
+    validation {
+      name
+      params
     }
     created
     updated
@@ -370,6 +376,7 @@ const STRATEGY_FRAGMENT = gql`
     verifiedSpacesCount
     examples
     schema
+    disabled
   }
 `;
 

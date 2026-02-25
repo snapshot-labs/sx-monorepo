@@ -2,7 +2,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { clients, starknetNetworks } from '@snapshot-labs/sx';
 import { CallData, uint256 } from 'starknet';
 import { HELPDESK_URL, MAX_SYMBOL_LENGTH } from '@/helpers/constants';
-import { pinPineapple } from '@/helpers/pin';
+import { pin } from '@/helpers/pin';
 import { _n, getUrl, shorten, sleep, verifyNetwork } from '@/helpers/utils';
 import { generateMerkleTree, getMerkleRoot } from '@/helpers/whitelistServer';
 import { NetworkID, StrategyParsedMetadata, VoteType } from '@/types';
@@ -23,32 +23,41 @@ export function createConstants(
   baseNetworkId: NetworkID,
   baseChainId: number
 ) {
-  const config = starknetNetworks[networkId as 'sn' | 'sn-sep'];
-  if (!config) throw new Error(`Unsupported network ${networkId}`);
+  if (!(networkId in starknetNetworks)) {
+    throw new Error(`Unsupported network ${networkId}`);
+  }
+
+  const config = starknetNetworks[networkId as keyof typeof starknetNetworks];
 
   const AUTHENTICATORS_SUPPORT_INFO: Record<string, AuthenticatorSupportInfo> =
     {
       [config.Authenticators.EthSig]: {
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         relayerType: 'evm',
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.EthTx]: {
+        priority: 2,
         isSupported: true,
         isContractSupported: true,
+        isReasonSupported: true,
         relayerType: 'evm-tx',
         connectors: EVM_CONNECTORS
       },
       [config.Authenticators.StarkSig]: {
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         relayerType: 'starknet',
         connectors: STARKNET_CONNECTORS
       },
       [config.Authenticators.StarkTx]: {
+        priority: 1,
         isSupported: true,
         isContractSupported: false,
+        isReasonSupported: true,
         connectors: STARKNET_CONNECTORS
       }
     };
@@ -245,7 +254,7 @@ export function createConstants(
             if (!strategy.generateMetadata) return;
 
             const metadata = await strategy.generateMetadata(strategy.params);
-            const pinned = await pinPineapple(metadata);
+            const pinned = await pin(metadata);
 
             return `ipfs://${pinned.cid}`;
           })
@@ -269,9 +278,9 @@ export function createConstants(
         required: ['threshold'],
         properties: {
           threshold: {
-            type: 'integer',
+            type: 'string',
+            format: 'uint256',
             title: 'Proposal threshold',
-            minimum: 1,
             examples: ['1']
           }
         }
@@ -335,7 +344,7 @@ export function createConstants(
             };
           });
 
-        const pinned = await pinPineapple({ tree });
+        const pinned = await pin({ tree });
 
         return {
           name: 'Whitelist',

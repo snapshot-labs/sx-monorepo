@@ -1,4 +1,6 @@
-import { Privacy, SignatureData } from '../../types';
+import { SignatureData as BaseSignatureData, Privacy } from '../../types';
+
+export type SignatureData = BaseSignatureData;
 
 export type Choice = number | number[] | string | Record<string, number>;
 
@@ -12,7 +14,7 @@ export type Envelope<
     | UnfollowSpace
     | SetAlias
 > = {
-  signatureData?: SignatureData;
+  signatureData?: BaseSignatureData;
   data: T;
 };
 
@@ -24,7 +26,7 @@ export type StrategyConfig = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: string;
 };
 
 export type Strategy = {
@@ -159,6 +161,7 @@ export type EIP712Message = Required<
 >;
 
 export type Vote = {
+  from?: string;
   space: string;
   authenticator: string;
   strategies: StrategyConfig[];

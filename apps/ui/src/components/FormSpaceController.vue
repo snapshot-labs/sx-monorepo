@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { shorten } from '@/helpers/utils';
 import { Network } from '@/networks/types';
 
 defineProps<{
@@ -9,7 +8,7 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'save', value: string);
+  (e: 'save', value: string): void;
 }>();
 
 const changeControllerModalOpen = ref(false);
@@ -25,10 +24,9 @@ function handleSave(value: string) {
       class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
     >
       <div class="flex flex-col">
-        <a
-          :href="network.helpers.getExplorerUrl(controller, 'contract')"
-          target="_blank"
-          class="flex items-center text-skin-text leading-5"
+        <AppLink
+          :to="network.helpers.getExplorerUrl(controller, 'contract')"
+          class="flex items-center text-skin-text leading-5 group"
         >
           <UiStamp
             :id="controller"
@@ -36,9 +34,9 @@ function handleSave(value: string) {
             :size="18"
             class="mr-2 !rounded"
           />
-          {{ shorten(controller) }}
+          <UiAddress :address="controller" />
           <IH-arrow-sm-right class="-rotate-45" />
-        </a>
+        </AppLink>
       </div>
       <button
         type="button"

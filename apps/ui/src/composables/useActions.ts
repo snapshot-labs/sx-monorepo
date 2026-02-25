@@ -2,8 +2,12 @@ import { Web3Provider } from '@ethersproject/providers';
 import { getDelegationNetwork } from '@/helpers/delegation';
 import { registerTransaction } from '@/helpers/mana';
 import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
-import { getNetwork, getReadWriteNetwork, metadataNetwork } from '@/networks';
-import { STARKNET_CONNECTORS } from '@/networks/common/constants';
+import {
+  getNetwork,
+  getReadWriteNetwork,
+  metadataNetwork,
+  offchainNetworks
+} from '@/networks';
 import { Connector, ExecutionInfo, StrategyConfig } from '@/networks/types';
 import {
   ChainId,
@@ -21,12 +25,11 @@ import {
   VoteType
 } from '@/types';
 
-const offchainToStarknetIds: Record<string, NetworkID> = {
-  s: 'sn',
-  's-tn': 'sn-sep'
+const PENDING_MESSAGES: Record<'vote' | 'propose' | 'transaction', string> = {
+  vote: 'Your vote is pending! Waiting for other signers',
+  propose: 'Your proposal is pending! Waiting for other signers',
+  transaction: 'Your transaction is pending! Waiting for other signers'
 };
-
-const starknetNetworkId = offchainToStarknetIds[metadataNetwork];
 
 export function useActions() {
   const network = getNetwork(metadataNetwork);
@@ -86,7 +89,7 @@ export function useActions() {
       if (envelope.signatureData.commitTxId) {
         uiStore.addPendingTransaction(
           envelope.signatureData.commitTxId,
-          network.baseNetworkId
+          network.baseChainId
         );
       }
 
@@ -147,11 +150,10 @@ export function useActions() {
 
       console.log('Receipt', receipt);
 
-      if (envelope.signatureData.signature === '0x')
-        uiStore.addNotification(
-          'success',
-          'Your vote is pending! waiting for other signers'
-        );
+      if (envelope.signatureData.signature === '0x') {
+        const safeContext = opts.safeAppContext ?? 'transaction';
+        uiStore.addNotification('success', PENDING_MESSAGES[safeContext]);
+      }
 
       if (hash) {
         uiStore.addPendingTransaction(hash, network.chainId);
@@ -170,22 +172,24 @@ export function useActions() {
     modalAccountOpen.value = true;
   }
 
-  async function getAliasSigner({
-    connector,
-    provider
-  }: {
-    connector: Connector;
-    provider: Web3Provider;
-  }) {
-    const network = getNetwork(
-      STARKNET_CONNECTORS.includes(connector.type)
-        ? starknetNetworkId
-        : metadataNetwork
-    );
+  async function getAliasSigner({ provider }: { provider: Web3Provider }) {
+    const network = getNetwork(metadataNetwork);
 
     return alias.getAliasWallet(address =>
       wrapPromise(metadataNetwork, network.actions.setAlias(provider, address))
     );
+  }
+
+  // Returns an alias signer if the connector is a Starknet wallet and the network is offchain,
+  // otherwise returns the original provider.
+  async function getOptionalAliasSigner(
+    auth: { connector: Connector; provider: Web3Provider },
+    networkId: NetworkID
+  ) {
+    return auth.connector.type === 'argentx' &&
+      offchainNetworks.includes(networkId)
+      ? await getAliasSigner(auth)
+      : auth.provider;
   }
 
   async function predictSpaceAddress(
@@ -311,11 +315,12 @@ export function useActions() {
     }
 
     const network = getNetwork(proposal.network);
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     const txHash = await wrapPromise(
       proposal.network,
       network.actions.vote(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         proposal,
@@ -355,11 +360,12 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     const txHash = await wrapPromise(
       space.network,
       network.actions.propose(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         space,
@@ -387,7 +393,7 @@ export function useActions() {
 
   async function updateProposal(
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
@@ -403,15 +409,16 @@ export function useActions() {
     }
 
     const network = getNetwork(space.network);
+    const signer = await getOptionalAliasSigner(auth.value, space.network);
 
     await wrapPromise(
       space.network,
       network.actions.updateProposal(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
         auth.value.account,
         space,
-        proposalId,
+        proposal,
         title,
         body,
         discussion,
@@ -441,10 +448,11 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
-      network.actions.flagProposal(auth.value.provider, proposal)
+      network.actions.flagProposal(signer, auth.value.account, proposal)
     );
 
     return true;
@@ -462,12 +470,14 @@ export function useActions() {
         `${auth.value.connector.type} is not supported for this action`
       );
     }
+    const signer = await getOptionalAliasSigner(auth.value, proposal.network);
 
     await wrapPromise(
       proposal.network,
       network.actions.cancelProposal(
-        auth.value.provider,
+        signer,
         auth.value.connector.type,
+        auth.value.account,
         proposal
       )
     );

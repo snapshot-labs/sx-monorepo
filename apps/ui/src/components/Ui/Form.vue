@@ -1,12 +1,7 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
 import Form from './Form.vue';
 import InputAddress from './InputAddress.vue';
+import InputArray from './InputArray.vue';
 import InputCheckbox from './InputCheckbox.vue';
 import InputColor from './InputColor.vue';
 import InputDuration from './InputDuration.vue';
@@ -18,6 +13,8 @@ import SelectMultiple from './SelectMultiple.vue';
 import SelectorNetwork from './SelectorNetwork.vue';
 import Textarea from './Textarea.vue';
 
+defineOptions({ inheritAttrs: false });
+
 const model = defineModel<any>({ required: true });
 
 const props = defineProps<{
@@ -26,18 +23,18 @@ const props = defineProps<{
   path?: string;
 }>();
 
-const dirty = ref(false);
+const slots = useSlots();
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
     }
 
     return model.value;
   },
   set(newValue) {
-    dirty.value = true;
     model.value = newValue;
   }
 });
@@ -64,8 +61,7 @@ const getComponent = (property: {
       if (property.items.enum) {
         return SelectMultiple;
       }
-
-      return null;
+      return InputArray;
     case 'string':
       if (property.format === 'long') return Textarea;
       if (property.format === 'addresses-with-voting-power') return Textarea;
@@ -87,6 +83,22 @@ const getComponent = (property: {
       return null;
   }
 };
+
+const getPropertySlots = (propertyName: string) => {
+  const propertySlots: Record<string, string> = {};
+  const prefix = `${propertyName}-`;
+
+  Object.keys(slots).forEach(slotName => {
+    if (slotName.startsWith(prefix)) {
+      const suffix = slotName.slice(prefix.length);
+      if (suffix) {
+        propertySlots[suffix] = slotName;
+      }
+    }
+  });
+
+  return propertySlots;
+};
 </script>
 
 <template>
@@ -101,6 +113,14 @@ const getComponent = (property: {
       :definition="property"
       :error="error?.[i]"
       :required="definition.required?.includes(i)"
-    />
+    >
+      <template
+        v-for="(sourceSlot, targetSlot) in getPropertySlots(i.toString())"
+        :key="targetSlot"
+        #[targetSlot]="slotProps"
+      >
+        <slot :name="sourceSlot" v-bind="slotProps" />
+      </template>
+    </component>
   </div>
 </template>

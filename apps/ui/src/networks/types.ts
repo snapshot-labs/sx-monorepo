@@ -10,6 +10,7 @@ import {
   NetworkID,
   Privacy,
   Proposal,
+  ScoresTick,
   Setting,
   Space,
   SpaceMetadata,
@@ -31,6 +32,8 @@ export type SpacesFilter = {
   domain?: string;
   category?: string;
   network?: string;
+  protocol?: ExplorePageProtocol;
+  protocol_in?: string[];
 };
 export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
@@ -86,6 +89,7 @@ export type StrategyTemplate = {
   version?: string;
   spaceCount?: number;
   verifiedSpaceCount?: number;
+  disabled?: boolean;
   link?: string;
   icon?: FunctionalComponent;
   type?: string;
@@ -129,7 +133,7 @@ export type ExecutionInfo = {
 
 export type SnapshotInfo = {
   at: number | null;
-  chainId?: number;
+  chainId?: ChainId;
 };
 
 export type VotingPower = {
@@ -145,7 +149,7 @@ export type VotingPower = {
   displayDecimals: number;
   token: string | null;
   symbol: string;
-  chainId?: number;
+  chainId?: ChainId;
   swapLink?: string;
 };
 
@@ -163,7 +167,7 @@ export type ReadOnlyNetworkActions = {
     snapshotInfo: SnapshotInfo
   ): Promise<VotingPower[]>;
   propose(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
@@ -182,11 +186,11 @@ export type ReadOnlyNetworkActions = {
     executions: ExecutionInfo[] | null
   ): Promise<any>;
   updateProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     space: Space,
-    proposalId: number | string,
+    proposal: Proposal,
     title: string,
     body: string,
     discussion: string,
@@ -196,14 +200,19 @@ export type ReadOnlyNetworkActions = {
     labels: string[],
     executions: ExecutionInfo[] | null
   ): Promise<any>;
-  flagProposal(web3: Web3Provider, proposal: Proposal);
+  flagProposal(
+    web3: Web3Provider | Wallet,
+    account: string,
+    proposal: Proposal
+  );
   cancelProposal(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
+    account: string,
     proposal: Proposal
   );
   vote(
-    web3: Web3Provider,
+    web3: Web3Provider | Wallet,
     connectorType: ConnectorType,
     account: string,
     proposal: Proposal,
@@ -309,6 +318,7 @@ export type NetworkActions = ReadOnlyNetworkActions & {
 
 export type NetworkApi = {
   apiUrl: string;
+  loadProposalScoresTicks(proposalId: string): Promise<ScoresTick[]>;
   loadProposalVotes(
     proposal: Proposal,
     paginationOpts: PaginationOpts,
@@ -398,6 +408,10 @@ export type AuthenticatorSupportInfo = {
    */
   isContractSupported: boolean;
   /**
+   * Whether the authenticator supports providing a reason when voting.
+   */
+  isReasonSupported: boolean;
+  /**
    * Type of the relayer used by authenticator.
    * Determines how authenticator is interacted with.
    */
@@ -441,7 +455,7 @@ export type NetworkHelpers = {
   getExplorerUrl(
     id: string,
     type: 'transaction' | 'address' | 'contract' | 'strategy' | 'token',
-    chainId?: number
+    chainId?: ChainId
   ): string;
 };
 
@@ -470,12 +484,14 @@ export type ReadWriteNetwork = BaseNetwork & {
 };
 export type Network = ReadOnlyNetwork | ReadWriteNetwork;
 
-export type ExplorePageProtocol = 'snapshot' | 'snapshot-x';
+export type ExplorePageProtocol = 'snapshot' | 'snapshot-x' | 'governor';
 
 export type ProtocolConfig = {
   key: ExplorePageProtocol;
   label: string;
   apiNetwork: NetworkID;
   networks: NetworkID[];
+  protocols?: string[];
   limit: number;
+  disabled?: boolean;
 };

@@ -117,7 +117,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <h4 class="eyebrow mb-2 font-medium">Voting</h4>
+  <UiEyebrow class="mb-2 font-medium">Voting</UiEyebrow>
   <div class="space-y-3">
     <div>
       <div class="s-label !mb-0">Voting delay</div>
@@ -305,7 +305,8 @@ watchEffect(() => {
       :open="isSelectValidationModalOpen"
       :network-id="space.network"
       :default-chain-id="snapshotChainId"
-      :space="space"
+      :space-id="space.id"
+      :voting-power-symbol="space.voting_power_symbol"
       :current="voteValidation"
       @close="isSelectValidationModalOpen = false"
       @save="value => (voteValidation = value)"

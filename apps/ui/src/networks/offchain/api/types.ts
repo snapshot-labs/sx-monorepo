@@ -1,6 +1,5 @@
 import {
   DelegationType,
-  NetworkID,
   SkinSettings,
   SpaceMetadataLabel,
   VoteType
@@ -9,10 +8,11 @@ import {
 export type ApiRelatedSpace = {
   id: string;
   name: string;
-  network: NetworkID;
+  network: string;
   avatar: string;
   cover: string | null;
   proposalsCount: number;
+  followersCount: number;
   activeProposals: number;
   votesCount: number;
   turbo: boolean;
@@ -80,6 +80,7 @@ export type ApiSpace = {
   private: boolean;
   flagged: boolean;
   flagCode: number;
+  hibernated: boolean;
   domain: string | null;
   skin: string | null;
   skinSettings: SkinSettings;
@@ -130,6 +131,7 @@ export type ApiProposal = {
   scores_state: 'invalid' | 'pending' | 'final';
   state: 'active' | 'pending' | 'closed';
   strategies: { network: string; params: Record<string, any>; name: string }[];
+  validation: { name: string; params: Record<string, any> };
   created: number;
   updated: number | null;
   votes: number;
@@ -163,4 +165,5 @@ export type ApiStrategy = {
   verifiedSpacesCount: number;
   examples: any;
   schema: any;
+  disabled: boolean;
 };

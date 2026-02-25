@@ -1,11 +1,9 @@
-import { keccak256 } from '@ethersproject/keccak256';
 import { faker } from '@faker-js/faker';
-import { getExecutionData } from '@snapshot-labs/sx';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding';
-import fetch from 'cross-fetch';
+import { getExecutionData, utils } from '@snapshot-labs/sx';
 import { poseidonHashMany } from 'micro-starknet';
 import { hash } from 'starknet';
-import { Network } from '../../.checkpoint/models';
+import { keccak256 } from 'viem';
+import { Network, Proposal, ScoresTick } from '../../.checkpoint/models';
 import { UI_URL } from '../config';
 
 type ExecutionType = Parameters<typeof getExecutionData>[0];
@@ -27,7 +25,7 @@ export function getProposalLink({
 }: {
   networkId: string;
   spaceId: string;
-  proposalId: number;
+  proposalId: number | string | bigint;
 }) {
   const spaceLink = getSpaceLink({ networkId, spaceId });
 
@@ -88,7 +86,15 @@ export async function getJSON(uri: string) {
   const url = getUrl(uri);
   if (!url) throw new Error('Invalid URI');
 
-  return fetch(url).then(res => res.json());
+  const res = await fetch(url, {
+    signal: AbortSignal.timeout(15000)
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch JSON from ${url}: ${res.statusText}`);
+  }
+
+  return res.json();
 }
 
 export function getExecutionHash({
@@ -100,7 +106,7 @@ export function getExecutionHash({
   type: 'starknet' | 'evm';
   executionType: string;
   executionDestination: string | null;
-  transactions: MetaTransaction[];
+  transactions: utils.encoding.MetaTransaction[];
 }) {
   const data = getExecutionData(
     executionType as ExecutionType,
@@ -120,7 +126,7 @@ export function getExecutionHash({
       return null;
     }
 
-    return keccak256(data.executionParams[0]);
+    return keccak256(data.executionParams[0] as `0x${string}`);
   }
 
   return `0x${poseidonHashMany(data.executionParams.map(v => BigInt(v))).toString(16)}`;
@@ -136,4 +142,27 @@ export function getParsedVP(value: string, decimals: number) {
   const parsedValue = parseInt(value, 10);
 
   return parsedValue / 10 ** decimals;
+}
+
+export async function updateScoresTick(
+  proposal: Proposal,
+  timestamp: number,
+  indexerName: string
+): Promise<void> {
+  const hourTimestamp = Math.floor(timestamp / 3600) * 3600;
+  const tickId = `${proposal.id}/${hourTimestamp}`;
+
+  let tick = await ScoresTick.loadEntity(tickId, indexerName);
+
+  if (!tick) {
+    tick = new ScoresTick(tickId, indexerName);
+    tick.proposal = proposal.id;
+  }
+
+  tick.timestamp = hourTimestamp;
+  tick.scores_1 = proposal.scores_1;
+  tick.scores_2 = proposal.scores_2;
+  tick.scores_3 = proposal.scores_3;
+
+  await tick.save();
 }

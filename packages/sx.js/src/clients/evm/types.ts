@@ -4,13 +4,7 @@ import {
 } from '@ethersproject/abstract-signer';
 import { ContractInterface } from '@ethersproject/contracts';
 import { Provider } from '@ethersproject/providers';
-import { EvmNetworkConfig } from '../../types';
-
-enum Choice {
-  Against = 0,
-  For = 1,
-  Abstain = 2
-}
+import { Choice, EvmNetworkConfig } from '../../types';
 
 export type AddressConfig = {
   addr: string;

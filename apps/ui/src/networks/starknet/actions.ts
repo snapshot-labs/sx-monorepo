@@ -258,6 +258,7 @@ export function createActions(
             space.voting_power_validation_strategy_strategies.map((_, i) => i),
           connectorType,
           isContract,
+          hasReason: false,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
@@ -339,7 +340,7 @@ export function createActions(
       connectorType: ConnectorType,
       account: string,
       space: Space,
-      proposalId: number | string,
+      proposal: Proposal,
       title: string,
       body: string,
       discussion: string,
@@ -377,6 +378,7 @@ export function createActions(
           space.voting_power_validation_strategy_strategies.map((_, i) => i),
         connectorType,
         isContract,
+        hasReason: false,
         ignoreRelayer: !relayer?.hasMinimumBalance
       });
 
@@ -406,7 +408,7 @@ export function createActions(
 
       const data = {
         space: space.id,
-        proposal: proposalId as number,
+        proposal: Number(proposal.proposal_id),
         authenticator,
         executionStrategy: selectedExecutionStrategy,
         metadataUri: `ipfs://${pinned.cid}`
@@ -438,6 +440,7 @@ export function createActions(
     cancelProposal: async (
       web3: any,
       connectorType: ConnectorType,
+      account: string,
       proposal: Proposal
     ) => {
       await verifyStarknetNetwork(web3, chainId);
@@ -445,7 +448,7 @@ export function createActions(
       return client.cancelProposal({
         signer: web3.provider.account,
         space: proposal.space.id,
-        proposal: proposal.proposal_id as number
+        proposal: Number(proposal.proposal_id)
       });
     },
     vote: async (
@@ -471,6 +474,7 @@ export function createActions(
           strategiesIndices: proposal.strategies_indices,
           connectorType,
           isContract,
+          hasReason: !!reason,
           ignoreRelayer: !relayer?.hasMinimumBalance
         });
 
@@ -506,7 +510,7 @@ export function createActions(
         space: proposal.space.id,
         authenticator,
         strategies: strategiesWithMetadata,
-        proposal: proposal.proposal_id as number,
+        proposal: Number(proposal.proposal_id),
         choice: getSdkChoice(choice),
         metadataUri: pinned ? `ipfs://${pinned.cid}` : ''
       };
@@ -585,7 +589,7 @@ export function createActions(
       return executionCall('eth', l1ChainId, 'executeStarknetProposal', {
         space: proposal.space.id,
         executor: proposal.execution_destination,
-        proposalId: proposal.proposal_id as number,
+        proposalId: Number(proposal.proposal_id),
         proposal: proposalData,
         votesFor,
         votesAgainst,
@@ -824,14 +828,7 @@ export function createActions(
     },
     followSpace: () => {},
     unfollowSpace: () => {},
-    setAlias: async (web3: any, alias: string) => {
-      await verifyStarknetNetwork(web3, chainId);
-
-      return starkSigClient.setAlias({
-        signer: web3.provider.account,
-        data: { alias }
-      });
-    },
+    setAlias: async () => {},
     updateUser: () => {},
     updateStatement: () => {},
     updateSettingsRaw: () => {

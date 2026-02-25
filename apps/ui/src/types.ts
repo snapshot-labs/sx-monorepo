@@ -1,3 +1,4 @@
+import { Transaction as _Transaction } from '@snapshot-labs/sx';
 import { VNode } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
@@ -21,6 +22,8 @@ export type ProposalState =
   | 'passed'
   | 'rejected'
   | 'closed'
+  | 'queued'
+  | 'vetoed'
   | 'executed';
 
 export type NetworkID =
@@ -83,7 +86,7 @@ export type SelectedStrategy = {
 export type SpaceMetadataTreasury = {
   name: string;
   address: string;
-  chainId: ChainId | null;
+  chainId: string | null;
 };
 
 export type SpaceMetadataLabel = {
@@ -98,7 +101,7 @@ export type SpaceMetadataDelegation = {
   apiType: DelegationType | null;
   apiUrl: string | null;
   contractAddress: string | null;
-  chainId: ChainId | null;
+  chainId: string | null;
 };
 
 export type SpaceMetadata = {
@@ -111,6 +114,7 @@ export type SpaceMetadata = {
   github: string;
   discord: string;
   farcaster: string;
+  clanker: string;
   votingPowerSymbol: string;
   treasuries: SpaceMetadataTreasury[];
   labels: SpaceMetadataLabel[];
@@ -135,6 +139,7 @@ export type StrategyParsedMetadata = {
 
 export type RelatedSpace = {
   id: string;
+  protocol: string;
   name: string;
   network: NetworkID;
   avatar: string;
@@ -142,10 +147,11 @@ export type RelatedSpace = {
   about?: string;
   proposal_count: number;
   vote_count: number;
+  follower_count: number;
   active_proposals: number | null;
   turbo: boolean;
   verified: boolean;
-  snapshot_chain_id: number;
+  snapshot_chain_id: string;
 };
 
 export type Validation = {
@@ -160,6 +166,7 @@ export type OffchainAdditionalRawData = {
   | 'private'
   | 'flagged'
   | 'flagCode'
+  | 'hibernated'
   | 'domain'
   | 'skin'
   | 'skinSettings'
@@ -179,11 +186,12 @@ export type OffchainAdditionalRawData = {
 
 export type Space = {
   id: string;
+  protocol: string;
   network: NetworkID;
   verified: boolean;
   turbo: boolean;
   turbo_expiration: number;
-  snapshot_chain_id?: number;
+  snapshot_chain_id?: string;
   name: string;
   avatar: string;
   cover: string;
@@ -196,6 +204,7 @@ export type Space = {
   github: string;
   discord: string;
   farcaster: string;
+  clanker?: string;
   coingecko?: string;
   terms: string;
   privacy: SpacePrivacy;
@@ -252,20 +261,22 @@ export type ProposalExecution = {
 
 export type Proposal = {
   id: string;
-  proposal_id: number | string;
+  proposal_id: string;
   network: NetworkID;
   execution_network: NetworkID;
   /**
    * If proposal is invalid it means that it was not created correctly.
    */
   isInvalid: boolean;
+  vp_decimals: number;
   type: VoteType;
   quorum: number;
   quorum_type?: 'default' | 'rejection';
   space: {
     id: string;
+    protocol: string;
     name: string;
-    snapshot_chain_id?: number;
+    snapshot_chain_id?: string;
     avatar: string;
     terms: string;
     controller: string;
@@ -290,10 +301,14 @@ export type Proposal = {
   body: string;
   discussion: string;
   executions: ProposalExecution[];
+  /** Timestamp when proposal starts */
   start: number;
+  /** Timestamp when proposal can end at the earliest */
   min_end: number;
+  /** Timestamp when proposal can end at the latest */
   max_end: number;
   snapshot: number;
+  executed_at: number | null;
   choices: string[];
   labels: string[];
   scores: number[];
@@ -306,6 +321,8 @@ export type Proposal = {
   strategies_indices: number[];
   strategies: string[];
   strategies_params: any[];
+  voting_power_validation_strategy_strategies: string[];
+  voting_power_validation_strategy_strategies_params: any[];
   created: number;
   edited: number | null;
   tx: string;
@@ -315,10 +332,18 @@ export type Proposal = {
   has_execution_window_opened: boolean;
   execution_ready: boolean;
   vetoed: boolean;
+  /**
+   * Determines if proposal execution is settled - all transactions have been executed or vetoed.
+   */
+  execution_settled: boolean;
+  /**
+   * Determines if proposal is completed - all votes have been already counted.
+   */
   completed: boolean;
   cancelled: boolean;
   state: ProposalState;
   privacy: Privacy;
+  plugins: Record<string, unknown>;
   flagged: boolean;
   flag_code: number;
 };
@@ -387,7 +412,7 @@ export type Vote = {
   space: {
     id: string;
   };
-  proposal: number | string;
+  proposal: string;
   choice: number | number[] | Record<string, number>;
   vp: number;
   reason?: string;
@@ -401,7 +426,7 @@ export type Member = {
 };
 
 export type Draft = {
-  proposalId: number | string | null;
+  originalProposal: Proposal | null;
   title: string;
   body: string;
   discussion: string;
@@ -438,76 +463,7 @@ export type SkinSettings = {
 
 export type Drafts = Record<string, Draft>;
 
-export type BaseTransaction = {
-  to: string;
-  data: string;
-  value: string;
-  salt: string;
-};
-
-export type SendTokenTransaction = BaseTransaction & {
-  _type: 'sendToken';
-  _form: {
-    recipient: string;
-    amount: string;
-    token: {
-      name: string;
-      decimals: number;
-      symbol: string;
-      address: string;
-    };
-  };
-};
-
-export type SendNftTransaction = BaseTransaction & {
-  _type: 'sendNft';
-  _form: {
-    recipient: string;
-    sender: string;
-    amount: string;
-    nft: {
-      type: string;
-      address: string;
-      id: string;
-      name: string;
-      collection?: string;
-    };
-  };
-};
-
-export type StakeTokenTransaction = BaseTransaction & {
-  _type: 'stakeToken';
-  _form: {
-    recipient: string;
-    args: any;
-    amount: string;
-  };
-};
-
-export type ContractCallTransaction = BaseTransaction & {
-  _type: 'contractCall';
-  _form: {
-    abi: any[];
-    recipient: string;
-    method: string;
-    args: any;
-    amount?: string;
-  };
-};
-
-export type RawTransaction = BaseTransaction & {
-  _type: 'raw';
-  _form: {
-    recipient: string;
-  };
-};
-
-export type Transaction =
-  | SendTokenTransaction
-  | SendNftTransaction
-  | StakeTokenTransaction
-  | ContractCallTransaction
-  | RawTransaction;
+export type Transaction = _Transaction;
 
 // Utils
 export type RequiredProperty<T> = {
@@ -544,4 +500,9 @@ export type SelectItem<T> = {
 export type Setting = {
   name: string;
   value: string | string[];
+};
+
+export type ScoresTick = {
+  timestamp: number;
+  scores: [number, number, number];
 };

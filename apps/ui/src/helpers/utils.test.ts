@@ -65,16 +65,17 @@ describe('utils', () => {
         avatar: '',
         cover: '',
         description: 'Test description',
+        votingPowerSymbol: 'VOTE',
         externalUrl: 'https://test.com',
         github: 'snapshot-labs',
         twitter: 'SnapshotLabs',
         discord: 'snapshot',
         farcaster: 'snapshot-labs',
-        votingPowerSymbol: 'VOTE',
+        clanker: '0x000000000000000000000000000000000000dead',
         treasuries: [
           {
             name: 'treasury 1',
-            chainId: 11155111,
+            chainId: '11155111',
             address: '0x000000000000000000000000000000000000dead'
           }
         ],
@@ -92,7 +93,7 @@ describe('utils', () => {
             apiType: 'governor-subgraph',
             apiUrl:
               'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
-            chainId: 11155111,
+            chainId: '11155111',
             contractAddress: '0x000000000000000000000000000000000000dead'
           }
         ]
@@ -109,11 +110,12 @@ describe('utils', () => {
           github: 'snapshot-labs',
           twitter: 'SnapshotLabs',
           farcaster: 'snapshot-labs',
+          clanker: '0x000000000000000000000000000000000000dead',
           discord: 'snapshot',
           treasuries: [
             {
               name: 'treasury 1',
-              chain_id: 11155111,
+              chain_id: '11155111',
               address: '0x000000000000000000000000000000000000dead'
             }
           ],
@@ -132,7 +134,7 @@ describe('utils', () => {
               api_url:
                 'https://thegraph.com/hosted-service/subgraph/arr00/uniswap-governance-v2',
               contract: '0x000000000000000000000000000000000000dead',
-              chain_id: 11155111
+              chain_id: '11155111'
             }
           ]
         }
@@ -314,18 +316,25 @@ describe('utils', () => {
       expect(controller).toBe(expectedController);
     });
 
-    it('should return the space controller address for a shib name on testnet', async () => {
-      const spaceId = 'snapshot-test-unclaimed.shib';
-      const expectedController = '0x91FD2c8d24767db4Ece7069AA27832ffaf8590f3';
-      const controller = await getSpaceController(spaceId, 's-tn');
-      expect(controller).toBe(expectedController);
-    });
-
     it('should return the space controller address for an ENS name on testnet', async () => {
       const spaceId = 'ens.eth';
       const expectedController = '0x179A862703a4adfb29896552DF9e307980D19285';
       const controller = await getSpaceController(spaceId, 's-tn');
       expect(controller).toBe(expectedController);
+    });
+
+    it('should return the space controller address for a sonic name on mainnet', async () => {
+      const spaceId = 'boorger.sonic';
+      const expectedController = '0x220bc93D88C0aF11f1159eA89a885d5ADd3A7Cf6';
+      const controller = await getSpaceController(spaceId, 's');
+      expect(controller).toBe(expectedController);
+    });
+
+    it('should throw an error when getting a sonic name on testnet', async () => {
+      const spaceId = 'boorger.sonic';
+      await expect(getSpaceController(spaceId, 's-tn')).rejects.toThrow(
+        'Unsupported network'
+      );
     });
   });
 

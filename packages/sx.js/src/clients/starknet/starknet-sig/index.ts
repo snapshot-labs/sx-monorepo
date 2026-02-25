@@ -3,32 +3,29 @@ import {
   Account,
   CallData,
   shortString,
-  typedData,
+  TypedData,
   uint256,
   validateAndParseAddress
 } from 'starknet';
 import {
-  aliasTypes,
   baseDomain,
   proposeTypes,
   updateProposalTypes,
   voteTypes
 } from './types';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import {
-  Alias,
   ClientConfig,
   ClientOpts,
   Envelope,
   Propose,
   SignatureData,
-  StarknetEIP712AliasMessage,
   StarknetEIP712ProposeMessage,
   StarknetEIP712UpdateProposalMessage,
   StarknetEIP712VoteMessage,
   UpdateProposal,
   Vote
-} from '../../../types';
-import { getStrategiesWithParams } from '../../../utils/strategies';
+} from '../types';
 
 export class StarknetSig {
   config: ClientConfig & { manaUrl: string };
@@ -70,7 +67,6 @@ export class StarknetSig {
       | StarknetEIP712ProposeMessage
       | StarknetEIP712UpdateProposalMessage
       | StarknetEIP712VoteMessage
-      | StarknetEIP712AliasMessage
   >(
     signer: Account,
     verifyingContract: string,
@@ -84,7 +80,7 @@ export class StarknetSig {
       verifyingContract
     };
 
-    const data: typeof typedData.TypedData = {
+    const data: TypedData = {
       types,
       primaryType,
       domain,
@@ -222,33 +218,6 @@ export class StarknetSig {
       message,
       voteTypes,
       'Vote'
-    );
-
-    return {
-      signatureData,
-      data
-    };
-  }
-
-  public async setAlias({
-    signer,
-    data
-  }: {
-    signer: Account;
-    data: Alias;
-  }): Promise<Envelope<Alias>> {
-    const message = {
-      from: validateAndParseAddress(signer.address),
-      timestamp: parseInt((Date.now() / 1000).toFixed()),
-      ...data
-    };
-
-    const signatureData = await this.sign(
-      signer,
-      '',
-      message,
-      aliasTypes,
-      'SetAlias'
     );
 
     return {

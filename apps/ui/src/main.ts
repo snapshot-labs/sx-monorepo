@@ -17,7 +17,9 @@ const knownHosts = [
   'horizen-eon.safe.onchainden.com',
   'safe.fantom.network',
   'safe.apechain.com',
-  'console.brahma.fi'
+  'console.brahma.fi',
+  'pass.celopg.eco',
+  'app.cg'
 ];
 const parentUrl =
   window.location != window.parent.location

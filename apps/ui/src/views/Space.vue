@@ -99,5 +99,9 @@ onUnmounted(() => {
       </UiButton>
     </div>
   </div>
-  <router-view v-else :space="space" :townhall-space="townhallSpace" />
+  <router-view
+    v-else-if="space"
+    :space="space"
+    :townhall-space="townhallSpace"
+  />
 </template>

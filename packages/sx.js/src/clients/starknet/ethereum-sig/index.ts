@@ -6,6 +6,8 @@ import {
 import randomBytes from 'randombytes';
 import { CallData, shortString } from 'starknet';
 import { proposeTypes, updateProposalTypes, voteTypes } from './types';
+import { getRSVFromSig } from '../../../utils/encoding';
+import { getStrategiesWithParams } from '../../../utils/strategies';
 import {
   ClientConfig,
   ClientOpts,
@@ -17,9 +19,7 @@ import {
   SignatureData,
   UpdateProposal,
   Vote
-} from '../../../types';
-import { getRSVFromSig } from '../../../utils/encoding';
-import { getStrategiesWithParams } from '../../../utils/strategies';
+} from '../types';
 
 export class EthereumSig {
   config: ClientConfig;

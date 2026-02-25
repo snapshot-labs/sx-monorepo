@@ -15,12 +15,15 @@ const POPULAR_STRATEGIES: Record<string, StrategyTemplate['address']> = {
   'ERC-1155': 'erc1155-balance-of'
 } as const;
 
+const HIDDEN_STRATEGIES: StrategyTemplate['address'][] = ['ticket'];
+
 const strategies = defineModel<StrategyConfig[]>({ required: true });
 
 const props = defineProps<{
   snapshotChainId: number;
   networkId: NetworkID;
-  space: { turbo: boolean; verified: boolean };
+  spaceId: string;
+  votingPowerSymbol: string;
 }>();
 
 const { limits } = useSettings();
@@ -29,6 +32,8 @@ const chainId = ref<number>(props.snapshotChainId);
 const isLoading = ref(false);
 const hasError = ref(false);
 const isEditStrategyModalOpen = ref(false);
+const isTestStrategiesModalOpen = ref(false);
+const testedStrategies: Ref<StrategyConfig[]> = ref([]);
 
 const editStrategyModalStrategy: ComputedRef<StrategyConfig | undefined> =
   computed(() => {
@@ -84,6 +89,11 @@ function handleSaveStrategy(value: StrategyConfig['params'], chainId: ChainId) {
   isEditStrategyModalOpen.value = false;
 }
 
+function handleTestStrategies(strategies: StrategyConfig[]) {
+  testedStrategies.value = strategies;
+  isTestStrategiesModalOpen.value = true;
+}
+
 function reset() {
   strategies.value = [];
 }
@@ -104,9 +114,23 @@ onMounted(() => {
         v-model:model-value="strategies"
         :network-id="networkId"
         :default-chain-id="chainId"
-        :hidden-strategies="['ticket']"
+        :hidden-strategies="HIDDEN_STRATEGIES"
         :limit="limits['space.default.strategies_limit']"
+        @test-strategies="handleTestStrategies"
       >
+        <template v-if="strategies.length" #actions>
+          <UiTooltip
+            class="flex items-center"
+            title="Test all custom strategies"
+          >
+            <button
+              class="text-skin-link"
+              @click="handleTestStrategies(strategies)"
+            >
+              <IH-play />
+            </button>
+          </UiTooltip>
+        </template>
         <template #empty>
           <div class="space-y-3">
             <div>Here are some of the most common voting strategies:</div>
@@ -114,7 +138,6 @@ onMounted(() => {
               <UiButton
                 v-for="(name, id) in POPULAR_STRATEGIES"
                 :key="id"
-                class="border py-2 px-3 text-center rounded-lg"
                 @click="handlePopularStrategyClick(id)"
               >
                 {{ id }}
@@ -126,6 +149,15 @@ onMounted(() => {
       </UiStrategiesConfiguratorOffchain>
     </div>
     <teleport to="#modal">
+      <ModalTestStrategy
+        :open="isTestStrategiesModalOpen"
+        :network-id="networkId"
+        :chain-id="snapshotChainId"
+        :space-id="spaceId"
+        :voting-power-symbol="votingPowerSymbol"
+        :strategies="testedStrategies"
+        @close="isTestStrategiesModalOpen = false"
+      />
       <ModalEditStrategy
         v-if="editStrategyModalStrategy"
         with-network-selector

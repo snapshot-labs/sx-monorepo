@@ -2,6 +2,7 @@
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
 import { getNetwork } from '@/networks';
+import { StrategyConfig } from '@/networks/types';
 import { ChainId, NetworkID } from '@/types';
 
 const CUSTOM_ERROR_SYMBOL = Symbol('customError');
@@ -26,12 +27,12 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'save', value: Record<string, any>, network: ChainId);
+  (e: 'close'): void;
+  (e: 'save', value: Record<string, any>, network: ChainId): void;
 }>();
 
 const network: Ref<ChainId> = ref('');
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const isDefinitionLoading = ref(false);
 const pickerField: Ref<string | null> = ref(null);
 const searchValue = ref('');
@@ -60,7 +61,7 @@ const formErrors = computed(() => {
     errors.network = 'Network is required';
   }
 
-  if (!props.definition) {
+  if (!definition.value) {
     try {
       JSON.parse(rawParams.value);
     } catch {
@@ -72,10 +73,10 @@ const formErrors = computed(() => {
   const customError = props.customErrorValidation?.(value, network.value);
   if (customError) errors[CUSTOM_ERROR_SYMBOL] = customError;
 
-  if (props.definition) {
+  if (definition.value) {
     return {
       ...errors,
-      ...validateForm(props.definition, form.value, {
+      ...validateForm(definition.value, form.value, {
         skipEmptyOptionalFields: true
       })
     };
@@ -85,12 +86,12 @@ const formErrors = computed(() => {
 });
 
 function handlePickerClick(field: string) {
-  showPicker.value = true;
+  isPickerShown.value = true;
   pickerField.value = field;
 }
 
 function handlePickerSelect(value: string) {
-  showPicker.value = false;
+  isPickerShown.value = false;
 
   if (!pickerField.value) return;
 
@@ -103,49 +104,90 @@ async function handleSubmit() {
   emit('save', value, network.value);
 }
 
-watchEffect(() => {
-  if (props.open && props.initialNetwork) {
-    network.value = props.initialNetwork;
-  }
-});
+function cloneStrategyConfig(config: StrategyConfig): StrategyConfig {
+  const {
+    validate,
+    generateSummary,
+    generateParams,
+    generateMetadata,
+    parseParams,
+    deploy,
+    ...rest
+  } = config;
 
-watchEffect(() => {
-  if (props.open && props.initialState) {
-    form.value = clone(props.initialState);
-    rawParams.value = JSON.stringify(props.initialState, null, 2);
+  return {
+    validate,
+    generateSummary,
+    generateParams,
+    generateMetadata,
+    parseParams,
+    deploy,
+    ...clone(rest)
+  };
+}
+
+function isStrategyConfig(config: unknown): config is StrategyConfig {
+  if (typeof config !== 'object' || config === null) return false;
+
+  return 'generateParams' in config;
+}
+
+function cloneInitialState(state: any) {
+  if (!state) return {};
+
+  if ('strategies' in state && Array.isArray(state.strategies)) {
+    return {
+      ...clone(state),
+      strategies: state.strategies.map((s: unknown) =>
+        isStrategyConfig(s) ? cloneStrategyConfig(s) : clone(s)
+      )
+    };
   }
-});
+
+  return clone(state);
+}
+
+watch(
+  () => props.open,
+  () => {
+    isPickerShown.value = false;
+
+    if (props.initialNetwork) {
+      network.value = props.initialNetwork;
+    }
+
+    if (props.initialState) {
+      form.value = cloneInitialState(props.initialState);
+      rawParams.value = JSON.stringify(props.initialState, null, 2);
+    } else {
+      form.value = {};
+      rawParams.value = '';
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3>Edit strategy</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
-        <div class="flex items-center border-t px-2 py-3 mt-3 -mb-3">
-          <IH-search class="mx-2" />
-          <input
-            ref="searchInput"
-            v-model="searchValue"
-            type="text"
-            placeholder="Search"
-            class="flex-auto bg-transparent text-skin-link"
-          />
-        </div>
+        <UiModalSearchInput v-model="searchValue" />
       </template>
     </template>
     <div v-if="isDefinitionLoading" class="p-4 flex">
       <UiLoading class="m-auto" />
     </div>
     <PickerContact
-      v-else-if="showPicker"
+      v-else-if="isPickerShown"
       :loading="false"
       :search-value="searchValue"
       @pick="handlePickerSelect"
@@ -167,7 +209,7 @@ watchEffect(() => {
           title: 'Network',
           examples: ['Select network'],
           networkId,
-          networksListKind: 'offchain'
+          networksListKind: 'full'
         }"
       />
       <UiForm
@@ -187,7 +229,7 @@ watchEffect(() => {
         :error="formErrors.rawParams"
       />
     </div>
-    <template v-if="!showPicker && !isDefinitionLoading" #footer>
+    <template v-if="!isPickerShown && !isDefinitionLoading" #footer>
       <UiButton
         class="w-full"
         :disabled="

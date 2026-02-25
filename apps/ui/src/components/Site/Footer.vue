@@ -6,6 +6,9 @@ import ICGithub from '~icons/c/github';
 import ICX from '~icons/c/x';
 
 const COMMIT_SHA = import.meta.env.VITE_COMMIT_SHA || '';
+const repositoryUrl = repository.url
+  .replace(/^git\+/, '')
+  .replace(/\.git$/, '');
 
 const SOCIALS = [
   {
@@ -28,7 +31,7 @@ const SOCIALS = [
     <UiContainer class="!max-w-screen-lg space-y-7">
       <div class="grid grid-col-2 md:grid-cols-4 space-y-4 md:space-y-0">
         <div class="space-y-2">
-          <div class="eyebrow">Snapshot</div>
+          <UiEyebrow>Snapshot</UiEyebrow>
           <div class="space-y-1">
             <div>
               <AppLink :to="{ name: 'my-explore' }"> Explore spaces </AppLink>
@@ -47,52 +50,52 @@ const SOCIALS = [
           </div>
         </div>
         <div class="space-y-2">
-          <div class="eyebrow">Resources</div>
+          <UiEyebrow>Resources</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <a :href="HELPDESK_URL" target="_blank">
+              <AppLink :to="HELPDESK_URL">
                 Helpdesk <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://snapshot.mirror.xyz" target="_blank">
+              <AppLink to="https://snapshot.mirror.xyz">
                 Blog
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://github.com/snapshot-labs/brand" target="_blank">
+              <AppLink to="https://github.com/snapshot-labs/brand">
                 Brand
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
           </div>
         </div>
         <div class="space-y-2">
-          <div class="eyebrow">Developers</div>
+          <UiEyebrow>Developers</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <a href="https://docs.snapshot.box" target="_blank">
+              <AppLink to="https://docs.snapshot.box">
                 Docs
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://github.com/snapshot-labs" target="_blank">
+              <AppLink to="https://github.com/snapshot-labs">
                 GitHub
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
             <div>
-              <a href="https://status.snapshot.org" target="_blank">
+              <AppLink to="https://status.snapshot.org">
                 Status
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
-              </a>
+              </AppLink>
             </div>
           </div>
         </div>
         <div class="space-y-2">
-          <div class="eyebrow">Company</div>
+          <UiEyebrow>Company</UiEyebrow>
           <div>
             <AppLink :to="{ name: 'site-terms' }">Terms of use</AppLink>
           </div>
@@ -100,21 +103,16 @@ const SOCIALS = [
             <AppLink :to="{ name: 'site-policy' }">Privacy policy</AppLink>
           </div>
           <div>
-            <a :href="HELPDESK_URL" target="_blank">Contact us</a>
+            <AppLink :to="HELPDESK_URL">Contact us</AppLink>
           </div>
         </div>
       </div>
       <div class="flex">
         <div class="flex-grow">
-          <img
-            src="@/assets/snapshot.svg"
-            alt="Snapshot"
-            class="w-4 inline-block mr-3"
-          />
+          <IC-snapshot class="size-[32px] inline-block text-skin-link mr-3" />
           © {{ new Date().getFullYear() }} Snapshot Labs
-          <a
-            :href="`https://github.com/${repository}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
-            target="_blank"
+          <AppLink
+            :to="`${repositoryUrl}${COMMIT_SHA && `/tree/${COMMIT_SHA}`}`"
             class="ml-1.5"
           >
             <span
@@ -123,18 +121,17 @@ const SOCIALS = [
               "
             />
             <IH-arrow-sm-right class="inline-block -rotate-45 ml-0.5" />
-          </a>
+          </AppLink>
         </div>
         <div class="flex space-x-2.5">
-          <a
+          <AppLink
             v-for="social in SOCIALS"
             :key="social.href"
-            :href="social.href"
-            target="_blank"
-            class="text-[#606060] hover:text-skin-link"
+            :to="social.href"
+            class="text-skin-text hover:text-skin-link"
           >
             <component :is="social.icon" class="size-[32px] text-skin-link" />
-          </a>
+          </AppLink>
         </div>
       </div>
     </UiContainer>

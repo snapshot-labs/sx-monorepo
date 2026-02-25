@@ -1,6 +1,6 @@
 {
   "name": "@snapshot-labs/sx",
-  "version": "0.1.7",
+  "version": "0.1.9",
   "publishConfig": {
     "access": "public"
   },
@@ -20,6 +20,7 @@
     "build": "tsc -p tsconfig.esnext.json && tsc -p tsconfig.cjs.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src ./test --ext .ts",
+    "lint:fix": "yarn lint --fix",
     "prepare": "yarn build",
     "prepublishOnly": "yarn run lint",
     "node:evm": "anvil",
@@ -35,28 +36,27 @@
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
-    "@ethersproject/abi": "^5.7.0",
-    "@ethersproject/abstract-signer": "^5.7.0",
-    "@ethersproject/address": "^5.7.0",
-    "@ethersproject/bignumber": "^5.7.0",
-    "@ethersproject/bytes": "^5.7.0",
-    "@ethersproject/constants": "^5.7.0",
-    "@ethersproject/contracts": "^5.7.0",
-    "@ethersproject/hash": "^5.6.1",
-    "@ethersproject/keccak256": "^5.7.0",
-    "@ethersproject/providers": "^5.7.0",
-    "@ethersproject/random": "^5.7.0",
-    "@ethersproject/solidity": "^5.7.0",
-    "@ethersproject/strings": "^5.7.0",
-    "@ethersproject/wallet": "^5.7.0",
+    "@ethersproject/abi": "^5.8.0",
+    "@ethersproject/abstract-signer": "^5.8.0",
+    "@ethersproject/address": "^5.8.0",
+    "@ethersproject/bignumber": "^5.8.0",
+    "@ethersproject/bytes": "^5.8.0",
+    "@ethersproject/constants": "^5.8.0",
+    "@ethersproject/contracts": "^5.8.0",
+    "@ethersproject/hash": "^5.8.0",
+    "@ethersproject/keccak256": "^5.8.0",
+    "@ethersproject/providers": "^5.8.0",
+    "@ethersproject/random": "^5.8.0",
+    "@ethersproject/solidity": "^5.8.0",
+    "@ethersproject/strings": "^5.8.0",
+    "@ethersproject/wallet": "^5.8.0",
     "@openzeppelin/merkle-tree": "^1.0.5",
     "@shutter-network/shutter-crypto": "1.0.1",
     "bn.js": "^5.2.1",
-    "cross-fetch": "^3.1.5",
     "micro-starknet": "^0.2.3",
     "randombytes": "^2.1.0",
     "snake-case": "^3.0.4",
-    "starknet": "6.11.0"
+    "starknet": "7.6.4"
   },
   "devDependencies": {
     "@ethersproject/units": "^5.7.0",
@@ -68,8 +68,8 @@
     "@types/randombytes": "^2.0.3",
     "eslint": "^8.57.0",
     "prettier": "^3.1.0",
-    "typescript": "^5.5.4",
-    "vitest": "^1.2.2"
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
   },
   "files": [
     "dist/**/*",

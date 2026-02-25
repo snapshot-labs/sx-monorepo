@@ -1,11 +1,7 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
 import { getRandomHexColor } from '@/helpers/utils';
+
+defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
   loading?: boolean;
@@ -18,17 +14,17 @@ const model = defineModel<string>();
 
 const { currentTheme } = useTheme();
 
-const dirty = ref(false);
+const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
   get() {
-    if (!model.value && !dirty.value && props.definition.default) {
+    if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
     }
+
     return model.value;
   },
   set(newValue: string) {
-    dirty.value = true;
     model.value = newValue.toUpperCase();
   }
 });
@@ -52,10 +48,6 @@ function isColorValid(color: string): boolean {
 function setRandomColor() {
   model.value = getRandomHexColor();
 }
-
-watch(model, () => {
-  dirty.value = true;
-});
 
 debouncedWatch(
   () => model.value,
@@ -95,7 +87,7 @@ function validateAndConvertColor(color: string): string {
     :definition="definition"
     :loading="loading"
     :error="error"
-    :dirty="dirty"
+    :dirty="isDirty"
     :required="required"
     :input-value-length="inputValue?.length"
   >

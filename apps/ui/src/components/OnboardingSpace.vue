@@ -49,7 +49,7 @@ const pendingTasks = computed(() =>
 
 <template>
   <div v-if="canSeeOnboarding && pendingTasks.length">
-    <UiLabel label="onboarding" sticky />
+    <UiSectionHeader label="Onboarding" sticky />
     <OnboardingTask
       v-for="[key, task] in pendingTasks"
       :key="key"

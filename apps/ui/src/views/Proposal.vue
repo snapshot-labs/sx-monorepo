@@ -6,6 +6,7 @@ import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
 import { useProposalQuery } from '@/queries/proposals';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Space } from '@/types';
+import { TOTAL_NAV_HEIGHT } from '../../tailwind.config';
 
 const props = defineProps<{
   space: Space;
@@ -35,6 +36,8 @@ const { data: proposal, isPending } = useProposalQuery(
   id
 );
 
+const router = useRouter();
+
 const {
   data: votingPower,
   error: votingPowerError,
@@ -53,15 +56,7 @@ const discussion = computed(() => {
   return sanitizeUrl(proposal.value.discussion);
 });
 
-const votingPowerDecimals = computed(() => {
-  if (!proposal.value) return 0;
-  return Math.max(
-    ...proposal.value.space.strategies_parsed_metadata.map(
-      metadata => metadata.decimals
-    ),
-    0
-  );
-});
+const votingPowerDecimals = computed(() => proposal.value?.vp_decimals ?? 0);
 
 const currentVote = computed(
   () =>
@@ -100,12 +95,20 @@ async function handleVoteSubmitted() {
 }
 
 watch(
-  [id, proposal],
-  async ([id, proposal]) => {
+  [id, proposal, isPending],
+  async ([id, proposal, isPending]) => {
     modalOpenVote.value = false;
     editMode.value = false;
     discourseTopic.value = null;
     boostCount.value = 0;
+
+    if (!isPending && !proposal) {
+      router.push({
+        name: 'space-overview',
+        params: { space: `${props.space.network}:${props.space.id}` }
+      });
+      return;
+    }
 
     if (!proposal) return;
 
@@ -149,9 +152,10 @@ watchEffect(() => {
         v-bind="$attrs"
       >
         <UiScrollerHorizontal
-          class="z-40 sticky top-[71px] lg:top-[72px]"
+          class="z-40 sticky top-header-height-with-offset lg:top-header-height"
           with-buttons
           gradient="xxl"
+          data-testid="proposal-tabs"
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
@@ -163,12 +167,13 @@ watchEffect(() => {
                 }
               }"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-overview'"
                 text="Overview"
               />
             </AppLink>
             <AppLink
+              v-if="proposal.vote_count"
               :to="{
                 name: 'space-proposal-votes',
                 params: {
@@ -178,10 +183,35 @@ watchEffect(() => {
               }"
               class="flex items-center"
             >
-              <UiLink
+              <UiLabel
                 :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
+                class="inline-block"
+              />
+            </AppLink>
+            <AppLink
+              v-if="
+                proposal.executions?.length ||
+                proposal.execution_strategy_type === 'safeSnap'
+              "
+              :to="{
+                name: 'space-proposal-execution',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-execution'"
+                :count="
+                  proposal.executions
+                    .map(execution => execution.transactions.length)
+                    .reduce((a, b) => a + b, 0)
+                "
+                text="Execution"
                 class="inline-block"
               />
             </AppLink>
@@ -197,31 +227,29 @@ watchEffect(() => {
                 }"
                 class="flex items-center"
               >
-                <UiLink
+                <UiLabel
                   :is-active="route.name === 'space-proposal-discussion'"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
                   class="inline-block"
                 />
               </AppLink>
-              <a
-                v-else
-                :href="discussion"
-                target="_blank"
-                class="flex items-center"
-              >
-                <h4 class="eyebrow text-skin-text" v-text="'Discussion'" />
+              <AppLink v-else :to="discussion" class="flex items-center">
+                <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-              </a>
+              </AppLink>
             </template>
             <template v-if="boostCount > 0">
-              <a
-                :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
+              <AppLink
+                :to="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
                 class="flex items-center"
-                target="_blank"
               >
-                <UiLink :count="boostCount" text="Boost" class="inline-block" />
-              </a>
+                <UiLabel
+                  :count="boostCount"
+                  text="Boost"
+                  class="inline-block"
+                />
+              </AppLink>
             </template>
           </div>
         </UiScrollerHorizontal>
@@ -234,21 +262,26 @@ watchEffect(() => {
         :max="440"
         :min="340"
         :class="[
-          'shrink-0 md:h-full z-40 border-l-0 md:border-l',
+          'shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg',
           {
             'hidden md:block': route.name === 'space-proposal-votes'
           }
         ]"
       >
-        <Affix :top="72" :bottom="64">
+        <Affix
+          data-testid="proposal-sidebar"
+          :top="TOTAL_NAV_HEIGHT"
+          :bottom="64"
+        >
           <div v-bind="$attrs" class="flex flex-col space-y-4 p-4 pb-0 !h-auto">
             <div
               v-if="
-                !proposal.cancelled &&
-                ['pending', 'active'].includes(proposal.state)
+                (!proposal.cancelled &&
+                  ['pending', 'active'].includes(proposal.state)) ||
+                currentVote
               "
             >
-              <h4 class="mb-2.5 eyebrow flex items-center space-x-2">
+              <UiEyebrow class="mb-2.5 flex items-center space-x-2">
                 <template v-if="editMode">
                   <IH-cursor-click />
                   <span>Edit your vote</span>
@@ -261,10 +294,13 @@ watchEffect(() => {
                   <IH-cursor-click />
                   <span>Cast your vote</span>
                 </template>
-              </h4>
+              </UiEyebrow>
               <div class="space-y-2">
                 <IndicatorVotingPower
-                  v-if="!currentVote || editMode"
+                  v-if="
+                    (!currentVote || editMode) &&
+                    ['pending', 'active'].includes(proposal.state)
+                  "
                   v-slot="votingPowerProps"
                   :network-id="proposal.network"
                   :voting-power="votingPower"
@@ -354,10 +390,10 @@ watchEffect(() => {
               </div>
             </div>
             <div v-if="!proposal.cancelled">
-              <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
                 <IH-chart-square-bar />
                 Results
-              </h4>
+              </UiEyebrow>
               <ProposalResults
                 with-details
                 :proposal="proposal"
@@ -365,10 +401,10 @@ watchEffect(() => {
               />
             </div>
             <div v-if="space.labels?.length && proposal.labels?.length">
-              <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
                 <IH-tag />
                 Labels
-              </h4>
+              </UiEyebrow>
               <ProposalLabels
                 :space-id="`${space.network}:${space.id}`"
                 :space-labels="space.labels"
@@ -377,10 +413,10 @@ watchEffect(() => {
               />
             </div>
             <div>
-              <h4 class="mb-2.5 eyebrow flex items-center gap-2">
+              <UiEyebrow class="mb-2.5 flex items-center gap-2">
                 <IH-clock />
                 Timeline
-              </h4>
+              </UiEyebrow>
               <ProposalTimeline :data="proposal" />
             </div>
           </div>

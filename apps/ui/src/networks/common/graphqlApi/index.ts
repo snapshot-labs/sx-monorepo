@@ -26,6 +26,7 @@ import {
   Proposal,
   ProposalExecution,
   ProposalState,
+  ScoresTick,
   Space,
   SpaceMetadataTreasury,
   Transaction,
@@ -49,6 +50,7 @@ import {
   LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
+  PROPOSAL_SCORES_TICKS_QUERY,
   PROPOSALS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
@@ -111,12 +113,19 @@ function getProposalState(
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);
 
-  if (proposal.executed) return 'executed';
-  if (proposal.max_end <= current) {
+  if (proposal.executed) {
+    if (proposal.vetoed) return 'vetoed';
+    return proposal.execution_settled ? 'executed' : 'queued';
+  }
+
+  if ((proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
-  if (proposal.start > current) return 'pending';
+
+  if ((proposal.start_block_number ?? proposal.start) > current) {
+    return 'pending';
+  }
 
   return 'active';
 }
@@ -142,14 +151,14 @@ function formatMetadataTreasury(treasury: string): SpaceMetadataTreasury {
     return {
       name,
       address,
-      chainId: CHAIN_IDS[network]
+      chainId: String(CHAIN_IDS[network])
     };
   }
 
   return {
     name,
     address,
-    chainId: chain_id
+    chainId: String(chain_id)
   };
 }
 
@@ -164,6 +173,10 @@ function getValidationStrategyStrategiesIndices(
   strategies: string[],
   parsedMetadata: ApiStrategyParsedMetadata[]
 ) {
+  if (strategies.length === 0 || parsedMetadata.length === 0) {
+    return [];
+  }
+
   // Those values are default sorted by block_range so newest entries are at the end
   const maxIndex = Math.max(
     ...parsedMetadata.slice(-strategies.length).map(metadata => metadata.index)
@@ -217,7 +230,7 @@ function processExecutions(
     return (
       match.treasury &&
       compareAddresses(treasury.address, match.treasury) &&
-      match.treasury_chain === treasury.chainId
+      String(match.treasury_chain) === treasury.chainId
     );
   });
 
@@ -250,6 +263,7 @@ function formatSpace(
     twitter: space.metadata.twitter,
     discord: space.metadata.discord,
     farcaster: space.metadata.farcaster,
+    clanker: space.metadata.clanker,
     terms: '',
     privacy: 'none',
     voting_power_symbol: space.metadata.voting_power_symbol,
@@ -272,7 +286,7 @@ function formatSpace(
           apiType: api_type,
           apiUrl: api_url,
           contractAddress: address === 'null' ? null : address,
-          chainId: CHAIN_IDS[network]
+          chainId: String(CHAIN_IDS[network])
         };
       }
 
@@ -281,7 +295,7 @@ function formatSpace(
         apiType: api_type,
         apiUrl: api_url,
         contractAddress: contract,
-        chainId: chain_id
+        chainId: String(chain_id)
       };
     }),
     executors: space.metadata.executors,
@@ -333,6 +347,7 @@ function formatProposal(
         proposal.execution_strategy !== emptyAddress),
     space: {
       id: proposal.space.id,
+      protocol: proposal.space.protocol,
       name: proposal.space.metadata.name,
       avatar: proposal.space.metadata.avatar,
       controller: proposal.space.controller,
@@ -365,15 +380,21 @@ function formatProposal(
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
       proposal.execution_strategy_type
     )
-      ? proposal.max_end <= current
-      : proposal.min_end <= current,
+      ? (proposal.max_end_block_number ?? proposal.max_end) <= current
+      : (proposal.min_end_block_number ?? proposal.min_end) <= current,
+    execution_settled: proposal.execution_settled,
     state,
     network: networkId,
     privacy: 'none',
-    quorum: +proposal.quorum,
+    quorum: Number(proposal.execution_strategy_details?.quorum || 0),
     flagged: false,
     flag_code: 0,
-    completed: ['passed', 'executed', 'rejected'].includes(state)
+    completed: ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(
+      state
+    ),
+    plugins: {},
+    voting_power_validation_strategy_strategies: [],
+    voting_power_validation_strategy_strategies_params: []
   };
 }
 
@@ -419,6 +440,23 @@ export function createApi(
 
   return {
     apiUrl: uri,
+    loadProposalScoresTicks: async (
+      proposalId: string
+    ): Promise<ScoresTick[]> => {
+      const { data } = await apollo.query({
+        query: PROPOSAL_SCORES_TICKS_QUERY,
+        variables: { id: proposalId }
+      });
+
+      return (data.proposal?.scores_ticks ?? []).map(tick => ({
+        timestamp: tick.timestamp,
+        scores: [
+          Number(tick.scores_1),
+          Number(tick.scores_2),
+          Number(tick.scores_3)
+        ] as const
+      }));
+    },
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,
@@ -449,7 +487,7 @@ export function createApi(
           orderDirection,
           where: {
             space: proposal.space.id,
-            proposal: Number(proposal.proposal_id),
+            proposal: proposal.proposal_id,
             ...filters
           }
         }

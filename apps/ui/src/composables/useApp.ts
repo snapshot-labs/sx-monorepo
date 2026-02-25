@@ -33,9 +33,14 @@ export function useApp() {
     state.app_name = title ?? window.location.toString();
   }
 
+  const isAuctionApp = computed(
+    () => import.meta.env.VITE_IS_BROKESTER === 'true'
+  );
+
   return {
     init,
     setAppName,
+    isAuctionApp,
     app: computed(() => state)
   };
 }

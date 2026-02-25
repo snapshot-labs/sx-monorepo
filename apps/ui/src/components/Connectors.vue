@@ -35,7 +35,7 @@ const availableConnectors = computed(() => {
   <UiButton
     v-for="connector in availableConnectors"
     :key="connector.id"
-    class="w-full flex items-center gap-2 !px-3"
+    class="w-full"
     @click="emit('click', connector)"
   >
     <img
@@ -46,15 +46,11 @@ const availableConnectors = computed(() => {
       :alt="connector.info.name"
     />
     <span class="flex-grow text-left" v-text="connector.info.name" />
-    <span
+    <UiPill
       v-if="connector.id === recentConnector"
-      class="inline-block bg-skin-link text-skin-bg text-[13px] rounded-full px-1.5"
-      v-text="'Recent'"
+      variant="primary"
+      label="Recent"
     />
-    <span
-      v-else-if="connector.type === 'injected'"
-      class="inline-block bg-skin-border text-skin-link text-[13px] rounded-full px-1.5"
-      v-text="'Detected'"
-    />
+    <UiPill v-else-if="connector.type === 'injected'" label="Detected" />
   </UiButton>
 </template>

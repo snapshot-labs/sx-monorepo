@@ -1,10 +1,6 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false });
+
 const uiStore = useUiStore();
 const pendingTransactionsModalOpen = ref(false);
 </script>
@@ -15,11 +11,7 @@ const pendingTransactionsModalOpen = ref(false);
     v-bind="$attrs"
     title="Pending transactions"
   >
-    <UiButton
-      primary
-      class="!px-0 w-[46px]"
-      @click="pendingTransactionsModalOpen = true"
-    >
+    <UiButton primary uniform @click="pendingTransactionsModalOpen = true">
       {{ uiStore.pendingTransactions.length }}
     </UiButton>
   </UiTooltip>

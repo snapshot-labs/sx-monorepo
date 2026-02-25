@@ -1,8 +1,8 @@
 import {
   getExecutionData as _getExecutionData,
-  Choice as SdkChoice
+  Choice as SdkChoice,
+  utils
 } from '@snapshot-labs/sx';
-import { MetaTransaction } from '@snapshot-labs/sx/dist/utils/encoding/execution-hash';
 import { getUrl } from '@/helpers/utils';
 import {
   AuthenticatorSupportInfo,
@@ -25,7 +25,7 @@ export function getExecutionData(
   space: SpaceExecutionData,
   executionStrategy: string,
   destinationAddress: string | null,
-  transactions: MetaTransaction[]
+  transactions: utils.encoding.MetaTransaction[]
 ) {
   const supportedExecutionIndex = space.executors.findIndex(
     executor => executor === executionStrategy
@@ -73,6 +73,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     strategies,
     strategiesIndices,
     isContract,
+    hasReason,
     connectorType,
     ignoreRelayer
   }: {
@@ -80,6 +81,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
     strategies: string[];
     strategiesIndices: number[];
     isContract: boolean;
+    hasReason: boolean;
     connectorType: ConnectorType;
     ignoreRelayer?: boolean;
   }) {
@@ -104,6 +106,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
       .filter(({ supportInfo }) => {
         if (isContract && !supportInfo.isContractSupported) return false;
         if (ignoreRelayer && supportInfo.relayerType) return false;
+        if (hasReason && !supportInfo.isReasonSupported) return false;
 
         return supportInfo.isSupported;
       })
@@ -111,7 +114,7 @@ export function createStrategyPicker({ helpers }: { helpers: NetworkHelpers }) {
         const aRelayerPriority = a.supportInfo.priority ?? 0;
         const bRelayerPriority = b.supportInfo.priority ?? 0;
 
-        return bRelayerPriority - aRelayerPriority;
+        return aRelayerPriority - bRelayerPriority;
       })
       .map(({ authenticator, supportInfo }) => ({
         authenticator,

@@ -4,7 +4,6 @@ import { Token } from '@/composables/usePayment';
 import { BarcodePayload } from '@/composables/usePaymentFactory';
 import { _n, clone, compareAddresses } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
-import { ChainId } from '@/types';
 
 const FORM = {
   quantity: 1
@@ -15,7 +14,7 @@ const props = withDefaults(
     open: boolean;
     unitPrice: number;
     tokens: Token[];
-    network: ChainId;
+    network: string;
     barcodePayload: BarcodePayload;
     calculator?: (unitPrice: number, quantity: number) => number;
     quantityLabel?: string;
@@ -29,8 +28,8 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'close');
-  (e: 'confirmed');
+  (e: 'close'): void;
+  (e: 'confirmed'): void;
 }>();
 
 const { auth } = useWeb3();
@@ -50,9 +49,10 @@ const { isPending, assetsMap } = useBalances({
       : null;
   })
 });
+const { isWhiteLabel } = useWhiteLabel();
 
 const selectedTokenAddress = ref<string>('');
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
@@ -135,9 +135,11 @@ async function moveToNextStep() {
 
   isModalTransactionProgressOpen.value = false;
 
-  if (await goToNextStep()) {
+  goToNextStep();
+
+  nextTick(() => {
     isModalTransactionProgressOpen.value = true;
-  }
+  });
 }
 
 function handleSubmit() {
@@ -151,7 +153,7 @@ function handleSubmit() {
 
 function handleTokenPick(address: string) {
   selectedTokenAddress.value = address;
-  showPicker.value = false;
+  isPickerShown.value = false;
 }
 
 watch(
@@ -160,7 +162,7 @@ watch(
     if (open) return;
 
     isTermsAccepted.value = false;
-    showPicker.value = false;
+    isPickerShown.value = false;
     isHidden.value = false;
     selectedTokenAddress.value = '';
     form.value = clone(FORM);
@@ -172,18 +174,18 @@ watch(
   <UiModal :open="open" :class="{ hidden: isHidden }" @close="emit('close')">
     <template #header>
       <h3>Payment</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
       </template>
     </template>
     <PickerToken
-      v-if="showPicker"
+      v-if="isPickerShown"
       :assets="filteredAssets"
       :address="auth?.account || ''"
       :network="network"
@@ -197,7 +199,7 @@ watch(
         <button
           type="button"
           class="s-input text-left h-[61px]"
-          @click="showPicker = true"
+          @click="isPickerShown = true"
         >
           <div class="flex items-center">
             <UiStamp
@@ -217,9 +219,9 @@ watch(
         :definition="definition.properties.quantity"
         :error="formErrors.quantity"
       />
-      <div class="space-y-[14px] pt-3">
+      <div class="space-y-3">
         <div
-          class="border rounded-lg text-[16px] bg-skin-input-bg p-3 py-2.5 space-y-1"
+          class="border rounded-lg text-[17px] bg-skin-border/40 p-3 py-2.5 space-y-1"
         >
           <div class="flex justify-between">
             You will pay
@@ -238,15 +240,24 @@ watch(
         </div>
         <UiCheckbox v-model="isTermsAccepted" class="text-start">
           <div class="text-skin-text leading-[22px] top-[-1px] relative">
-            Before confirming, please read and agree to the
-            <AppLink is-external :to="{ name: 'site-terms' }" @click.stop
-              >Terms of service</AppLink
+            I have read and agree to the
+            <span @click.stop>
+              <AppLink
+                is-external
+                :to="
+                  isWhiteLabel
+                    ? 'https://snapshot.box/#/terms-of-use'
+                    : { name: 'site-terms' }
+                "
+                @click.stop
+                >Terms of service</AppLink
+              ></span
             >.
           </div>
         </UiCheckbox>
       </div>
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton
         class="w-full"
         primary

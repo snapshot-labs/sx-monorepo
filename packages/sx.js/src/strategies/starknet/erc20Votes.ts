@@ -2,7 +2,13 @@
 
 import { Contract } from 'starknet';
 import ERC20VotesTokenAbi from './abis/ERC20VotesToken.json';
-import { ClientConfig, Envelope, Propose, Strategy, Vote } from '../../types';
+import {
+  ClientConfig,
+  Envelope,
+  Propose,
+  Strategy,
+  Vote
+} from '../../clients/starknet/types';
 
 export default function createErc20VotesStrategy(): Strategy {
   return {

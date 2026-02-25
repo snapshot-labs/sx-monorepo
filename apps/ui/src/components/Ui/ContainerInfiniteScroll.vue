@@ -10,7 +10,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
-  (e: 'endReached');
+  (e: 'endReached'): void;
 }>();
 
 const container: Ref<HTMLElement | null> = ref(null);

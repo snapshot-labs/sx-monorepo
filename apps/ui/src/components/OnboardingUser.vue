@@ -68,7 +68,7 @@ onMounted(async () => {
 
 <template>
   <div v-if="user && pendingTasks.length">
-    <UiLabel label="onboarding" sticky />
+    <UiSectionHeader label="Onboarding" sticky />
     <OnboardingTask
       v-for="[key, task] in pendingTasks"
       :key="key"
