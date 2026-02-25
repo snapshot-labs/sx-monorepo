@@ -1,8 +1,8 @@
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getNetwork } from '@/networks';
-import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm';
-import { METADATA as STARKNET_NETWORKS_METADATA } from '@/networks/starknet';
+import { METADATA as EVM_NETWORKS_METADATA } from '@/networks/evm/metadata';
+import { METADATA as STARKNET_NETWORKS_METADATA } from '@/networks/starknet/metadata';
 import { ChainId, NetworkID } from '@/types';
 import { getProvider } from './provider';
 import { getChainIdKind } from './utils';

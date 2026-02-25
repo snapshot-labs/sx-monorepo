@@ -4,7 +4,7 @@ import { MaybeRefOrGetter } from 'vue';
 import { getBalances, Token } from '@/helpers/alchemy';
 import { getTokenPrices } from '@/helpers/coingecko';
 import { COINGECKO_ASSET_PLATFORMS, ETH_CONTRACT } from '@/helpers/constants';
-import { METADATA } from '@/networks/evm';
+import { METADATA } from '@/networks/evm/metadata';
 import { ChainId } from '@/types';
 
 type Metadata = {
