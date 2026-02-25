@@ -110,10 +110,7 @@ function parseContractInteraction(
   try {
     const iface = new Interface(abi);
     const parsed = iface.parseTransaction({ data: tx.data });
-    methodName =
-      parsed.functionFragment?.format('sighash') ||
-      parsed.signature ||
-      methodName;
+    methodName = parsed.signature || methodName;
 
     for (let i = 0; parsed.args && i < parsed.args.length; i++) {
       args.push(String(parsed.args[i]));

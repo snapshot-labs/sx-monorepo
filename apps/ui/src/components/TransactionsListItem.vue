@@ -148,7 +148,7 @@ const parsedTitle = computedAsync(
 </script>
 
 <template>
-  <div class="w-full border-b last:border-b-0">
+  <div class="group w-full border-b last:border-b-0">
     <button
       class="w-full px-4 py-3 gap-2 flex items-center"
       @click="expanded = !expanded"
@@ -163,7 +163,16 @@ const parsedTitle = computedAsync(
         <IH-code v-else class="shrink-0" />
         <div class="truncate text-skin-link" v-html="parsedTitle" />
       </div>
-      <slot name="right" />
+      <slot name="right">
+        <IS-chevron-up
+          v-if="expanded"
+          class="shrink-0 text-skin-text invisible group-hover:visible"
+        />
+        <IS-chevron-down
+          v-else
+          class="shrink-0 text-skin-text invisible group-hover:visible"
+        />
+      </slot>
     </button>
     <div v-if="expanded" class="border-y last:border-b-0 px-4 py-3">
       <div v-if="call" class="text-skin-link">
