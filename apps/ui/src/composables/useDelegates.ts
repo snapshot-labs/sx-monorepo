@@ -63,6 +63,11 @@ const DELEGATION_SUBGRAPHS = {
   '11155111': 'https://subgrapher.snapshot.org/delegation/11155111'
 };
 
+const DELEGATION_API_OVERRIDES: Record<string, string> = {
+  'https://api.studio.thegraph.com/query/23545/delegates/version/latest':
+    'https://delegates-api.snapshot.box/'
+};
+
 const DELEGATES_QUERY = gql`
   query (
     $first: Int!
@@ -119,6 +124,8 @@ const DELEGATIONS_QUERY = gql`
 const metadataNetwork = getNetwork(metadataNetworkId);
 
 function convertUrl(apiUrl: string) {
+  if (DELEGATION_API_OVERRIDES[apiUrl]) return DELEGATION_API_OVERRIDES[apiUrl];
+
   const hostedPattern =
     /https:\/\/thegraph\.com\/hosted-service\/subgraph\/([\w-]+)\/([\w-]+)/;
 
