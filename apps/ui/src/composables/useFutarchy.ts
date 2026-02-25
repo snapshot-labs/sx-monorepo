@@ -133,7 +133,9 @@ export function useFutarchy(
   }
 
   /**
-   * Single unified fetch — gets market metadata + all candles in one request.
+   * Two-phase load:
+   * 1. Fast call (includeSpot=false) → render YES/NO candles immediately
+   * 2. Async spot call → merge spot candles when they arrive
    */
   async function load() {
     loadingChart.value = true;
@@ -142,9 +144,11 @@ export function useFutarchy(
     try {
       const params = new URLSearchParams({
         minTimestamp: String(startTimestamp.value),
-        maxTimestamp: String(maxTimestamp.value)
+        maxTimestamp: String(maxTimestamp.value),
+        includeSpot: 'false'
       });
 
+      // ── Phase 1: Fast YES/NO + metadata ──
       const res = await fetch(
         `${FUTARCHY_API_URL}/api/v2/proposals/${proposalId.value}/chart?${params}`
       );
@@ -157,11 +161,11 @@ export function useFutarchy(
       const market = FutarchyResponseSchema.parse(data.market);
       marketData.value = market;
 
-      // Process all candle data (YES + NO + Spot already included)
+      // Process YES/NO candles (no spot yet)
       const { candles, scaleFactor, hasYes, hasNo } = processCandleData(
         data.candles?.yes || [],
         data.candles?.no || [],
-        data.candles?.spot || []
+        []
       );
 
       if (!hasYes || !hasNo) {
@@ -169,17 +173,75 @@ export function useFutarchy(
         throw new Error('Missing conditional pool candle data');
       }
 
-      const spotCount = candles.filter(c => c.spot > 0).length;
-      console.log(`[useFutarchy] ✅ Unified response: ${candles.length} candles (YES+NO+${spotCount} spot)`);
+      console.log(`[useFutarchy] ✅ Phase 1: ${candles.length} candles (YES+NO, no spot yet)`);
 
       candleData.value = candles;
       priceScaleFactor.value = scaleFactor;
       loadingChart.value = false;
 
+      // ── Phase 2: Async spot fetch ──
+      const ticker = market.spot?.pool_ticker;
+      if (ticker) {
+        loadSpotAsync(ticker);
+      }
+
     } catch (e) {
       console.error('Error fetching Futarchy data', e);
       error.value = true;
       loadingChart.value = false;
+    }
+  }
+
+  /**
+   * Fetch spot candles asynchronously and merge into existing candle data.
+   */
+  async function loadSpotAsync(ticker: string) {
+    try {
+      const spotParams = new URLSearchParams({
+        ticker,
+        minTimestamp: String(startTimestamp.value),
+        maxTimestamp: String(maxTimestamp.value)
+      });
+
+      const spotRes = await fetch(
+        `${FUTARCHY_API_URL}/api/v1/spot-candles?${spotParams}`
+      );
+
+      if (!spotRes.ok) {
+        console.warn('[useFutarchy] ⚠️ Spot candles fetch failed:', spotRes.status);
+        return;
+      }
+
+      const spotData = await spotRes.json();
+      const spotCandles = spotData?.spotCandles || [];
+
+      if (spotCandles.length === 0) {
+        console.log('[useFutarchy] ℹ️ No spot candles returned');
+        return;
+      }
+
+      // Re-process with existing YES/NO data + new spot candles
+      const currentMarket = marketData.value;
+      if (!currentMarket) return;
+
+      // Re-fetch existing YES/NO from current candle data
+      const yesCandles = candleData.value
+        .filter(c => c.yes > 0)
+        .map(c => ({ periodStartUnix: String(c.time / 1000), close: String(c.yes) }));
+      const noCandles = candleData.value
+        .filter(c => c.no > 0)
+        .map(c => ({ periodStartUnix: String(c.time / 1000), close: String(c.no) }));
+
+      const { candles, scaleFactor } = processCandleData(yesCandles, noCandles, spotCandles);
+
+      const spotCount = candles.filter(c => c.spot > 0).length;
+      console.log(`[useFutarchy] ✅ Phase 2: merged ${spotCount} spot candles`);
+
+      candleData.value = candles;
+      priceScaleFactor.value = scaleFactor;
+
+    } catch (e) {
+      console.warn('[useFutarchy] ⚠️ Spot async load error:', e);
     }
   }
 
