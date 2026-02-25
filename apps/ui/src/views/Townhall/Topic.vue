@@ -17,7 +17,6 @@ const props = defineProps<{ space: Space; townhallSpace: TownhallSpace }>();
 const route = useRoute();
 const { web3 } = useWeb3();
 const { setTitle } = useTitle();
-const { setContext, setVars, openChatbot } = useChatbot();
 
 const spaceId = toRef(() => props.townhallSpace.space_id);
 const id = computed(() => Number(route.params.id));
@@ -107,30 +106,6 @@ watchEffect(() => {
   }
 
   setTitle(topic.value ? topic?.value.title : '');
-  setContext({
-    purpose:
-      'This is a topic page where you can add posts (ideas, feedback, opinions) for consensus-driven discussion. Each post should express one clear, concise idea.',
-    data: {
-      topic: {
-        id: topic.value.id,
-        title: topic.value.title,
-        body: topic.value.body,
-        vote_count: topic.value.vote_count
-      },
-      space: {
-        id: props.space.id,
-        name: props.space.name,
-        about: props.space.about
-      }
-    },
-    inputs: {
-      body: {
-        value: body.value,
-        definition: BODY_DEFINITION
-      }
-    }
-  });
-  setVars({ body });
 });
 </script>
 
@@ -278,14 +253,6 @@ watchEffect(() => {
                 <div>Publish</div>
                 <IH-paper-airplane class="rotate-90 relative left-[2px]" />
               </UiButton>
-
-              <button
-                class="text-skin-link flex items-center gap-1.5"
-                @click="openChatbot('Suggest post')"
-              >
-                <IH-sparkles />
-                Suggest post
-              </button>
             </div>
           </div>
         </div>
