@@ -1,10 +1,10 @@
 <script setup lang="ts">
+const emit = defineEmits<{ (e: 'close'): void }>();
+
 const { prompt, handleSubmit, handleInsert, history, loading, page, context } =
   useChatbot({
     onNewMessage: () => scrollToBottom()
   });
-
-defineEmits<{ (e: 'close'): void }>();
 
 const containerRef = ref<HTMLElement | null>(null);
 const promptRef = ref<HTMLTextAreaElement | null>(null);
@@ -28,7 +28,7 @@ function adjustHeight() {
   promptRef.value.style.height = `${newHeight}px`;
 }
 
-function handleEnterKey(event) {
+function handleEnterKey(event: KeyboardEvent) {
   if (event.shiftKey) return;
 
   event.preventDefault();
@@ -58,7 +58,7 @@ onMounted(async () => {
   <div>
     <div
       class="animate-fade-in z-50 _fixed top-0 bottom-0 bg-black/40 left-0 right-0"
-      @click="$emit('close')"
+      @click="emit('close')"
     />
     <div
       class="z-50 fixed h-full xl:max-h-[calc(100vh-24px)] xl:h-[600px] bottom-0 xl:shadow-lg left-0 xl:left-auto right-0 xl:w-[440px] xl:border xl:border-b-0 bg-skin-bg flex flex-col xl:rounded-t-lg xl:m-3.5 xl:mb-0"
@@ -67,7 +67,7 @@ onMounted(async () => {
         <button
           type="button"
           class="absolute right-0 -top-0.5 p-4"
-          @click="$emit('close')"
+          @click="emit('close')"
         >
           <IH-x />
         </button>
