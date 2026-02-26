@@ -160,7 +160,7 @@ export function useAuctionVerification({
   function handleError(err: unknown, message?: string) {
     status.value = 'error';
     error.value =
-      err instanceof Error ? err.message : message ?? 'An error occurred';
+      err instanceof Error ? err.message : (message ?? 'An error occurred');
     uiStore.addNotification('error', error.value);
   }
 

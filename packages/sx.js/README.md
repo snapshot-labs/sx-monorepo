@@ -7,17 +7,17 @@ Tests are run using [`anvil`](https://book.getfoundry.sh/reference/anvil/) and [
 ## Running sx-evm tests
 
 You need to have `anvil` running to run `sx-evm` tests.
-Start it using `yarn node:evm`.
+Start it using `bun run node:evm`.
 
 ```
-yarn test:integration:evm
+bun run test:integration:evm
 ```
 
 ## Running sx-starknet tests
 
 You need to have both `anvil` and `starknet-devnet` running to run `sx-evm` tests.
-Start them using `yarn node:evm` and `yarn node:starknet`.
+Start them using `bun run node:evm` and `bun run node:starknet`.
 
 ```
-yarn test:integration:starknet
+bun run test:integration:starknet
 ```

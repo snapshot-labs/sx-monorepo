@@ -7,22 +7,23 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
     container:
-      image: mcr.microsoft.com/playwright:v1.56.1-noble
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install unzip
+      run: apt-get update && apt-get install -y unzip
     - uses: actions/setup-node@v4
       with:
         node-version: lts/*
-        cache: 'yarn'
+    - uses: oven-sh/setup-bun@v2
     - name: Install dependencies
-      run: yarn
+      run: bun install --frozen-lockfile
     - name: Run E2E Tests
-      run: PLAYWRIGHT_HTML_OPEN=never yarn test:e2e --reporter=html
+      run: PLAYWRIGHT_HTML_OPEN=never bun run test:e2e --reporter=html
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
         name: playwright-report
         path: playwright-report/
         retention-days: 30
-

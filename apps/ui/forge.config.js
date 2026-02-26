@@ -16,7 +16,7 @@ export default {
     overwrite: true,
     prune: false,
     derefSymlinks: false,
-    packageManager: 'yarn'
+    packageManager: 'npm'
   },
 
   rebuildConfig: {},
