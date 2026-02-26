@@ -1,13 +1,10 @@
 <script lang="ts" setup>
-import {
-  createSubscription,
-  resendVerificationEmail,
-  updateSubscription
-} from '@/helpers/emailNotification';
+import { useQueryClient } from '@tanstack/vue-query';
 import { EmailSubscriptionStatus } from '@/helpers/emailNotification/types';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import {
+  EMAIL_NOTIFICATION_KEYS,
   useEmailNotificationFeedsListQuery,
   useEmailNotificationQuery
 } from '@/queries/emailNotification';
@@ -29,6 +26,7 @@ const SUBSCRIBE_DEFINITION = {
       type: 'string',
       format: 'email',
       title: 'Email',
+      errorMessage: 'Invalid email address',
       maxLength: 256,
       examples: ['e.g. me@snapshot.box']
     }
@@ -36,6 +34,8 @@ const SUBSCRIBE_DEFINITION = {
 };
 
 const { web3 } = useWeb3();
+const uiStore = useUiStore();
+const queryClient = useQueryClient();
 
 const form = ref<{
   email: string;
@@ -48,6 +48,9 @@ const { height: bottomToolbarHeight } = useElementSize(el);
 const status = ref<EmailSubscriptionStatus>('NOT_SUBSCRIBED');
 const feeds = reactive<Record<string, boolean>>({});
 const originalFeeds = ref<Record<string, boolean>>({});
+const isPending = ref(false);
+
+const { createSubscription, updateSubscription } = useEmailNotification();
 
 const {
   data: subscription,
@@ -63,18 +66,52 @@ const {
   isError: isFeedsListError
 } = useEmailNotificationFeedsListQuery();
 
-async function handleCreateSubscriptionClick() {
-  await createSubscription();
-}
+const isFormValid = computed(() => !Object.keys(formErrors.value).length);
 
-async function handleResendConfirmationClick() {
-  await resendVerificationEmail();
+async function handleCreateSubscriptionClick() {
+  if (!isFormValid.value) return;
+
+  try {
+    isPending.value = true;
+    const subscription = await createSubscription(form.value.email);
+
+    if (subscription) {
+      status.value = 'UNVERIFIED';
+    }
+  } catch (err) {
+    console.log(err);
+    uiStore.addNotification(
+      'error',
+      'An error occurred while submitting your query, please try again.'
+    );
+  } finally {
+    isPending.value = false;
+  }
 }
 
 async function handleUpdateSubscriptionClick() {
-  saving.value = true;
   try {
-    await updateSubscription();
+    saving.value = true;
+    const subscription = await updateSubscription(
+      Object.keys(feeds).filter(key => feeds[key])
+    );
+
+    if (subscription) {
+      uiStore.addNotification(
+        'success',
+        'Your subscriptions have been updated'
+      );
+
+      queryClient.invalidateQueries({
+        queryKey: EMAIL_NOTIFICATION_KEYS.user(web3.value.account)
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    uiStore.addNotification(
+      'error',
+      'An error occurred while submitting your query, please try again.'
+    );
   } finally {
     saving.value = false;
   }
@@ -167,7 +204,11 @@ watchEffect(async () => {
           :definition="SUBSCRIBE_DEFINITION.properties.email"
         />
       </div>
-      <UiButton disabled @click="handleCreateSubscriptionClick">
+      <UiButton
+        :disabled="!web3.account || !isFormValid || !formValidated"
+        :loading="isPending"
+        @click="handleCreateSubscriptionClick"
+      >
         Subscribe now
       </UiButton>
     </UiContainerSettings>
@@ -181,9 +222,6 @@ watchEffect(async () => {
         Please check your inbox and follow the instructions to complete the
         process.
       </template>
-      <UiButton @click="handleResendConfirmationClick">
-        Resend confirmation email
-      </UiButton>
     </UiContainerSettings>
     <UiContainerSettings
       v-else-if="status === 'VERIFIED'"

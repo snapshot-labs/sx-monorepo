@@ -2,9 +2,15 @@ import { useQuery } from '@tanstack/vue-query';
 import { MaybeRefOrGetter, toValue } from 'vue';
 import { getFeedsTypeList, getSubscription } from '@/helpers/emailNotification';
 
+export const EMAIL_NOTIFICATION_KEYS = {
+  user: (address: MaybeRefOrGetter<string>) =>
+    ['emailNotification', address] as const,
+  typesList: ['emailNotificationFeedsList'] as const
+};
+
 export function useEmailNotificationQuery(address: MaybeRefOrGetter<string>) {
   return useQuery({
-    queryKey: ['emailNotification', address],
+    queryKey: EMAIL_NOTIFICATION_KEYS.user(address),
     queryFn: async () => {
       return getSubscription(toValue(address));
     },
@@ -14,7 +20,7 @@ export function useEmailNotificationQuery(address: MaybeRefOrGetter<string>) {
 
 export function useEmailNotificationFeedsListQuery() {
   return useQuery({
-    queryKey: ['emailNotificationFeedsList'],
+    queryKey: EMAIL_NOTIFICATION_KEYS.typesList,
     queryFn: async () => {
       return getFeedsTypeList();
     },
