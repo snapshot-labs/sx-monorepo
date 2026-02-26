@@ -41,8 +41,8 @@
     "viem": "^2.38.0"
   },
   "devDependencies": {
-    "@snapshot-labs/eslint-config": "^0.1.0-beta.21",
-    "@snapshot-labs/prettier-config": "^0.1.0-beta.19",
+    "@snapshot-labs/eslint-config": "^0.1.0",
+    "@snapshot-labs/prettier-config": "^0.1.0",
     "eslint": "^8.57.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",

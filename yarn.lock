@@ -4521,33 +4521,6 @@
     yargs "^17.7.2"
     zod "^3.21.4"
 
-"@snapshot-labs/eslint-config-base@^0.1.0-beta.21":
-  version "0.1.0-beta.21"
-  resolved "https://registry.npmjs.org/@snapshot-labs/eslint-config-base/-/eslint-config-base-0.1.0-beta.21.tgz"
-  integrity sha512-1ZuKV3bn8OW3l9NgA0wnt55khoc0hIWBbkNjIytPnG00WlJTWLNgjHAhRQHaD4swK/3oaj8GSTxiOm0eEIfXeA==
-  dependencies:
-    "@typescript-eslint/eslint-plugin" "^8.29.1"
-    "@typescript-eslint/parser" "^8.29.1"
-    eslint-config-prettier "^10.1.1"
-    eslint-plugin-import "^2.31.0"
-    eslint-plugin-prettier "^5.2.6"
-
-"@snapshot-labs/eslint-config-vue@^0.1.0-beta.22":
-  version "0.1.0-beta.22"
-  resolved "https://registry.npmjs.org/@snapshot-labs/eslint-config-vue/-/eslint-config-vue-0.1.0-beta.22.tgz"
-  integrity sha512-/AYqSXSJ8yCYL0rMQIX9P+YoKBj9M+VwYFrQoBLkQFI/Lcp66t7abkoPHa9GS2EUwclS3n466JQ/bpt4CMXO8w==
-  dependencies:
-    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.21"
-    eslint-plugin-vue "^10.0.0"
-    vue-eslint-parser "^10.1.3"
-
-"@snapshot-labs/eslint-config@^0.1.0-beta.21":
-  version "0.1.0-beta.21"
-  resolved "https://registry.npmjs.org/@snapshot-labs/eslint-config/-/eslint-config-0.1.0-beta.21.tgz"
-  integrity sha512-3Y+sjt/c4ScVUYvsKu1u6O0ggcxM6t0AE0mMd8rcnX8kMfFikiWOTKN8c3m4ZmnuUb2vRCdCNxtMGMGju9JY+A==
-  dependencies:
-    "@snapshot-labs/eslint-config-base" "^0.1.0-beta.21"
-
 "@snapshot-labs/highlight@^0.1.0-beta.2":
   version "0.1.0-beta.2"
   resolved "https://registry.npmjs.org/@snapshot-labs/highlight/-/highlight-0.1.0-beta.2.tgz"
@@ -4572,11 +4545,6 @@
   integrity sha512-oUwIGU7xovQG7/rRNVgZi29UfrI7eqTmJh5/sk4oOV8+fGFy4yg7dbHRU62cBV6bJPuuN8PWwUgLzcXUmmuXwQ==
   dependencies:
     ofetch "^1.3.3"
-
-"@snapshot-labs/prettier-config@^0.1.0-beta.19":
-  version "0.1.0-beta.19"
-  resolved "https://registry.npmjs.org/@snapshot-labs/prettier-config/-/prettier-config-0.1.0-beta.19.tgz"
-  integrity sha512-vpfk3WU4idf7o0go4J+JnzZTRXB+KJEw39yElZhXxq4rzBQBzeZm/9xvlew4ZdN2A2bAHY4Ov6NL0/C8I+R1TA==
 
 "@snapshot-labs/snapshot.js@^0.14.20":
   version "0.14.20"
