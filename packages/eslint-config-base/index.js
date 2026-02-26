@@ -10,21 +10,13 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    'import/no-duplicates': ['error', { 'prefer-inline': true }],
-    '@typescript-eslint/consistent-type-imports': [
-      'error',
-      { prefer: 'no-type-imports' }
-    ],
     'prettier/prettier': 'error',
     'prefer-template': 'error',
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/ban-ts-comment': 'off',
     'lines-between-class-members': [
       'error',
       'always',
       { exceptAfterSingleLine: true }
     ],
-    'import/no-extraneous-dependencies': 'error',
     'sort-imports': [
       'error',
       {
@@ -32,6 +24,8 @@ module.exports = {
         ignoreDeclarationSort: true
       }
     ],
+    'import/no-duplicates': ['error', { 'prefer-inline': true }],
+    'import/no-extraneous-dependencies': 'error',
     'import/order': [
       'error',
       {
@@ -63,6 +57,12 @@ module.exports = {
           caseInsensitive: true
         }
       }
-    ]
+    ],
+    '@typescript-eslint/consistent-type-imports': [
+      'error',
+      { prefer: 'no-type-imports' }
+    ],
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off'
   }
 };
