@@ -39,7 +39,6 @@ const form = ref<{
 }>(clone(SUBSCRIBE_FORM_STATE));
 const formErrors = ref<Record<string, any>>({});
 const formValidated = ref(false);
-const saving = ref(false);
 const el = ref(null);
 const { height: bottomToolbarHeight } = useElementSize(el);
 const status = ref<EmailSubscriptionStatus>('NOT_SUBSCRIBED');
@@ -88,7 +87,7 @@ async function handleCreateSubscriptionClick() {
 
 async function handleUpdateSubscriptionClick() {
   try {
-    saving.value = true;
+    isPending.value = true;
     const subscription = await updateSubscription(
       Object.keys(feeds).filter(key => feeds[key])
     );
@@ -106,7 +105,7 @@ async function handleUpdateSubscriptionClick() {
       'An error occurred while submitting your query, please try again.'
     );
   } finally {
-    saving.value = false;
+    isPending.value = false;
   }
 }
 
@@ -241,7 +240,7 @@ watchEffect(async () => {
     ref="el"
     :error="null"
     :is-modified="isFeedsModified"
-    :saving="saving"
+    :saving="isPending"
     @save="handleUpdateSubscriptionClick"
     @reset="resetFeeds"
   />
