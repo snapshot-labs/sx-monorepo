@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/vue-query';
 import {
   DOMAIN,
   send,
@@ -9,11 +10,13 @@ import {
   EmailSubscriptionParams
 } from '@/helpers/emailNotification/types';
 import { isUserAbortError } from '@/helpers/utils';
+import { EMAIL_NOTIFICATION_KEYS } from '@/queries/emailNotification';
 
 type Schema = typeof SubscribeSchema | typeof UpdateSubscriptionsSchema;
 
 export function useEmailNotification() {
   const { auth } = useWeb3();
+  const queryClient = useQueryClient();
 
   async function _send(
     params: EmailSubscriptionParams,
@@ -50,11 +53,19 @@ export function useEmailNotification() {
   }
 
   async function updateSubscription(feeds: string[]): Promise<boolean> {
-    return _send(
+    const result = await _send(
       { email: '', subscriptions: feeds },
       UpdateSubscriptionsSchema,
       'update'
     );
+
+    if (result) {
+      queryClient.invalidateQueries({
+        queryKey: EMAIL_NOTIFICATION_KEYS.user(auth.value!.account)
+      });
+    }
+
+    return result;
   }
 
   return {

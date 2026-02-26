@@ -1,10 +1,8 @@
 <script lang="ts" setup>
-import { useQueryClient } from '@tanstack/vue-query';
 import { EmailSubscriptionStatus } from '@/helpers/emailNotification/types';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import {
-  EMAIL_NOTIFICATION_KEYS,
   useEmailNotificationFeedsListQuery,
   useEmailNotificationQuery
 } from '@/queries/emailNotification';
@@ -35,7 +33,6 @@ const SUBSCRIBE_DEFINITION = {
 
 const { web3 } = useWeb3();
 const uiStore = useUiStore();
-const queryClient = useQueryClient();
 
 const form = ref<{
   email: string;
@@ -101,10 +98,6 @@ async function handleUpdateSubscriptionClick() {
         'success',
         'Your subscriptions have been updated'
       );
-
-      queryClient.invalidateQueries({
-        queryKey: EMAIL_NOTIFICATION_KEYS.user(web3.value.account)
-      });
     }
   } catch (err) {
     console.error(err);
