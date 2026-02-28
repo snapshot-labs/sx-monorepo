@@ -11,6 +11,7 @@ import IHArrowLongLeft from '~icons/heroicons-outline/arrow-long-left';
 import IHAtSymbol from '~icons/heroicons-outline/at-symbol';
 import IHBell from '~icons/heroicons-outline/bell';
 import IHCash from '~icons/heroicons-outline/cash';
+import IHChatAlt from '~icons/heroicons-outline/chat-alt';
 import IHCog from '~icons/heroicons-outline/cog';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHGlobe from '~icons/heroicons-outline/globe-americas';
@@ -39,6 +40,7 @@ type NavigationItem = {
 
 const route = useRoute();
 const notificationsStore = useNotificationsStore();
+const { unreadCount: unreadMessagesCount } = useXmtp();
 const { isWhiteLabel } = useWhiteLabel();
 const { space: currentSpace } = useCurrentSpace();
 const { web3 } = useWeb3();
@@ -280,6 +282,12 @@ function getNavigationConfig(
         explore: {
           name: 'Explore',
           icon: IHGlobe
+        },
+        messages: {
+          name: 'Messages',
+          icon: IHChatAlt,
+          count: unreadMessagesCount.value,
+          hidden: !web3.value.account
         },
         notifications: {
           name: 'Notifications',

@@ -174,6 +174,20 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
+        <UiTooltip
+          v-if="web3.account && !compareAddresses(web3.account, user.id)"
+          title="Send message"
+        >
+          <UiButton
+            uniform
+            :to="{
+              name: 'my-messages-conversation',
+              params: { address: user.id }
+            }"
+          >
+            <IH-chat-alt />
+          </UiButton>
+        </UiTooltip>
         <DropdownShare :shareable="user" type="user" class="!px-0 w-[46px]" />
         <UiTooltip
           v-if="compareAddresses(web3.account, user.id)"
