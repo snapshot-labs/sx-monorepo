@@ -37,7 +37,8 @@ export default {
           name: 'Settings',
           link: { name: 'settings-spaces' },
           icon: IHCog,
-          hidden: !account
+          hidden: !account,
+          active: false
         }
       }
     };

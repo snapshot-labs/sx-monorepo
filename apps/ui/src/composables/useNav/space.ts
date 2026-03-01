@@ -77,7 +77,12 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
         link: { name: 'space-overview' },
         active: true
       },
-      ...tabItems
+      ...tabItems,
+      snapshotPro: {
+        name: 'Snapshot Pro',
+        link: { name: 'space-pro' },
+        hidden: !isOffchainNetwork
+      }
     }
   };
 }
