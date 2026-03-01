@@ -139,7 +139,7 @@ watch(
 );
 
 watch(
-  [() => isSubscriptionLoading.value, () => isFeedsListLoading.value],
+  [() => subscription.value, () => isSubscriptionLoading.value, () => isFeedsListLoading.value],
   async () => {
     if (
       isFeedsListLoading.value ||

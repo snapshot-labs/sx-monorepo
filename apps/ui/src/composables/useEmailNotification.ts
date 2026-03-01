@@ -60,7 +60,7 @@ export function useEmailNotification() {
     );
 
     if (result) {
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: EMAIL_NOTIFICATION_KEYS.user(auth.value!.account)
       });
     }
