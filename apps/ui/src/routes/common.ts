@@ -42,7 +42,7 @@ export const spaceChildrenRoutes: RouteRecordRaw[] = [
       { path: 'votes', name: 'space-proposal-votes', component: ProposalVotes },
       {
         path: 'market',
-        name: 'space-proposal-futarchy',
+        name: 'space-proposal-markets',
         component: ProposalMarkets
       },
       {

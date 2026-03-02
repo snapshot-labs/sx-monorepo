@@ -208,7 +208,7 @@ watchEffect(() => {
             <AppLink
               v-if="showFutarchyTab"
               :to="{
-                name: 'space-proposal-futarchy',
+                name: 'space-proposal-markets',
                 params: {
                   proposal: proposal.proposal_id,
                   space: `${proposal.network}:${proposal.space.id}`
@@ -217,7 +217,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="route.name === 'space-proposal-futarchy'"
+                :is-active="route.name === 'space-proposal-markets'"
                 :count="1"
                 text="Markets"
                 class="inline-block"

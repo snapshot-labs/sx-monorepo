@@ -38,12 +38,11 @@ const config: CodegenConfig = {
         }
       }
     },
-    // Temporarily disabled: schema endpoint unreachable
-    // './src/helpers/auction/referral/gql/': {
-    //   schema: 'https://api.brokester.box',
-    //   documents: ['src/helpers/auction/referral/queries.ts'],
-    //   ...baseConfig
-    // }
+    './src/helpers/auction/referral/gql/': {
+      schema: 'https://api.brokester.box',
+      documents: ['src/helpers/auction/referral/queries.ts'],
+      ...baseConfig
+    }
   }
 };
 
