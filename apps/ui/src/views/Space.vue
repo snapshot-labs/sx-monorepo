@@ -1,13 +1,13 @@
 <script setup lang="ts">
 const { loadVotes } = useAccount();
 const { web3 } = useWeb3();
-const { space, isPending, networkId, address } = useCurrentSpace();
+const { space, isPending } = useCurrentSpace();
 
 watch(
-  [networkId, address, () => web3.value.account],
-  ([networkId, address, account]) => {
-    if (!networkId || !address || !account) return;
-    loadVotes(networkId, [address]);
+  [space, () => web3.value.account],
+  ([space, account]) => {
+    if (!space || !account) return;
+    loadVotes(space.network, [space.id]);
   },
   { immediate: true }
 );

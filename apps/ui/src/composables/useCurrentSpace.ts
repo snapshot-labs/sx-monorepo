@@ -71,24 +71,8 @@ export function useCurrentSpace() {
     () => !knownSpace.value && (isResolving.value || isQueryPending.value)
   );
 
-  const networkId = computed<NetworkID | null>(() => {
-    if (knownSpace.value) return knownSpace.value.network;
-    if (spaceId.value) return spaceId.value.networkId;
-    return spaceParam.value
-      ? (spaceParam.value.split(':')[0] as NetworkID)
-      : null;
-  });
-
-  const address = computed<string | null>(() => {
-    if (knownSpace.value) return knownSpace.value.id;
-    if (spaceId.value) return spaceId.value.address;
-    return spaceParam.value ? spaceParam.value.split(':')[1] : null;
-  });
-
   return {
     space,
-    isPending,
-    networkId,
-    address
+    isPending
   };
 }

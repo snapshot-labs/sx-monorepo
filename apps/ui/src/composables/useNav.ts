@@ -1,7 +1,6 @@
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
-import { NetworkID } from '@/types';
 import my from './useNav/my';
 import org from './useNav/org';
 import settings from './useNav/settings';
@@ -37,7 +36,7 @@ export function useNav() {
   const notificationsStore = useNotificationsStore();
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
-  const { space, networkId, address } = useCurrentSpace();
+  const { space } = useCurrentSpace();
   const { organization } = useOrganization();
   const { isController } = useSpaceController(space);
 
@@ -71,8 +70,6 @@ export function useNav() {
     unreadCount: notificationsStore.unreadNotificationsCount,
     isWhiteLabel: isWhiteLabel.value,
     space: space.value,
-    networkId: networkId.value as NetworkID | null,
-    address: address.value,
     isController: isController.value,
     ensOwner: ensOwner.value,
     organization: organization.value
