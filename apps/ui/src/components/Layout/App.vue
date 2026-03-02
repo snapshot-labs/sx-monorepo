@@ -56,9 +56,6 @@ const {
 
 provide('web3', web3);
 
-const EDITOR_ROUTES = ['space-editor', 'org-editor'];
-const PROPOSAL_ROUTES = ['space-proposal', 'org-proposal'];
-
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
 const { hasAppNav } = useNav();
@@ -66,6 +63,10 @@ const { hasAppNav } = useNav();
 const hasSidebar = computed(() => !isStandaloneLayout.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
+
+const baseSubRouteName = computed(() =>
+  String(route.matched[1]?.name).replace(/^(space|org)-/, '')
+);
 
 const hasPlaceHolderSidebar = computed(
   () =>
@@ -78,13 +79,11 @@ const hasPlaceHolderSidebar = computed(
       'auction-upcoming',
       'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
-    ![...EDITOR_ROUTES, ...PROPOSAL_ROUTES].includes(
-      String(route.matched[1]?.name)
-    )
+    !['editor', 'proposal'].includes(baseSubRouteName.value)
 );
 
 const hasTopNav = computed(() => {
-  return !EDITOR_ROUTES.includes(String(route.matched[1]?.name));
+  return baseSubRouteName.value !== 'editor';
 });
 
 async function handleLogin(connector: Connector) {
