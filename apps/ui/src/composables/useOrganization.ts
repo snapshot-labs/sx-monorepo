@@ -25,14 +25,17 @@ export function useOrganization() {
   const { data: spaces, isLoading } = useQuery({
     queryKey: ['org', 'spaces', () => config.value?.id],
     queryFn: async () => {
+      const cfg = config.value;
+      if (!cfg) return [];
+
       const loadedSpaces = await Promise.all(
-        config.value!.spaceIds.map(async ({ network: networkId, id }) => {
+        cfg.spaceIds.map(async ({ network: networkId, id }) => {
           const network = getNetwork(networkId);
           const space = await network.api.loadSpace(id);
 
           if (!space) {
             console.warn(
-              `Failed to load space ${networkId}:${id} for organization ${config.value!.id}`
+              `Failed to load space ${networkId}:${id} for organization ${cfg.id}`
             );
             return null;
           }

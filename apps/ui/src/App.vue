@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
+import { getOrganizationConfigByDomain } from '@/helpers/organizations';
 import defaultRoutes from '@/routes/default';
 import { orgRootRoutes } from '@/routes/organization';
 import whiteLabelRoutes from '@/routes/whiteLabel';
@@ -21,7 +22,12 @@ const routeName = computed(() => String(route.matched[0]?.name));
 
 function getCustomDomainRoutes() {
   if (!isWhiteLabel.value) return defaultRoutes;
-  if (!whiteLabelSpace.value) return orgRootRoutes;
+  if (
+    !whiteLabelSpace.value &&
+    getOrganizationConfigByDomain(window.location.hostname)
+  ) {
+    return orgRootRoutes;
+  }
   return whiteLabelRoutes;
 }
 
