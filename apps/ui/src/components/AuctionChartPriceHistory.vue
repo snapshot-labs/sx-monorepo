@@ -33,8 +33,14 @@ const granularity = computed<ChartGranularity>(() => {
   const auctionDuration =
     Number(props.auction.endTimeTimestamp) -
     Number(props.auction.startingTimeStamp);
+  const auctionSinceStart =
+    Math.floor(Date.now() / 1000) - Number(props.auction.startingTimeStamp);
 
-  if ((offset.value && offset.value <= ONE_DAY) || auctionDuration <= ONE_DAY) {
+  if (
+    (offset.value && offset.value <= ONE_DAY) ||
+    auctionDuration <= ONE_DAY ||
+    auctionSinceStart <= ONE_DAY
+  ) {
     return 'minute';
   }
 
@@ -146,7 +152,7 @@ watchEffect(async () => {
       v-if="isPending || isError || hasNextPage || isFetchingNextPage"
       class="flex items-center justify-center flex-1"
     >
-      <template v-if="isError">Error while loading chart</template>
+      <template v-if="isError">Failed to load chart.</template>
       <UiLoading v-else-if="isPending || hasNextPage || isFetchingNextPage" />
     </div>
     <UiChartTime v-else class="flex-1" :series="chartSeries" />

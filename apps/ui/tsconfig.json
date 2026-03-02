@@ -1,25 +1,18 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "isolatedModules": true,
-    "strict": true,
-    "jsx": "preserve",
     "sourceMap": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
     "lib": ["esnext", "dom"],
-    "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
-    "allowJs": true,
     "baseUrl": ".",
     "types": ["vite/client", "unplugin-icons/types/vue"],
     "paths": {
       "@/*": ["src/*"]
     },
     "noImplicitAny": false,
-    "skipLibCheck": true
+    "noUncheckedIndexedAccess": false,
   },
   "include": [
     "src/**/*.ts",

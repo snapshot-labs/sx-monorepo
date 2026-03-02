@@ -70,7 +70,7 @@ test('should load discussion', async ({ page, proposalPage }) => {
   await proposalPage.selectTab('Discussion');
 
   await expect(
-    page.getByRole('button', { name: 'Join the discussion' })
+    page.getByRole('link', { name: 'Join the discussion' })
   ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: 'Updating the Code of Conduct' })

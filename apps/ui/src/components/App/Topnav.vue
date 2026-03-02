@@ -129,6 +129,7 @@ onUnmounted(() => {
         ]"
       />
     </div>
+
     <form
       v-if="searchConfig"
       id="search-form"
@@ -147,9 +148,13 @@ onUnmounted(() => {
       </label>
     </form>
 
+    <div v-if="isAuctionApp" class="flex-grow">
+      <IC-snapshot class="size-[28px] text-skin-link" />
+    </div>
+
     <div class="flex space-x-2 shrink-0">
       <UiButton v-if="web3.authLoading" loading />
-      <UiDropdown v-else-if="web3.account">
+      <UiDropdown v-else-if="web3.account" :key="route.fullPath">
         <template #button>
           <UiButton class="sm:w-auto !px-0 sm:!px-3">
             <span

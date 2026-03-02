@@ -5,7 +5,7 @@ const props = defineProps<{
   space: string;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
@@ -32,7 +32,7 @@ function handleRemoveDraft(id: string) {
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Drafts'" />
     </template>
@@ -49,7 +49,7 @@ function handleRemoveDraft(id: string) {
               params: { space: `${networkId}:${space}`, key: proposal.key },
               query: route.query
             }"
-            @click="$emit('close')"
+            @click="emit('close')"
           >
             {{ proposal.title || 'Untitled' }}
             <span class="text-skin-text">#{{ proposal.key }}</span>

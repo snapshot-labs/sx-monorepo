@@ -24,13 +24,10 @@ function handleContactEdit(contact) {
 
 <template>
   <div>
-    <div class="flex">
-      <div class="flex-auto" />
-      <div class="pt-4 px-4 space-x-2">
-        <UiButton uniform @click="openModal('editContact')">
-          <IH-plus-sm />
-        </UiButton>
-      </div>
+    <div class="flex justify-end p-4">
+      <UiButton uniform @click="openModal('editContact')">
+        <IH-plus-sm />
+      </UiButton>
     </div>
     <UiSectionHeader label="Contacts" />
     <div

@@ -101,18 +101,14 @@ const hasVoted = computed(
           }"
         >
           {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-          <span
-            v-if="proposal.author.role"
-            class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
-            v-text="proposal.author.role"
-          />
+          <UiPill v-if="proposal.author.role" :label="proposal.author.role" />
         </AppLink>
       </template>
     </div>
     <span>
       <template v-if="proposal.vote_count">
         ·
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-proposal-votes',
@@ -124,7 +120,7 @@ const hasVoted = computed(
         >
           {{ _n(proposal.vote_count, 'compact') }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </router-link>
+        </AppLink>
       </template>
       <span v-if="proposal.quorum" class="lowercase">
         · {{ formatQuorum(totalProgress) }}

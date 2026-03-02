@@ -33,7 +33,8 @@ import {
   getProposalLink,
   getSpaceDecimals,
   getSpaceLink,
-  updateCounter
+  updateCounter,
+  updateScoresTick
 } from '../common/utils';
 
 type Strategy = {
@@ -745,7 +746,12 @@ export function createWriters(config: FullConfig) {
     await proposal.save();
   };
 
-  const handleExecute: starknet.Writer = async ({ txId, rawEvent, event }) => {
+  const handleExecute: starknet.Writer = async ({
+    block,
+    txId,
+    rawEvent,
+    event
+  }) => {
     if (!rawEvent || !event) return;
 
     logger.info('Handle execute');
@@ -760,6 +766,7 @@ export function createWriters(config: FullConfig) {
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = txId ?? null;
+    proposal.executed_at = block?.timestamp ?? getCurrentTimestamp();
 
     await proposal.save();
   };
@@ -870,6 +877,8 @@ export function createWriters(config: FullConfig) {
       proposal[`scores_${choice}`],
       proposal.vp_decimals
     );
+
+    await updateScoresTick(proposal, created, config.indexerName);
     await proposal.save();
   };
 

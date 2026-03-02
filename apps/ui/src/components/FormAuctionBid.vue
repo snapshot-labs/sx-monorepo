@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import { formatUnits } from '@ethersproject/units';
 import { useQuery } from '@tanstack/vue-query';
@@ -9,12 +10,12 @@ import { getOrderBuyAmount } from '@/helpers/auction/orders';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { removeTrailingZeroes } from '@/helpers/format';
 import { getProvider } from '@/helpers/provider';
-import { parseUnits } from '@/helpers/token';
+import { isWethContract, parseUnits } from '@/helpers/token';
 import { _n, _p, _t } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 
+const ETH_MIN_BALANCE = 0.01;
 const MIN_PRICE_PREMIUM = 0.01; // 1% above minimum price
-const PRICE_PREMIUM = 0.25; // 25% above clearing price will show as 100% chance to pass
 const AMOUNT_DECIMALS = 6;
 
 const AMOUNT_DEFINITION = {
@@ -41,10 +42,19 @@ const props = defineProps<{
 const { web3Account } = useWeb3();
 const { modalAccountOpen } = useModal();
 
+const {
+  verificationType,
+  status: verificationStatus,
+  isVerified,
+  generateSignature
+} = useAuctionVerification({
+  network: computed(() => props.network),
+  auction: computed(() => props.auction)
+});
+
 const bidAmount = ref('');
 const bidPrice = ref('');
 const bidFdv = ref('');
-const sliderValue = ref(95);
 const isTermsAccepted = ref(false);
 
 const provider = computed(() => getProvider(Number(CHAIN_IDS[props.network])));
@@ -71,10 +81,14 @@ const canCancelOrder = computed(
   () => parseInt(props.auction.orderCancellationEndDate) > Date.now() / 1000
 );
 
+const isBiddingWithWeth = computed(() =>
+  isWethContract(props.auction.addressBiddingToken)
+);
+
 const { data: userBalance, isError: isBalanceError } = useQuery({
   queryKey: ['balance', web3Account, () => props.auction.addressBiddingToken],
   queryFn: async () => {
-    if (!web3Account.value) return '0';
+    if (!web3Account.value) return null;
 
     const contract = new Contract(
       props.auction.addressBiddingToken,
@@ -82,17 +96,45 @@ const { data: userBalance, isError: isBalanceError } = useQuery({
       provider.value
     );
 
-    const balance = await contract.balanceOf(web3Account.value);
+    const biddingTokenBalance: BigNumber = await contract.balanceOf(
+      web3Account.value
+    );
+    const gasTokenBalance = await provider.value.getBalance(web3Account.value);
 
-    return balance.toString();
+    return {
+      biddingTokenBalance: biddingTokenBalance.toBigInt(),
+      gasTokenBalance: gasTokenBalance.toBigInt()
+    };
   },
   enabled: computed(() => !!web3Account.value)
 });
 
+const availableBalance = computed(() => {
+  if (!userBalance.value) return 0n;
+
+  if (isBiddingWithWeth.value) {
+    const availableGasBalance =
+      userBalance.value.gasTokenBalance -
+      parseUnits(ETH_MIN_BALANCE.toString(), 18);
+
+    return (
+      userBalance.value.biddingTokenBalance +
+      (availableGasBalance > 0n ? availableGasBalance : 0n)
+    );
+  }
+
+  return userBalance.value.biddingTokenBalance;
+});
+
 const formattedBalance = computed(() => {
   if (!userBalance.value) return 0;
+
+  const totalBalance = isBiddingWithWeth.value
+    ? userBalance.value.biddingTokenBalance + userBalance.value.gasTokenBalance
+    : userBalance.value.biddingTokenBalance;
+
   return parseFloat(
-    formatUnits(userBalance.value, props.auction.decimalsBiddingToken)
+    formatUnits(totalBalance, props.auction.decimalsBiddingToken)
   );
 });
 
@@ -102,20 +144,23 @@ const amountError = computed(() => {
   if (!bidAmount.value) return undefined;
   if (formatErrors.value.amount) return formatErrors.value.amount;
 
-  const amount = parseFloat(bidAmount.value);
-
-  const minBiddingAmount = parseFloat(
-    formatUnits(
-      props.auction.minimumBiddingAmountPerOrder,
-      props.auction.decimalsBiddingToken
-    )
+  const amount = parseUnits(
+    bidAmount.value,
+    Number(props.auction.decimalsBiddingToken)
   );
 
+  const minBiddingAmount = BigInt(props.auction.minimumBiddingAmountPerOrder);
+
   if (amount <= minBiddingAmount) {
-    return `Amount must be bigger than ${_n(minBiddingAmount)} ${props.auction.symbolBiddingToken}`;
+    const formattedMinimumPrice = formatUnits(
+      minBiddingAmount,
+      Number(props.auction.decimalsBiddingToken)
+    );
+
+    return `Amount must be bigger than ${_n(formattedMinimumPrice, 'standard', { maximumFractionDigits: Number(props.auction.decimalsBiddingToken) })} ${props.auction.symbolBiddingToken}`;
   }
 
-  if (hasBalance.value && amount > formattedBalance.value) {
+  if (hasBalance.value && amount > availableBalance.value) {
     return 'Insufficient balance';
   }
 
@@ -159,16 +204,26 @@ const hasErrors = computed<boolean>(() => {
   );
 });
 
-// TODO: Replace with something that makes sense UX-wise
-// and use it across the entire app.
+const pricePremium = computed(() => {
+  const price = parseFloat(bidPrice.value);
+  if (!price) return null;
+
+  return convertPriceToPercentage(price);
+});
+
+const sliderValue = computed(() => {
+  if (pricePremium.value === null) return 0;
+
+  return Math.min(Math.max(pricePremium.value, 0), 100);
+});
+
 function convertPercentageToPrice(percentage: number) {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
   const minPrice = parseFloat(props.auction.exactOrder?.price || '0');
 
   const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
 
-  const premium = clearingPrice * PRICE_PREMIUM;
-  const premiumPrice = basePrice + (percentage / 100) * premium;
+  const premiumPrice = basePrice * (1 + percentage / 100);
 
   return premiumPrice;
 }
@@ -179,21 +234,18 @@ function convertPriceToPercentage(price: number) {
 
   const basePrice = Math.max(clearingPrice, minPrice * (1 + MIN_PRICE_PREMIUM));
 
-  const premium = clearingPrice * PRICE_PREMIUM;
-  const difference = price - basePrice;
-  const percentage = (difference / premium) * 100;
-
-  return Math.min(Math.max(percentage, 0), 100);
+  return ((price - basePrice) / basePrice) * 100;
 }
 
-function handlePlaceOrder() {
+async function handlePlaceOrder() {
   if (!web3Account.value) {
     modalAccountOpen.value = true;
-
     return;
   }
 
   if (hasErrors.value) return;
+
+  const attestation = await generateSignature();
 
   const sellAmount = parseUnits(
     bidAmount.value,
@@ -211,39 +263,25 @@ function handlePlaceOrder() {
       sellAmount,
       price,
       buyAmountDecimals: BigInt(props.auction.decimalsAuctioningToken)
-    })
+    }),
+    attestation,
+    auction: props.auction
   });
 }
 
-function getColor(progress: number) {
-  // Hardcoded colors for the gradient.
-  // Could be computed from the config, but we define those in RGBA so we would need to add code to convert them to HSL.
+function handleSetMaxAmount() {
+  if (!userBalance.value) {
+    bidAmount.value = '0';
+    return;
+  }
 
-  // Danger: hsl(354.34deg 79.9% 60.98%)
-  // Success: hsl(139.57deg 37.7% 52.16%)
-
-  const startHue = 354.34;
-  const startSaturation = 79.9;
-  const startLightness = 60.98;
-
-  const endHue = 139.57;
-  const endSaturation = 37.7;
-  const endLightness = 52.16;
-
-  let hueDiff = endHue - startHue;
-  if (hueDiff > 180) hueDiff -= 360;
-  if (hueDiff < -180) hueDiff += 360;
-
-  const hue = startHue + (hueDiff * progress) / 100;
-  const saturation =
-    startSaturation + ((endSaturation - startSaturation) * progress) / 100;
-  const lightness =
-    startLightness + ((endLightness - startLightness) * progress) / 100;
-
-  return `hsl(${hue}deg ${saturation}% ${lightness}%)`;
+  bidAmount.value = formatUnits(
+    availableBalance.value,
+    props.auction.decimalsBiddingToken
+  );
 }
 
-function handlePriceUpdate(value: string, fromSlider = false) {
+function handlePriceUpdate(value: string) {
   bidPrice.value = value;
 
   const price = parseFloat(value);
@@ -259,10 +297,6 @@ function handlePriceUpdate(value: string, fromSlider = false) {
   const fdv = price * totalSupplyFormatted;
 
   bidFdv.value = removeTrailingZeroes(fdv, AMOUNT_DECIMALS);
-
-  if (!fromSlider) {
-    sliderValue.value = convertPriceToPercentage(price);
-  }
 }
 
 function handleFdvUpdate(value: string) {
@@ -279,29 +313,32 @@ function handleFdvUpdate(value: string) {
   );
 
   const price = fdv / totalSupplyFormatted;
-  sliderValue.value = convertPriceToPercentage(price);
 
   bidPrice.value = removeTrailingZeroes(price, AMOUNT_DECIMALS);
 }
 
 function handleSliderChange(value: number) {
-  sliderValue.value = value;
-
-  const price = convertPercentageToPrice(sliderValue.value);
-  handlePriceUpdate(removeTrailingZeroes(price, AMOUNT_DECIMALS), true);
+  const price = convertPercentageToPrice(value);
+  handlePriceUpdate(removeTrailingZeroes(price, AMOUNT_DECIMALS));
 }
 
 onMounted(() => {
   const clearingPrice = parseFloat(props.auction.currentClearingPrice);
   if (clearingPrice <= 0) return;
 
-  handleSliderChange(50);
+  handleSliderChange(25);
 });
 </script>
 
 <template>
   <div>
-    <div class="s-box p-4 space-y-3">
+    <AuctionVerificationInfo
+      v-if="!isVerified"
+      :verification-type="verificationType"
+      :is-loading="verificationStatus === 'loading'"
+      :is-error="verificationStatus === 'error'"
+    />
+    <div v-else class="s-box p-4 space-y-3">
       <UiMessage
         v-if="web3Account && isBalanceError"
         type="danger"
@@ -351,11 +388,12 @@ onMounted(() => {
             }}
           </div>
           <button
-            class="absolute top-0 right-0 text-skin-link"
-            @click="bidAmount = String(formattedBalance)"
+            class="absolute top-0 right-0 text-skin-link flex items-center gap-1"
+            @click="handleSetMaxAmount"
           >
-            {{ _n(formattedBalance) }}
+            {{ _n(formattedBalance, 'standard', { maximumFractionDigits: 8 }) }}
             {{ auction.symbolBiddingToken }}
+            <IC-wallet class="inline-block shrink-0 size-[16px]" />
           </button>
         </div>
       </div>
@@ -433,11 +471,8 @@ onMounted(() => {
             class="absolute inset-0 pointer-events-none h-fit bg-skin-text/30 rounded-full overflow-hidden"
           >
             <div
-              class="flex justify-between w-full h-[7px] bg-no-repeat"
+              class="flex justify-between w-full h-[7px] bg-gradient-to-r from-skin-link to-skin-link bg-no-repeat"
               :style="{
-                backgroundImage: `linear-gradient(to right, ${getColor(
-                  sliderValue
-                )}, ${getColor(sliderValue)})`,
                 backgroundSize: `${sliderValue}% 100%`
               }"
             >
@@ -460,8 +495,16 @@ onMounted(() => {
             "
           />
         </div>
-        <div class="text-[17px]">
-          {{ _p(sliderValue / 100) }} likely to pass
+        <div v-if="pricePremium !== null" class="text-[17px]">
+          <template v-if="pricePremium === 0">
+            Equal to current clearing price
+          </template>
+          <template v-else-if="pricePremium > 0">
+            {{ _p(pricePremium / 100) }} above current clearing price
+          </template>
+          <template v-else>
+            {{ _p(-pricePremium / 100) }} below current clearing price
+          </template>
         </div>
       </div>
       <UiCheckbox v-model="isTermsAccepted" class="text-start">

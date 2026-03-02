@@ -2,8 +2,11 @@
 import { formatPrice, Order } from '@/helpers/auction';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { _c, _n, _t } from '@/helpers/utils';
+import { getNetwork } from '@/networks';
+import { NetworkID } from '@/types';
 
 const props = defineProps<{
+  networkId: NetworkID;
   auctionId: string;
   auction: AuctionDetailFragment;
   order: Order;
@@ -15,6 +18,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'cancel', order: Order): void;
 }>();
+
+const network = computed(() => getNetwork(props.networkId));
 
 const isCancellable = computed(() => {
   return Number(props.auction.orderCancellationEndDate) * 1000 > Date.now();
@@ -123,6 +128,14 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
           >
             <IS-x-mark :width="16" />
             Cancel bid
+          </UiDropdownItem>
+          <UiDropdownItem
+            :to="
+              network.helpers.getExplorerUrl(order.transactionId, 'transaction')
+            "
+          >
+            <IH-arrow-sm-right class="-rotate-45" :width="16" />
+            View on block explorer
           </UiDropdownItem>
         </template>
       </UiDropdown>

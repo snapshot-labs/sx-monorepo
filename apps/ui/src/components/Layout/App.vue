@@ -56,13 +56,7 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
-const hasAppNav = computed(
-  () =>
-    ['space', 'my', 'settings', 'pro'].includes(
-      String(route.matched[0]?.name)
-    ) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
-);
+const { hasAppNav } = useNav();
 
 const hasSidebar = computed(() => !isStandaloneLayout.value);
 
@@ -75,7 +69,10 @@ const hasPlaceHolderSidebar = computed(
       'create-space-snapshot',
       'create-space-snapshot-x',
       'auction',
-      'auctions'
+      'auctions',
+      'auction-invite',
+      'auction-upcoming',
+      'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
     !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
 );

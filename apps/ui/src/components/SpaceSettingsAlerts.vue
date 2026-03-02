@@ -43,14 +43,39 @@ const hasVotingStrategiesAlerts = computed(
       unsupportedProOnlyNetworks.value.length > 0)
 );
 
+const isRelayerBalanceLow = computed(() =>
+  alerts.value.has('IS_RELAYER_BALANCE_LOW')
+);
+
+const isRelayerBalanceInsufficient = computed(() =>
+  alerts.value.has('IS_RELAYER_BALANCE_INSUFFICIENT')
+);
+
+const isUsingOnlyInoperativeSigAuthenticators = computed(
+  () =>
+    alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
+      ?.isUsingOnlySigAuthenticators
+);
+
 const hasWhitelabelAlerts = computed(
   () =>
     props.activeTab === 'whitelabel' &&
     alerts.value.has('HAS_PRO_ONLY_WHITELABEL')
 );
 
+const hasAuthenticatorsAlerts = computed(
+  () =>
+    props.activeTab === 'authenticators' &&
+    (isRelayerBalanceLow.value ||
+      isRelayerBalanceInsufficient.value ||
+      isUsingOnlyInoperativeSigAuthenticators.value)
+);
+
 const hasAnyAlerts = computed(
-  () => hasVotingStrategiesAlerts.value || hasWhitelabelAlerts.value
+  () =>
+    hasVotingStrategiesAlerts.value ||
+    hasWhitelabelAlerts.value ||
+    hasAuthenticatorsAlerts.value
 );
 </script>
 
@@ -117,6 +142,20 @@ const hasAnyAlerts = computed(
           change to a premium network
           <IH-arrow-sm-right class="-rotate-45" />
         </AppLink>
+      </UiAlert>
+    </template>
+    <template v-if="hasAuthenticatorsAlerts">
+      <UiAlert v-if="isRelayerBalanceLow" type="error">
+        Your relayer balance is running low. Please top up to keep gasless
+        voting active.
+      </UiAlert>
+      <UiAlert v-if="isRelayerBalanceInsufficient" type="error">
+        Your relayer balance is depleted. Gasless voting is disabled until you
+        top up.
+      </UiAlert>
+      <UiAlert v-if="isUsingOnlyInoperativeSigAuthenticators" type="error">
+        Top up your relayer account to enable gasless voting, or add another
+        authenticator.
       </UiAlert>
     </template>
     <template v-if="hasWhitelabelAlerts">

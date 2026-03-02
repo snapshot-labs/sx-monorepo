@@ -1,10 +1,6 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
+defineOptions({ inheritAttrs: false });
+
 const uiStore = useUiStore();
 const pendingTransactionsModalOpen = ref(false);
 </script>

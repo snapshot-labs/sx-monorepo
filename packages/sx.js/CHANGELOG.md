@@ -1,5 +1,20 @@
 # @snapshot-labs/sx
 
+## 0.1.10
+
+### Patch Changes
+
+- 486e3d9: Add gasless execution support for Governor
+- d4a1f44: Add hasNonNativeBlockNumbers to EvmNetworkConfig
+- 046eed3: add GovernorBravo client
+- ba0cc5c: Accept descriptionHash in OpenZeppelinEthereumTx client instead of description
+- 2111bc3: add Transaction types to sx.js
+- 3a10211: use dedicated client for offchain starknet-sig, and support SNIP-12
+- 1edeac7: do not use toLocaleLowerCase for addresses
+- 32e122f: Add blockTime to EvmNetworkConfig
+- 2111bc3: add governor execution utils for decoding transactions
+- 59a0c07: add OpenZeppelinEthereumTx client
+
 ## 0.1.9
 
 ### Patch Changes

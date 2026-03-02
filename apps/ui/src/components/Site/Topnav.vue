@@ -9,38 +9,34 @@ const { toggleTheme, currentTheme } = useTheme();
     <div class="grow">
       <AppLink
         :to="{ name: 'site-landing' }"
-        class="text-[26px] text-skin-link inline-block"
+        class="text-[29px] text-skin-link inline-block"
       >
         <div class="flex items-center space-x-2.5">
-          <img
-            src="@/assets/snapshot.svg"
-            alt="Snapshot"
-            class="w-[24px] relative top-[2px]"
-          />
-          <span>snapshot</span>
+          <IC-snapshot class="size-[32px]" />
+          <span class="mb-1">snapshot</span>
         </div>
       </AppLink>
     </div>
     <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
       <li>
-        <router-link :to="{ name: 'site-landing', hash: '#features' }">
+        <AppLink :to="{ name: 'site-landing', hash: '#features' }">
           Features
-        </router-link>
+        </AppLink>
       </li>
       <li>
-        <router-link :to="{ name: 'site-ecosystem' }">Ecosystem</router-link>
+        <AppLink :to="{ name: 'site-ecosystem' }">Ecosystem</AppLink>
       </li>
       <li>
-        <a href="https://docs.snapshot.box" target="_blank">
+        <AppLink to="https://docs.snapshot.box">
           Developers
           <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        </AppLink>
       </li>
       <li>
-        <a href="https://snapshot.mirror.xyz" target="_blank">
+        <AppLink to="https://snapshot.mirror.xyz">
           Blog
           <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        </AppLink>
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">
