@@ -36,6 +36,8 @@ const MAPPING: Record<string, Record<string, any>> = {
     id: 'openagora.eth'
   },
   'governance.starknet.io': {
+    network: 'sn',
+    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
