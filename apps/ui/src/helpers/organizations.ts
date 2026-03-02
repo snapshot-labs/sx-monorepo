@@ -1,4 +1,9 @@
-import { RouteLocationNamedRaw, RouteLocationRaw } from 'vue-router';
+import {
+  RouteLocationNamedRaw,
+  RouteLocationNormalizedLoaded,
+  RouteLocationRaw,
+  Router
+} from 'vue-router';
 import { NavItem } from '@/composables/useNav/types';
 import { NetworkID, Space } from '@/types';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
@@ -139,4 +144,56 @@ export function getOrganizationConfigById(
   id: string
 ): OrganizationConfig | null {
   return ORGANIZATIONS[id] ?? null;
+}
+
+/**
+ * Patches router.push, router.replace, and router.resolve to rewrite
+ * space-* route names to org-* equivalents when in an org context.
+ *
+ * In whitelabel mode, space-* named routes don't exist in the route table,
+ * so router.push/resolve throw before guards can intercept.
+ * In non-whitelabel mode (/org/:org), space-* routes exist but would
+ * navigate outside the org context without rewriting.
+ *
+ * Skips rewriting when the target space is not part of the current org.
+ */
+export function patchRouterForOrg(router: Router) {
+  const originalPush = router.push.bind(router);
+  const originalReplace = router.replace.bind(router);
+  const originalResolve = router.resolve.bind(router);
+
+  function rewriteLocation(to: RouteLocationRaw): RouteLocationRaw {
+    if (
+      typeof to === 'string' ||
+      !('name' in to) ||
+      typeof to.name !== 'string'
+    )
+      return to;
+
+    if (String(router.currentRoute.value.matched[0]?.name) !== 'org') return to;
+
+    const spaceParam = to.params?.space as string | undefined;
+    if (spaceParam) {
+      const orgId = router.currentRoute.value.params.org as string | undefined;
+      const org =
+        getOrganizationConfigByDomain(window.location.hostname) ??
+        (orgId ? getOrganizationConfigById(orgId) : null);
+      const isOrgSpace = org?.spaceIds.some(
+        s => `${s.network}:${s.id}` === spaceParam
+      );
+      if (!isOrgSpace) return to;
+    }
+
+    const rewritten = toOrgRoute(to.name, {
+      ...(to.params as Record<string, string>)
+    });
+    return rewritten ? { ...to, ...rewritten } : to;
+  }
+
+  router.push = to => originalPush(rewriteLocation(to));
+  router.replace = to => originalReplace(rewriteLocation(to));
+  router.resolve = (
+    to: RouteLocationRaw,
+    currentLocation?: RouteLocationNormalizedLoaded
+  ) => originalResolve(rewriteLocation(to), currentLocation);
 }
