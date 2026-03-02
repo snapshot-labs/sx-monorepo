@@ -1,8 +1,8 @@
 import { RouteLocationNamedRaw, RouteLocationRaw } from 'vue-router';
 import { NavItem } from '@/composables/useNav/types';
 import { NetworkID, Space } from '@/types';
+import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
-import IHNewspaper from '~icons/heroicons-outline/newspaper';
 
 export type NamedRouteLocationRaw = RouteLocationNamedRaw &
   Required<Pick<RouteLocationNamedRaw, 'name'>>;
@@ -37,7 +37,7 @@ export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     navItems: {
       'space-proposals': {
         name: 'Polls',
-        icon: IHNewspaper,
+        icon: IHCheckCircle,
         link: {
           name: 'org-space-proposals',
           params: { space: 's:starknet.eth' }
