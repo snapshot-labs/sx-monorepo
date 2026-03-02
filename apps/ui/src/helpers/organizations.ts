@@ -1,5 +1,4 @@
 import {
-  RouteLocationNamedRaw,
   RouteLocationNormalizedLoaded,
   RouteLocationRaw,
   Router
@@ -9,10 +8,7 @@ import { NetworkID, Space } from '@/types';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
 
-export type NamedRouteLocationRaw = RouteLocationNamedRaw &
-  Required<Pick<RouteLocationNamedRaw, 'name'>>;
-
-export type SpaceId = { network: NetworkID; id: string };
+type SpaceId = { network: NetworkID; id: string };
 
 export type OrganizationConfig = {
   id: string;
@@ -25,7 +21,7 @@ export type Organization = OrganizationConfig & {
   spaces: Space[];
 };
 
-export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
+const ORGANIZATIONS: Record<string, OrganizationConfig> = {
   starknet: {
     id: 'starknet',
     name: 'Starknet',
@@ -52,8 +48,7 @@ export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       docs: {
         name: 'Docs',
         icon: IHDocumentText,
-        link: 'https://docs.starknet.io/learn/protocol/strk',
-        isExternal: true
+        link: 'https://docs.starknet.io/learn/protocol/strk'
       }
     }
   },
@@ -68,7 +63,7 @@ export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
 // e.g. VITE_ORGANIZATION_MAPPING='localhost;starknet'
 const ORGANIZATION_MAPPING = import.meta.env.VITE_ORGANIZATION_MAPPING;
 
-export const ORGANIZATION_DOMAINS: Record<string, string> = {
+const ORGANIZATION_DOMAINS: Record<string, string> = {
   'starknet.stage.box': 'starknet',
   ...(ORGANIZATION_MAPPING
     ? {
@@ -91,7 +86,7 @@ const ORG_ROUTES_WITH_SPACE = new Set([
  * Converts a space route (e.g. 'space-proposals') to its org equivalent (e.g. 'org-proposals').
  * Returns null if the route has no org equivalent.
  */
-export function toOrgRoute(
+function toOrgRoute(
   name: string,
   params: Record<string, any> = {}
 ): { name: string; params: Record<string, any> } | null {
@@ -114,24 +109,6 @@ export function toOrgRoute(
   }
 
   return null;
-}
-
-/**
- * Rewrites a navigation target to its org route when the space belongs to the organization.
- * Returns the original route unchanged if the space is not part of the organization.
- */
-export function resolveOrgRoute(
-  organization: Organization,
-  to: NamedRouteLocationRaw
-): RouteLocationRaw {
-  const spaceParam = to.params?.space as string | undefined;
-  const isOrgSpace = organization.spaceIds.some(
-    s => `${s.network}:${s.id}` === spaceParam
-  );
-  if (spaceParam && !isOrgSpace) return to;
-
-  const rewritten = toOrgRoute(to.name.toString(), to.params ?? {});
-  return rewritten ? { ...to, ...rewritten } : to;
 }
 
 export function getOrganizationConfigByDomain(
