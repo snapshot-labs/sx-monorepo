@@ -9,7 +9,7 @@ defineEmits<{
   (e: 'click'): void;
 }>();
 
-const { isWhiteLabel } = useWhiteLabel();
+const { isWhiteLabel, space: whiteLabelSpace } = useWhiteLabel();
 const router = useRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
@@ -26,7 +26,7 @@ function normalize(to: RouteLocationRaw) {
     return to;
   }
 
-  if (to.name.toString().startsWith('space-')) {
+  if (to.name.toString().startsWith('space-') && whiteLabelSpace.value) {
     delete to.params?.space;
   }
 

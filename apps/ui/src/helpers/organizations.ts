@@ -162,6 +162,10 @@ export function patchRouterForOrg(router: Router) {
   const originalReplace = router.replace.bind(router);
   const originalResolve = router.resolve.bind(router);
 
+  const isOrgWhiteLabel = !!getOrganizationConfigByDomain(
+    window.location.hostname
+  );
+
   function rewriteLocation(to: RouteLocationRaw): RouteLocationRaw {
     if (
       typeof to === 'string' ||
@@ -170,7 +174,11 @@ export function patchRouterForOrg(router: Router) {
     )
       return to;
 
-    if (String(router.currentRoute.value.matched[0]?.name) !== 'org') return to;
+    if (
+      !isOrgWhiteLabel &&
+      String(router.currentRoute.value.matched[0]?.name) !== 'org'
+    )
+      return to;
 
     const spaceParam = to.params?.space as string | undefined;
     if (spaceParam) {
