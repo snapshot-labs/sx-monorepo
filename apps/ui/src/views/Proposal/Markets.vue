@@ -17,6 +17,16 @@ const formatPrice = (v: number) =>
     maximumFractionDigits: data.value?.pricePrecision ?? 6
   })}`;
 
+const formatBadge = (index: number, values: number[]) => {
+  const spot = values[0];
+  if (index === 0 || !spot) return null;
+  const pct = ((values[index] - spot) / spot) * 100;
+  const rounded = Math.round(pct * 10) / 10;
+  if (rounded === 0) return null;
+  const text = `${rounded > 0 ? '+' : ''}${parseFloat(rounded.toFixed(1))}%`;
+  return { text, positive: rounded >= 0 };
+};
+
 const chartStart = computed(() => {
   const first = data.value?.candles.find(p => p.yes > 0 && p.no > 0);
   return first ? first.time / 1000 : props.proposal.start;
@@ -62,6 +72,7 @@ const chartSeries = computed<LineChartSeries[]>(() => {
         :start="chartStart"
         :end="proposal.max_end"
         :format-value="formatPrice"
+        :format-badge="formatBadge"
         :start-from-zero="false"
         linear
       />

@@ -11,6 +11,10 @@ const props = withDefaults(
     start: number;
     end: number;
     formatValue?: (v: number) => string;
+    formatBadge?: (
+      index: number,
+      values: number[]
+    ) => { text: string; positive: boolean } | null;
     quorum?: number;
     startFromZero?: boolean;
     linear?: boolean;
@@ -169,14 +173,19 @@ function buildPath(
 
 const currentTs = computed(() => hoveredTimestamp.value ?? effectiveEnd.value);
 
+const currentValues = computed(() =>
+  props.series.map((_, i) => getValueAt(i, currentTs.value))
+);
+
 const lines = computed(() =>
   [...props.series.keys()].reverse().map(i => ({
     points: buildPath(i, props.start, currentTs.value, true),
     ...colorOf(i),
     label: props.series[i].label,
     value: props.formatValue
-      ? props.formatValue(getValueAt(i, currentTs.value))
-      : String(getValueAt(i, currentTs.value))
+      ? props.formatValue(currentValues.value[i])
+      : String(currentValues.value[i]),
+    badge: props.formatBadge?.(i, currentValues.value) ?? null
   }))
 );
 
@@ -266,16 +275,23 @@ function handleMouseMove(e: MouseEvent) {
 
 <template>
   <div v-if="series.some(s => s.data.length > 0)">
-    <div class="flex justify-between items-center mb-2 px-4 py-2.5">
-      <div class="flex gap-2.5">
+    <div class="flex justify-between items-start mb-2 px-4 py-2.5">
+      <div class="flex flex-col md:flex-row gap-0 md:gap-2.5">
         <div
           v-for="(line, i) in displayLines"
           :key="i"
           class="flex items-center gap-1.5"
         >
           <span class="w-2 h-2 rounded-full" :class="line.bg" />
-          <span class="text-skin-text hidden md:block" v-text="line.label" />
+          <span class="text-skin-text" v-text="line.label" />
           <span class="font-bold text-skin-link" v-text="line.value" />
+          <span
+            v-if="line.badge"
+            :class="
+              line.badge.positive ? 'text-skin-success' : 'text-skin-danger'
+            "
+            v-text="line.badge.text"
+          />
         </div>
       </div>
       <span
