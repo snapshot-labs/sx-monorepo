@@ -64,8 +64,7 @@ export function useCurrentSpace() {
   });
 
   const space = computed<Space | null>(
-    () =>
-      orgRouteSpace.value ?? primarySpace.value ?? queriedSpace.value ?? null
+    () => knownSpace.value ?? queriedSpace.value ?? null
   );
 
   const isPending = computed(
