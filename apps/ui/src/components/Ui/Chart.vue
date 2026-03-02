@@ -420,9 +420,10 @@ onUnmounted(() => chart?.remove());
         <button
           v-if="showCurrencyToggle"
           class="text-xs px-2 py-0.5 rounded border border-skin-border hover:bg-skin-border transition-colors"
+          :title="currentSymbol"
           @click="useStableRate = !useStableRate"
         >
-          {{ currentSymbol }}
+          {{ useStableRate ? '$' : currentSymbol }}
         </button>
         <span class="text-skin-text">{{ currentDate }}</span>
       </div>
