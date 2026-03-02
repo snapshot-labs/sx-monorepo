@@ -59,21 +59,23 @@ const formattedVotingPower = computed(() => {
   return votingPower;
 });
 
-const routePrefix = computed(() => (organization.value ? 'org' : 'space'));
+const baseRouteName = computed(() =>
+  String(route.name).replace(/^(space|org)-/, '')
+);
 
 const navigation = computed(() => [
-  { label: 'Statement', route: `${routePrefix.value}-user-statement` },
+  { label: 'Statement', route: 'space-user-statement' },
   {
     label: 'Proposals',
-    route: `${routePrefix.value}-user-proposals`,
+    route: 'space-user-proposals',
     count: userActivity.value?.proposal_count
   },
   {
     label: 'Votes',
-    route: `${routePrefix.value}-user-votes`,
+    route: 'space-user-votes',
     count: userActivity.value?.vote_count
   }
-  // { label: 'Delegators', route: `${routePrefix.value}-user-delegators`, count: delegatesCount.value },
+  // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
 ]);
 
 const hasOnlyInvalidDelegations = computed(() => {
@@ -279,7 +281,7 @@ watch(
           :to="{ name: item.route, params: { user: userId } }"
         >
           <UiLabel
-            :is-active="route.name === item.route"
+            :is-active="baseRouteName === item.route.replace('space-', '')"
             :text="item.label"
             :count="item.count"
           />
