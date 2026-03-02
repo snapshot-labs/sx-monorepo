@@ -305,7 +305,11 @@ watchEffect(async () => {
           :definition="{
             type: 'string',
             title: 'Contract address',
-            examples: ['Address or ENS'],
+            examples: [
+              getChainIdKind(props.network) === 'evm'
+                ? 'Address or ENS'
+                : 'Address'
+            ],
             chainId: props.network,
             showControls: !loading
           }"
