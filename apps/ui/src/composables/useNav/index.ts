@@ -2,11 +2,12 @@ import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
+import orgProvider from './org';
 import settingsProvider from './settings';
 import spaceProvider from './space';
 import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 
-const providers: NavProvider[] = [spaceProvider, settingsProvider, myProvider];
+const providers: NavProvider[] = [orgProvider, spaceProvider, settingsProvider, myProvider];
 
 function enrichItems(
   config: NavConfig,
@@ -36,6 +37,7 @@ function setup() {
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
   const { space } = useCurrentSpace();
+  const { organization } = useOrganization();
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
 
@@ -74,7 +76,8 @@ function setup() {
     isWhiteLabel: isWhiteLabel.value,
     space: spaceOnRoute.value,
     isController: isController.value,
-    ensOwner: ensOwner.value
+    ensOwner: ensOwner.value,
+    organization: organization.value
   }));
 
   const hasAppNav = computed<boolean>(() => {
