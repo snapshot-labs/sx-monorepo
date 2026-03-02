@@ -9,8 +9,11 @@ const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const WHITELABEL_MAPPING = import.meta.env.VITE_WHITELABEL_MAPPING;
 const domain = window.location.hostname;
 
-// Hardcoded whitelabel mappings for onchain spaces
-const MAPPING = {
+// Whitelabel mappings for onchain spaces.
+// Override locally with VITE_WHITELABEL_MAPPING env var for easier testing
+// e.g. VITE_WHITELABEL_MAPPING='localhost;s:snapshot.eth'
+// e.g. VITE_WHITELABEL_MAPPING='localhost' (org whitelabel without space)
+const MAPPING: Record<string, Record<string, any>> = {
   'vanilla.box': {
     network: 'base',
     id: '0x8cF43759f3d4E72cB72cED6bd69cCe43d4428264',
@@ -53,7 +56,15 @@ const MAPPING = {
       theme: 'light',
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
-  }
+  },
+  ...(WHITELABEL_MAPPING
+    ? (() => {
+        const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
+        if (!localSpaceId) return { [localDomain]: {} };
+        const [network, id] = localSpaceId.split(':');
+        return { [localDomain]: { network, id } };
+      })()
+    : {})
 };
 
 const isWhiteLabel = ref(false);
@@ -72,17 +83,7 @@ async function getSpace(domain: string): Promise<Space | null> {
   const loadSpacesParams: Record<string, string> = {};
   let spaceNetwork = metadataNetwork;
 
-  // Resolve white label domain locally if mapping is provided
-  // for easier local testing
-  // e.g. VITEWHITE_LABEL_MAPPING='localhost;s:snapshot.eth'
-  if (WHITELABEL_MAPPING) {
-    const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
-    if (domain === localDomain) {
-      const [network, id] = localSpaceId.split(':');
-      spaceNetwork = network;
-      loadSpacesParams.id = id;
-    }
-  } else if (MAPPING[domain]) {
+  if (MAPPING[domain]) {
     if (!('id' in MAPPING[domain])) return null;
     loadSpacesParams.id = MAPPING[domain].id;
     spaceNetwork = MAPPING[domain].network;

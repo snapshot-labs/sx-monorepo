@@ -59,8 +59,17 @@ export const ORGANIZATIONS: Record<string, OrganizationConfig> = {
   }
 };
 
+// Override locally with VITE_ORGANIZATION_MAPPING env var for easier testing
+// e.g. VITE_ORGANIZATION_MAPPING='localhost;starknet'
+const ORGANIZATION_MAPPING = import.meta.env.VITE_ORGANIZATION_MAPPING;
+
 export const ORGANIZATION_DOMAINS: Record<string, string> = {
-  'starknet.stage.box': 'starknet'
+  'starknet.stage.box': 'starknet',
+  ...(ORGANIZATION_MAPPING
+    ? {
+        [ORGANIZATION_MAPPING.split(';')[0]]: ORGANIZATION_MAPPING.split(';')[1]
+      }
+    : {})
 };
 
 const ORG_ROUTES_WITH_SPACE = new Set([
