@@ -15,11 +15,11 @@ export function useOrganization() {
   const queryClient = useQueryClient();
 
   const config = computed<OrganizationConfig | null>(() => {
+    const byDomain = getOrganizationConfigByDomain(domain);
+    if (byDomain) return byDomain;
+
     if (String(route.matched[0]?.name) !== 'org') return null;
-    return (
-      getOrganizationConfigByDomain(domain) ??
-      getOrganizationConfigById(route.params.org as string)
-    );
+    return getOrganizationConfigById(route.params.org as string);
   });
 
   const { data: spaces, isLoading } = useQuery({

@@ -73,6 +73,10 @@ const ORG_ROUTES_WITH_SPACE = new Set([
   'org-space-proposals'
 ]);
 
+/**
+ * Converts a space route (e.g. 'space-proposals') to its org equivalent (e.g. 'org-proposals').
+ * Returns null if the route has no org equivalent.
+ */
 export function toOrgRoute(
   name: string,
   params: Record<string, any> = {}
@@ -98,6 +102,10 @@ export function toOrgRoute(
   return null;
 }
 
+/**
+ * Rewrites a navigation target to its org route when the space belongs to the organization.
+ * Returns the original route unchanged if the space is not part of the organization.
+ */
 export function resolveOrgRoute(
   organization: Organization,
   to: NamedRouteLocationRaw
