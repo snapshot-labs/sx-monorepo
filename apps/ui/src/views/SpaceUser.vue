@@ -16,6 +16,8 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { modalAccountOpen } = useModal();
+const { web3Account } = useWeb3();
 
 const userActivity = ref<UserActivity>({
   vote_count: 0,
@@ -133,6 +135,11 @@ async function loadUserActivity() {
 // }
 
 function handleDelegateClick() {
+  if (!web3Account.value) {
+    modalAccountOpen.value = true;
+    return;
+  }
+
   delegateModalState.value.delegatees[0] = { id: userId.value };
   delegateModalOpen.value = true;
 }
@@ -160,8 +167,8 @@ async function getVotingPower() {
 }
 
 watch(
-  userId,
-  async id => {
+  [userId, () => props.space.id],
+  async ([id]) => {
     loaded.value = false;
 
     if (isValidAddress(id)) {
@@ -247,13 +254,12 @@ watch(
         />
         <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
-            <a
-              :href="social.href"
-              target="_blank"
+            <AppLink
+              :to="social.href"
               class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
-            </a>
+            </AppLink>
           </template>
         </div>
       </div>

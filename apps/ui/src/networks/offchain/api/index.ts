@@ -10,6 +10,7 @@ import {
 } from '@/helpers/constants';
 import { parseOSnapTransaction } from '@/helpers/osnap/transactions';
 import { getProposalCurrentQuorum } from '@/helpers/quorum';
+import { parseSafeSnapTransaction } from '@/helpers/safesnap/transactions';
 import { getNames } from '@/helpers/stamp';
 import { clone, compareAddresses } from '@/helpers/utils';
 import {
@@ -30,6 +31,7 @@ import {
   ProposalExecution,
   ProposalState,
   RelatedSpace,
+  ScoresTick,
   Setting,
   SkinSettings,
   Space,
@@ -47,6 +49,7 @@ import {
   PROPOSAL_QUERY,
   PROPOSALS_QUERY,
   RANKING_QUERY,
+  SCORES_TICKS_VOTES_QUERY,
   SETTINGS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
@@ -82,6 +85,9 @@ const DELEGATE_REGISTRY_URLS: Partial<Record<NetworkID, string>> = {
   s: 'https://delegate-registry-api.snapshot.box',
   's-tn': 'https://testnet-delegate-registry-api.snapshot.box'
 };
+
+const SCORES_TICKS_LIMIT = 1000;
+export const SCORES_TICKS_MAX_VOTES = 4000;
 
 function getProposalState(
   networkId: NetworkID,
@@ -285,6 +291,7 @@ function formatSpace(
 function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
   let executions = [] as ProposalExecution[];
   let executionType = '';
+  let isInvalid = false;
 
   const chainIdToNetworkId = Object.fromEntries(
     Object.entries(CHAIN_IDS).map(([k, v]) => [v, k])
@@ -312,10 +319,45 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       executionType = 'oSnap';
     } catch (e) {
       console.warn('failed to parse oSnap execution', e);
+      isInvalid = true;
     }
   } else if (proposal.plugins.safeSnap) {
-    executions = [];
-    executionType = 'safeSnap';
+    try {
+      const safeSnapConfig = proposal.plugins.safeSnap;
+      const safes: any[] =
+        safeSnapConfig.safes ||
+        (safeSnapConfig.txs ? [{ txs: safeSnapConfig.txs }] : []);
+
+      executions = [
+        ...executions,
+        ...safes
+          .map(safe => {
+            const chainId = Number(safe.network || 1);
+            const batches: any[] = safe.txs || [];
+
+            const transactions = batches.flatMap(batch => {
+              const txs = batch.transactions || batch;
+              return (Array.isArray(txs) ? txs : [txs]).map(tx =>
+                parseSafeSnapTransaction(tx)
+              );
+            });
+
+            return {
+              strategyType: 'safeSnap',
+              safeName: '',
+              safeAddress: safe.realityAddress || safe.umaAddress || '',
+              networkId: chainIdToNetworkId[chainId],
+              chainId,
+              transactions
+            };
+          })
+          .filter(execution => execution.transactions.length > 0)
+      ];
+      executionType = 'safeSnap';
+    } catch (err) {
+      console.warn('failed to parse safeSnap execution', err);
+      isInvalid = true;
+    }
   }
 
   if (proposal.plugins.readOnlyExecution) {
@@ -350,7 +392,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
     id: proposal.id,
     network: networkId,
     metadata_uri: proposal.ipfs,
-    isInvalid: false,
+    isInvalid,
     author: {
       id: proposal.author,
       address_type: 1,
@@ -420,6 +462,7 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
       voting_power_validation_params,
     tx: '',
     execution_tx: null,
+    executed_at: null,
     veto_tx: null,
     privacy: proposal.privacy || 'none',
     flagged: proposal.flagged,
@@ -548,6 +591,56 @@ export function createApi(
 
   return {
     apiUrl: uri,
+    loadProposalScoresTicks: async (
+      proposalId: string
+    ): Promise<ScoresTick[]> => {
+      const votes: { choice: number; vp: number; created: number }[] = [];
+      let skip = 0;
+
+      while (skip < SCORES_TICKS_MAX_VOTES) {
+        const { data } = await apollo.query({
+          query: SCORES_TICKS_VOTES_QUERY,
+          variables: {
+            first: SCORES_TICKS_LIMIT,
+            skip,
+            where: { proposal: proposalId }
+          }
+        });
+
+        const page = data.votes;
+        votes.push(...page);
+
+        if (page.length < SCORES_TICKS_LIMIT) break;
+        skip += SCORES_TICKS_LIMIT;
+      }
+
+      const scores: [number, number, number] = [0, 0, 0];
+      const ticks: ScoresTick[] = [];
+
+      for (const vote of votes) {
+        if (
+          typeof vote.choice === 'number' &&
+          vote.choice >= 1 &&
+          vote.choice <= 3
+        ) {
+          scores[vote.choice - 1] += vote.vp;
+        }
+
+        const hourTs = Math.floor(vote.created / 3600) * 3600;
+        const last = ticks.at(-1);
+
+        if (!last || last.timestamp !== hourTs) {
+          ticks.push({
+            timestamp: hourTs,
+            scores: [...scores] as [number, number, number]
+          });
+        } else {
+          last.scores = [...scores] as [number, number, number];
+        }
+      }
+
+      return ticks;
+    },
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,

@@ -31,8 +31,6 @@ const ABOVE_CLEARING_PRICE_SERIES_OPTIONS: AreaSeriesPartialOptions = {
   priceLineVisible: false
 };
 
-const CLEARING_PRICE_COLOR = '#f59e0b';
-
 const props = defineProps<{
   data: SingleValueData[];
   auction: AuctionDetailFragment;
@@ -141,24 +139,19 @@ function formatNumber(value: number, range?: number): string {
       <div class="text-sm text-skin-text">
         Cumulative demand:
         <span class="text-skin-link">
-          {{ formatNumber(value) }} {{ props.auction.symbolBiddingToken }}
+          {{ formatNumber(value) }} {{ props.auction.symbolAuctioningToken }}
         </span>
       </div>
-      <div v-if="customValues?.bucketVolume" class="text-xs text-skin-text">
+      <div v-if="customValues?.bucketBuyAmount" class="text-xs text-skin-text">
         Bid volume @ this level:
         <span class="text-skin-link">
-          {{ formatNumber(customValues.bucketVolume as number) }}
-          {{ props.auction.symbolBiddingToken }}
+          {{ formatNumber(customValues.bucketBuyAmount as number) }}
+          {{ props.auction.symbolAuctioningToken }}
         </span>
       </div>
     </UiChartTooltip>
 
-    <UiChartVerticalLine
-      v-if="chart"
-      :chart="chart"
-      :value="clearingPrice"
-      :color="CLEARING_PRICE_COLOR"
-    >
+    <UiChartVerticalLine v-if="chart" :chart="chart" :value="clearingPrice">
       Clearing:
       {{
         _n(clearingPrice, 'standard', {

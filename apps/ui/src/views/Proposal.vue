@@ -173,10 +173,25 @@ watchEffect(() => {
               />
             </AppLink>
             <AppLink
-              v-if="
-                proposal.executions?.length ||
-                proposal.execution_strategy_type === 'safeSnap'
-              "
+              v-if="proposal.vote_count"
+              :to="{
+                name: 'space-proposal-votes',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-votes'"
+                :count="proposal.vote_count"
+                text="Votes"
+                class="inline-block"
+              />
+            </AppLink>
+            <AppLink
+              v-if="proposal.executions?.length"
               :to="{
                 name: 'space-proposal-execution',
                 params: {
@@ -194,23 +209,6 @@ watchEffect(() => {
                     .reduce((a, b) => a + b, 0)
                 "
                 text="Execution"
-                class="inline-block"
-              />
-            </AppLink>
-            <AppLink
-              :to="{
-                name: 'space-proposal-votes',
-                params: {
-                  proposal: proposal.proposal_id,
-                  space: `${proposal.network}:${proposal.space.id}`
-                }
-              }"
-              class="flex items-center"
-            >
-              <UiLabel
-                :is-active="route.name === 'space-proposal-votes'"
-                :count="proposal.vote_count"
-                text="Votes"
                 class="inline-block"
               />
             </AppLink>
@@ -233,28 +231,22 @@ watchEffect(() => {
                   class="inline-block"
                 />
               </AppLink>
-              <a
-                v-else
-                :href="discussion"
-                target="_blank"
-                class="flex items-center"
-              >
+              <AppLink v-else :to="discussion" class="flex items-center">
                 <UiEyebrow class="text-skin-text">Discussion</UiEyebrow>
                 <IH-arrow-sm-right class="-rotate-45 text-skin-text" />
-              </a>
+              </AppLink>
             </template>
             <template v-if="boostCount > 0">
-              <a
-                :href="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
+              <AppLink
+                :to="`https://v1.snapshot.box/#/${proposal.space.id}/proposal/${proposal.proposal_id}`"
                 class="flex items-center"
-                target="_blank"
               >
                 <UiLabel
                   :count="boostCount"
                   text="Boost"
                   class="inline-block"
                 />
-              </a>
+              </AppLink>
             </template>
           </div>
         </UiScrollerHorizontal>

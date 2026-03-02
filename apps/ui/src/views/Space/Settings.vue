@@ -59,6 +59,12 @@ const { invalidateController } = useSpaceController(toRef(props, 'space'));
 const uiStore = useUiStore();
 const queryClient = useQueryClient();
 const { setTitle } = useTitle();
+const {
+  isRevealed: isLeaveConfirmModalOpen,
+  reveal: revealLeaveConfirm,
+  confirm: confirmLeave,
+  cancel: cancelLeave
+} = useConfirmDialog();
 
 const el = ref(null);
 const { height: bottomToolbarHeight } = useElementSize(el);
@@ -240,7 +246,8 @@ const pendingSpace = computed(() => {
         ? String(strategy.chainId)
         : snapshotChainId.value
     })),
-    snapshot_chain_id: snapshotChainId.value
+    snapshot_chain_id: snapshotChainId.value,
+    authenticators: authenticators.value.map(strategy => strategy.address)
   };
 });
 
@@ -315,6 +322,14 @@ function addCustomStrategy(strategy: { address: string; type: string }) {
     }
   ];
 }
+
+onBeforeRouteLeave(async to => {
+  if (!isModified.value || !canModifySettings.value) return true;
+  if (to.name !== 'space-pro') return true;
+
+  const { isCanceled } = await revealLeaveConfirm();
+  return !isCanceled;
+});
 
 watch(
   () => props.space.controller,
@@ -460,12 +475,9 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
         description="Execution strategies determine if a proposal passes and how it is executed. This section is currently read-only."
       >
         <div class="space-y-3">
-          <FormStrategiesStrategyActive
-            v-for="strategy in executionStrategies"
-            :key="strategy.id"
-            read-only
-            :network-id="space.network"
-            :strategy="strategy"
+          <FormSpaceExecutionStrategies
+            :space="space"
+            :execution-strategies="executionStrategies"
           />
           <UiButton
             v-if="evmNetworks.includes(space.network)"
@@ -574,41 +586,18 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </UiContainerSettings>
     </div>
   </div>
-  <UiToolbarBottom v-if="showToolbar" ref="el">
-    <div
-      class="px-4 py-3 flex flex-col xs:flex-row items-center"
-      :class="error || isModified ? 'justify-between' : 'justify-end'"
-    >
-      <h4
-        v-if="error || isModified"
-        class="leading-7 font-medium truncate mb-2 xs:mb-0"
-        :class="{ 'text-skin-danger': error }"
-      >
-        {{ error || 'You have unsaved changes' }}
-      </h4>
-      <div class="flex space-x-3">
-        <button
-          v-if="isModified"
-          type="reset"
-          class="text-skin-heading"
-          @click="reset()"
-        >
-          Reset
-        </button>
-        <UiButton
-          v-if="!error"
-          :loading="saving"
-          primary
-          @click="handleSettingsSave"
-        >
-          <template v-if="isModified"> Save </template>
-          <template v-else-if="space.additionalRawData?.hibernated">
-            Reactivate
-          </template>
-        </UiButton>
-      </div>
-    </div>
-  </UiToolbarBottom>
+  <SettingsToolbar
+    v-if="showToolbar"
+    ref="el"
+    :error="error"
+    :is-modified="!!isModified"
+    :saving="saving"
+    :save-label="
+      space.additionalRawData?.hibernated && !isModified ? 'Reactivate' : 'Save'
+    "
+    @save="handleSettingsSave"
+    @reset="reset()"
+  />
   <teleport to="#modal">
     <ModalCustomStrategy
       :open="customStrategyModalOpen"
@@ -617,6 +606,24 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       @close="customStrategyModalOpen = false"
       @save="addCustomStrategy"
     />
+    <UiModal :open="isLeaveConfirmModalOpen" @close="cancelLeave">
+      <template #header>
+        <h3>Unsaved changes</h3>
+      </template>
+      <div class="s-box p-4">
+        <UiMessage type="danger">
+          You have unsaved changes. Are you sure you want to leave?
+        </UiMessage>
+      </div>
+      <template #footer>
+        <div class="flex gap-3 w-full">
+          <UiButton class="flex-1" @click="cancelLeave">Stay</UiButton>
+          <UiButton class="flex-1" primary @click="confirmLeave">
+            Leave
+          </UiButton>
+        </div>
+      </template>
+    </UiModal>
     <ModalTransactionProgress
       :open="saving && (!isOffchainNetwork || executeFn === saveController)"
       :chain-id="network.chainId"

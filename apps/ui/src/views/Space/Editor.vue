@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { sanitizeUrl } from '@braintree/sanitize-url';
+import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { useQueryClient } from '@tanstack/vue-query';
 import { LocationQueryValue } from 'vue-router';
 import { StrategyWithTreasury } from '@/composables/useTreasuries';
@@ -59,11 +60,14 @@ const { alerts } = useSpaceAlerts(toRef(props, 'space'), {
   isEditor: true
 });
 const { isController, isAdmin } = useSpaceSettings(toRef(props, 'space'));
+const { isInvalidNetwork: isSafeInvalidNetwork } = useSafeWallet(
+  props.space.network,
+  props.space.snapshot_chain_id
+);
 
 const modalOpen = ref(false);
 const modalOpenTerms = ref(false);
 const { modalAccountOpen } = useModal();
-const previewEnabled = ref(false);
 const sending = ref(false);
 const enforcedVoteType = ref<VoteType | null>(null);
 
@@ -252,7 +256,8 @@ const canSubmit = computed(() => {
     hasUnsupportedNetworks ||
     hasFormErrors ||
     disabledStrategiesList.value.length ||
-    unsupportedPremiumStrategiesList.value.length
+    unsupportedPremiumStrategiesList.value.length ||
+    isSafeInvalidNetwork.value
   ) {
     return false;
   }
@@ -647,6 +652,15 @@ watchEffect(() => {
               <IH-arrow-sm-right class="-rotate-45" /> </AppLink
             >.
           </UiAlert>
+          <UiAlert
+            v-else-if="space.snapshot_chain_id && isSafeInvalidNetwork"
+            type="error"
+            class="mb-4"
+          >
+            Please use a Safe on
+            {{ networks[space.snapshot_chain_id]?.name ?? 'this network' }} to
+            create proposals.
+          </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
               <UiAlert type="error" class="mb-4">
@@ -656,12 +670,11 @@ watchEffect(() => {
                   "
                 >
                   Please verify your space to publish more proposals.
-                  <a
-                    :href="VERIFIED_URL"
-                    target="_blank"
+                  <AppLink
+                    :to="VERIFIED_URL"
                     class="text-rose-500 dark:text-neutral-100 font-semibold"
                   >
-                    Verify space </a
+                    Verify space </AppLink
                   >.</span
                 >
                 <span v-else-if="spaceTypeForProposalLimit !== 'turbo'">
@@ -694,9 +707,9 @@ watchEffect(() => {
           </template>
           <div v-if="guidelines">
             <UiEyebrow class="mb-2">Guidelines</UiEyebrow>
-            <a :href="guidelines" target="_blank" class="block mb-4">
+            <AppLink :to="guidelines" class="block mb-4">
               <UiLinkPreview :url="guidelines" :show-default="true" />
-            </a>
+            </AppLink>
           </div>
           <UiInputString
             :key="proposalKey || ''"
@@ -705,29 +718,7 @@ watchEffect(() => {
             :error="formErrors.title"
             :required="true"
           />
-          <div class="flex space-x-3">
-            <button type="button" @click="previewEnabled = false">
-              <UiLabel
-                :is-active="!previewEnabled"
-                text="Write"
-                class="border-transparent"
-              />
-            </button>
-            <button type="button" @click="previewEnabled = true">
-              <UiLabel
-                :is-active="previewEnabled"
-                text="Preview"
-                class="border-transparent"
-              />
-            </button>
-          </div>
-          <UiMarkdown
-            v-if="previewEnabled"
-            class="px-3 py-2 border rounded-lg mb-[14px] min-h-[260px]"
-            :body="proposal.body"
-          />
           <UiComposer
-            v-else
             v-model="proposal.body"
             :definition="bodyDefinition"
             :error="formErrors.body"

@@ -87,7 +87,12 @@ async function getBoosts(proposalIds: string[]) {
   async function query(chainId: string) {
     const client = new ApolloClient({
       uri: SUBGRAPH_URLS[chainId],
-      cache: new InMemoryCache()
+      cache: new InMemoryCache(),
+      defaultOptions: {
+        query: {
+          fetchPolicy: 'no-cache'
+        }
+      }
     });
 
     const { data } = await client.query({

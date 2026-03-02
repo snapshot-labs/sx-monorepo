@@ -28,15 +28,14 @@ defineProps<{
     <div class="py-3 px-4">
       <div class="flex items-center space-x-2">
         <h4 class="text-skin-link inline-block" v-text="strategy.name" />
-        <a
+        <AppLink
           v-if="strategy.link"
-          :href="strategy.link"
-          target="_blank"
+          :to="strategy.link"
           class="inline-block"
           @click.stop
         >
           <IH-question-mark-circle />
-        </a>
+        </AppLink>
       </div>
       <div
         v-if="strategy.about"

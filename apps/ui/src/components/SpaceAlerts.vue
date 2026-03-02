@@ -57,6 +57,35 @@ const pendingTasks = computed(() => {
     });
   }
 
+  if (alerts.value.has('IS_RELAYER_BALANCE_INSUFFICIENT')) {
+    _alerts.push({
+      description:
+        'Relayer balance depleted. Gasless voting is disabled until you top up.',
+      link: { name: 'space-settings', params: { tab: 'authenticators' } },
+      type: 'error'
+    });
+  }
+
+  if (alerts.value.has('IS_RELAYER_BALANCE_LOW')) {
+    _alerts.push({
+      description:
+        'Relayer balance is running low. Top up soon to keep gasless voting active.',
+      link: { name: 'space-settings', params: { tab: 'authenticators' } },
+      type: 'error'
+    });
+  }
+
+  if (alerts.value.has('IS_SIG_AUTHENTICATOR_INOPERATIVE')) {
+    _alerts.push({
+      description: 'Top up your relayer account to enable gasless voting',
+      link: { name: 'space-settings', params: { tab: 'authenticators' } },
+      type: alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
+        ?.isUsingOnlySigAuthenticators
+        ? 'error'
+        : 'info'
+    });
+  }
+
   return _alerts;
 });
 

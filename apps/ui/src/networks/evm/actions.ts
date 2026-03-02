@@ -1021,7 +1021,7 @@ export function createActions(
             address,
             voterAddress,
             strategyMetadata,
-            snapshotInfo.at!,
+            snapshotInfo.at,
             strategiesParams[i],
             provider
           );

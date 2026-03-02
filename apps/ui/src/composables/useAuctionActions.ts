@@ -1,4 +1,7 @@
+import { BigNumber } from '@ethersproject/bignumber';
+import { Contract } from '@ethersproject/contracts';
 import { MaybeRefOrGetter } from 'vue';
+import { abis } from '@/helpers/abis';
 import {
   AUCTION_CONTRACT_ADDRESSES,
   AuctionNetworkId,
@@ -7,15 +10,7 @@ import {
 } from '@/helpers/auction';
 import * as actions from '@/helpers/auction/actions';
 import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
-import {
-  AUCTION_TAG,
-  POSTER_TAG,
-  REFERRAL_EIP712_DOMAIN,
-  REFERRAL_EIP712_TYPES
-} from '@/helpers/auction/referral';
-import { executionCall } from '@/helpers/mana';
-import { pin } from '@/helpers/pin';
-import { approve, getTokenAllowance } from '@/helpers/token';
+import { approve, deposit, getTokenAllowance } from '@/helpers/token';
 import {
   getUserFacingErrorMessage,
   isUserAbortError,
@@ -28,7 +23,7 @@ export function useAuctionActions(
   auction: MaybeRefOrGetter<AuctionDetailFragment>
 ) {
   const uiStore = useUiStore();
-  const { auth } = useWeb3();
+  const { auth, web3Account } = useWeb3();
   const { modalAccountOpen } = useModal();
 
   function wrapWithErrors<T extends any[], U>(fn: (...args: T) => Promise<U>) {
@@ -82,6 +77,29 @@ export function useAuctionActions(
     return allowance >= sellOrder.sellAmount;
   }
 
+  async function wrapEth(sellOrder: SellOrder) {
+    const contract = new Contract(
+      toValue(auction).addressBiddingToken,
+      abis.erc20,
+      auth.value!.provider
+    );
+
+    const balance: BigNumber = await contract.balanceOf(web3Account.value);
+    const missingBalance = sellOrder.sellAmount - balance.toBigInt();
+
+    if (missingBalance <= 0n) {
+      return null;
+    }
+
+    return wrapPromise(
+      deposit(
+        auth.value!.provider,
+        toValue(auction).addressBiddingToken,
+        missingBalance
+      )
+    );
+  }
+
   async function approveToken(sellOrder: SellOrder) {
     return wrapPromise(
       approve(
@@ -126,46 +144,6 @@ export function useAuctionActions(
     );
   }
 
-  async function setReferee(referee: string) {
-    const signer = auth.value!.provider.getSigner();
-    const signerAddress = await signer.getAddress();
-
-    const domain = {
-      ...REFERRAL_EIP712_DOMAIN,
-      chainId: chainId.value
-    };
-
-    const message = {
-      auction_tag: AUCTION_TAG,
-      referee: referee.toLowerCase()
-    };
-
-    const signature = await signer._signTypedData(
-      domain,
-      REFERRAL_EIP712_TYPES,
-      message
-    );
-
-    const metadata = {
-      method: 'SetAuctionReferee',
-      signer: signerAddress.toLowerCase(),
-      signature,
-      domain,
-      types: REFERRAL_EIP712_TYPES,
-      message
-    };
-
-    const { cid } = await pin(metadata);
-
-    return wrapPromise(
-      executionCall('eth', domain.chainId, 'postReferral', {
-        metadataUri: `ipfs://${cid}`,
-        posterTag: POSTER_TAG
-      }),
-      domain.chainId
-    );
-  }
-
   async function wrapPromise(
     promise: Promise<any>,
     txChainId?: number
@@ -181,11 +159,11 @@ export function useAuctionActions(
       wrapWithAuthAndNetwork(getIsTokenApproved)
     ),
     approveToken: wrapWithErrors(wrapWithAuthAndNetwork(approveToken)),
+    wrapEth: wrapWithErrors(wrapWithAuthAndNetwork(wrapEth)),
     placeSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(placeSellOrder)),
     cancelSellOrder: wrapWithErrors(wrapWithAuthAndNetwork(cancelSellOrder)),
     claimFromParticipantOrder: wrapWithErrors(
       wrapWithAuthAndNetwork(claimFromParticipantOrder)
-    ),
-    setReferee: wrapWithErrors(wrapWithAuthAndNetwork(setReferee))
+    )
   };
 }

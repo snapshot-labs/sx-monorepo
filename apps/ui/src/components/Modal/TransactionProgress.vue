@@ -105,7 +105,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" class="text-skin-heading" @close="$emit('close')">
+  <UiModal :open="open" class="text-skin-heading" @close="emit('close')">
     <div
       class="flex flex-col px-4 py-5 space-y-4 text-center items-center text-skin-text"
     >
@@ -146,19 +146,18 @@ watch(
       }"
     >
       <div v-if="step === 'approve'" v-text="'Proceed in your wallet'" />
-      <a
+      <AppLink
         v-else-if="['confirming', 'success'].includes(step) && txId"
-        :href="getGenericExplorerUrl(chainId, txId, 'transaction') ?? undefined"
-        target="_blank"
+        :to="getGenericExplorerUrl(chainId, txId, 'transaction') ?? undefined"
       >
         View on explorer
         <IH-arrow-sm-right class="inline-block -rotate-45" />
-      </a>
+      </AppLink>
       <div
         v-else-if="step === 'fail'"
         class="w-full flex justify-between space-x-[10px]"
       >
-        <UiButton class="w-full" @click="$emit('close')">Cancel</UiButton>
+        <UiButton class="w-full" @click="emit('close')">Cancel</UiButton>
         <UiButton primary class="w-full" @click="handleExecute">
           Try again
         </UiButton>
