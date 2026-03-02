@@ -14,16 +14,6 @@ import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
 
-const WHITELISTED_SPACES = [
-  'kleros.eth',
-  'paraswap-dao.eth',
-  'gnosis.eth',
-  'aavedao.eth'
-];
-
-// Dev mode: set VITE_FUTARCHY_DEV_MODE=true to show widget before proposal start
-const FUTARCHY_DEV_MODE = import.meta.env.VITE_FUTARCHY_DEV_MODE === 'true';
-
 const props = defineProps<{
   proposal: Proposal;
 }>();
@@ -361,11 +351,6 @@ onBeforeUnmount(() => destroyAudio());
       </h1>
 
       <ProposalStatus :state="proposal.state" class="top-[7.5px] mb-4" />
-
-      <WidgetFutarchy
-        v-if="WHITELISTED_SPACES.includes(proposal.space.id) && (FUTARCHY_DEV_MODE || proposal.start <= Math.floor(Date.now() / 1000))"
-        :proposal="proposal"
-      />
 
       <div class="flex justify-between items-center mb-4">
         <AppLink

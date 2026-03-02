@@ -3,6 +3,7 @@ import { getBoostsCount } from '@/helpers/boost';
 import { FLAGS, HELPDESK_URL } from '@/helpers/constants';
 import { loadSingleTopic, Topic } from '@/helpers/discourse';
 import { getFormattedVotingPower, sanitizeUrl } from '@/helpers/utils';
+import { FUTARCHY_SPACES, useFutarchyQuery } from '@/queries/futarchy';
 import { useProposalQuery } from '@/queries/proposals';
 import { useProposalVotingPowerQuery } from '@/queries/votingPower';
 import { Choice, Space } from '@/types';
@@ -34,6 +35,20 @@ const { data: proposal, isPending } = useProposalQuery(
   props.space.network,
   props.space.id,
   id
+);
+
+const isFutarchySpace = computed(() =>
+  FUTARCHY_SPACES.includes(props.space.id)
+);
+
+const { data: futarchyData } = useFutarchyQuery(
+  () => proposal.value?.id || '',
+  () => proposal.value?.start || 0,
+  () => proposal.value?.max_end || 0
+);
+
+const showFutarchyTab = computed(
+  () => isFutarchySpace.value && !!futarchyData.value?.candles.length
 );
 
 const router = useRouter();
@@ -187,6 +202,24 @@ watchEffect(() => {
                 :is-active="route.name === 'space-proposal-votes'"
                 :count="proposal.vote_count"
                 text="Votes"
+                class="inline-block"
+              />
+            </AppLink>
+            <AppLink
+              v-if="showFutarchyTab"
+              :to="{
+                name: 'space-proposal-futarchy',
+                params: {
+                  proposal: proposal.proposal_id,
+                  space: `${proposal.network}:${proposal.space.id}`
+                }
+              }"
+              class="flex items-center"
+            >
+              <UiLabel
+                :is-active="route.name === 'space-proposal-futarchy'"
+                :count="1"
+                text="Markets"
                 class="inline-block"
               />
             </AppLink>
