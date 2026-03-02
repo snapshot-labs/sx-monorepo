@@ -7,7 +7,12 @@ import settingsProvider from './settings';
 import spaceProvider from './space';
 import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 
-const providers: NavProvider[] = [orgProvider, spaceProvider, settingsProvider, myProvider];
+const providers: NavProvider[] = [
+  orgProvider,
+  spaceProvider,
+  settingsProvider,
+  myProvider
+];
 
 function enrichItems(
   config: NavConfig,
