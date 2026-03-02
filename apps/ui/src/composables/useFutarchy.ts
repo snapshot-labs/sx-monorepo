@@ -88,7 +88,8 @@ export function useFutarchy(
   function processCandleData(
     yesCandles: { periodStartUnix: string; close: string }[],
     noCandles: { periodStartUnix: string; close: string }[],
-    spotCandles: { periodStartUnix: string; close: string }[]
+    spotCandles: { periodStartUnix: string; close: string }[],
+    startTs?: number  // proposal start timestamp in seconds
   ): { candles: CandleDataPoint[]; scaleFactor: number; hasYes: boolean; hasNo: boolean } {
     const yesMap = new Map<number, number>();
     const noMap = new Map<number, number>();
@@ -115,13 +116,24 @@ export function useFutarchy(
 
     const sortedTimestamps = Array.from(allTimestamps).sort((a, b) => a - b);
 
+    // Back-fill: prepend proposal start time if candles start later
+    if (startTs && sortedTimestamps.length > 0) {
+      const startMs = startTs * 1000;
+      if (startMs < sortedTimestamps[0]) {
+        sortedTimestamps.unshift(startMs);
+      }
+    }
+
     // Scale factor for very small prices
     const allValues = [...yesMap.values(), ...noMap.values(), ...spotMap.values()].filter(v => v > 0);
     const maxValue = allValues.length > 0 ? Math.max(...allValues) : 1;
     const scaleFactor = maxValue < 1 ? Math.pow(10, Math.ceil(-Math.log10(maxValue))) : 1;
 
-    // Forward-fill: carry last known value for each series
-    let lastYes = 0, lastNo = 0, lastSpot = 0;
+    // Back-fill initial values: use first known price so the synthetic start
+    // candle shows the initial pool price instead of 0
+    let lastYes = yesMap.size > 0 ? yesMap.values().next().value! : 0;
+    let lastNo = noMap.size > 0 ? noMap.values().next().value! : 0;
+    let lastSpot = spotMap.size > 0 ? spotMap.values().next().value! : 0;
 
     const candles = sortedTimestamps.map(time => {
       if (yesMap.has(time)) lastYes = yesMap.get(time)!;
@@ -162,11 +174,16 @@ export function useFutarchy(
       const market = FutarchyResponseSchema.parse(data.market);
       marketData.value = market;
 
+      // Use chart_start_range from API if available, otherwise fall back to proposal start
+      const timeline = (data.market as any)?.timeline;
+      const effectiveStart: number = timeline?.chart_start_range || startTimestamp.value;
+
       // Process YES/NO candles (no spot yet)
       const { candles, scaleFactor, hasYes, hasNo } = processCandleData(
         data.candles?.yes || [],
         data.candles?.no || [],
-        []
+        [],
+        effectiveStart
       );
 
       if (!hasYes || !hasNo) {
@@ -180,7 +197,7 @@ export function useFutarchy(
       // ── Phase 2: Async spot fetch ──
       const ticker = market.spot?.pool_ticker;
       if (ticker) {
-        loadSpotAsync(ticker);
+        loadSpotAsync(ticker, effectiveStart);
       }
 
     } catch (e) {
@@ -193,11 +210,12 @@ export function useFutarchy(
   /**
    * Fetch spot candles asynchronously and merge into existing candle data.
    */
-  async function loadSpotAsync(ticker: string) {
+  async function loadSpotAsync(ticker: string, effectiveStart?: number) {
     try {
+      const minTs = effectiveStart || startTimestamp.value;
       const spotParams = new URLSearchParams({
         ticker,
-        minTimestamp: String(startTimestamp.value),
+        minTimestamp: String(minTs),
         maxTimestamp: String(maxTimestamp.value)
       });
 
@@ -229,7 +247,7 @@ export function useFutarchy(
         .filter(c => c.no > 0)
         .map(c => ({ periodStartUnix: String(c.time / 1000), close: String(c.no) }));
 
-      const { candles, scaleFactor } = processCandleData(yesCandles, noCandles, spotCandles);
+      const { candles, scaleFactor } = processCandleData(yesCandles, noCandles, spotCandles, effectiveStart || startTimestamp.value);
 
 
 
