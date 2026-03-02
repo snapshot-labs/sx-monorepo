@@ -148,7 +148,9 @@ export default {
   routeName: 'space',
   isVisible: ({ route }) =>
     !EXCLUDED_SUB_ROUTES.includes(String(route.matched[1]?.name)),
-  getConfig(context: NavContext): NavConfig {
+  getConfig(context: NavContext): NavConfig | null {
+    if (!context.space) return null;
+
     if (context.route.name === 'space-settings') {
       return getSpaceSettingsConfig(context);
     }

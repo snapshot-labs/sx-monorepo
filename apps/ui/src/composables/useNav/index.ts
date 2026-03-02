@@ -4,7 +4,7 @@ import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
 import settingsProvider from './settings';
 import spaceProvider from './space';
-import { NavConfig, NavItem, NavProvider } from './types';
+import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 
 const providers: NavProvider[] = [spaceProvider, settingsProvider, myProvider];
 
@@ -67,7 +67,7 @@ function setup() {
     { lazy: true }
   );
 
-  const context = computed(() => ({
+  const context = computed<NavContext>(() => ({
     route,
     account: web3.value.account,
     unreadCount: notificationsStore.unreadNotificationsCount,
@@ -77,17 +77,19 @@ function setup() {
     ensOwner: ensOwner.value
   }));
 
-  const hasAppNav = computed(() => {
+  const hasAppNav = computed<boolean>(() => {
     const provider = currentProvider.value;
     if (!provider) return false;
     return provider.isVisible?.(context.value) ?? true;
   });
 
-  const config = computed(() => {
+  const config = computed<NavConfig | null>(() => {
     const provider = currentProvider.value;
     if (!provider) return null;
 
     const result = provider.getConfig(context.value);
+    if (!result) return null;
+
     return enrichItems(result, provider.routeName, route);
   });
 

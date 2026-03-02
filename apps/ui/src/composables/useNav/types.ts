@@ -29,5 +29,5 @@ export type NavContext = {
 export type NavProvider = {
   routeName: string;
   isVisible?: (context: NavContext) => boolean;
-  getConfig: (context: NavContext) => NavConfig;
+  getConfig: (context: NavContext) => NavConfig | null;
 };
