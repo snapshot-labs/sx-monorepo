@@ -32,7 +32,7 @@ vi.mock('@/queries/spaces', () => ({
       if (!networkId || !spaceId) return null;
       return { id: `${networkId}:${spaceId}`, network: networkId } as any;
     });
-    return { data, isFetching: ref(false) };
+    return { data, isPending: ref(false) };
   }
 }));
 
@@ -73,7 +73,7 @@ describe('useCurrentSpace', () => {
       const { space, isPending } = withSetup(() => useCurrentSpace());
 
       expect(space.value).toBe(null);
-      expect(isPending.value).toBe(false);
+      expect(isPending.value).toBe(true);
     });
 
     it('should resolve direct addresses without calling resolver', async () => {
