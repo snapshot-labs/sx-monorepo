@@ -24,6 +24,7 @@ export function useCurrentSpace() {
       ) ?? null
   );
 
+  // Space already available from org or white-label context, no query needed
   const knownSpace = computed(() => orgRouteSpace.value ?? primarySpace.value);
 
   const queryFn = computed<typeof skipToken | (() => Promise<SpaceId | null>)>(
@@ -57,6 +58,7 @@ export function useCurrentSpace() {
     queryFn
   });
 
+  // Space fetched from API when not available locally
   const { data: queriedSpace, isPending: isQueryPending } = useSpaceQuery({
     networkId: () =>
       knownSpace.value ? null : spaceId.value?.networkId ?? null,
