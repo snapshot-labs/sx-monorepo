@@ -42,12 +42,12 @@ export function useCurrentSpace() {
     }
   );
 
-  const { data: spaceId, isFetching: isResolving } = useQuery({
+  const { data: spaceId, isPending: isResolving } = useQuery({
     queryKey: ['resolveSpace', () => spaceParam.value],
     queryFn
   });
 
-  const { data: queriedSpace, isFetching: isQueryFetching } = useSpaceQuery({
+  const { data: queriedSpace, isPending: isQueryPending } = useSpaceQuery({
     networkId: () =>
       primarySpace.value ? null : spaceId.value?.networkId ?? null,
     spaceId: () => (primarySpace.value ? null : spaceId.value?.address ?? null)
@@ -58,7 +58,7 @@ export function useCurrentSpace() {
   );
 
   const isPending = computed(
-    () => !primarySpace.value && (isResolving.value || isQueryFetching.value)
+    () => !primarySpace.value && (isResolving.value || isQueryPending.value)
   );
 
   return {
