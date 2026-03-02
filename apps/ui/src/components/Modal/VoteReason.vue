@@ -7,13 +7,13 @@ defineProps<{
   vote: Vote | null;
 }>();
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="'Reason'" />
     </template>

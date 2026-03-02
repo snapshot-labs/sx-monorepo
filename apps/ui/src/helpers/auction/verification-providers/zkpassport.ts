@@ -68,15 +68,20 @@ async function startVerification(context: VerificationContext): Promise<void> {
         return;
       }
 
-      await context.checkStatus({
-        showNotification: true,
-        metadata: {
-          zkpassport: {
-            proofs,
-            queryResult
+      try {
+        await context.checkStatus({
+          showNotification: true,
+          auth: context.auth,
+          metadata: {
+            zkpassport: {
+              proofs,
+              queryResult
+            }
           }
-        }
-      });
+        });
+      } catch (err) {
+        context.handleError(err, 'Failed to complete verification');
+      }
     });
 
     onReject(() => {

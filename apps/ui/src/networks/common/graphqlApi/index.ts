@@ -26,6 +26,7 @@ import {
   Proposal,
   ProposalExecution,
   ProposalState,
+  ScoresTick,
   Space,
   SpaceMetadataTreasury,
   Transaction,
@@ -49,6 +50,7 @@ import {
   LAST_INDEXED_BLOCK_QUERY,
   LEADERBOARD_QUERY,
   PROPOSAL_QUERY,
+  PROPOSAL_SCORES_TICKS_QUERY,
   PROPOSALS_QUERY,
   SPACE_QUERY,
   SPACES_QUERY,
@@ -438,6 +440,23 @@ export function createApi(
 
   return {
     apiUrl: uri,
+    loadProposalScoresTicks: async (
+      proposalId: string
+    ): Promise<ScoresTick[]> => {
+      const { data } = await apollo.query({
+        query: PROPOSAL_SCORES_TICKS_QUERY,
+        variables: { id: proposalId }
+      });
+
+      return (data.proposal?.scores_ticks ?? []).map(tick => ({
+        timestamp: tick.timestamp,
+        scores: [
+          Number(tick.scores_1),
+          Number(tick.scores_2),
+          Number(tick.scores_3)
+        ] as const
+      }));
+    },
     loadProposalVotes: async (
       proposal: Proposal,
       { limit, skip = 0 }: PaginationOpts,

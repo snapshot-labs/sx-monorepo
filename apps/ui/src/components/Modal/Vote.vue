@@ -207,7 +207,7 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <UiModal :open="open" :class="{ hidden }" @close="$emit('close')">
+  <UiModal :open="open" :class="{ hidden }" @close="emit('close')">
     <template #header>
       <h3>Cast your vote</h3>
     </template>
@@ -257,9 +257,9 @@ watchEffect(async () => {
             class="font-normal flex gap-0.5 text-sm items-center"
           >
             (
-            <a :href="blockExplorerUrl" target="_blank">{{
+            <AppLink :to="blockExplorerUrl">{{
               _n(proposal.snapshot)
-            }}</a>
+            }}</AppLink>
             <UiTooltip title="Snapshot block number">
               <IH-information-circle class="size-3" />
             </UiTooltip>
@@ -280,7 +280,7 @@ watchEffect(async () => {
       <div class="flex flex-col xs:flex-row gap-3">
         <UiButton
           class="w-full order-last xs:order-none"
-          @click="$emit('close')"
+          @click="emit('close')"
         >
           Cancel
         </UiButton>

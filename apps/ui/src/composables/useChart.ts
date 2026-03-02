@@ -16,7 +16,7 @@ import {
 import { MaybeRef } from 'vue';
 import { getPriceFormat } from '@/helpers/charts';
 
-const CHART_SERIES_COLORS = {
+export const CHART_SERIES_COLORS = {
   light: {
     lineColor: 'rgba(17, 17, 17, 0.8)',
     areaTopColor: 'rgba(17, 17, 17, 0.4)',

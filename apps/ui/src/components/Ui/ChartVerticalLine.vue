@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { IChartApi, Time } from 'lightweight-charts';
+import { CHART_SERIES_COLORS } from '@/composables/useChart';
 import { Coordinates, getSmartPosition } from '@/helpers/charts';
 
 type LinePosition = Coordinates & {
@@ -11,7 +12,6 @@ const LABEL_MARGIN = 0;
 const props = defineProps<{
   chart: IChartApi;
   value: number;
-  color: string;
 }>();
 
 const linePosition = ref<LinePosition>({ x: 0, y: 0, height: 0 });
@@ -19,6 +19,10 @@ const labelPosition = ref<Coordinates>({ x: 0, y: 0 });
 const isLineVisible = ref(false);
 const isLabelVisible = ref(false);
 const labelRef = ref<HTMLDivElement>();
+
+const { currentTheme } = useTheme();
+
+const color = computed(() => CHART_SERIES_COLORS[currentTheme.value].lineColor);
 
 const chartContainer = computed(() => {
   return props.chart.chartElement() || null;

@@ -1,11 +1,7 @@
-<script lang="ts">
-export default {
-  inheritAttrs: false
-};
-</script>
-
 <script setup lang="ts">
 import { getRandomHexColor } from '@/helpers/utils';
+
+defineOptions({ inheritAttrs: false });
 
 const props = defineProps<{
   loading?: boolean;

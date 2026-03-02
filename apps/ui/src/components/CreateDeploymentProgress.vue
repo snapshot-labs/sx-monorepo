@@ -260,11 +260,10 @@ onMounted(() => deploy());
           >
             Retry
           </button>
-          <a
+          <AppLink
             v-if="txIds[step.id]"
             class="inline-flex items-center"
-            target="_blank"
-            :href="
+            :to="
               getStepNetwork(step).helpers.getExplorerUrl(
                 txIds[step.id],
                 'transaction'
@@ -273,7 +272,7 @@ onMounted(() => deploy());
           >
             {{ shorten(txIds[step.id]) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-          </a>
+          </AppLink>
         </div>
       </div>
     </div>

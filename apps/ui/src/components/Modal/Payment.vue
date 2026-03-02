@@ -52,7 +52,7 @@ const { isPending, assetsMap } = useBalances({
 const { isWhiteLabel } = useWhiteLabel();
 
 const selectedTokenAddress = ref<string>('');
-const showPicker = ref(false);
+const isPickerShown = ref(false);
 const isHidden = ref(false);
 const isModalTransactionProgressOpen = ref(false);
 const isTermsAccepted = ref(false);
@@ -153,7 +153,7 @@ function handleSubmit() {
 
 function handleTokenPick(address: string) {
   selectedTokenAddress.value = address;
-  showPicker.value = false;
+  isPickerShown.value = false;
 }
 
 watch(
@@ -162,7 +162,7 @@ watch(
     if (open) return;
 
     isTermsAccepted.value = false;
-    showPicker.value = false;
+    isPickerShown.value = false;
     isHidden.value = false;
     selectedTokenAddress.value = '';
     form.value = clone(FORM);
@@ -174,18 +174,18 @@ watch(
   <UiModal :open="open" :class="{ hidden: isHidden }" @close="emit('close')">
     <template #header>
       <h3>Payment</h3>
-      <template v-if="showPicker">
+      <template v-if="isPickerShown">
         <button
           type="button"
           class="absolute left-0 -top-1 p-4"
-          @click="showPicker = false"
+          @click="isPickerShown = false"
         >
           <IH-arrow-narrow-left class="mr-2" />
         </button>
       </template>
     </template>
     <PickerToken
-      v-if="showPicker"
+      v-if="isPickerShown"
       :assets="filteredAssets"
       :address="auth?.account || ''"
       :network="network"
@@ -199,7 +199,7 @@ watch(
         <button
           type="button"
           class="s-input text-left h-[61px]"
-          @click="showPicker = true"
+          @click="isPickerShown = true"
         >
           <div class="flex items-center">
             <UiStamp
@@ -257,7 +257,7 @@ watch(
         </UiCheckbox>
       </div>
     </div>
-    <template v-if="!showPicker" #footer>
+    <template v-if="!isPickerShown" #footer>
       <UiButton
         class="w-full"
         primary

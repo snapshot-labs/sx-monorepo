@@ -198,15 +198,15 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           <UiAddress :address="user.id" copy-button="always" />
           <div v-if="userMetadata.loaded" class="flex items-center gap-2">
             <span class="hidden xs:inline">·</span>
-            <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
+            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
               {{ _n(userMetadata.following_count) }}
               <span class="text-skin-text">following</span>
-            </a>
+            </AppLink>
             ·
-            <a :href="`https://ethfollow.xyz/${user.id}`" target="_blank">
+            <AppLink :to="`https://ethfollow.xyz/${user.id}`">
               {{ _n(userMetadata.followers_count) }}
               <span class="text-skin-text">followers</span>
-            </a>
+            </AppLink>
           </div>
         </div>
         <div
@@ -216,13 +216,12 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
         />
         <div v-if="socials.length" class="space-x-2 flex">
           <template v-for="social in socials" :key="social.key">
-            <a
-              :href="social.href"
-              target="_blank"
+            <AppLink
+              :to="social.href"
               class="text-skin-text hover:text-skin-link"
             >
               <component :is="social.icon" class="size-[26px]" />
-            </a>
+            </AppLink>
           </template>
         </div>
       </div>

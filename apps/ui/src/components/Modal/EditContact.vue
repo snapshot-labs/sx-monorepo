@@ -75,7 +75,7 @@ watch(
 </script>
 
 <template>
-  <UiModal :open="open" @close="$emit('close')">
+  <UiModal :open="open" @close="emit('close')">
     <template #header>
       <h3 v-text="initialState?.address ? 'Edit contact' : 'Add contact'" />
     </template>

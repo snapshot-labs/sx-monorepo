@@ -114,6 +114,13 @@ const proposalMetadataUrl = computed(() => {
   return sanitizeUrl(url);
 });
 
+const snapshotV1Url = computed(() => {
+  if (!offchainNetworks.includes(props.proposal.network)) return null;
+  const base = SNAPSHOT_URLS[props.proposal.network];
+  if (!base) return null;
+  return `${base}/#/${props.proposal.space.id}/proposal/${props.proposal.id}`;
+});
+
 const proposalTransactionId = computed(() => {
   const network = getNetwork(props.proposal.network);
 
@@ -367,10 +374,9 @@ onBeforeUnmount(() => destroyAudio());
           <div class="flex flex-col ml-2 leading-4 gap-1">
             <div>
               {{ proposal.author.name || shortenAddress(proposal.author.id) }}
-              <span
+              <UiPill
                 v-if="proposal.author.role"
-                class="bg-skin-border text-skin-link text-[13px] rounded-full px-1.5 py-0.5"
-                v-text="proposal.author.role"
+                :label="proposal.author.role"
               />
             </div>
             <span class="text-skin-text text-sm">
@@ -515,6 +521,10 @@ onBeforeUnmount(() => destroyAudio());
                 <IH-arrow-sm-right class="-rotate-45" :width="16" />
                 View on block explorer
               </UiDropdownItem>
+              <UiDropdownItem v-if="snapshotV1Url" :to="snapshotV1Url">
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View on v1 interface
+              </UiDropdownItem>
             </template>
           </UiDropdown>
         </div>
@@ -537,38 +547,16 @@ onBeforeUnmount(() => destroyAudio());
           <IH-chat-alt />
           <span>Discussion</span>
         </UiEyebrow>
-        <a :href="discussion" target="_blank" class="block mb-5">
+        <AppLink :to="discussion" class="block mb-5">
           <UiLinkPreview :url="discussion" :show-default="true" />
-        </a>
+        </AppLink>
       </div>
-      <div
-        v-if="
-          (proposal.executions && proposal.executions.length > 0) ||
-          proposal.execution_strategy_type === 'safeSnap'
-        "
-      >
+      <div v-if="proposal.executions && proposal.executions.length > 0">
         <UiEyebrow class="mb-3 flex items-center gap-2">
           <IH-play />
           <span>Execution</span>
         </UiEyebrow>
         <div class="mb-4">
-          <UiAlert
-            v-if="proposal.execution_strategy_type === 'safeSnap'"
-            type="warning"
-          >
-            This proposal uses SafeSnap execution which is currently not
-            supported on the new interface. You can view execution details on
-            the
-            <a
-              :href="`${SNAPSHOT_URLS[proposal.network]}/#/${proposal.space.id}/proposal/${proposal.id}`"
-              target="_blank"
-              class="inline-flex items-center font-bold"
-            >
-              previous interface
-              <IH-arrow-sm-right class="inline-block -rotate-45" />
-            </a>
-            .
-          </UiAlert>
           <ProposalExecutionsList
             :network-id="proposal.network"
             :proposal="proposal"
@@ -577,7 +565,7 @@ onBeforeUnmount(() => destroyAudio());
         </div>
       </div>
       <div>
-        <router-link
+        <AppLink
           class="text-skin-text"
           :to="{
             name: 'space-proposal-votes',
@@ -589,7 +577,7 @@ onBeforeUnmount(() => destroyAudio());
         >
           {{ _n(proposal.vote_count) }}
           {{ proposal.vote_count !== 1 ? 'votes' : 'vote' }}
-        </router-link>
+        </AppLink>
         ·
         <button
           type="button"

@@ -6,7 +6,8 @@ import {
 } from '@tanstack/vue-query';
 import { MaybeRefOrGetter } from 'vue';
 import { getNames } from '@/helpers/stamp';
-import { getNetwork } from '@/networks';
+import { getNetwork, offchainNetworks } from '@/networks';
+import { SCORES_TICKS_MAX_VOTES } from '@/networks/offchain/api';
 import { ProposalsFilter } from '@/networks/types';
 import { NetworkID, Proposal } from '@/types';
 
@@ -60,7 +61,16 @@ export const PROPOSALS_KEYS = {
     networkId: MaybeRefOrGetter<NetworkID>,
     spaceId: MaybeRefOrGetter<string>,
     proposalId: MaybeRefOrGetter<string>
-  ) => [...PROPOSALS_KEYS.details(networkId, spaceId), proposalId] as const
+  ) => [...PROPOSALS_KEYS.details(networkId, spaceId), proposalId] as const,
+  scoresTicks: (
+    networkId: MaybeRefOrGetter<NetworkID>,
+    spaceId: MaybeRefOrGetter<string>,
+    proposalId: MaybeRefOrGetter<string>
+  ) =>
+    [
+      ...PROPOSALS_KEYS.detail(networkId, spaceId, proposalId),
+      'scoresTicks'
+    ] as const
 };
 
 async function withAuthorNames(proposals: Proposal[]) {
@@ -232,6 +242,33 @@ export function useProposalQuery(
       if (!proposal) return null;
 
       return (await withAuthorNames([proposal]))[0];
+    }
+  });
+}
+
+export function useProposalScoresTicksQuery(
+  proposal: MaybeRefOrGetter<Proposal>
+) {
+  const networkId = () => toValue(proposal).network;
+  const spaceId = () => toValue(proposal).space.id;
+  const proposalId = () => toValue(proposal).id;
+
+  return useQuery({
+    queryKey: PROPOSALS_KEYS.scoresTicks(networkId, spaceId, proposalId),
+    queryFn: async () => {
+      const p = toValue(proposal);
+
+      if (offchainNetworks.includes(p.network)) {
+        if (
+          p.type !== 'basic' ||
+          (p.privacy !== 'none' && !p.completed) ||
+          p.vote_count > SCORES_TICKS_MAX_VOTES
+        ) {
+          return [];
+        }
+      }
+
+      return getNetwork(p.network).api.loadProposalScoresTicks(p.id);
     }
   });
 }

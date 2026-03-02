@@ -41,6 +41,7 @@ export type AuctionVerificationType =
 
 export type VerificationStatus =
   | 'started'
+  | 'signing'
   | 'loading'
   | 'pending'
   | 'scanning'

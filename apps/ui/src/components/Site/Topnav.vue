@@ -19,24 +19,24 @@ const { toggleTheme, currentTheme } = useTheme();
     </div>
     <ul class="hidden lg:flex text-md text-skin-link space-x-4 mr-6">
       <li>
-        <router-link :to="{ name: 'site-landing', hash: '#features' }">
+        <AppLink :to="{ name: 'site-landing', hash: '#features' }">
           Features
-        </router-link>
+        </AppLink>
       </li>
       <li>
-        <router-link :to="{ name: 'site-ecosystem' }">Ecosystem</router-link>
+        <AppLink :to="{ name: 'site-ecosystem' }">Ecosystem</AppLink>
       </li>
       <li>
-        <a href="https://docs.snapshot.box" target="_blank">
+        <AppLink to="https://docs.snapshot.box">
           Developers
           <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        </AppLink>
       </li>
       <li>
-        <a href="https://snapshot.mirror.xyz" target="_blank">
+        <AppLink to="https://snapshot.mirror.xyz">
           Blog
           <IH-arrow-sm-right class="inline-block -rotate-45" />
-        </a>
+        </AppLink>
       </li>
     </ul>
     <div class="shrink-0 space-x-3 items-center flex">

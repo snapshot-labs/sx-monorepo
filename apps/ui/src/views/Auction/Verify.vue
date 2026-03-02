@@ -4,6 +4,7 @@ import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { PROVIDERS } from '@/helpers/auction/verification-providers';
 
 const VERIFICATION_PENDING_STATUSES: readonly VerificationStatus[] = [
+  'signing',
   'loading',
   'pending',
   'scanning',
@@ -91,6 +92,14 @@ const isPending = computed(() =>
       >
         Verify with {{ PROVIDERS[providerId].name }}
       </UiButton>
+    </div>
+
+    <div
+      v-else-if="verificationStatus === 'signing'"
+      class="mt-4 flex flex-col items-center space-y-3"
+    >
+      <UiLoading class="block" />
+      <p class="text-skin-text">Please sign the message in your wallet</p>
     </div>
 
     <ZKPassportVerification

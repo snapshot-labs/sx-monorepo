@@ -24,9 +24,8 @@ function handleSave(value: string) {
       class="flex justify-between items-center rounded-lg border px-4 py-3 text-skin-link"
     >
       <div class="flex flex-col">
-        <a
-          :href="network.helpers.getExplorerUrl(controller, 'contract')"
-          target="_blank"
+        <AppLink
+          :to="network.helpers.getExplorerUrl(controller, 'contract')"
           class="flex items-center text-skin-text leading-5 group"
         >
           <UiStamp
@@ -37,7 +36,7 @@ function handleSave(value: string) {
           />
           <UiAddress :address="controller" />
           <IH-arrow-sm-right class="-rotate-45" />
-        </a>
+        </AppLink>
       </div>
       <button
         type="button"

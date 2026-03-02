@@ -25,11 +25,7 @@ const title = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    const rawMethodName = props.tx._form.method.slice(
-      0,
-      props.tx._form.method.indexOf('(')
-    );
-    return `<b>${rawMethodName}</b> on <b>_NAME_</b>`;
+    return `<b>${props.tx._form.method.split('(')[0]}</b> on <b>_NAME_</b>`;
   }
 
   if (props.tx._type === 'raw') {
@@ -67,11 +63,7 @@ const call = computed(() => {
   }
 
   if (props.tx._type === 'contractCall') {
-    const rawMethodName = props.tx._form.method.slice(
-      0,
-      props.tx._form.method.indexOf('(')
-    );
-    return { name: rawMethodName, to: props.tx.to };
+    return { name: props.tx._form.method.split('(')[0], to: props.tx.to };
   }
 
   return null;
@@ -156,7 +148,7 @@ const parsedTitle = computedAsync(
 </script>
 
 <template>
-  <div class="w-full border-b last:border-b-0">
+  <div class="group w-full border-b last:border-b-0">
     <button
       class="w-full px-4 py-3 gap-2 flex items-center"
       @click="expanded = !expanded"
@@ -171,7 +163,16 @@ const parsedTitle = computedAsync(
         <IH-code v-else class="shrink-0" />
         <div class="truncate text-skin-link" v-html="parsedTitle" />
       </div>
-      <slot name="right" />
+      <slot name="right">
+        <IS-chevron-up
+          v-if="expanded"
+          class="shrink-0 text-skin-text invisible group-hover:visible"
+        />
+        <IS-chevron-down
+          v-else
+          class="shrink-0 text-skin-text invisible group-hover:visible"
+        />
+      </slot>
     </button>
     <div v-if="expanded" class="border-y last:border-b-0 px-4 py-3">
       <div v-if="call" class="text-skin-link">
@@ -180,47 +181,42 @@ const parsedTitle = computedAsync(
           call.name
         }}</code>
         on
-        <a
+        <AppLink
           class="inline-flex items-center"
-          target="_blank"
-          :href="
-            getGenericExplorerUrl(chainId, call.to, 'address') || undefined
-          "
+          :to="getGenericExplorerUrl(chainId, call.to, 'address') || undefined"
         >
           {{ shorten(call.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-        </a>
+        </AppLink>
       </div>
       <div v-else-if="interaction" class="text-skin-link">
         Interaction with
-        <a
+        <AppLink
           class="inline-flex items-center"
-          target="_blank"
-          :href="
+          :to="
             getGenericExplorerUrl(chainId, interaction.to, 'address') ||
             undefined
           "
         >
           {{ shorten(interaction.to) }}
           <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-        </a>
+        </AppLink>
       </div>
       <template v-if="params.length > 0">
         <h4 class="font-medium mt-3">Parameters</h4>
         <div v-for="param in params" :key="param.name" class="flex space-x-2">
           <span class="text-skin-link">{{ param.name }}</span>
-          <a
+          <AppLink
             v-if="param.type === 'address'"
             class="inline-flex items-center"
-            target="_blank"
-            :href="
+            :to="
               getGenericExplorerUrl(chainId, param.value, 'address') ||
               undefined
             "
           >
             {{ shorten(param.value) }}
             <IH-arrow-sm-right class="inline-block ml-1 -rotate-45" />
-          </a>
+          </AppLink>
           <div v-else class="break-all inline-block">{{ param.value }}</div>
         </div>
       </template>
