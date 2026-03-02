@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { createSendNftTransaction } from '@/helpers/transactions';
-import { clone } from '@/helpers/utils';
+import { clone, getChainIdKind } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Contact } from '@/types';
 
@@ -23,7 +23,9 @@ const recipientDefinition = computed(() => ({
   format: 'ens-or-address',
   chainId: props.network,
   title: 'Recipient',
-  examples: ['Address or ENS']
+  examples: [
+    getChainIdKind(props.network) === 'evm' ? 'Address or ENS' : 'Address'
+  ]
 }));
 
 const formValidator = computed(() =>
