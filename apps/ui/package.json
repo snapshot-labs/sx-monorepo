@@ -150,7 +150,7 @@
     "typescript": "^5.8.3",
     "unplugin-icons": "^0.17.0",
     "unplugin-vue-components": "^0.25.2",
-    "vite": "^7.0.6",
+    "vite": "npm:rolldown-vite@7.3.1",
     "vitest": "^3.2.4",
     "vue-tsc": "^3.0.3",
     "wait-on": "^8.0.5"
