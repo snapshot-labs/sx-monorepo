@@ -1,7 +1,7 @@
 import { Provider } from '@ethersproject/providers';
 import { RpcProvider } from 'starknet';
 import { starknetNetworks } from '@/networks';
-import { METADATA } from '@/networks/evm';
+import { METADATA } from '@/networks/evm/metadata';
 import { NetworkID } from '@/types';
 
 export const MANA_URL =

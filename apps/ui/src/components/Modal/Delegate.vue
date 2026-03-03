@@ -8,7 +8,7 @@ import {
   EVM_CONNECTORS,
   STARKNET_CONNECTORS
 } from '@/networks/common/constants';
-import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
+import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet/metadata';
 import { Connector, ConnectorType } from '@/networks/types';
 import { useDelegateesQuery } from '@/queries/delegatees';
 import { ChainId, Space, SpaceMetadataDelegation } from '@/types';

@@ -7,12 +7,9 @@ import {
 } from '@/helpers/auction/referral';
 import { executionCall } from '@/helpers/mana';
 import { pin } from '@/helpers/pin';
-import {
-  getUserFacingErrorMessage,
-  isUserAbortError,
-  verifyNetwork
-} from '@/helpers/utils';
-import { METADATA as EVM_METADATA } from '@/networks/evm';
+import { getUserFacingErrorMessage, isUserAbortError } from '@/helpers/utils';
+import { verifyNetwork } from '@/helpers/walletNetworks';
+import { METADATA as EVM_METADATA } from '@/networks/evm/metadata';
 
 export function useAuctionReferralActions(
   networkId: MaybeRefOrGetter<AuctionNetworkId>

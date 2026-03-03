@@ -1,7 +1,7 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers';
 import { RpcProvider } from 'starknet';
 import { getProvider } from '@/helpers/provider';
-import { METADATA as STARKNET_METADATA } from '@/networks/starknet';
+import { METADATA as STARKNET_METADATA } from '@/networks/starknet/metadata';
 import { ChainId, Choice, NetworkID } from '@/types';
 import { EDITOR_SNAPSHOT_OFFSET } from './constants';
 import { createProvider } from '../starknet/provider';
