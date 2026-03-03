@@ -50,10 +50,6 @@ const {
   toRef(() => ['active', 'pending'].includes(proposal.value?.state || ''))
 );
 
-const baseRouteName = computed(() =>
-  String(route.name).replace(/^(space|org)-/, '')
-);
-
 const discussion = computed(() => {
   if (!proposal.value) return null;
 
@@ -68,8 +64,8 @@ const currentVote = computed(
     votes.value[`${proposal.value.network}:${proposal.value.id}`]
 );
 
-const withoutContentInBottom = computed(
-  () => baseRouteName.value === 'proposal-votes'
+const withoutContentInBottom = computed(() =>
+  String(route.name).endsWith('proposal-votes')
 );
 
 async function handleVoteClick(choice: Choice) {
@@ -163,6 +159,7 @@ watchEffect(() => {
         >
           <div class="flex px-4 bg-skin-bg border-b space-x-3 min-w-max">
             <AppLink
+              v-slot="{ isExactActive }"
               :to="{
                 name: 'space-proposal-overview',
                 params: {
@@ -171,13 +168,11 @@ watchEffect(() => {
                 }
               }"
             >
-              <UiLabel
-                :is-active="baseRouteName === 'proposal-overview'"
-                text="Overview"
-              />
+              <UiLabel :is-active="isExactActive" text="Overview" />
             </AppLink>
             <AppLink
               v-if="proposal.vote_count"
+              v-slot="{ isExactActive }"
               :to="{
                 name: 'space-proposal-votes',
                 params: {
@@ -188,7 +183,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="baseRouteName === 'proposal-votes'"
+                :is-active="isExactActive"
                 :count="proposal.vote_count"
                 text="Votes"
                 class="inline-block"
@@ -196,6 +191,7 @@ watchEffect(() => {
             </AppLink>
             <AppLink
               v-if="proposal.executions?.length"
+              v-slot="{ isExactActive }"
               :to="{
                 name: 'space-proposal-execution',
                 params: {
@@ -206,7 +202,7 @@ watchEffect(() => {
               class="flex items-center"
             >
               <UiLabel
-                :is-active="baseRouteName === 'proposal-execution'"
+                :is-active="isExactActive"
                 :count="
                   proposal.executions
                     .map(execution => execution.transactions.length)
@@ -219,6 +215,7 @@ watchEffect(() => {
             <template v-if="discussion">
               <AppLink
                 v-if="discourseTopic?.posts_count"
+                v-slot="{ isExactActive }"
                 :to="{
                   name: 'space-proposal-discussion',
                   params: {
@@ -229,7 +226,7 @@ watchEffect(() => {
                 class="flex items-center"
               >
                 <UiLabel
-                  :is-active="baseRouteName === 'proposal-discussion'"
+                  :is-active="isExactActive"
                   :count="discourseTopic.posts_count"
                   text="Discussion"
                   class="inline-block"
@@ -265,7 +262,7 @@ watchEffect(() => {
         :class="[
           'shrink-0 md:h-full z-40 border-l-0 md:border-l bg-skin-bg',
           {
-            'hidden md:block': baseRouteName === 'proposal-votes'
+            'hidden md:block': withoutContentInBottom
           }
         ]"
       >

@@ -62,10 +62,11 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
   </a>
   <router-link
     v-else-if="props.to"
+    v-slot="{ isActive, isExactActive }"
     :to="normalize(props.to)"
     @click="$emit('click')"
   >
-    <slot />
+    <slot :is-active="isActive" :is-exact-active="isExactActive" />
   </router-link>
   <button v-else type="button" @click="$emit('click')">
     <slot />

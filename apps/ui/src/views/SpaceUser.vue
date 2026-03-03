@@ -59,10 +59,6 @@ const formattedVotingPower = computed(() => {
   return votingPower;
 });
 
-const baseRouteName = computed(() =>
-  String(route.name).replace(/^(space|org)-/, '')
-);
-
 const navigation = computed(() => [
   { label: 'Statement', route: 'space-user-statement' },
   {
@@ -278,10 +274,11 @@ watch(
         <AppLink
           v-for="(item, i) in navigation"
           :key="i"
+          v-slot="{ isExactActive }"
           :to="{ name: item.route, params: { user: userId } }"
         >
           <UiLabel
-            :is-active="baseRouteName === item.route.replace('space-', '')"
+            :is-active="isExactActive"
             :text="item.label"
             :count="item.count"
           />
