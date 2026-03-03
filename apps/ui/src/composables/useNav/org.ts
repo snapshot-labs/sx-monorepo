@@ -8,7 +8,7 @@ import IHNewspaper from '~icons/heroicons-outline/newspaper';
 const EXCLUDED_ROUTE_SUFFIXES = ['editor', 'proposal'];
 
 function getOrgConfig(context: NavContext): NavConfig {
-  const space = context.organization?.spaces[0];
+  const primarySpace = context.organization?.spaces[0];
   const routeName = context.route.name as string;
 
   const items: Record<string, NavItem> = {
@@ -17,21 +17,21 @@ function getOrgConfig(context: NavContext): NavConfig {
       icon: IHGlobeAlt,
       link: { name: 'space-overview' }
     },
-    ...(space
+    ...(primarySpace
       ? {
           proposals: {
             name: 'Proposals',
             icon: IHNewspaper,
             link: {
               name: 'space-proposals',
-              params: { space: `${space.network}:${space.id}` }
+              params: { space: `${primarySpace.network}:${primarySpace.id}` }
             }
           }
         }
       : {})
   };
 
-  if (space?.delegations?.length) {
+  if (primarySpace?.delegations?.length) {
     items.delegates = {
       name: 'Delegates',
       icon: IHLightningBolt,
@@ -39,7 +39,10 @@ function getOrgConfig(context: NavContext): NavConfig {
     };
   }
 
-  if (space && SPACES_DISCUSSIONS[`${space.network}:${space.id}`]) {
+  if (
+    primarySpace &&
+    SPACES_DISCUSSIONS[`${primarySpace.network}:${primarySpace.id}`]
+  ) {
     items.discussions = {
       name: 'Discussions',
       icon: IHAnnotation,
