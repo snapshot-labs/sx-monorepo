@@ -1,4 +1,3 @@
-import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
@@ -14,18 +13,13 @@ const providers: NavProvider[] = [
   myProvider
 ];
 
-function enrichItems(
-  config: NavConfig,
-  routeName: string,
-  route: Pick<RouteLocationNormalizedLoaded, 'name'>
-): NavConfig {
+function enrichItems(config: NavConfig, routeName: string): NavConfig {
   const items = Object.fromEntries(
     Object.entries(config.items)
       .map(([key, item]): [string, NavItem] => [
         key,
         {
           ...item,
-          active: item.active ?? route.name === `${routeName}-${key}`,
           hidden: item.hidden ?? false,
           link: item.link ?? { name: `${routeName}-${key}` }
         }
@@ -98,7 +92,7 @@ function setup() {
     const result = provider.getConfig(context.value);
     if (!result) return null;
 
-    return enrichItems(result, provider.routeName, route);
+    return enrichItems(result, provider.routeName);
   });
 
   return { hasAppNav, config };

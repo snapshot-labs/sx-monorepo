@@ -5,27 +5,48 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 
-const EXCLUDED_SUB_ROUTES = ['org-editor', 'org-proposal'];
+const EXCLUDED_ROUTE_SUFFIXES = ['editor', 'proposal'];
 
 function getOrgConfig(context: NavContext): NavConfig {
   const space = context.organization?.spaces[0];
+  const routeName = context.route.name as string;
 
   const items: Record<string, NavItem> = {
-    overview: { name: 'Overview', icon: IHGlobeAlt },
-    proposals: { name: 'Proposals', icon: IHNewspaper }
+    overview: {
+      name: 'Overview',
+      icon: IHGlobeAlt,
+      link: { name: 'space-overview' }
+    },
+    ...(space
+      ? {
+          proposals: {
+            name: 'Proposals',
+            icon: IHNewspaper,
+            link: {
+              name: 'space-proposals',
+              params: { space: `${space.network}:${space.id}` }
+            }
+          }
+        }
+      : {})
   };
 
   if (space?.delegations?.length) {
-    items.delegates = { name: 'Delegates', icon: IHLightningBolt };
+    items.delegates = {
+      name: 'Delegates',
+      icon: IHLightningBolt,
+      link: { name: 'space-delegates' }
+    };
   }
 
   if (space && SPACES_DISCUSSIONS[`${space.network}:${space.id}`]) {
     items.discussions = {
       name: 'Discussions',
       icon: IHAnnotation,
-      active: ['org-discussions', 'org-discussions-topic'].includes(
-        context.route.name as string
-      )
+      link: { name: 'space-discussions' },
+      active:
+        routeName.endsWith('-discussions') ||
+        routeName.endsWith('-discussions-topic')
     };
   }
 
@@ -45,8 +66,10 @@ function getOrgConfig(context: NavContext): NavConfig {
 
 const provider: NavProvider = {
   routeName: 'org',
-  isVisible: ({ route }) =>
-    !EXCLUDED_SUB_ROUTES.includes(String(route.matched[1]?.name)),
+  isVisible: ({ route }) => {
+    const name = String(route.matched[1]?.name);
+    return !EXCLUDED_ROUTE_SUFFIXES.some(suffix => name.endsWith(`-${suffix}`));
+  },
   getConfig: getOrgConfig
 };
 

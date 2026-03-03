@@ -417,7 +417,10 @@ async function handleProposeClick() {
         }
       });
     } else {
-      router.push({ name: 'space-proposals' });
+      router.push({
+        name: 'space-proposals',
+        params: { space: spaceKey.value }
+      });
     }
   } catch (e) {
     console.error(e);

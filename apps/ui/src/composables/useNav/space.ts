@@ -21,7 +21,6 @@ function getSettingsRoute(
   return {
     name,
     link: { name: 'space-settings', params: { tab } },
-    active: context.route.params.tab === tab,
     hidden
   };
 }
@@ -106,6 +105,7 @@ function canSeeSettings(context: NavContext): boolean {
 }
 
 function getSpaceMainConfig(context: NavContext): NavConfig {
+  const routeName = context.route.name as string;
   const items: Record<string, NavItem> = {
     overview: { name: 'Overview', icon: IHGlobeAlt },
     proposals: { name: 'Proposals', icon: IHNewspaper },
@@ -124,13 +124,17 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
       name: 'Discussions',
       icon: IHAnnotation,
       active: ['space-discussions', 'space-discussions-topic'].includes(
-        context.route.name as string
+        routeName
       )
     };
   }
 
   if (context.space?.treasuries?.length) {
-    items.treasury = { name: 'Treasury', icon: IHCash };
+    items.treasury = {
+      name: 'Treasury',
+      icon: IHCash,
+      active: 'space-treasury' === routeName
+    };
   }
 
   if (canSeeSettings(context)) {

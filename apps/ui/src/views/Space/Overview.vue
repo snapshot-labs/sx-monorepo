@@ -169,6 +169,7 @@ watchEffect(() => setTitle(props.space.name));
         :proposals="data ?? []"
         :route="{
           name: 'space-proposals',
+          params: { space: `${space.network}:${space.id}` },
           linkTitle: 'See more'
         }"
       />

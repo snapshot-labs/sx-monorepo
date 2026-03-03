@@ -1,9 +1,11 @@
 import {
-  RouteLocationNormalizedLoaded,
+  RouteLocationNormalized,
   RouteLocationRaw,
+  RouteParams,
   Router
 } from 'vue-router';
 import { NavItem } from '@/composables/useNav/types';
+import { stripInvalidSpaceParam } from '@/helpers/router';
 import { NetworkID, Space } from '@/types';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
@@ -36,11 +38,11 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       }
     ],
     navItems: {
-      'space-proposals': {
+      polls: {
         name: 'Polls',
         icon: IHCheckCircle,
         link: {
-          name: 'org-space-proposals',
+          name: 'space-proposals',
           params: { space: 's:starknet.eth' }
         },
         position: 3
@@ -72,45 +74,6 @@ const ORGANIZATION_DOMAINS: Record<string, string> = {
     : {})
 };
 
-const ORG_ROUTES_WITH_SPACE = new Set([
-  'org-proposal',
-  'org-proposal-overview',
-  'org-proposal-votes',
-  'org-proposal-execution',
-  'org-proposal-discussion',
-  'org-editor',
-  'org-space-proposals'
-]);
-
-/**
- * Converts a space route (e.g. 'space-proposals') to its org equivalent (e.g. 'org-proposals').
- * Returns null if the route has no org equivalent.
- */
-function toOrgRoute(
-  name: string,
-  params: Record<string, any> = {}
-): { name: string; params: Record<string, any> } | null {
-  if (name.startsWith('space-')) {
-    const suffix = name.slice('space-'.length);
-    const orgRouteName = `org-${suffix}`;
-    const orgSpaceRouteName = `org-space-${suffix}`;
-    const newParams = { ...params };
-
-    if (newParams.space && ORG_ROUTES_WITH_SPACE.has(orgSpaceRouteName)) {
-      return { name: orgSpaceRouteName, params: newParams };
-    }
-
-    if (!ORG_ROUTES_WITH_SPACE.has(orgRouteName)) delete newParams.space;
-    return { name: orgRouteName, params: newParams };
-  }
-
-  if (name === 'user') {
-    return { name: 'org-user-statement', params };
-  }
-
-  return null;
-}
-
 export function getOrganizationConfigByDomain(
   domain: string
 ): OrganizationConfig | null {
@@ -123,62 +86,107 @@ export function getOrganizationConfigById(
   return ORGANIZATIONS[id] ?? null;
 }
 
+function getDefaultSpaceParam(org: OrganizationConfig): string | null {
+  const space = org.spaceIds[0];
+  return space ? `${space.network}:${space.id}` : null;
+}
+
 /**
- * Patches router.push, router.replace, and router.resolve to rewrite
- * space-* route names to org-* equivalents when in an org context.
- *
- * In whitelabel mode, space-* named routes don't exist in the route table,
- * so router.push/resolve throw before guards can intercept.
- * In non-whitelabel mode (/org/:org), space-* routes exist but would
- * navigate outside the org context without rewriting.
- *
- * Skips rewriting when the target space is not part of the current org.
+ * Converts a named location (space-* or user) to its org-* equivalent.
+ * Returns null if no matching org route exists.
  */
-export function patchRouterForOrg(router: Router) {
-  const originalPush = router.push.bind(router);
-  const originalReplace = router.replace.bind(router);
-  const originalResolve = router.resolve.bind(router);
+function toOrgLocation(
+  name: string,
+  params: RouteParams,
+  router: Router
+): { name: string; params: RouteParams } | null {
+  if (name.startsWith('space-')) {
+    const orgRouteName = name.replace('space-', 'org-');
+    if (!router.hasRoute(orgRouteName)) return null;
 
-  const isOrgWhiteLabel = !!getOrganizationConfigByDomain(
-    window.location.hostname
-  );
-
-  function rewriteLocation(to: RouteLocationRaw): RouteLocationRaw {
-    if (
-      typeof to === 'string' ||
-      !('name' in to) ||
-      typeof to.name !== 'string'
-    )
-      return to;
-
-    if (
-      !isOrgWhiteLabel &&
-      String(router.currentRoute.value.matched[0]?.name) !== 'org'
-    )
-      return to;
-
-    const spaceParam = to.params?.space as string | undefined;
-    if (spaceParam) {
-      const orgId = router.currentRoute.value.params.org as string | undefined;
-      const org =
-        getOrganizationConfigByDomain(window.location.hostname) ??
-        (orgId ? getOrganizationConfigById(orgId) : null);
-      const isOrgSpace = org?.spaceIds.some(
-        s => `${s.network}:${s.id}` === spaceParam
-      );
-      if (!isOrgSpace) return to;
-    }
-
-    const rewritten = toOrgRoute(to.name, {
-      ...(to.params as Record<string, string>)
-    });
-    return rewritten ? { ...to, ...rewritten } : to;
+    const stripped = stripInvalidSpaceParam(orgRouteName, params, router);
+    return stripped ?? { name: orgRouteName, params };
   }
 
-  router.push = to => originalPush(rewriteLocation(to));
-  router.replace = to => originalReplace(rewriteLocation(to));
-  router.resolve = (
-    to: RouteLocationRaw,
-    currentLocation?: RouteLocationNormalizedLoaded
-  ) => originalResolve(rewriteLocation(to), currentLocation);
+  if (name === 'user') {
+    return { name: 'org-user-statement', params };
+  }
+
+  return null;
+}
+
+/**
+ * Navigation guard that redirects space-* routes to their org equivalents.
+ * Delegates to resolveOrgLocation and redirects when the route changes.
+ */
+export function onOrgNavigate(router: Router) {
+  return (to: RouteLocationNormalized) => {
+    const raw = {
+      name: String(to.name),
+      params: { ...to.params }
+    };
+    const resolved = resolveOrgLocation(raw, router);
+    if (
+      resolved === raw ||
+      typeof resolved === 'string' ||
+      !('name' in resolved)
+    )
+      return;
+
+    return {
+      name: resolved.name,
+      params: resolved.params,
+      query: to.query,
+      hash: to.hash
+    };
+  };
+}
+
+/**
+ * Resolves a route location for org context:
+ * - Whitelabel: strips :space param from routes that don't have :space in their path.
+ * - /org/:id: rewrites space-* → org-*, injects :org param,
+ *   and falls back to the org's first space when :space is missing.
+ *   Rejects navigation to spaces not belonging to the org.
+ * Returns `to` unchanged when no transformation is needed.
+ */
+export function resolveOrgLocation(
+  to: RouteLocationRaw,
+  router: Router
+): RouteLocationRaw {
+  if (typeof to === 'string' || !('name' in to) || typeof to.name !== 'string')
+    return to;
+
+  const whiteLabelOrg = getOrganizationConfigByDomain(window.location.hostname);
+
+  if (whiteLabelOrg) {
+    const stripped = stripInvalidSpaceParam(to.name, to.params ?? {}, router);
+    if (stripped) return { ...to, ...stripped };
+    return to;
+  }
+
+  if (String(router.currentRoute.value.matched[0]?.name) !== 'org') return to;
+
+  const orgId = router.currentRoute.value.params.org as string;
+  const orgConfig = getOrganizationConfigById(orgId);
+  if (!orgConfig) return to;
+
+  const toParams: RouteParams = { ...to.params } as RouteParams;
+
+  if (toParams.space) {
+    const isInOrg = orgConfig.spaceIds.some(
+      s => `${s.network}:${s.id}` === toParams.space
+    );
+    if (!isInOrg) return to;
+  }
+
+  toParams.org = orgId;
+
+  if (!toParams.space) {
+    const defaultSpace = getDefaultSpaceParam(orgConfig);
+    if (defaultSpace) toParams.space = defaultSpace;
+  }
+
+  const rewritten = toOrgLocation(to.name, toParams, router);
+  return rewritten ? { ...to, ...rewritten } : to;
 }
