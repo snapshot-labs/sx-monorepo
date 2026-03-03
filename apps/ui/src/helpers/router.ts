@@ -1,10 +1,6 @@
 import { RouteParams, RouteParamsRaw, Router } from 'vue-router';
 
-export function routeHasParam(
-  name: string,
-  param: string,
-  router: Router
-): boolean {
+function routeHasParam(name: string, param: string, router: Router): boolean {
   const route = router.getRoutes().find(r => r.name === name);
   if (!route) return false;
 
