@@ -147,7 +147,6 @@ export function onOrgNavigate(router: Router) {
  * - Whitelabel: strips :space param from routes that don't have :space in their path.
  * - /org/:id: rewrites space-* → org-*, injects :org param,
  *   and falls back to the org's first space when :space is missing.
- *   Rejects navigation to spaces not belonging to the org.
  * Returns `to` unchanged when no transformation is needed.
  */
 export function resolveOrgLocation(
