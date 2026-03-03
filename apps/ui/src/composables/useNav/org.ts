@@ -7,9 +7,11 @@ import IHNewspaper from '~icons/heroicons-outline/newspaper';
 
 const EXCLUDED_ROUTE_SUFFIXES = ['editor', 'proposal'];
 
-function getOrgConfig(context: NavContext): NavConfig {
+function getOrgConfig(context: NavContext): NavConfig | null {
   const primarySpace = context.organization?.spaces[0];
   const routeName = context.route.name as string;
+
+  if (!primarySpace) return null;
 
   const items: Record<string, NavItem> = {
     overview: {
@@ -17,21 +19,17 @@ function getOrgConfig(context: NavContext): NavConfig {
       icon: IHGlobeAlt,
       link: { name: 'space-overview' }
     },
-    ...(primarySpace
-      ? {
-          proposals: {
-            name: 'Proposals',
-            icon: IHNewspaper,
-            link: {
-              name: 'space-proposals',
-              params: { space: `${primarySpace.network}:${primarySpace.id}` }
-            }
-          }
-        }
-      : {})
+    proposals: {
+      name: 'Proposals',
+      icon: IHNewspaper,
+      link: {
+        name: 'space-proposals',
+        params: { space: `${primarySpace.network}:${primarySpace.id}` }
+      }
+    }
   };
 
-  if (primarySpace?.delegations?.length) {
+  if (primarySpace.delegations?.length) {
     items.delegates = {
       name: 'Delegates',
       icon: IHLightningBolt,
@@ -39,10 +37,7 @@ function getOrgConfig(context: NavContext): NavConfig {
     };
   }
 
-  if (
-    primarySpace &&
-    SPACES_DISCUSSIONS[`${primarySpace.network}:${primarySpace.id}`]
-  ) {
+  if (SPACES_DISCUSSIONS[`${primarySpace.network}:${primarySpace.id}`]) {
     items.discussions = {
       name: 'Discussions',
       icon: IHAnnotation,
