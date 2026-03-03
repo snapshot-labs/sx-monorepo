@@ -70,7 +70,7 @@ watchEffect(() => setTitle(props.space.name));
         <div class="flex items-center">
           <h1 data-testid="space-name" v-text="space.name" />
           <UiBadgeSpace
-            v-if="!isWhiteLabel && !organization"
+            v-if="!isWhiteLabel"
             class="ml-1 top-0.5"
             :verified="space.verified"
             :turbo="space.turbo"
