@@ -1,6 +1,12 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, metadataNetwork } from '@/networks';
-import { SkinSettings, Space } from '@/types';
+import { NetworkID, SkinSettings, Space } from '@/types';
+
+type WhiteLabelConfig = {
+  network?: NetworkID;
+  id?: string;
+  skinSettings?: SkinSettings;
+};
 
 // List of global paths, that should not be nested inside space scope
 // when redirecting from whitelabel to main app
@@ -13,7 +19,7 @@ const domain = window.location.hostname;
 // Override locally with VITE_WHITELABEL_MAPPING env var for easier testing
 // e.g. VITE_WHITELABEL_MAPPING='localhost;s:snapshot.eth'
 // e.g. VITE_WHITELABEL_MAPPING='localhost' (org whitelabel without space)
-const MAPPING: Record<string, Record<string, any>> = {
+const MAPPING: Record<string, WhiteLabelConfig> = {
   'vanilla.box': {
     network: 'base',
     id: '0x8cF43759f3d4E72cB72cED6bd69cCe43d4428264',
@@ -21,8 +27,10 @@ const MAPPING: Record<string, Record<string, any>> = {
       bg_color: '#252739',
       link_color: '#91ACEE',
       text_color: '#CDD6F4',
+      content_color: '#CDD6F4',
       border_color: '#313244',
       heading_color: '#CCD3F2',
+      primary_color: '#91ACEE',
       theme: 'dark',
       logo: 'ipfs://bafkreiab7pgyo4gzvospqgrlnfp6o5d6dpq4vijnzvcf5mhwzevt4hnd2m'
     }
@@ -42,8 +50,10 @@ const MAPPING: Record<string, Record<string, any>> = {
       bg_color: '#f9f8f9',
       link_color: '#000000',
       text_color: '#4a4a4f',
+      content_color: '#4a4a4f',
       border_color: '#e3e1e4',
       heading_color: '#1a1523',
+      primary_color: '#000000',
       theme: 'light',
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
@@ -53,8 +63,10 @@ const MAPPING: Record<string, Record<string, any>> = {
       bg_color: '#f9f8f9',
       link_color: '#000000',
       text_color: '#4a4a4f',
+      content_color: '#4a4a4f',
       border_color: '#e3e1e4',
       heading_color: '#1a1523',
+      primary_color: '#000000',
       theme: 'light',
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
@@ -85,10 +97,13 @@ async function getSpace(domain: string): Promise<Space | null> {
   const loadSpacesParams: Record<string, string> = {};
   let spaceNetwork = metadataNetwork;
 
-  if (MAPPING[domain]) {
-    if (!('id' in MAPPING[domain])) return null;
-    loadSpacesParams.id = MAPPING[domain].id;
-    spaceNetwork = MAPPING[domain].network;
+  const mapping = MAPPING[domain];
+
+  if (mapping) {
+    if (!mapping.id || !mapping.network) return null;
+
+    loadSpacesParams.id = mapping.id;
+    spaceNetwork = mapping.network;
   } else {
     loadSpacesParams.domain = domain;
   }
