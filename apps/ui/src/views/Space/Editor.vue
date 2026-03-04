@@ -125,9 +125,10 @@ const proposalData = computed(() => {
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
 );
-const isGovernorSpace = computed(() =>
-  explorePageProtocols.governor.protocols?.includes(props.space.protocol) ??
-  false
+const isGovernorSpace = computed(
+  () =>
+    explorePageProtocols.governor.protocols?.includes(props.space.protocol) ??
+    false
 );
 
 const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
