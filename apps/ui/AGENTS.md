@@ -12,7 +12,6 @@ See root `AGENTS.md` for architecture and repo-wide tooling.
 ```bash
 yarn dev           # Vite dev server on port 8080
 yarn codegen       # GraphQL codegen from 3 schemas
-yarn storybook     # Storybook dev on port 6006
 ```
 
 ## Auto-Imports
@@ -80,7 +79,6 @@ src/
   assets/        Static assets and custom icons (src/assets/icons/)
   components/    Vue components (auto-imported, directory-as-namespace)
   composables/   Reusable composition functions (auto-imported)
-  docs/          In-app documentation content
   helpers/       Pure utility functions and business logic
   networks/      Network implementations (EVM, Starknet, Offchain)
   queries/       Vue Query composables for server state
@@ -114,7 +112,7 @@ Source of truth: `tailwind.config.ts`
 
 - **Vitest** + **happy-dom** + **@vue/test-utils**
 - Tests are colocated next to source files
-- **Storybook 9** for component documentation and visual testing
+- **Storybook** lives in `packages/tune` — run `cd packages/tune && yarn storybook`
 
 ## GraphQL Codegen
 

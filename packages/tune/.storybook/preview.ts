@@ -3,8 +3,8 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import VueTippy from 'vue-tippy';
 import { withThemeByClassName } from '@storybook/addon-themes';
 
-import '../src/style.scss';
-import './style.css';
+import '../src/styles/base.scss';
+import './style.scss';
 import { h } from 'vue';
 
 setup(app => {

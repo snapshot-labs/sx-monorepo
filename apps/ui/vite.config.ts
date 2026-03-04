@@ -8,8 +8,8 @@ import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
+import { TuneResolver } from '@snapshot-labs/tune/resolver';
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 const ELECTRON = process.env.ELECTRON || false;
 
 const target = ['esnext'];
@@ -31,6 +31,7 @@ export default defineConfig({
     Components({
       directoryAsNamespace: true,
       resolvers: [
+        TuneResolver(),
         IconsResolver({
           customCollections: ['c'],
           alias: {

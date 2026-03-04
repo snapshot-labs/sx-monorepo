@@ -7,7 +7,7 @@ export default {
       /^\/src/,
       /^\/test/,
       /^\/tests/,
-      /^\/storybook-static/,
+
       /^\/screenshots/,
       /\.md$/
     ],
