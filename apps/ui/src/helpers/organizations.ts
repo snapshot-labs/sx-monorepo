@@ -86,11 +86,6 @@ export function getOrganizationConfigById(
   return ORGANIZATIONS[id] ?? null;
 }
 
-function getDefaultSpaceParam(org: OrganizationConfig): string | null {
-  const space = org.spaceIds[0];
-  return space ? `${space.network}:${space.id}` : null;
-}
-
 /**
  * Converts a named location (space-* or user) to its org-* equivalent.
  * Returns null if no matching org route exists.
@@ -145,8 +140,7 @@ export function onOrgNavigate(router: Router) {
 /**
  * Resolves a route location for org context:
  * - Whitelabel: strips :space param from routes that don't have :space in their path.
- * - /org/:id: rewrites space-* → org-*, injects :org param,
- *   and falls back to the org's first space when :space is missing.
+ * - /org/:id: rewrites space-* → org-* and injects :org param.
  * Returns `to` unchanged when no transformation is needed.
  */
 export function resolveOrgLocation(
@@ -180,11 +174,6 @@ export function resolveOrgLocation(
   }
 
   toParams.org = orgId;
-
-  if (!toParams.space) {
-    const defaultSpace = getDefaultSpaceParam(orgConfig);
-    if (defaultSpace) toParams.space = defaultSpace;
-  }
 
   const rewritten = toOrgLocation(to.name, toParams, router);
   return rewritten ? { ...to, ...rewritten } : to;
