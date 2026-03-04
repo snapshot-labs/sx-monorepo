@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useModal } from '../../composables/useModal';
+
 const emit = defineEmits<{
   (e: 'close'): void;
 }>();
