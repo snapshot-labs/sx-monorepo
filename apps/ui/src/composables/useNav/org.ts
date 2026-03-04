@@ -9,7 +9,6 @@ const EXCLUDED_ROUTE_SUFFIXES = ['editor', 'proposal'];
 
 function getOrgConfig(context: NavContext): NavConfig | null {
   const primarySpace = context.organization?.spaces[0];
-  const routeName = context.route.name as string;
 
   if (!primarySpace) return null;
 
@@ -42,9 +41,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       name: 'Discussions',
       icon: IHAnnotation,
       link: { name: 'space-discussions' },
-      active:
-        routeName.endsWith('-discussions') ||
-        routeName.endsWith('-discussions-topic')
+      isActiveOnChildren: true
     };
   }
 

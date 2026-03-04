@@ -14,7 +14,6 @@ import IHUserGroup from '~icons/heroicons-outline/user-group';
 const EXCLUDED_SUB_ROUTES = ['space-editor', 'space-proposal'];
 
 function getSettingsRoute(
-  context: NavContext,
   tab: string,
   { name, hidden }: { name: string; hidden?: boolean }
 ): NavItem {
@@ -60,7 +59,7 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
   const tabItems = Object.fromEntries(
     SETTINGS_TABS.map(({ key, tab, name, offchainOnly, onchainOnly }) => [
       key,
-      getSettingsRoute(context, tab ?? key, {
+      getSettingsRoute(tab ?? key, {
         name,
         hidden:
           (offchainOnly && !isOffchainNetwork) ||
@@ -76,7 +75,7 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
         name: 'Settings',
         icon: IHArrowLongLeft,
         link: { name: 'space-overview' },
-        active: true
+        isActiveOnChildren: true
       },
       ...tabItems,
       snapshotPro: {
@@ -105,7 +104,6 @@ function canSeeSettings(context: NavContext): boolean {
 }
 
 function getSpaceMainConfig(context: NavContext): NavConfig {
-  const routeName = context.route.name as string;
   const items: Record<string, NavItem> = {
     overview: { name: 'Overview', icon: IHGlobeAlt },
     proposals: { name: 'Proposals', icon: IHNewspaper },
@@ -123,9 +121,7 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
     items.discussions = {
       name: 'Discussions',
       icon: IHAnnotation,
-      active: ['space-discussions', 'space-discussions-topic'].includes(
-        routeName
-      )
+      isActiveOnChildren: true
     };
   }
 
@@ -133,7 +129,7 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
     items.treasury = {
       name: 'Treasury',
       icon: IHCash,
-      active: 'space-treasury' === routeName
+      isActiveOnChildren: true
     };
   }
 

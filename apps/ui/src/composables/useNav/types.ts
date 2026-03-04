@@ -9,7 +9,7 @@ export type NavItem = {
   count?: number;
   hidden?: boolean;
   link?: RouteLocationRaw;
-  active?: boolean;
+  isActiveOnChildren?: boolean;
   /** 1-based insertion index used by org nav to position custom items among defaults */
   position?: number;
 };
