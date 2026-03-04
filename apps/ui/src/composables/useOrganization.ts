@@ -10,7 +10,7 @@ import { Space } from '@/types';
 
 const domain = window.location.hostname;
 
-export function useOrganization() {
+function setup() {
   const route = useRoute();
   const queryClient = useQueryClient();
 
@@ -65,3 +65,5 @@ export function useOrganization() {
     isLoading
   };
 }
+
+export const useOrganization = createSharedComposable(setup);
