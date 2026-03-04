@@ -21,6 +21,7 @@ function updateIntersectionObserver() {
 
   const lastElement =
     container.value.children[container.value.children.length - 1];
+  if (!lastElement) return;
 
   intersectionObserver.observe(lastElement);
 }
@@ -31,8 +32,9 @@ function cleanup() {
 }
 
 const intersectionObserver = new IntersectionObserver(
-  ([entry]) => {
-    if (!entry.isIntersecting) return;
+  entries => {
+    const entry = entries[0];
+    if (!entry?.isIntersecting) return;
 
     intersectionObserver.unobserve(entry.target);
     emit('endReached');

@@ -1,4 +1,6 @@
-const modalOpen = ref(false);
+import { useModal as useTuneModal } from '@snapshot-labs/tune';
+
+const { modalOpen } = useTuneModal();
 const modalAccountOpen = ref(false);
 const modalAccountWithoutDismissOpen = ref(false);
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _n } from '@/helpers/utils';
+import { _n } from '../../helpers/common/format';
 
 const props = defineProps<{
   text: string;

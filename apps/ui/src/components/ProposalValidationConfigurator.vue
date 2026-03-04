@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import UiSelector from '@/components/Ui/Selector.vue';
+import { UiSelector } from '@snapshot-labs/tune';
 import { VALIDATION_TYPES_INFO } from '@/helpers/constants';
 import { NetworkID, Validation } from '@/types';
 import IHBeaker from '~icons/heroicons-outline/beaker';
