@@ -9,7 +9,7 @@ import {
   sanitizeUrl,
   shortenAddress
 } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
@@ -125,7 +125,7 @@ const proposalTransactionId = computed(() => {
   const network = getNetwork(props.proposal.network);
 
   if (
-    ['governor-bravo', '@openzeppelin/governor'].includes(
+    explorePageProtocols.governor.protocols?.includes(
       props.proposal.space.protocol
     )
   ) {
