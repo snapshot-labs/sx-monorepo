@@ -1,3 +1,6 @@
+// Plugin
+export { createTune } from './plugin';
+
 // Components
 export { default as UiAlert } from './components/Ui/Alert.vue';
 export { default as UiCarousel } from './components/Ui/Carousel.vue';
