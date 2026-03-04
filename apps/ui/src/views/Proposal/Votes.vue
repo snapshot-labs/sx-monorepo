@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
+import { LineChartSeries } from '@/components/Ui/LineChart.vue';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useProposalScoresTicksQuery } from '@/queries/proposals';
@@ -25,6 +26,21 @@ const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
 
 const { data: scoresTicks, isPending: isScoresTicksPending } =
   useProposalScoresTicksQuery(toRef(() => props.proposal));
+
+const chartSeries = computed<LineChartSeries[]>(() => {
+  if (!scoresTicks.value) return [];
+  const sorted = [...scoresTicks.value].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
+  const d = 10 ** props.proposal.vp_decimals;
+  return props.proposal.choices.map((choice, i) => ({
+    label: choice,
+    data: sorted.map(tick => ({
+      time: tick.timestamp,
+      value: tick.scores[i] / d
+    }))
+  }));
+});
 
 const {
   data,
@@ -69,13 +85,12 @@ function handleScrollEvent(target: HTMLElement) {
 
 <template>
   <div v-if="proposal.type === 'basic' && proposal.vote_count > 0">
-    <ProposalScoresChart
-      v-if="scoresTicks && scoresTicks.length > 0"
-      :ticks="scoresTicks"
-      :choices="proposal.choices"
-      :decimals="proposal.vp_decimals"
+    <UiLineChart
+      v-if="chartSeries.length > 0"
+      :series="chartSeries"
       :start="proposal.start"
       :end="proposal.max_end"
+      :format-value="_vp"
       :quorum="proposal.quorum"
       class="border-b pb-3"
     />

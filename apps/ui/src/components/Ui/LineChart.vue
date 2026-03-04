@@ -1,22 +1,28 @@
 <script setup lang="ts">
-import { _vp } from '@/helpers/utils';
-import { ScoresTick } from '@/types';
+export interface LineChartSeries {
+  label: string;
+  data: { time: number; value: number }[];
+  colorIndex?: number;
+}
 
 const props = withDefaults(
   defineProps<{
-    ticks: ScoresTick[];
-    choices: string[];
-    decimals: number;
+    series: LineChartSeries[];
     start: number;
     end: number;
+    formatValue?: (v: number) => string;
+    formatBadge?: (
+      index: number,
+      values: number[]
+    ) => { text: string; positive: boolean } | null;
     quorum?: number;
+    startFromZero?: boolean;
+    linear?: boolean;
   }>(),
-  { quorum: 0 }
+  { quorum: 0, startFromZero: true, linear: false }
 );
 
-const HEIGHT = 160;
-const PADDING = { top: 24, bottom: 30, left: 24, right: 24 };
-const SERIES = [
+const COLORS = [
   {
     stroke: 'stroke-skin-success',
     fill: 'fill-skin-success',
@@ -33,6 +39,12 @@ const SERIES = [
     bg: 'bg-skin-text'
   }
 ];
+
+const colorOf = (i: number) =>
+  COLORS[(props.series[i]?.colorIndex ?? i) % COLORS.length];
+
+const HEIGHT = 160;
+const PADDING = { top: 24, bottom: 30, left: 24, right: 24 };
 const CHART_HEIGHT = HEIGHT - PADDING.top - PADDING.bottom;
 const ZERO_Y = PADDING.top + CHART_HEIGHT;
 
@@ -45,67 +57,106 @@ const drawingWidth = computed(
   () => chartWidth.value - PADDING.left - PADDING.right
 );
 
-const sortedTicks = computed(() =>
-  [...props.ticks].sort((a, b) => a.timestamp - b.timestamp)
-);
-
 const effectiveEnd = computed(() => {
-  const lastTick = sortedTicks.value.at(-1);
-  const end = lastTick ? Math.max(props.end, lastTick.timestamp) : props.end;
+  const allTimes = props.series.flatMap(s => s.data.map(d => d.time));
+  const lastTime = allTimes.length ? Math.max(...allTimes) : props.end;
+  const end = Math.max(props.end, lastTime);
   return Math.min(end, Math.floor(Date.now() / 1000));
 });
 
 const duration = computed(() => effectiveEnd.value - props.start || 1);
 
-const maxScore = computed(() =>
-  Math.max(...sortedTicks.value.flatMap(t => t.scores), 1)
+const allValues = computed(() =>
+  props.series.flatMap(s => s.data.map(d => d.value)).filter(v => v > 0)
 );
 
-const scoreToY = (score: number) =>
-  ZERO_Y - (score / maxScore.value) * CHART_HEIGHT;
+const minValue = computed(() => {
+  if (props.startFromZero || !allValues.value.length) return 0;
+  const min = Math.min(...allValues.value);
+  const max = Math.max(...allValues.value);
+  const padding = (max - min) * 0.1 || max * 0.01;
+  return Math.max(0, min - padding);
+});
+
+const maxValue = computed(() => {
+  if (!allValues.value.length) return 1;
+  const max = Math.max(...allValues.value);
+  if (props.startFromZero) return max;
+  const padding = (max - minValue.value) * 0.1 || max * 0.01;
+  return max + padding;
+});
+
+const valueToY = (v: number) => {
+  const range = maxValue.value - minValue.value || 1;
+  return ZERO_Y - ((v - minValue.value) / range) * CHART_HEIGHT;
+};
 
 const timestampToX = (ts: number) =>
   PADDING.left +
   Math.max(0, Math.min(1, (ts - props.start) / duration.value)) *
     drawingWidth.value;
 
-const getTickAt = (ts: number) =>
-  sortedTicks.value.findLast(t => t.timestamp <= ts) ?? null;
+function getValueAt(seriesIndex: number, ts: number): number {
+  const data = props.series[seriesIndex]?.data;
+  if (!data) return 0;
 
-function buildPath(i: number, fromTs: number, toTs: number, fromZero = true) {
-  // For the primary line (fromZero=true), include ticks from start onwards
-  // For the grey continuation (fromZero=false), only include ticks after the hover point
-  const times = sortedTicks.value
-    .filter(t => t.timestamp > fromTs && t.timestamp <= toTs)
-    .map(t => t.timestamp);
+  let before: { time: number; value: number } | null = null;
+  let after: { time: number; value: number } | null = null;
+
+  for (const d of data) {
+    if (d.time <= ts) before = d;
+    else if (!after) after = d;
+  }
+
+  if (!before) return 0;
+  if (!after || !props.linear) return before.value;
+
+  const ratio = (ts - before.time) / (after.time - before.time);
+  return before.value + ratio * (after.value - before.value);
+}
+
+function buildPath(
+  seriesIndex: number,
+  fromTs: number,
+  toTs: number,
+  fromZero = true
+) {
+  const data = props.series[seriesIndex]?.data;
+  if (!data) return '';
+
+  const times = data
+    .filter(d => d.time > fromTs && d.time <= toTs)
+    .map(d => d.time);
 
   const points: string[] = [];
-  const startScore = getTickAt(fromTs)?.scores[i] ?? 0;
-
-  // For grey continuation: start from hover position if there's a score
-  // For primary line: check if there's a pre-start tick we need to render from start
+  const startValue = getValueAt(seriesIndex, fromTs);
   let lastY: number | null = null;
 
-  if (!fromZero && startScore > 0) {
-    // Grey line: start from hover position at current score
-    lastY = scoreToY(startScore);
+  if (!fromZero && startValue > 0) {
+    lastY = valueToY(startValue);
     points.push(`${timestampToX(fromTs)},${lastY}`);
-  } else if (fromZero && startScore > 0) {
-    // Primary line with pre-start tick: draw from chart start
-    lastY = scoreToY(startScore);
-    points.push(`${timestampToX(props.start)},${ZERO_Y}`);
+  } else if (startValue > 0) {
+    lastY = valueToY(startValue);
+    if (props.startFromZero) {
+      points.push(`${timestampToX(props.start)},${ZERO_Y}`);
+    }
     points.push(`${timestampToX(props.start)},${lastY}`);
   }
 
   for (const ts of times) {
-    const score = getTickAt(ts)?.scores[i] ?? 0;
-    if (score === 0 && lastY === null) continue;
+    const value = getValueAt(seriesIndex, ts);
+    if (value === 0 && lastY === null) continue;
 
     const x = timestampToX(ts);
-    const y = scoreToY(score);
+    const y = valueToY(value);
 
     if (lastY === null) {
-      points.push(`${x},${ZERO_Y}`, `${x},${y}`);
+      if (props.startFromZero) {
+        points.push(`${x},${ZERO_Y}`);
+      }
+      points.push(`${x},${y}`);
+    } else if (props.linear) {
+      points.push(`${x},${y}`);
     } else {
       points.push(`${x},${lastY}`, `${x},${y}`);
     }
@@ -113,23 +164,28 @@ function buildPath(i: number, fromTs: number, toTs: number, fromZero = true) {
   }
 
   if (lastY !== null) {
-    points.push(`${timestampToX(toTs)},${lastY}`);
+    const endY = props.linear ? valueToY(getValueAt(seriesIndex, toTs)) : lastY;
+    points.push(`${timestampToX(toTs)},${endY}`);
   }
 
   return points.join(' ');
 }
 
 const currentTs = computed(() => hoveredTimestamp.value ?? effectiveEnd.value);
-const currentTick = computed(() => getTickAt(currentTs.value));
+
+const currentValues = computed(() =>
+  props.series.map((_, i) => getValueAt(i, currentTs.value))
+);
 
 const lines = computed(() =>
-  [...props.choices.keys()].reverse().map(i => ({
+  [...props.series.keys()].reverse().map(i => ({
     points: buildPath(i, props.start, currentTs.value, true),
-    ...SERIES[i],
-    label: props.choices[i],
-    score: currentTick.value
-      ? _vp(currentTick.value.scores[i] / 10 ** props.decimals)
-      : '0'
+    ...colorOf(i),
+    label: props.series[i].label,
+    value: props.formatValue
+      ? props.formatValue(currentValues.value[i])
+      : String(currentValues.value[i]),
+    badge: props.formatBadge?.(i, currentValues.value) ?? null
   }))
 );
 
@@ -138,25 +194,24 @@ const displayLines = computed(() => [...lines.value].reverse());
 const grayedLines = computed(() =>
   hoveredTimestamp.value === null
     ? []
-    : [...props.choices.keys()].map(i =>
+    : [...props.series.keys()].map(i =>
         buildPath(i, hoveredTimestamp.value!, effectiveEnd.value, false)
       )
 );
 
 const currentX = computed(() => timestampToX(currentTs.value));
 
-const bulletPoints = computed(() => {
-  const tick = currentTick.value;
-  if (!tick) return [];
-  return [...props.choices.keys()]
+const bulletPoints = computed(() =>
+  [...props.series.keys()]
     .reverse()
-    .filter(i => tick.scores[i] > 0)
     .map(i => ({
       x: currentX.value,
-      y: scoreToY(tick.scores[i]),
-      fill: SERIES[i].fill
-    }));
-});
+      y: valueToY(getValueAt(i, currentTs.value)),
+      fill: colorOf(i).fill,
+      visible: getValueAt(i, currentTs.value) > 0
+    }))
+    .filter(pt => pt.visible)
+);
 
 const dateLabels = computed(() => {
   if (!drawingWidth.value) return [];
@@ -219,17 +274,24 @@ function handleMouseMove(e: MouseEvent) {
 </script>
 
 <template>
-  <div v-if="ticks.length > 0">
-    <div class="flex justify-between items-center mb-2 px-4 py-2.5">
-      <div class="flex gap-2.5">
+  <div v-if="series.some(s => s.data.length > 0)">
+    <div class="flex justify-between items-start mb-2 px-4 py-2.5">
+      <div class="flex flex-col md:flex-row gap-0 md:gap-2.5">
         <div
           v-for="(line, i) in displayLines"
           :key="i"
           class="flex items-center gap-1.5"
         >
           <span class="w-2 h-2 rounded-full" :class="line.bg" />
-          <span class="text-skin-text hidden md:block" v-text="line.label" />
-          <span class="font-bold text-skin-link" v-text="line.score" />
+          <span class="text-skin-text" v-text="line.label" />
+          <span class="font-bold text-skin-link" v-text="line.value" />
+          <span
+            v-if="line.badge"
+            :class="
+              line.badge.positive ? 'text-skin-success' : 'text-skin-danger'
+            "
+            v-text="line.badge.text"
+          />
         </div>
       </div>
       <span
@@ -255,8 +317,8 @@ function handleMouseMove(e: MouseEvent) {
           v-if="quorum > 0"
           :x1="PADDING.left"
           :x2="currentX"
-          :y1="scoreToY(quorum)"
-          :y2="scoreToY(quorum)"
+          :y1="valueToY(quorum)"
+          :y2="valueToY(quorum)"
           class="stroke-skin-link"
           stroke-dasharray="6 4"
           stroke-width="1"
@@ -265,8 +327,8 @@ function handleMouseMove(e: MouseEvent) {
           v-if="quorum > 0 && hoveredTimestamp !== null"
           :x1="currentX"
           :x2="chartWidth - PADDING.right"
-          :y1="scoreToY(quorum)"
-          :y2="scoreToY(quorum)"
+          :y1="valueToY(quorum)"
+          :y2="valueToY(quorum)"
           class="stroke-skin-border"
           stroke-dasharray="6 4"
           stroke-width="1"
