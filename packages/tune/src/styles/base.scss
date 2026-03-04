@@ -1,0 +1,255 @@
+@import 'tippy.js/dist/tippy.css';
+@import 'tippy.js/dist/border.css';
+@import 'tippy.js/dist/svg-arrow.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// Theme
+
+:root {
+  color-scheme: light;
+
+  // backgrounds
+  --bg: 255, 255, 255;
+  --border: 229, 229, 230;
+
+  // text
+  --heading: 0, 0, 0;
+  --link: 0, 0, 0;
+  --text: 87, 96, 106;
+  --content: rgba(0, 0, 0, 0.8);
+
+  // accents
+  --primary: 0, 0, 0;
+  --accent-foreground: 251, 251, 251;
+  --danger: 235, 76, 91;
+  --success: 87, 179, 117;
+
+  --accent-hover: rgba(250, 249, 252, 0.12);
+  --accent-active: rgba(250, 249, 252, 0.32);
+  --danger-border: rgba(235, 76, 91, 0.4);
+  --danger-hover: rgba(235, 76, 91, 0.04);
+  --danger-active: rgba(235, 76, 91, 0.12);
+  --success-border: rgba(87, 179, 117, 0.4);
+  --success-hover: rgba(87, 179, 117, 0.04);
+  --success-active: rgba(87, 179, 117, 0.12);
+}
+
+.dark {
+  color-scheme: dark;
+
+  // backgrounds
+  --bg: 20, 19, 24;
+  --border: 43, 42, 47;
+
+  // text
+  --heading: 255, 255, 255;
+  --link: 255, 255, 255;
+  --text: 160, 159, 164;
+  --content: rgba(255, 255, 255, 0.8);
+
+  // accents
+  --primary: 255, 255, 255;
+  --accent-foreground: 17, 17, 17;
+  --danger: 235, 76, 91;
+  --success: 87, 179, 117;
+
+  --accent-hover: rgba(28, 27, 32, 0.12);
+  --accent-active: rgba(28, 27, 32, 0.32);
+  --danger-border: rgba(235, 76, 91, 0.4);
+  --danger-hover: rgba(235, 76, 91, 0.04);
+  --danger-active: rgba(235, 76, 91, 0.12);
+  --success-border: rgba(87, 179, 117, 0.4);
+  --success-hover: rgba(87, 179, 117, 0.04);
+  --success-active: rgba(87, 179, 117, 0.12);
+}
+
+// Base elements
+
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  @apply overflow-y-scroll font-serif text-base min-h-screen bg-skin-bg text-skin-text antialiased;
+  scrollbar-gutter: stable;
+}
+
+// Typography
+
+h1 {
+  font-size: 44px;
+  line-height: 1.3em;
+}
+
+h2 {
+  @apply text-xl;
+  line-height: 1.2em;
+}
+
+h3 {
+  @apply text-lg;
+}
+
+h4 {
+  @apply text-[19px];
+}
+
+h5 {
+  @apply text-sm;
+}
+
+p {
+  @apply text-lg pb-2;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: rgba(var(--heading));
+  font-weight: 600;
+}
+
+a,
+.a {
+  color: rgba(var(--link));
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+// Inputs
+
+::placeholder {
+  color: rgba(var(--text)) !important;
+  opacity: 0.6 !important;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input {
+  outline: none;
+}
+
+input:disabled {
+  cursor: not-allowed;
+}
+
+input[type='time']::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+input:placeholder-shown {
+  text-overflow: ellipsis;
+}
+
+// Tune UI kit
+
+.s-input {
+  @apply text-skin-heading border border-skin-border block rounded-[24px] py-2 px-3 w-full bg-transparent mb-3 focus:outline-none;
+}
+
+.s-label {
+  @apply block mb-1;
+}
+
+.s-base {
+  &:focus-within .s-label-char-count,
+  &.s-error .s-label-char-count {
+    display: block;
+  }
+}
+
+.s-error {
+  @apply mb-2;
+
+  .s-input {
+    @apply border border-skin-danger;
+    margin-bottom: 4px !important;
+  }
+
+  textarea.s-input,
+  textarea.s-input:focus {
+    @apply outline outline-1 outline-offset-[-1px] outline-skin-danger border-transparent;
+  }
+
+  .s-label {
+    @apply text-skin-danger;
+  }
+
+  .s-input-error-message {
+    @apply text-skin-danger;
+  }
+}
+
+.s-form > .s-base:last-child {
+  .s-input,
+  &.s-error {
+    @apply mb-0;
+  }
+}
+
+.s-array {
+  @apply space-y-2.5;
+}
+
+.s-array-items {
+  .s-input-wrapper {
+    @apply flex items-center h-[40px] gap-2.5 px-2.5 border bg-skin-border rounded-lg;
+
+    * {
+      @apply shrink-0;
+    }
+
+    input {
+      @apply flex-1 h-[40px] py-[10px] bg-transparent text-skin-heading focus:outline-none;
+    }
+  }
+
+  .s-error .s-input-wrapper {
+    @apply border-skin-danger;
+  }
+
+  .s-form-wrapper {
+    @apply border border-skin-border rounded-lg p-3 pt-2 space-y-2.5;
+  }
+
+  > .s-base {
+    @apply space-y-1;
+  }
+}
+
+.s-array + .s-base {
+  @apply mt-4;
+}
+
+// Tippy.js tooltip
+
+.tippy-box[data-theme~='sx'] {
+  @apply bg-skin-border text-skin-link px-[14px] py-2 w-max z-50 rounded text-[17px] leading-5 transition-opacity;
+
+  .tippy-content {
+    @apply p-0;
+  }
+
+  .tippy-arrow {
+    color: rgba(var(--border));
+  }
+}
+
+div[data-tippy-root] {
+  @apply break-words;
+}
