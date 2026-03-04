@@ -27,7 +27,8 @@ withDefaults(
       <MenuButton
         :disabled="disabled"
         as="template"
-        class="cursor-pointer [&_svg]:pointer-events-none"
+        class="[&_svg]:pointer-events-none"
+        :class="disabled ? 'cursor-not-allowed' : 'cursor-pointer'"
       >
         <slot name="button" />
       </MenuButton>

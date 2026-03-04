@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { useDirty } from '../../composables/useDirty';
+import { FieldDefinition } from '../../types';
+
 const model = defineModel<string | number>();
 
 const props = withDefaults(
   defineProps<{
     error?: string;
-    definition: any;
+    definition: FieldDefinition<string | number>;
     disabled?: boolean;
     required?: boolean;
   }>(),
@@ -13,7 +16,7 @@ const props = withDefaults(
 
 const { isDirty } = useDirty(model, props.definition);
 
-const inputValue = computed({
+const inputValue = computed<string | number | undefined>({
   get() {
     if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
@@ -21,7 +24,7 @@ const inputValue = computed({
 
     return model.value;
   },
-  set(newValue: string) {
+  set(newValue) {
     model.value = newValue;
   }
 });
@@ -43,7 +46,7 @@ const inputValue = computed({
       :disabled="disabled"
       :class="{ '!text-skin-text': disabled }"
       v-bind="$attrs"
-      :placeholder="definition.examples && definition.examples[0]"
+      :placeholder="definition.examples && String(definition.examples[0])"
       :min="definition.minimum"
       :max="definition.maximum"
     />

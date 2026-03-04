@@ -183,7 +183,7 @@ onMounted(() => emit('errors', formErrors.value));
       v-if="space.additionalRawData?.domain"
       class="shrink-0 relative h-full hidden sm:block"
     >
-      <Affix :top="137" :bottom="100">
+      <UiAffix :top="137" :bottom="100">
         <div>
           <div class="flex justify-between items-center mb-2">
             <UiEyebrow class="font-medium">Preview</UiEyebrow>
@@ -219,7 +219,7 @@ onMounted(() => emit('errors', formErrors.value));
             </div>
           </div>
         </div>
-      </Affix>
+      </UiAffix>
     </div>
   </div>
 </template>

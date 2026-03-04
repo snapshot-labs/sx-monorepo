@@ -10,20 +10,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const OneHour: Story = {
+export const Default: Story = {
   args: {
     timestamp: Math.floor(Date.now() / 1000) + 3600
-  }
-};
-
-export const OneDay: Story = {
-  args: {
-    timestamp: Math.floor(Date.now() / 1000) + 86400
-  }
-};
-
-export const FiveMinutes: Story = {
-  args: {
-    timestamp: Math.floor(Date.now() / 1000) + 300
   }
 };

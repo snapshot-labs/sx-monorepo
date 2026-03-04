@@ -1,10 +1,11 @@
-<script setup lang="ts">
-import { _n } from '@/helpers/utils';
+<script setup lang="ts" generic="T">
+import { _n } from '../../helpers/common/format';
+import { FieldDefinition } from '../../types';
 
 const props = withDefaults(
   defineProps<{
     loading?: boolean;
-    definition: any;
+    definition: FieldDefinition<T>;
     inputValueLength?: number;
     error?: string;
     dirty?: boolean;
@@ -15,11 +16,11 @@ const props = withDefaults(
 
 const id = computed(() => crypto.randomUUID());
 
-const showError = computed(() => props.error && props.dirty);
+const shouldShowError = computed(() => props.error && props.dirty);
 </script>
 
 <template>
-  <div class="s-base" :class="showError ? 's-error' : ''">
+  <div class="s-base" :class="shouldShowError ? 's-error' : ''">
     <div class="relative">
       <div class="!flex justify-between s-label w-full gap-1">
         <label
@@ -42,7 +43,9 @@ const showError = computed(() => props.error && props.dirty);
       </div>
       <slot :id="id" />
     </div>
-    <span v-if="showError" class="s-input-error-message">{{ error }}</span>
+    <span v-if="shouldShowError" class="s-input-error-message">{{
+      error
+    }}</span>
     <legend v-if="definition.description" v-text="definition.description" />
   </div>
 </template>

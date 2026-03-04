@@ -1,14 +1,15 @@
 <script setup lang="ts">
+import { FieldDefinition } from '@snapshot-labs/tune';
 import { getUrl } from '@/helpers/utils';
 import { enabledNetworks, getNetwork } from '@/networks';
-import { BaseDefinition, NetworkID } from '@/types';
+import { NetworkID } from '@/types';
 
 const network = defineModel<string | number | null>({
   required: true
 });
 
 const props = defineProps<{
-  definition: BaseDefinition<string | number | null> & {
+  definition: FieldDefinition<string | number | null> & {
     networkId: NetworkID;
     networksListKind?: 'full' | 'builtin';
     networksFilter?: string[];
@@ -71,7 +72,7 @@ const options = computed(() => {
 </script>
 
 <template>
-  <Combobox
+  <UiCombobox
     v-model="network"
     :definition="{
       ...definition,

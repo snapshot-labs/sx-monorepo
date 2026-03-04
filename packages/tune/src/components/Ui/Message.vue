@@ -17,7 +17,7 @@ defineProps<{
     <IH-information-circle class="float-left mr-1" />
     <div class="leading-5">
       <slot />
-      <AppLink v-if="learnMoreLink" :to="learnMoreLink">Learn more</AppLink>
+      <TuneLink v-if="learnMoreLink" :to="learnMoreLink">Learn more</TuneLink>
     </div>
   </div>
 </template>

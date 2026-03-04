@@ -48,9 +48,9 @@ const buttonStyles = computed(() => {
 </script>
 
 <template>
-  <AppLink v-if="to" :to="to" :class="classNames" :style="buttonStyles">
+  <TuneLink v-if="to" :to="to" :class="classNames" :style="buttonStyles">
     <slot />
-  </AppLink>
+  </TuneLink>
   <button
     v-else
     :type="type"

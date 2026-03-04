@@ -14,19 +14,11 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Unordered: Story = {
+export const Default: Story = {
   args: {
     isOrdered: false,
-    orderDirection: 'desc',
-    default: 'Name'
-  }
-};
-
-export const Descending: Story = {
-  args: {
-    isOrdered: true,
-    orderDirection: 'desc',
-    default: 'Name'
+    orderDirection: 'asc',
+    default: 'Column Name'
   }
 };
 
@@ -34,6 +26,14 @@ export const Ascending: Story = {
   args: {
     isOrdered: true,
     orderDirection: 'asc',
-    default: 'Name'
+    default: 'Column Name'
+  }
+};
+
+export const Descending: Story = {
+  args: {
+    isOrdered: true,
+    orderDirection: 'desc',
+    default: 'Column Name'
   }
 };

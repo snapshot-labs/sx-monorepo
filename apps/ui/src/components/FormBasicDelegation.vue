@@ -90,7 +90,7 @@ watchEffect(async () => {
     :required="true"
     @pick="emit('pick')"
   />
-  <Combobox
+  <UiCombobox
     v-if="availableNetworks.length > 1"
     v-model="form.chainId"
     :definition="networkDefinition"

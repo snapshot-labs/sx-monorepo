@@ -63,6 +63,11 @@ export default {
       maximum: '1900px'
     },
     spacing: {
+      // Layout heights (consumers override for Electron builds)
+      'electron-titlebar-height': '0px',
+      'header-height': '72px',
+      'header-height-with-offset': '71px',
+
       0: '0px',
       0.5: '2px',
       1: '4px',

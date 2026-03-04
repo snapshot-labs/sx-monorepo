@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useDirty } from '@snapshot-labs/tune';
 import { EditorContent } from '@tiptap/vue-3';
 
 const model = defineModel<string>({ required: true });

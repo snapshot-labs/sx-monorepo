@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Fragment, Interface, JsonFragment } from '@ethersproject/abi';
 import { isAddress } from '@ethersproject/address';
+import { ObjectFieldDefinition } from '@snapshot-labs/tune';
 import { getIsContract } from '@/helpers/contracts';
 import { getABI } from '@/helpers/etherscan';
 import { getProvider } from '@/helpers/provider';
@@ -61,16 +62,19 @@ const currentMethod = computed(() => {
   return iface.value.getFunction(form.method);
 });
 
-const definition = computed(() => {
+const definition = computed<ObjectFieldDefinition | null>(() => {
   if (
     currentMethod.value &&
     currentMethod.value.name &&
     currentMethod.value.inputs.length > 0
   ) {
-    return abiToDefinition(currentMethod.value, props.network);
+    return abiToDefinition(
+      currentMethod.value,
+      props.network
+    ) as ObjectFieldDefinition;
   }
 
-  return {};
+  return null;
 });
 
 const formValidator = computed(() =>
@@ -99,7 +103,7 @@ const formValidator = computed(() =>
     additionalProperties: true
   })
 );
-const argsValidator = computed(() => getValidator(definition.value));
+const argsValidator = computed(() => getValidator(definition.value ?? {}));
 
 const errors = computed(() => {
   const errors = { ...formErrors.value };

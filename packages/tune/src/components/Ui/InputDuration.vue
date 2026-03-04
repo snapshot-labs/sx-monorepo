@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { useDirty } from '../../composables/useDirty';
+import { FieldDefinition } from '../../types';
+
 const model = defineModel<number>();
 
 const props = defineProps<{
   error?: string;
   required?: boolean;
-  definition: any;
+  definition: FieldDefinition<number>;
 }>();
 
 const { isDirty } = useDirty(model, props.definition);

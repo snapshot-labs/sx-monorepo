@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ObjectFieldDefinition } from '@snapshot-labs/tune';
 import { validateForm } from '@/helpers/validation';
 import { offchainNetworks } from '@/networks';
 import { NetworkID } from '@/types';
@@ -67,7 +68,7 @@ const definition = computed(() => {
             }
           })
     }
-  };
+  } as ObjectFieldDefinition;
 });
 
 const formErrors = computed(() => {

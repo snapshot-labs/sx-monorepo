@@ -26,8 +26,8 @@ type Preview = {
 };
 
 const preview = ref<Preview | null>(null);
-const previewIconResolved = ref<boolean>(false);
-const previewLoading = ref<boolean>(true);
+const isPreviewIconResolved = ref<boolean>(false);
+const isPreviewLoading = ref<boolean>(true);
 const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
@@ -44,7 +44,7 @@ async function isImageUrlValid(url: string): Promise<boolean> {
 async function update(val: string) {
   try {
     preview.value = null;
-    previewLoading.value = true;
+    isPreviewLoading.value = true;
     new URL(val);
     const url = `https://cdn.iframe.ly/api/iframely?url=${encodeURI(
       val
@@ -53,13 +53,13 @@ async function update(val: string) {
     preview.value = await result.json();
 
     if (preview.value?.links?.icon[0]?.href) {
-      previewIconResolved.value = await isImageUrlValid(
+      isPreviewIconResolved.value = await isImageUrlValid(
         preview.value.links.icon[0].href
       );
     }
   } catch {
   } finally {
-    previewLoading.value = false;
+    isPreviewLoading.value = false;
   }
 }
 
@@ -72,16 +72,16 @@ debouncedWatch(
 
 <template>
   <div
-    v-if="preview?.meta?.title || (showDefault && !previewLoading)"
+    v-if="preview?.meta?.title || (showDefault && !isPreviewLoading)"
     class="flex items-center px-4 py-3 border rounded-lg"
     :class="{
       'gap-2': showDefault,
-      '!gap-4': preview?.meta?.title || previewIconResolved
+      '!gap-4': preview?.meta?.title || isPreviewIconResolved
     }"
   >
-    <template v-if="preview && (preview?.meta?.title || previewIconResolved)">
+    <template v-if="preview && (preview?.meta?.title || isPreviewIconResolved)">
       <img
-        v-if="previewIconResolved"
+        v-if="isPreviewIconResolved"
         :src="preview.links.icon[0]?.href"
         width="32"
         height="32"

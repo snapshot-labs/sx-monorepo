@@ -1,26 +1,30 @@
 <script setup lang="ts" generic="T extends string | object">
 import Draggable from 'vuedraggable';
+import Form from './Form.vue';
+import { ArrayFieldDefinition, ObjectFieldDefinition } from '../../types';
 
 const items = defineModel<T[]>();
 
 const props = defineProps<{
   error?: Record<string, string> | string;
-  definition: any;
+  definition: ArrayFieldDefinition<T>;
   required?: boolean;
 }>();
 
-const itemsRef: Ref<any[]> = ref([]);
+const itemsRef = ref<HTMLElement[]>([]);
 const dirtyItems = ref<boolean[]>([]);
 
 const itemType = computed<'string' | 'object'>(() => {
-  return props.definition.items.type;
+  const type = props.definition.items.type;
+  return (Array.isArray(type) ? type[0] : type) as 'string' | 'object';
 });
 
 const getDefaultValue = (): T => (itemType.value === 'string' ? '' : {}) as T;
 
 const currentItems = computed<T[]>(
   () =>
-    items.value || (props.definition.minItems > 0 ? [getDefaultValue()] : [])
+    items.value ||
+    ((props.definition.minItems ?? 0) > 0 ? [getDefaultValue()] : [])
 );
 
 const inputValues = computed(() => {
@@ -45,6 +49,19 @@ const itemName = computed<string>(() => {
   return props.definition.items.title || 'Item';
 });
 
+const itemsDefinition = computed(() => {
+  return props.definition.items as ObjectFieldDefinition;
+});
+
+function getObjectError(index: number): Record<string, unknown> | undefined {
+  const error = props.error;
+  if (!error || typeof error === 'string') return undefined;
+  const value = error[index];
+  return typeof value === 'object'
+    ? (value as Record<string, unknown>)
+    : undefined;
+}
+
 function shouldShowError(index: number): boolean {
   return !!(inputErrors.value[index] && dirtyItems.value[index]);
 }
@@ -60,6 +77,7 @@ function deleteItem(index: number) {
   const newItems = [...currentItems.value];
   newItems.splice(index, 1);
   dirtyItems.value.splice(index, 1);
+  itemsRef.value.splice(index, 1);
   items.value = newItems;
 
   if (newItems.length === 0) return;
@@ -92,7 +110,18 @@ function handlePressDelete(index: number) {
   }
 
   deleteItem(index);
-  nextTick(() => itemsRef.value[index - 1].focus());
+  nextTick(() => itemsRef.value[index - 1]?.focus());
+}
+
+function getInputItem(index: number) {
+  return inputValues.value[index]!;
+}
+
+function setItemRef(
+  index: number,
+  el: Element | ComponentPublicInstance | null
+) {
+  if (el) itemsRef.value[index] = el as HTMLElement;
 }
 
 onMounted(() => {
@@ -105,7 +134,7 @@ onMounted(() => {
     <legend v-if="definition.title" class="flex justify-between items-center">
       <UiEyebrow class="font-medium"
         >{{ definition.title
-        }}{{ definition.minItems > 0 ? '*' : '' }}</UiEyebrow
+        }}{{ (definition.minItems ?? 0) > 0 ? '*' : '' }}</UiEyebrow
       >
       <UiTooltip v-if="definition.tooltip" :title="definition.tooltip">
         <IH-question-mark-circle class="shrink-0" />
@@ -116,9 +145,9 @@ onMounted(() => {
         v-if="currentItems.length < (definition.minItems || 0)"
         class="rounded-lg border border-skin-danger text-skin-danger px-3 py-1.5"
       >
-        At least {{ definition.minItems }} {{ itemName.toLowerCase()
-        }}{{ definition.minItems > 1 ? 's' : '' }}
-        {{ definition.minItems > 1 ? 'are' : 'is' }} required.
+        At least {{ definition.minItems ?? 0 }} {{ itemName.toLowerCase()
+        }}{{ (definition.minItems ?? 0) > 1 ? 's' : '' }}
+        {{ (definition.minItems ?? 0) > 1 ? 'are' : 'is' }} required.
       </div>
     </slot>
     <Draggable
@@ -145,13 +174,15 @@ onMounted(() => {
             <IC-drag v-if="definition.sortable" class="handle cursor-grab" />
             <slot name="input-prefix" :index="index" />
             <input
-              :ref="el => (itemsRef[index] = el)"
-              v-model.trim="inputValues[index].value"
+              :ref="el => setItemRef(index, el)"
+              v-model.trim="getInputItem(index).value"
               type="text"
               :placeholder="
-                definition.items?.examples?.[index] ||
-                definition.items?.examples?.[0] ||
-                ''
+                String(
+                  definition.items.examples?.[index] ||
+                    definition.items.examples?.[0] ||
+                    ''
+                )
               "
               @keydown.enter="handlePressEnter(index)"
               @keydown.delete="handlePressDelete(index)"
@@ -200,12 +231,11 @@ onMounted(() => {
               </button>
             </slot>
           </div>
-          <UiForm
-            v-model="inputValues[index].value"
-            :definition="definition.items"
-            :error="inputErrors[index]"
-          >
-          </UiForm>
+          <Form
+            v-model="getInputItem(index).value as Record<string, unknown>"
+            :definition="itemsDefinition"
+            :error="getObjectError(index)"
+          />
         </div>
       </template>
     </Draggable>

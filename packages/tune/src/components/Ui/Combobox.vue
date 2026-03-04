@@ -7,8 +7,8 @@ import {
   ComboboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
-import { omit } from '@/helpers/utils';
-import { DefinitionWithOptions } from '@/types';
+import { useDirty } from '../../composables/useDirty';
+import { FieldDefinitionWithOptions } from '../../types';
 
 const NULL_SYMBOL = Symbol('null');
 
@@ -17,7 +17,7 @@ const model = defineModel<T | null>({ required: true });
 const props = defineProps<{
   error?: string;
   inline?: boolean;
-  definition: DefinitionWithOptions<T | null>;
+  definition: FieldDefinitionWithOptions<T | null>;
   gap?: number;
   required?: boolean;
 }>();
@@ -55,6 +55,12 @@ const icon = computed(() => {
   return option ? option.icon : null;
 });
 
+const inlineDefinition = computed(() => {
+  return Object.fromEntries(
+    Object.entries(props.definition).filter(([key]) => key !== 'title')
+  );
+});
+
 function handleFocus(event: FocusEvent, open: boolean) {
   if (!event.target || open) return;
 
@@ -75,7 +81,7 @@ function getDisplayValue(value: T | null) {
 
 <template>
   <UiWrapperInput
-    :definition="inline ? omit(definition, ['title']) : definition"
+    :definition="inline ? inlineDefinition : definition"
     :error="error"
     :dirty="isDirty"
     :required="required"
@@ -118,11 +124,17 @@ function getDisplayValue(value: T | null) {
               }"
               :size="'1'"
               autocomplete="off"
-              :placeholder="definition.examples?.[0]"
+              :placeholder="
+                definition.examples?.[0]
+                  ? String(definition.examples[0])
+                  : undefined
+              "
               :display-value="item => getDisplayValue(item as T)"
               @keydown.enter="() => (query = '')"
-              @change="e => (query = e.target.value)"
-              @focus="event => handleFocus(event, open)"
+              @change="
+                (e: Event) => (query = (e.target as HTMLInputElement).value)
+              "
+              @focus="(event: FocusEvent) => handleFocus(event, open)"
             />
           </ComboboxButton>
           <ComboboxButton v-if="!inline" class="absolute right-3 bottom-[14px]">

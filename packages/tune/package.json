@@ -31,9 +31,11 @@
     "@headlessui/vue": ">=1.7.0",
     "@vueuse/core": ">=10.0.0",
     "tippy.js": ">=6.0.0",
+    "dayjs": ">=1.11.0",
     "vue": ">=3.4.0",
     "vue-router": ">=4.0.0",
-    "vue-tippy": ">=6.0.0"
+    "vue-tippy": ">=6.0.0",
+    "vuedraggable": ">=4.1.0"
   },
   "devDependencies": {
     "@headlessui-float/vue": "^0.15.0",
@@ -47,7 +49,9 @@
     "@storybook/addon-themes": "^9.0.18",
     "@storybook/vue3-vite": "^9.0.18",
     "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/test-utils": "^2.4.5",
     "@vueuse/core": "^10.4.1",
+    "dayjs": "^1.11.10",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.57.0",
     "eslint-plugin-storybook": "^9.0.18",
@@ -62,6 +66,7 @@
     "vue": "^3.4.15",
     "vue-router": "^4.2.5",
     "vue-tippy": "^6.4.1",
+    "vitest": "^3.2.4",
     "vue-tsc": "^3.0.3"
   }
 }

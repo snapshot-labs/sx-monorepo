@@ -271,7 +271,10 @@ watchEffect(async () => {
         <UiForm
           v-model="form"
           :error="formErrors"
-          :definition="{ properties: { reason: REASON_DEFINITION } }"
+          :definition="{
+            type: 'object',
+            properties: { reason: REASON_DEFINITION }
+          }"
         />
       </div>
     </div>
