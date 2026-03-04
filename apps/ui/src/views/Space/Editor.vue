@@ -125,6 +125,9 @@ const proposalData = computed(() => {
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
 );
+const isGovernorSpace = computed(() =>
+  ['governor-bravo', '@openzeppelin/governor'].includes(props.space.protocol)
+);
 
 const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
 
@@ -793,6 +796,7 @@ watchEffect(() => {
               class="s-box"
               :definition="choicesDefinition"
               :error="formErrors.choices"
+              :readonly="isGovernorSpace"
             >
               <template
                 v-if="proposal.type === 'basic'"
