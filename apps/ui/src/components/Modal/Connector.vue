@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Connector, ConnectorType } from '@/networks/types';
 
-const props = defineProps<{
+defineProps<{
   open: boolean;
   supportedConnectors?: ConnectorType[];
 }>();
@@ -10,21 +10,99 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const { open } = toRefs(props);
-
 const { web3 } = useWeb3();
+const router = useRouter();
+
+const showGuest = ref(false);
+const guestAddress = ref('');
+const guestLoading = ref(false);
+const formEl = ref<HTMLFormElement | null>(null);
+
+watch(showGuest, value => {
+  guestAddress.value = '';
+  if (value) nextTick(() => formEl.value?.querySelector('input')?.focus());
+});
+
+function handleGuestLogin() {
+  if (!guestAddress.value) return;
+
+  guestLoading.value = true;
+
+  const stop = watch(
+    () => web3.value.authLoading,
+    loading => {
+      if (loading) return;
+      stop();
+      guestLoading.value = false;
+      if (web3.value.account) {
+        showGuest.value = false;
+        emit('close');
+      }
+    }
+  );
+
+  router.push({
+    query: { ...router.currentRoute.value.query, as: guestAddress.value }
+  });
+}
+
+function handleConnectorClick(connector: Connector) {
+  if (connector.type === 'guest') {
+    showGuest.value = true;
+  } else {
+    emit('pick', connector);
+  }
+}
+
+function handleClose() {
+  showGuest.value = false;
+  emit('close');
+}
 </script>
 
 <template>
-  <UiModal :open="open" @close="emit('close')">
+  <UiModal :open="open" @close="handleClose">
     <template #header>
-      <h3 v-text="web3.account ? 'Change wallet' : 'Log in'" />
+      <h3
+        v-text="
+          showGuest
+            ? 'Log in as guest'
+            : web3.account
+              ? 'Change wallet'
+              : 'Log in'
+        "
+      />
     </template>
-    <div class="m-4 space-y-2 flex flex-col">
+    <form
+      v-if="showGuest"
+      ref="formEl"
+      class="s-box p-4"
+      @submit.prevent="handleGuestLogin"
+    >
+      <UiInputString
+        v-model="guestAddress"
+        :definition="{
+          title: 'Guest account',
+          examples: ['Address or ENS']
+        }"
+      />
+    </form>
+    <div v-else class="m-4">
       <Connectors
         :supported-connectors="supportedConnectors"
-        @click="(connector: Connector) => emit('pick', connector)"
+        @click="handleConnectorClick"
       />
     </div>
+    <template v-if="showGuest" #footer>
+      <UiButton
+        class="w-full"
+        primary
+        :loading="guestLoading"
+        :disabled="!guestAddress"
+        @click.prevent="handleGuestLogin"
+      >
+        Log in
+      </UiButton>
+    </template>
   </UiModal>
 </template>

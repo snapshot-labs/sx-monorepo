@@ -109,6 +109,7 @@ export default class Guest extends Connector {
         this.provider = new GuestProvider(address, chainId);
       }
     } catch (e) {
+      this.provider = undefined;
       console.error(e);
     }
   }
