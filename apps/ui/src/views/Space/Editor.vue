@@ -805,7 +805,7 @@ watchEffect(() => {
                 #input-suffix="{ index, deleteItem }"
               >
                 <button
-                  v-if="index > 1"
+                  v-if="index > 1 && isOffchainSpace"
                   class="text-skin-text"
                   title="Delete choice"
                   @click="deleteItem(index)"
