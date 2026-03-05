@@ -7,6 +7,7 @@ const props = defineProps<{
   error?: Record<string, string> | string;
   definition: any;
   required?: boolean;
+  readonly?: boolean;
 }>();
 
 const itemsRef: Ref<any[]> = ref([]);
@@ -148,6 +149,7 @@ onMounted(() => {
               :ref="el => (itemsRef[index] = el)"
               v-model.trim="inputValues[index].value"
               type="text"
+              :readonly="readonly"
               :placeholder="
                 definition.items?.examples?.[index] ||
                 definition.items?.examples?.[0] ||

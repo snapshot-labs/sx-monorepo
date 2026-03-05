@@ -7,7 +7,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { BASIC_CHOICES, VERIFIED_URL } from '@/helpers/constants';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -124,6 +124,11 @@ const proposalData = computed(() => {
 });
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
+);
+const isGovernorSpace = computed(
+  () =>
+    explorePageProtocols.governor.protocols?.includes(props.space.protocol) ??
+    false
 );
 
 const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
@@ -793,6 +798,7 @@ watchEffect(() => {
               class="s-box"
               :definition="choicesDefinition"
               :error="formErrors.choices"
+              :readonly="isGovernorSpace"
             >
               <template
                 v-if="proposal.type === 'basic'"
