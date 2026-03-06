@@ -36,7 +36,7 @@ watchEffect(() => {
   <UiTooltip
     ref="wrapperRef"
     :title="isTruncated ? tooltipContent : ''"
-    class="grow truncate"
+    class="truncate"
   >
     <slot>{{ content }}</slot>
   </UiTooltip>
