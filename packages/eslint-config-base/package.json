@@ -1,6 +1,6 @@
 {
   "name": "@snapshot-labs/eslint-config-base",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/snapshot-labs/sx-monorepo.git",
