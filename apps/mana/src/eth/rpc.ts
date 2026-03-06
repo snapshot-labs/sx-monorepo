@@ -217,8 +217,8 @@ export const createNetworkHandler = (chainId: number) => {
       });
 
       return rpcSuccess(res, receipt, id);
-    } catch (e) {
-      return rpcError(res, 500, e, id);
+    } catch (err) {
+      return rpcError(res, 500, err, id);
     }
   }
 

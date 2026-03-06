@@ -51,8 +51,8 @@ async function fetchPrices() {
 
     const validatedData = FutarchyResponseSchema.parse(resJson);
     data.value = validatedData;
-  } catch (e) {
-    console.error('Error fetching Futarchy API', e);
+  } catch (err) {
+    console.error('Error fetching Futarchy API', err);
     error.value = true;
   } finally {
     loading.value = false;

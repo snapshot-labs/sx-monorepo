@@ -55,8 +55,8 @@ async function run() {
         const result = await query.groupBy('votes.post_id', 'choice');
 
         return res.json({ result });
-      } catch (e) {
-        console.error('Error fetching results by role:', e);
+      } catch (err) {
+        console.error('Error fetching results by role:', err);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
     }

@@ -45,13 +45,13 @@ export function useActions() {
     return async (...args: T): Promise<U> => {
       try {
         return await fn(...args);
-      } catch (e) {
-        if (!isUserAbortError(e)) {
-          console.error(e);
-          uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      } catch (err) {
+        if (!isUserAbortError(err)) {
+          console.error(err);
+          uiStore.addNotification('error', getUserFacingErrorMessage(err));
         }
 
-        throw e;
+        throw err;
       }
     };
   }
@@ -715,9 +715,9 @@ export function useActions() {
           auth.value.account
         )
       );
-    } catch (e) {
-      if (!isUserAbortError(e)) {
-        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+    } catch (err) {
+      if (!isUserAbortError(err)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(err));
       }
 
       return false;
@@ -744,9 +744,9 @@ export function useActions() {
           auth.value.account
         )
       );
-    } catch (e) {
-      if (!isUserAbortError(e)) {
-        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+    } catch (err) {
+      if (!isUserAbortError(err)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(err));
       }
 
       return false;

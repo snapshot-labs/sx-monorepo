@@ -14,8 +14,8 @@ export default function createRpc(highlight: Highlight) {
           const result = await highlight.getMci();
 
           return rpcSuccess(res, result, id);
-        } catch (e) {
-          return rpcError(res, 500, -32000, e, id);
+        } catch (err) {
+          return rpcError(res, 500, -32000, err, id);
         }
       }
 
@@ -24,9 +24,9 @@ export default function createRpc(highlight: Highlight) {
           const result = await highlight.getUnitReceipt(params);
 
           return rpcSuccess(res, result, id);
-        } catch (e) {
-          console.log('e', e);
-          return rpcError(res, 500, -32000, e, id);
+        } catch (err) {
+          console.log('e', err);
+          return rpcError(res, 500, -32000, err, id);
         }
       }
 
@@ -35,9 +35,9 @@ export default function createRpc(highlight: Highlight) {
           const result = await highlight.postMessage(params);
 
           return rpcSuccess(res, result, id);
-        } catch (e) {
-          console.log(e);
-          return rpcError(res, 500, -32000, e, id);
+        } catch (err) {
+          console.log(err);
+          return rpcError(res, 500, -32000, err, id);
         }
       }
 

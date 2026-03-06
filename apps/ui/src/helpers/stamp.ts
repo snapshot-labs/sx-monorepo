@@ -47,8 +47,8 @@ export async function getAddresses(
       .filter(([, address]) => address);
 
     return Object.fromEntries(entries);
-  } catch (e) {
-    console.error('Failed to lookup addresses', e);
+  } catch (err) {
+    console.error('Failed to lookup addresses', err);
     return {};
   }
 }
@@ -95,8 +95,8 @@ export async function getNames(
       .filter(([, name]) => name);
 
     return Object.fromEntries(entries);
-  } catch (e) {
-    console.error('Failed to resolve names', e);
+  } catch (err) {
+    console.error('Failed to resolve names', err);
     return {};
   }
 }

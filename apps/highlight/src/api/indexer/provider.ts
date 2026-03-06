@@ -54,9 +54,9 @@ export class HighlightProvider extends BaseProvider {
     try {
       await this.handleBlock(blockNumber, receipt.unit, receipt.events);
       await this.instance.setLastIndexedBlock(blockNumber);
-    } catch (e) {
-      console.log('error when handling block', e);
-      throw e;
+    } catch (err) {
+      console.log('error when handling block', err);
+      throw err;
     }
 
     lastIndexedMci = blockNumber;

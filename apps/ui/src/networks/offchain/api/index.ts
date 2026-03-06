@@ -317,8 +317,8 @@ function formatProposal(proposal: ApiProposal, networkId: NetworkID): Proposal {
         })
       ];
       executionType = 'oSnap';
-    } catch (e) {
-      console.warn('failed to parse oSnap execution', e);
+    } catch (err) {
+      console.warn('failed to parse oSnap execution', err);
       isInvalid = true;
     }
   } else if (proposal.plugins.safeSnap) {

@@ -398,10 +398,10 @@ export const getValidator = (schema: AnySchema) => {
         await validate(getFormValues(schema, form, opts));
 
         return {};
-      } catch (e) {
-        if (!(e instanceof Ajv.ValidationError)) throw e;
+      } catch (err) {
+        if (!(err instanceof Ajv.ValidationError)) throw err;
 
-        return getErrors(e.errors);
+        return getErrors(err.errors);
       }
     }
   };

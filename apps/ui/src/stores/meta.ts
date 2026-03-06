@@ -31,8 +31,8 @@ export const useMetaStore = defineStore('meta', () => {
       const blockNumber = await provider.getBlockNumber();
       currentBlocks.value.set(networkId, blockNumber);
       currentTs.value.set(networkId, Math.floor(Date.now() / 1000));
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 

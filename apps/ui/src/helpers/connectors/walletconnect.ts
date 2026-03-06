@@ -97,8 +97,8 @@ export default class Walletconnect extends Connector {
       this.provider = await awaitProvider(this.modal, { isAutoConnect });
 
       this.modal.close();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -111,8 +111,8 @@ export default class Walletconnect extends Connector {
 
     try {
       await this.modal?.disconnect();
-    } catch (e) {
-      console.log('Error disconnecting modal', e);
+    } catch (err) {
+      console.log('Error disconnecting modal', err);
     }
 
     if (this.provider && 'disconnect' in this.provider) {

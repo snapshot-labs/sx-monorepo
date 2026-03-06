@@ -44,10 +44,10 @@ export async function placeSellOrder(
       networkId,
       price.toFixed(PRICE_PRECISION)
     );
-  } catch (e) {
+  } catch (err) {
     console.error(
       `Error trying to get previous order for auctionId ${auction.id}`,
-      e
+      err
     );
 
     throw new Error('Unable to get previous order ID');

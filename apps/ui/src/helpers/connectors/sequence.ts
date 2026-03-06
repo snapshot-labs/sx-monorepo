@@ -27,16 +27,16 @@ export default class Sequence extends Connector {
       }
 
       this.provider = wallet;
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 
   async disconnect() {
     try {
       await this.provider.disconnect();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 

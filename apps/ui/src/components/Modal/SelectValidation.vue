@@ -63,8 +63,8 @@ async function fetchValidations() {
   try {
     const response = await fetch(SCORE_API_URL);
     validations.value = Object.values(await response.json());
-  } catch (e) {
-    console.log('failed to load validations', e);
+  } catch (err) {
+    console.log('failed to load validations', err);
     hasError.value = true;
   } finally {
     isLoading.value = false;
@@ -158,7 +158,7 @@ const formErrors = computed(() => {
     try {
       JSON.parse(rawParams.value);
       return {};
-    } catch (e) {
+    } catch {
       return { rawParams: 'Invalid JSON' };
     }
   }

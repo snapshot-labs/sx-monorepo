@@ -17,6 +17,14 @@ module.exports = {
       'always',
       { exceptAfterSingleLine: true }
     ],
+    'no-restricted-syntax': [
+      'error',
+      {
+        selector: 'CatchClause > Identifier[name=/^(e|error)$/]',
+        message:
+          "Use 'err' instead of 'e', 'error', or use more descriptive name."
+      }
+    ],
     'sort-imports': [
       'error',
       {
