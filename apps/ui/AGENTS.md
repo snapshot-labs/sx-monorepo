@@ -112,7 +112,6 @@ Source of truth: `tailwind.config.ts`
 
 - **Vitest** + **happy-dom** + **@vue/test-utils**
 - Tests are colocated next to source files
-- **Storybook** lives in `packages/tune` — run `cd packages/tune && yarn storybook`
 
 ## GraphQL Codegen
 
