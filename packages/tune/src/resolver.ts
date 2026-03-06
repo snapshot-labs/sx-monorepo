@@ -1,13 +1,14 @@
-/** @returns {import('unplugin-vue-components').ComponentResolver} */
-export function TuneResolver() {
-  const components = [
-    'Checkbox',
-    'Loading',
-    'Switch',
-    'Tooltip',
-    'TooltipOnTruncate'
-  ];
+import { ComponentResolver } from 'unplugin-vue-components';
 
+const components = [
+  'Checkbox',
+  'Loading',
+  'Switch',
+  'Tooltip',
+  'TooltipOnTruncate'
+];
+
+export function TuneResolver(): ComponentResolver {
   return {
     type: 'component',
     resolve(name) {

@@ -7,7 +7,7 @@
     ".": "./dist/index.js",
     "./theme": "./dist/theme.css",
     "./tailwind-preset": "./tailwind.config.ts",
-    "./resolver": "./resolver.mjs"
+    "./resolver": "./dist/resolver.js"
   },
   "types": "./dist/index.d.ts",
   "prettier": "@snapshot-labs/prettier-config",
