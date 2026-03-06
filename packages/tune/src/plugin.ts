@@ -7,7 +7,6 @@ export function createTune(): Plugin {
       app.use(VueTippy, {
         defaultProps: {
           delay: [0, null],
-          theme: 'sx',
           animation: false
         }
       });
