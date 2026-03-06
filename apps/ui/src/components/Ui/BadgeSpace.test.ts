@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
+import { createTune } from '@snapshot-labs/tune';
 import { mount } from '@vue/test-utils';
 import { expect, it } from 'vitest';
-import { createTune } from '@snapshot-labs/tune';
 import BadgeSpace from './BadgeSpace.vue';
 
 const TURBO_CLASS = 'text-[#e2b719]';
