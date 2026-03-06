@@ -8,18 +8,29 @@ type SpaceId = { networkId: NetworkID; address: string };
 
 export function useCurrentSpace() {
   const { space: whiteLabelSpace } = useWhiteLabel();
+  const { organization } = useOrganization();
   const route = useRoute();
 
   const spaceParam = computed(() => route.params.space as string | undefined);
 
   const primarySpace = computed<Space | null>(
-    () => whiteLabelSpace.value ?? null
+    () => whiteLabelSpace.value ?? organization.value?.spaces[0] ?? null
   );
+
+  const orgRouteSpace = computed<Space | null>(
+    () =>
+      organization.value?.spaces.find(
+        s => spaceParam.value === `${s.network}:${s.id}`
+      ) ?? null
+  );
+
+  // Space already available from org or white-label context, no query needed
+  const knownSpace = computed(() => orgRouteSpace.value ?? primarySpace.value);
 
   const queryFn = computed<typeof skipToken | (() => Promise<SpaceId | null>)>(
     () => {
       const param = spaceParam.value;
-      if (primarySpace.value || !param) return skipToken;
+      if (knownSpace.value || !param) return skipToken;
 
       const [network, name] = param.split(':') as [NetworkID, string];
       if (!name) return skipToken;
@@ -47,18 +58,19 @@ export function useCurrentSpace() {
     queryFn
   });
 
+  // Space fetched from API when not available locally
   const { data: queriedSpace, isPending: isQueryPending } = useSpaceQuery({
     networkId: () =>
-      primarySpace.value ? null : spaceId.value?.networkId ?? null,
-    spaceId: () => (primarySpace.value ? null : spaceId.value?.address ?? null)
+      knownSpace.value ? null : spaceId.value?.networkId ?? null,
+    spaceId: () => (knownSpace.value ? null : spaceId.value?.address ?? null)
   });
 
   const space = computed<Space | null>(
-    () => primarySpace.value ?? queriedSpace.value ?? null
+    () => knownSpace.value ?? queriedSpace.value ?? null
   );
 
   const isPending = computed(
-    () => !primarySpace.value && (isResolving.value || isQueryPending.value)
+    () => !knownSpace.value && (isResolving.value || isQueryPending.value)
   );
 
   return {

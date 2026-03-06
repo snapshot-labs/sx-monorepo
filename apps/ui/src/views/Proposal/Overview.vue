@@ -182,6 +182,7 @@ async function handleEditClick() {
   router.push({
     name: 'space-editor',
     params: {
+      space: spaceId,
       key: draftId
     }
   });
@@ -215,6 +216,7 @@ async function handleDuplicateClick() {
   router.push({
     name: 'space-editor',
     params: {
+      space: spaceId,
       key: draftId
     }
   });

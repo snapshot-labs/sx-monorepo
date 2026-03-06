@@ -1,5 +1,6 @@
 import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
+import { Organization } from '@/helpers/organizations';
 import { Space } from '@/types';
 
 export type NavItem = {
@@ -8,7 +9,9 @@ export type NavItem = {
   count?: number;
   hidden?: boolean;
   link?: RouteLocationRaw;
-  active?: boolean;
+  isActiveOnChildren?: boolean;
+  /** 1-based insertion index used by org nav to position custom items among defaults */
+  position?: number;
 };
 
 export type NavConfig = {
@@ -24,6 +27,7 @@ export type NavContext = {
   space: Space | null;
   isController: boolean;
   ensOwner: string | null;
+  organization: Organization | null;
 };
 
 export type NavProvider = {

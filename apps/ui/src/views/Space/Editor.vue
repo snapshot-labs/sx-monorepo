@@ -422,7 +422,10 @@ async function handleProposeClick() {
         }
       });
     } else {
-      router.push({ name: 'space-proposals' });
+      router.push({
+        name: 'space-proposals',
+        params: { space: spaceKey.value }
+      });
     }
   } catch (e) {
     console.error(e);
@@ -483,7 +486,7 @@ watch(
 
     router.replace({
       name: 'space-editor',
-      params: { key: newId },
+      params: { space: spaceKey.value, key: newId },
       query: route.query
     });
   },

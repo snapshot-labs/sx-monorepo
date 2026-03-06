@@ -7,17 +7,23 @@ const { config } = useNav();
     <div class="py-4 no-scrollbar overscroll-contain overflow-auto">
       <AppLink
         v-for="(item, key) in config?.items ?? {}"
+        v-slot="{ isActive, isExactActive }"
         :key="key"
         :to="item.link"
-        class="px-4 space-x-2 flex items-center"
-        :class="[
-          item.active ? 'text-skin-link' : 'text-skin-text',
-          config?.slim ? 'py-1' : 'py-1.5'
-        ]"
       >
-        <component :is="item.icon" v-if="item.icon" />
-        <span class="grow" v-text="item.name" />
-        <UiPill v-if="item.count" :label="item.count" />
+        <div
+          class="px-4 space-x-2 flex items-center"
+          :class="[
+            (item.isActiveOnChildren ? isActive : isExactActive)
+              ? 'text-skin-link'
+              : 'text-skin-text',
+            config?.slim ? 'py-1' : 'py-1.5'
+          ]"
+        >
+          <component :is="item.icon" v-if="item.icon" />
+          <span class="grow" v-text="item.name" />
+          <UiPill v-if="item.count" :label="item.count" />
+        </div>
       </AppLink>
     </div>
   </div>

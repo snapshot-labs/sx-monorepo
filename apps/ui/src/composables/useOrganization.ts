@@ -1,0 +1,69 @@
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import {
+  getOrganizationConfigByDomain,
+  getOrganizationConfigById,
+  Organization,
+  OrganizationConfig
+} from '@/helpers/organizations';
+import { getNetwork } from '@/networks';
+import { Space } from '@/types';
+
+const domain = window.location.hostname;
+
+function setup() {
+  const route = useRoute();
+  const queryClient = useQueryClient();
+
+  const config = computed<OrganizationConfig | null>(() => {
+    const byDomain = getOrganizationConfigByDomain(domain);
+    if (byDomain) return byDomain;
+
+    if (String(route.matched[0]?.name) !== 'org') return null;
+    return getOrganizationConfigById(route.params.org as string);
+  });
+
+  const { data: spaces, isLoading } = useQuery({
+    queryKey: ['org', 'spaces', () => config.value?.id],
+    queryFn: async () => {
+      const cfg = config.value;
+      if (!cfg) return [];
+
+      const loadedSpaces = await Promise.all(
+        cfg.spaceIds.map(async ({ network: networkId, id }) => {
+          const network = getNetwork(networkId);
+          const space = await network.api.loadSpace(id);
+
+          if (!space) {
+            console.warn(
+              `Failed to load space ${networkId}:${id} for organization ${cfg.id}`
+            );
+            return null;
+          }
+
+          queryClient.setQueryData(
+            ['spaces', 'detail', `${space.network}:${space.id}`],
+            space
+          );
+
+          return space;
+        })
+      );
+
+      return loadedSpaces.filter((s): s is Space => !!s);
+    },
+    enabled: () => config.value !== null
+  });
+
+  const organization = computed<Organization | null>(() => {
+    const org = config.value;
+    if (!org || !spaces.value) return null;
+    return { ...org, spaces: spaces.value };
+  });
+
+  return {
+    organization,
+    isLoading
+  };
+}
+
+export const useOrganization = createSharedComposable(setup);

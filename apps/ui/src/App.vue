@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ElectronTitlebar from '@/components/ElectronTitlebar.vue';
+import { getOrganizationConfigByDomain } from '@/helpers/organizations';
 import defaultRoutes from '@/routes/default';
+import { orgRootRoutes } from '@/routes/organization';
 import whiteLabelRoutes from '@/routes/whiteLabel';
 
 const route = useRoute();
@@ -10,6 +12,7 @@ const {
   init: initWhiteLabel,
   isWhiteLabel,
   isCustomDomain,
+  space: whiteLabelSpace,
   resolved: whiteLabelResolved,
   failed: whiteLabelFailed
 } = useWhiteLabel();
@@ -17,10 +20,19 @@ const { setTitle } = useTitle();
 
 const routeName = computed(() => String(route.matched[0]?.name));
 
-function mountCustomDomainRoutes() {
-  const routes = isWhiteLabel.value ? whiteLabelRoutes : defaultRoutes;
+function getCustomDomainRoutes() {
+  if (!isWhiteLabel.value) return defaultRoutes;
+  if (
+    !whiteLabelSpace.value &&
+    getOrganizationConfigByDomain(window.location.hostname)
+  ) {
+    return orgRootRoutes;
+  }
+  return whiteLabelRoutes;
+}
 
-  routes.forEach(route => router.addRoute(route));
+function mountCustomDomainRoutes() {
+  getCustomDomainRoutes().forEach(r => router.addRoute(r));
   router.removeRoute('splash');
 }
 

@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import { getCacheHash, getStampUrl } from '@/helpers/utils';
-
-const { setFavicon } = useFavicon();
-const { space, isPending } = useCurrentSpace();
 const { loadVotes } = useAccount();
-const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
+const { space, isPending } = useCurrentSpace();
 
 watch(
   [space, () => web3.value.account],
@@ -15,25 +11,6 @@ watch(
   },
   { immediate: true }
 );
-
-watchEffect(() => {
-  if (!space.value) {
-    setFavicon(null);
-    return;
-  }
-
-  const faviconUrl = getStampUrl(
-    'space',
-    `${space.value.network}:${space.value.id}`,
-    16,
-    getCacheHash(space.value.avatar)
-  );
-  setFavicon(faviconUrl);
-});
-
-onUnmounted(() => {
-  if (!isWhiteLabel.value) setFavicon(null);
-});
 </script>
 
 <template>

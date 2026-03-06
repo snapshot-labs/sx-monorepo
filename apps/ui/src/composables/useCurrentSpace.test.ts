@@ -9,6 +9,7 @@ const CHECKSUMMED = '0x000000000000000000000000000000000000dEaD';
 
 let mockRoute: { params: Record<string, string> };
 const mockWhiteLabelSpace = ref<any>(null);
+const mockOrganization = ref<any>(null);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +23,10 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/composables/useWhiteLabel', () => ({
   useWhiteLabel: () => ({ space: mockWhiteLabelSpace })
+}));
+
+vi.mock('@/composables/useOrganization', () => ({
+  useOrganization: () => ({ organization: mockOrganization })
 }));
 
 vi.mock('@/queries/spaces', () => ({
@@ -59,6 +64,7 @@ function withSetup<T>(composable: () => T): T {
 beforeEach(() => {
   mockRoute = reactive({ params: {} });
   mockWhiteLabelSpace.value = null;
+  mockOrganization.value = null;
   resolveNameMock.mockReset();
   queryClient.clear();
 });
@@ -165,6 +171,40 @@ describe('useCurrentSpace', () => {
       });
 
       expect(space.value).toBe(null);
+    });
+  });
+
+  describe('organization', () => {
+    const orgSpaceA = { network: 'sn', id: '0xORG_A' };
+    const orgSpaceB = { network: 's', id: 'starknet.eth' };
+    const mockOrg = { spaces: [orgSpaceA, orgSpaceB] };
+
+    it('should return primary space when no route param', () => {
+      mockOrganization.value = mockOrg;
+      const { space } = withSetup(() => useCurrentSpace());
+
+      expect(space.value).toEqual(orgSpaceA);
+    });
+
+    it('should return route-matched org space when param matches', async () => {
+      mockOrganization.value = mockOrg;
+      mockRoute.params = { space: 's:starknet.eth' };
+      const { space } = withSetup(() => useCurrentSpace());
+      await nextTick();
+
+      expect(space.value).toEqual(orgSpaceB);
+      expect(resolveNameMock).not.toHaveBeenCalled();
+    });
+
+    it('should fall back to primary space when param does not match any org space', async () => {
+      mockOrganization.value = mockOrg;
+      mockRoute.params = { space: 'eth:unknown.eth' };
+      const { space, isPending } = withSetup(() => useCurrentSpace());
+      await nextTick();
+
+      expect(space.value).toEqual(orgSpaceA);
+      expect(isPending.value).toBe(false);
+      expect(resolveNameMock).not.toHaveBeenCalled();
     });
   });
 
