@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiLoading } from '@snapshot-labs/tune';
 import { lsGet, lsSet, stripHtmlTags } from '@/helpers/utils';
 
 type EditorType = 'visual' | 'markdown';
