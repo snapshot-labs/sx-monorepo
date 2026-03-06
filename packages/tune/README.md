@@ -58,6 +58,21 @@ export default defineConfig({
 });
 ```
 
+## Usage
+
+```vue
+<script setup lang="ts">
+import { UiTooltip, UiSwitch } from '@snapshot-labs/tune';
+</script>
+
+<template>
+  <UiTooltip title="Hello">Hover me</UiTooltip>
+  <UiSwitch v-model="enabled" title="Toggle" />
+</template>
+```
+
+With auto-import (step 4), the import is not needed — just use the components directly in templates.
+
 ## Components
 
 | Component | Description |
