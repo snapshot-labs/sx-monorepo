@@ -3,6 +3,7 @@ import { createRouter, createMemoryHistory } from 'vue-router';
 import { withThemeByClassName } from '@storybook/addon-themes';
 import { createTune } from '../src/plugin';
 import '../src/styles/theme.scss';
+import '../src/styles/tippy.scss';
 import './style.css';
 import { h } from 'vue';
 

@@ -1,3 +1,5 @@
+import './styles/tippy.scss';
+
 // Plugin
 export { createTune } from './plugin';
 
