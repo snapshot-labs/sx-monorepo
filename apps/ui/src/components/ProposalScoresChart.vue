@@ -122,12 +122,11 @@ function buildPath(i: number, fromTs: number, toTs: number, fromZero = true) {
 const currentTs = computed(() => hoveredTimestamp.value ?? effectiveEnd.value);
 const currentTick = computed(() => getTickAt(currentTs.value));
 
-// Return in render order: gray(2), red(1), green(0) for proper z-order
 const lines = computed(() =>
-  [2, 1, 0].map(i => ({
+  [...props.choices.keys()].reverse().map(i => ({
     points: buildPath(i, props.start, currentTs.value, true),
     ...SERIES[i],
-    label: props.choices[i] || `Choice ${i + 1}`,
+    label: props.choices[i],
     score: currentTick.value
       ? _vp(currentTick.value.scores[i] / 10 ** props.decimals)
       : '0'
@@ -139,7 +138,7 @@ const displayLines = computed(() => [...lines.value].reverse());
 const grayedLines = computed(() =>
   hoveredTimestamp.value === null
     ? []
-    : [0, 1, 2].map(i =>
+    : [...props.choices.keys()].map(i =>
         buildPath(i, hoveredTimestamp.value!, effectiveEnd.value, false)
       )
 );
@@ -149,7 +148,8 @@ const currentX = computed(() => timestampToX(currentTs.value));
 const bulletPoints = computed(() => {
   const tick = currentTick.value;
   if (!tick) return [];
-  return [2, 1, 0]
+  return [...props.choices.keys()]
+    .reverse()
     .filter(i => tick.scores[i] > 0)
     .map(i => ({
       x: currentX.value,

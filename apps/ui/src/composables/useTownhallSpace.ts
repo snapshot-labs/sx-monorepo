@@ -2,7 +2,9 @@ import { MaybeRefOrGetter } from 'vue';
 
 export type SpaceType = 'proposalsSpace' | 'discussionsSpace';
 
-export function useTownhallSpace(spaceParam: MaybeRefOrGetter<string>) {
+export function useTownhallSpace(
+  spaceParam: MaybeRefOrGetter<string | undefined>
+) {
   const { isWhiteLabel, space: whitelabelSpace } = useWhiteLabel();
 
   const isOpenAgora = computed(() => {

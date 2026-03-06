@@ -1,9 +1,4 @@
 <script lang="ts" setup>
-import {
-  createSubscription,
-  resendVerificationEmail,
-  updateSubscription
-} from '@/helpers/emailNotification';
 import { EmailSubscriptionStatus } from '@/helpers/emailNotification/types';
 import { clone } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
@@ -29,6 +24,7 @@ const SUBSCRIBE_DEFINITION = {
       type: 'string',
       format: 'email',
       title: 'Email',
+      errorMessage: 'Invalid email address',
       maxLength: 256,
       examples: ['e.g. me@snapshot.box']
     }
@@ -36,14 +32,21 @@ const SUBSCRIBE_DEFINITION = {
 };
 
 const { web3 } = useWeb3();
+const uiStore = useUiStore();
 
 const form = ref<{
   email: string;
 }>(clone(SUBSCRIBE_FORM_STATE));
 const formErrors = ref<Record<string, any>>({});
 const formValidated = ref(false);
+const el = ref(null);
+const { height: bottomToolbarHeight } = useElementSize(el);
 const status = ref<EmailSubscriptionStatus>('NOT_SUBSCRIBED');
 const feeds = reactive<Record<string, boolean>>({});
+const originalFeeds = ref<Record<string, boolean>>({});
+const isPending = ref(false);
+
+const { createSubscription, updateSubscription } = useEmailNotification();
 
 const {
   data: subscription,
@@ -59,16 +62,61 @@ const {
   isError: isFeedsListError
 } = useEmailNotificationFeedsListQuery();
 
-async function handleCreateSubscriptionClick() {
-  await createSubscription();
-}
+const isFormValid = computed(() => !Object.keys(formErrors.value).length);
 
-async function handleResendConfirmationClick() {
-  await resendVerificationEmail();
+async function handleCreateSubscriptionClick() {
+  if (!isFormValid.value) return;
+
+  try {
+    isPending.value = true;
+    const subscription = await createSubscription(form.value.email);
+
+    if (subscription) {
+      status.value = 'UNVERIFIED';
+    }
+  } catch (err) {
+    console.log(err);
+    uiStore.addNotification(
+      'error',
+      'An error occurred while submitting your query, please try again.'
+    );
+  } finally {
+    isPending.value = false;
+  }
 }
 
 async function handleUpdateSubscriptionClick() {
-  await updateSubscription();
+  try {
+    isPending.value = true;
+    const subscription = await updateSubscription(
+      Object.keys(feeds).filter(key => feeds[key])
+    );
+
+    if (subscription) {
+      uiStore.addNotification(
+        'success',
+        'Your subscriptions have been updated'
+      );
+    }
+  } catch (err) {
+    console.error(err);
+    uiStore.addNotification(
+      'error',
+      'An error occurred while submitting your query, please try again.'
+    );
+  } finally {
+    isPending.value = false;
+  }
+}
+
+const isFeedsModified = computed(() =>
+  Object.keys(feeds).some(key => feeds[key] !== originalFeeds.value[key])
+);
+
+function resetFeeds() {
+  Object.keys(feeds).forEach(key => {
+    feeds[key] = originalFeeds.value[key] ?? true;
+  });
 }
 
 const formValidator = getValidator(SUBSCRIBE_DEFINITION);
@@ -91,7 +139,11 @@ watch(
 );
 
 watch(
-  [() => isSubscriptionLoading.value, () => isFeedsListLoading.value],
+  [
+    () => subscription.value,
+    () => isSubscriptionLoading.value,
+    () => isFeedsListLoading.value
+  ],
   async () => {
     if (
       isFeedsListLoading.value ||
@@ -105,6 +157,7 @@ watch(
       feeds[key] = subscription.value.feeds.includes(key);
     });
 
+    originalFeeds.value = { ...feeds };
     status.value = subscription.value.status;
   },
   { immediate: true }
@@ -118,59 +171,60 @@ watchEffect(async () => {
 </script>
 
 <template>
-  <div>
-    <UiSectionHeader label="Email notifications" />
-    <div class="p-4 space-y-3 max-w-[640px]">
-      <UiLoading
-        v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"
-      />
-      <div
-        v-else-if="isFeedsListError || isSubscriptionError"
-        class="flex flex-col gap-3 items-start"
-      >
-        <UiAlert type="error">
-          There was an error fetching your subscription details. Please try
-          again.
-        </UiAlert>
-        <UiButton @click="refetchDetails"> <IH-refresh />Retry </UiButton>
+  <div
+    v-bind="$attrs"
+    class="!h-auto p-4"
+    :style="`min-height: calc(100vh - ${bottomToolbarHeight + 73}px)`"
+  >
+    <UiLoading
+      v-if="web3.authLoading || isSubscriptionLoading || isFeedsListLoading"
+    />
+    <div
+      v-else-if="isFeedsListError || isSubscriptionError"
+      class="max-w-[592px] flex flex-col gap-3 items-start"
+    >
+      <UiAlert type="error">
+        There was an error fetching your subscription details. Please try again.
+      </UiAlert>
+      <UiButton @click="refetchDetails"> <IH-refresh />Retry </UiButton>
+    </div>
+    <UiContainerSettings
+      v-else-if="status === 'NOT_SUBSCRIBED'"
+      title="Receive email notifications"
+      description="Stay updated with the latest and important updates directly on your inbox."
+    >
+      <div class="s-box">
+        <UiInputString
+          v-model="form.email"
+          :error="formErrors.email"
+          :definition="SUBSCRIBE_DEFINITION.properties.email"
+        />
       </div>
-      <template v-else-if="status === 'NOT_SUBSCRIBED'">
-        <div>
-          <h3 class="text-md leading-6">Receive email notifications</h3>
-          Stay updated with the latest and important updates directly on your
-          inbox.
-        </div>
-        <div class="s-box">
-          <UiInputString
-            v-model="form.email"
-            class="!mb-0"
-            :error="formErrors.email"
-            :definition="SUBSCRIBE_DEFINITION.properties.email"
-          />
-        </div>
-        <UiButton disabled @click="handleCreateSubscriptionClick">
-          Subscribe now
-        </UiButton>
+      <UiButton
+        :disabled="!web3.account || !isFormValid || !formValidated"
+        :loading="isPending"
+        @click="handleCreateSubscriptionClick"
+      >
+        Subscribe now
+      </UiButton>
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="status === 'UNVERIFIED'"
+      title="Confirm your email"
+    >
+      <template #description>
+        We've sent an email to your email address.
+        <br />
+        Please check your inbox and follow the instructions to complete the
+        process.
       </template>
-      <template v-else-if="status === 'UNVERIFIED'">
-        <div>
-          <h3 class="text-md leading-6">Confirm your email</h3>
-          <div>
-            We've sent an email to your email address.
-            <br />
-            Please check your inbox and follow the instructions to complete the
-            process.
-          </div>
-        </div>
-        <UiButton @click="handleResendConfirmationClick">
-          Resend confirmation email
-        </UiButton>
-      </template>
-      <template v-else-if="status === 'VERIFIED'">
-        <div>
-          <h3 class="text-md leading-6">Email notifications</h3>
-          Choose the notifications you'd like to receive - and those you don't.
-        </div>
+    </UiContainerSettings>
+    <UiContainerSettings
+      v-else-if="status === 'VERIFIED'"
+      title="Email notifications"
+      description="Choose the notifications you'd like to receive - and those you don't."
+    >
+      <div class="space-y-3 mb-4">
         <UiSwitch
           v-for="(feedType, key) in feedsList"
           :key="key"
@@ -182,10 +236,16 @@ watchEffect(async () => {
             <div class="text-skin-text" v-text="feedType.description" />
           </div>
         </UiSwitch>
-        <UiButton disabled @click="handleUpdateSubscriptionClick">
-          Update subscriptions
-        </UiButton>
-      </template>
-    </div>
+      </div>
+    </UiContainerSettings>
   </div>
+  <SettingsToolbar
+    v-if="status === 'VERIFIED' && isFeedsModified"
+    ref="el"
+    :error="null"
+    :is-modified="isFeedsModified"
+    :saving="isPending"
+    @save="handleUpdateSubscriptionClick"
+    @reset="resetFeeds"
+  />
 </template>

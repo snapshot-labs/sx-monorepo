@@ -24,7 +24,10 @@ function handleRemoveDraft(id: string) {
   const currentId = `${props.networkId}:${props.space}:${route.params.key}`;
 
   if (currentId === id) {
-    router.replace({ name: 'space-editor' });
+    router.replace({
+      name: 'space-editor',
+      params: { space: `${props.networkId}:${props.space}` }
+    });
   }
 
   removeDraft(id);

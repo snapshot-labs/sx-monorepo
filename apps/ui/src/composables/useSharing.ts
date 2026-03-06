@@ -24,9 +24,9 @@ const SOCIAL_NETWORKS: {
 ];
 
 export function useSharing() {
-  const router = useRouter();
   const { app } = useApp();
   const { isWhiteLabel } = useWhiteLabel();
+  const router = useAppRouter();
 
   function getProposalUrl(proposal: Proposal): string {
     return `${window.location.origin}/${

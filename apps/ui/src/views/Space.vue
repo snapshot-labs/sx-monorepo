@@ -1,24 +1,13 @@
 <script setup lang="ts">
-import { getCacheHash, getStampUrl } from '@/helpers/utils';
-import { useSpaceQuery } from '@/queries/spaces';
 import {
   useCreateSpaceMutation,
   useSpaceQuery as useTownhallSpaceQuery
 } from '@/queries/townhall';
 
-const { setFavicon } = useFavicon();
 const route = useRoute();
-const { param } = useRouteParser('space');
-const { spaceType, townhallSpaceId } = useTownhallSpace(param);
-const { resolved, address, networkId } = useResolve(param);
 const { loadVotes } = useAccount();
-const { isWhiteLabel } = useWhiteLabel();
 const { web3 } = useWeb3();
-
-const { data: space, isPending } = useSpaceQuery({
-  networkId,
-  spaceId: address
-});
+const { space, spaceType, townhallSpaceId, isPending } = useCurrentSpace();
 
 const { data: townhallSpace, isPending: isTownhallSpacePending } =
   useTownhallSpaceQuery({
@@ -38,37 +27,13 @@ const isTownhallRoute = computed(() => {
 });
 
 watch(
-  [resolved, networkId, address, () => web3.value.account],
-  async ([resolved, networkId, address, account]) => {
-    if (!resolved || !networkId || !address) return;
-
-    if (account) {
-      loadVotes(networkId, [address]);
-    }
+  [space, () => web3.value.account],
+  ([space, account]) => {
+    if (!space || !account) return;
+    loadVotes(space.network, [space.id]);
   },
-  {
-    immediate: true
-  }
+  { immediate: true }
 );
-
-watchEffect(() => {
-  if (!space.value) {
-    setFavicon(null);
-    return;
-  }
-
-  const faviconUrl = getStampUrl(
-    'space',
-    `${space.value.network}:${space.value.id}`,
-    16,
-    getCacheHash(space.value.avatar)
-  );
-  setFavicon(faviconUrl);
-});
-
-onUnmounted(() => {
-  if (!isWhiteLabel.value) setFavicon(null);
-});
 </script>
 
 <template>

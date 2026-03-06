@@ -1,0 +1,112 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parseSafeSnapTransaction > should fallback to raw for unknown type 1`] = `
+{
+  "_form": {
+    "recipient": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+  },
+  "_type": "raw",
+  "data": "0xdeadbeef",
+  "salt": "",
+  "to": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+  "value": "1",
+}
+`;
+
+exports[`parseSafeSnapTransaction > should parse contractInteraction 1`] = `
+{
+  "_form": {
+    "abi": [
+      {
+        "inputs": [
+          {
+            "name": "content",
+            "type": "string",
+          },
+          {
+            "name": "tag",
+            "type": "string",
+          },
+        ],
+        "name": "post",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function",
+      },
+    ],
+    "args": [
+      "test",
+      "test",
+    ],
+    "method": "post(string,string)",
+    "recipient": "0x000000000000cd17345801aa8147b8D3950260FF",
+  },
+  "_type": "contractCall",
+  "data": "0x0ae1b13d000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000004746573740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000047465737400000000000000000000000000000000000000000000000000000000",
+  "salt": "",
+  "to": "0x000000000000cd17345801aa8147b8D3950260FF",
+  "value": "0",
+}
+`;
+
+exports[`parseSafeSnapTransaction > should parse transferFunds with ERC20 token 1`] = `
+{
+  "_form": {
+    "amount": "100000000",
+    "recipient": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+    "token": {
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+      "decimals": 6,
+      "name": "USD Coin",
+      "symbol": "USDC",
+    },
+  },
+  "_type": "sendToken",
+  "data": "0xa9059cbb",
+  "salt": "",
+  "to": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  "value": "0",
+}
+`;
+
+exports[`parseSafeSnapTransaction > should parse transferFunds with native token 1`] = `
+{
+  "_form": {
+    "amount": "100000000000000000",
+    "recipient": "0xeF8305E140ac520225DAf050e2f71d5fBcC543e7",
+    "token": {
+      "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "decimals": 18,
+      "name": "Ethereum",
+      "symbol": "ETH",
+    },
+  },
+  "_type": "sendToken",
+  "data": "0x",
+  "salt": "",
+  "to": "0xeF8305E140ac520225DAf050e2f71d5fBcC543e7",
+  "value": "100000000000000000",
+}
+`;
+
+exports[`parseSafeSnapTransaction > should parse transferNFT 1`] = `
+{
+  "_form": {
+    "amount": "1",
+    "nft": {
+      "address": "0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5",
+      "collection": "Weee Did It Palz",
+      "id": "810",
+      "name": "Weeedidit Palls #101",
+      "type": "",
+    },
+    "recipient": "0x556B14CbdA79A36dC33FcD461a04A5BCb5dC2A70",
+    "sender": "",
+  },
+  "_type": "sendNft",
+  "data": "0x42842e0e",
+  "salt": "",
+  "to": "0x5A96CF3ace257Dfcc1fd3C037e548585124dc0C5",
+  "value": "0",
+}
+`;

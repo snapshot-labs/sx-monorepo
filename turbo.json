@@ -11,9 +11,15 @@
       "dependsOn": ["build"],
       "outputs": ["out/**"]
     },
-    "lint": {},
-    "lint:fix": {},
-    "//#lint:scripts": {},
+    "lint": {
+      "dependsOn": ["transit"]
+    },
+    "lint:fix": {
+      "dependsOn": ["transit"]
+    },
+    "//#lint:scripts": {
+      "dependsOn": ["transit"]
+    },
     "typecheck": {
       "dependsOn": ["^build", "codegen"]
     },
@@ -57,6 +63,12 @@
         "src/helpers/auction/referral/queries.ts",
         "src/helpers/townhall/api.ts"
       ]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "//#transit": {
+      "dependsOn": ["^transit"]
     }
   }
 }
