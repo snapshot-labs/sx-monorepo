@@ -1,5 +1,6 @@
 import path from 'path';
 import vue from '@vitejs/plugin-vue';
+import { TuneResolver } from '@snapshot-labs/tune/resolver';
 import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
 import { FileSystemIconLoader } from 'unplugin-icons/loaders';
@@ -8,7 +9,6 @@ import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 const ELECTRON = process.env.ELECTRON || false;
 
 export default defineConfig({
@@ -28,6 +28,7 @@ export default defineConfig({
     Components({
       directoryAsNamespace: true,
       resolvers: [
+        TuneResolver(),
         IconsResolver({
           customCollections: ['c'],
           alias: {

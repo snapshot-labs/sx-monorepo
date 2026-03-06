@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { mount } from '@vue/test-utils';
 import { expect, it } from 'vitest';
-import VueTippy from 'vue-tippy';
+import { createTune } from '@snapshot-labs/tune';
 import BadgeSpace from './BadgeSpace.vue';
 
 const TURBO_CLASS = 'text-[#e2b719]';
@@ -9,7 +9,7 @@ const VERIFIED_CLASS = 'text-[#2394ea]';
 const FLAGGED_CLASS = 'text-skin-danger';
 
 const GLOBAL = {
-  plugins: [VueTippy]
+  plugins: [createTune()]
 };
 
 it('should use verified color if only verified', () => {
