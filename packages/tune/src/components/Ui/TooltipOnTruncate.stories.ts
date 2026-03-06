@@ -14,7 +14,7 @@ export const Truncated: Story = {
   render: () => ({
     components: { TooltipOnTruncate },
     template: `
-      <div style="width: 150px">
+      <div style="width: 150px; display: flex">
         <TooltipOnTruncate>
           This is a very long text that will be truncated
         </TooltipOnTruncate>
@@ -27,7 +27,7 @@ export const NotTruncated: Story = {
   render: () => ({
     components: { TooltipOnTruncate },
     template: `
-      <div style="width: 300px">
+      <div style="width: 300px; display: flex">
         <TooltipOnTruncate>
           Short text
         </TooltipOnTruncate>
@@ -46,7 +46,7 @@ export const WithContentProp: Story = {
       return { args };
     },
     template: `
-      <div style="width: 150px">
+      <div style="width: 150px; display: flex">
         <TooltipOnTruncate v-bind="args">
           This is a very long text that will be truncated
         </TooltipOnTruncate>
