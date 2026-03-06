@@ -19,7 +19,7 @@
     ]
   },
   "scripts": {
-    "build": "vite build && vue-tsc --project tsconfig.build.json",
+    "build": "vite build && vue-tsc",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint \"./src/**/*.{ts,vue}\"",
     "lint:fix": "yarn lint --fix",
