@@ -6,29 +6,18 @@ const props = defineProps<{
 }>();
 
 const wrapperRef = ref<InstanceType<typeof UiTooltip> | null>(null);
-const isTruncated = ref(false);
+const el = computed(() => wrapperRef.value?.$el ?? null);
+const { width } = useElementSize(el);
 
-const tooltipContent = computed(() => {
-  return props.content || wrapperRef.value?.$el?.textContent || '';
+const isTruncated = computed(() => {
+  void width.value;
+  const dom = el.value;
+  if (!dom) return false;
+  return dom.scrollWidth > dom.clientWidth;
 });
 
-const checkTruncation = () => {
-  const el = wrapperRef.value?.$el;
-  if (!el) return;
-  isTruncated.value = el.scrollWidth > el.clientWidth;
-};
-
-const debouncedCheckTruncation = useDebounceFn(checkTruncation, 50);
-
-useResizeObserver(
-  computed(() => wrapperRef.value?.$el ?? null),
-  debouncedCheckTruncation
-);
-
-watchEffect(() => {
-  if (wrapperRef.value) {
-    checkTruncation();
-  }
+const tooltipContent = computed(() => {
+  return props.content || el.value?.textContent || '';
 });
 </script>
 
