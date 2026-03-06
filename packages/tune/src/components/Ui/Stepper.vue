@@ -1,9 +1,5 @@
 <script lang="ts" setup>
-export type StepRecords = Record<string, Step>;
-type Step = {
-  title: string;
-  isValid: () => boolean;
-};
+import type { StepRecords } from '../../types';
 
 const props = withDefaults(
   defineProps<{
@@ -21,7 +17,7 @@ const emit = defineEmits<{
 
 const stepper = useStepper(props.steps);
 
-const submitDisabled = computed(() =>
+const isSubmitDisabled = computed(() =>
   Object.values(props.steps).some(step => !step.isValid())
 );
 
@@ -70,7 +66,7 @@ function goToStep(stepName: string) {
         class="w-full"
         primary
         :loading="submitting"
-        :disabled="submitDisabled"
+        :disabled="isSubmitDisabled"
         @click="emit('submit')"
       >
         <slot name="submit-text"> Submit </slot>

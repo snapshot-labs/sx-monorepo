@@ -4,49 +4,43 @@ import Tooltip from './Tooltip.vue';
 const meta = {
   title: 'Ui/Tooltip',
   component: Tooltip,
-  tags: ['autodocs'],
-  args: {
-    title: 'Tooltip text',
-    default: 'Hover me'
-  },
-  argTypes: {
-    placement: {
-      control: { type: 'select' },
-      options: ['top', 'bottom', 'left', 'right']
-    }
-  }
+  tags: ['autodocs']
 } satisfies Meta<typeof Tooltip>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  render: args => ({
+    components: { Tooltip },
+    setup() {
+      return { args };
+    },
+    template: `
+      <Tooltip v-bind="args">
+        <button class="px-3 py-2 border rounded">Hover me</button>
+      </Tooltip>
+    `
+  }),
   args: {
-    title: 'This is a tooltip',
-    default: 'Hover me'
+    title: 'Tooltip text'
   }
 };
 
 export const Bottom: Story = {
+  render: args => ({
+    components: { Tooltip },
+    setup() {
+      return { args };
+    },
+    template: `
+      <Tooltip v-bind="args">
+        <button class="px-3 py-2 border rounded">Hover me</button>
+      </Tooltip>
+    `
+  }),
   args: {
-    title: 'Tooltip on bottom',
-    placement: 'bottom',
-    default: 'Hover me'
-  }
-};
-
-export const Left: Story = {
-  args: {
-    title: 'Tooltip on left',
-    placement: 'left',
-    default: 'Hover me'
-  }
-};
-
-export const Right: Story = {
-  args: {
-    title: 'Tooltip on right',
-    placement: 'right',
-    default: 'Hover me'
+    title: 'Tooltip text',
+    placement: 'bottom'
   }
 };

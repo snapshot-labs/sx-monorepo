@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useDirty } from '../../composables/useDirty';
+import { FieldDefinition } from '../../types';
+
 defineOptions({ inheritAttrs: false });
 
 const model = defineModel<string>();
@@ -7,12 +10,12 @@ const props = defineProps<{
   loading?: boolean;
   error?: string;
   required?: boolean;
-  definition: any;
+  definition: FieldDefinition<string>;
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
 
-const inputValue = computed({
+const inputValue = computed<string | undefined>({
   get() {
     if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
@@ -20,7 +23,7 @@ const inputValue = computed({
 
     return model.value;
   },
-  set(newValue: string) {
+  set(newValue) {
     model.value = newValue;
   }
 });
@@ -55,13 +58,29 @@ const inputLength = computed(() => {
     :required="required"
     :input-value-length="inputLength"
   >
-    <input
-      :id="id"
-      v-model.trim="inputValue"
-      type="text"
-      class="s-input"
-      v-bind="$attrs"
-      :placeholder="definition.examples && definition.examples[0]"
-    />
+    <div class="relative">
+      <div
+        v-if="$slots.prefix"
+        class="absolute left-3 top-1/2 -translate-y-1/2 z-10"
+      >
+        <slot name="prefix" />
+      </div>
+      <input
+        :id="id"
+        v-model.trim="inputValue"
+        type="text"
+        class="s-input"
+        v-bind="$attrs"
+        :placeholder="
+          definition.examples?.[0] ? String(definition.examples[0]) : undefined
+        "
+      />
+      <div
+        v-if="$slots.suffix"
+        class="absolute right-3 top-1/2 -translate-y-1/2 z-10"
+      >
+        <slot name="suffix" />
+      </div>
+    </div>
   </UiWrapperInput>
 </template>

@@ -18,7 +18,7 @@ const props = withDefaults(
 
 const wrapperEl = ref<HTMLDivElement | null>(null);
 const lastScrollY = ref(0);
-const ticking = ref<boolean>(false);
+const isTicking = ref<boolean>(false);
 const stickStatus = ref<StickStatus>(StickStatus.SCROLL);
 
 const el = computed(
@@ -26,7 +26,7 @@ const el = computed(
 );
 
 function updatePosition(scrollY: number) {
-  ticking.value = false;
+  isTicking.value = false;
 
   if (!el.value) return;
 
@@ -35,17 +35,17 @@ function updatePosition(scrollY: number) {
     window.innerHeight;
   const isTopReached =
     Math.round(el.value.getBoundingClientRect().top) >= props.top;
-  const scrollingDown = lastScrollY.value < scrollY;
-  const scrollingUp = lastScrollY.value > scrollY;
-  const stickedToBottom = stickStatus.value === StickStatus.BOTTOM;
-  const stickedToTop = stickStatus.value === StickStatus.TOP;
+  const isScrollingDown = lastScrollY.value < scrollY;
+  const isScrollingUp = lastScrollY.value > scrollY;
+  const isStuckToBottom = stickStatus.value === StickStatus.BOTTOM;
+  const isStuckToTop = stickStatus.value === StickStatus.TOP;
   const canScroll = !isTopReached || !isBottomReached;
 
-  if (scrollingDown && !stickedToBottom && canScroll) {
+  if (isScrollingDown && !isStuckToBottom && canScroll) {
     changeStickStatus(
       isBottomReached ? StickStatus.BOTTOM : StickStatus.SCROLL
     );
-  } else if (scrollingUp && !stickedToTop) {
+  } else if (isScrollingUp && !isStuckToTop) {
     changeStickStatus(isTopReached ? StickStatus.TOP : StickStatus.SCROLL);
   }
 
@@ -83,10 +83,10 @@ function unstick() {
 }
 
 function handlePositionUpdate() {
-  if (!ticking.value) {
+  if (!isTicking.value) {
     requestAnimationFrame(() => updatePosition(window.scrollY));
   }
-  ticking.value = true;
+  isTicking.value = true;
 }
 
 onMounted(() => {

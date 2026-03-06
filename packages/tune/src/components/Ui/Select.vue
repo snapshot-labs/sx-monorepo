@@ -1,18 +1,19 @@
 <script setup lang="ts" generic="T extends string | number">
-import { DefinitionWithOptions } from '@/types';
+import { useDirty } from '../../composables/useDirty';
+import { FieldDefinitionWithOptions } from '../../types';
 
 const model = defineModel<T>({ required: true });
 
 const props = defineProps<{
   error?: string;
   required?: boolean;
-  definition: DefinitionWithOptions<T>;
+  definition: FieldDefinitionWithOptions<T>;
   disabled?: boolean;
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
 
-const inputValue = computed({
+const inputValue = computed<T>({
   get() {
     if (!model.value && !isDirty.value && props.definition.default) {
       return props.definition.default;
@@ -20,7 +21,7 @@ const inputValue = computed({
 
     return model.value;
   },
-  set(newValue: T) {
+  set(newValue) {
     model.value = newValue;
   }
 });

@@ -69,7 +69,7 @@ function handleEndReached() {
 <template>
   <div>
     <div class="p-4 flex gap-4">
-      <Combobox
+      <UiCombobox
         v-model="network"
         class="mb-0"
         inline
@@ -81,7 +81,7 @@ function handleEndReached() {
           options: networks
         }"
       />
-      <Combobox
+      <UiCombobox
         v-model="status"
         class="mb-0"
         inline

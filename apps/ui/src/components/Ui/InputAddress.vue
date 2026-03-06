@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { FieldDefinition } from '@snapshot-labs/tune';
 import { getUrl } from '@/helpers/utils';
-import { BaseDefinition } from '@/types';
 
 type NetworkDetails = {
   name: string;
@@ -10,9 +10,11 @@ type NetworkDetails = {
 
 defineOptions({ inheritAttrs: false });
 
+const model = defineModel<string>();
+
 const props = defineProps<{
   path?: string;
-  definition?: BaseDefinition<string> & {
+  definition?: FieldDefinition<string> & {
     chainId?: number | string;
     showControls?: boolean;
   };
@@ -45,34 +47,32 @@ const shouldShowPicker = computed(() => {
 </script>
 
 <template>
-  <div class="relative">
-    <UiTooltip
-      v-if="networkDetails"
-      :title="networkDetails.name"
-      class="!absolute z-10 left-3 top-[29px]"
-    >
-      <img
-        :src="networkDetails.logoUrl ?? undefined"
-        class="size-3.5 rounded-full"
-      />
-    </UiTooltip>
-    <UiInputString
-      :definition="definition"
-      :required="required"
-      v-bind="$attrs as any"
-      :class="{
-        '!pl-[42px]': !!networkDetails,
-        '!pr-7': shouldShowPicker
-      }"
-    />
-    <button
-      v-if="shouldShowPicker"
-      class="absolute top-3.5 right-3 z-10"
-      type="button"
-      aria-label="Pick address from contacts"
-      @click="emit('pick', path || '')"
-    >
-      <IH-identification />
-    </button>
-  </div>
+  <UiInputString
+    v-model="model"
+    :definition="definition"
+    :required="required"
+    v-bind="$attrs as any"
+    :class="{
+      '!pl-[42px]': !!networkDetails,
+      '!pr-7': shouldShowPicker
+    }"
+  >
+    <template v-if="networkDetails" #prefix>
+      <UiTooltip :title="networkDetails.name">
+        <img
+          :src="networkDetails.logoUrl ?? undefined"
+          class="size-3.5 rounded-full"
+        />
+      </UiTooltip>
+    </template>
+    <template v-if="shouldShowPicker" #suffix>
+      <button
+        type="button"
+        aria-label="Pick address from contacts"
+        @click="emit('pick', path || '')"
+      >
+        <IH-identification />
+      </button>
+    </template>
+  </UiInputString>
 </template>

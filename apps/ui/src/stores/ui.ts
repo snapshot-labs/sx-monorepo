@@ -1,7 +1,8 @@
+import { NotificationType } from '@snapshot-labs/tune';
 import { defineStore } from 'pinia';
 import { waitForTransaction } from '@/helpers/generic';
 import { lsGet, lsSet } from '@/helpers/utils';
-import { ChainId, NotificationType } from '@/types';
+import { ChainId } from '@/types';
 
 type SafeModal = {
   id: string;

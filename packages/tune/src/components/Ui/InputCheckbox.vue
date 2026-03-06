@@ -1,15 +1,21 @@
 <script setup lang="ts">
-const model = defineModel<boolean>();
+import { useDirty } from '../../composables/useDirty';
+import { FieldDefinition } from '../../types';
+
+const model = defineModel<boolean>({ required: true });
 
 const props = defineProps<{
   error?: string;
   required?: boolean;
-  definition: any;
+  definition: FieldDefinition<boolean>;
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
 
-const inputValue = computed({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const { title, ...wrapperDefinition } = props.definition;
+
+const inputValue = computed<boolean>({
   get() {
     if (
       model.value === undefined &&
@@ -19,9 +25,9 @@ const inputValue = computed({
       return props.definition.default;
     }
 
-    return model.value;
+    return model.value ?? false;
   },
-  set(newValue: boolean) {
+  set(newValue) {
     model.value = newValue;
   }
 });
@@ -35,11 +41,10 @@ onMounted(() => {
 
 <template>
   <UiWrapperInput
-    v-slot="{ id }"
-    :definition="definition"
+    :definition="wrapperDefinition"
     :error="error"
     :dirty="isDirty"
   >
-    <input :id="id" v-model="inputValue" type="checkbox" class="mt-[7px]" />
+    <UiCheckbox v-model="inputValue" :title="definition.title" />
   </UiWrapperInput>
 </template>

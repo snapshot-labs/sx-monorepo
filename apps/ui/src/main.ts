@@ -1,4 +1,5 @@
 import { createTune } from '@snapshot-labs/tune';
+import AppLink from '@/components/AppLink.vue';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import App from '@/App.vue';
@@ -36,7 +37,7 @@ if (window.location.host !== parentHost && !knownHosts.includes(parentHost)) {
 }
 
 const pinia = createPinia();
-const tune = createTune();
+const tune = createTune({ linkComponent: AppLink });
 const app = createApp({ render: () => h(App) }).use(router);
 
 app.use(pinia);

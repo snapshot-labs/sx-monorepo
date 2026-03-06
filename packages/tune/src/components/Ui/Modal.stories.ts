@@ -1,61 +1,56 @@
 import { Meta, StoryObj } from '@storybook/vue3-vite';
-import { fn } from 'storybook/test';
+import { ref } from 'vue';
 import Modal from './Modal.vue';
 
-const meta = {
+const meta: Meta = {
   title: 'Ui/Modal',
   component: Modal,
-  tags: ['autodocs'],
-  args: {
-    open: true,
-    onClose: fn()
-  }
-} satisfies Meta<typeof Modal>;
+  tags: ['autodocs']
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: args => ({
+  render: () => ({
     components: { Modal },
-    setup: () => ({ args }),
+    setup() {
+      const open = ref(false);
+      return { open };
+    },
     template: `
-      <Modal v-bind="args">
-        <template #header>
-          <h3 class="text-lg">Modal title</h3>
-        </template>
-        <div class="p-4">Modal body content goes here.</div>
-        <template #footer>
-          <button class="border rounded-full px-4 py-2">Confirm</button>
-        </template>
-      </Modal>
-    `
-  })
-};
-
-export const BodyOnly: Story = {
-  render: args => ({
-    components: { Modal },
-    setup: () => ({ args }),
-    template: `
-      <Modal v-bind="args">
-        <div class="p-4">Simple modal with body content only.</div>
-      </Modal>
+      <div>
+        <button class="border px-3 py-2 rounded" @click="open = true">Open Modal</button>
+        <Modal :open="open" @close="open = false">
+          <template #header>Modal Title</template>
+          Modal body content
+          <template #footer>
+            <button class="border px-3 py-2 rounded" @click="open = false">Close</button>
+          </template>
+        </Modal>
+      </div>
     `
   })
 };
 
 export const NotCloseable: Story = {
-  render: args => ({
+  render: () => ({
     components: { Modal },
-    setup: () => ({ args }),
+    setup() {
+      const open = ref(false);
+      return { open };
+    },
     template: `
-      <Modal v-bind="args" :closeable="false">
-        <template #header>
-          <h3 class="text-lg">Required action</h3>
-        </template>
-        <div class="p-4">You must complete this action before continuing.</div>
-      </Modal>
+      <div>
+        <button class="border px-3 py-2 rounded" @click="open = true">Open Modal</button>
+        <Modal :open="open" :closeable="false" @close="open = false">
+          <template #header>Modal Title</template>
+          Modal body content
+          <template #footer>
+            <button class="border px-3 py-2 rounded" @click="open = false">Close</button>
+          </template>
+        </Modal>
+      </div>
     `
   })
 };

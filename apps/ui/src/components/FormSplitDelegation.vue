@@ -379,7 +379,7 @@ onMounted(() => {
           <IH-exclamation-circle />
         </UiTooltip>
       </UiEyebrow>
-      <Combobox v-model="form.chainId" :definition="networkDefinition" />
+      <UiCombobox v-model="form.chainId" :definition="networkDefinition" />
     </div>
   </div>
   <teleport to="#modal">

@@ -10,10 +10,12 @@
     "types": ["unplugin-icons/types/vue"]
   },
   "include": [
+    "auto-imports.d.ts",
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.vue",
     "auto-imports.d.ts",
+    "resolver.mjs",
     "tailwind.config.ts",
     "vite.config.ts"
   ]

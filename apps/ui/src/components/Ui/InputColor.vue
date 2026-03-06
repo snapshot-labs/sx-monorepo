@@ -14,25 +14,20 @@ const model = defineModel<string>();
 
 const { currentTheme } = useTheme();
 
-const { isDirty } = useDirty(model, props.definition);
-
-const inputValue = computed({
+const uppercaseModel = computed<string | undefined>({
   get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
     return model.value;
   },
-  set(newValue: string) {
-    model.value = newValue.toUpperCase();
+  set(newValue) {
+    model.value = newValue?.toUpperCase();
   }
 });
 
 const shadowColor = computed({
   get() {
-    if (inputValue.value && isColorValid(inputValue.value)) {
-      return inputValue.value;
+    const value = model.value || props.definition.default;
+    if (value && isColorValid(value)) {
+      return value;
     }
     return currentTheme.value === 'dark' ? '#000000' : '#FFFFFF';
   },
@@ -82,39 +77,32 @@ function validateAndConvertColor(color: string): string {
 </script>
 
 <template>
-  <UiWrapperInput
-    v-slot="{ id }"
+  <UiInputString
+    v-model="uppercaseModel"
     :definition="definition"
     :loading="loading"
     :error="error"
-    :dirty="isDirty"
     :required="required"
-    :input-value-length="inputValue?.length"
+    v-bind="$attrs"
+    class="!pl-6"
   >
-    <div class="flex">
+    <template #prefix>
       <input
         v-model="shadowColor"
         type="color"
-        class="absolute appearance-none cursor-pointer size-[18px] mt-[30px] ml-3 rounded border border-skin-text border-opacity-20 padding-0 margin-0"
+        class="appearance-none cursor-pointer size-[18px] rounded border border-skin-text border-opacity-20 p-0 m-0"
       />
-      <input
-        :id="id"
-        v-model.trim="inputValue"
-        type="text"
-        class="s-input !pl-6"
-        v-bind="$attrs"
-        :placeholder="definition.examples && definition.examples[0]"
-      />
+    </template>
+    <template v-if="definition.showControls" #suffix>
       <button
-        v-if="definition.showControls"
         title="Generate random color"
-        class="absolute right-3 mt-[20px]"
+        type="button"
         @click="setRandomColor"
       >
         <IH-refresh class="text-skin-link" />
       </button>
-    </div>
-  </UiWrapperInput>
+    </template>
+  </UiInputString>
 </template>
 
 <style scoped>

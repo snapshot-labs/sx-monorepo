@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { SelectItem } from '@snapshot-labs/tune';
 import { SPACE_CATEGORIES } from '@/helpers/constants';
 import { getUrl } from '@/helpers/utils';
 import { explorePageProtocols, getNetwork, metadataNetwork } from '@/networks';
 import { ExplorePageProtocol, ProtocolConfig } from '@/networks/types';
 import { useExploreSpacesQuery } from '@/queries/spaces';
-import { SelectItem } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -162,7 +162,7 @@ watchEffect(() => setTitle('Explore'));
           placement="start"
           :items="protocols"
         />
-        <Combobox
+        <UiCombobox
           v-model="network"
           class="mb-0"
           inline

@@ -6,7 +6,8 @@ import {
   ListboxOptions
 } from '@headlessui/vue';
 import { Float } from '@headlessui-float/vue';
-import { DefinitionWithMultipleOptions } from '@/types';
+import { useDirty } from '../../composables/useDirty';
+import { FieldDefinitionWithMultipleOptions } from '../../types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -15,7 +16,7 @@ const model = defineModel<T[]>({ required: true });
 const props = defineProps<{
   error?: string;
   required?: boolean;
-  definition: DefinitionWithMultipleOptions<T> & {
+  definition: FieldDefinitionWithMultipleOptions<T> & {
     maxItems?: number;
   };
 }>();
@@ -42,7 +43,7 @@ const currentValue = computed(() => {
         ? `Select up to ${props.definition.maxItems} items`
         : 'Select one or more items';
 
-    return props.definition.examples?.[0] || fallbackText;
+    return String(props.definition.examples?.[0] || fallbackText);
   }
 
   const currentItems = props.definition.options.filter(option =>

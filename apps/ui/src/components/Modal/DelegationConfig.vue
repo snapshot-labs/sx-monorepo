@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ObjectFieldDefinition } from '@snapshot-labs/tune';
 import { DELEGATION_TYPES_NAMES } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
@@ -120,7 +121,7 @@ const definition = computed(() => {
           }
         : {})
     }
-  };
+  } as ObjectFieldDefinition;
 });
 
 const formErrors = computed(() =>

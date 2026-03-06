@@ -377,7 +377,7 @@ watch(
       Invalid delegation
     </UiMessage>
     <div v-else class="s-box p-4 space-y-[14px]">
-      <Combobox
+      <UiCombobox
         v-if="!delegation && delegationsSupportedByCurrentWallet.length > 1"
         v-model="selectedDelegationIndex"
         class="!mb-0"
