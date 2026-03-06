@@ -34,7 +34,10 @@ const selectedChoices = ref<RankedChoice>(
       <template #item="{ element, index }">
         <UiButton :size="48" class="text-left handle cursor-grab">
           <IC-drag class="text-skin-text" />
-          <UiTooltipOnTruncate :content="proposal.choices[element - 1]" />
+          <UiTooltipOnTruncate
+            :content="proposal.choices[element - 1]"
+            class="grow"
+          />
           <div
             class="h-[18px] min-w-[18px] rounded-full leading-[18px] text-[13px] text-skin-link bg-skin-border px-2 text-center inline-block"
           >
