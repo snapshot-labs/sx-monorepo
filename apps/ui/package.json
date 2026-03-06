@@ -14,7 +14,7 @@
     "dev": "vite --port=8080",
     "build": "vite build",
     "codegen": "graphql-codegen",
-    "lint": "eslint \"./src/**/*.{ts,vue}\" --ignore-pattern \"**/gql/**\"",
+    "lint": "eslint \"./src/**/*.{ts,vue}\" --ignore-pattern \"**/gql/**\" --ignore-pattern \"**/*.stories.ts\"",
     "lint:fix": "yarn lint --fix",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",

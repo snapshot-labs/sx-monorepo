@@ -22,5 +22,8 @@
     "auto-imports.d.ts",
     "components.d.ts",
     "vite.config.ts"
+  ],
+  "exclude": [
+    "src/**/*.stories.ts"
   ]
 }
