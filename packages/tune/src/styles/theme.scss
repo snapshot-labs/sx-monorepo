@@ -88,13 +88,11 @@ body {
 // Typography
 
 h1 {
-  font-size: 44px;
-  line-height: 1.3em;
+  @apply text-[44px] leading-[1.3em];
 }
 
 h2 {
-  @apply text-xl;
-  line-height: 1.2em;
+  @apply text-xl leading-[1.2em];
 }
 
 h3 {
@@ -117,16 +115,15 @@ h1,
 h2,
 h3,
 h4 {
-  color: rgba(var(--heading));
-  font-weight: 600;
+  @apply text-skin-heading font-semibold;
 }
 
 a,
 .a {
-  color: rgba(var(--link));
+  @apply text-skin-link;
 
   &:hover {
-    cursor: pointer;
+    @apply cursor-pointer;
   }
 }
 
@@ -140,7 +137,7 @@ a,
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
-  margin: 0;
+  @apply m-0;
 }
 
 input[type='number'] {
@@ -149,19 +146,19 @@ input[type='number'] {
 }
 
 input {
-  outline: none;
+  @apply outline-none;
 }
 
 input:disabled {
-  cursor: not-allowed;
+  @apply cursor-not-allowed;
 }
 
 input[type='time']::-webkit-calendar-picker-indicator {
-  display: none;
+  @apply hidden;
 }
 
 input:placeholder-shown {
-  text-overflow: ellipsis;
+  @apply text-ellipsis;
 }
 
 // Tune UI kit
@@ -177,7 +174,7 @@ input:placeholder-shown {
 .s-base {
   &:focus-within .s-label-char-count,
   &.s-error .s-label-char-count {
-    display: block;
+    @apply block;
   }
 }
 
@@ -243,4 +240,3 @@ input:placeholder-shown {
 .s-array + .s-base {
   @apply mt-4;
 }
-
