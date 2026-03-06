@@ -7,7 +7,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { Contract } from '@ethersproject/contracts';
 import GovernorV4Abi from './abis/GovernorV4.json';
 import GovernorV5Abi from './abis/GovernorV5.json';
-import { ballotTypesV5, extendedBallotTypesV5 } from './types';
+import { ballotTypesV4, ballotTypesV5, extendedBallotTypesV5 } from './types';
 import { OpenZeppelinAuthenticator } from '../../../types';
 import {
   EIP712BallotV4,
@@ -79,6 +79,7 @@ export class EthereumSig {
     const { spaceId, proposalId, choice: support, reason } = data;
 
     let message: EIP712BallotV4 | EIP712BallotV5 | EIP712ExtendedBallotV5;
+    let types: Record<string, TypedDataField[]>;
 
     if (authenticatorType === 'OpenZeppelinAuthenticatorSignatureV5') {
       const govenorContract = new Contract(spaceId, GovernorV5Abi, signer);
@@ -93,6 +94,7 @@ export class EthereumSig {
           reason,
           params: '0x'
         };
+        types = extendedBallotTypesV5;
       } else {
         message = {
           voter,
@@ -100,12 +102,14 @@ export class EthereumSig {
           support,
           nonce: nonce.toNumber()
         };
+        types = ballotTypesV5;
       }
     } else if (authenticatorType === 'OpenZeppelinAuthenticatorSignatureV4') {
       message = {
         proposalId,
         support
       };
+      types = ballotTypesV4;
     } else {
       throw new Error('Unsupported authenticator type');
     }
@@ -115,7 +119,7 @@ export class EthereumSig {
       authenticatorType,
       spaceId,
       message,
-      reason ? extendedBallotTypesV5 : ballotTypesV5
+      types
     );
 
     return {
