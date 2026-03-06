@@ -39,9 +39,9 @@ const isPathActive = computed(() => {
     <slot />
   </a>
   <router-link
-    v-else-if="to"
+    v-else-if="resolved"
     v-slot="{ isActive: isRouteActive, isExactActive }"
-    :to="resolved!.fullPath"
+    :to="resolved.fullPath"
     @click="$emit('click')"
   >
     <slot
