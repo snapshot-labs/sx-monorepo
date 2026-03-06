@@ -45,13 +45,14 @@ export default defineConfig({
     lib: {
       entry: {
         index: 'src/index.ts',
-        theme: 'src/theme.ts'
+        theme: 'src/theme.ts',
+        resolver: 'src/resolver.ts'
       },
       formats: ['es']
     },
     cssCodeSplit: true,
     rollupOptions: {
-      external: ['vue', 'vue-router', '@vueuse/core'],
+      external: ['vue', 'vue-router', '@vueuse/core', 'unplugin-vue-components'],
       output: {
         globals: {
           vue: 'Vue'
