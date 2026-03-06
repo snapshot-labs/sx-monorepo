@@ -29,7 +29,7 @@ withDefaults(
 @import 'tippy.js/dist/border.css';
 @import 'tippy.js/dist/svg-arrow.css';
 
-.tippy-box[data-theme~='sx'] {
+.tippy-box {
   @apply bg-skin-border text-skin-link px-[14px] py-2 w-max z-50 rounded text-[17px] leading-5 transition-opacity;
 
   .tippy-content {
