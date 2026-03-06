@@ -1,24 +1,29 @@
 <script setup lang="ts">
+import UiTooltip from './Tooltip.vue';
+
 const props = defineProps<{
   content?: string;
 }>();
 
-const wrapperRef = ref<HTMLElement | null>(null);
+const wrapperRef = ref<InstanceType<typeof UiTooltip> | null>(null);
 const isTruncated = ref(false);
 
 const tooltipContent = computed(() => {
-  return props.content || wrapperRef.value?.textContent || '';
+  return props.content || wrapperRef.value?.$el?.textContent || '';
 });
 
 const checkTruncation = () => {
-  if (!wrapperRef.value) return;
-  isTruncated.value =
-    wrapperRef.value.scrollWidth > wrapperRef.value.clientWidth;
+  const el = wrapperRef.value?.$el;
+  if (!el) return;
+  isTruncated.value = el.scrollWidth > el.clientWidth;
 };
 
 const debouncedCheckTruncation = useDebounceFn(checkTruncation, 50);
 
-useResizeObserver(wrapperRef, debouncedCheckTruncation);
+useResizeObserver(
+  computed(() => wrapperRef.value?.$el ?? null),
+  debouncedCheckTruncation
+);
 
 watchEffect(() => {
   if (wrapperRef.value) {
@@ -28,13 +33,11 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div
+  <UiTooltip
     ref="wrapperRef"
-    v-tippy="{
-      content: isTruncated ? tooltipContent : null
-    }"
-    class="inline-block relative grow truncate"
+    :title="isTruncated ? tooltipContent : ''"
+    class="grow truncate"
   >
     <slot>{{ content }}</slot>
-  </div>
+  </UiTooltip>
 </template>
