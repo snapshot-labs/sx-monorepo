@@ -847,18 +847,18 @@ export function prettyConcat(options: string[], connector = 'or') {
     : uniqOptions[0];
 }
 
-export function isUserAbortError(e: any) {
+export function isUserAbortError(err: any) {
   return (
-    ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
-    ['User abort', 'User rejected the request.'].includes(e.message)
+    ['ACTION_REJECTED', 4001, 113].includes(err.code) ||
+    ['User abort', 'User rejected the request.'].includes(err.message)
   );
 }
 
 export function getUserFacingErrorMessage(
-  e: unknown,
+  err: unknown,
   fallback: string = 'Something went wrong. Please try again later.'
 ): string {
-  return (e instanceof Error && e.message) || fallback;
+  return (err instanceof Error && err.message) || fallback;
 }
 
 async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {
