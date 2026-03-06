@@ -2,6 +2,7 @@ import { FunctionalComponent } from 'vue';
 import { RouteLocationNormalizedLoaded, RouteLocationRaw } from 'vue-router';
 import { Organization } from '@/helpers/organizations';
 import { Space } from '@/types';
+import { SpaceType } from '../useTownhallSpace';
 
 export type NavItem = {
   name: string;
@@ -25,6 +26,7 @@ export type NavContext = {
   unreadCount: number;
   isWhiteLabel: boolean;
   space: Space | null;
+  spaceType: SpaceType;
   isController: boolean;
   ensOwner: string | null;
   organization: Organization | null;

@@ -11,4 +11,5 @@ export { EthereumSig as GovernorBravoEthereumSig } from './governor-bravo/ethere
 export { EthereumTx as OpenZeppelinEthereumTx } from './openzeppelin/ethereum-tx';
 export { EthereumSig as OpenZeppelinEthereumSig } from './openzeppelin/ethereum-sig';
 export { EthereumSig as OffchainEthereumSig } from './offchain/ethereum-sig';
+export { HighlightEthereumSigClient } from './highlight/ethereum-sig';
 export { StarknetSig as OffchainStarknetSig } from './offchain/starknet-sig';

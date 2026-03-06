@@ -12,6 +12,7 @@ export function useCurrentSpace() {
   const route = useRoute();
 
   const spaceParam = computed(() => route.params.space as string | undefined);
+  const { spaceType, townhallSpaceId } = useTownhallSpace(spaceParam);
 
   const primarySpace = computed<Space | null>(
     () => whiteLabelSpace.value ?? organization.value?.spaces[0] ?? null
@@ -74,6 +75,8 @@ export function useCurrentSpace() {
   );
 
   return {
+    spaceType,
+    townhallSpaceId,
     space,
     isPending
   };

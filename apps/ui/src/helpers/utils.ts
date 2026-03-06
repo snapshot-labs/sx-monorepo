@@ -199,10 +199,10 @@ export function _c(value: string | bigint, decimals = 18) {
   return formatter.format(parsed);
 }
 
-export function _p(value: number) {
+export function _p(value: number, maximumFractionDigits = 2) {
   const formatter = new Intl.NumberFormat('en', {
     style: 'percent',
-    maximumFractionDigits: 2
+    maximumFractionDigits
   });
   return formatter.format(value);
 }

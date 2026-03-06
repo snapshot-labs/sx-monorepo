@@ -35,7 +35,7 @@ function setup() {
   const notificationsStore = useNotificationsStore();
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
-  const { space } = useCurrentSpace();
+  const { space, spaceType } = useCurrentSpace();
   const { organization } = useOrganization();
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
@@ -74,6 +74,7 @@ function setup() {
     unreadCount: notificationsStore.unreadNotificationsCount,
     isWhiteLabel: isWhiteLabel.value,
     space: spaceOnRoute.value,
+    spaceType: spaceType.value,
     isController: isController.value,
     ensOwner: ensOwner.value,
     organization: organization.value

@@ -1,0 +1,85 @@
+{
+  "network_node_url": "http://localhost:3001",
+  "sources": [
+    {
+      "contract": "aliases",
+      "start": 1,
+      "events": [
+        {
+          "name": "setAlias",
+          "fn": "handleSetAlias"
+        }
+      ]
+    },
+    {
+      "contract": "townhall",
+      "start": 1,
+      "events": [
+        {
+          "name": "new_space",
+          "fn": "handleNewSpace"
+        },
+        {
+          "name": "new_category",
+          "fn": "handleNewCategory"
+        },
+        {
+          "name": "edit_category",
+          "fn": "handleEditCategory"
+        },
+        {
+          "name": "delete_category",
+          "fn": "handleDeleteCategory"
+        },
+        {
+          "name": "new_topic",
+          "fn": "handleNewTopic"
+        },
+        {
+          "name": "close_topic",
+          "fn": "handleCloseTopic"
+        },
+        {
+          "name": "new_post",
+          "fn": "handleNewPost"
+        },
+        {
+          "name": "pin_post",
+          "fn": "handlePinPost"
+        },
+        {
+          "name": "unpin_post",
+          "fn": "handleUnpinPost"
+        },
+        {
+          "name": "hide_post",
+          "fn": "handleHidePost"
+        },
+        {
+          "name": "new_vote",
+          "fn": "handleNewVote"
+        },
+        {
+          "name": "new_role",
+          "fn": "handleNewRole"
+        },
+        {
+          "name": "edit_role",
+          "fn": "handleEditRole"
+        },
+        {
+          "name": "delete_role",
+          "fn": "handleDeleteRole"
+        },
+        {
+          "name": "claim_role",
+          "fn": "handleClaimRole"
+        },
+        {
+          "name": "revoke_role",
+          "fn": "handleRevokeRole"
+        }
+      ]
+    }
+  ]
+}

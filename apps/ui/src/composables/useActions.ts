@@ -32,8 +32,10 @@ const PENDING_MESSAGES: Record<'vote' | 'propose' | 'transaction', string> = {
 };
 
 export function useActions() {
+  const network = getNetwork(metadataNetwork);
+
   const uiStore = useUiStore();
-  const alias = useAlias();
+  const alias = useAlias('aliases', network.api.loadAlias);
   const { auth } = useWeb3();
   const { addPendingVote } = useAccount();
   const { getCurrentFromDuration } = useMetaStore();
@@ -138,6 +140,10 @@ export function useActions() {
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.payloadType === 'HIGHLIGHT_VOTE') {
       console.log('Receipt', envelope.signatureData);
+    } else if (envelope.type === 'HIGHLIGHT_ENVELOPE') {
+      const receipt = await network.actions.send(envelope);
+
+      console.log('receipt', receipt);
     } else if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
       hash = receipt.transaction_hash || receipt.hash;
