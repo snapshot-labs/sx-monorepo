@@ -1,5 +1,4 @@
 import { createTune } from '@snapshot-labs/tune';
-import '@snapshot-labs/tune/theme';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
 import App from '@/App.vue';
