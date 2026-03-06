@@ -1,6 +1,7 @@
+import { createTune } from '@snapshot-labs/tune';
+import '@snapshot-labs/tune/theme';
 import { VueQueryPlugin } from '@tanstack/vue-query';
 import { createPinia } from 'pinia';
-import VueTippy from 'vue-tippy';
 import App from '@/App.vue';
 import router from '@/routes';
 import '@/style.scss';
@@ -38,13 +39,7 @@ if (window.location.host !== parentHost && !knownHosts.includes(parentHost)) {
 const pinia = createPinia();
 const app = createApp({ render: () => h(App) })
   .use(router)
-  .use(VueTippy, {
-    defaultProps: {
-      delay: [0, null],
-      theme: 'sx',
-      animation: false
-    }
-  });
+  .use(createTune());
 
 app.use(pinia);
 app.use(VueQueryPlugin);

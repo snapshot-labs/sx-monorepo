@@ -1,4 +1,5 @@
 import { Config } from 'tailwindcss';
+import tunePreset from '@snapshot-labs/tune/tailwind-preset';
 
 const ELECTRON_TITLEBAR_HEIGHT = !!process.env.ELECTRON ? 32 : 0;
 const APP_TOPNAV_HEIGHT = 72;
@@ -12,114 +13,23 @@ const TOTAL_WITH_SECTION = TOTAL_NAV_HEIGHT + 41;
 const STICKY_ELEMENT_BUFFER = 1;
 
 export default {
-  future: {
-    hoverOnlyWhenSupported: true
-  },
+  presets: [tunePreset],
   content: ['./index.html', './src/**/*.{js,ts,vue}'],
-  darkMode: 'class',
   theme: {
     extend: {
-      borderColor: {
-        DEFAULT: 'rgba(var(--border), <alpha-value>)'
-      },
-      colors: {
-        // IMPORTANT: Color variables that require opacity modifiers must be defined
-        // without space function and opacity value. They can be recognized by the
-        // <alpha-value> placeholder. See: https://tailwindcss.com/docs/customizing-colors#using-css-variables
-        transparent: 'transparent',
-
-        // backgrounds
-        'skin-bg': 'rgba(var(--bg), <alpha-value>)',
-        'skin-border': 'rgba(var(--border), <alpha-value>)',
-
-        // text
-        'skin-heading': 'rgba(var(--heading), <alpha-value>)',
-        'skin-link': 'rgba(var(--link), <alpha-value>)',
-        'skin-text': 'rgba(var(--text), <alpha-value>)',
-        'skin-content': 'var(--content)',
-
-        // accents
-        'skin-primary': 'rgba(var(--primary), <alpha-value>)',
-        'skin-accent-foreground':
-          'rgba(var(--accent-foreground), <alpha-value>)',
-        'skin-danger': 'rgba(var(--danger), <alpha-value>)',
-        'skin-success': 'rgba(var(--success), <alpha-value>)',
-
-        'skin-accent-hover': 'var(--accent-hover)',
-        'skin-accent-active': 'var(--accent-active)',
-        'skin-danger-border': 'var(--danger-border)',
-        'skin-danger-hover': 'var(--danger-hover)',
-        'skin-danger-active': 'var(--danger-active)',
-        'skin-success-border': 'var(--success-border)',
-        'skin-success-hover': 'var(--success-hover)',
-        'skin-success-active': 'var(--success-active)'
-      },
-      animation: {
-        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        halo: 'halo 1.5s ease-in-out infinite'
-      },
-      keyframes: {
-        halo: {
-          '0%, 100%': { opacity: '0' },
-          '50%': { opacity: '0.3' }
-        }
-      },
       gridTemplateColumns: {
         'explore-3': 'repeat(3, minmax(0, 230px))',
         'explore-4': 'repeat(4, minmax(0, 230px))',
         'explore-5': 'repeat(5, minmax(0, 230px))'
+      },
+      spacing: {
+        // Layout heights
+        'header-height': `${TOTAL_NAV_HEIGHT}px`,
+        'electron-titlebar-height': `${ELECTRON_TITLEBAR_HEIGHT}px`,
+        'header-height-with-offset': `${TOTAL_NAV_HEIGHT - STICKY_ELEMENT_BUFFER}px`,
+        'header-with-section-height': `${TOTAL_WITH_SECTION}px`,
+        'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION - 2 * STICKY_ELEMENT_BUFFER}px`
       }
-    },
-    screens: {
-      minimum: '320px',
-      xs: '420px',
-      sm: '544px',
-      md: '768px',
-      lg: '1012px',
-      xl: '1280px',
-      '2xl': '1536px',
-      '3xl': '1844px',
-      maximum: '1900px'
-    },
-    spacing: {
-      0: '0px',
-      0.5: '2px',
-      1: '4px',
-      1.5: '6px',
-      2: '8px',
-      2.5: '12px',
-      3: '16px',
-      3.5: '20px',
-      4: '24px',
-      5: '32px',
-      6: '40px',
-      7: '48px',
-      8: '64px',
-      9: '72px',
-      10: '80px',
-      11: '88px',
-      12: '96px',
-      maximum: '1900px',
-      // Layout heights
-      'header-height': `${TOTAL_NAV_HEIGHT}px`,
-      'electron-titlebar-height': `${ELECTRON_TITLEBAR_HEIGHT}px`,
-      'header-height-with-offset': `${TOTAL_NAV_HEIGHT - STICKY_ELEMENT_BUFFER}px`,
-      'header-with-section-height': `${TOTAL_WITH_SECTION}px`,
-      // This offset is used on elements that have two preceeding fixed/sticky elements.
-      // Second fixed/sticky element is already shifted by STICKY_ELEMENT_BUFFER, so for third element
-      // we need to shift it again by the same amount so they overlap again.
-      'header-with-section-height-with-offset': `${TOTAL_WITH_SECTION - 2 * STICKY_ELEMENT_BUFFER}px`
-    },
-    fontFamily: {
-      serif: ['"Calibre", Helvetica, Arial, sans-serif']
-    },
-    fontSize: {
-      xl: '28px',
-      lg: '22px',
-      md: '20px',
-      base: '18px',
-      sm: '16px',
-      xs: '14px'
     }
   }
 } satisfies Config;
