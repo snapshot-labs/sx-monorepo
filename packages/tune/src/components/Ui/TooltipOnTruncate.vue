@@ -7,13 +7,12 @@ const props = defineProps<{
 
 const wrapperRef = ref<InstanceType<typeof UiTooltip> | null>(null);
 const el = computed(() => wrapperRef.value?.$el ?? null);
-const { width } = useElementSize(el);
+const isTruncated = ref(false);
 
-const isTruncated = computed(() => {
-  void width.value;
+useResizeObserver(el, () => {
   const dom = el.value;
-  if (!dom) return false;
-  return dom.scrollWidth > dom.clientWidth;
+  if (!dom) return;
+  isTruncated.value = dom.scrollWidth > dom.clientWidth;
 });
 
 const tooltipContent = computed(() => {
