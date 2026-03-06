@@ -1,25 +1,25 @@
-import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
+import orgProvider from './org';
 import settingsProvider from './settings';
 import spaceProvider from './space';
 import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 
-const providers: NavProvider[] = [spaceProvider, settingsProvider, myProvider];
+const providers: NavProvider[] = [
+  orgProvider,
+  spaceProvider,
+  settingsProvider,
+  myProvider
+];
 
-function enrichItems(
-  config: NavConfig,
-  routeName: string,
-  route: Pick<RouteLocationNormalizedLoaded, 'name'>
-): NavConfig {
+function enrichItems(config: NavConfig, routeName: string): NavConfig {
   const items = Object.fromEntries(
     Object.entries(config.items)
       .map(([key, item]): [string, NavItem] => [
         key,
         {
           ...item,
-          active: item.active ?? route.name === `${routeName}-${key}`,
           hidden: item.hidden ?? false,
           link: item.link ?? { name: `${routeName}-${key}` }
         }
@@ -36,6 +36,7 @@ function setup() {
   const { isWhiteLabel } = useWhiteLabel();
   const { web3 } = useWeb3();
   const { space } = useCurrentSpace();
+  const { organization } = useOrganization();
 
   const currentRouteName = computed(() => String(route.matched[0]?.name));
 
@@ -74,7 +75,8 @@ function setup() {
     isWhiteLabel: isWhiteLabel.value,
     space: spaceOnRoute.value,
     isController: isController.value,
-    ensOwner: ensOwner.value
+    ensOwner: ensOwner.value,
+    organization: organization.value
   }));
 
   const hasAppNav = computed<boolean>(() => {
@@ -90,7 +92,7 @@ function setup() {
     const result = provider.getConfig(context.value);
     if (!result) return null;
 
-    return enrichItems(result, provider.routeName, route);
+    return enrichItems(result, provider.routeName);
   });
 
   return { hasAppNav, config };

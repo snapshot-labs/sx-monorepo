@@ -7,7 +7,7 @@ import IHUser from '~icons/heroicons-outline/user';
 
 export default {
   routeName: 'my',
-  getConfig({ account, route, unreadCount }: NavContext): NavConfig {
+  getConfig({ account, unreadCount }: NavContext): NavConfig {
     return {
       items: {
         home: {
@@ -29,16 +29,13 @@ export default {
           name: 'Profile',
           link: { name: 'user', params: { user: account } },
           icon: IHUser,
-          hidden: !account,
-          active:
-            (route.name as string) === 'user' && route.params.user === account
+          hidden: !account
         },
         settings: {
           name: 'Settings',
           link: { name: 'settings-spaces' },
           icon: IHCog,
-          hidden: !account,
-          active: false
+          hidden: !account
         }
       }
     };

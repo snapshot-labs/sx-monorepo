@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { RouteParams } from 'vue-router';
 import { Proposal as ProposalType } from '@/types';
 
 const props = withDefaults(
@@ -13,6 +14,7 @@ const props = withDefaults(
     showAuthor?: boolean;
     route?: {
       name: string;
+      params?: RouteParams;
       linkTitle: string;
     };
   }>(),
@@ -58,7 +60,7 @@ const currentLimit = computed(() => {
       </UiStateWarning>
       <AppLink
         v-else-if="route && proposals.length > currentLimit"
-        :to="{ name: route.name }"
+        :to="{ name: route.name, params: route.params }"
         class="px-4 py-2 block"
       >
         {{ route.linkTitle }}

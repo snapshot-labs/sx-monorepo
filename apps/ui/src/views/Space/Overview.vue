@@ -11,6 +11,7 @@ const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
 
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
@@ -95,7 +96,7 @@ watchEffect(() => setTitle(props.space.name));
               followers
             </div>
           </template>
-          <template v-if="!isWhiteLabel && space.parent?.name">
+          <template v-if="!isWhiteLabel && !organization && space.parent?.name">
             <div>·</div>
             <AppLink
               :to="{
@@ -133,7 +134,7 @@ watchEffect(() => setTitle(props.space.name));
       </div>
     </div>
     <SpaceAlerts :space="space" />
-    <OnboardingSpace :space="space" />
+    <OnboardingSpace v-if="!organization" :space="space" />
     <div v-if="showChildren" class="mb-4">
       <UiSectionHeader label="Sub-spaces" sticky />
       <UiColumnHeader class="hidden md:flex text-center">
@@ -168,6 +169,7 @@ watchEffect(() => setTitle(props.space.name));
         :proposals="data ?? []"
         :route="{
           name: 'space-proposals',
+          params: { space: `${space.network}:${space.id}` },
           linkTitle: 'See more'
         }"
       />

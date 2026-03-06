@@ -7,7 +7,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { BASIC_CHOICES, VERIFIED_URL } from '@/helpers/constants';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -124,6 +124,11 @@ const proposalData = computed(() => {
 });
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
+);
+const isGovernorSpace = computed(
+  () =>
+    explorePageProtocols.governor.protocols?.includes(props.space.protocol) ??
+    false
 );
 
 const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
@@ -417,7 +422,10 @@ async function handleProposeClick() {
         }
       });
     } else {
-      router.push({ name: 'space-proposals' });
+      router.push({
+        name: 'space-proposals',
+        params: { space: spaceKey.value }
+      });
     }
   } catch (e) {
     console.error(e);
@@ -478,7 +486,7 @@ watch(
 
     router.replace({
       name: 'space-editor',
-      params: { key: newId },
+      params: { space: spaceKey.value, key: newId },
       query: route.query
     });
   },
@@ -793,6 +801,7 @@ watchEffect(() => {
               class="s-box"
               :definition="choicesDefinition"
               :error="formErrors.choices"
+              :readonly="isGovernorSpace"
             >
               <template
                 v-if="proposal.type === 'basic'"
@@ -805,7 +814,7 @@ watchEffect(() => {
                 #input-suffix="{ index, deleteItem }"
               >
                 <button
-                  v-if="index > 1"
+                  v-if="index > 1 && isOffchainSpace"
                   class="text-skin-text"
                   title="Delete choice"
                   @click="deleteItem(index)"
