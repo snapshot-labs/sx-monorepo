@@ -37,7 +37,7 @@ withDefaults(
   }
 
   .tippy-arrow {
-    color: rgba(var(--border));
+    @apply text-skin-border;
   }
 }
 
