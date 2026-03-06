@@ -30,8 +30,8 @@ watch(
       const file = await loadImageFromIpfs(props.src);
       const resizedFile = await resizeImage(file, props.width, props.height);
       previewImageUrl.value = URL.createObjectURL(resizedFile);
-    } catch (error) {
-      console.error('Failed to load image preview', error);
+    } catch (err) {
+      console.error('Failed to load image preview', err);
       previewImageUrl.value = null;
     } finally {
       if (oldUrl) {

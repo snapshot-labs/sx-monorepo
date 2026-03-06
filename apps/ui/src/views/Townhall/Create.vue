@@ -107,13 +107,13 @@ async function handleSubmit() {
       try {
         await getTopic(spaceId, topicId);
         break;
-      } catch (e: unknown) {
-        if (e instanceof Error && e.message.includes('Row not found')) {
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('Row not found')) {
           await sleep(500);
           continue;
         }
 
-        throw e;
+        throw err;
       }
     }
 
@@ -121,8 +121,8 @@ async function handleSubmit() {
       name: 'space-townhall-topic',
       params: { id: topicId }
     });
-  } catch (e) {
-    addNotification('error', getUserFacingErrorMessage(e));
+  } catch (err) {
+    addNotification('error', getUserFacingErrorMessage(err));
   } finally {
     submitLoading.value = false;
   }

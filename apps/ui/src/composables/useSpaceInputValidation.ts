@@ -38,8 +38,8 @@ export function useSpaceInputValidation(
           value,
           valid: !!space
         };
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
 
         validationResult.value = {
           value,

@@ -136,10 +136,10 @@ export function useMarkdownEditor(
       });
 
       editorRef.value?.focus();
-    } catch (e) {
-      uiStore.addNotification('error', getUserFacingErrorMessage(e));
+    } catch (err) {
+      uiStore.addNotification('error', getUserFacingErrorMessage(err));
 
-      console.error('Failed to upload image', e);
+      console.error('Failed to upload image', err);
     } finally {
       uploading.value = false;
     }

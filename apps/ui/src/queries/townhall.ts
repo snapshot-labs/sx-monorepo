@@ -273,12 +273,12 @@ export function useUserRolesQuery({
     queryFn: async () => {
       try {
         return await getUserRoles(toValue(spaceId), toValue(user));
-      } catch (e) {
-        if (e instanceof Error && e.message.includes('Row not found')) {
+      } catch (err) {
+        if (err instanceof Error && err.message.includes('Row not found')) {
           return [];
         }
 
-        throw e;
+        throw err;
       }
     },
     enabled: () => !!toValue(user),

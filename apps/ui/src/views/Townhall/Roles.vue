@@ -84,8 +84,8 @@ async function handleAddRole(config: RoleConfig) {
       }
     );
     modalOpen.value = false;
-  } catch (e) {
-    addNotification('error', getUserFacingErrorMessage(e));
+  } catch (err) {
+    addNotification('error', getUserFacingErrorMessage(err));
   } finally {
     isSubmitLoading.value = false;
   }
@@ -141,8 +141,8 @@ async function handleEditRole(config: RoleConfig) {
     );
 
     modalOpen.value = false;
-  } catch (e) {
-    addNotification('error', getUserFacingErrorMessage(e));
+  } catch (err) {
+    addNotification('error', getUserFacingErrorMessage(err));
   } finally {
     isSubmitLoading.value = false;
   }
@@ -165,8 +165,8 @@ async function handleDeleteRole(id: string) {
         return old.filter(role => role.id !== id.toString());
       }
     );
-  } catch (e) {
-    addNotification('error', getUserFacingErrorMessage(e));
+  } catch (err) {
+    addNotification('error', getUserFacingErrorMessage(err));
   }
 }
 

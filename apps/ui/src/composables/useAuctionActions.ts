@@ -30,13 +30,13 @@ export function useAuctionActions(
     return async (...args: T): Promise<U> => {
       try {
         return await fn(...args);
-      } catch (e) {
-        if (!isUserAbortError(e)) {
-          console.error(e);
-          uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      } catch (err) {
+        if (!isUserAbortError(err)) {
+          console.error(err);
+          uiStore.addNotification('error', getUserFacingErrorMessage(err));
         }
 
-        throw e;
+        throw err;
       }
     };
   }

@@ -83,8 +83,8 @@ export async function waitForTransaction(
   if (waitForIndexing) {
     try {
       await network.helpers.waitForIndexing(txId);
-    } catch (e) {
-      console.error('Timeout while waiting for API indexing', e);
+    } catch (err) {
+      console.error('Timeout while waiting for API indexing', err);
     }
   }
 

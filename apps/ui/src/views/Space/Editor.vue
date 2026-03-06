@@ -427,8 +427,8 @@ async function handleProposeClick() {
         params: { space: spaceKey.value }
       });
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   } finally {
     sending.value = false;
   }

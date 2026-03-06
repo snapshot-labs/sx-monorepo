@@ -116,8 +116,8 @@ async function refreshScores() {
         )
       });
     }
-  } catch (e) {
-    console.warn('Failed to refresh scores', e);
+  } catch (err) {
+    console.warn('Failed to refresh scores', err);
   }
 }
 

@@ -19,8 +19,8 @@ onMounted(async () => {
     loading.value = true;
     topics.value = await loadTopics(discussionsUrl);
     loading.value = false;
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 });
 

@@ -11,8 +11,8 @@ export default class Coinbase extends Connector {
       await provider.request({ method: 'eth_requestAccounts' });
 
       this.provider = provider;
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 

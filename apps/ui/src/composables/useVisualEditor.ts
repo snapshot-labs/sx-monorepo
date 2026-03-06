@@ -109,7 +109,7 @@ function insertEditorImages(
 
       // Clean up the temporary blob URL
       URL.revokeObjectURL(tempUrl);
-    } catch (e) {
+    } catch (err) {
       // Clean up the temporary blob URL on error
       URL.revokeObjectURL(tempUrl);
 
@@ -130,8 +130,8 @@ function insertEditorImages(
         return true;
       });
 
-      uiStore.addNotification('error', getUserFacingErrorMessage(e));
-      console.error('Failed to upload image', e);
+      uiStore.addNotification('error', getUserFacingErrorMessage(err));
+      console.error('Failed to upload image', err);
     }
   });
 }

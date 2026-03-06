@@ -54,8 +54,8 @@ const tooltipMessage = computed(() => {
 async function handleClick() {
   try {
     await followedSpacesStore.toggleSpaceFollow(spaceIdComposite.value);
-  } catch (error) {
-    uiStore.addNotification('error', getUserFacingErrorMessage(error));
+  } catch (err) {
+    uiStore.addNotification('error', getUserFacingErrorMessage(err));
   }
 }
 </script>

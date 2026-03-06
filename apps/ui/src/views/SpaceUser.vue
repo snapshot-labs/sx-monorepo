@@ -160,8 +160,8 @@ async function getVotingPower() {
       }
     );
     votingPowerStatus.value = 'success';
-  } catch (e) {
-    console.warn('Failed to load voting power', e);
+  } catch (err) {
+    console.warn('Failed to load voting power', err);
     votingPowers.value = [];
     votingPowerStatus.value = 'error';
   }

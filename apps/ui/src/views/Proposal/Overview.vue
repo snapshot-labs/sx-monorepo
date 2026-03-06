@@ -314,9 +314,9 @@ async function handleDownloadVotes() {
 
   try {
     await downloadVotes(props.proposal.proposal_id);
-  } catch (e) {
-    if (e instanceof Error) {
-      if (e.message === 'PENDING_GENERATION') {
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === 'PENDING_GENERATION') {
         return uiStore.addNotification(
           'success',
           'Your report is currently being generated. It may take a few minutes. Please check back shortly.'
