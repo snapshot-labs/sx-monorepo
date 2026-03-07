@@ -1,0 +1,118 @@
+---
+title: "Settings"
+description: "Customize your space settings, manage members, voting strategies, validation, and more."
+---
+
+## Access your settings
+
+As a space admin, you can access the settings page from the space sidebar. The settings are organized into tabs, each covering a specific aspect of your space configuration.
+
+![](/images/31.png)
+
+<Info>
+You can navigate directly to the settings page with the URL: `https://snapshot.box/#/s:&lt;YOUR-SPACE&gt;/settings`
+</Info>
+
+## Profile
+
+Edit your space's profile information including name, description, avatar, cover image, categories, voting power symbol, and social accounts (website, GitHub, X, Farcaster, CoinGecko).
+
+![](/images/33.png)
+
+### Social accounts
+
+Link your social media accounts by entering your handle in the corresponding fields.
+
+![](/images/34.png)
+
+## Controller
+
+The controller is the account able to change the space settings and cancel pending proposals. By default it's set as the ENS domain owner, but you can change it to another address.
+
+![](/images/32.png)
+
+## Voting strategies
+
+Specify how voting power should be calculated by adding up to 6 strategies. Select a network and add strategies from the available list. Voting power is cumulative across strategies.
+
+To learn more about strategies, head to [voting-strategies.md](../voting-strategies).
+
+![](/images/36.png)
+
+## Members
+
+Assign roles and permissions to your space members:
+
+* **Admin:** can modify settings, manage proposals, and create proposals
+* **Moderator:** can manage proposals and create proposals
+* **Author:** can create proposals without validation
+
+Head to [space-roles.md](space-roles) to learn more about each role.
+
+![](/images/37.png)
+
+## Proposal
+
+Configure proposal guidelines, templates, and validation. The proposal validation determines who is allowed to create a proposal.
+
+![](/images/139.png)
+
+### Proposal validation
+
+To validate if someone can post a proposal, you can use the basic validation which checks voting power against a minimum threshold, or restrict proposals to authors only.
+
+To learn what a validation is head to [validation-strategies.md](../validation-strategies).
+
+![](/images/38.png)
+
+## Voting
+
+Set the **voting delay** (time between proposal creation and the start of voting) and the **voting period** (duration that voting remains open).
+
+Configure **quorum** (the amount of voting power required for a proposal to pass), **type** (voting system), **privacy**, and **vote validation**.
+
+![](/images/39.png)
+
+### Shielded voting
+
+You can enable shielded voting if you want to enable partial privacy and reduce voter apathy. Powered by Shutter, it uses threshold encryption so that voters' choices are private during the voting period and revealed when the proposal closes.
+
+To enable it, select **Shutter** in the **Privacy** dropdown on the Voting tab.
+
+![](/images/283.png)
+
+## Delegations
+
+Set a custom delegation contract to enable delegate discovery for your space.
+
+![](/images/98.png)
+
+<Info>
+Once set, the delegates registry will be visible in the **Delegates** tab on the space page.
+</Info>
+
+## Advanced
+
+Configure parent and children spaces (sub-spaces), terms, and other advanced settings.
+
+![](/images/35.png)
+
+<Info>
+To learn more about sub-spaces, head to [sub-spaces.md](sub-spaces).
+</Info>
+
+## Custom domain
+
+You can add a custom domain to your space in the **Custom domain** tab. Head to [add-custom-domain.md](add-custom-domain) for a step-by-step guide.
+
+![](/images/40.png)
+
+## Treasuries
+
+Link your organization's treasury to Snapshot by adding the treasury network, address, and name. You can add multiple treasuries to one space.
+
+![](/images/41.png)
+
+## Save your settings
+
+Make sure to click the **Save** button to apply your changes. You will need to **sign a message** (gasless) in your wallet to confirm.

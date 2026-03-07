@@ -1,0 +1,22 @@
+---
+title: "Overview"
+---
+
+**Snapshot X** is a fully onchain voting protocol deployed on EVM chains and Starknet. It consists of modular smart contracts that handle proposal creation, voting, and execution without reliance on any centralized service.
+
+Key properties:
+
+- **Censorship resistant:** the protocol runs entirely onchain with no centralized dependencies.
+- **Onchain voting power:** voting logic is fully onchain and auditable.
+- **Trustless execution:** proposal transactions are automatically executed when a proposal passes.
+
+Both the [EVM implementation](https://github.com/snapshot-labs/sx-evm) and the [Starknet implementation](https://github.com/snapshot-labs/sx-starknet) are open source.
+
+## Services
+
+To enhance the user experience of interacting with the protocol, Snapshot Labs provides a number of additional offchain services. All are fully open source and completely optional - they do not introduce any censorship concerns.
+
+- [**API**](api): A fast indexer for all protocol data.
+- [**SX.js**](sx.js): A TypeScript SDK for building integrations with the protocol.
+- [**UI**](ui): An interface for interacting with the protocol.
+- [**Mana**](mana): A meta-transaction relayer that sponsors proposal creation and vote costs.
