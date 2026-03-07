@@ -22,7 +22,6 @@ export { default as UiCounter } from './components/Ui/Counter.vue';
 export { default as UiDropdown } from './components/Ui/Dropdown.vue';
 export { default as UiDropdownItem } from './components/Ui/DropdownItem.vue';
 export { default as UiEyebrow } from './components/Ui/Eyebrow.vue';
-export { default as UiIconBasicChoice } from './components/Ui/IconBasicChoice.vue';
 export { default as UiLinkPreview } from './components/Ui/LinkPreview.vue';
 export { default as UiLoading } from './components/Ui/Loading.vue';
 export { default as UiMessage } from './components/Ui/Message.vue';

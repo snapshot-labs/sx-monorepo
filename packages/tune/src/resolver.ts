@@ -15,7 +15,6 @@ const components = [
   'Dropdown',
   'DropdownItem',
   'Eyebrow',
-  'IconBasicChoice',
   'LinkPreview',
   'Loading',
   'Message',
