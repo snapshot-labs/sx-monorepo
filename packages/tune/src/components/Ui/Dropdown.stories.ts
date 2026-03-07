@@ -4,7 +4,6 @@ import Dropdown from './Dropdown.vue';
 const meta = {
   title: 'Ui/Dropdown',
   component: Dropdown,
-  tags: ['autodocs'],
   argTypes: {
     placement: { control: 'select', options: ['start', 'end'] },
     gap: { control: 'text' },
