@@ -19,7 +19,9 @@ function checkTruncation() {
   isTruncated.value = dom.scrollWidth > dom.clientWidth;
 }
 
-useResizeObserver(el, checkTruncation);
+const debouncedCheckTruncation = useDebounceFn(checkTruncation, 50);
+
+useResizeObserver(el, debouncedCheckTruncation);
 watch(tooltipContent, checkTruncation);
 </script>
 
