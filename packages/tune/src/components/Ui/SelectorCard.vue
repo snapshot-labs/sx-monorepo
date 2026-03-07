@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { Component } from 'vue';
 import IHCode from '~icons/heroicons-outline/code';
 
 withDefaults(

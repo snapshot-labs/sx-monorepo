@@ -3,7 +3,7 @@
   lang="ts"
   generic="T extends string | number, U extends readonly Item<T>[]"
 >
-import { CSSProperties } from 'vue';
+import { Component, CSSProperties } from 'vue';
 
 export type Item<T extends string | number> = {
   key: T;
