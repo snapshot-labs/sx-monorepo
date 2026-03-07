@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { StepRecords } from '@snapshot-labs/tune';
+import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { clone, getSalt } from '@/helpers/utils';
 import { enabledReadWriteNetworks, getNetwork } from '@/networks';
 import { StrategyConfig } from '@/networks/types';

@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import { StepRecords } from '../../types';
-
-export type { StepRecords };
+export type StepRecords = Record<string, Step>;
+type Step = {
+  title: string;
+  isValid: () => boolean;
+};
 
 const props = withDefaults(
   defineProps<{
@@ -24,7 +26,7 @@ const submitDisabled = computed(() =>
 );
 
 const currentStep = computed(() => {
-  return stepper.stepNames.value[stepper.index.value] as string;
+  return stepper.stepNames.value[stepper.index.value];
 });
 
 function goToStep(stepName: string) {

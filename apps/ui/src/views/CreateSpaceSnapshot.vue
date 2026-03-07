@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { StepRecords } from '@snapshot-labs/tune';
+import { StepRecords } from '@/components/Ui/Stepper.vue';
 import { CHAIN_IDS } from '@/helpers/constants';
 import { clone } from '@/helpers/utils';
 import { metadataNetwork } from '@/networks';
