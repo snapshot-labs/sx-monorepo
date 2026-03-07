@@ -1,11 +1,8 @@
 @use 'sass:meta';
 
 @tailwind base;
+@import '@snapshot-labs/tune/style';
 @tailwind utilities;
-
-@layer base {
-  @import '@snapshot-labs/tune/style';
-}
 
 // App-specific fonts (not in tune)
 
