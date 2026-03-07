@@ -59,8 +59,6 @@ export default defineConfig({
         '@headlessui/vue',
         '@headlessui-float/vue',
         'dayjs',
-        'tippy.js',
-        'vue-tippy',
         'unplugin-vue-components'
       ],
       output: {
