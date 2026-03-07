@@ -1,3 +1,4 @@
+import { resolve } from 'path';
 import vue from '@vitejs/plugin-vue';
 import AutoImport from 'unplugin-auto-import/vite';
 import { FileSystemIconLoader } from 'unplugin-icons/loaders';
@@ -24,7 +25,8 @@ export default defineConfig({
     AutoImport({
       imports: ['vue', '@vueuse/core'],
       eslintrc: {
-        enabled: true
+        enabled: true,
+        filepath: resolve(__dirname, '.eslintrc-auto-import.json')
       }
     }),
     Icons({
