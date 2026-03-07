@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind utilities;
+
 /* Apply background color to Storybook docs: https://github.com/storybookjs/storybook/issues/30928 */
 
 .docs-story {

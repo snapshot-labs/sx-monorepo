@@ -1,9 +1,8 @@
 import { Preview, Decorator, setup } from '@storybook/vue3-vite';
 import { createRouter, createMemoryHistory } from 'vue-router';
-import VueTippy from 'vue-tippy';
 import { withThemeByClassName } from '@storybook/addon-themes';
-
-import '../src/style.scss';
+import { createTune } from '../src/plugin';
+import '../src/styles/index.scss';
 import './style.css';
 import { h } from 'vue';
 
@@ -21,9 +20,7 @@ setup(app => {
     })
   );
 
-  app.use(VueTippy, {
-    defaultProps: { appendTo: 'parent' }
-  });
+  app.use(createTune());
 });
 
 export const decorators: Decorator[] = [
@@ -51,9 +48,6 @@ const preview: Preview = {
       }
     },
     a11y: {
-      // 'todo' - show a11y violations in the test UI only
-      // 'error' - fail CI on a11y violations
-      // 'off' - skip a11y checks entirely
       test: 'todo'
     }
   }
