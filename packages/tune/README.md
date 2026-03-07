@@ -26,9 +26,10 @@ Import the styles (components + theme) in your app's global stylesheet:
 
 ```scss
 // style.scss
+@tailwind base;
+
 @import '@snapshot-labs/tune/style';
 
-@tailwind base;
 @tailwind utilities;
 ```
 
