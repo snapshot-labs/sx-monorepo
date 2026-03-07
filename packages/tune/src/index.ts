@@ -1,5 +1,5 @@
 // Styles
-import './styles/theme.scss';
+import './styles/index.scss';
 
 // Plugin
 export { createTune } from './plugin';
