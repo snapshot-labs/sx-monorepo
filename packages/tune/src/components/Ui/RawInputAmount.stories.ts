@@ -15,6 +15,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {
+    modelValue: '0'
+  },
   render: args => ({
     components: { RawInputAmount },
     setup: () => {
@@ -29,6 +32,10 @@ export const Default: Story = {
 };
 
 export const WithDecimals: Story = {
+  args: {
+    modelValue: '0',
+    decimals: 2
+  },
   render: args => ({
     components: { RawInputAmount },
     setup: () => {
@@ -39,8 +46,5 @@ export const WithDecimals: Story = {
       <RawInputAmount v-model="value" v-bind="args" class="border rounded px-3 py-2 w-full" />
       <div class="mt-2 text-sm">Value: {{ value }}</div>
     `
-  }),
-  args: {
-    decimals: 2
-  }
+  })
 };
