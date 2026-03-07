@@ -44,7 +44,6 @@ export default defineConfig({
     lib: {
       entry: {
         index: 'src/index.ts',
-        theme: 'src/theme.ts',
         resolver: 'src/resolver.ts'
       },
       formats: ['es']

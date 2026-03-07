@@ -20,13 +20,13 @@ import { createTune } from '@snapshot-labs/tune';
 app.use(createTune());
 ```
 
-### 2. Theme (optional)
+### 2. Styles
 
-Import the theme in your app's global stylesheet for CSS variables, fonts, typography resets, and base styles:
+Import the styles (components + theme) in your app's global stylesheet:
 
 ```scss
 // style.scss
-@import '@snapshot-labs/tune/theme';
+@import '@snapshot-labs/tune/style';
 
 @tailwind base;
 @tailwind utilities;

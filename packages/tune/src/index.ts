@@ -1,3 +1,6 @@
+// Styles
+import './styles/theme.scss';
+
 // Plugin
 export { createTune } from './plugin';
 
