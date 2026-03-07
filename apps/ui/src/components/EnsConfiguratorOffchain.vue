@@ -81,11 +81,26 @@ function handleSelect(value: string) {
   <div v-else class="space-y-4">
     <div class="space-y-2">
       <div>
-        To create a space, you need an ENS name on
-        {{ isTestnet ? 'Sepolia testnet' : 'Ethereum mainnet'
-        }}{{
-          !isTestnet ? ', or a web3 domain name on a mainnet network' : ''
-        }}.
+        <span>
+          To create a space, you need a web3 domain name. Supported domains:
+        </span>
+        <ul class="list-disc pl-4 mt-1">
+          <li>
+            <b>.eth</b> and DNS names imported to ENS (e.g., .com, .xyz, .org)
+            on {{ isTestnet ? 'Sepolia' : 'Ethereum' }}
+          </li>
+          <template v-if="!isTestnet">
+            <li><b>.shib</b> (D3) on Shibarium</li>
+            <li><b>.sonic</b> (Unstoppable Domains) on Sonic</li>
+            <li><b>.bnb</b> (Space ID) on BNB Chain</li>
+            <li>
+              <b>.crypto</b>, <b>.wallet</b>, <b>.nft</b>, <b>.x</b> and other
+              Unstoppable Domains TLDs on Polygon
+            </li>
+            <li><b>.lens</b> (Lens)</li>
+            <li><b>.stark</b> (Starknet ID)</li>
+          </template>
+        </ul>
       </div>
       <UiMessage v-if="!isTestnet" type="info">
         Still experimenting?
