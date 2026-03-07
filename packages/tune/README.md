@@ -22,7 +22,7 @@ app.use(createTune());
 
 ### 2. Styles
 
-Import the styles (components + theme) in your app's global stylesheet:
+Import the styles (components + theme) in your app's global stylesheet. The import order matters — tune must be between `@tailwind base` and `@tailwind utilities` so its styles override Tailwind's reset but utility classes still take priority:
 
 ```scss
 // style.scss
