@@ -9,7 +9,7 @@
     "./tailwind-preset": "./tailwind.config.ts",
     "./resolver": "./dist/resolver.js"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./dist/src/index.d.ts",
   "sideEffects": ["**/*.css"],
   "prettier": "@snapshot-labs/prettier-config",
   "eslintConfig": {
