@@ -4,10 +4,16 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./dist/index.js",
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js"
+    },
     "./style": "./dist/index.css",
     "./tailwind-preset": "./tailwind.config.ts",
-    "./resolver": "./dist/resolver.js"
+    "./resolver": {
+      "types": "./dist/src/resolver.d.ts",
+      "import": "./dist/resolver.js"
+    }
   },
   "types": "./dist/src/index.d.ts",
   "sideEffects": ["**/*.css"],
