@@ -40,9 +40,14 @@ import tunePreset from '@snapshot-labs/tune/tailwind-preset';
 
 export default {
   presets: [tunePreset],
-  content: ['./src/**/*.{js,ts,vue}']
+  content: [
+    './src/**/*.{js,ts,vue}',
+    './node_modules/@snapshot-labs/tune/src/**/*.vue'
+  ]
 };
 ```
+
+Tune's component templates use Tailwind utility classes (including arbitrary values like `w-[38px]`). Adding tune's source to `content` ensures Tailwind generates those classes. Tailwind v3 does not merge `content` from presets.
 
 ### 4. Component auto-import (optional)
 
