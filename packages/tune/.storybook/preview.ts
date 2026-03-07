@@ -2,7 +2,7 @@ import { Preview, Decorator, setup } from '@storybook/vue3-vite';
 import { createRouter, createMemoryHistory } from 'vue-router';
 import { withThemeByClassName } from '@storybook/addon-themes';
 import { createTune } from '../src/plugin';
-import '../src/styles/theme.scss';
+import '../src/styles/index.scss';
 import './style.css';
 import { h } from 'vue';
 
