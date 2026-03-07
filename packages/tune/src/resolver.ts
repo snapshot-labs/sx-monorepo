@@ -10,7 +10,6 @@ const components = [
   'Container',
   'ContainerInfiniteScroll',
   'ContainerSettings',
-  'Counter',
   'Dropdown',
   'Eyebrow',
   'LinkPreview',

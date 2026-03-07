@@ -17,7 +17,6 @@ export { default as UiColumnHeaderItemSortable } from './components/Ui/ColumnHea
 export { default as UiContainer } from './components/Ui/Container.vue';
 export { default as UiContainerInfiniteScroll } from './components/Ui/ContainerInfiniteScroll.vue';
 export { default as UiContainerSettings } from './components/Ui/ContainerSettings.vue';
-export { default as UiCounter } from './components/Ui/Counter.vue';
 export { default as UiDropdown } from './components/Ui/Dropdown.vue';
 export { default as UiEyebrow } from './components/Ui/Eyebrow.vue';
 export { default as UiLinkPreview } from './components/Ui/LinkPreview.vue';
