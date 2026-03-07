@@ -36,9 +36,10 @@ if (window.location.host !== parentHost && !knownHosts.includes(parentHost)) {
 }
 
 const pinia = createPinia();
+const tune = createTune();
 const app = createApp({ render: () => h(App) })
   .use(router)
-  .use(createTune());
+  .use(tune);
 
 app.use(pinia);
 app.use(VueQueryPlugin);
