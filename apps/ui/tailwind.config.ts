@@ -14,7 +14,11 @@ const STICKY_ELEMENT_BUFFER = 1;
 
 export default {
   presets: [tunePreset],
-  content: ['./index.html', './src/**/*.{js,ts,vue}'],
+  content: [
+    './index.html',
+    './src/**/*.{js,ts,vue}',
+    '../../packages/tune/src/**/*.vue'
+  ],
   theme: {
     extend: {
       gridTemplateColumns: {

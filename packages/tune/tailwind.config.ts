@@ -1,8 +1,6 @@
 import { Config } from 'tailwindcss';
-import { join } from 'path';
 
 export default {
-  content: [join(__dirname, 'src/**/*.vue')],
   future: {
     hoverOnlyWhenSupported: true
   },
