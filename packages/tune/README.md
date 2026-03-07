@@ -76,16 +76,6 @@ import { UiTooltip, UiSwitch } from '@snapshot-labs/tune';
 
 With auto-import (step 4), the import is not needed — just use the components directly in templates.
 
-## Components
-
-| Component | Description |
-| --- | --- |
-| `UiCheckbox` | Checkbox built on Headless UI Switch |
-| `UiLoading` | Loading spinner |
-| `UiSwitch` | Toggle switch built on Headless UI Switch |
-| `UiTooltip` | Tooltip built on tippy.js |
-| `UiTooltipOnTruncate` | Tooltip that only shows when text is truncated |
-
 ## Development
 
 ```bash
