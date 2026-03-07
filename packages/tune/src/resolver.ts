@@ -1,6 +1,7 @@
 import { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
+  'Alert',
   'Checkbox',
   'Loading',
   'Switch',
