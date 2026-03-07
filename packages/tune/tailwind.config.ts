@@ -1,6 +1,7 @@
 import { Config } from 'tailwindcss';
 
 export default {
+  content: ['./src/**/*.vue'],
   future: {
     hoverOnlyWhenSupported: true
   },
