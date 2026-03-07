@@ -864,7 +864,7 @@ export function createApi(
           variables: {
             first: 1000,
             skip: 0,
-            orderBy: 'proposal_count',
+            orderBy: 'vp_value',
             orderDirection: 'desc',
             where: {
               user: userId
@@ -875,7 +875,8 @@ export function createApi(
           data.leaderboards.map((leaderboard: any) => ({
             spaceId: `${networkId}:${leaderboard.space}`,
             vote_count: leaderboard.votesCount,
-            proposal_count: leaderboard.proposalsCount
+            proposal_count: leaderboard.proposalsCount,
+            vp_value: leaderboard.vpValue
           }))
         );
     },
@@ -886,7 +887,9 @@ export function createApi(
         | 'vote_count-desc'
         | 'vote_count-asc'
         | 'proposal_count-desc'
-        | 'proposal_count-asc' = 'vote_count-desc',
+        | 'proposal_count-asc'
+        | 'vp_value-desc'
+        | 'vp_value-asc' = 'vp_value-desc',
       user?: string
     ): Promise<UserActivity[]> {
       const [orderBy, orderDirection] = sortBy.split('-') as [
@@ -913,7 +916,8 @@ export function createApi(
             id: leaderboard.user,
             spaceId: leaderboard.space,
             vote_count: leaderboard.votesCount,
-            proposal_count: leaderboard.proposalsCount
+            proposal_count: leaderboard.proposalsCount,
+            vp_value: leaderboard.vpValue
           }))
         );
     },

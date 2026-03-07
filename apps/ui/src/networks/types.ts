@@ -356,7 +356,9 @@ export type NetworkApi = {
       | 'vote_count-desc'
       | 'vote_count-asc'
       | 'proposal_count-desc'
-      | 'proposal_count-asc',
+      | 'proposal_count-asc'
+      | 'vp_value-desc'
+      | 'vp_value-asc',
     user?: string
   ): Promise<UserActivity[]>;
   loadFollows(userId?: string, spaceId?: string): Promise<Follow[]>;
