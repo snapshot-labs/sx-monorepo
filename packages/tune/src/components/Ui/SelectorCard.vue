@@ -1,4 +1,7 @@
 <script lang="ts" setup>
+// Component is type-only in vue (no runtime value), needs `import type` to avoid Storybook error
+// eslint-disable-next-line @typescript-eslint/consistent-type-imports
+import type { Component } from 'vue';
 import IHCode from '~icons/heroicons-outline/code';
 
 withDefaults(

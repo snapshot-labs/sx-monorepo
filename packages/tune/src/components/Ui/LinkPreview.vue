@@ -82,7 +82,7 @@ debouncedWatch(
     <template v-if="preview && (preview?.meta?.title || previewIconResolved)">
       <img
         v-if="previewIconResolved"
-        :src="preview.links.icon[0].href"
+        :src="preview.links.icon[0]?.href"
         width="32"
         height="32"
         class="bg-white rounded shrink-0"

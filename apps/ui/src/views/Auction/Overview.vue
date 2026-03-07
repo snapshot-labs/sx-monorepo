@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatUnits } from '@ethersproject/units';
+import { UiColumnHeader } from '@snapshot-labs/tune';
 import { useQueryClient } from '@tanstack/vue-query';
-import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
 import {
   AuctionNetworkId,
   getAuctionState,
