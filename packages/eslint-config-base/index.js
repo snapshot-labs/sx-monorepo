@@ -1,76 +1,79 @@
-module.exports = {
-  parser: '@typescript-eslint/parser',
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'plugin:prettier/recommended'
-  ],
-  plugins: ['prettier', '@typescript-eslint', 'import'],
-  parserOptions: {
-    ecmaVersion: 2018,
-    sourceType: 'module'
+import importPlugin from 'eslint-plugin-import-x';
+import prettierPlugin from 'eslint-plugin-prettier/recommended';
+import tseslint from 'typescript-eslint';
+
+export default [
+  {
+    ignores: ['**/dist/**']
   },
-  rules: {
-    'prettier/prettier': 'error',
-    'prefer-template': 'error',
-    'lines-between-class-members': [
-      'error',
-      'always',
-      { exceptAfterSingleLine: true }
-    ],
-    'no-restricted-syntax': [
-      'error',
-      {
-        selector: 'CatchClause > Identifier[name=/^(e|error)$/]',
-        message:
-          "Use 'err' instead of 'e', 'error', or use more descriptive name."
-      }
-    ],
-    'sort-imports': [
-      'error',
-      {
-        ignoreCase: true,
-        ignoreDeclarationSort: true
-      }
-    ],
-    'import/no-duplicates': ['error', { 'prefer-inline': true }],
-    'import/no-extraneous-dependencies': 'error',
-    'import/order': [
-      'error',
-      {
-        groups: ['builtin', 'external', 'internal', 'type'],
-        pathGroups: [
-          {
-            pattern: 'vue',
-            group: 'builtin',
-            position: 'before'
-          },
-          {
-            pattern: 'vitest',
-            group: 'builtin',
-            position: 'before'
-          },
-          {
-            pattern: '@vue/**',
-            group: 'builtin',
-            position: 'before'
-          },
-          {
-            pattern: '@/**',
-            group: 'internal'
-          }
-        ],
-        'newlines-between': 'never',
-        alphabetize: {
-          order: 'asc',
-          caseInsensitive: true
+  ...tseslint.configs.recommended,
+  prettierPlugin,
+  {
+    plugins: {
+      'import-x': importPlugin
+    },
+    rules: {
+      'prefer-template': 'error',
+      'lines-between-class-members': [
+        'error',
+        'always',
+        { exceptAfterSingleLine: true }
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'CatchClause > Identifier[name=/^(e|error)$/]',
+          message:
+            "Use 'err' instead of 'e', 'error', or use more descriptive name."
         }
-      }
-    ],
-    '@typescript-eslint/consistent-type-imports': [
-      'error',
-      { prefer: 'no-type-imports' }
-    ],
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/ban-ts-comment': 'off'
+      ],
+      'sort-imports': [
+        'error',
+        {
+          ignoreCase: true,
+          ignoreDeclarationSort: true
+        }
+      ],
+      'import-x/no-duplicates': ['error', { 'prefer-inline': true }],
+      'import-x/no-extraneous-dependencies': 'error',
+      'import-x/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'type'],
+          pathGroups: [
+            {
+              pattern: 'vue',
+              group: 'builtin',
+              position: 'before'
+            },
+            {
+              pattern: 'vitest',
+              group: 'builtin',
+              position: 'before'
+            },
+            {
+              pattern: '@vue/**',
+              group: 'builtin',
+              position: 'before'
+            },
+            {
+              pattern: '@/**',
+              group: 'internal'
+            }
+          ],
+          'newlines-between': 'never',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true
+          }
+        }
+      ],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'no-type-imports' }
+      ],
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off'
+    }
   }
-};
+];

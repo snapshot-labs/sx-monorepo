@@ -14,7 +14,7 @@
     "dev": "vite --port=8080",
     "build": "vite build",
     "codegen": "graphql-codegen",
-    "lint": "eslint \"./src/**/*.{ts,vue}\" --ignore-pattern \"**/gql/**\"",
+    "lint": "eslint src/",
     "lint:fix": "yarn lint --fix",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
@@ -23,13 +23,6 @@
     "build-storybook": "storybook build",
     "dev:electron": "concurrently \"ELECTRON=true yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
     "build:electron": "electron-forge make --platform=darwin --arch=x64 && electron-forge make --platform=darwin --arch=arm64 && electron-forge make --platform=win32 --arch=x64 && electron-forge make --platform=win32 --arch=arm64 && electron-forge make --platform=win32 --arch=ia32 && electron-forge make --platform=linux --arch=x64 && electron-forge make --platform=linux --arch=arm64"
-  },
-  "eslintConfig": {
-    "extends": [
-      "@snapshot-labs/vue",
-      "plugin:storybook/recommended",
-      "./.eslintrc-auto-import.json"
-    ]
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
@@ -139,7 +132,7 @@
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.1",
     "electron": "^38.2.0",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",
     "husky": "^8.0.3",

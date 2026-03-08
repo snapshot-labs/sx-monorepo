@@ -24,7 +24,7 @@
     "dev": "tsc -w -p tsconfig.esnext.json",
     "build": "tsc -p tsconfig.esnext.json && tsc -p tsconfig.cjs.json",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ./src ./test --ext .ts",
+    "lint": "eslint ./src ./test",
     "lint:fix": "yarn lint --fix",
     "prepare": "yarn build",
     "prepublishOnly": "yarn run lint",
@@ -35,9 +35,6 @@
     "test:integration:starknet": "vitest run test/integration/starknet",
     "test:integration:evm": "vitest run test/integration/evm",
     "test:integration:offchain": "vitest run test/integration/offchain"
-  },
-  "eslintConfig": {
-    "extends": "@snapshot-labs"
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
@@ -71,7 +68,7 @@
     "@types/elliptic": "^6.4.14",
     "@types/node": "^18.11.9",
     "@types/randombytes": "^2.0.3",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.1.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
