@@ -33,9 +33,12 @@ const isError = ref(false);
 async function fetchPrices() {
   try {
     isLoading.value = true;
+    isError.value = false;
+    data.value = null;
     const res = await fetch(
       `${FUTARCHY_API_URL}/api/v2/proposals/${props.proposal.id}/chart?minTimestamp=${props.proposal.created}&maxTimestamp=${Math.floor(Date.now() / 1000)}&includeSpot=true`
     );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     data.value = FutarchyMarketSchema.parse((await res.json()).market);
   } catch (err) {
     console.error('Error fetching Futarchy API', err);
