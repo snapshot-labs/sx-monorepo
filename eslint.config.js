@@ -1,3 +1,1 @@
-import baseConfig from '@snapshot-labs/eslint-config';
-
-export default [...baseConfig];
+export { default } from '@snapshot-labs/eslint-config-base';
