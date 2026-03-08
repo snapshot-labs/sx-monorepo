@@ -3,8 +3,6 @@ import { z } from 'zod';
 import { _n, getUrl } from '@/helpers/utils';
 import { Proposal } from '@/types';
 
-const props = defineProps<{ proposal: Proposal }>();
-
 const FUTARCHY_API_URL =
   import.meta.env.VITE_FUTARCHY_API_URL ?? 'https://api.futarchy.fi/charts';
 const FUTARCHY_LOGO_URL =
@@ -26,32 +24,33 @@ const FutarchyMarketSchema = z.object({
 
 type FutarchyMarket = z.infer<typeof FutarchyMarketSchema>;
 
+const props = defineProps<{ proposal: Proposal }>();
+
 const data = ref<FutarchyMarket | null>(null);
-const loading = ref(true);
-const error = ref(false);
+const isLoading = ref(true);
+const isError = ref(false);
 
 async function fetchPrices() {
   try {
-    loading.value = true;
+    isLoading.value = true;
     const res = await fetch(
       `${FUTARCHY_API_URL}/api/v2/proposals/${props.proposal.id}/chart?minTimestamp=${props.proposal.created}&maxTimestamp=${Math.floor(Date.now() / 1000)}&includeSpot=true`
     );
     data.value = FutarchyMarketSchema.parse((await res.json()).market);
   } catch (err) {
     console.error('Error fetching Futarchy API', err);
-    error.value = true;
+    isError.value = true;
   } finally {
-    loading.value = false;
+    isLoading.value = false;
   }
 }
 
-onMounted(fetchPrices);
-watch(() => props.proposal.id, fetchPrices);
+watch(() => props.proposal.id, fetchPrices, { immediate: true });
 </script>
 
 <template>
   <AppLink
-    v-if="!loading && !error && data"
+    v-if="!isLoading && !isError && data"
     :to="`https://futarchy.fi/market?proposalId=${data.trading_address}&utm_source=snapshot`"
     class="block xl:flex xl:space-x-3 items-center border rounded-lg px-3.5 py-2.5 mb-4"
   >
