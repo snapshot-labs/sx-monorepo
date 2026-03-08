@@ -1,6 +1,10 @@
+import prettierConfig from 'eslint-config-prettier';
 import importPlugin from 'eslint-plugin-import-x';
 import prettierPlugin from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
+
+export const tsParser = tseslint.parser;
+export { prettierConfig };
 
 export default [
   {

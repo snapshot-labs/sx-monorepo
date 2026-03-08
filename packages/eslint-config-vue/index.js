@@ -1,7 +1,8 @@
-import baseConfig from '@snapshot-labs/eslint-config-base';
-import prettierConfig from 'eslint-config-prettier';
+import baseConfig, {
+  prettierConfig,
+  tsParser
+} from '@snapshot-labs/eslint-config-base';
 import pluginVue from 'eslint-plugin-vue';
-import tseslint from 'typescript-eslint';
 import vueParser from 'vue-eslint-parser';
 
 export default [
@@ -12,7 +13,7 @@ export default [
     languageOptions: {
       parser: vueParser,
       parserOptions: {
-        parser: tseslint.parser
+        parser: tsParser
       }
     }
   },

@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate",
-    "lint": "eslint src/",
+    "lint": "eslint src/ --rule 'no-console: error'",
     "lint:fix": "yarn lint --fix",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
@@ -35,9 +35,7 @@
     "viem": "^2.38.0"
   },
   "devDependencies": {
-    "@snapshot-labs/eslint-config": "^0.1.0",
     "@snapshot-labs/prettier-config": "^0.1.0",
-    "eslint": "^9.0.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "ts-node": "^10.9.1",
