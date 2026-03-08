@@ -5,14 +5,12 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate -o ./src/api/overrides.json -s ./src/api/schema.gql",
-    "lint": "eslint src/ --ext .ts --fix",
+    "lint": "eslint src/ test/",
+    "lint:fix": "yarn lint --fix",
     "test": "vitest",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "start": "node dist/src/index.js"
-  },
-  "eslintConfig": {
-    "extends": "@snapshot-labs"
   },
   "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
@@ -51,7 +49,7 @@
     "@types/node": "^22.14.0",
     "@types/pg": "^8.11.11",
     "@types/ws": "^8.18.1",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.5.3"
   },
   "engines": {
