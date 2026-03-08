@@ -36,7 +36,6 @@
     "test:integration:evm": "vitest run test/integration/evm",
     "test:integration:offchain": "vitest run test/integration/offchain"
   },
-  "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
     "@ethersproject/abi": "^5.8.0",
     "@ethersproject/abstract-signer": "^5.8.0",
@@ -62,14 +61,10 @@
   },
   "devDependencies": {
     "@ethersproject/units": "^5.7.0",
-    "@snapshot-labs/eslint-config": "^0.1.0",
-    "@snapshot-labs/prettier-config": "^0.1.0",
     "@types/bn.js": "^5.1.1",
     "@types/elliptic": "^6.4.14",
     "@types/node": "^18.11.9",
     "@types/randombytes": "^2.0.3",
-    "eslint": "^9.0.0",
-    "prettier": "^3.1.0",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
