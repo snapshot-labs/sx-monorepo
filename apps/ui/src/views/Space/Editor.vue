@@ -250,7 +250,7 @@ const isSubmitButtonLoading = computed(() => {
     isPropositionPowerPending.value
   );
 });
-const isSigAuthenticatorInoperativeOnly = computed(
+const isUsingOnlyInoperativeSigAuthenticators = computed(
   () =>
     alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
       ?.isUsingOnlySigAuthenticators ?? false
@@ -269,7 +269,7 @@ const canSubmit = computed(() => {
     disabledStrategiesList.value.length ||
     unsupportedPremiumStrategiesList.value.length ||
     isSafeInvalidNetwork.value ||
-    isSigAuthenticatorInoperativeOnly.value
+    isUsingOnlyInoperativeSigAuthenticators.value
   ) {
     return false;
   }
@@ -677,7 +677,7 @@ watchEffect(() => {
             create proposals.
           </UiAlert>
           <UiAlert
-            v-else-if="isSigAuthenticatorInoperativeOnly"
+            v-else-if="isUsingOnlyInoperativeSigAuthenticators"
             type="error"
             class="mb-4"
           >
