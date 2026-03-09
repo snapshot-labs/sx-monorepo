@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { getTopic } from '@/helpers/townhall/api';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
-import { getUserFacingErrorMessage, sleep } from '@/helpers/utils';
+import { getUserFacingErrorMessage } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { useUserRolesQuery } from '@/queries/townhall';
 import { Space } from '@/types';
@@ -99,27 +98,9 @@ async function handleSubmit() {
     );
     if (!res) return;
 
-    const [spaceId, topicId] = res.result.events.find(
-      event => event.key === 'new_topic'
-    ).data;
-
-    while (true) {
-      try {
-        await getTopic(spaceId, topicId);
-        break;
-      } catch (err) {
-        if (err instanceof Error && err.message.includes('Row not found')) {
-          await sleep(500);
-          continue;
-        }
-
-        throw err;
-      }
-    }
-
+    addNotification('success', 'Topic created successfully');
     await router.push({
-      name: 'space-townhall-topic',
-      params: { id: topicId }
+      name: 'space-townhall-topics'
     });
   } catch (err) {
     addNotification('error', getUserFacingErrorMessage(err));

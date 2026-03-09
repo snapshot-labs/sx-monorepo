@@ -35,7 +35,7 @@ const {
   isPending: isMutatingRole,
   variables,
   mutate
-} = useRoleMutation({ spaceId });
+} = useRoleMutation();
 
 const isUserAdmin = computed(() => {
   if (compareAddresses(props.townhallSpace.owner, web3.value.account)) {
@@ -66,24 +66,11 @@ async function handleAddRole(config: RoleConfig) {
     );
     if (!res) return;
 
-    const newRoles: Role[] = res.result.events
-      .filter(event => event.key === 'new_role')
-      .map(event => ({
-        space: { id: event.data[0].toString(), space_id: event.data[0] },
-        id: event.data[1],
-        name: config.name,
-        description: config.description,
-        color: config.color,
-        isAdmin: config.isAdmin
-      }));
-
-    queryClient.setQueryData<Role[]>(
-      ['townhall', 'roles', spaceId.value, 'list'],
-      (old = []) => {
-        return [...old, ...newRoles];
-      }
-    );
+    queryClient.invalidateQueries({
+      queryKey: ['townhall', 'roles', spaceId.value, 'list']
+    });
     modalOpen.value = false;
+    addNotification('success', 'Role created successfully');
   } catch (err) {
     addNotification('error', getUserFacingErrorMessage(err));
   } finally {

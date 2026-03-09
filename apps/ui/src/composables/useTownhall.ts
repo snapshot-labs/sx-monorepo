@@ -1,47 +1,14 @@
-import {
-  ApolloClient,
-  createHttpLink,
-  InMemoryCache
-} from '@apollo/client/core';
-import { Web3Provider } from '@ethersproject/providers';
 import { clients, TOWNHALL_PERMISSIONS } from '@snapshot-labs/sx';
-import gql from 'graphql-tag';
-import { HIGHLIGHT_URL } from '@/helpers/highlight';
+import { MANA_URL } from '@/helpers/mana';
 import { pin } from '@/helpers/pin';
-import { Alias } from '@/types';
 
-export const ALIASES_QUERY = gql`
-  query Aliases($address: String!, $alias: String!, $created_gt: Int) {
-    aliases(
-      where: { address: $address, alias: $alias, created_gt: $created_gt }
-    ) {
-      address
-      alias
-    }
-  }
-`;
+const TOWNHALL_CHAIN_ID = import.meta.env.VITE_TOWNHALL_CHAIN_ID || '8453';
 
 export function useTownhall() {
   const { auth } = useWeb3();
   const { modalAccountOpen } = useModal();
 
-  const alias = useAlias('townhall-aliases', loadAlias);
-
-  const apollo = new ApolloClient({
-    link: createHttpLink({ uri: HIGHLIGHT_URL }),
-    cache: new InMemoryCache({
-      addTypename: false
-    }),
-    defaultOptions: {
-      query: {
-        fetchPolicy: 'no-cache'
-      }
-    }
-  });
-
-  const highlightClient = new clients.HighlightEthereumSigClient(
-    `${HIGHLIGHT_URL}/highlight`
-  );
+  const highlightClient = new clients.HighlightEthereumSigClient();
 
   function getSalt() {
     const buffer = new Uint8Array(32);
@@ -52,50 +19,28 @@ export function useTownhall() {
     );
   }
 
-  async function loadAlias(
-    address: string,
-    aliasAddress: string,
-    created_gt: number
-  ) {
-    const {
-      data: { aliases }
-    }: { data: { aliases: Alias[] } } = await apollo.query({
-      query: ALIASES_QUERY,
-      variables: {
-        address,
-        alias: aliasAddress,
-        created_gt
-      }
+  async function sendToMana(envelope: any) {
+    const res = await fetch(`${MANA_URL}/eth_rpc/${TOWNHALL_CHAIN_ID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'sendTownhallEnvelope',
+        params: { envelope },
+        id: null
+      })
     });
 
-    return aliases?.[0] ?? null;
-  }
+    const { error, result } = await res.json();
+    if (error) {
+      const reason =
+        error.data?.reason || error.data?.message || error.message;
+      throw new Error(reason || 'Failed to send townhall envelope');
+    }
 
-  async function setAlias(web3: Web3Provider, alias: string) {
-    const signer = web3.getSigner();
-    const address = await signer.getAddress();
-
-    return highlightClient.setAlias({
-      signer: web3.getSigner(),
-      data: { from: address, alias },
-      salt: getSalt()
-    });
-  }
-
-  async function wrapPromise(promise: Promise<any>) {
-    const envelope = await promise;
-
-    const receipt = await highlightClient.send(envelope);
-
-    console.log('receipt', receipt);
-
-    return receipt;
-  }
-
-  async function getAliasSigner(provider: Web3Provider) {
-    return alias.getAliasWallet(address =>
-      wrapPromise(setAlias(provider, address))
-    );
+    return result;
   }
 
   async function sendCreateSpace() {
@@ -104,14 +49,14 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.createSpace({
-        signer,
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.createSpace({
+      signer,
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendCreateCategory(
@@ -133,19 +78,19 @@ export function useTownhall() {
       undefined,
       { protocol: 'swarm' }
     );
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.createCategory({
-        signer,
-        data: {
-          space,
-          metadataUri: `ipfs://${pinned.cid}`,
-          parentCategoryId: parentCategoryId ?? 0
-        },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.createCategory({
+      signer,
+      data: {
+        space,
+        metadataUri: `ipfs://${pinned.cid}`,
+        parentCategoryId: parentCategoryId ?? 0
+      },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendEditCategory(
@@ -168,20 +113,20 @@ export function useTownhall() {
       undefined,
       { protocol: 'swarm' }
     );
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.editCategory({
-        signer,
-        data: {
-          space,
-          id,
-          metadataUri: `ipfs://${pinned.cid}`,
-          parentCategoryId: parentCategoryId ?? 0
-        },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.editCategory({
+      signer,
+      data: {
+        space,
+        id,
+        metadataUri: `ipfs://${pinned.cid}`,
+        parentCategoryId: parentCategoryId ?? 0
+      },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendDeleteCategory(space: number, id: number) {
@@ -190,15 +135,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.deleteCategory({
-        signer,
-        data: { space, id },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.deleteCategory({
+      signer,
+      data: { space, id },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendTopic(
@@ -222,19 +167,19 @@ export function useTownhall() {
       undefined,
       { protocol: 'swarm' }
     );
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.createTopic({
-        signer,
-        data: {
-          space,
-          category: categoryId ?? 0,
-          metadataUri: `ipfs://${pinned.cid}`
-        },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.createTopic({
+      signer,
+      data: {
+        space,
+        category: categoryId ?? 0,
+        metadataUri: `ipfs://${pinned.cid}`
+      },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendCloseTopic(space: number, topic: number) {
@@ -243,15 +188,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.closeTopic({
-        signer,
-        data: { space, topic },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.closeTopic({
+      signer,
+      data: { space, topic },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendPost(space: number, topic: number, body: string) {
@@ -263,15 +208,15 @@ export function useTownhall() {
     const pinned = await pin({ body }, undefined, {
       protocol: 'swarm'
     });
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.createPost({
-        signer,
-        data: { space, topic, metadataUri: `ipfs://${pinned.cid}` },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.createPost({
+      signer,
+      data: { space, topic, metadataUri: `ipfs://${pinned.cid}` },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendHidePost(space: number, topic: number, post: number) {
@@ -280,15 +225,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.hidePost({
-        signer,
-        data: { space, topic, post },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.hidePost({
+      signer,
+      data: { space, topic, post },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendPinPost(space: number, topic: number, post: number) {
@@ -297,15 +242,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.pinPost({
-        signer,
-        data: { space, topic, post },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.pinPost({
+      signer,
+      data: { space, topic, post },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendUnpinPost(space: number, topic: number, post: number) {
@@ -314,15 +259,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.unpinPost({
-        signer,
-        data: { space, topic, post },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.unpinPost({
+      signer,
+      data: { space, topic, post },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendVote(
@@ -336,15 +281,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.vote({
-        signer,
-        data: { space, topic, post, choice },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.vote({
+      signer,
+      data: { space, topic, post, choice },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendCreateRole(
@@ -362,21 +307,21 @@ export function useTownhall() {
     const pinned = await pin({ name, description, color }, undefined, {
       protocol: 'swarm'
     });
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.createRole({
-        signer,
-        data: {
-          space,
-          permissionLevel: isAdmin
-            ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
-            : TOWNHALL_PERMISSIONS.DEFAULT,
-          metadataUri: `ipfs://${pinned.cid}`
-        },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.createRole({
+      signer,
+      data: {
+        space,
+        permissionLevel: isAdmin
+          ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
+          : TOWNHALL_PERMISSIONS.DEFAULT,
+        metadataUri: `ipfs://${pinned.cid}`
+      },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendEditRole(
@@ -395,22 +340,22 @@ export function useTownhall() {
     const pinned = await pin({ name, description, color }, undefined, {
       protocol: 'swarm'
     });
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.editRole({
-        signer,
-        data: {
-          space,
-          id,
-          permissionLevel: isAdmin
-            ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
-            : TOWNHALL_PERMISSIONS.DEFAULT,
-          metadataUri: `ipfs://${pinned.cid}`
-        },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.editRole({
+      signer,
+      data: {
+        space,
+        id,
+        permissionLevel: isAdmin
+          ? TOWNHALL_PERMISSIONS.ADMINISTRATOR
+          : TOWNHALL_PERMISSIONS.DEFAULT,
+        metadataUri: `ipfs://${pinned.cid}`
+      },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendDeleteRole(space: number, id: string) {
@@ -419,15 +364,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.deleteRole({
-        signer,
-        data: { space, id },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.deleteRole({
+      signer,
+      data: { space, id },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendClaimRole(space: number, id: string) {
@@ -436,15 +381,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.claimRole({
-        signer,
-        data: { space, id },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.claimRole({
+      signer,
+      data: { space, id },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   async function sendRevokeRole(space: number, id: string) {
@@ -453,15 +398,15 @@ export function useTownhall() {
       return null;
     }
 
-    const signer = await getAliasSigner(auth.value.provider);
+    const signer = auth.value.provider.getSigner();
 
-    return wrapPromise(
-      highlightClient.revokeRole({
-        signer,
-        data: { space, id },
-        salt: getSalt()
-      })
-    );
+    const envelope = await highlightClient.revokeRole({
+      signer,
+      data: { space, id },
+      salt: getSalt()
+    });
+
+    return sendToMana(envelope);
   }
 
   return {

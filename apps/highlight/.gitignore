@@ -11,3 +11,4 @@ coverage
 *.log
 
 .checkpoint
+.anvil-start-block

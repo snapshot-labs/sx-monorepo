@@ -21,8 +21,7 @@ const { data: userRoles } = useUserRolesQuery({
 });
 const { mutate: vote, isPending: isVotePending } = useVoteMutation({
   spaceId: toRef(props, 'spaceId'),
-  topicId: toRef(props, 'topicId'),
-  userRoles
+  topicId: toRef(props, 'topicId')
 });
 const { mutate: setPostVisibility, isPending: isSetPostVisibilityPending } =
   useSetPostVisibilityMutation({

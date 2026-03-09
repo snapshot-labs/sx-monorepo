@@ -8,7 +8,7 @@ export const HIGHLIGHT_URL =
 
 const signer = new Wallet(WALLET_PRIVATE_KEY);
 
-export const client = new Client({
+const client = new Client({
   url: `${HIGHLIGHT_URL}/highlight`,
   signer
 });
