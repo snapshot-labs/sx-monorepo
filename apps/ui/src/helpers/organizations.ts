@@ -16,7 +16,7 @@ export type OrganizationConfig = {
   id: string;
   name: string;
   spaceIds: SpaceId[];
-  navItems?: Record<string, NavItem>;
+  navItems?: Record<string, Partial<NavItem>>;
 };
 
 export type Organization = OrganizationConfig & {
@@ -38,6 +38,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       }
     ],
     navItems: {
+      proposals: { name: 'Votes' },
       polls: {
         name: 'Polls',
         icon: IHCheckCircle,

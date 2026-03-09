@@ -19,12 +19,9 @@
     "test:e2e:headed": "playwright test --config=playwright.config.ts --headed",
     "lint": "turbo run lint lint:scripts",
     "lint:fix": "turbo run lint:fix && yarn lint:scripts --fix",
-    "lint:scripts": "eslint scripts/ --ext .ts",
+    "lint:scripts": "eslint scripts/",
     "typecheck": "turbo run typecheck",
     "release": "yarn build && changeset publish"
-  },
-  "eslintConfig": {
-    "extends": "@snapshot-labs"
   },
   "prettier": "@snapshot-labs/prettier-config",
   "devDependencies": {
@@ -35,7 +32,7 @@
     "@snapshot-labs/prettier-config": "^0.1.0",
     "@types/decompress": "^4.2.7",
     "decompress": "^4.2.1",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.1.0",
     "turbo": "^2.4.0",
     "typescript": "^5.8.3"
