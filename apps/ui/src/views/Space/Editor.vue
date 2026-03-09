@@ -250,6 +250,12 @@ const isSubmitButtonLoading = computed(() => {
     isPropositionPowerPending.value
   );
 });
+const isUsingOnlyInoperativeSigAuthenticators = computed(
+  () =>
+    alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
+      ?.isUsingOnlySigAuthenticators ?? false
+);
+
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
     alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
@@ -262,7 +268,8 @@ const canSubmit = computed(() => {
     hasFormErrors ||
     disabledStrategiesList.value.length ||
     unsupportedPremiumStrategiesList.value.length ||
-    isSafeInvalidNetwork.value
+    isSafeInvalidNetwork.value ||
+    isUsingOnlyInoperativeSigAuthenticators.value
   ) {
     return false;
   }
@@ -668,6 +675,23 @@ watchEffect(() => {
             Please use a Safe on
             {{ networks[space.snapshot_chain_id]?.name ?? 'this network' }} to
             create proposals.
+          </UiAlert>
+          <UiAlert
+            v-else-if="isUsingOnlyInoperativeSigAuthenticators"
+            type="error"
+            class="mb-4"
+          >
+            The relayer account has insufficient funds. Top up the relayer or
+            add another authenticator to enable proposal creation.
+            <AppLink
+              v-if="isController || isAdmin"
+              :to="{
+                name: 'space-settings',
+                params: { tab: 'authenticators' }
+              }"
+              class="text-rose-500 dark:text-neutral-100 font-semibold"
+              >Go to settings</AppLink
+            >
           </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
