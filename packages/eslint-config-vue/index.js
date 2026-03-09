@@ -1,4 +1,4 @@
-import baseConfig from '@snapshot-labs/eslint-config-base';
+import baseConfig from '@snapshot-labs/eslint-config';
 import prettierConfig from 'eslint-config-prettier';
 import pluginVue from 'eslint-plugin-vue';
 import tseslint from 'typescript-eslint';

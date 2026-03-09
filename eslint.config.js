@@ -1,1 +1,1 @@
-export { default } from '@snapshot-labs/eslint-config-base';
+export { default } from '@snapshot-labs/eslint-config';
