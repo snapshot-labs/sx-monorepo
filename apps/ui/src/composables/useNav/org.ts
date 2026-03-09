@@ -5,7 +5,7 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 
-const EXCLUDED_ROUTE_SUFFIXES = ['editor', 'proposal'];
+const EXCLUDED_ROUTE_SUFFIXES = ['editor'];
 
 function getOrgConfig(context: NavContext): NavConfig | null {
   const primarySpace = context.organization?.spaces[0];
