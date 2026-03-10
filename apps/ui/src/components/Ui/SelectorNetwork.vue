@@ -15,7 +15,7 @@ const props = defineProps<{
   };
 }>();
 
-const { networks } = useOffchainNetworksList(props.definition.networkId);
+const { networks } = useOffchainNetworksList();
 
 const allOptions = computed(() => {
   const networksListKind = props.definition.networksListKind;
