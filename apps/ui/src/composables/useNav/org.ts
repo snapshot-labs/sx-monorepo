@@ -45,15 +45,25 @@ function getOrgConfig(context: NavContext): NavConfig | null {
     };
   }
 
-  const result = Object.entries(items);
+  const newItems: [string, Partial<NavItem>][] = [];
 
   if (context.organization?.navItems) {
     for (const [key, item] of Object.entries(context.organization.navItems)) {
-      const idx = item.position
-        ? Math.min(item.position - 1, result.length)
-        : result.length;
-      result.splice(idx, 0, [key, item]);
+      if (key in items) {
+        items[key] = { ...items[key], ...item };
+      } else {
+        newItems.push([key, item]);
+      }
     }
+  }
+
+  const result = Object.entries(items);
+
+  for (const [key, item] of newItems) {
+    const idx = item.position
+      ? Math.min(item.position - 1, result.length)
+      : result.length;
+    result.splice(idx, 0, [key, item as NavItem]);
   }
 
   return { items: Object.fromEntries(result) };

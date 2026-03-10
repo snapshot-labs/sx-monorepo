@@ -14,7 +14,7 @@
     "dev": "vite --port=8080",
     "build": "vite build",
     "codegen": "graphql-codegen",
-    "lint": "eslint \"./src/**/*.{ts,vue}\" --ignore-pattern \"**/gql/**\"",
+    "lint": "eslint src/",
     "lint:fix": "yarn lint --fix",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
@@ -24,14 +24,6 @@
     "dev:electron": "concurrently \"ELECTRON=true yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
     "build:electron": "electron-forge make --platform=darwin --arch=x64 && electron-forge make --platform=darwin --arch=arm64 && electron-forge make --platform=win32 --arch=x64 && electron-forge make --platform=win32 --arch=arm64 && electron-forge make --platform=win32 --arch=ia32 && electron-forge make --platform=linux --arch=x64 && electron-forge make --platform=linux --arch=arm64"
   },
-  "eslintConfig": {
-    "extends": [
-      "@snapshot-labs/vue",
-      "plugin:storybook/recommended",
-      "./.eslintrc-auto-import.json"
-    ]
-  },
-  "prettier": "@snapshot-labs/prettier-config",
   "dependencies": {
     "0xsequence": "^2.2.10",
     "@apollo/client": "^3.12.9",
@@ -125,7 +117,6 @@
     "@iconify-json/heroicons-solid": "^1.1.8",
     "@rollup/plugin-inject": "^5.0.3",
     "@snapshot-labs/eslint-config-vue": "^0.1.0",
-    "@snapshot-labs/prettier-config": "^0.1.0",
     "@storybook/addon-a11y": "^9.0.18",
     "@storybook/addon-docs": "^9.0.18",
     "@storybook/addon-themes": "^9.0.18",
@@ -139,12 +130,10 @@
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.1",
     "electron": "^38.2.0",
-    "eslint": "^8.57.0",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",
     "husky": "^8.0.3",
     "postcss": "^8.4.30",
-    "prettier": "^3.1.0",
     "rollup-plugin-visualizer": "^5.9.2",
     "sass": "^1.68.0",
     "storybook": "^9.0.18",
