@@ -17,18 +17,10 @@
   },
   "types": "./dist/src/index.d.ts",
   "sideEffects": ["**/*.css"],
-  "prettier": "@snapshot-labs/prettier-config",
-  "eslintConfig": {
-    "extends": [
-      "@snapshot-labs/vue",
-      "plugin:storybook/recommended",
-      "./.eslintrc-auto-import.json"
-    ]
-  },
   "scripts": {
     "build": "vite build && vue-tsc",
     "typecheck": "vue-tsc --noEmit",
-    "lint": "eslint \"./src/**/*.{ts,vue}\"",
+    "lint": "eslint src/",
     "lint:fix": "yarn lint --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -46,14 +38,12 @@
     "@iconify-json/heroicons-outline": "^1.1.7",
     "@iconify-json/heroicons-solid": "^1.1.8",
     "@snapshot-labs/eslint-config-vue": "^0.1.0",
-    "@snapshot-labs/prettier-config": "^0.1.0",
     "@storybook/addon-a11y": "^9.0.18",
     "@storybook/addon-docs": "^9.0.18",
     "@storybook/addon-themes": "^9.0.18",
     "@storybook/vue3-vite": "^9.0.18",
     "@vitejs/plugin-vue": "^6.0.0",
     "autoprefixer": "^10.4.16",
-    "eslint": "^8.57.0",
     "eslint-plugin-storybook": "^9.0.18",
     "postcss": "^8.4.30",
     "storybook": "^9.0.18",

@@ -9,8 +9,5 @@ export default [
     languageOptions: {
       globals: autoImportGlobals.globals
     }
-  },
-  {
-    ignores: ['**/gql/**', '**/*.stories.ts']
   }
 ];
