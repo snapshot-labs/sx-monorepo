@@ -25,7 +25,11 @@ function cancel() {
 </script>
 
 <template>
+  <div v-if="!isValidAddress">
+    <UiStateWarning class="px-4 py-3"> Invalid alias address </UiStateWarning>
+  </div>
   <div
+    v-else
     class="flex flex-col min-h-[calc(100vh-72px)] !pb-0 md:!pb-8 md:items-center md:justify-center md:pt-4"
   >
     <div
@@ -35,10 +39,7 @@ function cancel() {
         <h3>Authorize alias</h3>
       </div>
 
-      <UiStateWarning v-if="!isValidAddress" class="px-4 py-3">
-        Invalid alias address
-      </UiStateWarning>
-      <div v-else>
+      <div>
         <div class="bg-skin-border w-full h-[140px]" />
         <div class="-mt-[64px] flex flex-col items-center">
           <div class="flex items-center justify-center">
@@ -108,10 +109,7 @@ function cancel() {
         </template>
       </div>
 
-      <div
-        v-if="isValidAddress && !isLoading"
-        class="border-t p-4 mt-auto md:mt-0"
-      >
+      <div v-if="!isLoading" class="border-t p-4 mt-auto md:mt-0">
         <UiButton
           v-if="isAlreadyAuthorized"
           disabled

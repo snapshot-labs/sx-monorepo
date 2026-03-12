@@ -1,5 +1,5 @@
+import { isAddress } from '@ethersproject/address';
 import { isUserAbortError } from '@/helpers/utils';
-import { addressValidator } from '@/helpers/validation';
 import { getNetwork, metadataNetwork } from '@/networks';
 
 export function useAliasAuthorize(aliasAddress: Ref<string>) {
@@ -9,7 +9,7 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
   const error = ref<string | null>(null);
   const isAlreadyAuthorized = ref(false);
   const isCheckingAlias = ref(!!web3Account.value);
-  const isValidAddress = computed(() => addressValidator(aliasAddress.value));
+  const isValidAddress = computed(() => isAddress(aliasAddress.value));
 
   async function checkExistingAlias() {
     if (!web3Account.value || !aliasAddress.value || !isValidAddress.value)
