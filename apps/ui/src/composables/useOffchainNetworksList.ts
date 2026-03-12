@@ -4,7 +4,6 @@ import { NetworkID } from '@/types';
 
 const usage = ref<Record<string, number | undefined> | null>(null);
 const premiumByNetwork = ref(new Map<NetworkID, Set<string>>());
-const loadedNetworks = ref(new Set<NetworkID>());
 const loadingNetworks = new Set<NetworkID>();
 
 export function useOffchainNetworksList(
@@ -13,8 +12,8 @@ export function useOffchainNetworksList(
 ) {
   const loaded = computed(
     () =>
-      loadedNetworks.value.has(metadataNetwork) &&
-      loadedNetworks.value.has(networkId)
+      premiumByNetwork.value.has(metadataNetwork) &&
+      premiumByNetwork.value.has(networkId)
   );
 
   const premiumChainIds = computed(
@@ -40,7 +39,7 @@ export function useOffchainNetworksList(
   });
 
   async function loadNetwork(id: NetworkID) {
-    if (loadingNetworks.has(id) || loadedNetworks.value.has(id)) return;
+    if (loadingNetworks.has(id) || premiumByNetwork.value.has(id)) return;
 
     loadingNetworks.add(id);
 
@@ -63,7 +62,6 @@ export function useOffchainNetworksList(
       });
 
       premiumByNetwork.value.set(id, premium);
-      loadedNetworks.value.add(id);
     } finally {
       loadingNetworks.delete(id);
     }
