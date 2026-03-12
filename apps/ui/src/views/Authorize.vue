@@ -12,6 +12,7 @@ const {
   error,
   isAlreadyAuthorized,
   isCheckingAlias,
+  isValidAddress,
   authorize
 } = useAliasAuthorize(aliasAddress);
 const isLoading = computed(
@@ -34,7 +35,10 @@ function cancel() {
         <h3>Authorize alias</h3>
       </div>
 
-      <div>
+      <UiStateWarning v-if="!isValidAddress" class="px-4 py-3">
+        Invalid alias address
+      </UiStateWarning>
+      <div v-else>
         <div class="bg-skin-border w-full h-[140px]" />
         <div class="-mt-[64px] flex flex-col items-center">
           <div class="flex items-center justify-center">
@@ -104,7 +108,10 @@ function cancel() {
         </template>
       </div>
 
-      <div v-if="!isLoading" class="border-t p-4 mt-auto md:mt-0">
+      <div
+        v-if="isValidAddress && !isLoading"
+        class="border-t p-4 mt-auto md:mt-0"
+      >
         <UiButton
           v-if="isAlreadyAuthorized"
           disabled
