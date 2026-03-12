@@ -38,11 +38,6 @@ export default [
   },
   orgRoute,
   {
-    path: '/alias/authorize/:address',
-    name: 'alias-authorize',
-    component: Authorize
-  },
-  {
     path: '/:space',
     name: 'space',
     component: Space,
@@ -75,6 +70,11 @@ export default [
         component: EmailNotifications
       }
     ]
+  },
+  {
+    path: '/alias/authorize/:address',
+    name: 'alias-authorize',
+    component: Authorize
   },
   {
     path: '/home',

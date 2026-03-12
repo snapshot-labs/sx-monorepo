@@ -1,4 +1,4 @@
-const STANDALONE_ROUTES = [
+const AUCTION_ROUTES = [
   'auctions',
   'auction',
   'auction-verify-standalone',
@@ -15,10 +15,10 @@ export function useLayout() {
   const isStandaloneLayout = computed(() => {
     if (isWhiteLabel.value || isAuctionApp.value) return true;
 
-    const routeName = route.matched[0]?.name;
+    const routeName = route.matched[0]?.name?.toString();
 
     if (routeName) {
-      return STANDALONE_ROUTES.includes(routeName.toString());
+      return AUCTION_ROUTES.includes(routeName);
     }
 
     return false;
