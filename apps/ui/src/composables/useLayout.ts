@@ -1,9 +1,10 @@
-const AUCTION_ROUTES = [
+const STANDALONE_ROUTES = [
   'auctions',
   'auction',
   'auction-verify-standalone',
   'auction-verify',
-  'auction-invite'
+  'auction-invite',
+  'alias-authorize'
 ];
 
 export function useLayout() {
@@ -14,11 +15,11 @@ export function useLayout() {
   const isStandaloneLayout = computed(() => {
     if (isWhiteLabel.value || isAuctionApp.value) return true;
 
-    const routeName = route.matched[0]?.name?.toString();
-    const childRouteName = route.matched[1]?.name?.toString();
+    const routeName = route.matched[0]?.name;
 
-    if (routeName && AUCTION_ROUTES.includes(routeName)) return true;
-    if (childRouteName === 'alias-authorize') return true;
+    if (routeName) {
+      return STANDALONE_ROUTES.includes(routeName.toString());
+    }
 
     return false;
   });
