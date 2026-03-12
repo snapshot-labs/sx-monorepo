@@ -43,6 +43,7 @@ export function useOffchainNetworksList(
       const network = getNetwork(id);
       const result = await network.api.getNetworks();
 
+      // Only populate usage from metadataNetwork to prevent testnet counts from overwriting mainnet
       if (id === metadataNetwork) {
         usage.value = Object.keys(result).reduce((acc, chainId) => {
           acc[chainId] = result[chainId].spaces_count;
