@@ -78,9 +78,9 @@ const provider: NavProvider = {
       isWhiteLabel &&
       organization?.id === 'starknet' &&
       name.endsWith('-proposal')
-    )
+    ) {
       return true;
-
+    }
     return !EXCLUDED_ROUTE_SUFFIXES.some(suffix => name.endsWith(`-${suffix}`));
   },
   getConfig: getOrgConfig
