@@ -1,12 +1,26 @@
 import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { getNetwork, metadataNetwork } from '@/networks';
+import { NetworkID } from '@/types';
 
 const usage = ref<Record<string, number | undefined> | null>(null);
-const premiumChainIds = ref<Set<string>>(new Set());
-const loaded = ref(false);
-const loading = ref(false);
+const premiumByNetwork = ref(new Map<NetworkID, Set<string>>());
+const loadedNetworks = ref(new Set<NetworkID>());
+const loadingNetworks = new Set<NetworkID>();
 
-export function useOffchainNetworksList(hideUnused = false) {
+export function useOffchainNetworksList(
+  networkId: NetworkID = metadataNetwork,
+  hideUnused = false
+) {
+  const loaded = computed(
+    () =>
+      loadedNetworks.value.has(metadataNetwork) &&
+      loadedNetworks.value.has(networkId)
+  );
+
+  const premiumChainIds = computed(
+    () => premiumByNetwork.value.get(networkId) ?? new Set<string>()
+  );
+
   const networks = computed(() => {
     const rawNetworks = Object.values(snapshotJsNetworks);
 
@@ -25,34 +39,42 @@ export function useOffchainNetworksList(hideUnused = false) {
     });
   });
 
-  async function load() {
-    if (loading.value || loaded.value) return;
+  async function loadNetwork(id: NetworkID) {
+    if (loadingNetworks.has(id) || loadedNetworks.value.has(id)) return;
 
-    loading.value = true;
+    loadingNetworks.add(id);
 
     try {
-      const network = getNetwork(metadataNetwork);
-      const networks = await network.api.getNetworks();
+      const network = getNetwork(id);
+      const result = await network.api.getNetworks();
 
-      usage.value = Object.keys(networks).reduce((acc, chainId) => {
-        acc[chainId] = networks[chainId].spaces_count;
-        return acc;
-      }, {});
+      if (id === metadataNetwork) {
+        usage.value = Object.keys(result).reduce((acc, chainId) => {
+          acc[chainId] = result[chainId].spaces_count;
+          return acc;
+        }, {});
+      }
 
-      Object.keys(networks).forEach(chainId => {
-        if (networks[chainId].premium) {
-          premiumChainIds.value.add(chainId);
+      const premium = new Set<string>();
+      Object.keys(result).forEach(chainId => {
+        if (result[chainId].premium) {
+          premium.add(chainId);
         }
       });
 
-      loaded.value = true;
+      premiumByNetwork.value.set(id, premium);
+      loadedNetworks.value.add(id);
     } finally {
-      loading.value = false;
+      loadingNetworks.delete(id);
     }
   }
 
   onMounted(() => {
-    load();
+    loadNetwork(metadataNetwork);
+
+    if (networkId !== metadataNetwork) {
+      loadNetwork(networkId);
+    }
   });
 
   return {

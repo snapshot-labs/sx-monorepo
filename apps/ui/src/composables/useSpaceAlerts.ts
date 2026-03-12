@@ -39,7 +39,7 @@ export function useSpaceAlerts(
     networks,
     premiumChainIds,
     loaded: networksLoaded
-  } = useOffchainNetworksList();
+  } = useOffchainNetworksList(space.value.network);
 
   const isOffchainSpace = computed(() =>
     offchainNetworks.includes(space.value.network)
