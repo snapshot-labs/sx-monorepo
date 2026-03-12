@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useAliasAuthorize } from '@/composables/useAliasAuthorize';
-
 const route = useRoute();
 const router = useRouter();
 const { web3, web3Account } = useWeb3();
@@ -15,6 +13,7 @@ const {
   isValidAddress,
   authorize
 } = useAliasAuthorize(aliasAddress);
+
 const isLoading = computed(
   () => web3.value.authLoading || isCheckingAlias.value
 );
