@@ -24,6 +24,10 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       link: {
         name: 'space-proposals',
         params: { space: `${primarySpace.network}:${primarySpace.id}` }
+      },
+      activeRoute: {
+        prefix: 'space-proposal',
+        params: { space: `${primarySpace.network}:${primarySpace.id}` }
       }
     }
   };
@@ -41,7 +45,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       name: 'Discussions',
       icon: IHAnnotation,
       link: { name: 'space-discussions' },
-      isActiveOnChildren: true
+      activeRoute: { prefix: 'space-discussions' }
     };
   }
 
