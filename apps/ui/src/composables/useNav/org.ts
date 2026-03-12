@@ -71,10 +71,15 @@ function getOrgConfig(context: NavContext): NavConfig | null {
 
 const provider: NavProvider = {
   routeName: 'org',
-  isVisible: ({ route, isWhiteLabel }) => {
+  isVisible: ({ route, isWhiteLabel, organization }) => {
     const name = String(route.matched[1]?.name);
 
-    if (isWhiteLabel && name.endsWith('-proposal')) return true;
+    if (
+      isWhiteLabel &&
+      organization?.id === 'starknet' &&
+      name.endsWith('-proposal')
+    )
+      return true;
 
     return !EXCLUDED_ROUTE_SUFFIXES.some(suffix => name.endsWith(`-${suffix}`));
   },
