@@ -7,14 +7,10 @@ const premiumByNetwork = ref(new Map<NetworkID, Set<string>>());
 const loadingNetworks = new Set<NetworkID>();
 
 export function useOffchainNetworksList(
-  networkId: NetworkID = metadataNetwork,
+  networkId: NetworkID,
   hideUnused = false
 ) {
-  const loaded = computed(
-    () =>
-      premiumByNetwork.value.has(metadataNetwork) &&
-      premiumByNetwork.value.has(networkId)
-  );
+  const loaded = computed(() => premiumByNetwork.value.has(networkId));
 
   const premiumChainIds = computed(
     () => premiumByNetwork.value.get(networkId) ?? new Set<string>()
@@ -68,11 +64,7 @@ export function useOffchainNetworksList(
   }
 
   onMounted(() => {
-    loadNetwork(metadataNetwork);
-
-    if (networkId !== metadataNetwork) {
-      loadNetwork(networkId);
-    }
+    loadNetwork(networkId);
   });
 
   return {

@@ -48,7 +48,7 @@ const { data, fetchNextPage, hasNextPage, isPending, isFetchingNextPage } =
     category
   });
 
-const { networks: offchainNetworks } = useOffchainNetworksList(undefined, true);
+const { networks: offchainNetworks } = useOffchainNetworksList(metadataNetwork);
 
 const networks = computed(() => {
   const explorePageNetworks = explorePageProtocols[protocol.value].networks;
