@@ -18,6 +18,7 @@ const {
 const isLoading = computed(
   () => web3.value.authLoading || isCheckingAlias.value
 );
+const hasHistory = computed(() => !!window.history.state?.back);
 
 function cancel() {
   router.back();
@@ -118,7 +119,9 @@ function cancel() {
           <span class="text-skin-danger">Revoke alias</span>
         </UiButton>
         <div v-else class="w-full flex justify-between space-x-[10px]">
-          <UiButton class="w-full" @click="cancel"> Cancel </UiButton>
+          <UiButton v-if="hasHistory" class="w-full" @click="cancel">
+            Cancel
+          </UiButton>
           <UiButton
             primary
             class="w-full"
