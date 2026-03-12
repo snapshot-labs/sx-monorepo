@@ -4,7 +4,7 @@ const AUCTION_ROUTES = [
   'auction-verify-standalone',
   'auction-verify',
   'auction-invite',
-  'authorize'
+  'alias-authorize'
 ];
 
 export function useLayout() {

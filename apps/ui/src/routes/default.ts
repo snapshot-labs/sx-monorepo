@@ -39,7 +39,7 @@ export default [
   orgRoute,
   {
     path: '/alias/authorize/:address',
-    name: 'authorize',
+    name: 'alias-authorize',
     component: Authorize
   },
   {
