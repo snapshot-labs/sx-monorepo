@@ -5,8 +5,6 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
 
-const EXCLUDED_ROUTE_SUFFIXES = ['editor'];
-
 function getOrgConfig(context: NavContext): NavConfig | null {
   const primarySpace = context.organization?.spaces[0];
 
@@ -23,6 +21,10 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       icon: IHNewspaper,
       link: {
         name: 'space-proposals',
+        params: { space: `${primarySpace.network}:${primarySpace.id}` }
+      },
+      activeRoute: {
+        prefix: 'space-proposal',
         params: { space: `${primarySpace.network}:${primarySpace.id}` }
       }
     }
@@ -41,7 +43,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       name: 'Discussions',
       icon: IHAnnotation,
       link: { name: 'space-discussions' },
-      isActiveOnChildren: true
+      activeRoute: { prefix: 'space-discussions' }
     };
   }
 
@@ -71,9 +73,12 @@ function getOrgConfig(context: NavContext): NavConfig | null {
 
 const provider: NavProvider = {
   routeName: 'org',
-  isVisible: ({ route }) => {
+  isVisible: ({ route, isWhiteLabel }) => {
     const name = String(route.matched[1]?.name);
-    return !EXCLUDED_ROUTE_SUFFIXES.some(suffix => name.endsWith(`-${suffix}`));
+    if (name.endsWith('-editor')) return false;
+    if (name.endsWith('-proposal') && !isWhiteLabel) return false;
+
+    return true;
   },
   getConfig: getOrgConfig
 };

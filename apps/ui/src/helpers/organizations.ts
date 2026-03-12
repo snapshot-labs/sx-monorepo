@@ -46,6 +46,10 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           name: 'space-proposals',
           params: { space: 's:starknet.eth' }
         },
+        activeRoute: {
+          prefix: 'space-proposal',
+          params: { space: 's:starknet.eth' }
+        },
         position: 3
       },
       docs: {
