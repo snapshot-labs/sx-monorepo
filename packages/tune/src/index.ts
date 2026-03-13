@@ -5,9 +5,9 @@ import './styles/index.scss';
 export { createTune } from './plugin';
 
 // Types
-export type { NotificationType } from './types';
+export type * from './types';
 
-// Components
+// Components (auto-generated, do not edit manually)
 export { default as UiAlert } from './components/Ui/Alert.vue';
 export { default as UiCheckbox } from './components/Ui/Checkbox.vue';
 export { default as UiLoading } from './components/Ui/Loading.vue';

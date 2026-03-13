@@ -18,7 +18,8 @@
   "types": "./dist/src/index.d.ts",
   "sideEffects": ["**/*.css"],
   "scripts": {
-    "build": "vite build && vue-tsc",
+    "generate": "node scripts/generate-components.js",
+    "build": "yarn generate && vite build && vue-tsc",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint src/",
     "lint:fix": "yarn lint --fix",
