@@ -1,0 +1,91 @@
+# @snapshot-labs/tune
+
+Vue 3 UI kit for Snapshot apps. Ships built components, an opinionated theme, and a Tailwind preset.
+
+## Install
+
+```bash
+yarn add @snapshot-labs/tune
+```
+
+## Setup
+
+### 1. Plugin
+
+Register the Vue plugin (sets up tooltips):
+
+```ts
+import { createTune } from '@snapshot-labs/tune';
+
+app.use(createTune());
+```
+
+### 2. Styles
+
+Import the styles (components + theme) in your app's global stylesheet. The import order matters — tune must be between `@tailwind base` and `@tailwind utilities` so its styles override Tailwind's reset but utility classes still take priority:
+
+```scss
+// style.scss
+@tailwind base;
+@import '@snapshot-labs/tune/style';
+@tailwind utilities;
+```
+
+### 3. Tailwind preset (optional)
+
+Extend your Tailwind config with the shared design tokens (colors, spacing, fonts, breakpoints):
+
+```ts
+import tunePreset from '@snapshot-labs/tune/tailwind-preset';
+
+export default {
+  presets: [tunePreset],
+  content: [
+    './src/**/*.{js,ts,vue}',
+    './node_modules/@snapshot-labs/tune/src/**/*.vue'
+  ]
+};
+```
+
+Tune's component templates use Tailwind utility classes (including arbitrary values like `w-[38px]`). Adding tune's source to `content` ensures Tailwind generates those classes. Tailwind v3 does not merge `content` from presets.
+
+### 4. Component auto-import (optional)
+
+Use the resolver with `unplugin-vue-components` to auto-import `Ui*` components in templates:
+
+```ts
+import { TuneResolver } from '@snapshot-labs/tune/resolver';
+import Components from 'unplugin-vue-components/vite';
+
+export default defineConfig({
+  plugins: [
+    Components({
+      resolvers: [TuneResolver()]
+    })
+  ]
+});
+```
+
+## Usage
+
+```vue
+<script setup lang="ts">
+import { UiTooltip, UiSwitch } from '@snapshot-labs/tune';
+</script>
+
+<template>
+  <UiTooltip title="Hello">Hover me</UiTooltip>
+  <UiSwitch v-model="enabled" title="Toggle" />
+</template>
+```
+
+With auto-import (step 4), the import is not needed — just use the components directly in templates.
+
+## Development
+
+```bash
+yarn storybook     # Storybook dev server
+yarn build         # Build the library
+yarn typecheck     # Type check
+yarn lint          # Lint
+```

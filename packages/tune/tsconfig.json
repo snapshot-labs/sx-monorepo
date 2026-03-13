@@ -7,23 +7,17 @@
     "sourceMap": true,
     "lib": ["esnext", "dom"],
     "baseUrl": ".",
-    "types": ["vite/client", "unplugin-icons/types/vue"],
-    "paths": {
-      "@/*": ["src/*"]
-    },
-    "noImplicitAny": false,
-    "noUncheckedIndexedAccess": false,
+    "types": ["unplugin-icons/types/vue"],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist"
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
-    "src/**/*.tsx",
     "src/**/*.vue",
     "auto-imports.d.ts",
-    "components.d.ts",
+    "tailwind.config.ts",
     "vite.config.ts"
-  ],
-  "exclude": [
-    "src/**/*.stories.ts"
   ]
 }
