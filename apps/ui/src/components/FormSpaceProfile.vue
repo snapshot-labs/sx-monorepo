@@ -155,11 +155,7 @@ const formErrors = computed(() => {
   };
 });
 
-watch(formErrors, value => emit('errors', value));
-
-onMounted(() => {
-  emit('errors', formErrors.value);
-});
+watch(formErrors, value => emit('errors', value), { immediate: true });
 </script>
 
 <template>

@@ -52,13 +52,14 @@ async function loadTopic(url: string) {
 }
 
 watchEffect(() => setTitle(`${topic.value?.title || 'Discussions'}`));
-watch(discussion, async newDiscussion => {
-  if (newDiscussion) await loadTopic(newDiscussion);
-});
 
-onMounted(async () => {
-  if (discussion.value) await loadTopic(discussion.value);
-});
+watch(
+  discussion,
+  async newDiscussion => {
+    if (newDiscussion) await loadTopic(newDiscussion);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
