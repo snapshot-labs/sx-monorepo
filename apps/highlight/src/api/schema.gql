@@ -1,0 +1,106 @@
+scalar Text
+
+type Space {
+  id: String!
+  space_id: Int!
+  created: Int!
+  owner: String!
+  topic_count: Int!
+  vote_count: Int!
+}
+
+type Category {
+  id: String!
+  category_id: Int!
+  name: String!
+  slug: String!
+  description: String!
+  created: Int!
+  parent_category_id: Int!
+  parent_category: Category
+  topic_count: Int!
+  space: Space!
+}
+
+type Alias {
+  id: String!
+  address: String!
+  alias: String!
+  created: Int!
+}
+
+type Topic {
+  id: String!
+  category_id: Int!
+  category: Category
+  title: String!
+  body: Text!
+  discussion_url: String!
+  author: String!
+  post_count: Int!
+  vote_count: Int!
+  created: Int!
+  closed: Boolean!
+  space: Space!
+  topic_id: Int!
+  posts: [Post!]! @derivedFrom(field: "topic")
+  votes: [Vote!]! @derivedFrom(field: "topic")
+}
+
+type Post {
+  id: String!
+  body: Text!
+  author: String!
+  scores_1: Int!
+  scores_2: Int!
+  scores_3: Int!
+  vote_count: Int!
+  pinned: Boolean!
+  hidden: Boolean!
+  created: Int!
+  topic_id: Int!
+  post_id: Int!
+  space: Space!
+  topic: Topic!
+  votes: [Vote!]! @derivedFrom(field: "post")
+}
+
+type Vote {
+  id: String!
+  voter: String!
+  choice: Int!
+  created: Int!
+  topic_id: Int!
+  post_id: Int!
+  space: Space!
+  topic: Topic!
+  post: Post!
+}
+
+type Role {
+  id: String!
+  space: Space!
+  name: String!
+  description: String!
+  color: String!
+  isAdmin: Boolean!
+  # Workaround as we can't cascade delete yet
+  deleted: Boolean!
+  created: Int!
+}
+
+type User {
+  id: String!
+  roles: [UserRole!]! @derivedFrom(field: "user")
+}
+
+# Would be good to drop those entities if role is deleted in automated way.
+# This would require change in Checkpoint
+# For now we use soft-deletes to workaround it.
+# Ultimate solution would be to add annotation like cascadeDelete
+# eg. role: Role! @cascadeDelete
+type UserRole {
+  id: String!
+  user: User!
+  role: Role!
+}

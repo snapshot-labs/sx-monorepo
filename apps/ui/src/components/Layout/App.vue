@@ -32,6 +32,8 @@ const { setTheme } = useTheme();
 const { isStandaloneLayout } = useLayout();
 const { isWhiteLabel, space: whiteLabelSpace, skinSettings } = useWhiteLabel();
 const { setFavicon } = useFavicon();
+const { space: currentSpace } = useCurrentSpace();
+const { organization } = useOrganization();
 const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
   onSwipe(e: TouchEvent) {
@@ -56,20 +58,19 @@ provide('web3', web3);
 
 const scrollDisabled = computed(() => modalOpen.value || uiStore.sideMenuOpen);
 
-const hasAppNav = computed(
-  () =>
-    ['space', 'my', 'settings'].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
-);
+const { hasAppNav } = useNav();
 
 const hasSidebar = computed(() => !isStandaloneLayout.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
+const baseSubRouteName = computed(() =>
+  String(route.matched[1]?.name).replace(/^(space|org)-/, '')
+);
+
 const hasPlaceHolderSidebar = computed(
   () =>
     ![
-      'space-proposal',
       'create-space-snapshot',
       'create-space-snapshot-x',
       'auction',
@@ -78,11 +79,14 @@ const hasPlaceHolderSidebar = computed(
       'auction-upcoming',
       'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
-    !['space-editor', 'space-proposal'].includes(String(route.matched[1]?.name))
+    !['space-townhall-create', 'space-townhall-topic'].includes(
+      String(route.matched[1]?.name)
+    ) &&
+    !['editor', 'proposal'].includes(baseSubRouteName.value)
 );
 
 const hasTopNav = computed(() => {
-  return 'space-editor' !== String(route.matched[1]?.name);
+  return baseSubRouteName.value !== 'editor';
 });
 
 async function handleLogin(connector: Connector) {
@@ -149,6 +153,26 @@ watch(isSwiping, () => {
   }
 });
 
+const faviconSpace = computed(
+  () => organization.value?.spaces[0] ?? currentSpace.value
+);
+
+watchEffect(() => {
+  if (!faviconSpace.value) {
+    setFavicon(null);
+    return;
+  }
+
+  setFavicon(
+    getStampUrl(
+      'space',
+      `${faviconSpace.value.network}:${faviconSpace.value.id}`,
+      16,
+      getCacheHash(faviconSpace.value.avatar)
+    )
+  );
+});
+
 watch(
   isWhiteLabel,
   isWhiteLabel => {
@@ -159,14 +183,6 @@ watch(
 
     if (!whiteLabelSpace.value) return;
 
-    const faviconUrl = getStampUrl(
-      'space',
-      `${whiteLabelSpace.value.network}:${whiteLabelSpace.value.id}`,
-      16,
-      getCacheHash(whiteLabelSpace.value.avatar)
-    );
-
-    setFavicon(faviconUrl);
     setAppName(whiteLabelSpace.value.name);
     setTheme(skinSettings.value.theme);
     setSkin(skinSettings.value);
@@ -260,7 +276,7 @@ router.afterEach(() => {
       @close="uiStore.safeModal = null"
     />
     <ModalTransaction
-      v-if="route.name !== 'space-editor' && transaction && network"
+      v-if="hasTopNav && transaction && network"
       :open="!!transaction"
       :network="network"
       :initial-state="transaction._form"

@@ -1,0 +1,25 @@
+{
+  "name": "@snapshot-labs/eslint-config-vue",
+  "version": "0.1.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snapshot-labs/sx-monorepo.git",
+    "directory": "packages/eslint-config-vue"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@snapshot-labs/eslint-config": "^0.1.0",
+    "eslint-config-prettier": "^10.1.1",
+    "typescript-eslint": "^8.29.1",
+    "eslint-plugin-vue": "^10.0.0",
+    "vue-eslint-parser": "^10.1.3"
+  }
+}

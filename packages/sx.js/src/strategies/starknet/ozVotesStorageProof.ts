@@ -212,7 +212,7 @@ export default function createOzVotesStorageProofStrategy({
       let l1BlockNumber: bigint;
       try {
         l1BlockNumber = await contract.cached_timestamps(timestamp);
-      } catch (e) {
+      } catch (err) {
         throw new VotingPowerDetailsError(
           'Timestamp is not cached',
           type,
@@ -245,14 +245,14 @@ export default function createOzVotesStorageProofStrategy({
             exclusionMptProof
           })
         );
-      } catch (e) {
-        if (e instanceof LibraryError) {
+      } catch (err) {
+        if (err instanceof LibraryError) {
           // can be removed after contracts include this
           // https://github.com/snapshot-labs/sx-starknet/pull/624
-          if (e.message.includes('Slot is zero')) return 0n;
+          if (err.message.includes('Slot is zero')) return 0n;
         }
 
-        throw e;
+        throw err;
       }
     }
   };

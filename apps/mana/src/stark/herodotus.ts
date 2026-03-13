@@ -182,8 +182,8 @@ export async function processProposal(proposal: DbProposal) {
       );
       return;
     }
-  } catch (e) {
-    if (e instanceof Error && e.message === 'No query found') {
+  } catch (err) {
+    if (err instanceof Error && err.message === 'No query found') {
       logger.warn(
         { proposalId: proposal.id, herodotusId: proposal.herodotusId },
         'Query does not exist'
@@ -191,7 +191,7 @@ export async function processProposal(proposal: DbProposal) {
       return db.markProposalProcessed(proposal.id);
     }
 
-    throw e;
+    throw err;
   }
 
   const { indexerUrl } = getApi(ACCUMULATES_CHAIN_ID);

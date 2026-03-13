@@ -38,8 +38,8 @@ async function fetchDeletedSpaces(networkId: NetworkID, ids: string[]) {
           id,
           (await response.json())?.deleted === true
         );
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     })
   );
@@ -124,8 +124,8 @@ export function useWalletEns(networkId: NetworkID) {
       );
       ensNames.value.set(web3.value.account, records);
       hasError.value = false;
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       hasError.value = true;
     } finally {
       isRefreshing.value = false;

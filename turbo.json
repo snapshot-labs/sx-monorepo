@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "codegen", "api#codegen"],
+      "dependsOn": ["^build", "codegen", "api#codegen", "highlight#codegen"],
       "outputs": ["dist/**", "dist.cjs/**"],
       "env": ["ELECTRON"]
     },
@@ -11,9 +11,15 @@
       "dependsOn": ["build"],
       "outputs": ["out/**"]
     },
-    "lint": {},
-    "lint:fix": {},
-    "//#lint:scripts": {},
+    "lint": {
+      "dependsOn": ["transit"]
+    },
+    "lint:fix": {
+      "dependsOn": ["transit"]
+    },
+    "//#lint:scripts": {
+      "dependsOn": ["transit"]
+    },
     "typecheck": {
       "dependsOn": ["^build", "codegen"]
     },
@@ -46,15 +52,23 @@
         ".checkpoint/**",
         "src/networks/common/graphqlApi/gql/**",
         "src/helpers/auction/gql/**",
-        "src/helpers/auction/referral/gql/**"
+        "src/helpers/auction/referral/gql/**",
+        "src/helpers/townhall/gql/**"
       ],
       "inputs": [
         "**/*.gql",
         "codegen.ts",
         "src/networks/common/graphqlApi/queries.ts",
         "src/helpers/auction/queries.ts",
-        "src/helpers/auction/referral/queries.ts"
+        "src/helpers/auction/referral/queries.ts",
+        "src/helpers/townhall/api.ts"
       ]
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
+    "//#transit": {
+      "dependsOn": ["^transit"]
     }
   }
 }

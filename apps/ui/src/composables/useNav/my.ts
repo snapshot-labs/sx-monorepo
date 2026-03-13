@@ -1,0 +1,43 @@
+import { NavConfig, NavContext } from './types';
+import IHBell from '~icons/heroicons-outline/bell';
+import IHCog from '~icons/heroicons-outline/cog';
+import IHGlobe from '~icons/heroicons-outline/globe-americas';
+import IHHome from '~icons/heroicons-outline/home';
+import IHUser from '~icons/heroicons-outline/user';
+
+export default {
+  routeName: 'my',
+  getConfig({ account, unreadCount }: NavContext): NavConfig {
+    return {
+      items: {
+        home: {
+          name: 'Home',
+          icon: IHHome,
+          hidden: !account
+        },
+        explore: {
+          name: 'Explore',
+          icon: IHGlobe
+        },
+        notifications: {
+          name: 'Notifications',
+          count: unreadCount,
+          icon: IHBell,
+          hidden: !account
+        },
+        user: {
+          name: 'Profile',
+          link: { name: 'user', params: { user: account } },
+          icon: IHUser,
+          hidden: !account
+        },
+        settings: {
+          name: 'Settings',
+          link: { name: 'settings-spaces' },
+          icon: IHCog,
+          hidden: !account
+        }
+      }
+    };
+  }
+};

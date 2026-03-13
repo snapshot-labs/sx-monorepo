@@ -63,8 +63,8 @@ async function handleSubmit() {
       address: contractAddress.value,
       type
     });
-  } catch (e) {
-    console.error('Failed to fetch strategy type', e);
+  } catch (err) {
+    console.error('Failed to fetch strategy type', err);
     uiStore.addNotification(
       'error',
       'Failed to load strategy details. Make sure correct address is used.'

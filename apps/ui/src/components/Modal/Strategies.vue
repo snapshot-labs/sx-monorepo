@@ -51,8 +51,8 @@ watchEffect(async () => {
 
   try {
     strategies.value = await network.value.api.loadStrategies();
-  } catch (e) {
-    console.log('failed to load strategies', e);
+  } catch (err) {
+    console.log('failed to load strategies', err);
     hasError.value = true;
   } finally {
     isLoading.value = false;

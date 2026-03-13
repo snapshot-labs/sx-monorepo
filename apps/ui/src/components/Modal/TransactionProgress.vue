@@ -85,12 +85,12 @@ async function handleExecute() {
     } else {
       emit('confirmed', null);
     }
-  } catch (e) {
-    if (isUserAbortError(e)) {
+  } catch (err) {
+    if (isUserAbortError(err)) {
       emit('cancelled');
       return;
     }
-    console.warn('Transaction failed', e);
+    console.warn('Transaction failed', err);
 
     step.value = 'fail';
   }

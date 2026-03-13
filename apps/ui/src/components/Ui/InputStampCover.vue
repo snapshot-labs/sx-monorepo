@@ -41,10 +41,10 @@ async function handleFileChange(e: Event) {
 
     model.value = image.url;
     isUploading.value = false;
-  } catch (e) {
-    uiStore.addNotification('error', getUserFacingErrorMessage(e));
+  } catch (err) {
+    uiStore.addNotification('error', getUserFacingErrorMessage(err));
 
-    console.error('Failed to upload image', e);
+    console.error('Failed to upload image', err);
 
     if (fileInput.value) {
       fileInput.value.value = '';

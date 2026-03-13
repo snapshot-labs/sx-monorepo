@@ -33,7 +33,6 @@ export class EthereumTx {
         promise = contract.castVoteBySig(
           proposalId,
           choice,
-          signature,
           v,
           hexPadLeft(r.toHex()),
           hexPadLeft(s.toHex())

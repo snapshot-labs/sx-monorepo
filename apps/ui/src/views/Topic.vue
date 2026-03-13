@@ -42,8 +42,8 @@ async function loadTopic(url: string) {
     loading.value = true;
     topic.value = await loadSingleTopic(url);
     replies.value = topic.value.posts;
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     failed.value = true;
   } finally {
     loaded.value = true;

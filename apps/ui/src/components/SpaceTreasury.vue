@@ -118,7 +118,7 @@ async function addTx(tx: Transaction) {
   });
   router.push({
     name: 'space-editor',
-    params: { key: draftId }
+    params: { space: spaceKey.value, key: draftId }
   });
 }
 

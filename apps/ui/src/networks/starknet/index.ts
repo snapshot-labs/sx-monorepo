@@ -93,10 +93,10 @@ export function createStarknetNetwork(networkId: NetworkID): Network {
           let tx: Awaited<ReturnType<typeof provider.getTransactionReceipt>>;
           try {
             tx = await provider.getTransactionReceipt(txId);
-          } catch (e) {
+          } catch (err) {
             if (
-              e instanceof LibraryError &&
-              e.message.includes('Transaction hash not found')
+              err instanceof LibraryError &&
+              err.message.includes('Transaction hash not found')
             ) {
               if (retries > 60) {
                 clearInterval(timer);

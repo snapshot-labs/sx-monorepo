@@ -117,8 +117,8 @@ export async function getRelayerInfo(
       data.balance < MINIMUM_RELAYER_BALANCES[networkType] * 2;
 
     return data;
-  } catch (e) {
-    console.error('Failed to fetch relayer info:', e);
+  } catch (err) {
+    console.error('Failed to fetch relayer info:', err);
     return null;
   }
 }

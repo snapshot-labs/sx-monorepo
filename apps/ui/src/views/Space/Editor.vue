@@ -7,7 +7,7 @@ import { StrategyWithTreasury } from '@/composables/useTreasuries';
 import { BASIC_CHOICES, VERIFIED_URL } from '@/helpers/constants';
 import { omit, prettyConcat } from '@/helpers/utils';
 import { validateForm } from '@/helpers/validation';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { usePropositionPowerQuery } from '@/queries/propositionPower';
 import { Contact, Space, Transaction, VoteType } from '@/types';
@@ -124,6 +124,11 @@ const proposalData = computed(() => {
 });
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
+);
+const isGovernorSpace = computed(
+  () =>
+    explorePageProtocols.governor.protocols?.includes(props.space.protocol) ??
+    false
 );
 
 const supportsMultipleTreasuries = computed(() => isOffchainSpace.value);
@@ -245,6 +250,12 @@ const isSubmitButtonLoading = computed(() => {
     isPropositionPowerPending.value
   );
 });
+const isUsingOnlyInoperativeSigAuthenticators = computed(
+  () =>
+    alerts.value.get('IS_SIG_AUTHENTICATOR_INOPERATIVE')
+      ?.isUsingOnlySigAuthenticators ?? false
+);
+
 const canSubmit = computed(() => {
   const hasUnsupportedNetworks =
     alerts.value.has('HAS_PRO_ONLY_NETWORKS') &&
@@ -257,7 +268,8 @@ const canSubmit = computed(() => {
     hasFormErrors ||
     disabledStrategiesList.value.length ||
     unsupportedPremiumStrategiesList.value.length ||
-    isSafeInvalidNetwork.value
+    isSafeInvalidNetwork.value ||
+    isUsingOnlyInoperativeSigAuthenticators.value
   ) {
     return false;
   }
@@ -417,10 +429,13 @@ async function handleProposeClick() {
         }
       });
     } else {
-      router.push({ name: 'space-proposals' });
+      router.push({
+        name: 'space-proposals',
+        params: { space: spaceKey.value }
+      });
     }
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   } finally {
     sending.value = false;
   }
@@ -478,7 +493,7 @@ watch(
 
     router.replace({
       name: 'space-editor',
-      params: { key: newId },
+      params: { space: spaceKey.value, key: newId },
       query: route.query
     });
   },
@@ -661,6 +676,23 @@ watchEffect(() => {
             {{ networks[space.snapshot_chain_id]?.name ?? 'this network' }} to
             create proposals.
           </UiAlert>
+          <UiAlert
+            v-else-if="isUsingOnlyInoperativeSigAuthenticators"
+            type="error"
+            class="mb-4"
+          >
+            The relayer account has insufficient funds. Top up the relayer or
+            add another authenticator to enable proposal creation.
+            <AppLink
+              v-if="isController || isAdmin"
+              :to="{
+                name: 'space-settings',
+                params: { tab: 'authenticators' }
+              }"
+              class="text-rose-500 dark:text-neutral-100 font-semibold"
+              >Go to settings</AppLink
+            >
+          </UiAlert>
           <template v-else>
             <template v-if="proposalLimitReached">
               <UiAlert type="error" class="mb-4">
@@ -793,6 +825,7 @@ watchEffect(() => {
               class="s-box"
               :definition="choicesDefinition"
               :error="formErrors.choices"
+              :readonly="isGovernorSpace"
             >
               <template
                 v-if="proposal.type === 'basic'"
@@ -805,7 +838,7 @@ watchEffect(() => {
                 #input-suffix="{ index, deleteItem }"
               >
                 <button
-                  v-if="index > 1"
+                  v-if="index > 1 && isOffchainSpace"
                   class="text-skin-text"
                   title="Delete choice"
                   @click="deleteItem(index)"
