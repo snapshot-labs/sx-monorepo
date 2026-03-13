@@ -22,7 +22,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "dev:electron": "concurrently \"ELECTRON=true yarn dev\" \"wait-on http://localhost:8080 && electron .\"",
-    "build:electron": "electron-forge make --platform=darwin --arch=x64 && electron-forge make --platform=darwin --arch=arm64 && electron-forge make --platform=win32 --arch=x64 && electron-forge make --platform=win32 --arch=arm64 && electron-forge make --platform=win32 --arch=ia32 && electron-forge make --platform=linux --arch=x64 && electron-forge make --platform=linux --arch=arm64"
+    "build:electron": "electron-builder --mac --win --linux"
   },
   "dependencies": {
     "0xsequence": "^2.2.10",
@@ -109,9 +109,6 @@
   },
   "devDependencies": {
     "@babel/core": "^7.26.7",
-    "@electron-forge/cli": "^7.9.0",
-    "@electron-forge/maker-dmg": "^7.9.0",
-    "@electron-forge/maker-zip": "^7.9.0",
     "@graphql-codegen/cli": "^5.0.4",
     "@iconify-json/heroicons-outline": "^1.1.7",
     "@iconify-json/heroicons-solid": "^1.1.8",
@@ -130,6 +127,7 @@
     "autoprefixer": "^10.4.16",
     "concurrently": "^9.2.1",
     "electron": "^38.2.0",
+    "electron-builder": "^26.8.1",
     "eslint-plugin-storybook": "^9.0.18",
     "happy-dom": "^14.12.3",
     "husky": "^8.0.3",
