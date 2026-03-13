@@ -18,7 +18,7 @@
   "types": "./dist/src/index.d.ts",
   "sideEffects": ["**/*.css"],
   "scripts": {
-    "generate": "node scripts/generate-components.js",
+    "generate": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/generate-components.ts",
     "build": "yarn generate && vite build && vue-tsc",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint src/",

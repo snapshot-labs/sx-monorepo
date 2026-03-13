@@ -1,5 +1,4 @@
-import { globSync } from 'node:fs';
-import { writeFileSync } from 'node:fs';
+import { globSync, writeFileSync } from 'node:fs';
 import { basename } from 'node:path';
 
 const files = globSync('src/components/Ui/*.vue');
