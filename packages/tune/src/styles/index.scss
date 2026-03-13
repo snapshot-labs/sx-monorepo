@@ -129,8 +129,8 @@ a,
 // Inputs
 
 ::placeholder {
-  color: rgba(var(--text)) !important;
-  opacity: 0.6 !important;
+  color: rgba(var(--text));
+  opacity: 0.6;
 }
 
 input[type='number']::-webkit-inner-spin-button,
