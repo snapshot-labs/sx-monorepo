@@ -1,3 +1,4 @@
+import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
 import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
@@ -12,6 +13,31 @@ const providers: NavProvider[] = [
   settingsProvider,
   myProvider
 ];
+
+function getActiveItemKey(
+  config: NavConfig,
+  route: RouteLocationNormalizedLoaded
+): string | null {
+  const routeName = String(route.name);
+  const namespace = routeName.split('-')[0];
+
+  for (const [key, item] of Object.entries(config.items)) {
+    if (!item.activeRoute) continue;
+
+    const { prefix, params } = item.activeRoute;
+    const fullPrefix = prefix.replace(/^space-/, `${namespace}-`);
+
+    if (routeName !== fullPrefix && !routeName.startsWith(`${fullPrefix}-`))
+      continue;
+
+    if (!params) return key;
+    if (Object.entries(params).every(([k, v]) => route.params[k] === v)) {
+      return key;
+    }
+  }
+
+  return null;
+}
 
 function enrichItems(config: NavConfig, routeName: string): NavConfig {
   const items = Object.fromEntries(
@@ -96,7 +122,11 @@ function setup() {
     return enrichItems(result, provider.routeName);
   });
 
-  return { hasAppNav, config };
+  const activeItemKey = computed(() =>
+    config.value ? getActiveItemKey(config.value, route) : null
+  );
+
+  return { hasAppNav, config, activeItemKey };
 }
 
 export const useNav = createSharedComposable(setup);

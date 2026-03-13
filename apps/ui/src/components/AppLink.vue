@@ -10,7 +10,6 @@ defineEmits<{
 }>();
 
 const router = useAppRouter();
-const route = useRoute();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
   return (typeof to === 'string' && to.startsWith('http')) || props.isExternal;
@@ -19,13 +18,6 @@ function isExternalLink(to: RouteLocationRaw | undefined): to is string {
 const resolved = computed(() =>
   props.to && !isExternalLink(props.to) ? router.resolve(props.to) : null
 );
-
-const isPathActive = computed(() => {
-  if (!resolved.value) return false;
-
-  const linkPath = resolved.value.path;
-  return route.path === linkPath || route.path.startsWith(`${linkPath}/`);
-});
 </script>
 
 <template>
@@ -40,14 +32,11 @@ const isPathActive = computed(() => {
   </a>
   <router-link
     v-else-if="resolved"
-    v-slot="{ isActive: isRouteActive, isExactActive }"
+    v-slot="{ isExactActive }"
     :to="resolved.fullPath"
     @click="$emit('click')"
   >
-    <slot
-      :is-active="isRouteActive || isPathActive"
-      :is-exact-active="isExactActive"
-    />
+    <slot :is-exact-active="isExactActive" />
   </router-link>
   <button v-else type="button" @click="$emit('click')">
     <slot />
