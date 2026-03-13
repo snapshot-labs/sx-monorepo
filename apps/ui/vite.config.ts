@@ -1,5 +1,4 @@
 import path from 'path';
-import inject from '@rollup/plugin-inject';
 import vue from '@vitejs/plugin-vue';
 import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
@@ -11,8 +10,6 @@ import { defineConfig } from 'vite';
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 const ELECTRON = process.env.ELECTRON || false;
-
-const target = ['esnext'];
 
 export default defineConfig({
   base: ELECTRON ? './' : undefined,
@@ -59,23 +56,20 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: ['@snapshot-labs/sx'],
-    esbuildOptions: {
-      target
-    }
+    exclude: ['@snapshot-labs/sx']
   },
   build: {
-    target,
+    target: 'esnext',
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true
     },
-    rollupOptions: {
-      plugins: [
-        inject({
+    rolldownOptions: {
+      transform: {
+        inject: {
           Buffer: ['buffer', 'Buffer']
-        })
-      ]
+        }
+      }
     }
   },
   resolve: {
