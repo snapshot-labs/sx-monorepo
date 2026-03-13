@@ -22,7 +22,7 @@ function checkTruncation() {
 const debouncedCheckTruncation = useDebounceFn(checkTruncation, 50);
 
 useResizeObserver(el, debouncedCheckTruncation);
-watch(tooltipContent, checkTruncation);
+watch(tooltipContent, checkTruncation, { flush: 'post' });
 </script>
 
 <template>
