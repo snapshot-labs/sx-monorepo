@@ -73,3 +73,4 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 - Use TypeScript whenever possible, avoid `any`
 - Reuse existing code when possible — check helpers, composables, and utils before writing new logic
 - Name errors in catch blocks `err`: `catch (err) { ... }`
+- Use `is`/`has` prefix for boolean refs and variables (e.g. `isLoading`, `hasError`)

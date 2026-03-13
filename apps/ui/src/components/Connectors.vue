@@ -59,6 +59,6 @@ const availableConnectors = computed(() => {
       />
       <UiPill v-else-if="connector.type === 'injected'" label="Detected" />
     </template>
-    <span v-else class="flex-grow text-left">Log in as guest</span>
+    <span v-else class="text-left">Log in as guest</span>
   </button>
 </template>
