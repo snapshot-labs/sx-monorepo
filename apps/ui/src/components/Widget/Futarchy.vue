@@ -59,9 +59,7 @@ async function fetchPrices() {
   }
 }
 
-onMounted(() => fetchPrices());
-
-watch(() => props.proposal.id, fetchPrices);
+watch(() => props.proposal.id, fetchPrices, { immediate: true });
 </script>
 
 <template>
