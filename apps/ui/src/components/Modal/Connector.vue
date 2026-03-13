@@ -15,25 +15,20 @@ const router = useRouter();
 
 const showGuest = ref(false);
 const guestAddress = ref('');
-const guestLoading = ref(false);
+const isGuestLoading = ref(false);
 const formEl = ref<HTMLFormElement | null>(null);
-
-watch(showGuest, value => {
-  guestAddress.value = '';
-  if (value) nextTick(() => formEl.value?.querySelector('input')?.focus());
-});
 
 function handleGuestLogin() {
   if (!guestAddress.value) return;
 
-  guestLoading.value = true;
+  isGuestLoading.value = true;
 
   const stop = watch(
     () => web3.value.authLoading,
     loading => {
       if (loading) return;
       stop();
-      guestLoading.value = false;
+      isGuestLoading.value = false;
       if (web3.value.account) {
         showGuest.value = false;
         emit('close');
@@ -58,6 +53,11 @@ function handleClose() {
   showGuest.value = false;
   emit('close');
 }
+
+watch(showGuest, value => {
+  guestAddress.value = '';
+  if (value) nextTick(() => formEl.value?.querySelector('input')?.focus());
+});
 </script>
 
 <template>
@@ -97,7 +97,7 @@ function handleClose() {
       <UiButton
         class="w-full"
         primary
-        :loading="guestLoading"
+        :loading="isGuestLoading"
         :disabled="!guestAddress"
         @click.prevent="handleGuestLogin"
       >
