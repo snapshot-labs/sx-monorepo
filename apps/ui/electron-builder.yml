@@ -1,0 +1,29 @@
+appId: box.snapshot.app
+productName: Snapshot
+directories:
+  output: out
+  buildResources: src/assets
+files:
+  - dist/**/*
+  - main.cjs
+  - package.json
+  - "!node_modules"
+asar: false
+npmRebuild: false
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+  icon: src/assets/icon.icns
+win:
+  target:
+    - target: zip
+      arch: [x64, arm64, ia32]
+  icon: src/assets/icon.ico
+linux:
+  target:
+    - target: zip
+      arch: [x64, arm64]
+  icon: src/assets/icon.png
