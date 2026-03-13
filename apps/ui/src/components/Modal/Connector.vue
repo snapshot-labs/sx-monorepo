@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { formatAddress } from '@/helpers/connectors/guest';
+import { getAddresses } from '@/helpers/stamp';
 import { Connector, ConnectorType } from '@/networks/types';
 
 defineProps<{
@@ -13,50 +15,58 @@ const emit = defineEmits<{
 const { web3 } = useWeb3();
 const router = useRouter();
 
-const showGuest = ref(false);
+const isGuestFormVisible = ref(false);
 const guestAddress = ref('');
 const isGuestLoading = ref(false);
-const formEl = ref<HTMLFormElement | null>(null);
+const guestError = ref('');
 
-function handleGuestLogin() {
+async function handleGuestLogin() {
   if (!guestAddress.value) return;
 
-  isGuestLoading.value = true;
+  const value = guestAddress.value;
 
-  const stop = watch(
-    () => web3.value.authLoading,
-    loading => {
-      if (loading) return;
-      stop();
-      isGuestLoading.value = false;
-      if (web3.value.account) {
-        showGuest.value = false;
-        emit('close');
-      }
+  if (value.includes('.')) {
+    isGuestLoading.value = true;
+    guestError.value = '';
+    const resolved = await getAddresses([value], 1);
+    isGuestLoading.value = false;
+
+    if (!resolved[value]) {
+      guestError.value = 'Could not resolve ENS name';
+      return;
     }
-  );
+  } else {
+    try {
+      formatAddress(value);
+    } catch {
+      guestError.value = 'Enter a valid address or ENS name';
+      return;
+    }
+  }
 
   router.push({
-    query: { ...router.currentRoute.value.query, as: guestAddress.value }
+    query: { ...router.currentRoute.value.query, as: value }
   });
+  isGuestFormVisible.value = false;
+  emit('close');
 }
 
 function handleConnectorClick(connector: Connector) {
   if (connector.type === 'guest') {
-    showGuest.value = true;
+    isGuestFormVisible.value = true;
   } else {
     emit('pick', connector);
   }
 }
 
 function handleClose() {
-  showGuest.value = false;
+  isGuestFormVisible.value = false;
   emit('close');
 }
 
-watch(showGuest, value => {
+watch(isGuestFormVisible, () => {
   guestAddress.value = '';
-  if (value) nextTick(() => formEl.value?.querySelector('input')?.focus());
+  guestError.value = '';
 });
 </script>
 
@@ -65,7 +75,7 @@ watch(showGuest, value => {
     <template #header>
       <h3
         v-text="
-          showGuest
+          isGuestFormVisible
             ? 'Log in as guest'
             : web3.account
               ? 'Change wallet'
@@ -73,33 +83,31 @@ watch(showGuest, value => {
         "
       />
     </template>
-    <form
-      v-if="showGuest"
-      ref="formEl"
-      class="s-box p-4"
-      @submit.prevent="handleGuestLogin"
-    >
+    <div v-if="isGuestFormVisible" class="s-box p-4">
       <UiInputString
         v-model="guestAddress"
+        autofocus
+        :error="guestError"
         :definition="{
           title: 'Guest account',
           examples: ['Address or ENS']
         }"
+        @keydown.enter="handleGuestLogin"
       />
-    </form>
+    </div>
     <div v-else class="m-4">
       <Connectors
         :supported-connectors="supportedConnectors"
         @click="handleConnectorClick"
       />
     </div>
-    <template v-if="showGuest" #footer>
+    <template v-if="isGuestFormVisible" #footer>
       <UiButton
         class="w-full"
         primary
         :loading="isGuestLoading"
         :disabled="!guestAddress"
-        @click.prevent="handleGuestLogin"
+        @click="handleGuestLogin"
       >
         Log in
       </UiButton>
