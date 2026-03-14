@@ -16,7 +16,7 @@ const recentConnector = lsGet(RECENT_CONNECTOR);
 const { connectors } = useConnectors();
 
 const availableConnectors = computed(() => {
-  return connectors.value
+  const items = connectors.value
     .filter(connector => {
       return (
         !(
@@ -28,29 +28,37 @@ const availableConnectors = computed(() => {
     .sort((a, b) =>
       a.id === recentConnector ? -1 : b.id === recentConnector ? 1 : 0
     );
+
+  items.push(connectors.value.find(c => c.type === 'guest')!);
+
+  return items;
 });
 </script>
 
 <template>
-  <UiButton
+  <button
     v-for="connector in availableConnectors"
     :key="connector.id"
-    class="w-full"
+    type="button"
+    class="flex w-full items-center gap-2.5 px-3.5 h-[52px] text-skin-link border-x border-b first-of-type:rounded-t-lg first-of-type:border-t last-of-type:rounded-b-lg hover:bg-skin-border/40"
     @click="emit('click', connector)"
   >
-    <img
-      :src="connector.info.icon"
-      height="28"
-      width="28"
-      class="rounded-sm"
-      :alt="connector.info.name"
-    />
-    <span class="flex-grow text-left" v-text="connector.info.name" />
-    <UiPill
-      v-if="connector.id === recentConnector"
-      variant="primary"
-      label="Recent"
-    />
-    <UiPill v-else-if="connector.type === 'injected'" label="Detected" />
-  </UiButton>
+    <template v-if="connector.type !== 'guest'">
+      <img
+        :src="connector.info.icon"
+        height="28"
+        width="28"
+        class="rounded-sm"
+        :alt="connector.info.name"
+      />
+      <span class="flex-grow text-left" v-text="connector.info.name" />
+      <UiPill
+        v-if="connector.id === recentConnector"
+        variant="primary"
+        label="Recent"
+      />
+      <UiPill v-else-if="connector.type === 'injected'" label="Detected" />
+    </template>
+    <span v-else class="text-left">Log in as guest</span>
+  </button>
 </template>
