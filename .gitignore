@@ -23,7 +23,7 @@ dist.cjs
 .idea
 
 # debug
-*.log
+*.log*
 
 # local env files
 .env

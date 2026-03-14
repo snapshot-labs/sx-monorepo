@@ -12,10 +12,7 @@ auto-imports.d.ts
 .env.*.local
 
 # Log files
-npm-debug.log*
-bun-debug.log*
-bun-error.log*
-pnpm-debug.log*
+*.log*
 
 # Editor directories and files
 .idea
@@ -28,5 +25,4 @@ pnpm-debug.log*
 
 gql
 
-*storybook.log
 storybook-static
