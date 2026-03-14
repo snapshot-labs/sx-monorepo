@@ -15,7 +15,7 @@ This API depends on a couple of services:
 To get start, first install all dependencies with:
 
 ```sh
-yarn
+bun install
 
 ```
 
@@ -33,7 +33,7 @@ local setup.
 Finally, to run the service you do:
 
 ```sh
-yarn dev
+bun run dev
 ```
 
 This should start the service to be listening on port 3000.
@@ -45,7 +45,7 @@ Before running tests, ensure you have MySQL server running (see getting started 
 Next, run:
 
 ```
-yarn test
+bun run test
 ```
 
 This will run all tests.
@@ -60,8 +60,8 @@ To workaround this you need to do this
 
 ```sh
 cd checkpoint/node_modules/graphql
-yarn link
+bun link
 
 cd sx-api
-yarn link graphql
+bun link graphql
 ```
