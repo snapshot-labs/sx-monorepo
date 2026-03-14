@@ -13,8 +13,8 @@ auto-imports.d.ts
 
 # Log files
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+bun-debug.log*
+bun-error.log*
 pnpm-debug.log*
 
 # Editor directories and files

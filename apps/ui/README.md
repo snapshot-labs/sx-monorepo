@@ -17,7 +17,7 @@ file in `./src/networks`.
 ### Development
 
 ```bash
-yarn electron:start
+bun run electron:start
 ```
 
 This will start the Electron app in development mode. uses dev server at http://localhost:8080
@@ -25,7 +25,7 @@ This will start the Electron app in development mode. uses dev server at http://
 ### Build
 
 ```bash
-yarn electron:build
+bun run electron:build
 ```
 
 This will create installers for all platforms (macOS, Windows, Linux).

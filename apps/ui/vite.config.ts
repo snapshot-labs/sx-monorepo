@@ -1,3 +1,4 @@
+import { createRequire } from 'module';
 import path from 'path';
 import vue from '@vitejs/plugin-vue';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -7,6 +8,8 @@ import IconsResolver from 'unplugin-icons/resolver';
 import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
+
+const require = createRequire(import.meta.url);
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 const ELECTRON = process.env.ELECTRON || false;
@@ -76,10 +79,10 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       // polyfills
-      stream: path.resolve('../../node_modules/stream-browserify'),
-      events: path.resolve('../../node_modules/events'),
-      util: path.resolve('../../node_modules/util'),
-      buffer: path.resolve('../../node_modules/buffer')
+      stream: require.resolve('stream-browserify'),
+      events: require.resolve('events'),
+      util: require.resolve('util'),
+      buffer: require.resolve('buffer')
     },
     dedupe: ['@popperjs/core']
   }

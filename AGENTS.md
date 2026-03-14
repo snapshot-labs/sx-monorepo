@@ -3,15 +3,15 @@
 ## Commands
 
 ```bash
-yarn dev                # Start UI only (excludes API and Mana)
-yarn dev:interactive    # Interactive service selection (UI, API, Mana)
-yarn build              # Build all packages
-yarn test               # Run tests across all packages
-yarn test:integration   # Run integration tests
-yarn test:e2e           # Run Playwright end-to-end tests
-yarn lint               # Lint all code and scripts
-yarn lint:fix           # Lint and auto-fix
-yarn typecheck          # TypeScript type checking
+bun run dev                # Start UI only (excludes API and Mana)
+bun run dev:interactive    # Interactive service selection (UI, API, Mana)
+bun run build              # Build all packages
+bun run test               # Run tests across all packages
+bun run test:integration   # Run integration tests
+bun run test:e2e           # Run Playwright end-to-end tests
+bun run lint               # Lint all code and scripts
+bun run lint:fix           # Lint and auto-fix
+bun run typecheck          # TypeScript type checking
 ```
 
 CI will reject lint/type/test failures.
@@ -62,7 +62,7 @@ Snapshot monorepo. Three services communicate across multiple blockchain network
 
 ## Tooling
 
-- **Node** >=22.6, **Yarn** 1.22 (workspaces: `apps/*`, `packages/*`)
+- **Node** >=22.6, **Bun** >=1.3 (workspaces: `apps/*`, `packages/*`)
 - **Turborepo** for task orchestration (`turbo.json`)
 - **ESLint** `@snapshot-labs` config (Vue variant for UI)
 - **Prettier** `@snapshot-labs/prettier-config`

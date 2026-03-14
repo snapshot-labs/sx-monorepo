@@ -5,12 +5,12 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint . --rule 'no-console: error'",
-    "lint:fix": "yarn lint --fix",
+    "lint:fix": "bun run lint --fix",
     "build": "tsc",
-    "migrate": "yarn knex migrate:latest",
-    "predev": "yarn migrate",
+    "migrate": "bun run knex migrate:latest",
+    "predev": "bun run migrate",
     "dev": "nodemon src/index.ts",
-    "prestart": "yarn migrate",
+    "prestart": "bun run migrate",
     "start": "node dist/src/index.js",
     "check-starknet-balances": "node --experimental-strip-types --no-warnings=ExperimentalWarning ./scripts/check-starknet-balances.mts"
   },
