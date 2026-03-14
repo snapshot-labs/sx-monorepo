@@ -6,7 +6,7 @@
   "scripts": {
     "codegen": "checkpoint generate",
     "lint": "eslint src/ --rule 'no-console: error'",
-    "lint:fix": "yarn lint --fix",
+    "lint:fix": "bun run lint --fix",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "dev:debug": "nodemon --exec \"node --inspect --require ts-node/register src/index.ts\"",
