@@ -2,7 +2,6 @@
 const route = useRoute();
 const router = useRouter();
 const { web3, web3Account } = useWeb3();
-const { modalAccountOpen } = useModal();
 
 const aliasAddress = computed(() => (route.params.address as string) || '');
 const {
@@ -11,6 +10,7 @@ const {
   isAlreadyAuthorized,
   isCheckingAlias,
   isValidAddress,
+  isSelfAlias,
   authorize
 } = useAliasAuthorize(aliasAddress);
 
@@ -18,15 +18,16 @@ const isLoading = computed(
   () => web3.value.authLoading || isCheckingAlias.value
 );
 const hasHistory = computed(() => !!window.history.state?.back);
-
-function cancel() {
-  router.back();
-}
 </script>
 
 <template>
   <div v-if="!isValidAddress">
     <UiStateWarning class="px-4 py-3"> Invalid alias address </UiStateWarning>
+  </div>
+  <div v-else-if="isSelfAlias">
+    <UiStateWarning class="px-4 py-3">
+      You cannot authorize your own address as an alias
+    </UiStateWarning>
   </div>
   <div
     v-else
@@ -118,14 +119,14 @@ function cancel() {
           <span class="text-skin-danger">Revoke alias</span>
         </UiButton>
         <div v-else class="w-full flex justify-between space-x-[10px]">
-          <UiButton v-if="hasHistory" class="w-full" @click="cancel">
+          <UiButton v-if="hasHistory" class="w-full" @click="router.back()">
             Cancel
           </UiButton>
           <UiButton
             primary
             class="w-full"
             :loading="isAuthorizing"
-            @click="web3Account ? authorize() : (modalAccountOpen = true)"
+            @click="authorize()"
           >
             Authorize
           </UiButton>

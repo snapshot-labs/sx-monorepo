@@ -68,13 +68,13 @@ export default [
         path: 'email-notifications',
         name: 'settings-email-notifications',
         component: EmailNotifications
+      },
+      {
+        path: 'alias/authorize/:address',
+        name: 'alias-authorize',
+        component: Authorize
       }
     ]
-  },
-  {
-    path: '/alias/authorize/:address',
-    name: 'alias-authorize',
-    component: Authorize
   },
   {
     path: '/home',

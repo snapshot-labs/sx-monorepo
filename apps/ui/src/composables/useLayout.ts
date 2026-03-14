@@ -15,10 +15,12 @@ export function useLayout() {
     if (isWhiteLabel.value || isAuctionApp.value) return true;
 
     const routeName = route.matched[0]?.name?.toString();
+    const currentRouteName = route.name?.toString();
 
     if (routeName) {
       return (
-        AUCTION_ROUTES.includes(routeName) || routeName === 'alias-authorize'
+        AUCTION_ROUTES.includes(routeName) ||
+        currentRouteName === 'alias-authorize'
       );
     }
 

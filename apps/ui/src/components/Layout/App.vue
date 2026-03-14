@@ -77,12 +77,13 @@ const hasPlaceHolderSidebar = computed(
       'auctions',
       'auction-invite',
       'auction-upcoming',
-      'auction-verify-standalone',
-      'alias-authorize'
+      'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
-    !['space-townhall-create', 'space-townhall-topic'].includes(
-      String(route.matched[1]?.name)
-    ) &&
+    ![
+      'space-townhall-create',
+      'space-townhall-topic',
+      'alias-authorize'
+    ].includes(String(route.matched[1]?.name)) &&
     !['editor', 'proposal'].includes(baseSubRouteName.value)
 );
 
