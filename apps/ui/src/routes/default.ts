@@ -1,4 +1,5 @@
 import App from '@/views/App.vue';
+import Authorize from '@/views/Authorize.vue';
 import CreateSpaceSnapshot from '@/views/CreateSpaceSnapshot.vue';
 import CreateSpaceSnapshotX from '@/views/CreateSpaceSnapshotX.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
@@ -67,6 +68,11 @@ export default [
         path: 'email-notifications',
         name: 'settings-email-notifications',
         component: EmailNotifications
+      },
+      {
+        path: 'alias/authorize/:address',
+        name: 'alias-authorize',
+        component: Authorize
       }
     ]
   },
