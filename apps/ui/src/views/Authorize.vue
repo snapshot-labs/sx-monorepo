@@ -21,7 +21,8 @@ const hasHistory = computed(() => !!window.history.state?.back);
 </script>
 
 <template>
-  <div v-if="!isValidAddress">
+  <div v-if="!web3Account && !web3.authLoading" />
+  <div v-else-if="!isValidAddress">
     <UiStateWarning class="px-4 py-3"> Invalid alias address </UiStateWarning>
   </div>
   <div v-else-if="isSelfAlias">
