@@ -11,6 +11,7 @@ const {
   isCheckingAlias,
   isValidAddress,
   isSelfAlias,
+  checksumAddress,
   authorize
 } = useAliasAuthorize(aliasAddress);
 
@@ -52,7 +53,7 @@ const hasHistory = computed(() => !!window.history.state?.back);
               class="border-4 border-skin-bg relative z-[1]"
             />
             <UiStamp
-              :id="aliasAddress"
+              :id="checksumAddress"
               :size="80"
               class="border-4 border-skin-bg"
               :class="web3Account ? '-ml-3' : ''"
@@ -69,7 +70,7 @@ const hasHistory = computed(() => !!window.history.state?.back);
             <template v-if="isAlreadyAuthorized">
               The alias
               <UiAddress
-                :address="aliasAddress"
+                :address="checksumAddress"
                 copy-button="always"
                 class="inline-flex text-[20px] font-bold"
               />
@@ -78,7 +79,7 @@ const hasHistory = computed(() => !!window.history.state?.back);
             <template v-else>
               Do you want to authorize
               <UiAddress
-                :address="aliasAddress"
+                :address="checksumAddress"
                 copy-button="always"
                 class="inline-flex text-[20px] font-bold"
               />

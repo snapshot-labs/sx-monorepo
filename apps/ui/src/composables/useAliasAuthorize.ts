@@ -15,11 +15,14 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
   const queryClient = useQueryClient();
 
   const isValidAddress = computed(() => isAddress(aliasAddress.value));
+  const checksumAddress = computed(() =>
+    isValidAddress.value ? getAddress(aliasAddress.value) : ''
+  );
   const isSelfAlias = computed(
     () =>
       web3Account.value &&
       isValidAddress.value &&
-      getAddress(aliasAddress.value) === getAddress(web3Account.value)
+      checksumAddress.value === getAddress(web3Account.value)
   );
 
   const { data: isAlreadyAuthorized, isPending: isCheckingAlias } = useQuery({
@@ -29,7 +32,7 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
       try {
         const existing = await network.api.loadAlias(
           toValue(web3Account),
-          toValue(aliasAddress),
+          toValue(checksumAddress),
           0
         );
         return !!existing;
@@ -52,7 +55,7 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
       const network = getNetwork(metadataNetwork);
       const envelope = await network.actions.setAlias(
         auth.value.provider,
-        aliasAddress.value
+        checksumAddress.value
       );
       await network.actions.send(envelope);
     },
@@ -77,6 +80,7 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
     isCheckingAlias,
     isValidAddress,
     isSelfAlias,
+    checksumAddress,
     authorize
   };
 }
