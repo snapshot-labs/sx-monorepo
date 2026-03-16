@@ -251,6 +251,7 @@ watchEffect(() => {
             </template>
           </div>
         </UiScrollerHorizontal>
+        <WidgetSnack :proposal="proposal" />
         <router-view :proposal="proposal" />
       </div>
 
