@@ -68,6 +68,7 @@ const ORGANIZATION_MAPPING = import.meta.env.VITE_ORGANIZATION_MAPPING;
 
 const ORGANIZATION_DOMAINS: Record<string, string> = {
   'starknet.stage.box': 'starknet',
+  'governance.starknet.io': 'starknet',
   ...(ORGANIZATION_MAPPING
     ? {
         [ORGANIZATION_MAPPING.split(';')[0]]: ORGANIZATION_MAPPING.split(';')[1]
