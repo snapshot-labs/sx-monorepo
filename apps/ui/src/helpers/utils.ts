@@ -39,16 +39,12 @@ import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 const IPFS_GATEWAY: string =
   import.meta.env.VITE_IPFS_GATEWAY || 'https://cloudflare-ipfs.com';
 const ADDABLE_NETWORKS = {
-  //   12345: {
-  //     chainName: 'My network name',
-  //     nativeCurrency: {
-  //       name: 'MyNetwork',
-  //       symbol: 'NTW',
-  //       decimals: 18
-  //     },
-  //     rpcUrls: ['https://...'],
-  //     blockExplorerUrls: ['https://...']
-  //   }
+  11155111: {
+    chainName: 'Sepolia',
+    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    rpcUrls: ['https://rpc.sepolia.org'],
+    blockExplorerUrls: ['https://sepolia.etherscan.io']
+  }
 };
 
 dayjs.extend(relativeTime);

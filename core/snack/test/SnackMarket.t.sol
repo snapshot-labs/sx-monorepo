@@ -3,165 +3,147 @@ pragma solidity ^0.8.28;
 
 import "forge-std/Test.sol";
 import "../src/SnackMarket.sol";
-import "../src/MockUSDC.sol";
 
 contract SnackMarketTest is Test {
     SnackMarket market;
-    MockUSDC usdc;
     address oracle = address(0xBEEF);
     address alice = address(0xA11CE);
     address bob = address(0xB0B);
 
     function setUp() public {
-        usdc = new MockUSDC();
         market = new SnackMarket(
             keccak256("test://proposal/1"),
             "test://proposal/1",
-            address(usdc),
             oracle
         );
 
-        usdc.mint(alice, 10_000e6);
-        usdc.mint(bob, 10_000e6);
-
-        vm.prank(alice);
-        usdc.approve(address(market), type(uint256).max);
-        vm.prank(bob);
-        usdc.approve(address(market), type(uint256).max);
+        vm.deal(alice, 10_000e18);
+        vm.deal(bob, 10_000e18);
     }
 
     function test_firstBuyYes() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6); // Buy YES with 100 USDC
+        market.buyOutcome{value: 100e18}(0);
 
-        assertEq(market.supplyYes(), 100e6);
+        assertEq(market.supplyYes(), 100e18);
         assertEq(market.supplyNo(), 0);
-        assertEq(market.reserve(), 100e6);
-        assertEq(market.balanceOf(alice, 0), 100e6);
+        assertEq(market.reserve(), 100e18);
+        assertEq(market.balanceOf(alice, 0), 100e18);
     }
 
     function test_firstBuyNo() public {
         vm.prank(alice);
-        market.buyOutcome(1, 100e6); // Buy NO with 100 USDC
+        market.buyOutcome{value: 100e18}(1);
 
-        assertEq(market.supplyNo(), 100e6);
+        assertEq(market.supplyNo(), 100e18);
         assertEq(market.supplyYes(), 0);
-        assertEq(market.reserve(), 100e6);
-        assertEq(market.balanceOf(alice, 1), 100e6);
+        assertEq(market.reserve(), 100e18);
+        assertEq(market.balanceOf(alice, 1), 100e18);
     }
 
     function test_buyYesThenNo() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6); // Buy YES
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(bob);
-        market.buyOutcome(1, 100e6); // Buy NO
+        market.buyOutcome{value: 100e18}(1);
 
-        // Reserve should be 200 USDC
-        assertEq(market.reserve(), 200e6);
+        assertEq(market.reserve(), 200e18);
 
-        // Check prices sum to ~1e18
         (uint256 yesPrice, uint256 noPrice) = market.getPrices();
-        assertApproxEqAbs(yesPrice + noPrice, 1e18, 1); // Allow 1 wei rounding
+        assertApproxEqAbs(yesPrice + noPrice, 1e18, 1);
     }
 
     function test_priceMovesOnBuy() public {
-        // Buy equal amounts
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
         vm.prank(bob);
-        market.buyOutcome(1, 100e6);
+        market.buyOutcome{value: 100e18}(1);
 
         (uint256 yesBefore, ) = market.getPrices();
 
-        // Buy more YES → price should go up
         vm.prank(alice);
-        market.buyOutcome(0, 50e6);
+        market.buyOutcome{value: 50e18}(0);
 
         (uint256 yesAfter, ) = market.getPrices();
         assertGt(yesAfter, yesBefore);
     }
 
-    function test_sellReturnsUsdc() public {
+    function test_sellReturnsEth() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
-        uint256 balBefore = usdc.balanceOf(alice);
+        uint256 balBefore = alice.balance;
 
         vm.prank(alice);
-        market.sellOutcome(0, 50e6);
+        market.sellOutcome(0, 50e18);
 
-        uint256 balAfter = usdc.balanceOf(alice);
+        uint256 balAfter = alice.balance;
         assertGt(balAfter, balBefore);
-        assertEq(market.supplyYes(), 50e6);
+        assertEq(market.supplyYes(), 50e18);
     }
 
     function test_sellAllReturnsReserve() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
-        uint256 balBefore = usdc.balanceOf(alice);
+        uint256 balBefore = alice.balance;
 
         vm.prank(alice);
-        market.sellOutcome(0, 100e6);
+        market.sellOutcome(0, 100e18);
 
-        uint256 balAfter = usdc.balanceOf(alice);
-        // Should get back all 100 USDC (minus rounding)
-        assertApproxEqAbs(balAfter - balBefore, 100e6, 1);
+        uint256 balAfter = alice.balance;
+        assertApproxEqAbs(balAfter - balBefore, 100e18, 1);
         assertEq(market.reserve(), 0);
     }
 
     function test_resolveAndRedeem() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6); // Alice buys YES
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(bob);
-        market.buyOutcome(1, 100e6); // Bob buys NO
+        market.buyOutcome{value: 100e18}(1);
 
         uint256 totalReserve = market.reserve();
 
-        // Oracle resolves YES wins
         vm.prank(oracle);
         market.resolve(0);
 
         assertTrue(market.resolved());
         assertEq(market.winningOutcome(), 0);
 
-        // Alice redeems
-        uint256 balBefore = usdc.balanceOf(alice);
+        uint256 balBefore = alice.balance;
         vm.prank(alice);
         market.redeem();
 
-        uint256 payout = usdc.balanceOf(alice) - balBefore;
-        assertEq(payout, totalReserve); // Alice gets the full reserve
+        uint256 payout = alice.balance - balBefore;
+        assertEq(payout, totalReserve);
     }
 
     function test_multipleWinnersRedeem() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(bob);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(alice);
-        market.buyOutcome(1, 50e6); // Some NO tokens too
+        market.buyOutcome{value: 50e18}(1);
 
         uint256 totalReserve = market.reserve();
 
         vm.prank(oracle);
-        market.resolve(0); // YES wins
+        market.resolve(0);
 
         uint256 aliceYes = market.balanceOf(alice, 0);
         uint256 bobYes = market.balanceOf(bob, 0);
         uint256 totalYes = market.supplyYes();
 
-        // Both redeem
         vm.prank(alice);
         market.redeem();
         vm.prank(bob);
         market.redeem();
 
-        // Payouts should be proportional
         uint256 alicePayout = (aliceYes * totalReserve) / totalYes;
         uint256 bobPayout = (bobYes * totalReserve) / totalYes;
         assertApproxEqAbs(alicePayout + bobPayout, totalReserve, 1);
@@ -169,31 +151,31 @@ contract SnackMarketTest is Test {
 
     function test_cannotBuyAfterResolution() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(oracle);
         market.resolve(0);
 
         vm.prank(bob);
         vm.expectRevert(SnackMarket.MarketAlreadyResolved.selector);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
     }
 
     function test_cannotSellAfterResolution() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(oracle);
         market.resolve(0);
 
         vm.prank(alice);
         vm.expectRevert(SnackMarket.MarketAlreadyResolved.selector);
-        market.sellOutcome(0, 50e6);
+        market.sellOutcome(0, 50e18);
     }
 
     function test_onlyOracleCanResolve() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(alice);
         vm.expectRevert(SnackMarket.OnlyOracle.selector);
@@ -202,7 +184,7 @@ contract SnackMarketTest is Test {
 
     function test_cannotRedeemBeforeResolution() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(alice);
         vm.expectRevert(SnackMarket.MarketNotResolved.selector);
@@ -211,43 +193,42 @@ contract SnackMarketTest is Test {
 
     function test_loserCannotRedeem() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
         vm.prank(bob);
-        market.buyOutcome(1, 100e6);
+        market.buyOutcome{value: 100e18}(1);
 
         vm.prank(oracle);
-        market.resolve(0); // YES wins
+        market.resolve(0);
 
         vm.prank(bob);
         vm.expectRevert(SnackMarket.NothingToRedeem.selector);
-        market.redeem(); // Bob has NO tokens, not YES
+        market.redeem();
     }
 
     function test_previewBuy() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
-        uint256 preview = market.previewBuy(1, 50e6);
+        uint256 preview = market.previewBuy(1, 50e18);
         assertGt(preview, 0);
 
-        // Actually buy and compare
         vm.prank(bob);
-        market.buyOutcome(1, 50e6);
+        market.buyOutcome{value: 50e18}(1);
         assertEq(market.balanceOf(bob, 1), preview);
     }
 
     function test_previewSell() public {
         vm.prank(alice);
-        market.buyOutcome(0, 100e6);
+        market.buyOutcome{value: 100e18}(0);
 
-        uint256 preview = market.previewSell(0, 50e6);
+        uint256 preview = market.previewSell(0, 50e18);
         assertGt(preview, 0);
 
-        uint256 balBefore = usdc.balanceOf(alice);
+        uint256 balBefore = alice.balance;
         vm.prank(alice);
-        market.sellOutcome(0, 50e6);
-        assertEq(usdc.balanceOf(alice) - balBefore, preview);
+        market.sellOutcome(0, 50e18);
+        assertEq(alice.balance - balBefore, preview);
     }
 
     function test_emptyMarketPrices() public view {

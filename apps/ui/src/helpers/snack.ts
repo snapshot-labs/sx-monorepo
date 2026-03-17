@@ -1,13 +1,11 @@
 import { Contract } from '@ethersproject/contracts';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import type { Web3Provider } from '@ethersproject/providers';
-import type { Proposal } from '@/types';
+import { StaticJsonRpcProvider, Web3Provider } from '@ethersproject/providers';
+import { Proposal } from '@/types';
 
 const SNACK_FACTORY_ABI = [
   'function getMarket(string referenceUri) view returns (address)',
-  'function createAndBuy(string referenceUri, uint8 outcome, uint256 usdcAmount) returns (address)',
-  'function createMarket(string referenceUri) returns (address)',
-  'function usdc() view returns (address)'
+  'function createAndBuy(string referenceUri, uint8 outcome) payable returns (address)',
+  'function createMarket(string referenceUri) returns (address)'
 ];
 
 const SNACK_MARKET_ABI = [
@@ -17,33 +15,29 @@ const SNACK_MARKET_ABI = [
   'function resolved() view returns (bool)',
   'function winningOutcome() view returns (uint8)',
   'function getPrices() view returns (uint256 yesProb, uint256 noProb)',
-  'function previewBuy(uint8 outcome, uint256 usdcAmount) view returns (uint256)',
+  'function previewBuy(uint8 outcome, uint256 ethAmount) view returns (uint256)',
   'function previewSell(uint8 outcome, uint256 tokenAmount) view returns (uint256)',
-  'function buyOutcome(uint8 outcome, uint256 usdcAmount)',
+  'function buyOutcome(uint8 outcome) payable',
   'function sellOutcome(uint8 outcome, uint256 tokenAmount)',
   'function redeem()',
-  'function balanceOf(address account, uint256 id) view returns (uint256)',
-  'function usdc() view returns (address)'
-];
-
-const ERC20_ABI = [
-  'function approve(address spender, uint256 amount) returns (bool)',
-  'function allowance(address owner, address spender) view returns (uint256)',
-  'function balanceOf(address account) view returns (uint256)'
+  'function balanceOf(address account, uint256 id) view returns (uint256)'
 ];
 
 export const SNACK_FACTORY_ADDRESS =
   import.meta.env.VITE_SNACK_FACTORY_ADDRESS ?? '';
 export const SNACK_RPC_URL =
-  import.meta.env.VITE_SNACK_RPC_URL ?? 'http://127.0.0.1:8546';
+  import.meta.env.VITE_SNACK_RPC_URL ?? 'https://rpc.snapshot.org/11155111';
 export const SNACK_ENABLED = import.meta.env.VITE_SNACK_ENABLED === 'true';
-export const SNACK_CHAIN_ID = 13370;
+export const SNACK_CHAIN_ID = 11155111;
 
-// Dedicated read-only provider that always points to Anvil
-let _readProvider: JsonRpcProvider | null = null;
-export function getReadProvider(): JsonRpcProvider {
+// Dedicated read-only provider for the snack chain
+let _readProvider: StaticJsonRpcProvider | null = null;
+export function getReadProvider(): StaticJsonRpcProvider {
   if (!_readProvider) {
-    _readProvider = new JsonRpcProvider(SNACK_RPC_URL);
+    _readProvider = new StaticJsonRpcProvider(
+      { url: SNACK_RPC_URL, timeout: 25000 },
+      SNACK_CHAIN_ID
+    );
   }
   return _readProvider;
 }
@@ -52,20 +46,20 @@ export function buildReferenceUri(proposal: Proposal): string {
   return `snapshot://${proposal.network}:${proposal.space.id}/proposal/${proposal.proposal_id}`;
 }
 
-// Read-only contracts use the dedicated Anvil provider
+// Read-only contracts use the dedicated snack provider
 export function getFactoryReadonly() {
-  return new Contract(SNACK_FACTORY_ADDRESS, SNACK_FACTORY_ABI, getReadProvider());
+  return new Contract(
+    SNACK_FACTORY_ADDRESS,
+    SNACK_FACTORY_ABI,
+    getReadProvider()
+  );
 }
 
 export function getMarketReadonly(address: string) {
   return new Contract(address, SNACK_MARKET_ABI, getReadProvider());
 }
 
-export function getErc20Readonly(address: string) {
-  return new Contract(address, ERC20_ABI, getReadProvider());
-}
-
-// Write contracts use the wallet's signer (must be on Anvil chain)
+// Write contracts use the wallet's signer
 export function getFactoryContract(provider: Web3Provider) {
   return new Contract(
     SNACK_FACTORY_ADDRESS,
@@ -78,35 +72,6 @@ export function getMarketContract(address: string, provider: Web3Provider) {
   return new Contract(address, SNACK_MARKET_ABI, provider.getSigner());
 }
 
-export function getErc20Contract(address: string, provider: Web3Provider) {
-  return new Contract(address, ERC20_ABI, provider.getSigner());
-}
-
-// Switch the wallet to the Anvil chain
-export async function ensureAnvilChain(provider: Web3Provider): Promise<void> {
-  const network = await provider.getNetwork();
-  if (network.chainId === SNACK_CHAIN_ID) return;
-
-  try {
-    await provider.send('wallet_switchEthereumChain', [
-      { chainId: '0x' + SNACK_CHAIN_ID.toString(16) }
-    ]);
-  } catch (switchError: any) {
-    // Chain not added yet — add it
-    if (switchError.code === 4902) {
-      await provider.send('wallet_addEthereumChain', [
-        {
-          chainId: '0x' + SNACK_CHAIN_ID.toString(16),
-          chainName: 'Snack (Anvil)',
-          nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
-          rpcUrls: [SNACK_RPC_URL]
-        }
-      ]);
-    } else {
-      throw switchError;
-    }
-  }
-}
 
 export interface MarketState {
   address: string;
@@ -146,25 +111,63 @@ export async function fetchMarketState(
   };
 }
 
-export function formatProb(prob: bigint): string {
-  return ((Number(prob) / 1e18) * 100).toFixed(1);
+export function formatCents(prob: bigint): number {
+  return Math.round(Number(prob) / 1e16);
 }
 
-export function formatUsdc(amount: bigint): string {
-  return (Number(amount) / 1e6).toFixed(2);
+export function computeChance(
+  supplyYes: bigint,
+  supplyNo: bigint,
+  reserve: bigint,
+  outcome: number,
+  delta: number,
+  isSell: boolean
+): { yes: number; no: number } | null {
+  if (delta <= 0) return null;
+
+  const yes = Number(supplyYes);
+  const no = Number(supplyNo);
+
+  let newYes: number, newNo: number;
+
+  if (isSell) {
+    newYes = outcome === 0 ? yes - delta : yes;
+    newNo = outcome === 1 ? no - delta : no;
+    if (newYes < 0 || newNo < 0) return null;
+  } else {
+    const res = Number(reserve);
+    const newReserve = res + delta;
+    const other = outcome === 0 ? no : yes;
+    const newChosen = Math.sqrt(newReserve * newReserve - other * other);
+    newYes = outcome === 0 ? newChosen : yes;
+    newNo = outcome === 1 ? newChosen : no;
+  }
+
+  const total = newYes * newYes + newNo * newNo;
+  if (total === 0) return null;
+
+  return {
+    yes: Math.round((newYes / Math.sqrt(total)) * 100),
+    no: Math.round((newNo / Math.sqrt(total)) * 100)
+  };
 }
 
-export function parseUsdc(amount: string): bigint {
-  return BigInt(Math.floor(Number(amount) * 1e6));
+export function formatEth(amount: bigint): string {
+  const val = Number(amount) / 1e18;
+  if (val === 0) return '0';
+  // Up to 6 decimals, but strip trailing zeros
+  return parseFloat(val.toFixed(6)).toString();
 }
 
-/**
- * Wait for a transaction to be mined using the Anvil read provider.
- * Wallet providers can hang on tx.wait() after chain switching,
- * so we poll Anvil directly instead.
- */
+export function parseEth(amount: string): bigint {
+  const num = Number(amount);
+  if (!isFinite(num) || num < 0) return 0n;
+  // Use string manipulation to avoid floating point precision issues
+  return BigInt(Math.floor(num * 1e18));
+}
+
+/** Wait for a transaction to be mined by polling the snack RPC directly. */
 export async function waitForTx(txHash: string): Promise<void> {
-  // Raw fetch to avoid all ethers v5 provider caching issues
   for (let i = 0; i < 60; i++) {
     const res = await fetch(SNACK_RPC_URL, {
       method: 'POST',
@@ -177,7 +180,6 @@ export async function waitForTx(txHash: string): Promise<void> {
       })
     });
     const json = await res.json();
-    console.log('[snack] waitForTx poll', i, json.result ? 'found' : 'pending');
     if (json.result) return;
     await new Promise(r => setTimeout(r, 500));
   }
@@ -187,19 +189,19 @@ export async function waitForTx(txHash: string): Promise<void> {
 /**
  * Estimate payout if user's chosen outcome wins.
  * Uses the bonding curve: reserve = sqrt(supplyYes² + supplyNo²)
- * Returns { tokens, payout, profit } in USDC base units (6 decimals).
+ * Returns { tokens, payout, profit } in wei (18 decimals).
  */
 export function estimatePayout(
   supplyYes: bigint,
   supplyNo: bigint,
   reserve: bigint,
   outcome: number,
-  usdcAmount: bigint
+  ethAmount: bigint
 ): { tokens: number; payout: number; profit: number } {
   const yes = Number(supplyYes);
   const no = Number(supplyNo);
   const res = Number(reserve);
-  const amount = Number(usdcAmount);
+  const amount = Number(ethAmount);
 
   if (amount <= 0) return { tokens: 0, payout: 0, profit: 0 };
 
@@ -207,12 +209,13 @@ export function estimatePayout(
   const otherSupply = outcome === 0 ? no : yes;
   const currentSupply = outcome === 0 ? yes : no;
 
-  const newSupply = Math.sqrt(newReserve * newReserve - otherSupply * otherSupply);
+  const newSupply = Math.sqrt(
+    newReserve * newReserve - otherSupply * otherSupply
+  );
   const tokens = newSupply - currentSupply;
 
   if (newSupply <= 0) return { tokens: 0, payout: 0, profit: 0 };
 
-  // If this outcome wins, user gets (their tokens / total winning supply) * total reserve
   const payout = (tokens / newSupply) * newReserve;
   const profit = payout - amount;
 
@@ -220,9 +223,9 @@ export function estimatePayout(
 }
 
 /**
- * Estimate USDC returned when selling tokens.
+ * Estimate ETH returned when selling tokens.
  * newReserve = sqrt(newSupplyYes² + newSupplyNo²)
- * usdcReturned = reserve - newReserve
+ * ethReturned = reserve - newReserve
  */
 export function estimateSell(
   supplyYes: bigint,

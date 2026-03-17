@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { formatUsdc, parseUsdc, estimatePayout, estimateSell } from '@/helpers/snack';
-import { _n } from '@/helpers/utils';
 import { useSnack } from '@/composables/useSnack';
-import type { Proposal } from '@/types';
+import {
+  computeChance,
+  estimatePayout,
+  estimateSell,
+  formatCents,
+  formatEth,
+  parseEth
+} from '@/helpers/snack';
+import { _n } from '@/helpers/utils';
+import { Proposal } from '@/types';
 
 const props = defineProps<{
   open: boolean;
@@ -20,7 +27,8 @@ const {
   marketState,
   userYesBalance,
   userNoBalance,
-  userUsdcBalance,
+  userEthBalance,
+  ethPrice,
   txPending,
   buyOutcome,
   sellOutcome,
@@ -30,15 +38,17 @@ const {
 
 const { web3 } = useWeb3();
 
-const usdcAmount = ref('0');
-const sellAmount = ref('0');
+const ethAmount = ref('');
+const sellAmount = ref('');
 const selectedOutcome = ref<0 | 1>(0);
 const sellOutcomeSelection = ref<0 | 1>(0);
 const activeTab = ref<'buy' | 'sell'>('buy');
 
 const yesLabel = computed(() => props.proposal.choices[0]);
 const noLabel = computed(() => props.proposal.choices[1]);
-const outcomeLabel = computed(() => selectedOutcome.value === 0 ? yesLabel.value : noLabel.value);
+const outcomeLabel = computed(() =>
+  selectedOutcome.value === 0 ? yesLabel.value : noLabel.value
+);
 
 const hasYes = computed(() => userYesBalance.value > 0n);
 const hasNo = computed(() => userNoBalance.value > 0n);
@@ -47,7 +57,9 @@ const hasPosition = computed(() => hasYes.value || hasNo.value);
 const isResolved = computed(() => marketState.value?.resolved ?? false);
 const winnerLabel = computed(() => {
   if (!marketState.value?.resolved) return '';
-  return marketState.value.winningOutcome === 0 ? yesLabel.value : noLabel.value;
+  return marketState.value.winningOutcome === 0
+    ? yesLabel.value
+    : noLabel.value;
 });
 
 const canRedeem = computed(() => {
@@ -59,10 +71,6 @@ const canRedeem = computed(() => {
   return winBal > 0n;
 });
 
-function formatCents(prob: bigint): number {
-  return Math.round(Number(prob) / 1e16);
-}
-
 const yesCents = computed(() =>
   marketState.value ? formatCents(marketState.value.yesProb) : 50
 );
@@ -71,26 +79,14 @@ const noCents = computed(() =>
 );
 
 const postTradeChance = computed(() => {
-  const amount = Number(parseUsdc(usdcAmount.value));
-  if (!marketState.value || amount <= 0) return null;
-
-  const yes = Number(marketState.value.supplyYes);
-  const no = Number(marketState.value.supplyNo);
-  const res = Number(marketState.value.reserve);
-
-  const newReserve = res + amount;
-  const other = selectedOutcome.value === 0 ? no : yes;
-  const newChosen = Math.sqrt(newReserve * newReserve - other * other);
-
-  const newYes = selectedOutcome.value === 0 ? newChosen : yes;
-  const newNo = selectedOutcome.value === 1 ? newChosen : no;
-  const total = newYes * newYes + newNo * newNo;
-  if (total === 0) return null;
-
-  return {
-    yes: Math.round((newYes / Math.sqrt(total)) * 100),
-    no: Math.round((newNo / Math.sqrt(total)) * 100)
-  };
+  return computeChance(
+    marketState.value?.supplyYes ?? 0n,
+    marketState.value?.supplyNo ?? 0n,
+    marketState.value?.reserve ?? 0n,
+    selectedOutcome.value,
+    Number(parseEth(ethAmount.value)),
+    false
+  );
 });
 
 const displayChance = computed(() => {
@@ -103,7 +99,7 @@ const displayChance = computed(() => {
 });
 
 const estimate = computed(() => {
-  const amount = parseUsdc(usdcAmount.value);
+  const amount = parseEth(ethAmount.value);
   if (amount <= 0n) return null;
 
   const yes = marketState.value?.supplyYes ?? 0n;
@@ -120,37 +116,31 @@ const sellBalance = computed(() =>
 );
 
 const sellTokenAmount = computed(() => {
-  const parsed = parseUsdc(sellAmount.value);
-  // Cap at balance to avoid rounding issues from formatUsdc/parseUsdc roundtrip
+  const parsed = parseEth(sellAmount.value);
   return parsed > sellBalance.value ? sellBalance.value : parsed;
 });
 
 const sellEstReturn = computed(() => {
   if (!marketState.value || sellTokenAmount.value <= 0n) return 0;
   return estimateSell(
-    marketState.value.supplyYes, marketState.value.supplyNo,
-    marketState.value.reserve, sellOutcomeSelection.value, sellTokenAmount.value
+    marketState.value.supplyYes,
+    marketState.value.supplyNo,
+    marketState.value.reserve,
+    sellOutcomeSelection.value,
+    sellTokenAmount.value
   );
 });
 
 const postSellChance = computed(() => {
-  const amount = Number(sellTokenAmount.value);
-  if (!marketState.value || amount <= 0) return null;
-
-  const yes = Number(marketState.value.supplyYes);
-  const no = Number(marketState.value.supplyNo);
-
-  const newYes = sellOutcomeSelection.value === 0 ? yes - amount : yes;
-  const newNo = sellOutcomeSelection.value === 1 ? no - amount : no;
-  if (newYes < 0 || newNo < 0) return null;
-
-  const total = newYes * newYes + newNo * newNo;
-  if (total === 0) return null;
-
-  return {
-    yes: Math.round((newYes / Math.sqrt(total)) * 100),
-    no: Math.round((newNo / Math.sqrt(total)) * 100)
-  };
+  if (!marketState.value) return null;
+  return computeChance(
+    marketState.value.supplyYes,
+    marketState.value.supplyNo,
+    marketState.value.reserve,
+    sellOutcomeSelection.value,
+    Number(sellTokenAmount.value),
+    true
+  );
 });
 
 const sellDisplayChance = computed(() => {
@@ -162,14 +152,36 @@ const sellDisplayChance = computed(() => {
   return sellOutcomeSelection.value === 0 ? yesCents.value : noCents.value;
 });
 
+const price = computed(() => ethPrice.value ?? 0);
+
+function toUsd(weiAmount: number): number {
+  return (weiAmount / 1e18) * price.value;
+}
+
+const amountInput = ref<{ $el?: HTMLElement } | null>(null);
+
+// Reset and focus input on modal open
+watch(
+  () => props.open,
+  open => {
+    if (open) {
+      ethAmount.value = '';
+      sellAmount.value = '';
+      activeTab.value = 'buy';
+      selectedOutcome.value = 0;
+      nextTick(() => {
+        amountInput.value?.$el?.querySelector('input')?.focus();
+      });
+    }
+  }
+);
+
 function setMax() {
-  usdcAmount.value = formatUsdc(userUsdcBalance.value);
+  ethAmount.value = formatEth(userEthBalance.value);
 }
 
 function setSellMax() {
-  if (sellBalance.value > 0n) {
-    sellAmount.value = formatUsdc(sellBalance.value);
-  }
+  sellAmount.value = formatEth(sellBalance.value);
 }
 
 // Refresh balances when switching to sell tab
@@ -186,21 +198,29 @@ watch(hasPosition, () => {
   }
 });
 
-// Auto-select the side the user holds and prefill max
-watch([hasYes, hasNo, activeTab], () => {
-  if (activeTab.value !== 'sell') return;
-  if (!hasYes.value && hasNo.value) {
-    sellOutcomeSelection.value = 1;
-  } else if (!hasNo.value && hasYes.value) {
-    sellOutcomeSelection.value = 0;
-  }
-  // Prefill with max balance of selected side
-  nextTick(() => {
-    if (sellBalance.value > 0n) {
-      sellAmount.value = formatUsdc(sellBalance.value);
+// Auto-select the side the user holds when entering sell tab
+watch(
+  [hasYes, hasNo, activeTab],
+  () => {
+    if (activeTab.value !== 'sell') return;
+    if (!hasYes.value && hasNo.value) {
+      sellOutcomeSelection.value = 1;
+    } else if (!hasNo.value && hasYes.value) {
+      sellOutcomeSelection.value = 0;
     }
-  });
-}, { immediate: true });
+  },
+  { immediate: true }
+);
+
+// Prefill sell amount with max whenever balance changes or outcome switches
+watch(
+  [sellBalance, sellOutcomeSelection, activeTab],
+  () => {
+    if (activeTab.value !== 'sell') return;
+    sellAmount.value = sellBalance.value > 0n ? formatEth(sellBalance.value) : '';
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -212,16 +232,52 @@ watch([hasYes, hasNo, activeTab], () => {
     <div class="p-4 space-y-4">
       <div class="text-skin-text text-md text-center">
         <template v-if="isResolved">
-          This market has been resolved. The winning outcome is <span class="text-skin-link">{{ winnerLabel }}</span>.
+          This market has been resolved. The winning outcome is
+          <span class="text-skin-link">{{ winnerLabel }}</span
+          >.
         </template>
         <template v-else-if="activeTab === 'sell'">
-          <a class="text-skin-link font-bold cursor-pointer" @click="activeTab = 'buy'"><IH-switch-horizontal class="inline-block w-[1em] h-[1em] align-middle -mt-0.5" /> Sell</a> your <span class="text-skin-link">{{ sellOutcomeSelection === 0 ? yesLabel : noLabel }}</span> shares to cash out your position.
+          <div class="mb-2">
+            <UiButton class="!inline-flex !min-w-0 !font-normal" @click="activeTab = 'buy'">
+              <IH-switch-horizontal class="w-[1em] h-[1em]" />
+              Sell
+            </UiButton>
+          </div>
+          Sell your
+          <span class="text-skin-link">{{
+            sellOutcomeSelection === 0 ? yesLabel : noLabel
+          }}</span>
+          {{ ' ' }}
+          <span class="text-skin-link">shares</span> to convert them back to
+          ETH. Sell early to lock in profit or limit your loss.
         </template>
         <template v-else-if="selectedOutcome === 0">
-          <a v-if="hasPosition" class="text-skin-link font-bold cursor-pointer" @click="activeTab = 'sell'"><IH-switch-horizontal class="inline-block w-[1em] h-[1em] align-middle -mt-0.5" /> Buy</a><span v-else class="text-skin-link font-bold">Buy</span> <span class="text-skin-link">{{ yesLabel }}</span> <span class="text-skin-link">shares</span> if you think the proposal will <span class="text-skin-link">pass</span>. You'll earn a profit if you're right.
+          <div v-if="hasPosition" class="mb-2">
+            <UiButton class="!inline-flex !min-w-0 !font-normal" @click="activeTab = 'sell'">
+              <IH-switch-horizontal class="w-[1em] h-[1em]" />
+              Buy
+            </UiButton>
+          </div>
+          Buy
+          <span class="text-skin-link">{{ yesLabel }}</span>
+          {{ ' ' }}
+          <span class="text-skin-link">shares</span> if you think the proposal
+          will <span class="text-skin-link">pass</span>. You'll earn a profit if
+          you're right.
         </template>
         <template v-else>
-          <a v-if="hasPosition" class="text-skin-link font-bold cursor-pointer" @click="activeTab = 'sell'"><IH-switch-horizontal class="inline-block w-[1em] h-[1em] align-middle -mt-0.5" /> Buy</a><span v-else class="text-skin-link font-bold">Buy</span> <span class="text-skin-link">{{ noLabel }}</span> <span class="text-skin-link">shares</span> if you think the proposal will <span class="text-skin-link">fail</span>. You'll earn a profit if you're right.
+          <div v-if="hasPosition" class="mb-2">
+            <UiButton class="!inline-flex !min-w-0 !font-normal" @click="activeTab = 'sell'">
+              <IH-switch-horizontal class="w-[1em] h-[1em]" />
+              Buy
+            </UiButton>
+          </div>
+          Buy
+          <span class="text-skin-link">{{ noLabel }}</span>
+          {{ ' ' }}
+          <span class="text-skin-link">shares</span> if you think the proposal
+          will <span class="text-skin-link">fail</span>. You'll earn a profit if
+          you're right.
         </template>
       </div>
 
@@ -230,9 +286,7 @@ watch([hasYes, hasNo, activeTab], () => {
         <div
           class="rounded-xl p-4 text-center"
           :class="
-            winnerLabel === 'Yes'
-              ? 'bg-skin-success/10'
-              : 'bg-skin-danger/10'
+            winnerLabel === 'Yes' ? 'bg-skin-success/10' : 'bg-skin-danger/10'
           "
         >
           <div class="text-xs uppercase tracking-wide text-skin-text mb-1">
@@ -241,9 +295,7 @@ watch([hasYes, hasNo, activeTab], () => {
           <div
             class="text-xl font-bold"
             :class="
-              winnerLabel === 'Yes'
-                ? 'text-skin-success'
-                : 'text-skin-danger'
+              winnerLabel === 'Yes' ? 'text-skin-success' : 'text-skin-danger'
             "
           >
             {{ winnerLabel }}
@@ -251,65 +303,63 @@ watch([hasYes, hasNo, activeTab], () => {
         </div>
 
         <div v-if="hasPosition" class="space-y-2">
-          <div
-            v-if="hasYes"
-            class="flex justify-between items-center text-sm"
-          >
+          <div v-if="hasYes" class="flex justify-between items-center text-sm">
             <span class="text-skin-text">Your {{ yesLabel }} tokens</span>
             <span class="text-skin-link font-medium">
-              {{ formatUsdc(userYesBalance) }}
+              {{ formatEth(userYesBalance) }}
             </span>
           </div>
-          <div
-            v-if="hasNo"
-            class="flex justify-between items-center text-sm"
-          >
+          <div v-if="hasNo" class="flex justify-between items-center text-sm">
             <span class="text-skin-text">Your {{ noLabel }} tokens</span>
             <span class="text-skin-link font-medium">
-              {{ formatUsdc(userNoBalance) }}
+              {{ formatEth(userNoBalance) }}
             </span>
           </div>
         </div>
-
-        <UiButton
-          v-if="canRedeem"
-          primary
-          class="w-full"
-          :loading="txPending"
-          @click="redeem"
-        >
-          Redeem winnings
-        </UiButton>
       </div>
 
       <!-- Active market -->
       <div v-else class="space-y-4">
         <!-- Buy tab -->
-        <div v-if="activeTab === 'buy'" class="space-y-3">
+        <div v-if="activeTab === 'buy'" class="space-y-4">
           <!-- Outcome buttons -->
           <div class="flex gap-2">
             <UiButton
               class="flex-1"
-              :class="selectedOutcome === 0 ? 'snack-btn-yes-active' : 'snack-btn-yes-idle'"
+              :class="
+                selectedOutcome === 0
+                  ? 'snack-btn-yes-active'
+                  : 'snack-btn-yes-idle'
+              "
               @click="selectedOutcome = 0"
             >
-              {{ yesLabel }} {{ yesCents }}&cent;
+              {{ yesLabel }} {{ yesCents }}%
             </UiButton>
             <UiButton
               class="flex-1"
-              :class="selectedOutcome === 1 ? 'snack-btn-no-active' : 'snack-btn-no-idle'"
+              :class="
+                selectedOutcome === 1
+                  ? 'snack-btn-no-active'
+                  : 'snack-btn-no-idle'
+              "
               @click="selectedOutcome = 1"
             >
-              {{ noLabel }} {{ noCents }}&cent;
+              {{ noLabel }} {{ noCents }}%
             </UiButton>
           </div>
 
+          <div class="space-y-2">
           <!-- Amount -->
           <div class="s-box s-input-pb-0">
             <div class="relative">
               <UiInputAmount
-                v-model="usdcAmount"
-                :definition="{ type: 'string', title: 'Amount', examples: ['0'] }"
+                ref="amountInput"
+                v-model="ethAmount"
+                :definition="{
+                  type: 'string',
+                  title: 'Amount (ETH)',
+                  examples: ['0']
+                }"
               />
               <button
                 v-if="web3.account"
@@ -321,31 +371,13 @@ watch([hasYes, hasNo, activeTab], () => {
             </div>
           </div>
 
-          <!-- Buy / Connect wallet button -->
-          <UiButton
-            v-if="web3.account"
-            primary
-            class="w-full"
-            :loading="txPending"
-            :disabled="!usdcAmount || Number(usdcAmount) <= 0"
-            @click="buyOutcome(selectedOutcome, usdcAmount)"
-          >
-            Buy
-          </UiButton>
-          <UiButton
-            v-else
-            primary
-            class="w-full"
-            @click="emit('connect')"
-          >
-            Connect wallet
-          </UiButton>
-
           <!-- Estimated payout -->
           <div class="space-y-0.5">
             <div class="flex justify-between">
               <span class="text-skin-text">
-                {{ selectedOutcome === 0 ? 'Chance to pass' : 'Chance to fail' }}
+                {{
+                  selectedOutcome === 0 ? 'Chance to pass' : 'Chance to fail'
+                }}
               </span>
               <span class="font-medium text-skin-link">
                 {{ displayChance }}%
@@ -356,17 +388,40 @@ watch([hasYes, hasNo, activeTab], () => {
                 Est. return if {{ outcomeLabel }} wins
               </span>
               <span class="text-skin-heading font-medium">
-                ${{ _n(estimate.payout / 1e6, 'standard', { maximumFractionDigits: 2 }) }}
-                <span v-if="Number(usdcAmount) > 0" class="text-skin-success">
-                  +{{ _n((estimate.profit / (Number(usdcAmount) * 1e6)) * 100, 'standard', { maximumFractionDigits: 1 }) }}%
+                {{ _n(estimate.payout / 1e18, 'standard', { maximumFractionDigits: 6 }) }} ETH
+                <span class="text-skin-text"
+                  >${{
+                    _n(toUsd(estimate.payout), 'standard', {
+                      maximumFractionDigits: 2
+                    })
+                  }}</span
+                >{{ ' ' }}
+                <span
+                  v-if="
+                    Number(ethAmount) > 0 &&
+                    estimate.profit > 0 &&
+                    Math.round(
+                      (estimate.profit / (Number(ethAmount) * 1e18)) * 1000
+                    ) > 0
+                  "
+                  class="text-skin-success"
+                >
+                  +{{
+                    _n(
+                      (estimate.profit / (Number(ethAmount) * 1e18)) * 100,
+                      'standard',
+                      { maximumFractionDigits: 1 }
+                    )
+                  }}%
                 </span>
               </span>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- Sell tab -->
-        <div v-if="activeTab === 'sell'" class="space-y-3">
+        <div v-if="activeTab === 'sell'" class="space-y-4">
           <div
             v-if="!web3.account"
             class="text-center text-skin-text text-sm py-4"
@@ -378,28 +433,45 @@ watch([hasYes, hasNo, activeTab], () => {
             <div class="flex gap-2">
               <UiButton
                 class="flex-1"
-                :class="hasYes ? (sellOutcomeSelection === 0 ? 'snack-btn-yes-active' : 'snack-btn-yes-idle') : ''"
+                :class="
+                  hasYes
+                    ? sellOutcomeSelection === 0
+                      ? 'snack-btn-yes-active'
+                      : 'snack-btn-yes-idle'
+                    : ''
+                "
                 :disabled="!hasYes"
                 @click="sellOutcomeSelection = 0"
               >
-                {{ yesLabel }} · {{ formatUsdc(userYesBalance) }}
+                {{ yesLabel }} {{ yesCents }}%
               </UiButton>
               <UiButton
                 class="flex-1"
-                :class="hasNo ? (sellOutcomeSelection === 1 ? 'snack-btn-no-active' : 'snack-btn-no-idle') : ''"
+                :class="
+                  hasNo
+                    ? sellOutcomeSelection === 1
+                      ? 'snack-btn-no-active'
+                      : 'snack-btn-no-idle'
+                    : ''
+                "
                 :disabled="!hasNo"
                 @click="sellOutcomeSelection = 1"
               >
-                {{ noLabel }} · {{ formatUsdc(userNoBalance) }}
+                {{ noLabel }} {{ noCents }}%
               </UiButton>
             </div>
 
+            <div class="space-y-2">
             <!-- Shares amount -->
             <div class="s-box s-input-pb-0">
               <div class="relative">
                 <UiInputAmount
                   v-model="sellAmount"
-                  :definition="{ type: 'string', title: 'Shares', examples: ['0'] }"
+                  :definition="{
+                    type: 'string',
+                    title: 'Shares',
+                    examples: ['0']
+                  }"
                 />
                 <button
                   v-if="sellBalance > 0n"
@@ -411,22 +483,15 @@ watch([hasYes, hasNo, activeTab], () => {
               </div>
             </div>
 
-            <!-- Sell button -->
-            <UiButton
-              primary
-              class="w-full"
-              :loading="txPending"
-              :disabled="!sellAmount || sellTokenAmount <= 0n || sellTokenAmount > sellBalance"
-              @click="sellOutcome(sellOutcomeSelection, sellTokenAmount)"
-            >
-              Sell
-            </UiButton>
-
             <!-- Estimated return -->
             <div class="space-y-0.5">
               <div class="flex justify-between">
                 <span class="text-skin-text">
-                  {{ sellOutcomeSelection === 0 ? 'Chance to pass' : 'Chance to fail' }}
+                  {{
+                    sellOutcomeSelection === 0
+                      ? 'Chance to pass'
+                      : 'Chance to fail'
+                  }}
                 </span>
                 <span class="font-medium text-skin-link">
                   {{ sellDisplayChance }}%
@@ -435,20 +500,94 @@ watch([hasYes, hasNo, activeTab], () => {
               <div v-if="sellEstReturn > 0" class="flex justify-between">
                 <span class="text-skin-text">Est. return</span>
                 <span class="text-skin-heading font-medium">
-                  ${{ _n(sellEstReturn / 1e6, 'standard', { maximumFractionDigits: 2 }) }}
+                  {{ _n(sellEstReturn / 1e18, 'standard', { maximumFractionDigits: 6 }) }} ETH
+                  <span class="text-skin-text"
+                    >${{
+                      _n(toUsd(sellEstReturn), 'standard', {
+                        maximumFractionDigits: 2
+                      })
+                    }}</span
+                  >{{ ' ' }}
                   <span
-                    v-if="Number(sellAmount) > 0"
-                    :class="sellEstReturn >= Number(sellTokenAmount) ? 'text-skin-success' : 'text-skin-danger'"
+                    v-if="
+                      Number(sellAmount) > 0 &&
+                      Math.round(
+                        Math.abs(
+                          ((sellEstReturn - Number(sellTokenAmount)) /
+                            Number(sellTokenAmount)) *
+                            1000
+                        )
+                      ) > 0
+                    "
+                    :class="
+                      sellEstReturn >= Number(sellTokenAmount)
+                        ? 'text-skin-success'
+                        : 'text-skin-danger'
+                    "
                   >
-                    {{ sellEstReturn >= Number(sellTokenAmount) ? '+' : '' }}{{ _n(((sellEstReturn - Number(sellTokenAmount)) / Number(sellTokenAmount)) * 100, 'standard', { maximumFractionDigits: 1 }) }}%
+                    {{ sellEstReturn >= Number(sellTokenAmount) ? '+' : ''
+                    }}{{
+                      _n(
+                        ((sellEstReturn - Number(sellTokenAmount)) /
+                          Number(sellTokenAmount)) *
+                          100,
+                        'standard',
+                        { maximumFractionDigits: 1 }
+                      )
+                    }}%
                   </span>
                 </span>
               </div>
+            </div>
             </div>
           </template>
         </div>
       </div>
     </div>
+
+    <template #footer>
+      <!-- Resolved: Redeem -->
+      <UiButton
+        v-if="isResolved && canRedeem"
+        primary
+        class="w-full"
+        :loading="txPending"
+        @click="redeem"
+      >
+        Redeem winnings
+      </UiButton>
+
+      <!-- Buy tab -->
+      <template v-else-if="activeTab === 'buy'">
+        <UiButton
+          v-if="web3.account"
+          primary
+          class="w-full"
+          :loading="txPending"
+          :disabled="!ethAmount || Number(ethAmount) <= 0"
+          @click="buyOutcome(selectedOutcome, ethAmount)"
+        >
+          Buy
+        </UiButton>
+        <UiButton v-else primary class="w-full" @click="emit('connect')">
+          Connect wallet
+        </UiButton>
+      </template>
+
+      <!-- Sell tab -->
+      <UiButton
+        v-else-if="activeTab === 'sell' && hasPosition"
+        primary
+        class="w-full"
+        :loading="txPending"
+        :disabled="
+          !sellAmount || sellTokenAmount <= 0n || sellTokenAmount > sellBalance
+        "
+        @click="sellOutcome(sellOutcomeSelection, sellTokenAmount, sellOutcomeSelection === 0 ? yesLabel : noLabel)"
+      >
+        Sell
+      </UiButton>
+    </template>
   </UiModal>
 </template>
 
