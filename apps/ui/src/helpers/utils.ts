@@ -290,9 +290,9 @@ export function _rt(time: number) {
   }
 }
 
-export function _tt(number) {
+export function _tt(time: number) {
   try {
-    return dayjs().to(number * 1000, true);
+    return dayjs().to(time * 1000, true);
   } catch (e) {
     console.log(e);
     return '';
