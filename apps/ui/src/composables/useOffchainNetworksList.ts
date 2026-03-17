@@ -1,4 +1,5 @@
 import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
+import { MaybeRefOrGetter } from 'vue';
 import { getNetwork, metadataNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
@@ -7,13 +8,13 @@ const premiumByNetwork = ref(new Map<NetworkID, Set<string>>());
 const loadingNetworks = new Set<NetworkID>();
 
 export function useOffchainNetworksList(
-  networkId: NetworkID,
+  networkId: MaybeRefOrGetter<NetworkID>,
   hideUnused = false
 ) {
-  const loaded = computed(() => premiumByNetwork.value.has(networkId));
+  const loaded = computed(() => premiumByNetwork.value.has(toValue(networkId)));
 
   const premiumChainIds = computed(
-    () => premiumByNetwork.value.get(networkId) ?? new Set<string>()
+    () => premiumByNetwork.value.get(toValue(networkId)) ?? new Set<string>()
   );
 
   const networks = computed(() => {
@@ -45,10 +46,13 @@ export function useOffchainNetworksList(
 
       // Only populate usage from metadataNetwork to prevent testnet counts from overwriting mainnet
       if (id === metadataNetwork) {
-        usage.value = Object.keys(result).reduce((acc, chainId) => {
-          acc[chainId] = result[chainId].spaces_count;
-          return acc;
-        }, {});
+        usage.value = Object.keys(result).reduce(
+          (acc: Record<string, number>, chainId) => {
+            acc[chainId] = result[chainId].spaces_count;
+            return acc;
+          },
+          {}
+        );
       }
 
       const premium = new Set<string>();
@@ -59,14 +63,14 @@ export function useOffchainNetworksList(
       });
 
       premiumByNetwork.value.set(id, premium);
+    } catch (err) {
+      throw new Error(`Failed to load networks for ${id}: ${err}`);
     } finally {
       loadingNetworks.delete(id);
     }
   }
 
-  onMounted(() => {
-    loadNetwork(networkId);
-  });
+  watch(() => toValue(networkId), loadNetwork, { immediate: true });
 
   return {
     networks,
