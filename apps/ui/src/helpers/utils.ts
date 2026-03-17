@@ -293,8 +293,8 @@ export function _rt(time: number) {
 export function _tt(time: number) {
   try {
     return dayjs().to(time * 1000, true);
-  } catch (e) {
-    console.log(e);
+  } catch (err) {
+    console.log(err);
     return '';
   }
 }
