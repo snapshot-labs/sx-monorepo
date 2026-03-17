@@ -11,6 +11,7 @@ export type NavItem = {
   hidden?: boolean;
   link?: RouteLocationRaw;
   activeRoute?: { prefix: string; params?: Record<string, string> };
+  isActive?: boolean;
   /** 1-based insertion index used by org nav to position custom items among defaults */
   position?: number;
 };

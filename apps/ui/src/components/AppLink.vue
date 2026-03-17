@@ -32,11 +32,11 @@ const resolved = computed(() =>
   </a>
   <router-link
     v-else-if="resolved"
-    v-slot="{ isExactActive }"
+    v-slot="{ isActive, isExactActive }"
     :to="resolved.fullPath"
     @click="$emit('click')"
   >
-    <slot :is-exact-active="isExactActive" />
+    <slot :is-active="isActive" :is-exact-active="isExactActive" />
   </router-link>
   <button v-else type="button" @click="$emit('click')">
     <slot />

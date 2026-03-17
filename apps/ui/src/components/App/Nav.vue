@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const { config, activeItemKey } = useNav();
+const { config } = useNav();
 </script>
 
 <template>
@@ -14,7 +14,7 @@ const { config, activeItemKey } = useNav();
         <div
           class="px-4 space-x-2 flex items-center"
           :class="[
-            isExactActive || key === activeItemKey
+            isExactActive || item.isActive
               ? 'text-skin-link'
               : 'text-skin-text',
             config?.slim ? 'py-1' : 'py-1.5'

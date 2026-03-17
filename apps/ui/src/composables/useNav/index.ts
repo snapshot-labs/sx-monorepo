@@ -39,7 +39,11 @@ function getActiveItemKey(
   return null;
 }
 
-function enrichItems(config: NavConfig, routeName: string): NavConfig {
+function enrichItems(
+  config: NavConfig,
+  routeName: string,
+  activeKey: string | null
+): NavConfig {
   const items = Object.fromEntries(
     Object.entries(config.items)
       .map(([key, item]): [string, NavItem] => [
@@ -47,7 +51,8 @@ function enrichItems(config: NavConfig, routeName: string): NavConfig {
         {
           ...item,
           hidden: item.hidden ?? false,
-          link: item.link ?? { name: `${routeName}-${key}` }
+          link: item.link ?? { name: `${routeName}-${key}` },
+          isActive: key === activeKey
         }
       ])
       .filter(([, item]) => !item.hidden)
@@ -119,14 +124,11 @@ function setup() {
     const result = provider.getConfig(context.value);
     if (!result) return null;
 
-    return enrichItems(result, provider.routeName);
+    const activeKey = getActiveItemKey(result, route);
+    return enrichItems(result, provider.routeName, activeKey);
   });
 
-  const activeItemKey = computed(() =>
-    config.value ? getActiveItemKey(config.value, route) : null
-  );
-
-  return { hasAppNav, config, activeItemKey };
+  return { hasAppNav, config };
 }
 
 export const useNav = createSharedComposable(setup);
