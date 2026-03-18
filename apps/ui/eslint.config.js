@@ -11,6 +11,6 @@ export default [
     }
   },
   {
-    ignores: ['**/gql/**']
+    ignores: ['**/gql/**', '**/*.stories.ts']
   }
 ];
