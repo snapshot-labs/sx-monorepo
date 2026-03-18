@@ -51,18 +51,8 @@ export default defineConfig({
       formats: ['es']
     },
     cssCodeSplit: true,
-    rollupOptions: {
-      external: [
-        'vue',
-        'vue-router',
-        '@vueuse/core',
-        'unplugin-vue-components'
-      ],
-      output: {
-        globals: {
-          vue: 'Vue'
-        }
-      }
+    rolldownOptions: {
+      external: ['vue', 'vue-router', '@vueuse/core', 'unplugin-vue-components']
     }
   }
 });
