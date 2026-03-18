@@ -3,6 +3,10 @@ import createCompStrategy from './comp';
 import createMerkleWhitelist from './merkleWhitelist';
 import createOzVotesStrategy from './ozVotes';
 import createVanillaStrategy from './vanilla';
+import createProofOfTimeStrategy from './proofOfTime';
+export { createProofOfTimeStrategy };
+export type { ProofOfTime, PoTReading, PoTStrategyParams } from './proofOfTime';
+export { generateProofOfTime, computePoTHash, computeAccuracyMultiplier } from './proofOfTime';
 import {
   ClientConfig,
   IndexedConfig,
@@ -38,6 +42,10 @@ export function getStrategy(
 
   if (strategy.type === 'apeGas') {
     return createApeGasStrategy();
+  }
+
+  if (strategy.type === 'proofOfTime') {
+    return createProofOfTimeStrategy();
   }
 
   return null;
