@@ -6,6 +6,7 @@ import {
 import {
   BASIC_CHOICES,
   CHAIN_IDS,
+  DELEGATION_TYPES_NAMES,
   EVM_EMPTY_ADDRESS,
   STARKNET_EMPTY_ADDRESS
 } from '@/helpers/constants';
@@ -70,6 +71,14 @@ import {
 type ApiOptions = {
   baseNetworkId?: NetworkID;
   highlightApiUrl?: string;
+};
+
+const DELEGATES_SUBGRAPH_URL =
+  'https://api.studio.thegraph.com/query/23545/delegates/version/latest';
+
+const GOVERNOR_DELEGATIONS: Record<string, string> = {
+  '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': DELEGATES_SUBGRAPH_URL,
+  '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3': DELEGATES_SUBGRAPH_URL
 };
 
 function getAddressType(author: ApiProposal['author']) {
@@ -167,6 +176,24 @@ function formatLabels(labels: string[]) {
     const { id, name, description, color } = JSON.parse(label);
     return { id, name, description, color };
   });
+}
+
+function getGovernorDelegations(space: ApiSpaceWithMetadata) {
+  const apiUrl = GOVERNOR_DELEGATIONS[space.id];
+  if (!apiUrl) return [];
+
+  const contractAddress = space.strategies_params[0]?.toLowerCase();
+  if (!contractAddress) return [];
+
+  return [
+    {
+      name: DELEGATION_TYPES_NAMES['governor-subgraph'],
+      apiType: 'governor-subgraph',
+      apiUrl,
+      contractAddress,
+      chainId: String(getNetwork(space._indexer as NetworkID).chainId)
+    }
+  ];
 }
 
 function getValidationStrategyStrategiesIndices(
@@ -273,31 +300,33 @@ function formatSpace(
       formatMetadataTreasury(treasury)
     ),
     labels: formatLabels(space.metadata.labels),
-    delegations: space.metadata.delegations.map(delegation => {
-      const { name, api_type, api_url, contract, chain_id } =
-        JSON.parse(delegation);
+    delegations: space.metadata.delegations.length
+      ? space.metadata.delegations.map(delegation => {
+          const { name, api_type, api_url, contract, chain_id } =
+            JSON.parse(delegation);
 
-      if (contract?.includes(':')) {
-        // NOTE: Legacy format
-        const [network, address] = contract.split(':');
+          if (contract?.includes(':')) {
+            // NOTE: Legacy format
+            const [network, address] = contract.split(':');
 
-        return {
-          name: name,
-          apiType: api_type,
-          apiUrl: api_url,
-          contractAddress: address === 'null' ? null : address,
-          chainId: String(CHAIN_IDS[network])
-        };
-      }
+            return {
+              name,
+              apiType: api_type,
+              apiUrl: api_url,
+              contractAddress: address === 'null' ? null : address,
+              chainId: String(CHAIN_IDS[network])
+            };
+          }
 
-      return {
-        name: name,
-        apiType: api_type,
-        apiUrl: api_url,
-        contractAddress: contract,
-        chainId: String(chain_id)
-      };
-    }),
+          return {
+            name,
+            apiType: api_type,
+            apiUrl: api_url,
+            contractAddress: contract,
+            chainId: String(chain_id)
+          };
+        })
+      : getGovernorDelegations(space),
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
     executors_destinations: space.metadata.executors_destinations,
