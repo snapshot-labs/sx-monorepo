@@ -145,7 +145,9 @@ const votingTime = computed(() => {
   if (!current) return null;
 
   if (props.proposal.state === 'pending') {
-    return `Starting in ${startTime.value}`;
+    return startTime.value === 'now'
+      ? 'Starting soon'
+      : `Starting in ${startTime.value}`;
   }
 
   const hasEnded = props.proposal.max_end <= current;

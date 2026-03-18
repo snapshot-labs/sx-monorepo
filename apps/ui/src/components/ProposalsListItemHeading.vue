@@ -132,10 +132,18 @@ const hasVoted = computed(
         class="text-skin-text"
         @click="modalOpenTimeline = true"
       >
-        <template v-if="proposal.state === 'pending'">
-          starting in
-          <TimeRelative :time="proposal.start" without-suffix />
-        </template>
+        <TimeRelative
+          v-if="proposal.state === 'pending'"
+          v-slot="{ relativeTime }"
+          :time="proposal.start"
+          without-suffix
+        >
+          {{
+            relativeTime === 'now'
+              ? 'starting soon'
+              : `starting in ${relativeTime}`
+          }}
+        </TimeRelative>
         <TimeRelative v-else :time="proposal.max_end" />
       </button>
       <template v-if="hasVoted">

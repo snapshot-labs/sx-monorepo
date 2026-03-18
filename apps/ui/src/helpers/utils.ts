@@ -290,7 +290,6 @@ export function _rt(time: number, withoutSuffix = false) {
   }
 }
 
-
 export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
   const definition = {
     $async: true,
