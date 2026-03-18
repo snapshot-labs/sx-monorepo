@@ -281,23 +281,15 @@ export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   }
 }
 
-export function _rt(time: number) {
+export function _rt(time: number, withoutSuffix = false) {
   try {
-    return dayjs(time * 1000).fromNow(false);
+    return dayjs(time * 1000).fromNow(withoutSuffix);
   } catch (err) {
     console.log(err);
     return '';
   }
 }
 
-export function _tt(time: number) {
-  try {
-    return dayjs().to(time * 1000, true);
-  } catch (err) {
-    console.log(err);
-    return '';
-  }
-}
 
 export function abiToDefinition(abi: FunctionFragment, chainId?: ChainId) {
   const definition = {

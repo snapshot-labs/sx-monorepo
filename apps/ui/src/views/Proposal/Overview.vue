@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/vue-query';
 import { EVM_EMPTY_ADDRESS } from '@/helpers/constants';
 import {
   _n,
-  _tt,
   compareAddresses,
   getProposalId,
   getUrl,
@@ -137,6 +136,7 @@ const proposalTransactionId = computed(() => {
 });
 
 const endTime = useRelativeTime(() => props.proposal.max_end);
+const startTime = useRelativeTime(() => props.proposal.start, true);
 
 const votingTime = computed(() => {
   if (!props.proposal) return null;
@@ -145,7 +145,7 @@ const votingTime = computed(() => {
   if (!current) return null;
 
   if (props.proposal.state === 'pending') {
-    return `Starting in ${_tt(props.proposal.start)}`;
+    return `Starting in ${startTime.value}`;
   }
 
   const hasEnded = props.proposal.max_end <= current;
