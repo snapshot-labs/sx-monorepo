@@ -1,15 +1,22 @@
 import snapshotJsNetworks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { getNetwork } from '@/networks';
+import { MaybeRefOrGetter } from 'vue';
+import { getNetwork, metadataNetwork } from '@/networks';
 import { NetworkID } from '@/types';
 
 const usage = ref<Record<string, number | undefined> | null>(null);
-const premiumChainIds = ref<Set<string>>(new Set());
-const loaded = ref(false);
+const premiumByNetwork = ref(new Map<NetworkID, Set<string>>());
+const loadingNetworks = new Set<NetworkID>();
 
 export function useOffchainNetworksList(
-  networkId: NetworkID,
+  networkId: MaybeRefOrGetter<NetworkID>,
   hideUnused = false
 ) {
+  const loaded = computed(() => premiumByNetwork.value.has(toValue(networkId)));
+
+  const premiumChainIds = computed(
+    () => premiumByNetwork.value.get(toValue(networkId)) ?? new Set<string>()
+  );
+
   const networks = computed(() => {
     const rawNetworks = Object.values(snapshotJsNetworks);
 
@@ -28,29 +35,42 @@ export function useOffchainNetworksList(
     });
   });
 
-  async function load() {
-    if (loaded.value) return;
+  async function loadNetwork(id: NetworkID) {
+    if (loadingNetworks.has(id) || premiumByNetwork.value.has(id)) return;
 
-    const network = getNetwork(networkId);
-    const networks = await network.api.getNetworks();
+    loadingNetworks.add(id);
 
-    usage.value = Object.keys(networks).reduce((acc, chainId) => {
-      acc[chainId] = networks[chainId].spaces_count;
-      return acc;
-    }, {});
+    try {
+      const network = getNetwork(id);
+      const result = await network.api.getNetworks();
 
-    Object.keys(networks).forEach(chainId => {
-      if (networks[chainId].premium) {
-        premiumChainIds.value.add(chainId);
+      // Only populate usage from metadataNetwork to prevent testnet counts from overwriting mainnet
+      if (id === metadataNetwork) {
+        usage.value = Object.keys(result).reduce(
+          (acc: Record<string, number>, chainId) => {
+            acc[chainId] = result[chainId].spaces_count;
+            return acc;
+          },
+          {}
+        );
       }
-    });
 
-    loaded.value = true;
+      const premium = new Set<string>();
+      Object.keys(result).forEach(chainId => {
+        if (result[chainId].premium) {
+          premium.add(chainId);
+        }
+      });
+
+      premiumByNetwork.value.set(id, premium);
+    } catch (err) {
+      throw new Error(`Failed to load networks for ${id}: ${err}`);
+    } finally {
+      loadingNetworks.delete(id);
+    }
   }
 
-  onMounted(() => {
-    load();
-  });
+  watch(() => toValue(networkId), loadNetwork, { immediate: true });
 
   return {
     networks,
