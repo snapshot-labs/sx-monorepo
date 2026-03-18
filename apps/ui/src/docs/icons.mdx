@@ -1,0 +1,31 @@
+import { Meta, IconGallery, IconItem } from '@storybook/addon-docs/blocks';
+import { icons as outlineIcons } from '@iconify-json/heroicons-outline';
+import { icons as solidIcons } from '@iconify-json/heroicons-solid';
+
+<Meta title="Iconography" />
+
+# Iconography
+
+<h2>Outline icons</h2>
+<IconGallery>
+  {Object.entries(outlineIcons.icons).map(([name, icon]) => (
+    <IconItem
+      key={name}
+      name={name}
+    >
+      <svg dangerouslySetInnerHTML={{ __html: icon.body }} width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" />
+    </IconItem>
+  ))}
+</IconGallery>
+
+<h2>Solid icons</h2>
+<IconGallery>
+  {Object.entries(solidIcons.icons).map(([name, icon]) => (
+    <IconItem
+      key={name}
+      name={name}
+    >
+      <svg dangerouslySetInnerHTML={{ __html: icon.body }} width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" />
+    </IconItem>
+  ))}
+</IconGallery>
