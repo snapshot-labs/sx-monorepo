@@ -29,6 +29,7 @@ import {
   ProposalState,
   ScoresTick,
   Space,
+  SpaceMetadataDelegation,
   SpaceMetadataTreasury,
   Transaction,
   User,
@@ -178,7 +179,38 @@ function formatLabels(labels: string[]) {
   });
 }
 
-function getGovernorDelegations(space: ApiSpaceWithMetadata) {
+function formatDelegation(delegation: string): SpaceMetadataDelegation {
+  const { name, api_type, api_url, contract, chain_id } =
+    JSON.parse(delegation);
+
+  if (contract?.includes(':')) {
+    // NOTE: Legacy format
+    const [network, address] = contract.split(':');
+
+    return {
+      name,
+      apiType: api_type,
+      apiUrl: api_url,
+      contractAddress: address === 'null' ? null : address,
+      chainId: String(CHAIN_IDS[network])
+    };
+  }
+
+  return {
+    name,
+    apiType: api_type,
+    apiUrl: api_url,
+    contractAddress: contract,
+    chainId: String(chain_id)
+  };
+}
+
+function formatDelegations(
+  space: ApiSpaceWithMetadata
+): SpaceMetadataDelegation[] {
+  if (space.metadata.delegations.length) {
+    return space.metadata.delegations.map(formatDelegation);
+  }
   const apiUrl = GOVERNOR_DELEGATIONS[space.id];
   if (!apiUrl) return [];
 
@@ -191,7 +223,7 @@ function getGovernorDelegations(space: ApiSpaceWithMetadata) {
       apiType: 'governor-subgraph',
       apiUrl,
       contractAddress,
-      chainId: String(getNetwork(space._indexer as NetworkID).chainId)
+      chainId: String(CHAIN_IDS[space._indexer])
     }
   ];
 }
@@ -300,33 +332,7 @@ function formatSpace(
       formatMetadataTreasury(treasury)
     ),
     labels: formatLabels(space.metadata.labels),
-    delegations: space.metadata.delegations.length
-      ? space.metadata.delegations.map(delegation => {
-          const { name, api_type, api_url, contract, chain_id } =
-            JSON.parse(delegation);
-
-          if (contract?.includes(':')) {
-            // NOTE: Legacy format
-            const [network, address] = contract.split(':');
-
-            return {
-              name,
-              apiType: api_type,
-              apiUrl: api_url,
-              contractAddress: address === 'null' ? null : address,
-              chainId: String(CHAIN_IDS[network])
-            };
-          }
-
-          return {
-            name,
-            apiType: api_type,
-            apiUrl: api_url,
-            contractAddress: contract,
-            chainId: String(chain_id)
-          };
-        })
-      : getGovernorDelegations(space),
+    delegations: formatDelegations(space),
     executors: space.metadata.executors,
     executors_types: space.metadata.executors_types,
     executors_destinations: space.metadata.executors_destinations,
