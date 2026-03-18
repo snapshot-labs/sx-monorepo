@@ -57,7 +57,7 @@ watch(
           '!border-skin-link': selectedChoices[i + 1] > 0
         }"
       >
-        <UiTooltipOnTruncate :content="choice" class="text-skin-link" />
+        <UiTooltipOnTruncate :content="choice" class="grow text-skin-link" />
         <div class="flex gap-1 items-center">
           <UiButton
             :disabled="!selectedChoices[i + 1]"

@@ -1,10 +1,11 @@
 import { Transaction as _Transaction } from '@snapshot-labs/sx';
+import { NotificationType } from '@snapshot-labs/tune';
 import { VNode } from 'vue';
 import { RouteLocationRaw } from 'vue-router';
 import { ApiSpace as OffchainApiSpace } from '@/networks/offchain/api/types';
 
 // UI
-export type NotificationType = 'error' | 'warning' | 'success';
+export type { NotificationType };
 
 export type Task = {
   description: string;

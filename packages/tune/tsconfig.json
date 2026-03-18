@@ -1,0 +1,23 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "sourceMap": true,
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "types": ["unplugin-icons/types/vue"],
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.vue",
+    "auto-imports.d.ts",
+    "tailwind.config.ts",
+    "vite.config.ts"
+  ]
+}
