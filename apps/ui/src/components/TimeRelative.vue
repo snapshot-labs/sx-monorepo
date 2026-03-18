@@ -1,9 +1,13 @@
 <script setup lang="ts">
-const props = defineProps<{
-  time: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    time: number;
+    withoutSuffix?: boolean;
+  }>(),
+  { withoutSuffix: false }
+);
 
-const relativeTime = useRelativeTime(() => props.time);
+const relativeTime = useRelativeTime(() => props.time, props.withoutSuffix);
 </script>
 
 <template>
