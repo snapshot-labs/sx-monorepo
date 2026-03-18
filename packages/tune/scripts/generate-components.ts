@@ -5,7 +5,10 @@ const files = globSync('src/components/Ui/*.vue');
 const names = files.map(f => basename(f, '.vue')).sort();
 
 const indexExports = names
-  .map(name => `export { default as Ui${name} } from './components/Ui/${name}.vue';`)
+  .map(
+    name =>
+      `export { default as Ui${name} } from './components/Ui/${name}.vue';`
+  )
   .join('\n');
 
 const index = `// Styles
@@ -48,4 +51,6 @@ export function TuneResolver(): ComponentResolver {
 writeFileSync('src/index.ts', index);
 writeFileSync('src/resolver.ts', resolver);
 
-console.log(`Generated exports for ${names.length} components: ${names.join(', ')}`);
+console.log(
+  `Generated exports for ${names.length} components: ${names.join(', ')}`
+);

@@ -21,7 +21,7 @@
     "generate": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/generate-components.ts",
     "build": "yarn generate && vite build && vue-tsc",
     "typecheck": "vue-tsc --noEmit",
-    "lint": "eslint src/",
+    "lint": "eslint .",
     "lint:fix": "yarn lint --fix",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"

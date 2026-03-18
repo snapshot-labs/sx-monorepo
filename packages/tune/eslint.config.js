@@ -9,5 +9,8 @@ export default [
     languageOptions: {
       globals: autoImportGlobals.globals
     }
+  },
+  {
+    ignores: ['dist/**', 'storybook-static/**']
   }
 ];

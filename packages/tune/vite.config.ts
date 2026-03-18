@@ -52,7 +52,12 @@ export default defineConfig({
     },
     cssCodeSplit: true,
     rollupOptions: {
-      external: ['vue', 'vue-router', '@vueuse/core', 'unplugin-vue-components'],
+      external: [
+        'vue',
+        'vue-router',
+        '@vueuse/core',
+        'unplugin-vue-components'
+      ],
       output: {
         globals: {
           vue: 'Vue'
