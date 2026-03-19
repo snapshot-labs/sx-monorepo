@@ -69,10 +69,23 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
   },
+  'ens.stage.box': {
+    skinSettings: {
+      logo: 'ipfs://bafkreigdimh5bvu3jwyqbwpgnwlumipngfvuemutzughnv77ogqpedngfq',
+      bg_color: '#f9f8f9',
+      link_color: '#000000',
+      text_color: '#4a4a4f',
+      content_color: '#4a4a4f',
+      border_color: '#e3e1e4',
+      heading_color: '#1a1523',
+      primary_color: '#000000',
+      theme: 'light'
+    }
+  },
   ...(WHITELABEL_MAPPING
     ? (() => {
         const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
-        if (!localSpaceId) return { [localDomain]: {} };
+        if (!localSpaceId) return {};
         const [network, id] = localSpaceId.split(':');
         return { [localDomain]: { network, id } };
       })()

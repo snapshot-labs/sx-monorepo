@@ -7,6 +7,7 @@ import {
 import { NavItem } from '@/composables/useNav/types';
 import { stripInvalidSpaceParam } from '@/helpers/router';
 import { NetworkID, Space } from '@/types';
+import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCash from '~icons/heroicons-outline/cash';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
@@ -68,21 +69,15 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     name: 'ENS',
     spaceIds: [
       {
-        network: 's',
-        id: 'ens.eth'
-      },
-      {
         network: 'eth',
         id: '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3'
+      },
+      {
+        network: 's',
+        id: 'ens.eth'
       }
     ],
     navItems: {
-      proposals: {
-        link: {
-          name: 'space-proposals',
-          params: { space: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3' }
-        }
-      },
       signals: {
         name: 'Signals',
         icon: IHWifi,
@@ -95,7 +90,13 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       delegates: {
         name: 'Delegates',
         icon: IHLightningBolt,
-        link: { name: 'space-delegates' }
+        link: { name: 'space-delegates', params: { space: 's:ens.eth' } }
+      },
+      discussions: {
+        name: 'Discussions',
+        icon: IHAnnotation,
+        link: { name: 'space-discussions', params: { space: 's:ens.eth' } },
+        isActiveOnChildren: true
       },
       treasury: {
         name: 'Treasury',

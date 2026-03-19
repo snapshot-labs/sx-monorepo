@@ -59,17 +59,17 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
       ]
     },
     {
-      path: 'discussions',
+      path: ':space/discussions',
       name: `${prefix}-discussions`,
       component: SpaceDiscussions
     },
     {
-      path: 'discussions/:topic',
+      path: ':space/discussions/:topic',
       name: `${prefix}-discussions-topic`,
       component: Topic
     },
     {
-      path: 'delegates',
+      path: ':space/delegates',
       name: `${prefix}-delegates`,
       component: SpaceDelegates
     },
