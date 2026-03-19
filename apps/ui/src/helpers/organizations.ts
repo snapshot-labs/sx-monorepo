@@ -7,8 +7,11 @@ import {
 import { NavItem } from '@/composables/useNav/types';
 import { stripInvalidSpaceParam } from '@/helpers/router';
 import { NetworkID, Space } from '@/types';
+import IHCash from '~icons/heroicons-outline/cash';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
+import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
+import IHWifi from '~icons/heroicons-outline/wifi';
 
 type SpaceId = { network: NetworkID; id: string };
 
@@ -59,6 +62,51 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     id: 'snapshot',
     name: 'Snapshot',
     spaceIds: [{ network: 's', id: 'shot.eth' }]
+  },
+  ens: {
+    id: 'ens',
+    name: 'ENS',
+    spaceIds: [
+      {
+        network: 's',
+        id: 'ens.eth'
+      },
+      {
+        network: 'eth',
+        id: '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3'
+      }
+    ],
+    navItems: {
+      proposals: {
+        link: {
+          name: 'space-proposals',
+          params: { space: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3' }
+        }
+      },
+      signals: {
+        name: 'Signals',
+        icon: IHWifi,
+        link: {
+          name: 'space-proposals',
+          params: { space: 's:ens.eth' }
+        },
+        position: 2
+      },
+      delegates: {
+        name: 'Delegates',
+        icon: IHLightningBolt,
+        link: { name: 'space-delegates' }
+      },
+      treasury: {
+        name: 'Treasury',
+        icon: IHCash,
+        link: {
+          name: 'space-treasury',
+          params: { space: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3' }
+        },
+        isActiveOnChildren: true
+      }
+    }
   }
 };
 
@@ -69,6 +117,7 @@ const ORGANIZATION_MAPPING = import.meta.env.VITE_ORGANIZATION_MAPPING;
 const ORGANIZATION_DOMAINS: Record<string, string> = {
   'starknet.stage.box': 'starknet',
   'governance.starknet.io': 'starknet',
+  'ens.stage.box': 'ens',
   ...(ORGANIZATION_MAPPING
     ? {
         [ORGANIZATION_MAPPING.split(';')[0]]: ORGANIZATION_MAPPING.split(';')[1]
