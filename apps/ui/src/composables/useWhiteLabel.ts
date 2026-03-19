@@ -72,13 +72,13 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
   'ens.stage.box': {
     skinSettings: {
       logo: 'ipfs://bafkreigdimh5bvu3jwyqbwpgnwlumipngfvuemutzughnv77ogqpedngfq',
-      bg_color: '#f9f8f9',
-      link_color: '#000000',
-      text_color: '#4a4a4f',
-      content_color: '#4a4a4f',
-      border_color: '#e3e1e4',
-      heading_color: '#1a1523',
-      primary_color: '#000000',
+      bg_color: '#252739',
+      link_color: '#91ACEE',
+      text_color: '#CDD6F4',
+      content_color: '#CDD6F4',
+      border_color: '#313244',
+      heading_color: '#CCD3F2',
+      primary_color: '#91ACEE',
       theme: 'light'
     }
   },
