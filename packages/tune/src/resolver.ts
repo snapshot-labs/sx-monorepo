@@ -2,11 +2,27 @@ import { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
   'Alert',
+  'Carousel',
   'Checkbox',
+  'ColumnHeader',
+  'ColumnHeaderItemSortable',
+  'Container',
+  'ContainerInfiniteScroll',
+  'ContainerSettings',
+  'Eyebrow',
   'Loading',
+  'ModalSearchInput',
+  'Pill',
+  'RawInputAmount',
+  'ScrollerHorizontal',
+  'SectionHeader',
+  'Selector',
+  'StateWarning',
   'Switch',
+  'ToolbarBottom',
   'Tooltip',
-  'TooltipOnTruncate'
+  'TooltipOnTruncate',
+  'Topnav'
 ];
 
 export function TuneResolver(): ComponentResolver {
