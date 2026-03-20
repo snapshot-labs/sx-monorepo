@@ -71,7 +71,7 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
   },
   'ens.stage.box': {
     skinSettings: {
-      logo: 'ipfs://bafkreigdimh5bvu3jwyqbwpgnwlumipngfvuemutzughnv77ogqpedngfq',
+      logo: 'ipfs://bafkreicqvvdkplbjqqgbsd4xudjzoecacwupq7bsyyh7pamn6zhxubmsbu',
       bg_color: '#F6F6F6',
       link_color: '#011A25',
       text_color: '#4A5C63',
