@@ -181,11 +181,12 @@ watch(
       return;
     }
 
+    setTheme(skinSettings.value.theme);
+    setSkin(skinSettings.value);
+
     if (!whiteLabelSpace.value) return;
 
     setAppName(whiteLabelSpace.value.name);
-    setTheme(skinSettings.value.theme);
-    setSkin(skinSettings.value);
   },
   { immediate: true }
 );

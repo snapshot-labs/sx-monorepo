@@ -11,6 +11,7 @@ import SpaceDiscussions from '@/views/Space/Discussions.vue';
 import SpaceEditor from '@/views/Space/Editor.vue';
 import SpaceOverview from '@/views/Space/Overview.vue';
 import SpaceProposals from '@/views/Space/Proposals.vue';
+import SpaceTreasury from '@/views/Space/Treasury.vue';
 import SpaceUserProposals from '@/views/SpaceUser/Proposals.vue';
 import SpaceUserStatement from '@/views/SpaceUser/Statement.vue';
 import SpaceUserVotes from '@/views/SpaceUser/Votes.vue';
@@ -58,19 +59,24 @@ function createOrgChildren(prefix: 'org' | 'space'): RouteRecordRaw[] {
       ]
     },
     {
-      path: 'discussions',
+      path: ':space/discussions',
       name: `${prefix}-discussions`,
       component: SpaceDiscussions
     },
     {
-      path: 'discussions/:topic',
+      path: ':space/discussions/:topic',
       name: `${prefix}-discussions-topic`,
       component: Topic
     },
     {
-      path: 'delegates',
+      path: ':space/delegates',
       name: `${prefix}-delegates`,
       component: SpaceDelegates
+    },
+    {
+      path: ':space/treasury/:index?/:tab?',
+      name: `${prefix}-treasury`,
+      component: SpaceTreasury
     },
     {
       path: 'profile/:user',

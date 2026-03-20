@@ -1,6 +1,7 @@
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
+import IHCash from '~icons/heroicons-outline/cash';
 import IHGlobeAlt from '~icons/heroicons-outline/globe-alt';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHNewspaper from '~icons/heroicons-outline/newspaper';
@@ -32,7 +33,10 @@ function getOrgConfig(context: NavContext): NavConfig | null {
     items.delegates = {
       name: 'Delegates',
       icon: IHLightningBolt,
-      link: { name: 'space-delegates' }
+      link: {
+        name: 'space-delegates',
+        params: { space: `${primarySpace.network}:${primarySpace.id}` }
+      }
     };
   }
 
@@ -40,7 +44,22 @@ function getOrgConfig(context: NavContext): NavConfig | null {
     items.discussions = {
       name: 'Discussions',
       icon: IHAnnotation,
-      link: { name: 'space-discussions' },
+      link: {
+        name: 'space-discussions',
+        params: { space: `${primarySpace.network}:${primarySpace.id}` }
+      },
+      isActiveOnChildren: true
+    };
+  }
+
+  if (primarySpace.treasuries?.length) {
+    items.treasury = {
+      name: 'Treasury',
+      icon: IHCash,
+      link: {
+        name: 'space-treasury',
+        params: { space: `${primarySpace.network}:${primarySpace.id}` }
+      },
       isActiveOnChildren: true
     };
   }
