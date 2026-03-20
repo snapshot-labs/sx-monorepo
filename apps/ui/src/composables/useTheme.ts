@@ -2,10 +2,10 @@ import { Theme } from '@/types';
 
 type UserTheme = Theme | 'none';
 
-const preferredColor = usePreferredColorScheme();
-
-export function useTheme() {
+function setup() {
+  const preferredColor = usePreferredColorScheme();
   const store = useStorage<UserTheme>('theme', 'none');
+
   const defaultTheme = computed(() =>
     preferredColor.value === 'light' ? 'light' : 'dark'
   );
@@ -44,3 +44,5 @@ export function useTheme() {
     previewTheme
   };
 }
+
+export const useTheme = createSharedComposable(setup);
