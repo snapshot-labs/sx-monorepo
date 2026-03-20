@@ -12,7 +12,6 @@ See root `AGENTS.md` for architecture and repo-wide tooling.
 ```bash
 bun run dev           # Vite dev server on port 8080
 bun run codegen       # GraphQL codegen from 3 schemas
-bun run storybook     # Storybook dev on port 6006
 ```
 
 ## Auto-Imports
