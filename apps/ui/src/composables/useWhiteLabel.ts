@@ -85,7 +85,7 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
   ...(WHITELABEL_MAPPING
     ? (() => {
         const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
-        if (!localSpaceId) return {};
+        if (!localSpaceId) return { [localDomain]: {} };
         const [network, id] = localSpaceId.split(':');
         return { [localDomain]: { network, id } };
       })()
