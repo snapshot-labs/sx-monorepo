@@ -211,6 +211,7 @@ function formatDelegations(
   if (space.metadata.delegations.length) {
     return space.metadata.delegations.map(formatDelegation);
   }
+
   const apiUrl = GOVERNOR_DELEGATIONS[space.id];
   if (!apiUrl) return [];
 
