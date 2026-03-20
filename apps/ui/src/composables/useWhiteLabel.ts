@@ -73,8 +73,8 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
     skinSettings: {
       logo: 'ipfs://bafkreigdimh5bvu3jwyqbwpgnwlumipngfvuemutzughnv77ogqpedngfq',
       bg_color: '#F6F6F6',
-      link_color: '#4A5C63',
-      text_color: '#011A25',
+      link_color: '#011A25',
+      text_color: '#4A5C63',
       content_color: '#586069',
       border_color: '#E4E4E4',
       heading_color: '#011A25',
