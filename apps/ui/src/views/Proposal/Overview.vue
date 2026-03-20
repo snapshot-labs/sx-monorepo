@@ -136,12 +136,19 @@ const proposalTransactionId = computed(() => {
 });
 
 const endTime = useRelativeTime(() => props.proposal.max_end);
+const startTime = useRelativeTime(() => props.proposal.start, true);
 
 const votingTime = computed(() => {
   if (!props.proposal) return null;
 
   const current = getCurrent(props.proposal.network);
   if (!current) return null;
+
+  if (props.proposal.state === 'pending') {
+    return startTime.value === 'now'
+      ? 'Starting soon'
+      : `Starting in ${startTime.value}`;
+  }
 
   const hasEnded = props.proposal.max_end <= current;
 

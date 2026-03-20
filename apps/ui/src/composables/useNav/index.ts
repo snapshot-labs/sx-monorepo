@@ -26,14 +26,13 @@ function getActiveItemKey(
 
     const { prefix, params } = item.activeRoute;
     const fullPrefix = prefix.replace(/^space-/, `${namespace}-`);
+    const isMatchingRoute =
+      routeName === fullPrefix || routeName.startsWith(`${fullPrefix}-`);
+    const isMatchingParams =
+      !params ||
+      Object.entries(params).every(([k, v]) => route.params[k] === v);
 
-    if (routeName !== fullPrefix && !routeName.startsWith(`${fullPrefix}-`))
-      continue;
-
-    if (!params) return key;
-    if (Object.entries(params).every(([k, v]) => route.params[k] === v)) {
-      return key;
-    }
+    if (isMatchingRoute && isMatchingParams) return key;
   }
 
   return null;

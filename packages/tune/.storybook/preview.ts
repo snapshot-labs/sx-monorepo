@@ -1,10 +1,10 @@
-import { Preview, Decorator, setup } from '@storybook/vue3-vite';
-import { createRouter, createMemoryHistory } from 'vue-router';
 import { withThemeByClassName } from '@storybook/addon-themes';
-
-import '../src/style.scss';
-import './style.css';
+import { Decorator, Preview, setup } from '@storybook/vue3-vite';
 import { h } from 'vue';
+import { createMemoryHistory, createRouter } from 'vue-router';
+import { createTune } from '../src/plugin';
+import '../src/styles/index.scss';
+import './style.css';
 
 setup(app => {
   app.use(
@@ -19,6 +19,8 @@ setup(app => {
       ]
     })
   );
+
+  app.use(createTune());
 });
 
 export const decorators: Decorator[] = [
@@ -46,9 +48,6 @@ const preview: Preview = {
       }
     },
     a11y: {
-      // 'todo' - show a11y violations in the test UI only
-      // 'error' - fail CI on a11y violations
-      // 'off' - skip a11y checks entirely
       test: 'todo'
     }
   }
