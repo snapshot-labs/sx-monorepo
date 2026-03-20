@@ -78,6 +78,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       const idx = allItems.findIndex(([k]) => k === key);
       if (idx !== -1) {
         const base = allItems[idx][1];
+        if (!base && !item.name) continue;
         const merged = { ...(base ?? {}), ...item } as NavItem;
         if (item.position) {
           allItems.splice(idx, 1);
@@ -94,6 +95,12 @@ function getOrgConfig(context: NavContext): NavConfig | null {
   const result = allItems.filter(
     (entry): entry is [string, NavItem] => entry[1] !== null
   );
+
+  itemsToReposition.sort((a, b) => {
+    const posA = a[1].position ?? Infinity;
+    const posB = b[1].position ?? Infinity;
+    return posA - posB;
+  });
 
   for (const [key, item] of itemsToReposition) {
     const idx = item.position
