@@ -51,8 +51,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       link: {
         name: 'space-discussions',
         params: { space: `${primarySpace.network}:${primarySpace.id}` }
-      },
-      activeRoute: { prefix: 'space-discussions' }
+      }
     };
   }
 
@@ -63,8 +62,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       link: {
         name: 'space-treasury',
         params: { space: `${primarySpace.network}:${primarySpace.id}` }
-      },
-      activeRoute: { prefix: 'space-treasury' }
+      }
     };
   }
 

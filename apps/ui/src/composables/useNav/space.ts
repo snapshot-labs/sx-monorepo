@@ -126,16 +126,14 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
   ) {
     items.discussions = {
       name: 'Discussions',
-      icon: IHAnnotation,
-      activeRoute: { prefix: 'space-discussions' }
+      icon: IHAnnotation
     };
   }
 
   if (context.space?.treasuries?.length) {
     items.treasury = {
       name: 'Treasury',
-      icon: IHCash,
-      activeRoute: { prefix: 'space-treasury' }
+      icon: IHCash
     };
   }
 

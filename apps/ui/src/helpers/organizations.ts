@@ -98,8 +98,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       discussions: {
         name: 'Discussions',
         icon: IHAnnotation,
-        link: { name: 'space-discussions', params: { space: 's:ens.eth' } },
-        isActiveOnChildren: true
+        link: { name: 'space-discussions', params: { space: 's:ens.eth' } }
       }
     }
   }

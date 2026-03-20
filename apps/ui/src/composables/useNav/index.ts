@@ -22,9 +22,7 @@ function getActiveItemKey(
   const namespace = routeName.split('-')[0];
 
   for (const [key, item] of Object.entries(config.items)) {
-    if (!item.activeRoute) continue;
-
-    const { prefix, params } = item.activeRoute;
+    const { prefix, params } = item.activeRoute ?? { prefix: `space-${key}` };
     const fullPrefix = prefix.replace(/^space-/, `${namespace}-`);
     const isMatchingRoute =
       routeName === fullPrefix || routeName.startsWith(`${fullPrefix}-`);
