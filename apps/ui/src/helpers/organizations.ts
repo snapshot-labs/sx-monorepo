@@ -8,7 +8,6 @@ import { NavItem } from '@/composables/useNav/types';
 import { stripInvalidSpaceParam } from '@/helpers/router';
 import { NetworkID, Space } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
-import IHCash from '~icons/heroicons-outline/cash';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
@@ -96,15 +95,6 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         name: 'Discussions',
         icon: IHAnnotation,
         link: { name: 'space-discussions', params: { space: 's:ens.eth' } },
-        isActiveOnChildren: true
-      },
-      treasury: {
-        name: 'Treasury',
-        icon: IHCash,
-        link: {
-          name: 'space-treasury',
-          params: { space: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3' }
-        },
         isActiveOnChildren: true
       }
     }
