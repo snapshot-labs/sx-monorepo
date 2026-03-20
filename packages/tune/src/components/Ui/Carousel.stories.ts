@@ -10,22 +10,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const carouselContent = `<div class="flex min-w-max">
-      <div class="w-48 p-4 bg-white border rounded-lg shadow-sm mx-3">
-        <h3 class="font-semibold mb-2">Card Title 1</h3>
-        <p class="text-sm text-gray-600">This is a sample card content for the carousel.</p>
+const carouselContent = `<div style="display: flex; min-width: max-content; gap: 24px; padding-right: 24px;">
+      <div style="width: 192px; padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <h3 style="font-weight: 600; margin-bottom: 8px;">Card Title 1</h3>
+        <p style="font-size: 14px; color: #6b7280;">This is a sample card content for the carousel.</p>
       </div>
-      <div class="w-48 p-4 bg-white border rounded-lg shadow-sm mx-3">
-        <h3 class="font-semibold mb-2">Card Title 2</h3>
-        <p class="text-sm text-gray-600">Another card with different content to show variety.</p>
+      <div style="width: 192px; padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <h3 style="font-weight: 600; margin-bottom: 8px;">Card Title 2</h3>
+        <p style="font-size: 14px; color: #6b7280;">Another card with different content to show variety.</p>
       </div>
-      <div class="w-48 p-4 bg-white border rounded-lg shadow-sm mx-3">
-        <h3 class="font-semibold mb-2">Card Title 3</h3>
-        <p class="text-sm text-gray-600">Third card demonstrating the carousel functionality.</p>
+      <div style="width: 192px; padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <h3 style="font-weight: 600; margin-bottom: 8px;">Card Title 3</h3>
+        <p style="font-size: 14px; color: #6b7280;">Third card demonstrating the carousel functionality.</p>
       </div>
-      <div class="w-48 p-4 bg-white border rounded-lg shadow-sm mx-3">
-        <h3 class="font-semibold mb-2">Card Title 4</h3>
-        <p class="text-sm text-gray-600">Fourth card to show continuous scrolling effect.</p>
+      <div style="width: 192px; padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 8px;">
+        <h3 style="font-weight: 600; margin-bottom: 8px;">Card Title 4</h3>
+        <p style="font-size: 14px; color: #6b7280;">Fourth card to show continuous scrolling effect.</p>
       </div>
     </div>`;
 
