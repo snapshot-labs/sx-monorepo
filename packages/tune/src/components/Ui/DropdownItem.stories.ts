@@ -1,3 +1,4 @@
+import { Menu, MenuItems } from '@headlessui/vue';
 import { Meta, StoryObj } from '@storybook/vue3-vite';
 import DropdownItem from './DropdownItem.vue';
 
@@ -9,7 +10,13 @@ const meta = {
     disabled: {
       control: { type: 'boolean' }
     }
-  }
+  },
+  decorators: [
+    () => ({
+      components: { Menu, MenuItems },
+      template: '<Menu><MenuItems static><story /></MenuItems></Menu>'
+    })
+  ]
 } satisfies Meta<typeof DropdownItem>;
 
 export default meta;

@@ -17,7 +17,7 @@ export const Default: Story = {
     template: `
       <Stepper v-bind="args">
         <template #content="{ currentStep }">
-          <div class="p-4 border rounded">
+          <div style="padding: 16px; border: 1px solid rgba(var(--border)); border-radius: 8px;">
             Current step: {{ currentStep }}
           </div>
         </template>
@@ -40,7 +40,7 @@ export const AllValid: Story = {
     template: `
       <Stepper v-bind="args">
         <template #content="{ currentStep }">
-          <div class="p-4 border rounded">
+          <div style="padding: 16px; border: 1px solid rgba(var(--border)); border-radius: 8px;">
             Current step: {{ currentStep }}
           </div>
         </template>

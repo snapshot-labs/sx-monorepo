@@ -25,9 +25,9 @@ const submitDisabled = computed(() =>
   Object.values(props.steps).some(step => !step.isValid())
 );
 
-const currentStep = computed(() => {
-  return stepper.stepNames.value[stepper.index.value];
-});
+const currentStep = computed(
+  () => stepper.stepNames.value[stepper.index.value] as string
+);
 
 function goToStep(stepName: string) {
   stepper.goTo(stepName);
