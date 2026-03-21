@@ -7,14 +7,14 @@ const { config } = useNav();
     <div class="py-4 no-scrollbar overscroll-contain overflow-auto">
       <AppLink
         v-for="(item, key) in config?.items ?? {}"
-        v-slot="{ isActive, isExactActive }"
+        v-slot="{ isExactActive }"
         :key="key"
         :to="item.link"
       >
         <div
           class="px-4 space-x-2 flex items-center"
           :class="[
-            (item.isActiveOnChildren ? isActive : isExactActive)
+            isExactActive || item.isActive
               ? 'text-skin-link'
               : 'text-skin-text',
             config?.slim ? 'py-1' : 'py-1.5'

@@ -34,7 +34,11 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       {
         name: 'Proposals',
         icon: IHNewspaper,
-        link: { name: 'space-proposals', params: { space: spaceId } }
+        link: { name: 'space-proposals', params: { space: spaceId } },
+        activeRoute: {
+          prefix: 'space-proposal',
+          params: { space: spaceId }
+        }
       }
     ],
     [
@@ -53,8 +57,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
         ? {
             name: 'Discussions',
             icon: IHAnnotation,
-            link: { name: 'space-discussions', params: { space: spaceId } },
-            isActiveOnChildren: true
+            link: { name: 'space-discussions', params: { space: spaceId } }
           }
         : null
     ],
@@ -64,8 +67,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
         ? {
             name: 'Treasury',
             icon: IHCash,
-            link: { name: 'space-treasury', params: { space: spaceId } },
-            isActiveOnChildren: true
+            link: { name: 'space-treasury', params: { space: spaceId } }
           }
         : null
     ]
