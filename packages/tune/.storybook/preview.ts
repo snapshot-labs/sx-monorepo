@@ -20,7 +20,7 @@ setup(app => {
     })
   );
 
-  app.use(createTune());
+  app.use(createTune({ iframelyApiKey: 'd155718c86be7d5305ccb6' }));
 });
 
 export const decorators: Decorator[] = [

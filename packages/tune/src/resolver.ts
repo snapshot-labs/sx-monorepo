@@ -10,6 +10,7 @@ const components = [
   'ContainerInfiniteScroll',
   'ContainerSettings',
   'Eyebrow',
+  'LinkPreview',
   'Loading',
   'ModalSearchInput',
   'Pill',

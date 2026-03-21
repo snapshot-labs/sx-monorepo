@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { debouncedWatch } from '@vueuse/core';
+import { inject } from 'vue';
+import { TUNE_OPTIONS_KEY } from '../../plugin';
+
 const props = withDefaults(
   defineProps<{
     /**
@@ -25,10 +29,11 @@ type Preview = {
   };
 };
 
+const options = inject(TUNE_OPTIONS_KEY, {});
+
 const preview = ref<Preview | null>(null);
 const previewIconResolved = ref<boolean>(false);
 const previewLoading = ref<boolean>(true);
-const IFRAMELY_API_KEY = 'd155718c86be7d5305ccb6';
 
 onMounted(async () => await update(props.url));
 
@@ -42,13 +47,15 @@ async function isImageUrlValid(url: string): Promise<boolean> {
 }
 
 async function update(val: string) {
+  if (!options.iframelyApiKey) return;
+
   try {
     preview.value = null;
     previewLoading.value = true;
     new URL(val);
     const url = `https://cdn.iframe.ly/api/iframely?url=${encodeURI(
       val
-    )}&api_key=${IFRAMELY_API_KEY}`;
+    )}&api_key=${options.iframelyApiKey}`;
     const result = await fetch(url);
     preview.value = await result.json();
 
@@ -82,11 +89,11 @@ debouncedWatch(
     <template v-if="preview && (preview?.meta?.title || previewIconResolved)">
       <img
         v-if="previewIconResolved"
-        :src="preview.links.icon[0].href"
+        :src="preview?.links?.icon[0]?.href"
         width="32"
         height="32"
         class="bg-white rounded shrink-0"
-        :alt="preview.meta.title"
+        :alt="preview?.meta?.title"
       />
       <div class="flex flex-col truncate">
         <div

@@ -2,7 +2,8 @@
 import './styles/index.scss';
 
 // Plugin
-export { createTune } from './plugin';
+export { createTune, TUNE_OPTIONS_KEY } from './plugin';
+export type { TuneOptions } from './plugin';
 
 // Types
 export type * from './types';
@@ -17,6 +18,7 @@ export { default as UiContainer } from './components/Ui/Container.vue';
 export { default as UiContainerInfiniteScroll } from './components/Ui/ContainerInfiniteScroll.vue';
 export { default as UiContainerSettings } from './components/Ui/ContainerSettings.vue';
 export { default as UiEyebrow } from './components/Ui/Eyebrow.vue';
+export { default as UiLinkPreview } from './components/Ui/LinkPreview.vue';
 export { default as UiLoading } from './components/Ui/Loading.vue';
 export { default as UiModalSearchInput } from './components/Ui/ModalSearchInput.vue';
 export { default as UiPill } from './components/Ui/Pill.vue';

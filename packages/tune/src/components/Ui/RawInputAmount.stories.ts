@@ -35,7 +35,8 @@ export const WithDecimals: Story = {
   parameters: {
     docs: {
       description: {
-        story: 'Limits decimal places to the specified number (e.g. 2 decimals).'
+        story:
+          'Limits decimal places to the specified number (e.g. 2 decimals).'
       }
     }
   },

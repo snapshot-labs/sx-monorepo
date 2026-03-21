@@ -15,7 +15,8 @@ const index = `// Styles
 import './styles/index.scss';
 
 // Plugin
-export { createTune } from './plugin';
+export { createTune, TUNE_OPTIONS_KEY } from './plugin';
+export type { TuneOptions } from './plugin';
 
 // Types
 export type * from './types';
