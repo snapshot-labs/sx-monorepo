@@ -1,9 +1,18 @@
-import { Plugin } from 'vue';
+import { InjectionKey, Plugin } from 'vue';
+import { Router } from 'vue-router';
 import VueTippy from 'vue-tippy';
 
-export function createTune(): Plugin {
+export interface TuneOptions {
+  useRouter?: () => Router;
+}
+
+export const TUNE_OPTIONS_KEY: InjectionKey<TuneOptions> = Symbol('tune');
+
+export function createTune(options: TuneOptions = {}): Plugin {
   return {
     install(app) {
+      app.provide(TUNE_OPTIONS_KEY, options);
+
       app.use(VueTippy, {
         defaultProps: {
           delay: [0, null],
