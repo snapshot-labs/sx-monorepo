@@ -1,12 +1,20 @@
 import { ComponentResolver } from 'unplugin-vue-components';
 
-const components = [
+const uiComponents = [
   'Alert',
+  'Button',
   'Checkbox',
+  'DropdownItem',
   'Loading',
+  'Message',
+  'Stepper',
   'Switch',
   'Tooltip',
   'TooltipOnTruncate'
+];
+
+const rootComponents = [
+  'AppLink'
 ];
 
 export function TuneResolver(): ComponentResolver {
@@ -15,12 +23,19 @@ export function TuneResolver(): ComponentResolver {
     resolve(name) {
       if (name.startsWith('Ui')) {
         const componentName = name.slice(2);
-        if (components.includes(componentName)) {
+        if (uiComponents.includes(componentName)) {
           return {
             name: `Ui${componentName}`,
             from: '@snapshot-labs/tune'
           };
         }
+      }
+
+      if (rootComponents.includes(name)) {
+        return {
+          name,
+          from: '@snapshot-labs/tune'
+        };
       }
     }
   };
