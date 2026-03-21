@@ -13,9 +13,7 @@ const uiComponents = [
   'TooltipOnTruncate'
 ];
 
-const rootComponents = [
-  'AppLink'
-];
+const rootComponents = ['AppLink'];
 
 export function TuneResolver(): ComponentResolver {
   return {

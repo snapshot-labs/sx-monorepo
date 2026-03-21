@@ -15,9 +15,7 @@ const uiExports = uiNames
   .join('\n');
 
 const rootExports = rootNames
-  .map(
-    name => `export { default as ${name} } from './components/${name}.vue';`
-  )
+  .map(name => `export { default as ${name} } from './components/${name}.vue';`)
   .join('\n');
 
 const index = `// Styles
@@ -45,9 +43,7 @@ const uiComponents = [
 ${uiNames.map(name => `  '${name}'`).join(',\n')}
 ];
 
-const rootComponents = [
-${rootNames.map(name => `  '${name}'`).join(',\n')}
-];
+const rootComponents = [${rootNames.map(name => `'${name}'`).join(', ')}];
 
 export function TuneResolver(): ComponentResolver {
   return {
