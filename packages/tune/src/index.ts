@@ -5,9 +5,6 @@ import './styles/index.scss';
 export { createTune, TUNE_OPTIONS_KEY } from './plugin';
 export type { TuneOptions } from './plugin';
 
-// Composables
-export { useRouter } from './composables/useRouter';
-
 // Types
 export type * from './types';
 
