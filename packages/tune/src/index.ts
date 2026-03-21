@@ -29,7 +29,5 @@ export { default as UiSelector } from './components/Ui/Selector.vue';
 export { default as UiSelectorCard } from './components/Ui/SelectorCard.vue';
 export { default as UiStateWarning } from './components/Ui/StateWarning.vue';
 export { default as UiSwitch } from './components/Ui/Switch.vue';
-export { default as UiToolbarBottom } from './components/Ui/ToolbarBottom.vue';
 export { default as UiTooltip } from './components/Ui/Tooltip.vue';
 export { default as UiTooltipOnTruncate } from './components/Ui/TooltipOnTruncate.vue';
-export { default as UiTopnav } from './components/Ui/Topnav.vue';

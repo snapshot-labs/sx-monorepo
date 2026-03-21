@@ -21,10 +21,8 @@ const components = [
   'SelectorCard',
   'StateWarning',
   'Switch',
-  'ToolbarBottom',
   'Tooltip',
-  'TooltipOnTruncate',
-  'Topnav'
+  'TooltipOnTruncate'
 ];
 
 export function TuneResolver(): ComponentResolver {
