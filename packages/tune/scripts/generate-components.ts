@@ -30,7 +30,6 @@ export { useRouter } from './composables/useRouter';
 
 // Types
 export type * from './types';
-export type { StepRecords } from './components/Ui/Stepper.vue';
 
 // Components (auto-generated, do not edit manually)
 ${rootExports}

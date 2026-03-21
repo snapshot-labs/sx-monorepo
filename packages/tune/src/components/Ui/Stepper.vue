@@ -1,9 +1,5 @@
 <script lang="ts" setup>
-export type StepRecords = Record<string, Step>;
-type Step = {
-  title: string;
-  isValid: () => boolean;
-};
+import { StepRecords } from '../../types';
 
 const props = withDefaults(
   defineProps<{
