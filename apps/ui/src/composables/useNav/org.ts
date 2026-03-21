@@ -13,78 +13,102 @@ function getOrgConfig(context: NavContext): NavConfig | null {
 
   if (!primarySpace) return null;
 
-  const items: Record<string, NavItem> = {
-    overview: {
-      name: 'Overview',
-      icon: IHGlobeAlt,
-      link: { name: 'space-overview' }
-    },
-    proposals: {
-      name: 'Proposals',
-      icon: IHNewspaper,
-      link: {
-        name: 'space-proposals',
-        params: { space: `${primarySpace.network}:${primarySpace.id}` }
-      },
-      activeRoute: {
-        prefix: 'space-proposal',
-        params: { space: `${primarySpace.network}:${primarySpace.id}` }
-      }
-    }
-  };
+  const spaceId = `${primarySpace.network}:${primarySpace.id}`;
 
-  if (primarySpace.delegations?.length) {
-    items.delegates = {
-      name: 'Delegates',
-      icon: IHLightningBolt,
-      link: {
-        name: 'space-delegates',
-        params: { space: `${primarySpace.network}:${primarySpace.id}` }
-      }
-    };
-  }
+  const hasDelegates = primarySpace.delegations?.length;
+  const hasDiscussions = SPACES_DISCUSSIONS[spaceId];
+  const hasTreasury = primarySpace.treasuries?.length;
 
-  if (SPACES_DISCUSSIONS[`${primarySpace.network}:${primarySpace.id}`]) {
-    items.discussions = {
-      name: 'Discussions',
-      icon: IHAnnotation,
-      link: {
-        name: 'space-discussions',
-        params: { space: `${primarySpace.network}:${primarySpace.id}` }
+  // Canonical order matching space.ts
+  const allItems: [string, NavItem | null][] = [
+    [
+      'overview',
+      {
+        name: 'Overview',
+        icon: IHGlobeAlt,
+        link: { name: 'space-overview' }
       }
-    };
-  }
-
-  if (primarySpace.treasuries?.length) {
-    items.treasury = {
-      name: 'Treasury',
-      icon: IHCash,
-      link: {
-        name: 'space-treasury',
-        params: { space: `${primarySpace.network}:${primarySpace.id}` }
+    ],
+    [
+      'proposals',
+      {
+        name: 'Proposals',
+        icon: IHNewspaper,
+        link: { name: 'space-proposals', params: { space: spaceId } },
+        activeRoute: {
+          prefix: 'space-proposal',
+          params: { space: spaceId }
+        }
       }
-    };
-  }
+    ],
+    [
+      'delegates',
+      hasDelegates
+        ? {
+            name: 'Delegates',
+            icon: IHLightningBolt,
+            link: { name: 'space-delegates', params: { space: spaceId } }
+          }
+        : null
+    ],
+    [
+      'discussions',
+      hasDiscussions
+        ? {
+            name: 'Discussions',
+            icon: IHAnnotation,
+            link: { name: 'space-discussions', params: { space: spaceId } }
+          }
+        : null
+    ],
+    [
+      'treasury',
+      hasTreasury
+        ? {
+            name: 'Treasury',
+            icon: IHCash,
+            link: { name: 'space-treasury', params: { space: spaceId } }
+          }
+        : null
+    ]
+  ];
 
-  const newItems: [string, Partial<NavItem>][] = [];
+  const itemsToReposition: [string, NavItem][] = [];
 
   if (context.organization?.navItems) {
     for (const [key, item] of Object.entries(context.organization.navItems)) {
-      if (key in items) {
-        items[key] = { ...items[key], ...item };
+      const idx = allItems.findIndex(([k]) => k === key);
+      if (idx !== -1) {
+        const base = allItems[idx][1];
+        if (!base && !item.name) continue;
+        const merged = { ...(base ?? {}), ...item } as NavItem;
+        if (item.position) {
+          allItems.splice(idx, 1);
+          itemsToReposition.push([key, merged]);
+        } else {
+          allItems[idx][1] = merged;
+        }
       } else {
-        newItems.push([key, item]);
+        itemsToReposition.push([key, item as NavItem]);
       }
     }
   }
 
-  const result = Object.entries(items);
+  const result = allItems.filter(
+    (entry): entry is [string, NavItem] => entry[1] !== null
+  );
 
-  for (const [key, item] of newItems) {
+  itemsToReposition.sort((a, b) => {
+    const posA = a[1].position ?? Infinity;
+    const posB = b[1].position ?? Infinity;
+    return posA - posB;
+  });
+
+  for (const [key, item] of itemsToReposition) {
     const idx = item.position
       ? Math.min(item.position - 1, result.length)
       : result.length;
-    result.splice(idx, 0, [key, item as NavItem]);
+    result.splice(idx, 0, [key, item]);
   }
 
   return { items: Object.fromEntries(result) };
