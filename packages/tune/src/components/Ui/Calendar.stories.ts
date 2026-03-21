@@ -33,4 +33,3 @@ export const WithSelectedAndMinimum: Story = {
     min: dayjs().subtract(5, 'days').unix()
   }
 };
-
