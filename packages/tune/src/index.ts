@@ -9,7 +9,9 @@ export type { TuneOptions } from './plugin';
 export type * from './types';
 
 // Components (auto-generated, do not edit manually)
+export { default as UiAffix } from './components/Ui/Affix.vue';
 export { default as UiAlert } from './components/Ui/Alert.vue';
+export { default as UiCalendar } from './components/Ui/Calendar.vue';
 export { default as UiCarousel } from './components/Ui/Carousel.vue';
 export { default as UiCheckbox } from './components/Ui/Checkbox.vue';
 export { default as UiColumnHeader } from './components/Ui/ColumnHeader.vue';
@@ -17,7 +19,10 @@ export { default as UiColumnHeaderItemSortable } from './components/Ui/ColumnHea
 export { default as UiContainer } from './components/Ui/Container.vue';
 export { default as UiContainerInfiniteScroll } from './components/Ui/ContainerInfiniteScroll.vue';
 export { default as UiContainerSettings } from './components/Ui/ContainerSettings.vue';
+export { default as UiCountdown } from './components/Ui/Countdown.vue';
+export { default as UiDropdown } from './components/Ui/Dropdown.vue';
 export { default as UiEyebrow } from './components/Ui/Eyebrow.vue';
+export { default as UiLabel } from './components/Ui/Label.vue';
 export { default as UiLinkPreview } from './components/Ui/LinkPreview.vue';
 export { default as UiLoading } from './components/Ui/Loading.vue';
 export { default as UiModalSearchInput } from './components/Ui/ModalSearchInput.vue';

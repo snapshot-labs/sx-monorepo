@@ -1,7 +1,9 @@
 import { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
+  'Affix',
   'Alert',
+  'Calendar',
   'Carousel',
   'Checkbox',
   'ColumnHeader',
@@ -9,7 +11,10 @@ const components = [
   'Container',
   'ContainerInfiniteScroll',
   'ContainerSettings',
+  'Countdown',
+  'Dropdown',
   'Eyebrow',
+  'Label',
   'LinkPreview',
   'Loading',
   'ModalSearchInput',

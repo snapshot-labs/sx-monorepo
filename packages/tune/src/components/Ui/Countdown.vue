@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { partitionDuration } from '@/helpers/utils';
+import { partitionDuration } from '../../helpers/time';
 
 const props = defineProps<{
   timestamp: number;
