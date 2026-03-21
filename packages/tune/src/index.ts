@@ -26,6 +26,7 @@ export { default as UiRawInputAmount } from './components/Ui/RawInputAmount.vue'
 export { default as UiScrollerHorizontal } from './components/Ui/ScrollerHorizontal.vue';
 export { default as UiSectionHeader } from './components/Ui/SectionHeader.vue';
 export { default as UiSelector } from './components/Ui/Selector.vue';
+export { default as UiSelectorCard } from './components/Ui/SelectorCard.vue';
 export { default as UiStateWarning } from './components/Ui/StateWarning.vue';
 export { default as UiSwitch } from './components/Ui/Switch.vue';
 export { default as UiToolbarBottom } from './components/Ui/ToolbarBottom.vue';

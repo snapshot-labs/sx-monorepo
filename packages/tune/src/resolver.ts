@@ -18,6 +18,7 @@ const components = [
   'ScrollerHorizontal',
   'SectionHeader',
   'Selector',
+  'SelectorCard',
   'StateWarning',
   'Switch',
   'ToolbarBottom',
