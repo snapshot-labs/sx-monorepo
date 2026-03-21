@@ -17,27 +17,13 @@ defineOptions({ inheritAttrs: false });
 
 const model = defineModel<any>({ required: true });
 
-const props = defineProps<{
+defineProps<{
   error: any;
   definition: any;
   path?: string;
 }>();
 
 const slots = useSlots();
-const { isDirty } = useDirty(model, props.definition);
-
-const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue) {
-    model.value = newValue;
-  }
-});
 
 const getComponent = (property: {
   type: string;
@@ -108,7 +94,7 @@ const getPropertySlots = (propertyName: string) => {
       v-for="(property, i) in definition.properties"
       :key="i"
       v-bind="$attrs"
-      v-model="inputValue[i]"
+      v-model="model[i]"
       :path="path ? `${path}.${i}` : i"
       :definition="property"
       :error="error?.[i]"
