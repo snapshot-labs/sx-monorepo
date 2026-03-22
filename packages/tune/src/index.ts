@@ -13,7 +13,6 @@ export { default as UiAlert } from './components/Ui/Alert.vue';
 export { default as UiCarousel } from './components/Ui/Carousel.vue';
 export { default as UiCheckbox } from './components/Ui/Checkbox.vue';
 export { default as UiColumnHeader } from './components/Ui/ColumnHeader.vue';
-export { default as UiColumnHeaderItemSortable } from './components/Ui/ColumnHeaderItemSortable.vue';
 export { default as UiContainerInfiniteScroll } from './components/Ui/ContainerInfiniteScroll.vue';
 export { default as UiEyebrow } from './components/Ui/Eyebrow.vue';
 export { default as UiLinkPreview } from './components/Ui/LinkPreview.vue';
