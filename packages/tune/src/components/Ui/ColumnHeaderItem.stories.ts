@@ -14,7 +14,7 @@ const meta = {
       control: 'select',
       options: [undefined, 'asc', 'desc']
     },
-    sortChange: { action: 'sortChange' }
+    onSortChange: { action: 'sortChange' }
   }
 } satisfies Meta<typeof ColumnHeaderItem>;
 
