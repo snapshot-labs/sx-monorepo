@@ -44,8 +44,10 @@ const partnerStatistics = computed(
       <UiColumnHeader
         class="overflow-hidden gap-3 !top-header-height-with-offset"
       >
-        <div class="flex-1 min-w-0 truncate">Referee</div>
-        <div class="w-[80px] text-right truncate">Referrals</div>
+        <UiColumnHeaderItem class="flex-1 uppercase"> Referee </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="w-[100px] justify-end uppercase">
+          Referrals
+        </UiColumnHeaderItem>
       </UiColumnHeader>
 
       <div class="px-4">
@@ -83,7 +85,7 @@ const partnerStatistics = computed(
                   />
                 </div>
               </div>
-              <div class="w-[80px] text-right">
+              <div class="w-[100px] text-right">
                 <h4 class="text-skin-link">{{ entry.buyer_count }}</h4>
               </div>
             </div>

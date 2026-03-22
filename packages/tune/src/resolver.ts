@@ -3,6 +3,8 @@ import { ComponentResolver } from 'unplugin-vue-components';
 const components = [
   'Alert',
   'Checkbox',
+  'ColumnHeader',
+  'ColumnHeaderItem',
   'Loading',
   'Switch',
   'Tooltip',

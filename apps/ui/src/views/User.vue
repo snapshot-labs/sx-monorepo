@@ -227,10 +227,16 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       </div>
     </div>
     <UiSectionHeader label="Activity" sticky />
-    <UiColumnHeader class="text-right">
-      <span class="w-[60%] lg:w-[50%] text-left truncate">Space</span>
-      <span class="w-[20%] lg:w-[25%] truncate">Proposals</span>
-      <span class="w-[20%] lg:w-[25%] truncate">Votes</span>
+    <UiColumnHeader class="gap-3">
+      <UiColumnHeaderItem class="w-[60%] lg:w-[50%]">
+        Space
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[20%] lg:w-[25%] justify-end">
+        Proposals
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[20%] lg:w-[25%] justify-end">
+        Votes
+      </UiColumnHeaderItem>
     </UiColumnHeader>
     <UiLoading v-if="loadingActivities" class="px-4 py-3 block" />
     <UiStateWarning v-else-if="!activities.length" class="px-4 py-3">
@@ -247,7 +253,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
           user: user.id
         }
       }"
-      class="mx-4 border-b flex space-x-1 py-3"
+      class="mx-4 border-b flex gap-3 py-3"
     >
       <div
         class="flex items-center gap-x-3 leading-[22px] w-[60%] lg:w-[50%] font-semibold text-skin-link truncate"
