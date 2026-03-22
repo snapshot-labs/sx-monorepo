@@ -467,7 +467,7 @@ watch(volume, () => {
                   (ref as InstanceType<typeof UiColumnHeader> | null)
                     ?.container ?? null)
             "
-            class="py-2 text-sm tracking-wider"
+            class="py-2 text-sm tracking-wider px-4 gap-3"
             :sticky="false"
             scrollable-width="735px"
           >

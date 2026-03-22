@@ -227,7 +227,7 @@ watchEffect(() => setTitle(`${user.value?.name || id.value} user profile`));
       </div>
     </div>
     <UiSectionHeader label="Activity" sticky />
-    <UiColumnHeader class="gap-3">
+    <UiColumnHeader class="gap-3 px-4">
       <UiColumnHeaderItem class="w-[60%] lg:w-[50%]">
         Space
       </UiColumnHeaderItem>

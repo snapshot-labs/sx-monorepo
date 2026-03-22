@@ -15,10 +15,10 @@ export const Default: Story = {
   render: () => ({
     components: { ColumnHeader, ColumnHeaderItem },
     template: `
-      <ColumnHeader>
-        <ColumnHeaderItem class="w-[60%] lg:w-[50%]">Space</ColumnHeaderItem>
-        <ColumnHeaderItem class="w-[20%] lg:w-[25%]">Proposals</ColumnHeaderItem>
-        <ColumnHeaderItem class="w-[20%] lg:w-[25%]">Votes</ColumnHeaderItem>
+      <ColumnHeader class="px-4 gap-3">
+        <ColumnHeaderItem style="width: 60%">Space</ColumnHeaderItem>
+        <ColumnHeaderItem style="width: 20%">Proposals</ColumnHeaderItem>
+        <ColumnHeaderItem style="width: 20%">Votes</ColumnHeaderItem>
       </ColumnHeader>
     `
   })

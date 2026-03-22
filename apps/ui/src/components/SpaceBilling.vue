@@ -99,7 +99,7 @@ const statusText = computed(() => {
     </UiContainerSettings>
 
     <UiSectionHeader class="mt-4" label="Payment history" sticky />
-    <UiColumnHeader class="gap-3">
+    <UiColumnHeader class="gap-3 px-4">
       <UiColumnHeaderItem class="w-[190px] grow sm:grow-0">
         Date
       </UiColumnHeaderItem>

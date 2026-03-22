@@ -94,6 +94,7 @@ function handleScrollEvent(target: HTMLElement) {
           (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
           null)
     "
+    class="px-4 gap-3"
     scrollable-width="735px"
   >
     <UiColumnHeaderItem class="w-[218px] max-w-[218px]">
