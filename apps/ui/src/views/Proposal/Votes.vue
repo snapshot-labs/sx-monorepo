@@ -149,7 +149,7 @@ function handleScrollEvent(target: HTMLElement) {
       >
         Voting power
       </UiColumnHeaderItem>
-      <UiColumnHeaderItem class="min-w-[44px] lg:w-[60px]" />
+      <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
     </div>
   </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
@@ -237,7 +237,7 @@ function handleScrollEvent(target: HTMLElement) {
             </div>
           </div>
           <div
-            class="min-w-[44px] lg:w-[60px] flex items-center justify-center"
+            class="min-w-[20px] lg:w-[40px] flex items-center justify-end"
           >
             <UiDropdown>
               <template #button>

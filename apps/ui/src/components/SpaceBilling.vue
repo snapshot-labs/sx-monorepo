@@ -109,7 +109,7 @@ const statusText = computed(() => {
       <UiColumnHeaderItem class="w-[150px] sm:shrink-0 justify-end">
         Amount
       </UiColumnHeaderItem>
-      <UiColumnHeaderItem class="min-w-[44px] lg:w-[60px]" />
+      <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
     </UiColumnHeader>
 
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
@@ -148,7 +148,7 @@ const statusText = computed(() => {
           </span>
         </div>
 
-        <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
+        <div class="min-w-[20px] lg:w-[40px] flex items-center justify-end">
           <UiDropdown>
             <template #button>
               <button type="button" class="text-skin-link">
