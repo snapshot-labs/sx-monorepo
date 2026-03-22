@@ -236,9 +236,7 @@ function handleScrollEvent(target: HTMLElement) {
               {{ _n((vote.vp / proposal.scores_total) * 100) }}%
             </div>
           </div>
-          <div
-            class="min-w-[20px] lg:w-[40px] flex items-center justify-end"
-          >
+          <div class="min-w-[20px] lg:w-[40px] flex items-center justify-end">
             <UiDropdown>
               <template #button>
                 <button type="button">

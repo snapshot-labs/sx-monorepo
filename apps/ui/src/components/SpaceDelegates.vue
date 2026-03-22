@@ -237,9 +237,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               />
             </div>
           </AppLink>
-          <div
-            class="min-w-[20px] lg:w-[40px] flex items-center justify-end"
-          >
+          <div class="min-w-[20px] lg:w-[40px] flex items-center justify-end">
             <UiDropdown>
               <template #button>
                 <button class="text-skin-link">
