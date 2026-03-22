@@ -91,8 +91,7 @@ function handleScrollEvent(target: HTMLElement) {
     :ref="
       ref =>
         (votesHeader =
-          (ref as InstanceType<typeof UiColumnHeader> | null)?.container ??
-          null)
+          (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ?? null)
     "
     class="px-4 gap-3"
     scrollable-width="735px"

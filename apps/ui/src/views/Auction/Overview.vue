@@ -464,8 +464,8 @@ watch(volume, () => {
             :ref="
               ref =>
                 (bidsHeader =
-                  (ref as InstanceType<typeof UiColumnHeader> | null)
-                    ?.container ?? null)
+                  (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ??
+                  null)
             "
             class="py-2 text-sm tracking-wider px-4 gap-3"
             :sticky="false"
