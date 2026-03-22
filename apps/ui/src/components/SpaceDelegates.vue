@@ -211,12 +211,12 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 user: delegatee.id
               }
             }"
-            class="w-full flex justify-between items-center group"
+            class="w-full flex justify-between items-center truncate gap-3 group"
           >
-            <UiStamp :id="delegatee.id" type="avatar" :size="32" class="mr-3" />
-            <div class="flex-1 leading-[22px]">
+            <UiStamp :id="delegatee.id" type="avatar" :size="32" />
+            <div class="flex-1 leading-[22px] truncate">
               <h4
-                class="text-skin-link"
+                class="text-skin-link truncate"
                 v-text="delegatee.name || shorten(delegatee.id)"
               />
               <UiAddress
