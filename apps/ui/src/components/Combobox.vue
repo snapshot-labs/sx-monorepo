@@ -34,14 +34,8 @@ const filteredOptions = computed(() => {
 });
 
 const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: T | null) {
+  get: () => model.value,
+  set: (newValue: T | null) => {
     query.value = '';
     model.value = newValue;
   }

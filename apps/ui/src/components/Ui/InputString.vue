@@ -12,23 +12,10 @@ const props = defineProps<{
 
 const { isDirty } = useDirty(model, props.definition);
 
-const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: string) {
-    model.value = newValue;
-  }
-});
-
 // From AJV string length validation
 // See https://github.com/ajv-validator/ajv/blob/master/lib/runtime/ucs2length.ts
 const inputLength = computed(() => {
-  const str = inputValue.value || '';
+  const str = model.value || '';
   const len = str.length;
   let length = 0;
   let pos = 0;
@@ -57,7 +44,7 @@ const inputLength = computed(() => {
   >
     <input
       :id="id"
-      v-model.trim="inputValue"
+      v-model.trim="model"
       type="text"
       class="s-input"
       v-bind="$attrs"
