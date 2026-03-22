@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
+import { UiColumnHeader } from '@snapshot-labs/tune';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useProposalScoresTicksQuery } from '@/queries/proposals';
@@ -96,12 +96,14 @@ function handleScrollEvent(target: HTMLElement) {
     "
     class="!px-0 overflow-hidden"
   >
-    <div class="flex space-x-3 min-w-[735px] w-full">
-      <div class="ml-4 max-w-[218px] w-[218px] truncate">Voter</div>
-      <div class="grow w-[40%]">
-        <template v-if="offchainNetworks.includes(proposal.network)"
-          >Choice</template
-        >
+    <div class="flex gap-3 min-w-[735px] w-full">
+      <UiColumnHeaderItem class="ml-4 w-[218px] max-w-[218px]">
+        Voter
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="grow w-[40%]">
+        <template v-if="offchainNetworks.includes(proposal.network)">
+          Choice
+        </template>
         <UiSelectDropdown
           v-else
           v-model="choiceFilter"
@@ -130,26 +132,24 @@ function handleScrollEvent(target: HTMLElement) {
             </button>
           </template>
         </UiSelectDropdown>
-      </div>
-      <button
-        type="button"
-        class="flex max-w-[144px] w-[144px] items-center hover:text-skin-link space-x-1 truncate"
-        @click="handleSortChange('created')"
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[144px] max-w-[144px]"
+        :is-ordered="sortBy.startsWith('created')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('created')"
       >
-        <span>Date</span>
-        <IH-arrow-sm-down v-if="sortBy === 'created-desc'" class="shrink-0" />
-        <IH-arrow-sm-up v-else-if="sortBy === 'created-asc'" class="shrink-0" />
-      </button>
-      <button
-        type="button"
-        class="max-w-[144px] w-[144px] flex items-center justify-end hover:text-skin-link space-x-1 truncate"
-        @click="handleSortChange('vp')"
+        Date
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[144px] max-w-[144px] justify-end"
+        :is-ordered="sortBy.startsWith('vp')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('vp')"
       >
-        <span class="truncate">Voting power</span>
-        <IH-arrow-sm-down v-if="sortBy === 'vp-desc'" class="shrink-0" />
-        <IH-arrow-sm-up v-else-if="sortBy === 'vp-asc'" class="shrink-0" />
-      </button>
-      <div class="min-w-[44px] lg:w-[60px]" />
+        Voting power
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="min-w-[44px] lg:w-[60px]" />
     </div>
   </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
@@ -172,7 +172,7 @@ function handleScrollEvent(target: HTMLElement) {
         <div
           v-for="(vote, i) in data.pages.flat()"
           :key="i"
-          class="border-b flex space-x-3"
+          class="border-b flex gap-3"
         >
           <div
             class="right-0 h-[8px] absolute"

@@ -99,11 +99,15 @@ const statusText = computed(() => {
     </UiContainerSettings>
 
     <UiSectionHeader class="mt-4" label="Payment history" sticky />
-    <UiColumnHeader class="space-x-3">
-      <div class="w-[190px] grow sm:grow-0 text-left">Date</div>
-      <div class="hidden sm:flex grow">Type</div>
-      <div class="w-[150px] flex justify-end">Amount</div>
-      <div class="min-w-3.5" />
+    <UiColumnHeader class="gap-3">
+      <UiColumnHeaderItem class="w-[190px] grow sm:grow-0">
+        Date
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="hidden sm:flex grow w-0"> Type </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[150px] sm:shrink-0 justify-end">
+        Amount
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="min-w-[44px] lg:w-[60px]" />
     </UiColumnHeader>
 
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
@@ -125,7 +129,7 @@ const statusText = computed(() => {
       <div
         v-for="payment in payments"
         :key="payment.id"
-        class="border-b flex space-x-3 py-3"
+        class="border-b flex gap-3 py-3"
       >
         <div class="flex grow sm:grow-0 w-[190px] items-center">
           {{ dayjs((payment.timestamp || 0) * 1000).format('MMM D, YYYY') }}
@@ -142,14 +146,13 @@ const statusText = computed(() => {
           </span>
         </div>
 
-        <UiDropdown>
-          <template #button>
-            <div class="flex items-center h-full">
+        <div class="min-w-[44px] lg:w-[60px] flex items-center justify-center">
+          <UiDropdown>
+            <template #button>
               <button type="button" class="text-skin-link">
                 <IH-dots-horizontal />
               </button>
-            </div>
-          </template>
+            </template>
           <template #items>
             <UiDropdownItem
               :to="
@@ -159,8 +162,9 @@ const statusText = computed(() => {
               <IH-arrow-sm-right class="-rotate-45" :width="16" />
               View transaction
             </UiDropdownItem>
-          </template>
-        </UiDropdown>
+            </template>
+          </UiDropdown>
+        </div>
       </div>
     </UiContainerInfiniteScroll>
   </div>

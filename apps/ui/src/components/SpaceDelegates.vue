@@ -61,6 +61,7 @@ const isUpdatableDelegation = computed(() => {
   return props.delegation.apiType === 'split-delegation';
 });
 
+// split-delegation API supports only one sorting direction per field
 function getIsSortingDisabled(type: SortType) {
   return (
     props.delegation.apiType === 'split-delegation' &&
@@ -200,7 +201,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
         <div
           v-for="delegatee in delegatees"
           :key="delegatee.id"
-          class="flex w-full space-x-3 truncate border-b py-3"
+          class="flex w-full gap-3 truncate border-b py-3"
         >
           <AppLink
             :to="{
@@ -236,7 +237,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
               />
             </div>
           </AppLink>
-          <div class="flex items-center justify-center">
+          <div
+            class="min-w-[44px] lg:w-[60px] flex items-center justify-center"
+          >
             <UiDropdown>
               <template #button>
                 <button class="text-skin-link">
@@ -275,56 +278,38 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
     <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
-      <UiColumnHeader class="space-x-3">
-        <div
-          class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
+      <UiColumnHeader class="gap-3">
+        <UiColumnHeaderItem
+          class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0"
         >
-          <span class="truncate">Delegatee</span>
-        </div>
-        <div class="hidden sm:flex grow items-center truncate">
-          <span class="truncate">Statement</span>
-        </div>
-        <button
-          type="button"
-          class="hidden md:flex w-[80px] shrink-0 items-center justify-end hover:text-skin-link space-x-1 truncate"
-          :class="{
-            'hover:text-skin-text': getIsSortingDisabled(
-              'tokenHoldersRepresentedAmount'
-            )
-          }"
-          :disabled="getIsSortingDisabled('tokenHoldersRepresentedAmount')"
-          @click="handleSortChange('tokenHoldersRepresentedAmount')"
+          Delegatee
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="hidden sm:flex grow">
+          Statement
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem
+          class="hidden md:flex w-[80px] shrink-0 justify-end"
+          :is-ordered="sortBy.startsWith('tokenHoldersRepresentedAmount')"
+          :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+          @sort-change="
+            !getIsSortingDisabled('tokenHoldersRepresentedAmount') &&
+              handleSortChange('tokenHoldersRepresentedAmount')
+          "
         >
-          <span class="truncate">Delegators</span>
-          <IH-arrow-sm-down
-            v-if="sortBy === 'tokenHoldersRepresentedAmount-desc'"
-            class="shrink-0"
-          />
-          <IH-arrow-sm-up
-            v-else-if="sortBy === 'tokenHoldersRepresentedAmount-asc'"
-            class="shrink-0"
-          />
-        </button>
-        <button
-          type="button"
-          class="w-[120px] md:w-[150px] flex sm:shrink-0 justify-end items-center hover:text-skin-link space-x-1 truncate"
-          :class="{
-            'hover:text-skin-text': getIsSortingDisabled('delegatedVotes')
-          }"
-          :disabled="getIsSortingDisabled('delegatedVotes')"
-          @click="handleSortChange('delegatedVotes')"
+          Delegators
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem
+          class="w-[120px] md:w-[150px] sm:shrink-0 justify-end"
+          :is-ordered="sortBy.startsWith('delegatedVotes')"
+          :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+          @sort-change="
+            !getIsSortingDisabled('delegatedVotes') &&
+              handleSortChange('delegatedVotes')
+          "
         >
-          <span class="truncate">Voting power</span>
-          <IH-arrow-sm-down
-            v-if="sortBy === 'delegatedVotes-desc'"
-            class="shrink-0"
-          />
-          <IH-arrow-sm-up
-            v-else-if="sortBy === 'delegatedVotes-asc'"
-            class="shrink-0"
-          />
-        </button>
-        <div class="w-[20px]" />
+          Voting power
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="min-w-[44px] lg:w-[60px]" />
       </UiColumnHeader>
       <UiLoading v-if="isPending" class="px-4 py-3 block" />
       <template v-else>
@@ -343,73 +328,72 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
           class="px-4"
           @end-reached="hasNextPage && fetchNextPage()"
         >
-          <div
+          <AppLink
             v-for="(delegate, i) in data?.pages.flat()"
             :key="i"
-            class="border-b flex space-x-3"
+            :to="{
+              name: 'space-user-statement',
+              params: {
+                space: spaceKey,
+                user: delegate.user
+              }
+            }"
+            class="border-b flex gap-3 group"
           >
-            <AppLink
-              :to="{
-                name: 'space-user-statement',
-                params: {
-                  space: spaceKey,
-                  user: delegate.user
-                }
-              }"
-              class="flex w-full space-x-3 group"
+            <div
+              class="flex grow sm:grow-0 sm:shrink-0 items-center w-[120px] xs:w-[190px] py-3 gap-x-3 leading-[22px] truncate"
+            >
+              <UiStamp :id="delegate.user" :size="32" />
+              <div class="flex flex-col truncate">
+                <h4
+                  class="text-skin-link truncate"
+                  v-text="delegate.name || shorten(delegate.user)"
+                />
+                <UiAddress
+                  :address="delegate.user"
+                  class="text-[17px] text-skin-text truncate"
+                />
+              </div>
+            </div>
+            <div
+              class="hidden sm:flex items-center grow w-0 text-[17px] leading-[22px] text-skin-heading"
             >
               <div
-                class="flex grow sm:grow-0 sm:shrink-0 items-center w-[120px] xs:w-[190px] py-3 gap-x-3 leading-[22px] truncate"
-              >
-                <UiStamp :id="delegate.user" :size="32" />
-                <div class="flex flex-col truncate">
-                  <h4
-                    class="text-skin-link truncate"
-                    v-text="delegate.name || shorten(delegate.user)"
-                  />
-                  <UiAddress
-                    :address="delegate.user"
-                    class="text-[17px] text-skin-text truncate"
-                  />
-                </div>
-              </div>
+                v-if="delegate.statement"
+                class="line-clamp-2 max-h-[44px]"
+                v-text="
+                  shorten(removeMarkdown(delegate.statement.statement), 250)
+                "
+              />
+            </div>
+            <div
+              class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
+            >
+              <h4
+                class="text-skin-link"
+                v-text="_n(delegate.tokenHoldersRepresentedAmount)"
+              />
               <div
-                class="hidden sm:flex items-center grow w-0 text-[17px] leading-[22px] text-skin-heading"
-              >
-                <div
-                  v-if="delegate.statement"
-                  class="line-clamp-2 max-h-[44px]"
-                  v-text="
-                    shorten(removeMarkdown(delegate.statement.statement), 250)
-                  "
-                />
-              </div>
+                class="text-[17px] text-skin-text"
+                v-text="_p(delegate.delegatorsPercentage)"
+              />
+            </div>
+            <div
+              class="w-[120px] md:w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
+            >
+              <h4 class="text-skin-link truncate">
+                {{ _vp(Number(delegate.delegatedVotes)) }}
+                {{ space.voting_power_symbol }}
+              </h4>
               <div
-                class="hidden md:flex shrink-0 w-[80px] flex-col items-end justify-center leading-[22px] truncate"
-              >
-                <h4
-                  class="text-skin-link"
-                  v-text="_n(delegate.tokenHoldersRepresentedAmount)"
-                />
-                <div
-                  class="text-[17px] text-skin-text"
-                  v-text="_p(delegate.delegatorsPercentage)"
-                />
-              </div>
-              <div
-                class="w-[120px] md:w-[150px] flex flex-col sm:shrink-0 text-right justify-center leading-[22px] truncate"
-              >
-                <h4 class="text-skin-link truncate">
-                  {{ _vp(Number(delegate.delegatedVotes)) }}
-                  {{ space.voting_power_symbol }}
-                </h4>
-                <div
-                  class="text-[17px] text-skin-text"
-                  v-text="_p(delegate.votesPercentage)"
-                />
-              </div>
-            </AppLink>
-            <div class="flex items-center justify-center">
+                class="text-[17px] text-skin-text"
+                v-text="_p(delegate.votesPercentage)"
+              />
+            </div>
+            <div
+              class="min-w-[44px] lg:w-[60px] flex items-center justify-center"
+              @click.prevent
+            >
               <UiDropdown>
                 <template #button>
                   <button class="text-skin-link">
@@ -460,7 +444,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
                 </template>
               </UiDropdown>
             </div>
-          </div>
+          </AppLink>
           <template #loading>
             <UiLoading class="px-4 py-3 block" />
           </template>

@@ -164,19 +164,23 @@ watchEffect(() => setTitle(props.space.name));
     <OnboardingSpace v-if="!organization" :space="space" />
     <div v-if="showChildren" class="mb-4">
       <UiSectionHeader label="Sub-spaces" sticky />
-      <UiColumnHeader class="hidden md:flex text-center">
-        <div class="grow" />
-        <div
+      <UiColumnHeader class="hidden md:flex gap-3">
+        <UiColumnHeaderItem class="grow" />
+        <UiColumnHeaderItem
           v-if="space.protocol === 'snapshot'"
-          class="w-[100px]"
-          v-text="'Active'"
-        />
-        <div class="w-[100px]" v-text="'Proposals'" />
-        <div
+          class="w-[100px] justify-center"
+        >
+          Active
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="w-[100px] justify-center">
+          Proposals
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem
           v-if="space.protocol === 'snapshot'"
-          class="w-[100px]"
-          v-text="'Followers'"
-        />
+          class="w-[100px] justify-center"
+        >
+          Followers
+        </UiColumnHeaderItem>
       </UiColumnHeader>
       <div>
         <SpacesListItem

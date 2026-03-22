@@ -91,38 +91,26 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 <template>
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
-    <UiColumnHeader>
-      <div class="w-[40%] lg:w-[50%] flex items-center truncate">User</div>
-      <button
-        type="button"
-        class="flex w-[30%] lg:w-[25%] items-center justify-end hover:text-skin-link space-x-1 truncate"
-        @click="handleSortChange('proposal_count')"
+    <UiColumnHeader class="gap-3">
+      <UiColumnHeaderItem class="w-[40%] lg:w-[50%]">
+        User
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[30%] lg:w-[25%] justify-end"
+        :is-ordered="sortBy.startsWith('proposal_count')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('proposal_count')"
       >
-        <span class="truncate">Proposals</span>
-        <IH-arrow-sm-down
-          v-if="sortBy === 'proposal_count-desc'"
-          class="shrink-0"
-        />
-        <IH-arrow-sm-up
-          v-else-if="sortBy === 'proposal_count-asc'"
-          class="shrink-0"
-        />
-      </button>
-      <button
-        type="button"
-        class="flex justify-end items-center hover:text-skin-link w-[30%] lg:w-[25%] space-x-1 truncate"
-        @click="handleSortChange('vote_count')"
+        Proposals
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[30%] lg:w-[25%] justify-end"
+        :is-ordered="sortBy.startsWith('vote_count')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('vote_count')"
       >
-        <span class="truncate">Votes</span>
-        <IH-arrow-sm-down
-          v-if="sortBy === 'vote_count-desc'"
-          class="shrink-0"
-        />
-        <IH-arrow-sm-up
-          v-else-if="sortBy === 'vote_count-asc'"
-          class="shrink-0"
-        />
-      </button>
+        Votes
+      </UiColumnHeaderItem>
     </UiColumnHeader>
     <UiLoading v-if="isPending" class="px-4 py-3 block" />
     <template v-else>
@@ -143,7 +131,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
         <div
           v-for="(user, i) in data?.pages.flat()"
           :key="i"
-          class="border-b flex space-x-1"
+          class="border-b flex gap-3"
         >
           <div
             class="flex items-center py-3 gap-x-3 leading-[22px] w-[40%] lg:w-[50%] truncate"

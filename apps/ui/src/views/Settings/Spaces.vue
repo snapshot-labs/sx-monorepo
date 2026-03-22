@@ -70,15 +70,23 @@ watch(
       </UiTooltip>
     </div>
     <UiSectionHeader label="My spaces" sticky />
-    <UiColumnHeader class="hidden md:flex text-center">
-      <div class="grow" />
-      <div v-if="protocol === 'snapshot'" class="w-[100px]" v-text="'Active'" />
-      <div class="w-[100px]" v-text="'Proposals'" />
-      <div
+    <UiColumnHeader class="hidden md:flex gap-3">
+      <UiColumnHeaderItem class="grow" />
+      <UiColumnHeaderItem
         v-if="protocol === 'snapshot'"
-        class="w-[100px]"
-        v-text="'Followers'"
-      />
+        class="w-[100px] justify-center"
+      >
+        Active
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[100px] justify-center">
+        Proposals
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        v-if="protocol === 'snapshot'"
+        class="w-[100px] justify-center"
+      >
+        Followers
+      </UiColumnHeaderItem>
     </UiColumnHeader>
     <UiLoading v-if="loading" class="block m-4" />
     <div v-else-if="data?.pages.flat().length">

@@ -48,7 +48,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
 </script>
 
 <template>
-  <div class="flex justify-between items-center gap-3 py-3 px-4 leading-[22px]">
+  <div class="flex items-center gap-3 py-3 px-4 leading-[22px]">
     <div class="flex-1 min-w-[110px] flex flex-col justify-center truncate">
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
         <h4>{{ relativeTime }}</h4>

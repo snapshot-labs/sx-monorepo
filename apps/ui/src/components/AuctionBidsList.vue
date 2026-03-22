@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
+import { UiColumnHeader } from '@snapshot-labs/tune';
 import { AuctionNetworkId } from '@/helpers/auction';
 import {
   AuctionDetailFragment,
@@ -73,40 +73,46 @@ function handleSortChange(field: Order_OrderBy) {
     <div class="overflow-hidden">
       <UiColumnHeader
         ref="columnHeaderRef"
-        class="!px-0 py-2 uppercase text-sm tracking-wider overflow-hidden"
+        class="!px-0 py-2 text-sm tracking-wider overflow-hidden"
         :sticky="false"
       >
         <div
-          class="flex px-4 gap-3 uppercase text-sm tracking-wider min-w-[880px] w-full"
+          class="flex px-4 gap-3 text-sm tracking-wider min-w-[880px] w-full"
         >
-          <div class="flex-1 min-w-[168px] truncate">Bidder</div>
-          <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+          <UiColumnHeaderItem class="flex-1 min-w-[168px] uppercase">
+            Bidder
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] max-w-[200px] uppercase"
             :is-ordered="orderBy === 'timestamp'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('timestamp')"
           >
             Created
-          </UiColumnHeaderItemSortable>
-          <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] max-w-[200px] uppercase"
             :is-ordered="orderBy === 'sellAmount'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('sellAmount')"
           >
             Amount
-          </UiColumnHeaderItemSortable>
-          <UiColumnHeaderItemSortable
-            class="w-[200px] max-w-[200px]"
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] max-w-[200px] uppercase"
             :is-ordered="orderBy === 'price'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('price')"
           >
             Max. price
-          </UiColumnHeaderItemSortable>
-          <div class="w-[200px] max-w-[200px] truncate">Max. FDV</div>
-          <div class="w-[200px] max-w-[200px] truncate">Status</div>
-          <div class="min-w-[44px] lg:w-[60px]" />
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+            Max. FDV
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+            Status
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="min-w-[44px] lg:w-[60px]" />
         </div>
       </UiColumnHeader>
       <UiScrollerHorizontal @scroll="handleScrollEvent">
