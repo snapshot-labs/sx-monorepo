@@ -96,8 +96,8 @@ function handleScrollEvent(target: HTMLElement) {
     "
     class="!px-0 overflow-hidden"
   >
-    <div class="flex gap-3 min-w-[735px] w-full">
-      <UiColumnHeaderItem class="ml-4 w-[218px] max-w-[218px]">
+    <div class="flex gap-3 px-4 min-w-[735px] w-full">
+      <UiColumnHeaderItem class="w-[218px] max-w-[218px]">
         Voter
       </UiColumnHeaderItem>
       <UiColumnHeaderItem class="grow w-[40%]">
@@ -172,7 +172,7 @@ function handleScrollEvent(target: HTMLElement) {
         <div
           v-for="(vote, i) in data.pages.flat()"
           :key="i"
-          class="border-b flex gap-3"
+          class="border-b flex gap-3 px-4"
         >
           <div
             class="right-0 h-[8px] absolute"
@@ -193,7 +193,7 @@ function handleScrollEvent(target: HTMLElement) {
                 user: vote.voter.id
               }
             }"
-            class="leading-[22px] !ml-4 py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate group"
+            class="leading-[22px] py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate group"
           >
             <UiStamp :id="vote.voter.id" :size="32" />
             <div class="flex flex-col truncate">
