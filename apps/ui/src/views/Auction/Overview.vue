@@ -488,7 +488,9 @@ watch(volume, () => {
               <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
                 Status
               </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
+              <UiColumnHeaderItem
+                class="min-w-[20px] lg:w-[40px] justify-end"
+              />
             </div>
           </UiColumnHeader>
           <UiScrollerHorizontal @scroll="handleScrollEvent">
