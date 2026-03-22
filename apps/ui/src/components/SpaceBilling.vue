@@ -103,7 +103,9 @@ const statusText = computed(() => {
       <UiColumnHeaderItem class="w-[190px] grow sm:grow-0">
         Date
       </UiColumnHeaderItem>
-      <UiColumnHeaderItem class="hidden sm:flex grow w-0"> Type </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="hidden sm:flex grow w-0">
+        Type
+      </UiColumnHeaderItem>
       <UiColumnHeaderItem class="w-[150px] sm:shrink-0 justify-end">
         Amount
       </UiColumnHeaderItem>
@@ -153,15 +155,16 @@ const statusText = computed(() => {
                 <IH-dots-horizontal />
               </button>
             </template>
-          <template #items>
-            <UiDropdownItem
-              :to="
-                getGenericExplorerUrl(chainId, payment.id, 'transaction') || ''
-              "
-            >
-              <IH-arrow-sm-right class="-rotate-45" :width="16" />
-              View transaction
-            </UiDropdownItem>
+            <template #items>
+              <UiDropdownItem
+                :to="
+                  getGenericExplorerUrl(chainId, payment.id, 'transaction') ||
+                  ''
+                "
+              >
+                <IH-arrow-sm-right class="-rotate-45" :width="16" />
+                View transaction
+              </UiDropdownItem>
             </template>
           </UiDropdown>
         </div>
