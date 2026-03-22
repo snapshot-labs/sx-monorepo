@@ -20,7 +20,7 @@ const props = defineProps<{
   totalSupply: bigint;
 }>();
 
-const columnHeaderRef = ref<InstanceType<typeof UiColumnHeader> | null>(null);
+const columnHeaderRef = ref<HTMLElement | null>(null);
 const page = ref(1);
 const orderBy = ref<Order_OrderBy>('timestamp');
 const orderDirection = ref<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
@@ -44,9 +44,7 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     tokenAddress: () => props.auction.addressBiddingToken
   });
 
-const { x: columnHeaderX } = useScroll(
-  () => columnHeaderRef.value?.$el ?? null
-);
+const { x: columnHeaderX } = useScroll(columnHeaderRef);
 
 const totalPageCount = computed(() => {
   const pages = Math.ceil(props.auction.orderCount / LIMIT);
@@ -70,51 +68,46 @@ function handleSortChange(field: Order_OrderBy) {
 </script>
 <template>
   <div class="divide-y divide-skin-border">
-    <div class="overflow-hidden">
+    <div ref="columnHeaderRef" class="overflow-hidden">
       <UiColumnHeader
-        ref="columnHeaderRef"
-        class="overflow-hidden"
+        class="py-2 text-sm tracking-wider px-4 gap-3"
         :sticky="false"
+        style="min-width: 880px"
       >
-        <div
-          class="flex w-full py-2 text-sm tracking-wider px-4 gap-3"
-          style="min-width: 880px"
+        <UiColumnHeaderItem class="flex-1 min-w-[168px] uppercase">
+          Bidder
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem
+          class="w-[200px] max-w-[200px] uppercase"
+          :is-ordered="orderBy === 'timestamp'"
+          :order-direction="orderDirection"
+          @sort-change="handleSortChange('timestamp')"
         >
-          <UiColumnHeaderItem class="flex-1 min-w-[168px] uppercase">
-            Bidder
-          </UiColumnHeaderItem>
-          <UiColumnHeaderItem
-            class="w-[200px] max-w-[200px] uppercase"
-            :is-ordered="orderBy === 'timestamp'"
-            :order-direction="orderDirection"
-            @sort-change="handleSortChange('timestamp')"
-          >
-            Created
-          </UiColumnHeaderItem>
-          <UiColumnHeaderItem
-            class="w-[200px] max-w-[200px] uppercase"
-            :is-ordered="orderBy === 'sellAmount'"
-            :order-direction="orderDirection"
-            @sort-change="handleSortChange('sellAmount')"
-          >
-            Amount
-          </UiColumnHeaderItem>
-          <UiColumnHeaderItem
-            class="w-[200px] max-w-[200px] uppercase"
-            :is-ordered="orderBy === 'price'"
-            :order-direction="orderDirection"
-            @sort-change="handleSortChange('price')"
-          >
-            Max. price
-          </UiColumnHeaderItem>
-          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-            Max. FDV
-          </UiColumnHeaderItem>
-          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-            Status
-          </UiColumnHeaderItem>
-          <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
-        </div>
+          Created
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem
+          class="w-[200px] max-w-[200px] uppercase"
+          :is-ordered="orderBy === 'sellAmount'"
+          :order-direction="orderDirection"
+          @sort-change="handleSortChange('sellAmount')"
+        >
+          Amount
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem
+          class="w-[200px] max-w-[200px] uppercase"
+          :is-ordered="orderBy === 'price'"
+          :order-direction="orderDirection"
+          @sort-change="handleSortChange('price')"
+        >
+          Max. price
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+          Max. FDV
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+          Status
+        </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
       </UiColumnHeader>
       <UiScrollerHorizontal @scroll="handleScrollEvent">
         <div class="min-w-[880px]" :class="{ 'opacity-60': isFetching }">

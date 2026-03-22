@@ -87,15 +87,8 @@ function handleScrollEvent(target: HTMLElement) {
       <UiLoading />
     </div>
   </div>
-  <UiColumnHeader
-    :ref="
-      ref =>
-        (votesHeader =
-          (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ?? null)
-    "
-    class="overflow-hidden"
-  >
-    <div class="flex w-full px-4 gap-3" style="min-width: 735px">
+  <div ref="votesHeader" class="overflow-hidden">
+    <UiColumnHeader class="px-4 gap-3" style="min-width: 735px">
       <UiColumnHeaderItem class="w-[218px] max-w-[218px]">
         Voter
       </UiColumnHeaderItem>
@@ -149,8 +142,8 @@ function handleScrollEvent(target: HTMLElement) {
         Voting power
       </UiColumnHeaderItem>
       <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
-    </div>
-  </UiColumnHeader>
+    </UiColumnHeader>
+  </div>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />

@@ -459,40 +459,28 @@ watch(volume, () => {
         Log in to view your bids.
       </UiStateWarning>
       <template v-else>
-        <div class="overflow-hidden">
+        <div ref="bidsHeader" class="overflow-hidden">
           <UiColumnHeader
-            :ref="
-              ref =>
-                (bidsHeader =
-                  (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ??
-                  null)
-            "
-            class="overflow-hidden"
+            class="py-2 text-sm tracking-wider px-4 gap-3"
             :sticky="false"
+            style="min-width: 735px"
           >
-            <div
-              class="flex w-full py-2 text-sm tracking-wider px-4 gap-3"
-              style="min-width: 735px"
-            >
-              <UiColumnHeaderItem class="flex-1 min-w-[110px] uppercase">
-                Created
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Amount
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Max. price
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Max. FDV
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Status
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem
-                class="min-w-[20px] lg:w-[40px] justify-end"
-              />
-            </div>
+            <UiColumnHeaderItem class="flex-1 min-w-[110px] uppercase">
+              Created
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Amount
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Max. price
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Max. FDV
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Status
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
           </UiColumnHeader>
           <UiScrollerHorizontal @scroll="handleScrollEvent">
             <div class="min-w-[735px]">
