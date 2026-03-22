@@ -70,7 +70,7 @@ watch(
       </UiTooltip>
     </div>
     <UiSectionHeader label="My spaces" sticky />
-    <UiColumnHeader class="hidden md:flex gap-3">
+    <UiColumnHeader class="hidden md:flex gap-3 px-4">
       <UiColumnHeaderItem class="grow" />
       <UiColumnHeaderItem
         v-if="protocol === 'snapshot'"

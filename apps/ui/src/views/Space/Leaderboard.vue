@@ -91,7 +91,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
 <template>
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
-    <UiColumnHeader class="gap-3">
+    <UiColumnHeader class="gap-3 px-4">
       <UiColumnHeaderItem class="w-[40%] lg:w-[50%]"> User </UiColumnHeaderItem>
       <UiColumnHeaderItem
         class="w-[30%] lg:w-[25%] justify-end"

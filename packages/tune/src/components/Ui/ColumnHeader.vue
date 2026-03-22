@@ -29,8 +29,7 @@ defineExpose({
       {
         'sticky z-10 top-header-with-section-height-with-offset lg:top-header-with-section-height':
           sticky,
-        'overflow-hidden': scrollableWidth,
-        'px-4': !scrollableWidth
+        'overflow-hidden': scrollableWidth
       }
     ]"
     v-bind="scrollableWidth ? {} : $attrs"
@@ -38,7 +37,7 @@ defineExpose({
     <div
       v-if="scrollableWidth"
       v-bind="$attrs"
-      class="flex px-4 w-full"
+      class="flex w-full"
       :style="{ minWidth: scrollableWidth }"
     >
       <slot />

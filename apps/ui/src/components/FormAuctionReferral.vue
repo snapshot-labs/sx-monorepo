@@ -42,7 +42,7 @@ const partnerStatistics = computed(
       <h4 class="px-4 py-2">Leaderboard</h4>
 
       <UiColumnHeader
-        class="overflow-hidden gap-3 !top-header-height-with-offset"
+        class="overflow-hidden gap-3 px-4 !top-header-height-with-offset"
       >
         <UiColumnHeaderItem class="flex-1"> Referee </UiColumnHeaderItem>
         <UiColumnHeaderItem class="w-[100px] justify-end">

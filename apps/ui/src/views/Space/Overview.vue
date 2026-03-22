@@ -164,7 +164,7 @@ watchEffect(() => setTitle(props.space.name));
     <OnboardingSpace v-if="!organization" :space="space" />
     <div v-if="showChildren" class="mb-4">
       <UiSectionHeader label="Sub-spaces" sticky />
-      <UiColumnHeader class="hidden md:flex gap-3">
+      <UiColumnHeader class="hidden md:flex gap-3 px-4">
         <UiColumnHeaderItem class="grow" />
         <UiColumnHeaderItem
           v-if="space.protocol === 'snapshot'"
