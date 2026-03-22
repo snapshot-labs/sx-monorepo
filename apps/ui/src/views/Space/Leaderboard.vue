@@ -92,9 +92,7 @@ watchEffect(() => setTitle(`Leaderboard - ${props.space.name}`));
   <div>
     <UiSectionHeader label="Leaderboard" sticky />
     <UiColumnHeader class="gap-3">
-      <UiColumnHeaderItem class="w-[40%] lg:w-[50%]">
-        User
-      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[40%] lg:w-[50%]"> User </UiColumnHeaderItem>
       <UiColumnHeaderItem
         class="w-[30%] lg:w-[25%] justify-end"
         :is-ordered="sortBy.startsWith('proposal_count')"
