@@ -98,19 +98,19 @@ function handleEndReached() {
     <UiSectionHeader label="Auctions" sticky />
     <UiColumnHeader class="hidden md:flex gap-3">
       <UiColumnHeaderItem class="grow" />
-      <UiColumnHeaderItem class="w-[100px] justify-center uppercase">
+      <UiColumnHeaderItem class="w-[100px] justify-center">
         Selling
       </UiColumnHeaderItem>
-      <UiColumnHeaderItem class="w-[100px] justify-center uppercase">
+      <UiColumnHeaderItem class="w-[100px] justify-center">
         Buying
       </UiColumnHeaderItem>
-      <UiColumnHeaderItem class="w-[100px] justify-center uppercase">
+      <UiColumnHeaderItem class="w-[100px] justify-center">
         Status
       </UiColumnHeaderItem>
-      <UiColumnHeaderItem class="w-[100px] justify-center uppercase">
+      <UiColumnHeaderItem class="w-[100px] justify-center">
         Volume
       </UiColumnHeaderItem>
-      <UiColumnHeaderItem class="w-[170px] justify-center uppercase">
+      <UiColumnHeaderItem class="w-[170px] justify-center">
         End date
       </UiColumnHeaderItem>
     </UiColumnHeader>

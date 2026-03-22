@@ -467,31 +467,26 @@ watch(volume, () => {
                   (ref as InstanceType<typeof UiColumnHeader> | null)
                     ?.container ?? null)
             "
-            class="!px-0 py-2 text-sm tracking-wider overflow-hidden"
+            class="py-2 text-sm tracking-wider"
             :sticky="false"
+            scrollable-width="735px"
           >
-            <div
-              class="flex px-4 gap-3 text-sm tracking-wider min-w-[735px] w-full"
-            >
-              <UiColumnHeaderItem class="flex-1 min-w-[110px] uppercase">
-                Created
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Amount
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Max. price
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Max. FDV
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-                Status
-              </UiColumnHeaderItem>
-              <UiColumnHeaderItem
-                class="min-w-[20px] lg:w-[40px] justify-end"
-              />
-            </div>
+            <UiColumnHeaderItem class="flex-1 min-w-[110px] uppercase">
+              Created
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Amount
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Max. price
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Max. FDV
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              Status
+            </UiColumnHeaderItem>
+            <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
           </UiColumnHeader>
           <UiScrollerHorizontal @scroll="handleScrollEvent">
             <div class="min-w-[735px]">

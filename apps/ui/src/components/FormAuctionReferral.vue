@@ -44,10 +44,8 @@ const partnerStatistics = computed(
       <UiColumnHeader
         class="overflow-hidden gap-3 !top-header-height-with-offset"
       >
-        <UiColumnHeaderItem class="flex-1 uppercase">
-          Referee
-        </UiColumnHeaderItem>
-        <UiColumnHeaderItem class="w-[100px] justify-end uppercase">
+        <UiColumnHeaderItem class="flex-1"> Referee </UiColumnHeaderItem>
+        <UiColumnHeaderItem class="w-[100px] justify-end">
           Referrals
         </UiColumnHeaderItem>
       </UiColumnHeader>
