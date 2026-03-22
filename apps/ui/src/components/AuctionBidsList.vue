@@ -45,7 +45,7 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
   });
 
 const { x: columnHeaderX } = useScroll(
-  () => columnHeaderRef.value?.container ?? null
+  () => columnHeaderRef.value?.$el ?? null
 );
 
 const totalPageCount = computed(() => {

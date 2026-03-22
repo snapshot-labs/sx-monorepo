@@ -3,8 +3,6 @@ defineOptions({
   inheritAttrs: false
 });
 
-const container = ref<HTMLElement | null>(null);
-
 withDefaults(
   defineProps<{
     sticky?: boolean;
@@ -15,15 +13,10 @@ withDefaults(
     scrollableWidth: undefined
   }
 );
-
-defineExpose({
-  container
-});
 </script>
 
 <template>
   <div
-    ref="container"
     class="flex bg-skin-bg border-b w-full font-medium"
     :class="[
       {
