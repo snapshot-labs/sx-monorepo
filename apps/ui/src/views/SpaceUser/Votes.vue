@@ -99,9 +99,7 @@ watchEffect(() =>
 </script>
 
 <template>
-  <UiColumnHeader
-    class="gap-3 px-4 sticky-header-with-section"
-  >
+  <UiColumnHeader class="gap-3 px-4 sticky-header-with-section">
     <UiColumnHeaderItem class="grow"> Proposal </UiColumnHeaderItem>
     <UiColumnHeaderItem class="shrink-0 w-[35%] md:w-[220px]">
       Choice
