@@ -73,44 +73,44 @@ function handleSortChange(field: Order_OrderBy) {
     <div class="overflow-hidden">
       <UiColumnHeader
         ref="columnHeaderRef"
-        class="py-2 text-sm tracking-wider px-4 gap-3"
-        :sticky="false"
-        scrollable-width="880px"
+        class="!px-0 py-2 text-sm tracking-wider overflow-hidden"
       >
-        <UiColumnHeaderItem class="flex-1 min-w-[168px] uppercase">
-          Bidder
-        </UiColumnHeaderItem>
-        <UiColumnHeaderItem
-          class="w-[200px] max-w-[200px] uppercase"
-          :is-ordered="orderBy === 'timestamp'"
-          :order-direction="orderDirection"
-          @sort-change="handleSortChange('timestamp')"
-        >
-          Created
-        </UiColumnHeaderItem>
-        <UiColumnHeaderItem
-          class="w-[200px] max-w-[200px] uppercase"
-          :is-ordered="orderBy === 'sellAmount'"
-          :order-direction="orderDirection"
-          @sort-change="handleSortChange('sellAmount')"
-        >
-          Amount
-        </UiColumnHeaderItem>
-        <UiColumnHeaderItem
-          class="w-[200px] max-w-[200px] uppercase"
-          :is-ordered="orderBy === 'price'"
-          :order-direction="orderDirection"
-          @sort-change="handleSortChange('price')"
-        >
-          Max. price
-        </UiColumnHeaderItem>
-        <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-          Max. FDV
-        </UiColumnHeaderItem>
-        <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
-          Status
-        </UiColumnHeaderItem>
-        <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
+        <div class="flex px-4 gap-3 min-w-[880px] w-full">
+          <UiColumnHeaderItem class="flex-1 min-w-[168px] uppercase">
+            Bidder
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] max-w-[200px] uppercase"
+            :is-ordered="orderBy === 'timestamp'"
+            :order-direction="orderDirection"
+            @sort-change="handleSortChange('timestamp')"
+          >
+            Created
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] max-w-[200px] uppercase"
+            :is-ordered="orderBy === 'sellAmount'"
+            :order-direction="orderDirection"
+            @sort-change="handleSortChange('sellAmount')"
+          >
+            Amount
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem
+            class="w-[200px] max-w-[200px] uppercase"
+            :is-ordered="orderBy === 'price'"
+            :order-direction="orderDirection"
+            @sort-change="handleSortChange('price')"
+          >
+            Max. price
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+            Max. FDV
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+            Status
+          </UiColumnHeaderItem>
+          <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
+        </div>
       </UiColumnHeader>
       <UiScrollerHorizontal @scroll="handleScrollEvent">
         <div class="min-w-[880px]" :class="{ 'opacity-60': isFetching }">

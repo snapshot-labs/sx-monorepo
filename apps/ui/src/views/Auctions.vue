@@ -96,7 +96,9 @@ function handleEndReached() {
     </div>
 
     <UiSectionHeader label="Auctions" sticky />
-    <UiColumnHeader class="hidden md:flex gap-3 px-4">
+    <UiColumnHeader
+      class="hidden md:flex gap-3 px-4 sticky-header-with-section"
+    >
       <UiColumnHeaderItem class="grow" />
       <UiColumnHeaderItem class="w-[100px] justify-center">
         Selling

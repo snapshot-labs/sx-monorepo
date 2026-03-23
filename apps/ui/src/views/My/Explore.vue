@@ -197,7 +197,9 @@ watchEffect(() => setTitle('Explore'));
     </div>
     <div class="flex-grow" v-bind="$attrs">
       <UiSectionHeader label="Spaces" sticky />
-      <UiColumnHeader class="hidden md:flex gap-3 px-4">
+      <UiColumnHeader
+        class="hidden md:flex gap-3 px-4 sticky-header-with-section"
+      >
         <UiColumnHeaderItem class="grow" />
         <UiColumnHeaderItem
           v-if="protocol === 'snapshot'"

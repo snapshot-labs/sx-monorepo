@@ -276,7 +276,9 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
     <UiSectionHeader label="Delegates" sticky />
     <div class="text-left table-fixed w-full">
-      <UiColumnHeader class="gap-3 px-4">
+      <UiColumnHeader
+        class="gap-3 px-4 sticky-header-with-section"
+      >
         <UiColumnHeaderItem
           class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0"
         >

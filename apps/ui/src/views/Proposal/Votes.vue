@@ -55,15 +55,15 @@ async function handleEndReached() {
   fetchNextPage();
 }
 
+function handleScrollEvent(target: HTMLElement) {
+  votesHeaderX.value = target.scrollLeft;
+}
+
 function handleChoiceClick(vote: Vote | null) {
   if (!vote?.reason) return;
 
   selectedVote.value = vote;
   modalOpen.value = true;
-}
-
-function handleScrollEvent(target: HTMLElement) {
-  votesHeaderX.value = target.scrollLeft;
 }
 </script>
 
@@ -93,62 +93,63 @@ function handleScrollEvent(target: HTMLElement) {
         (votesHeader =
           (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ?? null)
     "
-    class="px-4 gap-3"
-    scrollable-width="735px"
+    class="!px-0 overflow-hidden sticky-header-with-section"
   >
-    <UiColumnHeaderItem class="w-[218px] max-w-[218px]">
-      Voter
-    </UiColumnHeaderItem>
-    <UiColumnHeaderItem class="grow w-[40%]">
-      <template v-if="offchainNetworks.includes(proposal.network)">
-        Choice
-      </template>
-      <UiSelectDropdown
-        v-else
-        v-model="choiceFilter"
-        class="font-normal text-center"
-        title="Choice"
-        gap="12"
-        placement="start"
-        :items="[
-          { key: 'any', label: 'Any' },
-          { key: 'for', label: 'For', indicator: 'bg-skin-success' },
-          {
-            key: 'against',
-            label: 'Against',
-            indicator: 'bg-skin-danger'
-          },
-          { key: 'abstain', label: 'Abstain', indicator: 'bg-skin-text' }
-        ]"
-      >
-        <template #button>
-          <button
-            class="flex items-center hover:text-skin-link space-x-2"
-            type="button"
-          >
-            <span class="truncate">Choice</span>
-            <IH-adjustments-vertical class="shrink-0" />
-          </button>
+    <div class="flex px-4 gap-3 min-w-[735px] w-full">
+      <UiColumnHeaderItem class="w-[218px] max-w-[218px]">
+        Voter
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="grow w-[40%]">
+        <template v-if="offchainNetworks.includes(proposal.network)">
+          Choice
         </template>
-      </UiSelectDropdown>
-    </UiColumnHeaderItem>
-    <UiColumnHeaderItem
-      class="w-[144px] max-w-[144px]"
-      :is-ordered="sortBy.startsWith('created')"
-      :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
-      @sort-change="handleSortChange('created')"
-    >
-      Date
-    </UiColumnHeaderItem>
-    <UiColumnHeaderItem
-      class="w-[144px] max-w-[144px] justify-end"
-      :is-ordered="sortBy.startsWith('vp')"
-      :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
-      @sort-change="handleSortChange('vp')"
-    >
-      Voting power
-    </UiColumnHeaderItem>
-    <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
+        <UiSelectDropdown
+          v-else
+          v-model="choiceFilter"
+          class="font-normal text-center"
+          title="Choice"
+          gap="12"
+          placement="start"
+          :items="[
+            { key: 'any', label: 'Any' },
+            { key: 'for', label: 'For', indicator: 'bg-skin-success' },
+            {
+              key: 'against',
+              label: 'Against',
+              indicator: 'bg-skin-danger'
+            },
+            { key: 'abstain', label: 'Abstain', indicator: 'bg-skin-text' }
+          ]"
+        >
+          <template #button>
+            <button
+              class="flex items-center hover:text-skin-link space-x-2"
+              type="button"
+            >
+              <span class="truncate">Choice</span>
+              <IH-adjustments-vertical class="shrink-0" />
+            </button>
+          </template>
+        </UiSelectDropdown>
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[144px] max-w-[144px]"
+        :is-ordered="sortBy.startsWith('created')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('created')"
+      >
+        Date
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem
+        class="w-[144px] max-w-[144px] justify-end"
+        :is-ordered="sortBy.startsWith('vp')"
+        :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
+        @sort-change="handleSortChange('vp')"
+      >
+        Voting power
+      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
+    </div>
   </UiColumnHeader>
   <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
