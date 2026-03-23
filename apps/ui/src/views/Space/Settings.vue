@@ -295,15 +295,22 @@ function handleControllerSave(value: string) {
   executeFn.value = saveController;
 }
 
-function handleSpaceDelete() {
+async function handleSpaceDelete() {
   saving.value = true;
-  executeFn.value = async () => {
-    await deleteSpace();
-    uiStore.addNotification('success', 'Your space was successfully deleted.');
-    router.push({ name: 'my-home' });
 
-    return null;
-  };
+  try {
+    const result = await deleteSpace();
+    if (result) {
+      uiStore.addNotification(
+        'success',
+        'Your space was successfully deleted.'
+      );
+      router.push({ name: 'my-home' });
+    }
+  } catch {
+  } finally {
+    saving.value = false;
+  }
 }
 
 function addCustomStrategy(strategy: { address: string; type: string }) {
