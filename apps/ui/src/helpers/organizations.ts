@@ -49,6 +49,10 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           name: 'space-proposals',
           params: { space: 's:starknet.eth' }
         },
+        activeRoute: {
+          prefix: 'space-proposal',
+          params: { space: 's:starknet.eth' }
+        },
         position: 3
       },
       docs: {
@@ -94,8 +98,7 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       discussions: {
         name: 'Discussions',
         icon: IHAnnotation,
-        link: { name: 'space-discussions', params: { space: 's:ens.eth' } },
-        isActiveOnChildren: true
+        link: { name: 'space-discussions', params: { space: 's:ens.eth' } }
       }
     }
   }

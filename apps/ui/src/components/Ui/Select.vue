@@ -11,19 +11,6 @@ const props = defineProps<{
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
-
-const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: T) {
-    model.value = newValue;
-  }
-});
 </script>
 
 <template>
@@ -33,7 +20,7 @@ const inputValue = computed({
     :dirty="isDirty"
     :required="required"
   >
-    <select v-model="inputValue" class="s-input" :disabled="disabled">
+    <select v-model="model" class="s-input" :disabled="disabled">
       <option disabled value="">Please select one</option>
       <option
         v-for="option in definition.options"
