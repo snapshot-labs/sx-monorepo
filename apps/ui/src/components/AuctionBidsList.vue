@@ -20,7 +20,7 @@ const props = defineProps<{
   totalSupply: bigint;
 }>();
 
-const columnHeaderRef = ref<InstanceType<typeof UiScrollableHeader> | null>(null);
+const columnHeaderRef = ref<HTMLElement | null>(null);
 const page = ref(1);
 const orderBy = ref<Order_OrderBy>('timestamp');
 const orderDirection = ref<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
@@ -44,10 +44,16 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     tokenAddress: () => props.auction.addressBiddingToken
   });
 
+const { x: columnHeaderX } = useScroll(columnHeaderRef);
+
 const totalPageCount = computed(() => {
   const pages = Math.ceil(props.auction.orderCount / LIMIT);
   return pages === 0 ? 1 : pages;
 });
+
+function handleScrollEvent(target: HTMLElement) {
+  columnHeaderX.value = target.scrollLeft;
+}
 
 function handleSortChange(field: Order_OrderBy) {
   if (orderBy.value === field) {
@@ -62,7 +68,7 @@ function handleSortChange(field: Order_OrderBy) {
 </script>
 <template>
   <div class="divide-y divide-skin-border">
-    <UiScrollableHeader ref="columnHeaderRef">
+    <div ref="columnHeaderRef" class="overflow-hidden">
       <UiColumnHeader
         class="py-2 text-sm tracking-wider px-4 gap-3"
         :sticky="false"
@@ -103,39 +109,39 @@ function handleSortChange(field: Order_OrderBy) {
         </UiColumnHeaderItem>
         <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
       </UiColumnHeader>
-    </UiScrollableHeader>
-    <UiScrollerHorizontal @scroll="e => columnHeaderRef?.handleScroll(e)">
-      <div class="min-w-[880px]" :class="{ 'opacity-60': isFetching }">
-        <UiLoading
-          v-if="isOrdersLoading || isBiddingTokenPriceLoading"
-          class="px-4 py-3 block"
-        />
-        <UiStateWarning v-else-if="isOrdersError" class="px-4 py-3">
-          Failed to load bids.
-        </UiStateWarning>
-        <UiStateWarning
-          v-else-if="auction.orderCount === 0"
-          class="px-4 py-3"
-        >
-          There are no bids yet.
-        </UiStateWarning>
-        <div
-          v-else-if="orders && typeof biddingTokenPrice === 'number'"
-          class="divide-y divide-skin-border flex flex-col justify-center"
-        >
-          <AuctionBid
-            v-for="order in orders"
-            :key="order.id"
-            :network-id="network"
-            :auction-id="auction.id"
-            :auction="auction"
-            :order="order"
-            :bidding-token-price="biddingTokenPrice"
-            :total-supply="totalSupply"
+      <UiScrollerHorizontal @scroll="handleScrollEvent">
+        <div class="min-w-[880px]" :class="{ 'opacity-60': isFetching }">
+          <UiLoading
+            v-if="isOrdersLoading || isBiddingTokenPriceLoading"
+            class="px-4 py-3 block"
           />
+          <UiStateWarning v-else-if="isOrdersError" class="px-4 py-3">
+            Failed to load bids.
+          </UiStateWarning>
+          <UiStateWarning
+            v-else-if="auction.orderCount === 0"
+            class="px-4 py-3"
+          >
+            There are no bids yet.
+          </UiStateWarning>
+          <div
+            v-else-if="orders && typeof biddingTokenPrice === 'number'"
+            class="divide-y divide-skin-border flex flex-col justify-center"
+          >
+            <AuctionBid
+              v-for="order in orders"
+              :key="order.id"
+              :network-id="network"
+              :auction-id="auction.id"
+              :auction="auction"
+              :order="order"
+              :bidding-token-price="biddingTokenPrice"
+              :total-supply="totalSupply"
+            />
+          </div>
         </div>
-      </div>
-    </UiScrollerHorizontal>
+      </UiScrollerHorizontal>
+    </div>
     <div
       v-if="auction.orderCount"
       class="flex justify-center items-center space-x-3 px-4 py-3"

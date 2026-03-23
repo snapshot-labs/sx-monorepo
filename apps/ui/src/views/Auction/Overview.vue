@@ -45,7 +45,8 @@ const { auth, web3 } = useWeb3();
 const queryClient = useQueryClient();
 const currentTimestamp = useTimestamp({ interval: 1000 });
 
-const bidsHeader = ref<InstanceType<typeof UiScrollableHeader> | null>(null);
+const bidsHeader = ref<HTMLElement | null>(null);
+const { x: bidsHeaderX } = useScroll(bidsHeader);
 
 const isModalTransactionProgressOpen = ref(false);
 const isModalShareOpen = ref(false);
@@ -315,6 +316,9 @@ function handleTransactionConfirmed(tx: string | null) {
   resetTransactionProgress();
 }
 
+function handleScrollEvent(target: HTMLElement) {
+  bidsHeaderX.value = target.scrollLeft;
+}
 
 watch(volume, () => {
   if (volume.value === 0 && chartType.value !== DEFAULT_CHART_TYPE) {
@@ -455,7 +459,7 @@ watch(volume, () => {
         Log in to view your bids.
       </UiStateWarning>
       <template v-else>
-        <UiScrollableHeader ref="bidsHeader">
+        <div ref="bidsHeader" class="overflow-hidden">
           <UiColumnHeader
             class="py-2 text-sm tracking-wider px-4 gap-3"
             :sticky="false"
@@ -478,48 +482,48 @@ watch(volume, () => {
             </UiColumnHeaderItem>
             <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
           </UiColumnHeader>
-        </UiScrollableHeader>
-        <UiScrollerHorizontal @scroll="e => bidsHeader?.handleScroll(e)">
-          <div class="min-w-[735px]">
-            <UiLoading
-              v-if="
-                isUserOrdersLoading ||
-                isUnclaimedOrdersLoading ||
-                isBiddingTokenPriceLoading
-              "
-              class="px-4 py-3 block"
-            />
-            <UiStateWarning
-              v-else-if="isUserOrdersError || isUnclaimedOrdersError"
-              class="px-4 py-3"
-            >
-              Failed to load bids.
-            </UiStateWarning>
-            <UiStateWarning
-              v-else-if="userOrders?.length === 0"
-              class="px-4 py-3"
-            >
-              You don't have any bids yet.
-            </UiStateWarning>
-            <div
-              v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
-              class="divide-y divide-skin-border flex flex-col justify-center border-b"
-            >
-              <AuctionUserBid
-                v-for="order in userOrders"
-                :key="order.id"
-                :network-id="network"
-                :auction-id="auctionId"
-                :auction="auction"
-                :order="order"
-                :order-status="userOrdersSummary.statuses[order.id]"
-                :bidding-token-price="biddingTokenPrice"
-                :total-supply="totalSupply"
-                @cancel="handleCancelSellOrder"
+          <UiScrollerHorizontal @scroll="handleScrollEvent">
+            <div class="min-w-[735px]">
+              <UiLoading
+                v-if="
+                  isUserOrdersLoading ||
+                  isUnclaimedOrdersLoading ||
+                  isBiddingTokenPriceLoading
+                "
+                class="px-4 py-3 block"
               />
+              <UiStateWarning
+                v-else-if="isUserOrdersError || isUnclaimedOrdersError"
+                class="px-4 py-3"
+              >
+                Failed to load bids.
+              </UiStateWarning>
+              <UiStateWarning
+                v-else-if="userOrders?.length === 0"
+                class="px-4 py-3"
+              >
+                You don't have any bids yet.
+              </UiStateWarning>
+              <div
+                v-else-if="userOrders && typeof biddingTokenPrice === 'number'"
+                class="divide-y divide-skin-border flex flex-col justify-center border-b"
+              >
+                <AuctionUserBid
+                  v-for="order in userOrders"
+                  :key="order.id"
+                  :network-id="network"
+                  :auction-id="auctionId"
+                  :auction="auction"
+                  :order="order"
+                  :order-status="userOrdersSummary.statuses[order.id]"
+                  :bidding-token-price="biddingTokenPrice"
+                  :total-supply="totalSupply"
+                  @cancel="handleCancelSellOrder"
+                />
+              </div>
             </div>
-          </div>
-        </UiScrollerHorizontal>
+          </UiScrollerHorizontal>
+        </div>
         <div class="px-4">
           <UiButton
             v-if="claimText"

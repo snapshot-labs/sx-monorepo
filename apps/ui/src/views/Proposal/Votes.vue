@@ -17,7 +17,8 @@ const choiceFilter = ref('any' as 'any' | 'for' | 'against' | 'abstain');
 const modalOpen = ref(false);
 const selectedVote = ref<Vote | null>(null);
 
-const votesHeader = ref<InstanceType<typeof UiScrollableHeader> | null>(null);
+const votesHeader = ref<HTMLElement | null>(null);
+const { x: votesHeaderX } = useScroll(votesHeader);
 
 const network = computed(() => getNetwork(props.proposal.network));
 const votingPowerDecimals = computed(() => props.proposal.vp_decimals);
@@ -61,6 +62,9 @@ function handleChoiceClick(vote: Vote | null) {
   modalOpen.value = true;
 }
 
+function handleScrollEvent(target: HTMLElement) {
+  votesHeaderX.value = target.scrollLeft;
+}
 </script>
 
 <template>
@@ -83,7 +87,7 @@ function handleChoiceClick(vote: Vote | null) {
       <UiLoading />
     </div>
   </div>
-  <UiScrollableHeader ref="votesHeader">
+  <div ref="votesHeader" class="overflow-hidden">
     <UiColumnHeader class="px-4 gap-3" style="min-width: 735px">
       <UiColumnHeaderItem class="w-[218px] max-w-[218px]">
         Voter
@@ -139,8 +143,8 @@ function handleChoiceClick(vote: Vote | null) {
       </UiColumnHeaderItem>
       <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />
     </UiColumnHeader>
-  </UiScrollableHeader>
-  <UiScrollerHorizontal @scroll="e => votesHeader?.handleScroll(e)">
+  </div>
+  <UiScrollerHorizontal @scroll="handleScrollEvent">
     <div class="min-w-[735px]">
       <UiLoading v-if="isPending" class="px-4 py-3 block absolute" />
       <UiStateWarning v-if="isError" class="px-4 py-3">
