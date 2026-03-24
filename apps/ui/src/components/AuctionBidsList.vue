@@ -80,7 +80,7 @@ function handleSortChange(field: Order_OrderBy) {
             Bidder
           </UiColumnHeaderItem>
           <UiColumnHeaderItem
-            class="w-[200px] max-w-[200px] uppercase"
+            class="w-[200px] uppercase"
             :is-ordered="orderBy === 'timestamp'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('timestamp')"
@@ -88,7 +88,7 @@ function handleSortChange(field: Order_OrderBy) {
             Created
           </UiColumnHeaderItem>
           <UiColumnHeaderItem
-            class="w-[200px] max-w-[200px] uppercase"
+            class="w-[200px] uppercase"
             :is-ordered="orderBy === 'sellAmount'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('sellAmount')"
@@ -96,17 +96,17 @@ function handleSortChange(field: Order_OrderBy) {
             Amount
           </UiColumnHeaderItem>
           <UiColumnHeaderItem
-            class="w-[200px] max-w-[200px] uppercase"
+            class="w-[200px] uppercase"
             :is-ordered="orderBy === 'price'"
             :order-direction="orderDirection"
             @sort-change="handleSortChange('price')"
           >
             Max. price
           </UiColumnHeaderItem>
-          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+          <UiColumnHeaderItem class="w-[200px] uppercase">
             Max. FDV
           </UiColumnHeaderItem>
-          <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+          <UiColumnHeaderItem class="w-[200px] uppercase">
             Status
           </UiColumnHeaderItem>
           <UiColumnHeaderItem class="min-w-[20px] lg:w-[40px] justify-end" />

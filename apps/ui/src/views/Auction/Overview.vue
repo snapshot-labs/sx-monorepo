@@ -473,16 +473,16 @@ watch(volume, () => {
               <UiColumnHeaderItem class="flex-1 min-w-[110px] uppercase">
                 Created
               </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              <UiColumnHeaderItem class="w-[200px] uppercase">
                 Amount
               </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              <UiColumnHeaderItem class="w-[200px] uppercase">
                 Max. price
               </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              <UiColumnHeaderItem class="w-[200px] uppercase">
                 Max. FDV
               </UiColumnHeaderItem>
-              <UiColumnHeaderItem class="w-[200px] max-w-[200px] uppercase">
+              <UiColumnHeaderItem class="w-[200px] uppercase">
                 Status
               </UiColumnHeaderItem>
               <UiColumnHeaderItem

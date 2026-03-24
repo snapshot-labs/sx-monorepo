@@ -96,7 +96,7 @@ function handleChoiceClick(vote: Vote | null) {
     class="overflow-hidden sticky-header-with-section"
   >
     <div class="flex px-4 gap-3 min-w-[735px] w-full">
-      <UiColumnHeaderItem class="w-[218px] max-w-[218px]">
+      <UiColumnHeaderItem class="w-[218px]">
         Voter
       </UiColumnHeaderItem>
       <UiColumnHeaderItem class="grow w-[40%]">
