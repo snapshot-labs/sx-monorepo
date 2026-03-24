@@ -53,6 +53,36 @@ export const GOVERNANCES: Partial<
       startBlock: 37959559
     }
   },
+  arb1: {
+    'Arbitrum Treasury': {
+      name: 'Arbitrum Treasury',
+      about: 'An onchain platform for all',
+      avatar: 'ipfs://QmWZ5SMRfvcK8tycsDqojQaSiKedgtVkS7CkZdxPgeCVsZ',
+      externalUrl: 'https://arbitrum.io',
+      github: 'OffchainLabs',
+      twitter: 'arbitrum',
+      address: '0x789fC99093B09aD01C34DC7251D0C89ce743e5a4',
+      authenticators: [
+        'OpenZeppelinAuthenticator',
+        'OpenZeppelinAuthenticatorSignatureV4'
+      ],
+      startBlock: 70398215
+    },
+    'Arbitrum Core': {
+      name: 'Arbitrum Core',
+      about: 'An onchain platform for all',
+      avatar: 'ipfs://QmWZ5SMRfvcK8tycsDqojQaSiKedgtVkS7CkZdxPgeCVsZ',
+      externalUrl: 'https://arbitrum.io',
+      github: 'OffchainLabs',
+      twitter: 'arbitrum',
+      address: '0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9',
+      authenticators: [
+        'OpenZeppelinAuthenticator',
+        'OpenZeppelinAuthenticatorSignatureV4'
+      ],
+      startBlock: 70398215
+    }
+  },
   sep: {
     Sekhmet: {
       name: 'Sekhmet',
