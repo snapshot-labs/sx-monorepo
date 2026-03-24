@@ -55,15 +55,15 @@ async function handleEndReached() {
   fetchNextPage();
 }
 
-function handleScrollEvent(target: HTMLElement) {
-  votesHeaderX.value = target.scrollLeft;
-}
-
 function handleChoiceClick(vote: Vote | null) {
   if (!vote?.reason) return;
 
   selectedVote.value = vote;
   modalOpen.value = true;
+}
+
+function handleScrollEvent(target: HTMLElement) {
+  votesHeaderX.value = target.scrollLeft;
 }
 </script>
 
@@ -131,7 +131,7 @@ function handleChoiceClick(vote: Vote | null) {
         </UiSelectDropdown>
       </UiColumnHeaderItem>
       <UiColumnHeaderItem
-        class="w-[144px] max-w-[144px]"
+        class="w-[144px]"
         :is-ordered="sortBy.startsWith('created')"
         :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
         @sort-change="handleSortChange('created')"
@@ -139,7 +139,7 @@ function handleChoiceClick(vote: Vote | null) {
         Date
       </UiColumnHeaderItem>
       <UiColumnHeaderItem
-        class="w-[144px] max-w-[144px] justify-end"
+        class="w-[144px] justify-end"
         :is-ordered="sortBy.startsWith('vp')"
         :order-direction="sortBy.endsWith('desc') ? 'desc' : 'asc'"
         @sort-change="handleSortChange('vp')"
