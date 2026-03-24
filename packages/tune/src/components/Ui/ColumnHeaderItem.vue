@@ -1,8 +1,4 @@
 <script setup lang="ts">
-const emit = defineEmits<{
-  (e: 'sortChange'): void;
-}>();
-
 const props = withDefaults(
   defineProps<{
     isOrdered?: boolean;
@@ -13,6 +9,10 @@ const props = withDefaults(
     orderDirection: undefined
   }
 );
+
+const emit = defineEmits<{
+  (e: 'sortChange'): void;
+}>();
 
 const isSortable = computed(() => props.orderDirection !== undefined);
 </script>
