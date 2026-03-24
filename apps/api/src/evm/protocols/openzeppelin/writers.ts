@@ -33,7 +33,10 @@ import {
   updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, OpenZeppelinConfig } from '../../types';
-import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
+import {
+  getTimestampFromBlock as _getTimestampFromBlock,
+  getActualBlockNumber
+} from '../../utils';
 
 export function createWriters(
   config: EVMConfig,
@@ -74,6 +77,28 @@ export function createWriters(
   const client = createPublicClient({
     transport: http(config.network_node_url)
   });
+
+  async function getQuorum({
+    address,
+    blockNumber
+  }: {
+    address: `0x${string}`;
+    blockNumber: number;
+  }) {
+    const actualBlockNumber = await getActualBlockNumber({
+      networkId: config.indexerName,
+      currentBlockNumber: blockNumber,
+      client
+    });
+
+    return client.readContract({
+      address,
+      abi: IGovernorAbi,
+      functionName: 'quorum',
+      args: [actualBlockNumber - 1n],
+      blockNumber: BigInt(blockNumber)
+    });
+  }
 
   async function initializeStrategies({
     spaceAddress,
@@ -150,12 +175,9 @@ export function createWriters(
 
     // Strategies & authentication
     const [quorum, timelock, token, proposalThreshold] = await Promise.all([
-      client.readContract({
+      getQuorum({
         address: contractAddress,
-        abi: IGovernorAbi,
-        functionName: 'quorum',
-        args: [BigInt(blockNumber - 1)],
-        blockNumber: BigInt(blockNumber)
+        blockNumber
       }),
       client.readContract({
         address: contractAddress,
@@ -304,12 +326,9 @@ export function createWriters(
       );
     if (!strategyParsedMetadataDataItem) return;
 
-    const quorum = await client.readContract({
+    const quorum = await getQuorum({
       address: spaceAddress,
-      abi: IGovernorAbi,
-      functionName: 'quorum',
-      args: [BigInt(blockNumber - 1)],
-      blockNumber: BigInt(blockNumber)
+      blockNumber
     });
 
     executionStrategy.quorum = quorum.toString();
@@ -656,12 +675,9 @@ export function createWriters(
         functionName: 'getMinDelay',
         blockNumber: BigInt(blockNumber)
       }),
-      client.readContract({
+      getQuorum({
         address: spaceAddress,
-        abi: IGovernorAbi,
-        functionName: 'quorum',
-        args: [BigInt(blockNumber - 1)],
-        blockNumber: BigInt(blockNumber)
+        blockNumber
       })
     ]);
 
