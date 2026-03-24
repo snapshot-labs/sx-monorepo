@@ -29,6 +29,16 @@ describe('getProposalCurrentQuorum', () => {
 
     expect(currentQuorum).toBe(20);
   });
+
+  it('should only use for votes for for_only quorum type', () => {
+    const currentQuorum = getProposalCurrentQuorum('eth', {
+      scores: [11, 20, 100],
+      scores_total: 131,
+      quorum_type: 'for_only'
+    });
+
+    expect(currentQuorum).toBe(11);
+  });
 });
 
 describe('formatQuorum', () => {
