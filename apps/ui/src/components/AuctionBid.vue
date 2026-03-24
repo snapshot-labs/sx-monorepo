@@ -53,7 +53,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         />
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] flex flex-col justify-center truncate">
+    <div class="w-[200px] flex flex-col justify-center truncate">
       <TimeRelative v-slot="{ relativeTime }" :time="Number(order.timestamp)">
         <h4>{{ relativeTime }}</h4>
       </TimeRelative>
@@ -61,7 +61,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
+    <div class="w-[200px] truncate">
       <h4 class="text-skin-link truncate">
         {{ _c(order.sellAmount, Number(auction.decimalsBiddingToken)) }}
         {{ auction.symbolBiddingToken }}
@@ -74,7 +74,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
+    <div class="w-[200px] truncate">
       <h4 class="text-skin-link truncate">
         {{ formatPrice(order.price) }}
         {{ auction.symbolBiddingToken }}
@@ -87,7 +87,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
+    <div class="w-[200px] truncate">
       <h4 class="text-skin-link truncate">
         {{ _n(fdv, 'compact') }}
         {{ auction.symbolBiddingToken }}
@@ -100,7 +100,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] text-skin-success truncate">Active</div>
+    <div class="w-[200px] text-skin-success truncate">Active</div>
     <div class="min-w-[20px] lg:w-[40px] flex items-center justify-end">
       <UiDropdown>
         <template #button>

@@ -57,7 +57,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         {{ _t(Number(order.timestamp), 'MMM D, YYYY') }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
+    <div class="w-[200px] truncate">
       <h4 class="text-skin-link truncate">
         {{ _c(order.sellAmount, Number(auction.decimalsBiddingToken)) }}
         {{ auction.symbolBiddingToken }}
@@ -70,7 +70,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
+    <div class="w-[200px] truncate">
       <h4 class="text-skin-link truncate">
         {{ formatPrice(order.price) }}
         {{ auction.symbolBiddingToken }}
@@ -83,7 +83,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] truncate">
+    <div class="w-[200px] truncate">
       <h4 class="text-skin-link truncate">
         {{ _n(fdv, 'compact') }}
         {{ auction.symbolBiddingToken }}
@@ -96,7 +96,7 @@ const fdvValue = computed(() => fdv.value * props.biddingTokenPrice);
         }}
       </div>
     </div>
-    <div class="w-[200px] max-w-[200px] text-skin-link truncate">
+    <div class="w-[200px] text-skin-link truncate">
       <span v-if="orderStatus === 'open'">Open</span>
       <span v-else-if="orderStatus === 'claimed'" class="text-skin-success">
         Claimed

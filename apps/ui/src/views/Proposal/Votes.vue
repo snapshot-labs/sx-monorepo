@@ -190,7 +190,7 @@ function handleScrollEvent(target: HTMLElement) {
                 user: vote.voter.id
               }
             }"
-            class="leading-[22px] py-3 max-w-[218px] w-[218px] flex items-center space-x-3 truncate group"
+            class="leading-[22px] py-3 w-[218px] flex items-center space-x-3 truncate group"
           >
             <UiStamp :id="vote.voter.id" :size="32" />
             <div class="flex flex-col truncate">
@@ -213,7 +213,7 @@ function handleScrollEvent(target: HTMLElement) {
             <ProposalVoteChoice :proposal="proposal" :vote="vote" />
           </button>
           <div
-            class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center truncate"
+            class="leading-[22px] w-[144px] flex flex-col justify-center truncate"
           >
             <TimeRelative v-slot="{ relativeTime }" :time="vote.created">
               <h4>{{ relativeTime }}</h4>
@@ -223,7 +223,7 @@ function handleScrollEvent(target: HTMLElement) {
             </div>
           </div>
           <div
-            class="leading-[22px] max-w-[144px] w-[144px] flex flex-col justify-center text-right truncate"
+            class="leading-[22px] w-[144px] flex flex-col justify-center text-right truncate"
           >
             <h4 class="text-skin-link truncate">
               {{ _vp(vote.vp / 10 ** votingPowerDecimals) }}
