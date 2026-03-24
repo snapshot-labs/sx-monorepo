@@ -11,6 +11,7 @@ type Governance = {
   farcaster?: string;
   address: `0x${string}`;
   authenticators: OpenZeppelinAuthenticator[];
+  quorumType?: 'for_only';
   startBlock: number;
 };
 

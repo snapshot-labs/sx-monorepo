@@ -351,6 +351,7 @@ export function createWriters(
     proposal.execution_strategy_details = executionStrategy.id;
     proposal.vp_decimals = strategyParsedMetadataDataItem.decimals;
     proposal.type = 'basic';
+    proposal.quorum_type = getGovernanceInfo(spaceAddress).quorumType || null;
     proposal.created = Number(block?.timestamp ?? getCurrentTimestamp());
     proposal.tx = txId;
 
