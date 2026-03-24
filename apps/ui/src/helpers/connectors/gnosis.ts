@@ -21,8 +21,8 @@ export default class Gnosis extends Connector {
         SafeAppProvider = SafeAppProvider.SafeAppProvider;
 
       this.provider = new SafeAppProvider(safe, sdk);
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 }

@@ -9,12 +9,12 @@ import {
   sanitizeUrl,
   shortenAddress
 } from '@/helpers/utils';
-import { getNetwork, offchainNetworks } from '@/networks';
+import { explorePageProtocols, getNetwork, offchainNetworks } from '@/networks';
 import { SNAPSHOT_URLS } from '@/networks/offchain';
 import { PROPOSALS_KEYS } from '@/queries/proposals';
 import { Proposal } from '@/types';
 
-const WHITELISTED_SPACES = ['kleros.eth', 'paraswap-dao.eth'];
+const WHITELISTED_SPACES: string[] = ['kleros.eth', 'gnosis.eth'];
 
 const props = defineProps<{
   proposal: Proposal;
@@ -125,7 +125,7 @@ const proposalTransactionId = computed(() => {
   const network = getNetwork(props.proposal.network);
 
   if (
-    ['governor-bravo', '@openzeppelin/governor'].includes(
+    explorePageProtocols.governor.protocols?.includes(
       props.proposal.space.protocol
     )
   ) {
@@ -136,12 +136,19 @@ const proposalTransactionId = computed(() => {
 });
 
 const endTime = useRelativeTime(() => props.proposal.max_end);
+const startTime = useRelativeTime(() => props.proposal.start, true);
 
 const votingTime = computed(() => {
   if (!props.proposal) return null;
 
   const current = getCurrent(props.proposal.network);
   if (!current) return null;
+
+  if (props.proposal.state === 'pending') {
+    return startTime.value === 'now'
+      ? 'Starting soon'
+      : `Starting in ${startTime.value}`;
+  }
 
   const hasEnded = props.proposal.max_end <= current;
 
@@ -182,6 +189,7 @@ async function handleEditClick() {
   router.push({
     name: 'space-editor',
     params: {
+      space: spaceId,
       key: draftId
     }
   });
@@ -215,6 +223,7 @@ async function handleDuplicateClick() {
   router.push({
     name: 'space-editor',
     params: {
+      space: spaceId,
       key: draftId
     }
   });
@@ -312,9 +321,9 @@ async function handleDownloadVotes() {
 
   try {
     await downloadVotes(props.proposal.proposal_id);
-  } catch (e) {
-    if (e instanceof Error) {
-      if (e.message === 'PENDING_GENERATION') {
+  } catch (err) {
+    if (err instanceof Error) {
+      if (err.message === 'PENDING_GENERATION') {
         return uiStore.addNotification(
           'success',
           'Your report is currently being generated. It may take a few minutes. Please check back shortly.'

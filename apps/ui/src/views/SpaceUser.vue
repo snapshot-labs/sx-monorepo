@@ -16,6 +16,7 @@ const props = defineProps<{ space: Space }>();
 const route = useRoute();
 const usersStore = useUsersStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
 const { modalAccountOpen } = useModal();
 const { web3Account } = useWeb3();
 
@@ -159,8 +160,8 @@ async function getVotingPower() {
       }
     );
     votingPowerStatus.value = 'success';
-  } catch (e) {
-    console.warn('Failed to load voting power', e);
+  } catch (err) {
+    console.warn('Failed to load voting power', err);
     votingPowers.value = [];
     votingPowerStatus.value = 'error';
   }
@@ -206,7 +207,7 @@ watch(
         >
           Delegate
         </UiButton>
-        <UiTooltip v-if="!isWhiteLabel" title="View profile">
+        <UiTooltip v-if="!isWhiteLabel && !organization" title="View profile">
           <UiButton :to="{ name: 'user', params: { user: user.id } }" uniform>
             <IH-user-circle />
           </UiButton>
@@ -273,10 +274,11 @@ watch(
         <AppLink
           v-for="(item, i) in navigation"
           :key="i"
+          v-slot="{ isExactActive }"
           :to="{ name: item.route, params: { user: userId } }"
         >
           <UiLabel
-            :is-active="route.name === item.route"
+            :is-active="isExactActive"
             :text="item.label"
             :count="item.count"
           />

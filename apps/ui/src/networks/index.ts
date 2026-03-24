@@ -112,7 +112,6 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       apiNetwork: 'eth',
       networks: ['eth'],
       protocols: ['governor-bravo', '@openzeppelin/governor'],
-      limit: 18,
-      disabled: import.meta.env.VITE_ENABLE_GOVERNOR !== 'true'
+      limit: 18
     }
   };

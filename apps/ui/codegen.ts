@@ -42,6 +42,11 @@ const config: CodegenConfig = {
       schema: 'https://api.brokester.box',
       documents: ['src/helpers/auction/referral/queries.ts'],
       ...baseConfig
+    },
+    './src/helpers/townhall/gql/': {
+      schema: '../highlight/.checkpoint/schema.gql',
+      documents: ['src/helpers/townhall/api.ts'],
+      ...baseConfig
     }
   }
 };

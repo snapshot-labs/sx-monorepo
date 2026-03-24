@@ -116,8 +116,8 @@ async function refreshScores() {
         )
       });
     }
-  } catch (e) {
-    console.warn('Failed to refresh scores', e);
+  } catch (err) {
+    console.warn('Failed to refresh scores', err);
   }
 }
 
@@ -189,7 +189,10 @@ onMounted(() => {
             class="text-white size-[14px] mt-0.5 ml-0.5"
           />
         </div>
-        <UiTooltipOnTruncate :content="proposal.choices[result.choice - 1]" />
+        <UiTooltipOnTruncate
+          :content="proposal.choices[result.choice - 1]"
+          class="grow"
+        />
         <IH-lock-closed
           v-if="proposal.privacy !== 'none' && !proposal.completed"
           class="size-[16px] shrink-0"

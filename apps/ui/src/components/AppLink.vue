@@ -9,51 +9,21 @@ defineEmits<{
   (e: 'click'): void;
 }>();
 
-const { isWhiteLabel } = useWhiteLabel();
-const router = useRouter();
+const router = useAppRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
   return (typeof to === 'string' && to.startsWith('http')) || props.isExternal;
 }
 
-function normalize(to: RouteLocationRaw) {
-  if (
-    !isWhiteLabel.value ||
-    typeof to === 'string' ||
-    !('name' in to) ||
-    !to.name
-  ) {
-    return to;
-  }
-
-  if (to.name.toString().startsWith('space-')) {
-    delete to.params?.space;
-  }
-
-  if (to.name.toString() === 'user') {
-    to.name = 'space-user-statement';
-  }
-
-  if (to.name.toString() === 'settings-spaces') {
-    to.name = 'settings-contacts';
-  }
-
-  return to;
-}
-
-function resolveToUrl(to: RouteLocationRaw | string): string {
-  if (typeof to === 'string') {
-    return to;
-  }
-
-  return router.resolve(to).href;
-}
+const resolved = computed(() =>
+  props.to && !isExternalLink(props.to) ? router.resolve(props.to) : null
+);
 </script>
 
 <template>
   <a
-    v-if="isExternalLink(props.to)"
-    :href="resolveToUrl(props.to)"
+    v-if="isExternalLink(to)"
+    :href="to"
     target="_blank"
     rel="noopener noreferrer"
     @click="$emit('click')"
@@ -61,11 +31,12 @@ function resolveToUrl(to: RouteLocationRaw | string): string {
     <slot />
   </a>
   <router-link
-    v-else-if="props.to"
-    :to="normalize(props.to)"
+    v-else-if="resolved"
+    v-slot="{ isActive, isExactActive }"
+    :to="resolved.fullPath"
     @click="$emit('click')"
   >
-    <slot />
+    <slot :is-active="isActive" :is-exact-active="isExactActive" />
   </router-link>
   <button v-else type="button" @click="$emit('click')">
     <slot />

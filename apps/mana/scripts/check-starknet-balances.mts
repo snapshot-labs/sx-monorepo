@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { gql, request } from 'graphql-request';
 import { RpcProvider, uint256 } from 'starknet';
 

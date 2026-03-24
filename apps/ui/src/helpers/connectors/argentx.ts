@@ -30,8 +30,8 @@ export default class Argentx extends Connector {
       }
 
       this.provider = starknet.wallet;
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -42,8 +42,8 @@ export default class Argentx extends Connector {
       await argentx.disconnect({
         clearLastWallet: true
       });
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 }

@@ -42,8 +42,8 @@ async function loadTopic(url: string) {
     loading.value = true;
     topic.value = await loadSingleTopic(url);
     replies.value = topic.value.posts;
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     failed.value = true;
   } finally {
     loaded.value = true;
@@ -52,13 +52,14 @@ async function loadTopic(url: string) {
 }
 
 watchEffect(() => setTitle(`${topic.value?.title || 'Discussions'}`));
-watch(discussion, async newDiscussion => {
-  if (newDiscussion) await loadTopic(newDiscussion);
-});
 
-onMounted(async () => {
-  if (discussion.value) await loadTopic(discussion.value);
-});
+watch(
+  discussion,
+  async newDiscussion => {
+    if (newDiscussion) await loadTopic(newDiscussion);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

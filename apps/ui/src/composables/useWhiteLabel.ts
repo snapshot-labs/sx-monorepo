@@ -1,6 +1,12 @@
 import { useQueryClient } from '@tanstack/vue-query';
 import { getNetwork, metadataNetwork } from '@/networks';
-import { SkinSettings, Space } from '@/types';
+import { NetworkID, SkinSettings, Space } from '@/types';
+
+type WhiteLabelConfig = {
+  network?: NetworkID;
+  id?: string;
+  skinSettings?: SkinSettings;
+};
 
 // List of global paths, that should not be nested inside space scope
 // when redirecting from whitelabel to main app
@@ -9,8 +15,11 @@ const DEFAULT_DOMAIN = import.meta.env.VITE_HOST || 'localhost';
 const WHITELABEL_MAPPING = import.meta.env.VITE_WHITELABEL_MAPPING;
 const domain = window.location.hostname;
 
-// Hardcoded whitelabel mappings for onchain spaces
-const MAPPING = {
+// Whitelabel mappings for onchain spaces.
+// Override locally with VITE_WHITELABEL_MAPPING env var for easier testing
+// e.g. VITE_WHITELABEL_MAPPING='localhost;s:snapshot.eth'
+// e.g. VITE_WHITELABEL_MAPPING='localhost' (org whitelabel without space)
+const MAPPING: Record<string, WhiteLabelConfig> = {
   'vanilla.box': {
     network: 'base',
     id: '0x8cF43759f3d4E72cB72cED6bd69cCe43d4428264',
@@ -18,8 +27,10 @@ const MAPPING = {
       bg_color: '#252739',
       link_color: '#91ACEE',
       text_color: '#CDD6F4',
+      content_color: '#CDD6F4',
       border_color: '#313244',
       heading_color: '#CCD3F2',
+      primary_color: '#91ACEE',
       theme: 'dark',
       logo: 'ipfs://bafkreiab7pgyo4gzvospqgrlnfp6o5d6dpq4vijnzvcf5mhwzevt4hnd2m'
     }
@@ -33,31 +44,52 @@ const MAPPING = {
     id: 'openagora.eth'
   },
   'governance.starknet.io': {
-    network: 'sn',
-    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
       text_color: '#4a4a4f',
+      content_color: '#4a4a4f',
       border_color: '#e3e1e4',
       heading_color: '#1a1523',
+      primary_color: '#000000',
       theme: 'light',
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
   },
   'starknet.stage.box': {
-    network: 'sn',
-    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
       text_color: '#4a4a4f',
+      content_color: '#4a4a4f',
       border_color: '#e3e1e4',
       heading_color: '#1a1523',
+      primary_color: '#000000',
       theme: 'light',
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
-  }
+  },
+  'ens.stage.box': {
+    skinSettings: {
+      logo: 'ipfs://bafkreifnnjex25bf6zfjmx3zugk46i7wqtb5un4ikm7dgfki3chcs2bccy',
+      bg_color: '#F6F6F6',
+      link_color: '#011A25',
+      text_color: '#4A5C63',
+      content_color: '#586069',
+      border_color: '#E4E4E4',
+      heading_color: '#011A25',
+      primary_color: '#0080BC',
+      theme: 'light'
+    }
+  },
+  ...(WHITELABEL_MAPPING
+    ? (() => {
+        const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
+        if (!localSpaceId) return { [localDomain]: {} };
+        const [network, id] = localSpaceId.split(':');
+        return { [localDomain]: { network, id } };
+      })()
+    : {})
 };
 
 const isWhiteLabel = ref(false);
@@ -76,19 +108,13 @@ async function getSpace(domain: string): Promise<Space | null> {
   const loadSpacesParams: Record<string, string> = {};
   let spaceNetwork = metadataNetwork;
 
-  // Resolve white label domain locally if mapping is provided
-  // for easier local testing
-  // e.g. VITEWHITE_LABEL_MAPPING='localhost;s:snapshot.eth'
-  if (WHITELABEL_MAPPING) {
-    const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');
-    if (domain === localDomain) {
-      const [network, id] = localSpaceId.split(':');
-      spaceNetwork = network;
-      loadSpacesParams.id = id;
-    }
-  } else if (MAPPING[domain]) {
-    loadSpacesParams.id = MAPPING[domain].id;
-    spaceNetwork = MAPPING[domain].network;
+  const mapping = MAPPING[domain];
+
+  if (mapping) {
+    if (!mapping.id || !mapping.network) return null;
+
+    loadSpacesParams.id = mapping.id;
+    spaceNetwork = mapping.network;
   } else {
     loadSpacesParams.domain = domain;
   }
@@ -116,11 +142,13 @@ export function useWhiteLabel() {
     let shouldResolve = true;
 
     try {
+      const mapping = MAPPING[domain];
+
       space.value = await getSpace(domain);
 
-      if (!space.value) return;
+      if (!space.value && !mapping) return;
 
-      if (!space.value.turbo && !MAPPING[domain]) {
+      if (space.value && !space.value.turbo && !mapping) {
         const redirectUrl = new URL(
           `${window.location.protocol}//${DEFAULT_DOMAIN}`
         );
@@ -145,10 +173,9 @@ export function useWhiteLabel() {
 
       isWhiteLabel.value = true;
       skinSettings.value =
-        MAPPING[domain]?.skinSettings ||
-        space.value.additionalRawData?.skinSettings;
-    } catch (e) {
-      console.log(e);
+        mapping?.skinSettings || space.value?.additionalRawData?.skinSettings;
+    } catch (err) {
+      console.log(err);
       failed.value = true;
     } finally {
       resolved.value = shouldResolve;

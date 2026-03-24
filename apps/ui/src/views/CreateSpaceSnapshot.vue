@@ -174,8 +174,8 @@ async function handleSubmit() {
       name: 'space-overview',
       params: { space: compositeSpaceId }
     });
-  } catch (e) {
-    console.error('Fail to create space', e);
+  } catch (err) {
+    console.error('Fail to create space', err);
   } finally {
     sending.value = false;
   }

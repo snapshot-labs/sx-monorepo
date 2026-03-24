@@ -32,8 +32,10 @@ const PENDING_MESSAGES: Record<'vote' | 'propose' | 'transaction', string> = {
 };
 
 export function useActions() {
+  const network = getNetwork(metadataNetwork);
+
   const uiStore = useUiStore();
-  const alias = useAlias();
+  const alias = useAlias('aliases', network.api.loadAlias);
   const { auth } = useWeb3();
   const { addPendingVote } = useAccount();
   const { getCurrentFromDuration } = useMetaStore();
@@ -43,13 +45,13 @@ export function useActions() {
     return async (...args: T): Promise<U> => {
       try {
         return await fn(...args);
-      } catch (e) {
-        if (!isUserAbortError(e)) {
-          console.error(e);
-          uiStore.addNotification('error', getUserFacingErrorMessage(e));
+      } catch (err) {
+        if (!isUserAbortError(err)) {
+          console.error(err);
+          uiStore.addNotification('error', getUserFacingErrorMessage(err));
         }
 
-        throw e;
+        throw err;
       }
     };
   }
@@ -138,6 +140,10 @@ export function useActions() {
     // TODO: unify send/soc to both return txHash under same property
     if (envelope.payloadType === 'HIGHLIGHT_VOTE') {
       console.log('Receipt', envelope.signatureData);
+    } else if (envelope.type === 'HIGHLIGHT_ENVELOPE') {
+      const receipt = await network.actions.send(envelope);
+
+      console.log('receipt', receipt);
     } else if (envelope.signatureData || envelope.sig) {
       const receipt = await network.actions.send(envelope);
       hash = receipt.transaction_hash || receipt.hash;
@@ -709,9 +715,9 @@ export function useActions() {
           auth.value.account
         )
       );
-    } catch (e) {
-      if (!isUserAbortError(e)) {
-        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+    } catch (err) {
+      if (!isUserAbortError(err)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(err));
       }
 
       return false;
@@ -738,9 +744,9 @@ export function useActions() {
           auth.value.account
         )
       );
-    } catch (e) {
-      if (!isUserAbortError(e)) {
-        uiStore.addNotification('error', getUserFacingErrorMessage(e));
+    } catch (err) {
+      if (!isUserAbortError(err)) {
+        uiStore.addNotification('error', getUserFacingErrorMessage(err));
       }
 
       return false;

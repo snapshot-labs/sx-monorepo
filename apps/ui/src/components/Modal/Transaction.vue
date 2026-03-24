@@ -180,8 +180,8 @@ async function handleToChange(to: string) {
     }
 
     form.abi = await getABI(Number(props.network), contractAddress);
-  } catch (e) {
-    console.log(e);
+  } catch (err) {
+    console.log(err);
     showAbiInput.value = true;
   } finally {
     loading.value = false;

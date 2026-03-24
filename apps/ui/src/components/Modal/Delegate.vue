@@ -245,9 +245,9 @@ async function handleSubmit() {
     );
 
     emit('close');
-  } catch (e) {
+  } catch (err) {
     isSending.value = false;
-    console.log('delegation failed', e);
+    console.log('delegation failed', err);
   } finally {
   }
 }

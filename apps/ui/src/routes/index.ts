@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import Splash from '@/components/Layout/Splash.vue';
 import aliases from '@/helpers/aliases.json';
+import { onOrgNavigate } from '@/helpers/organizations';
 import { metadataNetwork } from '@/networks';
 import auctionRoutes from '@/routes/auction';
 import defaultRoutes from '@/routes/default';
@@ -87,5 +88,7 @@ router.beforeEach((to, _from, next) => {
     next();
   }
 });
+
+router.beforeEach(onOrgNavigate(router));
 
 export default router;

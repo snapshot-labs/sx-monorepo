@@ -68,8 +68,8 @@ export function useSkin() {
       try {
         const skinSettings = decodeSkin(previewQuery as string);
         setSkin(skinSettings);
-      } catch (e) {
-        console.error('Unable to decode skin preview', e);
+      } catch (err) {
+        console.error('Unable to decode skin preview', err);
       }
     },
     { immediate: true }

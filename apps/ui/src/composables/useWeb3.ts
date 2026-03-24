@@ -126,8 +126,8 @@ export function useWeb3() {
             web3.listAccounts()
           ]);
         }
-      } catch (e) {
-        console.log(e);
+      } catch (err) {
+        console.log(err);
       }
       const acc = accounts.length > 0 ? accounts[0] : null;
 
@@ -136,15 +136,15 @@ export function useWeb3() {
         const usersStore = useUsersStore();
         try {
           await usersStore.fetchUser(formatAddress(acc));
-        } catch (e) {
-          console.warn('failed to fetch user', e);
+        } catch (err) {
+          console.warn('failed to fetch user', err);
         }
         state.account = formatAddress(acc);
         state.name = usersStore.getUser(acc)?.name || '';
       }
-    } catch (e) {
+    } catch (err) {
       reset();
-      return Promise.reject(e);
+      return Promise.reject(err);
     }
   }
 

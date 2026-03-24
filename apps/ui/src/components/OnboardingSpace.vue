@@ -22,7 +22,10 @@ const tasks = computed(() => ({
   proposals: {
     pending: props.space.proposal_count === 0,
     description: 'Publish your first proposal',
-    link: { name: 'space-editor' }
+    link: {
+      name: 'space-editor',
+      params: { space: `${props.space.network}:${props.space.id}` }
+    }
   },
   votes: {
     pending: props.space.vote_count < 10,

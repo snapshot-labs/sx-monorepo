@@ -52,16 +52,16 @@ export default class Unicorn extends Connector {
           client: this.client!
         });
       }
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 
   async disconnect() {
     try {
       await this.wallet?.disconnect();
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }
 

@@ -4,9 +4,9 @@ export default class Injected extends Connector {
   async connect() {
     try {
       await this.provider.request({ method: 'eth_requestAccounts' });
-    } catch (e: any) {
-      console.log(e);
-      if (e.code === 4001 || e.code === -32002) return;
+    } catch (err: any) {
+      console.log(err);
+      if (err.code === 4001 || err.code === -32002) return;
     }
   }
 

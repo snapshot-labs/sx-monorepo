@@ -198,7 +198,8 @@ export function useProposalsQuery(
 
 export function useProposalsSummaryQuery(
   networkId: MaybeRefOrGetter<NetworkID>,
-  spaceId: MaybeRefOrGetter<string>
+  spaceId: MaybeRefOrGetter<string>,
+  enabled: MaybeRefOrGetter<boolean> = true
 ) {
   const queryClient = useQueryClient();
 
@@ -217,7 +218,8 @@ export function useProposalsSummaryQuery(
       setProposalsDetails(queryClient, toValue(networkId), proposals);
 
       return proposals;
-    }
+    },
+    enabled: () => toValue(enabled)
   });
 }
 

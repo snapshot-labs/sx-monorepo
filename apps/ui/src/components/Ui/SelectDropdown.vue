@@ -3,10 +3,13 @@
   lang="ts"
   generic="T extends string | number, U extends readonly Item<T>[]"
 >
+import { CSSProperties } from 'vue';
+
 export type Item<T extends string | number> = {
   key: T;
   label: string;
   indicator?: string;
+  indicatorStyle?: CSSProperties;
   component?: Component;
   componentProps?: Record<string, unknown>;
 };
@@ -41,9 +44,10 @@ const items = computed(() => props.items);
           </div>
           <template v-if="currentItem">
             <div
-              v-if="currentItem.indicator"
+              v-if="currentItem.indicator || currentItem.indicatorStyle"
               class="size-[8px] rounded-full"
               :class="currentItem.indicator"
+              :style="currentItem.indicatorStyle"
             />
             <component
               :is="currentItem.component"
@@ -62,9 +66,10 @@ const items = computed(() => props.items);
         @click="model = item.key"
       >
         <div
-          v-if="item.indicator"
+          v-if="item.indicator || item.indicatorStyle"
           class="size-[8px] rounded-full"
           :class="item.indicator"
+          :style="item.indicatorStyle"
         />
         <component
           :is="item.component"

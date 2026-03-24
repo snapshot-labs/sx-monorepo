@@ -199,10 +199,10 @@ export function _c(value: string | bigint, decimals = 18) {
   return formatter.format(parsed);
 }
 
-export function _p(value: number) {
+export function _p(value: number, maximumFractionDigits = 2) {
   const formatter = new Intl.NumberFormat('en', {
     style: 'percent',
-    maximumFractionDigits: 2
+    maximumFractionDigits
   });
   return formatter.format(value);
 }
@@ -275,17 +275,17 @@ export function toBigIntOrNumber(value) {
 export function _t(number, format = 'MMM D, YYYY · h:mm A') {
   try {
     return dayjs(number * 1000).format(format);
-  } catch (e) {
-    console.log(e);
+  } catch (err) {
+    console.log(err);
     return '';
   }
 }
 
-export function _rt(time: number) {
+export function _rt(time: number, withoutSuffix = false) {
   try {
-    return dayjs(time * 1000).fromNow(false);
-  } catch (e) {
-    console.log(e);
+    return dayjs(time * 1000).fromNow(withoutSuffix);
+  } catch (err) {
+    console.log(err);
     return '';
   }
 }
@@ -458,12 +458,12 @@ export async function verifyStarknetNetwork(
         chainId
       }
     });
-  } catch (e) {
+  } catch (err) {
     if (
-      e instanceof Error &&
-      !e.message.toLowerCase().includes('not implemented')
+      err instanceof Error &&
+      !err.message.toLowerCase().includes('not implemented')
     ) {
-      throw new Error(e.message);
+      throw new Error(err.message);
     }
   }
 }
@@ -687,8 +687,8 @@ export async function imageUpload(file: File) {
   try {
     const receipt = await pin(formData);
     return { name: file.name, url: `ipfs://${receipt.cid}` };
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
   }
 }
 
@@ -696,8 +696,8 @@ export function simplifyURL(fullURL: string): string {
   try {
     const url = new URL(fullURL);
     return `${url.hostname}${url.pathname.replace(/\/$/, '')}`;
-  } catch (error) {
-    console.log('Error simplifying URL', error);
+  } catch (err) {
+    console.log('Error simplifying URL', err);
     return '';
   }
 }
@@ -847,18 +847,18 @@ export function prettyConcat(options: string[], connector = 'or') {
     : uniqOptions[0];
 }
 
-export function isUserAbortError(e: any) {
+export function isUserAbortError(err: any) {
   return (
-    ['ACTION_REJECTED', 4001, 113].includes(e.code) ||
-    ['User abort', 'User rejected the request.'].includes(e.message)
+    ['ACTION_REJECTED', 4001, 113].includes(err.code) ||
+    ['User abort', 'User rejected the request.'].includes(err.message)
   );
 }
 
 export function getUserFacingErrorMessage(
-  e: unknown,
+  err: unknown,
   fallback: string = 'Something went wrong. Please try again later.'
 ): string {
-  return (e instanceof Error && e.message) || fallback;
+  return (err instanceof Error && err.message) || fallback;
 }
 
 async function getUnstoppableDomainsNameOwner(name: string, chainId: number) {

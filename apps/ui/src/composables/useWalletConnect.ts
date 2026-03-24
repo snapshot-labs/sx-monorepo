@@ -235,8 +235,8 @@ export function useWalletConnect(
             error: getSdkError('USER_REJECTED')
           }
         });
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     });
 

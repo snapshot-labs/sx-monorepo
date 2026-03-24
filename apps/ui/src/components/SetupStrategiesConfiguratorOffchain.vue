@@ -63,7 +63,7 @@ async function loadAvailableStrategies() {
     const network = getNetwork(props.networkId);
     availableStrategies.value = await network.api.loadStrategies();
     hasError.value = false;
-  } catch (e) {
+  } catch (err) {
     hasError.value = true;
   } finally {
     isLoading.value = false;

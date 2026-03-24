@@ -12,6 +12,7 @@ const { isSafeWallet } = useSafeWallet(
 );
 const followedSpacesStore = useFollowedSpacesStore();
 const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
 const uiStore = useUiStore();
 
 const spaceIdComposite = computed(
@@ -53,14 +54,14 @@ const tooltipMessage = computed(() => {
 async function handleClick() {
   try {
     await followedSpacesStore.toggleSpaceFollow(spaceIdComposite.value);
-  } catch (error) {
-    uiStore.addNotification('error', getUserFacingErrorMessage(error));
+  } catch (err) {
+    uiStore.addNotification('error', getUserFacingErrorMessage(err));
   }
 }
 </script>
 
 <template>
-  <UiTooltip v-if="!isWhiteLabel" :title="tooltipMessage">
+  <UiTooltip v-if="!isWhiteLabel && !organization" :title="tooltipMessage">
     <UiButton
       :disabled="loading || isSafeWallet || preventFollowingMore"
       class="group"

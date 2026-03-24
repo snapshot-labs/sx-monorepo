@@ -13,18 +13,9 @@ const { isDirty } = useDirty(model, props.definition);
 
 const editorContainerRef = ref<HTMLElement | null>(null);
 
-const inputValue = computed(() => {
-  if (!model.value && !isDirty.value && props.definition.default) {
-    return props.definition.default;
-  }
-
-  return model.value;
-});
-
 const showError = computed<boolean>(
   () =>
-    !!props.error &&
-    (isDirty.value || props.definition.default !== inputValue.value)
+    !!props.error && (isDirty.value || props.definition.default !== model.value)
 );
 </script>
 

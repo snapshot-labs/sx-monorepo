@@ -14,8 +14,8 @@ export async function call(provider, abi: any[], call: any[], options?) {
   try {
     const params = call[2] || [];
     return await contract[call[1]](...params, options || {});
-  } catch (e) {
-    return Promise.reject(e);
+  } catch (err) {
+    return Promise.reject(err);
   }
 }
 
@@ -53,8 +53,8 @@ export async function multicall(
     return results.map((call, i) =>
       itf.decodeFunctionResult(calls[i][1], call)
     );
-  } catch (e) {
-    return Promise.reject(e);
+  } catch (err) {
+    return Promise.reject(err);
   }
 }
 
@@ -97,8 +97,8 @@ export async function multicall3(
         ? itf.decodeFunctionResult(calls[i][1], returnData)
         : null;
       return [success, decoded];
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       return [false, null];
     }
   });

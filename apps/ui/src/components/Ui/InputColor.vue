@@ -17,14 +17,8 @@ const { currentTheme } = useTheme();
 const { isDirty } = useDirty(model, props.definition);
 
 const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: string) {
+  get: () => model.value,
+  set: (newValue: string) => {
     model.value = newValue.toUpperCase();
   }
 });

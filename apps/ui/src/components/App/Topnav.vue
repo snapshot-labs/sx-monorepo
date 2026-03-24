@@ -21,7 +21,12 @@ const SEARCH_CONFIG = {
     defaultRoute: 'space-proposals',
     searchRoute: 'space-proposals',
     placeholder: 'Search for a proposal',
-    exclude: ['space-editor', 'space-proposal']
+    exclude: [
+      'space-editor',
+      'space-proposal',
+      'space-townhall-create',
+      'space-townhall-topic'
+    ]
   },
   my: {
     defaultRoute: 'my-explore',

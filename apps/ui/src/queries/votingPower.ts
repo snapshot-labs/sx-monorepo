@@ -76,15 +76,15 @@ export async function getVotingPower(
       votingPowers: vp,
       canVote: vp.some(vp => vp.value > 0n)
     };
-  } catch (e: any) {
+  } catch (err: any) {
     if (
-      e instanceof utils.errors.VotingPowerDetailsError &&
-      e.details === 'NOT_READY_YET' &&
-      ['evmSlotValue', 'ozVotesStorageProof', 'apeGas'].includes(e.source)
+      err instanceof utils.errors.VotingPowerDetailsError &&
+      err.details === 'NOT_READY_YET' &&
+      ['evmSlotValue', 'ozVotesStorageProof', 'apeGas'].includes(err.source)
     ) {
       throw new Error('NOT_READY_YET');
     }
-    throw e;
+    throw err;
   }
 }
 
