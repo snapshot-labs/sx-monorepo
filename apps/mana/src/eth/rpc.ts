@@ -249,6 +249,35 @@ export const createNetworkHandler = (chainId: number) => {
     }
   }
 
+  async function sendTownhallEnvelope(id: number, params: any, res: Response) {
+    try {
+      const { envelope } = params;
+
+      if (!envelope) {
+        return rpcError(res, 400, 'Missing envelope', id);
+      }
+
+      const content = JSON.stringify(envelope);
+
+      const wallet = getWallet('poster');
+      logger.info({ address: wallet.address }, 'Poster wallet');
+      const contract = new Contract(
+        POSTER_CONFIG.contract,
+        POSTER_CONFIG.abi,
+        wallet
+      );
+
+      const tx = await contract.post(content, 'townhall/1', {
+        gasLimit: 1_000_000
+      });
+
+      return rpcSuccess(res, { hash: tx.hash }, id);
+    } catch (err) {
+      logger.error({ err }, 'Failed to post townhall envelope');
+      return rpcError(res, 500, err, id);
+    }
+  }
+
   async function sendAuctionPartner(id: number, params: any, res: Response) {
     try {
       const { metadataUri, posterTag } = params;
@@ -336,6 +365,7 @@ export const createNetworkHandler = (chainId: number) => {
     executeQueuedProposal,
     executeStarknetProposal,
     registerApeGasProposal,
+    sendTownhallEnvelope,
     sendAuctionPartner,
     getWallet
   };

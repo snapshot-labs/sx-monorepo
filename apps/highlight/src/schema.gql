@@ -104,3 +104,7 @@ type UserRole {
   user: User!
   role: Role!
 }
+
+type Salt {
+  id: String!
+}

@@ -1,12 +1,10 @@
 import {
-  QueryClient,
   skipToken,
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient
 } from '@tanstack/vue-query';
-import kebabCase from 'lodash.kebabcase';
 import { MaybeRefOrGetter } from 'vue';
 import { SpaceType } from '@/composables/useTownhallSpace';
 import {
@@ -18,52 +16,14 @@ import {
   getTopic,
   getTopics,
   getUserRoles,
-  getVotes,
-  newCategoryEventToEntry,
-  newPostEventToEntry,
-  newVoteEventToEntry,
-  Result
+  getVotes
 } from '@/helpers/townhall/api';
-import { Category, Role, Space, Topic, Vote } from '@/helpers/townhall/types';
+import { Category, Role, Topic } from '@/helpers/townhall/types';
 
 export const TOPICS_LIMIT = 20;
 export const TOPICS_SUMMARY_LIMIT = 6;
 
 const DEFAULT_STALE_TIME = 1000 * 5;
-
-function addVoteToRoleResults({
-  queryClient,
-  spaceId,
-  topicId,
-  roleId,
-  vote
-}: {
-  queryClient: QueryClient;
-  spaceId: number;
-  topicId: number;
-  roleId: string;
-  vote: Vote;
-}) {
-  queryClient.setQueryData<Result[]>(
-    ['townhall', 'topicResults', { spaceId, topicId, roleId }, 'list'],
-    oldData => {
-      const updatedData = structuredClone(oldData ?? []);
-      const existingResult = updatedData.find(
-        r => r.post_id === vote.post_id && r.choice === vote.choice
-      );
-      if (existingResult) {
-        existingResult.vote_count += 1;
-      } else {
-        updatedData.push({
-          post_id: vote.post_id,
-          choice: vote.choice,
-          vote_count: 1
-        });
-      }
-      return updatedData;
-    }
-  );
-}
 
 export function useSpaceQuery({
   spaceId,
@@ -313,12 +273,7 @@ export function useResultsByRoleQuery({
   });
 }
 
-export function useRoleMutation({
-  spaceId
-}: {
-  spaceId: MaybeRefOrGetter<number>;
-}) {
-  const { web3 } = useWeb3();
+export function useRoleMutation() {
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
   const { sendClaimRole, sendRevokeRole } = useTownhall();
@@ -329,18 +284,16 @@ export function useRoleMutation({
         ? sendRevokeRole(role.space.space_id, role.id)
         : sendClaimRole(role.space.space_id, role.id);
     },
-    onSuccess: (data, { role, isRevoking }) => {
+    onSuccess: (data, { isRevoking }) => {
       if (!data) return;
 
-      queryClient.setQueryData<Role[]>(
-        [
-          'townhall',
-          'userRoles',
-          { user: web3.value.account, spaceId: toValue(spaceId) },
-          'list'
-        ],
-        (old = []) =>
-          isRevoking ? old.filter(r => r.id !== role.id) : [...old, role]
+      queryClient.invalidateQueries({
+        queryKey: ['townhall', 'userRoles']
+      });
+
+      addNotification(
+        'success',
+        isRevoking ? 'Role revoked' : 'Role claimed'
       );
     },
     onError: error => {
@@ -350,8 +303,6 @@ export function useRoleMutation({
 }
 
 export function useCreateSpaceMutation() {
-  const { web3 } = useWeb3();
-
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
   const { sendCreateSpace } = useTownhall();
@@ -363,30 +314,7 @@ export function useCreateSpaceMutation() {
     onSuccess: data => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'new_space'
-      );
-
-      const [spaceId]: [number] = eventData;
-
-      queryClient.setQueryData<Space>(
-        [
-          'townhall',
-          'spaces',
-          'detail',
-          {
-            spaceId
-          }
-        ],
-        () => ({
-          id: spaceId.toString(),
-          space_id: spaceId,
-          owner: web3.value.account,
-          topic_count: 0,
-          vote_count: 0
-        })
-      );
-
+      queryClient.invalidateQueries({ queryKey: ['townhall', 'spaces'] });
       addNotification('success', 'Space created successfully');
     },
     onError: error => {
@@ -421,29 +349,12 @@ export function useCreateCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: (data, variables) => {
+    onSuccess: data => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'new_category'
-      );
-
-      const category = {
-        ...newCategoryEventToEntry(eventData),
-        name: variables.name,
-        description: variables.description,
-        slug: kebabCase(variables.name)
-      };
-
-      queryClient.setQueryData<Category[]>(
-        ['townhall', 'categories', 'list', { spaceId, categoryId }],
-        old => {
-          if (!old) return old;
-
-          return [...old, category];
-        }
-      );
-
+      queryClient.invalidateQueries({
+        queryKey: ['townhall', 'categories']
+      });
       addNotification('success', 'Category created successfully');
     },
     onError: error => {
@@ -481,29 +392,12 @@ export function useEditCategoryMutation({
         toValue(categoryId)
       );
     },
-    onSuccess: (data, variables) => {
+    onSuccess: data => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'edit_category'
-      );
-
-      const category = {
-        ...newCategoryEventToEntry(eventData),
-        name: variables.name,
-        description: variables.description,
-        slug: kebabCase(variables.name)
-      };
-
-      queryClient.setQueryData<Category[]>(
-        ['townhall', 'categories', 'list', { spaceId, categoryId }],
-        old => {
-          if (!old) return old;
-
-          return old.map(c => (c.id === category.id ? category : c));
-        }
-      );
-
+      queryClient.invalidateQueries({
+        queryKey: ['townhall', 'categories']
+      });
       addNotification('success', 'Category edited successfully');
     },
     onError: error => {
@@ -600,27 +494,12 @@ export function useCreatePostMutation({
     mutationFn: (body: string) => {
       return sendPost(toValue(spaceId), toValue(topicId), body);
     },
-    onSuccess: async (data, body) => {
+    onSuccess: async data => {
       if (!data) return;
 
-      const { data: eventData } = data.result.events.find(
-        event => event.key === 'new_post'
-      );
-
-      const post = { ...newPostEventToEntry(eventData), body };
-
-      queryClient.setQueryData<Topic>(
-        ['townhall', 'topics', 'detail', { spaceId, topicId }],
-        old => {
-          if (!old) return old;
-
-          return {
-            ...old,
-            posts: [...old.posts, post]
-          };
-        }
-      );
-
+      queryClient.invalidateQueries({
+        queryKey: ['townhall', 'topics', 'detail', { spaceId, topicId }]
+      });
       addNotification('success', 'Post published successfully');
     },
     onError: error => {
@@ -710,14 +589,11 @@ export function useSetPostVisibilityMutation({
 
 export function useVoteMutation({
   spaceId,
-  topicId,
-  userRoles
+  topicId
 }: {
   spaceId: MaybeRefOrGetter<number>;
   topicId: MaybeRefOrGetter<number>;
-  userRoles: MaybeRefOrGetter<Role[] | undefined>;
 }) {
-  const { web3 } = useWeb3();
   const queryClient = useQueryClient();
   const { addNotification } = useUiStore();
   const { sendVote } = useTownhall();
@@ -729,32 +605,13 @@ export function useVoteMutation({
     onSuccess: async data => {
       if (!data) return;
 
-      const { data: event } = data.result.events.find(
-        event => event.key === 'new_vote'
-      );
-
-      const vote = newVoteEventToEntry(event);
-
-      queryClient.setQueryData<Vote[]>(
-        [
-          'townhall',
-          'votes',
-          'list',
-          { spaceId, topicId, user: web3.value.account }
-        ],
-        (old = []) => [...old, vote]
-      );
-
-      const roles = ['any', ...(toValue(userRoles) ?? []).map(role => role.id)];
-      roles.forEach(role => {
-        addVoteToRoleResults({
-          queryClient,
-          spaceId: toValue(spaceId),
-          topicId: toValue(topicId),
-          roleId: role,
-          vote
-        });
+      queryClient.invalidateQueries({
+        queryKey: ['townhall', 'votes']
       });
+      queryClient.invalidateQueries({
+        queryKey: ['townhall', 'topicResults']
+      });
+      addNotification('success', 'Vote submitted successfully');
     },
     onError: error => {
       addNotification('error', error.message);

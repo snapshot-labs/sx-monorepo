@@ -1,32 +1,48 @@
 import 'dotenv/config';
+import fs from 'fs';
+import path from 'path';
+import Checkpoint, { evm, LogLevel } from '@snapshot-labs/checkpoint';
 import cors from 'cors';
 import express from 'express';
-import { AGENTS_MAP } from './agents';
-import createCheckpoint from './api';
-import { RedisAdapter } from './highlight/adapter/redis';
-import Highlight from './highlight/highlight';
-import createRpc from './rpc';
+import { createConfig, getStartBlock } from './config';
+import { createWriters } from './writers';
 
 const PORT = process.env.PORT || 3002;
-const DATABASE_URL = process.env.DATABASE_URL || '';
+
+if (process.env.CA_CERT) {
+  process.env.CA_CERT = process.env.CA_CERT.replace(/\\n/g, '\n');
+}
 
 async function run() {
-  const adapter = new RedisAdapter({ url: DATABASE_URL });
-  const highlight = new Highlight({ adapter, agents: AGENTS_MAP });
+  const dir = __dirname.endsWith('dist/src') ? '../' : '';
+  const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
+  const schema = fs.readFileSync(schemaFile, 'utf8');
 
-  await highlight.reset();
+  const checkpoint = new Checkpoint(schema, {
+    logLevel: LogLevel.Fatal,
+    prettifyLogs: process.env.NODE_ENV !== 'production',
+    dbConnection: process.env.API_DATABASE_URL,
+    overridesConfig: {}
+  });
 
-  console.log('Highlight reset complete');
+  const startBlock = getStartBlock();
+  console.log('Starting from block', startBlock);
+  const config = createConfig(startBlock);
 
-  const rpc = createRpc(highlight);
-  const checkpoint = await createCheckpoint(highlight);
+  const writers = createWriters();
+  const indexer = new evm.EvmIndexer(writers);
+  checkpoint.addIndexer('townhall', config, indexer);
+
+  await checkpoint.reset();
+  await checkpoint.resetMetadata();
+  console.log('Checkpoint ready');
+
+  checkpoint.start();
 
   const app = express();
   app.use(express.json({ limit: '4mb' }));
   app.use(express.urlencoded({ limit: '4mb', extended: false }));
   app.use(cors({ maxAge: 86400 }));
-
-  app.use('/highlight', rpc);
 
   app.get(
     '/townhall/spaces/:spaceId/topics/:topicId/results_by_role/:roleId',
@@ -61,6 +77,7 @@ async function run() {
       }
     }
   );
+
   app.use('/', checkpoint.graphql);
 
   app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
