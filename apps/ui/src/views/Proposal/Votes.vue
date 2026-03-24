@@ -96,9 +96,7 @@ function handleChoiceClick(vote: Vote | null) {
     class="overflow-hidden sticky-header-with-section"
   >
     <div class="flex px-4 gap-3 min-w-[735px] w-full">
-      <UiColumnHeaderItem class="w-[218px]">
-        Voter
-      </UiColumnHeaderItem>
+      <UiColumnHeaderItem class="w-[218px]"> Voter </UiColumnHeaderItem>
       <UiColumnHeaderItem class="grow w-[40%]">
         <template v-if="offchainNetworks.includes(proposal.network)">
           Choice
