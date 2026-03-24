@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { UiColumnHeader } from '@snapshot-labs/tune';
 import { AuctionNetworkId } from '@/helpers/auction';
 import {
   AuctionDetailFragment,
@@ -20,7 +19,7 @@ const props = defineProps<{
   totalSupply: bigint;
 }>();
 
-const columnHeaderRef = ref<InstanceType<typeof UiColumnHeader> | null>(null);
+const columnHeaderEl = ref<HTMLElement | null>(null);
 const page = ref(1);
 const orderBy = ref<Order_OrderBy>('timestamp');
 const orderDirection = ref<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
@@ -44,9 +43,7 @@ const { data: biddingTokenPrice, isLoading: isBiddingTokenPriceLoading } =
     tokenAddress: () => props.auction.addressBiddingToken
   });
 
-const { x: columnHeaderX } = useScroll(
-  () => columnHeaderRef.value?.$el ?? null
-);
+const { x: columnHeaderX } = useScroll(columnHeaderEl);
 
 const totalPageCount = computed(() => {
   const pages = Math.ceil(props.auction.orderCount / LIMIT);
@@ -72,7 +69,7 @@ function handleSortChange(field: Order_OrderBy) {
   <div class="divide-y divide-skin-border">
     <div class="overflow-hidden">
       <UiColumnHeader
-        ref="columnHeaderRef"
+        :ref="ref => (columnHeaderEl = (ref as any)?.$el ?? null)"
         class="py-2 text-sm tracking-wider overflow-hidden"
       >
         <div class="flex px-4 gap-3 min-w-[880px] w-full">
