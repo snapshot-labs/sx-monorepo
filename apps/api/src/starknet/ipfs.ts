@@ -2,11 +2,7 @@ import { validateAndParseAddress } from 'starknet';
 import { createPublicClient, getAddress, http } from 'viem';
 import L1AvatarExectionStrategyAbi from './abis/l1/L1AvatarExectionStrategy';
 import { FullConfig } from './config';
-import {
-  ExecutionStrategy,
-  SpaceMetadataItem,
-  StrategiesParsedMetadataDataItem
-} from '../../.checkpoint/models';
+import { ExecutionStrategy, SpaceMetadataItem } from '../../.checkpoint/models';
 import { dropIpfs, getJSON, getSpaceName } from '../common/utils';
 
 export async function handleSpaceMetadata(
@@ -160,41 +156,4 @@ export async function handleSpaceMetadata(
   }
 
   await spaceMetadataItem.save();
-}
-
-export async function handleStrategiesParsedMetadata(
-  metadataUri: string,
-  config: FullConfig
-) {
-  const exists = await StrategiesParsedMetadataDataItem.loadEntity(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-  if (exists) return;
-
-  const strategiesParsedMetadataItem = new StrategiesParsedMetadataDataItem(
-    dropIpfs(metadataUri),
-    config.indexerName
-  );
-
-  const metadata: any = await getJSON(metadataUri);
-  if (metadata.name) strategiesParsedMetadataItem.name = metadata.name;
-  if (metadata.description)
-    strategiesParsedMetadataItem.description = metadata.description;
-
-  if (metadata.properties) {
-    if (metadata.properties.decimals) {
-      strategiesParsedMetadataItem.decimals = metadata.properties.decimals;
-    }
-    if (metadata.properties.symbol) {
-      strategiesParsedMetadataItem.symbol = metadata.properties.symbol;
-    }
-    if (metadata.properties.token)
-      strategiesParsedMetadataItem.token = metadata.properties.token;
-    if (metadata.properties.payload) {
-      strategiesParsedMetadataItem.payload = metadata.properties.payload;
-    }
-  }
-
-  await strategiesParsedMetadataItem.save();
 }
