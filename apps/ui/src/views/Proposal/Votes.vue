@@ -93,7 +93,7 @@ function handleChoiceClick(vote: Vote | null) {
         (votesHeader =
           (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ?? null)
     "
-    class="!px-0 overflow-hidden sticky-header-with-section"
+    class="overflow-hidden sticky-header-with-section"
   >
     <div class="flex px-4 gap-3 min-w-[735px] w-full">
       <UiColumnHeaderItem class="w-[218px] max-w-[218px]">

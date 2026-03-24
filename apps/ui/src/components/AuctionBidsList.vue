@@ -73,7 +73,7 @@ function handleSortChange(field: Order_OrderBy) {
     <div class="overflow-hidden">
       <UiColumnHeader
         ref="columnHeaderRef"
-        class="!px-0 py-2 text-sm tracking-wider overflow-hidden"
+        class="py-2 text-sm tracking-wider overflow-hidden"
       >
         <div class="flex px-4 gap-3 min-w-[880px] w-full">
           <UiColumnHeaderItem class="flex-1 min-w-[168px] uppercase">

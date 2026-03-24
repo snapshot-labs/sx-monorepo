@@ -467,7 +467,7 @@ watch(volume, () => {
                   (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ??
                   null)
             "
-            class="!px-0 py-2 text-sm tracking-wider overflow-hidden"
+            class="py-2 text-sm tracking-wider overflow-hidden"
           >
             <div class="flex px-4 gap-3 min-w-[735px] w-full">
               <UiColumnHeaderItem class="flex-1 min-w-[110px] uppercase">
