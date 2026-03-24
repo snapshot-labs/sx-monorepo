@@ -11,6 +11,7 @@ This protocol provides implementations for the following OpenZeppelin governance
 - [`GovernorCountingSimple`](https://docs.openzeppelin.com/contracts/5.x/api/governance#GovernorCountingSimple)
 - [`GovernorTimelockControl`](https://docs.openzeppelin.com/contracts/5.x/api/governance#GovernorTimelockControl)
 - [`GovernorSettings`](https://docs.openzeppelin.com/contracts/5.x/api/governance#GovernorSettings)
+- [`GovernorPreventLateQuorum`](https://docs.openzeppelin.com/contracts/5.x/api/governance#GovernorPreventLateQuorum)
 
 Support for other modules need to be implemented when integrating new governances.
 

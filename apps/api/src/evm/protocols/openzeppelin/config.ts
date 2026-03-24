@@ -57,6 +57,11 @@ export function createConfig(indexerName: NetworkID): Config | null {
       {
         name: 'TimelockChange(address,address)',
         fn: 'handleTimelockChange'
+      },
+      // GovernorPreventLateQuorum
+      {
+        name: 'ProposalExtended(uint256,uint64)',
+        fn: 'handleProposalExtended'
       }
     ]
   }));

@@ -2,6 +2,7 @@ import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks, utils } from '@snapshot-labs/sx';
 import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
 import ERC20VotesAbi from './abis/ERC20Votes';
+import GovernorPreventLateQuorumAbi from './abis/GovernorPreventLateQuorum';
 import GovernorSettingsAbi from './abis/GovernorSettings';
 import GovernorTimelockControlAbi from './abis/GovernorTimelockControl';
 import GovernorVotesAbi from './abis/GovernorVotes';
@@ -713,6 +714,38 @@ export function createWriters(
     await timelock.save();
   };
 
+  const handleProposalExtended: evm.Writer<
+    typeof GovernorPreventLateQuorumAbi,
+    'ProposalExtended'
+  > = async ({ blockNumber, block, event, rawEvent }) => {
+    if (!event || !rawEvent) return;
+
+    logger.info('Handle proposal extended');
+
+    const spaceAddress = getAddress(rawEvent.address);
+    const proposalId = `${spaceAddress}/${event.args.proposalId}`;
+
+    const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
+    if (!proposal) return;
+
+    const extendedDeadlineBlock = Number(event.args.extendedDeadline);
+
+    const extendedDeadlineTimestamp = await _getTimestampFromBlock({
+      networkId: config.indexerName,
+      blockNumber: extendedDeadlineBlock,
+      currentBlockNumber: blockNumber,
+      currentTimestamp: Number(block?.timestamp ?? getCurrentTimestamp()),
+      client
+    });
+
+    proposal.min_end = extendedDeadlineTimestamp;
+    proposal.min_end_block_number = extendedDeadlineBlock;
+    proposal.max_end = extendedDeadlineTimestamp;
+    proposal.max_end_block_number = extendedDeadlineBlock;
+
+    await proposal.save();
+  };
+
   return {
     // IGovernor
     handleProposalCreated,
@@ -726,6 +759,8 @@ export function createWriters(
     handleVotingPeriodSet,
     // GovernorTimelockControl
     handleTimelockChange,
+    // GovernorPreventLateQuorum
+    handleProposalExtended,
     // TimelockController
     handleNewDelay
   };
