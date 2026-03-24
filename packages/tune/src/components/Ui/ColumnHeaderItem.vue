@@ -21,7 +21,7 @@ const isSortable = computed(() => props.orderDirection !== undefined);
   <component
     :is="isSortable ? 'button' : 'span'"
     :type="isSortable ? 'button' : undefined"
-    class="flex items-center space-x-1 truncate"
+    class="flex items-center gap-1 truncate"
     :class="isSortable ? 'hover:text-skin-link' : ''"
     @click="isSortable && emit('sortChange')"
   >

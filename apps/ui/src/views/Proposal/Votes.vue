@@ -190,7 +190,7 @@ function handleScrollEvent(target: HTMLElement) {
                 user: vote.voter.id
               }
             }"
-            class="leading-[22px] py-3 w-[218px] flex items-center space-x-3 truncate group"
+            class="leading-[22px] py-3 w-[218px] flex items-center gap-3 truncate group"
           >
             <UiStamp :id="vote.voter.id" :size="32" />
             <div class="flex flex-col truncate">
