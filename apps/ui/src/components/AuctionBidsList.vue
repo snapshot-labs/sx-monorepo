@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiColumnHeader } from '@snapshot-labs/tune';
 import { AuctionNetworkId } from '@/helpers/auction';
 import {
   AuctionDetailFragment,
@@ -69,7 +70,11 @@ function handleSortChange(field: Order_OrderBy) {
   <div class="divide-y divide-skin-border">
     <div class="overflow-hidden">
       <UiColumnHeader
-        :ref="ref => (columnHeaderEl = (ref as any)?.$el ?? null)"
+        :ref="
+          ref =>
+            (columnHeaderEl =
+              (ref as InstanceType<typeof UiColumnHeader> | null)?.$el ?? null)
+        "
         class="py-2 text-sm tracking-wider overflow-hidden"
       >
         <div class="flex px-4 gap-3 min-w-[880px] w-full">
