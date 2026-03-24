@@ -680,17 +680,7 @@ export function createActions(
         provider
       );
 
-      const { relayerType } = pickAuthenticatorAndStrategies({
-        authenticators: proposal.space.authenticators,
-        strategies: proposal.strategies,
-        strategiesIndices: proposal.strategies_indices,
-        connectorType: 'injected',
-        isContract: false,
-        hasReason: false,
-        ignoreRelayer: !relayer?.hasMinimumBalance
-      });
-
-      if (relayerType === 'evm') {
+      if (relayer?.hasMinimumBalance) {
         return executionCall('eth', chainId, 'execute', {
           space: proposal.space.id,
           proposalId: proposal.proposal_id,
@@ -740,17 +730,7 @@ export function createActions(
         provider
       );
 
-      const { relayerType } = pickAuthenticatorAndStrategies({
-        authenticators: proposal.space.authenticators,
-        strategies: proposal.strategies,
-        strategiesIndices: proposal.strategies_indices,
-        connectorType: 'injected',
-        isContract: false,
-        hasReason: false,
-        ignoreRelayer: !relayer?.hasMinimumBalance
-      });
-
-      if (relayerType === 'evm') {
+      if (relayer?.hasMinimumBalance) {
         return executionCall('eth', chainId, 'executeQueuedProposal', {
           space: proposal.space.id,
           executionStrategy: proposal.execution_strategy,
