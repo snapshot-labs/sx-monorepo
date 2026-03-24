@@ -13,10 +13,10 @@
   "scripts": {
     "dev": "vite --port=8080",
     "build": "vite build",
+    "typecheck": "vue-tsc --noEmit",
     "codegen": "graphql-codegen",
     "lint": "eslint src/",
     "lint:fix": "bun run lint --fix",
-    "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "storybook": "storybook dev -p 6006",
