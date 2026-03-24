@@ -295,22 +295,15 @@ function handleControllerSave(value: string) {
   executeFn.value = saveController;
 }
 
-async function handleSpaceDelete() {
+function handleSpaceDelete() {
   saving.value = true;
+  executeFn.value = async () => {
+    await deleteSpace();
+    uiStore.addNotification('success', 'Your space was successfully deleted.');
+    router.push({ name: 'my-home' });
 
-  try {
-    const result = await deleteSpace();
-    if (result) {
-      uiStore.addNotification(
-        'success',
-        'Your space was successfully deleted.'
-      );
-      router.push({ name: 'my-home' });
-    }
-  } catch {
-  } finally {
-    saving.value = false;
-  }
+    return null;
+  };
 }
 
 function addCustomStrategy(strategy: { address: string; type: string }) {
@@ -632,7 +625,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </template>
     </UiModal>
     <ModalTransactionProgress
-      :open="saving && (!isOffchainNetwork || executeFn === saveController)"
+      :open="saving && (!isOffchainNetwork || executeFn !== save)"
       :chain-id="network.chainId"
       :messages="{
         approveTitle: 'Confirm your changes',
