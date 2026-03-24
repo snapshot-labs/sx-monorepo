@@ -674,9 +674,34 @@ export function createActions(
         convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
-      return executionCall('eth', chainId, 'execute', {
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        provider
+      );
+
+      const { relayerType } = pickAuthenticatorAndStrategies({
+        authenticators: proposal.space.authenticators,
+        strategies: proposal.strategies,
+        strategiesIndices: proposal.strategies_indices,
+        connectorType: 'injected',
+        isContract: false,
+        hasReason: false,
+        ignoreRelayer: !relayer?.hasMinimumBalance
+      });
+
+      if (relayerType === 'evm') {
+        return executionCall('eth', chainId, 'execute', {
+          space: proposal.space.id,
+          proposalId: proposal.proposal_id,
+          executionParams: executionData.executionParams[0]
+        });
+      }
+
+      return client.execute({
+        signer: getSigner(web3),
         space: proposal.space.id,
-        proposalId: proposal.proposal_id,
+        proposal: Number(proposal.proposal_id),
         executionParams: executionData.executionParams[0]
       });
     },
@@ -709,8 +734,32 @@ export function createActions(
         convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
-      return executionCall('eth', chainId, 'executeQueuedProposal', {
-        space: proposal.space.id,
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        provider
+      );
+
+      const { relayerType } = pickAuthenticatorAndStrategies({
+        authenticators: proposal.space.authenticators,
+        strategies: proposal.strategies,
+        strategiesIndices: proposal.strategies_indices,
+        connectorType: 'injected',
+        isContract: false,
+        hasReason: false,
+        ignoreRelayer: !relayer?.hasMinimumBalance
+      });
+
+      if (relayerType === 'evm') {
+        return executionCall('eth', chainId, 'executeQueuedProposal', {
+          space: proposal.space.id,
+          executionStrategy: proposal.execution_strategy,
+          executionParams: executionData.executionParams[0]
+        });
+      }
+
+      return client.executeQueuedProposal({
+        signer: getSigner(web3),
         executionStrategy: proposal.execution_strategy,
         executionParams: executionData.executionParams[0]
       });
