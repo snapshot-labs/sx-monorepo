@@ -625,7 +625,7 @@ watchEffect(() => setTitle(`Edit settings - ${props.space.name}`));
       </template>
     </UiModal>
     <ModalTransactionProgress
-      :open="saving && (!isOffchainNetwork || executeFn === saveController)"
+      :open="saving && (!isOffchainNetwork || executeFn !== save)"
       :chain-id="network.chainId"
       :messages="{
         approveTitle: 'Confirm your changes',
