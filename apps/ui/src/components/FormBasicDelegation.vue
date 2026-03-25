@@ -33,9 +33,7 @@ const delegateDefinition = computed(() => ({
   chainId: form.value.chainId,
   title: 'Delegatee',
   examples: [
-    getChainIdKind(form.value.chainId) === 'evm'
-      ? 'Address or ENS'
-      : 'Address'
+    getChainIdKind(form.value.chainId) === 'evm' ? 'Address or ENS' : 'Address'
   ]
 }));
 
