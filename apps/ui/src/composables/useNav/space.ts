@@ -75,7 +75,7 @@ function getSpaceSettingsConfig(context: NavContext): NavConfig {
         name: 'Settings',
         icon: IHArrowLongLeft,
         link: { name: 'space-overview' },
-        isActiveOnChildren: true
+        activeRoute: { prefix: 'space-settings' }
       },
       ...tabItems,
       snapshotPro: {
@@ -126,16 +126,14 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
   ) {
     items.discussions = {
       name: 'Discussions',
-      icon: IHAnnotation,
-      isActiveOnChildren: true
+      icon: IHAnnotation
     };
   }
 
   if (context.space?.treasuries?.length) {
     items.treasury = {
       name: 'Treasury',
-      icon: IHCash,
-      isActiveOnChildren: true
+      icon: IHCash
     };
   }
 

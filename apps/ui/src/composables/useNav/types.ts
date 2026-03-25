@@ -10,7 +10,8 @@ export type NavItem = {
   count?: number;
   hidden?: boolean;
   link?: RouteLocationRaw;
-  isActiveOnChildren?: boolean;
+  activeRoute?: { prefix: string; params?: Record<string, string> };
+  isActive?: boolean;
   /** 1-based insertion index used by org nav to position custom items among defaults */
   position?: number;
 };

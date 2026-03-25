@@ -19,25 +19,11 @@ const editor = useMarkdownEditor(
 );
 const { isDirty } = useDirty(model, props.definition);
 
-const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: string) {
-    model.value = newValue;
-  }
-});
-
-const inputValueLength = computed(() => inputValue.value.length);
+const inputValueLength = computed(() => model.value.length);
 
 const showError = computed<boolean>(
   () =>
-    !!props.error &&
-    (isDirty.value || props.definition.default !== inputValue.value)
+    !!props.error && (isDirty.value || props.definition.default !== model.value)
 );
 </script>
 

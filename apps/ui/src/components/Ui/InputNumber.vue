@@ -12,19 +12,6 @@ const props = withDefaults(
 );
 
 const { isDirty } = useDirty(model, props.definition);
-
-const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: string) {
-    model.value = newValue;
-  }
-});
 </script>
 
 <template>
@@ -37,7 +24,7 @@ const inputValue = computed({
   >
     <input
       :id="id"
-      v-model="inputValue"
+      v-model="model"
       type="number"
       class="s-input"
       :disabled="disabled"
