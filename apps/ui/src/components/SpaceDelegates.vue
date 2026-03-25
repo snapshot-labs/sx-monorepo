@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useQueryClient } from '@tanstack/vue-query';
 import removeMarkdown from 'remove-markdown';
+import { isValidDelegation } from '@/helpers/delegation';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { _n, _p, _vp, compareAddresses, shorten } from '@/helpers/utils';
 import { useDelegateesQuery } from '@/queries/delegatees';
@@ -118,11 +119,7 @@ function handleUpdateDelegatesClick(newDelegatee?: string) {
 }
 
 async function undelegate() {
-  if (
-    !props.delegation.apiType ||
-    !props.delegation.chainId ||
-    !props.delegation.contractAddress
-  ) {
+  if (!isValidDelegation(props.delegation)) {
     return null;
   }
 
@@ -159,7 +156,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>
-  <UiStateWarning v-if="!delegation.apiUrl" class="px-4 py-3">
+  <UiStateWarning v-if="!isValidDelegation(delegation)" class="px-4 py-3">
     Invalid delegation settings.
   </UiStateWarning>
   <template v-else>
@@ -274,7 +271,10 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
     </div>
 
     <UiSectionHeader label="Delegates" sticky />
-    <div class="text-left table-fixed w-full">
+    <UiStateWarning v-if="!delegation.apiUrl" class="px-4 py-3">
+      Delegation dashboard is not configured for this space.
+    </UiStateWarning>
+    <div v-else class="text-left table-fixed w-full">
       <UiColumnHeader class="space-x-3">
         <div
           class="w-[120px] xs:w-[190px] grow sm:grow-0 sm:shrink-0 flex items-center truncate"
