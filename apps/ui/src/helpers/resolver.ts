@@ -44,6 +44,7 @@ function createResolver() {
   }
 
   return {
+    resolveEns: memoize(resolveEns),
     resolveName: memoize(resolveName)
   };
 }

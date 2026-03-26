@@ -121,7 +121,9 @@ ajv.addFormat('ens-or-address', {
     if (!value) return false;
 
     try {
-      const resolved = await resolver.resolveName(value);
+      const resolved = value.endsWith('.eth')
+        ? await resolver.resolveEns('eth', value)
+        : null;
       if (resolved?.address) return true;
 
       return !!validateAndParseAddress(value);

@@ -1,5 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { getValidator } from './validation';
+
+vi.mock('@/helpers/resolver', () => ({
+  resolver: {
+    resolveEns: vi.fn(async (_networkId: string, name: string) => {
+      if (name === 'test.eth') return { address: '0x1234', networkId: 'eth' };
+
+      return null;
+    })
+  }
+}));
 
 describe('addresses-with-voting-power', () => {
   const schema = {
@@ -139,5 +149,36 @@ describe('decimals', () => {
     expect(validator.validate({ value: '10.000000001' })).toEqual({
       value: 'Can have at most 8 decimals.'
     });
+  });
+});
+
+describe('ens-or-address', () => {
+  const schema = {
+    $async: true,
+    type: 'object',
+    properties: {
+      to: {
+        type: 'string',
+        format: 'ens-or-address'
+      }
+    }
+  };
+  const validator = getValidator(schema);
+
+  it('should accept a valid ENS name', async () => {
+    const result = await validator.validateAsync({ to: 'test.eth' });
+    expect(result).toEqual({});
+  });
+
+  it('should accept a valid address', async () => {
+    const result = await validator.validateAsync({
+      to: '0x395ed61716b48dc904140b515e9f682e33330154'
+    });
+    expect(result).toEqual({});
+  });
+
+  it('should reject an invalid value', async () => {
+    const result = await validator.validateAsync({ to: 'not-valid' });
+    expect(result).toHaveProperty('to');
   });
 });
