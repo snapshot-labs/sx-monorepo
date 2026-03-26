@@ -3,6 +3,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  rmSync,
   writeFileSync
 } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
@@ -12,6 +13,7 @@ const scriptDir = dirname(fileURLToPath(import.meta.url));
 const componentsDir = join(scriptDir, '../src/components/Ui');
 const outDir = join(scriptDir, '../src/stories/auto');
 
+rmSync(outDir, { recursive: true, force: true });
 mkdirSync(outDir, { recursive: true });
 
 /** Known external types that can't be resolved from source. */
