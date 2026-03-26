@@ -28,8 +28,6 @@
         "@logtail/pino": "^0.5.5",
         "@snapshot-labs/checkpoint": "^0.1.0-beta.67",
         "@snapshot-labs/sx": "^0.1.0",
-        "@types/bn.js": "^5.1.0",
-        "@types/mysql": "^2.15.21",
         "@types/node": "^18.11.6",
         "cors": "^2.8.5",
         "dotenv": "^16.0.1",
@@ -54,7 +52,6 @@
       "name": "highlight",
       "version": "0.1.0",
       "dependencies": {
-        "@ethersproject/abi": "^5.8.0",
         "@ethersproject/abstract-signer": "^5.8.0",
         "@ethersproject/bignumber": "^5.8.0",
         "@ethersproject/contracts": "^5.8.0",
@@ -65,7 +62,6 @@
         "@snapshot-labs/sx": "^0.1.7",
         "async-lock": "^1.4.0",
         "change-case": "^4.1.2",
-        "connection-string": "^1.0.1",
         "cors": "^2.8.5",
         "dotenv": "^16.0.1",
         "express": "^4.18.1",
@@ -73,7 +69,6 @@
         "nodemon": "^2.0.19",
         "pino": "^9.9.0",
         "redis": "^4.6.7",
-        "ts-node": "^10.8.1",
         "typescript": "^5.8.3",
         "vitest": "^3.1.1",
         "zod": "^3.24.2",
@@ -83,10 +78,7 @@
         "@types/cors": "^2.8.17",
         "@types/express": "^4.17.11",
         "@types/lodash.kebabcase": "^4.1.9",
-        "@types/mysql": "^2.15.21",
         "@types/node": "^22.14.0",
-        "@types/pg": "^8.11.11",
-        "@types/ws": "^8.18.1",
       },
     },
     "apps/mana": {
@@ -94,16 +86,12 @@
       "version": "0.1.0",
       "dependencies": {
         "@ethersproject/contracts": "^5.8.0",
-        "@ethersproject/experimental": "5.8.0",
         "@ethersproject/keccak256": "^5.8.0",
         "@ethersproject/providers": "^5.8.0",
         "@ethersproject/wallet": "^5.8.0",
         "@logtail/pino": "^0.5.5",
-        "@scure/bip32": "^1.3.3",
-        "@scure/bip39": "^1.2.2",
         "@snapshot-labs/sx": "^0.1.0",
         "@types/cors": "^2.8.17",
-        "abi-wan-kanabi": "^2.0.0",
         "async-mutex": "^0.4.0",
         "connection-string": "^4.4.0",
         "cors": "^2.8.5",
@@ -117,12 +105,10 @@
         "zod": "^3.22.4",
       },
       "devDependencies": {
-        "@types/bn.js": "^5.1.0",
         "@types/express": "^4.17.5",
         "@types/node": "^18.14.4",
         "graphql-request": "^7.2.0",
         "nodemon": "^3.0.1",
-        "ts-node": "^10.9.1",
         "typescript": "^5.8.3",
       },
     },
@@ -134,19 +120,15 @@
         "@apollo/client": "^3.12.9",
         "@braintree/sanitize-url": "^6.0.4",
         "@coinbase/wallet-sdk": "^4.3.0",
-        "@ensdomains/eth-ens-namehash": "^2.0.15",
         "@ethersproject/abi": "^5.8.0",
         "@ethersproject/abstract-signer": "^5.8.0",
         "@ethersproject/address": "^5.8.0",
         "@ethersproject/bignumber": "^5.8.0",
         "@ethersproject/bytes": "^5.8.0",
-        "@ethersproject/constants": "^5.8.0",
         "@ethersproject/contracts": "^5.8.0",
         "@ethersproject/hash": "^5.8.0",
         "@ethersproject/keccak256": "^5.8.0",
         "@ethersproject/providers": "^5.8.0",
-        "@ethersproject/sha2": "5.8.0",
-        "@ethersproject/solidity": "^5.8.0",
         "@ethersproject/strings": "^5.8.0",
         "@ethersproject/units": "^5.8.0",
         "@ethersproject/wallet": "^5.8.0",
@@ -305,13 +287,10 @@
         "bn.js": "^5.2.1",
         "micro-starknet": "^0.2.3",
         "randombytes": "^2.1.0",
-        "snake-case": "^3.0.4",
         "starknet": "7.6.4",
       },
       "devDependencies": {
-        "@ethersproject/units": "^5.7.0",
         "@types/bn.js": "^5.1.1",
-        "@types/elliptic": "^6.4.14",
         "@types/node": "^18.11.9",
         "@types/randombytes": "^2.0.3",
         "typescript": "^5.8.3",
@@ -707,8 +686,6 @@
     "@ethersproject/constants": ["@ethersproject/constants@5.8.0", "", { "dependencies": { "@ethersproject/bignumber": "^5.8.0" } }, "sha512-wigX4lrf5Vu+axVTIvNsuL6YrV4O5AXl5ubcURKMEME5TnWBouUh0CDTWxZ2GpnRn1kcCgE7l8O5+VbV9QTTcg=="],
 
     "@ethersproject/contracts": ["@ethersproject/contracts@5.8.0", "", { "dependencies": { "@ethersproject/abi": "^5.8.0", "@ethersproject/abstract-provider": "^5.8.0", "@ethersproject/abstract-signer": "^5.8.0", "@ethersproject/address": "^5.8.0", "@ethersproject/bignumber": "^5.8.0", "@ethersproject/bytes": "^5.8.0", "@ethersproject/constants": "^5.8.0", "@ethersproject/logger": "^5.8.0", "@ethersproject/properties": "^5.8.0", "@ethersproject/transactions": "^5.8.0" } }, "sha512-0eFjGz9GtuAi6MZwhb4uvUM216F38xiuR0yYCjKJpNfSEy4HUM8hvqqBj9Jmm0IUz8l0xKEhWwLIhPgxNY0yvQ=="],
-
-    "@ethersproject/experimental": ["@ethersproject/experimental@5.8.0", "", { "dependencies": { "@ethersproject/web": "^5.8.0", "ethers": "^5.8.0", "scrypt-js": "3.0.1" } }, "sha512-Oa5LNrm0jk0xQwbwd///ptex4Y62VRYIBzLfRtPpS5CGE+4RbAvETWc7bp/I0cXHqvXjvdvPNcZNc40qB8B5Mw=="],
 
     "@ethersproject/hash": ["@ethersproject/hash@5.8.0", "", { "dependencies": { "@ethersproject/abstract-signer": "^5.8.0", "@ethersproject/address": "^5.8.0", "@ethersproject/base64": "^5.8.0", "@ethersproject/bignumber": "^5.8.0", "@ethersproject/bytes": "^5.8.0", "@ethersproject/keccak256": "^5.8.0", "@ethersproject/logger": "^5.8.0", "@ethersproject/properties": "^5.8.0", "@ethersproject/strings": "^5.8.0" } }, "sha512-ac/lBcTbEWW/VGJij0CNSw/wPcw9bSRgCB0AIBz8CvED/jfvDoV9hsIIiWfvWmFEi8RcXtlNwp2jv6ozWOsooA=="],
 
@@ -1484,8 +1461,6 @@
 
     "@types/deep-eql": ["@types/deep-eql@4.0.2", "", {}, "sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw=="],
 
-    "@types/elliptic": ["@types/elliptic@6.4.18", "", { "dependencies": { "@types/bn.js": "*" } }, "sha512-UseG6H5vjRiNpQvrhy4VF/JXdA3V/Fp5amvveaL+fs28BZ6xIKJBPnUPRlEaZpysD9MbpfaLi8lbl7PGUAkpWw=="],
-
     "@types/estree": ["@types/estree@1.0.8", "", {}, "sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w=="],
 
     "@types/express": ["@types/express@5.0.6", "", { "dependencies": { "@types/body-parser": "*", "@types/express-serve-static-core": "^5.0.0", "@types/serve-static": "^2" } }, "sha512-sKYVuV7Sv9fbPIt/442koC7+IIwK5olP1KWeD88e/idgoJqDm3JV/YUiPwkoKK92ylff2MGxSz1CSjsXelx0YA=="],
@@ -1522,15 +1497,11 @@
 
     "@types/mute-stream": ["@types/mute-stream@0.0.4", "", { "dependencies": { "@types/node": "*" } }, "sha512-CPM9nzrCPPJHQNA9keH9CVkVI+WR5kMa+7XEs5jcGQ0VoAGnLv242w8lIVgwAEfmE4oufJRaTc9PNLQl0ioAow=="],
 
-    "@types/mysql": ["@types/mysql@2.15.25", "", { "dependencies": { "@types/node": "*" } }, "sha512-pKjbzNu/xvD2xOx4psIfxu9CBg+GovLvQFk8NYTW3oT7Gf5QY65MvNgQNFvVb0nC3l9DCKGqBFYhujVrDqii4A=="],
-
     "@types/node": ["@types/node@18.19.16", "", { "dependencies": { "undici-types": "~5.26.4" } }, "sha512-mjtrR7Wco9ZwcGBc1zre6fENlj9z42/+0W26lBGtGBTPiR3Zm9iZAaiPhxreG6magwGCILLVYwlQ48GjAaqM6w=="],
 
     "@types/pako": ["@types/pako@2.0.4", "", {}, "sha512-VWDCbrLeVXJM9fihYodcLiIv0ku+AlOa/TQ1SvYOaBuyrSKgEcro95LJyIsJ4vSo6BXIxOKxiJAat04CmST9Fw=="],
 
     "@types/parse-json": ["@types/parse-json@4.0.2", "", {}, "sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw=="],
-
-    "@types/pg": ["@types/pg@8.16.0", "", { "dependencies": { "@types/node": "*", "pg-protocol": "*", "pg-types": "^2.2.0" } }, "sha512-RmhMd/wD+CF8Dfo+cVIy3RR5cl8CyfXQ0tGgW6XBL8L4LM/UTEbNXYRbLwU6w+CgrKBNbrQWt4FUtTfaU5jSYQ=="],
 
     "@types/qrcode": ["@types/qrcode@1.5.6", "", { "dependencies": { "@types/node": "*" } }, "sha512-te7NQcV2BOvdj2b1hCAHzAoMNuj65kNBMz0KBaxM6c3VGBOhU0dURQKOtH8CFNI/dsKkwlv32p26qYQTWoB5bw=="],
 
@@ -2028,7 +1999,7 @@
 
     "config-chain": ["config-chain@1.1.13", "", { "dependencies": { "ini": "^1.3.4", "proto-list": "~1.2.1" } }, "sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ=="],
 
-    "connection-string": ["connection-string@1.1.0", "", {}, "sha512-uWTk8bs+jczX5D0ptKk7hldRMtp4eqty8SyTS1lKZs24VOQRsGGwLAUUvj1+egd+LxYfDfkiPSm4bFp9LTgrbQ=="],
+    "connection-string": ["connection-string@4.4.0", "", {}, "sha512-D4xsUjSoE8m/B5yMOvCIHY+2ME6FIZhCq0NzBBT57Q8BuL7ArFhBK04osOfReoW4KFr5ztzFwWRdmnv9rCvu2w=="],
 
     "constant-case": ["constant-case@3.0.4", "", { "dependencies": { "no-case": "^3.0.4", "tslib": "^2.0.3", "upper-case": "^2.0.2" } }, "sha512-I2hSBi7Vvs7BEuJDr5dDHfzb/Ruj3FyvFyh7KLilAjNQw3Be+xgqUBA2W6scVEcL0hL1dwPRtIqEPVUCKkSsyQ=="],
 
@@ -3926,8 +3897,6 @@
 
     "@eslint/eslintrc/strip-json-comments": ["strip-json-comments@3.1.1", "", {}, "sha512-6fPc+R4ihwqP6N/aIv2f1gMH8lOVtWQHoqC4yK6oSDVVocumAsfCqjkXnqiYMhmMwS/mEHLp7Vehlt3ql6lEig=="],
 
-    "@ethersproject/experimental/ethers": ["ethers@5.8.0", "", { "dependencies": { "@ethersproject/abi": "5.8.0", "@ethersproject/abstract-provider": "5.8.0", "@ethersproject/abstract-signer": "5.8.0", "@ethersproject/address": "5.8.0", "@ethersproject/base64": "5.8.0", "@ethersproject/basex": "5.8.0", "@ethersproject/bignumber": "5.8.0", "@ethersproject/bytes": "5.8.0", "@ethersproject/constants": "5.8.0", "@ethersproject/contracts": "5.8.0", "@ethersproject/hash": "5.8.0", "@ethersproject/hdnode": "5.8.0", "@ethersproject/json-wallets": "5.8.0", "@ethersproject/keccak256": "5.8.0", "@ethersproject/logger": "5.8.0", "@ethersproject/networks": "5.8.0", "@ethersproject/pbkdf2": "5.8.0", "@ethersproject/properties": "5.8.0", "@ethersproject/providers": "5.8.0", "@ethersproject/random": "5.8.0", "@ethersproject/rlp": "5.8.0", "@ethersproject/sha2": "5.8.0", "@ethersproject/signing-key": "5.8.0", "@ethersproject/solidity": "5.8.0", "@ethersproject/strings": "5.8.0", "@ethersproject/transactions": "5.8.0", "@ethersproject/units": "5.8.0", "@ethersproject/wallet": "5.8.0", "@ethersproject/web": "5.8.0", "@ethersproject/wordlists": "5.8.0" } }, "sha512-DUq+7fHrCg1aPDFCHx6UIPb3nmt2XMpM7Y/g2gLhsl3lIBqeAfOJIl1qEvRf2uq3BiKxmh6Fh5pfp2ieyek7Kg=="],
-
     "@ethersproject/json-wallets/aes-js": ["aes-js@3.0.0", "", {}, "sha512-H7wUZRn8WpTq9jocdxQ2c8x2sKo9ZVmzfRE13GiNJXfp7NcKYEdvl3vspKjXox6RIG2VtaRe4JFvxG4rqp2Zuw=="],
 
     "@ethersproject/keccak256/js-sha3": ["js-sha3@0.8.0", "", {}, "sha512-gF1cRrHhIzNfToc802P800N8PpXS+evLLXfsVpowqmAFR9uwbi89WvXg2QspOmXL8QL86J4T1EpFu+yUkwJY3Q=="],
@@ -4094,8 +4063,6 @@
 
     "@snapshot-labs/checkpoint/@graphql-tools/schema": ["@graphql-tools/schema@8.5.1", "", { "dependencies": { "@graphql-tools/merge": "8.3.1", "@graphql-tools/utils": "8.9.0", "tslib": "^2.4.0", "value-or-promise": "1.0.11" }, "peerDependencies": { "graphql": "^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0" } }, "sha512-0Esilsh0P/qYcB5DKQpiKeQs/jevzIadNTaT0jeWklPMwNbT7yMX4EqZany7mbeRRlSRwMzNzL5olyFdffHBZg=="],
 
-    "@snapshot-labs/checkpoint/connection-string": ["connection-string@4.4.0", "", {}, "sha512-D4xsUjSoE8m/B5yMOvCIHY+2ME6FIZhCq0NzBBT57Q8BuL7ArFhBK04osOfReoW4KFr5ztzFwWRdmnv9rCvu2w=="],
-
     "@snapshot-labs/checkpoint/starknet": ["starknet@5.19.6", "", { "dependencies": { "@noble/curves": "~1.2.0", "@scure/starknet": "~0.3.0", "abi-wan-kanabi": "^1.0.3", "isomorphic-fetch": "^3.0.0", "lossless-json": "^2.0.8", "pako": "^2.0.4", "url-join": "^4.0.1" } }, "sha512-MyO48QKu+d8CBH/7ruI/RPrDwoFRNV/uxql2nBeA4ccqBXs698FkeGkMhZv++VIwf1MRajHcTM91KuyZQMyMLw=="],
 
     "@snapshot-labs/highlight/@snapshot-labs/pineapple": ["@snapshot-labs/pineapple@0.2.0", "", { "dependencies": { "cross-fetch": "^3.1.5" } }, "sha512-qphtrQQVYyDVbviak2Zluuh73SWaQFnG9+K/oLsSKSLg0TQmrY8aYxxjDipOTtX0Oyz7+OWYaADZ37gVyp/JxA=="],
@@ -4135,10 +4102,6 @@
     "@types/keyv/@types/node": ["@types/node@22.19.11", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w=="],
 
     "@types/mute-stream/@types/node": ["@types/node@22.19.11", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w=="],
-
-    "@types/mysql/@types/node": ["@types/node@22.19.11", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w=="],
-
-    "@types/pg/@types/node": ["@types/node@22.19.11", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w=="],
 
     "@types/qrcode/@types/node": ["@types/node@22.19.11", "", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-BH7YwL6rA93ReqeQS1c4bsPpcfOmJasG+Fkr6Y59q83f9M1WcBRHR2vM+P9eOisYRcN3ujQoiZY8uk5W+1WL8w=="],
 
@@ -4407,8 +4370,6 @@
     "make-fetch-happen/negotiator": ["negotiator@0.6.3", "", {}, "sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg=="],
 
     "mana/@types/express": ["@types/express@4.17.25", "", { "dependencies": { "@types/body-parser": "*", "@types/express-serve-static-core": "^4.17.33", "@types/qs": "*", "@types/serve-static": "^1" } }, "sha512-dVd04UKsfpINUnK0yBoYHDF3xu7xVH4BuDotC/xGuycx4CgbP48X/KF/586bcObxT0HENHXEU8Nqtu6NR+eKhw=="],
-
-    "mana/connection-string": ["connection-string@4.4.0", "", {}, "sha512-D4xsUjSoE8m/B5yMOvCIHY+2ME6FIZhCq0NzBBT57Q8BuL7ArFhBK04osOfReoW4KFr5ztzFwWRdmnv9rCvu2w=="],
 
     "markdown-it/argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
 
@@ -4805,10 +4766,6 @@
     "@types/keyv/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
     "@types/mute-stream/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
-
-    "@types/mysql/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
-
-    "@types/pg/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
     "@types/qrcode/@types/node/undici-types": ["undici-types@6.21.0", "", {}, "sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ=="],
 
