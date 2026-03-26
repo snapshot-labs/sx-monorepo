@@ -134,19 +134,19 @@ for (const file of files) {
   const argsLines: string[] = [];
   for (const [name, p] of Object.entries(allProps)) {
     const val = defaultForProp(p);
-    if (val !== 'undefined') argsLines.push(`    ${name}: ${val},`);
+    if (val !== 'undefined') argsLines.push(`    ${name}: ${val}`);
   }
   const hasLabelProp = 'label' in allProps || 'content' in allProps;
-  if (hasSlot && !hasLabelProp) argsLines.push(`    default: 'Example',`);
+  if (hasSlot && !hasLabelProp) argsLines.push(`    default: 'Example'`);
   const argsBlock =
-    argsLines.length > 0 ? `  args: {\n${argsLines.join('\n')}\n  },\n` : '';
+    argsLines.length > 0 ? `  args: {\n${argsLines.join(',\n')}\n  }` : '';
 
   // ArgTypes: all props with union types get select controls
   const argTypeEntries: string[] = [];
   for (const [prop, { type }] of Object.entries(allProps)) {
     // string | number → text control
     if (type === 'string | number') {
-      argTypeEntries.push(`    ${prop}: { control: 'text' },`);
+      argTypeEntries.push(`    ${prop}: { control: 'text' }`);
       continue;
     }
 
@@ -155,14 +155,26 @@ for (const file of files) {
       const formatted = values.map(v =>
         v === 'true' || v === 'false' ? v : `'${v}'`
       );
-      argTypeEntries.push(
-        `    ${prop}: { control: 'select', options: [${formatted.join(', ')}] },`
-      );
+      const optionsInline = `[${formatted.join(', ')}]`;
+      // Wrap long options arrays across multiple lines (prettier line limit)
+      if (
+        `    ${prop}: { control: 'select', options: ${optionsInline} }`.length >
+        80
+      ) {
+        const optionsMultiline = `[\n${formatted.map(v => `        ${v}`).join(',\n')}\n      ]`;
+        argTypeEntries.push(
+          `    ${prop}: {\n      control: 'select',\n      options: ${optionsMultiline}\n    }`
+        );
+      } else {
+        argTypeEntries.push(
+          `    ${prop}: { control: 'select', options: ${optionsInline} }`
+        );
+      }
     }
   }
   const argTypesBlock =
     argTypeEntries.length > 0
-      ? `  argTypes: {\n${argTypeEntries.join('\n')}\n  },\n`
+      ? `  argTypes: {\n${argTypeEntries.join(',\n')}\n  }`
       : '';
 
   const renderBlock =
@@ -170,20 +182,31 @@ for (const file of files) {
       ? `  render: (args: Record<string, unknown>) => ({
     components: { Component },
     setup: () => ({ args }),
-    template: \`<Component v-bind="args">{{ args.default }}</Component>\`,
-  }),\n`
+    template: \`<Component v-bind="args">{{ args.default }}</Component>\`
+  })`
       : '';
+
+  // Build meta fields and story fields, join with commas
+  const metaFields = [
+    `  title: 'Ui/${name}'`,
+    `  component: Component`,
+    `  tags: ['autodocs']`
+  ];
+  if (argTypesBlock) metaFields.push(argTypesBlock);
+
+  const storyFields: string[] = [];
+  if (argsBlock) storyFields.push(argsBlock);
+  if (renderBlock) storyFields.push(renderBlock);
 
   const content = `import Component from '../../components/Ui/${file}';
 
 export default {
-  title: 'Ui/${name}',
-  component: Component,
-  tags: ['autodocs'],
-${argTypesBlock}}
+${metaFields.join(',\n')}
+};
 
 export const Default = {
-${argsBlock}${renderBlock}}
+${storyFields.join(',\n')}
+};
 `;
 
   writeFileSync(join(outDir, `${name}.stories.ts`), content);
