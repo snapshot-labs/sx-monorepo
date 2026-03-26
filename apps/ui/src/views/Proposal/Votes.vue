@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
+import { UiColumnHeader } from '@snapshot-labs/tune';
 import { _n, _t, _vp, shortenAddress } from '@/helpers/utils';
 import { getNetwork, offchainNetworks } from '@/networks';
 import { useProposalScoresTicksQuery } from '@/queries/proposals';
