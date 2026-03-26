@@ -8,27 +8,6 @@ import {
   PROPOSALS_SUMMARY_LIMIT
 } from '@/queries/proposals';
 
-const { setTitle } = useTitle();
-const { isWhiteLabel } = useWhiteLabel();
-const { organization } = useOrganization();
-
-const space = computed(() => organization.value?.spaces[0]);
-
-const spaces = computed(() => organization.value?.spaces ?? []);
-
-const totalProposalCount = computed(() =>
-  spaces.value.reduce((sum, s) => sum + s.proposal_count, 0)
-);
-const totalVoteCount = computed(() =>
-  spaces.value.reduce((sum, s) => sum + s.vote_count, 0)
-);
-const hasOffchainSpace = computed(() =>
-  spaces.value.some(s => offchainNetworks.includes(s.network))
-);
-const totalFollowerCount = computed(() =>
-  spaces.value.reduce((sum, s) => sum + (s.follower_count ?? 0), 0)
-);
-
 const SOCIAL_KEYS = [
   'external_url',
   'twitter',
@@ -39,6 +18,41 @@ const SOCIAL_KEYS = [
   'farcaster',
   'clanker'
 ] as const;
+
+const { setTitle } = useTitle();
+const { isWhiteLabel } = useWhiteLabel();
+const { organization } = useOrganization();
+const proposalQueries = useQueries({
+  queries: computed(() =>
+    (organization.value?.spaces ?? []).map(s => ({
+      queryKey: PROPOSALS_KEYS.spaceSummary(s.network, s.id),
+      queryFn: () =>
+        getProposals([s.id], s.network, {
+          limit: PROPOSALS_SUMMARY_LIMIT,
+          skip: 0
+        })
+    }))
+  )
+});
+
+const space = computed(() => organization.value?.spaces[0]);
+const spaces = computed(() => organization.value?.spaces ?? []);
+
+const totalProposalCount = computed(() =>
+  spaces.value.reduce((sum, s) => sum + s.proposal_count, 0)
+);
+
+const totalVoteCount = computed(() =>
+  spaces.value.reduce((sum, s) => sum + s.vote_count, 0)
+);
+
+const hasOffchainSpace = computed(() =>
+  spaces.value.some(s => offchainNetworks.includes(s.network))
+);
+
+const totalFollowerCount = computed(() =>
+  spaces.value.reduce((sum, s) => sum + (s.follower_count ?? 0), 0)
+);
 
 const socials = computed(() => {
   const merged: Record<string, string> = {};
@@ -54,23 +68,12 @@ const socials = computed(() => {
   return getSocialNetworksLink(merged);
 });
 
-const proposalQueries = useQueries({
-  queries: computed(() =>
-    (organization.value?.spaces ?? []).map(s => ({
-      queryKey: PROPOSALS_KEYS.spaceSummary(s.network, s.id),
-      queryFn: () =>
-        getProposals([s.id], s.network, {
-          limit: PROPOSALS_SUMMARY_LIMIT,
-          skip: 0
-        })
-    }))
-  )
-});
-
 const isPending = computed(() => proposalQueries.value.some(q => q.isPending));
+
 const isError = computed(
   () => !isPending.value && proposalQueries.value.every(q => q.isError)
 );
+
 const proposals = computed(() =>
   proposalQueries.value
     .flatMap(q => q.data ?? [])
