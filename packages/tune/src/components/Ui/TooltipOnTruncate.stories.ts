@@ -40,3 +40,20 @@ export const NotTruncated: Story = {
     `
   })
 };
+
+export const WithContentProp: Story = {
+  args: {
+    content: 'Custom tooltip content'
+  },
+  render: args => ({
+    components: { TooltipOnTruncate },
+    setup: () => ({ args }),
+    template: `
+      <div style="width: 150px; display: flex">
+        <TooltipOnTruncate v-bind="args">
+          This is a very long text that will be truncated
+        </TooltipOnTruncate>
+      </div>
+    `
+  })
+};
