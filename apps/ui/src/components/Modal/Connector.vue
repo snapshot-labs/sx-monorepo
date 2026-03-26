@@ -34,8 +34,8 @@ async function handleGuestLogin() {
   router.push({
     query: { ...router.currentRoute.value.query, as: value }
   });
-  isGuestFormVisible.value = false;
-  emit('close');
+
+  handleClose();
 }
 
 function handleConnectorClick(connector: Connector) {
