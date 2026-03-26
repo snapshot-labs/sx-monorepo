@@ -29,19 +29,3 @@ export const Default: Story = {
     </ContainerInfiniteScroll>`
   })
 };
-
-export const LoadingMore: Story = {
-  args: {
-    enabled: true,
-    loadingMore: true
-  },
-  render: args => ({
-    components: { ContainerInfiniteScroll },
-    setup() {
-      return { args };
-    },
-    template: `<ContainerInfiniteScroll v-bind="args">
-      <div v-for="i in 5" :key="i" style="padding: 8px; border-bottom: 1px solid #e5e7eb;">Item {{ i }}</div>
-    </ContainerInfiniteScroll>`
-  })
-};

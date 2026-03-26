@@ -19,12 +19,13 @@
   "sideEffects": ["**/*.css"],
   "scripts": {
     "generate": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/generate-components.ts",
+    "generate:stories": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/generate-stories.ts",
     "build": "yarn generate && vite build && vue-tsc",
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "yarn lint --fix",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "storybook": "yarn generate:stories && storybook dev -p 6006",
+    "build-storybook": "yarn generate:stories && storybook build"
   },
   "peerDependencies": {
     "vue": ">=3.5.0"

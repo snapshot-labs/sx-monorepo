@@ -1,5 +1,6 @@
 dist
 storybook-static
+src/stories/auto
 .eslintrc-auto-import.json
 auto-imports.d.ts
 components.d.ts
