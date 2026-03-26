@@ -14,8 +14,19 @@ const { organization } = useOrganization();
 
 const space = computed(() => organization.value?.spaces[0]);
 
-const isOffchainSpace = computed(
-  () => space.value && offchainNetworks.includes(space.value.network)
+const spaces = computed(() => organization.value?.spaces ?? []);
+
+const totalProposalCount = computed(() =>
+  spaces.value.reduce((sum, s) => sum + s.proposal_count, 0)
+);
+const totalVoteCount = computed(() =>
+  spaces.value.reduce((sum, s) => sum + s.vote_count, 0)
+);
+const hasOffchainSpace = computed(() =>
+  spaces.value.some(s => offchainNetworks.includes(s.network))
+);
+const totalFollowerCount = computed(() =>
+  spaces.value.reduce((sum, s) => sum + (s.follower_count ?? 0), 0)
 );
 
 const socials = computed(() =>
@@ -95,19 +106,19 @@ watchEffect(() => {
         </div>
         <div class="mb-3 flex flex-wrap gap-x-1 items-center">
           <div>
-            <b class="text-skin-link">{{ _n(space.proposal_count) }}</b>
+            <b class="text-skin-link">{{ _n(totalProposalCount) }}</b>
             proposals
           </div>
           <div>·</div>
           <div>
-            <b class="text-skin-link">{{ _n(space.vote_count, 'compact') }}</b>
+            <b class="text-skin-link">{{ _n(totalVoteCount, 'compact') }}</b>
             votes
           </div>
-          <template v-if="isOffchainSpace">
+          <template v-if="hasOffchainSpace">
             <div>·</div>
             <div>
               <b class="text-skin-link">
-                {{ _n(space.follower_count, 'compact') }}
+                {{ _n(totalFollowerCount, 'compact') }}
               </b>
               followers
             </div>
