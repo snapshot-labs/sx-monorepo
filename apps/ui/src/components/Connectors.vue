@@ -43,22 +43,20 @@ const availableConnectors = computed(() => {
     class="flex w-full items-center gap-2.5 px-3.5 h-[52px] text-skin-link border-x border-b first-of-type:rounded-t-lg first-of-type:border-t last-of-type:rounded-b-lg hover:bg-skin-border/40"
     @click="emit('click', connector)"
   >
-    <template v-if="connector.type !== 'guest'">
-      <img
-        :src="connector.info.icon"
-        height="28"
-        width="28"
-        class="rounded-sm"
-        :alt="connector.info.name"
-      />
-      <span class="flex-grow text-left" v-text="connector.info.name" />
-      <UiPill
-        v-if="connector.id === recentConnector"
-        variant="primary"
-        label="Recent"
-      />
-      <UiPill v-else-if="connector.type === 'injected'" label="Detected" />
-    </template>
-    <span v-else class="text-left">Log in as guest</span>
+    <img
+      v-if="connector.info.icon"
+      :src="connector.info.icon"
+      height="28"
+      width="28"
+      class="rounded-sm"
+      :alt="connector.info.name"
+    />
+    <span class="flex-grow text-left" v-text="connector.info.name" />
+    <UiPill
+      v-if="connector.id === recentConnector"
+      variant="primary"
+      label="Recent"
+    />
+    <UiPill v-else-if="connector.type === 'injected'" label="Detected" />
   </button>
 </template>

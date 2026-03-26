@@ -53,7 +53,7 @@ export type Connector = {
   type: ConnectorType;
   info: {
     name: string;
-    icon: string;
+    icon?: string;
   };
   options: any;
   provider: any;
