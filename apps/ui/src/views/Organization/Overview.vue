@@ -29,9 +29,30 @@ const totalFollowerCount = computed(() =>
   spaces.value.reduce((sum, s) => sum + (s.follower_count ?? 0), 0)
 );
 
-const socials = computed(() =>
-  space.value ? getSocialNetworksLink(space.value) : []
-);
+const SOCIAL_KEYS = [
+  'external_url',
+  'twitter',
+  'discord',
+  'coingecko',
+  'github',
+  'lens',
+  'farcaster',
+  'clanker'
+] as const;
+
+const socials = computed(() => {
+  const merged: Record<string, string> = {};
+  for (const key of SOCIAL_KEYS) {
+    for (const s of spaces.value) {
+      const value = (s as Record<string, any>)[key];
+      if (value) {
+        merged[key] = value;
+        break;
+      }
+    }
+  }
+  return getSocialNetworksLink(merged);
+});
 
 const proposalQueries = useQueries({
   queries: computed(() =>
