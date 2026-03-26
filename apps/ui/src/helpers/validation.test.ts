@@ -179,6 +179,8 @@ describe('ens-or-address', () => {
 
   it('should reject an invalid value', async () => {
     const result = await validator.validateAsync({ to: 'not-valid' });
-    expect(result).toHaveProperty('to');
+    expect(result).toEqual({
+      to: 'Must be a valid ENS domain or address.'
+    });
   });
 });
