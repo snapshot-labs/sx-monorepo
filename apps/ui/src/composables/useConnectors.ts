@@ -81,9 +81,9 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
   },
   guest: {
     info: {
-      name: 'Log in as guest'
-    },
-    autoConnectOnly: true
+      name: 'Log in as guest',
+      ignoreRecent: true
+    }
   }
 } as const;
 

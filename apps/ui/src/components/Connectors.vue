@@ -16,7 +16,7 @@ const recentConnector = lsGet(RECENT_CONNECTOR);
 const { connectors } = useConnectors();
 
 const availableConnectors = computed(() => {
-  const items = connectors.value
+  return connectors.value
     .filter(connector => {
       return (
         !(
@@ -25,13 +25,12 @@ const availableConnectors = computed(() => {
         ) && !connector.autoConnectOnly
       );
     })
-    .sort((a, b) =>
-      a.id === recentConnector ? -1 : b.id === recentConnector ? 1 : 0
-    );
+    .sort((a, b) => {
+      if (a.id === recentConnector && !a.info.ignoreRecent) return -1;
+      if (b.id === recentConnector && !b.info.ignoreRecent) return 1;
 
-  items.push(connectors.value.find(c => c.type === 'guest')!);
-
-  return items;
+      return 0;
+    });
 });
 </script>
 
@@ -53,7 +52,7 @@ const availableConnectors = computed(() => {
     />
     <span class="flex-grow text-left" v-text="connector.info.name" />
     <UiPill
-      v-if="connector.id === recentConnector"
+      v-if="connector.id === recentConnector && !connector.info.ignoreRecent"
       variant="primary"
       label="Recent"
     />

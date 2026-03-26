@@ -54,6 +54,7 @@ export type Connector = {
   info: {
     name: string;
     icon?: string;
+    ignoreRecent?: boolean;
   };
   options: any;
   provider: any;
