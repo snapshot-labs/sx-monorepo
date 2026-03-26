@@ -1,23 +1,17 @@
 <script setup lang="ts">
 import { useQueries } from '@tanstack/vue-query';
-import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
+import {
+  _n,
+  autoLinkText,
+  getSocialNetworksLink,
+  SOCIAL_NETWORKS
+} from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import {
   getProposals,
   PROPOSALS_KEYS,
   PROPOSALS_SUMMARY_LIMIT
 } from '@/queries/proposals';
-
-const SOCIAL_KEYS = [
-  'external_url',
-  'twitter',
-  'discord',
-  'coingecko',
-  'github',
-  'lens',
-  'farcaster',
-  'clanker'
-] as const;
 
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
@@ -56,7 +50,7 @@ const totalFollowerCount = computed(() =>
 
 const socials = computed(() => {
   const merged: Record<string, string> = {};
-  for (const key of SOCIAL_KEYS) {
+  for (const { key } of SOCIAL_NETWORKS) {
     for (const s of spaces.value) {
       const value = (s as Record<string, any>)[key];
       if (value) {
