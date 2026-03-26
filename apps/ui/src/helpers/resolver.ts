@@ -13,8 +13,6 @@ type ResolvedName = {
 };
 
 function createResolver() {
-  const cache = new Map<string, ResolvedName>();
-
   async function resolveEns(
     networkId: NetworkID,
     name: string
@@ -36,21 +34,11 @@ function createResolver() {
     name: string,
     networkId: NetworkID = 'eth'
   ): Promise<ResolvedName | null> {
-    const cacheKey = `${networkId}:${name}`;
-
-    if (cache.has(cacheKey)) {
-      return cache.get(cacheKey)!;
-    }
-
     const shouldUseEns = name.endsWith('.eth') && !!ENS_CHAIN_IDS[networkId];
 
     const resolved = shouldUseEns
       ? await resolveEns(networkId, name)
       : { networkId, address: name };
-
-    if (resolved) {
-      cache.set(cacheKey, resolved);
-    }
 
     return resolved;
   }
