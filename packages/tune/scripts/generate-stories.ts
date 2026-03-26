@@ -41,6 +41,34 @@ interface PropInfo {
   defaultValue?: string;
 }
 
+interface ModelInfo {
+  name: string;
+  type: string;
+}
+
+/** Extract defineModel calls from a Vue SFC. */
+function parseModels(src: string): ModelInfo[] {
+  const models: ModelInfo[] = [];
+  // Matches: defineModel<Type>('name', ...) or defineModel<Type>(...)
+  const regex = /defineModel<(\w+)>\(\s*(?:'(\w+)')?\s*/g;
+  let match;
+  while ((match = regex.exec(src)) !== null) {
+    models.push({
+      name: match[2] ?? 'modelValue',
+      type: match[1]
+    });
+  }
+  return models;
+}
+
+/** Return a default value for a model type. */
+function defaultForModel(type: string): string {
+  if (type === 'boolean') return 'false';
+  if (type === 'string') return "''";
+  if (type === 'number') return '0';
+  return 'undefined';
+}
+
 /** Extract all props and their TypeScript type from a Vue SFC. */
 function parseProps(src: string): Record<string, PropInfo> {
   const propsMatch = src.match(/defineProps<\{([\s\S]*?)\}>/);
@@ -130,10 +158,15 @@ for (const file of files) {
 
   const src = readFileSync(join(componentsDir, file), 'utf8');
   const allProps = parseProps(src);
+  const models = parseModels(src);
   const hasSlot = /<slot/.test(src);
 
-  // Args: all props with known defaults (ensures Storybook controls are reactive)
+  // Args: models + all props with known defaults (ensures Storybook controls are reactive)
   const argsLines: string[] = [];
+  for (const model of models) {
+    const val = defaultForModel(model.type);
+    if (val !== 'undefined') argsLines.push(`    ${model.name}: ${val}`);
+  }
   for (const [name, p] of Object.entries(allProps)) {
     const val = defaultForProp(p);
     if (val !== 'undefined') argsLines.push(`    ${name}: ${val}`);
