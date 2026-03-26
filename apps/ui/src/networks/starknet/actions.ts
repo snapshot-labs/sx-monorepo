@@ -558,6 +558,8 @@ export function createActions(
         });
       }
 
+      await verifyStarknetNetwork(web3, chainId);
+
       return client.execute({
         signer: web3.provider.account,
         space: proposal.space.id,
