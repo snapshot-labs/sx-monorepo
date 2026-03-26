@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router';
-import Organization from '@/views/Organization.vue';
 import OrganizationOverview from '@/views/Organization/Overview.vue';
+import Organization from '@/views/Organization.vue';
 import ProposalExecution from '@/views/Proposal/Execution.vue';
 import ProposalOverview from '@/views/Proposal/Overview.vue';
 import ProposalVotes from '@/views/Proposal/Votes.vue';
