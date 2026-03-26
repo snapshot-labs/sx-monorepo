@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { useQueries } from '@tanstack/vue-query';
 import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import {
-  PROPOSALS_SUMMARY_LIMIT,
-  useProposalsSummaryQuery
+  getProposals,
+  PROPOSALS_KEYS,
+  PROPOSALS_SUMMARY_LIMIT
 } from '@/queries/proposals';
 
 const { setTitle } = useTitle();
@@ -20,10 +22,28 @@ const socials = computed(() =>
   space.value ? getSocialNetworksLink(space.value) : []
 );
 
-const { data, isPending, isError } = useProposalsSummaryQuery(
-  toRef(() => space.value!.network),
-  toRef(() => space.value!.id),
-  toRef(() => !!space.value)
+const proposalQueries = useQueries({
+  queries: computed(() =>
+    (organization.value?.spaces ?? []).map(s => ({
+      queryKey: PROPOSALS_KEYS.spaceSummary(s.network, s.id),
+      queryFn: () =>
+        getProposals([s.id], s.network, {
+          limit: PROPOSALS_SUMMARY_LIMIT,
+          skip: 0
+        })
+    }))
+  )
+});
+
+const isPending = computed(() => proposalQueries.value.some(q => q.isPending));
+const isError = computed(
+  () => !isPending.value && proposalQueries.value.every(q => q.isError)
+);
+const proposals = computed(() =>
+  proposalQueries.value
+    .flatMap(q => q.data ?? [])
+    .sort((a, b) => b.created - a.created)
+    .slice(0, PROPOSALS_SUMMARY_LIMIT)
 );
 
 watchEffect(() => {
@@ -115,13 +135,8 @@ watchEffect(() => {
       title="Proposals"
       :is-error="isError"
       :loading="isPending"
-      :limit="PROPOSALS_SUMMARY_LIMIT - 1"
-      :proposals="data ?? []"
-      :route="{
-        name: 'space-proposals',
-        params: { space: `${space.network}:${space.id}` },
-        linkTitle: 'See more'
-      }"
+      :limit="PROPOSALS_SUMMARY_LIMIT"
+      :proposals="proposals"
     />
   </div>
 </template>

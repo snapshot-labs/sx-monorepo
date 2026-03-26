@@ -100,7 +100,7 @@ function setProposalsDetails(
   }
 }
 
-async function getProposals(
+export async function getProposals(
   spaceIds: string[],
   networkId: NetworkID,
   { limit, skip }: { limit: number; skip: number },
