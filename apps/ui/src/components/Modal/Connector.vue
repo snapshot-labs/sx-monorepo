@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { formatAddress } from '@/helpers/connectors/guest';
-import { getAddresses } from '@/helpers/stamp';
+import { getValidator } from '@/helpers/validation';
 import { Connector, ConnectorType } from '@/networks/types';
+
+const GUEST_ACCOUNT_DEFINITION = {
+  type: 'string',
+  format: 'ens-or-address',
+  title: 'Guest account',
+  examples: ['Address or ENS']
+};
 
 defineProps<{
   open: boolean;
@@ -16,33 +22,14 @@ const { web3 } = useWeb3();
 const router = useRouter();
 
 const isGuestFormVisible = ref(false);
+const isFormValid = ref(false);
 const guestAddress = ref('');
-const isGuestLoading = ref(false);
-const guestError = ref('');
+const formErrors = ref({} as Record<string, any>);
 
 async function handleGuestLogin() {
   if (!guestAddress.value) return;
 
   const value = guestAddress.value;
-
-  if (value.includes('.')) {
-    isGuestLoading.value = true;
-    guestError.value = '';
-    const resolved = await getAddresses([value], 1);
-    isGuestLoading.value = false;
-
-    if (!resolved[value]) {
-      guestError.value = 'Could not resolve ENS name';
-      return;
-    }
-  } else {
-    try {
-      formatAddress(value);
-    } catch {
-      guestError.value = 'Enter a valid address or ENS name';
-      return;
-    }
-  }
 
   router.push({
     query: { ...router.currentRoute.value.query, as: value }
@@ -66,7 +53,26 @@ function handleClose() {
 
 watch(isGuestFormVisible, () => {
   guestAddress.value = '';
-  guestError.value = '';
+});
+
+watchEffect(async () => {
+  isFormValid.value = false;
+
+  const validator = getValidator({
+    $async: true,
+    type: 'object',
+    additionalProperties: false,
+    required: ['account'],
+    properties: {
+      account: GUEST_ACCOUNT_DEFINITION
+    }
+  });
+
+  formErrors.value = await validator.validateAsync({
+    account: guestAddress.value
+  });
+
+  isFormValid.value = Object.keys(formErrors.value).length === 0;
 });
 </script>
 
@@ -95,11 +101,8 @@ watch(isGuestFormVisible, () => {
       <UiInputString
         v-model="guestAddress"
         autofocus
-        :error="guestError"
-        :definition="{
-          title: 'Guest account',
-          examples: ['Address or ENS']
-        }"
+        :error="formErrors.account"
+        :definition="GUEST_ACCOUNT_DEFINITION"
         @keydown.enter="handleGuestLogin"
       />
     </div>
@@ -113,8 +116,7 @@ watch(isGuestFormVisible, () => {
       <UiButton
         class="w-full"
         primary
-        :loading="isGuestLoading"
-        :disabled="!guestAddress"
+        :disabled="!isFormValid"
         @click="handleGuestLogin"
       >
         Log in
