@@ -31,7 +31,7 @@ if (existsSync(typesPath)) {
   for (const m of typesContent.matchAll(
     /export\s+type\s+(\w+)\s*=\s*([^;]+)/g
   )) {
-    typeAliases[m[1]] = m[2].trim();
+    typeAliases[m[1]!] = m[2]!.trim();
   }
 }
 
@@ -55,7 +55,7 @@ function parseModels(src: string): ModelInfo[] {
   while ((match = regex.exec(src)) !== null) {
     models.push({
       name: match[2] ?? 'modelValue',
-      type: match[1]
+      type: match[1]!
     });
   }
   return models;
@@ -90,8 +90,8 @@ function parseProps(src: string): Record<string, PropInfo> {
   );
   if (defaultsMatch?.[1]) {
     for (const m of defaultsMatch[1].matchAll(/(\w+)\s*:\s*([^,}\n]+)/g)) {
-      if (props[m[1]]) {
-        props[m[1]].defaultValue = m[2].trim();
+      if (props[m[1]!]) {
+        props[m[1]!]!.defaultValue = m[2]!.trim();
       }
     }
   }
@@ -107,7 +107,7 @@ function parseUnionValues(tsType: string): string[] | null {
   for (const part of parts) {
     const strMatch = part.match(/^'([^']+)'$/);
     if (strMatch) {
-      values.push(strMatch[1]);
+      values.push(strMatch[1]!);
     } else if (part === 'boolean') {
       values.push('true', 'false');
     } else if (part === 'true' || part === 'false') {

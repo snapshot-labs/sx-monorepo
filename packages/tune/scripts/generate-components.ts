@@ -1,8 +1,9 @@
-import { globSync, writeFileSync } from 'node:fs';
-import { basename } from 'node:path';
+import { readdirSync, writeFileSync } from 'node:fs';
 
-const files = globSync('src/components/Ui/*.vue');
-const names = files.map(f => basename(f, '.vue')).sort();
+const names = readdirSync('src/components/Ui')
+  .filter((f: string) => f.endsWith('.vue'))
+  .map((f: string) => f.replace('.vue', ''))
+  .sort();
 
 const indexExports = names
   .map(
