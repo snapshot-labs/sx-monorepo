@@ -82,6 +82,14 @@ watch(isGuestFormVisible, () => {
               : 'Log in'
         "
       />
+      <button
+        v-if="isGuestFormVisible"
+        type="button"
+        class="absolute left-0 -top-1 p-4"
+        @click="isGuestFormVisible = false"
+      >
+        <IH-arrow-narrow-left class="mr-2" />
+      </button>
     </template>
     <div v-if="isGuestFormVisible" class="s-box p-4">
       <UiInputString
