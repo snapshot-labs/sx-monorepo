@@ -6,7 +6,7 @@
   "scripts": {
     "codegen": "checkpoint generate -o ./src/api/overrides.json -s ./src/api/schema.gql",
     "lint": "eslint src/ test/",
-    "lint:fix": "yarn lint --fix",
+    "lint:fix": "bun run lint --fix",
     "test": "vitest",
     "build": "tsc",
     "dev": "nodemon src/index.ts",

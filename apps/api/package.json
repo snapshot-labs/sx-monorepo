@@ -6,7 +6,7 @@
   "scripts": {
     "codegen": "checkpoint generate",
     "lint": "eslint src/ --rule 'no-console: error'",
-    "lint:fix": "yarn lint --fix",
+    "lint:fix": "bun run lint --fix",
     "build": "tsc",
     "dev": "nodemon src/index.ts",
     "dev:debug": "nodemon --exec \"node --inspect --require ts-node/register src/index.ts\"",
@@ -32,6 +32,8 @@
     "viem": "^2.38.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "nodemon": "^3.0.1",
     "ts-node": "^10.9.1",
     "typescript": "^5.8.3",
