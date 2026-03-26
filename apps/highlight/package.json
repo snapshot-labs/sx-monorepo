@@ -9,6 +9,7 @@
     "lint:fix": "bun run lint --fix",
     "test": "vitest",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "dev": "nodemon src/index.ts",
     "start": "node dist/src/index.js"
   },
