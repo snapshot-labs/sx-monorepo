@@ -57,6 +57,7 @@ watch(isGuestFormVisible, () => {
 
 watchEffect(async () => {
   isFormValid.value = false;
+  formErrors.value = {};
 
   const validator = getValidator({
     $async: true,
