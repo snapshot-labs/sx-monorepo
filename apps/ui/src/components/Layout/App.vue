@@ -82,7 +82,7 @@ const hasPlaceHolderSidebar = computed(
     ![
       'space-townhall-create',
       'space-townhall-topic',
-      'alias-authorize'
+      'settings-alias-authorize'
     ].includes(String(route.matched[1]?.name)) &&
     !['editor', 'proposal'].includes(baseSubRouteName.value)
 );

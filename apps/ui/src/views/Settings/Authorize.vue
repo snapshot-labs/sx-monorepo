@@ -6,6 +6,7 @@ const { web3, web3Account } = useWeb3();
 const aliasAddress = computed(() => (route.params.address as string) || '');
 const {
   isAuthorizing,
+  isJustAuthorized,
   error,
   isAlreadyAuthorized,
   isCheckingAlias,
@@ -19,18 +20,31 @@ const isLoading = computed(
   () => web3.value.authLoading || isCheckingAlias.value
 );
 const hasHistory = computed(() => !!window.history.state?.back);
+
+const redirectUri = computed(() => route.query.redirect_uri as string | undefined);
+const countdown = ref(0);
+
+watch(isJustAuthorized, val => {
+  if (val && redirectUri.value) {
+    countdown.value = 3;
+    const interval = setInterval(() => {
+      countdown.value--;
+      if (countdown.value <= 0) {
+        clearInterval(interval);
+        window.location.href = redirectUri.value!;
+      }
+    }, 1000);
+  }
+});
 </script>
 
 <template>
-  <div v-if="!web3Account && !web3.authLoading" />
-  <div v-else-if="!isValidAddress">
-    <UiStateWarning class="px-4 py-3"> Invalid alias address </UiStateWarning>
-  </div>
-  <div v-else-if="isSelfAlias">
-    <UiStateWarning class="px-4 py-3">
-      You cannot authorize your own address as an alias
-    </UiStateWarning>
-  </div>
+  <UiStateWarning v-if="!isValidAddress" class="px-4 py-3">
+    Invalid alias address
+  </UiStateWarning>
+  <UiStateWarning v-else-if="isSelfAlias" class="px-4 py-3">
+    You cannot authorize your own address as an alias
+  </UiStateWarning>
   <div
     v-else
     class="flex flex-col min-h-[calc(100vh-72px)] !pb-0 md:!pb-8 md:items-center md:justify-center md:pt-4"
@@ -66,29 +80,40 @@ const hasHistory = computed(() => !!window.history.state?.back);
         </div>
 
         <template v-else>
-          <div class="px-4 pt-4 pb-4 text-[20px] text-skin-link text-center">
-            <template v-if="isAlreadyAuthorized">
-              The alias
-              <UiAddress
-                :address="checksumAddress"
-                copy-button="always"
-                class="inline-flex text-[20px] font-bold"
-              />
-              is already authorized to perform actions on your behalf.
-            </template>
-            <template v-else>
-              Do you want to authorize
-              <UiAddress
-                :address="checksumAddress"
-                copy-button="always"
-                class="inline-flex text-[20px] font-bold"
-              />
-              to perform the following actions on your behalf?
-            </template>
-          </div>
+          <div class="p-4 space-y-4">
+            <div class="text-[20px] text-skin-link text-center">
+              <template v-if="isJustAuthorized">
+                <UiAddress
+                  :address="checksumAddress"
+                  copy-button="always"
+                  class="inline-flex font-bold"
+                />
+                has been successfully authorized to perform actions on your behalf.
+                <div v-if="redirectUri" class="mt-2 text-skin-text text-[16px]">
+                  Redirecting in {{ countdown }}s...
+                </div>
+              </template>
+              <template v-else-if="isAlreadyAuthorized">
+                The alias
+                <UiAddress
+                  :address="checksumAddress"
+                  copy-button="always"
+                  class="inline-flex font-bold"
+                />
+                is already authorized to perform actions on your behalf.
+              </template>
+              <template v-else>
+                Do you want to authorize
+                <UiAddress
+                  :address="checksumAddress"
+                  copy-button="always"
+                  class="inline-flex font-bold"
+                />
+                to perform the following actions on your behalf?
+              </template>
+            </div>
 
-          <div v-if="!isAlreadyAuthorized" class="px-4 pb-4 space-y-4">
-            <div class="border rounded-lg overflow-hidden">
+            <div v-if="!isAlreadyAuthorized" class="border rounded-lg overflow-hidden">
               <div class="flex items-center gap-2 px-4 py-2.5 text-skin-link">
                 <IH-check class="text-skin-success shrink-0 size-[16px]" />
                 <span>Cast a vote</span>
@@ -101,13 +126,11 @@ const hasHistory = computed(() => !!window.history.state?.back);
               </div>
             </div>
 
-            <div class="text-skin-text text-center">
+            <div v-if="!isAlreadyAuthorized" class="text-skin-text text-center">
               You can revoke this alias at any time.
             </div>
-          </div>
 
-          <div v-if="error" class="px-4 pb-4">
-            <UiAlert type="error">{{ error }}</UiAlert>
+            <UiAlert v-if="error" type="error">{{ error }}</UiAlert>
           </div>
         </template>
       </div>

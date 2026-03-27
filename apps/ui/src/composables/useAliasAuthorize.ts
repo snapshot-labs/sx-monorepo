@@ -1,28 +1,31 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query';
+import { MaybeRefOrGetter } from 'vue';
 import { isUserAbortError } from '@/helpers/utils';
 import { getNetwork, metadataNetwork } from '@/networks';
 
 const ALIAS_AUTHORIZE_KEYS = {
   check: (
     account: Ref<string> | ComputedRef<string>,
-    aliasAddress: Ref<string>
+    aliasAddress: MaybeRefOrGetter<string>
   ) => ['aliasAuthorize', 'check', account, aliasAddress] as const
 };
 
-export function useAliasAuthorize(aliasAddress: Ref<string>) {
+export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   const { web3Account, auth } = useWeb3();
   const queryClient = useQueryClient();
 
-  const isValidAddress = computed(() => isAddress(aliasAddress.value));
+  const isValidAddress = computed(() => isAddress(toValue(aliasAddress)));
   const checksumAddress = computed(() =>
-    isValidAddress.value ? getAddress(aliasAddress.value) : ''
+    isValidAddress.value ? getAddress(toValue(aliasAddress)) : ''
   );
   const isSelfAlias = computed(
     () =>
-      web3Account.value &&
-      isValidAddress.value &&
-      checksumAddress.value === getAddress(web3Account.value)
+      Boolean(
+        web3Account.value &&
+          isValidAddress.value &&
+          checksumAddress.value === getAddress(web3Account.value)
+      )
   );
 
   const { data: isAlreadyAuthorized, isPending: isCheckingAlias } = useQuery({
@@ -44,6 +47,8 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
       !!toValue(web3Account) && !!toValue(aliasAddress) && isValidAddress.value
   });
 
+  const isJustAuthorized = ref(false);
+
   const {
     mutate: authorize,
     isPending: isAuthorizing,
@@ -60,6 +65,7 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
       await network.actions.send(envelope);
     },
     onSuccess: () => {
+      isJustAuthorized.value = true;
       queryClient.setQueryData(
         ALIAS_AUTHORIZE_KEYS.check(web3Account, aliasAddress),
         true
@@ -75,6 +81,7 @@ export function useAliasAuthorize(aliasAddress: Ref<string>) {
 
   return {
     isAuthorizing,
+    isJustAuthorized,
     error,
     isAlreadyAuthorized: computed(() => isAlreadyAuthorized.value ?? false),
     isCheckingAlias,

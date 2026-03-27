@@ -1,5 +1,4 @@
 import App from '@/views/App.vue';
-import Authorize from '@/views/Authorize.vue';
 import CreateSpaceSnapshot from '@/views/CreateSpaceSnapshot.vue';
 import CreateSpaceSnapshotX from '@/views/CreateSpaceSnapshotX.vue';
 import Ecosystem from '@/views/Ecosystem.vue';
@@ -10,6 +9,7 @@ import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
+import Authorize from '@/views/Settings/Authorize.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import EmailNotifications from '@/views/Settings/EmailNotifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
@@ -71,7 +71,7 @@ export default [
       },
       {
         path: 'alias/authorize/:address',
-        name: 'alias-authorize',
+        name: 'settings-alias-authorize',
         component: Authorize
       }
     ]

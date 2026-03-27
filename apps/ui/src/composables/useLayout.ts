@@ -20,7 +20,7 @@ export function useLayout() {
     if (routeName) {
       return (
         AUCTION_ROUTES.includes(routeName) ||
-        currentRouteName === 'alias-authorize'
+        currentRouteName === 'settings-alias-authorize'
       );
     }
 
