@@ -9,6 +9,7 @@ type Governance = {
   github?: string;
   twitter?: string;
   farcaster?: string;
+  discord?: string;
   address: `0x${string}`;
   authenticators: OpenZeppelinAuthenticator[];
   quorumType?: 'for_only';
@@ -81,6 +82,24 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 70398215
+    },
+    GMX: {
+      name: 'GMX',
+      about:
+        'On-chain perpetual & spot dex: BTC, ETH, SOL and many other top crypto assets available with up to 100x leverage directly from your own wallet',
+      avatar:
+        'ipfs://bafkreidi2f72ct7y5y32hgjwblnfpul4fsac7o5av665o2ydm6th27unc4',
+      externalUrl: 'https://gmx.io',
+      github: 'gmx-io',
+      twitter: 'GMX_IO',
+      discord: 'H5PeQru3Aa',
+      address: '0x03e8f708e9C85EDCEaa6AD7Cd06824CeB82A7E68',
+      authenticators: [
+        'OpenZeppelinAuthenticator',
+        'OpenZeppelinAuthenticatorSignatureV5'
+      ],
+      quorumType: 'for_only',
+      startBlock: 204249812
     }
   },
   sep: {

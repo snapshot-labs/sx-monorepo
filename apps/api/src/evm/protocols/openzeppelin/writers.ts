@@ -266,6 +266,7 @@ export function createWriters(
     spaceMetadata.github = governanceInfo.github || '';
     spaceMetadata.twitter = governanceInfo.twitter || '';
     spaceMetadata.farcaster = governanceInfo.farcaster || '';
+    spaceMetadata.discord = governanceInfo.discord || '';
     spaceMetadata.voting_power_symbol = symbol;
     spaceMetadata.treasuries = createTreasuries(timelock);
     spaceMetadata.executors_strategies = [executionStrategy.id];
