@@ -177,7 +177,10 @@ describe('useCurrentSpace', () => {
   describe('organization', () => {
     const orgSpaceA = { network: 'sn', id: '0xORG_A' };
     const orgSpaceB = { network: 's', id: 'starknet.eth' };
-    const mockOrg = { spaces: [orgSpaceA, orgSpaceB] };
+    const mockOrg = {
+      spaceIds: [orgSpaceA, orgSpaceB],
+      spaces: [orgSpaceA, orgSpaceB]
+    };
 
     it('should return primary space when no route param', () => {
       mockOrganization.value = mockOrg;

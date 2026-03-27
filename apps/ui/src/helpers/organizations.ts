@@ -13,7 +13,7 @@ import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHWifi from '~icons/heroicons-outline/wifi';
 
-type SpaceId = { network: NetworkID; id: string };
+type SpaceId = { network: NetworkID; id: string; alias?: string };
 
 export type OrganizationConfig = {
   id: string;
@@ -73,11 +73,13 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     spaceIds: [
       {
         network: 'eth',
-        id: '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3'
+        id: '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3',
+        alias: 'onchain'
       },
       {
         network: 's',
-        id: 'ens.eth'
+        id: 'ens.eth',
+        alias: 'offchain'
       }
     ],
     navItems: {
@@ -86,6 +88,10 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         icon: IHWifi,
         link: {
           name: 'space-proposals',
+          params: { space: 's:ens.eth' }
+        },
+        activeRoute: {
+          prefix: 'space-proposals',
           params: { space: 's:ens.eth' }
         },
         position: 2
@@ -129,6 +135,31 @@ export function getOrganizationConfigById(
   id: string
 ): OrganizationConfig | null {
   return ORGANIZATIONS[id] ?? null;
+}
+
+/**
+ * Returns the alias for a space if one exists, otherwise its `network:id`.
+ */
+export function toSpaceRouteParam(
+  org: OrganizationConfig,
+  spaceId: string
+): string {
+  const match = org.spaceIds.find(s => `${s.network}:${s.id}` === spaceId);
+  return match?.alias ?? spaceId;
+}
+
+/**
+ * Resolves a space param (alias or `network:id`) to its canonical `network:id`.
+ * Returns null if the space doesn't belong to the organization.
+ */
+export function toSpaceId(
+  org: OrganizationConfig,
+  param: string
+): string | null {
+  const match = org.spaceIds.find(
+    s => s.alias === param || `${s.network}:${s.id}` === param
+  );
+  return match ? `${match.network}:${match.id}` : null;
 }
 
 /**
@@ -200,6 +231,12 @@ export function resolveOrgLocation(
   if (whiteLabelOrg) {
     const stripped = stripInvalidSpaceParam(to.name, to.params ?? {}, router);
     if (stripped) return { ...to, ...stripped };
+
+    const params = { ...to.params } as RouteParams;
+    if (params.space) {
+      params.space = toSpaceRouteParam(whiteLabelOrg, params.space as string);
+    }
+    if (params.space !== to.params?.space) return { ...to, params };
     return to;
   }
 
@@ -212,10 +249,8 @@ export function resolveOrgLocation(
   const toParams: RouteParams = { ...to.params } as RouteParams;
 
   if (toParams.space) {
-    const isInOrg = orgConfig.spaceIds.some(
-      s => `${s.network}:${s.id}` === toParams.space
-    );
-    if (!isInOrg) return to;
+    if (!toSpaceId(orgConfig, toParams.space as string)) return to;
+    toParams.space = toSpaceRouteParam(orgConfig, toParams.space as string);
   }
 
   toParams.org = orgId;
