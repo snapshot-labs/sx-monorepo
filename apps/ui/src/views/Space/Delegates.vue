@@ -6,7 +6,6 @@ const props = defineProps<{ space: Space }>();
 const { setTitle } = useTitle();
 
 const activeDelegationId = ref(0);
-
 const delegateData = computed(
   () => props.space.delegations[activeDelegationId.value]
 );

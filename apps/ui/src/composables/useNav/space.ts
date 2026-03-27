@@ -116,7 +116,7 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
     items.leaderboard = { name: 'Leaderboard', icon: IHUserGroup };
   }
 
-  if (context.space && context.space.delegations.length > 0) {
+  if (context.space?.delegations && context.space.delegations.length > 0) {
     items.delegates = { name: 'Delegates', icon: IHLightningBolt };
   }
 
