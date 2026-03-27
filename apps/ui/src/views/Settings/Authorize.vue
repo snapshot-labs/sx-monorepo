@@ -21,7 +21,9 @@ const isLoading = computed(
 );
 const hasHistory = computed(() => !!window.history.state?.back);
 
-const redirectUri = computed(() => route.query.redirect_uri as string | undefined);
+const redirectUri = computed(
+  () => route.query.redirect_uri as string | undefined
+);
 const countdown = ref(0);
 
 watch(isJustAuthorized, val => {
@@ -88,7 +90,8 @@ watch(isJustAuthorized, val => {
                   copy-button="always"
                   class="inline-flex font-bold"
                 />
-                has been successfully authorized to perform actions on your behalf.
+                has been successfully authorized to perform actions on your
+                behalf.
                 <div v-if="redirectUri" class="mt-2 text-skin-text text-[16px]">
                   Redirecting in {{ countdown }}s...
                 </div>
@@ -113,7 +116,10 @@ watch(isJustAuthorized, val => {
               </template>
             </div>
 
-            <div v-if="!isAlreadyAuthorized" class="border rounded-lg overflow-hidden">
+            <div
+              v-if="!isAlreadyAuthorized"
+              class="border rounded-lg overflow-hidden"
+            >
               <div class="flex items-center gap-2 px-4 py-2.5 text-skin-link">
                 <IH-check class="text-skin-success shrink-0 size-[16px]" />
                 <span>Cast a vote</span>

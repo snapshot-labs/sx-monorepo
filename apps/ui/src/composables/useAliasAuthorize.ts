@@ -19,13 +19,12 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   const checksumAddress = computed(() =>
     isValidAddress.value ? getAddress(toValue(aliasAddress)) : ''
   );
-  const isSelfAlias = computed(
-    () =>
-      Boolean(
-        web3Account.value &&
-          isValidAddress.value &&
-          checksumAddress.value === getAddress(web3Account.value)
-      )
+  const isSelfAlias = computed(() =>
+    Boolean(
+      web3Account.value &&
+        isValidAddress.value &&
+        checksumAddress.value === getAddress(web3Account.value)
+    )
   );
 
   const { data: isAlreadyAuthorized, isPending: isCheckingAlias } = useQuery({
