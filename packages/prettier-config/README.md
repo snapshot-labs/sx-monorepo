@@ -3,7 +3,7 @@
 ### Installation
 
 ```
-yarn add @snapshot-labs/prettier-config
+bun add @snapshot-labs/prettier-config
 ```
 
 ### Usage

@@ -204,6 +204,15 @@ describe('utils', () => {
       expect(_rt(timestamp + 60 * 60 * 24 * 31 * 2)).toBe('2mo left');
       expect(_rt(timestamp + 60 * 60 * 24 * 365)).toBe('1y left');
     });
+
+    it('should format time without suffix', () => {
+      expect(_rt(timestamp - 1, true)).toBe('now');
+      expect(_rt(timestamp - 60, true)).toBe('1m');
+      expect(_rt(timestamp - 60 * 60, true)).toBe('1h');
+      expect(_rt(timestamp + 1, true)).toBe('now');
+      expect(_rt(timestamp + 60, true)).toBe('1m');
+      expect(_rt(timestamp + 60 * 60, true)).toBe('1h');
+    });
   });
 
   describe('formatAddress', () => {

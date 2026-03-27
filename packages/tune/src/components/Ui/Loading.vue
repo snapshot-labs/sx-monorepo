@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useId } from 'vue';
+
 withDefaults(
   defineProps<{
     inverse?: boolean;
@@ -9,6 +11,8 @@ withDefaults(
     size: 20
   }
 );
+
+const gradientId = useId();
 </script>
 
 <template>
@@ -26,7 +30,7 @@ withDefaults(
     >
       <defs>
         <linearGradient
-          id="gradient"
+          :id="gradientId"
           x1="28.154%"
           y1="63.74%"
           x2="74.629%"
@@ -38,7 +42,7 @@ withDefaults(
       </defs>
       <g transform="translate(2)" fill="none" fill-rule="evenodd">
         <circle
-          stroke="url(#gradient)"
+          :stroke="`url(#${gradientId})`"
           stroke-width="4"
           cx="10"
           cy="12"

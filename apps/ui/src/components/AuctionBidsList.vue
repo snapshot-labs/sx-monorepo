@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UiColumnHeader from '@/components/Ui/ColumnHeader.vue';
+import { UiColumnHeader } from '@snapshot-labs/tune';
 import { AuctionNetworkId } from '@/helpers/auction';
 import {
   AuctionDetailFragment,

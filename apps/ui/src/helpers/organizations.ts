@@ -7,8 +7,11 @@ import {
 import { NavItem } from '@/composables/useNav/types';
 import { stripInvalidSpaceParam } from '@/helpers/router';
 import { NetworkID, Space } from '@/types';
+import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
+import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
+import IHWifi from '~icons/heroicons-outline/wifi';
 
 type SpaceId = { network: NetworkID; id: string };
 
@@ -46,6 +49,10 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
           name: 'space-proposals',
           params: { space: 's:starknet.eth' }
         },
+        activeRoute: {
+          prefix: 'space-proposal',
+          params: { space: 's:starknet.eth' }
+        },
         position: 3
       },
       docs: {
@@ -59,6 +66,41 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     id: 'snapshot',
     name: 'Snapshot',
     spaceIds: [{ network: 's', id: 'shot.eth' }]
+  },
+  ens: {
+    id: 'ens',
+    name: 'ENS',
+    spaceIds: [
+      {
+        network: 'eth',
+        id: '0x323A76393544d5ecca80cd6ef2A560C6a395b7E3'
+      },
+      {
+        network: 's',
+        id: 'ens.eth'
+      }
+    ],
+    navItems: {
+      signals: {
+        name: 'Signals',
+        icon: IHWifi,
+        link: {
+          name: 'space-proposals',
+          params: { space: 's:ens.eth' }
+        },
+        position: 2
+      },
+      delegates: {
+        name: 'Delegates',
+        icon: IHLightningBolt,
+        link: { name: 'space-delegates', params: { space: 's:ens.eth' } }
+      },
+      discussions: {
+        name: 'Discussions',
+        icon: IHAnnotation,
+        link: { name: 'space-discussions', params: { space: 's:ens.eth' } }
+      }
+    }
   }
 };
 
@@ -68,6 +110,8 @@ const ORGANIZATION_MAPPING = import.meta.env.VITE_ORGANIZATION_MAPPING;
 
 const ORGANIZATION_DOMAINS: Record<string, string> = {
   'starknet.stage.box': 'starknet',
+  'governance.starknet.io': 'starknet',
+  'ens.stage.box': 'ens',
   ...(ORGANIZATION_MAPPING
     ? {
         [ORGANIZATION_MAPPING.split(';')[0]]: ORGANIZATION_MAPPING.split(';')[1]

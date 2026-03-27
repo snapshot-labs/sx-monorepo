@@ -1,6 +1,5 @@
 import { Preview, Decorator, setup } from '@storybook/vue3-vite';
 import { createRouter, createMemoryHistory } from 'vue-router';
-import VueTippy from 'vue-tippy';
 import { withThemeByClassName } from '@storybook/addon-themes';
 
 import '../src/style.scss';
@@ -20,10 +19,6 @@ setup(app => {
       ]
     })
   );
-
-  app.use(VueTippy, {
-    defaultProps: { appendTo: 'parent' }
-  });
 });
 
 export const decorators: Decorator[] = [

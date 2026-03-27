@@ -7,30 +7,13 @@ const props = defineProps<{
   definition: any;
 }>();
 
+// Set default synchronously before useDirty so the initial value
+// is already present, avoiding a brief dirty/error flash on first render.
+if (model.value === undefined) {
+  model.value = props.definition.default ?? false;
+}
+
 const { isDirty } = useDirty(model, props.definition);
-
-const inputValue = computed({
-  get() {
-    if (
-      model.value === undefined &&
-      !isDirty.value &&
-      props.definition.default !== undefined
-    ) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: boolean) {
-    model.value = newValue;
-  }
-});
-
-onMounted(() => {
-  if (model.value === undefined && !isDirty.value) {
-    model.value = props.definition.default ?? false;
-  }
-});
 </script>
 
 <template>
@@ -40,6 +23,6 @@ onMounted(() => {
     :error="error"
     :dirty="isDirty"
   >
-    <input :id="id" v-model="inputValue" type="checkbox" class="mt-[7px]" />
+    <input :id="id" v-model="model" type="checkbox" class="mt-[7px]" />
   </UiWrapperInput>
 </template>

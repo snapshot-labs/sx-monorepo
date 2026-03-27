@@ -114,9 +114,7 @@ const previewUrl = computed(
     `${window.location.origin}/#/?skin-preview=${encodeSkin(skinSettings.value)}`
 );
 
-watch(formErrors, value => emit('errors', value));
-
-onMounted(() => emit('errors', formErrors.value));
+watch(formErrors, value => emit('errors', value), { immediate: true });
 </script>
 
 <template>

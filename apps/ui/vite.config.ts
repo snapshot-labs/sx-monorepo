@@ -1,6 +1,7 @@
+import { createRequire } from 'module';
 import path from 'path';
-import inject from '@rollup/plugin-inject';
 import vue from '@vitejs/plugin-vue';
+import { TuneResolver } from '@snapshot-labs/tune/resolver';
 import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
 import { FileSystemIconLoader } from 'unplugin-icons/loaders';
@@ -9,10 +10,9 @@ import Icons from 'unplugin-icons/vite';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
-const ELECTRON = process.env.ELECTRON || false;
+const require = createRequire(import.meta.url);
 
-const target = ['esnext'];
+const ELECTRON = process.env.ELECTRON || false;
 
 export default defineConfig({
   base: ELECTRON ? './' : undefined,
@@ -31,6 +31,7 @@ export default defineConfig({
     Components({
       directoryAsNamespace: true,
       resolvers: [
+        TuneResolver(),
         IconsResolver({
           customCollections: ['c'],
           alias: {
@@ -59,33 +60,30 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    exclude: ['@snapshot-labs/sx'],
-    esbuildOptions: {
-      target
-    }
+    exclude: ['@snapshot-labs/sx']
   },
   build: {
-    target,
+    target: 'esnext',
     commonjsOptions: {
       include: [/node_modules/],
       transformMixedEsModules: true
     },
-    rollupOptions: {
-      plugins: [
-        inject({
+    rolldownOptions: {
+      transform: {
+        inject: {
           Buffer: ['buffer', 'Buffer']
-        })
-      ]
+        }
+      }
     }
   },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
       // polyfills
-      stream: path.resolve('../../node_modules/stream-browserify'),
-      events: path.resolve('../../node_modules/events'),
-      util: path.resolve('../../node_modules/util'),
-      buffer: path.resolve('../../node_modules/buffer')
+      stream: require.resolve('stream-browserify'),
+      events: require.resolve('events'),
+      util: require.resolve('util'),
+      buffer: require.resolve('buffer')
     },
     dedupe: ['@popperjs/core']
   }

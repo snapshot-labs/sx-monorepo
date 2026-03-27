@@ -44,8 +44,6 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
     id: 'openagora.eth'
   },
   'governance.starknet.io': {
-    network: 'sn',
-    id: '0x009fedaf0d7a480d21a27683b0965c0f8ded35b3f1cac39827a25a06a8a682a4',
     skinSettings: {
       bg_color: '#f9f8f9',
       link_color: '#000000',
@@ -69,6 +67,19 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
       primary_color: '#000000',
       theme: 'light',
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
+    }
+  },
+  'ens.stage.box': {
+    skinSettings: {
+      logo: 'ipfs://bafkreifnnjex25bf6zfjmx3zugk46i7wqtb5un4ikm7dgfki3chcs2bccy',
+      bg_color: '#F6F6F6',
+      link_color: '#011A25',
+      text_color: '#4A5C63',
+      content_color: '#586069',
+      border_color: '#E4E4E4',
+      heading_color: '#011A25',
+      primary_color: '#0080BC',
+      theme: 'light'
     }
   },
   ...(WHITELABEL_MAPPING
