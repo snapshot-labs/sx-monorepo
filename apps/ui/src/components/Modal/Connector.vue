@@ -27,7 +27,7 @@ const guestAddress = ref('');
 const formErrors = ref({} as Record<string, any>);
 
 async function handleGuestLogin() {
-  if (!guestAddress.value) return;
+  if (!isFormValid.value) return;
 
   const value = guestAddress.value;
 
