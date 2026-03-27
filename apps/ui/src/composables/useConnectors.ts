@@ -2,6 +2,7 @@ import connectorsClass from '@/helpers/connectors/index';
 import { APP_NAME } from '@/helpers/constants';
 import Eip6963 from '@/helpers/eip6963';
 import { Connector, ConnectorType } from '@/networks/types';
+import IHUser from '~icons/heroicons-outline/user';
 
 type ConnectorDetail = Partial<
   Pick<Connector, 'id' | 'info' | 'options' | 'provider'> & {
@@ -82,6 +83,7 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
   guest: {
     info: {
       name: 'Log in as guest',
+      icon: IHUser,
       ignoreRecent: true
     }
   }

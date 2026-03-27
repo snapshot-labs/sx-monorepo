@@ -43,12 +43,17 @@ const availableConnectors = computed(() => {
     @click="emit('click', connector)"
   >
     <img
-      v-if="connector.info.icon"
+      v-if="connector.info.icon && typeof connector.info.icon === 'string'"
       :src="connector.info.icon"
       height="28"
       width="28"
       class="rounded-sm"
       :alt="connector.info.name"
+    />
+    <component
+      :is="connector.info.icon"
+      v-else-if="connector.info.icon"
+      class="size-[28px] shrink-0 p-1"
     />
     <span class="flex-grow text-left" v-text="connector.info.name" />
     <UiPill

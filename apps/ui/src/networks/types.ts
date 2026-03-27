@@ -53,7 +53,7 @@ export type Connector = {
   type: ConnectorType;
   info: {
     name: string;
-    icon?: string;
+    icon?: string | FunctionalComponent;
     ignoreRecent?: boolean;
   };
   options: any;
