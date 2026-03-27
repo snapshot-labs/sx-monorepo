@@ -114,7 +114,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
       key: 'governor',
       label: 'Governor',
       apiNetwork: 'eth',
-      networks: ['eth'],
+      networks: ['eth', 'arb1', 'bnb'],
       protocols: ['governor-bravo', '@openzeppelin/governor'],
       limit: 18
     }
