@@ -46,7 +46,7 @@ watch(isJustAuthorized, val => {
     You cannot authorize your own address as an alias
   </UiStateWarning>
   <div
-    v-else
+    v-else-if="web3Account"
     class="flex flex-col min-h-[calc(100vh-72px)] !pb-0 md:!pb-8 md:items-center md:justify-center md:pt-4"
   >
     <div
