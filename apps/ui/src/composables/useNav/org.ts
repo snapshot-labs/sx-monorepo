@@ -1,4 +1,3 @@
-import { getSpaceDelegations } from '@/helpers/delegation';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
@@ -16,7 +15,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
 
   const spaceId = `${primarySpace.network}:${primarySpace.id}`;
 
-  const hasDelegates = getSpaceDelegations(primarySpace).length > 0;
+  const hasDelegates = primarySpace.delegations.length > 0;
   const hasDiscussions = SPACES_DISCUSSIONS[spaceId];
   const hasTreasury = primarySpace.treasuries?.length;
 

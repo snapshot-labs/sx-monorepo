@@ -543,6 +543,19 @@ function formatDelegations(
     delegations.push(SPLIT_DELEGATION_DATA);
   }
 
+  const erc20VotesStrategy = space.strategies.find(
+    strategy => strategy.name === 'erc20-votes' && strategy.params?.address
+  );
+  if (erc20VotesStrategy && !delegations.length) {
+    delegations.push({
+      name: DELEGATION_TYPES_NAMES['governor-subgraph'],
+      apiType: 'governor-subgraph',
+      apiUrl: null,
+      contractAddress: erc20VotesStrategy.params.address,
+      chainId: erc20VotesStrategy.network || space.network
+    });
+  }
+
   return delegations;
 }
 

@@ -1,4 +1,3 @@
-import { getSpaceDelegations } from '@/helpers/delegation';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { compareAddresses } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
@@ -117,7 +116,7 @@ function getSpaceMainConfig(context: NavContext): NavConfig {
     items.leaderboard = { name: 'Leaderboard', icon: IHUserGroup };
   }
 
-  if (context.space && getSpaceDelegations(context.space).length > 0) {
+  if (context.space && context.space.delegations.length > 0) {
     items.delegates = { name: 'Delegates', icon: IHLightningBolt };
   }
 

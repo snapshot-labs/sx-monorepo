@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getSpaceDelegations, isValidDelegation } from '@/helpers/delegation';
+import { isValidDelegation } from '@/helpers/delegation';
 import {
   _vp,
   autoLinkText,
@@ -76,10 +76,11 @@ const navigation = computed(() => [
 ]);
 
 const hasOnlyInvalidDelegations = computed(() => {
-  const delegations = getSpaceDelegations(props.space);
-  if (!delegations.length) return true;
+  if (!props.space.delegations.length) return true;
 
-  return delegations.every(delegation => !isValidDelegation(delegation));
+  return props.space.delegations.every(
+    delegation => !isValidDelegation(delegation)
+  );
 });
 
 async function loadUserActivity() {

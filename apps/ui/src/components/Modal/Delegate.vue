@@ -4,7 +4,6 @@ import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
 import { DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
 import {
-  getSpaceDelegations,
   isValidDelegation,
   ValidSpaceMetadataDelegation
 } from '@/helpers/delegation';
@@ -70,7 +69,7 @@ const connectorModalConnectors = ref([] as ConnectorType[]);
 const selectedDelegationIndex = ref(0);
 
 const delegations = computed(() => {
-  return getSpaceDelegations(props.space).filter(isValidDelegation);
+  return props.space.delegations.filter(isValidDelegation);
 });
 
 const delegationsSupportedByCurrentWallet = computed(() => {
