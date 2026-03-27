@@ -18,5 +18,9 @@ watch(
 
 <template>
   <UiLoading v-if="isLoading" class="block p-4" />
-  <router-view v-else-if="space" :space="space" />
+  <router-view
+    v-else-if="space"
+    :key="`${space.network}:${space.id}`"
+    :space="space"
+  />
 </template>

@@ -199,15 +199,44 @@ describe('useCurrentSpace', () => {
       expect(resolveNameMock).not.toHaveBeenCalled();
     });
 
-    it('should fall back to primary space when param does not match any org space', async () => {
-      mockOrganization.value = mockOrg;
-      mockRoute.params = { space: 'eth:unknown.eth' };
-      const { space, isPending } = withSetup(() => useCurrentSpace());
+    it('should resolve alias to the correct org space', async () => {
+      mockOrganization.value = {
+        spaceIds: [orgSpaceA, { ...orgSpaceB, alias: 'offchain' }],
+        spaces: [orgSpaceA, orgSpaceB]
+      };
+      mockRoute.params = { space: 'offchain' };
+      const { space } = withSetup(() => useCurrentSpace());
       await nextTick();
 
-      expect(space.value).toEqual(orgSpaceA);
-      expect(isPending.value).toBe(false);
+      expect(space.value).toEqual(orgSpaceB);
       expect(resolveNameMock).not.toHaveBeenCalled();
+    });
+
+    it('should resolve alias to non-primary space', async () => {
+      const orgSpaceC = { network: 'eth', id: '0xORG_C' };
+      mockOrganization.value = {
+        spaceIds: [
+          { ...orgSpaceA, alias: 'onchain' },
+          { ...orgSpaceB, alias: 'offchain' },
+          orgSpaceC
+        ],
+        spaces: [orgSpaceA, orgSpaceB, orgSpaceC]
+      };
+      mockRoute.params = { space: 'offchain' };
+      const { space } = withSetup(() => useCurrentSpace());
+      await nextTick();
+
+      expect(space.value).toEqual(orgSpaceB);
+      expect(resolveNameMock).not.toHaveBeenCalled();
+    });
+
+    it('should not fall back to primary space when param does not match any org space', async () => {
+      mockOrganization.value = mockOrg;
+      mockRoute.params = { space: 'eth:unknown.eth' };
+      const { space } = withSetup(() => useCurrentSpace());
+      await nextTick();
+
+      expect(space.value).toBe(null);
     });
   });
 

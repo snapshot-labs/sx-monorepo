@@ -1,6 +1,6 @@
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
-import { Organization, toSpaceId } from '@/helpers/organizations';
+import { Organization, toOrgSpaceId } from '@/helpers/organizations';
 import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
 import orgProvider from './org';
@@ -15,6 +15,41 @@ const providers: NavProvider[] = [
   myProvider
 ];
 
+function isRouteMatch(
+  routeName: string,
+  namespace: string,
+  key: string,
+  activeRoute?: NavItem['activeRoute']
+): boolean {
+  const { prefix } = activeRoute ?? { prefix: `space-${key}` };
+  const fullPrefix = prefix.replace(/^space-/, `${namespace}-`);
+
+  return (
+    routeName === fullPrefix ||
+    routeName.startsWith(`${fullPrefix}-`) ||
+    (activeRoute ? routeName === `${namespace}-${key}` : false)
+  );
+}
+
+function isParamsMatch(
+  params: Record<string, string> | undefined,
+  route: RouteLocationNormalizedLoaded,
+  organization: Organization | null
+): boolean {
+  if (!params) return true;
+
+  return Object.entries(params).every(([k, v]) => {
+    const routeValue = route.params[k];
+    if (routeValue === v) return true;
+    if (k === 'space' && organization && typeof routeValue === 'string') {
+      const a = toOrgSpaceId(organization, routeValue);
+      const b = toOrgSpaceId(organization, v);
+      return a !== null && b !== null && a === b;
+    }
+    return false;
+  });
+}
+
 function getActiveItemKey(
   config: NavConfig,
   route: RouteLocationNormalizedLoaded,
@@ -24,29 +59,12 @@ function getActiveItemKey(
   const namespace = routeName.split('-')[0];
 
   for (const [key, item] of Object.entries(config.items)) {
-    const activeRoute = item.activeRoute;
-    const { prefix, params } = activeRoute ?? { prefix: `space-${key}` };
-    const fullPrefix = prefix.replace(/^space-/, `${namespace}-`);
-    const defaultPrefix = `${namespace}-${key}`;
-    const isMatchingRoute =
-      routeName === fullPrefix ||
-      routeName.startsWith(`${fullPrefix}-`) ||
-      (activeRoute ? routeName === defaultPrefix : false);
-    const isMatchingParams =
-      !params ||
-      Object.entries(params).every(([k, v]) => {
-        const routeValue = route.params[k];
-        if (routeValue === v) return true;
-        if (k === 'space' && organization && typeof routeValue === 'string') {
-          return (
-            toSpaceId(organization, routeValue) ===
-            toSpaceId(organization, v as string)
-          );
-        }
-        return false;
-      });
-
-    if (isMatchingRoute && isMatchingParams) return key;
+    if (
+      isRouteMatch(routeName, namespace, key, item.activeRoute) &&
+      isParamsMatch(item.activeRoute?.params, route, organization)
+    ) {
+      return key;
+    }
   }
 
   return null;

@@ -83,16 +83,26 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       }
     ],
     navItems: {
+      proposals: {
+        link: {
+          name: 'space-proposals',
+          params: { space: 'onchain' }
+        },
+        activeRoute: {
+          prefix: 'space-proposal',
+          params: { space: 'onchain' }
+        }
+      },
       signals: {
         name: 'Signals',
         icon: IHWifi,
         link: {
           name: 'space-proposals',
-          params: { space: 's:ens.eth' }
+          params: { space: 'offchain' }
         },
         activeRoute: {
           prefix: 'space-proposals',
-          params: { space: 's:ens.eth' }
+          params: { space: 'offchain' }
         },
         position: 2
       },
@@ -138,21 +148,10 @@ export function getOrganizationConfigById(
 }
 
 /**
- * Returns the alias for a space if one exists, otherwise its `network:id`.
- */
-export function toSpaceRouteParam(
-  org: OrganizationConfig,
-  spaceId: string
-): string {
-  const match = org.spaceIds.find(s => `${s.network}:${s.id}` === spaceId);
-  return match?.alias ?? spaceId;
-}
-
-/**
- * Resolves a space param (alias or `network:id`) to its canonical `network:id`.
+ * Resolves a space param (alias or canonical) to its canonical `network:id`.
  * Returns null if the space doesn't belong to the organization.
  */
-export function toSpaceId(
+export function toOrgSpaceId(
   org: OrganizationConfig,
   param: string
 ): string | null {
@@ -228,15 +227,21 @@ export function resolveOrgLocation(
 
   const whiteLabelOrg = getOrganizationConfigByDomain(window.location.hostname);
 
+  const currentSpace = router.currentRoute.value.params.space as
+    | string
+    | undefined;
+
   if (whiteLabelOrg) {
     const stripped = stripInvalidSpaceParam(to.name, to.params ?? {}, router);
     if (stripped) return { ...to, ...stripped };
 
-    const params = { ...to.params } as RouteParams;
-    if (params.space) {
-      params.space = toSpaceRouteParam(whiteLabelOrg, params.space as string);
+    if (currentSpace && to.params?.space) {
+      const currentId = toOrgSpaceId(whiteLabelOrg, currentSpace);
+      const targetId = toOrgSpaceId(whiteLabelOrg, to.params.space as string);
+      if (currentId && targetId && currentId === targetId) {
+        return { ...to, params: { ...to.params, space: currentSpace } };
+      }
     }
-    if (params.space !== to.params?.space) return { ...to, params };
     return to;
   }
 
@@ -249,8 +254,14 @@ export function resolveOrgLocation(
   const toParams: RouteParams = { ...to.params } as RouteParams;
 
   if (toParams.space) {
-    if (!toSpaceId(orgConfig, toParams.space as string)) return to;
-    toParams.space = toSpaceRouteParam(orgConfig, toParams.space as string);
+    if (!toOrgSpaceId(orgConfig, toParams.space as string)) return to;
+    if (currentSpace) {
+      const currentId = toOrgSpaceId(orgConfig, currentSpace);
+      const targetId = toOrgSpaceId(orgConfig, toParams.space as string);
+      if (currentId && targetId && currentId === targetId) {
+        toParams.space = currentSpace;
+      }
+    }
   }
 
   toParams.org = orgId;

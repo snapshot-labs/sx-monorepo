@@ -14,6 +14,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
   if (!primarySpace) return null;
 
   const spaceId = `${primarySpace.network}:${primarySpace.id}`;
+
   const hasDelegates = primarySpace.delegations?.length;
   const hasDiscussions = SPACES_DISCUSSIONS[spaceId];
   const hasTreasury = primarySpace.treasuries?.length;

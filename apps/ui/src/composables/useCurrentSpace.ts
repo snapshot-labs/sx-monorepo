@@ -1,6 +1,6 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { skipToken, useQuery } from '@tanstack/vue-query';
-import { toSpaceId as resolveOrgSpaceId } from '@/helpers/organizations';
+import { toOrgSpaceId } from '@/helpers/organizations';
 import { resolver } from '@/helpers/resolver';
 import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
@@ -23,12 +23,12 @@ export function useCurrentSpace() {
     const param = spaceParam.value;
     if (!param || !organization.value) return null;
 
-    const resolved = resolveOrgSpaceId(organization.value, param);
-    if (!resolved) return null;
+    const spaceId = toOrgSpaceId(organization.value, param);
+    if (!spaceId) return null;
 
     return (
       organization.value.spaces.find(
-        s => resolved === `${s.network}:${s.id}`
+        s => spaceId === `${s.network}:${s.id}`
       ) ?? null
     );
   });
@@ -38,7 +38,6 @@ export function useCurrentSpace() {
     if (whiteLabelSpace.value) return whiteLabelSpace.value;
     if (orgRouteSpace.value) return orgRouteSpace.value;
     if (!spaceParam.value) return primarySpace.value;
-    if (organization.value) return primarySpace.value;
     return null;
   });
 
