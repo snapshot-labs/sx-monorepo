@@ -4,9 +4,9 @@ import { Connector, ConnectorType } from '@/networks/types';
 
 const GUEST_ACCOUNT_DEFINITION = {
   type: 'string',
-  format: 'ens-or-address',
+  format: 'name-or-address',
   title: 'Guest account',
-  examples: ['Address or ENS']
+  examples: ['Address or name']
 };
 
 defineProps<{
