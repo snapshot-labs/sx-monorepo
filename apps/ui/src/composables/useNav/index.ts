@@ -1,5 +1,6 @@
 import { RouteLocationNormalizedLoaded } from 'vue-router';
 import { ENSChainId, getNameOwner } from '@/helpers/ens';
+import { Organization, toSpaceId } from '@/helpers/organizations';
 import { getNetwork, offchainNetworks } from '@/networks';
 import myProvider from './my';
 import orgProvider from './org';
@@ -16,19 +17,34 @@ const providers: NavProvider[] = [
 
 function getActiveItemKey(
   config: NavConfig,
-  route: RouteLocationNormalizedLoaded
+  route: RouteLocationNormalizedLoaded,
+  organization: Organization | null
 ): string | null {
   const routeName = String(route.name);
   const namespace = routeName.split('-')[0];
 
   for (const [key, item] of Object.entries(config.items)) {
-    const { prefix, params } = item.activeRoute ?? { prefix: `space-${key}` };
+    const activeRoute = item.activeRoute;
+    const { prefix, params } = activeRoute ?? { prefix: `space-${key}` };
     const fullPrefix = prefix.replace(/^space-/, `${namespace}-`);
+    const defaultPrefix = `${namespace}-${key}`;
     const isMatchingRoute =
-      routeName === fullPrefix || routeName.startsWith(`${fullPrefix}-`);
+      routeName === fullPrefix ||
+      routeName.startsWith(`${fullPrefix}-`) ||
+      (activeRoute ? routeName === defaultPrefix : false);
     const isMatchingParams =
       !params ||
-      Object.entries(params).every(([k, v]) => route.params[k] === v);
+      Object.entries(params).every(([k, v]) => {
+        const routeValue = route.params[k];
+        if (routeValue === v) return true;
+        if (k === 'space' && organization && typeof routeValue === 'string') {
+          return (
+            toSpaceId(organization, routeValue) ===
+            toSpaceId(organization, v as string)
+          );
+        }
+        return false;
+      });
 
     if (isMatchingRoute && isMatchingParams) return key;
   }
@@ -121,7 +137,7 @@ function setup() {
     const result = provider.getConfig(context.value);
     if (!result) return null;
 
-    const activeKey = getActiveItemKey(result, route);
+    const activeKey = getActiveItemKey(result, route, organization.value);
     return enrichItems(result, provider.routeName, activeKey);
   });
 
