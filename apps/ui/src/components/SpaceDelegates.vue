@@ -264,7 +264,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </div>
       <UiStateWarning v-else class="border-b py-3 mx-4">
         You are not delegating your voting power yet.
-        <template v-if="true">
+        <template v-if="isUpdatableDelegation">
           If you just delegated, it may take up to 5 minutes to show up.
         </template>
       </UiStateWarning>
