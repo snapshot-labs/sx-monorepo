@@ -15,6 +15,8 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
   const { web3Account, auth } = useWeb3();
   const queryClient = useQueryClient();
 
+  const isJustAuthorized = ref(false);
+
   const isValidAddress = computed(() => isAddress(toValue(aliasAddress)));
   const checksumAddress = computed(() =>
     isValidAddress.value ? getAddress(toValue(aliasAddress)) : ''
@@ -45,8 +47,6 @@ export function useAliasAuthorize(aliasAddress: MaybeRefOrGetter<string>) {
     enabled: () =>
       !!toValue(web3Account) && !!toValue(aliasAddress) && isValidAddress.value
   });
-
-  const isJustAuthorized = ref(false);
 
   const {
     mutate: authorize,
