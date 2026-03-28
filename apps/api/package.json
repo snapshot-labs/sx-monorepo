@@ -20,7 +20,7 @@
     "@logtail/pino": "^0.5.5",
     "@snapshot-labs/checkpoint": "^0.1.0-beta.67",
     "@snapshot-labs/sx": "^0.1.0",
-    "@types/node": "^18.11.6",
+    "@types/node": "^22.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.1",
     "express": "^4.21.2",

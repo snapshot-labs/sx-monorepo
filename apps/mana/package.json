@@ -7,6 +7,7 @@
     "lint": "eslint . --rule 'no-console: error'",
     "lint:fix": "bun run lint --fix",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "migrate": "bun run knex migrate:latest",
     "predev": "bun run migrate",
     "dev": "nodemon src/index.ts",
@@ -36,7 +37,7 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.5",
-    "@types/node": "^18.14.4",
+    "@types/node": "^22.6.0",
     "graphql-request": "^7.2.0",
     "nodemon": "^3.0.1",
     "typescript": "^5.8.3"
