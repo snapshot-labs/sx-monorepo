@@ -1,6 +1,4 @@
 <script setup lang="ts">
-defineOptions({ inheritAttrs: false });
-
 import { useQueries, useQueryClient } from '@tanstack/vue-query';
 import {
   _n,
