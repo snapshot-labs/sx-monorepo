@@ -83,7 +83,7 @@ async function withAuthorNames(proposals: Proposal[]) {
   });
 }
 
-function setProposalsDetails(
+export function setProposalsDetails(
   queryClient: QueryClient,
   networkId: NetworkID,
   proposals: Proposal[]

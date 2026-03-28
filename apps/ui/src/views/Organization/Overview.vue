@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineOptions({ inheritAttrs: false });
 
-import { useQueries } from '@tanstack/vue-query';
+import { useQueries, useQueryClient } from '@tanstack/vue-query';
 import {
   _n,
   autoLinkText,
@@ -12,21 +12,26 @@ import { offchainNetworks } from '@/networks';
 import {
   getProposals,
   PROPOSALS_KEYS,
-  PROPOSALS_SUMMARY_LIMIT
+  PROPOSALS_SUMMARY_LIMIT,
+  setProposalsDetails
 } from '@/queries/proposals';
 
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
+const queryClient = useQueryClient();
 const proposalQueries = useQueries({
   queries: computed(() =>
     (organization.value?.spaces ?? []).map(s => ({
       queryKey: PROPOSALS_KEYS.spaceSummary(s.network, s.id),
-      queryFn: () =>
-        getProposals([s.id], s.network, {
+      queryFn: async () => {
+        const proposals = await getProposals([s.id], s.network, {
           limit: PROPOSALS_SUMMARY_LIMIT,
           skip: 0
-        })
+        });
+        setProposalsDetails(queryClient, s.network, proposals);
+        return proposals;
+      }
     }))
   )
 });
