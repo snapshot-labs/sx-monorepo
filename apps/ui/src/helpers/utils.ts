@@ -14,7 +14,6 @@ import {
   constants as starknetConstants,
   validateAndParseAddress
 } from 'starknet';
-import { RouteParamsRaw } from 'vue-router';
 import { getSpaceController as getEnsSpaceController } from '@/helpers/ens';
 import { VotingPowerItem } from '@/queries/votingPower';
 import { ChainId, Choice, NetworkID, Proposal, SpaceMetadata } from '@/types';
@@ -807,15 +806,6 @@ export function getFormattedVotingPower(votingPower?: VotingPowerItem) {
 export function stripHtmlTags(text: string) {
   const doc = new DOMParser().parseFromString(text, 'text/html');
   return doc.body.textContent || '';
-}
-
-export function whiteLabelAwareParams(
-  isWhiteLabel: boolean,
-  params: RouteParamsRaw
-) {
-  if (isWhiteLabel) delete params.space;
-
-  return params;
 }
 
 export function hexToRgb(hex: string): { r: number; g: number; b: number } {

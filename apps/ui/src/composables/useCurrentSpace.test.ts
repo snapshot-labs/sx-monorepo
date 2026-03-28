@@ -7,7 +7,10 @@ import { useCurrentSpace } from './useCurrentSpace';
 const VALID_ADDRESS = '0x000000000000000000000000000000000000dEaD';
 const CHECKSUMMED = '0x000000000000000000000000000000000000dEaD';
 
-let mockRoute: { params: Record<string, string> };
+let mockRoute: {
+  params: Record<string, string>;
+  meta: Record<string, unknown>;
+};
 const mockWhiteLabelSpace = ref<any>(null);
 const mockOrganization = ref<any>(null);
 
@@ -62,7 +65,7 @@ function withSetup<T>(composable: () => T): T {
 }
 
 beforeEach(() => {
-  mockRoute = reactive({ params: {} });
+  mockRoute = reactive({ params: {}, meta: {} });
   mockWhiteLabelSpace.value = null;
   mockOrganization.value = null;
   resolveNameMock.mockReset();
@@ -177,7 +180,10 @@ describe('useCurrentSpace', () => {
   describe('organization', () => {
     const orgSpaceA = { network: 'sn', id: '0xORG_A' };
     const orgSpaceB = { network: 's', id: 'starknet.eth' };
-    const mockOrg = { spaces: [orgSpaceA, orgSpaceB] };
+    const mockOrg = {
+      spaceIds: [orgSpaceA, orgSpaceB],
+      spaces: [orgSpaceA, orgSpaceB]
+    };
 
     it('should return primary space when no route param', () => {
       mockOrganization.value = mockOrg;
@@ -196,15 +202,34 @@ describe('useCurrentSpace', () => {
       expect(resolveNameMock).not.toHaveBeenCalled();
     });
 
-    it('should fall back to primary space when param does not match any org space', async () => {
+    it('should resolve space from route meta (custom route)', async () => {
       mockOrganization.value = mockOrg;
-      mockRoute.params = { space: 'eth:unknown.eth' };
-      const { space, isPending } = withSetup(() => useCurrentSpace());
+      mockRoute.meta = { orgSpaceId: 's:starknet.eth' };
+      const { space } = withSetup(() => useCurrentSpace());
       await nextTick();
 
-      expect(space.value).toEqual(orgSpaceA);
-      expect(isPending.value).toBe(false);
+      expect(space.value).toEqual(orgSpaceB);
       expect(resolveNameMock).not.toHaveBeenCalled();
+    });
+
+    it('should resolve meta space over param when both present', async () => {
+      mockOrganization.value = mockOrg;
+      mockRoute.params = { space: 'sn:0xORG_A' };
+      mockRoute.meta = { orgSpaceId: 's:starknet.eth' };
+      const { space } = withSetup(() => useCurrentSpace());
+      await nextTick();
+
+      expect(space.value).toEqual(orgSpaceB);
+      expect(resolveNameMock).not.toHaveBeenCalled();
+    });
+
+    it('should not fall back to primary space when param does not match any org space', async () => {
+      mockOrganization.value = mockOrg;
+      mockRoute.params = { space: 'eth:unknown.eth' };
+      const { space } = withSetup(() => useCurrentSpace());
+      await nextTick();
+
+      expect(space.value).toBe(null);
     });
   });
 

@@ -1,11 +1,7 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { APP_NAME } from '@/helpers/constants';
-import {
-  getCacheHash,
-  getStampUrl,
-  whiteLabelAwareParams
-} from '@/helpers/utils';
+import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
@@ -64,9 +60,16 @@ const hasSidebar = computed(() => !isStandaloneLayout.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
-const baseSubRouteName = computed(() =>
-  String(route.matched[1]?.name).replace(/^(space|org)-/, '')
-);
+const baseSubRouteName = computed(() => {
+  const name = String(route.matched[1]?.name);
+  const rootPathSegment = route.matched[1]?.path.split('/')[1];
+  const routePathPrefix =
+    rootPathSegment && !rootPathSegment.startsWith(':')
+      ? `${rootPathSegment}-`
+      : '';
+
+  return name.replace(/^(space|org)-/, '').replace(routePathPrefix, '');
+});
 
 const hasPlaceHolderSidebar = computed(
   () =>
@@ -114,10 +117,10 @@ async function handleTransactionAccept() {
 
   router.push({
     name: 'space-editor',
-    params: whiteLabelAwareParams(isWhiteLabel.value, {
+    params: {
       space: walletConnectSpaceKey.value,
       key: draftId
-    })
+    }
   });
 
   reset();
