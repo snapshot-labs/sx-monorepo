@@ -15,23 +15,19 @@ export function useDelegatesQuery(
     | 'tokenHoldersRepresentedAmount-asc'
   >
 ) {
-  const delegates = toValue(delegation)?.apiUrl
-    ? useDelegates(
-        toValue(delegation) as RequiredProperty<SpaceMetadataDelegation>,
-        toValue(space)
-      )
-    : null;
+  const { getDelegates } = useDelegates(
+    toValue(delegation) as RequiredProperty<SpaceMetadataDelegation>,
+    toValue(space)
+  );
 
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['delegates', delegation, sortBy],
     enabled: () => !!toValue(delegation)?.apiUrl,
     queryFn: ({ pageParam }) => {
-      if (!delegates) throw new Error('Delegates not initialized');
-
       const [orderBy, orderDirection] = toValue(sortBy).split('-');
 
-      return delegates.getDelegates({
+      return getDelegates({
         orderBy,
         orderDirection,
         first: ITEMS_PER_PAGE,
