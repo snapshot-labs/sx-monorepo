@@ -14,7 +14,7 @@ const el = ref(null);
 const sidebarSwipeEnabled = ref(true);
 
 const route = useRoute();
-const router = useRouter();
+const router = useAppRouter();
 const uiStore = useUiStore();
 const {
   modalOpen,
