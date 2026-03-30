@@ -1,7 +1,8 @@
 import { withThemeByClassName } from '@storybook/addon-themes';
-import { type Decorator, type Preview, setup } from '@storybook/vue3-vite';
+import { setup } from '@storybook/vue3-vite';
 import { h } from 'vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
+import type { Decorator, Preview } from '@storybook/vue3-vite';
 import { createTune } from '../src/plugin';
 import '../src/styles/index.scss';
 import './style.css';
