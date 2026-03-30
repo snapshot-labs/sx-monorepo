@@ -35,7 +35,7 @@ function toggleQuestion(id) {
         </h1>
         <AppLink
           :to="LINK"
-          class="px-4 py-3 space-x-2 bg-skin-primary text-skin-bg rounded-full"
+          class="px-4 py-3 space-x-2 bg-skin-primary text-skin-accent-foreground rounded-full"
         >
           Talk to sales
           <IH-arrow-sm-right class="inline-block -rotate-45" />
@@ -151,7 +151,7 @@ function toggleQuestion(id) {
       <h2 class="font-display text-[36px] mb-5">Get network support today</h2>
       <AppLink
         :to="LINK"
-        class="px-4 py-3 space-x-2 bg-skin-primary text-skin-bg rounded-full"
+        class="px-4 py-3 space-x-2 bg-skin-primary text-skin-accent-foreground rounded-full"
       >
         Talk to sales
         <IH-arrow-sm-right class="inline-block -rotate-45" />

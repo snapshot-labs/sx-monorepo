@@ -14,7 +14,7 @@ withDefaults(
     :class="{
       'bg-skin-border text-skin-link': variant === 'default',
       'bg-skin-text text-skin-accent-foreground': variant === 'secondary',
-      'bg-skin-primary text-skin-bg': variant === 'primary'
+      'bg-skin-primary text-skin-accent-foreground': variant === 'primary'
     }"
   >
     <slot>{{ label }}</slot>
