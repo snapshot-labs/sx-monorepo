@@ -30,7 +30,7 @@ function toCustomRoute(
   return {
     ...route,
     name: toCustomRouteName(route.name, spaceRoute.path),
-    meta: { ...route.meta, ...spaceRoute.meta },
+    meta: { ...route.meta, ...spaceRoute.meta, customPath: spaceRoute.path },
     children: route.children?.map(c =>
       toCustomRoute(c as NamedRoute, spaceRoute)
     )

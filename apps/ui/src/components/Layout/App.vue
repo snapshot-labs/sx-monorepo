@@ -62,17 +62,10 @@ const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
 const baseSubRouteName = computed(() => {
   const name = String(route.matched[1]?.name);
-  const rootPathSegment = route.matched[1]?.path.split('/')[1];
-  const routePathPrefix =
-    rootPathSegment && !rootPathSegment.startsWith(':')
-      ? `${rootPathSegment}-`
-      : '';
+  const customPath = route.matched[1]?.meta?.customPath as string | undefined;
+  const prefix = customPath ? `(?:${customPath}-)?` : '';
 
-  const stripped = name.replace(/^(space|org)-/, '');
-
-  return stripped.startsWith(routePathPrefix)
-    ? stripped.slice(routePathPrefix.length)
-    : stripped;
+  return name.replace(new RegExp(`^(?:space|org)-${prefix}`), '');
 });
 
 const hasPlaceHolderSidebar = computed(
