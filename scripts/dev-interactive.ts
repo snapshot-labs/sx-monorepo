@@ -34,7 +34,12 @@ const SERVICES: Record<ServiceType, Service> = {
 
 const DOCKER_CMD = `docker compose -f scripts/docker-compose.yml up -d`;
 
-function runTurboWithFilters(serviceTypes: ServiceType[]) {
+function runTurboWithFilters(
+  serviceTypes: ServiceType[],
+  extraEnvOverrides: Record<string, string> = {}
+) {
+  if (serviceTypes.length === 0) return;
+
   const turboPath = path.resolve('node_modules', '.bin', 'turbo');
   const filterArgs = serviceTypes.flatMap(filter => [
     '--filter',
@@ -50,7 +55,8 @@ function runTurboWithFilters(serviceTypes: ServiceType[]) {
     stdio: 'inherit',
     env: {
       ...process.env,
-      ...extraEnv
+      ...extraEnv,
+      ...extraEnvOverrides
     }
   });
 

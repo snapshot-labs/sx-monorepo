@@ -52,7 +52,7 @@ const {
   auction: computed(() => props.auction)
 });
 
-const bidAmount = ref('');
+const bidAmount = ref('1');
 const bidPrice = ref('');
 const bidFdv = ref('');
 const isTermsAccepted = ref(false);
