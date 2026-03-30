@@ -33,15 +33,3 @@ export const WithSelectedAndMinimum: Story = {
     min: dayjs().subtract(5, 'days').unix()
   }
 };
-
-export const PastDateSelected: Story = {
-  args: {
-    selected: dayjs().subtract(10, 'days').unix()
-  }
-};
-
-export const FutureDateSelected: Story = {
-  args: {
-    selected: dayjs().add(15, 'days').unix()
-  }
-};
