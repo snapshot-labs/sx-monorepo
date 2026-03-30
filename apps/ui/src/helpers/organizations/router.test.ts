@@ -1,11 +1,8 @@
 // @vitest-environment happy-dom
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { RouteParams, RouteRecordRaw } from 'vue-router';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createMemoryHistory, createRouter, RouteRecordRaw } from 'vue-router';
 import {
-  getCustomRoute,
   getOrganizationConfigByDomain,
-  getOrganizationConfigById,
-  isOrgSpace,
   OrganizationConfig,
   SpaceRoute
 } from './config';
@@ -15,11 +12,9 @@ import {
   resolveOrgLocation
 } from './router';
 
-vi.mock('./config', () => ({
-  getOrganizationConfigByDomain: vi.fn(() => null),
-  getOrganizationConfigById: vi.fn(() => null),
-  isOrgSpace: vi.fn(() => false),
-  getCustomRoute: vi.fn(() => undefined)
+vi.mock('./config', async importOriginal => ({
+  ...(await importOriginal()),
+  getOrganizationConfigByDomain: vi.fn(() => null)
 }));
 
 const SPACE_ROUTE: SpaceRoute = {
@@ -42,57 +37,62 @@ const ORG: OrganizationConfig = {
   routes: [SPACE_ROUTE]
 };
 
+const STUB = { template: '' };
+
 const DEFAULT_CHILDREN: RouteRecordRaw[] = [
   {
     path: '',
     name: 'space-proposals',
-    component: { template: '' },
+    component: STUB,
     meta: { title: 'Proposals' }
   },
   {
     path: 'editor',
     name: 'space-editor',
-    component: { template: '' },
+    component: STUB,
     children: [
-      {
-        path: 'preview',
-        name: 'space-editor-preview',
-        component: { template: '' }
-      }
+      { path: 'preview', name: 'space-editor-preview', component: STUB }
     ]
   },
+  { path: ':proposal', name: 'space-proposal', component: STUB }
+];
+
+function buildRouter(routes: RouteRecordRaw[]) {
+  return createRouter({ history: createMemoryHistory(), routes });
+}
+
+const BASE_ROUTES: RouteRecordRaw[] = [
+  { path: '/', name: 'home', component: STUB },
   {
-    path: ':proposal',
-    name: 'space-proposal',
-    component: { template: '' }
+    path: '/:space',
+    name: 'space',
+    component: STUB,
+    children: DEFAULT_CHILDREN
+  },
+  { path: '/user', name: 'user', component: STUB },
+  { path: '/delegates', name: 'space-delegates', component: STUB },
+  {
+    path: '/:org',
+    name: 'org',
+    component: STUB,
+    children: [
+      { path: '', name: 'org-proposals', component: STUB },
+      { path: 'user', name: 'org-user-statement', component: STUB }
+    ]
   }
 ];
 
-function createMockRouter({
-  currentRouteName = 'org',
-  currentParams = {} as RouteParams,
-  routes = [] as { name?: string; path: string }[],
-  hasRouteOverride
-}: {
-  currentRouteName?: string;
-  currentParams?: RouteParams;
-  routes?: { name?: string; path: string }[];
-  hasRouteOverride?: (name: string) => boolean;
-} = {}) {
-  return {
-    currentRoute: {
-      value: {
-        matched: [{ name: currentRouteName }],
-        params: currentParams
-      }
-    },
-    hasRoute:
-      hasRouteOverride ?? ((name: string) => routes.some(r => r.name === name)),
-    getRoutes: () => routes
-  } as any;
-}
-
 describe('organizations/router', () => {
+  let router: ReturnType<typeof buildRouter>;
+
+  beforeEach(() => {
+    router = buildRouter(BASE_ROUTES);
+  });
+
+  afterEach(() => {
+    vi.mocked(getOrganizationConfigByDomain).mockReturnValue(null);
+  });
+
   describe('createCustomRoutes', () => {
     it('returns empty array when org has no routes', () => {
       const org: OrganizationConfig = { ...ORG, routes: undefined };
@@ -150,28 +150,17 @@ describe('organizations/router', () => {
   });
 
   describe('resolveOrgLocation', () => {
-    afterEach(() => {
-      vi.mocked(getOrganizationConfigByDomain).mockReturnValue(null);
-      vi.mocked(getOrganizationConfigById).mockReturnValue(null);
-      vi.mocked(isOrgSpace).mockReturnValue(false);
-      vi.mocked(getCustomRoute).mockReturnValue(undefined);
-    });
-
     it('passes through string locations', () => {
-      const router = createMockRouter();
-
       expect(resolveOrgLocation('/foo', router)).toBe('/foo');
     });
 
     it('passes through locations without a name', () => {
-      const router = createMockRouter();
       const to = { path: '/foo' };
 
       expect(resolveOrgLocation(to, router)).toBe(to);
     });
 
     it('passes through when name is not a string', () => {
-      const router = createMockRouter();
       const to = { name: Symbol('test') };
 
       expect(resolveOrgLocation(to as any, router)).toBe(to);
@@ -179,10 +168,6 @@ describe('organizations/router', () => {
 
     describe('whitelabel mode', () => {
       it('resolves custom route when space matches', () => {
-        vi.mocked(isOrgSpace).mockReturnValue(true);
-        vi.mocked(getCustomRoute).mockReturnValue(SPACE_ROUTE);
-
-        const router = createMockRouter();
         const to = {
           name: 'space-proposals',
           params: { space: 's:ens.eth' }
@@ -197,10 +182,6 @@ describe('organizations/router', () => {
       });
 
       it('resolves nested child routes by prefix', () => {
-        vi.mocked(isOrgSpace).mockReturnValue(true);
-        vi.mocked(getCustomRoute).mockReturnValue(SPACE_ROUTE);
-
-        const router = createMockRouter();
         const to = {
           name: 'space-proposal-votes',
           params: { space: 's:ens.eth', proposal: '0x1' }
@@ -215,12 +196,6 @@ describe('organizations/router', () => {
       });
 
       it('strips space param when route is not a custom route child', () => {
-        vi.mocked(isOrgSpace).mockReturnValue(true);
-        vi.mocked(getCustomRoute).mockReturnValue(SPACE_ROUTE);
-
-        const router = createMockRouter({
-          routes: [{ name: 'space-delegates', path: '/delegates' }]
-        });
         const to = {
           name: 'space-delegates',
           params: { space: 's:ens.eth' }
@@ -235,11 +210,6 @@ describe('organizations/router', () => {
       });
 
       it('returns original when no transformation applies', () => {
-        vi.mocked(isOrgSpace).mockReturnValue(false);
-
-        const router = createMockRouter({
-          routes: [{ name: 'space-proposals', path: '/:space/proposals' }]
-        });
         const to = { name: 'space-proposals', params: { space: 'other' } };
 
         expect(resolveOrgLocation(to, router, ORG)).toBe(to);
@@ -247,15 +217,8 @@ describe('organizations/router', () => {
     });
 
     describe('org mode', () => {
-      it('rewrites space-* to org-* routes', () => {
-        const router = createMockRouter({
-          currentRouteName: 'org',
-          currentParams: { org: 'starknet' },
-          routes: [{ name: 'org-proposals', path: '/:org/proposals' }],
-          hasRouteOverride: () => true
-        });
-        vi.mocked(getOrganizationConfigById).mockReturnValue(ORG);
-
+      it('rewrites space-* to org-* routes', async () => {
+        await router.push({ name: 'org', params: { org: 'starknet' } });
         const to = { name: 'space-proposals', params: {} };
         const result = resolveOrgLocation(to, router);
 
@@ -265,13 +228,8 @@ describe('organizations/router', () => {
         });
       });
 
-      it('rewrites user route to org-user-statement', () => {
-        const router = createMockRouter({
-          currentRouteName: 'org',
-          currentParams: { org: 'starknet' }
-        });
-        vi.mocked(getOrganizationConfigById).mockReturnValue(ORG);
-
+      it('rewrites user route to org-user-statement', async () => {
+        await router.push({ name: 'org', params: { org: 'starknet' } });
         const to = { name: 'user', params: {} };
         const result = resolveOrgLocation(to, router);
 
@@ -281,33 +239,24 @@ describe('organizations/router', () => {
         });
       });
 
-      it('skips when current route is not org', () => {
-        const router = createMockRouter({ currentRouteName: 'space' });
+      it('skips when current route is not org', async () => {
+        await router.push({ name: 'home' });
 
         const to = { name: 'space-proposals', params: {} };
 
         expect(resolveOrgLocation(to, router)).toBe(to);
       });
 
-      it('skips when org config not found', () => {
-        const router = createMockRouter({
-          currentRouteName: 'org',
-          currentParams: { org: 'unknown' }
-        });
-        vi.mocked(getOrganizationConfigById).mockReturnValue(null);
+      it('skips when org config not found', async () => {
+        await router.push({ name: 'org', params: { org: 'unknown' } });
 
         const to = { name: 'space-proposals', params: {} };
 
         expect(resolveOrgLocation(to, router)).toBe(to);
       });
 
-      it('skips when space param does not belong to org', () => {
-        const router = createMockRouter({
-          currentRouteName: 'org',
-          currentParams: { org: 'ens' }
-        });
-        vi.mocked(getOrganizationConfigById).mockReturnValue(ORG);
-        vi.mocked(isOrgSpace).mockReturnValue(false);
+      it('skips when space param does not belong to org', async () => {
+        await router.push({ name: 'org', params: { org: 'ens' } });
 
         const to = {
           name: 'space-proposals',
@@ -317,13 +266,16 @@ describe('organizations/router', () => {
         expect(resolveOrgLocation(to, router)).toBe(to);
       });
 
-      it('returns null when org route does not exist', () => {
-        const router = createMockRouter({
-          currentRouteName: 'org',
-          currentParams: { org: 'ens' },
-          hasRouteOverride: () => false
-        });
-        vi.mocked(getOrganizationConfigById).mockReturnValue(ORG);
+      it('returns original when org route does not exist', async () => {
+        const router = buildRouter([
+          { path: '/', name: 'home', component: STUB },
+          {
+            path: '/:org',
+            name: 'org',
+            component: STUB
+          }
+        ]);
+        await router.push({ name: 'org', params: { org: 'ens' } });
 
         const to = { name: 'space-proposals', params: {} };
 
@@ -333,18 +285,8 @@ describe('organizations/router', () => {
   });
 
   describe('onOrgNavigate', () => {
-    afterEach(() => {
-      vi.mocked(getOrganizationConfigByDomain).mockReturnValue(null);
-      vi.mocked(isOrgSpace).mockReturnValue(false);
-      vi.mocked(getCustomRoute).mockReturnValue(undefined);
-    });
-
     it('redirects to custom route on whitelabel domain', () => {
       vi.mocked(getOrganizationConfigByDomain).mockReturnValue(ORG);
-      vi.mocked(isOrgSpace).mockReturnValue(true);
-      vi.mocked(getCustomRoute).mockReturnValue(SPACE_ROUTE);
-
-      const router = createMockRouter();
       const guard = onOrgNavigate(router);
 
       const to = {
@@ -364,15 +306,8 @@ describe('organizations/router', () => {
       });
     });
 
-    it('falls back to resolveOrgLocation when no custom route', () => {
-      vi.mocked(getOrganizationConfigByDomain).mockReturnValue(null);
-      vi.mocked(getOrganizationConfigById).mockReturnValue(ORG);
-
-      const router = createMockRouter({
-        currentRouteName: 'org',
-        currentParams: { org: 'ens' },
-        hasRouteOverride: () => true
-      });
+    it('falls back to resolveOrgLocation when no custom route', async () => {
+      await router.push({ name: 'org', params: { org: 'ens' } });
       const guard = onOrgNavigate(router);
 
       const to = {
@@ -390,8 +325,8 @@ describe('organizations/router', () => {
       });
     });
 
-    it('returns undefined when no redirect needed', () => {
-      const router = createMockRouter({ currentRouteName: 'home' });
+    it('returns undefined when no redirect needed', async () => {
+      await router.push({ name: 'home' });
       const guard = onOrgNavigate(router);
 
       const to = {
