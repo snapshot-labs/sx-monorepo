@@ -54,6 +54,7 @@ export const GOVERNANCES: Partial<
       startBlock: 37959559
     }
   },
+  /*
   arb1: {
     'Arbitrum Treasury': {
       name: 'Arbitrum Treasury',
@@ -102,6 +103,7 @@ export const GOVERNANCES: Partial<
       startBlock: 204249812
     }
   },
+  */
   sep: {
     Sekhmet: {
       name: 'Sekhmet',
