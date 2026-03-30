@@ -36,6 +36,23 @@ export const GOVERNANCES: Partial<
       startBlock: 13533772
     }
   },
+  bnb: {
+    BNB: {
+      name: 'BNB Chain',
+      avatar:
+        'ipfs://bafkreibll4la7wqerzs7zwxjne2j7ayynbg2wlenemssoahxxj5rbt6c64',
+      externalUrl: 'https://www.bnbchain.org',
+      github: 'bnb-chain',
+      twitter: 'BNBChain',
+      address: '0x0000000000000000000000000000000000002004',
+      authenticators: [
+        'OpenZeppelinAuthenticator',
+        'OpenZeppelinAuthenticatorSignatureV4'
+      ],
+      quorumType: 'for_only',
+      startBlock: 37959559
+    }
+  },
   sep: {
     Sekhmet: {
       name: 'Sekhmet',
