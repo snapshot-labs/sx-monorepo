@@ -72,6 +72,43 @@ export function applyConfig(
   };
 }
 
+export async function getActualBlockNumber({
+  networkId,
+  currentBlockNumber,
+  client
+}: {
+  networkId: NetworkID;
+  currentBlockNumber: number;
+  client: PublicClient;
+}) {
+  const baseNetwork = evmNetworks[networkId];
+
+  if (!baseNetwork.Meta.hasNonNativeBlockNumbers) {
+    return BigInt(currentBlockNumber);
+  }
+
+  return client.readContract({
+    address: MULTICALL3_ADDRESS,
+    abi: [
+      {
+        inputs: [],
+        name: 'getBlockNumber',
+        outputs: [
+          {
+            internalType: 'uint256',
+            name: 'blockNumber',
+            type: 'uint256'
+          }
+        ],
+        stateMutability: 'view',
+        type: 'function'
+      }
+    ],
+    functionName: 'getBlockNumber',
+    blockNumber: BigInt(currentBlockNumber)
+  });
+}
+
 export async function getTimestampFromBlock({
   networkId,
   blockNumber,
@@ -85,31 +122,11 @@ export async function getTimestampFromBlock({
   currentTimestamp: number;
   client: PublicClient;
 }) {
-  const baseNetwork = evmNetworks[networkId];
-
-  let actualCurrentBlockNumber = BigInt(currentBlockNumber);
-  if (baseNetwork.Meta.hasNonNativeBlockNumbers) {
-    actualCurrentBlockNumber = await client.readContract({
-      address: MULTICALL3_ADDRESS,
-      abi: [
-        {
-          inputs: [],
-          name: 'getBlockNumber',
-          outputs: [
-            {
-              internalType: 'uint256',
-              name: 'blockNumber',
-              type: 'uint256'
-            }
-          ],
-          stateMutability: 'view',
-          type: 'function'
-        }
-      ],
-      functionName: 'getBlockNumber',
-      blockNumber: BigInt(currentBlockNumber)
-    });
-  }
+  const actualCurrentBlockNumber = await getActualBlockNumber({
+    networkId,
+    currentBlockNumber,
+    client
+  });
 
   const blockDifference = blockNumber - Number(actualCurrentBlockNumber);
 

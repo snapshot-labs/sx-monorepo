@@ -111,6 +111,7 @@ const ORGANIZATION_MAPPING = import.meta.env.VITE_ORGANIZATION_MAPPING;
 const ORGANIZATION_DOMAINS: Record<string, string> = {
   'starknet.stage.box': 'starknet',
   'governance.starknet.io': 'starknet',
+  'vote.ensdao.org': 'ens',
   'ens.stage.box': 'ens',
   ...(ORGANIZATION_MAPPING
     ? {

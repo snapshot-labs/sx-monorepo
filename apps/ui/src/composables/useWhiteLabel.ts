@@ -69,6 +69,19 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
       logo: 'ipfs://bafkreibsvohq3zg4zv5rxjv3vs57jmazs6lgrunjqy5n5uahdktconwple'
     }
   },
+  'vote.ensdao.org': {
+    skinSettings: {
+      logo: 'ipfs://bafkreifnnjex25bf6zfjmx3zugk46i7wqtb5un4ikm7dgfki3chcs2bccy',
+      bg_color: '#F6F6F6',
+      link_color: '#011A25',
+      text_color: '#4A5C63',
+      content_color: '#586069',
+      border_color: '#E4E4E4',
+      heading_color: '#011A25',
+      primary_color: '#0080BC',
+      theme: 'light'
+    }
+  },
   'ens.stage.box': {
     skinSettings: {
       logo: 'ipfs://bafkreifnnjex25bf6zfjmx3zugk46i7wqtb5un4ikm7dgfki3chcs2bccy',
