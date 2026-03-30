@@ -181,7 +181,6 @@ describe('useCurrentSpace', () => {
     const orgSpaceA = { network: 'sn', id: '0xORG_A' };
     const orgSpaceB = { network: 's', id: 'starknet.eth' };
     const mockOrg = {
-      spaceIds: [orgSpaceA, orgSpaceB],
       spaces: [orgSpaceA, orgSpaceB]
     };
 
