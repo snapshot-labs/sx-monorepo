@@ -83,7 +83,7 @@ async function withAuthorNames(proposals: Proposal[]) {
   });
 }
 
-export function setProposalsDetails(
+function setProposalsDetails(
   queryClient: QueryClient,
   networkId: NetworkID,
   proposals: Proposal[]
@@ -100,7 +100,7 @@ export function setProposalsDetails(
   }
 }
 
-export async function getProposals(
+async function getProposals(
   spaceIds: string[],
   networkId: NetworkID,
   { limit, skip }: { limit: number; skip: number },
@@ -196,6 +196,23 @@ export function useProposalsQuery(
   );
 }
 
+export function proposalsSummaryQueryFn(
+  queryClient: QueryClient,
+  networkId: NetworkID,
+  spaceId: string
+) {
+  return async () => {
+    const proposals = await getProposals([spaceId], networkId, {
+      skip: 0,
+      limit: PROPOSALS_SUMMARY_LIMIT
+    });
+
+    setProposalsDetails(queryClient, networkId, proposals);
+
+    return proposals;
+  };
+}
+
 export function useProposalsSummaryQuery(
   networkId: MaybeRefOrGetter<NetworkID>,
   spaceId: MaybeRefOrGetter<string>,
@@ -205,20 +222,11 @@ export function useProposalsSummaryQuery(
 
   return useQuery({
     queryKey: PROPOSALS_KEYS.spaceSummary(networkId, spaceId),
-    queryFn: async () => {
-      const proposals = await getProposals(
-        [toValue(spaceId)],
-        toValue(networkId),
-        {
-          skip: 0,
-          limit: PROPOSALS_SUMMARY_LIMIT
-        }
-      );
-
-      setProposalsDetails(queryClient, toValue(networkId), proposals);
-
-      return proposals;
-    },
+    queryFn: proposalsSummaryQueryFn(
+      queryClient,
+      toValue(networkId),
+      toValue(spaceId)
+    ),
     enabled: () => toValue(enabled)
   });
 }

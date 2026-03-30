@@ -8,10 +8,9 @@ import {
 } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
 import {
-  getProposals,
   PROPOSALS_KEYS,
   PROPOSALS_SUMMARY_LIMIT,
-  setProposalsDetails
+  proposalsSummaryQueryFn
 } from '@/queries/proposals';
 
 const { setTitle } = useTitle();
@@ -22,14 +21,7 @@ const proposalQueries = useQueries({
   queries: computed(() =>
     (organization.value?.spaces ?? []).map(s => ({
       queryKey: PROPOSALS_KEYS.spaceSummary(s.network, s.id),
-      queryFn: async () => {
-        const proposals = await getProposals([s.id], s.network, {
-          limit: PROPOSALS_SUMMARY_LIMIT,
-          skip: 0
-        });
-        setProposalsDetails(queryClient, s.network, proposals);
-        return proposals;
-      }
+      queryFn: proposalsSummaryQueryFn(queryClient, s.network, s.id)
     }))
   )
 });
