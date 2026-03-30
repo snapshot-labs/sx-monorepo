@@ -6,7 +6,10 @@ import addFormats from 'ajv-formats';
 import { validateAndParseAddress } from 'starknet';
 import { resolver } from '@/helpers/resolver';
 import { parseUnits } from '@/helpers/token';
-import { _n } from './utils';
+import { getAddresses as _getAddresses } from './stamp';
+import { _n, memoize } from './utils';
+
+const getAddresses = memoize(_getAddresses);
 
 type Opts = { skipEmptyOptionalFields: boolean };
 
@@ -125,6 +128,24 @@ ajv.addFormat('ens-or-address', {
         ? await resolver.resolveEns('eth', value)
         : null;
       if (resolved?.address) return true;
+
+      return !!validateAndParseAddress(value);
+    } catch {
+      return isAddress(value);
+    }
+  }
+});
+
+ajv.addFormat('name-or-address', {
+  async: true,
+  validate: async (value: string) => {
+    if (!value) return false;
+
+    try {
+      const resolved = value.includes('.')
+        ? await getAddresses([value], 1)
+        : null;
+      if (resolved && resolved[value]) return true;
 
       return !!validateAndParseAddress(value);
     } catch {
@@ -292,6 +313,8 @@ function getErrorMessage(errorObject: Partial<ErrorObject>): string {
         return 'Must be comma separated list of valid addresses.';
       case 'ens-or-address':
         return 'Must be a valid ENS domain or address.';
+      case 'name-or-address':
+        return 'Must be a valid name or address.';
       case 'abi':
         return 'Must be a valid ABI.';
       case 'twitter-handle':
