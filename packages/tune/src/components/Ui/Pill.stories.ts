@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/vue3-vite';
+import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import Pill from './Pill.vue';
 
 const meta = {
