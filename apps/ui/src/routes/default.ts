@@ -9,6 +9,7 @@ import Notifications from '@/views/My/Notifications.vue';
 import My from '@/views/My.vue';
 import Network from '@/views/Network.vue';
 import Policy from '@/views/Policy.vue';
+import Authorize from '@/views/Settings/Authorize.vue';
 import Contacts from '@/views/Settings/Contacts.vue';
 import EmailNotifications from '@/views/Settings/EmailNotifications.vue';
 import SettingsSpaces from '@/views/Settings/Spaces.vue';
@@ -67,6 +68,11 @@ export default [
         path: 'email-notifications',
         name: 'settings-email-notifications',
         component: EmailNotifications
+      },
+      {
+        path: 'alias/authorize/:address',
+        name: 'settings-alias-authorize',
+        component: Authorize
       }
     ]
   },

@@ -666,36 +666,36 @@ export function autoLinkText(text: string) {
   });
 }
 
-export function getSocialNetworksLink(data: any) {
-  return [
-    { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
-    { key: 'twitter', icon: ICX, urlFormat: 'https://x.com/$' },
-    { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
-    {
-      key: 'coingecko',
-      icon: ICCoingecko,
-      urlFormat: 'https://www.coingecko.com/coins/$'
-    },
-    { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
-    { key: 'lens', icon: ICLens, urlFormat: 'https://hey.xyz/u/$' },
-    {
-      key: 'farcaster',
-      icon: ICFarcaster,
-      urlFormat: 'https://warpcast.com/$'
-    },
-    {
-      key: 'clanker',
-      icon: ICClanker,
-      urlFormat: 'https://www.clanker.world/clanker/$'
-    }
-  ]
-    .map(({ key, icon, urlFormat }) => {
-      const value = data[key];
-      const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
+export const SOCIAL_NETWORKS = [
+  { key: 'external_url', icon: IHGlobeAlt, urlFormat: '$' },
+  { key: 'twitter', icon: ICX, urlFormat: 'https://x.com/$' },
+  { key: 'discord', icon: ICDiscord, urlFormat: 'https://discord.gg/$' },
+  {
+    key: 'coingecko',
+    icon: ICCoingecko,
+    urlFormat: 'https://www.coingecko.com/coins/$'
+  },
+  { key: 'github', icon: ICGithub, urlFormat: 'https://github.com/$' },
+  { key: 'lens', icon: ICLens, urlFormat: 'https://hey.xyz/u/$' },
+  {
+    key: 'farcaster',
+    icon: ICFarcaster,
+    urlFormat: 'https://warpcast.com/$'
+  },
+  {
+    key: 'clanker',
+    icon: ICClanker,
+    urlFormat: 'https://www.clanker.world/clanker/$'
+  }
+] as const;
 
-      return href ? { key, icon, href } : {};
-    })
-    .filter(social => social.href);
+export function getSocialNetworksLink(data: any) {
+  return SOCIAL_NETWORKS.map(({ key, icon, urlFormat }) => {
+    const value = data[key];
+    const href = value ? sanitizeUrl(urlFormat.replace('$', value)) : null;
+
+    return href ? { key, icon, href } : {};
+  }).filter(social => social.href);
 }
 
 export function getFormattedVotingPower(votingPower?: VotingPowerItem) {

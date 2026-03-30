@@ -3,6 +3,10 @@ import { getAddress } from '@ethersproject/address';
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
 import { h, VNode } from 'vue';
 import { DELEGATE_REGISTRY_STRATEGIES } from '@/helpers/constants';
+import {
+  isValidDelegation,
+  ValidSpaceMetadataDelegation
+} from '@/helpers/delegation';
 import { clone, compareAddresses, getUrl } from '@/helpers/utils';
 import {
   EVM_CONNECTORS,
@@ -17,10 +21,6 @@ import FormBasicDelegation from '../FormBasicDelegation.vue';
 type Delegatee = {
   id: string;
   share?: number;
-};
-
-type ValidSpaceMetadataDelegation = {
-  [P in keyof SpaceMetadataDelegation]: NonNullable<SpaceMetadataDelegation[P]>;
 };
 
 const SPLIT_DELEGATION_SUPPORTED_CHAIN_IDS = [1, 100];
@@ -68,10 +68,8 @@ const searchValue = ref('');
 const connectorModalConnectors = ref([] as ConnectorType[]);
 const selectedDelegationIndex = ref(0);
 
-const delegations = computed<ValidSpaceMetadataDelegation[]>(() => {
-  return props.space.delegations.filter(
-    isValidDelegation
-  ) as ValidSpaceMetadataDelegation[];
+const delegations = computed(() => {
+  return props.space.delegations.filter(isValidDelegation);
 });
 
 const delegationsSupportedByCurrentWallet = computed(() => {
@@ -80,9 +78,7 @@ const delegationsSupportedByCurrentWallet = computed(() => {
 
 const selectedDelegation = computed<ValidSpaceMetadataDelegation | null>(() => {
   if (props.delegation) {
-    return isValidDelegation(props.delegation)
-      ? (props.delegation as ValidSpaceMetadataDelegation)
-      : null;
+    return isValidDelegation(props.delegation) ? props.delegation : null;
   }
 
   return delegations.value[selectedDelegationIndex.value] || null;
@@ -170,10 +166,6 @@ function isDelegationSupportedByConnectedWallet(
   if (!auth.value?.connector || !delegation) return false;
 
   return delegationConnectors(delegation).includes(auth.value.connector.type);
-}
-
-function isValidDelegation(delegation?: SpaceMetadataDelegation): boolean {
-  return !!(delegation?.chainId && delegation?.apiUrl && delegation?.apiType);
 }
 
 function getNetworkDetails(chainId: number | string) {
