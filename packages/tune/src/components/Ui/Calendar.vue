@@ -114,11 +114,11 @@ function isSelectable(date: dayjs.Dayjs) {
       }
 
       &.selectable {
-        @apply text-skin-link hover:bg-skin-link hover:text-skin-bg cursor-pointer;
+        @apply text-skin-link hover:bg-skin-primary hover:text-skin-accent-foreground cursor-pointer;
       }
 
       &.selected {
-        @apply bg-skin-link;
+        @apply bg-skin-primary;
         @apply text-skin-bg;
       }
 

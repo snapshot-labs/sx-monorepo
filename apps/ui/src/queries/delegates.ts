@@ -23,6 +23,7 @@ export function useDelegatesQuery(
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['delegates', delegation, sortBy],
+    enabled: () => !!toValue(delegation)?.apiUrl,
     queryFn: ({ pageParam }) => {
       const [orderBy, orderDirection] = toValue(sortBy).split('-');
 

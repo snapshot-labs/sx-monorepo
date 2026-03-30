@@ -12,19 +12,6 @@ const props = defineProps<{
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
-
-const inputValue = computed({
-  get() {
-    if (!model.value && !isDirty.value && props.definition.default) {
-      return props.definition.default;
-    }
-
-    return model.value;
-  },
-  set(newValue: string) {
-    model.value = newValue;
-  }
-});
 </script>
 
 <template>
@@ -34,11 +21,11 @@ const inputValue = computed({
     :error="error"
     :dirty="isDirty"
     :required="required"
-    :input-value-length="inputValue?.length"
+    :input-value-length="model?.length"
   >
     <UiRawInputAmount
       :id="id"
-      v-model="inputValue"
+      v-model="model"
       class="s-input"
       v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
