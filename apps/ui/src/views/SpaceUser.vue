@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isValidDelegation } from '@/helpers/delegation';
 import {
   _vp,
   autoLinkText,
@@ -78,8 +79,7 @@ const hasOnlyInvalidDelegations = computed(() => {
   if (!props.space.delegations.length) return true;
 
   return props.space.delegations.every(
-    delegation =>
-      !delegation.chainId || !delegation.apiUrl || !delegation.apiType
+    delegation => !isValidDelegation(delegation)
   );
 });
 
