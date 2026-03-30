@@ -272,7 +272,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 
     <UiSectionHeader label="Delegates" sticky />
     <UiStateWarning v-if="!delegation.apiUrl" class="px-4 py-3">
-      Delegation dashboard is not configured for this space.
+      Delegation dashboard is not configured.
     </UiStateWarning>
     <div v-else class="text-left table-fixed w-full">
       <UiColumnHeader class="space-x-3">
