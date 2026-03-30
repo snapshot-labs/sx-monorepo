@@ -266,7 +266,7 @@ watchEffect(() => {
           }
         ]"
       >
-        <Affix
+        <UiAffix
           data-testid="proposal-sidebar"
           :top="TOTAL_NAV_HEIGHT"
           :bottom="64"
@@ -418,7 +418,7 @@ watchEffect(() => {
               <ProposalTimeline :data="proposal" />
             </div>
           </div>
-        </Affix>
+        </UiAffix>
       </UiResizableHorizontal>
     </template>
     <teleport to="#modal">

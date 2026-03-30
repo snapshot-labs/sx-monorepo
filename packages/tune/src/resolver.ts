@@ -1,14 +1,19 @@
 import { ComponentResolver } from 'unplugin-vue-components';
 
 const uiComponents = [
+  'Affix',
   'Alert',
   'Button',
+  'Calendar',
   'Carousel',
   'Checkbox',
   'ColumnHeader',
   'ContainerInfiniteScroll',
+  'Countdown',
+  'Dropdown',
   'DropdownItem',
   'Eyebrow',
+  'Label',
   'LinkPreview',
   'Loading',
   'Message',

@@ -57,6 +57,8 @@ export default defineConfig({
         'vue-router',
         '@vueuse/core',
         '@headlessui/vue',
+        '@headlessui-float/vue',
+        'dayjs',
         'unplugin-vue-components'
       ]
     }

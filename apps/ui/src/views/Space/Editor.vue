@@ -806,7 +806,7 @@ watchEffect(() => {
         </UiContainer>
       </div>
 
-      <Affix
+      <UiAffix
         :class="['shrink-0 md:w-[340px]']"
         :top="TOTAL_NAV_HEIGHT"
         :bottom="64"
@@ -886,7 +886,7 @@ watchEffect(() => {
             :editable="!proposal.originalProposal"
           />
         </div>
-      </Affix>
+      </UiAffix>
     </div>
     <teleport to="#modal">
       <ModalTerms

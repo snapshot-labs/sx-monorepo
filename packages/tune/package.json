@@ -27,8 +27,10 @@
     "build-storybook": "storybook build"
   },
   "peerDependencies": {
+    "@headlessui-float/vue": "^0.15.0",
     "@headlessui/vue": "^1.7.23",
     "@vueuse/core": "^10.4.1",
+    "dayjs": "^1.11.10",
     "vue": ">=3.5.0",
     "vue-router": ">=4.0.0"
   },
@@ -37,6 +39,8 @@
     "vue-tippy": "^6.4.1"
   },
   "devDependencies": {
+    "@headlessui-float/vue": "^0.15.0",
+    "@headlessui/vue": "^1.7.23",
     "@iconify-json/heroicons-outline": "^1.1.7",
     "@iconify-json/heroicons-solid": "^1.1.8",
     "@snapshot-labs/eslint-config-vue": "^0.1.0",
@@ -45,7 +49,9 @@
     "@storybook/addon-themes": "^9.0.18",
     "@storybook/vue3-vite": "^9.0.18",
     "@vitejs/plugin-vue": "^6.0.0",
+    "@vueuse/core": "^10.4.1",
     "autoprefixer": "^10.4.16",
+    "dayjs": "^1.11.10",
     "eslint-plugin-storybook": "^9.0.18",
     "postcss": "^8.4.30",
     "storybook": "^9.0.18",

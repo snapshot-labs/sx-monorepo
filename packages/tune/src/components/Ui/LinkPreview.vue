@@ -33,7 +33,7 @@ const preview = ref<Preview | null>(null);
 const previewIconResolved = ref<boolean>(false);
 const previewLoading = ref<boolean>(true);
 
-onMounted(async () => await update(props.url));
+onMounted(() => update(props.url));
 
 async function isImageUrlValid(url: string): Promise<boolean> {
   return new Promise(resolve => {
@@ -70,7 +70,7 @@ async function update(val: string) {
 
 debouncedWatch(
   () => props.url,
-  async val => await update(val),
+  val => update(val),
   { debounce: 500 }
 );
 </script>
