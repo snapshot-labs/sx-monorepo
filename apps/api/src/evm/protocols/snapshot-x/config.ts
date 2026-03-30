@@ -18,6 +18,7 @@ const START_BLOCKS: Record<NetworkID, number> = {
   arb1: 157825417,
   base: 23524251,
   mnt: 75662182,
+  bnb: Infinity,
   ape: 12100384,
   curtis: 16682282
 };
