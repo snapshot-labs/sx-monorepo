@@ -71,6 +71,11 @@ function resolveCustomRoute(
   const customRoute = getCustomRoute(org, space);
   if (!customRoute) return null;
 
+  const isChildRoute = customRoute.children.some(
+    c => routeName === c.name || routeName.startsWith(`${c.name}-`)
+  );
+  if (!isChildRoute) return null;
+
   const cleanParams = { ...params };
   delete cleanParams.space;
 
@@ -86,10 +91,13 @@ function toWhiteLabelLocation(
   params: RouteParams,
   router: Router
 ): { name: string; params: RouteParams } | null {
+  const custom = resolveCustomRoute(org, name, params);
+  if (custom) return custom;
+
   const stripped = stripInvalidSpaceParam(name, params, router);
   if (stripped) return stripped;
 
-  return resolveCustomRoute(org, name, params);
+  return null;
 }
 
 function toOrgLocation(
