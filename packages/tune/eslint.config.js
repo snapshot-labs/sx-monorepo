@@ -11,14 +11,6 @@ export default [
     }
   },
   {
-    rules: {
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports', fixStyle: 'separate-type-imports' }
-      ]
-    }
-  },
-  {
     ignores: ['dist/**', 'storybook-static/**']
   }
 ];

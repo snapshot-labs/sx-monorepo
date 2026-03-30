@@ -1,4 +1,4 @@
-import type { ComponentResolver } from 'unplugin-vue-components';
+import { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
   'Affix',

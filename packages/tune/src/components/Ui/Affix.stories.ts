@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/vue3-vite';
+import { Meta, StoryObj } from '@storybook/vue3-vite';
 import Affix from './Affix.vue';
 
 const meta = {

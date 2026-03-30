@@ -1,4 +1,4 @@
-import type { InjectionKey, Plugin } from 'vue';
+import { InjectionKey, Plugin } from 'vue';
 import VueTippy from 'vue-tippy';
 
 export interface TuneOptions {
