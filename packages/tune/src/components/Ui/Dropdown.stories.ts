@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/vue3-vite';
+import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import Dropdown from './Dropdown.vue';
 
 const meta = {

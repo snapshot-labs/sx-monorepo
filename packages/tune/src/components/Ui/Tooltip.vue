@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Props } from 'tippy.js';
+import type { Props } from 'tippy.js';
 
 withDefaults(
   defineProps<{
