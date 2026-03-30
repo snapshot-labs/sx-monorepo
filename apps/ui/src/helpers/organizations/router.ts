@@ -71,7 +71,7 @@ function resolveCustomRoute(
   const customRoute = getCustomRoute(org, space);
   if (!customRoute) return null;
 
-  const cleanParams = { ...params } as RouteParams;
+  const cleanParams = { ...params };
   delete cleanParams.space;
 
   return {
