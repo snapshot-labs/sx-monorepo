@@ -33,7 +33,7 @@ ${rootExports}
 ${uiExports}
 `;
 
-const resolver = `import { ComponentResolver } from 'unplugin-vue-components';
+const resolver = `import type { ComponentResolver } from 'unplugin-vue-components';
 
 const uiComponents = [
 ${uiNames.map(name => `  '${name}'`).join(',\n')}

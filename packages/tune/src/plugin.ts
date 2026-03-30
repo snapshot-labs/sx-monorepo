@@ -1,4 +1,4 @@
-import { InjectionKey, Plugin } from 'vue';
+import type { InjectionKey, Plugin } from 'vue';
 import type { Router } from 'vue-router';
 import VueTippy from 'vue-tippy';
 
