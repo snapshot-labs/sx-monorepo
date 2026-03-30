@@ -3,11 +3,13 @@ import { ETH_CONTRACT } from '@/helpers/constants';
 import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
+import pkg from '../../package.json';
 
 const STAKING_CHAIN_IDS: string[] = ['1', '11155111'];
 const EVM_CHAIN_IDS: string[] = evmNetworks
   .filter(network => enabledNetworks.includes(network))
   .map(network => String(getNetwork(network).chainId));
+const DUST_THRESHOLD = 0.01;
 
 const props = defineProps<{
   space: Space;
@@ -23,6 +25,7 @@ const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
 const isAddressModalOpen = ref(false);
+const showAllTokens = useStorage(`${pkg.name}.treasury.showAllTokens`, false);
 
 const balancesTreasury = computed(() => {
   if (!treasury.value?.network) return null;
@@ -100,6 +103,15 @@ const hasStakeableAssets = computed(() => {
     !isReadOnly.value &&
     assets.value.some(asset => asset.contractAddress === ETH_CONTRACT) &&
     STAKING_CHAIN_IDS.includes(treasury.value.network)
+  );
+});
+
+const filteredAssets = computed(() => {
+  if (showAllTokens.value) return assets.value;
+
+  return assets.value.filter(
+    asset =>
+      asset.value >= DUST_THRESHOLD || asset.contractAddress === ETH_CONTRACT
   );
 });
 
@@ -224,25 +236,46 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </AppLink>
       </div>
       <div>
-        <div class="flex pl-4 border-b space-x-3">
-          <AppLink
-            :to="{
-              params: {
-                tab: 'tokens'
-              }
-            }"
+        <div class="flex items-center px-4 border-b">
+          <div class="flex space-x-3">
+            <AppLink
+              :to="{
+                params: {
+                  tab: 'tokens'
+                }
+              }"
+            >
+              <UiLabel :is-active="page === 'tokens'" text="Tokens" />
+            </AppLink>
+            <AppLink
+              :to="{
+                params: {
+                  tab: 'nfts'
+                }
+              }"
+            >
+              <UiLabel :is-active="page === 'nfts'" text="NFTs" />
+            </AppLink>
+          </div>
+          <UiDropdown
+            v-if="page === 'tokens'"
+            class="flex items-center ml-auto"
           >
-            <UiLabel :is-active="page === 'tokens'" text="Tokens" />
-          </AppLink>
-          <AppLink
-            :to="{
-              params: {
-                tab: 'nfts'
-              }
-            }"
-          >
-            <UiLabel :is-active="page === 'nfts'" text="NFTs" />
-          </AppLink>
+            <template #button>
+              <button>
+                <IH-dots-vertical class="size-[22px]" />
+              </button>
+            </template>
+            <template #items>
+              <UiDropdownItem @click="showAllTokens = !showAllTokens">
+                <IH-eye v-if="!showAllTokens" />
+                <IH-eye-off v-else />
+                {{
+                  showAllTokens ? 'Hide low value tokens' : 'Show all tokens'
+                }}
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </div>
         <UiStateWarning
           v-if="
@@ -265,7 +298,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             Failed to load treasury tokens.
           </UiStateWarning>
           <AppLink
-            v-for="(asset, i) in assets"
+            v-for="(asset, i) in filteredAssets"
             v-else
             :key="i"
             :to="
