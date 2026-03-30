@@ -503,6 +503,11 @@ export function useActions() {
     if (!auth.value) return await forceLogin();
 
     const network = getReadWriteNetwork(proposal.network);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
 
     await wrapPromise(
       proposal.network,
@@ -514,6 +519,11 @@ export function useActions() {
     if (!auth.value) return await forceLogin();
 
     const network = getReadWriteNetwork(proposal.network);
+    if (!network.managerConnectors.includes(auth.value.connector.type)) {
+      throw new Error(
+        `${auth.value.connector.type} is not supported for this action`
+      );
+    }
 
     await wrapPromise(
       proposal.network,

@@ -6,6 +6,9 @@ import IHUsers from '~icons/heroicons-outline/users';
 
 export default {
   routeName: 'settings',
+  isVisible({ route }: NavContext) {
+    return route.name !== 'settings-alias-authorize';
+  },
   getConfig({ isWhiteLabel }: NavContext): NavConfig {
     return {
       items: {

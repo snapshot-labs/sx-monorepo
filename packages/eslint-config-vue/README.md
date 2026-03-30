@@ -3,7 +3,7 @@
 ### Installation
 
 ```
-yarn add @snapshot-labs/eslint-config-vue
+bun add @snapshot-labs/eslint-config-vue
 ```
 
 ### Usage

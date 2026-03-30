@@ -37,7 +37,10 @@ if (window.location.host !== parentHost && !knownHosts.includes(parentHost)) {
 }
 
 const pinia = createPinia();
-const tune = createTune({ useRouter: useAppRouter });
+const tune = createTune({
+  useRouter: useAppRouter,
+  iframelyApiKey: 'd155718c86be7d5305ccb6'
+});
 const app = createApp({ render: () => h(App) })
   .use(router)
   .use(tune);

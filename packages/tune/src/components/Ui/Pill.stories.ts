@@ -36,15 +36,3 @@ export const Primary: Story = {
     variant: 'primary'
   }
 };
-
-export const Role: Story = {
-  args: {
-    label: 'admin'
-  }
-};
-
-export const LargeCount: Story = {
-  args: {
-    label: '1.2K'
-  }
-};
