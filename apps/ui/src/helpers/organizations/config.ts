@@ -7,7 +7,7 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHWifi from '~icons/heroicons-outline/wifi';
 
 /** Remaps existing default space-* routes under a custom path. Whitelabel only. */
-type SpaceRoute = {
+export type SpaceRoute = {
   /** Base path segment, e.g. 'offchain'. No slashes. */
   path: string;
   meta: { orgSpaceId: string };
@@ -26,6 +26,12 @@ export type OrganizationConfig = {
 export type Organization = OrganizationConfig & {
   spaces: Space[];
 };
+
+const ENS_SPACE_ROUTES = [
+  { path: '', name: 'space-proposals' },
+  { path: 'create/:key?', name: 'space-editor' },
+  { path: ':proposal', name: 'space-proposal' }
+];
 
 const ORGANIZATIONS: Record<string, OrganizationConfig> = {
   starknet: {
@@ -85,20 +91,12 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       {
         path: 'onchain',
         meta: { orgSpaceId: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3' },
-        children: [
-          { path: '', name: 'space-proposals' },
-          { path: 'create/:key?', name: 'space-editor' },
-          { path: ':proposal', name: 'space-proposal' }
-        ]
+        children: ENS_SPACE_ROUTES
       },
       {
         path: 'offchain',
         meta: { orgSpaceId: 's:ens.eth' },
-        children: [
-          { path: '', name: 'space-proposals' },
-          { path: 'create/:key?', name: 'space-editor' },
-          { path: ':proposal', name: 'space-proposal' }
-        ]
+        children: ENS_SPACE_ROUTES
       }
     ],
     navItems: {

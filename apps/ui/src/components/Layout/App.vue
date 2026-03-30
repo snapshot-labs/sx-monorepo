@@ -68,7 +68,9 @@ const baseSubRouteName = computed(() => {
       ? `${rootPathSegment}-`
       : '';
 
-  return name.replace(/^(space|org)-/, '').replace(routePathPrefix, '');
+  return name
+    .replace(/^(space|org)-/, '')
+    .replace(new RegExp(`^${routePathPrefix}`), '');
 });
 
 const hasPlaceHolderSidebar = computed(

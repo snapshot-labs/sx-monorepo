@@ -11,46 +11,11 @@ import {
   getOrganizationConfigByDomain,
   getOrganizationConfigById,
   OrganizationConfig,
+  SpaceRoute,
   toOrgSpaceId
 } from './config';
 
 type NamedRoute = RouteRecordRaw & { name: string };
-
-function withMeta(
-  route: NamedRoute,
-  meta: Record<string, unknown>,
-  routePath: string
-): RouteRecordRaw {
-  return {
-    ...route,
-    name: String(route.name).replace(/^([^-]+-)/, `$1${routePath}-`),
-    meta: { ...route.meta, ...meta },
-    children: route.children?.map(c =>
-      withMeta(c as NamedRoute, meta, routePath)
-    )
-  } as RouteRecordRaw;
-}
-
-function toOrgLocation(
-  name: string,
-  params: RouteParams,
-  router: Router
-): { name: string; params: RouteParams } | null {
-  if (name.startsWith('space-')) {
-    const orgRouteName = name.replace('space-', 'org-');
-    if (!router.hasRoute(orgRouteName)) return null;
-
-    const stripped = stripInvalidSpaceParam(orgRouteName, params, router);
-
-    return stripped ?? { name: orgRouteName, params };
-  }
-
-  if (name === 'user') {
-    return { name: 'org-user-statement', params };
-  }
-
-  return null;
-}
 
 function toCustomRouteName(routeName: string, routePath: string): string {
   const [namespace, ...rest] = routeName.split('-');
@@ -58,28 +23,23 @@ function toCustomRouteName(routeName: string, routePath: string): string {
   return [namespace, routePath, ...rest].join('-');
 }
 
-/**
- * Resolves the custom route name for a space, if one exists and is registered.
- */
-function resolveCustomRouteName(
-  org: OrganizationConfig | null,
-  routeName: string,
-  spaceParam?: string | string[]
-): string | null {
-  if (!org || !spaceParam || Array.isArray(spaceParam)) return null;
-
-  const spaceId = toOrgSpaceId(org, spaceParam);
-  if (!spaceId) return null;
-
-  const customRoute = getCustomRoute(org, spaceId);
-  if (!customRoute) return null;
-
-  return toCustomRouteName(routeName, customRoute.path);
+function toCustomRoute(
+  route: NamedRoute,
+  spaceRoute: SpaceRoute
+): RouteRecordRaw {
+  return {
+    ...route,
+    name: toCustomRouteName(route.name, spaceRoute.path),
+    meta: { ...route.meta, ...spaceRoute.meta },
+    children: route.children?.map(c =>
+      toCustomRoute(c as NamedRoute, spaceRoute)
+    )
+  } as RouteRecordRaw;
 }
 
 /**
  * Creates custom routes from an org's route config.
- * Looks up components from the default children by matching route names.
+ * Only creates routes for children whose name matches an existing default route.
  */
 export function createCustomRoutes(
   org: OrganizationConfig,
@@ -92,75 +52,95 @@ export function createCustomRoutes(
       const source = defaultChildren.find(r => r.name === child.name);
       if (!source) return [];
 
-      const route = {
-        path: child.path ? `${spaceRoute.path}/${child.path}` : spaceRoute.path,
-        name: toCustomRouteName(child.name, spaceRoute.path),
-        component: source.component,
-        meta: spaceRoute.meta,
-        children: source.children?.map(c =>
-          withMeta(c as NamedRoute, spaceRoute.meta, spaceRoute.path)
-        )
-      } as RouteRecordRaw;
-
-      return [route];
+      return [
+        {
+          ...toCustomRoute(source as NamedRoute, spaceRoute),
+          path: child.path
+            ? `${spaceRoute.path}/${child.path}`
+            : spaceRoute.path
+        }
+      ];
     });
   });
 }
 
-/**
- * Navigation guard that redirects space-* routes to their org equivalents.
- * Also redirects default space routes to custom routes when applicable.
- */
-export function onOrgNavigate(router: Router): NavigationGuard {
-  return to => {
-    // Redirect default routes to custom routes for whitelabel orgs
-    const whiteLabelOrg = getOrganizationConfigByDomain(
-      window.location.hostname
-    );
-    const customName = resolveCustomRouteName(
-      whiteLabelOrg,
-      String(to.name),
-      to.params.space
-    );
+function resolveCustomRoute(
+  org: OrganizationConfig | null,
+  routeName: string,
+  params: RouteParams,
+  spaceParam?: string | string[]
+): { name: string; params: RouteParams } | null {
+  if (!org || !spaceParam || Array.isArray(spaceParam)) return null;
 
-    if (customName) {
-      const params = { ...to.params };
-      delete params.space;
+  const spaceId = toOrgSpaceId(org, spaceParam);
+  if (!spaceId) return null;
 
-      return {
-        name: customName,
-        params,
-        query: to.query,
-        hash: to.hash
-      };
-    }
+  const customRoute = getCustomRoute(org, spaceId);
+  if (!customRoute) return null;
 
-    const raw = {
-      name: String(to.name),
-      params: { ...to.params }
-    };
-    const resolved = resolveOrgLocation(raw, router);
-    if (
-      resolved === raw ||
-      typeof resolved === 'string' ||
-      !('name' in resolved)
-    )
-      return;
+  const cleanParams = { ...params } as RouteParams;
+  delete cleanParams.space;
 
-    return {
-      name: resolved.name,
-      params: resolved.params,
-      query: to.query,
-      hash: to.hash
-    };
+  return {
+    name: toCustomRouteName(routeName, customRoute.path),
+    params: cleanParams
   };
 }
 
+/** Rewrites a route for whitelabel context: strips invalid :space or resolves to a custom route. */
+function toWhiteLabelLocation(
+  org: OrganizationConfig,
+  name: string,
+  params: RouteParams,
+  router: Router
+): { name: string; params: RouteParams } | null {
+  const stripped = stripInvalidSpaceParam(name, params, router);
+  if (stripped) return stripped;
+
+  return resolveCustomRoute(org, name, params, params.space);
+}
+
+/** Rewrites a route for /org/:org context: space-* → org-*, injects :org param. */
+function toOrgLocation(
+  name: string,
+  params: RouteParams,
+  router: Router
+): { name: string; params: RouteParams } | null {
+  if (String(router.currentRoute.value.matched[0]?.name) !== 'org') return null;
+
+  const orgId = router.currentRoute.value.params.org as string;
+  const orgConfig = getOrganizationConfigById(orgId);
+  if (!orgConfig) return null;
+
+  if (params.space && !toOrgSpaceId(orgConfig, params.space as string)) {
+    return null;
+  }
+
+  const toParams = { ...params, org: orgId };
+
+  if (name.startsWith('space-')) {
+    const orgRouteName = name.replace('space-', 'org-');
+    if (!router.hasRoute(orgRouteName)) return null;
+
+    const stripped = stripInvalidSpaceParam(orgRouteName, toParams, router);
+
+    return stripped ?? { name: orgRouteName, params: toParams };
+  }
+
+  if (name === 'user') {
+    return { name: 'org-user-statement', params: toParams };
+  }
+
+  return null;
+}
+
 /**
- * Resolves a route location for org context:
- * - Whitelabel: strips :space param from routes that don't have :space in their path.
- * - /org/:id: rewrites space-* → org-* and injects :org param.
- * Returns `to` unchanged when no transformation is needed.
+ * Transforms programmatic navigation (router.push/resolve) for org context.
+ * Only applies to default route names — custom routes (e.g. /offchain) are
+ * matched directly by Vue Router and don't pass through here.
+ *
+ * 1. Whitelabel: strip invalid :space or rewrite to custom route
+ * 2. /org/:org: rewrite space-* → org-* and inject :org param
  */
 export function resolveOrgLocation(
   to: RouteLocationRaw,
@@ -169,44 +149,60 @@ export function resolveOrgLocation(
   if (typeof to === 'string' || !('name' in to) || typeof to.name !== 'string')
     return to;
 
+  const params = (to.params ?? {}) as RouteParams;
   const whiteLabelOrg = getOrganizationConfigByDomain(window.location.hostname);
 
+  // 1. Whitelabel: strip invalid :space or rewrite to custom route
   if (whiteLabelOrg) {
-    const stripped = stripInvalidSpaceParam(to.name, to.params ?? {}, router);
-    if (stripped) return { ...to, ...stripped };
-
-    // Rewrite to custom route when target space has one
-    const customName = resolveCustomRouteName(
+    const rewritten = toWhiteLabelLocation(
       whiteLabelOrg,
       to.name,
-      to.params?.space as string | undefined
+      params,
+      router
     );
 
-    if (customName) {
-      const params = { ...(to.params ?? {}) } as Record<string, string>;
-      delete params.space;
-
-      return { ...to, name: customName, params };
-    }
-
-    return to;
+    return rewritten ? { ...to, ...rewritten } : to;
   }
 
-  if (String(router.currentRoute.value.matched[0]?.name) !== 'org') return to;
-
-  const orgId = router.currentRoute.value.params.org as string;
-  const orgConfig = getOrganizationConfigById(orgId);
-  if (!orgConfig) return to;
-
-  const toParams: RouteParams = { ...to.params } as RouteParams;
-
-  if (toParams.space) {
-    if (!toOrgSpaceId(orgConfig, toParams.space as string)) return to;
-  }
-
-  toParams.org = orgId;
-
-  const rewritten = toOrgLocation(to.name, toParams, router);
+  // 2. /org/:org: rewrite space-* → org-*
+  const rewritten = toOrgLocation(to.name, params, router);
 
   return rewritten ? { ...to, ...rewritten } : to;
+}
+
+/** Navigation guard (beforeEach). Delegates to resolveOrgLocation for programmatic rewrites. */
+export function onOrgNavigate(router: Router): NavigationGuard {
+  return to => {
+    // 1. Whitelabel: redirect to custom route if space has one
+    const whiteLabelOrg = getOrganizationConfigByDomain(
+      window.location.hostname
+    );
+    const custom = resolveCustomRoute(
+      whiteLabelOrg,
+      String(to.name),
+      to.params as RouteParams,
+      to.params.space
+    );
+
+    if (custom) return { ...custom, query: to.query, hash: to.hash };
+
+    // 2. /org/:org: rewrite space-* → org-*
+    const raw = { name: String(to.name), params: { ...to.params } };
+    const resolved = resolveOrgLocation(raw, router);
+
+    if (
+      resolved === raw ||
+      typeof resolved === 'string' ||
+      !('name' in resolved)
+    ) {
+      return;
+    }
+
+    return {
+      name: resolved.name,
+      params: resolved.params,
+      query: to.query,
+      hash: to.hash
+    };
+  };
 }
