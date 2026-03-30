@@ -1,8 +1,9 @@
 export {
   getOrganizationConfigByDomain,
-  getOrganizationConfigById
+  getOrganizationConfigById,
+  type Organization,
+  type OrganizationConfig
 } from './config';
-export type { Organization, OrganizationConfig } from './config';
 export {
   createCustomRoutes,
   onOrgNavigate,
