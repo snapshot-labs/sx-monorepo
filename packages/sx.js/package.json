@@ -25,9 +25,9 @@
     "build": "tsc -p tsconfig.esnext.json && tsc -p tsconfig.cjs.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint ./src ./test",
-    "lint:fix": "yarn lint --fix",
-    "prepare": "yarn build",
-    "prepublishOnly": "yarn run lint",
+    "lint:fix": "bun run lint --fix",
+    "prepare": "bun run build",
+    "prepublishOnly": "bun run lint",
     "node:evm": "anvil",
     "node:starknet": "starknet-devnet --seed 1",
     "test": "SEPOLIA_NODE_URL=https://rpc.snapshot.org/11155111 vitest run test/unit",
@@ -56,14 +56,11 @@
     "bn.js": "^5.2.1",
     "micro-starknet": "^0.2.3",
     "randombytes": "^2.1.0",
-    "snake-case": "^3.0.4",
     "starknet": "7.6.4"
   },
   "devDependencies": {
-    "@ethersproject/units": "^5.7.0",
     "@types/bn.js": "^5.1.1",
-    "@types/elliptic": "^6.4.14",
-    "@types/node": "^18.11.9",
+    "@types/node": "^22.6.0",
     "@types/randombytes": "^2.0.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"

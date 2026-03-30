@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { clone } from '@/helpers/utils';
+import { clone, getChainIdKind } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { ChainId } from '@/types';
 
@@ -23,7 +23,9 @@ const controllerDefinition = computed(() => ({
   format: 'ens-or-address',
   chainId: props.chainId,
   title: 'Controller',
-  examples: ['Address or ENS']
+  examples: [
+    getChainIdKind(props.chainId) === 'evm' ? 'Address or ENS' : 'Address'
+  ]
 }));
 
 const formValidator = computed(() =>

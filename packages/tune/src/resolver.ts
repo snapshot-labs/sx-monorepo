@@ -2,10 +2,22 @@ import { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
   'Alert',
+  'Carousel',
   'Checkbox',
   'ColumnHeader',
   'ColumnHeaderItem',
+  'ContainerInfiniteScroll',
+  'Eyebrow',
+  'LinkPreview',
   'Loading',
+  'ModalSearchInput',
+  'Pill',
+  'RawInputAmount',
+  'ScrollerHorizontal',
+  'SectionHeader',
+  'Selector',
+  'SelectorCard',
+  'StateWarning',
   'Switch',
   'Tooltip',
   'TooltipOnTruncate'
