@@ -52,7 +52,15 @@ export default defineConfig({
     },
     cssCodeSplit: true,
     rolldownOptions: {
-      external: ['vue', 'vue-router', '@vueuse/core', 'unplugin-vue-components']
+      external: [
+        'vue',
+        'vue-router',
+        '@vueuse/core',
+        '@headlessui/vue',
+        '@headlessui-float/vue',
+        'dayjs',
+        'unplugin-vue-components'
+      ]
     }
   }
 });
