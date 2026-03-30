@@ -4,18 +4,22 @@ import TooltipOnTruncate from './TooltipOnTruncate.vue';
 const meta = {
   title: 'Ui/TooltipOnTruncate',
   component: TooltipOnTruncate,
-  tags: ['autodocs']
+  tags: ['autodocs'],
+  args: {
+    content: ''
+  }
 } satisfies Meta<typeof TooltipOnTruncate>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Truncated: Story = {
-  render: () => ({
+  render: args => ({
     components: { TooltipOnTruncate },
+    setup: () => ({ args }),
     template: `
       <div style="width: 150px; display: flex">
-        <TooltipOnTruncate>
+        <TooltipOnTruncate v-bind="args">
           This is a very long text that will be truncated
         </TooltipOnTruncate>
       </div>
@@ -24,11 +28,12 @@ export const Truncated: Story = {
 };
 
 export const NotTruncated: Story = {
-  render: () => ({
+  render: args => ({
     components: { TooltipOnTruncate },
+    setup: () => ({ args }),
     template: `
       <div style="width: 300px; display: flex">
-        <TooltipOnTruncate>
+        <TooltipOnTruncate v-bind="args">
           Short text
         </TooltipOnTruncate>
       </div>
@@ -42,9 +47,7 @@ export const WithContentProp: Story = {
   },
   render: args => ({
     components: { TooltipOnTruncate },
-    setup() {
-      return { args };
-    },
+    setup: () => ({ args }),
     template: `
       <div style="width: 150px; display: flex">
         <TooltipOnTruncate v-bind="args">
