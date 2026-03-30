@@ -28,7 +28,9 @@ function getCustomDomainRoutes() {
 
   const orgConfig = getOrganizationConfigByDomain(window.location.hostname);
   if (!whiteLabelSpace.value && orgConfig) {
-    const orgRoute = orgRootRoutes.find(r => r.name === 'org')!;
+    const orgRoute = orgRootRoutes.find(r => r.name === 'org');
+    if (!orgRoute) return orgRootRoutes;
+
     const defaultChildren = orgRoute.children ?? [];
     const customRoutes = createCustomRoutes(orgConfig, defaultChildren);
 
