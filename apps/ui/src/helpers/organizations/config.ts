@@ -165,17 +165,13 @@ export function getOrganizationConfigById(
   return ORGANIZATIONS[id] ?? null;
 }
 
-/**
- * Resolves a space param (canonical `network:id`) to its canonical form.
- * Returns null if the space doesn't belong to the organization.
- */
-export function toOrgSpaceId(
+export function isOrgSpace(
   org: OrganizationConfig,
-  param: string
-): string | null {
-  const match = org.spaceIds.find(s => `${s.network}:${s.id}` === param);
+  spaceParam?: string | string[]
+): spaceParam is string {
+  if (!spaceParam || Array.isArray(spaceParam)) return false;
 
-  return match ? `${match.network}:${match.id}` : null;
+  return org.spaceIds.some(s => `${s.network}:${s.id}` === spaceParam);
 }
 
 /**

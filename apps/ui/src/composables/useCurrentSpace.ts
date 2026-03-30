@@ -1,6 +1,5 @@
 import { getAddress, isAddress } from '@ethersproject/address';
 import { skipToken, useQuery } from '@tanstack/vue-query';
-import { toOrgSpaceId } from '@/helpers/organizations';
 import { resolver } from '@/helpers/resolver';
 import { useSpaceQuery } from '@/queries/spaces';
 import { NetworkID, Space } from '@/types';
@@ -22,9 +21,7 @@ export function useCurrentSpace() {
   const orgRouteSpace = computed<Space | null>(() => {
     if (!organization.value) return null;
 
-    const spaceId =
-      (route.meta.orgSpaceId as string) ??
-      (spaceParam.value && toOrgSpaceId(organization.value, spaceParam.value));
+    const spaceId = (route.meta.orgSpaceId as string) ?? spaceParam.value;
     if (!spaceId) return null;
 
     return (

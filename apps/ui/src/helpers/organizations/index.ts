@@ -1,7 +1,7 @@
 export {
   getOrganizationConfigByDomain,
   getOrganizationConfigById,
-  toOrgSpaceId
+  isOrgSpace
 } from './config';
 export type { Organization, OrganizationConfig } from './config';
 export {
