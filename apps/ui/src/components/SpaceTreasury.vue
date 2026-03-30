@@ -25,7 +25,12 @@ const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
 const isAddressModalOpen = ref(false);
-const showAllTokens = useStorage(`${pkg.name}.treasury.showAllTokens`, false);
+const showAllTokens = useStorage(
+  `${pkg.name}.treasury.show-low-value-tokens`,
+  false,
+  localStorage,
+  { writeDefaults: false }
+);
 
 const balancesTreasury = computed(() => {
   if (!treasury.value?.network) return null;
@@ -263,7 +268,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           >
             <template #button>
               <button>
-                <IH-dots-vertical class="size-[22px]" />
+                <IH-dots-horizontal class="size-[22px]" />
               </button>
             </template>
             <template #items>
@@ -271,7 +276,9 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
                 <IH-eye v-if="!showAllTokens" />
                 <IH-eye-off v-else />
                 {{
-                  showAllTokens ? 'Hide low value tokens' : 'Show all tokens'
+                  showAllTokens
+                    ? 'Hide low value tokens'
+                    : 'Show low value tokens'
                 }}
               </UiDropdownItem>
             </template>
