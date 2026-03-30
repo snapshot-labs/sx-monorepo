@@ -7,10 +7,7 @@ const components = [
   'Carousel',
   'Checkbox',
   'ColumnHeader',
-  'ColumnHeaderItemSortable',
-  'Container',
   'ContainerInfiniteScroll',
-  'ContainerSettings',
   'Countdown',
   'Dropdown',
   'Eyebrow',
@@ -26,10 +23,8 @@ const components = [
   'SelectorCard',
   'StateWarning',
   'Switch',
-  'ToolbarBottom',
   'Tooltip',
-  'TooltipOnTruncate',
-  'Topnav'
+  'TooltipOnTruncate'
 ];
 
 export function TuneResolver(): ComponentResolver {
