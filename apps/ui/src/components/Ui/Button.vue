@@ -85,10 +85,10 @@ const buttonStyles = computed(() => {
   }
 
   &.primary {
-    @apply bg-skin-link text-skin-bg border-skin-link;
+    @apply bg-skin-primary text-skin-accent-foreground border-skin-primary;
 
     &:disabled:deep() {
-      @apply bg-skin-link/40 border-transparent;
+      @apply bg-skin-primary/40 border-transparent;
 
       .loading,
       .loading.inverse {
