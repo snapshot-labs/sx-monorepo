@@ -36,6 +36,7 @@ export type NetworkID =
   | 'oeth'
   | 'base'
   | 'mnt'
+  | 'bnb'
   | 'ape'
   | 'curtis'
   | 'sep'
