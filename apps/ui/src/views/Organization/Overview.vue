@@ -159,11 +159,17 @@ watchEffect(() => {
     </div>
     <ProposalsList
       data-testid="summary-proposals-list"
-      :title="getPageName('proposals')"
+      title="Proposals"
       :is-error="isError"
       :loading="isPending"
       :limit="PROPOSALS_SUMMARY_LIMIT"
       :proposals="proposals"
-    />
+    >
+      <template #item-meta="{ proposal }">
+        {{
+          getPageName('proposals', `${proposal.network}:${proposal.space.id}`)
+        }}
+      </template>
+    </ProposalsList>
   </div>
 </template>

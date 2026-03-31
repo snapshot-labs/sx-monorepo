@@ -17,20 +17,27 @@ export type PageKey = keyof typeof DEFAULT_PAGE_NAMES;
 export function usePageNames(space?: MaybeRefOrGetter<Space | undefined>) {
   const { organization } = useOrganization();
 
-  function getPageName(key: PageKey): string {
+  function resolveSpaceId(spaceIdOverride?: string): string | undefined {
+    if (spaceIdOverride) return spaceIdOverride;
+    const resolvedSpace = toValue(space);
+    if (resolvedSpace) return `${resolvedSpace.network}:${resolvedSpace.id}`;
+
+    return undefined;
+  }
+
+  function getPageName(key: PageKey, spaceId?: string): string {
     const navItems = organization.value?.navItems;
     if (!navItems) return DEFAULT_PAGE_NAMES[key];
 
-    const resolvedSpace = toValue(space);
-    if (resolvedSpace) {
-      const spaceId = `${resolvedSpace.network}:${resolvedSpace.id}`;
+    const resolved = resolveSpaceId(spaceId);
+    if (resolved) {
       for (const [, item] of Object.entries(navItems)) {
         if (!item.name || !item.link || typeof item.link === 'string') continue;
         const link = item.link as {
           name?: string;
           params?: Record<string, string>;
         };
-        if (link.name === `space-${key}` && link.params?.space === spaceId) {
+        if (link.name === `space-${key}` && link.params?.space === resolved) {
           return item.name;
         }
       }

@@ -87,6 +87,7 @@ const hasVoted = computed(
       </div>
     </div>
     <div class="inline">
+      <slot />
       {{ getProposalId(proposal) }}
       <template v-if="showAuthor">
         by
