@@ -31,6 +31,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   // EVM
   eth: 1,
   oeth: 10,
+  bnb: 56,
   matic: 137,
   base: 8453,
   arb1: 42161,

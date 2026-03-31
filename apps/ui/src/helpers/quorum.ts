@@ -17,6 +17,10 @@ export function getProposalCurrentQuorum(
       : Number(proposal.scores_total);
   }
 
+  if (proposal.quorum_type === 'for_only') {
+    return Number(proposal.scores[0]);
+  }
+
   // Only For and Abstain votes are counted towards quorum progress in SX spaces.
   return Number(proposal.scores[0]) + Number(proposal.scores[2]);
 }
