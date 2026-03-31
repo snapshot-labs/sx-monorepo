@@ -32,7 +32,6 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-desc'
     | 'tokenHoldersRepresentedAmount-asc'
 );
-const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const actions = useActions();
 const queryClient = useQueryClient();
@@ -153,8 +152,6 @@ function handleUndelegateConfirmed() {
 function handleUndelegateClick() {
   isUndelegating.value = true;
 }
-
-watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>

@@ -16,7 +16,6 @@ const props = defineProps<{
   extraContacts?: Contact[];
 }>();
 
-const { setTitle } = useTitle();
 const { getPageLabel } = usePageLabels(() => props.space);
 const route = useRoute();
 const router = useRouter();
@@ -138,8 +137,6 @@ async function addTx(tx: Transaction) {
     params: { space: spaceKey.value, key: draftId }
   });
 }
-
-watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
