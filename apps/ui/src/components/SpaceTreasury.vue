@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
+import { _c, _n, lsGet, lsSet, sanitizeUrl, shorten } from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
-import pkg from '../../package.json';
 
 const STAKING_CHAIN_IDS: string[] = ['1', '11155111'];
 const EVM_CHAIN_IDS: string[] = evmNetworks
@@ -25,12 +24,7 @@ const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
 const isAddressModalOpen = ref(false);
-const showLowValueTokens = useStorage(
-  `${pkg.name}.treasury.show-low-value-tokens`,
-  false,
-  localStorage,
-  { writeDefaults: false }
-);
+const showSmallBalances = ref(lsGet('treasury.show-small-balances', false));
 
 const balancesTreasury = computed(() => {
   if (!treasury.value?.network) return null;
@@ -112,13 +106,18 @@ const hasStakeableAssets = computed(() => {
 });
 
 const filteredAssets = computed(() => {
-  if (showLowValueTokens.value) return assets.value;
+  if (showSmallBalances.value) return assets.value;
 
   return assets.value.filter(
     asset =>
       asset.value >= DUST_THRESHOLD || asset.contractAddress === ETH_CONTRACT
   );
 });
+
+function toggleSmallBalances() {
+  showSmallBalances.value = !showSmallBalances.value;
+  lsSet('treasury.show-small-balances', showSmallBalances.value);
+}
 
 function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
@@ -272,13 +271,13 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
               </button>
             </template>
             <template #items>
-              <UiDropdownItem @click="showLowValueTokens = !showLowValueTokens">
-                <IH-eye v-if="!showLowValueTokens" />
+              <UiDropdownItem @click="toggleSmallBalances">
+                <IH-eye v-if="!showSmallBalances" />
                 <IH-eye-off v-else />
                 {{
-                  showLowValueTokens
-                    ? 'Hide low value tokens'
-                    : 'Show low value tokens'
+                  showSmallBalances
+                    ? 'Hide small balances'
+                    : 'Show small balances'
                 }}
               </UiDropdownItem>
             </template>
