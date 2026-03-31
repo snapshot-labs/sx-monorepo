@@ -2,7 +2,7 @@ import { MaybeRefOrGetter } from 'vue';
 import { useOrganization } from '@/composables/useOrganization';
 import { Space } from '@/types';
 
-const DEFAULT_PAGE_NAMES = {
+export const DEFAULT_PAGE_LABELS = {
   overview: 'Overview',
   proposals: 'Proposals',
   delegates: 'Delegates',
@@ -12,9 +12,9 @@ const DEFAULT_PAGE_NAMES = {
   settings: 'Settings'
 } as const;
 
-export type PageKey = keyof typeof DEFAULT_PAGE_NAMES;
+export type PageKey = keyof typeof DEFAULT_PAGE_LABELS;
 
-export function usePageNames(space?: MaybeRefOrGetter<Space | undefined>) {
+export function usePageLabels(space?: MaybeRefOrGetter<Space | undefined>) {
   const { organization } = useOrganization();
 
   function resolveSpaceId(spaceIdOverride?: string): string | undefined {
@@ -25,9 +25,9 @@ export function usePageNames(space?: MaybeRefOrGetter<Space | undefined>) {
     return undefined;
   }
 
-  function getPageName(key: PageKey, spaceId?: string): string {
+  function getPageLabel(key: PageKey, spaceId?: string): string {
     const navItems = organization.value?.navItems;
-    if (!navItems) return DEFAULT_PAGE_NAMES[key];
+    if (!navItems) return DEFAULT_PAGE_LABELS[key];
 
     const resolved = resolveSpaceId(spaceId);
     if (resolved) {
@@ -45,8 +45,8 @@ export function usePageNames(space?: MaybeRefOrGetter<Space | undefined>) {
 
     if (navItems[key]?.name) return navItems[key].name!;
 
-    return DEFAULT_PAGE_NAMES[key];
+    return DEFAULT_PAGE_LABELS[key];
   }
 
-  return { getPageName };
+  return { getPageLabel };
 }

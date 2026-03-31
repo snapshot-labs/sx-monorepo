@@ -5,7 +5,7 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { getPageName } = usePageNames(() => props.space);
+const { getPageLabel } = usePageLabels(() => props.space);
 
 const topics: Ref<Topic[]> = ref([]);
 const loading = ref(false);
@@ -26,7 +26,7 @@ onMounted(async () => {
 });
 
 watchEffect(() =>
-  setTitle(`${getPageName('discussions')} - ${props.space.name}`)
+  setTitle(`${getPageLabel('discussions')} - ${props.space.name}`)
 );
 </script>
 
@@ -42,7 +42,7 @@ watchEffect(() =>
       </div>
     </div>
     <TopicsList
-      :title="getPageName('discussions')"
+      :title="getPageLabel('discussions')"
       :loading="loading"
       :topics="topics"
     />

@@ -10,7 +10,7 @@ const USERS_LIMIT = 20;
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { getPageName } = usePageNames(() => props.space);
+const { getPageLabel } = usePageLabels(() => props.space);
 
 const sortBy = ref(
   'vote_count-desc' as
@@ -87,13 +87,13 @@ function handleEndReached() {
 }
 
 watchEffect(() =>
-  setTitle(`${getPageName('leaderboard')} - ${props.space.name}`)
+  setTitle(`${getPageLabel('leaderboard')} - ${props.space.name}`)
 );
 </script>
 
 <template>
   <div>
-    <UiSectionHeader :label="getPageName('leaderboard')" sticky />
+    <UiSectionHeader :label="getPageLabel('leaderboard')" sticky />
     <UiColumnHeader>
       <div class="w-[40%] lg:w-[50%] flex items-center truncate">User</div>
       <button

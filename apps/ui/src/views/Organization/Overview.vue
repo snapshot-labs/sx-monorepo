@@ -16,7 +16,7 @@ import {
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
-const { getPageName } = usePageNames();
+const { getPageLabel } = usePageLabels();
 const queryClient = useQueryClient();
 const proposalQueries = useQueries({
   queries: computed(() =>
@@ -167,7 +167,7 @@ watchEffect(() => {
     >
       <template #item-meta="{ proposal }">
         {{
-          getPageName('proposals', `${proposal.network}:${proposal.space.id}`)
+          getPageLabel('proposals', `${proposal.network}:${proposal.space.id}`)
         }}
       </template>
     </ProposalsList>

@@ -9,7 +9,7 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { getPageName } = usePageNames(() => props.space);
+const { getPageLabel } = usePageLabels(() => props.space);
 const router = useRouter();
 const route = useRoute();
 const { web3 } = useWeb3();
@@ -114,7 +114,7 @@ watch(
 );
 
 watchEffect(() =>
-  setTitle(`${getPageName('proposals')} - ${props.space.name}`)
+  setTitle(`${getPageLabel('proposals')} - ${props.space.name}`)
 );
 </script>
 
@@ -228,7 +228,7 @@ watchEffect(() =>
       </div>
     </div>
     <ProposalsList
-      :title="getPageName('proposals')"
+      :title="getPageLabel('proposals')"
       limit="off"
       :is-error="isError"
       :loading="isPending"
