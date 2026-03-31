@@ -1,5 +1,5 @@
-import { Meta, StoryObj } from '@storybook/vue3-vite';
 import dayjs from 'dayjs';
+import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import Calendar from './Calendar.vue';
 
 const meta = {
