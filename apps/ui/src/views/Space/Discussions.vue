@@ -5,6 +5,7 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
+const { getPageName } = usePageNames(() => props.space);
 
 const topics: Ref<Topic[]> = ref([]);
 const loading = ref(false);
@@ -24,7 +25,9 @@ onMounted(async () => {
   }
 });
 
-watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
+watchEffect(() =>
+  setTitle(`${getPageName('discussions')} - ${props.space.name}`)
+);
 </script>
 
 <template>
@@ -38,6 +41,10 @@ watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
         </UiButton>
       </div>
     </div>
-    <TopicsList title="Topics" :loading="loading" :topics="topics" />
+    <TopicsList
+      :title="getPageName('discussions')"
+      :loading="loading"
+      :topics="topics"
+    />
   </div>
 </template>

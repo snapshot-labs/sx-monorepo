@@ -20,6 +20,7 @@ const { spaceType, townhallSpaceId } = useTownhallSpace(spaceParam);
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
+const { getPageName } = usePageNames(() => props.space);
 
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
@@ -190,7 +191,7 @@ watchEffect(() => setTitle(props.space.name));
       <ProposalsList
         v-if="spaceType === 'proposalsSpace'"
         data-testid="summary-proposals-list"
-        title="Proposals"
+        :title="getPageName('proposals')"
         :is-error="isError"
         :loading="isPending"
         :limit="PROPOSALS_SUMMARY_LIMIT - 1"

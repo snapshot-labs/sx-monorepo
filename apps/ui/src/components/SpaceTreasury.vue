@@ -17,6 +17,7 @@ const props = defineProps<{
 }>();
 
 const { setTitle } = useTitle();
+const { getPageName } = usePageNames(() => props.space);
 const route = useRoute();
 const router = useRouter();
 const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
@@ -184,7 +185,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
     </div>
     <div class="space-y-3">
       <div>
-        <UiSectionHeader label="Treasury" sticky />
+        <UiSectionHeader :label="getPageName('treasury')" sticky />
         <AppLink
           :to="treasuryExplorerUrl || '#'"
           class="flex justify-between items-center mx-4 py-3 border-b group"

@@ -16,6 +16,7 @@ import {
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
+const { getPageName } = usePageNames();
 const queryClient = useQueryClient();
 const proposalQueries = useQueries({
   queries: computed(() =>
@@ -158,7 +159,7 @@ watchEffect(() => {
     </div>
     <ProposalsList
       data-testid="summary-proposals-list"
-      title="Proposals"
+      :title="getPageName('proposals')"
       :is-error="isError"
       :loading="isPending"
       :limit="PROPOSALS_SUMMARY_LIMIT"

@@ -15,6 +15,8 @@ const props = defineProps<{
   delegation: SpaceMetadataDelegation;
 }>();
 
+const { getPageName } = usePageNames(() => props.space);
+
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{
   delegatees: { id: string }[];
@@ -270,7 +272,7 @@ watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
       </UiStateWarning>
     </div>
 
-    <UiSectionHeader label="Delegates" sticky />
+    <UiSectionHeader :label="getPageName('delegates')" sticky />
     <UiStateWarning v-if="!delegation.apiUrl" class="px-4 py-3">
       Delegation dashboard is not configured.
     </UiStateWarning>
