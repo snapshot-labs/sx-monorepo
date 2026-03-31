@@ -11,36 +11,33 @@ export const DEFAULT_PAGE_LABELS = {
 } as const;
 
 export type PageKey = keyof typeof DEFAULT_PAGE_LABELS;
+type NavLink = { name?: string; params?: Record<string, string> };
 
 export function usePageLabels(space?: MaybeRefOrGetter<Space | undefined>) {
   const { organization } = useOrganization();
 
+  const defaultSpaceId = computed<string | undefined>(() => {
+    const s = toValue(space);
+
+    return s && `${s.network}:${s.id}`;
+  });
+
   function getPageLabel(key: PageKey, spaceId?: string): string {
     const navItems = organization.value?.navItems;
-    if (!navItems) return DEFAULT_PAGE_LABELS[key];
+    const fallback = navItems?.[key]?.name || DEFAULT_PAGE_LABELS[key];
+    const targetSpaceId = spaceId || defaultSpaceId.value;
 
-    const resolvedSpace = toValue(space);
-    const resolved =
-      spaceId ||
-      (resolvedSpace && `${resolvedSpace.network}:${resolvedSpace.id}`);
+    if (!targetSpaceId || !navItems) return fallback;
 
-    if (resolved) {
-      for (const item of Object.values(navItems)) {
-        if (!item.name || !item.link || typeof item.link === 'string') continue;
-        const link = item.link as {
-          name?: string;
-          params?: Record<string, string>;
-        };
-        if (link.name === `space-${key}` && link.params?.space === resolved) {
-          return item.name;
-        }
-      }
-    }
+    const match = Object.values(navItems).find(item => {
+      const link = item.link as NavLink | undefined;
 
-    const name = navItems[key]?.name;
-    if (name) return name;
+      return (
+        link?.name === `space-${key}` && link?.params?.space === targetSpaceId
+      );
+    });
 
-    return DEFAULT_PAGE_LABELS[key];
+    return match?.name || fallback;
   }
 
   return { getPageLabel };
