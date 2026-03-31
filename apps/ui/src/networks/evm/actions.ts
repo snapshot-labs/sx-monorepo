@@ -27,11 +27,8 @@ import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import {
-  createErc1155Metadata,
-  getChainIdKind,
-  verifyNetwork
-} from '@/helpers/utils';
+import { createErc1155Metadata, getChainIdKind } from '@/helpers/utils';
+import { verifyNetwork } from '@/helpers/walletNetworks';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   buildMetadata,
