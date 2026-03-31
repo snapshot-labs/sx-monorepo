@@ -41,10 +41,6 @@ watchEffect(() =>
         </UiButton>
       </div>
     </div>
-    <TopicsList
-      :title="getPageLabel('discussions')"
-      :loading="loading"
-      :topics="topics"
-    />
+    <TopicsList title="Topics" :loading="loading" :topics="topics" />
   </div>
 </template>
