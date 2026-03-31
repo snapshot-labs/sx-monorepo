@@ -7,9 +7,7 @@ export const DEFAULT_PAGE_LABELS = {
   proposals: 'Proposals',
   delegates: 'Delegates',
   discussions: 'Discussions',
-  treasury: 'Treasury',
-  leaderboard: 'Leaderboard',
-  settings: 'Settings'
+  treasury: 'Treasury'
 } as const;
 
 export type PageKey = keyof typeof DEFAULT_PAGE_LABELS;
