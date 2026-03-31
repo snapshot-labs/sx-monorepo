@@ -15,21 +15,17 @@ export type PageKey = keyof typeof DEFAULT_PAGE_LABELS;
 export function usePageLabels(space?: MaybeRefOrGetter<Space | undefined>) {
   const { organization } = useOrganization();
 
-  function resolveSpaceId(spaceIdOverride?: string): string | undefined {
-    if (spaceIdOverride) return spaceIdOverride;
-    const resolvedSpace = toValue(space);
-    if (resolvedSpace) return `${resolvedSpace.network}:${resolvedSpace.id}`;
-
-    return undefined;
-  }
-
   function getPageLabel(key: PageKey, spaceId?: string): string {
     const navItems = organization.value?.navItems;
     if (!navItems) return DEFAULT_PAGE_LABELS[key];
 
-    const resolved = resolveSpaceId(spaceId);
+    const resolvedSpace = toValue(space);
+    const resolved =
+      spaceId ||
+      (resolvedSpace && `${resolvedSpace.network}:${resolvedSpace.id}`);
+
     if (resolved) {
-      for (const [, item] of Object.entries(navItems)) {
+      for (const item of Object.values(navItems)) {
         if (!item.name || !item.link || typeof item.link === 'string') continue;
         const link = item.link as {
           name?: string;
@@ -41,7 +37,8 @@ export function usePageLabels(space?: MaybeRefOrGetter<Space | undefined>) {
       }
     }
 
-    if (navItems[key]?.name) return navItems[key].name!;
+    const name = navItems[key]?.name;
+    if (name) return name;
 
     return DEFAULT_PAGE_LABELS[key];
   }
