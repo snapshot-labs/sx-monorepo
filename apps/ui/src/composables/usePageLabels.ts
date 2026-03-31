@@ -30,10 +30,11 @@ export function usePageLabels(space?: MaybeRefOrGetter<Space | undefined>) {
     if (!targetSpaceId || !navItems) return fallback;
 
     const match = Object.values(navItems).find(item => {
-      const link = item.link as NavLink | undefined;
+      if (typeof item.link !== 'object') return false;
+      const link = item.link as NavLink;
 
       return (
-        link?.name === `space-${key}` && link?.params?.space === targetSpaceId
+        link.name === `space-${key}` && link.params?.space === targetSpaceId
       );
     });
 

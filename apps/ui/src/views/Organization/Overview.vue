@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useQueries, useQueryClient } from '@tanstack/vue-query';
+import { DEFAULT_PAGE_LABELS } from '@/composables/usePageLabels';
 import {
   _n,
   autoLinkText,
@@ -166,9 +167,21 @@ watchEffect(() => {
       :proposals="proposals"
     >
       <template #item-meta="{ proposal }">
-        {{
-          getPageLabel('proposals', `${proposal.network}:${proposal.space.id}`)
-        }}
+        <template
+          v-if="
+            getPageLabel(
+              'proposals',
+              `${proposal.network}:${proposal.space.id}`
+            ) !== DEFAULT_PAGE_LABELS.proposals
+          "
+        >
+          {{
+            getPageLabel(
+              'proposals',
+              `${proposal.network}:${proposal.space.id}`
+            )
+          }}
+        </template>
       </template>
     </ProposalsList>
   </div>
