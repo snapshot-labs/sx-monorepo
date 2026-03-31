@@ -43,6 +43,13 @@ export const METADATA: Record<string, Metadata> = {
     apiUrl: API_URL,
     avatar: 'ipfs://bafkreidkucwfn4mzo2gtydrt2wogk3je5xpugom67vhi4h4comaxxjzoz4'
   },
+  bnb: {
+    name: 'BNB Chain',
+    ticker: 'BNB',
+    chainId: 56,
+    apiUrl: API_URL,
+    avatar: 'ipfs://bafkreibll4la7wqerzs7zwxjne2j7ayynbg2wlenemssoahxxj5rbt6c64'
+  },
   eth: {
     name: 'Ethereum',
     chainId: 1,
