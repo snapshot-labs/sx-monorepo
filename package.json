@@ -42,7 +42,7 @@
     "prettier": "3.2.5"
   },
   "engines": {
-    "node": ">=22.6"
+    "node": ">=22.6.0"
   },
   "packageManager": "bun@1.3.9",
   "workspaces": [

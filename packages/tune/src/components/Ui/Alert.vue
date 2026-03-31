@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NotificationType } from '../../types';
+import type { NotificationType } from '../../types';
 
 defineProps<{
   type: NotificationType;

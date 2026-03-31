@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-import { type Component } from 'vue';
+import type { Component } from 'vue';
 import IHCode from '~icons/heroicons-outline/code';
 
 withDefaults(
