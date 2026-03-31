@@ -1,6 +1,6 @@
 import type { InjectionKey, Plugin } from 'vue';
-import type { Router } from 'vue-router';
 import VueTippy from 'vue-tippy';
+import type { Router } from 'vue-router';
 
 export interface TuneOptions {
   useRouter?: () => Router;

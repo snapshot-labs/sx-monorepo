@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { StepRecords } from '../../types';
+import type { StepRecords } from '../../types';
 
 const props = withDefaults(
   defineProps<{

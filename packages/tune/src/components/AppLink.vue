@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
+import type { RouteLocationRaw, RouterLinkProps } from 'vue-router';
 import { useRouter } from '../composables/useRouter';
 
 const props = defineProps<
