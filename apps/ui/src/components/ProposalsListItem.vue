@@ -50,7 +50,9 @@ function handleAcceptTerms() {
         :show-space="showSpace"
         class="flex-auto mr-4 w-0"
       >
-        <slot />
+        <template #meta>
+          <slot name="meta" />
+        </template>
       </ProposalsListItemHeading>
       <div class="hidden md:block">
         <ProposalVote :proposal="proposal">

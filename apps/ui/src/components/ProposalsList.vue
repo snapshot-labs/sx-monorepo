@@ -54,7 +54,9 @@ const currentLimit = computed(() => {
           :show-space="showSpace"
           :show-author="showAuthor"
         >
-          <slot name="item-meta" :proposal="proposal" />
+          <template #meta>
+            <slot name="item-meta" :proposal="proposal" />
+          </template>
         </ProposalsListItem>
       </UiContainerInfiniteScroll>
       <UiStateWarning v-if="!proposals.length" class="px-4 py-3">
