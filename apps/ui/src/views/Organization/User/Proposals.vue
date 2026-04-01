@@ -12,9 +12,12 @@ const metaStore = useMetaStore();
 const { setTitle } = useTitle();
 
 const spaceIdsByNetwork = computed<Map<NetworkID, string[]>>(() => {
-  const grouped = Map.groupBy(props.organization.spaces, s => s.network);
+  return props.organization.spaces.reduce((map, s) => {
+    if (!map.has(s.network)) map.set(s.network, []);
+    map.get(s.network)!.push(s.id);
 
-  return new Map(Array.from(grouped, ([k, v]) => [k, v.map(s => s.id)]));
+    return map;
+  }, new Map<NetworkID, string[]>());
 });
 
 const { data: proposals, isPending } = useQuery({

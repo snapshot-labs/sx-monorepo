@@ -16,9 +16,12 @@ const metaStore = useMetaStore();
 const { setTitle } = useTitle();
 
 const spaceIdsByNetwork = computed<Map<NetworkID, string[]>>(() => {
-  const grouped = Map.groupBy(props.organization.spaces, s => s.network);
+  return props.organization.spaces.reduce((map, s) => {
+    if (!map.has(s.network)) map.set(s.network, []);
+    map.get(s.network)!.push(s.id);
 
-  return new Map(Array.from(grouped, ([k, v]) => [k, v.map(s => s.id)]));
+    return map;
+  }, new Map<NetworkID, string[]>());
 });
 
 const {
@@ -150,8 +153,8 @@ watchEffect(() => setTitle(`${props.user.name || props.user.id} votes`));
     @end-reached="handleEndReached"
   >
     <div
-      v-for="(proposal, i) in proposals"
-      :key="i"
+      v-for="proposal in proposals"
+      :key="`${proposal.network}:${proposal.id}`"
       class="border-b py-[14px] flex gap-3"
     >
       <ProposalsListItemHeading
