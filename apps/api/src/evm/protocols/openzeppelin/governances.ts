@@ -18,7 +18,7 @@ type Governance = {
   address: `0x${string}`;
   authenticators: OpenZeppelinAuthenticator[];
   startBlock: number;
-  extraTreasuries?: Treasury[];
+  treasuries?: Treasury[];
 };
 
 export const GOVERNANCES: Partial<
@@ -40,7 +40,7 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 13533772,
-      extraTreasuries: [
+      treasuries: [
         {
           name: 'ENS Endowment',
           address: '0x4F2083f5fBede34C2714aFfb3105539775f7FE64',
