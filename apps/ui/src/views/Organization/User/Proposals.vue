@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query';
+import { Organization } from '@/helpers/organizations';
 import { getNetwork } from '@/networks';
 import { NetworkID, User } from '@/types';
 
 defineOptions({ inheritAttrs: false });
 
-const props = defineProps<{ user: User }>();
+const props = defineProps<{ organization: Organization; user: User }>();
 
 const metaStore = useMetaStore();
 const { setTitle } = useTitle();
-const { organization } = useOrganization();
-
-const spaces = computed(() => organization.value?.spaces ?? []);
 
 const spaceIdsByNetwork = computed<Map<NetworkID, string[]>>(() => {
-  const grouped = Map.groupBy(spaces.value, s => s.network);
+  const grouped = Map.groupBy(props.organization.spaces, s => s.network);
 
   return new Map(Array.from(grouped, ([k, v]) => [k, v.map(s => s.id)]));
 });
@@ -22,7 +20,7 @@ const spaceIdsByNetwork = computed<Map<NetworkID, string[]>>(() => {
 const { data: proposals, isPending } = useQuery({
   queryKey: [
     'org',
-    () => organization.value?.id,
+    () => props.organization.id,
     'user',
     () => props.user.id,
     'proposals'
