@@ -1,6 +1,12 @@
 import { OpenZeppelinAuthenticator } from '@snapshot-labs/sx';
 import { NetworkID } from '../../types';
 
+export type Treasury = {
+  name: string;
+  address: string;
+  chainId: number;
+};
+
 type Governance = {
   name: string;
   about?: string;
@@ -12,6 +18,7 @@ type Governance = {
   address: `0x${string}`;
   authenticators: OpenZeppelinAuthenticator[];
   startBlock: number;
+  extraTreasuries?: Treasury[];
 };
 
 export const GOVERNANCES: Partial<
@@ -32,7 +39,29 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticator',
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
-      startBlock: 13533772
+      startBlock: 13533772,
+      extraTreasuries: [
+        {
+          name: 'ENS Endowment',
+          address: '0x4F2083f5fBede34C2714aFfb3105539775f7FE64',
+          chainId: 1
+        },
+        {
+          name: 'ETH Registrar Controller 2',
+          address: '0x59E16fcCd424Cc24e280Be16E11Bcd56fb0CE547',
+          chainId: 1
+        },
+        {
+          name: 'ETH Registrar Controller',
+          address: '0x253553366Da8546fC250F225fe3d25d0C782303b',
+          chainId: 1
+        },
+        {
+          name: 'Old ETH Registrar Controller',
+          address: '0x283Af0B28c62C092C9727F1Ee09c02CA627EB7F5',
+          chainId: 1
+        }
+      ]
     }
   },
   sep: {
