@@ -30,8 +30,8 @@ const {
     'org',
     () => props.organization.id,
     'user',
-    'votes',
-    () => props.user.id
+    () => props.user.id,
+    'votes'
   ],
   queryFn: async () => {
     const results = await Promise.all(
@@ -93,7 +93,8 @@ const {
     () => props.organization.id,
     'user',
     () => props.user.id,
-    'votes'
+    'votes',
+    'proposals'
   ],
   enabled: () => !!votes.value,
   queryFn: ({ pageParam }) => {
