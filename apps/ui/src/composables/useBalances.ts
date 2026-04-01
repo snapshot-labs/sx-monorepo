@@ -40,7 +40,7 @@ export function useBalances({
   treasury: MaybeRefOrGetter<Treasury | null>;
 }) {
   async function loadBalances(address: string, chainId: string) {
-    const metadata = METADATA_BY_CHAIN_ID.get(chainId);
+    const metadata = METADATA_BY_CHAIN_ID.get(Number(chainId));
     const baseToken = metadata?.ticker
       ? { name: metadata.name, symbol: metadata.ticker }
       : { name: 'Ether', symbol: 'ETH' };
