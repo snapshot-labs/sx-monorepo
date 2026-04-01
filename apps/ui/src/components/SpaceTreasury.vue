@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ETH_CONTRACT } from '@/helpers/constants';
-import { _c, _n, sanitizeUrl, shorten } from '@/helpers/utils';
+import { _c, _n, lsGet, lsSet, sanitizeUrl, shorten } from '@/helpers/utils';
 import { enabledNetworks, evmNetworks, getNetwork } from '@/networks';
 import { Contact, Space, SpaceMetadataTreasury, Transaction } from '@/types';
 
@@ -8,6 +8,7 @@ const STAKING_CHAIN_IDS: string[] = ['1', '11155111'];
 const EVM_CHAIN_IDS: string[] = evmNetworks
   .filter(network => enabledNetworks.includes(network))
   .map(network => String(getNetwork(network).chainId));
+const DUST_THRESHOLD = 0.01;
 
 const props = defineProps<{
   space: Space;
@@ -23,6 +24,7 @@ const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
 const isAddressModalOpen = ref(false);
+const showSmallBalances = ref(lsGet('treasury.show-small-balances', false));
 
 const balancesTreasury = computed(() => {
   if (!treasury.value?.network) return null;
@@ -102,6 +104,20 @@ const hasStakeableAssets = computed(() => {
     STAKING_CHAIN_IDS.includes(treasury.value.network)
   );
 });
+
+const filteredAssets = computed(() => {
+  if (showSmallBalances.value) return assets.value;
+
+  return assets.value.filter(
+    asset =>
+      asset.value >= DUST_THRESHOLD || asset.contractAddress === ETH_CONTRACT
+  );
+});
+
+function toggleSmallBalances() {
+  showSmallBalances.value = !showSmallBalances.value;
+  lsSet('treasury.show-small-balances', showSmallBalances.value);
+}
 
 function openModal(type: 'tokens' | 'nfts' | 'stake') {
   modalOpen.value[type] = true;
@@ -224,25 +240,48 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
         </AppLink>
       </div>
       <div>
-        <div class="flex pl-4 border-b space-x-3">
-          <AppLink
-            :to="{
-              params: {
-                tab: 'tokens'
-              }
-            }"
+        <div class="flex items-center px-4 border-b">
+          <div class="flex space-x-3">
+            <AppLink
+              :to="{
+                params: {
+                  tab: 'tokens'
+                }
+              }"
+            >
+              <UiLabel :is-active="page === 'tokens'" text="Tokens" />
+            </AppLink>
+            <AppLink
+              :to="{
+                params: {
+                  tab: 'nfts'
+                }
+              }"
+            >
+              <UiLabel :is-active="page === 'nfts'" text="NFTs" />
+            </AppLink>
+          </div>
+          <UiDropdown
+            v-if="page === 'tokens'"
+            class="flex items-center ml-auto"
           >
-            <UiLabel :is-active="page === 'tokens'" text="Tokens" />
-          </AppLink>
-          <AppLink
-            :to="{
-              params: {
-                tab: 'nfts'
-              }
-            }"
-          >
-            <UiLabel :is-active="page === 'nfts'" text="NFTs" />
-          </AppLink>
+            <template #button>
+              <button>
+                <IH-dots-horizontal class="size-[22px]" />
+              </button>
+            </template>
+            <template #items>
+              <UiDropdownItem @click="toggleSmallBalances">
+                <IH-eye v-if="!showSmallBalances" />
+                <IH-eye-off v-else />
+                {{
+                  showSmallBalances
+                    ? 'Hide small balances'
+                    : 'Show small balances'
+                }}
+              </UiDropdownItem>
+            </template>
+          </UiDropdown>
         </div>
         <UiStateWarning
           v-if="
@@ -265,7 +304,7 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             Failed to load treasury tokens.
           </UiStateWarning>
           <AppLink
-            v-for="(asset, i) in assets"
+            v-for="(asset, i) in filteredAssets"
             v-else
             :key="i"
             :to="

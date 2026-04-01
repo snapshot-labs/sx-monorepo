@@ -288,6 +288,8 @@ type Proposal {
   scores_total: BigDecimalVP!
   "Minimum voting power required for execution"
   quorum: BigDecimalVP!
+  "Quorum counting mode (e.g. for_only for Bravo-style where only For votes count)"
+  quorum_type: String
   "Parsed total voting power as float"
   scores_total_parsed: Float!
   "Timestamp when proposal was created"

@@ -196,6 +196,23 @@ export function useProposalsQuery(
   );
 }
 
+export function proposalsSummaryQueryFn(
+  queryClient: QueryClient,
+  networkId: NetworkID,
+  spaceId: string
+) {
+  return async () => {
+    const proposals = await getProposals([spaceId], networkId, {
+      skip: 0,
+      limit: PROPOSALS_SUMMARY_LIMIT
+    });
+
+    setProposalsDetails(queryClient, networkId, proposals);
+
+    return proposals;
+  };
+}
+
 export function useProposalsSummaryQuery(
   networkId: MaybeRefOrGetter<NetworkID>,
   spaceId: MaybeRefOrGetter<string>,
@@ -205,20 +222,11 @@ export function useProposalsSummaryQuery(
 
   return useQuery({
     queryKey: PROPOSALS_KEYS.spaceSummary(networkId, spaceId),
-    queryFn: async () => {
-      const proposals = await getProposals(
-        [toValue(spaceId)],
-        toValue(networkId),
-        {
-          skip: 0,
-          limit: PROPOSALS_SUMMARY_LIMIT
-        }
-      );
-
-      setProposalsDetails(queryClient, toValue(networkId), proposals);
-
-      return proposals;
-    },
+    queryFn: proposalsSummaryQueryFn(
+      queryClient,
+      toValue(networkId),
+      toValue(spaceId)
+    ),
     enabled: () => toValue(enabled)
   });
 }

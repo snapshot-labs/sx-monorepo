@@ -12,7 +12,7 @@ import { AuctionDetailFragment } from '@/helpers/auction/gql/graphql';
 import { compareOrders, decodeOrder } from '@/helpers/auction/orders';
 import { _n, sleep } from '@/helpers/utils';
 import { EVM_CONNECTORS } from '@/networks/common/constants';
-import { METADATA as EVM_METADATA } from '@/networks/evm';
+import { METADATA as EVM_METADATA } from '@/networks/evm/metadata';
 import {
   AUCTION_KEYS,
   useBiddingTokenPriceQuery,
@@ -562,7 +562,11 @@ watch(volume, () => {
   <div
     class="w-full max-w-[400px] md:h-full z-40 border-l-0 md:border-l bg-skin-bg"
   >
-    <Affix data-testid="proposal-sidebar" :top="TOTAL_NAV_HEIGHT" :bottom="64">
+    <UiAffix
+      data-testid="proposal-sidebar"
+      :top="TOTAL_NAV_HEIGHT"
+      :bottom="64"
+    >
       <div>
         <UiScrollerHorizontal with-buttons gradient="xxl">
           <div class="flex px-4 space-x-3 bg-skin-bg border-b min-w-max">
@@ -606,7 +610,7 @@ watch(volume, () => {
           class="mb-4"
         />
       </div>
-    </Affix>
+    </UiAffix>
   </div>
   <teleport to="#modal">
     <ModalShare

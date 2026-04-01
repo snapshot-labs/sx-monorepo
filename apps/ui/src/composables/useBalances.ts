@@ -4,7 +4,7 @@ import { MaybeRefOrGetter } from 'vue';
 import { getBalances, Token } from '@/helpers/alchemy';
 import { getTokenPrices } from '@/helpers/coingecko';
 import { COINGECKO_ASSET_PLATFORMS, ETH_CONTRACT } from '@/helpers/constants';
-import { METADATA } from '@/networks/evm';
+import { METADATA } from '@/networks/evm/metadata';
 import { ChainId } from '@/types';
 
 type Metadata = {
@@ -40,7 +40,7 @@ export function useBalances({
   treasury: MaybeRefOrGetter<Treasury | null>;
 }) {
   async function loadBalances(address: string, chainId: string) {
-    const metadata = METADATA_BY_CHAIN_ID.get(chainId);
+    const metadata = METADATA_BY_CHAIN_ID.get(Number(chainId));
     const baseToken = metadata?.ticker
       ? { name: metadata.name, symbol: metadata.ticker }
       : { name: 'Ether', symbol: 'ETH' };

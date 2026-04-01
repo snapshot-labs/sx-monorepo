@@ -141,6 +141,9 @@ export const evmNetworks = {
     hasNonNativeBlockNumbers: true
   }),
   base: createStandardConfig(8453, { blockTime: 2 }),
+  bnb: createStandardConfig(56, {
+    blockTime: 0.45
+  }),
   mnt: createStandardConfig(5000, {
     blockTime: 2,
     // https://docs.mantle.xyz/network/system-information/fee-mechanism/eip-1559-support#application-of-eip-1559-in-mantle-v2-tectonic
@@ -169,5 +172,6 @@ export const evmPolygon = createEvmConfig('matic');
 export const evmArbitrum = createEvmConfig('arb1');
 export const evmBase = createEvmConfig('base');
 export const evmMantle = createEvmConfig('mnt');
+export const evmBnb = createEvmConfig('bnb');
 export const evmApe = createEvmConfig('ape');
 export const evmCurtis = createEvmConfig('curtis');
