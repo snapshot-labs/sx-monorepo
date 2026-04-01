@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useInfiniteQuery, useQuery } from '@tanstack/vue-query';
-import { Organization } from '@/helpers/organizations';
 import { getNames } from '@/helpers/stamp';
 import { getNetwork } from '@/networks';
 import { NetworkID, Proposal, User, Vote } from '@/types';
@@ -10,13 +9,16 @@ const VOTES_LIMIT = 1000;
 
 defineOptions({ inheritAttrs: false });
 
-const props = defineProps<{ organization: Organization; user: User }>();
+const props = defineProps<{ user: User }>();
 
 const metaStore = useMetaStore();
 const { setTitle } = useTitle();
+const { organization } = useOrganization();
+
+const spaces = computed(() => organization.value?.spaces ?? []);
 
 const spaceIdsByNetwork = computed<Map<NetworkID, string[]>>(() => {
-  const grouped = Map.groupBy(props.organization.spaces, s => s.network);
+  const grouped = Map.groupBy(spaces.value, s => s.network);
 
   return new Map(Array.from(grouped, ([k, v]) => [k, v.map(s => s.id)]));
 });
@@ -28,7 +30,7 @@ const {
 } = useQuery({
   queryKey: [
     'org',
-    () => props.organization.id,
+    () => organization.value?.id,
     'user',
     'votes',
     () => props.user.id
@@ -90,7 +92,7 @@ const {
   initialPageParam: 0,
   queryKey: [
     'org',
-    () => props.organization.id,
+    () => organization.value?.id,
     'user',
     () => props.user.id,
     'votes'

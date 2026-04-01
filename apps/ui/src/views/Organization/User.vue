@@ -162,6 +162,6 @@ watch(
         </AppLink>
       </div>
     </UiScrollerHorizontal>
-    <router-view :user="user" :space="space" :organization="organization" />
+    <router-view :user="user" :space="space" />
   </div>
 </template>
