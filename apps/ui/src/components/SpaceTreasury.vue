@@ -24,7 +24,9 @@ const { strategiesWithTreasuries } = useTreasuries(props.space);
 const { createDraft } = useEditor();
 
 const isAddressModalOpen = ref(false);
-const showSmallBalances = ref(lsGet('treasury.show-small-balances', false));
+const isSmallBalancesVisible = ref(
+  lsGet('treasury.show-small-balances') === true
+);
 
 const balancesTreasury = computed(() => {
   if (!treasury.value?.network) return null;
@@ -106,7 +108,7 @@ const hasStakeableAssets = computed(() => {
 });
 
 const filteredAssets = computed(() => {
-  if (showSmallBalances.value) return assets.value;
+  if (isSmallBalancesVisible.value) return assets.value;
 
   return assets.value.filter(
     asset =>
@@ -115,8 +117,8 @@ const filteredAssets = computed(() => {
 });
 
 function toggleSmallBalances() {
-  showSmallBalances.value = !showSmallBalances.value;
-  lsSet('treasury.show-small-balances', showSmallBalances.value);
+  isSmallBalancesVisible.value = !isSmallBalancesVisible.value;
+  lsSet('treasury.show-small-balances', isSmallBalancesVisible.value);
 }
 
 function openModal(type: 'tokens' | 'nfts' | 'stake') {
@@ -272,10 +274,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
             </template>
             <template #items>
               <UiDropdownItem @click="toggleSmallBalances">
-                <IH-eye v-if="!showSmallBalances" />
+                <IH-eye v-if="!isSmallBalancesVisible" />
                 <IH-eye-off v-else />
                 {{
-                  showSmallBalances
+                  isSmallBalancesVisible
                     ? 'Hide small balances'
                     : 'Show small balances'
                 }}
