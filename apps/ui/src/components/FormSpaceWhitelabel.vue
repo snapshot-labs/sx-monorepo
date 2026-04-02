@@ -181,7 +181,7 @@ watch(formErrors, value => emit('errors', value), { immediate: true });
       v-if="space.additionalRawData?.domain"
       class="shrink-0 relative h-full hidden sm:block"
     >
-      <Affix :top="137" :bottom="100">
+      <UiAffix :top="137" :bottom="100">
         <div>
           <div class="flex justify-between items-center mb-2">
             <UiEyebrow class="font-medium">Preview</UiEyebrow>
@@ -217,7 +217,7 @@ watch(formErrors, value => emit('errors', value), { immediate: true });
             </div>
           </div>
         </div>
-      </Affix>
+      </UiAffix>
     </div>
   </div>
 </template>

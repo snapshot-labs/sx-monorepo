@@ -118,7 +118,8 @@ function getProposalState(
   const quorum = BigInt(proposal.quorum);
   const currentQuorum = getProposalCurrentQuorum(networkId, {
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    scores_total: proposal.scores_total
+    scores_total: proposal.scores_total,
+    quorum_type: proposal.quorum_type ?? undefined
   });
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);
@@ -423,6 +424,7 @@ function formatProposal(
     network: networkId,
     privacy: 'none',
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
+    quorum_type: proposal.quorum_type as Proposal['quorum_type'],
     flagged: false,
     flag_code: 0,
     completed: ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(

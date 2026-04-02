@@ -25,7 +25,7 @@ export type * from './types';
 ${indexExports}
 `;
 
-const resolver = `import { ComponentResolver } from 'unplugin-vue-components';
+const resolver = `import type { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
 ${names.map(name => `  '${name}'`).join(',\n')}
