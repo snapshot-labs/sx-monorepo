@@ -303,16 +303,10 @@ watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
           <UiStateWarning v-else-if="isError" class="px-4 py-3">
             Failed to load treasury tokens.
           </UiStateWarning>
-          <UiStateWarning
-            v-else-if="isSuccess && filteredAssets.length === 0"
-            class="px-4 py-3"
-          >
-            All tokens have small balances. Use the menu to show them.
-          </UiStateWarning>
           <AppLink
-            v-for="asset in filteredAssets"
+            v-for="(asset, i) in filteredAssets"
             v-else
-            :key="asset.contractAddress"
+            :key="i"
             :to="
               asset.contractAddress === ETH_CONTRACT
                 ? treasuryExplorerUrl
