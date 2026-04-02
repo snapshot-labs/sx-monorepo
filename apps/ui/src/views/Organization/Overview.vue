@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQueries, useQueryClient } from '@tanstack/vue-query';
-import { DEFAULT_PAGE_LABELS } from '@/composables/usePageLabels';
+import { getOrgPageLabel } from '@/helpers/organizations';
 import {
   _n,
   autoLinkText,
@@ -17,7 +17,6 @@ import {
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
-const { getPageLabel } = usePageLabels();
 const queryClient = useQueryClient();
 const proposalQueries = useQueries({
   queries: computed(() =>
@@ -167,21 +166,13 @@ watchEffect(() => {
       :proposals="proposals"
     >
       <template #item-meta="{ proposal }">
-        <template
-          v-if="
-            getPageLabel(
-              'proposals',
-              `${proposal.network}:${proposal.space.id}`
-            ) !== DEFAULT_PAGE_LABELS.proposals
-          "
-        >
-          {{
-            getPageLabel(
-              'proposals',
-              `${proposal.network}:${proposal.space.id}`
-            )
-          }}
-        </template>
+        {{
+          getOrgPageLabel(
+            organization,
+            'proposals',
+            `${proposal.network}:${proposal.space.id}`
+          )
+        }}
       </template>
     </ProposalsList>
   </div>

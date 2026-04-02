@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getOrgPageLabel } from '@/helpers/organizations';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
@@ -20,7 +21,6 @@ const { spaceType, townhallSpaceId } = useTownhallSpace(spaceParam);
 const { setTitle } = useTitle();
 const { isWhiteLabel } = useWhiteLabel();
 const { organization } = useOrganization();
-const { getPageLabel } = usePageLabels(() => props.space);
 
 const isOffchainSpace = computed(() =>
   offchainNetworks.includes(props.space.network)
@@ -191,7 +191,13 @@ watchEffect(() => setTitle(props.space.name));
       <ProposalsList
         v-if="spaceType === 'proposalsSpace'"
         data-testid="summary-proposals-list"
-        :title="getPageLabel('proposals')"
+        :title="
+          getOrgPageLabel(
+            organization,
+            'proposals',
+            `${space.network}:${space.id}`
+          ) ?? 'Proposals'
+        "
         :is-error="isError"
         :loading="isPending"
         :limit="PROPOSALS_SUMMARY_LIMIT - 1"

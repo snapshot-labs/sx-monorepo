@@ -5,7 +5,6 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { getPageLabel } = usePageLabels(() => props.space);
 
 const topics: Ref<Topic[]> = ref([]);
 const loading = ref(false);
@@ -25,9 +24,7 @@ onMounted(async () => {
   }
 });
 
-watchEffect(() =>
-  setTitle(`${getPageLabel('discussions')} - ${props.space.name}`)
-);
+watchEffect(() => setTitle(`Discussions - ${props.space.name}`));
 </script>
 
 <template>

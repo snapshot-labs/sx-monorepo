@@ -1,4 +1,3 @@
-import { DEFAULT_PAGE_LABELS } from '@/composables/usePageLabels';
 import { SPACES_DISCUSSIONS } from '@/helpers/discourse';
 import { NavConfig, NavContext, NavItem, NavProvider } from './types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
@@ -25,7 +24,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
     [
       'overview',
       {
-        name: DEFAULT_PAGE_LABELS.overview,
+        name: 'Overview',
         icon: IHGlobeAlt,
         link: { name: 'space-overview' }
       }
@@ -33,7 +32,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
     [
       'proposals',
       {
-        name: DEFAULT_PAGE_LABELS.proposals,
+        name: 'Proposals',
         icon: IHNewspaper,
         link: { name: 'space-proposals', params: { space: spaceId } },
         activeRoute: {
@@ -46,7 +45,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       'delegates',
       hasDelegates
         ? {
-            name: DEFAULT_PAGE_LABELS.delegates,
+            name: 'Delegates',
             icon: IHLightningBolt,
             link: { name: 'space-delegates', params: { space: spaceId } }
           }
@@ -56,7 +55,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       'discussions',
       hasDiscussions
         ? {
-            name: DEFAULT_PAGE_LABELS.discussions,
+            name: 'Discussions',
             icon: IHAnnotation,
             link: { name: 'space-discussions', params: { space: spaceId } }
           }
@@ -66,7 +65,7 @@ function getOrgConfig(context: NavContext): NavConfig | null {
       'treasury',
       hasTreasury
         ? {
-            name: DEFAULT_PAGE_LABELS.treasury,
+            name: 'Treasury',
             icon: IHCash,
             link: { name: 'space-treasury', params: { space: spaceId } }
           }

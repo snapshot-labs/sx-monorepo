@@ -4,16 +4,13 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { getPageLabel } = usePageLabels(() => props.space);
 
 const activeDelegationId = ref(0);
 const delegateData = computed(
   () => props.space.delegations[activeDelegationId.value]
 );
 
-watchEffect(() =>
-  setTitle(`${getPageLabel('delegates')} - ${props.space.name}`)
-);
+watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>

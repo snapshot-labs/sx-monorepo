@@ -16,7 +16,7 @@ const props = defineProps<{
   extraContacts?: Contact[];
 }>();
 
-const { getPageLabel } = usePageLabels(() => props.space);
+const { setTitle } = useTitle();
 const route = useRoute();
 const router = useRouter();
 const { treasury, getExplorerUrl } = useTreasury(props.treasuryData);
@@ -137,6 +137,8 @@ async function addTx(tx: Transaction) {
     params: { space: spaceKey.value, key: draftId }
   });
 }
+
+watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 </script>
 
 <template>
@@ -182,7 +184,7 @@ async function addTx(tx: Transaction) {
     </div>
     <div class="space-y-3">
       <div>
-        <UiSectionHeader :label="getPageLabel('treasury')" sticky />
+        <UiSectionHeader label="Treasury" sticky />
         <AppLink
           :to="treasuryExplorerUrl || '#'"
           class="flex justify-between items-center mx-4 py-3 border-b group"

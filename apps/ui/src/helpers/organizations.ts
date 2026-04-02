@@ -14,6 +14,7 @@ import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHWifi from '~icons/heroicons-outline/wifi';
 
 type SpaceId = { network: NetworkID; id: string };
+type NavLink = { name?: string; params?: Record<string, string> };
 
 export type OrganizationConfig = {
   id: string;
@@ -223,4 +224,22 @@ export function resolveOrgLocation(
 
   const rewritten = toOrgLocation(to.name, toParams, router);
   return rewritten ? { ...to, ...rewritten } : to;
+}
+
+export function getOrgPageLabel(
+  organization: Organization | null,
+  key: string,
+  spaceId: string
+): string | undefined {
+  const navItems = organization?.navItems;
+  if (!navItems) return undefined;
+
+  const match = Object.values(navItems).find(item => {
+    if (typeof item.link !== 'object') return false;
+    const link = item.link as NavLink;
+
+    return link.name === `space-${key}` && link.params?.space === spaceId;
+  });
+
+  return match?.name ?? navItems[key]?.name;
 }

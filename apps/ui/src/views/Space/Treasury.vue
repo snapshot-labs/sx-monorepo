@@ -5,7 +5,6 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
-const { getPageLabel } = usePageLabels(() => props.space);
 const route = useRoute();
 const router = useRouter();
 const treasuriesList = ref<HTMLElement | null>(null);
@@ -30,9 +29,7 @@ watch(
   },
   { immediate: true }
 );
-watchEffect(() =>
-  setTitle(`${getPageLabel('treasury')} - ${props.space.name}`)
-);
+watchEffect(() => setTitle(`Treasury - ${props.space.name}`));
 watchEffect(() => {
   const { index, tab } = route.params;
 

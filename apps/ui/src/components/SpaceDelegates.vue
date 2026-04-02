@@ -15,8 +15,6 @@ const props = defineProps<{
   delegation: SpaceMetadataDelegation;
 }>();
 
-const { getPageLabel } = usePageLabels(() => props.space);
-
 const delegateModalOpen = ref(false);
 const delegateModalState = ref<{
   delegatees: { id: string }[];
@@ -32,6 +30,7 @@ const sortBy = ref(
     | 'tokenHoldersRepresentedAmount-desc'
     | 'tokenHoldersRepresentedAmount-asc'
 );
+const { setTitle } = useTitle();
 const { web3 } = useWeb3();
 const actions = useActions();
 const queryClient = useQueryClient();
@@ -152,6 +151,8 @@ function handleUndelegateConfirmed() {
 function handleUndelegateClick() {
   isUndelegating.value = true;
 }
+
+watchEffect(() => setTitle(`Delegates - ${props.space.name}`));
 </script>
 
 <template>
@@ -269,7 +270,7 @@ function handleUndelegateClick() {
       </UiStateWarning>
     </div>
 
-    <UiSectionHeader :label="getPageLabel('delegates')" sticky />
+    <UiSectionHeader label="Delegates" sticky />
     <UiStateWarning v-if="!delegation.apiUrl" class="px-4 py-3">
       Delegation dashboard is not configured.
     </UiStateWarning>
