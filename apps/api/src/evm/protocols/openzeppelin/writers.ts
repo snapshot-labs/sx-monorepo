@@ -62,7 +62,7 @@ export function createWriters(
 
   const createTreasuries = (
     timelockAddress: string,
-    treasuries?: Treasury[]
+    readOnlyTreasuries: Treasury[] = []
   ) => {
     const timelockTreasury = JSON.stringify({
       name: 'Timelock',
@@ -70,7 +70,7 @@ export function createWriters(
       address: timelockAddress
     });
 
-    const extra = (treasuries ?? []).map(treasury =>
+    const extra = readOnlyTreasuries.map(treasury =>
       JSON.stringify({
         name: treasury.name,
         chain_id: treasury.chainId,
@@ -257,7 +257,7 @@ export function createWriters(
     spaceMetadata.voting_power_symbol = symbol;
     spaceMetadata.treasuries = createTreasuries(
       timelock,
-      governanceInfo.treasuries
+      governanceInfo.readOnlyTreasuries
     );
     spaceMetadata.executors_strategies = [executionStrategy.id];
     await spaceMetadata.save();
@@ -661,7 +661,7 @@ export function createWriters(
 
     spaceMetadataItem.treasuries = createTreasuries(
       getAddress(event.args.newTimelock),
-      governanceInfo.treasuries
+      governanceInfo.readOnlyTreasuries
     );
 
     const [timelockDelay, quorum] = await Promise.all([
