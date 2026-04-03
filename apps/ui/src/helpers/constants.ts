@@ -31,6 +31,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
   // EVM
   eth: 1,
   oeth: 10,
+  bnb: 56,
   matic: 137,
   base: 8453,
   arb1: 42161,
@@ -46,6 +47,7 @@ export const CHAIN_IDS: Record<Exclude<NetworkID, 's' | 's-tn'>, ChainId> = {
 export const COINGECKO_ASSET_PLATFORMS = {
   1: 'ethereum',
   10: 'optimistic-ethereum',
+  56: 'binance-smart-chain',
   100: 'xdai',
   137: 'polygon-pos',
   5000: 'mantle',
@@ -58,6 +60,7 @@ export const COINGECKO_ASSET_PLATFORMS = {
 export const COINGECKO_BASE_ASSETS = {
   ethereum: 'ethereum',
   'optimistic-ethereum': 'ethereum',
+  'binance-smart-chain': 'binancecoin',
   xdai: 'xdai',
   'polygon-pos': 'matic-network',
   mantle: 'mantle',
