@@ -8,6 +8,7 @@ import {
   evmApe,
   evmArbitrum,
   evmBase,
+  evmBnb,
   evmCurtis,
   evmMainnet,
   evmMantle,
@@ -27,11 +28,8 @@ import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import Multicaller from '@/helpers/multicaller';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import {
-  createErc1155Metadata,
-  getChainIdKind,
-  verifyNetwork
-} from '@/helpers/utils';
+import { createErc1155Metadata, getChainIdKind } from '@/helpers/utils';
+import { verifyNetwork } from '@/helpers/walletNetworks';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   buildMetadata,
@@ -66,6 +64,7 @@ import { EDITOR_APP_NAME } from '../common/constants';
 
 const CONFIGS: Record<number, EvmNetworkConfig> = {
   10: evmOptimism,
+  56: evmBnb,
   137: evmPolygon,
   5000: evmMantle,
   8453: evmBase,

@@ -75,7 +75,7 @@ type ApiOptions = {
 };
 
 const DELEGATES_SUBGRAPH_URL =
-  'https://api.studio.thegraph.com/query/23545/delegates/version/latest';
+  'https://subgrapher.snapshot.org/subgraph/arbitrum/7iEHSsBprpnwCHKULfaQaCA6gU6RcEgnXfD3XtHx4yyc';
 
 const GOVERNOR_DELEGATIONS: Record<string, string> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': DELEGATES_SUBGRAPH_URL,
@@ -118,7 +118,8 @@ function getProposalState(
   const quorum = BigInt(proposal.quorum);
   const currentQuorum = getProposalCurrentQuorum(networkId, {
     scores: [proposal.scores_1, proposal.scores_2, proposal.scores_3],
-    scores_total: proposal.scores_total
+    scores_total: proposal.scores_total,
+    quorum_type: proposal.quorum_type ?? undefined
   });
   const scoresFor = BigInt(proposal.scores_1);
   const scoresAgainst = BigInt(proposal.scores_2);
@@ -423,6 +424,7 @@ function formatProposal(
     network: networkId,
     privacy: 'none',
     quorum: Number(proposal.execution_strategy_details?.quorum || 0),
+    quorum_type: proposal.quorum_type as Proposal['quorum_type'],
     flagged: false,
     flag_code: 0,
     completed: ['passed', 'rejected', 'queued', 'vetoed', 'executed'].includes(

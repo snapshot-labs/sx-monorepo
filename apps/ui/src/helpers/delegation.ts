@@ -1,5 +1,5 @@
 import { enabledNetworks, evmNetworks } from '@/networks';
-import { METADATA } from '@/networks/starknet';
+import { METADATA } from '@/networks/starknet/metadata';
 import { ChainId, NetworkID, SpaceMetadataDelegation } from '@/types';
 import { getChainIdKind } from './utils';
 

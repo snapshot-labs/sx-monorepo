@@ -12,7 +12,8 @@ import {
   VerificationContext
 } from '@/helpers/auction/verification-providers';
 import { CHAIN_IDS } from '@/helpers/constants';
-import { isUserAbortError, verifyNetwork } from '@/helpers/utils';
+import { isUserAbortError } from '@/helpers/utils';
+import { verifyNetwork } from '@/helpers/walletNetworks';
 
 const ATTESTATION_API_URL = import.meta.env.VITE_ATTESTATION_URL;
 

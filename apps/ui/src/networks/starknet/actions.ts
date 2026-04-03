@@ -18,11 +18,8 @@ import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import {
-  createErc1155Metadata,
-  verifyNetwork,
-  verifyStarknetNetwork
-} from '@/helpers/utils';
+import { createErc1155Metadata } from '@/helpers/utils';
+import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   EVM_CONNECTORS,
