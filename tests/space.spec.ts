@@ -30,6 +30,7 @@ test('should navigate to proposal page', async ({
 
   await page
     .getByRole('link', { name: 'Updating the Code of Conduct' })
+    .first()
     .click();
 
   await proposalPage.isReady();
