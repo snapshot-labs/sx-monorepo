@@ -27,7 +27,7 @@ export type Organization = OrganizationConfig & {
   spaces: Space[];
 };
 
-const ENS_SPACE_ROUTES = [
+const ENS_SPACE_ROUTES: SpaceRoute['children'] = [
   { path: '', name: 'space-proposals' },
   { path: 'create/:key?', name: 'space-editor' },
   { path: ':proposal', name: 'space-proposal' }
