@@ -1,6 +1,6 @@
 import { FunctionalComponent } from 'vue';
 import { SellOrder } from '@/helpers/auction';
-import { getChoiceText, whiteLabelAwareParams } from '@/helpers/utils';
+import { getChoiceText } from '@/helpers/utils';
 import { Choice, Proposal, Space, User } from '@/types';
 import ICFarcaster from '~icons/c/farcaster';
 import ICLens from '~icons/c/lens';
@@ -25,17 +25,16 @@ const SOCIAL_NETWORKS: {
 
 export function useSharing() {
   const { app } = useApp();
-  const { isWhiteLabel } = useWhiteLabel();
   const router = useAppRouter();
 
   function getProposalUrl(proposal: Proposal): string {
     return `${window.location.origin}/${
       router.resolve({
         name: 'space-proposal',
-        params: whiteLabelAwareParams(isWhiteLabel.value, {
+        params: {
           space: `${proposal.network}:${proposal.space.id}`,
           proposal: proposal.proposal_id
-        })
+        }
       }).href
     }`;
   }
@@ -44,9 +43,7 @@ export function useSharing() {
     return `${window.location.origin}/${
       router.resolve({
         name: 'user',
-        params: whiteLabelAwareParams(isWhiteLabel.value, {
-          user: user.id
-        })
+        params: { user: user.id }
       }).href
     }`;
   }
@@ -55,10 +52,10 @@ export function useSharing() {
     return `${window.location.origin}/${
       router.resolve({
         name: 'space-user',
-        params: whiteLabelAwareParams(isWhiteLabel.value, {
+        params: {
           space: `${spaceUser.space.network}:${spaceUser.space.id}`,
           user: spaceUser.user.id
-        })
+        }
       }).href
     }`;
   }

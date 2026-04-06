@@ -18,15 +18,25 @@ export function useCurrentSpace() {
     () => whiteLabelSpace.value ?? organization.value?.spaces[0] ?? null
   );
 
-  const orgRouteSpace = computed<Space | null>(
-    () =>
-      organization.value?.spaces.find(
-        s => spaceParam.value === `${s.network}:${s.id}`
-      ) ?? null
-  );
+  const orgRouteSpace = computed<Space | null>(() => {
+    if (!organization.value) return null;
+
+    const spaceId = (route.meta.orgSpaceId as string) ?? spaceParam.value;
+    if (!spaceId) return null;
+
+    return (
+      organization.value.spaces.find(s => `${s.network}:${s.id}` === spaceId) ??
+      null
+    );
+  });
 
   // Space already available from org or white-label context, no query needed
-  const knownSpace = computed(() => orgRouteSpace.value ?? primarySpace.value);
+  const knownSpace = computed(() => {
+    if (whiteLabelSpace.value) return whiteLabelSpace.value;
+    if (orgRouteSpace.value) return orgRouteSpace.value;
+    if (!spaceParam.value) return primarySpace.value;
+    return null;
+  });
 
   const queryFn = computed<typeof skipToken | (() => Promise<SpaceId | null>)>(
     () => {
