@@ -75,7 +75,7 @@ type ApiOptions = {
 };
 
 const DELEGATES_SUBGRAPH_URL =
-  'https://api.studio.thegraph.com/query/23545/delegates/version/latest';
+  'https://subgrapher.snapshot.org/subgraph/arbitrum/7iEHSsBprpnwCHKULfaQaCA6gU6RcEgnXfD3XtHx4yyc';
 
 const GOVERNOR_DELEGATIONS: Record<string, string> = {
   '0x408ED6354d4973f66138C91495F2f2FCbd8724C3': DELEGATES_SUBGRAPH_URL,

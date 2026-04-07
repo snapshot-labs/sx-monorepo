@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
-import { getOrgPageLabel } from '@/helpers/organizations';
+import { getOrgProposalLabel } from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
 import { useProposalsQuery } from '@/queries/proposals';
 import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
@@ -33,9 +33,8 @@ const selectIconBaseProps = {
 
 const proposalsLabel = computed(
   () =>
-    getOrgPageLabel(
+    getOrgProposalLabel(
       organization.value,
-      'proposals',
       `${props.space.network}:${props.space.id}`
     ) ?? 'Proposals'
 );

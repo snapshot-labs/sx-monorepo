@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getOrgPageLabel } from '@/helpers/organizations';
+import { getOrgProposalLabel } from '@/helpers/organizations';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
@@ -192,9 +192,8 @@ watchEffect(() => setTitle(props.space.name));
         v-if="spaceType === 'proposalsSpace'"
         data-testid="summary-proposals-list"
         :title="
-          getOrgPageLabel(
+          getOrgProposalLabel(
             organization,
-            'proposals',
             `${space.network}:${space.id}`
           ) ?? 'Proposals'
         "

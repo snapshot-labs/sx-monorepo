@@ -1,11 +1,4 @@
-import {
-  RouteLocationNormalized,
-  RouteLocationRaw,
-  RouteParams,
-  Router
-} from 'vue-router';
 import { NavItem } from '@/composables/useNav/types';
-import { stripInvalidSpaceParam } from '@/helpers/router';
 import { NetworkID, Space } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
@@ -13,19 +6,34 @@ import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHWifi from '~icons/heroicons-outline/wifi';
 
-type SpaceId = { network: NetworkID; id: string };
 type NavLink = { name?: string; params?: Record<string, string> };
+
+/** Remaps existing default space-* routes under a custom path. Whitelabel only. */
+export type SpaceRoute = {
+  /** Base path segment, e.g. 'offchain'. No slashes. */
+  path: string;
+  meta: { orgSpaceId: string };
+  /** Each name must reference an existing default route (e.g. 'space-proposals') */
+  children: { path: string; name: string }[];
+};
 
 export type OrganizationConfig = {
   id: string;
   name: string;
-  spaceIds: SpaceId[];
+  spaceIds: { network: NetworkID; id: string }[];
+  routes?: SpaceRoute[];
   navItems?: Record<string, Partial<NavItem>>;
 };
 
 export type Organization = OrganizationConfig & {
   spaces: Space[];
 };
+
+const ENS_SPACE_ROUTES: SpaceRoute['children'] = [
+  { path: '', name: 'space-proposals' },
+  { path: 'create/:key?', name: 'space-editor' },
+  { path: ':proposal', name: 'space-proposal' }
+];
 
 const ORGANIZATIONS: Record<string, OrganizationConfig> = {
   starknet: {
@@ -81,13 +89,39 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         id: 'ens.eth'
       }
     ],
+    routes: [
+      {
+        path: 'onchain',
+        meta: { orgSpaceId: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3' },
+        children: ENS_SPACE_ROUTES
+      },
+      {
+        path: 'offchain',
+        meta: { orgSpaceId: 's:ens.eth' },
+        children: ENS_SPACE_ROUTES
+      }
+    ],
     navItems: {
+      proposals: {
+        link: {
+          name: 'space-proposals',
+          params: {
+            space: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3'
+          }
+        },
+        activeRoute: {
+          prefix: 'space-onchain'
+        }
+      },
       signals: {
         name: 'Signals',
         icon: IHWifi,
         link: {
           name: 'space-proposals',
           params: { space: 's:ens.eth' }
+        },
+        activeRoute: {
+          prefix: 'space-offchain'
         },
         position: 2
       },
@@ -133,102 +167,27 @@ export function getOrganizationConfigById(
   return ORGANIZATIONS[id] ?? null;
 }
 
-/**
- * Converts a named location (space-* or user) to its org-* equivalent.
- * Returns null if no matching org route exists.
- */
-function toOrgLocation(
-  name: string,
-  params: RouteParams,
-  router: Router
-): { name: string; params: RouteParams } | null {
-  if (name.startsWith('space-')) {
-    const orgRouteName = name.replace('space-', 'org-');
-    if (!router.hasRoute(orgRouteName)) return null;
+export function isOrgSpace(
+  org: OrganizationConfig,
+  spaceParam?: string | string[]
+): spaceParam is string {
+  if (!spaceParam || Array.isArray(spaceParam)) return false;
 
-    const stripped = stripInvalidSpaceParam(orgRouteName, params, router);
-    return stripped ?? { name: orgRouteName, params };
-  }
-
-  if (name === 'user') {
-    return { name: 'org-user-statement', params };
-  }
-
-  return null;
+  return org.spaceIds.some(s => `${s.network}:${s.id}` === spaceParam);
 }
 
 /**
- * Navigation guard that redirects space-* routes to their org equivalents.
- * Delegates to resolveOrgLocation and redirects when the route changes.
+ * Returns the custom route for a space, if one exists.
  */
-export function onOrgNavigate(router: Router) {
-  return (to: RouteLocationNormalized) => {
-    const raw = {
-      name: String(to.name),
-      params: { ...to.params }
-    };
-    const resolved = resolveOrgLocation(raw, router);
-    if (
-      resolved === raw ||
-      typeof resolved === 'string' ||
-      !('name' in resolved)
-    )
-      return;
-
-    return {
-      name: resolved.name,
-      params: resolved.params,
-      query: to.query,
-      hash: to.hash
-    };
-  };
+export function getCustomRoute(
+  org: OrganizationConfig,
+  spaceId: string
+): SpaceRoute | undefined {
+  return org.routes?.find(r => r.meta.orgSpaceId === spaceId);
 }
 
-/**
- * Resolves a route location for org context:
- * - Whitelabel: strips :space param from routes that don't have :space in their path.
- * - /org/:id: rewrites space-* → org-* and injects :org param.
- * Returns `to` unchanged when no transformation is needed.
- */
-export function resolveOrgLocation(
-  to: RouteLocationRaw,
-  router: Router
-): RouteLocationRaw {
-  if (typeof to === 'string' || !('name' in to) || typeof to.name !== 'string')
-    return to;
-
-  const whiteLabelOrg = getOrganizationConfigByDomain(window.location.hostname);
-
-  if (whiteLabelOrg) {
-    const stripped = stripInvalidSpaceParam(to.name, to.params ?? {}, router);
-    if (stripped) return { ...to, ...stripped };
-    return to;
-  }
-
-  if (String(router.currentRoute.value.matched[0]?.name) !== 'org') return to;
-
-  const orgId = router.currentRoute.value.params.org as string;
-  const orgConfig = getOrganizationConfigById(orgId);
-  if (!orgConfig) return to;
-
-  const toParams: RouteParams = { ...to.params } as RouteParams;
-
-  if (toParams.space) {
-    const isInOrg = orgConfig.spaceIds.some(
-      s => `${s.network}:${s.id}` === toParams.space
-    );
-    if (!isInOrg) return to;
-  }
-
-  toParams.org = orgId;
-
-  const rewritten = toOrgLocation(to.name, toParams, router);
-  return rewritten ? { ...to, ...rewritten } : to;
-}
-
-export function getOrgPageLabel(
+export function getOrgProposalLabel(
   organization: Organization | null,
-  key: string,
   spaceId: string
 ): string | undefined {
   const navItems = organization?.navItems;
@@ -238,8 +197,8 @@ export function getOrgPageLabel(
     if (typeof item.link !== 'object') return false;
     const link = item.link as NavLink;
 
-    return link.name === `space-${key}` && link.params?.space === spaceId;
+    return link.name === 'space-proposals' && link.params?.space === spaceId;
   });
 
-  return match?.name ?? navItems[key]?.name;
+  return match?.name ?? navItems.proposals?.name;
 }

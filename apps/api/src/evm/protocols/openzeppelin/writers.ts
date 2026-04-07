@@ -8,7 +8,7 @@ import GovernorTimelockControlAbi from './abis/GovernorTimelockControl';
 import GovernorVotesAbi from './abis/GovernorVotes';
 import IGovernorAbi from './abis/IGovernor';
 import TimelockControllerAbi from './abis/TimelockController';
-import { GOVERNANCES } from './governances';
+import { GOVERNANCES, Treasury } from './governances';
 import logger from './logger';
 import { convertChoice, getProposalBody, getProposalTitle } from './utils';
 import {
@@ -64,14 +64,25 @@ export function createWriters(
     return { strategyId, strategyDataItemId, metadataId };
   };
 
-  const createTreasuries = (timelockAddress: string) => {
-    return [
+  const createTreasuries = (
+    timelockAddress: string,
+    readOnlyTreasuries: Treasury[] = []
+  ) => {
+    const timelockTreasury = JSON.stringify({
+      name: 'Timelock',
+      chain_id: protocolConfig.chainId,
+      address: timelockAddress
+    });
+
+    const extra = readOnlyTreasuries.map(treasury =>
       JSON.stringify({
-        name: 'Timelock',
-        chain_id: protocolConfig.chainId,
-        address: timelockAddress
+        name: treasury.name,
+        chain_id: treasury.chainId,
+        address: treasury.address
       })
-    ];
+    );
+
+    return [timelockTreasury, ...extra];
   };
 
   const client = createPublicClient({
@@ -268,7 +279,10 @@ export function createWriters(
     spaceMetadata.farcaster = governanceInfo.farcaster || '';
     spaceMetadata.discord = governanceInfo.discord || '';
     spaceMetadata.voting_power_symbol = symbol;
-    spaceMetadata.treasuries = createTreasuries(timelock);
+    spaceMetadata.treasuries = createTreasuries(
+      timelock,
+      governanceInfo.readOnlyTreasuries
+    );
     spaceMetadata.executors_strategies = [executionStrategy.id];
     await spaceMetadata.save();
 
@@ -665,8 +679,11 @@ export function createWriters(
     );
     if (!spaceMetadataItem) return;
 
+    const governanceInfo = getGovernanceInfo(spaceAddress);
+
     spaceMetadataItem.treasuries = createTreasuries(
-      getAddress(event.args.newTimelock)
+      getAddress(event.args.newTimelock),
+      governanceInfo.readOnlyTreasuries
     );
 
     const [timelockDelay, quorum] = await Promise.all([
