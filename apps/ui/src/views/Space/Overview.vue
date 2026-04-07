@@ -192,10 +192,8 @@ watchEffect(() => setTitle(props.space.name));
         v-if="spaceType === 'proposalsSpace'"
         data-testid="summary-proposals-list"
         :title="
-          getOrgProposalLabel(
-            organization,
-            `${space.network}:${space.id}`
-          ) ?? 'Proposals'
+          getOrgProposalLabel(organization, `${space.network}:${space.id}`) ??
+          'Proposals'
         "
         :is-error="isError"
         :loading="isPending"
