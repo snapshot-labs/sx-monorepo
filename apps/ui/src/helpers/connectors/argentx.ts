@@ -5,18 +5,22 @@ export default class Argentx extends Connector {
   async connect() {
     const { currentTheme } = useTheme();
 
-    const userOptions = {
-      modalMode: localStorage.getItem('starknetLastConnectedWallet')
-        ? 'neverAsk'
-        : 'alwaysAsk',
-      modalTheme: currentTheme.value
-    };
-
     try {
+      const injected = (window as any).starknet_argentX;
+      if (injected?.isInAppBrowser) {
+        await injected.enable();
+        this.provider = injected;
+
+        return;
+      }
+
       const argentx = await get();
       const starknet = await argentx.connect({
         ...this.options,
-        ...userOptions
+        modalMode: localStorage.getItem('starknetLastConnectedWallet')
+          ? 'neverAsk'
+          : 'alwaysAsk',
+        modalTheme: currentTheme.value
       });
 
       if (!starknet.wallet) {
