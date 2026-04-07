@@ -40,3 +40,6 @@ dist.cjs
 
 # playwright related files
 .browser
+
+# npm lock file (project uses bun)
+package-lock.json
