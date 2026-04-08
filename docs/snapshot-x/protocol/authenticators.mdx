@@ -28,7 +28,7 @@ function authenticate(
 * `salt` : The salt used in the signature to prevention replays (only required for proposal creation and updating).
 * `target`: The destination space contract.
 * `functionSelector`: The function selector of the desired action.
-* `data`: The ABI encoded transaction payload for the action. Refer to the [Space actions](space-actions) section for more information on the payload contents. 
+* `data`: The ABI encoded transaction payload for the action. Refer to the [Space actions](/snapshot-x/protocol/space-actions) section for more information on the payload contents. 
 
 This can work in conjunction with a meta transaction relayer to allow proposal creation or vote costs to be sponsored by the DAO, providing a free end user experience.
 
@@ -42,7 +42,7 @@ function authenticate(address target, bytes4 functionSelector, bytes calldata da
 
 * `target`: The destination space contract.
 * `functionSelector`: The function selector of the desired action.
-* `data`: The ABI encoded transaction payload for the action. Refer to the [Space actions](space-actions) section for more information on the payload contents. 
+* `data`: The ABI encoded transaction payload for the action. Refer to the [Space actions](/snapshot-x/protocol/space-actions) section for more information on the payload contents. 
 
 <Tip>
 The core use case for this authenticator is to allow **smart contract accounts such as multisigs to use Snapshot X** as they have no way to generate a signature and therefore cannot authenticate via signature verification.
@@ -53,5 +53,5 @@ The core use case for this authenticator is to allow **smart contract accounts s
 Our modular approach here allows spaces to **authenticate users via other authentication methods without any changes to the space contract**. 
 
 <Info>
-Please note, that if you wanted to add sybil resistance to your governance process, this should not be handled by Authenticators, but by [Proposal validations](proposal-validations) or [Voting strategies](voting-strategies).
+Please note, that if you wanted to add sybil resistance to your governance process, this should not be handled by Authenticators, but by [Proposal validations](/snapshot-x/protocol/proposal-validations) or [Voting strategies](/snapshot-x/protocol/voting-strategies).
 </Info>

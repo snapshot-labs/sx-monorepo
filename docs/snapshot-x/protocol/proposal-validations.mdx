@@ -20,7 +20,7 @@ DAOs are free to write their own custom strategies that suit their own needs how
 
 ### Proposition power
 
-A strategy that validates an `author` to create a proposal if their `propositionPower` calculated from a set of Voting strategies exceeds a `proposalThreshold` value. It means that if the proposal threshold is set to `5`, the author needs to have at least `5` Proposition power to create a proposal. This strategy uses the same logic as [Voting strategies](voting-strategies), so refer to that section for more information.
+A strategy that validates an `author` to create a proposal if their `propositionPower` calculated from a set of Voting strategies exceeds a `proposalThreshold` value. It means that if the proposal threshold is set to `5`, the author needs to have at least `5` Proposition power to create a proposal. This strategy uses the same logic as [Voting strategies](/snapshot-x/protocol/voting-strategies), so refer to that section for more information.
 
 When calling this strategy, `params` should be:
 
@@ -47,4 +47,4 @@ Using this strategy can help to prevent proposal creation spam in your space.
 
 ### And more!
 
-These strategies can be combined and extended to provide flexible Proposal validation mechanisms. The interface for Proposal validation strategies can be found [here](proposal-validations).
+These strategies can be combined and extended to provide flexible Proposal validation mechanisms. The interface for Proposal validation strategies can be found [here](https://github.com/snapshot-labs/sx-evm/tree/main/src/proposal-validations).

@@ -44,6 +44,14 @@ Yes. The message you sign in your wallet to cast a vote doesn't affect your hold
 Yes. Limiting the number of followed spaces to 25 is one of our anti-scam and anti-spam measures.
 </Accordion>
 
+<Accordion title="I get 'Oops, something went wrong!' what should I do?">
+Wait for around 10 minutes and try again. If the error persists, open the console panel (right click > `Inspect` > `Console` tab), take a screenshot, and contact our support on [Help Center](https://help.snapshot.box/en/) with the error details and what action you were trying to perform.
+</Accordion>
+
+<Accordion title="I'm receiving 'The message timestamp is not valid'. What should I do?">
+The reason behind this error is that the time configured on your device isn't accurate. [Refer here to troubleshoot](https://github.com/snapshot-labs/snapshot/discussions/769#discussioncomment-1400619).
+</Accordion>
+
 ## Voting
 
 <Accordion title="How can I vote?">
@@ -88,6 +96,10 @@ Go to the proposal page and click the download icon to get a CSV file. You can o
 This issue is related to either space settings or the failure of the external infrastructure that Snapshot relies on. Wait 15 minutes and try again. If the error persists, please contact our support on [Help Center](https://help.snapshot.box/en/) with the URL of the proposal and the error message.
 </Accordion>
 
+<Accordion title="I get 'Oops, failed to check voting power'. What should I do?">
+This is related to either space settings or a failure of external infrastructure. Wait 15 minutes and try again. If the error persists, contact our support on [Help Center](https://help.snapshot.box/en/) with the proposal URL and the error message.
+</Accordion>
+
 <Accordion title="There is a proposal open and I have a new token minted after the proposal's creation. Can it be used to vote?">
 No. Snapshot calculates the voting power at the time of proposal creation. If the token was not in your wallet before the proposal was created, it will not be counted.
 </Accordion>
@@ -105,7 +117,7 @@ With the [Snapshot Pro](/user-guides/spaces/pro) plan, the character limit incre
 </Accordion>
 
 <Accordion title="Is it possible to submit proposals programmatically?">
-Yes, using Snapshot's API or SDK, you can automate proposal submissions. Check the [developer documentation](/tools/snapshot.js) for specific methods and requirements.
+Yes, using Snapshot's API or SDK, you can automate proposal submissions. Check the [developer documentation](/tools/snapshot-js) for specific methods and requirements.
 </Accordion>
 
 <Accordion title="What happens if a proposal doesn't reach quorum?">
@@ -122,6 +134,10 @@ Yes. Have a look at the [Quadratic Voting](/proposals/voting-types) system which
 
 <Accordion title="'Your proposal cannot be submitted due to a missing proposal validation rule'. What does it mean?">
 Due to multiple spam attacks on Snapshot, all spaces are required to set up a Proposal Validation. Head to [validation strategies](/user-guides/validation-strategies#how-to-use-validation-strategies) to learn how.
+</Accordion>
+
+<Accordion title="The token I want to use for executing a transaction is not verified. Can I verify it?">
+You can submit your request by following the process described in the [token verification](/v1-interface/token-verification) section.
 </Accordion>
 
 ## Voting strategies
@@ -167,6 +183,10 @@ It's a two step process:
 
 <Accordion title="I want different voting strategies for different types of proposals. How?">
 You can use sub-spaces on Snapshot. This allows you to link different spaces and set different settings for each of them. Learn more in [sub-spaces](/user-guides/spaces/sub-spaces).
+</Accordion>
+
+<Accordion title="I'm not a developer. Can someone build a strategy for me?">
+Yes. You can create an issue on [snapshot-labs/score-api](https://github.com/snapshot-labs/score-api/issues) and then post it in the [#developers](https://discord.com/channels/707079246388133940/747050056422785055) channel on Discord.
 </Accordion>
 
 ## Space settings

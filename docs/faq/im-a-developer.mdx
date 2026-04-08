@@ -27,25 +27,25 @@ We use IPFS to pin the receipts of the votes. You can have a more detailed look 
 </Accordion>
 
 <Accordion title="How to add a webhook?">
-Have a look at our documentation: [webhooks.md](../tools/webhooks)
+Have a look at our documentation: [webhooks](/tools/webhooks)
 </Accordion>
 
 <Accordion title="Can I use the Hub API without an API Key?">
 Yes you can, however we encourage everyone to apply for a key to ensure a continuous access to the service as the limits for the keyless access are much lower than with an API Key.
 
-Learn more here: [api-keys.md](../tools/api/api-keys)
+Learn more here: [api-keys](/tools/api/api-keys)
 </Accordion>
 
 <Accordion title="Where can I generate an API Key for Hub GraphQL or Score API?">
-Head to [api-keys.md](../tools/api/api-keys) to apply for a key and generate it for your own usage.
+Head to [api-keys](/tools/api/api-keys) to apply for a key and generate it for your own usage.
 </Accordion>
 
 <Accordion title="I'm trying to generate an API Key but I get an error that my address in not whitelisted. What should I do?">
-If you have filled in the [API Request Key Form](../tools/api/api-keys#api-key-request-form) please have some patience and wait for our direct response to the contact you provided in it.
+If you have filled in the [API Request Key Form](/tools/api/api-keys#api-key-request-form) please have some patience and wait for our direct response to the contact you provided in it.
 
 If you haven't filled in the form yet then please do so and we will reach out to you shortly.
 
-You can find more details about the process here: [api-keys.md](../tools/api/api-keys)
+You can find more details about the process here: [api-keys](/tools/api/api-keys)
 </Accordion>
 
 <Accordion title="Are there any limits for using the Hub GraphQL API?">
@@ -57,11 +57,11 @@ After September 12th the limits will be updated:
 
 **🔑 With the API Key:** 2 million requests per month.\\
 
-Learn how to apply and generate your API Key here: [api-keys.md](../tools/api/api-keys)
+Learn how to apply and generate your API Key here: [api-keys](/tools/api/api-keys)
 </Accordion>
 
 <Accordion title="Are there any limits for using snapshot.js or Score API?">
-Yes, same as for Hub API. When it comes to snapshot.js, refer to [#utils](../tools/snapshot.js#utils) in Snapshot.js documentation. Make sure to generate your API Key to get higher usage limits. One key can be used for all API services and limits are counted individually per service.
+Yes, same as for Hub API. When it comes to snapshot.js, refer to [#utils](/tools/snapshot-js#utils) in Snapshot.js documentation. Make sure to generate your API Key to get higher usage limits. One key can be used for all API services and limits are counted individually per service.
 </Accordion>
 
 ### Snapshot.js
@@ -81,13 +81,13 @@ No. If you are interested in building it, reach out to the team on the [#develop
 </Accordion>
 
 <Accordion title="How to use <code>snapshot.js</code> to create a space or update space settings?">
-Have a look at our documentation here: [#create-or-edit-a-space](../tools/snapshot.js#create-or-edit-a-space)
+Have a look at our documentation here: [#create-or-edit-a-space](/tools/snapshot-js#create-or-edit-a-space)
 </Accordion>
 
 ### Adding a network
 
 <Accordion title="How can I add our network to Snapshot?">
-Follow our documentation to learn all the steps to add a new network to Snapshot: [#add-a-new-network](../developer-guides/networks#add-a-new-network)
+Follow our documentation to learn all the steps to add a new network to Snapshot: [#add-a-new-network](/developer-guides/networks#add-a-new-network)
 </Accordion>
 
 <Accordion title="How can I check if the RPC node is a Full Archive Node?">
@@ -107,8 +107,8 @@ You can browse through the existing staking strategies →[https://snapshot.org/
 
 If none of them work for you, have a look at the options below.
 
-* In order to use the staking contract it has to have a `balanceOf` method which allows reading the balance of the staked tokens. You can use the[https://snapshot.org/#/strategy/erc20-balance-of](https://snapshot.org/#/strategy/erc20-balance-of) strategy with it.
-* If your contract has a method getting the balance named differently, you can also use the[https://snapshot.org/#/strategy/contract-call](https://snapshot.org/#/strategy/contract-call) strategy.
+* In order to use the staking contract it has to have a `balanceOf` method which allows reading the balance of the staked tokens. You can use the [erc20-balance-of](https://snapshot.org/#/strategy/erc20-balance-of) strategy with it.
+* If your contract has a method getting the balance named differently, you can also use the [contract-call](https://snapshot.org/#/strategy/contract-call) strategy.
 </Accordion>
 
 <Accordion title="How long will it take to merge my PR?">
@@ -118,7 +118,7 @@ It usually takes around 72 hours so please have some patience. Once the PR is me
 <Accordion title="Is it possible to support delegation on our network?">
 Yes. If it’s not supported yet you can create a custom voting strategy to enable delegation on your network. You can see an example here →[https://snapshot.org/#/strategy/orbs-network-delegation](https://snapshot.org/#/strategy/orbs-network-delegation)
 
-To learn more have a look at our documentation: [voting-strategy.md](../developer-guides/voting-strategy)
+To learn more have a look at our documentation: [voting-strategy](/developer-guides/voting-strategy)
 </Accordion>
 
 <Accordion title="I get <code>0</code> voting power in the delegation strategy playground but I can vote on real proposals.">
@@ -126,5 +126,5 @@ Most probably you are missing the `delegationSpace` parameter. Make sure to prov
 </Accordion>
 
 <Accordion title="How to use our token from our network for voting?">
-If it doesn’t exist yet, you can create a new voting strategy. Have a look at our documentation to learn more: [voting-strategy.md](../developer-guides/voting-strategy)
+If it doesn’t exist yet, you can create a new voting strategy. Have a look at our documentation to learn more: [voting-strategy](/developer-guides/voting-strategy)
 </Accordion>

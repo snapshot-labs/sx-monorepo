@@ -30,7 +30,7 @@ For OpenZeppelin ERC20Votes tokens, the function `get_past_votes` is reproduced 
 
 ### Transaction relayer
 
-In order to avoid the overhead of installing and managing a Starknet account, we ask users to sign their vote with their Ethereum wallet, and then simply relay the transaction on the Starknet network using our transaction relayer [Mana](../services/mana). Once the transaction is relayed, and by leveraging the modularity of our authenticators system, a [special authenticator](https://github.com/snapshot-labs/sx-starknet/blob/develop/starknet/src/authenticators/eth_sig.cairo) verifies the provided signature and lets the vote be counted in!
+In order to avoid the overhead of installing and managing a Starknet account, we ask users to sign their vote with their Ethereum wallet, and then simply relay the transaction on the Starknet network using our transaction relayer [Mana](/snapshot-x/services/mana). Once the transaction is relayed, and by leveraging the modularity of our authenticators system, a [special authenticator](https://github.com/snapshot-labs/sx-starknet/blob/develop/starknet/src/authenticators/eth_sig.cairo) verifies the provided signature and lets the vote be counted in!
 
 But who pays for the relaying fees? It is expected that DAOs who want to provide their users with this ease of vote would be the paying those fees, which should be minimal anyway!
 

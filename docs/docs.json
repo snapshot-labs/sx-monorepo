@@ -6,6 +6,7 @@
     "default": "dark",
     "strict": true
   },
+  "favicon": "/logo/snapshot.svg",
   "logo": {
     "dark": "/logo/snapshot.svg",
     "light": "/logo/snapshot.svg"
@@ -121,7 +122,7 @@
             "group": "Tools",
             "pages": [
               "tools/tools-overview",
-              "tools/snapshot.js",
+              "tools/snapshot-js",
               {
                 "group": "API",
                 "pages": [
@@ -152,7 +153,7 @@
                 ]
               },
               "snapshot-x/services/api",
-              "snapshot-x/services/sx.js",
+              "snapshot-x/services/sx-js",
               "snapshot-x/services/ui",
               "snapshot-x/services/mana"
             ]
@@ -161,6 +162,16 @@
       }
     ]
   },
+  "redirects": [
+    {
+      "source": "/tools/snapshot.js",
+      "destination": "/tools/snapshot-js"
+    },
+    {
+      "source": "/snapshot-x/services/sx.js",
+      "destination": "/snapshot-x/services/sx-js"
+    }
+  ],
   "contextual": {
     "options": [
       "copy",
