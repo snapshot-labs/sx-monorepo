@@ -77,9 +77,11 @@ export async function verifyStarknetNetwork(
   chainId: starknetConstants.StarknetChainId
 ) {
   if (!web3.provider.request) return;
-  // Skip network switch for Argent Mobile,
-  // only SN_MAIN is supported (getting `unknown request` error inside in-built browser)
+  // Skip network switch for Argent Mobile (and Ready in-app browser injected
+  // provider) — only SN_MAIN is supported and `wallet_switchStarknetChain`
+  // returns "Unknown request" inside the in-app browser.
   if (web3.provider.name === 'Argent Mobile') return;
+  if (web3.provider.isInAppBrowser) return;
   try {
     await web3.provider.request({
       type: 'wallet_switchStarknetChain',
