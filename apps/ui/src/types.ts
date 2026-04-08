@@ -36,6 +36,7 @@ export type NetworkID =
   | 'oeth'
   | 'base'
   | 'mnt'
+  | 'bnb'
   | 'ape'
   | 'curtis'
   | 'sep'
@@ -272,7 +273,7 @@ export type Proposal = {
   vp_decimals: number;
   type: VoteType;
   quorum: number;
-  quorum_type?: 'default' | 'rejection';
+  quorum_type?: 'default' | 'rejection' | 'for_only';
   space: {
     id: string;
     protocol: string;

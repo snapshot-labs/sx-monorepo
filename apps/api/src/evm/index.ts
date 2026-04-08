@@ -26,6 +26,7 @@ const maticConfig = createConfig('matic', protocols);
 const arb1Config = createConfig('arb1', protocols);
 const baseConfig = createConfig('base', protocols);
 const mntConfig = createConfig('mnt', protocols);
+const bnbConfig = createConfig('bnb', protocols);
 const apeConfig = createConfig('ape', protocols);
 const curtisConfig = createConfig('curtis', protocols);
 
@@ -69,6 +70,7 @@ const maticIndexer = new evm.EvmIndexer(createWriters(maticConfig));
 const arb1Indexer = new evm.EvmIndexer(createWriters(arb1Config));
 const baseIndexer = new evm.EvmIndexer(createWriters(baseConfig));
 const mntIndexer = new evm.EvmIndexer(createWriters(mntConfig));
+const bnbIndexer = new evm.EvmIndexer(createWriters(bnbConfig));
 const apeIndexer = new evm.EvmIndexer(createWriters(apeConfig));
 const curtisIndexer = new evm.EvmIndexer(createWriters(curtisConfig));
 
@@ -85,6 +87,7 @@ export function addEvmIndexers(checkpoint: Checkpoint) {
   registerIndexer(checkpoint, arb1Config.indexerName, arb1Config, arb1Indexer);
   registerIndexer(checkpoint, baseConfig.indexerName, baseConfig, baseIndexer);
   registerIndexer(checkpoint, mntConfig.indexerName, mntConfig, mntIndexer);
+  registerIndexer(checkpoint, bnbConfig.indexerName, bnbConfig, bnbIndexer);
   registerIndexer(checkpoint, apeConfig.indexerName, apeConfig, apeIndexer);
   registerIndexer(
     checkpoint,

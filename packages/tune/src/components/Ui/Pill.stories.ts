@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from '@storybook/vue3-vite';
+import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import Pill from './Pill.vue';
 
 const meta = {
@@ -34,17 +34,5 @@ export const Primary: Story = {
   args: {
     label: 'Recent',
     variant: 'primary'
-  }
-};
-
-export const Role: Story = {
-  args: {
-    label: 'admin'
-  }
-};
-
-export const LargeCount: Story = {
-  args: {
-    label: '1.2K'
   }
 };

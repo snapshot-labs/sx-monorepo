@@ -105,6 +105,7 @@ gql(`
       address_type
     }
     quorum
+    quorum_type
     execution_hash
     metadata {
       id

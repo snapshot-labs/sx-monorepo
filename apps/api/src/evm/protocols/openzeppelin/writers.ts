@@ -2,12 +2,13 @@ import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks, utils } from '@snapshot-labs/sx';
 import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
 import ERC20VotesAbi from './abis/ERC20Votes';
+import GovernorPreventLateQuorumAbi from './abis/GovernorPreventLateQuorum';
 import GovernorSettingsAbi from './abis/GovernorSettings';
 import GovernorTimelockControlAbi from './abis/GovernorTimelockControl';
 import GovernorVotesAbi from './abis/GovernorVotes';
 import IGovernorAbi from './abis/IGovernor';
 import TimelockControllerAbi from './abis/TimelockController';
-import { GOVERNANCES } from './governances';
+import { GOVERNANCES, Treasury } from './governances';
 import logger from './logger';
 import { convertChoice, getProposalBody, getProposalTitle } from './utils';
 import {
@@ -32,7 +33,10 @@ import {
   updateScoresTick
 } from '../../../common/utils';
 import { EVMConfig, OpenZeppelinConfig } from '../../types';
-import { getTimestampFromBlock as _getTimestampFromBlock } from '../../utils';
+import {
+  getTimestampFromBlock as _getTimestampFromBlock,
+  getActualBlockNumber
+} from '../../utils';
 
 export function createWriters(
   config: EVMConfig,
@@ -60,19 +64,52 @@ export function createWriters(
     return { strategyId, strategyDataItemId, metadataId };
   };
 
-  const createTreasuries = (timelockAddress: string) => {
-    return [
+  const createTreasuries = (
+    timelockAddress: string,
+    readOnlyTreasuries: Treasury[] = []
+  ) => {
+    const timelockTreasury = JSON.stringify({
+      name: 'Timelock',
+      chain_id: protocolConfig.chainId,
+      address: timelockAddress
+    });
+
+    const extra = readOnlyTreasuries.map(treasury =>
       JSON.stringify({
-        name: 'Timelock',
-        chain_id: protocolConfig.chainId,
-        address: timelockAddress
+        name: treasury.name,
+        chain_id: treasury.chainId,
+        address: treasury.address
       })
-    ];
+    );
+
+    return [timelockTreasury, ...extra];
   };
 
   const client = createPublicClient({
     transport: http(config.network_node_url)
   });
+
+  async function getQuorum({
+    address,
+    blockNumber
+  }: {
+    address: `0x${string}`;
+    blockNumber: number;
+  }) {
+    const actualBlockNumber = await getActualBlockNumber({
+      networkId: config.indexerName,
+      currentBlockNumber: blockNumber,
+      client
+    });
+
+    return client.readContract({
+      address,
+      abi: IGovernorAbi,
+      functionName: 'quorum',
+      args: [actualBlockNumber - 1n],
+      blockNumber: BigInt(blockNumber)
+    });
+  }
 
   async function initializeStrategies({
     spaceAddress,
@@ -149,12 +186,9 @@ export function createWriters(
 
     // Strategies & authentication
     const [quorum, timelock, token, proposalThreshold] = await Promise.all([
-      client.readContract({
+      getQuorum({
         address: contractAddress,
-        abi: IGovernorAbi,
-        functionName: 'quorum',
-        args: [BigInt(blockNumber - 1)],
-        blockNumber: BigInt(blockNumber)
+        blockNumber
       }),
       client.readContract({
         address: contractAddress,
@@ -243,8 +277,12 @@ export function createWriters(
     spaceMetadata.github = governanceInfo.github || '';
     spaceMetadata.twitter = governanceInfo.twitter || '';
     spaceMetadata.farcaster = governanceInfo.farcaster || '';
+    spaceMetadata.discord = governanceInfo.discord || '';
     spaceMetadata.voting_power_symbol = symbol;
-    spaceMetadata.treasuries = createTreasuries(timelock);
+    spaceMetadata.treasuries = createTreasuries(
+      timelock,
+      governanceInfo.readOnlyTreasuries
+    );
     spaceMetadata.executors_strategies = [executionStrategy.id];
     await spaceMetadata.save();
 
@@ -303,12 +341,9 @@ export function createWriters(
       );
     if (!strategyParsedMetadataDataItem) return;
 
-    const quorum = await client.readContract({
+    const quorum = await getQuorum({
       address: spaceAddress,
-      abi: IGovernorAbi,
-      functionName: 'quorum',
-      args: [BigInt(blockNumber - 1)],
-      blockNumber: BigInt(blockNumber)
+      blockNumber
     });
 
     executionStrategy.quorum = quorum.toString();
@@ -350,6 +385,7 @@ export function createWriters(
     proposal.execution_strategy_details = executionStrategy.id;
     proposal.vp_decimals = strategyParsedMetadataDataItem.decimals;
     proposal.type = 'basic';
+    proposal.quorum_type = getGovernanceInfo(spaceAddress).quorumType || null;
     proposal.created = Number(block?.timestamp ?? getCurrentTimestamp());
     proposal.tx = txId;
 
@@ -643,8 +679,11 @@ export function createWriters(
     );
     if (!spaceMetadataItem) return;
 
+    const governanceInfo = getGovernanceInfo(spaceAddress);
+
     spaceMetadataItem.treasuries = createTreasuries(
-      getAddress(event.args.newTimelock)
+      getAddress(event.args.newTimelock),
+      governanceInfo.readOnlyTreasuries
     );
 
     const [timelockDelay, quorum] = await Promise.all([
@@ -654,12 +693,9 @@ export function createWriters(
         functionName: 'getMinDelay',
         blockNumber: BigInt(blockNumber)
       }),
-      client.readContract({
+      getQuorum({
         address: spaceAddress,
-        abi: IGovernorAbi,
-        functionName: 'quorum',
-        args: [BigInt(blockNumber - 1)],
-        blockNumber: BigInt(blockNumber)
+        blockNumber
       })
     ]);
 
@@ -713,6 +749,38 @@ export function createWriters(
     await timelock.save();
   };
 
+  const handleProposalExtended: evm.Writer<
+    typeof GovernorPreventLateQuorumAbi,
+    'ProposalExtended'
+  > = async ({ blockNumber, block, event, rawEvent }) => {
+    if (!event || !rawEvent) return;
+
+    logger.info('Handle proposal extended');
+
+    const spaceAddress = getAddress(rawEvent.address);
+    const proposalId = `${spaceAddress}/${event.args.proposalId}`;
+
+    const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
+    if (!proposal) return;
+
+    const extendedDeadlineBlock = Number(event.args.extendedDeadline);
+
+    const extendedDeadlineTimestamp = await _getTimestampFromBlock({
+      networkId: config.indexerName,
+      blockNumber: extendedDeadlineBlock,
+      currentBlockNumber: blockNumber,
+      currentTimestamp: Number(block?.timestamp ?? getCurrentTimestamp()),
+      client
+    });
+
+    proposal.min_end = extendedDeadlineTimestamp;
+    proposal.min_end_block_number = extendedDeadlineBlock;
+    proposal.max_end = extendedDeadlineTimestamp;
+    proposal.max_end_block_number = extendedDeadlineBlock;
+
+    await proposal.save();
+  };
+
   return {
     // IGovernor
     handleProposalCreated,
@@ -726,6 +794,8 @@ export function createWriters(
     handleVotingPeriodSet,
     // GovernorTimelockControl
     handleTimelockChange,
+    // GovernorPreventLateQuorum
+    handleProposalExtended,
     // TimelockController
     handleNewDelay
   };

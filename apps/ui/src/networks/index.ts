@@ -12,6 +12,7 @@ const polygonNetwork = createEvmNetwork('matic');
 const arbitrumNetwork = createEvmNetwork('arb1');
 const baseNetwork = createEvmNetwork('base');
 const mantleNetwork = createEvmNetwork('mnt');
+const bnbNetwork = createEvmNetwork('bnb');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
 const apeNetwork = createEvmNetwork('ape');
@@ -30,6 +31,7 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'base',
       'mnt',
       'oeth',
+      'bnb',
       'ape',
       'curtis',
       'sep',
@@ -44,6 +46,7 @@ export const evmNetworks: NetworkID[] = [
   'mnt',
   'base',
   'oeth',
+  'bnb',
   'ape',
   'curtis',
   'sep'
@@ -64,6 +67,7 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'arb1') return arbitrumNetwork;
   if (id === 'base') return baseNetwork;
   if (id === 'mnt') return mantleNetwork;
+  if (id === 'bnb') return bnbNetwork;
   if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
   if (id === 'ape') return apeNetwork;

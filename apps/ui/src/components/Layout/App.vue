@@ -1,11 +1,7 @@
 <script lang="ts" setup>
 import resolveConfig from 'tailwindcss/resolveConfig';
 import { APP_NAME } from '@/helpers/constants';
-import {
-  getCacheHash,
-  getStampUrl,
-  whiteLabelAwareParams
-} from '@/helpers/utils';
+import { getCacheHash, getStampUrl } from '@/helpers/utils';
 import { Connector } from '@/networks/types';
 import { Transaction } from '@/types';
 import tailwindConfig from '../../../tailwind.config';
@@ -18,7 +14,7 @@ const el = ref(null);
 const sidebarSwipeEnabled = ref(true);
 
 const route = useRoute();
-const router = useRouter();
+const router = useAppRouter();
 const uiStore = useUiStore();
 const {
   modalOpen,
@@ -64,9 +60,13 @@ const hasSidebar = computed(() => !isStandaloneLayout.value);
 
 const hasSwipeableContent = computed(() => hasSidebar.value || hasAppNav.value);
 
-const baseSubRouteName = computed(() =>
-  String(route.matched[1]?.name).replace(/^(space|org)-/, '')
-);
+const baseSubRouteName = computed(() => {
+  const name = String(route.matched[1]?.name);
+  const customPath = route.matched[1]?.meta?.customPath as string | undefined;
+  const prefix = customPath ? `(${customPath}-)?` : '';
+
+  return name.replace(new RegExp(`^(space|org)-${prefix}`), '');
+});
 
 const hasPlaceHolderSidebar = computed(
   () =>
@@ -79,9 +79,11 @@ const hasPlaceHolderSidebar = computed(
       'auction-upcoming',
       'auction-verify-standalone'
     ].includes(String(route.matched[0]?.name)) &&
-    !['space-townhall-create', 'space-townhall-topic'].includes(
-      String(route.matched[1]?.name)
-    ) &&
+    ![
+      'space-townhall-create',
+      'space-townhall-topic',
+      'settings-alias-authorize'
+    ].includes(String(route.matched[1]?.name)) &&
     !['editor', 'proposal'].includes(baseSubRouteName.value)
 );
 
@@ -112,10 +114,10 @@ async function handleTransactionAccept() {
 
   router.push({
     name: 'space-editor',
-    params: whiteLabelAwareParams(isWhiteLabel.value, {
+    params: {
       space: walletConnectSpaceKey.value,
       key: draftId
-    })
+    }
   });
 
   reset();

@@ -1,7 +1,8 @@
 import { withThemeByClassName } from '@storybook/addon-themes';
-import { Decorator, Preview, setup } from '@storybook/vue3-vite';
+import { setup } from '@storybook/vue3-vite';
 import { h } from 'vue';
 import { createMemoryHistory, createRouter } from 'vue-router';
+import type { Decorator, Preview } from '@storybook/vue3-vite';
 import { createTune } from '../src/plugin';
 import '../src/styles/index.scss';
 import './style.css';
@@ -20,7 +21,7 @@ setup(app => {
     })
   );
 
-  app.use(createTune());
+  app.use(createTune({ iframelyApiKey: 'd155718c86be7d5305ccb6' }));
 });
 
 export const decorators: Decorator[] = [

@@ -15,7 +15,8 @@ const index = `// Styles
 import './styles/index.scss';
 
 // Plugin
-export { createTune } from './plugin';
+export { createTune, TUNE_OPTIONS_KEY } from './plugin';
+export type { TuneOptions } from './plugin';
 
 // Types
 export type * from './types';
@@ -24,7 +25,7 @@ export type * from './types';
 ${indexExports}
 `;
 
-const resolver = `import { ComponentResolver } from 'unplugin-vue-components';
+const resolver = `import type { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
 ${names.map(name => `  '${name}'`).join(',\n')}

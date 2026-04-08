@@ -1,6 +1,6 @@
 import { enabledNetworks, evmNetworks } from '@/networks';
-import { METADATA } from '@/networks/starknet';
-import { ChainId, NetworkID } from '@/types';
+import { METADATA } from '@/networks/starknet/metadata';
+import { ChainId, NetworkID, SpaceMetadataDelegation } from '@/types';
 import { getChainIdKind } from './utils';
 
 export function getDelegationNetwork(chainId: ChainId) {
@@ -19,4 +19,20 @@ export function getDelegationNetwork(chainId: ChainId) {
   if (!actionNetwork) throw new Error('Failed to detect action network');
 
   return actionNetwork;
+}
+
+export type ValidSpaceMetadataDelegation = {
+  [P in keyof SpaceMetadataDelegation]: P extends 'apiUrl'
+    ? SpaceMetadataDelegation[P]
+    : NonNullable<SpaceMetadataDelegation[P]>;
+};
+
+export function isValidDelegation(
+  delegation: SpaceMetadataDelegation
+): delegation is ValidSpaceMetadataDelegation {
+  return !!(
+    delegation.chainId &&
+    delegation.apiType &&
+    delegation.contractAddress
+  );
 }

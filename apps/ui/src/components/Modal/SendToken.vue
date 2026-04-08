@@ -4,7 +4,7 @@ import { METADATA_BY_CHAIN_ID } from '@/composables/useBalances';
 import { Token } from '@/helpers/alchemy';
 import { ETH_CONTRACT } from '@/helpers/constants';
 import { createSendTokenTransaction } from '@/helpers/transactions';
-import { clone } from '@/helpers/utils';
+import { clone, getChainIdKind } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { Contact, Transaction } from '@/types';
 
@@ -82,7 +82,9 @@ const recipientDefinition = computed(() => ({
   format: 'ens-or-address',
   chainId: props.network,
   title: 'Recipient',
-  examples: ['Address or ENS']
+  examples: [
+    getChainIdKind(props.network) === 'evm' ? 'Address or ENS' : 'Address'
+  ]
 }));
 
 const amountDefinition = computed(() => ({

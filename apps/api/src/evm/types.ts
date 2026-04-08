@@ -8,6 +8,7 @@ export type NetworkID =
   | 'arb1'
   | 'base'
   | 'mnt'
+  | 'bnb'
   | 'ape'
   | 'curtis';
 

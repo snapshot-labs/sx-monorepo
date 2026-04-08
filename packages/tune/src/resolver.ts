@@ -1,9 +1,27 @@
-import { ComponentResolver } from 'unplugin-vue-components';
+import type { ComponentResolver } from 'unplugin-vue-components';
 
 const components = [
+  'Affix',
   'Alert',
+  'Calendar',
+  'Carousel',
   'Checkbox',
+  'ColumnHeader',
+  'ContainerInfiniteScroll',
+  'Countdown',
+  'Dropdown',
+  'Eyebrow',
+  'Label',
+  'LinkPreview',
   'Loading',
+  'ModalSearchInput',
+  'Pill',
+  'RawInputAmount',
+  'ScrollerHorizontal',
+  'SectionHeader',
+  'Selector',
+  'SelectorCard',
+  'StateWarning',
   'Switch',
   'Tooltip',
   'TooltipOnTruncate'
