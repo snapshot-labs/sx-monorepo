@@ -1,5 +1,9 @@
 import Connector from './connector';
 const get = () => import(/* webpackChunkName: "argentx" */ 'starknetkit');
+const getInjected = () =>
+  import(/* webpackChunkName: "argentx" */ 'starknetkit/injected');
+const getWebwallet = () =>
+  import(/* webpackChunkName: "argentx" */ 'starknetkit/webwallet');
 
 export default class Argentx extends Connector {
   async connect() {
@@ -14,9 +18,15 @@ export default class Argentx extends Connector {
         return;
       }
 
-      const argentx = await get();
+      const [argentx, { InjectedConnector }, { WebWalletConnector }] =
+        await Promise.all([get(), getInjected(), getWebwallet()]);
       const starknet = await argentx.connect({
         ...this.options,
+        connectors: [
+          new InjectedConnector({ options: { id: 'argentX' } }),
+          new InjectedConnector({ options: { id: 'braavos' } }),
+          new WebWalletConnector()
+        ],
         modalMode: localStorage.getItem('starknetLastConnectedWallet')
           ? 'neverAsk'
           : 'alwaysAsk',
