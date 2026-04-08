@@ -29,10 +29,6 @@ async function fetchGovernorSubgraphDelegatees(
   space: Space
 ): Promise<Delegatee[]> {
   const { getDelegatee } = useActions();
-  const { getDelegates } = useDelegates(
-    delegation as RequiredProperty<typeof delegation>,
-    space
-  );
 
   const delegateeData = await getDelegatee(delegation, account);
 
@@ -51,6 +47,11 @@ async function fetchGovernorSubgraphDelegatees(
       }
     ];
   }
+
+  const { getDelegates } = useDelegates(
+    delegation as RequiredProperty<typeof delegation>,
+    space
+  );
 
   const [names, [apiDelegate]] = await Promise.all([
     getNames([delegateeData.address]),
