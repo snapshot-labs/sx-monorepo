@@ -18,11 +18,8 @@ import { getIsContract as _getIsContract } from '@/helpers/contracts';
 import { executionCall, getRelayerInfo, MANA_URL } from '@/helpers/mana';
 import { getProvider } from '@/helpers/provider';
 import { convertToMetaTransactions } from '@/helpers/transactions';
-import {
-  createErc1155Metadata,
-  verifyNetwork,
-  verifyStarknetNetwork
-} from '@/helpers/utils';
+import { createErc1155Metadata } from '@/helpers/utils';
+import { verifyNetwork, verifyStarknetNetwork } from '@/helpers/walletNetworks';
 import { WHITELIST_SERVER_URL } from '@/helpers/whitelistServer';
 import {
   EVM_CONNECTORS,
@@ -544,10 +541,27 @@ export function createActions(
         convertToMetaTransactions(proposal.executions[0].transactions)
       );
 
-      return executionCall('stark', chainId as string, 'execute', {
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        starkProvider
+      );
+
+      if (relayer?.hasMinimumBalance) {
+        return executionCall('stark', chainId as string, 'execute', {
+          space: proposal.space.id,
+          proposalId: proposal.proposal_id,
+          executionParams: executionData.executionParams
+        });
+      }
+
+      await verifyStarknetNetwork(web3, chainId);
+
+      return client.execute({
+        signer: web3.provider.account,
         space: proposal.space.id,
-        proposalId: proposal.proposal_id,
-        executionParams: executionData.executionParams
+        proposalId: Number(proposal.proposal_id),
+        executionPayload: executionData.executionParams
       });
     },
     executeQueuedProposal: async (web3: any, proposal: Proposal) => {
@@ -585,6 +599,16 @@ export function createActions(
       );
 
       const executionHash = `${executionParams[2]}${executionParams[1].slice(2)}`;
+
+      const relayer = await getRelayerInfo(
+        proposal.space.id,
+        proposal.network,
+        starkProvider
+      );
+
+      if (!relayer?.hasMinimumBalance) {
+        throw new Error('Relayer has insufficient funds to execute');
+      }
 
       return executionCall('eth', l1ChainId, 'executeStarknetProposal', {
         space: proposal.space.id,

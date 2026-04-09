@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import networks from '@snapshot-labs/snapshot.js/src/networks.json';
-import { getUrl } from '@/helpers/utils';
+import { getChainIdKind, getUrl } from '@/helpers/utils';
 import { getValidator } from '@/helpers/validation';
 import { ChainId } from '@/types';
 
@@ -32,7 +32,9 @@ const delegateDefinition = computed(() => ({
   format: 'ens-or-address',
   chainId: form.value.chainId,
   title: 'Delegatee',
-  examples: ['Address or ENS']
+  examples: [
+    getChainIdKind(form.value.chainId) === 'evm' ? 'Address or ENS' : 'Address'
+  ]
 }));
 
 const formValidator = computed(() =>

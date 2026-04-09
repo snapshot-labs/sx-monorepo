@@ -29,14 +29,29 @@ async function fetchGovernorSubgraphDelegatees(
   space: Space
 ): Promise<Delegatee[]> {
   const { getDelegatee } = useActions();
-  const { getDelegates } = useDelegates(
-    delegation as RequiredProperty<typeof delegation>,
-    space
-  );
 
   const delegateeData = await getDelegatee(delegation, account);
 
   if (!delegateeData) return [];
+
+  if (!delegation.apiUrl) {
+    const names = await getNames([delegateeData.address]);
+
+    return [
+      {
+        id: delegateeData.address,
+        balance: Number(delegateeData.balance) / 10 ** delegateeData.decimals,
+        delegatedVotePercentage: 1,
+        name: names[delegateeData.address],
+        share: 100
+      }
+    ];
+  }
+
+  const { getDelegates } = useDelegates(
+    delegation as RequiredProperty<typeof delegation>,
+    space
+  );
 
   const [names, [apiDelegate]] = await Promise.all([
     getNames([delegateeData.address]),
@@ -278,6 +293,6 @@ export function useDelegateesQuery(
       !!toValue(account) &&
       !!toValue(delegation)?.chainId &&
       !!toValue(delegation)?.apiType &&
-      !!toValue(delegation)?.apiUrl
+      !!(toValue(delegation)?.apiUrl || toValue(delegation)?.contractAddress)
   });
 }

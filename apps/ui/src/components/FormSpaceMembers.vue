@@ -2,7 +2,7 @@
 import { isAddress } from '@ethersproject/address';
 import { getGenericExplorerUrl } from '@/helpers/generic';
 import { getNetwork } from '@/networks';
-import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet';
+import { METADATA as STARKNET_NETWORK_METADATA } from '@/networks/starknet/metadata';
 import { Member, NetworkID } from '@/types';
 
 const model = defineModel<Member[]>({

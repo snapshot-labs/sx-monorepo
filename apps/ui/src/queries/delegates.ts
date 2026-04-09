@@ -15,15 +15,15 @@ export function useDelegatesQuery(
     | 'tokenHoldersRepresentedAmount-asc'
   >
 ) {
-  const { getDelegates } = useDelegates(
-    toValue(delegation) as RequiredProperty<SpaceMetadataDelegation>,
-    toValue(space)
-  );
-
   return useInfiniteQuery({
     initialPageParam: 0,
     queryKey: ['delegates', delegation, sortBy],
+    enabled: () => !!toValue(delegation)?.apiUrl,
     queryFn: ({ pageParam }) => {
+      const { getDelegates } = useDelegates(
+        toValue(delegation) as RequiredProperty<SpaceMetadataDelegation>,
+        toValue(space)
+      );
       const [orderBy, orderDirection] = toValue(sortBy).split('-');
 
       return getDelegates({
