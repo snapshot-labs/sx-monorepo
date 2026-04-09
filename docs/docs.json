@@ -6,7 +6,7 @@
     "default": "dark",
     "strict": true
   },
-  "favicon": "/logo/snapshot.svg",
+  "favicon": "/logo/favicon.svg",
   "logo": {
     "dark": "/logo/snapshot.svg",
     "light": "/logo/snapshot.svg"
