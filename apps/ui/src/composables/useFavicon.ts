@@ -1,12 +1,15 @@
-const DEFAULT_FAVICON = '/favicon.svg';
+const DEFAULT_FAVICONS: Record<string, string> = {
+  '(prefers-color-scheme: dark)': '/favicon.svg',
+  '(prefers-color-scheme: light)': '/favicon-dark.svg'
+};
 
 export function useFavicon(favicon?: string) {
   const setFavicon = (newFavicon: string | null) => {
-    if (!newFavicon) return setFavicon(DEFAULT_FAVICON);
-
     document.head
       .querySelectorAll<HTMLLinkElement>('link[rel="icon"]')
-      .forEach(el => (el.href = newFavicon));
+      .forEach(el => {
+        el.href = newFavicon || DEFAULT_FAVICONS[el.media] || '/favicon.svg';
+      });
   };
 
   if (favicon) {
