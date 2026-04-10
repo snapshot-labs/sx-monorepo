@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getOrgProposalLabel } from '@/helpers/organizations';
 import { Space as TownhallSpace } from '@/helpers/townhall/types';
 import { _n, autoLinkText, getSocialNetworksLink } from '@/helpers/utils';
 import { offchainNetworks } from '@/networks';
@@ -190,7 +191,10 @@ watchEffect(() => setTitle(props.space.name));
       <ProposalsList
         v-if="spaceType === 'proposalsSpace'"
         data-testid="summary-proposals-list"
-        title="Proposals"
+        :title="
+          getOrgProposalLabel(organization, `${space.network}:${space.id}`) ??
+          'Proposals'
+        "
         :is-error="isError"
         :loading="isPending"
         :limit="PROPOSALS_SUMMARY_LIMIT - 1"

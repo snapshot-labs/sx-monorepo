@@ -6,6 +6,8 @@ import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
 import IHWifi from '~icons/heroicons-outline/wifi';
 
+type NavLink = { name?: string; params?: Record<string, string> };
+
 /** Remaps existing default space-* routes under a custom path. Whitelabel only. */
 export type SpaceRoute = {
   /** Base path segment, e.g. 'offchain'. No slashes. */
@@ -182,4 +184,21 @@ export function getCustomRoute(
   spaceId: string
 ): SpaceRoute | undefined {
   return org.routes?.find(r => r.meta.orgSpaceId === spaceId);
+}
+
+export function getOrgProposalLabel(
+  organization: Organization | null,
+  spaceId: string
+): string | undefined {
+  const navItems = organization?.navItems;
+  if (!navItems) return undefined;
+
+  const match = Object.values(navItems).find(item => {
+    if (typeof item.link !== 'object') return false;
+    const link = item.link as NavLink;
+
+    return link.name === 'space-proposals' && link.params?.space === spaceId;
+  });
+
+  return match?.name ?? navItems.proposals?.name;
 }

@@ -49,7 +49,11 @@ function handleAcceptTerms() {
         :show-author="showAuthor"
         :show-space="showSpace"
         class="flex-auto mr-4 w-0"
-      />
+      >
+        <template #meta>
+          <slot name="meta" />
+        </template>
+      </ProposalsListItemHeading>
       <div class="hidden md:block">
         <ProposalVote :proposal="proposal">
           <template #wrong-safe-network><div /></template>

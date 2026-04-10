@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useQueries, useQueryClient } from '@tanstack/vue-query';
+import { getOrgProposalLabel } from '@/helpers/organizations';
 import {
   _n,
   autoLinkText,
@@ -163,6 +164,15 @@ watchEffect(() => {
       :loading="isPending"
       :limit="PROPOSALS_SUMMARY_LIMIT"
       :proposals="proposals"
-    />
+    >
+      <template #item-meta="{ proposal }">
+        {{
+          getOrgProposalLabel(
+            organization,
+            `${proposal.network}:${proposal.space.id}`
+          )
+        }}
+      </template>
+    </ProposalsList>
   </div>
 </template>

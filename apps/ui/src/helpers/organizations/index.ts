@@ -1,6 +1,7 @@
 export {
   getOrganizationConfigByDomain,
   getOrganizationConfigById,
+  getOrgProposalLabel,
   type Organization,
   type OrganizationConfig
 } from './config';
