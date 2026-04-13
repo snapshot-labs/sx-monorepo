@@ -162,6 +162,7 @@ export function useSpaceSettings(space: Ref<Space>) {
   const votingStrategies = ref([] as StrategyConfig[]);
   const initialExecutionStrategiesObjectHash = ref(null as string | null);
   const initialValidationStrategyObjectHash = ref(null as string | null);
+  const initialVotingStrategiesObjectHash = ref(null as string | null);
 
   // Offchain properties
   const proposalValidation = ref({ name: 'basic', params: {} } as Validation);
@@ -771,6 +772,7 @@ export function useSpaceSettings(space: Ref<Space>) {
 
     authenticators.value = authenticatorsValue;
     votingStrategies.value = votingStrategiesValue;
+    initialVotingStrategiesObjectHash.value = objectHash(votingStrategiesValue);
     validationStrategy.value = validationStrategyValue;
     initialValidationStrategyObjectHash.value = objectHash(
       validationStrategyValue
@@ -829,6 +831,8 @@ export function useSpaceSettings(space: Ref<Space>) {
       const maxVotingPeriodValue = maxVotingPeriod.value;
       const authenticatorsValue = authenticators.value;
       const votingStrategiesValue = votingStrategies.value;
+      const initialVotingStrategiesObjectHashValue =
+        initialVotingStrategiesObjectHash.value;
       const validationStrategyValue = validationStrategy.value;
       const initialValidationStrategyObjectHashValue =
         initialValidationStrategyObjectHash.value;
@@ -1010,17 +1014,6 @@ export function useSpaceSettings(space: Ref<Space>) {
           return true;
         }
 
-        const [strategiesToAdd, strategiesToRemove] = await processChanges(
-          votingStrategiesValue,
-          space.value.strategies,
-          space.value.strategies_params,
-          space.value.strategies_parsed_metadata
-        );
-
-        if (strategiesToAdd.length || strategiesToRemove.length) {
-          return true;
-        }
-
         const hasValidationStrategyChanged =
           objectHash(validationStrategyValue) !==
           initialValidationStrategyObjectHashValue;
@@ -1032,6 +1025,26 @@ export function useSpaceSettings(space: Ref<Space>) {
           objectHash(executionStrategiesValue) !==
           initialExecutionStrategiesObjectHashValue;
         if (hasExecutionStrategiesChanged) {
+          return true;
+        }
+
+        // Preliminary check to detect input changes early before expensive
+        // params/metadata generation (e.g. MerkleWhitelist IPFS pin).
+        if (
+          objectHash(votingStrategiesValue) !==
+          initialVotingStrategiesObjectHashValue
+        ) {
+          return true;
+        }
+
+        const [strategiesToAdd, strategiesToRemove] = await processChanges(
+          votingStrategiesValue,
+          space.value.strategies,
+          space.value.strategies_params,
+          space.value.strategies_parsed_metadata
+        );
+
+        if (strategiesToAdd.length || strategiesToRemove.length) {
           return true;
         }
       }
