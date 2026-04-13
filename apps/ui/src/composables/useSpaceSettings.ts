@@ -1008,13 +1008,6 @@ export function useSpaceSettings(space: Ref<Space>) {
           return true;
         }
 
-        if (
-          objectHash(votingStrategiesValue) !==
-          initialVotingStrategiesObjectHashValue
-        ) {
-          return true;
-        }
-
         const hasValidationStrategyChanged =
           objectHash(validationStrategyValue) !==
           initialValidationStrategyObjectHashValue;
@@ -1026,6 +1019,26 @@ export function useSpaceSettings(space: Ref<Space>) {
           objectHash(executionStrategiesValue) !==
           initialExecutionStrategiesObjectHashValue;
         if (hasExecutionStrategiesChanged) {
+          return true;
+        }
+
+        // Preliminary check to detect input changes early before expensive
+        // params/metadata generation (e.g. MerkleWhitelist IPFS pin).
+        if (
+          objectHash(votingStrategiesValue) !==
+          initialVotingStrategiesObjectHashValue
+        ) {
+          return true;
+        }
+
+        const [strategiesToAdd, strategiesToRemove] = await processChanges(
+          votingStrategiesValue,
+          space.value.strategies,
+          space.value.strategies_params,
+          space.value.strategies_parsed_metadata
+        );
+
+        if (strategiesToAdd.length || strategiesToRemove.length) {
           return true;
         }
       }
