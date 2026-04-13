@@ -134,7 +134,7 @@ function getProposalState(
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
 
-  if ((proposal.start_block_number ?? proposal.start) > current) {
+  if (Number(proposal.start_block_number ?? proposal.start) > current) {
     return 'pending';
   }
 
