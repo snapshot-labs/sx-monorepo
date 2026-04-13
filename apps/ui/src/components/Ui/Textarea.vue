@@ -18,18 +18,12 @@ const { isDirty } = useDirty(model, props.definition);
 const LARGE_VALUE_THRESHOLD = 100_000;
 const textareaRef = ref<HTMLTextAreaElement>();
 
-watch([textareaRef, model], ([el, val]) => {
-  if (el && el.value !== (val ?? '')) {
-    el.value = val ?? '';
-  }
-});
-
 const updateModelDebounced = useDebounceFn((el: HTMLTextAreaElement) => {
   model.value = el.value;
 }, 500);
 
-function onInput(e: Event) {
-  const el = e.target as HTMLTextAreaElement;
+function onInput(event: Event) {
+  const el = event.target as HTMLTextAreaElement;
 
   if (el.value.length > LARGE_VALUE_THRESHOLD) {
     updateModelDebounced(el);
@@ -37,6 +31,12 @@ function onInput(e: Event) {
     model.value = el.value;
   }
 }
+
+watch([textareaRef, model], ([el, val]) => {
+  if (el && el.value !== (val ?? '')) {
+    el.value = val ?? '';
+  }
+});
 </script>
 
 <template>
