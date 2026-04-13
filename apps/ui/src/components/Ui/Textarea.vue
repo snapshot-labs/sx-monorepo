@@ -10,6 +10,33 @@ const props = defineProps<{
 }>();
 
 const { isDirty } = useDirty(model, props.definition);
+
+// Large values (e.g. 61k-line whitelist) cause browser layout thrashing when
+// Vue re-sets the textarea DOM value on every reactive update. For these cases
+// we debounce model sync so typing stays responsive while validation still
+// fires after 500ms.
+const LARGE_VALUE_THRESHOLD = 100_000;
+const textareaRef = ref<HTMLTextAreaElement>();
+
+const updateModelDebounced = useDebounceFn((el: HTMLTextAreaElement) => {
+  model.value = el.value;
+}, 500);
+
+function onInput(event: Event) {
+  const el = event.target as HTMLTextAreaElement;
+
+  if (el.value.length > LARGE_VALUE_THRESHOLD) {
+    updateModelDebounced(el);
+  } else {
+    model.value = el.value;
+  }
+}
+
+watch([textareaRef, model], ([el, val]) => {
+  if (el && el.value !== (val ?? '')) {
+    el.value = val ?? '';
+  }
+});
 </script>
 
 <template>
@@ -23,10 +50,11 @@ const { isDirty } = useDirty(model, props.definition);
   >
     <textarea
       :id="id"
-      v-model="model"
+      ref="textareaRef"
       class="s-input"
       v-bind="$attrs"
       :placeholder="definition.examples && definition.examples[0]"
+      @input="onInput"
     />
   </UiWrapperInput>
 </template>
