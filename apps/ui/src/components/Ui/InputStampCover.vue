@@ -30,9 +30,9 @@ function openFilePicker() {
   fileInput.value?.click();
 }
 
-async function handleFileChange(e: Event) {
+async function handleFileChange(event: Event) {
   try {
-    const file = (e.target as HTMLInputElement).files?.[0];
+    const file = (event.target as HTMLInputElement).files?.[0];
 
     isUploading.value = true;
 

@@ -164,10 +164,10 @@ export function useMarkdownEditor(
   watch(editorRef, el => {
     if (!el) return;
 
-    el.addEventListener('keydown', (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && shortcuts[e.key]) {
-        e.preventDefault();
-        shortcuts[e.key]();
+    el.addEventListener('keydown', (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && shortcuts[event.key]) {
+        event.preventDefault();
+        shortcuts[event.key]();
       }
     });
   });
