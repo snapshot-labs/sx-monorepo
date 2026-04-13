@@ -327,6 +327,12 @@ export function useSpaceSettings(space: Ref<Space>) {
     if (objectHash(coreMetadata) !== objectHash(previousCoreMetadata)) {
       return true;
     }
+    if (strategy.type === 'MerkleWhitelist') {
+      // NOTE: MerkleWhitelist params are expensive to compute so we try to skip this step if possible.
+      // If metadata has changed then we already know strategy has changed, if metadata is the same
+      // we can assume params are the same as well as they use the same source params.
+      return false;
+    }
 
     let params: string[] = [];
     if (evmNetworks.includes(space.value.network)) {
