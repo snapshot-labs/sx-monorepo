@@ -18,8 +18,8 @@ const fallbackUrl = computed(() =>
 );
 const url = computed(() => props.item.image || fallbackUrl.value);
 
-function handleError(e: Event) {
-  (e.target as HTMLImageElement).src = fallbackUrl.value;
+function handleError(event: Event) {
+  (event.target as HTMLImageElement).src = fallbackUrl.value;
 }
 </script>
 
