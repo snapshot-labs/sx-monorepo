@@ -129,7 +129,7 @@ function getProposalState(
     return proposal.execution_settled ? 'executed' : 'queued';
   }
 
-  if ((proposal.max_end_block_number ?? proposal.max_end) <= current) {
+  if (Number(proposal.max_end_block_number ?? proposal.max_end) <= current) {
     if (currentQuorum < quorum) return 'rejected';
     return scoresFor > scoresAgainst ? 'passed' : 'rejected';
   }
@@ -313,6 +313,9 @@ function formatSpace(
 ): Space {
   return {
     ...space,
+    voting_delay: Number(space.voting_delay),
+    min_voting_period: Number(space.min_voting_period),
+    max_voting_period: Number(space.max_voting_period),
     turbo_expiration: 0,
     network: space._indexer as NetworkID,
     name: space.metadata.name,
@@ -378,6 +381,10 @@ function formatProposal(
 
   return {
     ...proposal,
+    min_end: Number(proposal.min_end),
+    max_end: Number(proposal.max_end),
+    snapshot: Number(proposal.snapshot),
+    execution_time: Number(proposal.execution_time),
     isInvalid:
       proposal.metadata === null ||
       (proposal.metadata.execution === null &&
@@ -417,8 +424,8 @@ function formatProposal(
     has_execution_window_opened: ['Axiom', 'EthRelayer'].includes(
       proposal.execution_strategy_type
     )
-      ? (proposal.max_end_block_number ?? proposal.max_end) <= current
-      : (proposal.min_end_block_number ?? proposal.min_end) <= current,
+      ? Number(proposal.max_end_block_number ?? proposal.max_end) <= current
+      : Number(proposal.min_end_block_number ?? proposal.min_end) <= current,
     execution_settled: proposal.execution_settled,
     state,
     network: networkId,
