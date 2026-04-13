@@ -130,7 +130,9 @@ export async function getTimestampFromBlock({
 
   const blockDifference = blockNumber - Number(actualCurrentBlockNumber);
 
-  return Math.round(
-    currentTimestamp + blockDifference * evmNetworks[networkId].Meta.blockTime
+  return BigInt(
+    Math.round(
+      currentTimestamp + blockDifference * evmNetworks[networkId].Meta.blockTime
+    )
   );
 }

@@ -335,12 +335,12 @@ export function createWriters(
       });
 
     proposal.start = await getTimestampFromBlock(event.args.startBlock);
-    proposal.start_block_number = Number(event.args.startBlock);
+    proposal.start_block_number = event.args.startBlock;
     proposal.min_end = await getTimestampFromBlock(event.args.endBlock);
-    proposal.min_end_block_number = Number(event.args.endBlock);
+    proposal.min_end_block_number = event.args.endBlock;
     proposal.max_end = proposal.min_end;
     proposal.max_end_block_number = proposal.min_end_block_number;
-    proposal.snapshot = proposal.start_block_number;
+    proposal.snapshot = event.args.startBlock;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
     proposal.strategies = space.strategies;
@@ -454,7 +454,7 @@ export function createWriters(
     if (!proposal) return;
 
     proposal.executed = true;
-    proposal.execution_time = Number(event.args.eta);
+    proposal.execution_time = event.args.eta;
 
     await proposal.save();
   };

@@ -251,9 +251,9 @@ export function createWriters(
     space.turbo = false;
     space.metadata = null;
     space.controller = getAddress(event.args.input.owner);
-    space.voting_delay = event.args.input.votingDelay;
-    space.min_voting_period = event.args.input.minVotingDuration;
-    space.max_voting_period = event.args.input.maxVotingDuration;
+    space.voting_delay = BigInt(event.args.input.votingDelay);
+    space.min_voting_period = BigInt(event.args.input.minVotingDuration);
+    space.max_voting_period = BigInt(event.args.input.maxVotingDuration);
     space.proposal_threshold = '0';
     space.strategies_indices = votingStrategies.map((_, i) => i);
     space.strategies = votingStrategies.map(s => getAddress(s.addr));
@@ -391,7 +391,7 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.min_voting_period = event.args.newMinVotingDuration;
+    space.min_voting_period = BigInt(event.args.newMinVotingDuration);
 
     await space.save();
   };
@@ -409,7 +409,7 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.max_voting_period = event.args.newMaxVotingDuration;
+    space.max_voting_period = BigInt(event.args.newMaxVotingDuration);
 
     await space.save();
   };
@@ -427,7 +427,7 @@ export function createWriters(
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.voting_delay = event.args.newVotingDelay;
+    space.voting_delay = BigInt(event.args.newVotingDelay);
 
     await space.save();
   };
@@ -657,16 +657,20 @@ export function createWriters(
     proposal.start = await getTimestampFromBlock(
       event.args.proposal.startBlockNumber
     );
-    proposal.start_block_number = event.args.proposal.startBlockNumber;
+    proposal.start_block_number = BigInt(event.args.proposal.startBlockNumber);
     proposal.min_end = await getTimestampFromBlock(
       event.args.proposal.minEndBlockNumber
     );
-    proposal.min_end_block_number = event.args.proposal.minEndBlockNumber;
+    proposal.min_end_block_number = BigInt(
+      event.args.proposal.minEndBlockNumber
+    );
     proposal.max_end = await getTimestampFromBlock(
       event.args.proposal.maxEndBlockNumber
     );
-    proposal.max_end_block_number = event.args.proposal.maxEndBlockNumber;
-    proposal.snapshot = event.args.proposal.startBlockNumber;
+    proposal.max_end_block_number = BigInt(
+      event.args.proposal.maxEndBlockNumber
+    );
+    proposal.snapshot = BigInt(event.args.proposal.startBlockNumber);
     proposal.type = 'basic';
     proposal.scores_1 = '0';
     proposal.scores_1_parsed = 0;
@@ -691,7 +695,7 @@ export function createWriters(
     proposal.execution_strategy = getAddress(
       event.args.proposal.executionStrategy
     );
-    proposal.execution_time = 0;
+    proposal.execution_time = 0n;
     proposal.executed = false;
     proposal.vetoed = false;
     proposal.execution_settled = false;
@@ -800,8 +804,9 @@ export function createWriters(
       : [];
 
     if (apeGasStrategiesIndices.length) {
-      proposal.start += protocolConfig.apeGasStrategyDelay;
-      proposal.min_end = Math.max(proposal.start, proposal.min_end);
+      proposal.start += BigInt(protocolConfig.apeGasStrategyDelay);
+      proposal.min_end =
+        proposal.min_end > proposal.start ? proposal.min_end : proposal.start;
     }
 
     for (const [, i] of apeGasStrategiesIndices) {
@@ -819,7 +824,7 @@ export function createWriters(
         await registerApeGasProposal(
           {
             viewId,
-            snapshot: proposal.snapshot
+            snapshot: Number(proposal.snapshot)
           },
           protocolConfig
         );
@@ -981,7 +986,7 @@ export function createWriters(
           break;
         case 'SimpleQuorumTimelock':
           proposal.execution_time =
-            now + Number(executionStrategy.timelock_delay);
+            BigInt(now) + executionStrategy.timelock_delay;
           break;
       }
     }

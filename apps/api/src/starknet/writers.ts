@@ -95,13 +95,9 @@ export function createWriters(config: FullConfig) {
     space.turbo = false;
     space.metadata = null;
     space.controller = validateAndParseAddress(event.owner);
-    space.voting_delay = Number(BigInt(event.voting_delay).toString());
-    space.min_voting_period = Number(
-      BigInt(event.min_voting_duration).toString()
-    );
-    space.max_voting_period = Number(
-      BigInt(event.max_voting_duration).toString()
-    );
+    space.voting_delay = BigInt(event.voting_delay);
+    space.min_voting_period = BigInt(event.min_voting_duration);
+    space.max_voting_period = BigInt(event.max_voting_duration);
     space.proposal_threshold = '0';
     space.strategies_indices = strategies.map((_, i) => i);
     space.strategies = strategies;
@@ -198,9 +194,7 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.min_voting_period = Number(
-      BigInt(event.min_voting_duration).toString()
-    );
+    space.min_voting_period = BigInt(event.min_voting_duration);
 
     await space.save();
   };
@@ -218,9 +212,7 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.max_voting_period = Number(
-      BigInt(event.max_voting_duration).toString()
-    );
+    space.max_voting_period = BigInt(event.max_voting_duration);
 
     await space.save();
   };
@@ -256,7 +248,7 @@ export function createWriters(config: FullConfig) {
     const space = await Space.loadEntity(spaceId, config.indexerName);
     if (!space) return;
 
-    space.voting_delay = Number(BigInt(event.voting_delay).toString());
+    space.voting_delay = BigInt(event.voting_delay);
 
     await space.save();
   };
@@ -466,15 +458,11 @@ export function createWriters(config: FullConfig) {
     proposal.author = author.address;
     proposal.metadata = null;
     proposal.execution_hash = event.proposal.execution_payload_hash;
-    proposal.start = parseInt(startTimestamp.toString());
-    proposal.min_end = parseInt(minEnd.toString());
-    proposal.max_end = parseInt(
-      BigInt(event.proposal.max_end_timestamp).toString()
-    );
-    proposal.snapshot = parseInt(
-      BigInt(event.proposal.start_timestamp).toString()
-    );
-    proposal.execution_time = 0;
+    proposal.start = startTimestamp;
+    proposal.min_end = minEnd;
+    proposal.max_end = BigInt(event.proposal.max_end_timestamp);
+    proposal.snapshot = BigInt(event.proposal.start_timestamp);
+    proposal.execution_time = 0n;
     proposal.execution_strategy = validateAndParseAddress(
       event.proposal.execution_strategy
     );
@@ -621,7 +609,7 @@ export function createWriters(config: FullConfig) {
           {
             l1TokenAddress,
             strategyAddress: strategy,
-            snapshotTimestamp: proposal.snapshot
+            snapshotTimestamp: Number(proposal.snapshot)
           },
           config
         );

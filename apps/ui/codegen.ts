@@ -8,6 +8,11 @@ const baseConfig: CodegenConfig['config'] = {
     avoidOptionals: {
       field: true,
       inputValue: false
+    },
+    scalars: {
+      BigInt: 'string',
+      Bytes: 'string',
+      BigDecimal: 'string'
     }
   },
   presetConfig: {
@@ -28,15 +33,7 @@ const config: CodegenConfig = {
       schema:
         'https://subgrapher.snapshot.org/subgraph/arbitrum/6EcQPEFwfCiAq45qUKk4Wnajp5vCUFuxq4r5xSBiya1d',
       documents: ['src/helpers/auction/queries.ts'],
-      ...baseConfig,
-      config: {
-        ...baseConfig.config,
-        scalars: {
-          BigInt: 'string',
-          Bytes: 'string',
-          BigDecimal: 'string'
-        }
-      }
+      ...baseConfig
     },
     './src/helpers/auction/referral/gql/': {
       schema: 'https://api.brokester.box',
