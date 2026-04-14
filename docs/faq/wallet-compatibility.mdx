@@ -1,0 +1,38 @@
+---
+title: "Wallet compatibility"
+---
+
+## Does Snapshot support EIP-1271?
+
+Yes, Snapshot supports EIP-1271, enabling smart contract wallets to participate directly in governance.
+
+EIP-1271 is a standard designed for smart contracts to verify signatures. Normally, verifying signatures requires private keys, but smart contracts can't hold private keys. EIP-1271 addresses this by allowing smart contracts to implement their own method for signature verification. You can read more about [EIP-1271 here](https://eips.ethereum.org/EIPS/eip-1271).
+
+If you manage a smart contract account, you can use it to create proposals or vote directly on Snapshot. Make sure your smart contract account is on the same base network as the Snapshot space you want to interact with.
+
+## Does Snapshot support EIP-6492?
+
+Yes, Snapshot supports EIP-6492, a standard specifically created for undeployed smart contract wallets, also known as counterfactual wallets.
+
+EIP-6492 provides a standardized method to verify signatures from smart contract wallets before they are deployed onchain. These counterfactual wallets have their addresses determined in advance, enabling users to participate in governance activities such as voting and proposal creation on Snapshot without initially deploying their wallet contracts. You can read more about [EIP-6492 here](https://eips.ethereum.org/EIPS/eip-6492).
+
+## How to fix signing issue with MetaMask Chrome extension v12.15.1
+
+A release of the MetaMask Chrome extension (version 12.15.1) introduced a bug affecting message signing. This issue prevented Snapshot users from voting and creating new proposals. The MetaMask team fixed the problem in version 12.15.2.
+
+If you're experiencing trouble with Snapshot while using MetaMask, please ensure your extension is updated:
+
+### Check your MetaMask version
+
+1. Open your MetaMask Chrome extension
+2. Click on the top-right three-dot menu
+3. Click Settings (gear icon)
+4. Go to **About**
+5. If the version is **12.15.2 or higher**, you're good to go. If it's 12.15.1 or lower, update manually.
+
+### How to update MetaMask manually on Chrome
+
+1. Open a new tab and navigate to `chrome://extensions`
+2. Locate MetaMask and click **Details**
+3. Enable **Developer mode** (toggle in the top-right corner)
+4. Click **Update** to install the latest version

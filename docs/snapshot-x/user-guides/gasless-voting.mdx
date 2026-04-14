@@ -1,0 +1,19 @@
+---
+title: "Gasless voting"
+---
+
+To enable gasless voting and proposals on a Snapshot X space, first add the **Ethereum signature authenticator** (or the **Starknet signature authenticator** if your space uses Starknet).
+
+When you create a Snapshot X space, a dedicated wallet is automatically generated to facilitate gasless interactions. You can find the address of this dedicated wallet in the **Authenticator** page within your space settings.
+
+To activate gasless voting and proposal submissions, simply top up this wallet with ETH (or the relevant gas token).
+
+<Warning>
+If the wallet balance drops below **0.01 ETH**, the gasless functionality will be disabled.
+</Warning>
+
+## What is Mana?
+
+Mana is a meta-transaction relayer that enables gasless governance on Snapshot X. Instead of requiring users to pay gas fees for proposals and votes, Mana sponsors those fees by accepting signed messages and broadcasting them onchain. This eliminates the need for users to hold or spend ETH for governance actions, making participation more accessible.
+
+The source code is available at [github.com/snapshot-labs/sx-monorepo/tree/master/apps/mana](https://github.com/snapshot-labs/sx-monorepo/tree/master/apps/mana).

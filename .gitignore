@@ -40,3 +40,5 @@ dist.cjs
 
 # playwright related files
 .browser
+
+/legacy-docs

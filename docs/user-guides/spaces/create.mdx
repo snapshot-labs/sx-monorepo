@@ -1,0 +1,73 @@
+---
+title: "Create a space"
+description: "This page guides you step by step through the process of creating a space for your organization."
+---
+
+<Info>
+If you want to experiment with Snapshot before creating a real space, try [testnet.snapshot.box](https://testnet.snapshot.box) - a Sepolia testnet playground for testing.
+</Info>
+
+To create a new Snapshot space, you need an ENS name. For spaces on [snapshot.box](https://snapshot.box), you'll need an ENS name on Ethereum mainnet. For spaces on [testnet.snapshot.box](https://testnet.snapshot.box), you'll need an ENS name on Sepolia. You can register one at [ens.domains](https://ens.domains).
+
+To get started, go to [snapshot.box/#/create](https://snapshot.box/#/create) or click the **+** button in the left sidebar. You will be guided through the following steps.
+
+### 1. Profile
+
+Set up your space's identity. Enter a **name** (required) and optionally add a description, avatar, cover image, categories, voting power symbol, and social accounts (website, GitHub, X, Farcaster, CoinGecko).
+
+You can update this information at any time after creating the space.
+
+![](/images/23.png)
+
+### 2. Domain name
+
+Select your space's domain name. You need an ENS name on Ethereum mainnet or a web3 domain name on a mainnet network. Your available domains will be listed automatically.
+
+If you don't have a domain, you can register a new ENS name or attach a custom domain. By default, the space's controller is the domain owner.
+
+![](/images/27.png)
+
+### 3. Network
+
+Select the base network for your space.
+
+![](/images/30.png)
+
+### 4. Voting strategies
+
+Choose how your users' votes are counted through a set of strategies. You can pick from common strategies like **ERC-20**, **ERC-20 Votes**, **ERC-721**, or **ERC-1155**, or browse the full list to add a custom strategy.
+
+<Info>
+Each strategy takes into account the assets that belong to the voting address **at the time of proposal creation**, not at the time of voting.
+</Info>
+
+![](/images/25.png)
+
+### 5. Proposal validation
+
+Configure who is allowed to create a proposal. Options include:
+
+* **Only authors can propose:** restrict proposal creation to designated authors
+* **Basic:** use a minimum score with any strategy to determine eligibility
+* **Gitcoin Passport gated:** require users to have a Gitcoin Passport
+* **Karma EAS Attestation:** use EAS attestations for eligibility
+
+![](/images/26.png)
+
+### 6. Voting settings
+
+Set the **voting delay** (time between proposal creation and voting start) and the **voting period** (how long voting remains open). If left empty, the proposal author will be able to set these values.
+
+![](/images/28.png)
+
+### 7. Members
+
+Assign roles and permissions to your space members. Available roles:
+
+* **Admin:** can modify settings, manage proposals, and create proposals
+* **Moderator:** can manage proposals and create proposals
+* **Author:** can create proposals without validation
+
+Once everything is configured, click **Create space** to finalize.
+
+![](/images/43.png)
