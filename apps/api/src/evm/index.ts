@@ -67,7 +67,11 @@ const ethIndexer = new evm.EvmIndexer(createWriters(ethConfig));
 const sepIndexer = new evm.EvmIndexer(createWriters(sepConfig));
 const oethIndexer = new evm.EvmIndexer(createWriters(oethConfig));
 const maticIndexer = new evm.EvmIndexer(createWriters(maticConfig));
-const arb1Indexer = new evm.EvmIndexer(createWriters(arb1Config));
+const arb1Indexer = process.env.HYPERSYNC_API_TOKEN
+  ? new evm.HyperSyncEvmIndexer(createWriters(arb1Config), {
+      apiToken: process.env.HYPERSYNC_API_TOKEN
+    })
+  : new evm.EvmIndexer(createWriters(arb1Config));
 const baseIndexer = new evm.EvmIndexer(createWriters(baseConfig));
 const mntIndexer = new evm.EvmIndexer(createWriters(mntConfig));
 const bnbIndexer = new evm.EvmIndexer(createWriters(bnbConfig));
