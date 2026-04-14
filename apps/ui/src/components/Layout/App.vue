@@ -32,8 +32,8 @@ const { space: currentSpace } = useCurrentSpace();
 const { organization } = useOrganization();
 const { login, web3 } = useWeb3();
 const { isSwiping, direction } = useSwipe(el, {
-  onSwipe(e: TouchEvent) {
-    const noSideBarSwipe = (e.target as Element)?.closest(
+  onSwipe(event: TouchEvent) {
+    const noSideBarSwipe = (event.target as Element)?.closest(
       '[data-no-sidebar-swipe]'
     );
     sidebarSwipeEnabled.value =

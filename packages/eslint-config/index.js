@@ -25,6 +25,11 @@ export default [
           selector: 'CatchClause > Identifier[name=/^(e|error)$/]',
           message:
             "Use 'err' instead of 'e', 'error', or use more descriptive name."
+        },
+        {
+          selector:
+            'Identifier[name=/^(e|evt)$/][typeAnnotation.typeAnnotation.typeName.name=/Event$/]',
+          message: "Use 'event' instead of 'e' or 'evt' for event parameters."
         }
       ],
       'sort-imports': [

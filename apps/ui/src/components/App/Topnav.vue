@@ -60,8 +60,8 @@ const searchConfig = computed(() => {
   return null;
 });
 
-function handleSearchSubmit(e: Event) {
-  e.preventDefault();
+function handleSearchSubmit(event: Event) {
+  event.preventDefault();
 
   if (!searchConfig.value) return;
 

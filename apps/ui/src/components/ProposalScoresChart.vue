@@ -207,12 +207,12 @@ const displayedDate = computed(() =>
         .replace(',', ' ·')
 );
 
-function handleMouseMove(e: MouseEvent) {
+function handleMouseMove(event: MouseEvent) {
   if (!containerRef.value) return;
   const rect = containerRef.value.getBoundingClientRect();
   const ratio = Math.max(
     0,
-    Math.min(1, (e.clientX - rect.left - PADDING.left) / drawingWidth.value)
+    Math.min(1, (event.clientX - rect.left - PADDING.left) / drawingWidth.value)
   );
   hoveredTimestamp.value = props.start + ratio * duration.value;
 }

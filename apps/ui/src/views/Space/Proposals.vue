@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { LocationQueryRaw } from 'vue-router';
 import ProposalIconStatus from '@/components/ProposalIconStatus.vue';
+import { getOrgProposalLabel } from '@/helpers/organizations';
 import { ProposalsFilter } from '@/networks/types';
 import { useProposalsQuery } from '@/queries/proposals';
 import { useSpaceVotingPowerQuery } from '@/queries/votingPower';
@@ -9,6 +10,7 @@ import { Space } from '@/types';
 const props = defineProps<{ space: Space }>();
 
 const { setTitle } = useTitle();
+const { organization } = useOrganization();
 const router = useRouter();
 const route = useRoute();
 const { web3 } = useWeb3();
@@ -28,6 +30,14 @@ const labels = ref<string[]>([]);
 const selectIconBaseProps = {
   size: 16
 };
+
+const proposalsLabel = computed(
+  () =>
+    getOrgProposalLabel(
+      organization.value,
+      `${props.space.network}:${props.space.id}`
+    ) ?? 'Proposals'
+);
 
 const spaceLabels = computed(() => {
   if (!props.space.labels) return {};
@@ -112,7 +122,7 @@ watch(
   { immediate: true }
 );
 
-watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
+watchEffect(() => setTitle(`${proposalsLabel.value} - ${props.space.name}`));
 </script>
 
 <template>
@@ -225,7 +235,7 @@ watchEffect(() => setTitle(`Proposals - ${props.space.name}`));
       </div>
     </div>
     <ProposalsList
-      title="Proposals"
+      :title="proposalsLabel"
       limit="off"
       :is-error="isError"
       :loading="isPending"
