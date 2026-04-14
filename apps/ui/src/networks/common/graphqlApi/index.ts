@@ -381,6 +381,7 @@ function formatProposal(
 
   return {
     ...proposal,
+    start: Number(proposal.start),
     min_end: Number(proposal.min_end),
     max_end: Number(proposal.max_end),
     snapshot: Number(proposal.snapshot),
