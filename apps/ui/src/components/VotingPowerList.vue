@@ -48,42 +48,54 @@ const baseNetwork = computed(() =>
               }
             )
           }}
-          {{ strategy.symbol || votingPower.symbol }}
+          {{ votingPower.symbol }}
         </div>
       </div>
-      <div v-if="strategy.token" class="flex items-center gap-2 mt-1">
-        <AppLink
-          :to="
-            (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(
-              strategy.address
-            )
-              ? baseNetwork
-              : network
-            ).helpers.getExplorerUrl(
-              strategy.token,
-              'contract',
-              strategy.chainId
-            )
-          "
-          class="flex items-center text-skin-text"
-        >
-          <UiStamp
-            :id="strategy.token"
-            type="avatar"
-            :size="18"
-            class="mr-2 rounded-sm"
-          />
-          {{ shorten(strategy.token) }}
-          <IH-arrow-sm-right class="ml-1 -rotate-45" />
-        </AppLink>
-        <AppLink
-          v-if="strategy.swapLink"
-          :to="strategy.swapLink"
-          class="flex items-center text-skin-text"
-        >
-          Buy
-          <IH-arrow-sm-right class="ml-1 -rotate-45" />
-        </AppLink>
+      <div
+        v-if="strategy.token || strategy.symbol"
+        class="flex justify-between mt-1"
+      >
+        <div v-if="strategy.token" class="flex items-center gap-2">
+          <AppLink
+            :to="
+              (network.constants.STORAGE_PROOF_STRATEGIES_TYPES?.includes(
+                strategy.address
+              )
+                ? baseNetwork
+                : network
+              ).helpers.getExplorerUrl(
+                strategy.token,
+                'contract',
+                strategy.chainId
+              )
+            "
+            class="flex items-center text-skin-text"
+          >
+            <UiStamp
+              :id="strategy.token"
+              type="avatar"
+              :size="18"
+              class="mr-2 rounded-sm"
+            />
+            {{ shorten(strategy.token) }}
+            <IH-arrow-sm-right class="ml-1 -rotate-45" />
+          </AppLink>
+          <AppLink
+            v-if="strategy.swapLink"
+            :to="strategy.swapLink"
+            class="flex items-center text-skin-text"
+          >
+            Buy
+            <IH-arrow-sm-right class="ml-1 -rotate-45" />
+          </AppLink>
+        </div>
+        <div v-else />
+        <div class="text-skin-text shrink-0">
+          <template v-if="strategy.token">
+            {{ _n(Number(strategy.value) / 10 ** strategy.displayDecimals) }}
+          </template>
+          {{ strategy.symbol }}
+        </div>
       </div>
     </div>
   </div>
