@@ -53,7 +53,7 @@ const baseNetwork = computed(() =>
       </div>
       <div
         v-if="strategy.token || strategy.symbol"
-        class="flex justify-between mt-1"
+        class="flex justify-between"
       >
         <div v-if="strategy.token" class="flex items-center gap-2">
           <AppLink
@@ -90,11 +90,11 @@ const baseNetwork = computed(() =>
           </AppLink>
         </div>
         <div v-else />
-        <div class="text-skin-text shrink-0">
+        <div>
           <template v-if="strategy.token">
             {{ _n(Number(strategy.value) / 10 ** strategy.displayDecimals) }}
           </template>
-          {{ strategy.symbol }}
+          {{ strategy.symbol || 'units' }}
         </div>
       </div>
     </div>
