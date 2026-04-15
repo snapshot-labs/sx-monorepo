@@ -38,6 +38,8 @@ import {
   getActualBlockNumber
 } from '../../utils';
 
+const ARB1_VOTE_INDEXING_START_BLOCK = 167429438;
+
 export function createWriters(
   config: EVMConfig,
   protocolConfig: OpenZeppelinConfig
@@ -508,12 +510,20 @@ export function createWriters(
   };
 
   const handleVoteCast: evm.Writer<typeof IGovernorAbi, 'VoteCast'> = async ({
+    blockNumber,
     block,
     txId,
     event,
     rawEvent
   }) => {
     if (!event || !rawEvent) return;
+
+    if (
+      config.indexerName === 'arb1' &&
+      blockNumber < ARB1_VOTE_INDEXING_START_BLOCK
+    ) {
+      return;
+    }
 
     logger.info('Handle vote cast');
 
