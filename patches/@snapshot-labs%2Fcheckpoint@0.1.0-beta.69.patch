@@ -1,0 +1,56 @@
+diff --git a/node_modules/@snapshot-labs/checkpoint/.bun-tag-43e731c2041b273c b/.bun-tag-43e731c2041b273c
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/src/providers/evm/hypersync-provider.js b/dist/src/providers/evm/hypersync-provider.js
+index 4978164a631efbe2735e6c4d821be1cc3125b316..d16988bf21cba63e17e2bbc2791bef20eed26788 100644
+--- a/dist/src/providers/evm/hypersync-provider.js
++++ b/dist/src/providers/evm/hypersync-provider.js
+@@ -2,6 +2,8 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.HyperSyncEvmProvider = void 0;
+ const provider_1 = require("./provider");
++const VOTE_CAST_TOPIC = '0xb8e138887d0aa13bab447e82de9d5c1777041ecd21ca36ba824ff1e6c07ddda4';
++const VOTE_CAST_MIN_BLOCK = 167429439;
+ const FIELD_SELECTION = {
+     block: ['number', 'timestamp', 'hash', 'parent_hash'],
+     log: [
+@@ -88,6 +90,10 @@ class HyperSyncEvmProvider extends provider_1.EvmProvider {
+                     });
+                 }
+                 for (const log of chunk.logs ?? []) {
++                    if (log.topic0 === VOTE_CAST_TOPIC &&
++                        log.block_number < VOTE_CAST_MIN_BLOCK) {
++                        continue;
++                    }
+                     const topics = [
+                         log.topic0,
+                         log.topic1,
+diff --git a/src/providers/evm/hypersync-provider.ts b/src/providers/evm/hypersync-provider.ts
+index c47f01b6a539d49a0127a4b75867c7df514cc8f0..99960e2c156ca49fb542a5a42129dcbeb7cf9909 100644
+--- a/src/providers/evm/hypersync-provider.ts
++++ b/src/providers/evm/hypersync-provider.ts
+@@ -41,6 +41,10 @@ type HyperSyncResponse = {
+   }[];
+ };
+ 
++const VOTE_CAST_TOPIC =
++  '0xb8e138887d0aa13bab447e82de9d5c1777041ecd21ca36ba824ff1e6c07ddda4';
++const VOTE_CAST_MIN_BLOCK = 167429439;
++
+ const FIELD_SELECTION = {
+   block: ['number', 'timestamp', 'hash', 'parent_hash'],
+   log: [
+@@ -161,6 +165,13 @@ export class HyperSyncEvmProvider extends EvmProvider {
+         }
+ 
+         for (const log of chunk.logs ?? []) {
++          if (
++            log.topic0 === VOTE_CAST_TOPIC &&
++            log.block_number < VOTE_CAST_MIN_BLOCK
++          ) {
++            continue;
++          }
++
+           const topics = [
+             log.topic0,
+             log.topic1,
