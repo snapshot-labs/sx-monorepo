@@ -1,4 +1,4 @@
-import Checkpoint, { evm } from '@snapshot-labs/checkpoint';
+import Checkpoint, { evm } from 'checkpoint-playground';
 import { createConfig } from './config';
 import { registerIndexer } from '../register';
 import { createWriters as createGovernorBravoWriters } from './protocols/governor-bravo/writers';

@@ -1,5 +1,5 @@
-import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks, utils } from '@snapshot-labs/sx';
+import { evm } from 'checkpoint-playground';
 import { createPublicClient, getAddress, http, keccak256, toHex } from 'viem';
 import ERC20VotesAbi from './abis/ERC20Votes';
 import GovernorPreventLateQuorumAbi from './abis/GovernorPreventLateQuorum';

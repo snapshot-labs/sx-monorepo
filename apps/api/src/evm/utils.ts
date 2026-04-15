@@ -1,5 +1,5 @@
-import { evm } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
+import { evm } from 'checkpoint-playground';
 import { PublicClient } from 'viem';
 import { EVMConfig, NetworkID, PartialConfig } from './types';
 

@@ -1,4 +1,4 @@
-import { BaseWriterParams } from '@snapshot-labs/checkpoint';
+import { BaseWriterParams } from 'checkpoint-playground';
 import { Event, Unit } from '../../highlight/types';
 
 export type Writer = (

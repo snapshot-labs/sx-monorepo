@@ -1,5 +1,5 @@
-import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
+import { CheckpointConfig } from 'checkpoint-playground';
 import GovernorModule from './abis/GovernorModule';
 import Timelock from './abis/Timelock';
 import { GovernorBravoConfig, NetworkID } from '../../types';

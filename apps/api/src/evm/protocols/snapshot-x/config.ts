@@ -1,5 +1,5 @@
-import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { evmNetworks } from '@snapshot-labs/sx';
+import { CheckpointConfig } from 'checkpoint-playground';
 import AxiomExecutionStrategy from './abis/AxiomExecutionStrategy';
 import L1AvatarExecutionStrategy from './abis/L1AvatarExecutionStrategy';
 import L1AvatarExecutionStrategyFactory from './abis/L1AvatarExecutionStrategyFactory';

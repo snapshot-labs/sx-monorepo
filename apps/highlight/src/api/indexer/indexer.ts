@@ -1,4 +1,4 @@
-import { BaseIndexer, Instance } from '@snapshot-labs/checkpoint';
+import { BaseIndexer, Instance } from 'checkpoint-playground';
 import { Logger as PinoLogger } from 'pino';
 import { HighlightProvider } from './provider';
 import { Writer } from './types';

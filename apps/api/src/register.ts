@@ -1,7 +1,7 @@
 import Checkpoint, {
   BaseIndexer,
   CheckpointConfig
-} from '@snapshot-labs/checkpoint';
+} from 'checkpoint-playground';
 import { ENABLED_NETWORKS } from './config';
 
 export function registerIndexer(
