@@ -20,7 +20,7 @@
     "@ethersproject/hash": "^5.8.0",
     "@ethersproject/providers": "^5.8.0",
     "@ethersproject/wallet": "^5.8.0",
-    "checkpoint-playground": "^0.1.1",
+    "checkpoint-playground": "^0.1.2",
     "@snapshot-labs/sx": "^0.1.7",
     "async-lock": "^1.4.0",
     "change-case": "^4.1.2",

@@ -18,7 +18,7 @@
     "@as-integrations/express4": "^1.1.2",
     "@faker-js/faker": "^7.4.0",
     "@logtail/pino": "^0.5.5",
-    "checkpoint-playground": "^0.1.1",
+    "checkpoint-playground": "^0.1.2",
     "@snapshot-labs/sx": "^0.1.0",
     "@types/node": "^22.6.0",
     "cors": "^2.8.5",
