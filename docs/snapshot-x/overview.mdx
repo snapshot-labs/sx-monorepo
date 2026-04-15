@@ -1,0 +1,33 @@
+---
+title: "Overview"
+---
+
+Snapshot X is a fully onchain voting protocol. Use these docs to learn how to create spaces, submit proposals, cast votes, and integrate with the protocol.
+
+<CardGroup cols={3}>
+  <Card title="User guides" href="/snapshot-x/user-guides/create-a-space">
+    **Non-technical documentation for the platform.** Go here if you want to create a space, proposal or cast a vote.
+  </Card>
+  <Card title="Protocol" href="/snapshot-x/protocol/overview">
+    **Technical documentation for Snapshot X protocol.** Go here if you want to understand the protocol architecture.
+  </Card>
+  <Card title="Services" href="/snapshot-x/services/architecture">
+    **Overview of the services built for a better UX when interacting with the protocol.** Go here if you want to integrate Snapshot X in your platform.
+  </Card>
+</CardGroup>
+
+## What is Snapshot X?
+
+**Snapshot X** is an onchain voting protocol that utilizes modular smart contracts for all operations, offering censorship resistance, onchain voting power computation, and trustless proposal execution. The difference with the original [Snapshot](https://snapshot.box) is that Snapshot X is **fully onchain**. What this means is:
+
+* **The protocol is censorship resistant**: Anyone can cast a vote. The protocol runs without any reliance on offchain or centralized services which have the power to censor votes. \[1]
+* **Voting power is computed onchain**: The voting logic is fully onchain and auditable so you can be sure of the logic used to compute voting power and decide on the outcome of proposals.
+* **The execution is trustless**: Proposal transactions are automatically executed following the passing of a proposal. Say you create a new proposal which, if it passes, will transfer 1 ETH to `vitalik.eth`. If the proposal passes, the 1 ETH will automatically get sent to `vitalik.eth`, without any further human action needed.
+
+<Info>
+Snapshot can be found on EVM-chains and on Starknet. Both the [EVM implementation](https://github.com/snapshot-labs/sx-evm) and the [Cairo implementation](https://github.com/snapshot-labs/sx-starknet) are open source. The Starknet's specific details can be found on [this dedicated page](/snapshot-x/protocol/starknet-specifics).
+</Info>
+
+If anything in these docs is unclear or you would like more detail, do not hesitate to reach out on [Discord](https://discord.snapshot.org).
+
+\[1] We note that there are in fact offchain services (eg the relayer Mana) built for use with Snapshot X, but these are not mandatory and therefore cannot lead to censorship.

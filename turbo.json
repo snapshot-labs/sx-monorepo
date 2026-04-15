@@ -39,6 +39,7 @@
         "ENABLE_SNAPSHOT_X",
         "ENABLE_GOVERNOR_BRAVO",
         "ENABLE_OPENZEPPELIN",
+        "HYPERSYNC_API_TOKEN",
         "VITE_MANA_URL"
       ]
     },

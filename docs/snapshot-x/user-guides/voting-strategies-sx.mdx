@@ -1,0 +1,55 @@
+---
+title: "Voting strategies"
+---
+
+Snapshot X provides several onchain voting strategies for calculating voting power.
+
+## Whitelist
+
+The Whitelist strategy assigns specific voting power to chosen addresses. It uses a format of `address:voting_power` and a Merkle tree for onchain verification. Only the tree's root is stored onchain. During voting, users prove their inclusion in the list using Merkle proofs. This approach saves gas, allows easy updates, and provides precise control over voting power distribution.
+
+Example format:
+
+```
+0x1234567890123456789012345678901234567890:100
+0xabcdefabcdefabcdefabcdefabcdefabcdefabcd:50
+0x9876543210987654321098765432109876543210:75
+```
+
+## ERC-20 Votes (EIP-5805)
+
+The ERC-20 Votes strategy assigns voting power based on delegated token balances. It works with ERC-20 or ERC-721 tokens that implement the EIP-5805 Votes extension from OpenZeppelin. This strategy allows token holders to participate in governance by delegating their voting power, either to themselves or to other addresses.
+
+## EVM slot value
+
+The EVM slot value strategy uses values stored in specific slots on an EVM chain as voting power. It retrieves data such as ERC-20 token balances or ERC-721 token ownership from Ethereum mainnet or Sepolia testnet and leverages storage proofs to verify data integrity on layer 2. Currently, this strategy is only available on Starknet.
+
+To set up this strategy:
+
+1. Add the Ethereum mainnet or Sepolia testnet contract address
+2. Find the storage slot where balances are stored using [storage.herodotus.dev](https://storage.herodotus.dev)
+3. Enter the contract address and select the network
+4. Locate the index where the balances are stored
+
+For example, for the ApeCoin (APE) ERC-20 token, the balances are stored in slot index 0.
+
+## Vanilla
+
+The Vanilla strategy is a simple voting strategy used for testing purposes, available only on testnets. It assigns 1 voting power to each participant, regardless of their token holdings.
+
+## OZ Votes storage proof
+
+The OZ Votes storage proof strategy uses delegated balances stored in specific slots on an EVM chain as voting power. This strategy focuses on verifying delegated voting power for tokens using ERC-20 Votes or ERC-721 Votes, utilizing the trace 224 or 208 format. It leverages storage proofs to ensure data integrity on layer 2. Currently, this strategy is only available on Starknet.
+
+To set up this strategy:
+
+1. Add the Ethereum mainnet or Sepolia testnet contract address
+2. Find the storage slot where delegated balances are stored using [storage.herodotus.dev](https://storage.herodotus.dev)
+3. Enter the contract address and select the network
+4. Locate the index where the delegated balances are stored
+
+For example, for the ENS ERC-20 token, the delegated balances are stored in slot index 7.
+
+<Info>
+If you need help setting up any voting strategy, contact our support team through the [Help Center](https://help.snapshot.box).
+</Info>

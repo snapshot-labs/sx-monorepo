@@ -83,7 +83,6 @@ export const GOVERNANCES: Partial<
       startBlock: 37959559
     }
   },
-  /*
   arb1: {
     'Arbitrum Treasury': {
       name: 'Arbitrum Treasury',
@@ -112,7 +111,8 @@ export const GOVERNANCES: Partial<
         'OpenZeppelinAuthenticatorSignatureV4'
       ],
       startBlock: 70398215
-    },
+    }
+    /*
     GMX: {
       name: 'GMX',
       about:
@@ -131,8 +131,8 @@ export const GOVERNANCES: Partial<
       quorumType: 'for_only',
       startBlock: 204249812
     }
+    */
   },
-  */
   sep: {
     Sekhmet: {
       name: 'Sekhmet',
