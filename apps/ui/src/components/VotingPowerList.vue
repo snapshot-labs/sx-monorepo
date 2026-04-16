@@ -51,7 +51,10 @@ const baseNetwork = computed(() =>
           {{ votingPower.symbol }}
         </div>
       </div>
-      <div class="flex justify-between">
+      <div
+        v-if="strategy.token || strategy.symbol"
+        class="flex justify-between"
+      >
         <div v-if="strategy.token" class="flex items-center gap-2">
           <AppLink
             :to="
@@ -88,7 +91,9 @@ const baseNetwork = computed(() =>
         </div>
         <div v-else />
         <div>
-          {{ _n(Number(strategy.value) / 10 ** strategy.displayDecimals) }}
+          <template v-if="strategy.token">
+            {{ _n(Number(strategy.value) / 10 ** strategy.displayDecimals) }}
+          </template>
           {{ strategy.symbol || 'units' }}
         </div>
       </div>
