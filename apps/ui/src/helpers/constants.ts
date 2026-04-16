@@ -18,6 +18,8 @@ export const API_TESTNET_URL =
 
 export const HELPDESK_URL = 'https://help.snapshot.box';
 
+export const DOCS_URL = 'https://docs.snapshot.box';
+
 export const VERIFIED_URL =
   'https://help.snapshot.box/en/articles/9171639-how-to-get-my-space-verified';
 

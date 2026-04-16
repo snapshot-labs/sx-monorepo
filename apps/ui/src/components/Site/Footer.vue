@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HELPDESK_URL } from '@/helpers/constants';
+import { DOCS_URL, HELPDESK_URL } from '@/helpers/constants';
 import { repository, version } from '@/../package.json';
 import ICDiscord from '~icons/c/discord';
 import ICGithub from '~icons/c/github';
@@ -75,7 +75,7 @@ const SOCIALS = [
           <UiEyebrow>Developers</UiEyebrow>
           <div class="space-y-1">
             <div>
-              <AppLink to="https://docs.snapshot.box">
+              <AppLink :to="`${DOCS_URL}/developers`">
                 Docs
                 <IH-arrow-sm-right class="inline-block -rotate-45" />
               </AppLink>
