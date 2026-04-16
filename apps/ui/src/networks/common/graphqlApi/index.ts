@@ -386,6 +386,7 @@ function formatProposal(
     max_end: Number(proposal.max_end),
     snapshot: Number(proposal.snapshot),
     execution_time: Number(proposal.execution_time),
+    executed_at: proposal.executed_at ? Number(proposal.executed_at) : null,
     isInvalid:
       proposal.metadata === null ||
       (proposal.metadata.execution === null &&
