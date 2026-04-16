@@ -501,8 +501,8 @@ export function createWriters(
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = rawEvent.transactionHash;
-    proposal.executed_at = Number(block?.timestamp ?? getCurrentTimestamp());
-    proposal.executed_at_block_number = blockNumber;
+    proposal.executed_at = block?.timestamp ?? BigInt(getCurrentTimestamp());
+    proposal.executed_at_block_number = BigInt(blockNumber);
 
     await proposal.save();
   };

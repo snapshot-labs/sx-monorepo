@@ -317,9 +317,9 @@ type Proposal {
   "Whether proposal has been cancelled"
   cancelled: Boolean!
   "Timestamp when the proposal execution was finalized"
-  executed_at: Int
+  executed_at: BigInt
   "Block number when the proposal execution was finalized (EVM only)"
-  executed_at_block_number: Int
+  executed_at_block_number: BigInt
   "Historical scores"
   scores_ticks: [ScoresTick!]! @derivedFrom(field: "proposal")
 }

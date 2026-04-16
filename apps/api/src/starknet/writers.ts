@@ -754,7 +754,7 @@ export function createWriters(config: FullConfig) {
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = txId ?? null;
-    proposal.executed_at = block?.timestamp ?? getCurrentTimestamp();
+    proposal.executed_at = BigInt(block?.timestamp ?? getCurrentTimestamp());
 
     await proposal.save();
   };
