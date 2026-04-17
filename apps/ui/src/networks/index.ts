@@ -13,6 +13,7 @@ const arbitrumNetwork = createEvmNetwork('arb1');
 const baseNetwork = createEvmNetwork('base');
 const mantleNetwork = createEvmNetwork('mnt');
 const bnbNetwork = createEvmNetwork('bnb');
+const bnbtNetwork = createEvmNetwork('bnbt');
 const optimismNetwork = createEvmNetwork('oeth');
 const ethereumNetwork = createEvmNetwork('eth');
 const apeNetwork = createEvmNetwork('ape');
@@ -32,6 +33,7 @@ export const enabledNetworks: NetworkID[] = import.meta.env
       'mnt',
       'oeth',
       'bnb',
+      'bnbt',
       'ape',
       'curtis',
       'sep',
@@ -47,12 +49,20 @@ export const evmNetworks: NetworkID[] = [
   'base',
   'oeth',
   'bnb',
+  'bnbt',
   'ape',
   'curtis',
   'sep'
 ];
 export const offchainNetworks: NetworkID[] = ['s', 's-tn'];
 export const starknetNetworks: NetworkID[] = ['sn', 'sn-sep'];
+export const governorNetworks: NetworkID[] = [
+  'eth',
+  'arb1',
+  'bnb',
+  'bnbt',
+  'sep'
+];
 // This network is used for aliases/follows/profiles/explore page.
 export const metadataNetwork: NetworkID =
   import.meta.env.VITE_METADATA_NETWORK || 's';
@@ -68,6 +78,7 @@ export const getNetwork = (id: NetworkID) => {
   if (id === 'base') return baseNetwork;
   if (id === 'mnt') return mantleNetwork;
   if (id === 'bnb') return bnbNetwork;
+  if (id === 'bnbt') return bnbtNetwork;
   if (id === 'oeth') return optimismNetwork;
   if (id === 'eth') return ethereumNetwork;
   if (id === 'ape') return apeNetwork;
@@ -90,6 +101,9 @@ export const enabledReadWriteNetworks: NetworkID[] = enabledNetworks.filter(
   id => !getNetwork(id).readOnly
 );
 
+const onchainApiNetwork =
+  enabledNetworks.find(network => !offchainNetworks.includes(network)) || 'eth';
+
 export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
   {
     snapshot: {
@@ -102,9 +116,7 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
     'snapshot-x': {
       key: 'snapshot-x',
       label: 'Snapshot X',
-      apiNetwork:
-        enabledNetworks.find(network => !offchainNetworks.includes(network)) ||
-        'eth',
+      apiNetwork: onchainApiNetwork,
       networks: enabledNetworks.filter(
         network => !offchainNetworks.includes(network)
       ),
@@ -113,8 +125,10 @@ export const explorePageProtocols: Record<ExplorePageProtocol, ProtocolConfig> =
     governor: {
       key: 'governor',
       label: 'Governor',
-      apiNetwork: 'eth',
-      networks: ['eth'],
+      apiNetwork: onchainApiNetwork,
+      networks: enabledNetworks.filter(network =>
+        governorNetworks.includes(network)
+      ),
       protocols: ['governor-bravo', '@openzeppelin/governor'],
       limit: 18
     }

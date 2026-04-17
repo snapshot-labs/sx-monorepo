@@ -5,6 +5,7 @@ import {
   evmArbitrum,
   evmBase,
   evmBnb,
+  evmBnbt,
   evmCurtis,
   evmMainnet,
   evmMantle,
@@ -36,6 +37,7 @@ const BROKESTER_API_URL =
 const NETWORKS = new Map<number, EvmNetworkConfig>([
   [10, evmOptimism],
   [56, evmBnb],
+  [97, evmBnbt],
   [137, evmPolygon],
   [8453, evmBase],
   [5000, evmMantle],
