@@ -76,6 +76,64 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
     name: 'Snapshot',
     spaceIds: [{ network: 's', id: 'shot.eth' }]
   },
+  arbitrum: {
+    id: 'arbitrum',
+    name: 'Arbitrum',
+    spaceIds: [
+      {
+        network: 'arb1',
+        id: '0x789fC99093B09aD01C34DC7251D0C89ce743e5a4'
+      },
+      {
+        network: 'arb1',
+        id: '0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9'
+      },
+      {
+        network: 's',
+        id: 'arbitrumfoundation.eth'
+      }
+    ],
+    navItems: {
+      proposals: {
+        name: 'Treasury proposals',
+        link: {
+          name: 'space-proposals',
+          params: { space: 'arb1:0x789fC99093B09aD01C34DC7251D0C89ce743e5a4' }
+        }
+      },
+      core: {
+        name: 'Core proposals',
+        icon: IHDocumentText,
+        link: {
+          name: 'space-proposals',
+          params: { space: 'arb1:0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9' }
+        },
+        position: 3
+      },
+      offchain: {
+        name: 'Offchain proposals',
+        icon: IHCheckCircle,
+        link: {
+          name: 'space-proposals',
+          params: { space: 's:arbitrumfoundation.eth' }
+        },
+        position: 4
+      },
+      discussions: {
+        name: 'Discussions',
+        icon: IHAnnotation,
+        link: {
+          name: 'space-discussions',
+          params: { space: 's:arbitrumfoundation.eth' }
+        }
+      },
+      docs: {
+        name: 'Docs',
+        icon: IHDocumentText,
+        link: 'https://docs.arbitrum.foundation/'
+      }
+    }
+  },
   ens: {
     id: 'ens',
     name: 'ENS',
@@ -148,6 +206,7 @@ const ORGANIZATION_DOMAINS: Record<string, string> = {
   'governance.starknet.io': 'starknet',
   'vote.ensdao.org': 'ens',
   'ens.stage.box': 'ens',
+  'arbitrum.stage.box': 'arbitrum',
   ...(ORGANIZATION_MAPPING
     ? {
         [ORGANIZATION_MAPPING.split(';')[0]]: ORGANIZATION_MAPPING.split(';')[1]
