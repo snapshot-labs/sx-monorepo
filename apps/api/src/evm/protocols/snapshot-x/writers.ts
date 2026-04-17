@@ -1,4 +1,4 @@
-import { evm } from '@snapshot-labs/checkpoint';
+import { evm } from 'checkpoint-playground';
 import {
   createPublicClient,
   decodeAbiParameters,

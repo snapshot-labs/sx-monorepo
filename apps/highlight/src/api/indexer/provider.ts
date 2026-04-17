@@ -1,4 +1,4 @@
-import { BaseProvider, BlockNotFoundError } from '@snapshot-labs/checkpoint';
+import { BaseProvider, BlockNotFoundError } from 'checkpoint-playground';
 import { Writer } from './types';
 import Highlight from '../../highlight/highlight';
 import { Event, Unit } from '../../highlight/types';

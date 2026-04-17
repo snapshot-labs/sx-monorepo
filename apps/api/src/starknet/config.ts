@@ -1,5 +1,5 @@
-import { CheckpointConfig } from '@snapshot-labs/checkpoint';
 import { starknetNetworks } from '@snapshot-labs/sx';
+import { CheckpointConfig } from 'checkpoint-playground';
 import { validateAndParseAddress } from 'starknet';
 import { MANA_URL } from '../config';
 import spaceAbi from './abis/space.json';

@@ -1,4 +1,4 @@
-import Checkpoint, { starknet } from '@snapshot-labs/checkpoint';
+import Checkpoint, { starknet } from 'checkpoint-playground';
 import { createConfig } from './config';
 import { createWriters } from './writers';
 import { registerIndexer } from '../register';

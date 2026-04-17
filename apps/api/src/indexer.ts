@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import Checkpoint from '@snapshot-labs/checkpoint';
+import Checkpoint from 'checkpoint-playground';
 import {
   addEvmIndexers,
   ENABLE_GOVERNOR_BRAVO,

@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
-import Checkpoint, { LogLevel } from '@snapshot-labs/checkpoint';
+import Checkpoint, { LogLevel } from 'checkpoint-playground';
 import { startApiServer } from './api';
 import { startIndexer } from './indexer';
 import logger, { pinoOptions } from './logger';

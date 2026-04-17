@@ -1,4 +1,4 @@
-import { CheckpointConfig } from '@snapshot-labs/checkpoint';
+import { CheckpointConfig } from 'checkpoint-playground';
 
 export type NetworkID =
   | 'eth'

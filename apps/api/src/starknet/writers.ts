@@ -1,4 +1,4 @@
-import { starknet } from '@snapshot-labs/checkpoint';
+import { starknet } from 'checkpoint-playground';
 import { hash, validateAndParseAddress } from 'starknet';
 import { FullConfig } from './config';
 import { handleSpaceMetadata } from './ipfs';

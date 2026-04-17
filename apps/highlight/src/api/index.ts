@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import Checkpoint, { LogLevel } from '@snapshot-labs/checkpoint';
+import Checkpoint, { LogLevel } from 'checkpoint-playground';
 import config from './config.json';
 import { HighlightIndexer } from './indexer';
 import overrides from './overrides.json';
