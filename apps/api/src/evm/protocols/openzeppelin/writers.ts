@@ -10,8 +10,14 @@ import IGovernorAbi from './abis/IGovernor';
 import TimelockControllerAbi from './abis/TimelockController';
 import { GOVERNANCES, Treasury } from './governances';
 import logger from './logger';
-import { convertChoice, getProposalBody, getProposalTitle } from './utils';
 import {
+  computeTimelockOperationIds,
+  convertChoice,
+  getProposalBody,
+  getProposalTitle
+} from './utils';
+import {
+  ExecutionHash,
   ExecutionStrategy,
   Leaderboard,
   Proposal,
@@ -415,7 +421,33 @@ export function createWriters(
     proposalMetadata.body = getProposalBody(proposalBody);
     proposalMetadata.choices = ['For', 'Against', 'Abstain'];
     proposalMetadata.execution = JSON.stringify(execution);
-    proposal.execution_hash = keccak256(toHex(proposalBody));
+
+    const descriptionHash = keccak256(toHex(proposalBody));
+    proposal.execution_hash = descriptionHash;
+
+    // Store a reverse index from TimelockController operation id -> proposal so
+    // we can settle proposals even when they are executed by calling the
+    // timelock directly (bypassing Governor.execute). We save both pre-v5 and
+    // v5+ OZ Governor variants since the salt formula changed mid-2023.
+    const timelockOperationIds = computeTimelockOperationIds({
+      governor: spaceAddress,
+      targets: event.args.targets,
+      values: event.args.values,
+      calldatas: event.args.calldatas,
+      descriptionHash
+    });
+
+    for (const operationId of timelockOperationIds) {
+      const existing = await ExecutionHash.loadEntity(
+        operationId,
+        config.indexerName
+      );
+      if (existing) continue;
+
+      const executionHash = new ExecutionHash(operationId, config.indexerName);
+      executionHash.proposal_id = proposalId;
+      await executionHash.save();
+    }
 
     let leaderboardItem = await Leaderboard.loadEntity(
       leaderboardId,
@@ -749,6 +781,37 @@ export function createWriters(
     await timelock.save();
   };
 
+  const handleTimelockCallExecuted: evm.Writer<
+    typeof TimelockControllerAbi,
+    'CallExecuted'
+  > = async ({ event, rawEvent, block, blockNumber }) => {
+    if (!event || !rawEvent) return;
+
+    logger.info('Handle timelock call executed');
+
+    const executionHash = await ExecutionHash.loadEntity(
+      event.args.id,
+      config.indexerName
+    );
+    if (!executionHash) return;
+
+    const proposal = await Proposal.loadEntity(
+      executionHash.proposal_id,
+      config.indexerName
+    );
+    if (!proposal) return;
+
+    if (proposal.execution_settled) return;
+
+    proposal.execution_settled = true;
+    proposal.completed = true;
+    proposal.execution_tx = rawEvent.transactionHash;
+    proposal.executed_at = block?.timestamp ?? BigInt(getCurrentTimestamp());
+    proposal.executed_at_block_number = BigInt(blockNumber);
+
+    await proposal.save();
+  };
+
   const handleProposalExtended: evm.Writer<
     typeof GovernorPreventLateQuorumAbi,
     'ProposalExtended'
@@ -797,6 +860,7 @@ export function createWriters(
     // GovernorPreventLateQuorum
     handleProposalExtended,
     // TimelockController
-    handleNewDelay
+    handleNewDelay,
+    handleTimelockCallExecuted
   };
 }
