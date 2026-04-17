@@ -110,6 +110,7 @@ export function createEvmNetwork(networkId: NetworkID): Network {
       'base',
       'mnt',
       'bnb',
+      'bnbt',
       'arb1',
       'ape',
       'curtis'

@@ -11,6 +11,7 @@ export const ALCHEMY_SUPPORTED_CHAIN_IDS = [
   '1', // Ethereum,
   '10', // Optimism,
   '56', // Binance Smart Chain
+  '97', // Binance Smart Chain Testnet
   '100', // Gnosis Safe
   '137', // Polygon,
   '324', // ZkSync Era
@@ -39,6 +40,7 @@ const NETWORKS: Record<(typeof ALCHEMY_SUPPORTED_CHAIN_IDS)[number], string> = {
   '1': 'eth-mainnet',
   '10': 'opt-mainnet',
   '56': 'bnb-mainnet',
+  '97': 'bnb-testnet',
   '100': 'gnosis-mainnet',
   '137': 'polygon-mainnet',
   '324': 'zksync-mainnet',

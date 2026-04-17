@@ -176,5 +176,6 @@ export const evmArbitrum = createEvmConfig('arb1');
 export const evmBase = createEvmConfig('base');
 export const evmMantle = createEvmConfig('mnt');
 export const evmBnb = createEvmConfig('bnb');
+export const evmBnbt = createEvmConfig('bnbt');
 export const evmApe = createEvmConfig('ape');
 export const evmCurtis = createEvmConfig('curtis');
