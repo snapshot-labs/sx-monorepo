@@ -4,6 +4,7 @@ import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
 import IHLightningBolt from '~icons/heroicons-outline/lightning-bolt';
+import IHNewspaper from '~icons/heroicons-outline/newspaper';
 import IHWifi from '~icons/heroicons-outline/wifi';
 
 type NavLink = { name?: string; params?: Record<string, string> };
@@ -29,7 +30,7 @@ export type Organization = OrganizationConfig & {
   spaces: Space[];
 };
 
-const ENS_SPACE_ROUTES: SpaceRoute['children'] = [
+const DEFAULT_SPACE_ROUTES: SpaceRoute['children'] = [
   { path: '', name: 'space-proposals' },
   { path: 'create/:key?', name: 'space-editor' },
   { path: ':proposal', name: 'space-proposal' }
@@ -93,31 +94,62 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
         id: 'arbitrumfoundation.eth'
       }
     ],
+    routes: [
+      {
+        path: 'treasury-gov',
+        meta: {
+          orgSpaceId: 'arb1:0x789fC99093B09aD01C34DC7251D0C89ce743e5a4'
+        },
+        children: DEFAULT_SPACE_ROUTES
+      },
+      {
+        path: 'core-gov',
+        meta: {
+          orgSpaceId: 'arb1:0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9'
+        },
+        children: DEFAULT_SPACE_ROUTES
+      },
+      {
+        path: 'signals',
+        meta: { orgSpaceId: 's:arbitrumfoundation.eth' },
+        children: DEFAULT_SPACE_ROUTES
+      }
+    ],
     navItems: {
       proposals: {
-        name: 'Treasury proposals',
+        name: 'Treasury governor',
+        icon: IHNewspaper,
         link: {
           name: 'space-proposals',
           params: { space: 'arb1:0x789fC99093B09aD01C34DC7251D0C89ce743e5a4' }
+        },
+        activeRoute: {
+          prefix: 'space-treasury-gov'
         }
       },
       core: {
-        name: 'Core proposals',
-        icon: IHDocumentText,
+        name: 'Core governor',
+        icon: IHNewspaper,
         link: {
           name: 'space-proposals',
           params: { space: 'arb1:0xf07DeD9dC292157749B6Fd268E37DF6EA38395B9' }
         },
+        activeRoute: {
+          prefix: 'space-core-gov'
+        },
         position: 3
       },
-      offchain: {
-        name: 'Offchain proposals',
-        icon: IHCheckCircle,
+      signals: {
+        name: 'Signals',
+        icon: IHWifi,
         link: {
           name: 'space-proposals',
           params: { space: 's:arbitrumfoundation.eth' }
         },
-        position: 4
+        activeRoute: {
+          prefix: 'space-signals'
+        },
+        position: 2
       },
       discussions: {
         name: 'Discussions',
@@ -151,12 +183,12 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       {
         path: 'onchain',
         meta: { orgSpaceId: 'eth:0x323A76393544d5ecca80cd6ef2A560C6a395b7E3' },
-        children: ENS_SPACE_ROUTES
+        children: DEFAULT_SPACE_ROUTES
       },
       {
         path: 'offchain',
         meta: { orgSpaceId: 's:ens.eth' },
-        children: ENS_SPACE_ROUTES
+        children: DEFAULT_SPACE_ROUTES
       }
     ],
     navItems: {
