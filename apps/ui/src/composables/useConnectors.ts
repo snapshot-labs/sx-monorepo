@@ -1,21 +1,8 @@
-import { connectors as connectorsClass, Eip6963 } from '@snapshot-labs/lock';
+import { ConnectorDetail, useLock } from '@snapshot-labs/lock/vue';
 import { APP_NAME } from '@/helpers/constants';
 import { getAddresses } from '@/helpers/stamp';
-import { Connector, ConnectorType } from '@/networks/types';
+import { ConnectorType } from '@/networks/types';
 import IHUser from '~icons/heroicons-outline/user';
-
-type ConnectorDetail = Partial<
-  Pick<Connector, 'id' | 'info' | 'options' | 'provider'> & {
-    autoConnectOnly?: boolean;
-  }
->;
-
-const eip6963 = new Eip6963();
-
-eip6963.subscribe();
-eip6963.requestProviders();
-
-const injectedProviders = ref(eip6963.providerDetails);
 
 const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
   injected: {},
@@ -92,35 +79,5 @@ const CONNECTOR_DETAILS: Record<ConnectorType, ConnectorDetail> = {
 } as const;
 
 export function useConnectors() {
-  function getConnectors(
-    connectorType: ConnectorType,
-    connector: ConnectorDetail
-  ) {
-    return connectorType === 'injected'
-      ? Array.from(injectedProviders.value.entries()).map(([id, detail]) => ({
-          ...detail,
-          id
-        }))
-      : [connector];
-  }
-
-  const connectors = computed<Connector[]>(() => {
-    return (
-      Object.entries(CONNECTOR_DETAILS) as [ConnectorType, ConnectorDetail][]
-    ).flatMap(([type, detail]) => {
-      return getConnectors(type, detail).map(
-        d =>
-          new connectorsClass[type]({
-            id: d.id || type,
-            type: type,
-            info: d.info,
-            options: d.options,
-            provider: d.provider,
-            autoConnectOnly: d.autoConnectOnly
-          }) as unknown as Connector
-      );
-    });
-  });
-
-  return { connectors };
+  return useLock(CONNECTOR_DETAILS);
 }

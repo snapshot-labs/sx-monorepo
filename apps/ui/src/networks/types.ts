@@ -44,13 +44,7 @@ export type ProposalsFilter = {
   labels?: string[];
 } & Record<string, any>;
 export type ConnectorType = LockConnectorType;
-export type Connector = Omit<LockConnector, 'info'> & {
-  info: {
-    name: string;
-    icon?: string | FunctionalComponent;
-    ignoreRecent?: boolean;
-  };
-};
+export type Connector = LockConnector;
 export type GeneratedMetadata =
   | {
       name: string;

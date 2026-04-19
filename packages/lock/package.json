@@ -17,7 +17,14 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./vue": {
+      "import": "./dist/vue/index.js",
+      "types": "./dist/vue/index.d.ts"
     }
+  },
+  "peerDependencies": {
+    "vue": ">=3.5.0"
   },
   "scripts": {
     "dev": "tsc -w",
@@ -42,7 +49,8 @@
   },
   "devDependencies": {
     "@types/node": "^22.6.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vue": "^3.5.30"
   },
   "files": [
     "dist/**/*",
