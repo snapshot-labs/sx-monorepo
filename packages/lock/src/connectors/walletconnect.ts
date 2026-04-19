@@ -1,6 +1,5 @@
 import { AppKit } from '@reown/appkit';
 import Connector from './connector';
-import { sleep } from '../utils';
 
 /**
  * Delay before and after disconnecting from WalletConnect.
@@ -12,6 +11,8 @@ import { sleep } from '../utils';
  */
 const DISCONNECT_DELAY = 1000;
 const RECONNECT_TIMEOUT = 5000;
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const awaitProvider = (
   appKit: AppKit,
@@ -37,7 +38,7 @@ export default class Walletconnect extends Connector {
   private modal: AppKit | null = null;
 
   async connect(isAutoConnect = false) {
-    const { currentTheme } = useTheme();
+    const themeMode = this.options.getTheme?.() ?? 'light';
 
     try {
       const { createAppKit } = await import('@reown/appkit');
@@ -59,7 +60,8 @@ export default class Walletconnect extends Connector {
         linea
       } = await import('@reown/appkit/networks');
 
-      const { projectId, ...metadata } = this.options;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { projectId, getTheme, ...metadata } = this.options;
 
       this.modal = createAppKit({
         networks: [
@@ -79,7 +81,7 @@ export default class Walletconnect extends Connector {
           celo,
           linea
         ],
-        themeMode: currentTheme.value,
+        themeMode,
         allWallets: 'ONLY_MOBILE',
         metadata,
         projectId
@@ -87,7 +89,7 @@ export default class Walletconnect extends Connector {
 
       // This is needed in case the user changes the theme mode
       // otherwise modal will be opened with half light and half dark theme
-      await this.modal.setThemeMode(currentTheme.value);
+      await this.modal.setThemeMode(themeMode);
 
       if (!isAutoConnect && !this.provider) {
         await this.disconnect();

@@ -2,13 +2,12 @@ import EventEmitter from 'events';
 import { getAddress } from '@ethersproject/address';
 import { validateAndParseAddress } from 'starknet';
 import Connector from './connector';
-import { getAddresses } from '../stamp';
 
 const ADDRESS_KEY = 'connector:guest:address';
 const CHAIN_ID_KEY = 'connector:guest:chainId';
 const DEFAULT_CHAIN_ID = 1;
 
-class GuestProvider extends EventEmitter {
+export class GuestProvider extends EventEmitter {
   public selectedAddress: string;
   public chainId: number;
 
@@ -67,35 +66,15 @@ export function formatAddress(address: string): string {
 }
 
 export default class Guest extends Connector {
-  constructor(options) {
-    super(options);
-
-    const router = useRouter();
-    const { login } = useWeb3();
-
-    watch(
-      () => router.currentRoute.value.query.as,
-      async address => {
-        if (!address) return;
-
-        await login(this);
-
-        const query = { ...router.currentRoute.value.query };
-        delete query.as;
-        delete query.chainId;
-
-        router.push({ query });
-      }
-    );
-  }
-
   async connect(): Promise<void> {
-    const searchParams = useUrlSearchParams('hash');
+    const searchParams = new URLSearchParams(
+      window.location.hash.split('?')[1] ?? ''
+    );
 
     try {
-      const chainId = await this.#getChainId(searchParams.chainId as string);
+      const chainId = await this.#getChainId(searchParams.get('chainId') ?? '');
       const address = await this.#getAddress(
-        searchParams.as as string,
+        searchParams.get('as') ?? '',
         chainId
       );
 
@@ -125,9 +104,9 @@ export default class Guest extends Connector {
       throw new Error('No address provided');
     }
 
-    if (address.includes('.')) {
-      const resolved = await getAddresses([address], chainId);
-      if (resolved[address]) return resolved[address];
+    if (address.includes('.') && this.options.resolveName) {
+      const resolved = await this.options.resolveName(address, chainId);
+      if (resolved) return resolved;
     }
 
     return formatAddress(address);

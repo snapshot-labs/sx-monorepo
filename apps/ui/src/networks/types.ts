@@ -1,5 +1,9 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { Wallet } from '@ethersproject/wallet';
+import {
+  Connector as LockConnector,
+  ConnectorType as LockConnectorType
+} from '@snapshot-labs/lock';
 import { FunctionalComponent } from 'vue';
 import {
   Alias,
@@ -39,29 +43,13 @@ export type ProposalsFilter = {
   state?: 'any' | 'active' | 'pending' | 'closed';
   labels?: string[];
 } & Record<string, any>;
-export type ConnectorType =
-  | 'argentx'
-  | 'injected'
-  | 'walletconnect'
-  | 'coinbase'
-  | 'gnosis'
-  | 'sequence'
-  | 'unicorn'
-  | 'guest';
-export type Connector = {
-  id: string;
-  type: ConnectorType;
+export type ConnectorType = LockConnectorType;
+export type Connector = Omit<LockConnector, 'info'> & {
   info: {
     name: string;
     icon?: string | FunctionalComponent;
     ignoreRecent?: boolean;
   };
-  options: any;
-  provider: any;
-  autoConnectOnly: boolean;
-  connect: () => void;
-  autoConnect: () => void;
-  disconnect: () => void;
 };
 export type GeneratedMetadata =
   | {
