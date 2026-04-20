@@ -75,13 +75,9 @@ const navigation = computed(() => [
   // { label: 'Delegators', route: 'space-user-delegators', count: delegatesCount.value },
 ]);
 
-const hasOnlyInvalidDelegations = computed(() => {
-  if (!props.space.delegations.length) return true;
-
-  return props.space.delegations.every(
-    delegation => !isValidDelegation(delegation)
-  );
-});
+const hasValidDelegation = computed(() =>
+  props.space.delegations.some(delegation => isValidDelegation(delegation))
+);
 
 async function loadUserActivity() {
   const spaceNetwork = getNetwork(props.space.network);
@@ -201,10 +197,7 @@ watch(
         class="relative bg-skin-bg h-[16px] -top-3 rounded-t-[16px] md:hidden"
       />
       <div class="absolute right-4 top-4 space-x-2 flex">
-        <UiButton
-          v-if="!hasOnlyInvalidDelegations"
-          @click="handleDelegateClick()"
-        >
+        <UiButton v-if="hasValidDelegation" @click="handleDelegateClick()">
           Delegate
         </UiButton>
         <UiTooltip v-if="!isWhiteLabel && !organization" title="View profile">
