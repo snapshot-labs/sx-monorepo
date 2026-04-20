@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "checkpoint generate",
-    "lint": "eslint src/ --rule 'no-console: error'",
+    "lint": "eslint . --rule 'no-console: error'",
     "lint:fix": "bun run lint --fix",
     "build": "tsc",
     "dev": "nodemon src/index.ts",

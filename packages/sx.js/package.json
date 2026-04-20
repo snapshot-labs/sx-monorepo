@@ -24,7 +24,7 @@
     "dev": "tsc -w -p tsconfig.esnext.json",
     "build": "tsc -p tsconfig.esnext.json && tsc -p tsconfig.cjs.json",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ./src ./test",
+    "lint": "eslint .",
     "lint:fix": "bun run lint --fix",
     "prepare": "bun run build",
     "prepublishOnly": "bun run lint",

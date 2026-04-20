@@ -1,10 +1,9 @@
-import { Preview, Decorator, setup } from '@storybook/vue3-vite';
-import { createRouter, createMemoryHistory } from 'vue-router';
 import { withThemeByClassName } from '@storybook/addon-themes';
-
+import { Decorator, Preview, setup } from '@storybook/vue3-vite';
+import { h } from 'vue';
+import { createMemoryHistory, createRouter } from 'vue-router';
 import '../src/style.scss';
 import './style.css';
-import { h } from 'vue';
 
 setup(app => {
   app.use(
