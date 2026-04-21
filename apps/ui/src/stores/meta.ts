@@ -7,6 +7,7 @@ import { NetworkID } from '@/types';
 export const useMetaStore = defineStore('meta', () => {
   const currentTs = ref(new Map<NetworkID, number>());
   const currentBlocks = ref(new Map<NetworkID, number>());
+  const blockTimestamps = ref(new Map<string, number>());
 
   function getConfigBlockTime(networkId: NetworkID) {
     if (networkId in evmConfigs) {
@@ -52,10 +53,58 @@ export const useMetaStore = defineStore('meta', () => {
     return Math.round(current * getConfigBlockTime(networkId));
   }
 
+  function getBlockTimestamp(
+    networkId: NetworkID,
+    targetBlock: number | null
+  ): number | null {
+    if (targetBlock === null) return null;
+
+    const cacheKey = `${networkId}:${targetBlock}`;
+    const cached = blockTimestamps.value.get(cacheKey);
+    if (cached) return cached;
+
+    const currentBlock = currentBlocks.value.get(networkId);
+    const currentTimestamp = currentTs.value.get(networkId);
+    if (!currentBlock || !currentTimestamp) return null;
+
+    // Only estimate future blocks — past blocks wait for real timestamp
+    if (targetBlock <= currentBlock) return null;
+
+    const blockTime = getConfigBlockTime(networkId);
+    return Math.round(
+      currentTimestamp + (targetBlock - currentBlock) * blockTime
+    );
+  }
+
+  async function fetchBlockTimestamp(
+    networkId: NetworkID,
+    targetBlock: number | null
+  ): Promise<number | null> {
+    if (targetBlock === null) return null;
+    if (!evmNetworks.includes(networkId)) return null;
+
+    const cacheKey = `${networkId}:${targetBlock}`;
+    const cached = blockTimestamps.value.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const provider = getProvider(getNetwork(networkId).currentChainId);
+      const block = await provider.getBlock(targetBlock);
+      if (block) {
+        blockTimestamps.value.set(cacheKey, block.timestamp);
+        return block.timestamp;
+      }
+    } catch {}
+
+    return null;
+  }
+
   return {
     getCurrent,
     fetchBlock,
     getCurrentFromDuration,
-    getDurationFromCurrent
+    getDurationFromCurrent,
+    getBlockTimestamp,
+    fetchBlockTimestamp
   };
 });

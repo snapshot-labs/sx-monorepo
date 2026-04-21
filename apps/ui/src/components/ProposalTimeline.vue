@@ -33,9 +33,19 @@ const LABELS = {
   executed: 'Executed'
 };
 
-const { getDurationFromCurrent } = useMetaStore();
+const { getDurationFromCurrent, getBlockTimestamp, fetchBlockTimestamp } =
+  useMetaStore();
 
 const timestamp = useTimestamp({ interval: 1000 });
+
+watchEffect(() => {
+  const data = props.data;
+  if ('proposal_id' in data) {
+    fetchBlockTimestamp(data.network, data.start_block_number);
+    fetchBlockTimestamp(data.network, data.min_end_block_number);
+    fetchBlockTimestamp(data.network, data.max_end_block_number);
+  }
+});
 
 const now = computed(() => Math.floor(timestamp.value / 1000));
 
@@ -43,6 +53,18 @@ function formatTimelineValues(): ProposalTimelineValues {
   const data = props.data;
   if ('start' in data) {
     const { created, start, min_end, max_end } = data;
+    const isProposal = 'proposal_id' in data;
+    if (isProposal) {
+      const network = data.network;
+      return {
+        created,
+        start: getBlockTimestamp(network, data.start_block_number) ?? start,
+        min_end:
+          getBlockTimestamp(network, data.min_end_block_number) ?? min_end,
+        max_end:
+          getBlockTimestamp(network, data.max_end_block_number) ?? max_end
+      };
+    }
     return {
       created,
       start,

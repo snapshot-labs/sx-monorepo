@@ -3,6 +3,8 @@ import { formatQuorum, quorumLabel, quorumProgress } from '@/helpers/quorum';
 import { _n, getProposalId, shortenAddress } from '@/helpers/utils';
 import { Proposal as ProposalType } from '@/types';
 
+const { getBlockTimestamp, fetchBlockTimestamp } = useMetaStore();
+
 const props = withDefaults(
   defineProps<{
     proposal: ProposalType;
@@ -27,6 +29,28 @@ const hasVoted = computed(
   () =>
     props.showVotedIndicator &&
     votes.value[`${props.proposal.network}:${props.proposal.id}`]
+);
+
+fetchBlockTimestamp(props.proposal.network, props.proposal.start_block_number);
+fetchBlockTimestamp(
+  props.proposal.network,
+  props.proposal.max_end_block_number
+);
+
+const estimatedStart = computed(
+  () =>
+    getBlockTimestamp(
+      props.proposal.network,
+      props.proposal.start_block_number
+    ) ?? props.proposal.start
+);
+
+const estimatedMaxEnd = computed(
+  () =>
+    getBlockTimestamp(
+      props.proposal.network,
+      props.proposal.max_end_block_number
+    ) ?? props.proposal.max_end
 );
 </script>
 <template>
@@ -136,7 +160,7 @@ const hasVoted = computed(
         <TimeRelative
           v-if="proposal.state === 'pending'"
           v-slot="{ relativeTime }"
-          :time="proposal.start"
+          :time="estimatedStart"
           without-suffix
         >
           {{
@@ -145,7 +169,7 @@ const hasVoted = computed(
               : `starting in ${relativeTime}`
           }}
         </TimeRelative>
-        <TimeRelative v-else :time="proposal.max_end" />
+        <TimeRelative v-else :time="estimatedMaxEnd" />
       </button>
       <template v-if="hasVoted">
         ·
