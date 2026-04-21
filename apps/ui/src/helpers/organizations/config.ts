@@ -1,5 +1,5 @@
 import { NavItem } from '@/composables/useNav/types';
-import { NetworkID, Space } from '@/types';
+import { NetworkID, Space, SpaceMetadataTreasury } from '@/types';
 import IHAnnotation from '~icons/heroicons-outline/annotation';
 import IHCheckCircle from '~icons/heroicons-outline/check-circle';
 import IHDocumentText from '~icons/heroicons-outline/document-text';
@@ -24,6 +24,8 @@ export type OrganizationConfig = {
   spaceIds: { network: NetworkID; id: string }[];
   routes?: SpaceRoute[];
   navItems?: Record<string, Partial<NavItem>>;
+  /** Org-level treasuries (read-only display). */
+  treasuries?: SpaceMetadataTreasury[];
 };
 
 export type Organization = OrganizationConfig & {
@@ -92,6 +94,13 @@ const ORGANIZATIONS: Record<string, OrganizationConfig> = {
       {
         network: 's',
         id: 'arbitrumfoundation.eth'
+      }
+    ],
+    treasuries: [
+      {
+        name: 'Treasury',
+        address: '0xF3FC178157fb3c87548bAA86F9d24BA38E649B58',
+        chainId: '42161'
       }
     ],
     routes: [

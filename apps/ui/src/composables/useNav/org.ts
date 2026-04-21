@@ -17,7 +17,8 @@ function getOrgConfig(context: NavContext): NavConfig | null {
 
   const hasDelegates = primarySpace.delegations?.length;
   const hasDiscussions = SPACES_DISCUSSIONS[spaceId];
-  const hasTreasury = primarySpace.treasuries?.length;
+  const hasTreasury =
+    context.organization?.treasuries?.length || primarySpace.treasuries?.length;
 
   // Canonical order matching space.ts
   const allItems: [string, NavItem | null][] = [
