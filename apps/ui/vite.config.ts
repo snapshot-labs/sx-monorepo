@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 import path from 'path';
-import vue from '@vitejs/plugin-vue';
 import { TuneResolver } from '@snapshot-labs/tune/resolver';
+import vue from '@vitejs/plugin-vue';
 import { visualizer } from 'rollup-plugin-visualizer';
 import AutoImport from 'unplugin-auto-import/vite';
 import { FileSystemIconLoader } from 'unplugin-icons/loaders';
