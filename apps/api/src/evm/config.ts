@@ -56,6 +56,7 @@ export function createConfig(
     indexerName,
     network_node_url: `https://rpc.snapshot.org/${network.Meta.eip712ChainId}`,
     ...partialConfig,
+    state_retention_blocks: 5000,
     snapshotXConfig: snapshotXConfig?.protocolConfig,
     governorBravoConfig: governorBravoConfig?.protocolConfig,
     openZeppelinConfig: openZeppelinConfig?.protocolConfig

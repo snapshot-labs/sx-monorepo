@@ -95,6 +95,19 @@ const MAPPING: Record<string, WhiteLabelConfig> = {
       theme: 'light'
     }
   },
+  'arbitrum.stage.box': {
+    skinSettings: {
+      logo: 'ipfs://bafkreid7lqlhqi34op5dppmrt77ewdtedwdc5wodch25slfbjrc2bql3ty',
+      bg_color: '#000000',
+      link_color: '#ffffff',
+      text_color: '#a3a8a8',
+      content_color: '#a3a8a8',
+      border_color: '#353535',
+      heading_color: '#ffffff',
+      primary_color: '#10abff',
+      theme: 'dark'
+    }
+  },
   ...(WHITELABEL_MAPPING
     ? (() => {
         const [localDomain, localSpaceId] = WHITELABEL_MAPPING.split(';');

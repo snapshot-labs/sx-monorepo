@@ -19,6 +19,7 @@ const START_BLOCKS: Record<NetworkID, number> = {
   base: 23524251,
   mnt: 75662182,
   bnb: Infinity,
+  bnbt: Infinity,
   ape: 12100384,
   curtis: 16682282
 };

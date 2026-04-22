@@ -11,5 +11,12 @@ export function useRelativeTime(
     relativeTime.value = _rt(toValue(time), withoutSuffix);
   }, 1000);
 
+  watch(
+    () => toValue(time),
+    time => {
+      relativeTime.value = _rt(time, withoutSuffix);
+    }
+  );
+
   return relativeTime;
 }

@@ -10,8 +10,14 @@ import IGovernorAbi from './abis/IGovernor';
 import TimelockControllerAbi from './abis/TimelockController';
 import { GOVERNANCES, Treasury } from './governances';
 import logger from './logger';
-import { convertChoice, getProposalBody, getProposalTitle } from './utils';
 import {
+  computeTimelockOperationIds,
+  convertChoice,
+  getProposalBody,
+  getProposalTitle
+} from './utils';
+import {
+  ExecutionHash,
   ExecutionStrategy,
   Leaderboard,
   Proposal,
@@ -369,12 +375,12 @@ export function createWriters(
       });
 
     proposal.start = await getTimestampFromBlock(event.args.voteStart);
-    proposal.start_block_number = Number(event.args.voteStart);
+    proposal.start_block_number = event.args.voteStart;
     proposal.min_end = await getTimestampFromBlock(event.args.voteEnd);
-    proposal.min_end_block_number = Number(event.args.voteEnd);
+    proposal.min_end_block_number = event.args.voteEnd;
     proposal.max_end = proposal.min_end;
     proposal.max_end_block_number = proposal.min_end_block_number;
-    proposal.snapshot = proposal.start_block_number;
+    proposal.snapshot = event.args.voteStart;
     proposal.treasuries = spaceMetadataItem?.treasuries || [];
     proposal.quorum = executionStrategy.quorum;
     proposal.strategies = space.strategies;
@@ -415,7 +421,33 @@ export function createWriters(
     proposalMetadata.body = getProposalBody(proposalBody);
     proposalMetadata.choices = ['For', 'Against', 'Abstain'];
     proposalMetadata.execution = JSON.stringify(execution);
-    proposal.execution_hash = keccak256(toHex(proposalBody));
+
+    const descriptionHash = keccak256(toHex(proposalBody));
+    proposal.execution_hash = descriptionHash;
+
+    // Store a reverse index from TimelockController operation id -> proposal so
+    // we can settle proposals even when they are executed by calling the
+    // timelock directly (bypassing Governor.execute). We save both pre-v5 and
+    // v5+ OZ Governor variants since the salt formula changed mid-2023.
+    const timelockOperationIds = computeTimelockOperationIds({
+      governor: spaceAddress,
+      targets: event.args.targets,
+      values: event.args.values,
+      calldatas: event.args.calldatas,
+      descriptionHash
+    });
+
+    for (const operationId of timelockOperationIds) {
+      const existing = await ExecutionHash.loadEntity(
+        operationId,
+        config.indexerName
+      );
+      if (existing) continue;
+
+      const executionHash = new ExecutionHash(operationId, config.indexerName);
+      executionHash.proposal_id = proposalId;
+      await executionHash.save();
+    }
 
     let leaderboardItem = await Leaderboard.loadEntity(
       leaderboardId,
@@ -479,7 +511,7 @@ export function createWriters(
     if (!proposal) return;
 
     proposal.executed = true;
-    proposal.execution_time = Number(event.args.etaSeconds);
+    proposal.execution_time = event.args.etaSeconds;
 
     await proposal.save();
   };
@@ -501,8 +533,8 @@ export function createWriters(
     proposal.execution_settled = true;
     proposal.completed = true;
     proposal.execution_tx = rawEvent.transactionHash;
-    proposal.executed_at = Number(block?.timestamp ?? getCurrentTimestamp());
-    proposal.executed_at_block_number = blockNumber;
+    proposal.executed_at = block?.timestamp ?? BigInt(getCurrentTimestamp());
+    proposal.executed_at_block_number = BigInt(blockNumber);
 
     await proposal.save();
   };
@@ -630,7 +662,7 @@ export function createWriters(
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
     if (!space) return;
 
-    space.voting_delay = Number(event.args.newVotingDelay);
+    space.voting_delay = event.args.newVotingDelay;
 
     await space.save();
   };
@@ -649,7 +681,7 @@ export function createWriters(
     const space = await Space.loadEntity(spaceAddress, config.indexerName);
     if (!space) return;
 
-    space.min_voting_period = Number(event.args.newVotingPeriod);
+    space.min_voting_period = event.args.newVotingPeriod;
     space.max_voting_period = space.min_voting_period;
 
     await space.save();
@@ -749,6 +781,37 @@ export function createWriters(
     await timelock.save();
   };
 
+  const handleTimelockCallExecuted: evm.Writer<
+    typeof TimelockControllerAbi,
+    'CallExecuted'
+  > = async ({ event, rawEvent, block, blockNumber }) => {
+    if (!event || !rawEvent) return;
+
+    logger.info('Handle timelock call executed');
+
+    const executionHash = await ExecutionHash.loadEntity(
+      event.args.id,
+      config.indexerName
+    );
+    if (!executionHash) return;
+
+    const proposal = await Proposal.loadEntity(
+      executionHash.proposal_id,
+      config.indexerName
+    );
+    if (!proposal) return;
+
+    if (proposal.execution_settled) return;
+
+    proposal.execution_settled = true;
+    proposal.completed = true;
+    proposal.execution_tx = rawEvent.transactionHash;
+    proposal.executed_at = block?.timestamp ?? BigInt(getCurrentTimestamp());
+    proposal.executed_at_block_number = BigInt(blockNumber);
+
+    await proposal.save();
+  };
+
   const handleProposalExtended: evm.Writer<
     typeof GovernorPreventLateQuorumAbi,
     'ProposalExtended'
@@ -763,11 +826,11 @@ export function createWriters(
     const proposal = await Proposal.loadEntity(proposalId, config.indexerName);
     if (!proposal) return;
 
-    const extendedDeadlineBlock = Number(event.args.extendedDeadline);
+    const extendedDeadlineBlock = event.args.extendedDeadline;
 
     const extendedDeadlineTimestamp = await _getTimestampFromBlock({
       networkId: config.indexerName,
-      blockNumber: extendedDeadlineBlock,
+      blockNumber: Number(extendedDeadlineBlock),
       currentBlockNumber: blockNumber,
       currentTimestamp: Number(block?.timestamp ?? getCurrentTimestamp()),
       client
@@ -797,6 +860,7 @@ export function createWriters(
     // GovernorPreventLateQuorum
     handleProposalExtended,
     // TimelockController
-    handleNewDelay
+    handleNewDelay,
+    handleTimelockCallExecuted
   };
 }

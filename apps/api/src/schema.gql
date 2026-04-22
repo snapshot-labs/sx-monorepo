@@ -22,11 +22,11 @@ type Space {
   "Address of the space controller/owner"
   controller: String!
   "Delay before voting starts after proposal creation (blocks on EVM, seconds on Starknet)"
-  voting_delay: Int!
+  voting_delay: BigInt!
   "Minimum voting period duration (blocks on EVM, seconds on Starknet)"
-  min_voting_period: Int!
+  min_voting_period: BigInt!
   "Maximum voting period duration (blocks on EVM, seconds on Starknet)"
-  max_voting_period: Int!
+  max_voting_period: BigInt!
   "Minimum voting power required to create a proposal"
   proposal_threshold: BigDecimalVP!
   "Index for the next strategy to be added"
@@ -228,21 +228,21 @@ type Proposal {
   "Proposal metadata containing title, body, and choices"
   metadata: ProposalMetadataItem
   "Timestamp when proposal starts"
-  start: Int!
+  start: BigInt!
   "When voting starts (only defined on EVM)"
-  start_block_number: Int
+  start_block_number: BigInt
   "Minimum timestamp when voting can end"
-  min_end: Int!
+  min_end: BigInt!
   "Minimum block number when voting can end (only defined on EVM)"
-  min_end_block_number: Int
+  min_end_block_number: BigInt
   "Maximum timestamp when voting must end"
-  max_end: Int!
+  max_end: BigInt!
   "Maximum block number when voting must end (only defined on EVM)"
-  max_end_block_number: Int
+  max_end_block_number: BigInt
   "Timepoint used for voting power calculation (blocks on EVM, seconds on Starknet)"
-  snapshot: Int!
+  snapshot: BigInt!
   "Timestamp when proposal can be executed"
-  execution_time: Int!
+  execution_time: BigInt!
   "Address of the execution strategy contract"
   execution_strategy: String!
   # Note: in the future move this field to execution_strategy
@@ -317,9 +317,9 @@ type Proposal {
   "Whether proposal has been cancelled"
   cancelled: Boolean!
   "Timestamp when the proposal execution was finalized"
-  executed_at: Int
+  executed_at: BigInt
   "Block number when the proposal execution was finalized (EVM only)"
-  executed_at_block_number: Int
+  executed_at_block_number: BigInt
   "Historical scores"
   scores_ticks: [ScoresTick!]! @derivedFrom(field: "proposal")
 }

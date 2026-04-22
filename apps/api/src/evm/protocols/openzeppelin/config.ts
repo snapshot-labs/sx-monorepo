@@ -75,6 +75,10 @@ export function createConfig(indexerName: NetworkID): Config | null {
           {
             name: 'MinDelayChange(uint256,uint256)',
             fn: 'handleNewDelay'
+          },
+          {
+            name: 'CallExecuted(bytes32,uint256,address,uint256,bytes)',
+            fn: 'handleTimelockCallExecuted'
           }
         ]
       }

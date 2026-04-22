@@ -1,3 +1,60 @@
+import { encodeAbiParameters, keccak256, toHex } from 'viem';
+
+const ZERO_BYTES32: `0x${string}` =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+function hashOperationBatch(
+  targets: readonly `0x${string}`[],
+  values: readonly bigint[],
+  calldatas: readonly `0x${string}`[],
+  salt: `0x${string}`
+): `0x${string}` {
+  return keccak256(
+    encodeAbiParameters(
+      [
+        { type: 'address[]' },
+        { type: 'uint256[]' },
+        { type: 'bytes[]' },
+        { type: 'bytes32' },
+        { type: 'bytes32' }
+      ],
+      [targets, values, calldatas, ZERO_BYTES32, salt]
+    )
+  );
+}
+
+/**
+ * Compute OpenZeppelin Governor's TimelockController operation id(s) for a
+ * proposal. Returns two ids because the salt formula changed in OZ v5
+ * (PR #4432, mid-2023): pre-v5 salt is `descriptionHash`, v5+ salt is
+ * `bytes32(bytes20(governor)) ^ descriptionHash`. The predecessor is always
+ * zero. We store both so a single handler works for both OZ variants without
+ * per-governance version config.
+ */
+export function computeTimelockOperationIds({
+  governor,
+  targets,
+  values,
+  calldatas,
+  descriptionHash
+}: {
+  governor: `0x${string}`;
+  targets: readonly `0x${string}`[];
+  values: readonly bigint[];
+  calldatas: readonly `0x${string}`[];
+  descriptionHash: `0x${string}`;
+}): [`0x${string}`, `0x${string}`] {
+  const governorSalt = toHex(
+    (BigInt(governor) << 96n) ^ BigInt(descriptionHash),
+    { size: 32 }
+  );
+
+  return [
+    hashOperationBatch(targets, values, calldatas, descriptionHash),
+    hashOperationBatch(targets, values, calldatas, governorSalt)
+  ];
+}
+
 /**
  * Extract raw title from proposal body.
  * @param body proposal body
