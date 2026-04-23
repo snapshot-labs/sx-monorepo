@@ -258,7 +258,7 @@ router.afterEach(() => {
       />
       <main class="flex-auto w-full flex">
         <div class="flex-auto w-0" :class="{ 'mt-header-height': hasTopNav }">
-          <router-view class="h-full pb-10" />
+          <router-view class="h-full" />
         </div>
         <div
           v-if="hasPlaceHolderSidebar"
