@@ -32,7 +32,7 @@ export async function verifyNetwork(
       params: [{ chainId: encodedChainId }]
     });
   } catch (err) {
-    if (err instanceof Error && 'code' in err && err.code !== 4902) {
+    if (!(err instanceof Error && 'code' in err && err.code === 4902)) {
       throw err;
     }
 
