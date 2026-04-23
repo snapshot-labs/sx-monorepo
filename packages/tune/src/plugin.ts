@@ -1,7 +1,9 @@
 import type { InjectionKey, Plugin } from 'vue';
 import VueTippy from 'vue-tippy';
+import type { Router } from 'vue-router';
 
 export interface TuneOptions {
+  useRouter?: () => Router;
   iframelyApiKey?: string;
 }
 

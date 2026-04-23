@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { RouteLocationRaw, RouterLinkProps } from 'vue-router';
+import type { RouteLocationRaw, RouterLinkProps } from 'vue-router';
+import { useRouter } from '../composables/useRouter';
 
 const props = defineProps<
   Omit<RouterLinkProps, 'to'> & { to?: RouteLocationRaw; isExternal?: boolean }
@@ -9,7 +10,7 @@ defineEmits<{
   (e: 'click'): void;
 }>();
 
-const router = useAppRouter();
+const router = useRouter();
 
 function isExternalLink(to: RouteLocationRaw | undefined): to is string {
   return (typeof to === 'string' && to.startsWith('http')) || props.isExternal;

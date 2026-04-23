@@ -31,7 +31,8 @@
     "@headlessui/vue": "^1.7.23",
     "@vueuse/core": "^10.4.1",
     "dayjs": "^1.11.10",
-    "vue": ">=3.5.0"
+    "vue": ">=3.5.0",
+    "vue-router": ">=4.0.0"
   },
   "dependencies": {
     "tippy.js": "^6.3.7",
