@@ -14,8 +14,18 @@ export async function getAddresses(
   chainId: ChainId
 ): Promise<Record<string, string>> {
   try {
+    // Normalize each name individually and silently skip names that
+    // cannot be normalized (e.g. partial input while a user is typing).
+    // This avoids a noisy console.error for expected invalid input and
+    // still allows valid names in the batch to be resolved.
     const inputMapping = Object.fromEntries(
-      names.map(name => [name, ensNormalize(name)])
+      names.flatMap(name => {
+        try {
+          return [[name, ensNormalize(name)]];
+        } catch {
+          return [];
+        }
+      })
     );
     const resolvedNamesKeys = Array.from(resolvedNames.keys());
     const unresolvedNames = Object.values(inputMapping).filter(
