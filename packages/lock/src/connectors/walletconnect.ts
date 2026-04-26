@@ -38,7 +38,8 @@ export default class Walletconnect extends Connector {
   private modal: AppKit | null = null;
 
   async connect(isAutoConnect = false) {
-    const themeMode = this.options.getTheme?.() ?? 'light';
+    const { projectId, getTheme, ...metadata } = this.options;
+    const themeMode = getTheme?.() ?? 'light';
 
     try {
       const { createAppKit } = await import('@reown/appkit');
@@ -59,9 +60,6 @@ export default class Walletconnect extends Connector {
         celo,
         linea
       } = await import('@reown/appkit/networks');
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { projectId, getTheme, ...metadata } = this.options;
 
       this.modal = createAppKit({
         networks: [

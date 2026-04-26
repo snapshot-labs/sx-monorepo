@@ -1,30 +1,15 @@
 # @snapshot-labs/lock
 
-Web3 connector library. Bundles a base `Connector` class, concrete
+Web3 connector library for Snapshot's Vue app. It bundles concrete
 implementations for common wallets (injected, WalletConnect, Coinbase,
-Safe, Sequence, Argent X, Unicorn) and a `Guest` connector backed by
-`GuestProvider`, plus an EIP-6963 provider discovery helper.
+Safe, Sequence, Argent X, Unicorn) plus a `Guest` connector and an
+EIP-6963 provider discovery helper used internally by the Vue composable.
 
 Heavy wallet SDKs are loaded on demand inside each connector's
 `connect()` method, so consumers only pay the download cost for the
 connector the user actually picks.
 
 ## Usage
-
-```ts
-import { connectors } from '@snapshot-labs/lock';
-
-const walletconnect = new connectors.walletconnect({
-  id: 'walletconnect',
-  type: 'walletconnect',
-  info: { name: 'WalletConnect' },
-  options: { projectId: '...' },
-  provider: undefined,
-  autoConnectOnly: false
-});
-
-await walletconnect.connect();
-```
 
 ### Vue
 
@@ -43,3 +28,10 @@ const { connectors } = useLock(CONNECTOR_DETAILS);
 
 `useLock` handles EIP-6963 discovery of injected wallets and returns a
 reactive list of instantiated connectors ready for login flows.
+
+The package root currently exposes only the shared `Connector` and
+`ConnectorType` types:
+
+```ts
+import type { Connector, ConnectorType } from '@snapshot-labs/lock';
+```

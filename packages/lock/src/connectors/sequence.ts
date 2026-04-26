@@ -9,13 +9,12 @@ export default class Sequence extends Connector {
   }
 
   async connect() {
-    const theme = this.options.getTheme?.() ?? 'light';
+    const { getTheme, ...options } = this.options;
+    const theme = getTheme?.() ?? 'light';
 
     try {
       const wallet = await this.getWallet();
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { getTheme, ...options } = this.options;
       const connectDetails = await wallet.connect({
         ...options,
         authorize: true,

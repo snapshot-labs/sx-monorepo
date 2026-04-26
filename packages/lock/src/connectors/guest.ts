@@ -7,7 +7,7 @@ const ADDRESS_KEY = 'connector:guest:address';
 const CHAIN_ID_KEY = 'connector:guest:chainId';
 const DEFAULT_CHAIN_ID = 1;
 
-export class GuestProvider extends EventEmitter {
+class GuestProvider extends EventEmitter {
   public selectedAddress: string;
   public chainId: number;
 
@@ -55,7 +55,7 @@ export class GuestProvider extends EventEmitter {
   }
 }
 
-export function formatAddress(address: string): string {
+function formatAddress(address: string): string {
   try {
     return address.length === 42
       ? getAddress(address)
