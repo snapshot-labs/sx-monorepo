@@ -8,7 +8,8 @@ const getWebwallet = (): Promise<any> =>
 
 export default class Argentx extends Connector {
   async connect() {
-    const modalTheme = this.options.getTheme?.() ?? 'light';
+    const { getTheme, ...options } = this.options;
+    const modalTheme = getTheme?.() ?? 'light';
 
     try {
       const injected = (window as any).starknet_argentX;
@@ -21,8 +22,6 @@ export default class Argentx extends Connector {
 
       const [argentx, { InjectedConnector }, { WebWalletConnector }] =
         await Promise.all([get(), getInjected(), getWebwallet()]);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { getTheme, ...options } = this.options;
       const starknet = await argentx.connect({
         ...options,
         connectors: [
