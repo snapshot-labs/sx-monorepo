@@ -3,7 +3,7 @@ import { Web3Provider } from '@ethersproject/providers';
 import { clients, evmNetworks } from '@snapshot-labs/sx';
 import {
   APE_GAS_CONFIGS,
-  HELPDESK_URL,
+  DOCS_URL,
   MAX_SYMBOL_LENGTH
 } from '@/helpers/constants';
 import { PinFunction } from '@/helpers/pin';
@@ -255,7 +255,7 @@ export function createConstants(
       name: 'Vanilla',
       about:
         'A strategy that gives one voting power to anyone. It should only be used for testing purposes and not in production.',
-      link: `${HELPDESK_URL}/en/articles/9839150-vanilla-voting-strategy`,
+      link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#vanilla`,
       icon: IHBeaker,
       generateMetadata: async (params: Record<string, any>) => ({
         name: 'Vanilla',
@@ -295,7 +295,7 @@ export function createConstants(
       name: 'Whitelist',
       about:
         'A strategy that defines a list of addresses each with designated voting power, using a Merkle tree for verification.',
-      link: `${HELPDESK_URL}/en/articles/9839118-whitelist-voting-strategy`,
+      link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#whitelist`,
       generateSummary: (params: Record<string, any>) => {
         const length =
           params.whitelist.trim().length === 0
@@ -407,7 +407,7 @@ export function createConstants(
       name: 'ERC-20 Votes (EIP-5805)',
       about:
         'A strategy that allows delegated balances of OpenZeppelin style checkpoint tokens to be used as voting power.',
-      link: `${HELPDESK_URL}/en/articles/9839125-erc-20-votes-eip-5805-voting-strategy`,
+      link: `${DOCS_URL}/snapshot-x/user-guides/voting-strategies-sx#erc-20-votes-eip-5805`,
       icon: IHCode,
       generateSummary: (params: Record<string, any>) =>
         `(${shorten(params.contractAddress)}, ${params.decimals})`,

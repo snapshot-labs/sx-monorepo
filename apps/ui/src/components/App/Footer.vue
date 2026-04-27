@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { HELPDESK_URL } from '@/helpers/constants';
+import { DOCS_URL } from '@/helpers/constants';
 
 const { isWhiteLabel, resolved } = useWhiteLabel();
 const route = useRoute();
@@ -27,7 +27,7 @@ const isSiteRoute = computed(() => {
         </UiButton>
       </UiTooltip>
       <UiTooltip title="Get help">
-        <UiButton :to="HELPDESK_URL" uniform>
+        <UiButton :to="`${DOCS_URL}/faq/support-and-feedback`" uniform>
           <IH-chat />
         </UiButton>
       </UiTooltip>
