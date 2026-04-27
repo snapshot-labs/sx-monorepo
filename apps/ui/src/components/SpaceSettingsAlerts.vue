@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DOCS_URL } from '@/helpers/constants';
 import { prettyConcat } from '@/helpers/utils';
 import { Space } from '@/types';
 
@@ -87,7 +88,7 @@ const hasAnyAlerts = computed(
         {{ deprecatedStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
         deprecated and no longer supported.
         <AppLink
-          to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+          :to="`${DOCS_URL}/faq/migrations#migrating-from-multichain-voting-strategy`"
           class="inline-flex items-center"
         >
           See migration guide
@@ -99,7 +100,7 @@ const hasAnyAlerts = computed(
         {{ disabledStrategies.length > 1 ? 'strategies are' : 'strategy is' }}
         no longer available.
         <AppLink
-          to="https://help.snapshot.box/en/articles/11638664-migrating-from-multichain-voting-strategy"
+          :to="`${DOCS_URL}/faq/migrations#migrating-from-multichain-voting-strategy`"
           class="inline-flex items-center font-semibold text-rose-500"
         >
           See migration guide
@@ -118,7 +119,7 @@ const hasAnyAlerts = computed(
         <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
         or
         <AppLink
-          to="https://help.snapshot.box/en/articles/11568442-migrating-from-delegation-to-with-delegation-strategy"
+          :to="`${DOCS_URL}/faq/migrations#migrating-from-delegation-to-with-delegation-strategy`"
           class="inline-flex items-center"
         >
           follow migration guide
@@ -136,7 +137,7 @@ const hasAnyAlerts = computed(
         <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
         or
         <AppLink
-          to="https://help.snapshot.box/en/articles/10478752-what-are-the-premium-networks"
+          :to="`${DOCS_URL}/faq/networks#what-are-the-premium-networks`"
           class="inline-flex items-center"
         >
           change to a premium network
@@ -164,7 +165,7 @@ const hasAnyAlerts = computed(
         <AppLink :to="{ name: 'space-pro' }">Upgrade to Pro</AppLink>
         or
         <AppLink
-          to="https://help.snapshot.box/en/articles/11661865-migrating-from-using-a-whitelabel"
+          :to="`${DOCS_URL}/user-guides/spaces/add-custom-domain#migrating-from-a-whitelabel`"
           class="inline-flex items-center"
         >
           follow migration guide

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DOCS_URL } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
 import { NetworkID, Space } from '@/types';
 
@@ -137,7 +138,7 @@ watchEffect(() => {
   <UiEyebrow class="mb-2 font-medium">Sub-spaces</UiEyebrow>
   <UiMessage
     type="info"
-    :learn-more-link="'https://docs.snapshot.box/user-guides/spaces/sub-spaces'"
+    :learn-more-link="`${DOCS_URL}/user-guides/spaces/sub-spaces`"
   >
     Add a sub-space to display its proposals within your space. If you want the
     current space to be displayed on the sub-space's page, the space need to be

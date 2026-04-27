@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { DOCS_URL } from '@/helpers/constants';
+
 const { toggleTheme, currentTheme } = useTheme();
 </script>
 
@@ -27,7 +29,7 @@ const { toggleTheme, currentTheme } = useTheme();
         <AppLink :to="{ name: 'site-ecosystem' }">Ecosystem</AppLink>
       </li>
       <li>
-        <AppLink to="https://docs.snapshot.box">
+        <AppLink :to="`${DOCS_URL}/developers`">
           Developers
           <IH-arrow-sm-right class="inline-block -rotate-45" />
         </AppLink>
