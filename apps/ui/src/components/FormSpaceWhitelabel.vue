@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { DOCS_URL } from '@/helpers/constants';
 import { getValidator } from '@/helpers/validation';
 import { SkinSettings, Space } from '@/types';
 
@@ -132,7 +133,7 @@ watch(formErrors, value => emit('errors', value), { immediate: true });
         <UiMessage
           type="info"
           class="mb-3"
-          learn-more-link="https://help.snapshot.box/en/articles/11201771-how-to-add-a-custom-domain"
+          :learn-more-link="`${DOCS_URL}/user-guides/spaces/add-custom-domain`"
         >
           To set up a custom domain, you need to create a CNAME record pointing
           to "cname.snapshot.box" with your DNS provider or registrar.
