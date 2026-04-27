@@ -1,8 +1,17 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { includeIgnoreFile } from '@eslint/compat';
 import importPlugin from 'eslint-plugin-import-x';
 import prettierPlugin from 'eslint-plugin-prettier/recommended';
 import tseslint from 'typescript-eslint';
 
+const gitignorePath = path.resolve(process.cwd(), '.gitignore');
+const gitignoreConfig = fs.existsSync(gitignorePath)
+  ? [includeIgnoreFile(gitignorePath)]
+  : [];
+
 export default [
+  ...gitignoreConfig,
   {
     ignores: ['**/dist/**']
   },

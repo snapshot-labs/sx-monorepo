@@ -45,7 +45,7 @@ Yes. Limiting the number of followed spaces to 25 is one of our anti-scam and an
 </Accordion>
 
 <Accordion title="I get 'Oops, something went wrong!' what should I do?">
-Wait for around 10 minutes and try again. If the error persists, open the console panel (right click > `Inspect` > `Console` tab), take a screenshot, and contact our support on [Help Center](https://help.snapshot.box/en/) with the error details and what action you were trying to perform.
+Wait for around 10 minutes and try again. If the error persists, open the console panel (right click > `Inspect` > `Console` tab), take a screenshot, and contact our support on [Help Center](/faq/support-and-feedback) with the error details and what action you were trying to perform.
 </Accordion>
 
 <Accordion title="I'm receiving 'The message timestamp is not valid'. What should I do?">
@@ -93,11 +93,11 @@ Go to the proposal page and click the download icon to get a CSV file. You can o
 </Accordion>
 
 <Accordion title="I get 'Your voting power could not be calculated due to misconfigured strategy or unresponsive RPC node'. What should I do?">
-This issue is related to either space settings or the failure of the external infrastructure that Snapshot relies on. Wait 15 minutes and try again. If the error persists, please contact our support on [Help Center](https://help.snapshot.box/en/) with the URL of the proposal and the error message.
+This issue is related to either space settings or the failure of the external infrastructure that Snapshot relies on. Wait 15 minutes and try again. If the error persists, please contact our support on [Help Center](/faq/support-and-feedback) with the URL of the proposal and the error message.
 </Accordion>
 
 <Accordion title="I get 'Oops, failed to check voting power'. What should I do?">
-This is related to either space settings or a failure of external infrastructure. Wait 15 minutes and try again. If the error persists, contact our support on [Help Center](https://help.snapshot.box/en/) with the proposal URL and the error message.
+This is related to either space settings or a failure of external infrastructure. Wait 15 minutes and try again. If the error persists, contact our support on [Help Center](/faq/support-and-feedback) with the proposal URL and the error message.
 </Accordion>
 
 <Accordion title="There is a proposal open and I have a new token minted after the proposal's creation. Can it be used to vote?">
@@ -155,7 +155,13 @@ You need to set up a Basic voting validation which allows you to select a specif
 </Accordion>
 
 <Accordion title="Why is my voting power equal to 0?">
-There might be multiple reasons. Most commonly your voting power is 0 because you didn't have the required tokens in your wallet at the time of proposal creation. Have a look at [this discussion](https://github.com/snapshot-labs/snapshot/discussions/767) to explore other potential reasons.
+There are a few common reasons:
+
+* **No required assets.** You don't hold the tokens or meet the criteria required by the space's voting strategies.
+* **Delegation required.** For tokens using ERC-20 Votes (EIP-5805), you must delegate your tokens — to yourself or another address — before they count as voting power.
+* **Snapshotted at proposal start.** Voting power is taken at the time the proposal was created. Tokens acquired after that point don't count for that proposal.
+
+You can also check [this discussion](https://github.com/snapshot-labs/snapshot/discussions/767) for further reasons.
 </Accordion>
 
 <Accordion title="Why is my voting power reduced? I'm a delegate.">
@@ -212,7 +218,7 @@ The process can take up to 72 hours.
 </Accordion>
 
 <Accordion title="My space is no longer verified. Why?">
-Verification status is valid as long as the space meets all requirements. Make sure you meet all requirements defined in [get verified](/user-guides/spaces/get-verified#how-to-get-your-space-verified) and contact our support on [Help Center](https://help.snapshot.box/en/) to regain the space verification.
+Verification status is valid as long as the space meets all requirements. Make sure you meet all requirements defined in [get verified](/user-guides/spaces/get-verified#how-to-get-your-space-verified) and contact our support on [Help Center](/faq/support-and-feedback) to regain the space verification.
 </Accordion>
 
 <Accordion title="I made a mistake with my space settings and I want to cancel existing votes. How?">
@@ -319,7 +325,7 @@ Please fill out the [partnership form](https://tally.so/r/w2axeK) and we'll get 
 </Accordion>
 
 <Accordion title="I have an issue, where should I report it?">
-Before reporting, browse through this FAQ and our documentation. If you still have an issue, contact our support on [Help Center](https://help.snapshot.box/en/) with the following details:
+Before reporting, browse through this FAQ and our documentation. If you still have an issue, contact our support on [Help Center](/faq/support-and-feedback) with the following details:
 
 * Detailed description of the issue (what action were you trying to perform, what error did you get)
 * Screenshots of the error
