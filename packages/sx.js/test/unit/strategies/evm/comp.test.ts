@@ -11,28 +11,26 @@ describe('compStrategy', () => {
   beforeAll(() => {
     vi.mock('@ethersproject/contracts', () => ({
       Contract: class {
-        async getCurrentVotes(
-          voterAddress: string,
-          { blockTag }: { blockTag: number | string }
-        ) {
+        async getPriorVotes(voterAddress: string, block: number) {
           if (
             voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe' &&
-            blockTag === 8388714
+            block === 8388714
           ) {
             return '150000000';
           }
 
           if (
             voterAddress === '0x000000000000000000000000000000000000dead' &&
-            blockTag === 8388714
+            block === 8388714
           ) {
             return '0';
           }
 
-          if (
-            voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe' &&
-            blockTag === 'latest'
-          ) {
+          return '0';
+        }
+
+        async getCurrentVotes(voterAddress: string) {
+          if (voterAddress === '0xa40839f84cf98ee6f4fdb84c1bb1a448e7835efe') {
             return '300000000';
           }
 
